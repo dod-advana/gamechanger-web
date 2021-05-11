@@ -1,0 +1,35 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/src/components/fsd/FSDdata.js
+/src/api/FSDdata.js
+
+# testing
+/coverage
+.vscode/*
+jest_0/
+jest/
+
+# production
+/build
+
+# misc
+.DS_Store
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+uotapp-react.out
+src/sonar-project.properties
+src/.scannerwork/report-task.txt
+src/.scannerwork/.sonar_lock
+src/api/FSDdata.js
+sh.exe.stackdump
+.vscode/launch.json
+.editorconfig
+dump.rdb
+yarn.lock
+yarn.lock
+.idea

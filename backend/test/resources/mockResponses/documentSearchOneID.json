@@ -1,0 +1,38 @@
+{
+   "docs": [{
+      "display_title_s":"AJP 3.2 ALLIED JOINT DOCTRINE FOR LAND OPERATIONS",
+      "display_org_s":"NATO",
+      "crawler_used_s":"test",
+      "doc_num":"3.2",
+      "summary_30":"Understanding the operational environment helps the joint force commander to better Joint force commanders use campaign plans to focus operational operations component commanders will develop supporting plans to the joint force While fighting power delivers a force to a commander, combat functions represent It refers to a military forces ability and activities to attack enemy information The joint force commander plans the operation guided by AJP-01",
+      "is_revoked_b":false,
+      "doc_type":"AJP",
+      "type":"document",
+      "title":"ALLIED JOINT DOCTRINE FOR LAND OPERATIONS",
+      "keyw_5":"land operations, intentionally blank, version 1, land forces, combat power, force protection, allied doctrine, ajp- 2, operational effectiveness, offensive action",
+      "filename":"AJP 3.2.pdf",
+      "access_timestamp_dt":"2021-02-16T20:13:27",
+      "id":"AJP 3.2.pdf_0",
+      "display_doc_type_s":"Document",
+      "publication_date_dt":"2016-03-16T00:00:00",
+      "page_count":90,
+      "topics_rs":[
+         "manoeuvre",
+         "forces",
+         "enemy",
+         "edition version",
+         "agreed"
+      ],
+      "pageHits":[
+         {
+            "snippet":"Battlespace The environment , factors and conditions that must be understood to apply combat power , protect a force or complete a mission successfully .It includes the land , maritime , air and space environments ; the enemy and friendly forces present therein ; facilities ; terrestrial and space weather ; health hazards ; terrain ; the electromagnetic spectrum ; and the information environment in the joint operations area and other areas of interest .( NTMS - NATO Agreed ) ",
+            "pageNumber":80
+         }
+      ],
+      "pageHitCount":1,
+      "esIndex":"gamechanger",
+      "ref_list":[    
+      ]
+    }]
+}
+

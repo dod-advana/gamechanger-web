@@ -1,0 +1,58 @@
+/* Hack needed to force the select up for the gridview */
+.select-up .Select-menu-outer {
+	position: absolute !important;
+	top: auto !important;
+	bottom: calc(100% - 1px) !important; border-bottom-left-radius: 0px !important;
+	border-bottom-right-radius: 0px !important;
+	border-top-left-radius: 5px !important;
+	border-top-right-radius: 5px !important;
+  }
+  
+  .select-up .is-open .Select-control {
+	border-top-right-radius: 0 !important;
+	border-top-left-radius: 0 !important;
+	border-bottom-right-radius: 5px !important;
+	border-bottom-left-radius: 5px !important;
+  }
+  
+  .Select-menu-outer {
+	max-height: 30vh !important;
+	  z-index: 999 !important;
+  }
+  
+  .Select-menu {
+	max-height: calc(30vh - 2px) !important;
+  }
+  
+  a, a:visited {
+	color: #1E88E5;
+  }
+  .pagination > li > a, .pagination > li > span {
+	color: rgb(0, 132, 143) !important;
+  }
+  
+  .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+	background-color: rgb(0, 132, 143) !important;
+	border-color: rgb(0, 132, 143) !important;
+	color: white !important;
+  }
+  
+  /* footer */
+  #footer_link:hover {
+	  color: #fff;
+	  text-decoration: none;
+  }
+  /*mega-menu list onHover*/
+  #mega_menu {
+	  text-decoration: none;
+  }
+  
+  #mega_menu:hover {
+	  border-left: 3px solid #386F94 !important;
+	  color: #386F94 !important;
+  }
+  
+  #mega_menu:hover div span h5 {
+	  color: #386F94 !important;
+  }
+  

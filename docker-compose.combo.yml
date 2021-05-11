@@ -1,0 +1,32 @@
+version: '3'
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:9.6
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./postgres:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_HOST_AUTH_METHOD=trust
+    redis:
+        container_name: redis
+        image: redis
+        ports: 
+           - "6379:6379"
+    gamechanger-web:
+        container_name: gamechanger-web
+        build:
+            context: .
+            dockerfile: Dockerfile.prod
+            args:
+                MIGRATION_HOST: postgres
+        ports:
+            - "5860:5860"
+            - "8990:8990"
+        volumes:
+            - ./:/usr/app/
+            # - /usr/app/backend/node_modules
+        depends_on:
+            - postgres
+            - redis

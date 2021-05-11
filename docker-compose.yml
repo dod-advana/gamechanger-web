@@ -1,0 +1,42 @@
+version: '3'
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:9.6
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./postgres:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_HOST_AUTH_METHOD=trust
+    redis:
+        container_name: redis
+        image: redis
+        ports: 
+           - "6379:6379"
+    gamechanger-web-node:
+        container_name: gamechanger-web-node
+        build:
+            context: ./backend/
+            args:
+                MIGRATION_HOST: postgres
+        ports:
+            # - "5860:5860"
+            - "8990:8990"
+        volumes:
+            - ./backend/:/usr/src/app/
+            - /usr/src/app/node_modules
+        depends_on:
+            - postgres
+            - redis
+    gamechanger-web-react:
+        container_name: gamechanger-web-react
+        build:
+            context: ./frontend/
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./frontend/:/usr/src/app/
+            - /usr/src/app/node_modules
+        depends_on:
+            - gamechanger-web-node

@@ -1,0 +1,3710 @@
+{
+  "body":{
+     "took":241,
+     "timed_out":false,
+     "_shards":{
+        "total":3,
+        "successful":3,
+        "skipped":0,
+        "failed":0
+     },
+     "hits":{
+        "total":{
+           "value":348,
+           "relation":"eq"
+        },
+        "max_score":22.919777,
+        "hits":[
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+              "_score":22.919777,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "battle":0.17685316043686258,
+                    "ships":0.38350625558942847,
+                    "craft":0.39695043438489025,
+                    "combatant":0.3589271609869009,
+                    "secnavinst":0.29341856818590306
+                 },
+                 "orgs_rs":{
+                    "Navy":17,
+                    "U.S.C.":1,
+                    "Combatant":1
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "SECNAVINST 5030.8C GENERAL GUIDANCE FOR THE CLASSIFICATION OF NAVAL VESSELS AND BATTLE FORCE SHIP COUNTING PROCEDURES"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "secnav_pubs"
+                 ],
+                 "doc_num":[
+                    "5030.8C"
+                 ],
+                 "summary_30":[
+                    "contributing to combat operations , or a United States Naval Ship through are not included in the battle force ship count. support to combatant ships and other naval operations."
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "SECNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "GENERAL GUIDANCE FOR THE CLASSIFICATION OF NAVAL VESSELS AND BATTLE FORCE SHIP COUNTING PROCEDURES"
+                 ],
+                 "keyw_5":[
+                    "provide support",
+                    "valid comparisons",
+                    "uss constitution",
+                    "surface combatant",
+                    "support missions",
+                    "ships designed",
+                    "ship types",
+                    "secnav directed",
+                    "patrol combatant",
+                    "patrol boats"
+                 ],
+                 "filename":[
+                    "SECNAVINST 5030.8C.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "SECNAVINST 5030.8C.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "publication_date_dt":[
+                    "2016-06-14T00:00:00"
+                 ],
+                 "page_count":[
+                    14
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":13,
+                          "relation":"eq"
+                       },
+                       "max_score":15.241008,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":0
+                             },
+                             "_score":15.241008,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   0
+                                ],
+                                "paragraphs.filename":[
+                                   "SECNAVINST 5030.8C.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "DEPARTMENT OF THE NAVY OFFICE OF THE SECRETARY 1000 NAVY PENTAGON WASHINGTON DC 20350 - 1000 SECNAV INSTRUCTION 5030.SC From : Secretary of the Navy SECNAVINST 5030.SC ASN ( RD&A ) ( N9I )June 14 , 2016 Subj : GENERAL GUIDANCE FOR THE CLASSIFICATION OF NAVAL VESSELS AND BATTLE FORCE SHIP COUNTING PROCEDURES Ref : ( a ) 10 U.S.C . § 231 Encl : ( b ) OPNAVINST 4700.SK ( c ) OPNAVINST 4770.5H ( 1 ) Combatant Ship Category ( 2 ) Auxiliary Ship Category ( 3 ) Combatant Craft Category ( 4 ) Support Craft Category ( 5 ) Special Instructions 1 .Purpose .To identify naval ship categories and classifications .2 . Cancellation .SECNAVINST 5030 .SB .3 . Background .Enclosures ( 1 ) through ( 4 ) issue guidance for establishing the official counting procedures of Navy battle force ships .Enclosure ( 5 ) provides special instructions for the application of letter prefixes and symbols in ship classifications .4 . Policy a .Battle Force Inventory .Battle force ships are commissioned United States Ship ( USS ) warships capable of contributing to combat operations , or a United States Naval Ship that contributes directly to Navy warfighting or support missions , and shall be maintained in the Naval Vessel Register . b .Battle Force Counting Procedures .An accurate battle force count is necessary to support the reporting requirements in reference ( a ) .The battle force ship count will only include combat capable ships that contribute to warfighting missions , specified combat support missions , or service support missions .Specifically , the battle force ship count will include : "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Policy a .<em>Battle</em> <em>Force</em> Inventory .<em>Battle</em> <em>force</em> ships are commissioned United States Ship ( USS ) warships capable of contributing to combat operations , or a United States Naval Ship"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":17
+                             },
+                             "_score":14.81899,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   2
+                                ],
+                                "paragraphs.filename":[
+                                   "SECNAVINST 5030.8C.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( 1 ) Maintain the battle force ship inventory ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( 1 ) Maintain the <em>battle</em> <em>force</em> ship inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":7
+                             },
+                             "_score":14.581697,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   1
+                                ],
+                                "paragraphs.filename":[
+                                   "SECNAVINST 5030.8C.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( 3 ) Ships entering and leaving the battle force inventory ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( 3 ) Ships entering and leaving the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":6
+                             },
+                             "_score":13.303545,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   1
+                                ],
+                                "paragraphs.filename":[
+                                   "SECNAVINST 5030.8C.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( 2 ) All other craft and auxiliaries listed in enclosures ( 2 ) through ( 4 ) are not included in the battle force ship count ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( 2 ) All other craft and auxiliaries listed in enclosures ( 2 ) through ( 4 ) are not included in the <em>battle</em> <em>force</em> ship count ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"93bda1c1ee22fe1b9f27894bc92a5aa2de480d2d1d46767683138f095e938703",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":10
+                             },
+                             "_score":13.303545,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   1
+                                ],
+                                "paragraphs.filename":[
+                                   "SECNAVINST 5030.8C.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) For the purpose of the battle force count in the Annual Long Range Plan for Construction of Naval Vessels , ships "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) For the purpose of the <em>battle</em> <em>force</em> count in the Annual Long Range Plan for Construction of Naval Vessels , ships"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"fb8541855357f29c7c2ddf22cd6b882b47fb02f9bfad0a201ca0617bc30f032c",
+              "_score":22.682438,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "operations":0.11807675394370686,
+                    "conduct":0.13946259728833543,
+                    "coastal riverine":0.6678928733010219,
+                    "enclosure":0.15512635348801462,
+                    "opnavinst":0.4969553493704431
+                 },
+                 "orgs_rs":{
+                    "II":5,
+                    "Navy":6,
+                    "USCG":2,
+                    "U.S.C.":1
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "OPNAVINST 3501.363B REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR COASTAL RIVERINE FORCES"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "3501.363B"
+                 ],
+                 "summary_30":[
+                    "CRF unit shall be capable of providing anti-terrorism and force AMW CCC FHP EXW FSO INT IO LOG MOB MOS NCO SUW CRF units and personnel operate ashore, at sea, in harbors,"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "OPNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR COASTAL RIVERINE FORCES"
+                 ],
+                 "keyw_5":[
+                    "force",
+                    "task force",
+                    "subordinate unit",
+                    "response force",
+                    "operations",
+                    "expeditionary environment",
+                    "embarked security",
+                    "embarked personnel",
+                    "deception operations",
+                    "amphibious force"
+                 ],
+                 "filename":[
+                    "OPNAVINST 3501.363B.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "OPNAVINST 3501.363B.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "publication_date_dt":[
+                    "2014-04-10T00:00:00"
+                 ],
+                 "page_count":[
+                    79
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":15.171143,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"fb8541855357f29c7c2ddf22cd6b882b47fb02f9bfad0a201ca0617bc30f032c",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":657
+                             },
+                             "_score":15.171143,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   51
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3501.363B.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "LOG 12 PROVIDE BATTLE FORCE LOGISTICS SUPPORT ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "LOG 12 PROVIDE <em>BATTLE</em> <em>FORCE</em> LOGISTICS SUPPORT ."
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+              "_score":18.953144,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "opnav":0.5254204437886674,
+                    "comusfltforcom":0.26124934558410773,
+                    "compacflt":0.25474649876152783,
+                    "opnavinst":0.3065258964974536,
+                    "homebase":0.25068810007123066
+                 },
+                 "orgs_rs":{
+                    "Congress":5,
+                    "Navy":53,
+                    "Congressional":5,
+                    "U.S.C.":1,
+                    "Marine Corps":1,
+                    "Department of Defense":2,
+                    "Defense":2
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "OPNAVINST 3111.17A STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "secnav_pubs"
+                 ],
+                 "doc_num":[
+                    "3111.17A"
+                 ],
+                 "summary_30":[
+                    "The Navys SLD plan only includes those operating forces that meet the criteria outlined The Navy includes in the SLD plan only those operating forces that meet the criteria specified in"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "OPNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY"
+                 ],
+                 "keyw_5":[
+                    "working group",
+                    "sld plan",
+                    "force structure",
+                    "vessels listed",
+                    "treaty partners",
+                    "support facilities",
+                    "submarine forces",
+                    "strategic laydown",
+                    "southwest asia",
+                    "sld process"
+                 ],
+                 "filename":[
+                    "OPNAVINST 3111.17A.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "OPNAVINST 3111.17A.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "Title 10",
+                    "JP 5-0",
+                    "JP 3-0",
+                    "JP 3-01",
+                    "Executive Order 12114"
+                 ],
+                 "publication_date_dt":[
+                    "2017-05-02T00:00:00"
+                 ],
+                 "page_count":[
+                    25
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":6,
+                          "relation":"eq"
+                       },
+                       "max_score":15.035559,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":348
+                             },
+                             "_score":15.035559,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   21
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17A.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "a . Commissioned vessels in the battle force inventory ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Commissioned vessels in the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":229
+                             },
+                             "_score":14.642971,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   13
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17A.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) overall ship totals by year per the battle force inventory ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) overall ship totals by year per the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":379
+                             },
+                             "_score":14.641436,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   23
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17A.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "6 . Battle Force Inventory .Battle force ships are commissioned United States Ship ( USS ) warships capable of contributing to combat operations , or a United States Naval Ship ( USNS ) that contributes directly to Navy warfighting or support missions and are maintained in the Naval Vessel Register .( Source : reference ( b ) ) "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "<em>Battle</em> <em>Force</em> Inventory .<em>Battle</em> <em>force</em> ships are commissioned United States Ship ( USS ) warships capable of contributing to combat operations , or a United States Naval Ship ( USNS )"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":351
+                             },
+                             "_score":14.516624,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   21
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17A.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Note : Some MSC ships are not included in the battle force inventory ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Note : Some MSC ships are not included in the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"79a44bbe5cac887e050eebc8b8430b33e2aa9a691f2c2f35fb88fa7c88f179c2",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":365
+                             },
+                             "_score":13.153341,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   22
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17A.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "4 . For the purposes of considering a fleet distribution ratio policy ( e.g . , 60 percent in the Pacific ) , only vessels in the battle force inventory will be included .Battle force inventory ship and submarine basing will be counted by their administrative chain of command for the fleet distribution ratio .However , the nuclear aircraft carrier undergoing refueling and complex overhaul , and new construction submarines prior to the post shipyard availability , will not be included in the ratio ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   ". , 60 percent in the Pacific ) , only vessels in the <em>battle</em> <em>force</em> inventory will be included .<em>Battle</em> <em>force</em> inventory ship and submarine basing will be counted by their administrative"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"d6c8302c4193a482379e162f07cbc7437c02ab37a85c53d177d4b519fa55f0cc",
+              "_score":18.711739,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "theory operation":0.3852182183473526,
+                    "isolate malfunctions":0.4306068033595191,
+                    "operational checks":0.22321458459368881,
+                    "skill":0.20615518209850942,
+                    "advanced troubleshooting":0.4608398271453768
+                 },
+                 "orgs_rs":{
+                    "Sec":52,
+                    "Reserve":7,
+                    "Army":23,
+                    "the Air Force":2,
+                    "Air Force":19
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CFETP 2A9X1X BomberSpecial (BS) Integrated CommunicationNavigationMission Systems"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "air_force_pubs"
+                 ],
+                 "doc_num":[
+                    "2A9X1X"
+                 ],
+                 "summary_30":[
+                    "7-skill level, the craftsman will also train on any qualification or duty specific tasks identified by the Skill level training requirements in this career field are defined in terms of tasks and"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CFETP"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "BomberSpecial (BS) Integrated CommunicationNavigationMission Systems"
+                 ],
+                 "keyw_5":[
+                    "tr",
+                    "operation tr",
+                    "training provided",
+                    "knowledge",
+                    "1e‐4b",
+                    "technical references",
+                    "level",
+                    "collision avoidance system",
+                    "air force",
+                    "/integration"
+                 ],
+                 "filename":[
+                    "CFETP 2A9X1X.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "CFETP 2A9X1X.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "AFJQS Force",
+                    "AFJQS AFJQS"
+                 ],
+                 "publication_date_dt":[
+                    "2017-10-05T00:00:00"
+                 ],
+                 "page_count":[
+                    126
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":13.657963,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"d6c8302c4193a482379e162f07cbc7437c02ab37a85c53d177d4b519fa55f0cc",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":1312
+                             },
+                             "_score":13.657963,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   69
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "‐ ‐ ‐ 5.6.7 Force XXI Battle Command Brigade and Below ( FBCB2 ) TR : Applicable E 8C T.O.s "
+                                ],
+                                "paragraphs.filename":[
+                                   "CFETP 2A9X1X.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "‐ ‐ ‐ 5.6.7 <em>Force</em> XXI <em>Battle</em> Command Brigade and Below ( FBCB2 ) TR : Applicable E 8C T.O.s"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"b01a9710abfbaeeb5aaa34fbf023586f9d34b4ac0e95a00d427b0d8fb1543a13",
+              "_score":18.266731,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "measures":0.23586466233348508,
+                    "defence":0.3138934423919668,
+                    "threat":0.16085620159549263,
+                    "allied":0.179886721402546,
+                    "edition version":0.5711294701592694
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "AJP 3.14 ALLIED JOINT DOCTRINE FOR FORCE PROTECTION"
+                 ],
+                 "display_org_s":[
+                    "NATO"
+                 ],
+                 "crawler_used_s":[
+                    "nato_stanag"
+                 ],
+                 "doc_num":[
+                    "3.14"
+                 ],
+                 "summary_30":[
+                    "Develop and Implement Force Protection Measures, Tasks, implement FP measures, tasks, and activities based on the mission and threat, 22 For more on criticality, threat, and vulnerability assessments, see Allied Command Operations Force defence in support of FP is to help to prevent the CBRN incidents, protect NATO Allied Joint Medical Support Doctrine, and MC 472, NATO Military Concept for Defence against"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "AJP"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "ALLIED JOINT DOCTRINE FOR FORCE PROTECTION"
+                 ],
+                 "keyw_5":[
+                    "joint force",
+                    "risk management",
+                    "nato-led forces",
+                    "intentionally blank",
+                    "nato-led force",
+                    "mutual interference",
+                    "medical support",
+                    "implementing measures",
+                    "fundamental elements",
+                    "fp requirements"
+                 ],
+                 "filename":[
+                    "AJP 3.14.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:27"
+                 ],
+                 "id":[
+                    "AJP 3.14.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "publication_date_dt":[
+                    "2015-04-02T00:00:00"
+                 ],
+                 "page_count":[
+                    80
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":12.295258,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"b01a9710abfbaeeb5aaa34fbf023586f9d34b4ac0e95a00d427b0d8fb1543a13",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":511
+                             },
+                             "_score":12.295258,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   62
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "b . Force Health Protection.53 FHP is the sum of all efforts to reduce or eliminate the incidence of disease and non battle injuries to enhance "
+                                ],
+                                "paragraphs.filename":[
+                                   "AJP 3.14.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "<em>Force</em> Health Protection.53 FHP is the sum of all efforts to reduce or eliminate the incidence of disease and non <em>battle</em> injuries to enhance"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+              "_score":18.21796,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "opnav":0.5496594737836475,
+                    "basing":0.2192134179392774,
+                    "laydown":0.18384210033709858,
+                    "opnavinst":0.3160857905688865,
+                    "homeports":0.18957145638247652
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "OPNAVINST 3111.17B STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "secnav_pubs"
+                 ],
+                 "doc_num":[
+                    "3111.17B"
+                 ],
+                 "summary_30":[
+                    "approval the projected homeports, home bases, hubs, and shore posture locations of the Navys The Navys SLD plan only includes those operating forces that meet the criteria outlined"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "OPNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY"
+                 ],
+                 "keyw_5":[
+                    "sld plan",
+                    "working group",
+                    "un-programmed project",
+                    "submarine force",
+                    "strategy releasability",
+                    "sld execution",
+                    "sld development",
+                    "sld decision",
+                    "shore infrastructure",
+                    "select platforms"
+                 ],
+                 "filename":[
+                    "OPNAVINST 3111.17B.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "OPNAVINST 3111.17B.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "DoDD 4715.21",
+                    "JP 5-0",
+                    "JP 3-0",
+                    "JP 3-01",
+                    "Executive Order 12114"
+                 ],
+                 "publication_date_dt":[
+                    "2020-11-13T00:00:00"
+                 ],
+                 "page_count":[
+                    28
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":5,
+                          "relation":"eq"
+                       },
+                       "max_score":14.459231,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":159
+                             },
+                             "_score":14.459231,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   11
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "a . Commissioned vessels in the battle force inventory ."
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17B.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Commissioned vessels in the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":278
+                             },
+                             "_score":14.04718,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   16
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) overall ship totals by year per the battle force inventory ."
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17B.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( c ) overall ship totals by year per the <em>battle</em> <em>force</em> inventory ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":418
+                             },
+                             "_score":13.7695675,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   25
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "7 . Battle Force Inventory .A battle force ship is commissioned a United States Ship ( USS ) warship capable of contributing to combat operations , or a United States Naval Ship ( USNS ) that contributes directly to Navy warfighting or support missions and is maintained in the Naval Vessel Register .( Source : reference ( b ) ) "
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17B.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "<em>Battle</em> <em>Force</em> Inventory .A <em>battle</em> <em>force</em> ship is commissioned a United States Ship ( USS ) warship capable of contributing to combat operations , or a United States Naval Ship ( USNS"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":179
+                             },
+                             "_score":13.05508,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   12
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "5 . MSC ships will be included in the SLD development and execution if the battle force inventory is impacted ."
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17B.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "MSC ships will be included in the SLD development and execution if the <em>battle</em> <em>force</em> inventory is impacted ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"a4b9f571852403051e43bbdbb92aa7ad71f3fe80ec13693da15e197265d92a3d",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":178
+                             },
+                             "_score":12.59664,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   12
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "4 . For the purposes of considering a fleet distribution ratio , only vessels in the battle force inventory will be included .Battle force inventory ship and submarine basing will be counted by their administrative chain of command for the fleet distribution ratio .However , the nuclear aircraft carrier undergoing refueling and complex overhaul , and new construction submarines prior to the post shipyard availability , will not be included in the ratio ."
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3111.17B.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "For the purposes of considering a fleet distribution ratio , only vessels in the <em>battle</em> <em>force</em> inventory will be included .<em>Battle</em> <em>force</em> inventory ship and submarine basing will be counted"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"83eb15c43184bad99cdbb7496b2619645c763b41fced320c42974a2896da184f",
+              "_score":17.465366,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "comprehend":0.3632079632392854,
+                    "joint":0.2838521725877893,
+                    "senior enlisted":0.254744745594808,
+                    "cjcsi":0.3992713234392151,
+                    "sejpme":0.35377800082974303
+                 },
+                 "orgs_rs":{
+                    "the Department of Defense":3,
+                    "II":2,
+                    "Congress":1,
+                    "Army":1,
+                    "USAF":1,
+                    "U.S.C.":3,
+                    "National Guard":1,
+                    "Combatant":1,
+                    "the Armed Forces":3,
+                    "Joint":4,
+                    "the Coast Guard":1,
+                    "Department of Defense":1,
+                    "Defense":5,
+                    "the National Guard":1,
+                    "Navy":1,
+                    "USMC":1,
+                    "the Joint Chiefs of Staff":88,
+                    "the Air Force":1
+                 },
+                 "pagerank_r":0.00004475522244484071
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CJCSI 1805.01B Enlisted Professional Military Education Policy"
+                 ],
+                 "display_org_s":[
+                    "Joint Chiefs of Staff"
+                 ],
+                 "crawler_used_s":[
+                    "jcs_pubs"
+                 ],
+                 "doc_num":[
+                    "1805.01B"
+                 ],
+                 "summary_30":[
+                    "Appendix D - Senior Enlisted Joint Professional Military Education Annex B - Senior Enlisted Joint Professional Military Education Annex B - Senior Enlisted Joint Professional Military Education"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CJCSI"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "Enlisted Professional Military Education Policy"
+                 ],
+                 "keyw_5":[
+                    "intentionally blank",
+                    "military education",
+                    "joint education",
+                    "joint force",
+                    "national security",
+                    "joint staff",
+                    "joint operations",
+                    "joint chiefs",
+                    "enlisted leaders",
+                    "learning areas"
+                 ],
+                 "filename":[
+                    "CJCSI 1805.01B.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:25"
+                 ],
+                 "id":[
+                    "CJCSI 1805.01B.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "DoDD 5230.9",
+                    "Title 10",
+                    "CJCSI 1805.01B",
+                    "CJCSI 1805.01A",
+                    "CJCSI 1801.01",
+                    "CJCSM 3500.04",
+                    "JP 1-02"
+                 ],
+                 "publication_date_dt":[
+                    "2015-05-15T00:00:00"
+                 ],
+                 "page_count":[
+                    66
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":12.925875,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"83eb15c43184bad99cdbb7496b2619645c763b41fced320c42974a2896da184f",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":450
+                             },
+                             "_score":12.925875,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   49
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCSI 1805.01B.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "( 4 ) Comprehend how leaders overcome the challenges of Joint Task Force organization , staff integration , and battle rhythm development at operational headquarters in a complex environment ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "( 4 ) Comprehend how leaders overcome the challenges of Joint Task <em>Force</em> organization , staff integration , and <em>battle</em> rhythm development at operational headquarters in a complex environment"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"53101bd2327102bc561fdd9702629790ef30cbee76cae25a9ad575b99e71e4ac",
+              "_score":17.17682,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "developmental education":0.29630525493157683,
+                    "education":0.26415808485709363,
+                    "training":0.29078477170220957,
+                    "career field":0.3259578306991226,
+                    "airmen":0.23359425165527753
+                 },
+                 "orgs_rs":{
+                    "Reserve":19,
+                    "the Department of Defense":6,
+                    "II":1,
+                    "National Guard":32,
+                    "Federal State":1,
+                    "the Armed Forces":7,
+                    "Joint":2,
+                    "Department of Defense":73,
+                    "Defense":13,
+                    "Navy":1,
+                    "the Military Services":2,
+                    "State":1,
+                    "the Air Force":92,
+                    "Veterans Affairs":12,
+                    "Air Force":936
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "AFI 36-2670 TOTAL FORCE DEVELOPMENT"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "36-2670"
+                 ],
+                 "summary_30":[
+                    "career field managers in developing and facilitating the Air Force Reserve officer development team; however, the Reserve functional manager may appoint a career field Board for regular Air Force officers competing for resident developmental education Manage enlisted professional military education programs for Air Force Course, Air Force Reserve Airmen may complete all levels of enlisted professional military AF Career Field Managers validate training requirements in coordination MAJCOM Functional Managers, and Chief, Air Force Voluntary Education Program, requirements for the training detachment to support and notify the AF Career Field Manager AFIT/ACB for education"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "AFI"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "TOTAL FORCE DEVELOPMENT"
+                 ],
+                 "keyw_5":[
+                    "air force",
+                    "career field",
+                    "force development",
+                    "career development",
+                    "development team",
+                    "functional manager",
+                    "training requirements",
+                    "distance learning",
+                    "total force",
+                    "developmental education"
+                 ],
+                 "filename":[
+                    "AFI 36-2670.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "AFI 36-2670.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "DoDD 5000.1",
+                    "DoDD 1322.08E",
+                    "DoDD 5000.01",
+                    "DoDI 1322.29",
+                    "DoDI 1304.28",
+                    "DoDI 1322.26",
+                    "DoDI 5040.02",
+                    "DoDI 1322.31",
+                    "DoDI 1400.25",
+                    "DoDI 1344.07",
+                    "DoDI 1322.25",
+                    "DoDI 1322.19",
+                    "DoDI 1300.25",
+                    "DoDI 1341.13",
+                    "DoDI 1336.05",
+                    "DoDI 7730.54",
+                    "DoDI 1322.10",
+                    "DoDM 7730.54",
+                    "DoDM 1336.05",
+                    "DoDM 1348.33",
+                    "DoDM 7730.54, Volume 1",
+                    "DoDM 1348.33, Volume 3",
+                    "Title 10",
+                    "Title 32",
+                    "Title 5",
+                    "Title 38",
+                    "JP 1-0",
+                    "JP 1-02",
+                    "Executive Order 13607",
+                    "Executive Order 13478",
+                    "Executive Order 12107",
+                    "AFJQS Force"
+                 ],
+                 "publication_date_dt":[
+                    "2020-06-25T00:00:00"
+                 ],
+                 "page_count":[
+                    395
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":4,
+                          "relation":"eq"
+                       },
+                       "max_score":16.191425,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"53101bd2327102bc561fdd9702629790ef30cbee76cae25a9ad575b99e71e4ac",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":570
+                             },
+                             "_score":16.191425,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   346
+                                ],
+                                "paragraphs.filename":[
+                                   "AFI 36-2670.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "338 AFI36-2670 25 JUNE 2020 Attachment 9 DEVELOPMENT TEAM BATTLE RHYTHM ( REGULAR AIR FORCE ) Figure A9.1 . Development Team Battle Rhythm ( Regular Air Force ) ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "338 AFI36-2670 25 JUNE 2020 Attachment 9 DEVELOPMENT TEAM <em>BATTLE</em> RHYTHM ( REGULAR AIR <em>FORCE</em> ) Figure A9.1 . Development Team <em>Battle</em> Rhythm ( Regular Air <em>Force</em> ) ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"53101bd2327102bc561fdd9702629790ef30cbee76cae25a9ad575b99e71e4ac",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":63
+                             },
+                             "_score":13.80208,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   14
+                                ],
+                                "paragraphs.filename":[
+                                   "AFI 36-2670.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "337 Attachment 9—DEVELOPMENT TEAM BATTLE RHYTHM ( REGULAR AIR FORCE ) 338 Attachment 10—CAREER FIELD MANAGER APPOINTMENT TEMPLATE "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "337 Attachment 9—DEVELOPMENT TEAM <em>BATTLE</em> RHYTHM ( REGULAR AIR <em>FORCE</em> ) 338 Attachment 10—CAREER FIELD MANAGER APPOINTMENT TEMPLATE"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"53101bd2327102bc561fdd9702629790ef30cbee76cae25a9ad575b99e71e4ac",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":108
+                             },
+                             "_score":6.0085025,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   33
+                                ],
+                                "paragraphs.filename":[
+                                   "AFI 36-2670.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Panel membership , number of individuals nominated/vectored for developmental education , number of developmental education slots available , number of individuals nominated for squadron command ( officers ) , projected number of squadron command positions available , number of individuals selected as squadron command candidates , elements of a successful individual ’s record ( e.g . , stratification , awards/recognition , special selections and assignments ) .1.4.5.28 . Will review career field Air Expeditionary Force posturing and coding to ensure capabilities are visible and properly aligned in the Air Expeditionary Force .1.4.5.29 . Will consider cross functional developmental and utilization requirements ( see paragraph 1.3.5 ) when recommending vectors for their officers and civilians .Development Team chairs ( in coordination with career field managers , and assignment teams/career field teams ) must use cross functional authority provided input to ensure these cross functional requirements are appropriately addressed during development team sessions .Finally , development teams should provide feedback to cross functional authorities on the requirements cross functional authorities provided prior to the development team session .1.4.5.30 . Will determine development team meeting dates and agenda items .1.4.5.30.1 . Development teams will meet at least once per year .Specific times will be determined by the functional manager but will align with the development team battle rhythm ( see Attachment 9 ) .Reg AF Development Team meetings will be held at the Air Force Personnel Center and must be coordinated with AFPC/DP3 .Waivers to this requirement must be submitted to AF/A1D for approval .1.4.5.30.2 . Will provide development team meeting dates to AFPC/DP2ND no later than 60 days prior to the start of each development team meeting .AFPC/DP3 will post development team meeting dates on the respective Development Pages in my Pers .1.4.5.30.3 . At least once per year , will begin development team meetings with an overview of existing and projected requirements , to include existing 365 day deployment opportunities and existing and projected authorized strength ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Will review career field Air Expeditionary <em>Force</em> posturing and coding to ensure capabilities are visible and properly aligned in the Air Expeditionary <em>Force</em> .1.4.5.29 ."
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"53101bd2327102bc561fdd9702629790ef30cbee76cae25a9ad575b99e71e4ac",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":518
+                             },
+                             "_score":5.008736,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   334
+                                ],
+                                "paragraphs.filename":[
+                                   "AFI 36-2670.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "326 AFI36-2670 25 JUNE 2020 Attachment 4 FUNCTIONAL AUTHORITY ALIGNMENT TABLES Table A4.1 . Functional Authorities for Officer Career Fields ( note 1 ) .AFSC Career Field Functional Authority 11X Pilot AF/A3 12X Combat Systems Officer AF/A3 13A Astronaut AF/A3 13B Air Battle Manager AF/A3 13D Control and Recovery AF/A3 13L Air Liaison Officer AF/A3 13M Airfield Operations AF/A3 13S Space Operations AFSPC/CC 13N Nuclear/Missile Operations Officers AF/A10 14N Intelligence AF/A2 15W Weather AF/A3 16F Regional Affairs Strategist SAF/IA 16P Political Military Affairs Strategist SAF/IA 16G , 16R Operations Support AF/A3 17D Cyberspace Operations SAF/CIO A6 18X Remotely Piloted Aircraft Pilot AF/A3 21A Aircraft Maintenance AF/A4 21M Munitions/Missile Maintenance AF/A4 21R Logistics Readiness AF/A4 31P Security Forces AF/A4 32E Civil Engineer AF/A4 35B Band SAF/PA 35X Public Affairs SAF/PA 38F ( Note 2 ) Force Support AF/A1 41A Medical Services Corps AF/SG 42X , 43X Biomedical Sciences Corps AF/SG 44X , 45X , 48X Medical Corps AF/SG 46X Nurse Corps AF/SG 47X Dental Corps AF/SG 51J Judge Advocate General ’s Corps AF/JA 52R Chaplain AF/HC 61A/B/C/D ( note 3 ) Scientist SAF/AQ 62E Developmental Engineer SAF/AQ 63A Acquisition Management SAF/AQ 64P Contracting SAF/AQ 65X Financial Management SAF/FM 71S Office of Special Investigations SAF/IG IO Information Operations AF/A3 "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Functional Authorities for Officer Career Fields ( note 1 ) .AFSC Career Field Functional Authority 11X Pilot AF/A3 12X Combat Systems Officer AF/A3 13A Astronaut AF/A3 13B Air <em>Battle</em>"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"07c0e49f2445dde0ed7182a40b86818069286b8fdefa2ef26ec38310e9b31cae",
+              "_score":17.140087,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "asbestos":0.16055892711835743,
+                    "safety":0.14889455564566031,
+                    "hazmat":0.25105902074307446,
+                    "respirator":0.20763544797649217,
+                    "opnavinst":0.5431931983311091
+                 },
+                 "orgs_rs":{
+                    "the Department of Defense":2,
+                    "II":2,
+                    "Navy":89,
+                    "IO":6,
+                    "Department of Defense":5
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "OPNAVINST 5100.19F NAVY SAFETY AND OCCUPATIONAL HEALTH PROGRAM MANUAL FOR FORCES AFLOAT"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "secnav_pubs"
+                 ],
+                 "doc_num":[
+                    "5100.19F"
+                 ],
+                 "summary_30":[
+                    "Some safety hazards may be corrected by ships force, while others may require Review heat stress surveys and ensure stay times for engineering or reactor personnel Review heat stress surveys and ensure stay times for personnel are being properly Ensure personnel exposed to hazardous noise wear the correct hearing protection as Ensure that personnel required to perform work involving lead exposure are provided Wear the same personal fall protection equipment as the personnel working aloft or Wear the proper personnel protective equipment including heavy-duty gloves, safety Paint removal operations can produce extremely high personnel exposures to toxic"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "OPNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "NAVY SAFETY AND OCCUPATIONAL HEALTH PROGRAM MANUAL FOR FORCES AFLOAT"
+                 ],
+                 "keyw_5":[
+                    "safety officer",
+                    "fit test",
+                    "safety precautions",
+                    "medical surveillance",
+                    "electrical shock",
+                    "work platform",
+                    "hot work",
+                    "heat stress",
+                    "hazardous material",
+                    "fall protection"
+                 ],
+                 "filename":[
+                    "OPNAVINST 5100.19F.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "OPNAVINST 5100.19F.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "DoD 6055.05-M",
+                    "DoDI 6055.01",
+                    "DoDI 6055.05",
+                    "DoDI 6055.12",
+                    "DoDI 6055.15",
+                    "Title 10",
+                    "Title 42",
+                    "Title 29",
+                    "Title 40",
+                    "Title 15",
+                    "Executive Order 12344"
+                 ],
+                 "publication_date_dt":[
+                    "2019-05-05T00:00:00"
+                 ],
+                 "page_count":[
+                    491
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":14.747631,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"07c0e49f2445dde0ed7182a40b86818069286b8fdefa2ef26ec38310e9b31cae",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":455
+                             },
+                             "_score":14.747631,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   14
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "and Battle Force Ship Counting Procedures "
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 5100.19F.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "and <em>Battle</em> <em>Force</em> Ship Counting Procedures"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"11ec225d9ab29aa7e09b9d30c8635769345be0bfab465d8256c8df35bfbd0b00",
+              "_score":16.99253,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "assessment":0.19143808937732187,
+                    "gsorts":0.33194771640508575,
+                    "readiness":0.46713296220116984,
+                    "chairman":0.42399073363423007,
+                    "guide":0.24529217456410873
+                 },
+                 "orgs_rs":{
+                    "the Department of Defense":7,
+                    "Congress":6,
+                    "Army":6,
+                    "Combatant":2,
+                    "the Armed Forces":4,
+                    "Joint":9,
+                    "Department of Defense":7,
+                    "USSOCOM":2,
+                    "Defense":15,
+                    "Coast Guard":1,
+                    "CSA":1,
+                    "Department":3,
+                    "Navy":2,
+                    "the Military Services":1,
+                    "the Joint Chiefs of Staff":57,
+                    "the Air Force":1
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CJCS GDE 3401D CJCS Guide to the Chairman's Readiness System"
+                 ],
+                 "display_org_s":[
+                    "Joint Chiefs of Staff"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "3401D"
+                 ],
+                 "summary_30":[
+                    "units into an effective joint force ready to measure, assess, and report readiness from a joint assessment ensuring our joint force is ready to framework for assessing Unit Readiness using Force"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CJCS GDE"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "CJCS Guide to the Chairman's Readiness System"
+                 ],
+                 "keyw_5":[
+                    "cjcs guide",
+                    "intentionally blank",
+                    "readiness system",
+                    "joint staff",
+                    "readiness assessment",
+                    "joint force",
+                    "future readiness",
+                    "assigned mission",
+                    "weapon system",
+                    "unit relocation"
+                 ],
+                 "filename":[
+                    "CJCS GDE 3401D.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:25"
+                 ],
+                 "id":[
+                    "CJCS GDE 3401D.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "DoDD 7730.65",
+                    "Title 10",
+                    "CJCSI 3401.02B",
+                    "CJCSI 3401.01E",
+                    "CJCSI 3100.01",
+                    "CJCSI 3401.01",
+                    "CJCSI 3401.02",
+                    "CJCSI 3110.01",
+                    "CJCSI 3137.01",
+                    "CJCSI 5123.01",
+                    "CJCSM 3150.02",
+                    "CJCSG 3401D",
+                    "JP 3-33",
+                    "JP 2-0",
+                    "JP 1-02"
+                 ],
+                 "publication_date_dt":[
+                    "2010-11-15T00:00:00"
+                 ],
+                 "page_count":[
+                    52
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":12.482907,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"11ec225d9ab29aa7e09b9d30c8635769345be0bfab465d8256c8df35bfbd0b00",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":241
+                             },
+                             "_score":12.482907,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   40
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCS GDE 3401D.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "military capability .The ability to achieve a specified wartime objective ( win a war or battle , destroy a target set ) .It includes four major components : force structure , modernization , readiness , and sustainability ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "military capability .The ability to achieve a specified wartime objective ( win a war or <em>battle</em> , destroy a target set ) .It includes four major components : <em>force</em> structure , modernization"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+              "_score":16.844742,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "defence":0.16050015509057217,
+                    "buildings":0.20785727804683854,
+                    "should":0.16731726974991273,
+                    "enemy":0.17608823963855863,
+                    "edition version":0.6249777722299353
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "ATP 99 URBAN TACTICS"
+                 ],
+                 "display_org_s":[
+                    "NATO"
+                 ],
+                 "crawler_used_s":[
+                    "nato_stanag"
+                 ],
+                 "doc_num":[
+                    "99"
+                 ],
+                 "summary_30":[
+                    "considerations, it is the impact of military operations on the urban population and vice required effects on ground targets to support land operations in the full spectrum and increase the operational effectiveness of forces and weapon systems. isolate enemy positions, and to help following units pass into UEs. Such an infiltration the building to engage enemy forces from any direction. building as a command controlled trap (with explosives to be fired after the enemy has concealed in likely enemy weapons firing positions or on likely routes."
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "ATP"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "URBAN TACTICS"
+                 ],
+                 "keyw_5":[
+                    "annex",
+                    "fire support",
+                    "offensive operations",
+                    "friendly forces",
+                    "force elements",
+                    "direct fire",
+                    "atp-99",
+                    "version 1",
+                    "urban operations",
+                    "tactical activities"
+                 ],
+                 "filename":[
+                    "ATP 99.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:27"
+                 ],
+                 "id":[
+                    "ATP 99.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "publication_date_dt":[
+                    "2017-02-10T00:00:00"
+                 ],
+                 "page_count":[
+                    182
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":8,
+                          "relation":"eq"
+                       },
+                       "max_score":16.330175,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":871
+                             },
+                             "_score":16.330175,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   82
+                                ],
+                                "paragraphs.filename":[
+                                   "ATP 99.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Ser Essential stages 1 .Perimeter force battle 2 .Disruption force battle 3 .Main defended area ( MDA ) 4 .Reserve "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Ser Essential stages 1 .Perimeter <em>force</em> <em>battle</em> 2 .Disruption <em>force</em> <em>battle</em> 3 .Main defended area ( MDA ) 4 .Reserve"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":873
+                             },
+                             "_score":15.065451,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   82
+                                ],
+                                "paragraphs.filename":[
+                                   "ATP 99.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "2 . Perimeter force battle .At battle group level the perimeter force provides covering troops , ideally in mutually supporting locations that provide information about the enemy and also start his destruction .They move or withdraw when they can no longer influence the battle .They may have secondary tasks in the MDA or reserve .Consideration should be given to the following ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Perimeter <em>force</em> <em>battle</em> .At <em>battle</em> group level the perimeter <em>force</em> provides covering troops , ideally in mutually supporting locations that provide information about the enemy and also"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":882
+                             },
+                             "_score":13.471632,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   83
+                                ],
+                                "paragraphs.filename":[
+                                   "ATP 99.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "3 . Disruption force battle .The disruption force should cause attrition , disrupt the attack and draw the enemy towards selected KA .Essentially the disruption force should conduct a delaying operation .Consideration should be given to the following ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Disruption <em>force</em> <em>battle</em> .The disruption <em>force</em> should cause attrition , disrupt the attack and draw the enemy towards selected KA .Essentially the disruption <em>force</em> should conduct a delaying"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":713
+                             },
+                             "_score":12.569055,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   68
+                                ],
+                                "paragraphs.filename":[
+                                   "ATP 99.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "5 . Regrouping .Sufficient time has to be allowed for any reinforcement , regrouping , orders and rehearsals .At battle group level , the assaulting force is likely to be organized as follows : "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Regrouping .Sufficient time has to be allowed for any reinforcement , regrouping , orders and rehearsals .At <em>battle</em> group level , the assaulting <em>force</em> is likely to be organized as follows"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"c86247ac852004a961e56c6edddac4e80975f33a9f2b3e1125991f40c45e6f12",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":148
+                             },
+                             "_score":12.231405,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   22
+                                ],
+                                "paragraphs.filename":[
+                                   "ATP 99.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "3 . Flexibility .Due to the complexity of the UE within a multidimensional battle space with adversaries using asymmetric tactics , the joint and combined force must be prepared to adapt to the dynamic environment ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Flexibility .Due to the complexity of the UE within a multidimensional <em>battle</em> space with adversaries using asymmetric tactics , the joint and combined <em>force</em> must be prepared to adapt"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"00d78bdd25658ac9fe4e33bf92fb9c3889fb6c6c66c648d2a34a8ae555482058",
+              "_score":16.516312,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "total":0.1565241048042554,
+                    "subactivity":0.35463049008721104,
+                    "financial management":0.18830269604077807,
+                    "exhibit":0.578495628563009,
+                    "budget":0.15801881681275523
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "DoDFMR V2ACH3 Volume 2A, Chapter 3 : \"Operation and Maintenance Appropriations\""
+                 ],
+                 "display_org_s":[
+                    "FMR"
+                 ],
+                 "crawler_used_s":[
+                    "fmr_pubs"
+                 ],
+                 "doc_num":[
+                    "V2ACH3"
+                 ],
+                 "summary_30":[
+                    "Exhibits in Support of Section 0302 - Program and Budget Review Submission Separate OP-8 exhibits must be prepared for PY, CY, BY for each Military Department in total and for each appropriation/fund in which civilian personnel are 1) For Navy only, provide the funding level-by Active and Reserve-for Ship Operations as defined by the Budget Exhibit OP-41 (described in the DoD The Reconciliation of Increases and Decreases section will be included in the PB-58 for both the OSD/OMB Program and Budget Review Submission and the"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "DoDFMR"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "Volume 2A, Chapter 3 : \"Operation and Maintenance Appropriations\""
+                 ],
+                 "keyw_5":[
+                    "dod 14-",
+                    "fy cy",
+                    "fy py",
+                    "fy cy/",
+                    "operations financed",
+                    "current year",
+                    "2bdod 14-",
+                    "fy ___",
+                    "fund source",
+                    "flying hours"
+                 ],
+                 "filename":[
+                    "DoDFMR V2ACH3.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:19"
+                 ],
+                 "id":[
+                    "DoDFMR V2ACH3.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "DoD 7000.14-R",
+                    "DoDD 7250.13",
+                    "DoDD 1015.8",
+                    "DoDD 1015.1",
+                    "DoDD 1330.9",
+                    "DoDD 1015.10",
+                    "DoDI 1015.10",
+                    "DoDI 1015.12",
+                    "DoDI 1342.22",
+                    "DoDI 1322.25",
+                    "DoDI 7000.12",
+                    "Title 5",
+                    "Title 2",
+                    "Title 10",
+                    "Title 1"
+                 ],
+                 "publication_date_dt":[
+                    "2010-12-01T00:00:00"
+                 ],
+                 "page_count":[
+                    252
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":4,
+                          "relation":"eq"
+                       },
+                       "max_score":17.018051,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"00d78bdd25658ac9fe4e33bf92fb9c3889fb6c6c66c648d2a34a8ae555482058",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":3251
+                             },
+                             "_score":17.018051,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   184
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Reserve Battle Force Reserve Non Battle Force "
+                                ],
+                                "paragraphs.filename":[
+                                   "DoDFMR V2ACH3.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Reserve <em>Battle</em> <em>Force</em> Reserve Non <em>Battle</em> <em>Force</em>"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"00d78bdd25658ac9fe4e33bf92fb9c3889fb6c6c66c648d2a34a8ae555482058",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":3252
+                             },
+                             "_score":16.092098,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   184
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Battle Force Ships ( Active plus Reserve Battle Force ) Exhibit PBA 3 Ship Operations ( Page 1 of 4 ) "
+                                ],
+                                "paragraphs.filename":[
+                                   "DoDFMR V2ACH3.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "<em>Battle</em> <em>Force</em> Ships ( Active plus Reserve <em>Battle</em> <em>Force</em> ) Exhibit PBA 3 Ship Operations ( Page 1 of 4 )"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"00d78bdd25658ac9fe4e33bf92fb9c3889fb6c6c66c648d2a34a8ae555482058",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":3255
+                             },
+                             "_score":14.602008,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   185
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Battle Force Ships Inventory Adjustments by Category "
+                                ],
+                                "paragraphs.filename":[
+                                   "DoDFMR V2ACH3.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "<em>Battle</em> <em>Force</em> Ships Inventory Adjustments by Category"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"00d78bdd25658ac9fe4e33bf92fb9c3889fb6c6c66c648d2a34a8ae555482058",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":3250
+                             },
+                             "_score":13.657963,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   184
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Ship Inventory ( End of Year ) Navy Active MSC Charter/Support Battle Force Ships ( Active ) "
+                                ],
+                                "paragraphs.filename":[
+                                   "DoDFMR V2ACH3.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Ship Inventory ( End of Year ) Navy Active MSC Charter/Support <em>Battle</em> <em>Force</em> Ships ( Active )"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+              "_score":16.489025,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "battle":0.22150569286466043,
+                    "pacaf":0.20515873838912627,
+                    "mission":0.18344008254766841,
+                    "afman":0.4347697770378915,
+                    "norad":0.18740623900241338
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "AFMAN 13-1BCCV3 OPERATING PROCEDURES-BATTLE CONTROL CENTER (BCC)"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "air_force_pubs"
+                 ],
+                 "doc_num":[
+                    "13-1BCCV3"
+                 ],
+                 "summary_30":[
+                    "equips units that operate the BCC within Alaska, Hawaii and Guam, and the theater air control functions of battle management, weapons control, surveillance, identification, tactical data link"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "AFMAN"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "OPERATING PROCEDURES-BATTLE CONTROL CENTER (BCC)"
+                 ],
+                 "keyw_5":[
+                    "mission crew",
+                    "air picture",
+                    "air defense",
+                    "weapons section",
+                    "weapons assignment",
+                    "track data",
+                    "surveillance data",
+                    "control enterprise",
+                    "aerospace control",
+                    "weapons technician"
+                 ],
+                 "filename":[
+                    "AFMAN 13-1BCCV3.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "AFMAN 13-1BCCV3.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "publication_date_dt":[
+                    "2020-10-20T00:00:00"
+                 ],
+                 "page_count":[
+                    45
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":13,
+                          "relation":"eq"
+                       },
+                       "max_score":13.571426,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":42
+                             },
+                             "_score":13.571426,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   42
+                                ],
+                                "paragraphs.filename":[
+                                   "AFMAN 13-1BCCV3.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "AFMAN13-1BCCV3 20 OCTOBER 2020 43 AFNORTH—Air Forces Northern AFSC—Air Force Specialty Code ANG—Air National Guard ANR—Alaska NORAD Region AOC—Air and Space Operations Center APM—Air Picture Management ASO—Air Surveillance Officer AST—Air Surveillance Technician ATO—Air Tasking Order AWO—Air Weapons Officer BC—Battle Commander BCC—Battle Control Center BMO—Battle Management Operator BMS—Battle Management Superintendent BS—Battle Staff C2—Command and Control C4I—Command and Control , Communications , Computers , and Information CC—Commander CDO—Cyberspace Duty Officer CFP—Communications Focal Point COMSEC—Communications Security CONPLAN—Contingency Plan CONR—CONUS NORAD Region CONUS—Continental United States DAFI—Department of the Air Force Instruction DEFCON—Defense Condition DEN—Domestic Event Network DMA—Dangerous Military Activity DNCS—Data Net Control Station DO—Director of Operations EA/EP—Electronic Attack/Electronic Protection EAC—Emergency Action Coordinator "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Picture Management ASO—Air Surveillance Officer AST—Air Surveillance Technician ATO—Air Tasking Order AWO—Air Weapons Officer BC—<em>Battle</em> Commander BCC—<em>Battle</em> Control Center BMO—<em>Battle</em>"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":1
+                             },
+                             "_score":12.002861,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   1
+                                ],
+                                "paragraphs.filename":[
+                                   "AFMAN 13-1BCCV3.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "2 AFMAN13-1BCCV3 20 OCTOBER 2020 Information Governance Program , and disposed of IAW the Air Force Records Disposition Schedule located in the Air Force Records Information Management System .Refer recommended changes and questions about this publication to the OPR listed above using the AF Form 847 , Recommendation for Change of Publication ; route AF Form 847 from the field through the appropriate chain of command .Reference to forms within this manual also equates to electronic products when authorized .The reports in this manual are exempt from licensing according to AFI 33-324 , The Air Force Information Collections and Reports Management Program .The use of the name or mark of any specific manufacturer , commercial product , commodity , or service in this publication does not imply endorsement by the Air Force .Compliance with Attachment 1 is not mandatory .SUMMARY OF CHANGES This manual has been completely revised and rewritten to reflect the evolving operational environment .This manual must be completely reviewed due to the extent of the operational and administrative changes .Chapter 1—BATTLE CONTROL CENTER OVERVIEW 5 1.1 . Overview .................................................................................................................. 5 1.2 . Threat Environment ................................................................................................. 5 1.3 . Purpose ... . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .5 1.4 . Roles and Responsibilities ....................................................................................... 6 1.5 . Supplements/Waiver Authority ............................................................................... 7 Chapter 2—CONTINENTAL UNITED STATES ( CONUS ) BATTLE CONTROL CENTER ( BCC ) 9 2.1 . Mission ... . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .9 2.2 . Battle Staff ( BS ) ....................................................................................................... 9 2.3 . Battle Control Center Mission Crew Function ........................................................ 10 2.4 . Battle Control Center ( BCC ) Mission Crew Composition ...................................... 10 Figure 2.1 . Combat Mission Crew Composition–CONUS BCC ............................................... 10 2.5 . Common Mission Crew Duties and Responsibilities .............................................. 11 2.6 . MCC ( 13B ) .............................................................................................................. 11 2.7 . Weapons Section ...................................................................................................... 13 2.8 . Air Picture Management ( APM ) Section ................................................................. 15 2.9 . Mission Certifications .............................................................................................. 20 "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "2 AFMAN13-1BCCV3 20 OCTOBER 2020 Information Governance Program , and disposed of IAW the Air <em>Force</em> Records Disposition Schedule located in the Air <em>Force</em> Records Information Management"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":41
+                             },
+                             "_score":10.384768,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   41
+                                ],
+                                "paragraphs.filename":[
+                                   "AFMAN 13-1BCCV3.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "42 AFMAN13-1BCCV3 20 OCTOBER 2020 Attachment 1 GLOSSARY OF REFERENCES AND SUPPORTING INFORMATION References DAFPD 10-9 , Lead Command Designation and Responsibilities for Weapon Systems , 8 March 2007 DAFPD 13-1 , Command and Control Enterprise ( C2 Enterprise ) , 6 August 2012 AFI 33-324 , The Air Force Information Collections and Reports Management Program , 22 July 2019 DAFI 33-360 , Publications and Forms Management , 1 December 2015 AFMAN 13-1BCC , Volume 1 , Battle Control Center ( BCC ) Training , 17 July 2020 AFTTP 3-3 , Integrated Planning and Employment ( IPE ) , 3 April 2020 AFI 11-214 , Air Operations Rules and Procedures , 8 July 2020 NORAD Instruction 10-4 , NORAD Emergency Action Procedures , 9 June 2015 AFI 33-322 , Records Management and Information Governance Program , 23 March 2020 AFI 16-1404 , Air Force Information Security Program , 29 May 2015 Prescribed Forms None Adopted Forms AF Form 847 , Recommendation for Change of Publication DD Form 2992 , Medical Recommendation for Flying or Special Operational Duty Abbreviations and Acronyms ABCC—Alaska Battle Control Center ABM—Air Battle Manager ACC—Air Combat Command ACO—Airspace Control Order ACS—Air Control Squadron ADA—Air Defense Artillery ADD—Air Defense Director ADLE—Air Defense Liaison Element ADLT—Air Defense Liaison Team ADS—Air Defense Squadron AETC—Air Education and Training Command "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Lead Command Designation and Responsibilities for Weapon Systems , 8 March 2007 DAFPD 13-1 , Command and Control Enterprise ( C2 Enterprise ) , 6 August 2012 AFI 33-324 , The Air <em>Force</em>"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":9
+                             },
+                             "_score":9.429812,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   9
+                                ],
+                                "paragraphs.filename":[
+                                   "AFMAN 13-1BCCV3.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "10 AFMAN13-1BCCV3 20 OCTOBER 2020 2.2.3.5 . Communications Focal Point ( CFP ) .The CFP is a consolidation of all support activities within the BCC .The CFP functions in direct support of the unit 's operational mission and includes , but is not limited to , maintenance control , telephone administration desk , and traditional network help desk .The CFP collects data from internal and external sources ( such as unit work centers , the Defense Information Systems Agency , and Air Force Network Operations ) .In addition , the CFP monitors and coordinates scheduled and unscheduled maintenance , maintaining visibility of equipment and systems metrics and indicators .2.3 . Battle Control Center Mission Crew Function .The BCC mission crew performs the functions of battle management , weapons control , surveillance , identification , tactical data link operations and management and track reporting .The mission crew also provides airspace management .2.4 . Battle Control Center ( BCC ) Mission Crew Composition .The BCC mission crew is the focal point for operations .Supervised by a mission crew commander ( MCC ) , the mission crew is tasked to execute the mission on a continuous basis and is manned by a number of personnel , tailored to meet mission requirements .Some duty positions serve as prerequisites to others and these prerequisites are located AFMAN 13-1BCC Volume 1 , Battle Control Center Training .The mission crew will consist of the duty positions identified in Figure 2.1 as described in the following sections .( T 2 ) Additionally , the mission crew may have personnel certified to augment and assist the battle management , weapons , and tactical data links functional areas .See paragraph 2.9 for certification positions .Figure 2.1 . Combat Mission Crew Composition–CONUS BCC .COMBAT MISSION CREW COMPOSITION CONUS BCC1 Crew Position Crew Total Mission Crew Commander ( MCC ) 2 Mission Technician * ( MT ) 2 , 2c 2 Senior Director ( SD ) 2 Air Weapons Officer/Weapons Director ( AWO/WD ) 6 Weapons Technician * ( WT ) 2 , 2a 2 Air Surveillance Officer ( ASO ) 2 Air Surveillance ( AST ) 2 Surveillance Technician ( ST ) 9 Interface Control Watch Officer * ( ICWO ) 2 , 2b 1 Interface Control Technician ( ICT ) 2 Total 30 Notes : 1 .The complexity of mission or additional battle management areas may require additional crew members .2 . The “*” denotes a mission certification position .See paragraph 2.9 for further information ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "administration desk , and traditional network help desk .The CFP collects data from internal and external sources ( such as unit work centers , the Defense Information Systems Agency , and Air <em>Force</em>"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"ceca5377faf917b06fbf6d8104bc54b4c8183c1c54af90e15aad40bd0b27394e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":4
+                             },
+                             "_score":8.742355,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   4
+                                ],
+                                "paragraphs.filename":[
+                                   "AFMAN 13-1BCCV3.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "AFMAN13-1BCCV3 20 OCTOBER 2020 5 Chapter 1 BATTLE CONTROL CENTER OVERVIEW 1.1 . Overview .This manual describes the Battle Control Center ( BCC ) , the tactical level command and control ( C2 ) node that conducts defensive counterair operations in the North American Aerospace Defense Command/United States Northern Command ( NORAD/USNORTHCOM ) and INDOPACOM areas of responsibility .Headquarters Air Combat Command ( HQ ACC ) organizes , trains , and equips the units within the Continental United States ( CONUS ) .Headquarters Pacific Air Forces ( HQ PACAF ) organizes , trains , and equips units that operate the BCC within Alaska , Hawaii and Guam , and the theater air control system ( TACS ) units that operate fixed sites within the Republic of Korea and Japan .1.2 . Threat Environment .America and our deployed forces confront a greater diversity of threats and challenges than ever before .While the traditional , strategic threat to our deployed forces and Homeland remains , terrorist and asymmetric threats have become preeminent .In addition to long range military strategic aviation , commercial aircraft ( e.g . , airliners , charter , cargo , and business jets ) , general aviation aircraft , unconventional aircraft ( e.g . , crop dusters , unmanned aerial vehicles , and ultralights ) , and cruise missiles ( . i.e . , both air and sea launched ) have been included in the overall threat profile .1.3 . Purpose .1.3.1 .This manual standardizes the structure , functions , and responsibilities for each of the ACC and PACAF units listed below .1.3.2 . CONUS .Within the CONUS , the Eastern and Western Air Defense Sectors are equipped with the BCC for the Homeland Defense mission .The Sector Commanders are responsible to the Commander , NORAD/USNORTHCOM through the Commander , CONUS NORAD Region ( CONR ) /Air Forces NORTHERN ( AFNORTH ) for air sovereignty and aerospace control during peacetime and air superiority during wartime .Where Air Force Specialty Codes ( AFSC ) are annotated , the Canadian Forces equivalent is implied .1.3.3 . Alaskan Battle Control Center ( ABCC ) .The ABCC is responsible to the NORAD/NORTHCOM Commander through the Alaska NORAD Region ( ANR ) Commander for homeland defense , air defense , air sovereignty , and aerospace warning and control of their assigned area of operation .Where AFSCs are annotated , the Canadian Forces equivalent is implied .1.3.4 . Hawaii Battle Control Center/Pacific Air Defense Sector ( PADS ) .The PADS is responsible to the INDOPACOM commander through the area air defense commander ( AADC ) for homeland defense , air defense , air sovereignty , and aerospace control and warning of their assigned area of operation .1.3.5 . United States Air Force ( USAF ) TACS elements in Korea are responsible to the 7th Air Force ( 7 AF ) commander for planning , directing , and coordinating the execution of military air operations throughout the Republic of Korea ( in time of hostility , USAF TACS elements are responsible the commander , Air Component Command ) ."
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "United States Air <em>Force</em> ( USAF ) TACS elements in Korea are responsible to the 7th Air <em>Force</em> ( 7 AF ) commander for planning , directing , and coordinating the execution of military"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"886d4a8e44656ce861efe57c90a1ee46597887419ca8df5400e15dfff46c16c1",
+              "_score":16.31647,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "afjqs":0.8462398982747852,
+                    "trainee initials":0.15659159127114589,
+                    "start complete":0.16262380740354204,
+                    "trainer initials":0.13860857065043766,
+                    "deployment":0.1968660000356124
+                 },
+                 "orgs_rs":{
+                    "Air Force":29
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "AFJQS 8U000 Air Force Job Qualification Standard (AFJQS) Unit Deployment Manager (UDM)"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "8U000"
+                 ],
+                 "summary_30":[
+                    "Document training required by this AFJQS in accordance with AFI 36-2201, Air Force AFJQS UNIT DEPLOYMENT MANAGER TASK LIST AFJQS UNIT DEPLOYMENT MANAGER TASK LIST AFJQS UNIT DEPLOYMENT MANAGER TASK LIST"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "AFJQS"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "Air Force Job Qualification Standard (AFJQS) Unit Deployment Manager (UDM)"
+                 ],
+                 "keyw_5":[
+                    "utc availability",
+                    "training system",
+                    "trainers authorized",
+                    "total force",
+                    "task qualification",
+                    "security",
+                    "parts ii",
+                    "operations security",
+                    "movement document",
+                    "knowledge"
+                 ],
+                 "filename":[
+                    "AFJQS 8U000.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "AFJQS 8U000.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "DoDD 7730.65",
+                    "DoDI 5200.01",
+                    "CJCSM 3122.05",
+                    "CJCSM 3150.16C",
+                    "JP 3-35",
+                    "JP 5-0",
+                    "AFJQS Force",
+                    "AFJQS AFJQS"
+                 ],
+                 "publication_date_dt":[
+                    "2013-07-09T00:00:00"
+                 ],
+                 "page_count":[
+                    10
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":11.375679,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"886d4a8e44656ce861efe57c90a1ee46597887419ca8df5400e15dfff46c16c1",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":59
+                             },
+                             "_score":11.375679,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   4
+                                ],
+                                "paragraphs.filename":[
+                                   "AFJQS 8U000.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "5 . AIR AND SPACE EXPEDITIONARY FORCE ( AEF ) TR : AFI 10-215 , AFI 10-244 , AFI 10-401 , AFI 10-403 , AFI 36-3802 , JP 3-35 , JP 5-0 , JP 1 , AFDD 1 , AFDD 2 , DTR 4500.9R , Part I & II 5.1 . Cycle/Battle Rhythm "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Cycle/<em>Battle</em> Rhythm"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"e18141e8ea5f5b9ceeeebc68bbd1d7f6227b5926e5b06f14d23f994e27c0ab80",
+              "_score":16.156916,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "majcom":0.18254606014006464,
+                    "forces":0.2441923993843707,
+                    "force":0.3411972190749937,
+                    "reclama":0.39385323054000787,
+                    "sourcing":0.20901846852731512
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "DAFI 10-401 OPERATIONS PLANNING AND EXECUTION"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "air_force_pubs"
+                 ],
+                 "doc_num":[
+                    "10-401"
+                 ],
+                 "summary_30":[
+                    "provides resources to support the Department of the Air Forces mission to defend the United Air Force or Space component is responsible for supporting combatant commander forces and those required for combat support operations over a range of national military identify the manpower required to meet the unit mission, by Air Force Specialty level, to"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "DAFI"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "OPERATIONS PLANNING AND EXECUTION"
+                 ],
+                 "keyw_5":[
+                    "air force",
+                    "combatant commander",
+                    "force elements",
+                    "joint force",
+                    "institutional force",
+                    "force providers",
+                    "sourcing solution",
+                    "reclama process",
+                    "operational force",
+                    "manpower requirements"
+                 ],
+                 "filename":[
+                    "DAFI 10-401.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "DAFI 10-401.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "DoDD 1315.18",
+                    "DoDD 7730.65",
+                    "DoDD 3100.10",
+                    "DoDD 7045.14",
+                    "DoDD 1200.17",
+                    "DoDD 1352.01",
+                    "DoDI 1352.01",
+                    "DoDI 3020.45",
+                    "DoDI 5158.05",
+                    "DoDI 7730.66",
+                    "DoDI 8260.03",
+                    "DoDI 7730.64",
+                    "DoDI 1235.12",
+                    "Title 10",
+                    "CJCSI 4110.01E",
+                    "CJCSI 3401.02B",
+                    "CJCSM 3130.06",
+                    "CJCSM 3122.02E",
+                    "CJCSM 3130.06B",
+                    "CJCSG 3130",
+                    "JP 1-02",
+                    "Executive Order 12861",
+                    "Executive Order 12866"
+                 ],
+                 "publication_date_dt":[
+                    "2021-01-13T00:00:00"
+                 ],
+                 "page_count":[
+                    74
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":2,
+                          "relation":"eq"
+                       },
+                       "max_score":8.667546,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"e18141e8ea5f5b9ceeeebc68bbd1d7f6227b5926e5b06f14d23f994e27c0ab80",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":255
+                             },
+                             "_score":8.667546,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   51
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "34 DAFI10-401 13 JANUARY 2021 5.2.2 . Force providers will review the alignment of postured forces as part of the preparatory actions for every global force management cycle .( T 1 ) .5.2.3 .All combatant commanders are required to identify force requirements in the Joint Capabilities Requirements Manager for presentation to the Joint Staff for service sourcing and validation .The rotational force battle rhythm is the mechanism for managing and scheduling forces .5.2.4 .The component staffs work with the AFPC requirements managers to correct changes to the TPFDD elements based on the Joint Capabilities Requirements Manager requirements .Any change affecting the Joint Capabilities Requirements Manager requirements requires a global force management force tracking number change request .5.2.5 . If the Joint Capabilities Requirements Manager requirements contain line remarks , a global force management change request is required to change a line remark .If the Joint Capabilities Requirements Manager does not contain line remarks , a global force management change request is not required .Line remarks not contained within the Joint Capabilities Requirements Manager are non binding to the force provider .The AFPC requirements managers should inform the component staff that changing requirements might result in a delay in sourcing the new requirement .5.2.6 .The AFPC requirements managers build the rotational requirements and provide the TPFDD to the supported component staff for review prior to each rotation period .Any additional force capabilities or changes to the existing force requirements generates a new or modified deployment order .The component staff immediately submits a deletion requests upon determination the force capability is no longer required .5.2.6.1 . AF/A3O and AFPC , AEF Policy , Plans and Programs ( AFPC/DP3 ) monitors the global force management planning tasks for the upcoming force rotation schedule to ensure the efficient and timely execution of the force management battle rhythm .Component staff planners , headquarters FAMs , and unit commanders are required to complete their actions in accordance with the published timelines .5.2.6.2 .The master rotational schedule is built/updated annually in sufficient time to meet the Joint Staff global force management master timeline .The scheduling process : 5.2.6.2.1 . Accommodates the Air Reserve Component notification and mobilization timelines in accordance with AFI 10-402 .5.2.6.2.2 . Provides supported component staffs with sufficient time to provide operational risk assessments to the combatant commander ’s mission .5.2.6.2.3 . Allows force providers to assess institutional risk assessments .5.2.6.2.4 . Improves force development and personnel/assignment actions by the supporting commanders .5.3 . War Reserve Materiel .5.3.1 . War reserve materiel supports the full range of military operations outlined in the national military strategy .The use of war reserve materiel starter or swing stocks is restricted to ensure sufficient capability is available to support theater requirements ."
+                                ],
+                                "paragraphs.filename":[
+                                   "DAFI 10-401.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "timely execution of the <em>force</em> management <em>battle</em> rhythm .Component staff planners , headquarters FAMs , and unit commanders are required to complete their actions in accordance with"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"e18141e8ea5f5b9ceeeebc68bbd1d7f6227b5926e5b06f14d23f994e27c0ab80",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":34
+                             },
+                             "_score":7.8205357,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   3
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "5 . Functional Area Guidance .Functional area guidance will be developed per the annual Global Force Management and AEF Milestones Memo .( T 1 ) .6 . Reserve Component Utilization : Air Reserve Components ( ARC ) ( i.e . , Air Force Reserve Command and Air National Guard ) are an “ operational ” reserve ; this requires assured access via mobilization in order to plan , commit , and sustain sourcing solutions during execution .To access the ARC as an operational reserve , ARC organizations are assigned to Reserve Component Periods by their respective ARC headquarters .The Reserve Component Construct supports a 1:5 M2D .Some organizations are assigned to BLKYR to reflect an in place requirement or UTC whose battle rhythms are managed internally .Reserve Component Periods are annotated in the BLOCK field of UTC availability .For volunteer policies , refer to the respective ARC headquarters ."
+                                ],
+                                "paragraphs.filename":[
+                                   "DAFI 10-401.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "by their respective ARC headquarters .The Reserve Component Construct supports a 1:5 M2D .Some organizations are assigned to BLKYR to reflect an in place requirement or UTC whose <em>battle</em>"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"1beecfd75a94a73965ba4518763bf4e15a6402b22c69324b412e7b3d15f6552e",
+              "_score":16.042898,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "disposition":0.3918747304257941,
+                    "generating activities":0.26239589314717565,
+                    "generating activity":0.23607415894375403,
+                    "aircraft eject":0.37926532949586317,
+                    "demil":0.3210126588409788
+                 },
+                 "orgs_rs":{
+                    "the Department of Defense":49,
+                    "Reserve":6,
+                    "OSD":1,
+                    "Army":40,
+                    "the United States Government":2,
+                    "Defense for Acquisition and Sustainment":1,
+                    "Treasury":2,
+                    "USDAS":1,
+                    "Department of Defense":99,
+                    "Defense":6,
+                    "the U.S. Government":22,
+                    "USN":1,
+                    "Navy":9,
+                    "Department":3,
+                    "the Department of Justice":1,
+                    "Senate":1,
+                    "State":69,
+                    "Veterans Affairs":1,
+                    "the House of Representatives":2
+                 },
+                 "pagerank_r":0.00022619724864191088
+              },
+              "fields":{
+                 "display_title_s":[
+                    "DoDM 4160.21 Defense Materiel Disposition: Instructions for Hazardous Property and Other Special Processing Materiel"
+                 ],
+                 "display_org_s":[
+                    "Dept. of Defense"
+                 ],
+                 "crawler_used_s":[
+                    "dod_issuances"
+                 ],
+                 "doc_num":[
+                    "4160.21"
+                 ],
+                 "summary_30":[
+                    "Transfer silver batteries to DLA Disposition Services sites and process as either Generating activities or DLA Disposition Services sites will accomplish disposal tubes to be transferred to the DLA Disposition Services site contain radioactive material nearest DLA Disposition Services site facility by the activity that is requesting disposal. of suspected PCB items is required prior to ultimate disposal, DLA Disposition Services sites for turn-in to a DLA Disposition Services site, generating activities should ensure that any Prior to transferring to DLA Disposition Services sites, generating activities must"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "DoDM"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "Defense Materiel Disposition: Instructions for Hazardous Property and Other Special Processing Materiel"
+                 ],
+                 "keyw_5":[
+                    "dodm 21-v4",
+                    "generating activities",
+                    "generating activity",
+                    "dod components",
+                    "october 22",
+                    "military department",
+                    "disposition instructions",
+                    "serial number",
+                    "physical custody",
+                    "personal property"
+                 ],
+                 "filename":[
+                    "DoDM 4160.21 Volume 4 CH 3.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:16"
+                 ],
+                 "id":[
+                    "DoDM 4160.21 Volume 4 CH 3.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Manual"
+                 ],
+                 "ref_list":[
+                    "DoD 4165.66-M",
+                    "DoD 5400.11-R",
+                    "DoD 4715.05-G",
+                    "DoD 7000.14-R",
+                    "DoD 6055.09-M",
+                    "DoD 4100.39-M",
+                    "DoD 4715.5-G",
+                    "DoD 4140.27",
+                    "DoD 4500.36-R",
+                    "DoD 4160.21-M",
+                    "DoDD 5134.12",
+                    "DoDI 4140.01",
+                    "DoDI 4160.28",
+                    "DoDI 2030.08",
+                    "DoDI 4715.23",
+                    "DoDI 4715.05",
+                    "DoDI 5000.76",
+                    "DoDI 5030.59",
+                    "DoDI 4140.62",
+                    "DoDI 6055.15",
+                    "DoDI 8500.01",
+                    "DoDM 4160.28",
+                    "DoDM 4160.21-V4",
+                    "DoDM 4100.39",
+                    "DoDM 5200.01",
+                    "DoDM 4140.01",
+                    "DoDM 4140.65",
+                    "DoDM 4500.36",
+                    "Title 41",
+                    "Title 40",
+                    "Title 10",
+                    "Title 15",
+                    "Title 29",
+                    "Title 49",
+                    "Title 42",
+                    "Title 22",
+                    "Title 18",
+                    "Title 21",
+                    "Title 4",
+                    "Title 16",
+                    "Title 14",
+                    "Title 7",
+                    "Title 47",
+                    "Executive Order 12999",
+                    "AR 380-40",
+                    "AR 40-657"
+                 ],
+                 "publication_date_dt":[
+                    "2015-10-22T00:00:00"
+                 ],
+                 "page_count":[
+                    220
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":14.602008,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"1beecfd75a94a73965ba4518763bf4e15a6402b22c69324b412e7b3d15f6552e",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":404
+                             },
+                             "_score":14.602008,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   45
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "6 . Air Force Airmen ’s Battle Uniform ."
+                                ],
+                                "paragraphs.filename":[
+                                   "DoDM 4160.21 Volume 4 CH 3.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Air <em>Force</em> Airmen ’s <em>Battle</em> Uniform ."
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"797a9988e272263f969f1adea18c3614eae6845a7e6edf7d64dd541d46d665c7",
+              "_score":15.922409,
+              "_source":{
+                 "kw_doc_score_r":0.00001,
+                 "topics_rs":{
+                    "specialty":0.2183179771463266,
+                    "skill":0.18571216995914352,
+                    "training":0.33288572314729054,
+                    "cfetp":0.3401715811748127,
+                    "career field":0.26946518467837516
+                 },
+                 "orgs_rs":{
+                    
+                 },
+                 "pagerank_r":0.00001
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CFETP 1C5X1C2 COMMAND AND CONTROL BATTLE MANAGEMENT OPERATONS"
+                 ],
+                 "display_org_s":[
+                    "Dept. of the Air Force"
+                 ],
+                 "crawler_used_s":[
+                    "air_force_pubs"
+                 ],
+                 "doc_num":[
+                    "1C5X1C2"
+                 ],
+                 "summary_30":[
+                    "Identifies task and knowledge training requirements for each skill level in this specialty and recommends Military Training, Airmen will complete the Command and Control Battle Management Operations Apprentice Course"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CFETP"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "COMMAND AND CONTROL BATTLE MANAGEMENT OPERATONS"
+                 ],
+                 "keyw_5":[
+                    "training requirements",
+                    "afpd 13-1",
+                    "web site",
+                    "wd",
+                    "user administrators",
+                    "training record",
+                    "training plan",
+                    "training managers",
+                    "training center",
+                    "total force"
+                 ],
+                 "filename":[
+                    "CFETP 1C5X1C2.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:10:32"
+                 ],
+                 "id":[
+                    "CFETP 1C5X1C2.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Document"
+                 ],
+                 "ref_list":[
+                    "CJCSI 3270.01A",
+                    "JP 3-50",
+                    "FM 1-02",
+                    "FM 101-5-1"
+                 ],
+                 "publication_date_dt":[
+                    "2020-12-05T00:00:00"
+                 ],
+                 "page_count":[
+                    26
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":2,
+                          "relation":"eq"
+                       },
+                       "max_score":9.112948,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"797a9988e272263f969f1adea18c3614eae6845a7e6edf7d64dd541d46d665c7",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":22
+                             },
+                             "_score":9.112948,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   3
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "COMMAND AND CONTROL BATTLE MANAGEMENT OPERATIONS SPECIALTY AFSC 1C5X1 TABLE OF CONTENTS Preface 3 Abbreviations and Terms Explained 4 PART 1 Section A – General Information 6 Purpose of CFETP Use of CFETP Coordination and Approval of the CFETP Section B – Career Field Progression and Information 8 Specialty Descriptions Skill/Career Progression Apprentice Level ( 3 ) Journeyman Level ( 5 ) Craftsman Level ( 7 ) Superintendent Level ( 9 ) Training Decisions Community College of the Air Force "
+                                ],
+                                "paragraphs.filename":[
+                                   "CFETP 1C5X1C2.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "COMMAND AND CONTROL <em>BATTLE</em> MANAGEMENT OPERATIONS SPECIALTY AFSC 1C5X1 TABLE OF CONTENTS Preface 3 Abbreviations and Terms Explained 4 PART 1 Section A – General Information 6 Purpose"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"797a9988e272263f969f1adea18c3614eae6845a7e6edf7d64dd541d46d665c7",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":232
+                             },
+                             "_score":5.746582,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   17
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "14 .Craftsman Level Training : No constraints identified .Part II SECTION A - SPECIALTY TRAINING STANDARD 1 .Implementation .This Part II STS will be used for technical training provided by AETC for classes beginning 20200622 for 3 skill level training .2 . Purpose .As prescribed in AFI 36-2670 , Total Force Development , this Part II STS and in collaboration with the Command and Control Battle Management Operations , Air Force Career Field Manager ( AFCFM ) , it is mandatory for all command and control specialties , regardless of duty assignment , to use the career field guidance and the USAF approved automated training record system .2.1 . Column 1 ( Task , Knowledge , and Technical Reference ) : Lists the most common tasks , knowledge , and technical references ( TR ) necessary for airmen to perform duties in the skill level .2.2 . Column 2 .( Certification for OJT ) .Used to record completion of tasks and knowledge training requirements .Use the automated training record application to document individual qualifications .2.3 . Column 3 ( Proficiency Codes Used to Indicate Training/Information Provided ) .Indicates formal training and correspondence course requirements .It shows the proficiency to be demonstrated on the job by the graduate as a result of training on the task and knowledge and the career knowledge provided by the correspondence course .Course descriptions and reporting instructions for course E3ABR1C531 are identified in the Air Force Education and Training Course Announcements ( ETCA ) database which is located at the following URL : https://cs2.eis.af.mil/sites/app10 ETCA/Site Pages/Home.aspx 2.4 . Qualitative Requirements .Attachment 1 contains the proficiency code key used to indicate the level of training and knowledge provided by resident training and career development courses ."
+                                ],
+                                "paragraphs.filename":[
+                                   "CFETP 1C5X1C2.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Purpose .As prescribed in AFI 36-2670 , Total <em>Force</em> Development , this Part II STS and in collaboration with the Command and Control <em>Battle</em> Management Operations , Air <em>Force</em> Career"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"1ad64e1eb5cc79f3a8707c0bdb6397db6cbe8fd4df7fe9030a376d5b94b8c48b",
+              "_score":15.494996,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "amphibious":0.23943898064651375,
+                    "beach":0.22201642116733294,
+                    "craft":0.2800563228381303,
+                    "opnavinst":0.4536503465057042,
+                    "train":0.39584299405997814
+                 },
+                 "orgs_rs":{
+                    "II":2,
+                    "Navy":28,
+                    "Army":1,
+                    "USMC":3,
+                    "DSCA":3,
+                    "Department of Defense":2
+                 },
+                 "pagerank_r":0.00003509842455928412
+              },
+              "fields":{
+                 "display_title_s":[
+                    "OPNAVINST 3501.93F REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR NAVAL BEACH GROUPS AND THEIR ELEMENTS"
+                 ],
+                 "display_org_s":[
+                    "US Navy"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "3501.93F"
+                 ],
+                 "summary_30":[
+                    "Required Operational Capabilities for Naval Beach Required Operational Capabilities for Naval Beach operations, to include providing essential services, training ships in support of landing force operations and or deployed on Provide beach operations support for other unit landing AMW 10 CONDUCT BEACH PARTY OPERATIONS TO SUPPORT AN AMW 10 CONDUCT BEACH PARTY OPERATIONS TO SUPPORT AN"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "OPNAVINST"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR NAVAL BEACH GROUPS AND THEIR ELEMENTS"
+                 ],
+                 "keyw_5":[
+                    "displacement craft",
+                    "base unit",
+                    "mpf ub",
+                    "non-displacement craft",
+                    "landing craft",
+                    "response force",
+                    "amphibious operation",
+                    "supply support",
+                    "data communications",
+                    "provide participants"
+                 ],
+                 "filename":[
+                    "OPNAVINST 3501.93F.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:14:18"
+                 ],
+                 "id":[
+                    "OPNAVINST 3501.93F.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "publication_date_dt":[
+                    "2016-02-08T00:00:00"
+                 ],
+                 "page_count":[
+                    191
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":10.791084,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"1ad64e1eb5cc79f3a8707c0bdb6397db6cbe8fd4df7fe9030a376d5b94b8c48b",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":39
+                             },
+                             "_score":10.791084,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   5
+                                ],
+                                "paragraphs.filename":[
+                                   "OPNAVINST 3501.93F.pdf"
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "c . Condition II - Modified Battle Readiness : Condition II is condition I ( Battle Readiness ) modified to meet particular probable threats that are situation dependent .As such , condition II is a subset of condition I that stands up particular condition I capabilities at the discretion of the task force or group commander or commanding officer .While in condition II , the unit must be capable of meeting the following AMW CCC CON EW FHP FSO INT IO LOG MOB MOS NCO NSW P P S S S S S S P P S P S AMW : INT : IO : LOG : CON : MOB : EW : electronic warfare MOS : FHP : force health protection NCO : FSO : NSW : CCC : logistics mobility missions of state naval special warfare noncombat operations command , control , and communications intelligence information construction fleet support operations amphibious warfare NAVAL BEACH UNIT "
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Condition II - Modified <em>Battle</em> Readiness : Condition II is condition I ( <em>Battle</em> Readiness ) modified to meet particular probable threats that are situation dependent .As such , condition"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"92c773622bd722f7b53025175e1f71e6d634ddc2a4c1747cc8da42829aa5f203",
+              "_score":15.376995,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "development":0.17431017690361306,
+                    "unclassified":0.17405145851335432,
+                    "joint":0.4072605000805401,
+                    "cjcsi":0.41041228559876375,
+                    "enclosure unclassified":0.3189361973544499
+                 },
+                 "orgs_rs":{
+                    "Department":6,
+                    "the Joint Chiefs of Staff":72,
+                    "Defense for Acquisition and Sustainment":1,
+                    "Joint":1,
+                    "Department of Defense":10,
+                    "Defense":21
+                 },
+                 "pagerank_r":0.00003825522963438575
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CJCSI 3030.01 IMPLEMENTING JOINT FORCE DEVELOPMENT AND DESIGN"
+                 ],
+                 "display_org_s":[
+                    "Joint Chiefs of Staff"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "3030.01"
+                 ],
+                 "summary_30":[
+                    "future Joint Force through concept development, assessment, and capability joint concept-driven, threat-informed approach to capability development. Joint Staff coordination of force development and design efforts to close future"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CJCSI"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "IMPLEMENTING JOINT FORCE DEVELOPMENT AND DESIGN"
+                 ],
+                 "keyw_5":[
+                    "joint force",
+                    "unclassified enclosure",
+                    "joint staff",
+                    "intentionally blank",
+                    "joint chiefs",
+                    "force development",
+                    "unclassified",
+                    "joint concepts",
+                    "joint concept-driven",
+                    "globally integrated"
+                 ],
+                 "filename":[
+                    "CJCSI 3030.01.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:25"
+                 ],
+                 "id":[
+                    "CJCSI 3030.01.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "DoDD 5105.79",
+                    "Title 10",
+                    "CJCSI 3030.01",
+                    "CJCSI 3050.01",
+                    "CJCSI 5123.01",
+                    "CJCSI 3100.01",
+                    "CJCSI 3010.02",
+                    "CJCSI 5120.02",
+                    "CJCSI 1800.01",
+                    "CJCSI 1805.01",
+                    "CJCSI 3500.01",
+                    "CJCSI 3150.25",
+                    "CJCSI 1801.01",
+                    "CJCSI 3010.01",
+                    "JP 5-0",
+                    "JP 3-0"
+                 ],
+                 "publication_date_dt":[
+                    "2019-12-03T00:00:00"
+                 ],
+                 "page_count":[
+                    40
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":3,
+                          "relation":"eq"
+                       },
+                       "max_score":12.209648,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"92c773622bd722f7b53025175e1f71e6d634ddc2a4c1747cc8da42829aa5f203",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":123
+                             },
+                             "_score":12.209648,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   12
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "4 . Governance Battle Rhythm .The JFDD governance battle rhythm is depicted in Table 1 .This battle rhythm applies to the Joint Staff , with Service and CCMD participation as appropriate , based on the subject matter .In addition , the criticality and scope of JFDD issues may require vetting at meetings of the Deputy Operations Deputies , Ops Deps , and CJCS .Processes , procedures , and governance responsibilities for the Chairman ’s Title 10 Force Development functions are codified in respective CJCSIs .These distinct "
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCSI 3030.01.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Governance <em>Battle</em> Rhythm .The JFDD governance <em>battle</em> rhythm is depicted in Table 1 .This <em>battle</em> rhythm applies to the Joint Staff , with Service and CCMD participation as appropriate"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"92c773622bd722f7b53025175e1f71e6d634ddc2a4c1747cc8da42829aa5f203",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":179
+                             },
+                             "_score":8.113022,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   19
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "5 . Integrate Across the Joint Staff .As a part of global integration , the Joint Staff organizes , aligns , and leverages FDD efforts and continuously assesses progress toward priority force development objectives .The J Dirs facilitate inputs and collaboration for JFDD through a system of boards , cells , centers , and working groups to manage prioritization , integration , and assessment over time .This integrated approach guides JFDD activities to produce deliverables that are timed , sequenced , and responsive to the JSPS battle rhythm ; maximize impact on the Chairman ’s Program Recommendation ( CPR ) ; and shape joint requirements for CCMD and Service implementation ."
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCSI 3030.01.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Integrate Across the Joint Staff .As a part of global integration , the Joint Staff organizes , aligns , and leverages FDD efforts and continuously assesses progress toward priority <em>force</em>"
+                                ]
+                             }
+                          },
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"92c773622bd722f7b53025175e1f71e6d634ddc2a4c1747cc8da42829aa5f203",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":129
+                             },
+                             "_score":7.13523,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   13
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Governance Forum Frequency Office of Primary Responsibility DMAG Weekly Chaired by Dep Sec Def and VCJCS ; attended by senior leaders from the Services and CCMDs .Tri Chair Weekly Chaired by the Director of CAPE , USD ( P ) , and Joint Staff ( DJ 7/DJ 8 ) ; attended by senior leaders from the Services and CCMDs .Force Development and Design Integration Board Biweekly Chaired by DJ 7 ; attended by Joint Staff Directors/Vice Directors and designated planners/action officers ( AOs ) .JROC Weekly/As Needed Chaired by VCJCS ; attended by Vice Service Chiefs , DJ 8 , and OSD principals , CCMDs , and FCB Chairs as necessary .Executive Steering Committee Biannually Chaired by DJ 7 ; attended by the Services , CCMDs , Joint Staff , NGB , and OSD FDD principals .Joint Force Integration Cell Weekly Co chaired by J 7 and J 8 general/flag officers ; attended by planners , AOs , and subject matter experts from across the Joint Staff , JFDT , FCBs , OSD , and Services .Table 1 .Governance Battle Rhythm "
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCSI 3030.01.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "by J 7 and J 8 general/flag officers ; attended by planners , AOs , and subject matter experts from across the Joint Staff , JFDT , FCBs , OSD , and Services .Table 1 .Governance <em>Battle</em>"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           },
+           {
+              "_index":"gamechanger_20210222_reparse",
+              "_type":"_doc",
+              "_id":"5ea05370c648008c3d286f4d8230a998e6d2ed0476b545ce243df0d330ec0773",
+              "_score":15.350658,
+              "_source":{
+                 "kw_doc_score_r":null,
+                 "topics_rs":{
+                    "gentext":0.4544433268471699,
+                    "jfccs":0.2548771616945694,
+                    "cjcsi":0.4043028136145143,
+                    "unchecked":0.20916468440581903,
+                    "optask":0.2137727658882824
+                 },
+                 "orgs_rs":{
+                    "CSA":1,
+                    "the Military Services":1,
+                    "the Joint Chiefs of Staff":41,
+                    "Combatant":2,
+                    "Marine Corps":2,
+                    "Joint":2,
+                    "Department of Defense":3,
+                    "Coast Guard":1,
+                    "Military Services":1
+                 },
+                 "pagerank_r":0.00004641214449192957
+              },
+              "fields":{
+                 "display_title_s":[
+                    "CJCSI 3115.01 Common Tactical Picture Reporting Requirements"
+                 ],
+                 "display_org_s":[
+                    "Joint Chiefs of Staff"
+                 ],
+                 "crawler_used_s":[
+                    "test"
+                 ],
+                 "doc_num":[
+                    "3115.01"
+                 ],
+                 "summary_30":[
+                    "The Commander, Joint Task Force CTP, uses GCCS-J CCDRs, CJTF, Services, and agencies will identify relevant CTP data JOINT FORCE AIR COMPONENT COMMANDER HAS REPORTING AND TRACK"
+                 ],
+                 "is_revoked_b":[
+                    false
+                 ],
+                 "doc_type":[
+                    "CJCSI"
+                 ],
+                 "type":[
+                    "document"
+                 ],
+                 "title":[
+                    "Common Tactical Picture Reporting Requirements"
+                 ],
+                 "keyw_5":[
+                    "intentionally blank",
+                    "tactical picture",
+                    "near-real time",
+                    "joint staff",
+                    "joint chiefs",
+                    "back cover",
+                    "version 2p7",
+                    "unified actions",
+                    "track management",
+                    "track information"
+                 ],
+                 "filename":[
+                    "CJCSI 3115.01.pdf"
+                 ],
+                 "access_timestamp_dt":[
+                    "2021-02-16T20:13:25"
+                 ],
+                 "id":[
+                    "CJCSI 3115.01.pdf_0"
+                 ],
+                 "display_doc_type_s":[
+                    "Instructions"
+                 ],
+                 "ref_list":[
+                    "CJCSI 3115.01",
+                    "CJCSI 3500.01H",
+                    "CJCSI 3151.01B",
+                    "CJCSI 3151.01",
+                    "CJCSI 3500.01",
+                    "CJCSM 3115.01",
+                    "CJCSM 3115.01B",
+                    "CJCSM 3150.01",
+                    "JP 1-02",
+                    "JP 3-0",
+                    "JP 3-01",
+                    "JP 6-0",
+                    "JP 2-0"
+                 ],
+                 "publication_date_dt":[
+                    "2012-05-30T00:00:00"
+                 ],
+                 "page_count":[
+                    30
+                 ]
+              },
+              "inner_hits":{
+                 "paragraphs":{
+                    "hits":{
+                       "total":{
+                          "value":1,
+                          "relation":"eq"
+                       },
+                       "max_score":11.264974,
+                       "hits":[
+                          {
+                             "_index":"gamechanger_20210222_reparse",
+                             "_type":"_doc",
+                             "_id":"5ea05370c648008c3d286f4d8230a998e6d2ed0476b545ce243df0d330ec0773",
+                             "_nested":{
+                                "field":"paragraphs",
+                                "offset":200
+                             },
+                             "_score":11.264974,
+                             "fields":{
+                                "paragraphs.page_num_i":[
+                                   27
+                                ],
+                                "paragraphs.par_raw_text_t":[
+                                   "Tactical Picture .The real time or near real time integrated battle picture derived from sources managed by a component commander of the joint task force that is a subset of the common tactical picture .Also called TP ."
+                                ],
+                                "paragraphs.filename":[
+                                   "CJCSI 3115.01.pdf"
+                                ]
+                             },
+                             "highlight":{
+                                "paragraphs.par_raw_text_t":[
+                                   "Tactical Picture .The real time or near real time integrated <em>battle</em> picture derived from sources managed by a component commander of the joint task <em>force</em> that is a subset of the common"
+                                ]
+                             }
+                          }
+                       ]
+                    }
+                 }
+              }
+           }
+        ]
+     },
+     "aggregations":{
+        "doc_type_aggs":{
+           "doc_count_error_upper_bound":0,
+           "sum_other_doc_count":0,
+           "buckets":[
+              {
+                 "key":"AFMAN",
+                 "doc_count":69
+              },
+              {
+                 "key":"AFI",
+                 "doc_count":64
+              },
+              {
+                 "key":"OPNAVINST",
+                 "doc_count":39
+              },
+              {
+                 "key":"CFETP",
+                 "doc_count":21
+              },
+              {
+                 "key":"AFTTP",
+                 "doc_count":19
+              },
+              {
+                 "key":"AJP",
+                 "doc_count":18
+              },
+              {
+                 "key":"AFH",
+                 "doc_count":14
+              },
+              {
+                 "key":"DoDI",
+                 "doc_count":10
+              },
+              {
+                 "key":"AFPAM",
+                 "doc_count":9
+              },
+              {
+                 "key":"CJCSI",
+                 "doc_count":8
+              },
+              {
+                 "key":"AFPD",
+                 "doc_count":6
+              },
+              {
+                 "key":"CJCSM",
+                 "doc_count":6
+              },
+              {
+                 "key":"SECNAVINST",
+                 "doc_count":6
+              },
+              {
+                 "key":"AJMedP",
+                 "doc_count":5
+              },
+              {
+                 "key":"AMedP",
+                 "doc_count":5
+              },
+              {
+                 "key":"DAFI",
+                 "doc_count":5
+              },
+              {
+                 "key":"DAFMAN",
+                 "doc_count":4
+              },
+              {
+                 "key":"DoDM",
+                 "doc_count":4
+              },
+              {
+                 "key":"Title",
+                 "doc_count":4
+              },
+              {
+                 "key":"AEP",
+                 "doc_count":3
+              },
+              {
+                 "key":"DoDFMR",
+                 "doc_count":3
+              },
+              {
+                 "key":"NAVMED",
+                 "doc_count":3
+              },
+              {
+                 "key":"AAP",
+                 "doc_count":2
+              },
+              {
+                 "key":"ATP",
+                 "doc_count":2
+              },
+              {
+                 "key":"DoDD",
+                 "doc_count":2
+              },
+              {
+                 "key":"HOI",
+                 "doc_count":2
+              },
+              {
+                 "key":"STANAG",
+                 "doc_count":2
+              },
+              {
+                 "key":"AAMedP",
+                 "doc_count":1
+              },
+              {
+                 "key":"AASTP",
+                 "doc_count":1
+              },
+              {
+                 "key":"AFGM",
+                 "doc_count":1
+              },
+              {
+                 "key":"AFJQS",
+                 "doc_count":1
+              },
+              {
+                 "key":"AFMD",
+                 "doc_count":1
+              },
+              {
+                 "key":"AMSP",
+                 "doc_count":1
+              },
+              {
+                 "key":"APP",
+                 "doc_count":1
+              },
+              {
+                 "key":"ATrainP",
+                 "doc_count":1
+              },
+              {
+                 "key":"CJCS GDE",
+                 "doc_count":1
+              },
+              {
+                 "key":"COMNAVRESFORCOMINST",
+                 "doc_count":1
+              },
+              {
+                 "key":"DAFPAM",
+                 "doc_count":1
+              },
+              {
+                 "key":"EO",
+                 "doc_count":1
+              },
+              {
+                 "key":"MTP",
+                 "doc_count":1
+              }
+           ]
+        }
+     }
+  },
+  "statusCode":200,
+  "headers":{
+     "date":"Tue, 16 Mar 2021 20:00:27 GMT",
+     "content-type":"application/json; charset=UTF-8",
+     "content-length":"95126",
+     "connection":"keep-alive",
+     "access-control-allow-origin":"*"
+  },
+  "meta":{
+     "context":null,
+     "request":{
+        "params":{
+           "method":"POST",
+           "path":"/gamechanger/_search",
+           "body":"{\"_source\":{\"includes\":[\"pagerank_r\",\"kw_doc_score_r\",\"orgs_rs\",\"topics_rs\"]},\"stored_fields\":[\"filename\",\"title\",\"page_count\",\"doc_type\",\"doc_num\",\"ref_list\",\"id\",\"summary_30\",\"keyw_5\",\"p_text\",\"type\",\"p_page\",\"display_title_s\",\"display_org_s\",\"display_doc_type_s\",\"is_revoked_b\",\"access_timestamp_dt\",\"publication_date_dt\",\"crawler_used_s\"],\"from\":0,\"size\":20,\"aggregations\":{\"doc_type_aggs\":{\"terms\":{\"field\":\"doc_type\",\"size\":10000}}},\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"paragraphs\",\"inner_hits\":{\"_source\":false,\"stored_fields\":[\"paragraphs.page_num_i\",\"paragraphs.filename\",\"paragraphs.par_raw_text_t\"],\"from\":0,\"size\":5,\"highlight\":{\"fields\":{\"paragraphs.filename.search\":{\"number_of_fragments\":0},\"paragraphs.par_raw_text_t\":{\"fragment_size\":180,\"number_of_fragments\":1}},\"fragmenter\":\"span\"}},\"query\":{\"bool\":{\"should\":[{\"wildcard\":{\"paragraphs.filename.search\":{\"value\":\"battle force*\",\"boost\":15}}},{\"query_string\":{\"query\":\"battle force\",\"default_field\":\"paragraphs.par_raw_text_t\",\"default_operator\":\"and\",\"fuzzy_max_expansions\":100,\"fuzziness\":\"AUTO\"}}]}}}},{\"query_string\":{\"query\":\"is_revoked_b:false\"}},{\"query_string\":{\"query\":\"doc_type:(*) OR display_org_s:(undefined)\"}}],\"should\":[{\"multi_match\":{\"query\":\"battle force\",\"fields\":[\"keyw_5^2\",\"id^2\",\"summary_30\",\"paragraphs.par_raw_text_t\"],\"operator\":\"or\"}},{\"rank_feature\":{\"field\":\"pagerank_r\",\"boost\":0.5}},{\"rank_feature\":{\"field\":\"kw_doc_score_r\",\"boost\":0.1}}]}}}",
+           "querystring":"",
+           "headers":{
+              "user-agent":"elasticsearch-js/7.11.0 (linux 4.19.121-linuxkit-x64; Node.js v10.9.0)",
+              "x-elastic-client-meta":"es=7.11.0,js=10.9.0,t=7.11.0,hc=10.9.0",
+              "content-type":"application/json",
+              "content-length":"1472"
+           },
+           "timeout":30000
+        },
+        "options":{
+           
+        },
+        "id":2
+     },
+     "name":"elasticsearch-js",
+     "connection":{
+        "url":"https://10.192.45.83/",
+        "id":"https://10.192.45.83/",
+        "headers":{
+           
+        },
+        "deadCount":0,
+        "resurrectTimeout":0,
+        "_openRequests":0,
+        "status":"alive",
+        "roles":{
+           "master":true,
+           "data":true,
+           "ingest":true,
+           "ml":false
+        }
+     },
+     "attempts":0,
+     "aborted":false
+  }
+}

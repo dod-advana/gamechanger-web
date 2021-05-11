@@ -1,0 +1,16 @@
+.MuiPopover-root {
+    z-index: 9999 !important;
+}
+
+.MuiTypography-h3 {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif !important;
+    font-weight: 600;
+}
+
+.MuiFormLabel-root.Mui-focused {
+    color: #E9691D !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #E9691D !important;
+}
