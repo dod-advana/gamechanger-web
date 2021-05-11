@@ -1,0 +1,18 @@
+
+.vis-network {
+    overflow: visible;
+}
+
+.scene-tooltip {
+    color: black !important;
+    background: white !important;
+    border: black !important;
+}
+
+#graphViewToggle > span.MuiFormControlLabel-label {
+    color: unset !important;
+    padding-top: unset !important;
+    font-size: unset !important;
+    border: unset !important;
+    height: unset !important;
+}

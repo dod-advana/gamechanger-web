@@ -1,0 +1,12 @@
+FROM node:10
+RUN npm install -g nodemon
+RUN npm install -g sequelize-cli
+RUN npm install -g jest
+COPY . /usr/src/app
+WORKDIR /usr/src/app/frontend
+RUN npm install
+RUN npm run build
+RUN mv build ../backend/
+WORKDIR /usr/src/app/backend
+RUN npm install
+CMD "npm" "start"

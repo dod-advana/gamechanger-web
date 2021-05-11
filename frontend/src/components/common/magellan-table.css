@@ -1,0 +1,7 @@
+.magellan-table > tbody > tr:nth-child(even) {
+  background-color: #eceff1;
+}
+.magellan-table > thead > tr {
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #424242;
+}
