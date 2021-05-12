@@ -2,11 +2,12 @@ version: '3'
 services:
     postgres:
         container_name: postgres
-        image: postgres:9.6
+        build:
+            context: ./postgres/
         ports:
             - "5432:5432"
         volumes:
-            - ./postgres:/var/lib/postgresql/data
+            - ./postgres/data:/var/lib/postgresql/data
         environment:
             - POSTGRES_HOST_AUTH_METHOD=trust
     redis:
@@ -14,6 +15,26 @@ services:
         image: redis
         ports: 
            - "6379:6379"
+    # elasticsearch:
+    #     container_name: elasticsearch
+    #     image: docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+    #     environment:
+    #         - xpack.security.enabled=false
+    #         - discovery.type=single-node
+    #     ulimits:
+    #         memlock:
+    #             soft: -1
+    #             hard: -1
+    #         nofile:
+    #             soft: 65536
+    #             hard: 65536
+    #     cap_add:
+    #     - IPC_LOCK
+    #     volumes:
+    #     - ./elasticsearch:/usr/share/elasticsearch/data
+    #     ports:
+    #     - 9200:9200
+    #     - 9300:9300
     gamechanger-web-node:
         container_name: gamechanger-web-node
         build:
@@ -29,6 +50,7 @@ services:
         depends_on:
             - postgres
             - redis
+            # - elasticsearch
     gamechanger-web-react:
         container_name: gamechanger-web-react
         build:
