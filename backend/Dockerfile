@@ -11,6 +11,5 @@ COPY . /usr/src/app
 RUN mkdir /etc/secrets/
 COPY ./secrets/* /etc/secrets/
 EXPOSE 8990
-# EXPOSE 5860
-CMD nodemon index.js
+CMD ./start.sh
 # CMD sleep 600000

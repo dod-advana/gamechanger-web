@@ -1,7 +1,7 @@
 node_modules/*
 [Ll]ogs/
 [Ll]og/
-postgres-data/*
+postgres/data/*
 postgres-staging/*
 .vscode
 coverage/*
