@@ -25,13 +25,12 @@ See LICENSE.md (including licensing intent - INTENT.md) and CONTRIBUTING.md
 
 ## How to Setup Local Env for Development
 
-### MacOS / Linux
-- Coming soon...
+- Pull down the code
+- In backend, copy .env.template to .env and fill in the values to point to your databases appropriately
+- In frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
+- Run docker-compose build at top level
+- Run docker-compose up at top level
 
-### Windows
+## Known/Common Issues
 
-- Coming soon...
-
-## Common Issues
-
-- None :)
+- Currently this repo assumes you are working with some external dependencies in our corporate environment. We are currently working to remove this limitation. Stay tuned, this update will come soon. Once this gets solved we will also include a pre-canned .env and .env.development that can work out of the box.
