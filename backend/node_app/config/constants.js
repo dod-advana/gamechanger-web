@@ -59,10 +59,9 @@ module.exports = Object.freeze({
 		cacheReloadUserId: 'gc-auto-cache-reload',
 		cacheReloadCronTimingPattern: '0 0 * * *',
 		allow_daterange: true,
-		simpleIndex: 'gamechanger_20210222_newanalyzer',
-		historyIndex: 'search_history',
-		entityIndex: 'entities',
-		textSuggestIndex: 'gamechanger_20210222_reparse'
+		historyIndex: process.env.GAMECHANGER_ELASTICSEARCH_HISTORY_INDEX,
+		entityIndex: process.env.GAMECHANGER_ELASTICSEARCH_ENTITIES_INDEX,
+		textSuggestIndex: process.env.GAMECHANGER_ELASTICSEARCH_SUGGEST_INDEX
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
 	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
@@ -77,10 +76,10 @@ module.exports = Object.freeze({
 	},
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
-		protocol: 'https',
+		protocol: process.env.GAMECHANGER_ELASTICSEARCH_PROTOCOL,
 		host: process.env.GAMECHANGER_ELASTICSEARCH_HOST,
 		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT,
-		user: process.env.GAMECHANGER_ELASTICSEARCH_USER,
+		user: process.env.GAMECHANGER_ELASTICSEARCH_USER ? process.env.GAMECHANGER_ELASTICSEARCH_USER : '',
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA_FILEPATH,
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
@@ -88,10 +87,10 @@ module.exports = Object.freeze({
 		requestTimeout: 60000
 	},
 	EDA_ELASTIC_SEARCH_OPTS: {
-		protocol: 'https',
+		protocol: process.env.EDA_ELASTICSEARCH_PROTOCOL,
 		host: process.env.EDA_ELASTICSEARCH_HOST,
 		port: process.env.EDA_ELASTICSEARCH_PORT,
-		user: process.env.EDA_ELASTICSEARCH_USER,
+		user: process.env.EDA_ELASTICSEARCH_USER ? process.env.EDA_ELASTICSEARCH_USER : '',
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD,
 		ca: process.env.EDA_ELASTICSEARCH_CA_FILEPATH,
 		index: process.env.EDA_ELASTICSEARCH_INDEX,

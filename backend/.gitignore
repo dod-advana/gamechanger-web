@@ -6,3 +6,4 @@ postgres-staging/*
 .vscode
 coverage/*
 secrets/*
+.env
