@@ -14,7 +14,7 @@ import AdvanaMegaMenuPill, {
 } from 'advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 import GCButton from "../common/GCButton";
 
-const isDecoupled = process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const styles = {
 	container: {

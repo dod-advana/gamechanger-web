@@ -1,7 +1,7 @@
 export default {
 	DASHBOARD_DEFAULT_SYSTEM: "GFEBS",
-	API_URL: process.env.REACT_APP_BACKEND_URL,
-	GLUU_SSO_ENABLED: (!process.env.REACT_APP_GLUU_SSO || !(process.env.REACT_APP_GLUU_SSO === 'disabled')),
+	API_URL: window?.__env__?.REACT_APP_BACKEND_URL ? window?.__env__?.REACT_APP_BACKEND_URL : process.env.REACT_APP_BACKEND_URL,
+	GLUU_SSO_ENABLED: window?.__env__?.REACT_APP_GLUU_SSO !== 'disabled' && process.env.REACT_APP_GLUU_SSO !== 'disabled',
 	TLD : 'mil',
 	QLIK_URL : 'https://qlik.audit.boozallencsn.com',
 	GAMECHANGER_DECOUPLED_URL : 'https://gamechanger.advana.data.mil',
@@ -12,8 +12,8 @@ export default {
 	TRIFACTA_LINK: 'https://trifacta.advana.data.mil',
 	CONFLUENCE_LINK: 'https://wiki.advana.data.mil',
 	NFR_LINK: 'https://nfr.advana.data.mil',
-	DATA_CATALOG_LINK: process.env.REACT_APP_DATA_CATALOG_LINK,
-	MATOMO_LINK: process.env.REACT_APP_MATOMO_LINK,
+	DATA_CATALOG_LINK: window?.__env__?.REACT_APP_DATA_CATALOG_LINK ? window?.__env__?.REACT_APP_DATA_CATALOG_LINK : process.env.REACT_APP_DATA_CATALOG_LINK,
+	MATOMO_LINK: window?.__env__?.REACT_APP_MATOMO_LINK ? window?.__env__?.REACT_APP_MATOMO_LINK : process.env.REACT_APP_MATOMO_LINK,
 	MAX_SIMPLE_TABLE_CELLS: 50000,
 	PERMISSIONS: {
 		GAMECHANGER_ADMIN: 'Gamechanger Admin',
@@ -28,5 +28,5 @@ export default {
 		SHOW_DATERANGES: true,
 		SHOW_SOURCE_TRACKER: false
 	},
-	USER_TOKEN_ENDPOINT: `${process.env.REACT_APP_BACKEND_URL}/api/auth/token`
+	USER_TOKEN_ENDPOINT: `${window?.__env__?.REACT_APP_BACKEND_URL ? window?.__env__?.REACT_APP_BACKEND_URL : process.env.REACT_APP_BACKEND_URL}/api/auth/token`
 }

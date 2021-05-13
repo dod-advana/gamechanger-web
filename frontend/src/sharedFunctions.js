@@ -8,7 +8,7 @@ const _ = require('lodash');
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
-export const isDecoupled = process.env.REACT_APP_GC_DECOUPLED === 'true';
+export const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 // Sets the state using context
 export const setState = (dispatch, newState) => {

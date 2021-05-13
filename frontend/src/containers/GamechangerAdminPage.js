@@ -41,7 +41,7 @@ import styles from '../components/admin/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
-const isDecoupled = process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const toolTheme = {
 	menuBackgroundColor: '#171A23',

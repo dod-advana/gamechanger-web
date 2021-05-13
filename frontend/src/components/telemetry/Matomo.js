@@ -10,10 +10,12 @@ const MATOMO_LINK = Config.MATOMO_LINK;
 
 let matomo = null;
 
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+
 try {
 	matomo = MatomoReactRouter({
 		url: MATOMO_LINK,
-		siteId: process.env.REACT_APP_GC_DECOUPLED === 'true' ? 2 : 1
+		siteId: isDecoupled ? 2 : 1
 	});
 	// matomo = {
 	// 	push: (data) => { console.log(data) },
@@ -84,7 +86,7 @@ export function trackPageView(documentTitle, customDimensions) {
 		if (!useMatomo) return;
 
 		// Set User
-		const userId = process.env.REACT_APP_GC_DECOUPLED === 'true' ? GCAuth.getTokenPayload().cn : Auth.getUserId() || ' ';
+		const userId = isDecoupled ? GCAuth.getTokenPayload().cn : Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId)
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));

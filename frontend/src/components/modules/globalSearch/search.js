@@ -3,8 +3,8 @@ import _ from 'lodash';
 
 export const DEFAULT_SEARCH_TYPES = {
 	applications: true,
-	dashboards: (process.env.REACT_APP_NODE_ENV !== "sipr"),
-	dataSources: (process.env.REACT_APP_NODE_ENV !== "sipr"),
+	dashboards: (process.env.REACT_APP_NODE_ENV !== "sipr" && window?.__env__?.REACT_APP_NODE_ENV !== "sipr"),
+	dataSources: (process.env.REACT_APP_NODE_ENV !== "sipr" && window?.__env__?.REACT_APP_NODE_ENV !== "sipr"),
 	databases: true,
 	documentation: false,
 	organizations: false,
