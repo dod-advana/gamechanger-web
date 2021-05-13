@@ -1,5 +1,5 @@
 FROM node:10
-RUN apt-get update && apt-get install -y vim
+# RUN apt-get update && apt-get install -y vim
 RUN npm config set registry http://10.194.9.122
 RUN npm install -g jest
 WORKDIR /usr/src/app
