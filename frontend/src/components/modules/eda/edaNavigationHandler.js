@@ -28,7 +28,7 @@ import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
 import GamechangerContractSearchIcon from '../../../images/logos/GAMECHANGER-Contract-White.png';
 
-const isDecoupled = process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const styles = {
 	wording: {

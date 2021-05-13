@@ -1,4 +1,5 @@
 FROM node:10
+RUN npm config set registry http://10.194.9.122
 RUN npm install -g nodemon
 RUN npm install -g sequelize-cli
 RUN npm install -g jest
@@ -8,5 +9,7 @@ RUN npm install
 RUN npm run build
 RUN mv build ../backend/
 WORKDIR /usr/src/app/backend
+RUN mkdir /etc/secrets/
+COPY ./backend/secrets/* /etc/secrets/
 RUN npm install
 CMD "npm" "start"

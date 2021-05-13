@@ -66,6 +66,26 @@ thes.waitForLoad().then(() => {
 	console.log(thes.lookUp('defense'));
 });
 
+try {
+	if (process.env.DISABLE_FRONT_END_CONFIG !== 'true') {
+		let result = {};
+
+		for (let envvar in process.env) {
+			if (envvar.startsWith('REACT_APP_'))
+				result[envvar] = process.env[envvar];
+		};
+
+		fs.writeFileSync(
+			path.join(__dirname, "./build", "config.js"),
+			`window.__env__ = ${JSON.stringify(result)}`
+		);
+	}
+
+} catch (err) {
+	console.error(err);
+	console.error('No env variables created')
+}
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 
@@ -149,10 +169,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 
 app.post('/api/auth/token', async function (req, res) {
 
-	console.log('tyrrytrtryrtrytrtyrtyryt');
-
 	if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-		console.log('asdfasdfasdf');
 		let cn = 'unknown user';
 		let perms = [''];
 		try {

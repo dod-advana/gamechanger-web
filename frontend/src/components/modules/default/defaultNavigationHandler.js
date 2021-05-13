@@ -27,7 +27,7 @@ import AdminIcon from "../../../images/icon/NewAdminIcon.png";
 import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
 
-const isDecoupled = process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const styles = {
 	wording: {

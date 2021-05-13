@@ -52,9 +52,14 @@ require('typeface-montserrat');
 
 require('./favicon.ico');
 
+console.log(window?.__env__?.REACT_APP_MATOMO_LINK);
+console.log(process.env.REACT_APP_MATOMO_LINK);
+
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
-	siteId: process.env.REACT_APP_GC_DECOUPLED === 'true' ? 2 : 1
+	siteId: isDecoupled ? 2 : 1
 });
 
 const history = createBrowserHistory();
@@ -117,7 +122,7 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	const RenderComponent = Component || Render;
 	useEffect(() => {
 		// On route load we want to log this to matomo, that is all this use effect does
-		const userId = process.env.REACT_APP_GC_DECOUPLED === 'true' ? GCAuth.getTokenPayload().cn : Auth.getUserId() || ' ';
+		const userId = isDecoupled ? GCAuth.getTokenPayload().cn : Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId)
 		pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
@@ -205,7 +210,7 @@ const App = (props) => {
 	useEffect(() => {
 		const initialize = async () => {
 
-			if(process.env.REACT_APP_GC_DECOUPLED === 'true') {
+			if(isDecoupled) {
 				GCAuth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
 			} else {
 				Auth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
@@ -265,8 +270,8 @@ const App = (props) => {
 								)} />
 							</Router>
 						</SlideOutMenuContextHandler>
-						{process.env.REACT_APP_GC_DECOUPLED === 'true' && <DecoupledFooter setUserMatomo={setUserMatomo} />}
-						{process.env.REACT_APP_GC_DECOUPLED !== 'true' && <AdvanaFooter />}
+						{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+						{isDecoupled && <AdvanaFooter />}
 					</div>
 				</V0MuiThemeProvider>
 			</MuiThemeProvider>
