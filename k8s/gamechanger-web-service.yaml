@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.combo.yml
+    kompose.version: 1.22.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: gamechanger-web
+  name: gamechanger-web
+spec:
+  ports:
+    - name: "5860"
+      port: 5860
+      targetPort: 5860
+    - name: "8990"
+      port: 8990
+      targetPort: 8990
+  selector:
+    io.kompose.service: gamechanger-web
+status:
+  loadBalancer: {}
