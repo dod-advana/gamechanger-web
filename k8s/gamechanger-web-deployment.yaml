@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.combo.yml
+    kompose.version: 1.22.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: gamechanger-web
+  name: gamechanger-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gamechanger-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.combo.yml
+        kompose.version: 1.22.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: gamechanger-web
+    spec:
+      containers:
+        - image: gamechanger-web_gamechanger-web
+          name: gamechanger-web
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5860
+            - containerPort: 8990
+          resources: {}
+          volumeMounts:
+            - mountPath: /usr/app/
+              name: gamechanger-web-claim0
+      restartPolicy: Always
+      volumes:
+        - name: gamechanger-web-claim0
+          persistentVolumeClaim:
+            claimName: gamechanger-web-claim0
+status: {}
