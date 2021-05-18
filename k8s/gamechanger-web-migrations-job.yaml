@@ -20,6 +20,13 @@ spec:
           volumeMounts:
             - mountPath: /usr/app/
               name: gamechanger-web-claim0
+          env:
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "password"
           command: ["/bin/bash", "-c", "chmod 755 /usr/src/app/backend/scripts/deployment-scripts/runMigrations.sh && /usr/src/app/backend/scripts/deployment-scripts/runMigrations.sh"]
       restartPolicy: OnFailure
       volumes:
