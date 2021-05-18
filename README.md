@@ -27,6 +27,7 @@ See LICENSE.md (including licensing intent - INTENT.md) and CONTRIBUTING.md
 
 - Pull down the code
 - In backend, copy .env.template to .env and fill in the values to point to your databases appropriately
+- In backend, create a secrets folder at the top level of backend (gamechanger-web/backend/secrets) and drop in cert.pem, dod_certs.pem, gamechanger.crt, and key.pem
 - In frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
 - Run docker-compose build at top level
 - Run docker-compose up at top level
