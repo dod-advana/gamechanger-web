@@ -35,6 +35,8 @@ These are the recommended steps if you are just trying to get coding.
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
 - At the top level run **docker-compose build** to build the images
 - At the top level run **docker-compose up** to start the containers
+- Your frontend will be available at http://localhost:3000
+- To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
 
 ## How to Setup Local Single Node K8s Env for Development/Testing
 
@@ -48,6 +50,10 @@ This set up is more advanced and is intended for prepping for releases to produc
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources). Specifically make sure you grab the .env files that are designated as k8s the versions.
 - At the top level run **docker-compose -f docker-compose.combo.yml build** to build the images
 - In gamechanger-web/k8s, run **kubectl apply -f .**
+- Run **kubectl get pods** and once all pods are in a successful state the application should be up and available. Note the gamechanger-web pod name for the next step.
+- Run **kubectl port-forward <INSERT_GAMECHANGER-WEB_POD_NAME_HERE> 8990:8990**
+- Your frontend will be available at http://localhost:8990
+- To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
 
 ## Known/Common Issues
 
