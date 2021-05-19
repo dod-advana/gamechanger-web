@@ -6,6 +6,7 @@ import "react-select/dist/react-select.css";
 // import Config from './config/config';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
 import { getProvider } from "./components/factories/contextFactory";
+import ConsentAgreement from 'advana-platform-ui/dist/ConsentAgreement';
 import GamechangerPage from './containers/GameChangerPage';
 import GamechangerAdminPage from './containers/GamechangerAdminPage';
 import GamechangerEsPage from './containers/GamechangerEsPage';
@@ -88,7 +89,7 @@ const styles = {
 		height: 'calc(100% - 6px)'
 	},
 	newContainer: {
-		height: 'calc(100% - 30px)',
+		minHeight: 'calc(100% - 30px)',
 		marginLeft: '50px',
 		marginTop: '2em'
 	}
@@ -210,7 +211,7 @@ const App = (props) => {
 	useEffect(() => {
 		const initialize = async () => {
 
-			if(isDecoupled) {
+			if (isDecoupled) {
 				GCAuth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
 			} else {
 				Auth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
@@ -234,8 +235,8 @@ const App = (props) => {
 		}
 	}, [initialized]);
 
-	if(!initialized || !tokenLoaded) {
-		return (<LoadingIndicator/>);
+	if (!initialized || !tokenLoaded) {
+		return (<LoadingIndicator />);
 	}
 
 	console.log(Auth.getUserPermissions());
@@ -244,35 +245,38 @@ const App = (props) => {
 		<MatomoProvider value={instance}>
 			<MuiThemeProvider theme={ThemeDefault}>
 				<V0MuiThemeProvider muiTheme={v0Theme}>
-					<div style={{ height: '100%', paddingTop: 1, marginTop: -1 }}>
-						<ClassificationBanner />
-						<SlideOutMenuContextHandler>
-							<Router>
+					<ClassificationBanner />
+					<ConsentAgreement />
 
-								<Route exact path='/' children={({ match, location, history }) => (
-									<div style={getStyleType(match, location)}>
-										<>
-											{location.pathname !== '/pdfviewer/gamechanger' && <SlideOutMenu match={match} location={location} history={history} />}
-											<Switch >
-												{tokenLoaded && gameChangerCloneRoutes.map(route => {
-													return (
-														route
-													)
-												})}
-												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
-												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
-												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
-												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
-												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
-											</Switch>
-										</>
-									</div>
-								)} />
-							</Router>
-						</SlideOutMenuContextHandler>
-						{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
-						{isDecoupled && <AdvanaFooter />}
-					</div>
+					<SlideOutMenuContextHandler>
+
+						<Router>
+
+							<Route exact path='/' children={({ match, location, history }) => (
+								<div style={getStyleType(match, location)}>
+									<>
+										{location.pathname !== '/pdfviewer/gamechanger' && <SlideOutMenu match={match} location={location} history={history} />}
+										<Switch >
+											{tokenLoaded && gameChangerCloneRoutes.map(route => {
+												return (
+													route
+												)
+											})}
+											<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
+											<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
+											<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
+											<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
+											<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
+										</Switch>
+									</>
+								</div>
+							)} />
+						</Router>
+
+					</SlideOutMenuContextHandler>
+
+					{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+					{!isDecoupled && <AdvanaFooter />}
 				</V0MuiThemeProvider>
 			</MuiThemeProvider>
 		</MatomoProvider>
