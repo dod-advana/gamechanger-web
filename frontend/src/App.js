@@ -18,7 +18,6 @@ import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
 import { MuiThemeProvider as V0MuiThemeProvider } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-// import ClassificationBanner from './components/advana/ClassificationBanner';
 import { useMatomo } from '@datapunt/matomo-tracker-react'
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from 'advana-side-nav/dist/SlideOutMenuContext';
@@ -36,7 +35,6 @@ import Config from './config/config';
 import Auth from 'advana-platform-ui/dist/utilities/Auth';
 import AdvanaFooter from 'advana-platform-ui/dist/AdvanaFooter';
 import ThemeDefault from 'advana-platform-ui/dist/theme-default';
-
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 
 import ClassificationBanner from 'advana-platform-ui/dist/ClassificationBanner';
@@ -48,6 +46,7 @@ import ClassificationBanner from 'advana-platform-ui/dist/ClassificationBanner';
 import NotFoundPage from 'advana-platform-ui/dist/containers/NotFoundPage';
 import ErrorPage from 'advana-platform-ui/dist/containers/GenericErrorPage';
 import DecoupledFooter from './components/navigation/DecoupledFooter';
+import { ErrorBoundary } from 'react-error-boundary';
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -151,8 +150,6 @@ const App = (props) => {
 
 	const getGamechangerClones = async (tutorialData) => {
 		try {
-			let permissions = Auth.getUserPermissions();
-			// const { gameChangerClones } = this.state;
 			const data = await gameChangerAPI.getCloneData();
 			const cloneRoutes = _.map(data.data, (clone, idx) => {
 				if (clone.is_live && clone.clone_to_advana) {
@@ -255,19 +252,24 @@ const App = (props) => {
 							<Route exact path='/' children={({ match, location, history }) => (
 								<div style={getStyleType(match, location)}>
 									<>
-										{location.pathname !== '/pdfviewer/gamechanger' && <SlideOutMenu match={match} location={location} history={history} />}
-										<Switch >
-											{tokenLoaded && gameChangerCloneRoutes.map(route => {
-												return (
-													route
-												)
-											})}
-											<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
-											<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
-											<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
-											<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
-											<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
-										</Switch>
+										<ErrorBoundary
+											FallbackComponent={ErrorPage}
+										>
+											{location.pathname !== '/pdfviewer/gamechanger' && <SlideOutMenu match={match} location={location} history={history} />}
+											<Switch >
+												{tokenLoaded && gameChangerCloneRoutes.map(route => {
+													return (
+														route
+													)
+												})}
+												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
+												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
+												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
+												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
+												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
+												<Route path="*" component={NotFoundPage} />
+											</Switch>
+										</ErrorBoundary>
 									</>
 								</div>
 							)} />
