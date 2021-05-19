@@ -88,7 +88,6 @@ try {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
-
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
@@ -100,7 +99,7 @@ app.use(function (req, res, next) {
 	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
 	if (approvedClients.includes(hostname)) {
 		res.setHeader('Access-Control-Allow-Origin', hostname);
-	} else {
+	} else if (origin) {
 		res.setHeader('Access-Control-Allow-Origin', origin);
 	}
 	// res.header('Access-Control-Allow-Origin', '*');
