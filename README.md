@@ -46,7 +46,6 @@ This set up is more advanced and is intended for prepping for releases to produc
 - Pull down the code
 - In gamechanger-web/backend, copy .env.template to .env and fill in the values to point to your databases appropriately
 - In gamechanger-web/backend, create a secrets folder at the top level of backend (gamechanger-web/backend/secrets) and drop in cert.pem, dod_certs.pem, gamechanger.crt, and key.pem
-- In gamechanger-web/frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources). Specifically make sure you grab the .env files that are designated as k8s the versions.
 - At the top level run **docker-compose -f docker-compose.combo.yml build** to build the images
 - In gamechanger-web/k8s, run **kubectl apply -f .**
