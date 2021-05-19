@@ -30,7 +30,7 @@ See LICENSE.md (including licensing intent - INTENT.md) and CONTRIBUTING.md
 - In backend, copy .env.template to .env and fill in the values to point to your databases appropriately
 - In backend, create a secrets folder at the top level of backend (gamechanger-web/backend/secrets) and drop in cert.pem, dod_certs.pem, gamechanger.crt, and key.pem
 - In frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
-- **Side note - **If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
+- **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
 - At the top level run **docker-compose build** to build the images
 - At the top level run **docker-compose up** to start the containers
 
