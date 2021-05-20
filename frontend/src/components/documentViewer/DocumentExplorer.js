@@ -63,7 +63,7 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 	})
 }
 
-export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, componentStepNumbers, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) {
+export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
@@ -81,8 +81,8 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 			const rec = data[dataIdx];
 			if (rec) {
 				// const filepath = rec.filepath;
-				const filename = rec.filename;
-				const pageObj = rec.pageHits[pageHitIdx];
+				const filename = !isEDA ? rec.filename : rec.file_location_eda_ext;
+				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 				const pageNumber = pageObj ? pageObj.pageNumber : 1;
 				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
 					setIframeLoading(true);
@@ -94,7 +94,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				}
 			}
 		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]);
+	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, isEDA]);
 
 	useEffect(() => {
 		if (!collapseKeys) {
@@ -191,7 +191,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 
 	return (
 		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
-			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH} tutorial-step-${componentStepNumbers["Search Panel"]}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
 				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{
 						totalCount ?
@@ -271,7 +271,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 					}
 				})}
 			</div>
-			<div className={`col-xs-${iframePanelSize} tutorial-step-${componentStepNumbers["Main Panel"]}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
+			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
 				<div style={{ display: 'flex', width: '100%', height: '94%', flexDirection: 'column' }}>
 					<div className="searchdemo-vertical-bar-toggle" style={leftBarExtraStyles} onClick={() => handleLeftPanelToggle()}>
 						<i
@@ -304,7 +304,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 
 			</div>
 			<GCTooltip title={ isEDA ? ((data && data[0] && data[0].acomod_eda_ext) ? 'Pulled from PDS data' : 'No data available') : ''} arrow placement="top" enterDelay={400}>
-				<div className={`col-xs-${RIGHT_PANEL_COL_WIDTH} tutorial-step-${componentStepNumbers["Document Data Panel"]}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+				<div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
 					<SimpleTable tableClass={'magellan-table'}
 						zoom={0.8}
 						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}

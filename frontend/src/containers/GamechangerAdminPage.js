@@ -755,14 +755,14 @@ const GamechangerAdminPage = props => {
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
-								// checkMatomo();
+								checkMatomo();
 								trackEvent('GAMECHANGER_Admin', "AdminPageToggleMatomo", "onClick");
 							}} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa fa-eye fa-2x"></i>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Matomo</span></h2>
 							</Link>
 						</Paper>
-					</div> */}
+					</div>
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={toggleSearchCache} style={{ textDecoration: 'none' }}>
@@ -1097,7 +1097,7 @@ const GamechangerAdminPage = props => {
 								<GCCheckbox
 									checked={editCloneData[field.key]}
 									onChange={handleCheck}
-									name={field.display_name}
+									name={field.key}
 									color="primary"
 									style={styles.checkbox}
 								/>
@@ -1179,10 +1179,8 @@ const GamechangerAdminPage = props => {
 
 	const storeCloneData = (cloneToEdit = null) => {
 		
-		let parseJSON = false;
 		if (!cloneToEdit) {
 			cloneToEdit = editCloneData;
-			parseJSON = true;
 		}
 		
 		const cloneDataToStore = {...cloneToEdit};
@@ -1191,11 +1189,11 @@ const GamechangerAdminPage = props => {
 		delete cloneDataToStore.createdAt;
 		delete cloneDataToStore.updatedAt;
 		
-		if (parseJSON) {
 			cloneTableMetaData.jsonFields.forEach(field => {
-				cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
+				if (typeof cloneDataToStore[field.key] === 'string') {
+					cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
+				}
 			})
-		}
 		
 		gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
 			if (data.status === 200) {
@@ -1426,6 +1424,7 @@ const GamechangerAdminPage = props => {
 				}}
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
+				rawSearchResults={[]}
 			>
 			</SearchBanner>
 
@@ -1587,7 +1586,7 @@ const GamechangerAdminPage = props => {
 						allTutorials={tutorialData}
 						fromGC
 					/>
-			} */}
+			}*/}
 		</div>
 	);
 }

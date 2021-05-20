@@ -82,7 +82,8 @@ class TextSuggestionController {
 				autocorrect: corrected ? [corrected] : [],
 				presearchFile: presearchFile || [],
 				presearchTitle: presearchTitle || [],
-				presearchEntity: presearchEntity || [],
+				presearchTopic: presearchEntity.presearchTopic || [],
+				presearchOrg: presearchEntity.presearchOrg || [],
 				predictions: presearchHistory || []
 			});
 
@@ -184,12 +185,17 @@ class TextSuggestionController {
 
 
 	getPreEntityCorrected(suggesterArray) {
-		const presearch = [];
+		const presearchTopic = [];
+		const presearchOrg = [];
+
 		suggesterArray.forEach(suggestion => {
-			presearch.push(suggestion['_source'].name);
+			if(suggestion['_source'].type && suggestion['_source'].type === 'topic'){ // if topic, add to topic list. 
+				presearchTopic.push(suggestion['_source'].name);
+			} else {
+				presearchOrg.push(suggestion['_source'].name);
 			}
-		);
-		return presearch;
+		});
+		return {presearchTopic, presearchOrg};
 	}
 
 }

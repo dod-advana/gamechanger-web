@@ -351,7 +351,6 @@ const StyledFrontCardContent = styled.div`
 const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch}) => {
 	const displayTitle = getDisplayTitle(item);
 	// const isRevoked = item.is_revoked_b;
-	const num = item.doc_num;
 	
 	const docListView = state.listView && !graphView;
 	
@@ -377,7 +376,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				</GCTooltip>
 				<div className={'selected-favorite'}>
 					<div style={{display: "flex"}}>
-						{checkboxComponent(item.filename, `${displayType} ${num}`, idx)}
+						{checkboxComponent(item.filename, item.display_title_s, idx)}
 						{favoriteComponent()}
 					</div>
 				</div>

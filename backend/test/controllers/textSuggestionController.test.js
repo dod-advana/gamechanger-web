@@ -182,7 +182,7 @@ describe('TextSuggestionController', function () {
 					options: [
 						{
 							text: 'artificial',
-							score: 0.80,
+							score: 0.85,
 							freq: 522
 						},
 						{

@@ -368,7 +368,7 @@ const GCDataStatusTracker = (props) => {
 
 		const fileClicked = (filename) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker' , 'PDFOpen');
-			window.open(`/#/pdfviewer/gamechanger?filename=${filename}&cloneIndex=${state.cloneData.clone_name}`);
+			window.open(`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${state.cloneData.clone_name}`);
 		};
 		
 		const dataColumns = [

@@ -84,7 +84,6 @@ const EdaSearchHandler = {
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
-		document.body.style.overflow = 'unset'
 		
 		const searchFavorite = favSearchUrls.includes(url);
 		
@@ -141,7 +140,8 @@ const EdaSearchHandler = {
 			docTypeData: {},
 			runningEntitySearch: true,
 			runningTopicSearch: true,
-			hideTabs: true
+			hideTabs: true,
+			statsLoading: true
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
@@ -160,7 +160,8 @@ const EdaSearchHandler = {
 			
 			const combinedSearch = 'false';
 	
-			const resp = await gameChangerAPI.modularSearch({
+			// regular search
+			gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
 				searchText: searchObject.search,
 				offset,
@@ -178,118 +179,170 @@ const EdaSearchHandler = {
 					combinedSearch,
 					edaSearchSettings
 				},
-			});
+			}).then(resp => {
+				const t1 = new Date().getTime();
 			
-			const t1 = new Date().getTime();
-			
-			let getUserDataFlag = true;
-	
-			if (_.isObject(resp.data)) {
-				let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
-	
-				if (docs && Array.isArray(docs)) {
-	
-					// intelligent search failed, show keyword results with warning alert
-					if (resp.data.transformFailed) {
-						setState(dispatch, {transformFailed: true});
-					}
-	
-					searchResults = searchResults.concat(docs);
-	
-					const favFilenames = userData.favorite_documents.map(document => {
-						return document.filename;
-					});
-	
-					searchResults.forEach(result => {
-						result.favorite = favFilenames.includes(result.filename);
-					});
-	
-					// if this search is a favorite, turn off notifications of new results
-					if (searchFavorite) {
-						userData.favorite_searches.forEach((search, index) => {
-							if (search.url === url) {
-								clearFavoriteSearchUpdate(search, index, dispatch);
-								getUserDataFlag = false;
-							}
+				let getUserDataFlag = true;
+		
+				if (_.isObject(resp.data)) {
+
+					let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
+		
+					if (docs && Array.isArray(docs)) {
+		
+						// intelligent search failed, show keyword results with warning alert
+						if (resp.data.transformFailed) {
+							setState(dispatch, {transformFailed: true});
+						}
+		
+						searchResults = searchResults.concat(docs);
+		
+						const favFilenames = userData.favorite_documents.map(document => {
+							return document.filename;
+						});
+		
+						searchResults.forEach(result => {
+							result.favorite = favFilenames.includes(result.filename);
+						});
+		
+						// if this search is a favorite, turn off notifications of new results
+						if (searchFavorite) {
+							userData.favorite_searches.forEach((search, index) => {
+								if (search.url === url) {
+									clearFavoriteSearchUpdate(search, index, dispatch);
+									getUserDataFlag = false;
+								}
+							});
+						}
+						
+						let hasExpansionTerms = false;
+						
+						if (expansionDict) {
+							Object.keys(expansionDict).forEach(key => {
+								if (expansionDict[key].length > 0) hasExpansionTerms = true;
+							})
+						}
+						
+						if (!offset) {
+							trackSearch(
+								searchText,
+								`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
+								totalCount + (foundEntity ? 1 : 0),
+								false
+							);
+						}
+		
+						setState(dispatch, {
+							timeFound: ((t1 - t0) / 1000).toFixed(2),
+							prevSearchText: searchText,
+							loading: false,
+							count: totalCount + (foundEntity ? 1 : 0),
+							rawSearchResults: searchResults,
+							docSearchResults: docs,
+							searchResultsCount: searchResults.length,
+							autocompleteItems: [],
+							expansionDict,
+							isCachedResult: isCached,
+							timeSinceCache,
+							hasExpansionTerms,
+							metricsLoading: false,
+							metricsCounted: true,
+							loadingTinyUrl: false,
+							hideTabs: false
+						});
+					} else {
+						if (!offset) {
+							trackSearch(
+								searchText,
+								`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
+								0,
+								false
+							);
+						}
+						
+						setState(dispatch, {
+							loading: false,
+							count: 0,
+							rawSearchResults: [],
+							docSearchResults: [],
+							searchResultsCount: 0,
+							runningSearch: false,
+							prevSearchText: searchText,
+							isCachedResult: false,
+							loadingTinyUrl: false,
+							hasExpansionTerms: false
 						});
 					}
-					
-					let hasExpansionTerms = false;
-					
-					if (expansionDict) {
-						Object.keys(expansionDict).forEach(key => {
-							if (expansionDict[key].length > 0) hasExpansionTerms = true;
-						})
-					}
-					
-					if (!offset) {
-						trackSearch(
-							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							totalCount + (foundEntity ? 1 : 0),
-							false
-						);
-					}
-	
-					setState(dispatch, {
-						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						prevSearchText: searchText,
-						loading: false,
-						count: totalCount + (foundEntity ? 1 : 0),
-						rawSearchResults: searchResults,
-						docSearchResults: docs,
-						searchResultsCount: searchResults.length,
-						autocompleteItems: [],
-						expansionDict,
-						isCachedResult: isCached,
-						timeSinceCache,
-						hasExpansionTerms,
-						metricsLoading: false,
-						metricsCounted: true,
-						loadingTinyUrl: false,
-						hideTabs: false
-					});
 				} else {
-					if (!offset) {
-						trackSearch(
-							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							0,
-							false
-						);
-					}
-					
 					setState(dispatch, {
+						prevSearchText: null,
 						loading: false,
-						count: 0,
-						rawSearchResults: [],
-						docSearchResults: [],
 						searchResultsCount: 0,
+						noResultsMessage: NO_RESULTS_MESSAGE,
+						autocompleteItems: [],
 						runningSearch: false,
-						prevSearchText: searchText,
-						isCachedResult: false,
 						loadingTinyUrl: false,
 						hasExpansionTerms: false
 					});
 				}
-			} else {
-				setState(dispatch, {
-					prevSearchText: null,
-					loading: false,
-					searchResultsCount: 0,
-					noResultsMessage: NO_RESULTS_MESSAGE,
-					autocompleteItems: [],
-					runningSearch: false,
-					loadingTinyUrl: false,
-					hasExpansionTerms: false
-				});
-			}
-	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
-	
-			if (getUserDataFlag) {
-				getUserData(dispatch);
-			}
+		
+				setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+		
+				if (getUserDataFlag) {
+					getUserData(dispatch);
+				}
+			}).catch(err => {
+				console.log(err);
+				throw err;
+			});
+
+			// stats search
+			gameChangerAPI.modularSearch({
+				cloneName: cloneData.clone_name,
+				searchText: searchObject.search,
+				offset,
+				limit: 10000,
+				options: {
+					transformResults,
+					charsPadding,
+					showTutorial,
+					useGCCache,
+					tiny_url,
+					searchFields,
+					accessDateFilter,
+					publicationDateFilter,
+					publicationDateAllTime,
+					includeRevoked,
+					combinedSearch,
+					edaSearchSettings,
+					forStats: true,
+				},
+			}).then((resp) => {
+				if(_.isObject(resp.data)) {
+					const docs = resp.data.docs;
+					const issuingOrgs = {
+						"Air Force": 0,
+						"Army": 0,
+						"DLA": 0,
+						"Marine Corps": 0,
+						"Navy": 0,
+						"4th Estate": 0
+					}
+
+					for (const doc of docs) {
+						if (doc.issuing_organization_eda_ext && issuingOrgs[doc.issuing_organization_eda_ext] !== undefined) {
+							issuingOrgs[doc.issuing_organization_eda_ext] += 1;
+						}
+					}
+
+					setState(dispatch, { issuingOrgs, statsLoading: false });
+				}
+			}).catch(err => {
+				console.log('error')
+				console.log(err);
+				throw err;
+			});
+
 	
 		} catch(e) {
 			console.log(e);

@@ -11,7 +11,7 @@ class PolicyGraphHandler extends GraphHandler {
 			searchUtility = new SearchUtility(opts),
 			constants = CONSTANTS,
 			dataLibrary = new DataLibrary(opts),
-			dataTracker = new DataTrackerController()
+			dataTracker = new DataTrackerController(opts)
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 
@@ -65,13 +65,9 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const [results, query, params] = await this.getGraphData(
 			// 	`MATCH (d:Document) WHERE d.doc_id in $ids
-			// 	WITH d
-			// 	MATCH pt=(d)-[bt:BELONGS_TO]->(pub:Publication)
-			// 	WHERE pub.name in $pub_ids
-			// 	WITH pt, bt, pub
-			// 	OPTIONAL MATCH pt2=(pub)-[ref:REFERENCES]->(p2:Publication)
-			// 	WHERE  p2.name in $pub_ids AND NOT pub = p2
-			// 	RETURN ref as references, bt as belongs_to, NODES(pt) as nelongs_to_nodes, NODES(pt2) as references_nodes;`,
+			// 	OPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)
+			// 	WHERE NOT d = d2 AND d2.doc_id in $ids
+			// 	RETURN d, pt;`,
 			// 	{ids: docIds, pub_ids: pubIds}, isTest, userId
 			// );
 
@@ -361,7 +357,8 @@ class PolicyGraphHandler extends GraphHandler {
 		'display_doc_type_s',
 		'display_org_s',
 		'display_title_s',
-		'ref_list'
+		'ref_list',
+		'pagerank_r'
 	], extStoredFields = [], extSearchFields = [], includeRevoked = false }, user) {
 
 		try {
@@ -379,6 +376,7 @@ class PolicyGraphHandler extends GraphHandler {
 			storedFields = [...storedFields, ...extStoredFields];
 
 			let query = {
+				_source: {includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank']},
 				stored_fields: storedFields,
 				from: 0,
 				size: 10000,
@@ -425,7 +423,7 @@ class PolicyGraphHandler extends GraphHandler {
 										'keyw_5'
 									],
 									operator: 'AND',
-									type: "best_fields"
+									type: 'best_fields'
 								}
 							}
 						],
@@ -623,7 +621,7 @@ class PolicyGraphHandler extends GraphHandler {
 	cleanUpEsResultsForGraph(raw, searchTerms, user, expansionDict) {
 		try {
 			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
-				return { totalCount: 0, docIds: [], pubIds: [] };
+				return { totalCount: 0, docs: [] };
 			}
 
 			let results = {};
@@ -640,7 +638,9 @@ class PolicyGraphHandler extends GraphHandler {
 					display_title_s: result.display_title_s,
 					display_org_s: result.display_org_s,
 					display_doc_type_s: result.display_doc_type_s,
-					ref_list: result.ref_list
+					ref_list: result.ref_list,
+					pagerank_r: result.pagerank_r,
+					ref_name: `${result.doc_type} ${result.doc_num}`
 				});
 			});
 
@@ -657,50 +657,50 @@ class PolicyGraphHandler extends GraphHandler {
 		try {
 			const result = {records: []};
 
-			const publicationRecords = [];
 			const documentsRecords = [];
-			const belongsToRecords = [];
 			const referencesRecords = [];
 
 			// Find and create unique pub nodes
-			const pubsIndex = {};
-			const pubDocs = {};
 			let nodeIndex = 0;
-
-			docs.forEach(doc => {
-				const pubName = `${doc.doc_type} ${doc.doc_num}`;
-				if (!pubsIndex.hasOwnProperty(pubName)) {
-					pubsIndex[pubName] = nodeIndex++;
-					pubDocs[pubName] = [doc.id];
-					publicationRecords.push(new Record(['publication'], [
-						{
-							identity: { low: pubsIndex[pubName], high: 0 },
-							labels: ['Publication'],
-							properties: {
-								doc_num: doc.doc_num,
-								doc_type: doc.doc_type,
-								name: pubName,
-								display_org_s: doc.display_org_s,
-								display_doc_type_s: doc.display_doc_type_s,
-							}
-						}
-					], { publication: 0 }));
-				} else {
-					pubDocs[pubName].push(doc.id);
-				}
-			});
 
 			// Create document nodes link to pubsIndex and make references
 			let linkIndex = 0;
-			const pubsRefDict = {};
-			Object.keys(pubsIndex).forEach(key => {
-				pubsRefDict[key] = [];
-			});
+			const docsRefDict = {};
 
 			docs.forEach(doc => {
 				const pubName = `${doc.doc_type} ${doc.doc_num}`;
 				const docIndex = nodeIndex++;
 
+				if (docsRefDict.hasOwnProperty(pubName)) {
+					docsRefDict[pubName].push(docIndex);
+				} else {
+					docsRefDict[pubName] = [docIndex];
+				}
+
+				doc.index = docIndex;
+
+				// Doc
+				documentsRecords.push(new Record(['document'], [
+					{
+						identity: { low: doc.index, high: 0 },
+						labels: ['Document'],
+						properties: {
+							doc_id: doc.doc_id,
+							doc_type: doc.doc_type,
+							doc_num: doc.doc_num,
+							display_title_s: doc.display_title_s,
+							display_org_s: doc.display_org_s,
+							display_doc_type_s: doc.display_doc_type_s,
+							pagerank_r: doc.pagerank_r,
+							ref_name: doc.ref_name
+						}
+					}
+				], { document: 0 }));
+
+			});
+
+			docs.forEach(doc => {
+				const pubName = `${doc.doc_type} ${doc.doc_num}`;
 				if (!doc.ref_list) doc.ref_list = [];
 
 				// Ensure refs are good with spaces between type and num
@@ -718,59 +718,26 @@ class PolicyGraphHandler extends GraphHandler {
 						newRef = ref;
 					}
 
-					if (pubsIndex.hasOwnProperty(newRef)) {
-						if (pubsRefDict[pubName].indexOf(newRef) === -1) pubsRefDict[pubName].push(newRef);
-					}
-				});
-
-				// Doc
-				documentsRecords.push(new Record(['document'], [
-					{
-						identity: { low: docIndex, high: 0 },
-						labels: ['Document'],
-						properties: {
-							doc_id: doc.doc_id,
-							doc_type: doc.doc_type,
-							doc_num: doc.doc_num,
-							display_title_s: doc.display_title_s,
-							display_org_s: doc.display_org_s,
-							display_doc_type_s: doc.display_doc_type_s
-						}
-					}
-				], { document: 0 }));
-
-				belongsToRecords.push(new Record(['belongs_to'], [
-					{
-						end: { low: pubsIndex[pubName], high: 0 },
-						identity: { low: linkIndex++, high: 0 },
-						properties: {},
-						start: { low: docIndex, high: 0 },
-						type: 'BELONGS_TO'
-					}
-				], { belongs_to: 0 }));
-			});
-
-			// Create References links
-			Object.keys(pubsRefDict).forEach(key => {
-				if (pubsRefDict[key].length > 0) {
-					pubsRefDict[key].forEach(pubRef => {
-						if (pubRef !== key) {
+					if (docsRefDict.hasOwnProperty(newRef) && newRef !== pubName) {
+						docsRefDict[newRef].forEach(ref => {
 							referencesRecords.push(new Record(['references'], [
 								{
-									end: { low: pubsIndex[pubRef], high: 0 },
+									end: { low: ref, high: 0 },
 									identity: { low: linkIndex++, high: 0 },
 									properties: {},
-									start: { low: pubsIndex[key], high: 0 },
+									start: { low: doc.index, high: 0 },
 									type: 'REFERENCES'
 								}
 							], { references: 0 }));
-						}
-					});
-				}
+						});
+					}
+				});
+
+
 			});
 
-			result.records = [...documentsRecords, ...referencesRecords, ...belongsToRecords, ... publicationRecords];
-			return this.cleanNeo4jData(result, true, userId);
+			result.records = [...documentsRecords, ...referencesRecords];
+			return this.searchUtility.cleanNeo4jData(result, true, userId);
 
 		} catch (err) {
 			this.logger.error(err, '8TP5S8L', userId);

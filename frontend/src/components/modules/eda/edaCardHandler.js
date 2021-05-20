@@ -15,31 +15,52 @@ import {KeyboardArrowRight} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 
+
+//
 export const EDA_FIELDS = [
-	"pds_contract_eda_ext_1", 
-	"pds_contract_eda_ext_2", 
-	"metadata_eda_ext_n.signature_date_eda_ext_dt", 
-	"refnum_eda_ext_n.ref_value_eda_ext_1", 
-	"address_eda_ext_n.org_name_eda_ext_1",
-	"address_eda_ext_n.orgid_cage_eda_ext_1",
-	"address_eda_ext_n.org_name_eda_ext_2",
-	"address_eda_ext_n.orgid_cage_eda_ext_2",
-	"obligated",
-	"address_eda_ext_n.orgid_dodaac_eda_ext",
-	"refnum_eda_ext_n.ref_value_eda_ext_2"
+	"award_id_eda_ext", 
+	"reference_idv_eda_ext", 
+	"signature_date_eda_ext", 
+	"vendor_name_eda_ext",
+	"vendor_duns_eda_ext",
+	"vendor_cage_eda_ext",
+	"contract_issue_name_eda_ext",
+	"contract_issue_dodaac_eda_ext",
+	"paying_office_name_eda_ext",
+	"paying_office_dodaac_eda_ext",
+	"modification_eda_ext",
+	"contract_admin_name_eda_ext",
+	"contract_admin_office_dodaac_eda_ext",
+	"effective_date_eda_ext"
 ];
+
+const PDS_FIELDS = [
+	"naics_eda_ext",
+	"obligated_amounts_eda_ext"
+];
+
+const SYN_FIELDS = [
+	"misc_fsc_eda_ext"
+];
+
 export const EDA_FIELD_JSON_MAP = {
-	"pds_contract_eda_ext_1": "Award ID", 
-	"pds_contract_eda_ext_2": "Referenced IDV", 
-	"metadata_eda_ext_n.signature_date_eda_ext_dt": "Award Date Signed", 
-	"refnum_eda_ext_n.ref_value_eda_ext_1" : "NAICS (Code)",
-	"address_eda_ext_n.org_name_eda_ext_1": "Vendor Name",
-	"address_eda_ext_n.orgid_cage_eda_ext_1": "Vendor CAGE",
-	"address_eda_ext_n.org_name_eda_ext_2": "Subcontractor Name",
-	"address_eda_ext_n.orgid_cage_eda_ext_2": "Subcontractor CAGE",
-	"obligated": "Total Obligation",
-	"address_eda_ext_n.orgid_dodaac_eda_ext": "Contract Issuing Office DoDAAC",
-	"refnum_eda_ext_n.ref_value_eda_ext_2": "PSC on Contract Header",
+	"award_id_eda_ext": "Award ID", 
+	"reference_idv_eda_ext": "Referenced IDV", 
+	"signature_date_eda_ext": "Award Date Signed", 
+	"naics_eda_ext" : "NAICS (Code)",
+	"vendor_name_eda_ext": "Vendor Name",
+	"vendor_duns_eda_ext": "Vendor DUNS",
+	"vendor_cage_eda_ext": "Vendor CAGE",
+	"obligated_amounts_eda_ext": "Obligated Amounts",
+	"contract_issue_name_eda_ext": "Contract Issuing Office Name",
+	"contract_issue_dodaac_eda_ext": "Contract Issuing Office DoDaaC",
+	"misc_fsc_eda_ext": "PSC on Contract Header",
+	"paying_office_name_eda_ext": "Paying Office Name",
+	"paying_office_dodaac_eda_ext": "Paying Office DoDAAC",
+	"modification_eda_ext": "Modification Number",
+	"contract_admin_name_eda_ext": "Contract Admin Name",
+	"contract_admin_office_dodaac_eda_ext": "Contract Admin Office DoDAAC",
+	"effective_date_eda_ext": "Effective Date"
 };
 
 const styles = {
@@ -498,11 +519,11 @@ const EdaCardHandler = {
 			const currentAsOfText = `Page Count: ${item.page_count}`;
 
 			let tooltipText = 'No metadata available';
-			if (item && item.metadata_type_eda_ext) {
+			if (item && item.metadata_type_eda_ext && item.award_id_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
 				}
-				else if (item.metadata_type_eda_ext === 'syn') {
+				else if (item.metadata_type_eda_ext === 'syn' && item.award_id_eda_ext) {
 					tooltipText = 'Pulled from Synopsis data';
 				}
 			}
@@ -677,22 +698,25 @@ const EdaCardHandler = {
 			} = props;
 
 			let tooltipText = 'No metadata available';
-			if (item && item.metadata_type_eda_ext) {
+			let fields = EDA_FIELDS;
+			if (item && item.metadata_type_eda_ext && item.award_id_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
+					fields = fields.concat(PDS_FIELDS);
 				}
 				else if (item.metadata_type_eda_ext === 'syn') {
 					tooltipText = 'Pulled from Synopsis data';
+					fields = fields.concat(SYN_FIELDS);
 				}
 			}
 			
 			return (
 				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
-					<div>
+					<div style={{ height: '100%', overflow: 'auto'}}>
 						<SimpleTable tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, item)}
+							rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, fields, item)}
 							height={'auto'}
 							dontScroll={true}
 							colWidth={colWidth}

@@ -1,11 +1,26 @@
 const { DataLibrary} = require('../../lib/dataLibrary');
 const ExportHandler = require('../base/exportHandler');
+const CONSTANTS = require('../../config/constants');
+const SearchUtility = require('../../utils/searchUtility');
+const EDASearchUtility = require('./edaSearchUtility');
+const csvStringifyLib = require('csv-stringify');
+
 
 class EdaExportHandler extends ExportHandler {
 	constructor(opts={}) {
-		super();
-
-		this.dataApi = new DataLibrary(opts);
+		const {
+			dataLibrary = new DataLibrary(opts),
+			csvStringify = csvStringifyLib,
+			searchUtility = new SearchUtility(),
+			edaSearchUtility = new EDASearchUtility(),
+			constants = CONSTANTS
+		} = opts;
+		super({...opts});
+		this.dataLibrary = dataLibrary;
+		this.csvStringify = csvStringify;
+		this.searchUtility = searchUtility;
+		this.edaSearchUtility = edaSearchUtility;
+		this.constants = constants;
 	}
 
 	async exportHelper(req, res, userId) {
@@ -26,6 +41,7 @@ class EdaExportHandler extends ExportHandler {
 				...rest
 			} = req.body;
 			
+			const clientObj = {};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			const permissions = req.permissions ? req.permissions : [];
 			req.body.searchTerms = searchTerms;
@@ -33,10 +49,11 @@ class EdaExportHandler extends ExportHandler {
 
 			let searchResults;
 			try {
+
 				// Using getESClient check to enable eda export. Verify whether permissible
 				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
-					esClientName = 'eda';
-					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+					clientObj.esClientName = 'eda';
+					clientObj.esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 				} else {
 					throw 'Unauthorized';
 				}
@@ -44,23 +61,24 @@ class EdaExportHandler extends ExportHandler {
 
 				req.body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				req.body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
-				const esQuery = this.searchUtility.getElasticsearchPagesQuery(req.body, userId);
-
-				const results = await this.dataApi.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+				
+				const esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(req.body, userId);
+				const results = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 
 				if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-					searchResults = this.searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, clientObj.esIndex);
+					searchResults = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, [], expansionDict, clientObj.esIndex);
 				} else {
 					this.logger.error('Error with Elasticsearch download results', 'T5GRJ4Lzdf', userId);
 					searchResults = { totalCount: 0, docs: [] };
 				}
 			} catch (e) {
-				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L0V3LYT', userId);
+				this.logger.error(`Error sentence transforming document search results ${e.message}`, '3MP4JCA', userId);
 				throw e;
 			}
 
 			try {
 				const { docs } = searchResults;
+
 				if (historyId) {
 					await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
 				} else {
@@ -81,7 +99,7 @@ class EdaExportHandler extends ExportHandler {
 					rest.orgFilter = orgFilter;
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
 				} else if (format === 'csv') {
-					const csvStream = this.reports.createCsvStream(searchResults, userId);
+					const csvStream = this.createCsvStream(searchResults, userId);
 					res.status(200);
 					csvStream.pipe(res);
 				} else {
@@ -99,6 +117,62 @@ class EdaExportHandler extends ExportHandler {
 		}
 	}
 
+	createCsvStream(data, userId) {
+		try {
+			const stringifier = this.csvStringify({ delimiter: ',' });
+
+			stringifier.on('error', (err) => {
+				this.logger.error(e.message, 'P9KP9BX', userId);
+				throw new Error(err);
+			})
+
+			this.writeCsvData(stringifier, data);
+
+			stringifier.end();
+			return stringifier;
+
+		} catch (e) {
+			this.logger.error(e.message, '9WZWAAR', userId);
+			throw e;
+		}
+	}
+
+	writeCsvData(stringifier, data) {
+
+		if(data && data.docs && data.docs.length > 0){
+			const header = ['Filename', 'Contract Number', 'Page Count', 'Issuing Organization'];
+			stringifier.write(header);
+
+			data.docs.forEach((doc) => {
+				const item = [doc.filename, this.getDisplayTitle(doc), doc.page_count, doc.issuing_organization_eda_ext];
+				stringifier.write(item);
+			});
+		}
+	}
+
+	getDisplayTitle (item) {
+		if (item.title && item.title !== 'NA') {
+			return item.title.replace(/-empty/g, '');
+		}
+		else {
+			try {
+				const rootfile = item.filename.substr(item.filename.lastIndexOf("/")+1)
+				const pieces = rootfile.split('-');
+				const first = pieces[7];
+				if (first === 'empty' || !first) {
+					throw new Error('parsing failed')
+				}
+				const second = pieces[8] === 'empty' ? '' : `-${pieces[8]}`;
+				const mod = pieces[9] === 'empty' ? '' : `-${pieces[9]}`;
+				const mod2 = pieces[10] === 'empty' ? '' : `-${pieces[10]}`;
+	
+				return `${first}${second}${mod}${mod2}`;
+			} catch (e) {
+				return `${item.filename.substr(item.filename.lastIndexOf("/")+1) ? 'Not Available' : ''}`
+			}
+		}
+	};
+
 }
 
-module.exports = new EdaExportHandler();
+module.exports = EdaExportHandler;

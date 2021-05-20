@@ -19,7 +19,7 @@ class ExportHandler {
 
 	async export(res, searchText, format, options, cloneName, permissions, userId) {
 		try {
-			this.logger.info(`${userId} is doing a ${cloneName} export for ${searchText} in ${format} format, options ${options}`)
+			this.logger.info(`${userId} is doing a ${cloneName} export for ${searchText} in ${format} format, options ${JSON.stringify(options)}`)
 			const body = options;
 			body.searchText = searchText;
 			body.format = format;

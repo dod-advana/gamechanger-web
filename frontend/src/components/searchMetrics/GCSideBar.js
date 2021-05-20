@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 
@@ -119,11 +119,13 @@ export default function SideBar(props) {
 	
 	const {state} = context;
 	
-	const [topEntities, setTopEntities] = React.useState([]);
-	const [topTopics, setTopTopics] = React.useState([]);
-	const [runningTopicSearch, setRunningTopicSearch] = React.useState(state.runningTopicSearch);
-	const [runningEntitySearch, setRunningEntitySearch] = React.useState(state.runningEntitySearch);
+	const [topEntities, setTopEntities] = useState([]);
+	const [topTopics, setTopTopics] = useState([]);
+	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
+	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
 	
+	
+
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
 		state.entitiesForSearch.forEach(entity => {
@@ -138,7 +140,7 @@ export default function SideBar(props) {
 		setRunningTopicSearch(state.runningTopicSearch);
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
-	
+
 	const renderTopEntities = () => {
 		return (
 			
@@ -163,7 +165,7 @@ export default function SideBar(props) {
 			
 		);
 	};
-	
+
 	const renderTopTopics = () => {
 		return (
 			
@@ -172,7 +174,7 @@ export default function SideBar(props) {
 					return (
 						<div className={'topic-button'} key={`topic-${idx}`}onClick={() => {
 							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TopTopics', topic.name)
-							window.open(`#/gamechanger/details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`);
+							window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`);
 						}}>
 							{topic}
 						</div>
@@ -256,13 +258,13 @@ export default function SideBar(props) {
 											}
 									</GCAccordion>
 								</div>
-								<div style={{width: '100%', marginBottom: 10}}>
+								{false && <div style={{width: '100%', marginBottom: 10}}>
 									<GCAccordion expanded={false} header={'LEGEND'} headerTextWeight={'normal'}>
 										<>
 											{renderLegend()}
 										</>
 									</GCAccordion>
-								</div>
+								</div>}
 							</>}
 						</div>
 					</div>

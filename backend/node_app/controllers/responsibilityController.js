@@ -43,12 +43,11 @@ class ResponsibilityController {
 				attributes: [
 					'id',
 					'filename',
-					'primaryEntity',
-					'responsibilityLevel1',
-					'responsibilityLevel2',
-					'responsibilityLevel3',
-					'entitiesFound',
-					'references'
+					'documentTitle',
+					'organizationPersonnel',
+					'responsibilityText',
+					'otherOrganizationPersonnel',
+					'documentsReferenced'
 				]
 			});
 			res.status(200).send({totalCount: results.count, results: results.rows});
@@ -83,7 +82,7 @@ class ResponsibilityController {
 						<p>Responsibility Row in Postgres: ${id}</p>
 						<p>${issue_description}</p>`;
 					this.emailUtility.sendEmail(emailBody, 'Responsibility Issue Report', this.constants.GAME_CHANGER_OPTS.emailAddress, null, null, userId).then(resp => {
-						res.status(200).send(report);
+						resp.status(200).send(report);
 					}).catch(error => {
 						this.logger.error(JSON.stringify(error), 'YXBG3G4', userId);
 						res.status(200).send(report);

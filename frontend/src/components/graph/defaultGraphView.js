@@ -1,8 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import NodeClusterView from "./GCNodeClusterView";
-import {getOrgToOrgQuery, getTypeQuery, SEARCH_TYPES} from "../../gamechangerUtils";
+import {
+	getOrgToOrgQuery,
+	getTypeQuery,
+	numberWithCommas,
+	SEARCH_TYPES
+} from "../../gamechangerUtils";
 import {getSearchObjectFromString, setState} from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
+import {MemoizedPolicyGraphView} from "./policyGraphView";
+import ViewHeader from "../mainView/ViewHeader";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -83,7 +89,7 @@ const getGraphData = async (setRunningSearch, setGraphResultsFound, graphResults
 	}
 }
 
-const DefaultGraphView = (props) => {
+export default function DefaultGraphView (props) {
 
 	const {context} = props;
 	const {state, dispatch} = context;
@@ -92,6 +98,17 @@ const DefaultGraphView = (props) => {
 	const [runningSearch, setRunningSearch] = useState(false);
 	const [noSearches, setNoSearches] = useState(true);
 	const [graph, setGraph] = useState({ nodes: [], edges: [], timeFound: 0 });
+	const [documentsFound, setDocumentsFound] = React.useState(0);
+	const [timeFound, setTimeFound] = React.useState('0');
+	const [numOfEdges, setNumOfEdges] = React.useState(0);
+	
+	const [width, setWidth] = React.useState(window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100));
+	const [height, setHeight] = React.useState(window.innerHeight * .75);
+	
+	useEffect(() => {
+		setWidth(window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100));
+		setHeight(window.innerHeight * .75);
+	}, [state]);
 	
 	useEffect (() => {
 		if (state.runGraphSearch) {
@@ -99,22 +116,39 @@ const DefaultGraphView = (props) => {
 		}
 	}, [state, graphResultsFound, dispatch])
 	
+	const resultsText = runningSearch ? 'Running search...' : noSearches ? 'Make a search to see the graph network' : `${numberWithCommas(documentsFound)} document nodes and ${numberWithCommas(numOfEdges)} edges returned in ${timeFound} seconds`;
+	
 	return (
-		<>
-			<NodeClusterView
-				graphData={graph}
-				runningSearch={runningSearch}
-				searchText={state.searchText}
-				componentStepNumbers={state.componentStepNumbers}
-				resetGraph={state.isResetting}
-				noSearches={noSearches}
-				notificationCountProp={state.notifications.length}
-				expansionTerms={state.hasExpansionTerms}
-				state={state}
-				dispatch={dispatch}
+		<div style={{...styles.graphContainer, height: '100%'}}>
+			<ViewHeader context={context} resultsText={resultsText}/>
+			{/* <div style={styles.resultsText}>
+				{resultsText}
+			</div> */}
+			<MemoizedPolicyGraphView width={width} height={height} graphData={graph} runningSearchProp={runningSearch}
+							 notificationCountProp={state.notifications.length} setDocumentsFound={setDocumentsFound}
+							 setTimeFound={setTimeFound} cloneData={state.cloneData} expansionTerms={state.hasExpansionTerms}
+							 setNumOfEdges={setNumOfEdges} dispatch={dispatch} showSideFilters={state.showSideFilters}
+							 searchText={state.searchText}
 			/>
-		</>
+		</div>
 	);
 };
 
-export default DefaultGraphView;
+const styles = {
+	graphContainer: {
+		alignItems: 'center',
+		width: 'unset',
+		height: '800px',
+		margin: '0'
+	},
+	resultsText: {
+		display: 'inline-block',
+		fontWeight: 'bold',
+		zIndex:1,
+		fontSize: 22,
+		color: '#131E43',
+		backgroundColor: 'rgba(255, 255, 255, 0.9)',
+		padding: '10px 6px 6px 6px',
+		borderRadius: '3px'
+	},
+};

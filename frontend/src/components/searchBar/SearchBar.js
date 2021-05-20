@@ -5,19 +5,18 @@ import {
 } from "../../sharedFunctions";
 import GameChangerSearchBar from "./GameChangerSearchBar";
 import {
-	getTrackingNameForFactory,
 	PAGE_BORDER_RADIUS,
 	SEARCH_TYPES
-} from "../../gamechangerUtils";
-import {gcBlue} from "../../components/common/gc-colors";
+} from "../..//gamechangerUtils";
+import {gcBlue} from "../common/gc-colors";
 import {SearchBanner} from "./GCSearchBanner";
-import {trackEvent} from "../telemetry/Matomo";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 
 const SearchBar = (props) => {
 	
 	const {state, dispatch} = props.context;
-	
+
+	const { rawSearchResults } = state;
 	const [searchHandler, setSearchHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 	
@@ -41,12 +40,6 @@ const SearchBar = (props) => {
 		setState(dispatch, {menuOpen: !state.menuOpen});
 	}
 	
-	const addSearchTerm = (obj) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${obj.phrase}_${obj.source}`);
-		const newSearchText = state.searchText.trim() ? `${state.searchText} OR ${obj.phrase}` : obj.phrase;
-		setState(dispatch, { searchText: newSearchText, runSearch: true });
-	}
-	
 	const setLoginModal = (open) => {
 		setState(dispatch, { loginModalOpen: open });
 	}
@@ -64,14 +57,29 @@ const SearchBar = (props) => {
 	const updateSearchTextOnly = (searchText) => {
 		setState(dispatch, {searchText});
 	}
-	
+
+	const handleCategoryTabChange = (tabName) => {
+		if (tabName === 'all'){
+			setState(dispatch,{
+				activeCategoryTab:tabName,
+				docSearchResults:state.docSearchResults.slice(0,6),
+				resultsPage: 1,
+				replaceResults: true,
+				infiniteScrollPage: 1
+			})
+		} else if (tabName === 'Documents' && state.resultsPage !== 1){
+			setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true})
+		} else if (tabName === 'Documents'){
+			setState(dispatch,{activeCategoryTab:tabName, replaceResults: false})
+		}
+		setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1})
+	}
 	return (
 		<>
 			<SearchBanner
 				titleBarModule={state.cloneData.title_bar_module}
 				onTitleClick={() => {
 					window.location.href = `#/${state.cloneData.url}`;
-					document.body.style.overflow = 'unset';
 					dispatch({type: 'RESET_STATE'});
 				}}
 				componentStepNumbers={state.componentStepNumbers}
@@ -82,10 +90,16 @@ const SearchBar = (props) => {
 				cloneData={state.cloneData}
 				expansionDict={state.expansionDict}
 				searchText={state.searchText}
-				addSearchTerm={addSearchTerm}
 				loginModalOpen={state.loginModalOpen}
 				setLoginModal={setLoginModal}
 				jupiter={props.jupiter}
+				rawSearchResults={rawSearchResults}
+				selectedCategories={state.selectedCategories}
+				activeCategoryTab={state.activeCategoryTab}
+				setActiveCategoryTab={tabName=>handleCategoryTabChange(tabName)}
+				categoryMetadata={state.categoryMetadata}
+				pageDisplayed={state.pageDisplayed}
+				dispatch={dispatch}
 			>
 				<GameChangerSearchBar
 					handleSearch={() => searchHandler.handleSearch(state, dispatch)}
@@ -104,7 +118,7 @@ const SearchBar = (props) => {
 					favorite={state.isFavoriteSearch}
 					publicationDateFilter={state.searchSettings?.publicationDateFilter || [null, null]}
 					accessDateFilter={state.searchSettings?.accessDateFilter || [null, null]}
-					checkUserInfo={() => {checkUserInfo(state, dispatch)}}
+					checkUserInfo={() => { return checkUserInfo(state, dispatch)}}
 				/>
 			</SearchBanner>
 		</>

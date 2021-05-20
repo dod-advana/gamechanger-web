@@ -83,7 +83,6 @@ const DefaultSearchHandler = {
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
-		document.body.style.overflow = 'unset'
 		
 		const searchFavorite = favSearchUrls.includes(url);
 		

@@ -5,6 +5,7 @@ import { List, ListItem, Drawer, ListSubheader, Table, TableBody, TableRow, Tabl
 import { backgroundGreyDark } from '../../components/common/gc-colors';
 import GCButton from '../common/GCButton';
 import ExportIcon from '../../images/icon/Export.svg';
+import GCToolTip from '../common/GCToolTip';
 
 
 const SelectedDocumentList = styled(List)`
@@ -44,7 +45,7 @@ export const SelectedDocsDrawer = (props) => {
         setDrawer,
         clearSelections, 
         openExport,
-        // removeSelection,
+        removeSelection,
         componentStepNumbers,
         isDrawerReady,
         setDrawerReady,
@@ -55,13 +56,13 @@ export const SelectedDocsDrawer = (props) => {
         checkUserInfo
     } = props;
 
-    // const handleRemoveSelection = (key) => {
-    //     removeSelection(key);
+    const handleRemoveSelection = (key) => {
+        removeSelection(key);
 
-    //     if (selectedDocuments.size === 0) {
-    //         setDrawer(false);
-    //     }
-    // }
+        if (selectedDocuments.size === 0) {
+            setDrawer(false);
+        }
+    }
 
     const renderSelectedDocuments = () => {
 		const rowJSX = [];
@@ -81,7 +82,7 @@ export const SelectedDocsDrawer = (props) => {
                             justifyContent: 'space-between'
                         }}>
                             <span style={{ fontSize: 16 }}>{value}</span>
-                            {/* <i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer', height: 17 }} onClick={() => handleRemoveSelection(key)} /> */}
+                            <i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer', height: 17 }} onClick={()=>handleRemoveSelection(key)} />
                         </div>
                     </DrawerTableCell>
 				</DrawerTableRow>
@@ -119,11 +120,12 @@ export const SelectedDocsDrawer = (props) => {
                 id='gcOpenSelectedDocsDrawer'
                 className={`tutorial-step-${componentStepNumbers["Open Selected Documents Drawer"]}`}
                 onClick={() => handleExportButtonClick()}
-                style={{minWidth: 0, padding: '0px 9px', margin: '16px 0px 0px 10px', height: 50}}
+                style={{minWidth: 0, padding: '0px 7px', margin: '16px 0px 0px 10px', height: 34}}
                 disabled={!rawSearchResults || rawSearchResults.length <= 0 ? true : false}
             >
-                Export
-                <img src={ExportIcon} style={{ width: 15, opacity: !rawSearchResults || rawSearchResults.length <= 0 ? .6 : 1 }} alt="export"/>
+                <GCToolTip title='Export' placement="bottom" arrow>
+                    <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 15, opacity: !rawSearchResults || rawSearchResults.length <= 0 ? .6 : 1 }} alt="export"/>
+                </GCToolTip>
         	</GCButton>
 
             <Drawer open={docsDrawerOpen} anchor='right' onClose={() => setDrawer(false)} PaperProps={{ style: { backgroundColor: 'rgb(244, 249, 255)'}, className: `tutorial-step-${componentStepNumbers['Selected Documents Drawer']}` }}>

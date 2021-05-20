@@ -1,4 +1,4 @@
-const { SearchController } = require('../searchController');
+const { ModularGameChangerController } = require('../modularGameChangerController');
 const { ORGFILTER, getOrgOptions, getOrgToDocQuery } = require('../../utils/routeUtility');
 const LOGGER = require('../../lib/logger');
 
@@ -9,7 +9,7 @@ class ExternalSearchController {
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
-			search = new SearchController(opts)
+			search = new ModularGameChangerController(opts)
 		} = opts;
 		this.searchController = search;
 		this.logger = logger;
@@ -38,38 +38,39 @@ class ExternalSearchController {
 		return {orgFilter, orgFilterQuery};
 	}
 
-	/**
-	 * @method externalSearch
-	 * @param {String} searchType - Whether the search is Intelligent or Keyword
-	 * @param {Object} req - The general request containing body and query
-	 * @param {String} req.query.search - string that is to be searched
-	 * @param {String} req.query.orgFilter - string of orgs separated by _.
-	 * @param {int} [req.query.offset=0] - optional to start at a different point in the results
-	 * @param {int} [req.query.limit=20] - optional number of results to request at a time
-	 *
-	 * @param {Object} res - The response to reurn with object and status code
-	 */
-	async externalSearch(searchType, req, res){
+
+	async externalSearch(req, res){
 		let userId = 'API';
-		searchType = (searchType === 'Intelligent') ? searchType : 'Keyword';
 		try {
 			if (!req.query || !req.query.search || req.query.search === '') {
 				return res.status(400).send('Missing search');
 			} else {
 				userId = req.get('SSL_CLIENT_S_DN_CN');
+				let orgFilterString = req.query.orgFilter || [];
+				let typeFilterString = req.query.typeFilter || [];
+				if (typeof orgFilterString === 'string') {
+					orgFilterString = req.query.orgFilter ? [req.query.orgFilter] : [];
+				}
+				if (typeof typeFilterString === 'string') {
+					typeFilterString = req.query.typeFilter ? [req.query.typeFilter] : [];
+				}
 				// Format filter from query
-				const {orgFilter, orgFilterQuery} = this.createOrgFilter(req.query.orgFilter);
 				const body = {
 					searchText: req.query.search,
-					searchType,
-					orgFilter,
-					orgFilterQuery,
-					tiny_url: 'gamechanger?tiny=4',
+					cloneName: req.query.cloneName,
 					offset: req.query.offset ? parseInt(req.query.offset) : 0,
-					limit: req.query.limit ? parseInt(req.query.limit) : 20
+					limit: req.query.limit ? parseInt(req.query.limit) : 20,
+					options: {
+						searchType: 'keyword',
+						orgFilter: {},
+						typeFilter: {},
+						orgFilterString: orgFilterString,
+						typeFilterString: typeFilterString,
+						tiny_url: 'gamechanger?tiny=4',
+					}
 				};
-				const result = await this.searchController.documentSearchHelper({...req, body}, userId);
-				return res.status(200).send(result);
+				req.body = body;
+				await this.searchController.search(req, res);
 			}
 		} catch (err) {
 			const { message } = err;

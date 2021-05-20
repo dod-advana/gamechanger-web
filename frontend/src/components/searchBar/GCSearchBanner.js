@@ -7,7 +7,8 @@ import { primaryGreyLight } from '../../components/common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
 import AdvanaStackedLogo from 'advana-platform-ui/dist/images/Stackedlogo.png';
 import TitleBarFactory from "../factories/titleBarFactory";
-
+import SearchTabBar from "../modules/globalSearch/SearchTabBar";
+import { SearchContext } from "../modules/globalSearch/SearchContext";
 import AdvanaMegaMenuPill, { 
 	PillButton,
 	TitleText
@@ -80,44 +81,6 @@ const styles = {
 	}
 };
 
-const ExpandTermsContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: left;
-	max-width: 100%;
-	margin: auto;
-	margin-bottom: 12px;
-`
-
-const ExpandedTermsWrapper = styled.div`
-	display: flex;
-	align-items: left;
-	flex-wrap: wrap;
-	justify-content:left;
-`;
-
-const AddTermButton = styled.button`
-	border: none;
-	height: 30px;
-	border-radius: 15px;
-	background-color: white;
-	color: black;
-	white-space: nowrap;
-	text-align: center;
-	display: inline-block;
-	padding-left: 15px;
-	padding-right: 15px;
-	margin-left: 6px;
-	margin-right: 6px;
-	cursor: pointer;
-	border: 1px solid darkgray;
-
-	&:hover {
-		background-color: #E9691D;
-		color: white;
-	};
-`;
-
 const LoginModalHeader = styled.div`
 	display:flex;
 	width: 100%;
@@ -155,22 +118,24 @@ export const SearchBanner = (props) => {
 		onTitleClick,
 		componentStepNumbers = [],
 		isDataTracker,
-		expansionDict = {},
-		addSearchTerm,
 		loginModalOpen,
 		setLoginModal,
 		jupiter,
 		cloneData,
 		detailsType,
-		titleBarModule
+		titleBarModule,
+		rawSearchResults,
+		selectedCategories,
+		categoryMetadata,
+		activeCategoryTab,
+		setActiveCategoryTab,
+		pageDisplayed,
+		dispatch
 	} = props;
 
-	const [expansionTerms, setExpansionTerms] = useState([]);
 	const [titleBarHandler, setTitleBarHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
-	const comparableExpansion = JSON.stringify(expansionDict);
-	
 	useEffect(() => {
 		// Create the factory
 		if (titleBarModule && !loaded) {
@@ -183,49 +148,19 @@ export const SearchBanner = (props) => {
 		
 	}, [loaded, titleBarModule]);
 
-	useEffect(() => {
-		// nested arrays of expanded terms from each searchTerm
-		const expansion = JSON.parse(comparableExpansion)
-		let expandedTerms = Object.values(expansion || {});
-		const keys = Object.keys(expansion || {});
-		const quotedKeys = keys.map((term) => `"${term}"`);
-		const exclude = new Set([...keys, ...quotedKeys]);
-		let topFive = new Set();
-
-		while(topFive.size < 7){
-			if(expandedTerms.length === 0){
-				break;
-			}
-			const frontArr = expandedTerms[0];
-			const term = frontArr.shift();
-			const [a, ...rest] = expandedTerms;
-			if(!term){
-				expandedTerms = [...rest];
-			} else {
-				if(!exclude.has(term)){
-					topFive.add(term);
-				}
-				expandedTerms = [...rest, a];
-			}
-		}
-
-		setExpansionTerms(Array.from(topFive));
-
-	}, [comparableExpansion]);
-
 	return (
 		<div style={{ ...styles.container, ...style }} className={componentStepNumbers ? `tutorial-step-${componentStepNumbers["Search Bar"]}` : null}>
 			{loaded &&
-				<div style={styles.titleBar}>
+				<div style={{...styles.titleBar, borderBottom: (rawSearchResults.length>0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : ''}}>
 					{titleBarHandler.getTitleBar({onTitleClick, componentStepNumbers, cloneData, detailsType})}
 					{isDataTracker &&
-					<div style={{display: 'flex'}}>
-						<img src={GamechangerLogo} style={styles.adminTitle} onClick={onTitleClick} alt='gamechanger'
-							 className={componentStepNumbers ? `tutorial-step-${componentStepNumbers["Gamechanger Title"]}` : null}/>
-						<Typography variant="h2" style={styles.adminWording} display="inline">
-							Data Tracker
-						</Typography>
-					</div>
+						<div style={{display: 'flex'}}>
+							<img src={GamechangerLogo} style={styles.adminTitle} onClick={onTitleClick} alt='gamechanger'
+								 className={componentStepNumbers ? `tutorial-step-${componentStepNumbers["Gamechanger Title"]}` : null}/>
+							<Typography variant="h2" style={styles.adminWording} display="inline">
+								Data Tracker
+							</Typography>
+						</div>
 					}
 					<div style={styles.searchBar}>
 						{children}
@@ -246,18 +181,23 @@ export const SearchBanner = (props) => {
 					}
 				</div>
 			}
-			{ expansionTerms.length > 0 && (
-				<ExpandTermsContainer>
-					<label style={{margin: 3}}>Add Terms:</label>
-					<ExpandedTermsWrapper>
-						{expansionTerms.map((obj, index) => {
-							return (
-								<AddTermButton key={index + '_' + obj.phrase + '_' + obj.source} onClick={() => { addSearchTerm(obj) }}>{obj.phrase}</AddTermButton>
-							)
-						})}
-					</ExpandedTermsWrapper>
-				</ExpandTermsContainer>
-			)}
+	
+			{rawSearchResults.length > 0 && pageDisplayed === 'main' && cloneData.clone_name === 'gamechanger' &&
+				<SearchContext.Provider
+					value={{
+						searchTypes: selectedCategories,
+						activeTab: activeCategoryTab,
+						setActiveTab: setActiveCategoryTab,
+						resultMetaData: categoryMetadata,
+						returnHome: () => { 
+							window.location.href = `/#/${cloneData.clone_name}`
+							dispatch({type: 'RESET_STATE'});
+					 	}
+					}}
+				>
+					<SearchTabBar containerStyles={{width:'100%'}}/>
+				</SearchContext.Provider>
+			}
 
 			<Modal 
 				style={{
@@ -278,9 +218,9 @@ export const SearchBanner = (props) => {
 						</IconButton>
 					</LoginModalHeader>
 					<LoginModalBody>
-						{/* <LoginModalBodyDiv>
+						<LoginModalBodyDiv>
 							<TitleText style={{ fontSize: 25 }}>Advana Account</TitleText>
-						</LoginModalBodyDiv> */}
+						</LoginModalBodyDiv>
 						<LoginModalBodyDiv>
 							<AdvanaLogo src={AdvanaStackedLogo} alt='advana' />
 						</LoginModalBodyDiv>

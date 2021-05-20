@@ -232,7 +232,7 @@ class AppStatsController {
 					matomo_log_action b
 				where
 					a.idaction_name = b.idaction
-					and (search_cat = 'GAMECHANGER__combined' or search_cat = 'GAMECHANGER_Keyword')
+					and (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
 					and a.server_time > '${startDate}'
 				order by
 					idvisit,

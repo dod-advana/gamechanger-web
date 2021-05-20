@@ -1,7 +1,6 @@
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {ForceGraph2D} from "react-force-graph";
-import {backgroundWhite} from "../../components/common/gc-colors";
-import {gcOrange} from "../../components/common/gc-colors";
+import {backgroundWhite, gcOrange} from "../../components/common/gc-colors";
 import React, {useEffect, useRef} from "react";
 import {
 	calcLinkControlPoints, draw2DArrows, EDGE_PATTERNS,
@@ -26,9 +25,11 @@ const NODE_ALPHA = 1;
 const HIDDEN_NODE_ALPHA = 0.08;
 const LINK_ALPHA = 0.5;
 const DEGREE_REL_TO_GET = 1;
-const ZOOM_LIMIT = 8;
+export const ZOOM_LIMIT = 8;
 const ARROW_LENGTH = 3;
 const ARROW_REL_POS = 1;
+
+const edgePatterns =[[], ...shuffleArray(EDGE_PATTERNS)];
 
 const styles = {
 	loading: {
@@ -278,14 +279,16 @@ export default function GraphNodeCluster2D(props) {
 	const [nodeLabelSelected, setNodeLabelSelected] = React.useState(null);
 	const [edgeLabelPatterns, setEdgeLabelPatterns] = React.useState({});
 	const [edgeLabels, setEdgeLabels] = React.useState({});
-	const [edgePatterns, setEdgePatterns] = React.useState([]);
+	
 	const [legendData, setLegendData] = React.useState({});
 	const [shouldCenter, setShouldCenter] = React.useState(true)
 	
 	const [dagMode, setDagMode] = React.useState(false);
 	
+	const { nodes, edges } = graph;
+	const graphData = { nodes, links: edges };
+	
 	useEffect(() => {
-		setEdgePatterns([[], ...shuffleArray(EDGE_PATTERNS)]);
 		setHighlightNodes(new Set());
 		setDegreeConnected({ 0: [], 1: [], 2: [] });
 		setEdgeLabels({});
@@ -293,6 +296,7 @@ export default function GraphNodeCluster2D(props) {
 	
 	useEffect(() => {
 		const legendData = {};
+		const edgeLabels = {};
 		if (graph.labels) {
 			const nodeLabelColors = {};
 			graph.labels.forEach(label => {
@@ -307,9 +311,9 @@ export default function GraphNodeCluster2D(props) {
 			setLegendData(legendData);
 		}
 		
-		Object.keys(edgeLabels).forEach(label => {
-			edgeLabels[label] = 0;
-		});
+		// Object.keys(edgeLabels).forEach(label => {
+		// 	edgeLabels[label] = 0;
+		// });
 		
 		if (graph.edges) {
 			graph.edges.forEach(edge => {
@@ -327,7 +331,7 @@ export default function GraphNodeCluster2D(props) {
 			setEdgeLabels(edgeLabels);
 			setEdgeLabelPatterns(tmpEdgeLabelPatterns);
 		}
-	}, [graph, edgeLabels, edgePatterns]);
+	}, [graph]);
 	
 	useEffect(() => {
 		setShouldRunSimulation(runSimulationProp);
@@ -356,195 +360,9 @@ export default function GraphNodeCluster2D(props) {
 		//setGraphRendered1stTime(false);
 	}, [reloadGraphProp, runSimulationProp]);
 	
-	const { nodes, edges } = graph;
-	const graphData = { nodes, links: edges };
-	
-	const handleCreateNodeLabel = createNodeLabel ? createNodeLabel : (node) => {
-		return node.name;
-	}
-	
-	const handleCreateGraphNode = createGraphNode ? createGraphNode : (node, ctx, globalScale) => {
-		
-		let outlineThickness = 3;
-		let connectedLevel = -1;
-		
-		if (highlightNodes.size > 0 && highlightNodes.has(node)) {
-			if (degreeConnected[0].includes(node)){
-				connectedLevel = 0;
-			} else if (degreeConnected[1].includes(node)) {
-				connectedLevel = 1;
-			}
-			outlineThickness += 2;
-		}
-		
-		if (selectedNodeID === node.id){
-			outlineThickness += 2;
-		}
-		
-		const { nodeColor, nodeHexColor, nodeTextColor } = (nodeLabelSelected !== null && nodeLabelSelected !== node.label) ?
-			getNodeColors(node, hiddenNodeAlpha, nodeLabelColors) :
-			getNodeColors(node, nodeAlpha, nodeLabelColors);
-		const outlineColor = (nodeLabelSelected !== null && nodeLabelSelected !== node.label) ?
-			getNodeOutlineColors(node, hiddenNodeAlpha, nodeHexColor, connectedLevel) :
-			getNodeOutlineColors(node, nodeAlpha, nodeHexColor, connectedLevel);
-		
-		ctx.beginPath();
-
-		ctx.fillStyle = nodeColor;
-		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
-		ctx.fill();
-		ctx.strokeStyle = outlineColor
-		ctx.lineWidth = outlineThickness / globalScale;
-		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
-		ctx.stroke();
-		
-		// Selected/Hovered Outline
-		if (node.id === selectedNodeID || node.id === nodeHoverID) {
-			ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
-			ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
-			ctx.arc(node.x, node.y, node.value * nodeRelativeSize + 0.2, 0, 2 * Math.PI, false);
-			ctx.stroke();
-		}
-
-		handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
-	}
-	
-	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
-		const label = handleCreateNodeLabel(node);
-		const MAX_FONT_SIZE = (nodeRelativeSize / 5) * 1.5
-		
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		ctx.fillStyle = nodeTextColor || getTextColorBasedOnBackground(node.color);
-		
-		if (label && globalScale > (3 / (nodeRelativeSize / 5))) {
-			const lines = getLines(ctx, label,  node.value * nodeRelativeSize);
-			lines.lines.forEach(function(line, i) {
-				const fontSize = Math.min(MAX_FONT_SIZE, (node.value * nodeRelativeSize + 1.5) / lines.lines.length );
-				ctx.font = `${fontSize}px Sans-Serif`;
-
-				const mid = lines.lines.length / 2;
-				if (lines.lines.length % 2 === 0) { // Even so no middle
-					if (i <= mid) {
-						ctx.fillText(line, node.x, node.y - (fontSize * Math.floor(mid - i)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
-					} else {
-						ctx.fillText(line, node.x, node.y + (fontSize * Math.floor(i - mid)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
-					}
-				} else { // Odd So middle
-					if (i < mid) {
-						ctx.fillText(line, node.x, node.y - (fontSize * Math.floor(mid - i)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
-					} else {
-						ctx.fillText(line, node.x, node.y + (fontSize * Math.floor((i+1) - mid)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
-					}
-				}
-			});
-		}
-	}
-	
-	const handleCreateGraphLink = createGraphLink ? createGraphLink : (link, ctx, globalScale) => {
-
-		calcLinkControlPoints(link);
-
-		const start = link.source;
-		const end = link.target;
-		let lineWidth = edgeThickness;
-
-		if (highlightNodes.size > 0 && (highlightNodes.has(start) || highlightNodes.has(end))) {
-			lineWidth += 1;
-		}
-
-		const color = handleGetLinkColor(link);
-
-		ctx.strokeStyle = color;
-
-		// ignore unbound links
-		if (typeof start !== 'object' || typeof end !== 'object') return;
-
-		ctx.save();
-
-		// Draw link
-		ctx.beginPath();
-		ctx.setLineDash(edgeLabelPatterns[link.label].pattern || []);
-		ctx.lineWidth = lineWidth / globalScale;
-		ctx.moveTo(start.x, start.y);
-
-		const controlPoints = link.__controlPoints;
-
-		if (!controlPoints) { // Straight line
-		  ctx.lineTo(end.x, end.y);
-		} else {
-		  // Use quadratic curves for regular lines and bezier for loops
-		  ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
-		}
-		ctx.stroke();
-
-		// Draw Arrow
-		draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
-		
-		if (displayLinkLabel) {
-			handleCreateGraphLinkText(link, ctx, globalScale);
-		}
-		
-		ctx.restore();
-	}
-	
-	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
-		const MAX_FONT_SIZE = 4;
-		const LABEL_NODE_MARGIN = nodeRelativeSize * 1.5;
-		
-		const start = link.source;
-		const end = link.target;
-		
-		// ignore unbound links
-		if (typeof start !== 'object' || typeof end !== 'object') return;
-		
-		// calculate label positioning
-		const textPos = Object.assign(...['x', 'y'].map(c => ({
-			[c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
-		})));
-		
-		const relLink = { x: end.x - start.x, y: end.y - start.y };
-		
-		const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
-		
-		let textAngle = Math.atan2(relLink.y, relLink.x);
-		// maintain label vertical orientation for legibility
-		if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
-		if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
-		
-		const label = `${link.label}`;
-		
-		// estimate fontSize to fit in link length
-		ctx.font = '1px Sans-Serif';
-		const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
-		ctx.font = `${fontSize}px Sans-Serif`;
-		const textWidth = ctx.measureText(label).width;
-		const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-		
-		// draw text label (with background rect)
-		ctx.save();
-		if (link.__controlPoints?.length >=2) {
-			const x = (textPos.x + link.__controlPoints[0]) / 2
-			const y = (textPos.y + link.__controlPoints[1]) / 2
-			ctx.translate(x, y);
-		} else {
-			ctx.translate(textPos.x, textPos.y);
-		}
-		ctx.rotate(textAngle);
-		
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-		ctx.fillRect(- bckgDimensions[0] / 2, - bckgDimensions[1] / 2, ...bckgDimensions);
-		
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		ctx.fillStyle = 'darkgrey';
-		ctx.fillText(label, 0, 0);
-		ctx.restore();
-	}
-	
-	const handleGetLinkColor = onGetLinkColor ? onGetLinkColor : (link) => {
-		return getLinkColor(link, linkAlpha);
-	}
+	/**
+	 * Graph Interactions
+	 */
 	
 	const handleNodeHover = onNodeHover ? onNodeHover : (node) => {
 		const elem = document.getElementById('graph2dContainer');
@@ -612,60 +430,6 @@ export default function GraphNodeCluster2D(props) {
 		setSelectedNodeID(-1);
 	}
 	
-	const handleSimulationStop = onSimulationStop ? onSimulationStop : () => {
-		setShouldRunSimulation(false);
-		
-		if (!graphRendered1stTime) {
-			recenterGraph();
-			setGraphRendered1stTime(true);
-		}
-		
-		if (!shouldCenter) setShouldCenter(true);
-		
-		const nodes = {};
-		let centralNode = null;
-		
-		graph.nodes.forEach(node => {
-			node.fx = null;
-			node.fy = null;
-			node.fz = null;
-		});
-		
-		let count = 0;
-		graph.edges.forEach(edge => {
-			const end = edge.target;
-			const start = edge.source;
-			
-			if (nodes.hasOwnProperty(end.id)) {
-				nodes[end.id] += 1;
-			} else {
-				nodes[end.id] = 1;
-			}
-			
-			if (nodes.hasOwnProperty(start.id)) {
-				nodes[start.id] += 1;
-			} else {
-				nodes[start.id] = 1;
-			}
-			
-			if (nodes[end.id] > count) {
-				count = nodes[end.id] ;
-				centralNode = end;
-			} else if (nodes[start.id] > count) {
-				count = nodes[start.id] ;
-				centralNode = start;
-			} else if (!centralNode) {
-				centralNode = end;
-			}
-		});
-		
-		if (centralNode) {
-			centralNode.fx = centralNode?.x;
-			centralNode.fy = centralNode?.y;
-			centralNode.fz = centralNode?.z;
-		}
-	}
-	
 	const handleOnZoom = onZoom ? onZoom : (event) => {
 		// trackEvent('Graph', 'onZoom', 'zoom', event.k);
 		if (event.k > zoomLimit) {
@@ -674,9 +438,36 @@ export default function GraphNodeCluster2D(props) {
 		}
 	}
 	
-	const handleUpdateNodeSize = updateNodeSize ? updateNodeSize : (size) => {
-		setNodeRelativeSize(size);
+	const handleResetGraph = resetGraph ? resetGraph : () => {
+		graph.nodes.forEach(node => {
+			node.hidden = false;
+		});
+		
+		setReloadGraph(!reloadGraph);
+		setShouldRunSimulation(true);
 	}
+	
+	const recenterGraph = () => {
+		if (shouldCenter) focusCameraOnGraph();
+	}
+	
+	const focusCameraOnGraph = () => {
+		const ref = graphRefProp ? graphRefProp : graphRef;
+		
+		if (ref.current) {
+
+			const atLeastN = getNodesWithNEdges(4);
+
+			ref.current.zoomToFit(500, 150, (node) => {
+				return atLeastN.includes(node.id);
+			});
+
+		}
+	}
+	
+	/**
+	 * Graph Legend Functions
+	 */
 	
 	const handleRenderNodeLegendItems = renderNodeLegendItems ? renderNodeLegendItems : () => {
 		return (
@@ -786,6 +577,302 @@ export default function GraphNodeCluster2D(props) {
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphLegendOnClick', label, label !== nodeLabelSelected)
 		setNodeLabelSelected(label === nodeLabelSelected ? null : label);
 	}
+	
+	/**
+	 * Graph Functions
+	 */
+	
+	const handleCreateNodeLabel = createNodeLabel ? createNodeLabel : (node) => {
+		return node.name;
+	}
+	
+	const handleCreateGraphNode = createGraphNode ? createGraphNode : (node, ctx, globalScale) => {
+		
+		let outlineThickness = 3;
+		let connectedLevel = -1;
+		
+		if (highlightNodes.size > 0 && highlightNodes.has(node)) {
+			if (degreeConnected[0].includes(node)){
+				connectedLevel = 0;
+			} else if (degreeConnected[1].includes(node)) {
+				connectedLevel = 1;
+			}
+			outlineThickness += 2;
+		}
+		
+		if (selectedNodeID === node.id){
+			outlineThickness += 2;
+		}
+		
+		const { nodeColor, nodeHexColor, nodeTextColor } = (nodeLabelSelected !== null && nodeLabelSelected !== node.label) ?
+			getNodeColors(node, hiddenNodeAlpha, nodeLabelColors) :
+			getNodeColors(node, nodeAlpha, nodeLabelColors);
+		const outlineColor = (nodeLabelSelected !== null && nodeLabelSelected !== node.label) ?
+			getNodeOutlineColors(node, hiddenNodeAlpha, nodeHexColor, connectedLevel) :
+			getNodeOutlineColors(node, nodeAlpha, nodeHexColor, connectedLevel);
+		
+		ctx.beginPath();
+
+		ctx.fillStyle = nodeColor;
+		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
+		ctx.fill();
+		ctx.strokeStyle = outlineColor
+		ctx.lineWidth = outlineThickness / globalScale;
+		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
+		ctx.stroke();
+		
+		// Selected/Hovered Outline
+		if (node.id === selectedNodeID || node.id === nodeHoverID) {
+			ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
+			ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
+			ctx.arc(node.x, node.y, node.value * nodeRelativeSize + 0.2, 0, 2 * Math.PI, false);
+			ctx.stroke();
+		}
+
+		handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
+	}
+	
+	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
+		const label = handleCreateNodeLabel(node);
+		const MAX_FONT_SIZE = (nodeRelativeSize / 5) * 1.5
+		
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillStyle = nodeTextColor || getTextColorBasedOnBackground(node.color);
+		
+		if (label && globalScale > (3 / (nodeRelativeSize / 5))) {
+			const lines = getLines(ctx, label,  node.value * nodeRelativeSize);
+			lines.lines.forEach(function(line, i) {
+				const fontSize = Math.min(MAX_FONT_SIZE, (node.value * nodeRelativeSize + 1.5) / lines.lines.length );
+				ctx.font = `${fontSize}px Sans-Serif`;
+
+				const mid = lines.lines.length / 2;
+				if (lines.lines.length % 2 === 0) { // Even so no middle
+					if (i <= mid) {
+						ctx.fillText(line, node.x, node.y - (fontSize * Math.floor(mid - i)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
+					} else {
+						ctx.fillText(line, node.x, node.y + (fontSize * Math.floor(i - mid)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
+					}
+				} else { // Odd So middle
+					if (i < mid) {
+						ctx.fillText(line, node.x, node.y - (fontSize * Math.floor(mid - i)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
+					} else {
+						ctx.fillText(line, node.x, node.y + (fontSize * Math.floor((i+1) - mid)) + (lines.lines.length > 1 ? (fontSize / lines.lines.length) : 0));
+					}
+				}
+			});
+		}
+	}
+	
+	const handleCreateGraphLink = createGraphLink ? createGraphLink : (link, ctx, globalScale) => {
+
+		calcLinkControlPoints(link);
+
+		const start = link.source;
+		const end = link.target;
+		let lineWidth = edgeThickness;
+
+		if (highlightNodes.size > 0 && (highlightNodes.has(start) || highlightNodes.has(end))) {
+			lineWidth += 1;
+		}
+
+		const color = handleGetLinkColor(link);
+
+		ctx.strokeStyle = color;
+
+		// ignore unbound links
+		if (typeof start !== 'object' || typeof end !== 'object') return;
+
+		ctx.save();
+
+		// Draw link
+		ctx.beginPath();
+		ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
+		ctx.lineWidth = lineWidth / globalScale;
+		ctx.moveTo(start.x, start.y);
+
+		const controlPoints = link.__controlPoints;
+
+		if (!controlPoints) { // Straight line
+		  ctx.lineTo(end.x, end.y);
+		} else {
+		  // Use quadratic curves for regular lines and bezier for loops
+		  ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
+		}
+		ctx.stroke();
+
+		// Draw Arrow
+		draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
+		
+		if (displayLinkLabel) {
+			handleCreateGraphLinkText(link, ctx, globalScale);
+		}
+		
+		ctx.restore();
+	}
+	
+	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
+		const MAX_FONT_SIZE = 4;
+		const LABEL_NODE_MARGIN = nodeRelativeSize * 1.5;
+		
+		const start = link.source;
+		const end = link.target;
+		
+		// ignore unbound links
+		if (typeof start !== 'object' || typeof end !== 'object') return;
+		
+		// calculate label positioning
+		const textPos = Object.assign(...['x', 'y'].map(c => ({
+			[c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+		})));
+		
+		const relLink = { x: end.x - start.x, y: end.y - start.y };
+		
+		const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
+		
+		let textAngle = Math.atan2(relLink.y, relLink.x);
+		// maintain label vertical orientation for legibility
+		if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
+		if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+		
+		const label = `${link.label}`;
+		
+		// estimate fontSize to fit in link length
+		ctx.font = '1px Sans-Serif';
+		const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
+		ctx.font = `${fontSize}px Sans-Serif`;
+		const textWidth = ctx.measureText(label).width;
+		const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+		
+		// draw text label (with background rect)
+		ctx.save();
+		if (link.__controlPoints?.length >=2) {
+			const x = (textPos.x + link.__controlPoints[0]) / 2
+			const y = (textPos.y + link.__controlPoints[1]) / 2
+			ctx.translate(x, y);
+		} else {
+			ctx.translate(textPos.x, textPos.y);
+		}
+		ctx.rotate(textAngle);
+		
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+		ctx.fillRect(- bckgDimensions[0] / 2, - bckgDimensions[1] / 2, ...bckgDimensions);
+		
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillStyle = 'darkgrey';
+		ctx.fillText(label, 0, 0);
+		ctx.restore();
+	}
+	
+	const handleGetLinkColor = onGetLinkColor ? onGetLinkColor : (link) => {
+		return getLinkColor(link, linkAlpha);
+	}
+	
+	const handleSimulationStop = onSimulationStop ? onSimulationStop : () => {
+		setShouldRunSimulation(false);
+		
+		if (!graphRendered1stTime) {
+			recenterGraph();
+			setGraphRendered1stTime(true);
+		}
+		
+		if (!shouldCenter) setShouldCenter(true);
+		
+		const nodes = {};
+		let centralNode = null;
+		
+		graph.nodes.forEach(node => {
+			node.fx = null;
+			node.fy = null;
+			node.fz = null;
+		});
+		
+		let count = 0;
+		graph.edges.forEach(edge => {
+			const end = edge.target;
+			const start = edge.source;
+			
+			if (nodes.hasOwnProperty(end.id)) {
+				nodes[end.id] += 1;
+			} else {
+				nodes[end.id] = 1;
+			}
+			
+			if (nodes.hasOwnProperty(start.id)) {
+				nodes[start.id] += 1;
+			} else {
+				nodes[start.id] = 1;
+			}
+			
+			if (nodes[end.id] > count) {
+				count = nodes[end.id] ;
+				centralNode = end;
+			} else if (nodes[start.id] > count) {
+				count = nodes[start.id] ;
+				centralNode = start;
+			} else if (!centralNode) {
+				centralNode = end;
+			}
+		});
+		
+		if (centralNode) {
+			centralNode.fx = centralNode?.x;
+			centralNode.fy = centralNode?.y;
+			centralNode.fz = centralNode?.z;
+		}
+	}
+	
+	const handleUpdateNodeSize = updateNodeSize ? updateNodeSize : (size) => {
+		setNodeRelativeSize(size);
+	}
+	
+	const getNodesWithNEdges = (numEdges) => {
+
+		const edgeCount = {};
+		const atLeastN = [];
+
+		graph.edges.forEach(edge => {
+			const edgeSource = edge.source.id ?? edge.source;
+			const edgeTarget = edge.target.id ?? edge.target;
+
+			if (!atLeastN.includes(edgeSource)) {
+				if (edgeCount[edgeSource]) {
+					edgeCount[edgeSource] += 1;
+					if (edgeCount[edgeSource] >= numEdges) {
+						atLeastN.push(edgeSource);
+					}
+				}
+				else {
+					edgeCount[edgeSource] = 1;
+				}
+			}
+
+			if (!atLeastN.includes(edgeTarget)) {
+				if (edgeCount[edgeTarget]) {
+					edgeCount[edgeTarget] += 1;
+					if (edgeCount[edgeTarget] >= numEdges) {
+						atLeastN.push(edgeTarget);
+					}
+				}
+				else {
+					edgeCount[edgeTarget] = 1;
+				}
+			}
+		});
+		
+		if (atLeastN.length <= 0) {
+			atLeastN.push(...graph.nodes.map(node => {
+				return node.id;
+			}));
+		}
+
+		return atLeastN;
+	}
+	
+	/**
+	 * Menu Funcions
+	 */
 	
 	const settingsBurger = () => {
 		return (
@@ -914,75 +1001,9 @@ export default function GraphNodeCluster2D(props) {
 		)
 	}
 	
-	const handleResetGraph = resetGraph ? resetGraph : () => {
-		graph.nodes.forEach(node => {
-			node.hidden = false;
-		});
-		
-		setReloadGraph(!reloadGraph);
-		setShouldRunSimulation(true);
-	}
-	
-	const recenterGraph = () => {
-		if (shouldCenter) focusCameraOnGraph();
-	}
-	
-	const focusCameraOnGraph = () => {
-		const ref = graphRefProp ? graphRefProp : graphRef;
-		
-		if (ref.current) {
-
-			const atLeastN = getNodesWithNEdges(4);
-
-			ref.current.zoomToFit(500, 150, (node) => {
-				return atLeastN.includes(node.id);
-			});
-
-		}
-	}
-	
-	const getNodesWithNEdges = (numEdges) => {
-
-		const edgeCount = {};
-		const atLeastN = [];
-
-		graph.edges.forEach(edge => {
-			const edgeSource = edge.source.id ?? edge.source;
-			const edgeTarget = edge.target.id ?? edge.target;
-
-			if (!atLeastN.includes(edgeSource)) {
-				if (edgeCount[edgeSource]) {
-					edgeCount[edgeSource] += 1;
-					if (edgeCount[edgeSource] >= numEdges) {
-						atLeastN.push(edgeSource);
-					}
-				}
-				else {
-					edgeCount[edgeSource] = 1;
-				}
-			}
-
-			if (!atLeastN.includes(edgeTarget)) {
-				if (edgeCount[edgeTarget]) {
-					edgeCount[edgeTarget] += 1;
-					if (edgeCount[edgeTarget] >= numEdges) {
-						atLeastN.push(edgeTarget);
-					}
-				}
-				else {
-					edgeCount[edgeTarget] = 1;
-				}
-			}
-		});
-		
-		if (atLeastN.length <= 0) {
-			atLeastN.push(...graph.nodes.map(node => {
-				return node.id;
-			}));
-		}
-
-		return atLeastN;
-	}
+	/**
+	 * Render Functions
+	 */
 	
 	const renderNodeViewer = () => {
 		if (showBasic) {

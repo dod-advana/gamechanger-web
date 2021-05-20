@@ -164,7 +164,7 @@ function reducer(state, action) {
 				exportDialogVisible: action.payload,
 				isSelectedDocs: action.payload
 			};
-		case 'REST_SEARCH_SETTINGS':
+		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
 				searchSettings: initState.searchSettings

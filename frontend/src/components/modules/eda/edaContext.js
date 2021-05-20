@@ -2,6 +2,15 @@ import React, { useReducer } from 'react';
 
 const initState = {
     edaSearchSettings: {
+        allOrgsSelected: true,
+        organizations: {
+            airForce: false,
+            army: false,
+            dla: false,
+            marineCorps: false,
+            navy: false,
+            estate: false,
+        },
         aggregations: {
             officeAgency: false,
             vendor: false,
@@ -13,6 +22,9 @@ const initState = {
     },
     showDialog: false,
     resultsPage: 1,
+    showSideFilters: true,
+    issuingOrgs: {},
+    statsLoading: false,
     
     // not part of EDA (yet) but currently required in NewGameChangerPage: 
     notifications: [],
@@ -22,6 +34,7 @@ const initState = {
     rawSearchResults: [],
     userData: {
         favorite_searches: [],
+        favorite_documents: [],
     },
     notificationIds: [],
     componentStepNumbers: [],
@@ -48,6 +61,11 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
+        case 'RESET_SEARCH_SETTINGS':
+            return {
+                ...state,
+                edaSearchSettings: initState.edaSearchSettings
+            };
 		default:
 			return state;
 	}

@@ -3,7 +3,6 @@ const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 're
 const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
 const { getTenDigitUserId } = require('../../utils/userUtility');
-const searchUtility = new SearchUtility();
 const GC_HISTORY = require('../../models').gc_history;
 const sparkMD5 = require('spark-md5');
 
@@ -14,16 +13,18 @@ class SearchHandler {
 			redisDB = redisAsyncClient,
 			gc_history = GC_HISTORY,
 			logger = LOGGER,
+			searchUtility = new SearchUtility(opts)
 		} = opts;
 		this.redisClientDB = redisClientDB;
 		this.redisDB = redisDB;
 		this.gc_history = gc_history;
 		this.logger = logger;
+		this.searchUtility = searchUtility;
 	}
 
 	async search(searchText, offset, limit, options, cloneName, permissions, userId) {
 		// Setup the request
-		console.log(`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${options}`);
+		console.log(`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(options)}`);
 		const proxyBody = options;
 		proxyBody.searchText = searchText;
 		proxyBody.offset = offset;
@@ -60,7 +61,7 @@ class SearchHandler {
 			this.redisDB.select(this.redisClientDB);
 
 			// ## try to get cached results
-			const redisKey = searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
+			const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
 
 			// check cache for search (first page only)
 			const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
@@ -85,7 +86,7 @@ class SearchHandler {
 		this.redisDB.select(this.redisClientDB);
 
 		// ## try to get cached results
-		const redisKey = searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
+		const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
 
 		try {
 			const timestamp = new Date().getTime();

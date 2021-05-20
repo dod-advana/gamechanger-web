@@ -94,8 +94,8 @@ describe('ExternalSearchController', function () {
 		};
 
 		const search = {
-			documentSearchHelper() {
-				return Promise.resolve(apiResMock);
+			search(req, res) {
+				return res.send(apiResMock);
 			},
 		};
 
@@ -120,32 +120,29 @@ describe('ExternalSearchController', function () {
 			},
 			query: {
 				search: 'fakeSearchString',
-				orgFilter: 'Dept. of Defense_Joint Chiefs of Staff_Intelligence Community_United States Code',
+				cloneName: 'Test',
 			},
 			get(key) {
 				return this.headers[key];
 			}
 		};
 
-		let resData;
-		const res = {
-			...resMock,
-			send: (data) => {
-				resData = data;
-				return data;
-			}
-		};
-
 
 		it('should run a keyword search', (done) => {
-target.externalSearch('Keyword', req, res).then(() => {
-				assert.deepStrictEqual(resData, apiResMock);
-				done();
-			});
-		});
-		it('should run a intelligent search', (done) => {
-target.externalSearch('Intelligent', req, res).then(() => {
-				assert.deepStrictEqual(resData, apiResMock);
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code){
+					resCode = code;
+					return this;
+				},
+				send(msg){
+					resMsg = msg;
+				}
+			};
+
+			target.externalSearch(req, res).then(() => {
+				assert.deepStrictEqual(resMsg, apiResMock);
 				done();
 			});
 		});

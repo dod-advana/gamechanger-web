@@ -64,12 +64,12 @@ const styles = {
 	},
 };
 
-const auxDisplayBackFields = ["precedence", "Sensitivity", "Importance", "date", "originator", "receiver", "Subject", "Body"];
+const auxDisplayBackFields = ["precedence", "Sensitivity", "Importance", "DTG", "originator", "receiver", "Subject", "Body"];
 const auxDisplayTitleField = "Subject";
 const auxDisplayFrontFields = ["originator", "receiver", "Subject", "Body"];
 const auxDisplayFieldJSONMap = {"Subject":"Subject","Body":"Body: ","from_address":"From Address","from_name":"From: ","from_type":"From Type","to_address":"To Address","to_name":"To: ","to_type":"To Type","cc_address":"CC Address","cc_name":"CC Name","cc_type":"CC Type","importance":"Importance","sensitivity":"Sensitivity","categories":"Categories","billing_information":"Billing Info","originator":"Originator","receiver":"Receiver"};
 const auxDisplayLeftSubtitleText = "precedence";
-const auxDisplayRightSubtitleField = "date";
+const auxDisplayRightSubtitleField = "DTG";
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
@@ -433,7 +433,7 @@ const HermesCardHandler = {
 					<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
 						onClick={(e) => {
 							e.preventDefault();
-							clickFn(item.body)
+							clickFn(item.Body)
 						}}
 					>
 						Open

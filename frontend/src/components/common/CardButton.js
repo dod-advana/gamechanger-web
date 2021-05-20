@@ -6,7 +6,7 @@ export const CardButton = styled.a`
   border-radius: 6px;
   padding: 10px 20px;
   background-color: ${({disabled}) => disabled ? grey400 : '#FFFFFF'};
-  color: '#8091A5 !important',
+  color: '#8091A5 !important';
   font-weight: bold;
   font-size: 16px;
   font-family: "Montserrat";

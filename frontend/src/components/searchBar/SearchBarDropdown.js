@@ -18,8 +18,10 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 				return <SubText>Title</SubText>
 			case 'predictions':
 				return <SubText>Prediction</SubText>
-			case 'entity':
-				return <SubText>Entity</SubText>
+			case 'presearchOrg':
+				return <SubText>Organization</SubText>
+			case 'presearchTopic':
+				return <SubText>Topic</SubText>
 			default:
 				return;
 		}

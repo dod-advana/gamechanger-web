@@ -137,6 +137,7 @@ router.get('/appSettings/entitySearch', appSettings.getEntitySearchMode);
 router.post('/appSettings/entitySearch', appSettings.setEntitySearchMode);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
+router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 
 
 module.exports = router;

@@ -151,7 +151,7 @@ class ModularGameChangerController {
 
 	async search(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, searchText, offset = 0, limit = 20, options} = req.body;
+		const {cloneName, searchText, offset = 0, limit = 18, options} = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId);

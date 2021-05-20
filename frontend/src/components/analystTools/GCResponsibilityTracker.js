@@ -154,30 +154,29 @@ const GCResponsibilityTracker = (props) => {
 	const renderDataTable = () => {
 		const dataColumns = [
 			{
-				Header: 'Document',
-				accessor: 'filename',
+				Header: 'Document Title',
+				accessor: 'documentTitle',
 				style: { 'whiteSpace': 'unset' },
-				width: 150,
+				width: 300,
 				Cell: row => (
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							fileClicked(row.value, row.row.responsibilityLevel2, 1, isClone, cloneData);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, isClone, cloneData);
 						}}
 						style={{ color: '#386F94' }}
 						>
 							<div>
-								<p>{row.value.replace('.json', '.pdf')}</p>
+								<p>{row.value}</p>
 							</div>
 						</Link>
 					</TableRow>
 				),
 			},
 			{
-				Header: 'Primary Entity',
-				accessor: 'primaryEntity',
+				Header: 'Organization/Personnel',
+				accessor: 'organizationPersonnel',
 				style: { 'whiteSpace': 'unset' },
-				width: 150,
 				Cell: row => (
 					<TableRow>
 						{row.value}
@@ -185,10 +184,9 @@ const GCResponsibilityTracker = (props) => {
 				),
 			},
 			{
-				Header: 'Responsibilty Level 1',
-				accessor: 'responsibilityLevel1',
+				Header: 'Responsibility Text',
+				accessor: 'responsibilityText',
 				style: { 'whiteSpace': 'unset' },
-				width: 190,
 				Cell: row => (
 					<TableRow>
 						{row.value}
@@ -196,8 +194,8 @@ const GCResponsibilityTracker = (props) => {
 				),
 			},
 			{
-				Header: 'Responsibilty Level 2',
-				accessor: 'responsibilityLevel2',
+				Header: 'Other Organization/Personnel',
+				accessor: 'otherOrganizationPersonnel',
 				style: { 'whiteSpace': 'unset' },
 				width: 300,
 				Cell: row => (
@@ -207,33 +205,13 @@ const GCResponsibilityTracker = (props) => {
 				),
 			},
 			{
-				Header: 'Responsibilty Level 3',
-				accessor: 'responsibilityLevel3',
+				Header: 'Documents Referenced',
+				accessor: 'documentsReferenced',
 				style: { 'whiteSpace': 'unset' },
-				width: 180,
+				width: 200,
 				Cell: row => (
 					<TableRow>
-						{row.value}
-					</TableRow>
-				),
-			},
-			{
-				Header: 'Entities Found',
-				accessor: 'entitiesFound',
-				style: { 'whiteSpace': 'unset' },
-				Cell: row => (
-					<TableRow>
-						{row.value}
-					</TableRow>
-				),
-			},
-			{
-				Header: 'References',
-				accessor: 'references',
-				style: { 'whiteSpace': 'unset' },
-				Cell: row => (
-					<TableRow>
-						{row.value}
+						{row.value? row.value.join(", "): '' }
 					</TableRow>
 				),
 			},

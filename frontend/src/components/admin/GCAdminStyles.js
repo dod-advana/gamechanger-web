@@ -1,9 +1,9 @@
 import {
-	gcOrange,
 	primary,
 	backgroundWhite,
 	backgroundGreyLight,
-	backgroundGreyDark
+	backgroundGreyDark,
+	gcOrange
 } from '../../components/common/gc-colors';
 import { typography } from 'material-ui/styles';
 

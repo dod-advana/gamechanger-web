@@ -16,7 +16,7 @@ import {
 	AccessTime,
 	Search
 } from '@material-ui/icons';
-import {getTrackingNameForFactory} from "../../gamechangerUtils";
+import {getTrackingNameForFactory, getQueryVariable} from "../../gamechangerUtils";
 
 const useStyles = (theme) => ({
 	root: {
@@ -110,8 +110,9 @@ class GameChangerSearchBar extends React.Component {
 		predictions: [],
 		presearchFile: [],
 		presearchTitle: [],
-		presearchEntity: [],
-
+		presearchOrg: [],
+		presearchTopic: [],
+		searchText: getQueryVariable('q') || '',
 		originalText: null, // describes text used before using arrow keys
 		cursor: null, // describes cursor position when using arrow keys
 		dataRows: []
@@ -130,15 +131,19 @@ class GameChangerSearchBar extends React.Component {
 	componentDidUpdate(prevProps, prevState) {
 		// check if search is different, or any of the search history results have changed.
 		if ( this.state.originalText === null && // if we are using arrow keys, do not update dropdown data
-			(this.props.searchText !== prevProps.searchText || 
+			(this.state.searchText !== prevState.searchText || 
 			!_.isEqual(this.state.userSearchHistory, prevState.userSearchHistory) ||
 			!_.isEqual(this.state.autocorrect, prevState.autocorrect) ||
 			!_.isEqual(this.state.presearchFile, prevState.presearchFile) ||
 			!_.isEqual(this.state.presearchTitle, prevState.presearchTitle) ||
-			!_.isEqual(this.state.presearchEntity, prevState.presearchEntity) )
+			!_.isEqual(this.state.presearchTopic, prevState.presearchTopic) ||
+			!_.isEqual(this.state.presearchOrg, prevState.presearchOrg) )
 			) {
-			const newDataRows = this.getDropdownData(this.props.searchText);
-			this.setState({ dataRows: newDataRows });
+			const newDataRows = this.getDropdownData(this.state.searchText);
+			this.setState({ dataRows: newDataRows});
+		}
+		if ( this.props.searchText !== prevProps.searchText ) {
+			this.setState({ searchText: this.props.searchText });
 		}
 	}
 
@@ -149,7 +154,8 @@ class GameChangerSearchBar extends React.Component {
 			this.setState({ autocorrect: data?.autocorrect?.map(item => ({ text: item })) ?? [], 
 			presearchFile: data?.presearchFile?.map(item => ({ text: item })) ?? [], 
 			presearchTitle: data?.presearchTitle?.map(item => ({ text: item })) ?? [],
-			presearchEntity: data?.presearchEntity?.map(item => ({ text: item })) ?? [],
+			presearchTopic: data?.presearchTopic?.map(item => ({ text: item })) ?? [],
+			presearchOrg: data?.presearchOrg?.map(item => ({ text: item })) ?? [],
 			predictions: data?.predictions?.map(item => ({ text: item })) ?? []});
 		} catch (e) {
 			console.log('debouncedFetchSearchSuggestions err', e);
@@ -174,22 +180,28 @@ class GameChangerSearchBar extends React.Component {
 			e.preventDefault(); // keep cursor at front 
 		}
 		if(e.keyCode === 40 && this.state.cursor === null && data[0] !== undefined ){
-			this.setState({cursor: 0, originalText: this.props.searchText});
-			this.props.updateSearchTextOnly(data[0].toLowerCase());
+			this.setState({cursor: 0, originalText: this.state.searchText});
+			this.setState({searchText:data[0].toLowerCase()})
+		}
+		else if(e.keyCode === 38 && this.state.cursor === null && data[0] !== undefined ){
+			this.setState({cursor: data.length-1, originalText: this.state.searchText});
+			this.setState({searchText:data[data.length-1].toLowerCase()})
 		}
 		else if (e.keyCode === 38 && this.state.cursor === 0) {
-      this.setState( prevState => ({cursor: prevState.cursor - 1}));
-			this.setState({cursor: null, originalText: null}); // return to original state
-			this.props.updateSearchTextOnly(this.state.originalText)
-    }
-    else if (e.keyCode === 38 && this.state.cursor > 0) {
-      this.setState( prevState => ({ cursor: prevState.cursor - 1 }));
-			this.props.updateSearchTextOnly(data[this.state.cursor - 1].toLowerCase());
-    } else if (e.keyCode === 40 && this.state.cursor < data.length -1 ) {
-      this.setState( prevState => ({ cursor: prevState.cursor + 1 }));
-			this.props.updateSearchTextOnly(data[this.state.cursor + 1].toLowerCase());
-    }
-  }
+			this.setState({cursor: null, originalText: null, searchText: this.state.originalText}); // return to original state
+		}
+		else if (e.keyCode === 38 && this.state.cursor > 0) {
+			this.setState( prevState => ({ cursor: prevState.cursor - 1}));
+			this.setState({searchText: data[this.state.cursor - 1].toLowerCase()})
+		} 
+		else if (e.keyCode === 40 && this.state.cursor < data.length -1 ) {
+			this.setState( prevState => ({ cursor: prevState.cursor + 1}));
+			this.setState({searchText: data[this.state.cursor + 1].toLowerCase()})
+		}
+		else if (e.keyCode === 40 && this.state.cursor === data.length-1 ) {
+			this.setState({cursor: null, originalText: null, searchText: this.state.originalText}); // return to original state by wrapping
+		}
+	}
 
 
 	handleFavoriteSearchClicked = (anchorEL, favorite) => {
@@ -226,7 +238,7 @@ class GameChangerSearchBar extends React.Component {
 			this.clearLiveSuggestions();
 		}
 
-		this.props.handleSearchTextUpdate(value, false);
+		this.setState({ searchText: value });
 	}
 
 	clearLiveSuggestions = () => {
@@ -234,13 +246,15 @@ class GameChangerSearchBar extends React.Component {
 			autocorrect: [],
 			predictions: [],
 			presearchFile: [],
-			presearchEntity: [],
+			presearchOrg: [],
+			presearchTopic: [],
 			presearchTitle: []
 		})
 	}
 
 	handleRowPressed = ({ text, rowType }) => {
 		this.props.handleSearchTextUpdate(text, true);
+		this.setState({searchText: text});
 		document.activeElement.blur();
 
 		if (rowType) {
@@ -256,7 +270,7 @@ class GameChangerSearchBar extends React.Component {
 		if (event) {
 			event.preventDefault();
 		}
-		this.props.handleSearch();
+		this.props.handleSearchTextUpdate(this.state.searchText, true);
 		document.activeElement.blur();
 	}
 
@@ -324,9 +338,9 @@ class GameChangerSearchBar extends React.Component {
 				rowType: 'predictions'
 			});
 		}
-		if (searchText.length > 0 && this.state.presearchEntity?.length > 0) {
+		if (searchText.length > 0 && this.state.presearchTopic?.length > 0) {
 			const rows = [];
-			this.state.presearchEntity.forEach(o => {
+			this.state.presearchTopic.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -336,7 +350,22 @@ class GameChangerSearchBar extends React.Component {
 				IconComponent: Search,
 				rows: rows,
 				handleRowPressed: this.handleRowPressed,
-				rowType: 'entity'
+				rowType: 'presearchTopic'
+			});
+		}
+		if (searchText.length > 0 && this.state.presearchOrg?.length > 0) {
+			const rows = [];
+			this.state.presearchOrg.forEach(o => {
+				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+					rows.push(o);
+					textArray.push(o.text.toLowerCase());
+				}
+			});
+			data.push({
+				IconComponent: Search,
+				rows: rows,
+				handleRowPressed: this.handleRowPressed,
+				rowType: 'presearchOrg'
 			});
 		}
 		if ((this.state.userSearchHistory?.length > 0) && (searchText.length === 0)){
@@ -379,7 +408,7 @@ class GameChangerSearchBar extends React.Component {
 				>
 					<SearchBarInput
 						type="text"
-						value={this.props.searchText}
+						value={this.state.searchText}
 						onChange={this.handleOnType}
 						onBlur={this.handleOnBlur}
 						placeholder="Search..."

@@ -1,12 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {
 	getOrgToOrgQuery, getTrackingNameForFactory, getTypeQuery,
-	numberWithCommas,
-	PAGE_DISPLAYED, RESULTS_PER_PAGE, scrollToContentTop, SEARCH_TYPES, setFilterVariables, StyledCenterContainer,
-	getQueryVariable
+	PAGE_DISPLAYED, RESULTS_PER_PAGE, SEARCH_TYPES, setFilterVariables, getQueryVariable
 } from "../../gamechangerUtils";
-import TabView from "./tabView";
-import {TabPanel} from "react-tabs";
+import ResultView from "./ResultView";
 import {Button} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {trackEvent} from "../telemetry/Matomo";
@@ -15,12 +12,15 @@ import GCResponsibilityTracker from "../analystTools/GCResponsibilityTracker";
 import GCUserDashboard from "../user/GCUserDashboard";
 import {
 	checkUserInfo,
-	clearDashboardNotification, getSearchObjectFromString,
+	clearDashboardNotification,
+	getSearchObjectFromString,
 	getUserData,
-	handleSaveFavoriteDocument, handleSaveFavoriteTopic, setSearchURL
+	handleSaveFavoriteDocument,
+	handleSaveFavoriteTopic,
+	setSearchURL,
+	setState
 } from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
-import DocumentExplorer from "../documentViewer/DocumentExplorer";
 import {DidYouMean} from "../searchBar/SearchBarStyledComponents";
 import MagellanTrendingLinkList from "../common/MagellanTrendingLinkList";
 import Pagination from "react-js-pagination";
@@ -30,25 +30,19 @@ import {gcOrange} from "../../components/common/gc-colors";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import GameChangerSideBar from "../searchMetrics/GCSideBar";
 import ExportResultsDialog from "../export/ExportResultsDialog";
-import {setState} from "../../sharedFunctions";
 // import util from "../advana/api/util";
 import uuidv4 from "uuid/v4";
-import {Card} from "../cards/GCCard";
-import GameChangerSearchMatrix from '../searchMetrics/GCSearchMatrix';
 import QueryDialog from "../admin/QueryDialog";
 import DocDialog from "../admin/DocDialog";
 import MainViewFactory from "../factories/mainViewFactory";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import SearchHandlerFactory from "../factories/searchHandlerFactory";
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-// Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
-
-// Edge 20+
-const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const handlePageLoad = async (state, dispatch, history) => {
 
@@ -96,19 +90,19 @@ const handlePageLoad = async (state, dispatch, history) => {
 		// do nothing
 	}
 	
-	// // fetch ES index
-	// try{
-	// 	const esIndex = await gameChangerAPI.getElasticSearchIndex();
-	// 	setState(dispatch, { esIndex: esIndex.data });
-	// } catch (e){
-	// 	console.log(e);
-	// }
+	// fetch ES index
+	try{
+		const esIndex = await gameChangerAPI.getElasticSearchIndex();
+		setState(dispatch, { esIndex: esIndex.data });
+	} catch (e){
+		console.log(e);
+	}
 	
-	// try {
-	// 	getUserData(dispatch);
-	// } catch(e) {
-	// 	console.log(e);
-	// }
+	try {
+		getUserData(dispatch);
+	} catch(e) {
+		console.log(e);
+	}
 	
 	// get url data and set accordingly
 	const searchText = getQueryVariable('q');
@@ -260,9 +254,11 @@ const MainView = (props) => {
 
 	const {state, dispatch} = context;
 	
-	const[pageLoaded, setPageLoaded] = useState(false);
+	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
-	
+	const [searchHandler, setSearchHandler] = useState();
+
+
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const factory = new MainViewFactory(state.cloneData.main_view_module);
@@ -270,6 +266,13 @@ const MainView = (props) => {
 			setMainViewHandler(handler);
 			setPageLoaded(true);
 			handlePageLoad(state, dispatch, state.history);
+			const viewNames = handler.getViewNames();
+
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
+			const searchHandler = searchFactory.createHandler();
+			setSearchHandler(searchHandler)
+			
+			setState(dispatch, {viewNames})
 		}
 		
 		if (state.userData.favorite_searches?.length > 0) {
@@ -287,201 +290,49 @@ const MainView = (props) => {
 			}
 		}
 	}, [state, dispatch, pageLoaded])
-	
-	const getTabNames = () => {
-		const tabNames = [{name: 'cardView', title: 'CARD VIEW', className: '', id: 'gcCardView'}];
-		
-		const extraTabs = mainViewHandler.getTabNames({componentStepNumbers: state.componentStepNumbers});
-		extraTabs.forEach(tab => {
-			tabNames.push(tab);
-		})
-		
-		tabNames.push({name: 'documentExplorer', title: 'DOCUMENT EXPLORER', className: `tutorial-step-${state.componentStepNumbers["Open Document Explorer"]}`, id: 'gcOpenDocExplorer'});
-		
-		return tabNames;
-	}
-	
-	const getTabPanels = () => {
-		
-		const tabPanels = [getCardViewPanel()];
-		
-		const extraTabPanels = mainViewHandler.getTabPanels({context});
-		extraTabPanels.forEach(panel => {
-			tabPanels.push(panel);
-		})
-		
-		tabPanels.push(getDocumentExplorerViewPanel());
-		
-		return tabPanels;
-	}
-	
-	const getCardViewPanel = () => {
-		const {
-			rawSearchResults,
-			loading,
-			count,
-			iframePreviewLink,
-			timeFound,
-			resultsPage,
-			componentStepNumbers,
-			listView,
-			hideTabs,
-			isCachedResult,
-			timeSinceCache,
-			cloneData,
-			showSideFilters,
-			sidebarDocTypes,
-			sidebarOrgs
-		} = state;
-		
-		let sideScroll = {
-			height: '72vh'
-		}
-		if (!iframePreviewLink) sideScroll = {};
-		
-		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`
-		
-		return (
-			<div key={'cardView'}>
-				<TabPanel key={'cardView'} style={{marginTop: hideTabs ? 40 : 'auto'}}>
-					<div>
-						<div id="game-changer-content-top"/>
-						{!loading &&
-							<StyledCenterContainer showSideFilters={showSideFilters}>
-								{showSideFilters &&
-									<div className={'left-container'}>
-										<div className={'side-bar-container'}>
-											<div className={'filters-container sidebar-section-title'}>FILTERS</div>
-											<GameChangerSearchMatrix context={context} />
-											{sidebarDocTypes.length > 0 && sidebarOrgs.length > 0 &&
-												<>
-													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar context={context} cloneData={cloneData} />
-												</>
-											}
-										</div>
-									</div>
-								}
-								<div className={'right-container'}>
-									{!hideTabs &&
-										<div className={'results-count-pagination-container'}>
-											<div className={'sidebar-section-title'}>
-												{numberWithCommas(count)} results found in {timeFound} seconds
-											</div>
-											<div className={'gcPagination pagination-container'}>
-												<Pagination
-													activePage={resultsPage}
-													itemsCountPerPage={RESULTS_PER_PAGE}
-													totalItemsCount={count}
-													pageRangeDisplayed={8}
-													onChange={page => {
-														trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-														setState(dispatch, {resultsPage: page, runSearch: true});
-													}}
-													className='gcPagination'
-												/>
 
-													<GCButton
-														style={{
-															...styles.listViewBtn,
-															backgroundColor: listView ? '#8091A5' : 'white',
-															borderColor: '#DFE6EE'
-														}}
-														onClick={() => {
-															if (!listView) {
-																setState(dispatch, {listView: !listView});
-																trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), "ListViewToggle", "onToggle", !listView, {
-																	id: 1,
-																	value: "Test B"
-																});
-															}
-														}}
-														className={`fa fa-layouttoggle tutorial-step-${componentStepNumbers["List View"]}`}
-														id="gcListView"
-													>
-														<GCTooltip title='List View' placement="bottom" arrow>
-															<i style={{color: listView ? 'white' : '#8091A5'}}
-															className="fa fa-list"/>
-														</GCTooltip>
-													</GCButton>
-													<GCButton
-														style={{
-															...styles.listViewBtn,
-															backgroundColor: listView ? 'white' : '#8091A5',
-															borderColor: '#DFE6EE'
-														}}
-														onClick={() => {
-															if (listView) {
-																setState(dispatch, {listView: !listView});
-																trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), "ListViewToggle", "onToggle", !listView, {
-																	id: 1,
-																	value: "Test B"
-																});
-															}
-														}}
-														className={`fa fa-layouttoggle tutorial-step-${componentStepNumbers["Single Card View"]}`}
-														id="gcSingleCardBtn"
-														disabled={IS_EDGE}
-													>
-														<GCTooltip title='Grid View' placement="bottom" arrow>
-															<i className="fa fa-th" style={{
-																color: listView ? '#8091A5' : 'white'
-															}}/>
-														</GCTooltip>
-													</GCButton>
-											</div>
-										</div>
-									}
-								
-									<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
-										<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
-											<div className="row" style={{marginLeft: 0, marginRight: 0}}>
-												{!loading &&
-													getSearchResults(rawSearchResults)
-												}
-											</div>
-										</div>
-									</div>
-								</div>
-							</StyledCenterContainer>
-						}
-						{!iframePreviewLink &&
-							<div style={styles.paginationWrapper} className={'gcPagination'}>
-								<Pagination
-									activePage={resultsPage}
-									itemsCountPerPage={RESULTS_PER_PAGE}
-									totalItemsCount={count}
-									pageRangeDisplayed={8}
-									onChange={page => {
-										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-										setState(dispatch, { resultsPage: page, runSearch: true });
-										scrollToContentTop();
-									}}
-								/>
-							</div>
-						}
-						{isCachedResult &&
-							<div style={styles.cachedResultIcon}>
-								<GCTooltip title={cacheTip} placement="right" arrow>
-									<i style={styles.image} className="fa fa-bolt fa-2x"/>
-								</GCTooltip>
-							</div>
-						}
-						{Permissions.isGameChangerAdmin() && !loading &&
-							<div style={styles.cachedResultIcon}>
-								<i style={{...styles.image, cursor: 'pointer'}} className="fa fa-rocket" onClick={() => setState(dispatch, { showEsQueryDialog: true })}/>
-							</div>
-						}
-					</div>
-				</TabPanel>
-			</div>
-		)
+	useEffect(() => {
+		if (state.cloneData.clone_name === 'gamechanger'){
+			if (state.docsPagination && searchHandler) {
+				searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+			}
+			if(state.entityPagination && searchHandler){
+				searchHandler.handleEntityPagination(state, dispatch);
+			}
+			if(state.topicPagination && searchHandler){
+				searchHandler.handleTopicPagination(state, dispatch);
+			}
+		}
+	}, [state, dispatch, searchHandler]);
+
+
+	useBottomScrollListener(() => {
+		if(state.activeCategoryTab !== 'all' && !state.docsLoading && !state.docsPagination){
+			setState(dispatch, {
+				docsLoading: true,
+				infiniteScrollPage: state.infiniteScrollPage+1,
+				replaceResults: false,
+				docsPagination: true
+			})
+		}
+	},{debounce: 5000} )
+
+
+	const getViewPanels = () => {
+		const viewPanels = {'Card': mainViewHandler.getCardViewPanel({context})};
+		
+		const extraViewPanels = mainViewHandler.getExtraViewPanels({context});
+		extraViewPanels.forEach(({panelName, panel}) => {
+			viewPanels[panelName] = panel;
+		})
+	
+		return viewPanels;
 	}
 	
 	const handleDidYouMeanClicked = () => {
 		const { didYouMean } = state
 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
-		setState(dispatch, { didYouMean: didYouMean, runSearch: true });
+		setState(dispatch, { searchText: didYouMean, runSearch: true });
 	}
 	
 	const handleLinkListItemClick = (searchText) => {
@@ -489,43 +340,7 @@ const MainView = (props) => {
 		setState(dispatch, { searchText, autoCompleteItems: [], metricsCounted: false, runSearch: true });
 	}
 	
-	const getSearchResults = (searchResultData) => {
-		return _.map(searchResultData, (item, idx) => {
-			return (
-				<Card key={idx}
-					item={item}
-					idx={idx}
-					state={state}
-					dispatch={dispatch}
-				/>
-			);
-		});
-	}
-	
-	const getDocumentExplorerViewPanel = () => {
-		return (
-			<TabPanel key={'documentExplorerView'}>
-				<div style={{ ...styles.tabContainer, height: '800px' }}>
-					<DocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
-						data={state.docSearchResults}
-						searchText={state.searchText}
-						prevSearchText={state.prevSearchText}
-						totalCount={state.count}
-						loading={state.loading}
-						componentStepNumbers={state.componentStepNumbers}
-						resultsPage={state.resultsPage}
-						resultsPerPage={RESULTS_PER_PAGE}
-						onPaginationClick={(page) => {
-							setState(dispatch, { resultsPage: page, runSearch: true });
-						}}
-						isClone={true}
-						cloneData={state.cloneData}
-					    isEDA={state.cloneData.clone_name === 'eda'}
-					/>
-				</div>
-			</TabPanel>
-		)
-	}
+
 	
 	const getAnalystTools = () => {
 		return (
@@ -549,7 +364,7 @@ const MainView = (props) => {
 				handleFavoriteTopic={({topic_name, topic_summary, favorite}) =>
 					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)}
 				clearDashboardNotification={(type) => clearDashboardNotification(type, state, dispatch)}
-				cloneData={state.cloneData} checkUserInfo={() => {checkUserInfo(state, dispatch)}}
+				cloneData={state.cloneData} checkUserInfo={() => { return checkUserInfo(state, dispatch)}}
 			/>
 		);
 	}
@@ -639,8 +454,8 @@ const MainView = (props) => {
 	}
 	
 	const renderHideTabs = () => {
-		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch } = state;
-
+		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading } = state;
+		const showDidYouMean = didYouMean && !loading;
 		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
 		let trendingLinks = [];
@@ -654,7 +469,7 @@ const MainView = (props) => {
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
-				dispatch({type: 'REST_SEARCH_SETTINGS'});
+				dispatch({type: 'RESET_SEARCH_SETTINGS'});
 				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
 				setSearchURL(state, state.searchSettings)
 			}
@@ -667,6 +482,11 @@ const MainView = (props) => {
 					<div style={styles.resultsCount}><p style={{fontWeight:'normal', display:'inline'}}>Looks like we don't have any matches for </p>"{prevSearchText}"</div>
 				</div>
 			}
+			{showDidYouMean && (
+				<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
+					Did you mean <DidYouMean onClick={handleDidYouMeanClicked}>{didYouMean}</DidYouMean>?
+				</div>
+			)}
 			{cloneData.clone_name === 'gamechanger' && (
 				<div style={{ margin: '10px auto', width: '67%' }}>
 					<div className={`tutorial-step-${componentStepNumbers["Trending Searches"]}`} >
@@ -695,12 +515,11 @@ const MainView = (props) => {
 			return  getNonMainPageOuterContainer(getUserDashboard);
 		case PAGE_DISPLAYED.main:
 		default:
-			const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, didYouMean, loading, rawSearchResults} = state;
+			const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings} = state;
 			const {allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter,} = searchSettings;
 			
 			const noResults = Boolean(rawSearchResults?.length === 0);
 			const hideSearchResults = noResults && !loading;
-			const showDidYouMean = (rawSearchResults.length < 6) && didYouMean && !loading;
 
 			const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
@@ -723,12 +542,8 @@ const MainView = (props) => {
 							cloneData = {state.cloneData}
 							searchType={searchType}
 							searchFields={searchFields}
+							edaSearchSettings={edaSearchSettings}
 						/>
-					)}
-					{showDidYouMean && (
-						<div style={{ marginTop: '16px', fontSize: '25px', width: hideSearchResults ? '67%' : 'auto', paddingLeft: hideSearchResults ? 'auto' : '65px' }}>
-							Did you mean <DidYouMean onClick={handleDidYouMeanClicked}>{didYouMean}</DidYouMean>?
-						</div>
 					)}
 					{loading &&
 						<div style={{ margin: '0 auto' }}>
@@ -736,7 +551,7 @@ const MainView = (props) => {
 						</div>
 					}
 					{hideSearchResults && renderHideTabs()}
-					{(!hideSearchResults && pageLoaded) && <TabView {...props} tabNames={getTabNames()} tabPanels={getTabPanels()} />}
+					{(!hideSearchResults && pageLoaded) && <ResultView {...props} viewNames={viewNames} viewPanels={getViewPanels()} />}
 					{state.showEsQueryDialog && (
 						<QueryDialog
 							open={state.showEsQueryDialog}
@@ -756,20 +571,11 @@ const MainView = (props) => {
 	}
 }
 
-const fullWidthCentered = {
-	width: "100%",
-	display: "flex",
-	flexDirection: "column",
-	justifyContent: "center",
-	alignItems: "center"
-};
 
 const styles = {
 	tabContainer: {
 		alignItems: 'center',
 		marginBottom: '14px',
-		height: '600px',
-		margin: '0px 4% 0 65px'
 	},
 	resultsCount: {
 		fontFamily: 'Noto Sans',
@@ -777,22 +583,7 @@ const styles = {
 		fontWeight: 'bold',
 		color: '#131E43',
 		paddingTop: '10px'
-	},
-	listViewBtn: {
-		minWidth: 0,
-		margin: '20px 0px 0px',
-		marginLeft: 10,
-		padding: '0px 7px 0',
-		fontSize: 20,
-		height: 34
-	},
-	cachedResultIcon: {
-		display: 'flex',
-		justifyContent: 'center',
-		padding: '0 0 1% 0'
-	},
-	searchResults: fullWidthCentered,
-	paginationWrapper: fullWidthCentered,
+	}
 }
 
 export default MainView;

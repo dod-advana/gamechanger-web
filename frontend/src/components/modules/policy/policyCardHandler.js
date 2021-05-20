@@ -477,7 +477,6 @@ const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setIsFavor
 const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch}) => {
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
-	const num = item.doc_num;
 	
 	const docListView = state.listView && !graphView;
 	
@@ -515,7 +514,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				<div className={'selected-favorite'}>
 					<div style={{display: "flex"}}>
 						{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-						{checkboxComponent(item.filename, `${displayType} ${num}`, idx)}
+						{checkboxComponent(item.filename, item.display_title_s, idx)}
 						{favoriteComponent()}
 					</div>
 				</div>
@@ -691,18 +690,22 @@ const PolicyCardHandler = {
 			if (state.listView && !intelligentSearch) {
 				return (
 					<StyledListViewFrontCardContent>
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
-								setHitsExpanded(!hitsExpanded);
-							}}
-						>
-							<GCTooltip title={'Date GAMECHANGER last verified this document against its originating source'} placement='top' arrow>
-								<span className = "buttonText">Page Hits</span>
-							</GCTooltip>
-							<i className= {hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{hitsExpanded &&
+						{item.pageHits.length > 0 &&
+							<button type="button" className={'list-view-button'}
+									onClick={() => {
+										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
+										setHitsExpanded(!hitsExpanded);
+									}}
+							>
+								<GCTooltip
+									title={'Date GAMECHANGER last verified this document against its originating source'}
+									placement='top' arrow>
+									<span className="buttonText">Page Hits</span>
+								</GCTooltip>
+								<i className={hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
+							</button>
+						}
+						{hitsExpanded && item.pageHits.length > 0 &&
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
 									{_.chain(item.pageHits).map((page, key) => {
@@ -895,8 +898,8 @@ const PolicyCardHandler = {
 				source_file_item = 'unknown';
 			}
 
-			const favoritableData = [	{Key: 'Published', Value: publicationDate}, 
-										{Key: labelText, Value: dateText}, 
+			const favoritableData = [	{Key: 'Published', Value: publicationDate},
+										{Key: labelText, Value: dateText},
 										{Key: 'Source', Value: (source_item)},
 										{Key: 'File Orgin', Value: (file_orgin_item)},
 										{Key: 'Source File', Value: (source_file_item)},
@@ -940,6 +943,7 @@ const PolicyCardHandler = {
 				setToggledMore,
 				closeGraphCard,
 				showEsDoc,
+				item,
 				searchText
 			} = props;
 			
@@ -965,19 +969,17 @@ const PolicyCardHandler = {
 						>
 							Close
 						</CardButton>}
-						<GCTooltip title={'Check back soon for a new document details page.'}>
-							 <CardButton
-								disabled={true}
-								style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-								href={'#'}
-								onClick={(e) => {
-									trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
-									e.preventDefault();
-								}}
-							 >
-								 Details
-							</CardButton>
-						</GCTooltip>
+						 <CardButton
+							style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+							href={'#'}
+							onClick={(e) => {
+								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
+								window.open(`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`);
+								e.preventDefault();
+							}}
+						 >
+							 Details
+						</CardButton>
 						{(toggledMore && Permissions.isGameChangerAdmin()) &&
 							 <CardButton
 								style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
@@ -1321,12 +1323,11 @@ const PolicyCardHandler = {
 	
 	topic: {
 		getDisplayTitle: (item) => {
-			return item.title;
+			return item.name;
 		},
 		getCardHeader: (props) => {
 			const {item, state} = props;
-			
-			const displayTitle = item.title;
+			const displayTitle = item.name;
 
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={state.listView} intelligentSearch={false}>
@@ -1363,69 +1364,133 @@ const PolicyCardHandler = {
 		},
 		
 		getCardSubHeader: (props) => {
-			return (<></>);
+			const {state, toggledMore} = props;
+			const cardType = 'Topic';
+			const iconSrc = getTypeIcon(cardType);
+			const typeTextColor = getTypeTextColor(cardType);
+			let { docTypeColor } = getDocTypeStyles(cardType, 'Uncategorized');
+			return (
+			<>
+				{!state.listView && !toggledMore &&
+					<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={docTypeColor}>
+						<div className={'sub-header-full'}>
+							{iconSrc.length > 0 && <img src={iconSrc} alt="type logo"/>}
+							{cardType}
+						</div>
+					</StyledFrontCardSubHeader>
+				}
+			</>)
+
 		},
 		
 		getCardFront: (props) => {
-			
 			const {
 				 item,
 				 state,
+				 backBody,
+				 metadataExpanded,
+				 setMetadataExpanded,
 			} = props;
-			
-			return (
-				<StyledEntityTopicFrontCardContent listView={state.listView}>
-					{!item.done ?
-						<div className={'loading-indicator'} style={{marginTop: -60}}>
-							<LoadingIndicator customColor={'#E9691D'} />
-						</div>
-					:
-						<div className={'topic-container'}>
-							<div className={'topics-doc-count'}>
-									<span className={'topics-header'}>Total Documents:</span> {item.doc_count}
+
+			if(state.listView){
+				return (
+					<StyledListViewFrontCardContent>
+						{item.information && <p>{item.information}</p>}
+						<button type="button" className={'list-view-button'}
+							onClick={() => {
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
+								setMetadataExpanded(!metadataExpanded);
+							}}
+						>
+							<span className="buttonText">Topics Metadata</span>
+							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
+						</button>
+						{metadataExpanded &&
+							<div className={'metadata'}>
+								<div className={'inner-scroll-container'}>
+									{backBody}
 								</div>
-								<div className={'topics-organizations'}>
-									<span className={'topics-header'}>Top Organizations: </span>
-									
-									<StyledTopEntities width={60} height={60} margin={'10px 0'}>
-										{item.entities && item.entities.map(entity => {
-											return (
-												<GCTooltip title={entity.name} arrow enterDelay={30}>
-													<div className={'entity-div'} onClick={() => {
-														trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TopicCardOnClick', `${entity.name}DetailsPage`);
-														window.open(`#/gamechanger-details?type=entity&entityName=${entity.name}&cloneName=${state.cloneData.clone_name}`);
-													}}>
-														<img
-															alt={`${entity.name} Img`}
-															src={entity.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png'}
-														/>
-														<span>{entity.aliase.length > 10 ? entity.aliase.slice(0, 7) + '...' : entity.aliase}</span>
-													</div>
-												</GCTooltip>
-											);
-										})}
-									</StyledTopEntities>
-								</div>
-						</div>
-					}
-				</StyledEntityTopicFrontCardContent>
-			);
+							</div>
+						}
+					</StyledListViewFrontCardContent>
+				);
+			}else {
+				return (
+					<StyledEntityTopicFrontCardContent listView={state.listView}>
+						<p>{item.information}</p>
+					</StyledEntityTopicFrontCardContent>
+				);
+			}
+
 		},
 		
 		getCardBack: (props) => {
+			const {item} = props;
+			console.log(item);
+			const tableData = [];
+			Object.keys(item).forEach(key => {
+				if (item[key] !== '') {
+					if (key !== 'information' && key !== 'type' && key !== 'crawlers' && key !== 'num_mentions') {
+						if (key === 'aliases') {
+							let finalString = '';
+							if(Array.isArray(item[key])){
+								item[key].forEach(alias => { finalString = finalString + alias.name + ' '});
+							}
+							else {
+								finalString = item[key];
+							}
+							tableData.push({
+								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Value: finalString
+							});
+						}	else if (key === 'documentCount') {
+							tableData.push({
+								Key: 'Document Count',
+								Value: (item[key][0].documents)
+							});
+						} else if(key === 'relatedTopics') {
+							let finalString = ''
+							item[key].forEach(obj => {
+								finalString += obj.topic_name.charAt(0).toUpperCase() + obj.topic_name.slice(1) + ', '
+							})
+							tableData.push({
+								Key: 'Related Topics',
+								Value: finalString
+							});
+						} else {
+							tableData.push({
+								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Value: item[key]
+							});
+						}
+					}
+				}
+			});
 			
 			return (
-				<></>
+				<SimpleTable tableClass={'magellan-table'}
+					zoom={1}
+					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+					rows={tableData}
+					height={'auto'}
+					dontScroll={true}
+					colWidth={colWidth}
+					disableWrap={true}
+					title={'Topic Info'}
+					hideHeader={false}
+				/>
 			);
 		},
 		
 		getFooter: (props) => {
-			
+
 			const {
 				name,
 				cloneName,
 				graphView,
-				closeGraphCard
+				closeGraphCard,
+				toggledMore,
+				setToggledMore,
 			} = props;
 			
 			return (
@@ -1435,7 +1500,7 @@ const PolicyCardHandler = {
 							onClick={(e) => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${name}DetailsPage`);
 									e.preventDefault();
-									window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
+									// window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
 							}}
 						>
 							Open
@@ -1451,6 +1516,14 @@ const PolicyCardHandler = {
 						>
 							Close
 						</CardButton>}
+						<div style={{...styles.viewMoreButton}} onClick={() => {
+						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
+							setToggledMore(!toggledMore)
+						}}
+					>
+						{toggledMore ? 'Overview' : 'More'}
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+					</div>
 					</>
 				</>
 			);
