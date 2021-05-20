@@ -67,7 +67,7 @@ class DataTrackerController {
 		const { limit = 10, offset = 0, order = [], where = {} } = req.body;
 		try {
 			const totalCount = await this.documentCorpus.count({ where, group: 'source_fqdn'});
-			const sources = await this.documentCorpus.find({
+			const sources = await this.documentCorpus.findAll({
 				limit,
 				offset,
 				order,

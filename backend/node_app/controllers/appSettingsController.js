@@ -21,7 +21,7 @@ class AppSettingsController {
 	async getCombinedSearchMode(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const combinedSearch = await this.appSettings.find({ attributes: ['value'], where: { key: 'combined_search'} });
+			const combinedSearch = await this.appSettings.findAll({ attributes: ['value'], where: { key: 'combined_search'} });
 
 			res.status(200).send(combinedSearch);
 		} catch (err) {
@@ -50,7 +50,7 @@ class AppSettingsController {
 	async getIntelligentAnswersMode(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const intelligentAnswers = await this.appSettings.find({ attributes: ['value'], where: { key: 'intelligent_answers'} });
+			const intelligentAnswers = await this.appSettings.findAll({ attributes: ['value'], where: { key: 'intelligent_answers'} });
 
 			res.status(200).send(intelligentAnswers);
 		} catch (err) {
@@ -79,7 +79,7 @@ class AppSettingsController {
 	async getEntitySearchMode(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const intelligentAnswers = await this.appSettings.find({ attributes: ['value'],  where: { key: 'entity_search'} });
+			const intelligentAnswers = await this.appSettings.findAll({ attributes: ['value'],  where: { key: 'entity_search'} });
 
 			res.status(200).send( intelligentAnswers );
 		} catch (err) {

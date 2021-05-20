@@ -73,7 +73,7 @@ let privateMethods = {
 
 	findUser(userId) {
 		return new Promise(function (resolve, reject) {
-			user.find({
+			user.findAll({
 				where: { id: userId },
 				include: [{
 					model: role,
@@ -91,7 +91,7 @@ let privateMethods = {
 
 	findUserByUsername(username) {
 		return new Promise(function (resolve, reject) {
-			user.find({
+			user.findAll({
 				where: { username: username },
 				include: [{
 					model: role,
@@ -143,7 +143,7 @@ let privateMethods = {
 
 	getRoleByTransitionToStatusId(toStatusId) {
 		return new Promise(function (resolve, reject) {
-			Transition.find({
+			Transition.findAll({
 				attributes: ['perms'],
 				where: {
 					fromStatusId: toStatusId,
@@ -216,7 +216,7 @@ let privateMethods = {
 
 	killSession(userid) {
 		return new Promise(function (resolve, reject) {
-			user.find({
+			user.findAll({
 				attributes: ['id', 'session_id'],
 				where: {
 					id: userid
@@ -291,14 +291,14 @@ let privateMethods = {
 
 	updateUserSandbox(userid, roleid) {
 		return new Promise(function (resolve, reject) {
-			user.find({
+			user.findAll({
 				where: { id: userid }
 			}).then(userObj => {
 				if (!_.isNil(userObj.sandbox_id)) {
 					resolve();
 					return;
 				}
-				role.find({
+				role.findAll({
 					where: { id: roleid },
 					include: [{ model: Permission, attributes: ['name'] }]
 				}).then(role => {

@@ -14,6 +14,7 @@ const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 class UserController {
 
@@ -31,7 +32,7 @@ class UserController {
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
 			search = new SearchController(opts),
-			sequelize = new Sequelize(),
+			sequelize = new Sequelize(constants.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
@@ -111,7 +112,7 @@ class UserController {
 					where: {
 						user_id: user.user_id,
 						is_tutorial_search: false,
-						tiny_url: {$not: null}
+						tiny_url: {[Op.ne]: null}
 					},
 					order: [
 						['id', 'DESC'],
@@ -393,7 +394,7 @@ class UserController {
 				username = req.body.username;
 			}
 			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.find({ where: { username } });
+			const exists = await this.internalUserTracking.findAll({ where: { username } });
 			if (exists) {
 				const { id, username } = exists;
 				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
@@ -565,7 +566,7 @@ class UserController {
 					group: ['user_id','new_user_id'],
 					where: {
 						'new_user_id': {
-							$not: null
+							[Op.ne]: null
 						}
 					}
 				});
