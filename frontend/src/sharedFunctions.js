@@ -47,6 +47,27 @@ export const handleSearchTypeUpdate = ({ value = SEARCH_TYPES.keyword }, dispatc
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', 'value', value);
 }
 
+export const createCopyTinyUrl = (toolUrl, dispatch) => {
+	let url = window.location.hash.toString();
+	url = url.replace("#/", "");
+	gameChangerAPI.shortenSearchURLPOST(url).then(res => {
+		try {
+			// method for copying text to clipboard
+			const element = document.createElement('textarea');
+			element.value = `${window.location.origin}/#/${toolUrl}?tiny=${res.data.tinyURL}`;
+			element.setAttribute('readonly', '');
+			element.style = {position: 'absolute', left: '-9999px'};
+			document.body.appendChild(element);
+			element.select();
+			document.execCommand('copy');
+			document.body.removeChild(element);
+			setState(dispatch, {showSnackbar: true, snackBarMsg: 'Link copied to clipboard'});
+		} catch(err) {
+			console.log(err);
+		}
+	});
+}
+
 export const handleSaveFavoriteSearch = async (favoriteName, favoriteSummary, favorite, dispatch, state) => {
 	const { searchText, count, cloneData } = state;
 	const tinyUrl = await createTinyUrl(cloneData);

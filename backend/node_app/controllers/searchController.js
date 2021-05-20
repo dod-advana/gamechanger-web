@@ -30,14 +30,14 @@ class SearchController {
 			logger = LOGGER,
 			searchUtility = new SearchUtility(opts),
 			gcHistory = GC_HISTORY,
-			mlApi = new MLApiClient(),
-			thesaurus = new Thesaurus(),
+			mlApi = new MLApiClient(opts),
+			thesaurus = new Thesaurus(opts),
 			async_redis,
 			favoriteSearch = FAVORITE_SEARCH,
 			sparkMD5 = sparkMD5Lib,
 			dataApi = new DataLibrary(opts),
 			exportHistoryController = new ExportHistoryController(opts),
-			reports = new Reports(),
+			reports = new Reports(opts),
 			gcSearchURLs = GC_SEARCH_URLS,
 			appSettings = APP_SETTINGS,
 			dataTracker = new DataTrackerController(opts)
@@ -869,7 +869,7 @@ class SearchController {
 					}
 				}
 			} catch (e) {
-				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L0V3LYT', userId);
+				this.logger.error(`Error sentence transforming document search results ${e.message}`, '4ZPDBVT', userId);
 				const { message } = e;
 				this.logger.error(message, 'CSQDCW9', userId);
 				throw e;

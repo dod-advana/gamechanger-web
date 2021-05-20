@@ -191,8 +191,8 @@ describe('ModularGameChangerController', function () {
 				handler_factory: {
 					createHandler(handlerType, cloneName) {
 						return {
-							export() {
-								return {msg: 'I am a dummy export. Check out the test for specific modules.', handlerType, cloneName};
+							export(res) {
+								res.send({msg: 'I am a dummy export. Check out the test for specific modules.', handlerType, cloneName});
 							}
 						};
 					}

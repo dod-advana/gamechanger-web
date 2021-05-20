@@ -3,6 +3,7 @@ const sparkMD5Lib = require('spark-md5');
 const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
+const neo4jLib = require('neo4j-driver');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -14,15 +15,15 @@ class SearchUtility {
 			logger = LOGGER,
 			sparkMD5 = sparkMD5Lib,
 			constants = constantsFile,
-			mlApi = new MLApiClient(),
-			dataLibrary = new DataLibrary()
+			mlApi = new MLApiClient(opts),
+			dataApi = new DataLibrary(opts)
 		} = opts;
 
 		this.logger = logger;
 		this.sparkMD5 = sparkMD5;
 		this.constants = constants;
 		this.mlApi = mlApi;
-		this.dataLibrary = dataLibrary;
+		this.dataLibrary = dataApi;
 
 		this.combineExpansionTerms = this.combineExpansionTerms.bind(this);
 		this.getEsSearchTerms = this.getEsSearchTerms.bind(this);
@@ -35,6 +36,11 @@ class SearchUtility {
 		this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
+		this.phraseQAQuery = this.phraseQAQuery.bind(this);
+		this.expandParagraphs = this.expandParagraphs.bind(this);
+		this.queryOneDocQA = this.queryOneDocQA.bind(this);
+		this.getQAContext = this.getQAContext.bind(this);
+		this.filterQAResults = this.filterQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -264,7 +270,7 @@ class SearchUtility {
 		}
 	}
 
-	getElasticsearchQuery({ searchText, searchTerms, parsedQuery, orgFilterString, typeFilterString, index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], publicationDateAllTime = true, storedFields = [
+	getElasticsearchQuery({ searchText, searchTerms, parsedQuery, orgFilterString = '', typeFilterString = '', index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], publicationDateAllTime = true, storedFields = [
 		'filename',
 		'title',
 		'page_count',
@@ -446,7 +452,7 @@ class SearchUtility {
 				}
 			}
 
-			if (!includeRevoked && !isClone) {
+			if (!includeRevoked && !isClone) { // if includeRevoked, get return cancelled docs
 				query.query.bool.filter.push({
 					term: {
 						is_revoked_b: 'false'
@@ -836,6 +842,224 @@ class SearchUtility {
 		}
 	}
 
+	phraseQAQuery (searchText, searchTextList, maxLength, user) {
+		// breaks up a question query into bigrams for ES search
+		let bigrams = [];
+		let length = searchTextList.length - 2;
+		for (let i =0; i <= length; i++) {
+			bigrams.push(searchTextList.slice(i, i+2).join(' '));
+		}
+
+		try {
+			// add additional search fields to the query
+			const mustQueries = [];
+			const shouldQueries = [
+				{
+				  multi_match: {
+					query: searchText,
+					fields: [
+					  'keyw_5^2',
+					  'id^2',
+					  'summary_30',
+					  'paragraphs.par_raw_text_t'
+					],
+					operator: 'or'
+				  }
+				}
+			  ]
+			for (const element of bigrams) {
+				const wildcard = {
+					wildcard: {
+						'paragraphs.filename.search': { 
+							value:  element,
+							boost: 15
+						}
+					}
+				}
+				mustQueries.push(wildcard);
+				const qs = {
+					query_string: {
+					  query: element,
+					  default_field: 'paragraphs.par_raw_text_t',
+					  default_operator: 'AND',
+					  fuzzy_max_expansions: 100,
+					  fuzziness: 'AUTO'
+					}
+				}
+				mustQueries.push(qs);
+				const mm = {
+					multi_match: {
+					  query: element,
+					  fields: ["summary_30","title", "keyw_5"],
+					  type: "phrase",
+					  boost: 5
+					}
+				}
+				shouldQueries.push(mm);
+			}
+
+			let query = {
+				
+				query: {
+				  bool: {
+					must: [
+					  {
+						nested: {
+						  path: 'paragraphs',
+						  inner_hits: {
+							_source: false,
+							stored_fields: [
+							  'paragraphs.page_num_i',
+							  'paragraphs.filename',
+							  'paragraphs.par_raw_text_t'
+							],
+							from: 0,
+							size: 5,
+							highlight: {
+							  fields: {
+								'paragraphs.filename.search': {
+								  number_of_fragments: 0
+								},
+								'paragraphs.par_raw_text_t': {
+								  fragment_size: maxLength,
+								  number_of_fragments: 1
+								}
+							  },
+							  fragmenter: 'span'
+							}
+						  },
+						  query: {
+							bool: {
+							  should: mustQueries
+							}
+						  }
+						}
+					  }
+					],
+					should: shouldQueries
+				  }
+				}
+			  }
+			return query;
+		} catch (e) {
+			this.logger.error(e, 'TJDDKH5F', user);
+		}
+	}
+
+	expandParagraphs (listParagraphs, parIdx, minLength) {
+		// adds context around short paragraphs to make them longer
+		let start = parIdx;
+		let arr = [];
+		let text = '';
+		let context = [];
+		text = listParagraphs[start];
+		let total_pars = listParagraphs.length;
+		arr = text.split(/\s+/);
+		let step = 1;
+		try {
+			while ((arr.length < minLength) && (step <= total_pars)) {
+				while (start > 0) {
+					start = start - step;
+				}
+				let end = +start + +step + +1;
+				step += 1;
+				context = listParagraphs.slice(start, end);
+				text = context.join(' ');
+				arr = text.split(/\s+/);
+			}
+		return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'BVD4546JN', userId);
+		}
+	}
+
+	async queryOneDocQA(filename, userId, minLength) {
+		// query entire docs to expand short paragraphs/get beginning of doc
+		try {
+			let esClientName = 'gamechanger';
+			let esIndex = 'gamechanger';
+			let parIdx = 0; // only expands beginning of doc, not hit paragraphs (unless we retrieve those ids)
+			let newQuery = this.getESQueryOneDoc(filename, userId); // query ES for single doc
+			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
+			let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
+			let qaTextList = qaResults.map(item => item.par_raw_text_t);
+			let qaSubset = await this.expandParagraphs(qaTextList, parIdx, minLength); // get only text around the hit paragraph up to the max length
+			return qaSubset;
+		} catch (e) {
+			LOGGER.error(e.message, 'COP4546JN', userId);
+		}
+	}
+
+	async getQAContext(searchResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold) {
+		
+		let context = [];
+		let docLimit = Math.min(maxDocContext, searchResults.body.hits.hits.length);
+		try {
+			for (var i = 0; i < docLimit; i++) {
+				try {
+					let resultDoc = searchResults.body.hits.hits[i];
+					let filename = resultDoc._source.filename;
+					let docId = resultDoc._source.id;
+					let displayName = resultDoc._source.display_title_s;
+					let docScore = resultDoc._score;
+					if (docScore > scoreThreshold) {
+						let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
+						let paraLimits = Math.min(maxParaContext, paraHits.length);
+						for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
+							if (paraHits[x]) {
+								let contextPara = {};
+								let parId = paraHits[x]._nested.offset;
+								contextPara.filename = displayName;
+								contextPara.parId = parId;
+								contextPara.docId = docId;
+								let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
+								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+								if (para.length > maxLength) { // if paragraph is too long, take highlight
+									para = paraHits[x].highlight['paragraphs.par_raw_text_t'][0];
+									para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+									contextPara.text = para
+									context.push(contextPara);
+								} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
+									contextPara.text = para
+									context.push(contextPara);
+								}
+							}
+						}
+					} else {
+						let qaSubset = await this.queryOneDocQA(filename, userId, minLength); // this adds the beginning of the doc
+						let text = qaSubset.join(' ');
+						let contextPara = {};
+						text = text.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+						if (text.length > 200) {
+							contextPara.filename = displayName;
+							contextPara.text = text;
+							contextPara.parId = 0;
+							contextPara.docId = docId;
+							context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
+						}
+					}
+				} catch (e) {
+					LOGGER.error(e.message, 'CPQGFDJN', userId);
+					break
+				}
+			}
+			return context
+		} catch (e) {
+			LOGGER.error(e.message, 'CPQ4FFJN', userId);
+		}
+	}
+
+	filterQAResults(shortenedResults) {
+		// filter answers with '[CLS]' which means QA model doesn't know
+		let { question, answers }  = shortenedResults;
+		answers = answers.filter(function (e) {
+			return e.trim().split(/\s/)[0] !== '[CLS]' 
+		});
+		let newResults = { question, answers };
+
+		return newResults;
+	}
+
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
@@ -927,9 +1151,9 @@ class SearchUtility {
 					index: this.constants.GAME_CHANGER_OPTS.entityIndex
 				},
 				{
-					size: 1,
+					size: 2,
 					_source: {
-						includes: [name, aliases]
+						includes: [name, aliases, 'type']
 					},
 					query: {
 						prefix: {
@@ -1203,75 +1427,73 @@ class SearchUtility {
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits.paragraphs) {
-						r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-							const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
-								// use page 0 for title matches or errors
-								// but only allow 1
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
+					if (r.inner_hits) {
+						if (r.inner_hits.paragraphs) {
+							r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
+								const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
+								let pageNumber = pageIndex + 1;
+								// one hit per page max
+								if (!pageSet.has(pageNumber)) {
+									const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
+									// use page 0 for title matches or errors
+									// but only allow 1
+									if (usePageZero) {
+										if (pageSet.has(0)) {
+											return;
+										} else {
+											pageNumber = 0;
+											pageSet.add(0);
+										}
 									}
+									
+									pageSet.add(pageNumber);
+									result.pageHits.push({snippet, pageNumber});
 								}
-
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber});
+							});
+							
+							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+							if(r.highlight){
+								if(r.highlight['title.search']){
+									result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+								}
+								if(r.highlight.keyw_5){
+									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
+								}
 							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
-							}
-						}
-						result.pageHitCount = pageSet.size;
-
-					} else {
-						r.inner_hits.pages.hits.hits.forEach((phit) => {
-							const pageIndex = phit._nested.offset;
-							// const snippet =  phit.fields["pages.p_raw_text"][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.getESHighlightContent(phit, user);
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
+							result.pageHitCount = pageSet.size;
+							
+						} else {
+							r.inner_hits.pages.hits.hits.forEach((phit) => {
+								const pageIndex = phit._nested.offset;
+								// const snippet =  phit.fields["pages.p_raw_text"][0];
+								let pageNumber = pageIndex + 1;
+								// one hit per page max
+								if (!pageSet.has(pageNumber)) {
+									const [snippet, usePageZero] = this.getESHighlightContent(phit, user);
+									if (usePageZero) {
+										if (pageSet.has(0)) {
+											return;
+										} else {
+											pageNumber = 0;
+											pageSet.add(0);
+										}
 									}
+									pageSet.add(pageNumber);
+									result.pageHits.push({snippet, pageNumber});
 								}
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber });
+							});
+							
+							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+							if(r.highlight){
+								if(r.highlight['title.search']){
+									result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+								}
+								if(r.highlight.keyw_5){
+									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
 							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-							}
+							result.pageHitCount = pageSet.size;
 						}
-						result.pageHitCount = pageSet.size;
-
-						// console.log(_source);
-						// grab eda results ... create eda searchutil?
-						const {address_eda_ext_n, metadata_eda_ext_n} = _source;
-						result.address_eda_ext_n = address_eda_ext_n;
-						result.metadata_eda_ext_n = metadata_eda_ext_n;
 					}
 
 					result.esIndex = index;
@@ -1295,7 +1517,7 @@ class SearchUtility {
 			this.logger.error(err.message, 'GL7EDI3', user);
 		}
 	}
-
+	
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
 		try {
 			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
@@ -1401,16 +1623,23 @@ class SearchUtility {
 
 	async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
 		let filename;
-		let sentenceResults = this.mlApi.getSentenceTransformerResults(searchText, userId);
-		let searchResults = this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
-		const resultArray = await Promise.all([sentenceResults, searchResults]);
-		sentenceResults = resultArray[0];
-		searchResults = resultArray[1];
-	
+		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){ // if there is a result, shift offset / limits accordingly. 
+			if(req.body.offset === 0){
+				req.body.limit = 5
+			} else {
+				req.body.offset -= 1;
+			}
+		}
+		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+		// const resultArray = await Promise.all([sentenceResults, searchResults]);
+		// sentenceResults = resultArray[0];
+		// searchResults = resultArray[1];
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
 			searchResults.totalCount += 1;
 		}
+
 		const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
 		if (sentenceResults === TRANSFORM_ERRORED) {
 			searchResults.transformFailed = true;
@@ -1496,7 +1725,7 @@ class SearchUtility {
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
-				if (this.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
 
 				return { totalCount: 0, docs: [] };
 			}
@@ -1509,9 +1738,11 @@ class SearchUtility {
 		
 	}
 	
-	getEntityQuery(searchText) {
+	getEntityQuery(searchText, offset = 0, limit = 6) {
 		try {
 			let query = {
+				from: offset,
+				size: limit,
 					query: {
 						bool: {
 							should: [
@@ -1540,7 +1771,8 @@ class SearchUtility {
 									type: 'phrase_prefix'
 								}
 						}
-						]
+						],
+						must_not: [ {term: {"entity_type.keyword": "topic"}} ]
 						}
 					}
 				};
@@ -1549,6 +1781,24 @@ class SearchUtility {
 				this.logger.error(err, 'JAEIWMF', '');
 			}
 		}
+
+		getTopicQuery(searchText, offset = 0, limit = 6) {
+			try {
+				let query = {
+					from: offset,
+					size: limit,
+						query: {
+							bool: {
+								must: [ { match_phrase: { 'name': searchText } } ],
+								filter: [ { term: { 'entity_type.keyword': 'topic'}}]
+							}
+						}
+					};
+				return query;
+				} catch (err) {
+					this.logger.error(err, 'YTP3YF0', '');
+				}
+			}
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
@@ -1578,6 +1828,262 @@ class SearchUtility {
 		}
 		else {return false}
 	}
+
+	cleanNeo4jData(result, isTest, user) {
+		const nodes = {};
+		const nodeIds = [];
+		const edgeIds = [];
+		const edges = {};
+		const labels = [];
+		const nodeProperties = {};
+		const relationships = [];
+		const relProperties = {};
+		const docIds = [];
+		const graphMetaData = [];
+		
+		try {
+			const addNode = (node) => {
+				nodes[node.id] = node;
+				if (nodeIds.indexOf(node.id) === -1) {
+					nodeIds.push(node.id);
+					if (labels.indexOf(node.label) === -1) {
+						labels.push(node.label);
+						nodeProperties[node.label] = node.properties;
+					}
+				}
+			};
+
+			const addEdge = (edge) => {
+				try {
+					edges[edge.id] = edge;
+					if (edgeIds.indexOf(edge.id) === -1) {
+						edgeIds.push(edge.id);
+						if (relationships.indexOf(edge.label) === -1) {
+							relationships.push(edge.label);
+							relProperties[edge.label] = edge.properties;
+						}
+					}
+
+					const tmpEdges = edgeIds.filter(edgeId => {
+						if (edges[edgeId].source === edge.source && edges[edgeId].target === edge.target){
+							return edgeId;
+						}
+					});
+
+					const edgeCount = tmpEdges.length;
+					const oddEdges = (edgeCount % 2 !== 0);
+					tmpEdges.forEach((edgeId, index) => {
+						if (oddEdges && index === 0){
+							edges[edgeId].rotation = 0;
+							edges[edgeId].curvature = 0;
+						} else {
+							edges[edgeId].rotation = Math.PI * (index / 6);
+							edges[edgeId].curvature = (edgeCount / 10) * ((index % 2 !== 0) ? -1 : 1);
+						}
+					});
+				} catch (err) {
+					console.log(edge);
+				}
+			};
+
+			result.records.forEach(record => {
+				const recObj = record.toObject();
+
+				if (recObj.hasOwnProperty('entityScore')) {
+					const node = this.buildNodeVisObject(recObj.node, isTest, user);
+					node.entityScore = recObj.entityScore;
+					node.mentions = recObj.mentions.low;
+					addNode(node);
+				} else if (recObj.hasOwnProperty('topicScore')) {
+					const node = this.buildNodeVisObject(recObj.node, isTest, user);
+					node.topicScore = recObj.topicScore;
+					addNode(node);
+				} else if (recObj.hasOwnProperty('doc_id')) {
+					docIds.push({doc_id: recObj.doc_id, mentions: recObj.mentions.low});
+				} else if (recObj.hasOwnProperty('primary_key')) {
+					graphMetaData.push({
+						label: recObj.label,
+						property: recObj.property,
+						type: recObj.type,
+						primary_key: recObj.primary_key
+					});
+				} else if (recObj.hasOwnProperty('relTypesCount')) {
+					graphMetaData.push({
+						relationship_counts: recObj.relTypesCount,
+						node_counts: recObj.labels
+					});
+				} else if (recObj.hasOwnProperty('topic')) {
+					addNode(this.buildNodeVisObject(recObj.topic, isTest, user));
+					nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
+				} else if (recObj.hasOwnProperty('topic_name')) {
+					recObj.doc_count = recObj.doc_count.low;
+					graphMetaData.push(recObj);
+				} else if (recObj.hasOwnProperty('doc_count')) {
+					graphMetaData.push({
+						documents: recObj.doc_count.low
+					});
+				} else {
+					Object.values(recObj).map(async (v) => {
+						const recType = this.getNeo4jType(v, isTest);
+						if (recType === 'Node') {
+							addNode(this.buildNodeVisObject(v, isTest, user));
+						} else if (recType === 'Relationship') {
+							addEdge(this.buildEdgeVisObject(v, isTest, user));
+						} else if (recType === 'Path') {
+							addNode(this.buildNodeVisObject(v.start, isTest, user));
+							addNode(this.buildNodeVisObject(v.end, isTest, user));
+
+							for (let obj of v.segments) {
+								addNode(this.buildNodeVisObject(obj.start, isTest, user));
+								addNode(this.buildNodeVisObject(obj.end, isTest, user));
+								addEdge(this.buildEdgeVisObject(obj.relationship, isTest, user));
+							}
+						} else if (recType === 'Array') {
+							for (let obj of v) {
+								const recType = this.getNeo4jType(obj, isTest);
+								if (recType === 'Node') {
+									addNode(this.buildNodeVisObject(obj, isTest, user));
+								} else if (recType === 'Relationship') {
+									addEdge(this.buildEdgeVisObject(obj, isTest, user));
+								}
+							}
+						} else {
+							if (v !== null) {
+								console.log(v);
+							}
+						}
+					});
+				}
+			});
+
+			if (docIds.length > 0) {
+				return { doc_ids: docIds };
+			} else if (graphMetaData.length > 0) {
+				return { graph_metadata: graphMetaData };
+			} else if (Object.keys(nodes).length <= 0 && result.records[0]){
+				const record = result.records[0].toObject();
+				Object.keys(record).forEach(key => {
+					if (record[key].hasOwnProperty('low')) {
+						record[key] = record[key].low;
+					}
+				});
+				return {...record};
+			}
+			
+			const pr = require('pagerank.js');
+			const rtnEdges = Object.values(edges);
+			const rtnNodes = Object.values(nodes);
+			const idToPRMap = {};
+
+			pr.reset();
+
+			rtnEdges.forEach(edge => {
+				pr.link(edge.source, edge.target, 1.0);
+			});
+
+			pr.rank(0.85, 0.000001, function (node, rank) {
+				idToPRMap[node] = rank;
+			});
+
+			rtnNodes.forEach(node => {
+				node.pageRank = idToPRMap[node.id] || 1;
+			});
+
+			return { nodes: Object.values(nodes), edges: Object.values(edges), labels, relationships, nodeProperties, relProperties };
+
+		} catch (err) {
+			this.logger.error(err, '193UPTH', user);
+			return { nodes: Object.values(nodes), edges: Object.values(edges), labels, relationships, nodeProperties, relProperties };
+		}
+	}
+
+	buildNodeVisObject(neo4jNode, isTest, user) {
+		let node = {};
+		try {
+
+			let label = neo4jNode.labels[0];
+
+			node.id = !isTest ? neo4jNode.identity.toInt() : neo4jNode.identity.low;
+			node.label = label;
+
+			const title_properties = Object.keys(neo4jNode.properties);
+			node.properties = [];
+
+			for (const key of title_properties) {
+				if (neo4jNode.properties.hasOwnProperty(key)) {
+					if (!isTest && neo4jLib.isInt(neo4jNode.properties[key])){
+						node[key] = neo4jNode.properties[key].toNumber();
+					} else if (isTest && neo4jNode.properties[key] && neo4jNode.properties[key].hasOwnProperty('low')) {
+						node[key] = neo4jNode.properties[key].low;
+					} else {
+						node[key] = neo4jNode.properties[key];
+					}
+					node.properties.push(key);
+				}
+			}
+
+			if (!node.hasOwnProperty('value')) node.value = 1;
+
+		} catch (err) {
+			this.logger.error(err, 'BSCU681', user);
+		}
+
+		return node;
+	}
+
+	buildEdgeVisObject(neo4jRel, isTest, user) {
+		let edge = {};
+
+		try {
+			edge.id = !isTest ? neo4jRel.identity.toInt() : neo4jRel.identity.low;
+			edge.source = !isTest ? neo4jRel.start.toInt() : neo4jRel.start.low;
+			edge.target = !isTest ? neo4jRel.end.toInt() : neo4jRel.end.low;
+			edge.label = neo4jRel.type;
+
+			const title_properties = Object.keys(neo4jRel.properties);
+			edge.properties = [];
+
+			for (const key of title_properties) {
+				if (neo4jRel.properties.hasOwnProperty(key)) {
+					if (!isTest && neo4jLib.isInt(neo4jRel.properties[key])){
+						edge[key] = neo4jRel.properties[key].toNumber();
+					} else if (isTest && neo4jRel.properties[key] && neo4jRel.properties[key].hasOwnProperty('low')) {
+						edge[key] = neo4jRel.properties[key].low;
+					} else {
+						edge[key] = neo4jRel.properties[key];
+					}
+					edge.properties.push(key);
+				}
+			}
+
+			if (!edge.hasOwnProperty('value')) edge.value = 1;
+		} catch (err) {
+			this.logger.error(err, 'UPKARU0', user);
+		}
+
+		return edge;
+	}
+
+	getNeo4jType(v, isTest) {
+
+		if (v === null) return false;
+
+		if (isTest) {
+			const keys = Object.keys(v);
+			if (keys.includes('identity') && keys.includes('labels') && keys.includes('properties')) return 'Node';
+			else if (keys.includes('identity') && keys.includes('start') && keys.includes('end') && keys.includes('type') && keys.includes('properties')) return 'Relationship';
+			else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
+			else if (v instanceof Array) return 'Array';
+			else return false;
+		} else {
+			if (v instanceof neo4jLib.types.Node) return 'Node';
+			else if (v instanceof neo4jLib.types.Relationship) return 'Relationship';
+			else if (v instanceof neo4jLib.types.Path) return 'Path';
+			else if (v instanceof Array) return 'Array';
+			else return false;
+		}
+	}
+
 }
 
 module.exports = SearchUtility;

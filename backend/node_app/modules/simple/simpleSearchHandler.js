@@ -4,16 +4,13 @@ const constants = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
-const mlApi = new MLApiClient();
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const dataTracker = new DataTrackerController();
 const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
-const dataLibrary = new DataLibrary();
 const {Thesaurus} = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
-const GC_HISTORY = require('../../models').gc_history;
+const LOGGER = require('../../lib/logger');
 
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
@@ -22,7 +19,20 @@ const SearchHandler = require('../base/searchHandler');
 
 class SimpleSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
+		const {
+			dataTracker = new DataTrackerController(opts),
+			logger = LOGGER,
+			searchUtility = new SearchUtility(opts),
+			dataLibrary = new DataLibrary(opts),
+			mlApi = new MLApiClient(opts),
+		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
+
+		this.dataTracker = dataTracker;
+		this.logger = logger;
+		this.searchUtility = searchUtility;
+		this.dataLibrary = dataLibrary;
+		this.mlApi = mlApi;
 	}
 
 	async searchHelper(req, userId) {
@@ -73,7 +83,7 @@ class SimpleSearchHandler extends SearchHandler {
 			const clientObj = {esClientName: 'gamechanger', esIndex};
 
 			// log query to ES
-			storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 
 			if (!forCacheReload && useGCCache && offset === 0) {
 				return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
@@ -82,7 +92,7 @@ class SimpleSearchHandler extends SearchHandler {
 			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = {};
 			try {
-				expansionDict = await mlApi.getExpandedSearchTerms(termsArray, userId);
+				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
 			} catch (e) {
 			// log error and move on, expansions are not required
 				if (forCacheReload){
@@ -146,10 +156,10 @@ class SimpleSearchHandler extends SearchHandler {
 			// this.logger.info('exp: ' + expansionDict);
 			await redisAsyncClient.select(redisAsyncClientDB);
 
-			let searchResults = await documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+			let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
 
 			// insert crawler dates into search results
-			searchResults = await dataTracker.crawlerDateHelper(searchResults, userId);
+			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 
 			// try to store to cache
 			if (useGCCache && searchResults) {
@@ -162,7 +172,7 @@ class SimpleSearchHandler extends SearchHandler {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
 					historyRec.numResults = totalCount;
-					await storeRecordOfSearchInPg(historyRec, userId);
+					await this.storeRecordOfSearchInPg(historyRec, userId);
 				} catch (e) {
 					this.logger.error(e.message, 'SHW1IT9', userId);
 				}
@@ -217,109 +227,80 @@ class SimpleSearchHandler extends SearchHandler {
 				this.logger.error(message, 'W28XNE0', userId);
 				historyRec.endTime = new Date().toISOString();
 				historyRec.hadError = true;
-				await storeRecordOfSearchInPg(historyRec, showTutorial);
+				await this.storeRecordOfSearchInPg(historyRec, showTutorial);
 			}
 			throw err;
 		}
 	}
-}
 
-async function storeRecordOfSearchInPg(historyRec, showTutorial) {
-	let userId = 'Unknown';
-	try {
-		const { user_id, searchText, startTime, endTime, hadError, numResults, searchType, cachedResult, orgFilters, tiny_url, request_body, search_version, clone_name } = historyRec;
-		const hashed_user = sparkMD5.hash(user_id);
+	async documentSearch(req, body, clientObj, userId) {
+		try {
+			const {
+				getIdList,
+				selectedDocuments,
+				expansionDict = {},
+				forGraphCache = false
+			} = body;
+			const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(body);
+			body.searchTerms = searchTerms;
+			body.parsedQuery = parsedQuery;
 
-		if (user_id) userId = user_id;
+			let { esClientName, esIndex } = clientObj;
+			let esQuery = '';
 
-		const obj = {
-			user_id: hashed_user,
-			search: searchText,
-			run_at: startTime,
-			completion_time: endTime,
-			had_error: hadError,
-			num_results: numResults,
-			search_type: searchType,
-			cached_result: cachedResult,
-			org_filters: orgFilters,
-			is_tutorial_search: showTutorial,
-			tiny_url: tiny_url,
-			clone_name,
-			request_body,
-			search_version
-		};
+			if (esQuery === '') {
+				if (forGraphCache) {
+					esQuery = searchUtility.getElasticsearchQueryForGraphCache(body, userId);
+				} else {
+					esQuery = getElasticsearchQuery(body, userId);
+				}
+			}
 
-		GC_HISTORY.create(obj);
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 
-	} catch (err) {
-		this.logger.error(err, 'CTZKD4B', userId);
+				if (getIdList) {
+					return searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+				}
+
+				if (forGraphCache){
+					return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
+				} else {
+					return searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+				}
+			} else {
+				this.logger.error('Error with Elasticsearch results', '0F31BB1', userId);
+				return { totalCount: 0, docs: [] };
+			}
+		} catch (e) {
+			this.logger.error(e.message, 'V3EVTG5', userId);
+		}
 	}
-}
 
-async function storeEsRecord(esClient, offset, clone_name, userId, searchText){
-	try {
+	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
+		try {
 		// log search query to elasticsearch
-		if (offset === 0){
-			let clone_log = clone_name || 'policy';
-			const searchLog = {
-				user_id: sparkMD5.hash(userId),
-				search_query: searchText,
-				run_time: new Date().getTime(),
-				clone_name: clone_log
+			if (offset === 0){
+				let clone_log = clone_name || 'policy';
+				const searchLog = {
+					user_id: sparkMD5.hash(userId),
+					search_query: searchText,
+					run_time: new Date().getTime(),
+					clone_name: clone_log
 
-			};
-			let search_history_index = constants.GAME_CHANGER_OPTS.historyIndex;
+				};
+				let search_history_index = constants.GAME_CHANGER_OPTS.historyIndex;
 
-			dataLibrary.putDocument(esClient, search_history_index, searchLog);
+				this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
+			}
+		} catch (e) {
+			this.logger.error(e.message, 'WFHI0RW');
 		}
-	} catch (e) {
-		this.logger.error(e.message, 'WFHI0RW');
 	}
+
 }
 
-async function documentSearch(req, body, clientObj, userId) {
-	try {
-		const {
-			getIdList,
-			selectedDocuments,
-			expansionDict = {},
-			forGraphCache = false
-		} = body;
-		const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(body);
-		body.searchTerms = searchTerms;
-		body.parsedQuery = parsedQuery;
 
-		let { esClientName, esIndex } = clientObj;
-		let esQuery = '';
-
-		if (esQuery === '') {
-			if (forGraphCache) {
-				esQuery = searchUtility.getElasticsearchQueryForGraphCache(body, userId);
-			} else {
-				esQuery = getElasticsearchQuery(body, userId);
-			}
-		}
-
-		const results = await dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-		if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-
-			if (getIdList) {
-				return searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
-			}
-
-			if (forGraphCache){
-				return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
-			} else {
-				return searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
-			}
-		} else {
-			this.logger.error('Error with Elasticsearch results', '0F31BB1', userId);
-			return { totalCount: 0, docs: [] };
-		}
-	} catch (e) {
-		const { message } = e;
-	}
-}
 function getElasticsearchQuery(
 	{
 		searchText,

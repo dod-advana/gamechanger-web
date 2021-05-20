@@ -11,28 +11,24 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false
 			},
-			responsibilityLevel1: {
+			documentTitle: {
 				type: DataTypes.TEXT,
 				allowNull: false
 			},
-			responsibilityLevel2: {
-				type: DataTypes.TEXT,
-				allowNull: false
-			},
-			responsibilityLevel3: {
-				type: DataTypes.BOOLEAN,
-				allowNull: false
-			},
-			primaryEntity: {
+			organizationPersonnel: {
 				type: DataTypes.TEXT,
 				allowNull: true
 			},
-			entitiesFound: {
+			responsibilityText: {
+				type: DataTypes.TEXT,
+				allowNull: false
+			},
+			otherOrganizationPersonnel: {
 				type: DataTypes.TEXT,
 				allowNull: true
 			},
-			references: {
-				type: DataTypes.TEXT,
+			documentsReferenced: {
+				type: DataTypes.ARRAY(DataTypes.TEXT),
 				allowNull: true
 			},
 

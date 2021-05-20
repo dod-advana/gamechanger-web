@@ -13,7 +13,7 @@ const initState = {
 		main_view_module: 'policy/policyMainViewHandler',
 		display_name: 'GAMECHANGER',
 		is_live: true,
-		url: '/',
+		url: 'gamechanger',
 		permissions_required: false,
 		clone_to_advana: true,
 		clone_togamchanger: true,
@@ -113,8 +113,25 @@ const initState = {
 	timeFound: 0.0,
 	hasExpansionTerms: false,
 	noSearches: true,
+
 	count: 0,
 	resultsPage: 1,
+	docsPagination: false,
+	docsLoading: false,	
+
+	entityCount: 0,
+	entityPage: 1,
+	entityPagination: false,
+	entitiesLoading: false,
+
+	topicCount: 0,
+	topicPage: 1,
+	topicPagination: false,
+	topicsLoading: false,
+
+	replaceResults: true,
+	infiniteScrollPage: 1,
+
 	searchText: '',
 	prevSearchText: null,
 	runSearch: false,
@@ -122,6 +139,7 @@ const initState = {
 	expansionDict: {},
 	rawSearchResults: [],
 	docSearchResults: [],
+	qaResults: {question: '', answers: []},
 	isFavoriteSearch: false,
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
@@ -137,7 +155,19 @@ const initState = {
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
 		includeRevoked: false
-	}
+	},
+
+	// Categories
+	selectedCategories: {
+		Documents: true,
+		Organizations: true,
+		Topics: false
+	},
+
+	// category totals
+	categoryMetadata: {},
+
+	activeCategoryTab: 'all'
 };
 
 const init = (initialState) => {
@@ -174,7 +204,7 @@ function reducer(state, action) {
 				exportDialogVisible: action.payload,
 				isSelectedDocs: action.payload
 			};
-		case 'REST_SEARCH_SETTINGS':
+		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
 				searchSettings: initState.searchSettings

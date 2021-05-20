@@ -17,7 +17,7 @@ describe('AppStatsController', function () {
 						database: 'fakeDatabase'
 					}
 				}
-			}
+			};
 			let mysqlParams = null;
 			let connectCalled = false;
 			let endCalled = false;
@@ -47,10 +47,9 @@ describe('AppStatsController', function () {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
-					console.log(response);
 					callback(null, response, []);
 				}
-			}
+			};
 			const mysql_lib = {
 				createConnection: (params) => {
 					mysqlParams = params;
@@ -58,7 +57,7 @@ describe('AppStatsController', function () {
 				}
 			};
 			const opts = {mysql_lib, constants};
-			const req = {body: {isClone: false, cloneData: {}, internalUsers: [], daysAgo: 7}};
+			const req = {body: {isClone: false, cloneData: {clone_name: 'gamechanger'}, internalUsers: [], daysAgo: 7}};
 			let passedCode = null;
 			let sentData = null;
 			const res = {
@@ -68,11 +67,11 @@ describe('AppStatsController', function () {
 						send: (data) => {
 							sentData = data;
 						}
-					}
+					};
 				}
 			};
 
-			const expectedData = {"daysBack":7,"data":{"avgSearchesPerSession":13,"blacklist":[],"cloneData": {}, "isClone": false, "excluding": [], "topSearches":{"topN":10,"data":[{"search":"fakeSearch1","count":32},{"search":"fakeSearch2","count":16}]}}};
+			const expectedData = {daysBack: 7, data: {avgSearchesPerSession: 13, blacklist: [], cloneData: {clone_name: 'gamechanger'}, excluding: [], topSearches: {topN: 10, data: [{search: 'fakeSearch1', count: 32}, {search: 'fakeSearch2', count: 16}]}}};
 
 			const target = new AppStatsController(opts);
 			await target.getAppStats(req, res);
@@ -93,7 +92,7 @@ describe('AppStatsController', function () {
 						database: 'fakeDatabase'
 					}
 				}
-			}
+			};
 			let mysqlParams = null;
 			let connectCalled = false;
 			let endCalled = false;
@@ -123,10 +122,9 @@ describe('AppStatsController', function () {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
-					console.log(response);
 					callback(null, response, []);
 				}
-			}
+			};
 			const mysql_lib = {
 				createConnection: (params) => {
 					mysqlParams = params;
@@ -134,7 +132,7 @@ describe('AppStatsController', function () {
 				}
 			};
 			const opts = {mysql_lib, constants};
-			const req = {body: {isClone: true, cloneData: {clone_name: "test"}, internalUsers: [], daysAgo: 7}};
+			const req = {body: {isClone: true, cloneData: {clone_name: 'test'}, internalUsers: [], daysAgo: 7}};
 			let passedCode = null;
 			let sentData = null;
 			const res = {
@@ -144,12 +142,11 @@ describe('AppStatsController', function () {
 						send: (data) => {
 							sentData = data;
 						}
-					}
+					};
 				}
 			};
 
-			const expectedData = {"daysBack":7,"data":{"avgSearchesPerSession":13, "blacklist":[], "cloneData": {"clone_name": "test"}, "excluding": [], "isClone": true, "topSearches":{"topN":10,"data":[{"search":"fakeSearch1","count":32},{"search":"fakeSearch2","count":16}]}}};
-
+			const expectedData = {data: {avgSearchesPerSession: 13, blacklist: [], cloneData: {clone_name: 'test'}, excluding: [], topSearches: {data: [{count: 32, search: 'fakeSearch1'}, {count: 16, search: 'fakeSearch2'}], topN: 10}}, daysBack: 7};
 			const target = new AppStatsController(opts);
 			await target.getAppStats(req, res);
 			assert.equal(passedCode, 200);
@@ -168,7 +165,7 @@ describe('AppStatsController', function () {
 						database: 'fakeDatabase'
 					}
 				}
-			}
+			};
 			let mysqlParams = null;
 			let connectCalled = false;
 			let endCalled = false;
@@ -198,10 +195,9 @@ describe('AppStatsController', function () {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
-					console.log(response);
 					callback(null, response, []);
 				}
-			}
+			};
 			const mysql_lib = {
 				createConnection: (params) => {
 					mysqlParams = params;
@@ -209,7 +205,7 @@ describe('AppStatsController', function () {
 				}
 			};
 			const opts = {mysql_lib, constants};
-			const req = {body: {isClone: false, cloneData: {}, internalUsers: ['testUser'], daysAgo: 7}};
+			const req = {body: {isClone: false, cloneData: {clone_name: 'game_changer'}, internalUsers: ['testUser'], daysAgo: 7}};
 			let passedCode = null;
 			let sentData = null;
 			const res = {
@@ -219,12 +215,11 @@ describe('AppStatsController', function () {
 						send: (data) => {
 							sentData = data;
 						}
-					}
+					};
 				}
 			};
 
-			const expectedData = {"daysBack":7,"data":{"avgSearchesPerSession":13,"blacklist":[],"cloneData": {}, "isClone": false, "excluding": ['testUser'], "topSearches":{"topN":10,"data":[{"search":"fakeSearch1","count":32},{"search":"fakeSearch2","count":16}]}}};
-
+			const expectedData = {data: {avgSearchesPerSession: 13, blacklist: [], cloneData: {clone_name: 'game_changer'}, excluding: ['testUser'], topSearches: {data: [{count: 32, search: 'fakeSearch1'}, {count: 16, search: 'fakeSearch2'}], topN: 10}}, daysBack: 7};
 			const target = new AppStatsController(opts);
 			await target.getAppStats(req, res);
 			assert.equal(passedCode, 200);
@@ -243,7 +238,7 @@ describe('AppStatsController', function () {
 						database: 'fakeDatabase'
 					}
 				}
-			}
+			};
 			let mysqlParams = null;
 			let connectCalled = false;
 			let endCalled = false;
@@ -262,7 +257,7 @@ describe('AppStatsController', function () {
 					}
 				]
 			];
-			let blacklist=['testQuery'];
+			let blacklist = ['testQuery'];
 			const mySqlConnection = {
 				connect: () => {
 					connectCalled = true;
@@ -274,10 +269,9 @@ describe('AppStatsController', function () {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
-					console.log(response);
 					callback(null, response, []);
 				}
-			}
+			};
 			const mysql_lib = {
 				createConnection: (params) => {
 					mysqlParams = params;
@@ -285,7 +279,7 @@ describe('AppStatsController', function () {
 				}
 			};
 			const opts = {mysql_lib, constants};
-			const req = {body: {isClone: false, cloneData: {}, internalUsers: ['testUser'], daysAgo: 7, blacklist: blacklist}};
+			const req = {body: {isClone: false, cloneData: {clone_name: 'gamechanger'}, internalUsers: ['testUser'], daysAgo: 7, blacklist: blacklist}};
 			let passedCode = null;
 			let sentData = null;
 			const res = {
@@ -295,11 +289,11 @@ describe('AppStatsController', function () {
 						send: (data) => {
 							sentData = data;
 						}
-					}
+					};
 				}
 			};
 
-			const expectedData = {"daysBack":7,"data":{"avgSearchesPerSession":13,"blacklist":['testQuery'],"cloneData": {}, "isClone": false, "excluding": ['testUser'], "topSearches":{"topN":10,"data":[{"search":"fakeSearch1","count":32},{"search":"fakeSearch2","count":16}]}}};
+			const expectedData = {daysBack: 7, data: {avgSearchesPerSession: 13, blacklist: ['testQuery'], cloneData: {clone_name: 'gamechanger'}, excluding: ['testUser'], topSearches: {topN: 10, data: [{search: 'fakeSearch1', count: 32}, {search: 'fakeSearch2', count: 16}]}}};
 
 			const target = new AppStatsController(opts);
 			await target.getAppStats(req, res);

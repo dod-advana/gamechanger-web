@@ -32,7 +32,7 @@ var IS_EDGE = !IS_IE && !!window.StyleMedia;
 const gameChangerAPI = new GameChangerAPI();
 
 const StyledCardContainer = styled.div`
-	width: ${({listView, showSideFilters, graphView}) => listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.3%' : '25%'};
+	width: ${({listView, showSideFilters, graphView}) => listView ? '100%' : graphView ? '414px' : showSideFilters ? '33%' : '25%'};
 	min-width: ${({listView}) => listView ? '' : '351px'};
 	
 	.styled-card-container {

@@ -241,6 +241,29 @@ export const StyledTopTopics = styled.div`
 	}
 `;
 
+export const StyledAddTermButton = styled.button`
+	border: none;
+	height: 30px;
+	border-radius: 15px;
+	background-color: white;
+	color: black;
+	white-space: nowrap;
+	text-align: center;
+	display: inline-block;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-bottom: 6px;
+	cursor: pointer;
+	border: 1px solid darkgray;
+
+	&:hover {
+		background-color: #E9691D;
+		color: white;
+	};
+`;
+
 export default function SearchMatrix(props) {
 	
 	const {
@@ -269,8 +292,42 @@ export default function SearchMatrix(props) {
    const classes = useStyles();
 
 	const [searchFields, setSearchFields] = React.useState(state.searchSettings.searchFields);
+	const [expansionTerms, setExpansionTerms] = React.useState([]);
 
 	const pubAllTime = state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
+
+	const comparableExpansion = JSON.stringify(state.expansionDict);
+
+	useEffect(() => {
+		// nested arrays of expanded terms from each searchTerm
+		const expansion = JSON.parse(comparableExpansion)
+		let expandedTerms = Object.values(expansion || {});
+		const keys = Object.keys(expansion || {});
+		const quotedKeys = keys.map((term) => `"${term}"`);
+		const exclude = new Set([...keys, ...quotedKeys]);
+		let topFive = new Set();
+
+		while(topFive.size < 7){
+			if(expandedTerms.length === 0){
+				break;
+			}
+			const frontArr = expandedTerms[0];
+			const term = frontArr.shift();
+			const [a, ...rest] = expandedTerms;
+			if(!term){
+				expandedTerms = [...rest];
+			} else {
+				if(!exclude.has(term)){
+					topFive.add(term);
+				}
+				expandedTerms = [...rest, a];
+			}
+		}
+		let topFiveArr = Array.from(topFive)
+		topFiveArr = topFiveArr.map(term => {return {...term, checked:state.searchText.includes(term.phrase)}})
+		setExpansionTerms(topFiveArr);
+
+	}, [state, comparableExpansion]);
 
 	useEffect(() => {
 		setSearchFields(state.searchSettings.searchFields);
@@ -286,7 +343,18 @@ export default function SearchMatrix(props) {
 		if (event) {
 			event.preventDefault();
 		}
-		setState(dispatch, {runSearch: true});
+		let newSearchText = state.searchText.trim()
+		expansionTerms.forEach(({phrase, source, checked}) => {
+			if(checked && !newSearchText.includes(phrase)) {
+				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
+				newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
+			} 
+			else if(!checked && newSearchText.includes(` OR ${phrase}`)) {
+				newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
+			}
+
+		})
+		setState(dispatch, { searchText: newSearchText, runSearch: true });
 	}
 	
 	const setSearchField = (key, value) => {
@@ -374,7 +442,17 @@ export default function SearchMatrix(props) {
 		newSearchSettings.allOrgsSelected = true;
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 	}
-	
+
+	const handleSelectCategory = (event) => {
+		if(state.activeCategoryTab === event.target.name){
+			setState(dispatch, { 
+				selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked},
+				activeCategoryTab: 'all'
+			})
+		}
+		setState(dispatch, { selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked}})
+	}
+
 	const handleSelectPublicationDateAllTime = (e) => {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.publicationDateAllTime = true;
@@ -460,6 +538,12 @@ export default function SearchMatrix(props) {
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 	}
 
+	const handleAddSearchTerm = (phrase,source,idx) => {
+		const temp = _.cloneDeep(expansionTerms)
+		temp[idx].checked = !temp[idx].checked
+		setExpansionTerms(temp);
+	}
+
 	const renderSearchTypes = () => {
 		return (
 			<div style={{width: '100%'}}>
@@ -536,7 +620,7 @@ export default function SearchMatrix(props) {
 									clearOnBlur
 									blurOnSelect
 									openOnFocus
-                                    style={{ backgroundColor: 'white', width: '100%' }}
+									style={{ backgroundColor: 'white', width: '100%' }}
 									value={searchField.field}
 									default
 									onChange={(event, value) => setSearchField(key, value)}
@@ -801,6 +885,58 @@ export default function SearchMatrix(props) {
 		);
 	}
 
+	const renderCategories = () => {
+		return (
+			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+				{Object.keys(state.selectedCategories).map(category => {
+					return (
+						<FormGroup key={`${category}-key`} row style={{ marginBottom: '10px' }}>
+							<FormControlLabel
+								name={category}
+								value={category}
+								classes={{ label: classes.titleText }}
+								control={<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={handleSelectCategory}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									checked={state.selectedCategories[category]}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+									name={category}
+									style={styles.filterBox}
+								/>}
+								label={category}
+								labelPlacement="end"
+								style={styles.titleText}
+							/>
+						</FormGroup>
+					)
+				})}
+			</FormControl>
+		)
+	}
+
+	const renderExpansionTerms = () => {
+		return (
+			<div style={{margin: '10px 0 10px 0'}}>
+				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
+					{expansionTerms.map(({phrase, source, checked}, idx) => {
+						const term = phrase
+						return (
+							<FormControlLabel
+								key={term}
+								value={term}
+								classes={{ label: classes.checkboxPill }}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={term} checked={checked} onClick={() => handleAddSearchTerm(phrase,source,idx)} />}
+								label={term}
+								labelPlacement="end"
+							/>
+						)
+					})}
+				</FormGroup>
+			</div>
+		);
+	};
+
 	return (
 		<div className={''} style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}>
 			<div className={''}>
@@ -831,7 +967,12 @@ export default function SearchMatrix(props) {
 							</div>}
 							
 							<div style={{width: '100%', marginBottom: 10}}>
-								<GCAccordion expanded={true} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+								<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+									{ renderCategories() }
+								</GCAccordion>
+							</div>
+							<div style={{width: '100%', marginBottom: 10}}>
+								<GCAccordion expanded={false} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 									{ renderSources() }
 								</GCAccordion>
 							</div>
@@ -859,6 +1000,12 @@ export default function SearchMatrix(props) {
 									{ renderAdvancedFilters() }
 								</GCAccordion>
 							</div>
+
+							{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
+								<GCAccordion expanded={true} header={'ADD SEARCH TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+									{ renderExpansionTerms() }
+								</GCAccordion>
+							</div>}
 
 							<GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={handleSubmit}>Update Search</GCButton>
 							<button

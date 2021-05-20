@@ -110,11 +110,11 @@ export const downloadFile = async (data, format, cloneData) => {
 	}
 }
 
-export default ({ open, handleClose, searchObject, selectedDocuments, isSelectedDocs, orgFilter, orgFilterString, typeFilter, typeFilterString, isClone, cloneData, getUserData, searchType, searchFields }) => {
+export default ({ open, handleClose, searchObject, selectedDocuments, isSelectedDocs, orgFilter, orgFilterString, typeFilter, typeFilterString, isClone, cloneData, getUserData, searchType, searchFields, edaSearchSettings }) => {
 	
 	const [loading, setLoading] = useState(false)
 	const [errorMsg, setErrorMsg] = useState('')
-	const isEda = cloneData.clone_name === 'contractsearch';
+	const isEda = cloneData.clone_name === 'eda';
 	const [selectedFormat, setSelectedFormat] = isEda ? useState('csv') : useState('pdf')
 	const index = cloneData.clone_name;
 
@@ -131,7 +131,7 @@ export default ({ open, handleClose, searchObject, selectedDocuments, isSelected
 			url = url.replace("#/", "");
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
-			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields }});
+			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings }});
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
 		} catch (err) {

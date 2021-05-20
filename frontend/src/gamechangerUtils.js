@@ -129,7 +129,7 @@ export const PAGE_BORDER_RADIUS = 5;
 
 export const StyledCenterContainer = styled.div`
 	width: unset;
-    margin: 0px 4.3% 0px 65px;
+    margin: 0px 15px
     padding: 0px;
     align-items: left;
     
@@ -143,7 +143,7 @@ export const StyledCenterContainer = styled.div`
     }
     
     .left-container {
-    	width: ${({showSideFilters}) => showSideFilters ? '22.5%' : '0%'};
+    	width: ${({showSideFilters}) => showSideFilters ? '20%' : '0%'};
 		margin-top: 0px;
 		float: left;
 		padding: 0px;
@@ -158,17 +158,18 @@ export const StyledCenterContainer = styled.div`
     }
     
     .right-container {
-    	margin-left: ${({showSideFilters}) => showSideFilters ? '24.5%' : '0%'};
+    	margin-left: ${({showSideFilters}) => showSideFilters ? '22.5%' : '0%'};
 		margin-top: 0px;
 		width: ${({showSideFilters}) => showSideFilters ? '75.7%' : '100%'};
 		padding: 0px;
 		box-shadow: none;
 		
-		.results-count-pagination-container {
+		.results-count-view-buttons-container {
 			display: flex;
-    		justify-content: space-between;
+			justify-content: space-between;
+			margin: 20px 0
     		
-    		.pagination-container {
+    		.view-buttons-container {
     			margin-top: -14px;
     			display: flex;
     		}
@@ -243,6 +244,23 @@ export const getMetadataForPropertyTable = (item) => {
 
 	})
 	return data;
+}
+
+export function commaThousands(value) {
+	if (_.isNull(value) || _.isUndefined(value))
+		return "";
+
+	return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+export const getCurrentView = (view, list) => {
+	if (view === 'Card' && list){
+		return 'List';
+	} else if (view === 'Card'){
+		return 'Grid';
+	} else {
+		return view
+	}
 }
 
 //https://stackoverflow.com/a/2901298

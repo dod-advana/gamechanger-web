@@ -262,7 +262,7 @@ describe('GraphHandler', function () {
 
 			try {
 				const actual = await target.getGraphData('test', {}, true, 'test');
-				const expected = [{edges: [{curvature: 0, id: 1890, label: 'REFERENCES', properties: [], rotation: 0, source: 505, target: 505, value: 1}], labels: ['Publication'], nodeProperties: {Publication: ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num']}, nodes: [{display_doc_type_s: 'Directive', display_org_s: 'Intelligence Community', doc_num: '402', doc_type: 'ICD', id: 505, label: 'Publication', name: 'ICD 402', properties: ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num'], value: 1}], relProperties: {REFERENCES: []}, relationships: ['REFERENCES']}, 'test', {}];
+				const expected = [{edges: [{curvature: 0, id: 1890, label: 'REFERENCES', properties: [], rotation: 0, source: 505, target: 505, value: 1}], labels: ['Publication'], nodeProperties: {Publication: ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num']}, nodes: [{display_doc_type_s: 'Directive', display_org_s: 'Intelligence Community', doc_num: '402', doc_type: 'ICD', id: 505, label: 'Publication', name: 'ICD 402', pageRank: 1, properties: ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num'], value: 1}], relProperties: {REFERENCES: []}, relationships: ['REFERENCES']}, 'test', {}];
 				assert.deepStrictEqual(actual, expected);
 				done();
 			} catch (e) {

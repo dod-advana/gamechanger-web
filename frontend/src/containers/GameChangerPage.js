@@ -1,5 +1,4 @@
 import React, {useContext, useEffect} from 'react';
-import '../index.css';
 import './gamechanger.css';
 import MainView from "../components/mainView/MainView";
 import {getContext} from "../components/factories/contextFactory";
@@ -49,7 +48,7 @@ const GameChangerPage = (props) => {
 	}, [cloneData, state, dispatch, history]);
 	
 	return (
-		<div style={styles.mainContainer}>
+		<div className="main-container">
 			{state.cloneDataSet &&
 				<>
 					{/* Side Navigation */}
@@ -94,13 +93,6 @@ const GameChangerPage = (props) => {
 		</div>
 	);
 	
-};
-
-const styles = {
-	mainContainer: {
-		minHeight: 'calc(100% - 89px)',
-		backgroundColor: 'white',
-	},
 };
 
 export default GameChangerPage;

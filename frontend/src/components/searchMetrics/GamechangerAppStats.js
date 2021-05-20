@@ -52,8 +52,7 @@ export default () => {
 
 	const getAppStats = async () => {
 		try {
-			const { data = {} } = await gameChangerAPI.getAppStats();
-			console.log(data);
+			const { data = {} } = await gameChangerAPI.getAppStats({cloneData: {clone_name: 'gamechanger'}});
 			setData(data);
 		} catch (e) {
 			console.error(e);

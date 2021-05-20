@@ -7,18 +7,29 @@ import styled from "styled-components";
 import Paper from 'material-ui/Paper/Paper';
 import SimpleTable from "../components/common/SimpleTable";
 import {MemoizedNodeCluster2D} from "../components/graph/GraphNodeCluster2D";
-import {numberWithCommas} from "../gamechangerUtils";
+import {	numberWithCommas, getMetadataForPropertyTable,
+	getReferenceListMetadataPropertyTable, getTrackingNameForFactory} from "../gamechangerUtils";
 import Pagination from "react-js-pagination";
 import {Card} from "../components/cards/GCCard";
 import GCAccordion from "../components/common/GCAccordion";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../components/common/gc-colors";
+import _ from "lodash";
+import DocumentDetailsPage from "../components/details/documentDetailsPage";
+import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 
 const gameChangerAPI = new GameChangerAPI();
 
 const RESULTS_PER_PAGE = 18;
 
-const MainContainer = styled.div`
+const colWidth = {
+	maxWidth: '900px',
+	whiteSpace: 'nowrap',
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+};
+
+export const MainContainer = styled.div`
 	display: flex;
 	margin: 10px 4%;
 	font-family: Montserrat !important;
@@ -84,6 +95,35 @@ const MainContainer = styled.div`
 	}
 `
 
+const FavoriteTopic = styled.button`
+	border: none;
+	height: 25px;
+	border-radius: 15px;
+	background-color: white;
+	color: black;
+	white-space: nowrap;
+	text-align: center;
+	display: inline-block;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-bottom: 3px;
+	cursor: pointer;
+	border: 1px solid darkgray;
+
+	> i {
+        color: ${({ favorited }) => favorited? '#E9691D' : '#B0B9BE'};
+    }
+	&:hover {
+		background-color: #E9691D;
+		color: white;
+        > i {
+             color: ${({ favorited }) => favorited? '#FFFFFF' : '#B0B9BE'};
+        }
+	};
+`;
+
 function useQuery(location, setQuery, query) {
 	if (!query) {
 		setQuery(new URLSearchParams(location.search));
@@ -120,8 +160,8 @@ const getEntityData = async (name, cloneName) => {
 	}
 	
 	const graphResp = await gameChangerAPI.graphQueryPOST(
-	'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF*]->(p:Entity) ' +
-		'WHERE p.name = $name AND NOT c.name = "" ' +
+	'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
+		'WHERE c.name = $name ' +
 		'RETURN pc;', 'WHB0K4M', cloneName, {params: {name: name}}
 	);
 	
@@ -134,9 +174,9 @@ const getEntityData = async (name, cloneName) => {
 const getTopicData = async (name, cloneName) => {
 	const data = {topic: {}, graph: {nodes: [], edges: []}};
 	const resp = await gameChangerAPI.graphQueryPOST(
-		`MATCH (t:Topic) WHERE t.name =~ '(?i)$name'
-			WITH t MATCH (d:Document)-[:CONTAINS]->(t2:Topic) WHERE t2 = t
-			RETURN t as topic, count(t2) as documentCountsForTopic;`, '8SJ22U3', cloneName, {params: {name: name}}
+		'MATCH (t:Topic) WHERE t.name = $name ' +
+			'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
+			'RETURN t as topic, count(d) as documentCountsForTopic;', '8SJ22U3', cloneName, {params: {name: name}}
 	);
 	
 	if (resp.data.nodes && resp.data.nodes.length > 0){
@@ -147,7 +187,7 @@ const getTopicData = async (name, cloneName) => {
 		
 		const graphResp = await gameChangerAPI.graphQueryPOST(
 		'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
-			'WHERE t.name =~ "(?i)$name' +
+			'WHERE t.name = $name ' +
 			'RETURN pt;', 'KRH4Q7C', cloneName, {params: {name: name}}
 		);
 	
@@ -157,6 +197,85 @@ const getTopicData = async (name, cloneName) => {
 	return data;
 }
 
+const getDocumentData = async (doc_id, cloneName) => {
+	const data = {document: {}};
+	const resp = await gameChangerAPI.callSearchFunction({
+		functionName: 'getSingleDocumentFromES',
+		cloneName: cloneName,
+		options: {
+			docIds: [doc_id]
+		}
+	})
+	
+	data.document = resp.data.docs[0];
+	
+	console.log(resp.data)
+	
+	const docData = getMetadataForPropertyTable(data.document);
+	const { ref_list = [] } = data.document;
+	const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list, true);
+	
+	const labelText = data.document.isRevoked ? 'Cancel Date' : 'Verification Date';
+	let dateText = "Unknown";
+	if(data.document.current_as_of !== undefined && data.document.current_as_of !== ''){
+		const currentDate = new Date(data.document.current_as_of);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
+		dateText = `${month}-${day}-${year}`;
+	}
+	
+	let publicationDate;
+	if(data.document.publication_date_dt !== undefined && data.document.publication_date_dt !== ''){
+		const currentDate = new Date(data.document.publication_date_dt);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
+		publicationDate = `${month}-${day}-${year}`;
+	} else {
+		publicationDate = `unknown`;
+	}
+	
+	const favoritableData = [{Key: 'Published', Value: publicationDate}, {Key: labelText, Value: dateText}, ...addFavoriteTopicToMetadata(docData, cloneName)];
+	
+	data.document.details = favoritableData;
+	data.document.refList = previewDataReflist;
+	
+	return data;
+}
+
+const addFavoriteTopicToMetadata = (data, cloneName) => {
+		const temp = _.cloneDeep(data);
+		temp.map(metaData => {
+			if(metaData.Key === 'Topics') {
+				metaData.Key = <div>
+					Topics<br/><b style={{color:'red'}}>(Beta)</b>
+					</div>
+				const topics = metaData.Value;
+				metaData.Value =
+				<div>
+					{topics.map((topic,index) => {
+						topic = topic.trim()
+						return(
+							<FavoriteTopic key={index}
+								onClick={(event) => {
+									trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic)
+									window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+								}}
+								favorited={false}
+							>
+								{topic}
+							</FavoriteTopic>
+							)
+						})
+					}
+				</div>
+			}
+			return metaData
+		})
+		return temp
+	}
+	
 const GameChangerDetailsPage = (props) => {
 	
 	const {
@@ -167,7 +286,7 @@ const GameChangerDetailsPage = (props) => {
 	const [entity, setEntity] = useState(null)
 	const [query, setQuery] = useState(null)
 	const [runningQuery, setRunningQuery] = useState(false);
-	const [graph, setGraph] = useState({nodes: [], edges: []});
+	const [graph, setGraph] = useState({nodes: [], edges: [], labels: []});
 	const [docCount, setDocCount] = useState(0);
 	const [timeFound, setTimeFound] = useState('0.0');
 	const [docResultsPage, setDocResultsPage] = useState(0);
@@ -180,6 +299,9 @@ const GameChangerDetailsPage = (props) => {
 	
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
+	
+	const [document, setDocument] = useState(null);
+	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
 	
 	const graphRef = useRef();
 	
@@ -226,6 +348,16 @@ const GameChangerDetailsPage = (props) => {
 					setRunningQuery(false);
 				})
 				break;
+			case 'document':
+				setDetailsType('Document');
+				name = query.get('documentName');
+				
+				setShowDocumentContainer(true);
+				getDocumentData(name, cloneName).then(data => {
+					setDocument(data.document);
+				});
+				
+				break;
 			default:
 				break;
 		}
@@ -268,7 +400,7 @@ const GameChangerDetailsPage = (props) => {
 		});
 		
 		const t0 = new Date().getTime();
-		gameChangerAPI.getDocumentsForTopic({cloneData, docIds, searchText}).then(resp => {
+		gameChangerAPI.getDocumentsForTopic(cloneData.clone_name, {docIds, searchText}).then(resp => {
 			
 			const t1 = new Date().getTime();
 			setDocCount(resp.data.totalCount)
@@ -323,7 +455,7 @@ const GameChangerDetailsPage = (props) => {
 										rows={entity.details}
 										height={'auto'}
 										dontScroll={true}
-										colWidth={styles.entityColWidth}
+										colWidth={colWidth}
 										disableWrap={true}
 										title={'Entity Statistics'}
 										hideHeader={true}
@@ -401,8 +533,7 @@ const GameChangerDetailsPage = (props) => {
 												 rows={topic.details || []}
 												 height={'auto'}
 												 dontScroll={true}
-												 colWidth={styles.topicColWidth}
-												 firstColWidth={{width: '300px'}}
+												 colWidth={colWidth}
 												 disableWrap={true}
 												 title={'Topic Statistics'}
 												 hideHeader={true}
@@ -414,9 +545,12 @@ const GameChangerDetailsPage = (props) => {
 							
 							<div className={'section'}>
 								<GCAccordion expanded={true} header={'GRAPH VIEW'} backgroundColor={'rgb(238,241,242)'}>
-									<MemoizedNodeCluster2D graphWidth={1420} graphHeight={400} runningQuery={runningQuery}
-														   displayLinkLabel={false} graph={graph} graphRefProp={graphRef}
-														   hierarchyView={hierarchyView}/>
+									<MemoizedPolicyGraphView width={1420} height={670} graphData={graph} runningSearchProp={runningQuery}
+										 notificationCountProp={0} setDocumentsFound={() => {}} setTimeFound={() => {}}
+										 cloneData={cloneData} expansionTerms={false} setNumOfEdges={() => {}}
+										 dispatch={{}} showSideFilters={false} showBasic={false} searchText={''}
+										 hierarchyView={hierarchyView} detailsView={true}
+									/>
 								</GCAccordion>
 							</div>
 							
@@ -466,6 +600,7 @@ const GameChangerDetailsPage = (props) => {
 			<SearchBanner
 				detailsType={detailsType}
 				titleBarModule={'details/detailsTitleBarHandler'}
+				rawSearchResults={[]}
 			>
 			</SearchBanner>
 			
@@ -477,10 +612,15 @@ const GameChangerDetailsPage = (props) => {
 				renderTopicContainer()
 			}
 			
+			{showDocumentContainer &&
+				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
+									 graphData={graph}
+				/>
+			}
+			
 		</div>
 	);
-
-}
+};
 
 const styles = {
 	entityColWidth: {

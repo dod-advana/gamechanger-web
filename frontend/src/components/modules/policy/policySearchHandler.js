@@ -22,7 +22,7 @@ const gameChangerAPI = new GameChangerAPI();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	gameChangerAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
+		setState(dispatch, {didYouMean: data?.autocorrect?.[0]});
 	}).catch(_ => {
 		//do nothing
 	})
@@ -38,7 +38,7 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 }
 
 const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, tabName} = state;
+	const { searchText,  resultsPage, currentViewName} = state;
 	const {searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked} = searchSettings;
 	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
 	let orgFilterText = 'ALLORGS';
@@ -54,7 +54,7 @@ const setSearchURL = (state, searchSettings) => {
 	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
 	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&tabName=${tabName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&viewName=${currentViewName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
 	window.history.pushState(null, null, linkString);
 }
 
@@ -69,7 +69,7 @@ const PolicySearchHandler = {
 			showTutorial,
 			userData,
 			searchSettings,
-			tabName,
+			currentViewName,
 			cloneData
 		} = state;
 		
@@ -100,7 +100,6 @@ const PolicySearchHandler = {
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
-		document.body.style.overflow = 'unset'
 		
 		const searchFavorite = favSearchUrls.includes(url);
 		
@@ -136,7 +135,6 @@ const PolicySearchHandler = {
 		const t0 = new Date().getTime();
 	
 		let searchResults = [];
-		let foundEntity = false;
 	
 		const transformResults = searchType === SEARCH_TYPES.contextual;
 		
@@ -148,8 +146,13 @@ const PolicySearchHandler = {
 			autocompleteItems: [],
 			rawSearchResults: [],
 			docSearchResults: [],
+			topicSearchResults: [],
+			entitySearchResults: [],
+			categoryMetadata: {},
+			qaResults: {question: '', answers: [], filenames: [], docIds: []},
 			searchResultsCount: 0,
 			count: 0,
+			entityCount: 0,
 			resultsDownloadURL: '',
 			timeFound: 0.0,
 			iframePreviewLink: null,
@@ -175,7 +178,7 @@ const PolicySearchHandler = {
 		
 		try {
 			
-			if (cloneData.show_graph && tabName === 'graphView') {
+			if (cloneData.show_graph && currentViewName === 'Graph') {
 				setState(dispatch, {runGraphSearch: true});
 			}
 			
@@ -224,8 +227,6 @@ const PolicySearchHandler = {
 					orgFilterString,
 					transformResults,
 					charsPadding,
-					orgFilter: modifiedOrgFilter,
-					typeFilter: modifiedTypeFilter,
 					typeFilterString,
 					showTutorial,
 					useGCCache,
@@ -235,7 +236,7 @@ const PolicySearchHandler = {
 					publicationDateFilter,
 					publicationDateAllTime,
 					includeRevoked,
-					combinedSearch
+					limit: 6,
 				},
 			});
 			
@@ -244,19 +245,27 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, totalCount, expansionDict, isCached, timeSinceCache, query } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults } = resp.data;
+
+				const categoryMetadata = 
+				{
+					Documents: {total: totalCount},
+					Organizations: {total: totalEntities},
+					Topics: {total: totalTopics},
+				};
 	
-				if (docs && Array.isArray(docs)) {
+				if (entities && Array.isArray(entities)) {
 					// if entity, add wiki description
-					docs.slice(0,2).forEach(async (obj, i) => {
+					entities.forEach(async (obj, i) => {
 						if(obj && obj.type === 'organization'){
 							const descriptionAPI = await gameChangerAPI.getDescriptionFromWikipedia(obj.name);
 							let description = descriptionAPI.query;
 							if(description.pages){
-								docs[i].description = description.pages[Object.keys(description.pages)[0]].extract
+								entities[i].description = description.pages[Object.keys(description.pages)[0]].extract
 							}					
 						}
 					});
+
 					// intelligent search failed, show keyword results with warning alert
 					if (resp.data.transformFailed) {
 						setState(dispatch, {transformFailed: true});
@@ -381,19 +390,26 @@ const PolicySearchHandler = {
 						trackSearch(
 							searchText,
 							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							totalCount + (foundEntity ? 1 : 0),
+							totalCount,
 							false
 						);
 					}
 	
 					setState(dispatch, {
+						activeCategoryTab: (entities.length === 0 && topics.length === 0) ? 'Documents' : 'all',
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
 						loading: false,
-						count: totalCount + (foundEntity ? 1 : 0),
+						count: totalCount,
+						entityCount: totalEntities,
+						topicCount: totalTopics,
 						rawSearchResults: searchResults,
 						docSearchResults: docs,
+						entitySearchResults: entities,
+						topicSearchResults: topics, 
+						qaResults: qaResults,
 						searchResultsCount: searchResults.length,
+						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
 						expansionDict,
 						isCachedResult: isCached,
@@ -411,7 +427,7 @@ const PolicySearchHandler = {
 						trackSearch(
 							searchText,
 							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							totalCount + (foundEntity ? 1 : 0),
+							totalCount,
 							false
 						);
 					}
@@ -421,6 +437,10 @@ const PolicySearchHandler = {
 						count: 0,
 						rawSearchResults: [],
 						docSearchResults: [],
+						entitySearchResults: [],
+						topicSearchResults: [],
+						categoryMetadata: {},
+						qaResults: {question: '', answers: [], filenames: [], docIds: []},
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
@@ -429,6 +449,8 @@ const PolicySearchHandler = {
 						hasExpansionTerms: false,
 						resetSettingsSwitch: false,
 					});
+					
+					
 				}
 			} else {
 				setState(dispatch, {
@@ -443,7 +465,7 @@ const PolicySearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+			setSearchURL({searchText, resultsPage, currentViewName, cloneData}, searchSettings);
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -462,10 +484,146 @@ const PolicySearchHandler = {
 				hasExpansionTerms: false
 			});
 		}
-	
+		
 		const index = cloneData.clone_name;
 		getAndSetDidYouMean(index, searchText, dispatch);
-	}
+	},
+
+	handleDocPagination: async (state, dispatch, replaceResults) => {
+		const {
+			activeCategoryTab,
+			docSearchResults,
+			infiniteScrollPage,
+			searchText = "",
+			resultsPage,
+			listView,
+			showTutorial,
+			searchSettings,
+			cloneData
+		} = state;
+
+		const {
+			searchType,
+			orgFilter,
+			typeFilter,
+			allOrgsSelected,
+			allTypesSelected,
+			includeRevoked,
+			accessDateFilter,
+			publicationDateFilter,
+			publicationDateAllTime,
+			searchFields,
+		} = searchSettings;
+
+		const offset = (((activeCategoryTab === 'all' ? resultsPage : infiniteScrollPage) - 1) * RESULTS_PER_PAGE);
+		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
+		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
+		const transformResults = searchType === SEARCH_TYPES.contextual;
+		const charsPadding = listView ? 750 : 90;
+		let modifiedOrgFilter = allOrgsSelected ? {} : orgFilter;
+		let modifiedTypeFilter = allTypesSelected ? {} : typeFilter;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = (activeCategoryTab === 'all' || infiniteScrollPage === 1) ? 6 : 18;
+
+		const resp = await gameChangerAPI.callSearchFunction( 
+			{
+				functionName: 'documentSearchPagination',
+				cloneName: cloneData.clone_name,
+				options: {
+					searchText,
+					offset,
+					searchType,
+					orgFilterString,
+					transformResults,
+					charsPadding,
+					orgFilter: modifiedOrgFilter,
+					typeFilter: modifiedTypeFilter,
+					typeFilterString,
+					showTutorial,
+					useGCCache,
+					searchFields,
+					accessDateFilter,
+					publicationDateFilter,
+					publicationDateAllTime,
+					includeRevoked,
+					limit,
+				},
+			});
+
+			if(resp.data){
+				if(replaceResults) {
+					setState(dispatch, {
+						docSearchResults: resp.data.docs,
+						docsLoading: false,
+						docsPagination: false
+					});
+				} else {
+					setState(dispatch, {
+						docSearchResults: [...docSearchResults, ...resp.data.docs],
+						docsLoading: false,
+						docsPagination: false,
+					});
+				}
+			}
+		},
+	
+
+		handleEntityPagination: async (state, dispatch) => {
+			setState(dispatch, {
+				entityPagination: false,
+			});
+			const {
+				searchText = "",
+				entityPage,
+				cloneData
+			} = state;
+			const offset = ((entityPage - 1) * RESULTS_PER_PAGE);
+			const resp = await gameChangerAPI.callSearchFunction( 
+				{
+					functionName: 'entityPagination',
+					cloneName: cloneData.clone_name,
+					options: {
+						searchText,
+						offset,
+						limit: 6,
+					},
+				});
+				if(resp.data){
+					setState(dispatch, {
+						entitySearchResults: resp.data.entities,
+						entitiesLoading: false
+					});
+				}
+		},
+
+		handleTopicPagination: async(state, dispatch) => {
+			setState(dispatch, {
+				topicPagination: false,
+			});
+			const {
+				searchText = "",
+				entityPage,
+				cloneData
+			} = state;
+			const offset = ((entityPage - 1) * RESULTS_PER_PAGE);
+			const resp = await gameChangerAPI.callSearchFunction( 
+				{
+					functionName: 'topicPagination',
+					cloneName: cloneData.clone_name,
+					options: {
+						searchText,
+						offset,
+						limit: 6,
+					},
+				});
+				if(resp.data){
+					setState(dispatch, {
+						topicSearchResults: resp.data.entities,
+						topicsLoading: false
+					});
+				}
+		}
+	
 };
 
 export default PolicySearchHandler;

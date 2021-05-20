@@ -11,7 +11,7 @@ const initState = {
 		navigation_module: 'policy/policyNavigationHandler',
 		display_name: 'GAMECHANGER',
 		is_live: true,
-		url: '/',
+		url: 'gamechanger',
 		permissions_required: false,
 		clone_to_advana: true,
 		clone_togamchanger: true,
@@ -70,10 +70,17 @@ const initState = {
 	documentProperties: [],
 	pageDisplayed: 'main',
 	listView: false,
-	
+	qaResults: { question: [], answers: [] },
+	selectedCategories: {
+		Documents: true,
+		Organizations: false,
+		Topics: false
+	},	
+
 	// Documents
 	iframePreviewLink: null,
 	detailViewId: 0,
+	docsLoading: false,
 	
 	// Export
 	selectedDocuments: new Map(),
@@ -85,6 +92,7 @@ const initState = {
 	menuOpen: false,
 	tabName: '',
 	hideTabs: true,
+	activeCategoryTab: 'all',
 	
 	// Graph
 	runGraphSearch: false,
@@ -133,7 +141,18 @@ const initState = {
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
 		includeRevoked: false
-	}
+	},
+	docsPagination: false,
+
+	entityCount: 0,
+	entityPage: 1,
+	entityPagination: false,
+	entitiesLoading: false,
+
+	topicCount: 0,
+	topicPage: 1,
+	topicPagination: false,
+	topicsLoading: false,
 };
 
 const init = (initialState) => {
@@ -170,7 +189,7 @@ function reducer(state, action) {
 				exportDialogVisible: action.payload,
 				isSelectedDocs: action.payload
 			};
-		case 'REST_SEARCH_SETTINGS':
+		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
 				searchSettings: initState.searchSettings

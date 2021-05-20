@@ -120,7 +120,7 @@ const GCAccordion = (props) => {
 			<StyledAccordionSummary style= {{ backgroundColor: headerBackground }} aria-controls="accordion-content" id="accordion-header"
 							  expandIcon={isExpanded ? <CollapseIcon style={{ color: headerTextColor }}/> : <ExpandIcon style={{ color: headerTextColor }} />}>
 				<PanelHeader style = {{ color: headerTextColor, fontWeight: headerTextWeight }}>{header}</PanelHeader>
-				{itemCount && 
+				{itemCount >= 0 &&
 				<Typography 
 					style={{color:'white', marginTop:'3px', marginLeft:'6px', fontSize:'14px', fontWeight:'900'}}>
 						({itemCount})

@@ -108,6 +108,14 @@ export default (props) => {
     }
     
     const handleSubmit = async () => {
+        
+         if (EmailValidator.validate(userEmail)) {
+            setEmailError(false);
+        }else{
+            setEmailError(true);
+            return;
+        }
+        
         setLoading(true);
         /*
             If coming from a different component that took a specific screen shot then

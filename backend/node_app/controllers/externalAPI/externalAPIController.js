@@ -27,6 +27,40 @@ module.exports.SwaggerDefinition = {
 				UnauthorizedError: {
 					description: 'API key is missing or invalid'
 				}
+			},
+			requestBodies: {
+				Search: {
+					description: 'A JSON object containing search information',
+					required: true,
+					content: {
+						'application/json': {
+							schema: {
+								type: 'object',
+								properties: {
+									cloneName: {
+										type: 'string',
+										required: true,
+										default: 'gamechanger'
+									},
+									searchText: {
+										type: 'string',
+										required: true
+									},
+									offset: {
+										type: 'integer',
+										required: false,
+										default: 0
+									},
+									limit: {
+										type: 'integer',
+										required: false,
+										default: 20
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		},
 		security: [

@@ -79,3 +79,9 @@
     box-shadow: none !important;
     border: none;
 }
+
+.main-container { 
+    overflow: auto !important;
+    min-height: calc(100% - 89px);
+    background-color: white;
+}
