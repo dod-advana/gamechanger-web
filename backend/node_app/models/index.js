@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const Sequelize = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const basename = path.basename(module.filename);
 const constants = require('../config/constants.js');
 const db = {};
@@ -27,7 +27,8 @@ fs
         (file !== basename) &&
         (file.slice(-3) === '.js'))
 	.forEach(file => {
-		const model = db.game_changer.import(path.join(__dirname + '/game_changer', file));
+		// const model = db.game_changer.import(path.join(__dirname + '/game_changer', file));
+		const model = require(path.join(__dirname + '/game_changer', file))(db['game_changer'], DataTypes);
 		db[model.name] = model;
 	});
 
@@ -39,7 +40,8 @@ fs
         (file !== basename) &&
         (file.slice(-3) === '.js'))
 	.forEach(file => {
-		const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
+		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
+		const model = require(path.join(__dirname + '/gc-orchestration', file))(db['gc-orchestration'], DataTypes);
 		db[model.name] = model;
 	});
 

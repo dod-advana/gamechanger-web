@@ -39,7 +39,7 @@ class PolicyExportHandler extends ExportHandler {
 				const noSourceSpecified = _.isEqual({}, orgFilter);
 				const noTypeSpecified = _.isEqual({}, typeFilter);
 				const noPubDateSpecified = req.body.publicationDateAllTime;
-				let combinedSearch = await this.appSettings.find({ attributes: ['value'], where: { key: 'combined_search'} });
+				let combinedSearch = await this.appSettings.findAll({ attributes: ['value'], where: { key: 'combined_search'} });
 				if (combinedSearch.length > 0){
 					combinedSearch = combinedSearch[0].dataValues.value === 'true';
 				}
