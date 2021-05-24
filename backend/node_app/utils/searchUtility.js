@@ -41,6 +41,8 @@ class SearchUtility {
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
 		this.filterQAResults = this.filterQAResults.bind(this);
+		this.generateQASearchReport = this.generateQASearchReport.bind(this);
+		this.generateSearchReport = this.generateSearchReport.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1058,6 +1060,39 @@ class SearchUtility {
 		let newResults = { question, answers };
 
 		return newResults;
+	}
+
+	generateQASearchReport(qaSearchText, maxLength, maxDocContext, maxParaContext, minLength, scoreThreshold, context, userId) {
+		var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+		let report = {datetime: today, userId: userId, question: qaSearchText, maxLength: maxLength, maxDocContext: maxDocContext, maxParaContext: maxParaContext, minLength: minLength, scoreThreshold: scoreThreshold, context: context}
+		const fs = require('fs');
+		let filedir = './scripts/qa-testing/' + date + '_search_reports.txt'
+		//fs.appendFile("message.txt", `Hello ${user.username}! You are ${notes.age}`, (err) => { 
+		fs.appendFile(filedir, JSON.stringify(report), (err) => { 
+			if (err) { 
+				console.log(err); 
+			} 
+		});
+	}
+
+	generateSearchReport(searchText, searchResults, entities, topics, userId) {
+		var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+		let shortenedResults = [];
+		searchResults.docs.forEach((i) => {
+			shortenedResults.push({filename: i['display_title_s'], docType: i['doc_type'], type: i['type'], org: i['display_org_s'], text: i['pageHits']});
+		})
+
+		let report = {datetime: today, userId: userId, query: searchText, searchResults: shortenedResults, entities: entities, topics: topics}
+		const fs = require('fs');
+		let filedir = './scripts/qa-testing/' + date + '_search_reports.txt'
+		//fs.appendFile("message.txt", `Hello ${user.username}! You are ${notes.age}`, (err) => { 
+		fs.appendFile(filedir, JSON.stringify(report), (err) => { 
+			if (err) { 
+				console.log(err); 
+			} 
+		});
 	}
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
