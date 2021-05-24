@@ -10,8 +10,7 @@ module.exports = {
 				type: Sequelize.INTEGER
 			},
 			username: {
-				type: Sequelize.TEXT,
-				unique: true
+				type: Sequelize.TEXT
 			},
 			name: {
 				type: Sequelize.TEXT,
