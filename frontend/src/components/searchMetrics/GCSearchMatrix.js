@@ -645,7 +645,7 @@ export default function SearchMatrix(props) {
 									/>
 								</div>
 								{searchFields[key].field !== null &&
-									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key)} />
+									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state)} />
 								}
 							</div>
 						</div>
