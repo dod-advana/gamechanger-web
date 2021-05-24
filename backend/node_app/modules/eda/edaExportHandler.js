@@ -79,14 +79,14 @@ class EdaExportHandler extends ExportHandler {
 			try {
 				const { docs } = searchResults;
 
-				if (historyId) {
-					await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
-				} else {
-					await this.exportHistory.storeExportHistory(res, req.body, {
-						totalCount: docs.length,
-						searchTerms
-					}, userId);
-				}
+				// if (historyId) {
+				// 	await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
+				// } else {
+				// 	await this.exportHistory.storeExportHistory(res, req.body, {
+				// 		totalCount: docs.length,
+				// 		searchTerms
+				// 	}, userId);
+				// }
 
 				if (format === 'pdf') {
 					const sendDataCallback = (buffer) => {

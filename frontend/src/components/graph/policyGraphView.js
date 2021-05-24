@@ -204,7 +204,7 @@ const makeFilteredGraph = (is2D, graph, collections) => {
 
 	const gT0 = new Date().getTime();
 
-	const { filteredGraph, docOrgNumbers } = filterGraphData(nodes, edges, collections);
+	const { filteredGraph, docOrgNumbers } = filterGraphData(nodes, edges);
 
 	setFixedCoordsBasedOnView(is2D, filteredGraph.nodes);
 
@@ -517,7 +517,7 @@ export default function PolicyGraphView(props) {
 		const myStyle = {
 			position: 'absolute',
 			top: `${mouseXY.y + 99 + (notificationCount * 50) + (expansionTerms ? 41 : 0) + (detailsView ? -175 : 0)}px`,
-			left:`${mouseXY.x - 20 + (showSideFilters ? 424 : detailsView ? -100 : 0)}px`,
+			left:`${mouseXY.x - 20 + (showSideFilters ? 372 : detailsView ? -100 : 0)}px`,
 			zIndex: 99
 		};
 		
@@ -740,7 +740,7 @@ export default function PolicyGraphView(props) {
 					<Card
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
 						dispatch={dispatch}
 						graphView={true}
 						collection={collections[selectedItem.id]}
@@ -751,7 +751,7 @@ export default function PolicyGraphView(props) {
 					<Card
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
 						dispatch={dispatch}
 						graphView={true}
 					/>
@@ -766,7 +766,7 @@ export default function PolicyGraphView(props) {
 					<Card
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
 						dispatch={dispatch}
 						graphView={true}
 					/>
@@ -782,7 +782,7 @@ export default function PolicyGraphView(props) {
 					<Card
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
 						dispatch={dispatch}
 						graphView={true}
 					/>
