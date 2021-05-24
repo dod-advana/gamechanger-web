@@ -122,7 +122,7 @@ export default (props) => {
             use that(i.e. DocumentExplorer). Otherwise take a the page in the current 
             view as the image. 
         */
-        if(screenShot !== ''){
+        if(screenShot && screenShot !== ''){
             try{
                 await gameChangerAPI.sendFeedbackPOST({feedbackType, feedbackText, screenShot})
                 setLoading(false);
@@ -236,7 +236,7 @@ export default (props) => {
                         variant="outlined"
                         error={emailError}
                         style={{margin:'0 0 0 20px', width:"700px"}}
-                        placeholder="Entering your email adddress will help us respond directly to you!"
+                        placeholder="Entering your email address will help us respond directly to you!"
                         value={userEmail}
                         onChange={e=>handleEmailChange(e.target.value)}
                         helperText = {emailError ? "Enter Valid Email Format!" : ""}

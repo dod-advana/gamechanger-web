@@ -5,11 +5,11 @@ const SearchUtility = require('../../utils/searchUtility');
 class EDASearchUtility {
 	constructor(opts = {}) {
 
-		const {
-			logger = LOGGER,
-			constants = constantsFile,
-			searchUtility = new SearchUtility()
-		} = opts;
+        const {
+            logger = LOGGER,
+            constants = constantsFile,
+			searchUtility = new SearchUtility(opts)
+        } = opts;
 
 		this.logger = logger;
 		this.constants = constants;
