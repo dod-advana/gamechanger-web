@@ -33,8 +33,7 @@ These are the recommended steps if you are just trying to get coding.
 - In gamechanger-web/backend, create a secrets folder at the top level of backend (gamechanger-web/backend/secrets) and drop in cert.pem, dod_certs.pem, gamechanger.crt, and key.pem
 - In gamechanger-web/frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
-- At the top level run **docker-compose build** to build the images
-- At the top level run **docker-compose up** to start the containers
+- At the top level run **./resetDocker.sh**
 - Your frontend will be available at http://localhost:3000
 - To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
 
