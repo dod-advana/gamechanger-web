@@ -133,7 +133,7 @@ const handlePageLoad = async (state, dispatch, history) => {
 	
 	if(typeURL) {
 		setFilterVariables(typeFilterObject, typeURL);
-		if (orgURL !== 'ALLTYPES') {
+		if (typeURL !== 'ALLTYPES') {
 			newSearchSettings.allTypesSelected = false;
 			newSearchSettings.specificTypesSelected = true;
 		} else {

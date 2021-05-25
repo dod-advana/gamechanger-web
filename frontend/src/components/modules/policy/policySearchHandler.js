@@ -499,7 +499,8 @@ const PolicySearchHandler = {
 			listView,
 			showTutorial,
 			searchSettings,
-			cloneData
+			cloneData,
+			currentSort
 		} = state;
 
 		const {
@@ -547,6 +548,7 @@ const PolicySearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					limit,
+					sort: currentSort
 				},
 			});
 
