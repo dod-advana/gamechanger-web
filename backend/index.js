@@ -164,6 +164,11 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(AAA.redisSession());
 	AAA.setupSaml(app)
 	app.use(AAA.ensureAuthenticated);
+
+	app.use(async function (req, res, next) {
+		req.permissions = req.session.user.perms;
+		next();
+	});
 }
 
 app.post('/api/auth/token', async function (req, res) {

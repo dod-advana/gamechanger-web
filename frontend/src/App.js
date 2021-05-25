@@ -236,8 +236,6 @@ const App = (props) => {
 		return (<LoadingIndicator />);
 	}
 
-	console.log(Auth.getUserPermissions());
-
 	return (
 		<MatomoProvider value={instance}>
 			<MuiThemeProvider theme={ThemeDefault}>
