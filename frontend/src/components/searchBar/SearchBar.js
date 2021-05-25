@@ -60,14 +60,29 @@ const SearchBar = (props) => {
 
 	const handleCategoryTabChange = (tabName) => {
 		if (tabName === 'all'){
-			setState(dispatch,{
-				activeCategoryTab:tabName,
-				docSearchResults:state.docSearchResults.slice(0,6),
-				resultsPage: 1,
-				replaceResults: true,
-				infiniteScrollPage: 1
-			})
-		} else if (tabName === 'Documents' && state.resultsPage !== 1){
+			// if sort is relevance
+			if(state.currentSort === 'Relevance'){
+				setState(dispatch,{
+					activeCategoryTab:tabName,
+					docSearchResults:state.docSearchResults.slice(0,6),
+					resultsPage: 1,
+					replaceResults: true,
+					infiniteScrollPage: 1
+				})
+			} else {
+				// if sort isn't relevance, reset
+				setState(dispatch,{
+					activeCategoryTab:tabName,
+					docSearchResults:[],
+					resultsPage: 1,
+					replaceResults: true,
+					infiniteScrollPage: 1,
+					currentSort: 'Relevance',
+					docsPagination: true
+				})
+			}
+			
+		} else if (tabName === 'Documents' && (state.resultsPage !== 1 || (state.activeCategoryTab === 'all' && state.currentSort !== 'Relevance'))){ // if pagination is wrong, or current sorting doesn't match
 			setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true})
 		} else if (tabName === 'Documents'){
 			setState(dispatch,{activeCategoryTab:tabName, replaceResults: false})
