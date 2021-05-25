@@ -739,7 +739,6 @@ describe('SearchUtility', function () {
 	});
 
 	describe('#cleanUpIdEsResultsForGraphCache', function () {
-
 		it('should return with searchData and pageHits when a search is done', () => {
 			const user = 'fake user';
 			const raw = RAW_ES_BODY_SEARCH_RESPONSE;
