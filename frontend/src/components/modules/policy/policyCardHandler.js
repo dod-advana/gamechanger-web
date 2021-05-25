@@ -1210,8 +1210,8 @@ const PolicyCardHandler = {
 			const tableData = [];
 			Object.keys(item).forEach(key => {
 				if (item[key] !== '') {
-					if (key !== 'image' && key !== 'properties' && key !== 'label' && key !== 'value' &&
-						key !== 'details' && key !== 'id' && key !== 'favorite' && key !== 'done') {
+					if (key !== 'image' && key !== 'properties' && key !== 'label' && key !== 'value' && key !== 'type' && 
+						key !== 'details' && key !== 'id' && key !== 'favorite' && key !== 'done' && key !== 'entity_type') {
 						if (key === 'website') {
 							tableData.push({
 								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),

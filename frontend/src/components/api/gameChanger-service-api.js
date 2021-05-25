@@ -83,6 +83,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
+	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 
 
 	exportHistoryDELETE: function(id){
@@ -616,6 +617,17 @@ export default class GameChangerAPI {
 
 	setEntitySearchMode = async (value) => {
 		const url = endpoints.entitySearch;
+		const bodyValue = value ? 'true' : 'false';
+		return axiosPOST(this.axios, url, {value: bodyValue});
+	}
+
+	getTopicSearchMode = async () => {
+		const url = endpoints.topicSearch;
+		return axiosGET(this.axios, url)
+	}
+
+	setTopicSearchMode = async (value) => {
+		const url = endpoints.topicSearch;
 		const bodyValue = value ? 'true' : 'false';
 		return axiosPOST(this.axios, url, {value: bodyValue});
 	}

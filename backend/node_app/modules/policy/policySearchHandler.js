@@ -315,13 +315,23 @@ class PolicySearchHandler extends SearchHandler {
 				const entities = await this.entitySearch(searchText, offset, 6, userId);
 				enrichedResults.entities = entities.entities;
 				enrichedResults.totalEntities = entities.totalEntities;
+			} else {
+				enrichedResults.entities = [];
+				enrichedResults.totalEntities = 0;
 			}
 
 			//add topics
-			if (true) { // make a topicSearch switch
+			let topicSearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			if (topicSearchOn.length > 0){
+				topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
+			}
+			if (topicSearchOn) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
 				enrichedResults.topics = topics.topics;
 				enrichedResults.totalTopics = topics.totalTopics;
+			} else {
+				enrichedResults.topics = [];
+				enrichedResults.totalTopics = 0;
 			}
 			
 			return enrichedResults;
@@ -577,28 +587,28 @@ class PolicySearchHandler extends SearchHandler {
 			if(entityResults.body.hits.hits.length > 0 ){
 				const entityList = entityResults.body.hits.hits.map( async obj => {
 					let returnEntity = {};
-					let ent = obj; // take highest hit
+					let ent = obj; 
 					returnEntity = ent._source;
 					returnEntity.type = 'organization';
-					returnEntity.pageHits = [];
 					// get img_link
 					const ent_ids = [returnEntity.name];
 					const graphQueryString = `WITH ${JSON.stringify(ent_ids)} AS ids MATCH (e:Entity) WHERE e.name in ids return e;`
 					const docData = await this.dataLibrary.queryGraph(graphQueryString, {params: {ids: ent_ids}}, userId);
-					// const docData2 = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					try {
-						const tempEntity = docData.result.records[0]._fields[0].properties;
-						for(const key of Object.keys(tempEntity) ) {
-							if(key !== 'aliases' ){
-								returnEntity[key] = tempEntity[key];
+					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
+					try{ // if parsing and adding stuff fails, log docDataCleaned 
+						if(docDataCleaned && docDataCleaned.nodes && docDataCleaned.nodes.length > 0){			
+							for(const key of Object.keys(docDataCleaned.nodes[0]) ) { // take highest hit, add key value pairs into return object
+								if(key !== 'properties' && key !== 'nodeVec' && key !== 'pageHits' && key !== 'pageRank'){
+									returnEntity[key] = docDataCleaned.nodes[0][key];
+								}
 							}
 						}
-						return returnEntity;
-					}
-					catch(err) {
+					} catch(err) {
 						const { message } = err;
 						this.logger.error(message, '9WJGAKB', userId);
+						this.logger.error('docDataCleaned: ' + JSON.stringify(docDataCleaned), '9WJGAKB', userId);
 					}
+					return returnEntity;
 				});
 				
 				let entities = [];
@@ -611,6 +621,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'VLPOJJJ');
+			return {entities: [], totalEntities: 0};
 		}
 	}
 
@@ -652,6 +663,7 @@ class PolicySearchHandler extends SearchHandler {
 		}
 		catch (e) {
 			this.logger.error(e.message, 'OICE7JS');
+			return {topics: [], totalTopics: 0};
 		}
 	}
 	
