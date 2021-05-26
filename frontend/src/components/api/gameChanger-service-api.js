@@ -55,6 +55,10 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
+	reloadModels: '/api/gamechanger/reloadModels',
+	downloadDependencies: '/api/gamechanger/downloadDependencies',
+	getS3List: '/api/gamechanger/getS3List',
+	getAPIInformation: '/api/gamechanger/getAPIInformation',
 	getTransformerList: '/api/gameChanger/getTransformerList',
 	getCurrentTransformer: '/api/gameChanger/getCurrentTransformer',
 	setTransformerModel: '/api/gameChanger/setTransformerModel',
@@ -457,6 +461,26 @@ export default class GameChangerAPI {
 	deleteTrendingBlacklist = async (data) => {
 		const url = endpoints.deleteTrendingBlacklist;
 		return axiosPOST(this.axios, url, data);
+	}
+
+	reloadModels = async () => {
+		const url = endpoints.reloadModels;
+		return util.axiosGET(this.axios, url);
+	}
+
+	downloadDependencies = async () => {
+		const url = endpoints.downloadDependencies;
+		return util.axiosGET(this.axios, url);
+	}
+
+	getAPIInformation = async () => {
+		const url = endpoints.getAPIInformation;
+		return util.axiosGET(this.axios, url);
+	}
+
+	getS3List = async () => {
+		const url = endpoints.getS3List;
+		return util.axiosGET(this.axios, url);
 	}
 
 	getTransformerList = async () => {
