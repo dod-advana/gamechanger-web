@@ -83,7 +83,7 @@ class GlobalSearchHandler extends SearchHandler {
 			}
 
 			// Databases
-			if (getDataSources) {
+			if (getDatabases) {
 				searchResults.databases = await this.getDataCatalogResults(searchText, offset, limit, 'databases', userId);
 			}
 
@@ -134,7 +134,7 @@ class GlobalSearchHandler extends SearchHandler {
 								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
 			const results = await database.uot.query(hitQuery, {type: Sequelize.QueryTypes.SELECT, raw: true});
 	
-			const [apps, appResults] = this. performApplicationSearch(results, lunrSearchUtils.parse(searchText));
+			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
 			return this.generateRespData(apps, appResults, offset, limit);
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6VG', userId);
