@@ -1,12 +1,12 @@
 FROM 10.194.9.80:5000/node:14
 RUN apt-get update && apt-get install -y vim && apt-get install -y postgresql
 RUN npm config set registry http://10.194.9.122
-RUN npm install -g nodemon
-RUN npm install -g sequelize-cli
-RUN npm install -g jest
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
 RUN npm install
+RUN npm install -g nodemon
+RUN npm install -g sequelize-cli
+RUN npm install -g jest
 COPY . /usr/src/app
 RUN mkdir /etc/secrets/
 COPY ./secrets/* /etc/secrets/
