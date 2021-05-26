@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 COPY package.json /usr/src/app
 RUN npm -version
 RUN npm install -g nodemon
-RUN npm install -g sequelize-cli
+RUN /usr/local/bin/npm install -g sequelize-cli
 RUN npm install -g jest
 RUN npm config set registry http://10.194.9.122
 RUN npm install
