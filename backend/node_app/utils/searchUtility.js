@@ -1003,6 +1003,11 @@ class SearchUtility {
 					let docId = resultDoc._source.id;
 					let displayName = resultDoc._source.display_title_s;
 					let docScore = resultDoc._score;
+					let docTypeDisplay = resultDoc._source.display_doc_type_s;
+					let pubDate = resultDoc._source.publication_date_dt;
+					let pageCount = resultDoc._source.page_count;
+					let docType = resultDoc._source.doc_type;
+					let org = resultDoc._source.display_org_s;
 					if (docScore > qaParams.scoreThreshold) {
 						let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 						let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
@@ -1013,6 +1018,12 @@ class SearchUtility {
 								contextPara.filename = displayName;
 								contextPara.parId = parId;
 								contextPara.docId = docId;
+								contextPara.docScore = docScore;
+								contextPara.docTypeDisplay = docTypeDisplay;
+								contextPara.pubDate = pubDate;
+								contextPara.pageCount = pageCount;
+								contextPara.docType = docType;
+								contextPara.org = org
 								let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
 								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
 								if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
@@ -1036,6 +1047,12 @@ class SearchUtility {
 							contextPara.text = text;
 							contextPara.parId = 0;
 							contextPara.docId = docId;
+							contextPara.docScore = docScore;
+							contextPara.docTypeDisplay = docTypeDisplay;
+							contextPara.pubDate = pubDate;
+							contextPara.pageCount = pageCount;
+							contextPara.docType = docType;
+							contextPara.org = org
 							context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 						}
 					}
