@@ -12,11 +12,61 @@ class TransformerController {
 		this.logger = logger;
 		this.mlApi = mlApi;
 
+		this.getAPIInformation = this.getAPIInformation.bind(this);
+		this.getS3List = this.getS3List.bind(this);
 		this.getTransformerList = this.getTransformerList.bind(this);
 		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
 		this.setTransformerModel = this.setTransformerModel.bind(this);
 	}
 
+	async reloadModels(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const resp = await this.mlApi.reloadModels(userId);
+			res.send(resp);
+		} catch (err) {
+			this.logger.error(err.message, 'UB4F9M4', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async downloadDependencies(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const resp = await this.mlApi.downloadDependencies(userId);
+			res.send(resp);
+		} catch (err) {
+			this.logger.error(err.message, 'UB4F9M4', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getAPIInformation(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const resp = await this.mlApi.getAPIInformation(userId);
+			res.send(resp);
+		} catch (err) {
+			this.logger.error(err.message, 'UB4F9M4', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getS3List(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const resp = await this.mlApi.getS3List(userId);
+			res.send(resp);
+		} catch (err) {
+			this.logger.error(err.message, 'UB4F9M4', userId);
+			res.status(500).send(err);
+		}
+	}
+	
 	async getTransformerList(req, res) {
 		let userId = 'webapp_unknown';
 		try {

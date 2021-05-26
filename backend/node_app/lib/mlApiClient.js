@@ -105,6 +105,46 @@ class MLApiClient {
 		}
 	}
 
+	async getAPIInformation(userId) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+
+		try {
+			const url = `${mlBaseUrl}/`;
+			const { data } = await this.axios({
+				url,
+				method: 'get',
+				headers
+			});
+
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'cPq9c3xw', userId);
+			throw e;
+		}
+	}
+
+	async getS3List(userId) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+
+		try {
+			const url = `${mlBaseUrl}/s3?function=models`;
+			const { data } = await this.axios({
+				url,
+				method: 'get',
+				headers
+			});
+
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'cPq9c3xw', userId);
+			throw e;
+		}
+	}
+
 	async getTransfomerModelList(userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
@@ -143,6 +183,41 @@ class MLApiClient {
 		}
 	}
 
+	async reloadModels(userId) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+		try {
+			const url = `${transformerBaseUrl}/reloadModels`;
+			const { data } = await this.axios({
+				url,
+				method: 'get',
+				headers
+			});
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'VY3FQBN', userId);
+			throw e;
+		}
+	}
+	async downloadDependencies(userId) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+		try {
+			const url = `${transformerBaseUrl}/getCurrentTransformer`;
+			const { data } = await this.axios({
+				url,
+				method: 'get',
+				headers
+			});
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'VY3FQBN', userId);
+			throw e;
+		}
+	}
+	
 	async setTransformerModel(model_name, userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
