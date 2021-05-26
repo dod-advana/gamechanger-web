@@ -1,4 +1,4 @@
-FROM node:14
+FROM 10.194.9.80:5000/node:14
 RUN apt-get update && apt-get install -y vim && apt-get install -y postgresql
 RUN npm config set registry http://10.194.9.122
 RUN npm install -g nodemon
