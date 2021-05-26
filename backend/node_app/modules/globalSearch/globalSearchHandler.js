@@ -10,7 +10,7 @@ const https = require('https');
 const _ = require('lodash');
 const dcUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
-const database = require('../../models/game_changer');
+const databaseFile = require('../../models/game_changer');
 
 const redisAsyncClientDB = 7;
 
@@ -24,11 +24,13 @@ class GlobalSearchHandler extends SearchHandler {
 		const {
 			logger = LOGGER,
 			constants = constantsFile,
+			database = databaseFile
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 		
 		this.logger = logger;
 		this.constants = constants;
+		this.database = database;
 	}
 
 	async searchHelper(req, userId) {
@@ -132,8 +134,8 @@ class GlobalSearchHandler extends SearchHandler {
 							  from megamenu_links
 							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
 								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
-			const results = await database.uot.query(hitQuery, {type: Sequelize.QueryTypes.SELECT, raw: true});
-	
+			const results = await this.database.uot.query(hitQuery, {type: Sequelize.QueryTypes.SELECT, raw: true});
+			console.log(results)
 			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
 			return this.generateRespData(apps, appResults, offset, limit);
 		} catch (err) {
@@ -146,6 +148,7 @@ class GlobalSearchHandler extends SearchHandler {
 		try {
 			let results = await Promise.all([this.getQlikApps(), this.getQlikApps({}, userId.substring(0, userId.length - 4))]);
 	
+			
 			const [apps, searchResults] = this.performSearch(this.mergeUserApps((results[0].data || []), (results[1].data || [])), lunrSearchUtils.parse(searchText));
 			return this.generateRespData(apps, searchResults, offset, limit);
 		} catch (err) {
@@ -230,6 +233,7 @@ class GlobalSearchHandler extends SearchHandler {
 	async getQlikApps(params = {}, userId) {
 		try {
 			let url = `${QLIK_URL}/qrs/app/full`;
+			const test = await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
 			return await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
 		} catch (err) {
 			if (!userId) // most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
