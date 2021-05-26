@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField } from "@material-ui/core";
 import GCButton from '../common/GCButton';
 import EmailValidator from "email-validator";
@@ -64,6 +64,8 @@ export default (props) => {
 
     const [emailError, setEmailError] = useState(false);
     const [orgError, setOrgError] = useState(false);
+    const [passedOnInfo, setPassedOnInfo] = useState(true);
+    
 
     const checkRequired = (field, value) => {
         if (field === 'email') {
@@ -82,12 +84,37 @@ export default (props) => {
     const setUserInfoModal = (isOpen) => {
 		setState(dispatch, { userInfoModalOpen: isOpen });
 	}
-
+    /**
+     * If the user closes the model that decision 
+     * is put in local storage for a day
+     * @method passOnUserInfo
+     */
     const passOnUserInfo = () =>{
-        setState(dispatch, { userInfoPassed: true });
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const userInfo ={
+            passed:true,
+            expires:tomorrow.toUTCString()
+        }
+        localStorage.setItem('userInfoPassed', JSON.stringify(userInfo));
+        setPassedOnInfo(userInfo.passed)
     }
-
-
+    /**
+     * Check the local storage for a userInfoPassed object
+     * if it hasn't expired return true
+     * @method passedOnUserInfo
+     * @returns boolean
+     */
+    const passedOnUserInfo =() => {
+        const infoPassed =  JSON.parse(localStorage.getItem('userInfoPassed'));
+        let didPass = false;
+        if (infoPassed && (new Date(infoPassed.expires) > new Date())){
+            didPass= infoPassed.passed;
+        }
+        setPassedOnInfo(didPass);
+    }
+    
 	const handleUserInfoInput = (field, text) => {
 		const userInfo = {...state.userInfo};
 		userInfo[field] = text;
@@ -104,10 +131,12 @@ export default (props) => {
 		}
 		setUserInfoModal(false);
 	}
-
+    useEffect(() => {
+		passedOnUserInfo()
+	}, []);
     return (
         <Dialog
-            open={state.userInfoModalOpen && !state.userInfoPassed}
+            open={true && !passedOnInfo}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
