@@ -136,7 +136,7 @@ export default (props) => {
 	}, []);
     return (
         <Dialog
-            open={true && !passedOnInfo}
+            open={state.userInfoModalOpen && !passedOnInfo}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
