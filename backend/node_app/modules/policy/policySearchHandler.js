@@ -15,7 +15,7 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
-const testing = true; // set true to save search results in txt file
+const testing = false; // set true to save search results in txt file
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
