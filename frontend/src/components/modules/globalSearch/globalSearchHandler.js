@@ -14,11 +14,10 @@ const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-const setSearchURL = (state, searchSettings) => {
+const setSearchURL = (state, selectedCategories) => {
 	const { searchText} = state;
-	const {showingSearchTypes} = searchSettings;
 	
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...showingSearchTypes }).toString()}`;
+	const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...selectedCategories }).toString()}`;
 	window.history.pushState(null, null, linkString);
 }
 
@@ -34,12 +33,9 @@ const GlobalSearchHandler = {
 			searchSettings,
 			tabName,
 			cloneData,
-			showTutorial
+			showTutorial,
+			selectedCategories
 		} = state;
-		
-		const {
-			showingSearchTypes
-		} = searchSettings;
 		
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
@@ -117,6 +113,17 @@ const GlobalSearchHandler = {
 	
 		const tiny_url = await createTinyUrl(cloneData);
 		
+		const categoryMetadata =
+			{
+				Applications: {total: 0},
+				Dashboards: {total: 0},
+				DataSources: {total: 0},
+				Databases: {total: 0},
+				Documentation: {total: 0},
+				Organizations: {total: 0},
+				Services: {total: 0},
+			};
+		
 		try {
 			
 			// Make the global search calls
@@ -132,40 +139,48 @@ const GlobalSearchHandler = {
 						showTutorial,
 						useGCCache,
 						tiny_url,
-						getApplications: showingSearchTypes.applications,
-						getDashboards: showingSearchTypes.dashboards,
-						getDataSources: showingSearchTypes.dataSources,
-						getDatabases: showingSearchTypes.databases
+						getApplications: selectedCategories.Applications,
+						getDashboards: selectedCategories.Dashboards,
+						getDataSources: selectedCategories.DataSources,
+						getDatabases: selectedCategories.Databases
 					},
 				});
+				
+				
+				
 				data.applications.hits.forEach(hit => {
 					hit.type = 'application';
 					searchResults.push(hit);
 				})
 				totalCount += data.applications.totalCount;
+				categoryMetadata.Applications.total = data.applications.totalCount || 0;
 				
 				data.dashboards.hits.forEach(hit => {
 					hit.type = 'dashboard';
 					searchResults.push(hit);
 				})
 				totalCount += data.dashboards.totalCount;
+				categoryMetadata.Dashboards.total = data.dashboards.totalCount || 0;
 				
 				data.dataSources.results.forEach(hit => {
 					hit.type = 'dataSource';
 					searchResults.push(hit);
 				})
 				totalCount += data.dataSources.total;
+				categoryMetadata.DataSources.total = data.dataSources.total || 0;
 				
 				data.databases.results.forEach(hit => {
 					hit.type = 'database';
 					searchResults.push(hit);
 				})
 				totalCount += data.databases.total;
+				categoryMetadata.Databases.total = data.databases.total || 0;
+				console.log(data)
 			} catch (err) {
 				console.error(err);
 			}
 			
-			console.log(searchResults);
+			console.log(categoryMetadata);
 			
 			const t1 = new Date().getTime();
 			
@@ -194,7 +209,8 @@ const GlobalSearchHandler = {
 					metricsLoading: false,
 					metricsCounted: true,
 					loadingTinyUrl: false,
-					hideTabs: false
+					hideTabs: false,
+					categoryMetadata
 				});
 				
 			} else {

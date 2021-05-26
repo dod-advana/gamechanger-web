@@ -52,9 +52,6 @@ require('typeface-montserrat');
 
 require('./favicon.ico');
 
-console.log(window?.__env__?.REACT_APP_MATOMO_LINK);
-console.log(process.env.REACT_APP_MATOMO_LINK);
-
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const instance = createInstance({
@@ -235,8 +232,6 @@ const App = (props) => {
 	if (!initialized || !tokenLoaded) {
 		return (<LoadingIndicator />);
 	}
-
-	console.log(Auth.getUserPermissions());
 
 	return (
 		<MatomoProvider value={instance}>

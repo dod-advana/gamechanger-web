@@ -13,7 +13,6 @@ import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
 import {Card} from "../../cards/GCCard";
 import ViewHeader from "../../mainView/ViewHeader";
-
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 
 // // Internet Explorer 6-11
@@ -50,6 +49,17 @@ const styles = {
 }
 
 const EdaMainViewHandler = {
+	async handlePageLoad(props) {
+		await defaultMainViewHandler.handlePageLoad(props);
+	},
+	
+	getMainView(props) {
+		return defaultMainViewHandler.getMainView(props);
+	},
+	
+	handleCategoryTabChange(props) {
+		defaultMainViewHandler.handleCategoryTabChange(props);
+	},
 
 	getViewNames(props) {
 		const viewNames = defaultMainViewHandler.getViewNames(props);

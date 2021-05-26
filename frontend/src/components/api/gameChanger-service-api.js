@@ -83,6 +83,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
+	getThumbnail: '/api/gameChanger/getThumbnail',
 
 
 	exportHistoryDELETE: function(id){
@@ -643,5 +644,10 @@ export default class GameChangerAPI {
 	callSearchFunction = async(body) => {
 		const url = endpoints.callSearchFunctionPOST;
 		return axiosPOST(this.axios, url, body);
+	}
+	
+	getThumbnail = async (body) => {
+		const url = endpoints.getThumbnail;
+		return axiosGET(this.axios, url, {params:body});
 	}
 }

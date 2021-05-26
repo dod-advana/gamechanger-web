@@ -40,7 +40,7 @@ const DrawerTableCell = styled(TableCell)`
 
 export const SelectedDocsDrawer = (props) => {
     const {
-        selectedDocuments,
+        selectedDocuments = [],
         docsDrawerOpen,
         setDrawer,
         clearSelections, 
