@@ -18,9 +18,6 @@ import QLIKICON from "../../../images/icon/QLIK.svg";
 import moment from "moment";
 import {parseOwnerName} from "./search";
 import {primary} from "../../common/gc-colors";
-import GameChangerAPI from "../../api/gameChanger-service-api";
-
-const gameChangerAPI = new GameChangerAPI();
 
 const styles = {
 	container: {
@@ -212,26 +209,26 @@ const getUrl = (id, restricted) => {
 };
 
 const cardSubHeaderHandler = (props) => {
-	const {item, state, toggledMore} = props;
-	
-	let typeColor = 'black';
-	switch (item.type) {
-		case 'application':
-			typeColor = 'rgb(50, 18, 77)';
-			break;
-		case 'dashboard':
-			typeColor = 'rgb(11, 167, 146)';
-			break;
-		case 'dataSource':
-			typeColor = 'rgb(5, 159, 217)';
-			break;
-		case 'database':
-			typeColor = 'rgb(233, 105, 29)';
-			break;
-		default:
-			typeColor = 'rgb(233, 105, 29)';
-			break;
-	}
+	// const {item} = props;
+	//
+	// let typeColor;
+	// switch (item.type) {
+	// 	case 'application':
+	// 		typeColor = 'rgb(50, 18, 77)';
+	// 		break;
+	// 	case 'dashboard':
+	// 		typeColor = 'rgb(11, 167, 146)';
+	// 		break;
+	// 	case 'dataSource':
+	// 		typeColor = 'rgb(5, 159, 217)';
+	// 		break;
+	// 	case 'database':
+	// 		typeColor = 'rgb(233, 105, 29)';
+	// 		break;
+	// 	default:
+	// 		typeColor = 'rgb(233, 105, 29)';
+	// 		break;
+	// }
 	
 	return (
 		<>

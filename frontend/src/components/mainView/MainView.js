@@ -22,8 +22,6 @@ import MainViewFactory from "../factories/mainViewFactory";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
-const _ = require('lodash');
-
 const gameChangerAPI = new GameChangerAPI();
 
 const MainView = (props) => {

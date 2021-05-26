@@ -25,8 +25,6 @@ const GlobalSearchTitleBarHandler = {
 	
 	getCategoryTabs(props) {
 		const {
-			rawSearchResults = [],
-			pageDisplayed,
 			selectedCategories,
 			activeCategoryTab,
 			setActiveCategoryTab,
