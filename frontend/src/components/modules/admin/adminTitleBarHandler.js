@@ -15,6 +15,10 @@ const PolicyTitleBar = {
 				</Typography>
 			</div>
 		);
+	},
+	
+	getCategoryTabs(props) {
+		return <></>
 	}
 }
 
