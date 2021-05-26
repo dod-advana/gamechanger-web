@@ -11,7 +11,7 @@ import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, StyledCenterContainer
 } from "../../../gamechangerUtils";
-import { Typography, Button } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import '../../../containers/gamechanger.css';
 import ResultView from "../../mainView/ResultView";
 import AppsIcon from '@material-ui/icons/Apps';
@@ -161,8 +161,6 @@ const GlobalSearchMainViewHandler = {
 		const {
 			state,
 			dispatch,
-			setCurrentTime,
-			renderHideTabs,
 			pageLoaded,
 			getViewPanels
 		} = props;
@@ -209,7 +207,6 @@ const GlobalSearchMainViewHandler = {
 	handleCategoryTabChange(props) {
 		const {
 			tabName,
-			state,
 			dispatch
 		} = props;
 		
@@ -232,7 +229,6 @@ const GlobalSearchMainViewHandler = {
 			componentStepNumbers,
 			iframePreviewLink,
 			selectedCategories,
-			timeSinceCache,
 			rawSearchResults,
 			applicationsPage,
 			dashboardsPage,
@@ -260,7 +256,6 @@ const GlobalSearchMainViewHandler = {
 			height: '72vh'
 		}
 		if (!iframePreviewLink) sideScroll = {};
-		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`;
 
 		return (
 			<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`} style={{marginTop: 0}}>

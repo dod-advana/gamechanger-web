@@ -25,65 +25,65 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from "../../telemetry/Matomo";
 import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 
-const renderSearchTypes = (classes) => {
-	
-	return (
-		<div style={{width: '100%'}}>
-		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}>
-			<FormGroup style={{width: '100%'}}>
-				<FormControlLabel
-					name='Documentations'
-					value='Documentations'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={_.noop}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={false}
-						checkedIcon={<i style={{ color: '#E9691D' }}
-							className="fa fa-check" />}
-						name='Documentations'
-					/>}
-					label='Documentations'
-					labelPlacement="end"
-				/>
-				<FormControlLabel
-					name='Organizations'
-					value='Organizations'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={_.noop}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={false}
-						checkedIcon={<i style={{ color: '#E9691D' }}
-							className="fa fa-check" />}
-						name='Organizations'
-					/>}
-					label='Organizations'
-					labelPlacement="end"
-				/>
-				<FormControlLabel
-					name='Topics'
-					value='Topics'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={_.noop}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={false}
-						checkedIcon={<i style={{ color: '#E9691D' }}
-							className="fa fa-check" />}
-						name='Topics'
-					/>}
-					label='Topics'
-					labelPlacement="end"
-				/>
-			</FormGroup>
-		</FormControl>
-		</div>
-	);
-}
+// const renderSearchTypes = (classes) => {
+//
+// 	return (
+// 		<div style={{width: '100%'}}>
+// 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}>
+// 			<FormGroup style={{width: '100%'}}>
+// 				<FormControlLabel
+// 					name='Documentations'
+// 					value='Documentations'
+// 					classes={{ label: classes.titleText }}
+// 					control={<Checkbox
+// 						classes={{ root: classes.filterBox }}
+// 						onClick={_.noop}
+// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+// 						checked={false}
+// 						checkedIcon={<i style={{ color: '#E9691D' }}
+// 							className="fa fa-check" />}
+// 						name='Documentations'
+// 					/>}
+// 					label='Documentations'
+// 					labelPlacement="end"
+// 				/>
+// 				<FormControlLabel
+// 					name='Organizations'
+// 					value='Organizations'
+// 					classes={{ label: classes.titleText }}
+// 					control={<Checkbox
+// 						classes={{ root: classes.filterBox }}
+// 						onClick={_.noop}
+// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+// 						checked={false}
+// 						checkedIcon={<i style={{ color: '#E9691D' }}
+// 							className="fa fa-check" />}
+// 						name='Organizations'
+// 					/>}
+// 					label='Organizations'
+// 					labelPlacement="end"
+// 				/>
+// 				<FormControlLabel
+// 					name='Topics'
+// 					value='Topics'
+// 					classes={{ label: classes.titleText }}
+// 					control={<Checkbox
+// 						classes={{ root: classes.filterBox }}
+// 						onClick={_.noop}
+// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+// 						checked={false}
+// 						checkedIcon={<i style={{ color: '#E9691D' }}
+// 							className="fa fa-check" />}
+// 						name='Topics'
+// 					/>}
+// 					label='Topics'
+// 					labelPlacement="end"
+// 				/>
+// 			</FormGroup>
+// 		</FormControl>
+// 		</div>
+// 	);
+// }
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
@@ -643,7 +643,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={true} header={'ADD SEARCH TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'ADD SEARCH TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 					</GCAccordion>
 				</div>}
