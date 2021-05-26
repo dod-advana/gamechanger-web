@@ -39,6 +39,7 @@ const initState = {
 	userData: { favorite_searches: [], favorite_documents: [], favorite_topics: [], search_history: [], export_history: [], api_key:'' },
 	newUser: false,
 	userInfoModalOpen: false,
+	userInfoPassed:false,
 	userInfo: {
 		email: '',
 		org: '',
