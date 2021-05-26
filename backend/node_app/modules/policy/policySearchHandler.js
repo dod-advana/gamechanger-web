@@ -347,9 +347,9 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
-        
-    searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-	searchResults.qaContext = {params: {}, context: []};
+    
+    	searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
 		if (permissions) {
 		//if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
