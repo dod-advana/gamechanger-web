@@ -34,7 +34,7 @@ These are the recommended steps if you are just trying to get coding.
 - In gamechanger-web/frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
 - At the top level run **./resetDocker.sh**
-- Your frontend will be available at http://localhost:3000
+- Your frontend will be available at http://localhost:3000/#/gamechanger
 - To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
 
 ## How to Setup Local Single Node K8s Env for Development/Testing
@@ -50,7 +50,7 @@ This set up is more advanced and is intended for prepping for releases to produc
 - In gamechanger-web/k8s, run **kubectl apply -f .**
 - Run **kubectl get pods** and once all pods are in a successful state the application should be up and available. Note the gamechanger-web pod name for the next step.
 - Run **kubectl port-forward <INSERT_GAMECHANGER-WEB_POD_NAME_HERE> 8990:8990**
-- Your frontend will be available at http://localhost:8990
+- Your frontend will be available at http://localhost:8990/#/gamechanger
 - To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
 
 ## Known/Common Issues
