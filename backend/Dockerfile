@@ -1,4 +1,5 @@
 FROM 10.194.9.80:5000/node:14
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN apt-get update && apt-get install -y vim && apt-get install -y postgresql
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
