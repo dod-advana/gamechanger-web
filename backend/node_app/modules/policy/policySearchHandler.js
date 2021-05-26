@@ -15,6 +15,7 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
+const testing = true; // set true to save search results in txt file
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -305,7 +306,7 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		try {
 			let enrichedResults = await this.qaEnrichment(req, searchResults, userId);
-
+			
 			// add entities
 			let entitySearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
 			if (entitySearchOn.length > 0){
@@ -323,6 +324,16 @@ class PolicySearchHandler extends SearchHandler {
 				enrichedResults.topics = topics.topics;
 				enrichedResults.totalTopics = topics.totalTopics;
 			}
+
+			// add results to search report
+			if (testing === true) {
+				let saveResults = {}
+				saveResults.regular = searchResults.docs.slice(0, 10);
+				saveResults.context = enrichedResults.qaContext.context;
+				saveResults.entities = enrichedResults.entities;
+				saveResults.topics = enrichedResults.topics;
+				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
+			};
 			
 			return enrichedResults;
 		}
@@ -338,6 +349,7 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
         
     searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+	searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
 		if (permissions) {
 		//if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
@@ -353,35 +365,43 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, maxLength, userId);
+					let qaParams = {};
+					qaParams.maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
+					qaParams.maxDocContext = 3; // how many docs to pull for context
+					qaParams.maxParaContext = 3; // how many paragraphs per doc to pull for context
+					qaParams.minLength = 350; // max length to expand individual paragraphs
+					qaParams.scoreThreshold = 100; // if a doc scores higher than this, pull hit paragraphs, if not pull intro
+					searchResults.qaContext.params = qaParams;
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let maxDocContext = 3; // how many docs to pull for context
-					let maxParaContext = 3; // how many paragraphs per doc to pull for context
-					let minLength = 350; // max length to expand individual paragraphs
-					let scoreThreshold = 100; // if a doc scores higher than this, pull hit paragraphs, if not pull intro
-					let context = await this.searchUtility.getQAContext(contextResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold);
+					let context = await this.searchUtility.getQAContext(contextResults, userId, qaParams);
+					searchResults.qaContext.context = context;
+					if (testing === true) {
+						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+					}
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
 						searchResults.qaResults.question = qaSearchText + '?';
-						if(shortenedResults.answers.length > 0 && shortenedResults.answers[0].text) {
-							let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
-							let cleanedResults = shortenedResults.answers.map(item => item.text);
-							searchResults.qaResults.answers = cleanedResults;
-							searchResults.qaResults.filenames = contextIds;
-							searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
-						} else {
-							searchResults.qaResults.answers = shortenedResults;
-						}
+						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['status'] == 'passed';
+							});
+						} 
+						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
+						let cleanedResults = shortenedResults.answers.map(item => item.text);
+						searchResults.qaResults.answers = cleanedResults;
+						searchResults.qaResults.filenames = contextIds;
+						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
 				}
 			}
 		}
+
     return searchResults;
 	}
 
