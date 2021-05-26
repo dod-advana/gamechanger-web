@@ -4,6 +4,7 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
+const fs = require('fs');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -40,9 +41,7 @@ class SearchUtility {
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
-		this.filterQAResults = this.filterQAResults.bind(this);
-		this.generateQASearchReport = this.generateQASearchReport.bind(this);
-		this.generateSearchReport = this.generateSearchReport.bind(this);
+		this.addSearchReport = this.addSearchReport.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -992,10 +991,10 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(searchResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold) {
+	async getQAContext(searchResults, userId, qaParams) {
 		
 		let context = [];
-		let docLimit = Math.min(maxDocContext, searchResults.body.hits.hits.length);
+		let docLimit = Math.min(qaParams.maxDocContext, searchResults.body.hits.hits.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
 				try {
@@ -1004,9 +1003,9 @@ class SearchUtility {
 					let docId = resultDoc._source.id;
 					let displayName = resultDoc._source.display_title_s;
 					let docScore = resultDoc._score;
-					if (docScore > scoreThreshold) {
+					if (docScore > qaParams.scoreThreshold) {
 						let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
-						let paraLimits = Math.min(maxParaContext, paraHits.length);
+						let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 						for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 							if (paraHits[x]) {
 								let contextPara = {};
@@ -1016,7 +1015,7 @@ class SearchUtility {
 								contextPara.docId = docId;
 								let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
 								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-								if (para.length > maxLength) { // if paragraph is too long, take highlight
+								if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
 									para = paraHits[x].highlight['paragraphs.par_raw_text_t'][0];
 									para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
 									contextPara.text = para
@@ -1028,7 +1027,7 @@ class SearchUtility {
 							}
 						}
 					} else {
-						let qaSubset = await this.queryOneDocQA(filename, userId, minLength); // this adds the beginning of the doc
+						let qaSubset = await this.queryOneDocQA(filename, userId, qaParams.minLength); // this adds the beginning of the doc
 						let text = qaSubset.join(' ');
 						let contextPara = {};
 						text = text.replace(/\.\s(?=\.)/g,''); // remove TOC periods
@@ -1051,48 +1050,26 @@ class SearchUtility {
 		}
 	}
 
-	filterQAResults(shortenedResults) {
-		// filter answers with '[CLS]' which means QA model doesn't know
-		let { question, answers }  = shortenedResults;
-		answers = answers.filter(function (e) {
-			return e.trim().split(/\s/)[0] !== '[CLS]' 
-		});
-		let newResults = { question, answers };
-
-		return newResults;
-	}
-
-	generateQASearchReport(qaSearchText, maxLength, maxDocContext, maxParaContext, minLength, scoreThreshold, context, userId) {
-		var today = new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-		let report = {datetime: today, userId: userId, question: qaSearchText, maxLength: maxLength, maxDocContext: maxDocContext, maxParaContext: maxParaContext, minLength: minLength, scoreThreshold: scoreThreshold, context: context}
-		const fs = require('fs');
-		let filedir = './scripts/qa-testing/' + date + '_search_reports.txt'
-		//fs.appendFile("message.txt", `Hello ${user.username}! You are ${notes.age}`, (err) => { 
-		fs.appendFile(filedir, JSON.stringify(report), (err) => { 
-			if (err) { 
-				console.log(err); 
-			} 
-		});
-	}
-
-	generateSearchReport(searchText, searchResults, entities, topics, userId) {
-		var today = new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-		let shortenedResults = [];
-		searchResults.docs.forEach((i) => {
-			shortenedResults.push({filename: i['display_title_s'], docType: i['doc_type'], type: i['type'], org: i['display_org_s'], text: i['pageHits']});
-		})
-
-		let report = {datetime: today, userId: userId, query: searchText, searchResults: shortenedResults, entities: entities, topics: topics}
-		const fs = require('fs');
-		let filedir = './scripts/qa-testing/' + date + '_search_reports.txt'
-		//fs.appendFile("message.txt", `Hello ${user.username}! You are ${notes.age}`, (err) => { 
-		fs.appendFile(filedir, JSON.stringify(report), (err) => { 
-			if (err) { 
-				console.log(err); 
-			} 
-		});
+	addSearchReport(query, params, saveResults, userId) {
+		try {
+			var today = new Date();
+			var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+			let dir = './scripts/search-testing/';
+			if (!fs.existsSync(dir)) {
+				fs.mkdirSync(dir, {
+					recursive: true
+				});
+			}
+			let filedir = dir + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
+			let report = {query: query, userId: userId, date: today, params: params, saveResults: saveResults};
+			fs.writeFile(filedir, JSON.stringify(report), (err) => { 
+				if (err) { 
+					LOGGER.error(err, 'CPQ4KSLN', userId); 
+				}
+			});
+		} catch (e) {
+			LOGGER.error(e.message, 'WWKLNQPN', userId);
+		}
 	}
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
