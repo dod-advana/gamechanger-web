@@ -633,6 +633,8 @@ class PolicySearchHandler extends SearchHandler {
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if(topicResults.body.hits.hits.length > 0) {
 				let topics = topicResults.body.hits.hits.map(async obj => {
+					let returnObject = obj._source;
+					returnObject.type = 'topic';
 					const topicDocumentCount =
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
@@ -642,14 +644,18 @@ class PolicySearchHandler extends SearchHandler {
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
 						RETURN count(d) as doc_count`;
-					const topicData = await this.dataLibrary.queryGraph(topicDocumentCount, {params: {}}, userId);
-					const docData = await this.dataLibrary.queryGraph(documentCount, {params: {}}, userId);
-					const topicDataCleaned = this.searchUtility.cleanNeo4jData(topicData.result, false, userId);
-					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					let returnObject = obj._source;
-					returnObject.type = 'topic';
-					returnObject.relatedTopics = topicDataCleaned.graph_metadata;
-					returnObject.documentCount = docDataCleaned.graph_metadata;
+					try {
+						const topicData = await this.dataLibrary.queryGraph(topicDocumentCount, {params: {}}, userId);
+						const docData = await this.dataLibrary.queryGraph(documentCount, {params: {}}, userId);
+						const topicDataCleaned = this.searchUtility.cleanNeo4jData(topicData.result, false, userId);
+						const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
+						returnObject.relatedTopics = topicDataCleaned.graph_metadata;
+						returnObject.documentCount = docDataCleaned.graph_metadata;
+					} catch (err) { // log errors if neo4j stuff fails 
+						this.logger.error(err.message, 'OICE7JS');
+						this.logger.error(JSON.stringify(topicDataCleaned), 'OICE7JS');
+						this.logger.error(JSON.stringify(docDataCleaned), 'OICE7JS');
+					}
 					return returnObject;
 				});
 
