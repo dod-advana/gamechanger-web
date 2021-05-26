@@ -256,9 +256,6 @@ const GlobalSearchMainViewHandler = {
 			return result.type === 'database';
 		});
 		
-		console.log(databases)
-
-
 		let sideScroll = {
 			height: '72vh'
 		}
