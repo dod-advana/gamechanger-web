@@ -229,9 +229,7 @@ class DataLibrary {
 		const { req } = res;
 		const { _parsedOriginalUrl: { query = undefined } } = req;
 		const queryString = query ? `?${query}` : '';
-		// console.log("RES!!!!!\n",req)
-		// console.log("Query!!! ",queryString)
-
+		// console.log("getFilePDFn",req)
 		
 		try {
 			
@@ -239,27 +237,18 @@ class DataLibrary {
 
 				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL+ req.baseUrl + req.path + queryString;
 
-				// try{
-
-					this.axios({
-						method: 'get',
-						url: edaUrl,
-						 responseType:'stream'
-						})
-					  .then(response => {
-						console.log("RESPONSE!!!",response.data)
-						response.data.pipe(res);
-						
-					  })
-					  .catch(err=>{
-						this.logger.error(err, 'N4BAC3N', userId);
-						throw err;
-					});//(err => console.log(err));
-					 
-				// } catch (err) {
-				// 	this.logger.error(err, 'N4BAC3N', userId);
-				// 	throw err;
-				// }
+				this.axios({
+					method: 'get',
+					url: edaUrl,
+						responseType:'stream'
+					})
+					.then(response => {
+					response.data.pipe(res);
+					})
+					.catch(err=>{
+					this.logger.error(err, 'N4BAC3N', userId);
+					throw err;
+				});
 			}
 			else{
 				const params = {
