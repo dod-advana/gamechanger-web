@@ -1,4 +1,4 @@
-FROM 10.194.9.80:5000/node:14
+FROM node:14
 # RUN apt-get update && apt-get install -y vim
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
