@@ -4,7 +4,6 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
-const fs = require('fs');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -41,7 +40,7 @@ class SearchUtility {
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
-		this.addSearchReport = this.addSearchReport.bind(this);
+		this.filterQAResults = this.filterQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -991,10 +990,10 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(searchResults, userId, qaParams) {
+	async getQAContext(searchResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold) {
 		
 		let context = [];
-		let docLimit = Math.min(qaParams.maxDocContext, searchResults.body.hits.hits.length);
+		let docLimit = Math.min(maxDocContext, searchResults.body.hits.hits.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
 				try {
@@ -1003,14 +1002,9 @@ class SearchUtility {
 					let docId = resultDoc._source.id;
 					let displayName = resultDoc._source.display_title_s;
 					let docScore = resultDoc._score;
-					let docTypeDisplay = resultDoc._source.display_doc_type_s;
-					let pubDate = resultDoc._source.publication_date_dt;
-					let pageCount = resultDoc._source.page_count;
-					let docType = resultDoc._source.doc_type;
-					let org = resultDoc._source.display_org_s;
-					if (docScore > qaParams.scoreThreshold) {
+					if (docScore > scoreThreshold) {
 						let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
-						let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
+						let paraLimits = Math.min(maxParaContext, paraHits.length);
 						for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 							if (paraHits[x]) {
 								let contextPara = {};
@@ -1018,15 +1012,9 @@ class SearchUtility {
 								contextPara.filename = displayName;
 								contextPara.parId = parId;
 								contextPara.docId = docId;
-								contextPara.docScore = docScore;
-								contextPara.docTypeDisplay = docTypeDisplay;
-								contextPara.pubDate = pubDate;
-								contextPara.pageCount = pageCount;
-								contextPara.docType = docType;
-								contextPara.org = org
 								let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
 								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-								if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
+								if (para.length > maxLength) { // if paragraph is too long, take highlight
 									para = paraHits[x].highlight['paragraphs.par_raw_text_t'][0];
 									para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
 									contextPara.text = para
@@ -1038,7 +1026,7 @@ class SearchUtility {
 							}
 						}
 					} else {
-						let qaSubset = await this.queryOneDocQA(filename, userId, qaParams.minLength); // this adds the beginning of the doc
+						let qaSubset = await this.queryOneDocQA(filename, userId, minLength); // this adds the beginning of the doc
 						let text = qaSubset.join(' ');
 						let contextPara = {};
 						text = text.replace(/\.\s(?=\.)/g,''); // remove TOC periods
@@ -1047,12 +1035,6 @@ class SearchUtility {
 							contextPara.text = text;
 							contextPara.parId = 0;
 							contextPara.docId = docId;
-							contextPara.docScore = docScore;
-							contextPara.docTypeDisplay = docTypeDisplay;
-							contextPara.pubDate = pubDate;
-							contextPara.pageCount = pageCount;
-							contextPara.docType = docType;
-							contextPara.org = org
 							context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 						}
 					}
@@ -1067,26 +1049,15 @@ class SearchUtility {
 		}
 	}
 
-	addSearchReport(query, params, saveResults, userId) {
-		try {
-			var today = new Date();
-			var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-			let dir = './scripts/search-testing/';
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, {
-					recursive: true
-				});
-			}
-			let filedir = dir + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
-			let report = {query: query, userId: userId, date: today, params: params, saveResults: saveResults};
-			fs.writeFile(filedir, JSON.stringify(report), (err) => { 
-				if (err) { 
-					LOGGER.error(err, 'CPQ4KSLN', userId); 
-				}
-			});
-		} catch (e) {
-			LOGGER.error(e.message, 'WWKLNQPN', userId);
-		}
+	filterQAResults(shortenedResults) {
+		// filter answers with '[CLS]' which means QA model doesn't know
+		let { question, answers }  = shortenedResults;
+		answers = answers.filter(function (e) {
+			return e.trim().split(/\s/)[0] !== '[CLS]' 
+		});
+		let newResults = { question, answers };
+
+		return newResults;
 	}
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
@@ -1741,7 +1712,6 @@ class SearchUtility {
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
