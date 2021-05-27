@@ -384,17 +384,24 @@ class PolicySearchHandler extends SearchHandler {
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
+						console.log("RAW ANSWERS", shortenedResults);
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
 								return i['status'] == 'passed';
 							});
-						} 
+						} else {
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['text'] !== ''
+							});
+						}
 						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
 						let cleanedResults = shortenedResults.answers.map(item => item.text);
 						searchResults.qaResults.answers = cleanedResults;
 						searchResults.qaResults.filenames = contextIds;
 						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						console.log("results");
+						console.log(searchResults.qaResults.answers[0]);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
