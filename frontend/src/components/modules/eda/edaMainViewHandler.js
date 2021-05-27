@@ -1,14 +1,12 @@
 import React from "react";
 import EDASummaryView from "./edaSummaryView";
 import EDASidePanel from "./edaSidePanel";
-
+import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
-import GCButton from "../../common/GCButton";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {
 	getTrackingNameForFactory,
-	numberWithCommas,
 	RESULTS_PER_PAGE, scrollToContentTop, StyledCenterContainer
 } from "../../../gamechangerUtils";
 import {trackEvent} from "../../telemetry/Matomo";
@@ -18,10 +16,6 @@ import ViewHeader from "../../mainView/ViewHeader";
 
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 
-// Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
-// Edge 20+
-const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const _ = require('lodash');
 
@@ -76,10 +70,40 @@ const EdaMainViewHandler = {
 		const {
 			edaSearchSettings,
 			docSearchResults,
-			loading
+			loading,
+			cloneData,
+			resultsPage,
+			searchText,
+			prevSearchText,
+			count
 		} = state;
 
-		const viewPanels = defaultMainViewHandler.getExtraViewPanels(props);
+		const viewPanels = [];
+		viewPanels.push(
+			{
+				panelName: 'Explorer',
+				panel:
+					<StyledCenterContainer showSideFilters={false}>
+						<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
+							<ViewHeader {...props} mainStyles={{margin:'20px 0 0 0'}} resultsText=' '/>
+							<EDADocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
+								data={docSearchResults}
+								searchText={searchText}
+								prevSearchText={prevSearchText}
+								totalCount={count}
+								loading={loading}
+								resultsPage={resultsPage}
+								resultsPerPage={RESULTS_PER_PAGE}
+								onPaginationClick={(page) => {
+									setState(dispatch, { resultsPage: page, runSearch: true });
+								}}
+								isClone={true}
+								cloneData={cloneData}
+							/>
+						</div>
+					</StyledCenterContainer>
+			}
+		);
 		viewPanels.push({panelName: 'Summary', panel:
 			<div>
 				{!loading && <StyledCenterContainer>
@@ -93,6 +117,7 @@ const EdaMainViewHandler = {
 				</StyledCenterContainer>}
 			</div>
 		});
+		
 
 		return viewPanels;
 	},
