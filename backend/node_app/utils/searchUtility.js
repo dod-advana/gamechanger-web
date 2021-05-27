@@ -1711,7 +1711,16 @@ class SearchUtility {
 				}
 			}
 
+			console.log('aaaaaaaaaaaa');
+			console.log(esClientName);
+			console.log(esIndex);
+			console.log(JSON.stringify(esQuery));
+			console.log(userId);
+
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+
+			console.log(results);
+
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
