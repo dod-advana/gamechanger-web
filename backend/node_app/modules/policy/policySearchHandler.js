@@ -334,12 +334,12 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.topics = enrichedResults.topics;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
-			
 			return enrichedResults;
 		}
 		catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
 		}
+		
 		return searchResults;
 	}
 
@@ -347,9 +347,9 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
-        
-    searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-	searchResults.qaContext = {params: {}, context: []};
+		
+		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
 		if (permissions) {
 		//if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
@@ -361,7 +361,7 @@ class PolicySearchHandler extends SearchHandler {
 			const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
 			const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
 			const isQuestion = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
-				if (intelligentQuestions && isQuestion){
+			if (intelligentQuestions && isQuestion){
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
@@ -376,7 +376,14 @@ class PolicySearchHandler extends SearchHandler {
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, userId, qaParams);
+					let sentResults;
+					if (searchResults.sentResults) {
+						sentResults = searchResults.sentResults.map(item => item.id);
+					} else {
+						sentResults = [];
+						console.log("\n\nSentence results not available");
+					}
+					let context = await this.searchUtility.getQAContext(contextResults, sentResults, userId, qaParams);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
@@ -387,7 +394,7 @@ class PolicySearchHandler extends SearchHandler {
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['status'] == 'passed';
+								return i['status'] == 'passed' && i['text'] !== '';
 							});
 						} 
 						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
@@ -624,6 +631,8 @@ class PolicySearchHandler extends SearchHandler {
 				let entities = [];
 				if(entityList.length > 0){
 					entities = await Promise.all(entityList);
+					console.log("ENTITIES")
+					console.log(entities)
 				}
 				return {entities, totalEntities: entityResults.body.hits.total.value};
 			} else {
