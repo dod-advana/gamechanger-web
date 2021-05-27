@@ -465,22 +465,22 @@ export default class GameChangerAPI {
 
 	reloadModels = async () => {
 		const url = endpoints.reloadModels;
-		return util.axiosGET(this.axios, url);
+		return axiosGET(this.axios, url);
 	}
 
 	downloadDependencies = async () => {
 		const url = endpoints.downloadDependencies;
-		return util.axiosGET(this.axios, url);
+		return axiosGET(this.axios, url);
 	}
 
 	getAPIInformation = async () => {
 		const url = endpoints.getAPIInformation;
-		return util.axiosGET(this.axios, url);
+		return axiosGET(this.axios, url);
 	}
 
 	getS3List = async () => {
 		const url = endpoints.getS3List;
-		return util.axiosGET(this.axios, url);
+		return axiosGET(this.axios, url);
 	}
 
 	getTransformerList = async () => {

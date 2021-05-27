@@ -19,7 +19,7 @@ import _ from "underscore";
 import "react-table/react-table.css";
 import GCButton from "../components/common/GCButton";
 import Modal from 'react-modal';
-import MLDashboard from '../components/gamechanger/admin/MLDashboard';
+import MLDashboard from '../components/admin/MLDashboard';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
 import GCTrendingBlacklist from '../components/admin/GCTrendingBlacklist';
 import InternalUsersManagement from '../components/user/InternalUserManagement';

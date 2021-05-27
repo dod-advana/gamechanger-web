@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Select, TextField, FormControl, Typography, MenuItem, Tooltip } from '@material-ui/core'
-import GameChangerAPI from '../../../api/tools/datatools/gameChanger/gameChanger-service-api';
+import GameChangerAPI from '../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../common/GCButton";
-import { trackEvent } from '../../../utilities/telemetry/Matomo';
+import { trackEvent } from '../telemetry/Matomo';
 import styles from './GCAdminStyles';
 import './index.scss';
 const status = ['ok', 'loading', 'error'];
@@ -76,7 +76,7 @@ const logs = [];
 /**
  * This class queries the ml api information and provides controls 
  * for the different endpoints
- * @class MLPortal
+ * @class MLDashboard
  */
 export default () => {
 
