@@ -142,7 +142,7 @@
 	"scripts": {
 		"109": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=test109 yarn start",
 		"start": "react-scripts start",
-		"dev": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=development yarn start",
+		"dev": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=development PORT=8080 yarn start",
 		"devDecoupled": "REACT_APP_GLUU_SSO=disabled NODE_ENV=development REACT_APP_NODE_ENV=development REACT_APP_GC_DECOUPLED=1 yarn start",
 		"awsDocker": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=aws PORT=8080 react-scripts --max_old_space_size=8096 start",
 		"build": "react-scripts --max_old_space_size=4096 build",
