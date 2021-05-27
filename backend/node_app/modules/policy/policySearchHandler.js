@@ -391,12 +391,18 @@ class PolicySearchHandler extends SearchHandler {
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
+						console.log("SHORTENED RESULTS");
+						console.log(shortenedResults);
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
 								return i['status'] == 'passed' && i['text'] !== '';
 							});
-						} 
+						} else {
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['text'] !== ''
+							});
+						}
 						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
 						let cleanedResults = shortenedResults.answers.map(item => item.text);
 						searchResults.qaResults.answers = cleanedResults;
@@ -601,6 +607,8 @@ class PolicySearchHandler extends SearchHandler {
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			console.log("ENTITIES");
+			console.log(entityResults.body.hits.hits);
 			if(entityResults.body.hits.hits.length > 0 ){
 				const entityList = entityResults.body.hits.hits.map( async obj => {
 					let returnEntity = {};
@@ -631,8 +639,6 @@ class PolicySearchHandler extends SearchHandler {
 				let entities = [];
 				if(entityList.length > 0){
 					entities = await Promise.all(entityList);
-					console.log("ENTITIES")
-					console.log(entities)
 				}
 				return {entities, totalEntities: entityResults.body.hits.total.value};
 			} else {

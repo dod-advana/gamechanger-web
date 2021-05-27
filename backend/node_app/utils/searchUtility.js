@@ -1000,7 +1000,9 @@ class SearchUtility {
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
+				console.log("REGULAR CONTEXT");
 				let resultDoc = contextResults.body.hits.hits[i];
+				console.log(resultDoc._source.id);
 				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
 				if (resultDoc._score > qaParams.scoreThreshold) {
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
@@ -1023,7 +1025,7 @@ class SearchUtility {
 					}
 				} else {
 					let parIdx = 0;
-					let qaSubset = await this.queryOneDocQA(docId, parIdx, qaParams.minLength, userId); // this adds the beginning of the doc
+					let qaSubset = await this.queryOneDocQA(resultDoc._source.id, parIdx, qaParams.minLength, userId); // this adds the beginning of the doc
 					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
 					if (text.length > 200) {
 						contextPara.parId = parIdx;
@@ -1034,7 +1036,9 @@ class SearchUtility {
 			}
 			try {
 				for (var i = 0; i < sentResults.length; i++) {
+					console.log("SENTENCE CONTEXT");
 					let [docId, parIdx] = sentResults[i].split('_');
+					console.log(docId);
 					let qaSubset = await this.queryOneDocQA(docId + '_0', parIdx, qaParams.minLength, userId); // this adds the beginning of the doc
 					let resultDoc = contextResults.body.hits.hits[0];
 					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
