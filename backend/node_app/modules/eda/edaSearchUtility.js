@@ -487,6 +487,103 @@ class EDASearchUtility {
 					mustQueries.push(rangeQuery);
 				}
 			}
+
+			if (edaSearchSettings.issueOffice && edaSearchSettings.issueOffice.length > 0) {
+				mustQueries.push ({
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								must: [
+									{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": edaSearchSettings.issueOffice}}
+								]
+							}
+						}
+					}
+				});
+			}
+
+			if (edaSearchSettings.allYearsSelected === false && edaSearchSettings.fiscalYears) {
+				const nestedQuery = {
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								should: []
+							}
+						}
+					}
+				}
+
+				for (const year of edaSearchSettings.fiscalYears) {
+					const ceil = parseInt(year) + 1;
+					nestedQuery.nested.query.bool.should.push({
+						range: {
+							"extracted_data_eda_n.signature_date_eda_ext_dt": {
+								gte: year,
+								lte: ceil.toString(),
+								format: 'yyyy'
+							}
+						}
+					})
+				}
+				mustQueries.push(nestedQuery);
+			}
+
+			if (edaSearchSettings.allDataSelected === false && edaSearchSettings.contractData) {
+				const contractTypes = Object.keys(edaSearchSettings.contractData);
+				const mustQuery = {
+					bool: {
+						should: []
+					}
+				}
+				let metadataText = '';
+
+				// set up query based on PDS, SYN, or PDF selected
+				for (const contractType of contractTypes) {
+					if (edaSearchSettings.contractData[contractType]) {
+						if (contractType === 'none') { // PDF
+							mustQuery.bool.should.push(
+								{
+									match: {
+										is_supplementary_data_included_eda_ext_b: false
+									}
+								}
+							)
+						}
+						else { // PDS or SYN
+							metadataText += contractType + ", ";
+						}
+					}
+				}
+
+				if (metadataText != '') {
+					metadataText = metadataText.substring(0, metadataText.length - 2);
+					mustQuery.bool.should.push(
+						{
+							bool: {
+								must: [
+									{
+										match: {
+											metadata_type_eda_ext: metadataText
+										}
+									},
+									{
+										match: {
+											is_supplementary_data_included_eda_ext_b: true
+										}
+									}
+								]
+							}
+						}
+						
+					)
+				}
+
+				if (mustQuery.bool.should.length > 0) {
+					mustQueries.push(mustQuery);
+				}
+			}
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
