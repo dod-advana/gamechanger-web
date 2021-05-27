@@ -35,6 +35,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId) {
+		console.log('bbbbbbbbbbbbbbbbbb');
 		const {
 			offset,
 			useGCCache,
@@ -46,7 +47,10 @@ class PolicySearchHandler extends SearchHandler {
 			return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
 		}
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+		console.log('cccccccccccccc');
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		console.log('ddddddddd');
+		console.log(searchResults);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
 		this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		return enrichedResults;
