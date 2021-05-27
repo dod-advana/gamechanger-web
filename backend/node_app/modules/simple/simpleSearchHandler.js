@@ -85,9 +85,9 @@ class SimpleSearchHandler extends SearchHandler {
 			// log query to ES
 			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 
-			if (!forCacheReload && useGCCache && offset === 0) {
-				return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-			}
+			// if (!forCacheReload && useGCCache && offset === 0) {
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// }
 			// try to get search expansion
 			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = {};
