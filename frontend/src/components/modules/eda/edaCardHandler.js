@@ -5,7 +5,8 @@ import {
 	getTrackingNameForFactory, getTypeIcon, getTypeTextColor
 } from "../../../gamechangerUtils";
 import {
-	getEDAMetadataForPropertyTable
+	getEDAMetadataForPropertyTable,
+	getDisplayTitle
 } from "./edaUtils";
 import {primary} from "../../../components/common/gc-colors";
 import {CardButton} from "../../common/CardButton";
@@ -396,29 +397,6 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
 	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
-};
-
-const getDisplayTitle = (item) => {
-	if (item.title && item.title !== 'NA') {
-		return item.title.replaceAll('-empty', '').replaceAll('empty-', '');
-	}
-	else {
-		try {
-			const rootfile = item.filename.substr(item.filename.lastIndexOf("/")+1)
-			const pieces = rootfile.split('-');
-			const first = pieces[7];
-			if (first === 'empty' || !first) {
-				throw new Error('parsing failed')
-			}
-			const second = pieces[8] === 'empty' ? '' : `-${pieces[8]}`;
-			const mod = pieces[9] === 'empty' ? '' : `-${pieces[9]}`;
-			const mod2 = pieces[10] === 'empty' ? '' : `-${pieces[10]}`;
-
-			return `${first}${second}${mod}${mod2}`;
-		} catch (e) {
-			return `${item?.filename?.substr(item.filename.lastIndexOf("/")+1) ?? 'Not Available'}`
-		}
-	}
 };
 
 const EdaCardHandler = {
