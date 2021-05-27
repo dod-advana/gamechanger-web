@@ -4,11 +4,11 @@ import EDASidePanel from "./edaSidePanel";
 
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
-import GCButton from "../../common/GCButton";
+// import GCButton from "../../common/GCButton";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {
 	getTrackingNameForFactory,
-	numberWithCommas,
+	// numberWithCommas,
 	RESULTS_PER_PAGE, scrollToContentTop, StyledCenterContainer
 } from "../../../gamechangerUtils";
 import {trackEvent} from "../../telemetry/Matomo";
@@ -21,7 +21,7 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 // Edge 20+
-const IS_EDGE = !IS_IE && !!window.StyleMedia;
+// const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const _ = require('lodash');
 
