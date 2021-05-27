@@ -42,9 +42,10 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
 		// if using cache
-		if (!forCacheReload && useGCCache && offset === 0) {
-			return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-		}
+		// if (!forCacheReload && useGCCache && offset === 0) {
+		// 	console.log('something');
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// }
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
