@@ -8,7 +8,7 @@ class EDASearchUtility {
         const {
             logger = LOGGER,
             constants = constantsFile,
-			searchUtility = new SearchUtility()
+			searchUtility = new SearchUtility(opts)
         } = opts;
 
         this.logger = logger;

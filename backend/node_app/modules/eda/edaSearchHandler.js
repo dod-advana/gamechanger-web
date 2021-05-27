@@ -3,8 +3,6 @@ const searchUtility = new SearchUtility();
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
-const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
-const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const mlApi = new MLApiClient();
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
@@ -23,13 +21,17 @@ class EdaSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
 		const { 
 			dataLibrary = new DataLibrary(opts),
-			edaSearchUtility = new EDASearchUtility(),
-			constants = CONSTANTS
+			edaSearchUtility = new EDASearchUtility(opts),
+			constants = CONSTANTS,
+			separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
+			redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost')
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 		this.dataLibrary = dataLibrary;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
+		this.separatedRedisAsyncClient = separatedRedisAsyncClient;
+		this.redisAsyncClient = redisAsyncClient;
 	}
 
 	async searchHelper(req, userId) {
@@ -70,8 +72,8 @@ class EdaSearchHandler extends SearchHandler {
 			const cloneSpecificObject = { };
 
 			const operator = 'and';
-
-			const redisDB = separatedRedisAsyncClient;
+			
+			const redisDB = this.separatedRedisAsyncClient;
 			redisDB.select(redisAsyncClientDB);
 
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
@@ -105,15 +107,15 @@ class EdaSearchHandler extends SearchHandler {
 			}
 
 			// get expanded abbreviations
-			await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
+			await this.redisAsyncClient.select(abbreviationRedisAsyncClientDB);
 			let abbreviationExpansions = [];
 			let i = 0;
 			for (i = 0; i < termsArray.length; i++) {
 				let term = termsArray[i];
 				let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-				let expandedTerm = await redisAsyncClient.get(upperTerm);
+				let expandedTerm = await this.redisAsyncClient.get(upperTerm);
 				let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-				let compressedTerm = await redisAsyncClient.get(lowerTerm);
+				let compressedTerm = await this.redisAsyncClient.get(lowerTerm);
 				if (expandedTerm) {
 					if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 						abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
@@ -131,7 +133,7 @@ class EdaSearchHandler extends SearchHandler {
 
 			expansionDict = searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
 			// this.logger.info('exp: ' + expansionDict);
-			await redisAsyncClient.select(redisAsyncClientDB);
+			await this.redisAsyncClient.select(redisAsyncClientDB);
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);

@@ -43,12 +43,17 @@ describe('EDASearchHandler', function () {
                     }
                 },
                 constants: {
-                    env: {
-                        EDA_ELASTIC_SEARCH_OPTS: 'test es opts',
-                        GAME_CHANGER_OPTS: {
-                            historyIndex: 'test index'
-                        }
+                    EDA_ELASTIC_SEARCH_OPTS: 'test es opts',
+                    GAME_CHANGER_OPTS: {
+                        historyIndex: 'test index'
                     }
+                },
+                redisAsyncClient: {
+                    select() {},
+                    get() {}
+                },
+                separatedRedisAsyncClient: {
+                    select(){}
                 }
 			};
 
