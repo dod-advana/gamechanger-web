@@ -35,35 +35,22 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId) {
-		try {
-			console.log('bbbbbbbbbbbbbbbbbb');
-			const {
-				offset,
-				useGCCache,
-				forCacheReload = false,
-			} = req.body;
-			console.log(req.body);
-			console.log('tttttttt');
-			let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
-			console.log('uuuuuuuuuuu');
-			// if using cache
-			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	console.log('something');
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-			// }
-			console.log('yyyyyyyyy');
-			let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-			console.log('cccccccccccccc');
-			let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
-			console.log('ddddddddd');
-			console.log(searchResults);
-			let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
-			this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
-			return enrichedResults;
-		} catch(err) {
-			console.error('hhhhhhh');
-			console.error(err);
-		}
+		const {
+			offset,
+			useGCCache,
+			forCacheReload = false,
+		} = req.body;
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
+		// if using cache
+		// if (!forCacheReload && useGCCache && offset === 0) {
+		// 	console.log('something');
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// }
+		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
+		this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		return enrichedResults;
 	}
 
 	async callFunctionHelper(req, userId) {
