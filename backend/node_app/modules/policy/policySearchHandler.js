@@ -42,11 +42,16 @@ class PolicySearchHandler extends SearchHandler {
 				useGCCache,
 				forCacheReload = false,
 			} = req.body;
+			console.log(req.body);
+			console.log('tttttttt');
 			let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
+			console.log('uuuuuuuuuuu');
 			// if using cache
 			if (!forCacheReload && useGCCache && offset === 0) {
+				console.log('something');
 				return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
 			}
+			console.log('yyyyyyyyy');
 			let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 			console.log('cccccccccccccc');
 			let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
