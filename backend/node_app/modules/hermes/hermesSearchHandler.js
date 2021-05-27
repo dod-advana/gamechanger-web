@@ -49,9 +49,9 @@ class HermesSearchHandler extends SearchHandler {
 
 			const cloneSpecificObject = {};
 
-			if (!forCacheReload && useGCCache && offset === 0) {
-				return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-			}
+			// if (!forCacheReload && useGCCache && offset === 0) {
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// }
 
 			const clientObj = {esClientName: 'gamechanger', esIndex: constants.HERMES_ELASTIC_SEARCH_OPTS.index};
 
