@@ -585,7 +585,7 @@ const GamechangerAdminPage = props => {
 			const value = data.value === 'true';
 			setTopicSearch(value);
 		} catch(e) {
-			console.error('Error getting entity search mode', e);
+			console.error('Error getting topic search mode', e);
 		}
 	}
 
