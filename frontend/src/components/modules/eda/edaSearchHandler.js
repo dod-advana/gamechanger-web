@@ -201,8 +201,12 @@ const EdaSearchHandler = {
 							return document.filename;
 						});
 		
+						let totalObligatedAmount = 0;
 						searchResults.forEach(result => {
 							result.favorite = favFilenames.includes(result.filename);
+							if (result.obligated_amounts_eda_ext) {
+								totalObligatedAmount += result.obligated_amounts_eda_ext;
+							}
 						});
 		
 						// if this search is a favorite, turn off notifications of new results
@@ -248,7 +252,8 @@ const EdaSearchHandler = {
 							metricsLoading: false,
 							metricsCounted: true,
 							loadingTinyUrl: false,
-							hideTabs: false
+							hideTabs: false,
+							totalObligatedAmount
 						});
 					} else {
 						if (!offset) {

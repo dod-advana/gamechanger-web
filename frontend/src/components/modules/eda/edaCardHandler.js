@@ -31,17 +31,11 @@ export const EDA_FIELDS = [
 	"modification_eda_ext",
 	"contract_admin_name_eda_ext",
 	"contract_admin_office_dodaac_eda_ext",
-	"effective_date_eda_ext"
-];
-
-const PDS_FIELDS = [
+	"effective_date_eda_ext",
 	"naics_eda_ext",
-	"obligated_amounts_eda_ext"
+	"obligated_amounts_eda_ext",
 ];
 
-const SYN_FIELDS = [
-	"misc_fsc_eda_ext"
-];
 
 export const EDA_FIELD_JSON_MAP = {
 	"award_id_eda_ext": "Award ID", 
@@ -51,7 +45,7 @@ export const EDA_FIELD_JSON_MAP = {
 	"vendor_name_eda_ext": "Vendor Name",
 	"vendor_duns_eda_ext": "Vendor DUNS",
 	"vendor_cage_eda_ext": "Vendor CAGE",
-	"obligated_amounts_eda_ext": "Obligated Amounts",
+	"obligated_amounts_eda_ext": "Total Obligated Amounts",
 	"contract_issue_name_eda_ext": "Contract Issuing Office Name",
 	"contract_issue_dodaac_eda_ext": "Contract Issuing Office DoDaaC",
 	"misc_fsc_eda_ext": "PSC on Contract Header",
@@ -60,7 +54,7 @@ export const EDA_FIELD_JSON_MAP = {
 	"modification_eda_ext": "Modification Number",
 	"contract_admin_name_eda_ext": "Contract Admin Name",
 	"contract_admin_office_dodaac_eda_ext": "Contract Admin Office DoDAAC",
-	"effective_date_eda_ext": "Effective Date"
+	"effective_date_eda_ext": "Effective Date",
 };
 
 const styles = {
@@ -702,11 +696,9 @@ const EdaCardHandler = {
 			if (item && item.metadata_type_eda_ext && item.award_id_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
-					fields = fields.concat(PDS_FIELDS);
 				}
 				else if (item.metadata_type_eda_ext === 'syn') {
 					tooltipText = 'Pulled from Synopsis data';
-					fields = fields.concat(SYN_FIELDS);
 				}
 			}
 			
