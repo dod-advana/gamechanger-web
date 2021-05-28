@@ -878,6 +878,14 @@ const GamechangerAdminPage = props => {
 							</Link>
 						</Paper>
 					</div>
+					<div style={styles.feature}>
+						<Paper style={styles.paper} zDepth={2} circle>
+							<Link to="#" onClick={reloadHandlerMap} style={{ textDecoration: 'none' }}>
+							<i style={styles.image} className="fa fa-map fa-2x"></i>
+								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle User Feedback</span></h2>
+							</Link>
+						</Paper>
+					</div>
 					<div style={{ minWidth: '400px', height: '150px', border: '2px solid darkgray', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
 						<b>Transformer Model Select</b>
 						<select style={{ margin: '0 5px' }} value={selectedTransformer} onChange={({ target: { value } }) => { setSelectedTransformer(value) }}>

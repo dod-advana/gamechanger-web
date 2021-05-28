@@ -83,6 +83,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
+	userFeedback:'/api/gamechanger/appSettings/userFeedback',
 
 
 	exportHistoryDELETE: function(id){
@@ -618,6 +619,16 @@ export default class GameChangerAPI {
 		const url = endpoints.entitySearch;
 		const bodyValue = value ? 'true' : 'false';
 		return axiosPOST(this.axios, url, {value: bodyValue});
+	}
+
+	getUserFeedbackMode = async () => {
+		const url = endpoints.userFeedback;
+		return axiosGET(this.axios, url)
+	}
+
+	toggleUserFeedbackMode = async () => {
+		const url = endpoints.userFeedback;
+		return axiosPOST(this.axios, url, {})
 	}
 
 	getDescriptionFromWikipedia(title) {
