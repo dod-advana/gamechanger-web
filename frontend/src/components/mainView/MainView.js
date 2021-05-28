@@ -23,19 +23,14 @@ import {
 import GameChangerAPI from "../api/gameChanger-service-api";
 import {DidYouMean} from "../searchBar/SearchBarStyledComponents";
 import MagellanTrendingLinkList from "../common/MagellanTrendingLinkList";
-import Pagination from "react-js-pagination";
-import GCTooltip from "../common/GCToolTip";
-import GCButton from "../common/GCButton";
 import {gcOrange} from "../../components/common/gc-colors";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
-import GameChangerSideBar from "../searchMetrics/GCSideBar";
 import ExportResultsDialog from "../export/ExportResultsDialog";
 // import util from "../advana/api/util";
 import uuidv4 from "uuid/v4";
 import QueryDialog from "../admin/QueryDialog";
 import DocDialog from "../admin/DocDialog";
 import MainViewFactory from "../factories/mainViewFactory";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 

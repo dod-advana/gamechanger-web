@@ -16,8 +16,6 @@ import styled from "styled-components";
 import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
-import {StyledTopEntities} from "../../searchMetrics/GCSideBar";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 
 const styles = {
