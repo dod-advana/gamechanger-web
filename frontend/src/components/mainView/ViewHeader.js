@@ -114,7 +114,7 @@ const ViewHeader = (props) => {
 
 	const handleChangeSort = (event) => {
 		const {target: { value }} = event;
-		setState(dispatch,{currentSort: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
 	}
 
 	const handleChangeOrder = (value) => {
@@ -163,20 +163,36 @@ const ViewHeader = (props) => {
 							})}
 							</Select>
 						</FormControl>
-						<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
-							<i 
-								class="fa fa-sort-amount-desc" 
-								style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'black' : 'grey'}} 
-								aria-hidden="true"
-								onClick={() => {handleChangeOrder('desc')}	}
-							></i>
-							<i 
-								class="fa fa-sort-amount-asc" 
-								style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'black' : 'grey'}} 
-								aria-hidden="true"
-								onClick={() => {handleChangeOrder('asc')}	}
-							></i>
-						</div>
+						{currentSort !== 'Alphabetical' ? 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									class="fa fa-sort-amount-desc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+								<i 
+									class="fa fa-sort-amount-asc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+							</div>) : 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									class="fa fa-sort-alpha-asc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+								<i 
+									class="fa fa-sort-alpha-desc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+							</div>)
+						}
 				</>
 				}
 				<FormControl classes={{root:classes.root}}>
