@@ -500,7 +500,8 @@ const PolicySearchHandler = {
 			showTutorial,
 			searchSettings,
 			cloneData,
-			currentSort
+			currentSort,
+			currentOrder
 		} = state;
 
 		const {
@@ -548,7 +549,8 @@ const PolicySearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					limit,
-					sort: currentSort
+					sort: currentSort,
+					order: currentOrder,
 				},
 			});
 

@@ -168,6 +168,7 @@ const initState = {
 		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'Most Referenced']
 	},
 	currentSort: 'Relevance',
+	currentOrder: 'desc',
 
 	// category totals
 	categoryMetadata: {},

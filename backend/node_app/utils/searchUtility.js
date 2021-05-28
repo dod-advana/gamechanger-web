@@ -317,7 +317,8 @@ class SearchUtility {
 			extStoredFields = [], 
 			extSearchFields = [], 
 			includeRevoked = false,
-			sort = ''
+			sort = 'Relevance', 
+			order = 'desc',
 		 }, 
 		 user) {
 
@@ -454,17 +455,20 @@ class SearchUtility {
 			};
 
 			switch(sort){
+				case 'Relevance':
+					query.sort = [ {"_score": {"order" : order}} ]
+					break;
 				case 'Publishing Date':
-					query.sort = [ {"publication_date_dt": {"order" : "desc"}} ]
+					query.sort = [ {"publication_date_dt": {"order" : order}} ]
 					break;
 				case 'Alphabetical':
-					query.sort = [ {"display_title_s": {"order" : "asc"}} ]
+					query.sort = [ {"display_title_s": {"order" : order}} ]
 					break;
 				case 'Most Referenced':
 					query.sort = [{"_script": {
 						"type": "number",
 						"script": "doc.ref_list.size()",
-						"order": "desc"
+						"order": order
 					}}]
 				default: 
 					break;

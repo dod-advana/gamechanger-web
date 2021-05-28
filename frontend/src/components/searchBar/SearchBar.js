@@ -60,8 +60,8 @@ const SearchBar = (props) => {
 
 	const handleCategoryTabChange = (tabName) => {
 		if (tabName === 'all'){
-			// if sort is relevance
-			if(state.currentSort === 'Relevance'){
+			// if sort is relevance descending
+			if(state.currentSort === 'Relevance' && state.currentOrder === 'currentOrder'){
 				setState(dispatch,{
 					activeCategoryTab:tabName,
 					docSearchResults:state.docSearchResults.slice(0,6),
@@ -78,11 +78,12 @@ const SearchBar = (props) => {
 					replaceResults: true,
 					infiniteScrollPage: 1,
 					currentSort: 'Relevance',
+					currentOrder: 'desc',
 					docsPagination: true
 				})
 			}
 			
-		} else if (tabName === 'Documents' && (state.resultsPage !== 1 || (state.activeCategoryTab === 'all' && state.currentSort !== 'Relevance'))){ // if pagination is wrong, or current sorting doesn't match
+		} else if (tabName === 'Documents' && (state.resultsPage !== 1 || (state.activeCategoryTab === 'all' && (state.currentSort !== 'Relevance' || state.currentOrder !== 'desc')))){ // if pagination is wrong, or current sorting doesn't match
 			setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true})
 		} else if (tabName === 'Documents'){
 			setState(dispatch,{activeCategoryTab:tabName, replaceResults: false})
