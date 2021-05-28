@@ -58,7 +58,8 @@ const ViewHeader = (props) => {
 		currentViewName,
 		viewNames,
 		categorySorting,
-		currentSort
+		currentSort,
+		currentOrder
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -87,7 +88,7 @@ const ViewHeader = (props) => {
 				tempCount = count;
 		}
 		setDisplayCount(tempCount)
-	},[activeCategoryTab, count, entityCount, topicCount])
+	},[activeCategoryTab, count, entityCount, topicCount, currentOrder])
 	
 	const setDrawer = (open) => {
 		setState(dispatch, {docsDrawerOpen: open});
@@ -116,6 +117,10 @@ const ViewHeader = (props) => {
 		setState(dispatch,{currentSort: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
 	}
 
+	const handleChangeOrder = (value) => {
+		setState(dispatch,{currentOrder: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+	}
+
 	const handleChangeView = (event) => {
 		const {target: { value }} = event;
 		switch(value) {
@@ -142,21 +147,37 @@ const ViewHeader = (props) => {
 			</div>
 			<div className={'view-buttons-container'}>
 				{categorySorting[activeCategoryTab] !== undefined && 
-					<FormControl classes={{root:classes.root}}>
-						<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
-						<Select
-						labelId="view-name"
-						id="view-name-select"
-						value={currentSort}
-						onChange={handleChangeSort}
-						classes={{root:classes.selectRoot}}
-						autoWidth
-						>
-						{categorySorting[activeCategoryTab].map(sort => {
-							return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
-						})}
-						</Select>
-					</FormControl>
+					<>
+						<FormControl classes={{root:classes.root}}>
+							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
+							<Select
+							labelId="view-name"
+							id="view-name-select"
+							value={currentSort}
+							onChange={handleChangeSort}
+							classes={{root:classes.selectRoot}}
+							autoWidth
+							>
+							{categorySorting[activeCategoryTab].map(sort => {
+								return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
+							})}
+							</Select>
+						</FormControl>
+						<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+							<i 
+								class="fa fa-sort-amount-desc" 
+								style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'black' : 'grey'}} 
+								aria-hidden="true"
+								onClick={() => {handleChangeOrder('desc')}	}
+							></i>
+							<i 
+								class="fa fa-sort-amount-asc" 
+								style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'black' : 'grey'}} 
+								aria-hidden="true"
+								onClick={() => {handleChangeOrder('asc')}	}
+							></i>
+						</div>
+				</>
 				}
 				<FormControl classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
