@@ -135,7 +135,6 @@ class GlobalSearchHandler extends SearchHandler {
 							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
 								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
 			const results = await this.database.uot.query(hitQuery, {type: Sequelize.QueryTypes.SELECT, raw: true});
-			console.log(results)
 			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
 			return this.generateRespData(apps, appResults, offset, limit);
 		} catch (err) {
@@ -147,8 +146,6 @@ class GlobalSearchHandler extends SearchHandler {
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
 			let results = await Promise.all([this.getQlikApps(), this.getQlikApps({}, userId.substring(0, userId.length - 4))]);
-	
-			
 			const [apps, searchResults] = this.performSearch(this.mergeUserApps((results[0].data || []), (results[1].data || [])), lunrSearchUtils.parse(searchText));
 			return this.generateRespData(apps, searchResults, offset, limit);
 		} catch (err) {
@@ -233,7 +230,6 @@ class GlobalSearchHandler extends SearchHandler {
 	async getQlikApps(params = {}, userId) {
 		try {
 			let url = `${QLIK_URL}/qrs/app/full`;
-			const test = await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
 			return await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
 		} catch (err) {
 			if (!userId) // most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
