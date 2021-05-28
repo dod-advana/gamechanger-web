@@ -424,6 +424,7 @@ const GamechangerAdminPage = props => {
 	const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
+	const [userFeedback, setUserFeedback] = useState(true);
 	const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 
@@ -567,6 +568,15 @@ const GamechangerAdminPage = props => {
 			console.error('Error getting entity search mode', e);
 		}
 	}
+	const getUserFeedback = async () => {
+		try {
+			const { data } = await gameChangerAPI.getUserFeedbackMode();
+			const value = data.value === 'true';
+			setUserFeedback(value);
+		} catch(e) {
+			console.error('Error getting user feedback mode', e);
+		}
+	}
 
 	useEffect(() => {
 		getCurrentTransformer();
@@ -574,6 +584,7 @@ const GamechangerAdminPage = props => {
 		getCombinedSearch();
 		getIntelligentAnswers();
 		getEntitySearch();
+		getUserFeedback();
 	}, []);
 
 	const createAlert = (title, type, message) => {
@@ -702,6 +713,19 @@ const GamechangerAdminPage = props => {
 		} catch (e){
 			console.log(e);
 			createAlert('Reloading Handler Map', "error", "Failed updating handler map")
+		}
+	}
+	const toggleUserFeedback = async () => {
+		const title = "Requst User Feedback: ";
+		createAlert(title, "info", "Started");
+		try {
+			await gameChangerAPI.toggleUserFeedbackMode().then(res => {
+				createAlert('Toggling user feedback value', "success", 'updated user feedback mode')
+				getUserFeedback();
+			})
+		} catch (e){
+			console.log(e);
+			createAlert('Toggling user feedback value', "error", "failed updating user feedback mode")
 		}
 	}
 
@@ -879,9 +903,9 @@ const GamechangerAdminPage = props => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
-							<Link to="#" onClick={reloadHandlerMap} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-map fa-2x"></i>
+						<Paper style={userFeedback?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+							<Link to="#" onClick={toggleUserFeedback} style={{ textDecoration: 'none' }}>
+							<i style={styles.image} className="fa fa-id-card-o fa-2x"></i>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle User Feedback</span></h2>
 							</Link>
 						</Paper>

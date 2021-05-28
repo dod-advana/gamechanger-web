@@ -50,8 +50,8 @@ class AppSettingsController {
 	async getMode(key, req, res){
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const mode = await this.appSettings.findAll({ attributes: ['value'], where: { key: key} });
-			res.status(200).send(mode);
+			const mode = await this.appSettings.findOrCreate({ attributes: ['value'], where: { key: key}, defaults: {value: 'true'} });
+			res.status(200).send(mode[0]);
 		} catch (err) {
 			this.logger.error(err, 'DF90FR3', userId);
 			res.status(500).send(err);
@@ -90,15 +90,15 @@ class AppSettingsController {
 	async toggleMode(key, req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			let modeSetting = await this.appSettings.findAll({ attributes: ['value'], where: { key: key} });
-			console.log(modeSetting)
-			if (modeSetting.value === 'true'){
-				modeSetting.value = 'false'
+			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key} });
+			console.log(dataValues)
+			if (dataValues.value === 'true'){
+				dataValues.value = 'false'
 			}
 			else{
-				modeSetting.value = 'true'
+				dataValues.value = 'true'
 			}
-			const updatedResult = await this.appSettings.update(modeSetting, { where: {key: key} });
+			const updatedResult = await this.appSettings.update(dataValues, { where: {key: key} });
 			res.status(200).send({ updatedResult });
 		} catch (err) {
 			this.logger.error(err, 'PQNAF35', userId);
