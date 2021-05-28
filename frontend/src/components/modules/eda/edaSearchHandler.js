@@ -201,14 +201,6 @@ const EdaSearchHandler = {
 							return document.filename;
 						});
 		
-						let totalObligatedAmount = 0;
-						searchResults.forEach(result => {
-							result.favorite = favFilenames.includes(result.filename);
-							if (result.obligated_amounts_eda_ext) {
-								totalObligatedAmount += result.obligated_amounts_eda_ext;
-							}
-						});
-		
 						// if this search is a favorite, turn off notifications of new results
 						if (searchFavorite) {
 							userData.favorite_searches.forEach((search, index) => {
@@ -252,8 +244,7 @@ const EdaSearchHandler = {
 							metricsLoading: false,
 							metricsCounted: true,
 							loadingTinyUrl: false,
-							hideTabs: false,
-							totalObligatedAmount
+							hideTabs: false
 						});
 					} else {
 						if (!offset) {
@@ -334,13 +325,18 @@ const EdaSearchHandler = {
 						"4th Estate": 0
 					}
 
+					let totalObligatedAmount = 0;
 					for (const doc of docs) {
 						if (doc.issuing_organization_eda_ext && issuingOrgs[doc.issuing_organization_eda_ext] !== undefined) {
 							issuingOrgs[doc.issuing_organization_eda_ext] += 1;
 						}
+						if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
+							totalObligatedAmount += doc.obligated_amounts_eda_ext;
+						}
+						
 					}
 
-					setState(dispatch, { issuingOrgs, statsLoading: false });
+					setState(dispatch, { issuingOrgs, statsLoading: false, totalObligatedAmount });
 				}
 			}).catch(err => {
 				console.log('error')
