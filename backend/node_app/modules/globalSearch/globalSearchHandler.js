@@ -55,9 +55,9 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const cloneSpecificObject = {};
 
-			if (!forCacheReload && useGCCache && offset === 0) {
-				return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-			}
+			// if (!forCacheReload && useGCCache && offset === 0) {
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// }
 			const searchResults = {applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0};
 
 			// Applications
