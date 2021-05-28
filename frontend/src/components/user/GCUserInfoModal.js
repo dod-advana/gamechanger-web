@@ -4,9 +4,10 @@ import GCButton from '../common/GCButton';
 import EmailValidator from "email-validator";
 import {getUserData, setState} from "../../sharedFunctions";
 import GamechangerUserManagementAPI from "../api/GamechangerUserManagement";
+import GameChangerAPI from '../api/gameChanger-service-api';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/Close'
-
+const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 const CloseButton = styled.div`
     padding: 6px;
@@ -65,6 +66,7 @@ export default (props) => {
     const [emailError, setEmailError] = useState(false);
     const [orgError, setOrgError] = useState(false);
     const [passedOnInfo, setPassedOnInfo] = useState(true);
+    const [userFeedbackMode, setUserFeedbackMode] = useState(false);
     
 
     const checkRequired = (field, value) => {
@@ -114,6 +116,16 @@ export default (props) => {
         }
         setPassedOnInfo(didPass);
     }
+
+    const getUserFeedbackMode = async () => {
+		try {
+			const { data } = await gameChangerAPI.getUserFeedbackMode();
+			const value = data.value === 'true';
+			setUserFeedbackMode(value);
+		} catch(e) {
+			console.error('Error getting user feedback mode', e);
+		}
+	}
     
 	const handleUserInfoInput = (field, text) => {
 		const userInfo = {...state.userInfo};
@@ -132,11 +144,12 @@ export default (props) => {
 		setUserInfoModal(false);
 	}
     useEffect(() => {
-		passedOnUserInfo()
+        getUserFeedbackMode();
+		passedOnUserInfo();
 	}, []);
     return (
         <Dialog
-            open={state.userInfoModalOpen && !passedOnInfo}
+            open={state.userInfoModalOpen && !passedOnInfo && userFeedbackMode}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
