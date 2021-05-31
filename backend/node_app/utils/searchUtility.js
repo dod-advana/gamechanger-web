@@ -746,7 +746,7 @@ class SearchUtility {
 		}
 	}
 
-	getESQueryUsingOneID(id, user, limit = 100) {
+	getESQueryUsingOneID(id, user, limit = 100, maxLength=200) {
 		try {
 			return {
 				_source: {
@@ -793,7 +793,19 @@ class SearchUtility {
 										'paragraphs.par_raw_text_t'
 									],
 									from: 0,
-									size: 5
+									size: 5,
+									highlight: {
+									  fields: {
+										'paragraphs.filename.search': {
+										  number_of_fragments: 0
+										},
+										'paragraphs.par_raw_text_t': {
+										  fragment_size: maxLength,
+										  number_of_fragments: 1
+										}
+									  },
+									  fragmenter: 'span'
+									}
 								},
 								query: {
 									bool: {
@@ -947,48 +959,45 @@ class SearchUtility {
 		}
 	}
 
-	expandParagraphs (listParagraphs, parIdx, minLength) {
+	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
+		let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
+		let qaTextList = qaResults.map(item => item.par_raw_text_t);
 		let start = parIdx;
-		let end = +start + 1;
-		let arr = [];
-		let text = '';
-		let context = [];
-		text = listParagraphs[start];
-		let total_pars = listParagraphs.length;
-		//console.log("BEGINNING START: ", start, "TOTAL PARS: ", total_pars);
-		arr = text.split(/\s+/);
+		let end = +start + +1;
+		let text = qaTextList[start];
+		let total_pars = qaTextList.length;
+		let context = []
+		let arr = text.split(/\s+/);
 		try {
-			for (start=start,end=end;start>0,end<total_pars;start--,end++) {
-				//console.log("start: ", start, "end: ", end);
-				context = listParagraphs.slice(start, end);
+			for (start,end; start>=0,end<=total_pars; --start,++end) {
+				if (start <= 1) {
+					start = 1
+				}
+				if (end >= total_pars) {
+					end = total_pars
+				}
+				context = qaTextList.slice(start, end);
 				text = context.join(' ');
 				arr = text.split(/\s+/);
 				if (arr.length > minLength) {
 					break
 				}
 			}
-			//console.log("LENGTH");
-			//console.log(arr.length);
-			//console.log("CONTEXT")
-			//console.log(context);
 			return context;
 		} catch (e) {
 			LOGGER.error(e.message, 'BVD4546JN', userId);
 		}
 	}
 
-	async queryOneDocQA(docId, parIdx, minLength, userId) {
+	async queryOneDocQA(docId, userId) {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
-			let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
-			let qaTextList = qaResults.map(item => item.par_raw_text_t);
-			let qaSubset = await this.expandParagraphs(qaTextList, parIdx, minLength); // get only text around the hit paragraph up to the max length
-			return qaSubset;
+			return singleResult;
 		} catch (e) {
 			LOGGER.error(e.message, 'COP4546JN', userId);
 		}
@@ -998,19 +1007,19 @@ class SearchUtility {
 		
 		let context = [];
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
+		let parIdx = 0;
 		try {
 			for (var i = 0; i < docLimit; i++) {
-				console.log("REGULAR CONTEXT");
 				let resultDoc = contextResults.body.hits.hits[i];
-				console.log(resultDoc._source.id);
-				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
 				if (resultDoc._score > qaParams.scoreThreshold) {
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
-							let parIdx = paraHits[x]._nested.offset;
+							parIdx = paraHits[x]._nested.offset;
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
 							contextPara.parId = parIdx;
+							contextPara.source = "context search";
 							let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
 							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
@@ -1024,34 +1033,52 @@ class SearchUtility {
 						}
 					}
 				} else {
-					let parIdx = 0;
-					let qaSubset = await this.queryOneDocQA(resultDoc._source.id, parIdx, qaParams.minLength, userId); // this adds the beginning of the doc
+					parIdx = 0;
+					let singleResult = await this.queryOneDocQA(resultDoc._source.id, userId); // this adds the beginning of the doc
+					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+					contextPara.source = "context search"
+					contextPara.parId = parIdx;
 					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
 					if (text.length > 200) {
-						contextPara.parId = parIdx;
 						contextPara.text = text;
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
 			}
-			try {
+			if (sentResults) {
 				for (var i = 0; i < sentResults.length; i++) {
-					console.log("SENTENCE CONTEXT");
-					let [docId, parIdx] = sentResults[i].split('_');
-					console.log(docId);
-					let qaSubset = await this.queryOneDocQA(docId + '_0', parIdx, qaParams.minLength, userId); // this adds the beginning of the doc
-					let resultDoc = contextResults.body.hits.hits[0];
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
-					contextPara.parId = parIdx;
-					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods
-					if (text.length > 200) {
-						contextPara.text = text;
-						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
+					try {
+						let [docId, parIdx] = sentResults[i].id.split('_');
+						docId = docId + '_0';
+						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
+						let resultDoc = singleResult.body.hits.hits[0];
+						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+						contextPara.parId = parIdx;
+						contextPara.source = "intelligent search";
+						let paraHit = resultDoc._source.paragraphs[parIdx];
+						let para = paraHit.par_raw_text_t;
+						para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+						if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
+							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+							contextPara.text = para;
+						} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
+							contextPara.text = para;
+						} else {
+							let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+							let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods
+							contextPara.text = text;
+						}
+						if (sentResults[i].score >= 0.95) {
+							context.unshift(contextPara);
+						} else {
+							context.push(contextPara);
+						}
+					} catch (e) {
+						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			} catch (e) {
-				LOGGER.error(e.message, 'CLQPERNC', userId);
-			}
+			} 
 			return context
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
@@ -1062,13 +1089,13 @@ class SearchUtility {
 		try {
 			var today = new Date();
 			var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-			let dir = './scripts/search-testing/';
+			let dir = './scripts/search-testing/' + date + '/';
 			if (!fs.existsSync(dir)) {
 				fs.mkdirSync(dir, {
 					recursive: true
 				});
 			}
-			let filedir = dir + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
+			let filedir = dir  + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
 			let report = {query: query, userId: userId, date: today, params: params, saveResults: saveResults};
 			fs.writeFile(filedir, JSON.stringify(report), (err) => { 
 				if (err) { 
@@ -1682,9 +1709,9 @@ class SearchUtility {
 	async documentSearchOneID(req, body, clientObj, userId) {
 		try {
 	
-			const { id = '', searchTerms = [], expansionDict = {}, limit = 20 } = body;
+			const { id = '', searchTerms = [], expansionDict = {}, limit = 20, maxLength = 200 } = body;
 	
-			const esQuery = this.getESQueryUsingOneID(id, userId, limit);
+			const esQuery = this.getESQueryUsingOneID(id, userId, limit, maxLength);
 			const { esClientName, esIndex } = clientObj;
 	
 			const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);

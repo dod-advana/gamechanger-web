@@ -339,7 +339,6 @@ class PolicySearchHandler extends SearchHandler {
 		catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
 		}
-		
 		return searchResults;
 	}
 
@@ -376,14 +375,7 @@ class PolicySearchHandler extends SearchHandler {
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let sentResults;
-					if (searchResults.sentResults) {
-						sentResults = searchResults.sentResults.map(item => item.id);
-					} else {
-						sentResults = [];
-						console.log("\n\nSentence results not available");
-					}
-					let context = await this.searchUtility.getQAContext(contextResults, sentResults, userId, qaParams);
+					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
@@ -391,8 +383,6 @@ class PolicySearchHandler extends SearchHandler {
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
-						console.log("SHORTENED RESULTS");
-						console.log(shortenedResults);
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
@@ -400,7 +390,7 @@ class PolicySearchHandler extends SearchHandler {
 							});
 						} else {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['text'] !== ''
+								return i['text'] !== '';
 							});
 						}
 						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
@@ -607,8 +597,6 @@ class PolicySearchHandler extends SearchHandler {
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			console.log("ENTITIES");
-			console.log(entityResults.body.hits.hits);
 			if(entityResults.body.hits.hits.length > 0 ){
 				const entityList = entityResults.body.hits.hits.map( async obj => {
 					let returnEntity = {};
