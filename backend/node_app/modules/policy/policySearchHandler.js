@@ -15,7 +15,6 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
-const testing = false; // set true to save search results in txt file
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -43,9 +42,10 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
 		// if using cache
-		if (!forCacheReload && useGCCache && offset === 0) {
-			return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
-		}
+		// if (!forCacheReload && useGCCache && offset === 0) {
+		// 	console.log('something');
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// }
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
@@ -306,7 +306,7 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		try {
 			let enrichedResults = await this.qaEnrichment(req, searchResults, userId);
-			
+
 			// add entities
 			let entitySearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
 			if (entitySearchOn.length > 0){
@@ -364,14 +364,8 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let qaParams = {};
-					qaParams.maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
-					qaParams.maxDocContext = 3; // how many docs to pull for context
-					qaParams.maxParaContext = 3; // how many paragraphs per doc to pull for context
-					qaParams.minLength = 350; // max length to expand individual paragraphs
-					qaParams.scoreThreshold = 100; // if a doc scores higher than this, pull hit paragraphs, if not pull intro
-					searchResults.qaContext.params = qaParams;
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
+					let maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, maxLength, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
@@ -404,7 +398,6 @@ class PolicySearchHandler extends SearchHandler {
 				}
 			}
 		}
-
     return searchResults;
 	}
 

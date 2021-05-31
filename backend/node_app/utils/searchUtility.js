@@ -4,7 +4,6 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
-const fs = require('fs');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -41,7 +40,7 @@ class SearchUtility {
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
-		this.addSearchReport = this.addSearchReport.bind(this);
+		this.filterQAResults = this.filterQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1760,6 +1759,7 @@ class SearchUtility {
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
