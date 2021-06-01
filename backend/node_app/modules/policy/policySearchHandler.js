@@ -15,6 +15,7 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
+const testing = false;
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -350,6 +351,7 @@ class PolicySearchHandler extends SearchHandler {
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
 		if (permissions) {
 		//if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
@@ -358,14 +360,13 @@ class PolicySearchHandler extends SearchHandler {
 				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 			}
 			const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
-			const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
+			const searchTextList = req.searchText.toLowerCase().trim().split(/\s|\b/);
 			const isQuestion = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
 			if (intelligentQuestions && isQuestion){
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, maxLength, userId);
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
@@ -377,6 +378,7 @@ class PolicySearchHandler extends SearchHandler {
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
+						shortenedResults = this.searchUtility.filterQAResults(shortenedResults);
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
