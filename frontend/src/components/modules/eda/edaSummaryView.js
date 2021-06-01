@@ -87,7 +87,7 @@ const styles = {
     },
     tableHeaderRow: {
         backgroundColor: '#131E43',
-        color: 'white'
+        color: 'white',
     },
     tableColumn: {
         textAlign: 'left',
@@ -291,12 +291,12 @@ export const EDASummaryView = (props) => {
                 style={{
                     height: "90%",
                     borderTopRightRadius: 5,
-                    borderTopLeftRadius: 5
+                    borderTopLeftRadius: 5,
                 }}
                 getTableProps={(state, rowInfo, column) => {
                     return { style: { 
                         borderTopRightRadius: 5,
-                        borderTopLeftRadius: 5
+                        borderTopLeftRadius: 5,
                     }}
                 }}
             />
@@ -715,7 +715,7 @@ export const EDASummaryView = (props) => {
                     getTbodyProps={(state, rowInfo, column) => {
                         return {
                             style: {
-                                overflow: 'unset'
+                                overflow: 'auto'
                             }
                         };
                     }}
