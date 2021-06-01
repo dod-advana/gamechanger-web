@@ -40,7 +40,6 @@ class SearchUtility {
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
-		this.filterQAResults = this.filterQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1082,17 +1081,6 @@ class SearchUtility {
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
 		}
-	}
-
-	filterQAResults(shortenedResults) {
-		// filter answers with '[CLS]' which means QA model doesn't know
-		let { question, answers }  = shortenedResults;
-		answers = answers.filter(function (e) {
-			return e.text.trim().split(/\s/)[0] !== '[CLS]' 
-		});
-		let newResults = { question, answers };
-
-		return newResults;
 	}
 
 	addSearchReport(query, params, saveResults, userId) {
