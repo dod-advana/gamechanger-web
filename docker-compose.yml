@@ -41,6 +41,8 @@ services:
             context: ./backend/
             args:
                 MIGRATION_HOST: postgres
+        environment:
+            - CHOKIDAR_USEPOLLING=true
         ports:
             # - "5860:5860"
             - "8990:8990"
@@ -57,6 +59,8 @@ services:
             context: ./frontend/
         ports:
             - "3000:3000"
+        environment:
+            - CHOKIDAR_USEPOLLING=true
         volumes:
             - ./frontend/:/usr/src/app/
             - /usr/src/app/node_modules

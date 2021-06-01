@@ -1,3 +1,2 @@
 elasticsearch
 values.*.yaml
-docker-compose.override.yml
