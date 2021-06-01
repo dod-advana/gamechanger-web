@@ -165,7 +165,7 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'Most Referenced']
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
 	},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
