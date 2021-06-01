@@ -464,7 +464,7 @@ class SearchUtility {
 				case 'Alphabetical':
 					query.sort = [ {"display_title_s": {"order" : order}} ]
 					break;
-				case 'Most Referenced':
+				case 'References':
 					query.sort = [{"_script": {
 						"type": "number",
 						"script": "doc.ref_list.size()",

@@ -651,7 +651,7 @@ describe('SearchUtility', function () {
 			assert.deepStrictEqual(actual.sort, [ {"display_title_s": {"order" : "asc"}} ]);
 		});
 
-		it('should return sorted ES query (Most Referenced)', () => {
+		it('should return sorted ES query (References)', () => {
 			const tmpOpts = {
 				...opts,
 				constants: {env: { GAME_CHANGER_OPTS: {allow_daterange: false}}}
@@ -664,7 +664,7 @@ describe('SearchUtility', function () {
 				parsedQuery,
 				orgFilterString: [],
 				typeFilterString: [],
-				sort: 'Most Referenced'
+				sort: 'References'
 			});
 			assert.deepStrictEqual(actual.sort,  [{"_script": {
 				"type": "number",
