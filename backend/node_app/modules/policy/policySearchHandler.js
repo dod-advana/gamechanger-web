@@ -360,7 +360,7 @@ class PolicySearchHandler extends SearchHandler {
 				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 			}
 			const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
-			const searchTextList = req.searchText.toLowerCase().trim().split(/\s|\b/);
+			const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
 			const isQuestion = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
 			if (intelligentQuestions && isQuestion){
 				try {
