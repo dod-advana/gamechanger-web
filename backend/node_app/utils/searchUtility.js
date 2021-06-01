@@ -1084,6 +1084,17 @@ class SearchUtility {
 		}
 	}
 
+	filterQAResults(shortenedResults) {
+		// filter answers with '[CLS]' which means QA model doesn't know
+		let { question, answers }  = shortenedResults;
+		answers = answers.filter(function (e) {
+			return e.trim().split(/\s/)[0] !== '[CLS]' 
+		});
+		let newResults = { question, answers };
+
+		return newResults;
+	}
+
 	addSearchReport(query, params, saveResults, userId) {
 		try {
 			var today = new Date();
