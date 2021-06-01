@@ -58,7 +58,7 @@ services:
         build:
             context: ./frontend/
         ports:
-            - "3000:3000"
+            - "8080:8080"
         environment:
             - CHOKIDAR_USEPOLLING=true
         volumes:
