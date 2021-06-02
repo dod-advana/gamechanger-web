@@ -34,21 +34,21 @@ class SearchHandler {
 		return await this.searchHelper({body: proxyBody, permissions}, userId);
 	}
 
-	async callFunction(functionName, options, cloneName, permissions, userId) {
+	async callFunction(functionName, options, cloneName, permissions, userId, res) {
 		// Setup the request
 		console.log(`${userId} is calling ${functionName} in the ${cloneName} search module with options ${options}`);
 		const proxyBody = options;
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;
 
-		return await this.callFunctionHelper({body: proxyBody, permissions}, userId);
+		return await this.callFunctionHelper({body: proxyBody, permissions}, userId, res);
 	}
 
 	async searchHelper(req, userId) {
 		return req.body;
 	}
 
-	async callFunctionHelper(req, userId) {
+	async callFunctionHelper(req, userId, res) {
 		return req.body;
 	}
 

@@ -1,7 +1,9 @@
 import React from "react";
 import {Typography} from "@material-ui/core";
+import {SearchContext} from "./SearchContext";
+import SearchTabBar from "./SearchTabBar";
 
-const DefaultTitleBarHandler = {
+const GlobalSearchTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
 			onTitleClick,
@@ -22,22 +24,44 @@ const DefaultTitleBarHandler = {
 	},
 	
 	getCategoryTabs(props) {
-		return <></>
+		const {
+			selectedCategories,
+			activeCategoryTab,
+			setActiveCategoryTab,
+			categoryMetadata,
+			cloneData,
+			dispatch
+		} = props;
+		
+		return (
+			<>
+				<SearchContext.Provider
+					value={{
+						searchTypes: selectedCategories,
+						activeTab: activeCategoryTab,
+						setActiveTab: setActiveCategoryTab,
+						resultMetaData: categoryMetadata,
+						returnHome: () => {
+							window.location.href = `/#/${cloneData.clone_name}`
+							dispatch({type: 'RESET_STATE'});
+						}
+					}}
+				>
+					<SearchTabBar containerStyles={{width:'100%'}}/>
+				</SearchContext.Provider>
+			</>
+		)
 	},
 	
 	getTitleBarStyle(props) {
-		const {
-			rawSearchResults,
-			pageDisplayed
-		} = props;
 		return {
 			...styles.titleBar,
-			borderBottom: (rawSearchResults.length > 0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : ''
+			borderBottom: '2px solid rgb(176, 186, 197)'
 		};
 	}
 }
 
-export default DefaultTitleBarHandler;
+export default GlobalSearchTitleBarHandler;
 
 const styles = {
 	wording: {
@@ -45,7 +69,7 @@ const styles = {
 		marginRight: 15
 	},
 	titleBar: {
-		padding: '0 1em',
+		padding: '20px 1em',
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
