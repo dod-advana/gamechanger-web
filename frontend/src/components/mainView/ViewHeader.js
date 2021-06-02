@@ -48,13 +48,15 @@ const ViewHeader = (props) => {
 	
 	const {
 		activeCategoryTab,
+		cloneData,
+		componentStepNumbers,
 		count,
+		currentViewName,
 		entityCount,
+		listView,
+		selectedCategories,
 		topicCount,
 		timeFound,
-		cloneData,
-		listView,
-		currentViewName,
 		viewNames
 	} = state;
 
@@ -72,7 +74,9 @@ const ViewHeader = (props) => {
 		let tempCount;
 		switch(activeCategoryTab){
 			case 'all':
-				tempCount = count+entityCount+topicCount;
+				tempCount = (selectedCategories['Documents']===true ? count : 0) +
+							(selectedCategories['Organizations']===true ? entityCount : 0) +
+							(selectedCategories['Topics']===true ? topicCount: 0);
 				break;
 			case 'Organizations':
 				tempCount = entityCount;
@@ -136,12 +140,13 @@ const ViewHeader = (props) => {
 				<FormControl classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
-					labelId="view-name"
-					id="view-name-select"
-					value={dropdownValue}
-					onChange={handleChangeView}
-					classes={{root:classes.selectRoot}}
-					autoWidth
+						className={`tutorial-step-${componentStepNumbers["Change View"]}`}
+						labelId="view-name"
+						id="view-name-select"
+						value={dropdownValue}
+						onChange={handleChangeView}
+						classes={{root:classes.selectRoot}}
+						autoWidth
 					>
 					{viewNames.map(view => {
 						if(view.name === "Card"){

@@ -1,6 +1,6 @@
 const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
-const constants = require('../../config/constants');
+const constantsFile = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
@@ -25,6 +25,9 @@ class PolicySearchHandler extends SearchHandler {
 			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
+			async_redis = redisAsyncClient,
+			app_settings = APP_SETTINGS,
+			constants = constantsFile
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 
@@ -33,6 +36,9 @@ class PolicySearchHandler extends SearchHandler {
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
+		this.async_redis = async_redis;
+		this.app_settings = app_settings;
+		this.constants = constants;
 	}
 
 	async searchHelper(req, userId) {
@@ -61,7 +67,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'getSingleDocumentFromES':
 				return this.getSingleDocumentFromESHelper(req, userId);
 			case 'getDocumentsForDetailsPageFromES':
-					return this.getDocumentsForDetailsPageFromESHelper(req, userId);
+				return this.getDocumentsForDetailsPageFromESHelper(req, userId);
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
@@ -111,9 +117,9 @@ class PolicySearchHandler extends SearchHandler {
 			searchFields = {},
 			includeRevoked
 		} = body;
-		const clientObj = {esClientName: 'gamechanger', esIndex: constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index};
+		const clientObj = {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index};
 
-		try{
+		try {
 			historyRec.searchText = searchText;
 			historyRec.orgFilters = JSON.stringify(orgFilterString);
 			historyRec.tiny_url = tiny_url;
@@ -125,18 +131,17 @@ class PolicySearchHandler extends SearchHandler {
 
 			const cloneSpecificObject = { orgFilterString, searchFields: Object.values(searchFields), includeRevoked };
 
-			const redisDB = redisAsyncClient;
+			const redisDB = this.async_redis;
 			redisDB.select(redisAsyncClientDB);
 
 			// log query to ES
 			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 			return {historyRec, cloneSpecificObject, clientObj};
-		}
-		catch (e) {
+		} catch (e) {
 			this.logger.error(e.message, 'AC3CP8H');
 		}
 		// if fail, return empty objects
-		return {historyRec, cloneSpecificObject: { orgFilter, searchFields: Object.values(searchFields), includeRevoked }	, }
+		return {historyRec, cloneSpecificObject: { orgFilter, searchFields: Object.values(searchFields), includeRevoked }, };
 	}
 
 
@@ -153,8 +158,7 @@ class PolicySearchHandler extends SearchHandler {
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
 			return expansionDict;
-		}
-		catch(e) {
+		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
 		}
 	}
@@ -190,15 +194,15 @@ class PolicySearchHandler extends SearchHandler {
 
 	async abbreviationCleaner(termsArray){
 		// get expanded abbreviations
-		await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
+		await this.async_redis.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
 		let i = 0;
 		for (i = 0; i < termsArray.length; i++) {
 			let term = termsArray[i];
 			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await redisAsyncClient.get(upperTerm);
+			let expandedTerm = await this.async_redis.get(upperTerm);
 			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await redisAsyncClient.get(lowerTerm);
+			let compressedTerm = await this.async_redis.get(lowerTerm);
 			if (expandedTerm) {
 				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
@@ -250,7 +254,7 @@ class PolicySearchHandler extends SearchHandler {
 		try {
 			// this.logger.info('exp: ' + expansionDict);
 			// caching db
-			await redisAsyncClient.select(redisAsyncClientDB);
+			await this.async_redis.select(redisAsyncClientDB);
 
 			let searchResults;
 			// combined search: run if not clone + flag enabled
@@ -258,7 +262,7 @@ class PolicySearchHandler extends SearchHandler {
 			const noSourceSpecified = _.isEqual([], orgFilterString);
 			const noPubDateSpecified = req.body.publicationDateAllTime;
 			const noTypeSpecified = _.isEqual([], typeFilterString);
-			let combinedSearch = await APP_SETTINGS.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
+			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			if (combinedSearch.length > 0){
 				combinedSearch = combinedSearch[0].dataValues.value === 'true';
 			}
@@ -283,8 +287,7 @@ class PolicySearchHandler extends SearchHandler {
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			return searchResults;
-		}
-		catch(e) {
+		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
 		}
 	}
@@ -309,7 +312,7 @@ class PolicySearchHandler extends SearchHandler {
 			let enrichedResults = await this.qaEnrichment(req, searchResults, userId);
 
 			// add entities
-			let entitySearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
+			let entitySearchOn = await this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
 			if (entitySearchOn.length > 0){
 				entitySearchOn = entitySearchOn[0].dataValues.value === 'true';
 			}
@@ -319,7 +322,7 @@ class PolicySearchHandler extends SearchHandler {
 				enrichedResults.totalEntities = entities.totalEntities;
 			}
 
-			//add topics
+			// add topics
 			if (true) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
 				enrichedResults.topics = topics.topics;
@@ -335,9 +338,9 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.topics = enrichedResults.topics;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
+
 			return enrichedResults;
-		}
-		catch (e) {
+		} catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
 		}
 		return searchResults;
@@ -353,9 +356,9 @@ class PolicySearchHandler extends SearchHandler {
 		const permissions = req.permissions ? req.permissions : [];
 		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
 		if (permissions) {
-		//if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
+		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
-			let intelligentQuestions = await APP_SETTINGS.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
 			if (intelligentQuestions.length > 0){
 				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 			}
@@ -399,7 +402,7 @@ class PolicySearchHandler extends SearchHandler {
 				}
 			}
 		}
-    return searchResults;
+		return searchResults;
 	}
 
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId){
@@ -591,8 +594,8 @@ class PolicySearchHandler extends SearchHandler {
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if(entityResults.body.hits.hits.length > 0 ){
-				const entityList = entityResults.body.hits.hits.map( async obj => {
+			if (entityResults.body.hits.hits.length > 0){
+				const entityList = entityResults.body.hits.hits.map(async obj => {
 					let returnEntity = {};
 					let ent = obj; // take highest hit
 					returnEntity = ent._source;
@@ -600,26 +603,25 @@ class PolicySearchHandler extends SearchHandler {
 					returnEntity.pageHits = [];
 					// get img_link
 					const ent_ids = [returnEntity.name];
-					const graphQueryString = `WITH ${JSON.stringify(ent_ids)} AS ids MATCH (e:Entity) WHERE e.name in ids return e;`
+					const graphQueryString = `WITH ${JSON.stringify(ent_ids)} AS ids MATCH (e:Entity) WHERE e.name in ids return e;`;
 					const docData = await this.dataLibrary.queryGraph(graphQueryString, {params: {ids: ent_ids}}, userId);
 					// const docData2 = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
 					try {
 						const tempEntity = docData.result.records[0]._fields[0].properties;
-						for(const key of Object.keys(tempEntity) ) {
-							if(key !== 'aliases' ){
+						for (const key of Object.keys(tempEntity)) {
+							if (key !== 'aliases'){
 								returnEntity[key] = tempEntity[key];
 							}
 						}
 						return returnEntity;
-					}
-					catch(err) {
+					} catch (err) {
 						const { message } = err;
 						this.logger.error(message, '9WJGAKB', userId);
 					}
 				});
-				
+
 				let entities = [];
-				if(entityList.length > 0){
+				if (entityList.length > 0){
 					entities = await Promise.all(entityList);
 				}
 				return {entities, totalEntities: entityResults.body.hits.total.value};
@@ -632,18 +634,18 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async topicSearch(searchText, offset, limit = 6, userId){
-		try{
+		try {
 			let esIndex = 'entities';
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getTopicQuery(searchText, offset, limit);
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if(topicResults.body.hits.hits.length > 0) {
+			if (topicResults.body.hits.hits.length > 0) {
 				let topics = topicResults.body.hits.hits.map(async obj => {
 					const topicDocumentCount =
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
 						RETURN t2.name as topic_name, count(d) as doc_count
-						ORDER BY doc_count DESC LIMIT 5`
+						ORDER BY doc_count DESC LIMIT 5`;
 					const documentCount =
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
@@ -659,19 +661,18 @@ class PolicySearchHandler extends SearchHandler {
 					return returnObject;
 				});
 
-				if(topics.length > 0){
+				if (topics.length > 0){
 					topics = await Promise.all(topics);
 				}
 
-				return {topics, totalTopics: topicResults.body.hits.total.value}
+				return {topics, totalTopics: topicResults.body.hits.total.value};
 			}
 			return {topics: [], totalTopics: 0};
-		}
-		catch (e) {
+		} catch (e) {
 			this.logger.error(e.message, 'OICE7JS');
 		}
 	}
-	
+
 
 	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
 		try {
@@ -685,7 +686,7 @@ class PolicySearchHandler extends SearchHandler {
 					clone_name: clone_log
 
 				};
-				let search_history_index = constants.GAME_CHANGER_OPTS.historyIndex;
+				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
 
 				this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
 			}
