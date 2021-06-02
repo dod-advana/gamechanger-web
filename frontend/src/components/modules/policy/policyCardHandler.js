@@ -16,8 +16,6 @@ import styled from "styled-components";
 import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
-import {StyledTopEntities} from "../../searchMetrics/GCSideBar";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 
 const styles = {
@@ -426,7 +424,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText.replace(/"/gi, '')}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 };
 
-const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked, cloneData) => {
+const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
 		const { favorite_topics = null } = userData ?? {};
 		let favorites = [];
 		
@@ -459,7 +457,7 @@ const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setIsFavor
 								   onClick={(event) => {
 								   		event.stopPropagation();
 								   		setFavoriteTopic(topic)
-										setIsFavorite(favorited);
+										setFavorite(favorited);
 										handleFavoriteTopicClicked(event.target)
 								   }}
 								/>
@@ -844,7 +842,7 @@ const PolicyCardHandler = {
 			}
 		},
 		
-		getCardBack: ({item, state, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked}) => {
+		getCardBack: ({item, state, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked}) => {
 			
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item
@@ -903,7 +901,7 @@ const PolicyCardHandler = {
 										{Key: 'Source', Value: (source_item)},
 										{Key: 'File Orgin', Value: (file_orgin_item)},
 										{Key: 'Source File', Value: (source_file_item)},
-										...addFavoriteTopicToMetadata(data, state.userData, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked, state.cloneData)];
+										...addFavoriteTopicToMetadata(data, state.userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, state.cloneData)];
 			
 			return (
 				<div>
@@ -1210,8 +1208,8 @@ const PolicyCardHandler = {
 			const tableData = [];
 			Object.keys(item).forEach(key => {
 				if (item[key] !== '') {
-					if (key !== 'image' && key !== 'properties' && key !== 'label' && key !== 'value' &&
-						key !== 'details' && key !== 'id' && key !== 'favorite' && key !== 'done') {
+					if (key !== 'image' && key !== 'properties' && key !== 'label' && key !== 'value' && key !== 'type' && 
+						key !== 'details' && key !== 'id' && key !== 'favorite' && key !== 'done' && key !== 'entity_type') {
 						if (key === 'website') {
 							tableData.push({
 								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
@@ -1426,7 +1424,6 @@ const PolicyCardHandler = {
 		
 		getCardBack: (props) => {
 			const {item} = props;
-			console.log(item);
 			const tableData = [];
 			Object.keys(item).forEach(key => {
 				if (item[key] !== '') {

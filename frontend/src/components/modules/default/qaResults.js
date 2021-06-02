@@ -7,7 +7,6 @@ import {
 import {trackEvent} from "../../telemetry/Matomo";
 import GCTooltip from "../../common/GCToolTip";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import Link from "@material-ui/core/Link";
 
 const styles = {
