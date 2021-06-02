@@ -133,7 +133,7 @@ const handlePageLoad = async (state, dispatch, history) => {
 	
 	if(typeURL) {
 		setFilterVariables(typeFilterObject, typeURL);
-		if (orgURL !== 'ALLTYPES') {
+		if (typeURL !== 'ALLTYPES') {
 			newSearchSettings.allTypesSelected = false;
 			newSearchSettings.specificTypesSelected = true;
 		} else {
@@ -515,7 +515,7 @@ const MainView = (props) => {
 			return  getNonMainPageOuterContainer(getUserDashboard);
 		case PAGE_DISPLAYED.main:
 		default:
-			const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings} = state;
+			const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings, currentSort, currentOrder} = state;
 			const {allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter,} = searchSettings;
 			
 			const noResults = Boolean(rawSearchResults?.length === 0);
@@ -543,6 +543,8 @@ const MainView = (props) => {
 							searchType={searchType}
 							searchFields={searchFields}
 							edaSearchSettings={edaSearchSettings}
+							sort={currentSort}
+							order={currentOrder}
 						/>
 					)}
 					{loading &&
