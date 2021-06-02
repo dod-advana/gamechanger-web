@@ -426,7 +426,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText.replace(/"/gi, '')}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 };
 
-const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked, cloneData) => {
+const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
 		const { favorite_topics = null } = userData ?? {};
 		let favorites = [];
 		
@@ -459,7 +459,7 @@ const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setIsFavor
 								   onClick={(event) => {
 								   		event.stopPropagation();
 								   		setFavoriteTopic(topic)
-										setIsFavorite(favorited);
+										setFavorite(favorited);
 										handleFavoriteTopicClicked(event.target)
 								   }}
 								/>
@@ -844,7 +844,7 @@ const PolicyCardHandler = {
 			}
 		},
 		
-		getCardBack: ({item, state, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked}) => {
+		getCardBack: ({item, state, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked}) => {
 			
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item
@@ -903,7 +903,7 @@ const PolicyCardHandler = {
 										{Key: 'Source', Value: (source_item)},
 										{Key: 'File Orgin', Value: (file_orgin_item)},
 										{Key: 'Source File', Value: (source_file_item)},
-										...addFavoriteTopicToMetadata(data, state.userData, setFavoriteTopic, setIsFavorite, handleFavoriteTopicClicked, state.cloneData)];
+										...addFavoriteTopicToMetadata(data, state.userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, state.cloneData)];
 			
 			return (
 				<div>
@@ -1426,7 +1426,6 @@ const PolicyCardHandler = {
 		
 		getCardBack: (props) => {
 			const {item} = props;
-			console.log(item);
 			const tableData = [];
 			Object.keys(item).forEach(key => {
 				if (item[key] !== '') {

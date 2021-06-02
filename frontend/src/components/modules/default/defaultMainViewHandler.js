@@ -9,7 +9,6 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import GameChangerSideBar from "../../searchMetrics/GCSideBar";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
-import GetQAResults from './qaResults';
 import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, StyledCenterContainer, scrollToContentTop
@@ -108,10 +107,8 @@ const DefaultMainViewHandler = {
 			loading,
 			count,
 			iframePreviewLink,
-			timeFound,
 			resultsPage,
 			componentStepNumbers,
-			listView,
 			hideTabs,
 			isCachedResult,
 			timeSinceCache,
