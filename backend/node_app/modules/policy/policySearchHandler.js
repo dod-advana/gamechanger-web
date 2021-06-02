@@ -15,6 +15,7 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
+const testing = false;
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -262,9 +263,7 @@ class PolicySearchHandler extends SearchHandler {
 			const noPubDateSpecified = req.body.publicationDateAllTime;
 			const noTypeSpecified = _.isEqual([], typeFilterString);
 			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
-			if (combinedSearch.length > 0){
-				combinedSearch = combinedSearch[0].dataValues.value === 'true';
-			}
+			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
 
 			const operator = 'and';
 			if (noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
@@ -319,14 +318,34 @@ class PolicySearchHandler extends SearchHandler {
 				const entities = await this.entitySearch(searchText, offset, 6, userId);
 				enrichedResults.entities = entities.entities;
 				enrichedResults.totalEntities = entities.totalEntities;
+			} else {
+				enrichedResults.entities = [];
+				enrichedResults.totalEntities = 0;
 			}
 
-			// add topics
-			if (true) { // make a topicSearch switch
+			//add topics
+			let topicSearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			if (topicSearchOn.length > 0){
+				topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
+			}
+			if (topicSearchOn) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
 				enrichedResults.topics = topics.topics;
 				enrichedResults.totalTopics = topics.totalTopics;
+			} else {
+				enrichedResults.topics = [];
+				enrichedResults.totalTopics = 0;
 			}
+
+			// add results to search report
+			if (testing === true) {
+				let saveResults = {}
+				saveResults.regular = searchResults.docs.slice(0, 10);
+				saveResults.context = enrichedResults.qaContext.context;
+				saveResults.entities = enrichedResults.entities;
+				saveResults.topics = enrichedResults.topics;
+				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
+			};
 
 			return enrichedResults;
 		} catch (e) {
@@ -339,9 +358,11 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
-
-    	searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		
+		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
 		if (permissions) {
 		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
@@ -356,29 +377,33 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, maxLength, userId);
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let maxDocContext = 3; // how many docs to pull for context
-					let maxParaContext = 3; // how many paragraphs per doc to pull for context
-					let minLength = 350; // max length to expand individual paragraphs
-					let scoreThreshold = 100; // if a doc scores higher than this, pull hit paragraphs, if not pull intro
-					let context = await this.searchUtility.getQAContext(contextResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold);
+					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
+					searchResults.qaContext.context = context;
+					if (testing === true) {
+						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+					}
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
 						searchResults.qaResults.question = qaSearchText + '?';
-						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].text) {
-							let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
-							let cleanedResults = shortenedResults.answers.map(item => item.text);
-							searchResults.qaResults.answers = cleanedResults;
-							searchResults.qaResults.filenames = contextIds;
-							searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['status'] == 'passed' && i['text'] !== '';
+							});
 						} else {
-							searchResults.qaResults.answers = shortenedResults;
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['text'] !== '';
+							});
 						}
+						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
+						let cleanedResults = shortenedResults.answers.map(item => item.text);
+						searchResults.qaResults.answers = cleanedResults;
+						searchResults.qaResults.filenames = contextIds;
+						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
@@ -580,27 +605,28 @@ class PolicySearchHandler extends SearchHandler {
 			if (entityResults.body.hits.hits.length > 0){
 				const entityList = entityResults.body.hits.hits.map(async obj => {
 					let returnEntity = {};
-					let ent = obj; // take highest hit
+					let ent = obj;
 					returnEntity = ent._source;
 					returnEntity.type = 'organization';
-					returnEntity.pageHits = [];
 					// get img_link
 					const ent_ids = [returnEntity.name];
 					const graphQueryString = `WITH ${JSON.stringify(ent_ids)} AS ids MATCH (e:Entity) WHERE e.name in ids return e;`;
 					const docData = await this.dataLibrary.queryGraph(graphQueryString, {params: {ids: ent_ids}}, userId);
-					// const docData2 = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					try {
-						const tempEntity = docData.result.records[0]._fields[0].properties;
-						for (const key of Object.keys(tempEntity)) {
-							if (key !== 'aliases'){
-								returnEntity[key] = tempEntity[key];
+					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
+					try{ // if parsing and adding stuff fails, log docDataCleaned
+						if(docDataCleaned && docDataCleaned.nodes && docDataCleaned.nodes.length > 0){
+							for(const key of Object.keys(docDataCleaned.nodes[0]) ) { // take highest hit, add key value pairs into return object
+								if(key !== 'properties' && key !== 'nodeVec' && key !== 'pageHits' && key !== 'pageRank'){
+									returnEntity[key] = docDataCleaned.nodes[0][key];
+								}
 							}
 						}
-						return returnEntity;
-					} catch (err) {
+					} catch(err) {
 						const { message } = err;
 						this.logger.error(message, '9WJGAKB', userId);
+						this.logger.error('docDataCleaned: ' + JSON.stringify(docDataCleaned), '9WJGAKB', userId);
 					}
+					return returnEntity;
 				});
 
 				let entities = [];
@@ -613,6 +639,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'VLPOJJJ');
+			return {entities: [], totalEntities: 0};
 		}
 	}
 
@@ -624,6 +651,8 @@ class PolicySearchHandler extends SearchHandler {
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (topicResults.body.hits.hits.length > 0) {
 				let topics = topicResults.body.hits.hits.map(async obj => {
+					let returnObject = obj._source;
+					returnObject.type = 'topic';
 					const topicDocumentCount =
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
@@ -633,14 +662,18 @@ class PolicySearchHandler extends SearchHandler {
 						`MATCH (t:Topic) where t.name = "${obj._source.name.toLowerCase()}"
 						OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
 						RETURN count(d) as doc_count`;
-					const topicData = await this.dataLibrary.queryGraph(topicDocumentCount, {params: {}}, userId);
-					const docData = await this.dataLibrary.queryGraph(documentCount, {params: {}}, userId);
-					const topicDataCleaned = this.searchUtility.cleanNeo4jData(topicData.result, false, userId);
-					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					let returnObject = obj._source;
-					returnObject.type = 'topic';
-					returnObject.relatedTopics = topicDataCleaned.graph_metadata;
-					returnObject.documentCount = docDataCleaned.graph_metadata;
+					try {
+						const topicData = await this.dataLibrary.queryGraph(topicDocumentCount, {params: {}}, userId);
+						const docData = await this.dataLibrary.queryGraph(documentCount, {params: {}}, userId);
+						const topicDataCleaned = this.searchUtility.cleanNeo4jData(topicData.result, false, userId);
+						const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
+						returnObject.relatedTopics = topicDataCleaned.graph_metadata;
+						returnObject.documentCount = docDataCleaned.graph_metadata;
+					} catch (err) { // log errors if neo4j stuff fails
+						this.logger.error(err.message, 'OICE7JS');
+						this.logger.error(JSON.stringify(topicDataCleaned), 'OICE7JS');
+						this.logger.error(JSON.stringify(docDataCleaned), 'OICE7JS');
+					}
 					return returnObject;
 				});
 
@@ -653,6 +686,7 @@ class PolicySearchHandler extends SearchHandler {
 			return {topics: [], totalTopics: 0};
 		} catch (e) {
 			this.logger.error(e.message, 'OICE7JS');
+			return {topics: [], totalTopics: 0};
 		}
 	}
 

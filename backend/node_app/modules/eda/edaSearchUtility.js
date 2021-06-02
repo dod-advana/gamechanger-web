@@ -3,7 +3,7 @@ const constantsFile = require('../../config/constants');
 const SearchUtility = require('../../utils/searchUtility');
 
 class EDASearchUtility {
-    constructor(opts = {}) {
+	constructor(opts = {}) {
 
         const {
             logger = LOGGER,
@@ -11,16 +11,16 @@ class EDASearchUtility {
 			searchUtility = new SearchUtility(opts)
         } = opts;
 
-        this.logger = logger;
+		this.logger = logger;
 		this.constants = constants;
 		this.searchUtility = searchUtility;
 
-        this.getElasticsearchPagesQuery = this.getElasticsearchPagesQuery.bind(this);
-        this.getElasticsearchStatsQuery = this.getElasticsearchStatsQuery.bind(this);
-        this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
-    }
+		this.getElasticsearchPagesQuery = this.getElasticsearchPagesQuery.bind(this);
+		this.getElasticsearchStatsQuery = this.getElasticsearchStatsQuery.bind(this);
+		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
+	}
 
-    getElasticsearchPagesQuery(
+	getElasticsearchPagesQuery(
 		{
 			searchText,
 			parsedQuery,
@@ -65,14 +65,14 @@ class EDASearchUtility {
 				}
 			}
 
-			if (!edaSearchSettings.allOrgsSelected && edaSearchSettings.organizations) {
+			if (edaSearchSettings.allOrgsSelected === false && edaSearchSettings.organizations) {
 				const matchQuery = 					
 				{ 
-					"nested": {
-						"path": "extracted_data_eda_n",
-						"query": {
-							"bool": {
-								"should": []
+					'nested': {
+						'path': 'extracted_data_eda_n',
+						'query': {
+							'bool': {
+								'should': []
 							}
 						}
 					}
@@ -82,8 +82,8 @@ class EDASearchUtility {
 				for (const org of orgs) {
 					matchQuery.nested.query.bool.should.push(
 						{
-							"match": {
-								"extracted_data_eda_n.dodaac_org_type_eda_ext": org
+							'match': {
+								'extracted_data_eda_n.dodaac_org_type_eda_ext': org
 							}
 						}
 					);
@@ -94,12 +94,12 @@ class EDASearchUtility {
 			if (edaSearchSettings.issueAgency) {
 				mustQueries.push( 
 					{
-						"nested": {
-							"path": "extracted_data_eda_n",
-							"query": {
-								"bool": {
-									"must": [
-										{ "match" : { "extracted_data_eda_n.contract_issue_office_name_eda_ext": edaSearchSettings.issueAgency}}
+						'nested': {
+							'path': 'extracted_data_eda_n',
+							'query': {
+								'bool': {
+									'must': [
+										{ 'match' : { 'extracted_data_eda_n.contract_issue_office_name_eda_ext': edaSearchSettings.issueAgency}}
 									]
 								}
 							}
@@ -111,10 +111,10 @@ class EDASearchUtility {
 			if (edaSearchSettings.startDate || edaSearchSettings.endDate) {
 				const rangeQuery = {
 					nested: {
-						path: "extracted_data_eda_n",
+						path: 'extracted_data_eda_n',
 						query: {
 							range: {
-								"extracted_data_eda_n.signature_date_eda_ext_dt": {}
+								'extracted_data_eda_n.signature_date_eda_ext_dt': {}
 							}
 						}
 					}
@@ -124,12 +124,12 @@ class EDASearchUtility {
 				let push = false;
 	
 				if (edaSearchSettings.startDate) {
-					rangeQuery.nested.query.range["extracted_data_eda_n.signature_date_eda_ext_dt"].gte = edaSearchSettings.startDate; //Math.round(start.getTime() / 1000)
+					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].gte = edaSearchSettings.startDate; //Math.round(start.getTime() / 1000)
 					push = true;
 				}
 				
 				if (edaSearchSettings.endDate) {
-					rangeQuery.nested.query.range["extracted_data_eda_n.signature_date_eda_ext_dt"].lte = edaSearchSettings.endDate // Math.round(end.getTime() / 1000)
+					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].lte = edaSearchSettings.endDate // Math.round(end.getTime() / 1000)
 					push = true;	
 				}
 	
@@ -137,12 +137,109 @@ class EDASearchUtility {
 					mustQueries.push(rangeQuery);
 				}
 			}
+
+			if (edaSearchSettings.issueOffice && edaSearchSettings.issueOffice.length > 0) {
+				mustQueries.push ({
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								must: [
+									{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": edaSearchSettings.issueOffice}}
+								]
+							}
+						}
+					}
+				});
+			}
+
+			if (edaSearchSettings.allYearsSelected === false && edaSearchSettings.fiscalYears) {
+				const nestedQuery = {
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								should: []
+							}
+						}
+					}
+				}
+
+				for (const year of edaSearchSettings.fiscalYears) {
+					const ceil = parseInt(year) + 1;
+					nestedQuery.nested.query.bool.should.push({
+						range: {
+							"extracted_data_eda_n.signature_date_eda_ext_dt": {
+								gte: year,
+								lte: ceil.toString(),
+								format: 'yyyy'
+							}
+						}
+					})
+				}
+				mustQueries.push(nestedQuery);
+			}
+
+			if (edaSearchSettings.allDataSelected === false && edaSearchSettings.contractData) {
+				const contractTypes = Object.keys(edaSearchSettings.contractData);
+				const mustQuery = {
+					bool: {
+						should: []
+					}
+				}
+				let metadataText = '';
+
+				// set up query based on PDS, SYN, or PDF selected
+				for (const contractType of contractTypes) {
+					if (edaSearchSettings.contractData[contractType]) {
+						if (contractType === 'none') { // PDF
+							mustQuery.bool.should.push(
+								{
+									match: {
+										is_supplementary_data_included_eda_ext_b: false
+									}
+								}
+							)
+						}
+						else { // PDS or SYN
+							metadataText += contractType + ", ";
+						}
+					}
+				}
+
+				if (metadataText != '') {
+					metadataText = metadataText.substring(0, metadataText.length - 2);
+					mustQuery.bool.should.push(
+						{
+							bool: {
+								must: [
+									{
+										match: {
+											metadata_type_eda_ext: metadataText
+										}
+									},
+									{
+										match: {
+											is_supplementary_data_included_eda_ext_b: true
+										}
+									}
+								]
+							}
+						}
+						
+					)
+				}
+
+				if (mustQuery.bool.should.length > 0) {
+					mustQueries.push(mustQuery);
+				}
+			}
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'is_supplementary_data_included_eda_ext_b']
 				},
 				stored_fields: storedFields,
 				from: offset,
@@ -269,7 +366,7 @@ class EDASearchUtility {
 		}
 	}
 
-    getElasticsearchStatsQuery(
+	getElasticsearchStatsQuery(
 		{
 			searchText,
 			parsedQuery,
@@ -317,12 +414,12 @@ class EDASearchUtility {
 			if (edaSearchSettings.issueAgency) {
 				mustQueries.push( 
 					{
-						"nested": {
-							"path": "extracted_data_eda_n",
-							"query": {
-								"bool": {
-									"must": [
-										{ "match" : { "extracted_data_eda_n.contract_issue_office_name_eda_ext": edaSearchSettings.issueAgency}}
+						'nested': {
+							'path': 'extracted_data_eda_n',
+							'query': {
+								'bool': {
+									'must': [
+										{ 'match' : { 'extracted_data_eda_n.contract_issue_office_name_eda_ext': edaSearchSettings.issueAgency}}
 									]
 								}
 							}
@@ -334,11 +431,11 @@ class EDASearchUtility {
 			if (!edaSearchSettings.allOrgsSelected && edaSearchSettings.organizations) {
 				const matchQuery = 					
 				{ 
-					"nested": {
-						"path": "extracted_data_eda_n",
-						"query": {
-							"bool": {
-								"should": []
+					'nested': {
+						'path': 'extracted_data_eda_n',
+						'query': {
+							'bool': {
+								'should': []
 							}
 						}
 					}
@@ -348,8 +445,8 @@ class EDASearchUtility {
 				for (const org of orgs) {
 					matchQuery.nested.query.bool.should.push(
 						{
-							"match": {
-								"extracted_data_eda_n.dodaac_org_type_eda_ext": org
+							'match': {
+								'extracted_data_eda_n.dodaac_org_type_eda_ext': org
 							}
 						}
 					);
@@ -360,10 +457,10 @@ class EDASearchUtility {
 			if (edaSearchSettings.startDate || edaSearchSettings.endDate) {
 				const rangeQuery = {
 					nested: {
-						path: "extracted_data_eda_n",
+						path: 'extracted_data_eda_n',
 						query: {
 							range: {
-								"extracted_data_eda_n.signature_date_eda_ext_dt": {}
+								'extracted_data_eda_n.signature_date_eda_ext_dt': {}
 							}
 						}
 					}
@@ -373,14 +470,14 @@ class EDASearchUtility {
 				let push = false;
 	
 				if (edaSearchSettings.startDate) {
-					rangeQuery.nested.query.range["extracted_data_eda_n.signature_date_eda_ext_dt"] = {
+					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'] = {
 						gte: edaSearchSettings.startDate //Math.round(start.getTime() / 1000)
 					}
 					push = true;
 				}
 				
 				if (edaSearchSettings.endDate) {
-					rangeQuery.nested.query.range["extracted_data_eda_n.signature_date_eda_ext_dt"] = {
+					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'] = {
 						lte: edaSearchSettings.endDate // Math.round(end.getTime() / 1000)
 					}
 					push = true;	
@@ -388,6 +485,103 @@ class EDASearchUtility {
 	
 				if (push) {
 					mustQueries.push(rangeQuery);
+				}
+			}
+
+			if (edaSearchSettings.issueOffice && edaSearchSettings.issueOffice.length > 0) {
+				mustQueries.push ({
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								must: [
+									{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": edaSearchSettings.issueOffice}}
+								]
+							}
+						}
+					}
+				});
+			}
+
+			if (edaSearchSettings.allYearsSelected === false && edaSearchSettings.fiscalYears) {
+				const nestedQuery = {
+					nested: {
+						path: "extracted_data_eda_n",
+						query: {
+							bool: {
+								should: []
+							}
+						}
+					}
+				}
+
+				for (const year of edaSearchSettings.fiscalYears) {
+					const ceil = parseInt(year) + 1;
+					nestedQuery.nested.query.bool.should.push({
+						range: {
+							"extracted_data_eda_n.signature_date_eda_ext_dt": {
+								gte: year,
+								lte: ceil.toString(),
+								format: 'yyyy'
+							}
+						}
+					})
+				}
+				mustQueries.push(nestedQuery);
+			}
+
+			if (edaSearchSettings.allDataSelected === false && edaSearchSettings.contractData) {
+				const contractTypes = Object.keys(edaSearchSettings.contractData);
+				const mustQuery = {
+					bool: {
+						should: []
+					}
+				}
+				let metadataText = '';
+
+				// set up query based on PDS, SYN, or PDF selected
+				for (const contractType of contractTypes) {
+					if (edaSearchSettings.contractData[contractType]) {
+						if (contractType === 'none') { // PDF
+							mustQuery.bool.should.push(
+								{
+									match: {
+										is_supplementary_data_included_eda_ext_b: false
+									}
+								}
+							)
+						}
+						else { // PDS or SYN
+							metadataText += contractType + ", ";
+						}
+					}
+				}
+
+				if (metadataText != '') {
+					metadataText = metadataText.substring(0, metadataText.length - 2);
+					mustQuery.bool.should.push(
+						{
+							bool: {
+								must: [
+									{
+										match: {
+											metadata_type_eda_ext: metadataText
+										}
+									},
+									{
+										match: {
+											is_supplementary_data_included_eda_ext_b: true
+										}
+									}
+								]
+							}
+						}
+						
+					)
+				}
+
+				if (mustQuery.bool.should.length > 0) {
+					mustQueries.push(mustQuery);
 				}
 			}
 	
@@ -513,7 +707,7 @@ class EDASearchUtility {
 		}
 	}
 
-    cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
+	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
 		try {
 			let results = {
 				query,
@@ -663,12 +857,12 @@ class EDASearchUtility {
 		// Issuing Organization
 		if (data.dodaac_org_type_eda_ext) {
 			const orgToDisplay = {
-				army: "Army",
-				airforce: "Air Force",
-				dla: "DLA",
-				marinecorps: "Marine Corps",
-				navy: "Navy",
-				estate: "4th Estate"
+				army: 'Army',
+				airforce: 'Air Force',
+				dla: 'DLA',
+				marinecorps: 'Marine Corps',
+				navy: 'Navy',
+				estate: '4th Estate'
 			}
 
 			result.issuing_organization_eda_ext = orgToDisplay[data.dodaac_org_type_eda_ext];

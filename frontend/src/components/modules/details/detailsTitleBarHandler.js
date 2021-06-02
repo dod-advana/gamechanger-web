@@ -1,7 +1,8 @@
 import React from "react";
 import {Typography} from "@material-ui/core";
+import defaultTitleBarHandler from "../default/defaultTitleBarHandler";
 
-const PolicyTitleBar = {
+const DetailsTitleBar = {
 	getTitleBar: (props) => {
 		const {
 			detailsType
@@ -17,10 +18,18 @@ const PolicyTitleBar = {
 				<b style={{color: 'red', fontSize: 14, alignSelf: 'flex-end'}}>(Beta)</b>
 			</div>
 		);
+	},
+	
+	getCategoryTabs(props) {
+		return <></>
+	},
+	
+	getTitleBarStyle(props) {
+		return defaultTitleBarHandler.getTitleBarStyle(props);
 	}
 }
 
-export default PolicyTitleBar;
+export default DetailsTitleBar;
 
 const styles = {
 	wording: {

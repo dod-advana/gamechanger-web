@@ -3,12 +3,10 @@ import { Typography, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import styled from 'styled-components';
 import Modal from 'react-modal';
-import { primaryGreyLight } from '../../components/common/gc-colors';
+import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
 import AdvanaStackedLogo from 'advana-platform-ui/dist/images/Stackedlogo.png';
 import TitleBarFactory from "../factories/titleBarFactory";
-import SearchTabBar from "../modules/globalSearch/SearchTabBar";
-import { SearchContext } from "../modules/globalSearch/SearchContext";
 import AdvanaMegaMenuPill, { 
 	PillButton,
 	TitleText
@@ -151,7 +149,7 @@ export const SearchBanner = (props) => {
 	return (
 		<div style={{ ...styles.container, ...style }} className={componentStepNumbers ? `tutorial-step-${componentStepNumbers["Search Bar"]}` : null}>
 			{loaded &&
-				<div style={{...styles.titleBar, borderBottom: (rawSearchResults.length>0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : ''}}>
+				<div style={titleBarHandler.getTitleBarStyle({rawSearchResults, pageDisplayed})}>
 					{titleBarHandler.getTitleBar({onTitleClick, componentStepNumbers, cloneData, detailsType})}
 					{isDataTracker &&
 						<div style={{display: 'flex'}}>
@@ -182,22 +180,16 @@ export const SearchBanner = (props) => {
 				</div>
 			}
 	
-			{rawSearchResults.length > 0 && pageDisplayed === 'main' && cloneData.clone_name === 'gamechanger' &&
-				<SearchContext.Provider
-					value={{
-						searchTypes: selectedCategories,
-						activeTab: activeCategoryTab,
-						setActiveTab: setActiveCategoryTab,
-						resultMetaData: categoryMetadata,
-						returnHome: () => { 
-							window.location.href = `/#/${cloneData.clone_name}`
-							dispatch({type: 'RESET_STATE'});
-					 	}
-					}}
-				>
-					<SearchTabBar containerStyles={{width:'100%'}}/>
-				</SearchContext.Provider>
-			}
+			{loaded && titleBarHandler.getCategoryTabs({
+				rawSearchResults,
+				pageDisplayed,
+				selectedCategories,
+				activeCategoryTab,
+				setActiveCategoryTab,
+				categoryMetadata,
+				cloneData,
+				dispatch}
+			)}
 
 			<Modal 
 				style={{

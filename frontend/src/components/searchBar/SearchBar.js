@@ -7,10 +7,11 @@ import GameChangerSearchBar from "./GameChangerSearchBar";
 import {
 	PAGE_BORDER_RADIUS,
 	SEARCH_TYPES
-} from "../..//gamechangerUtils";
+} from "../../gamechangerUtils";
 import {gcBlue} from "../common/gc-colors";
 import {SearchBanner} from "./GCSearchBanner";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
+import MainViewFactory from "../factories/mainViewFactory";
 
 const SearchBar = (props) => {
 	
@@ -18,20 +19,25 @@ const SearchBar = (props) => {
 
 	const { rawSearchResults } = state;
 	const [searchHandler, setSearchHandler] = useState();
+	const [mainViewHandler, setMainViewHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 	
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
-			const factory = new SearchHandlerFactory(state.cloneData.search_module);
-			const handler = factory.createHandler();
-			setSearchHandler(handler)
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
+			const tmpSearchHandler = searchFactory.createHandler();
+			setSearchHandler(tmpSearchHandler)
+			const mainViewFactory = new MainViewFactory(state.cloneData.main_view_module);
+			const tmpMainViewHandler = mainViewFactory.createHandler();
+			setMainViewHandler(tmpMainViewHandler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
 	
 	useEffect(() => {
 		if (state.runSearch && searchHandler) {
+			setState(dispatch, { resetSettingsSwitch: false })
 			searchHandler.handleSearch(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);
@@ -59,20 +65,7 @@ const SearchBar = (props) => {
 	}
 
 	const handleCategoryTabChange = (tabName) => {
-		if (tabName === 'all'){
-			setState(dispatch,{
-				activeCategoryTab:tabName,
-				docSearchResults:state.docSearchResults.slice(0,6),
-				resultsPage: 1,
-				replaceResults: true,
-				infiniteScrollPage: 1
-			})
-		} else if (tabName === 'Documents' && state.resultsPage !== 1){
-			setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true})
-		} else if (tabName === 'Documents'){
-			setState(dispatch,{activeCategoryTab:tabName, replaceResults: false})
-		}
-		setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1})
+		mainViewHandler.handleCategoryTabChange({tabName, state, dispatch});
 	}
 	return (
 		<>

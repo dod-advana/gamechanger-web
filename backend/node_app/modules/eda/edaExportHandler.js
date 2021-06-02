@@ -11,8 +11,8 @@ class EdaExportHandler extends ExportHandler {
 		const {
 			dataLibrary = new DataLibrary(opts),
 			csvStringify = csvStringifyLib,
-			searchUtility = new SearchUtility(),
-			edaSearchUtility = new EDASearchUtility(),
+			searchUtility = new SearchUtility(opts),
+			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS
 		} = opts;
 		super({...opts});
