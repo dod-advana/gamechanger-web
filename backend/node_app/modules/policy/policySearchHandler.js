@@ -15,6 +15,7 @@ const SearchHandler = require('../base/searchHandler');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
+const testing = false;
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -262,9 +263,7 @@ class PolicySearchHandler extends SearchHandler {
 			const noPubDateSpecified = req.body.publicationDateAllTime;
 			const noTypeSpecified = _.isEqual([], typeFilterString);
 			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
-			if (combinedSearch.length > 0){
-				combinedSearch = combinedSearch[0].dataValues.value === 'true';
-			}
+			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
 
 			const operator = 'and';
 			if (noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
@@ -328,6 +327,16 @@ class PolicySearchHandler extends SearchHandler {
 				enrichedResults.totalTopics = topics.totalTopics;
 			}
 
+			// add results to search report
+			if (testing === true) {
+				let saveResults = {}
+				saveResults.regular = searchResults.docs.slice(0, 10);
+				saveResults.context = enrichedResults.qaContext.context;
+				saveResults.entities = enrichedResults.entities;
+				saveResults.topics = enrichedResults.topics;
+				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
+			};
+
 			return enrichedResults;
 		} catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
@@ -339,9 +348,11 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
-
-    	searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		
+		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
 		if (permissions) {
 		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
@@ -356,29 +367,33 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let maxLength = 3000; // max length of a paragraph in chars, if longer, get paragraph highlight
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, maxLength, userId);
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let maxDocContext = 3; // how many docs to pull for context
-					let maxParaContext = 3; // how many paragraphs per doc to pull for context
-					let minLength = 350; // max length to expand individual paragraphs
-					let scoreThreshold = 100; // if a doc scores higher than this, pull hit paragraphs, if not pull intro
-					let context = await this.searchUtility.getQAContext(contextResults, userId, maxDocContext, maxParaContext, minLength, maxLength, scoreThreshold);
+					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
+					searchResults.qaContext.context = context;
+					if (testing === true) {
+						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+					}
 					let qaContext = context.map(item => item.text);
 					if (context.length > 0) { // if context results, query QA model
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
 						searchResults.qaResults.question = qaSearchText + '?';
-						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].text) {
-							let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
-							let cleanedResults = shortenedResults.answers.map(item => item.text);
-							searchResults.qaResults.answers = cleanedResults;
-							searchResults.qaResults.filenames = contextIds;
-							searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['status'] == 'passed' && i['text'] !== '';
+							});
 						} else {
-							searchResults.qaResults.answers = shortenedResults;
+							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+								return i['text'] !== '';
+							});
 						}
+						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
+						let cleanedResults = shortenedResults.answers.map(item => item.text);
+						searchResults.qaResults.answers = cleanedResults;
+						searchResults.qaResults.filenames = contextIds;
+						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
