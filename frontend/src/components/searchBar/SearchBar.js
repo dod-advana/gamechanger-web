@@ -37,6 +37,7 @@ const SearchBar = (props) => {
 	
 	useEffect(() => {
 		if (state.runSearch && searchHandler) {
+			setState(dispatch, { resetSettingsSwitch: false })
 			searchHandler.handleSearch(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);

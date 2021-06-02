@@ -7,7 +7,7 @@ const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_U
 const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
-const {Thesaurus} = require('../../lib/thesaurus');;
+const {Thesaurus} = require('../../lib/thesaurus');
 
 const redisAsyncClientDB = 4;
 const abbreviationRedisAsyncClientDB = 9;
@@ -76,7 +76,7 @@ class EdaSearchHandler extends SearchHandler {
 
 			const operator = 'and';
 
-			const redisDB = this.async_redis;
+			const redisDB = this.sep_async_redis;
 			redisDB.select(redisAsyncClientDB);
 
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
