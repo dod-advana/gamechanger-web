@@ -424,6 +424,7 @@ const GamechangerAdminPage = props => {
 	const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
+	const [topicSearch, setTopicSearch] = useState(true);
 	const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 
@@ -519,6 +520,16 @@ const GamechangerAdminPage = props => {
 		}
 	}
 
+	const setTopicSearchMode = async () => {
+		try {
+			await gameChangerAPI.setTopicSearchMode(!topicSearch);
+			setTopicSearch(!topicSearch);
+			createAlert("Topic Search", "info", (!topicSearch ? "On" : "Off"));
+		} catch(e) {
+			console.error('Error setting Topic Search', e);
+		}
+	}
+
 	const getCurrentTransformer = async () => {
 		try {
 			const { data } = await gameChangerAPI.getCurrentTransformer();
@@ -568,12 +579,23 @@ const GamechangerAdminPage = props => {
 		}
 	}
 
+	const getTopicSearch = async () => {
+		try {
+			const { data } = await gameChangerAPI.getTopicSearchMode();
+			const value = data.value === 'true';
+			setTopicSearch(value);
+		} catch(e) {
+			console.error('Error getting topic search mode', e);
+		}
+	}
+
 	useEffect(() => {
 		getCurrentTransformer();
 		getTransformerList();
 		getCombinedSearch();
 		getIntelligentAnswers();
 		getEntitySearch();
+		getTopicSearch();
 	}, []);
 
 	const createAlert = (title, type, message) => {
@@ -859,6 +881,14 @@ const GamechangerAdminPage = props => {
 							<Link to="#" onClick={setEntitySearchMode} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className="fa fa-id-badge fa-2x"></i>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Entity Search</span></h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper style={styles.paper} zDepth={2} circle>
+							<Link to="#" onClick={setTopicSearchMode} style={{ textDecoration: 'none' }}>
+							<i style={styles.image} className="fa fa-id-badge fa-2x"></i>
+								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Topic Search</span></h2>
 							</Link>
 						</Paper>
 					</div>

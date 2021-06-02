@@ -1,9 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {
-	getOrgToOrgQuery, getTrackingNameForFactory, getTypeQuery,
-	PAGE_DISPLAYED, RESULTS_PER_PAGE, SEARCH_TYPES, setFilterVariables, getQueryVariable
-} from "../../gamechangerUtils";
-import ResultView from "./ResultView";
+import { getTrackingNameForFactory, PAGE_DISPLAYED } from "../../gamechangerUtils";
 import {Button} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {trackEvent} from "../telemetry/Matomo";
@@ -13,7 +9,6 @@ import GCUserDashboard from "../user/GCUserDashboard";
 import {
 	checkUserInfo,
 	clearDashboardNotification,
-	getSearchObjectFromString,
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
@@ -23,225 +18,11 @@ import {
 import GameChangerAPI from "../api/gameChanger-service-api";
 import {DidYouMean} from "../searchBar/SearchBarStyledComponents";
 import MagellanTrendingLinkList from "../common/MagellanTrendingLinkList";
-import {gcOrange} from "../../components/common/gc-colors";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
-import ExportResultsDialog from "../export/ExportResultsDialog";
-// import util from "../advana/api/util";
-import uuidv4 from "uuid/v4";
-import QueryDialog from "../admin/QueryDialog";
-import DocDialog from "../admin/DocDialog";
 import MainViewFactory from "../factories/mainViewFactory";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
-const _ = require('lodash');
-
 const gameChangerAPI = new GameChangerAPI();
-
-
-const handlePageLoad = async (state, dispatch, history) => {
-
-	if (state.runSearch) return;
-	
-	let documentProperties = await getDocumentProperties(dispatch);
-	
-	// redirect the page if using tinyurl
-	const url = await checkForTinyURL(window.location);
-	if (url) {
-		history.replace(`#/${url}`);
-		//setPageLoaded(false);
-		//return;
-	}
-	else if (url === null) {
-		///history.replace(state.cloneData.clone_data.url);
-		return;
-	}
-	
-	try {
-		getTrendingSearches(state.cloneData);
-	} catch (e) {
-		// Do nothing
-	}
-	
-	// set search settings
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	try {
-		const results = await gameChangerAPI.getUserSettings();
-		const searchSettings = results.data.search_settings;
-		
-		if (searchSettings) {
-
-			const accessAsDates = newSearchSettings.accessDateFilter[0] && newSearchSettings.accessDateFilter[1] ? newSearchSettings.accessDateFilter.map(date => new Date(date)) : [null,null];
-			const publicationAsDates = newSearchSettings.publicationDateFilter[0] && newSearchSettings.publicationDateFilter[1] ? newSearchSettings.publicationDateFilter.map(date => new Date(date)) : [null,null];
-			const publicationDateAllTimeValue = newSearchSettings.publicationDateAllTime === undefined ? true : newSearchSettings.publicationDateAllTime;
-			
-			newSearchSettings.accessDateFilter = accessAsDates;
-			newSearchSettings.publicationDateFilter = publicationAsDates;
-			newSearchSettings.publicationDateAllTime = publicationDateAllTimeValue;
-		} else {
-			console.log('NO SETTINGS')
-		}
-	} catch (e) {
-		// do nothing
-	}
-	
-	// fetch ES index
-	try{
-		const esIndex = await gameChangerAPI.getElasticSearchIndex();
-		setState(dispatch, { esIndex: esIndex.data });
-	} catch (e){
-		console.log(e);
-	}
-	
-	try {
-		getUserData(dispatch);
-	} catch(e) {
-		console.log(e);
-	}
-	
-	// get url data and set accordingly
-	const searchText = getQueryVariable('q');
-	let searchType = getQueryVariable('searchType');
-	let offset = getQueryVariable('offset');
-	let tabName = getQueryVariable('tabName');
-	let orgURL = getQueryVariable('orgFilter');
-	let typeURL = getQueryVariable('typeFilter');
-	let searchFieldsURL = getQueryVariable('searchFields');
-	
-	if (!tabName) {
-		tabName = state.tabName;
-	}
-
-	let orgFilterObject = _.cloneDeep(newSearchSettings.orgFilter);
-	let typeFilterObject = _.cloneDeep(newSearchSettings.typeFilter);
-
-	if (orgURL) {
-		setFilterVariables(orgFilterObject, orgURL);
-		if (orgURL !== 'ALLORGS') {
-			newSearchSettings.allOrgsSelected = false;
-			newSearchSettings.specificOrgsSelected = true;
-		} else {
-			newSearchSettings.allOrgsSelected = true;
-			newSearchSettings.specificOrgsSelected = false;
-		}
-	}
-	
-	if(typeURL) {
-		setFilterVariables(typeFilterObject, typeURL);
-		if (orgURL !== 'ALLTYPES') {
-			newSearchSettings.allTypesSelected = false;
-			newSearchSettings.specificTypesSelected = true;
-		} else {
-			newSearchSettings.allTypesSelected = true;
-			newSearchSettings.specificTypesSelected = false;
-		}
-	}
-	
-	let searchFields;
-	
-	if (searchFieldsURL) {
-		const searchFieldPairs = searchFieldsURL.split('_');
-
-		searchFieldPairs.forEach(pairText => {
-			if (documentProperties) {
-				const pair = pairText.split('-');
-				const field = documentProperties.filter(prop => prop.display_name === pair[0])[0];
-				searchFields[uuidv4()] = { field: field, input: pair[1] }
-			}
-		});
-		searchFields[uuidv4()] = { field: null, input: '' }
-		newSearchSettings.searchFields = searchFields;
-	}
-
-	if (Object.values(SEARCH_TYPES).indexOf(searchType) === -1) {
-		searchType = 'Keyword';
-	}
-
-	if (isNaN(offset)) {
-		offset = 0;
-	}
-
-	const resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
-
-	if (searchText) {
-		newSearchSettings.searchType = searchType;
-		newSearchSettings.orgFilter = orgFilterObject;
-		newSearchSettings.typeFilter = typeFilterObject;
-		setState(dispatch, {
-			searchText,
-			resultsPage,
-			searchSettings: newSearchSettings,
-			offset,
-			tabName,
-			runSearch: true
-		});
-		
-		setSearchURL({searchText, resultsPage, tabName, cloneData: state.cloneData}, newSearchSettings);
-	}
-}
-
-const getDocumentProperties = async (dispatch) => {
-	let documentProperties = [];
-
-	try {
-		const docPropsResponse = await gameChangerAPI.getDocumentProperties();
-		const keepList = {
-			'display_title_s': 'Title',
-			'display_doc_type_s': 'Document Type',
-			'display_org_s': 'Organization',
-			'doc_num': 'Document Number',
-			'filename': 'Filename',
-		}
-		documentProperties = docPropsResponse.data.filter(field => Object.keys(keepList).indexOf(field.name) !== -1);
-		documentProperties.forEach(field => {
-			field.display_name = keepList[field.name];
-		});
-	} catch(e) {
-		console.log(e)
-	}
-
-	setState(dispatch, {documentProperties});
-
-	return documentProperties;
-}
-
-const checkForTinyURL = async (location) => {
-
-	const tiny = getQueryVariable('tiny');
-
-	if (!location || !tiny) {
-		return false;
-	}
-
-	if (tiny) {
-		const res = await gameChangerAPI.convertTinyURLPOST(tiny);
-		return res.data.url;
-	}
-}
-
-const getTrendingSearches = (cloneData) => {
-	const daysAgo = 7;
-	let internalUsers = [];
-	let blacklist = [];
-
-	gameChangerAPI.getInternalUsers().then(({data}) => {
-		data.forEach(d => {
-			internalUsers.push(d.username);
-		});
-
-		gameChangerAPI.getTrendingBlacklist().then(({data}) => {
-			data.forEach(d => {
-				blacklist.push(d.search_text);
-			});
-
-			gameChangerAPI.getAppStats({cloneData, daysAgo, internalUsers, blacklist}).then(({data}) => {
-				localStorage.setItem(`trending${cloneData.clone_name}Searches`, JSON.stringify(data.data.topSearches.data));
-			}).catch(e => {console.log("error with getting trending: " + e);})
-
-		}).catch(e => console.log("error with getting blacklist: " + e));
-
-	}).catch(e => {console.log("error getting internal users: " + e)});
-}
 
 const MainView = (props) => {
 	
@@ -260,7 +41,7 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			handlePageLoad(state, dispatch, state.history);
+			handler.handlePageLoad({state, dispatch, history: state.history});
 			const viewNames = handler.getViewNames();
 
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
@@ -510,59 +291,13 @@ const MainView = (props) => {
 			return  getNonMainPageOuterContainer(getUserDashboard);
 		case PAGE_DISPLAYED.main:
 		default:
-			const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings} = state;
-			const {allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter,} = searchSettings;
+			if (mainViewHandler) {
+				return mainViewHandler.getMainView({state, dispatch, setCurrentTime, renderHideTabs, pageLoaded, getViewPanels});
+			}
+			else {
+				return <></>
+			}
 			
-			const noResults = Boolean(rawSearchResults?.length === 0);
-			const hideSearchResults = noResults && !loading;
-
-			const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
-
-			return (
-				<>
-					{exportDialogVisible && (
-						<ExportResultsDialog
-							open={exportDialogVisible}
-							handleClose={() => setState(dispatch, { exportDialogVisible: false })}
-							searchObject={getSearchObjectFromString(prevSearchText)}
-							setCurrentTime={setCurrentTime}
-							selectedDocuments={selectedDocuments}
-							isSelectedDocs={isSelectedDocs}
-							orgFilterString={getOrgToOrgQuery(allOrgsSelected, orgFilter)}
-							typeFilterString={getTypeQuery(allTypesSelected, typeFilter)}
-							orgFilter={orgFilter}
-							typeFilter={typeFilter}
-							getUserData={() => getUserData(dispatch)}
-							isClone = {true}
-							cloneData = {state.cloneData}
-							searchType={searchType}
-							searchFields={searchFields}
-							edaSearchSettings={edaSearchSettings}
-						/>
-					)}
-					{loading &&
-						<div style={{ margin: '0 auto' }}>
-							<LoadingIndicator customColor={gcOrange} />
-						</div>
-					}
-					{hideSearchResults && renderHideTabs()}
-					{(!hideSearchResults && pageLoaded) && <ResultView {...props} viewNames={viewNames} viewPanels={getViewPanels()} />}
-					{state.showEsQueryDialog && (
-						<QueryDialog
-							open={state.showEsQueryDialog}
-							handleClose={() => { setState(dispatch, { showEsQueryDialog: false }) }}
-							query={state.query}
-						/>
-					)}
-					{state.showEsDocDialog && (
-						<DocDialog
-							open={state.showEsDocDialog}
-							handleClose={() => { setState(dispatch, { showEsDocDialog: false }) }}
-							doc={state.selectedDoc}
-						/>
-					)}
-				</>
-			);
 	}
 }
 
