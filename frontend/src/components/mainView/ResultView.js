@@ -22,28 +22,10 @@ const ResultView = (props) => {
 	}, [state.currentViewName]);
 	
 	return (
-		<div style={styles.tabButtonContainer}>
+		<>
 			{viewPanels[currentView]}
-			<div style={styles.spacer} />
-		</div>
+		</>
 	);
-}
-
-const styles = {
-	tabContainer: {
-		alignItems: 'center',
-		marginBottom: '14px',
-		height: '600px',
-		margin: '0px 4% 0 65px'
-	},
-	tabButtonContainer: {
-		width: '100%',
-		padding: '0em 1em',
-		alignItems: 'center'
-	},
-	spacer: {
-		flex: '0.375'
-	},
 }
 
 export default ResultView;
