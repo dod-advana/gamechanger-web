@@ -82,6 +82,6 @@
 
 .main-container { 
     overflow: auto !important;
-    min-height: calc(100% - 89px);
     background-color: white;
+    min-height: calc(100vh - 30px);
 }

@@ -1,6 +1,7 @@
 import GamechangerLogo from "../../../images/logos/GAMECHANGER-NoPentagon.png";
 import React from "react";
 import {Typography} from "@material-ui/core";
+import defaultTitleBarHandler from "../default/defaultTitleBarHandler";
 
 const PolicyTitleBar = {
 	getTitleBar: (props) => {
@@ -15,6 +16,14 @@ const PolicyTitleBar = {
 				</Typography>
 			</div>
 		);
+	},
+	
+	getCategoryTabs(props) {
+		return <></>
+	},
+	
+	getTitleBarStyle(props) {
+		return defaultTitleBarHandler.getTitleBarStyle(props);
 	}
 }
 
