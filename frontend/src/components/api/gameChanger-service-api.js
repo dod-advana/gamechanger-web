@@ -84,6 +84,8 @@ const endpoints = {
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback:'/api/gamechanger/appSettings/userFeedback',
+	getThumbnail: '/api/gameChanger/getThumbnail',
+	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 
 
@@ -631,6 +633,16 @@ export default class GameChangerAPI {
 		const url = endpoints.userFeedback;
 		return axiosPOST(this.axios, url, {})
 	}
+	getTopicSearchMode = async () => {
+		const url = endpoints.topicSearch;
+		return axiosGET(this.axios, url)
+	}
+
+	setTopicSearchMode = async (value) => {
+		const url = endpoints.topicSearch;
+		const bodyValue = value ? 'true' : 'false';
+		return axiosPOST(this.axios, url, {value: bodyValue});
+	}
 
 	getDescriptionFromWikipedia(title) {
 		const url = `https://en.wikipedia.org/w/api.php?origin=*&format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=${title}`;
@@ -660,5 +672,10 @@ export default class GameChangerAPI {
 	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+	}
+	
+	getThumbnail = async (body) => {
+		const url = endpoints.getThumbnail;
+		return axiosGET(this.axios, url, {params:body});
 	}
 }

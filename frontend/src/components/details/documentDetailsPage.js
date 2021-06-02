@@ -92,6 +92,7 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 					edge.source = source;
 					edge.target = target;
 					graph.edges.push(edge);
+					edgeIds.push(edge.id)
 				}
 			});
 		});

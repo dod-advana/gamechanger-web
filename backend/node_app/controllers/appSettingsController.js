@@ -21,9 +21,10 @@ class AppSettingsController {
 			userFeedback:'request_user_feedback',
 			intelligentAnswers:'intelligent_answers',
 			entitySearch:'entity_search',
-			combinedSearch:'combined_search'
+			combinedSearch:'combined_search',
+			topicSearch:'topic_search'
 		}
-
+		
 		// Binding the key for combined search mode to get and set
 		this.getCombinedSearchMode = this.getMode.bind(this, this.keys.combinedSearch);
 		this.setCombinedSearchMode = this.setMode.bind(this, this.keys.combinedSearch);
@@ -39,6 +40,10 @@ class AppSettingsController {
 		// Binding the key for combined search mode to get and toggle
 		this.getUserFeedbackMode = this.getMode.bind(this, this.keys.userFeedback);
 		this.toggleUserFeedbackMode = this.toggleMode.bind(this, this.keys.userFeedback);
+
+		// Binding the key for topic search mode to get and set
+		this.getTopicSearchMode = this.getMode.bind(this, this.keys.topicSearch);
+		this.setTopicSearchMode = this.setMode.bind(this, this.keys.topicSearch);
 	}
 	/**
 	 * A generic get method to grab a key's value
