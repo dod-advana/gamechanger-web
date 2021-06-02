@@ -263,9 +263,7 @@ class PolicySearchHandler extends SearchHandler {
 			const noPubDateSpecified = req.body.publicationDateAllTime;
 			const noTypeSpecified = _.isEqual([], typeFilterString);
 			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
-			if (combinedSearch.length > 0){
-				combinedSearch = combinedSearch[0].dataValues.value === 'true';
-			}
+			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
 
 			const operator = 'and';
 			if (noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
