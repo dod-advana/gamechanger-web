@@ -18,13 +18,23 @@ const initState = {
         },
         startDate: null,
         endDate: null,
-        issueAgency: null
+        issueAgency: null,
+        issueOffice: null,
+        allYearsSelected: true,
+        fiscalYears: [],
+        allDataSelected: true,
+        contractData: {
+            pds: false,
+            syn: false,
+            none: false
+        }
     },
     showDialog: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
     statsLoading: false,
+    resetSettingsSwitch: false,
     
     // not part of EDA (yet) but currently required in NewGameChangerPage: 
     notifications: [],
