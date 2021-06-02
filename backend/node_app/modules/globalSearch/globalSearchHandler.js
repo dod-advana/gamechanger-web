@@ -57,9 +57,8 @@ class GlobalSearchHandler extends SearchHandler {
 		} = req.body;
 
 		try {
-			const { searchText, tiny_url, limit, offset } = req.body;
+			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
-			historyRec.tiny_url = tiny_url;
 			historyRec.showTutorial = showTutorial;
 
 			const cloneSpecificObject = {};
