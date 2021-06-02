@@ -186,7 +186,6 @@ const App = (props) => {
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
-		console.log(includePaths.includes(location.pathname))
 		return includePaths.includes(location.pathname);
 	}
 
