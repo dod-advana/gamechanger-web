@@ -17,7 +17,7 @@ import BetaModal from "../../common/BetaModal";
 import QLIKICON from "../../../images/icon/QLIK.svg";
 import moment from "moment";
 import {parseOwnerName} from "./search";
-import {primary} from "../../../components/common/gc-colors";
+import {primary} from "../../common/gc-colors";
 
 const styles = {
 	container: {
@@ -143,24 +143,24 @@ const StyledFrontCardHeader = styled.div`
 	}
 `;
 
-const StyledFrontCardSubHeader = styled.div`
-	display: flex;
-	position: relative;
-	
-	.sub-header-one {
-		color: ${({typeTextColor}) => typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({typeColor}) => typeColor ? typeColor : '#000000'};
-		width: 100%;
-		padding: 8px;
-		display: flex;
-		align-items: center;
-		
-		img {
-			width: 25px;
-    		margin: 0px 10px 0px 0px;
-		}
-	}
-`;
+// const StyledFrontCardSubHeader = styled.div`
+// 	display: flex;
+// 	position: relative;
+//
+// 	.sub-header-one {
+// 		color: ${({typeTextColor}) => typeTextColor ? typeTextColor : '#ffffff'};
+// 		background-color: ${({typeColor}) => typeColor ? typeColor : '#000000'};
+// 		width: 100%;
+// 		padding: 8px;
+// 		display: flex;
+// 		align-items: center;
+//
+// 		img {
+// 			width: 25px;
+//     		margin: 0px 10px 0px 0px;
+// 		}
+// 	}
+// `;
 
 const StyledFrontCardContent = styled.div`
 	font-family: "Noto Sans";
@@ -204,41 +204,41 @@ const clickFn = (cloneName, href, type) => {
 
 const getUrl = (id, restricted) => {
 	if (restricted)
-		return `${CONFIG.env.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
-	return `${CONFIG.env.QLIK_URL}/sense/app/${id}`;
+		return `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
+	return `${CONFIG.QLIK_URL}/sense/app/${id}`;
 };
 
 const cardSubHeaderHandler = (props) => {
-	const {item, state, toggledMore} = props;
-	
-	let typeColor = 'black';
-	switch (item.type) {
-		case 'application':
-			typeColor = 'rgb(50, 18, 77)';
-			break;
-		case 'dashboard':
-			typeColor = 'rgb(11, 167, 146)';
-			break;
-		case 'dataSource':
-			typeColor = 'rgb(5, 159, 217)';
-			break;
-		case 'database':
-			typeColor = 'rgb(233, 105, 29)';
-			break;
-		default:
-			typeColor = 'rgb(233, 105, 29)';
-			break;
-	}
+	// const {item} = props;
+	//
+	// let typeColor;
+	// switch (item.type) {
+	// 	case 'application':
+	// 		typeColor = 'rgb(50, 18, 77)';
+	// 		break;
+	// 	case 'dashboard':
+	// 		typeColor = 'rgb(11, 167, 146)';
+	// 		break;
+	// 	case 'dataSource':
+	// 		typeColor = 'rgb(5, 159, 217)';
+	// 		break;
+	// 	case 'database':
+	// 		typeColor = 'rgb(233, 105, 29)';
+	// 		break;
+	// 	default:
+	// 		typeColor = 'rgb(233, 105, 29)';
+	// 		break;
+	// }
 	
 	return (
 		<>
-			{!state.listView && !toggledMore &&
-				<StyledFrontCardSubHeader typeTextColor={'white'} typeColor={typeColor}>
-					<div className={'sub-header-one'}>
-						{capitalizeFirst(item.type)}
-					</div>
-				</StyledFrontCardSubHeader>
-			}
+			{/*{!state.listView && !toggledMore &&*/}
+			{/*	<StyledFrontCardSubHeader typeTextColor={'white'} typeColor={typeColor}>*/}
+			{/*		<div className={'sub-header-one'}>*/}
+			{/*			{capitalizeFirst(item.type)}*/}
+			{/*		</div>*/}
+			{/*	</StyledFrontCardSubHeader>*/}
+			{/*}*/}
 		</>
 	);
 };
@@ -323,7 +323,7 @@ const GlobalSearchCardHandler = {
 			}
 			else permission = true;
 			
-			const url = !permission? `${CONFIG.env.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
+			const url = !permission? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
 			
 			const RestrictedLink = <Link
 				href={url}
@@ -410,7 +410,7 @@ const GlobalSearchCardHandler = {
 				<StyledFrontCardContent isWideCard={true}>
 					<div className={'image-container'}>
 						<img
-							src={thumbnail ? `${CONFIG.env.DATA_API_BASE_URL}data/qlik/thumbnail?` + new URLSearchParams({ location: thumbnail }).toString() : undefined}
+							src={thumbnail ? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` + new URLSearchParams({ location: thumbnail }).toString() : undefined}
 							style={styles.image}
 							alt={thumbnail ? name : undefined}
 						/>
@@ -489,7 +489,7 @@ const GlobalSearchCardHandler = {
 				window.open(url, '_blank');
 			}
 			const onCancelClick = () => setModalOpen(false);
-			const onLegacyClick = () => openWindowCloseModal(`${CONFIG.env.QLIK_URL}/sense/app/${id}`);
+			const onLegacyClick = () => openWindowCloseModal(`${CONFIG.QLIK_URL}/sense/app/${id}`);
 			const onBetaClick = () => openWindowCloseModal(`#/qlik/app/${id}`);
 		
 			return (
@@ -513,7 +513,7 @@ const GlobalSearchCardHandler = {
 			
 			let { name, id } = item.resource;
 			
-			const url = `${CONFIG.env.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
 			
 			return (
 				<StyledFrontCardHeader listView={state.listView} restricted={false}>
@@ -579,7 +579,7 @@ const GlobalSearchCardHandler = {
 			
 			let { id } = item.resource;
 			
-			const url = `${CONFIG.env.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
 			
 			return (
 				<>
@@ -615,11 +615,13 @@ const GlobalSearchCardHandler = {
 			
 			const {item, state, graphView} = props;
 			
+			console.log(props)
+			
 			const docListView = state.listView && !graphView;
 			
 			let { name, id } = item.resource;
 			
-			const url = `${CONFIG.env.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
 			
 			return (
 				<StyledFrontCardHeader listView={state.listView} restricted={false}>
@@ -685,7 +687,7 @@ const GlobalSearchCardHandler = {
 			
 			let { id } = item.resource;
 			
-			const url = `${CONFIG.env.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
 			
 			return (
 				<>
