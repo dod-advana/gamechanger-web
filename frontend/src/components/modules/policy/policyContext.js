@@ -164,9 +164,14 @@ const initState = {
 		Topics: false
 	},
 
+	categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
+	currentSort: 'Relevance',
+	currentOrder: 'desc',
+
 	// category totals
 	categoryMetadata: {},
-
 	activeCategoryTab: 'all'
 };
 

@@ -243,7 +243,9 @@ class PolicySearchHandler extends SearchHandler {
 			tiny_url,
 			forCacheReload = false,
 			searchFields = {},
-			includeRevoked
+			includeRevoked, 
+			sort = 'Relevance',
+			order = 'desc'
 		} = req.body;
 
 		try {
@@ -252,7 +254,7 @@ class PolicySearchHandler extends SearchHandler {
 			await redisAsyncClient.select(redisAsyncClientDB);
 
 			let searchResults;
-			// combined search: run if not clone + flag enabled
+			// combined search: run if not clone + sort === 'relevance' + flag enabled
 			const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
 			const noSourceSpecified = _.isEqual([], orgFilterString);
 			const noPubDateSpecified = req.body.publicationDateAllTime;
@@ -263,7 +265,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			const operator = 'and';
-			if (noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
+			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
 				try {
 					searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset);
 				} catch (e) {
