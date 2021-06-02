@@ -83,6 +83,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
+	getThumbnail: '/api/gameChanger/getThumbnail',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 
 
@@ -649,5 +650,10 @@ export default class GameChangerAPI {
 	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+	}
+	
+	getThumbnail = async (body) => {
+		const url = endpoints.getThumbnail;
+		return axiosGET(this.axios, url, {params:body});
 	}
 }

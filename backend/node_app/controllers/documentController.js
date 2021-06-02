@@ -3,7 +3,11 @@ const LOGGER = require('../lib/logger');
 const GC_ASSISTS = require('../models').gc_assists;
 const { DataLibrary } = require('../lib/dataLibrary');
 const sparkMD5Lib = require('spark-md5');
-
+const fs = require('fs');
+const axios = require('axios');
+const https = require('https');
+const url = require('url');
+const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
 	constructor(opts = {}) {
@@ -25,6 +29,7 @@ class DocumentController {
 		this.getDocumentsToAnnotate = this.getDocumentsToAnnotate.bind(this);
 		this.saveDocumentAnnotations = this.saveDocumentAnnotations.bind(this);
 		this.getPDF = this.getPDF.bind(this);
+		this.getThumbnail = this.getThumbnail.bind(this);
 		this.cleanDocumentForCrowdAssist = this.cleanDocumentForCrowdAssist.bind(this);
 		this.getDocumentProperties = this.getDocumentProperties.bind(this);
 		this.cleanUpEsResultsForAssist = this.cleanUpEsResultsForAssist.bind(this);
@@ -217,6 +222,49 @@ class DocumentController {
 			res.status(500).send(message);
 		}
 	}
+	
+	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
+		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
+	};
+	
+	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
+		return {
+			params: {
+				Xrfkey: 1234567890123456,
+				...params
+			},
+			headers: { 'content-type': 'application/json', 'X-Qlik-xrfkey': '1234567890123456', 'X-Qlik-user': this.getUserHeader(userid) },
+			httpsAgent: new https.Agent({
+				rejectUnauthorized: false,
+				ca: fs.readFileSync(CA),
+				key: fs.readFileSync(KEY),
+				cert: fs.readFileSync(CERT)
+			})
+		};
+	};
+	
+	async getThumbnail(req, res) {
+		try {
+			
+			const {location} = url.parse(req.url,true).query;
+			console.log(location)
+			let response = await axios.get(`${QLIK_URL}${location}`, { ...this.getRequestConfigs(), responseType: 'stream' });
+	
+			res.writeHead(200, {
+				'content-type': response.headers['content-type'],
+				'cache-control': response.headers['cache-control'],
+				'etag': response.headers['etag'],
+				'expires': response.headers['expires'],
+				'last-modified': response.headers['last-modified'],
+			});
+	
+			response.data.pipe(res);
+	
+		} catch (err) {
+			this.logger.error(err, '7GILAOJ');
+			res.end();
+		}
+	};
 
 	async getDocumentProperties(req, res) {
 		let userId = 'webapp_unknown';
