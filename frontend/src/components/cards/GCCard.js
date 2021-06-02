@@ -700,7 +700,8 @@ function GCCard (props) {
 											showEsDoc: () => {
 												console.log(item);
 												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
-											}
+											},
+											state
 										})}
 									</div>
 								</div>
@@ -745,7 +746,8 @@ function GCCard (props) {
 										showEsDoc: () => {
 											console.log(item);
 											setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
-										}
+										},
+										state
 									})}
 								</div>
 							</div>
