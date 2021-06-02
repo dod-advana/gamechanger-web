@@ -88,7 +88,7 @@ const ViewHeader = (props) => {
 				tempCount = count;
 		}
 		setDisplayCount(tempCount)
-	},[activeCategoryTab, count, entityCount, topicCount])
+	},[activeCategoryTab, count, entityCount, topicCount, selectedCategories])
 	
 	const setDrawer = (open) => {
 		setState(dispatch, {docsDrawerOpen: open});

@@ -19,6 +19,21 @@ const DefaultTitleBarHandler = {
 				</Typography>
 			</div>
 		);
+	},
+	
+	getCategoryTabs(props) {
+		return <></>
+	},
+	
+	getTitleBarStyle(props) {
+		const {
+			rawSearchResults,
+			pageDisplayed
+		} = props;
+		return {
+			...styles.titleBar,
+			borderBottom: (rawSearchResults.length > 0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : ''
+		};
 	}
 }
 
@@ -28,5 +43,14 @@ const styles = {
 	wording: {
 		color: '#131E43',
 		marginRight: 15
-	}
+	},
+	titleBar: {
+		padding: '0 1em',
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		flex: 1,
+		minHeight: 80,
+		width: '100%'
+	},
 };
