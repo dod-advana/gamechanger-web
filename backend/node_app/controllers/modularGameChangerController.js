@@ -167,7 +167,7 @@ class ModularGameChangerController {
 		const {cloneName, functionName, options} = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res);
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
