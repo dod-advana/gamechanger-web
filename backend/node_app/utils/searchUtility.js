@@ -1198,7 +1198,7 @@ class SearchUtility {
 				{
 					size: 2,
 					_source: {
-						includes: [name, aliases, 'type']
+						includes: [name, aliases, 'entity_type']
 					},
 					query: {
 						prefix: {

@@ -84,6 +84,7 @@ const endpoints = {
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	getThumbnail: '/api/gameChanger/getThumbnail',
+	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 
 
@@ -618,6 +619,17 @@ export default class GameChangerAPI {
 
 	setEntitySearchMode = async (value) => {
 		const url = endpoints.entitySearch;
+		const bodyValue = value ? 'true' : 'false';
+		return axiosPOST(this.axios, url, {value: bodyValue});
+	}
+
+	getTopicSearchMode = async () => {
+		const url = endpoints.topicSearch;
+		return axiosGET(this.axios, url)
+	}
+
+	setTopicSearchMode = async (value) => {
+		const url = endpoints.topicSearch;
 		const bodyValue = value ? 'true' : 'false';
 		return axiosPOST(this.axios, url, {value: bodyValue});
 	}
