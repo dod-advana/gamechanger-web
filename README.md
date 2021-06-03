@@ -42,15 +42,18 @@ This set up is more advanced and is intended for prepping for releases to produc
 
 - Ensure you have docker, docker-compose, and kubernetes installed on your machine
 - Pull down the code
-- In gamechanger-web/backend, copy .env.template to .env and fill in the values to point to your databases appropriately
-- In gamechanger-web/backend, create a secrets folder at the top level of backend (gamechanger-web/backend/secrets) and drop in cert.pem, dod_certs.pem, gamechanger.crt, and key.pem
-- **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources). Specifically make sure you grab the .env files that are designated as k8s the versions.
-- At the top level run **docker-compose -f docker-compose.combo.yml build** to build the images
+- In gamechanger-web/k8s/gamechanger-chart, copy values.yaml to values.dev.yaml and fill in the values to point to your databases appropriately
+- **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned version of the above file from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources).
+- At the top level run docker build -t 10.194.9.80:5000/gamechanger-web:latest -f Dockerfile.prod .
+- At the top level run docker push 10.194.9.80:5000/gamechanger-web:latest
 - In gamechanger-web/k8s, run **kubectl apply -f .**
+- In gamechanger-web/k8s, run **./deploy.sh**
 - Run **kubectl get pods** and once all pods are in a successful state the application should be up and available. Note the gamechanger-web pod name for the next step.
 - Run **kubectl port-forward <INSERT_GAMECHANGER-WEB_POD_NAME_HERE> 8990:8990**
 - Your frontend will be available at http://localhost:8990/#/gamechanger
 - To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
+- If you need to troubleshoot postgres, this command will start up a pod with postgres access: **kubectl run -i --tty my_pod --image=postgres:9.6 -- /bin/bash**
+- Once in that container you can run **psql -U postgres -h postgres** to inspect the database
 
 ## Known/Common Issues
 
