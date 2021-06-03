@@ -14,7 +14,7 @@ class TransformerController {
 
 		this.getAPIInformation = this.getAPIInformation.bind(this);
 		this.getS3List = this.getS3List.bind(this);
-		this.getTransformerList = this.getTransformerList.bind(this);
+		this.getModelsList = this.getModelsList.bind(this);
 		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
 		this.setTransformerModel = this.setTransformerModel.bind(this);
 	}
@@ -67,11 +67,11 @@ class TransformerController {
 		}
 	}
 	
-	async getTransformerList(req, res) {
+	async getModelsList(req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.getTransfomerModelList(userId);
+			const resp = await this.mlApi.getModelsList(userId);
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'UB4F9M4', userId);

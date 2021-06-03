@@ -538,25 +538,6 @@ const GamechangerAdminPage = props => {
 		}
 	}
 
-	const getCurrentTransformer = async () => {
-		try {
-			const { data } = await gameChangerAPI.getCurrentTransformer();
-			const { model_name } = data;
-			setCurrentTransformerDisplayName(model_name);
-		} catch (e) {
-			console.error('Error getting current transformer model', e);
-		}
-	};
-
-	const getTransformerList = async () => {
-		try {
-			const { data } = await gameChangerAPI.getTransformerList();
-			setTransformerList(data);
-		} catch(e) {
-			console.error('Error getting transformer list', e);
-		}
-	};
-
 	const getCombinedSearch = async () => {
 		try {
 			const { data } = await gameChangerAPI.getCombinedSearchMode();

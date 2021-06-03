@@ -81,11 +81,16 @@ const logs = [];
 export default () => {
 
 	// Set state variables
-    const [transformerList, setTransformerList] = useState([]);
+    const [downloadedModelsList, setDonwloadedModelsList] = useState({
+        "transformers": [],
+        "sentence": [],
+        "qexp": [],
+    });
     const [s3List, setS3List] = useState([]);
     const [APIData, setAPIData] = useState({});
     const [currentTransformer, setCurrentTransformer] = useState({});
-    const [selectedTransformer, setSelectedTransformer] = useState([]);
+    const [selectedSentence, setSelectedSentence] = useState([]);
+    const [selectedQEXP, setSelectedQEXP] = useState([]);
 	const [transformerLoading, setTransformerLoading] = useState(true);
 
     // flags that parameters have been changed and on 
@@ -121,7 +126,7 @@ export default () => {
             await getAPIInformation();
             await getCurrentTransformer();
             await getS3List();
-            await getTransformerList();
+            await getModelsList();
             // Set status to OK
             setConnectionStatus(0);
         } catch (e) {
@@ -175,17 +180,17 @@ export default () => {
         }
     }
     /**
-     * Get a list of all the transformers
-     * @method getTransformerList
+     * Get a list of all the downloaded sentence index, qexp, and transformers.
+     * @method getModelsList
      */
-    const getTransformerList = async () =>{
+    const getModelsList = async () =>{
         try{
-            // set transformerList
-            const list = await gameChangerAPI.getTransformerList();
-            setTransformerList(list.data);
-            updateLogs('Successfully queried transformer list',0);
+            // set downloadedModelsList
+            const list = await gameChangerAPI.getModelsList();
+            setDonwloadedModelsList(list.data);
+            updateLogs('Successfully queried models list',0);
         }catch (e) {
-            updateLogs("Error querying transformer list: " + e.toString() ,2);
+            updateLogs("Error querying models list: " + e.toString() ,2);
             throw e;
         }
     }
@@ -205,22 +210,6 @@ export default () => {
         }
     }
     /**
-     * Post to change the current transformer 
-     * @method updateCurrentTransformer
-     */
-    const updateCurrentTransformer = async () => {
-		try {
-			setTransformerLoading(true);
-			const { data } = await gameChangerAPI.setTransformerModel(selectedTransformer);
-            updateLogs('Updated selected transformer to ' + selectedTransformer,0);
-            await getCurrentTransformer();
-		} catch(e) {
-			updateLogs('Error setting transformer model: ' + e.toString() ,2);
-		} finally {
-			setTransformerLoading(false);
-		}
-	}
-    /**
      * @method triggerDownload
      */
     const triggerDownload = async () => {
@@ -236,7 +225,11 @@ export default () => {
      */
     const triggerReloadModels = async () => {
         try{
-            await gameChangerAPI.reloadModels();
+            await gameChangerAPI.reloadModels({
+                "transformer": "",
+                "sentence": selectedSentence,
+                "qexp": selectedQEXP,
+            });
             updateLogs('Realoading Models',0);
         } catch(e){
             updateLogs('Error reloading models: ' + e.toString() ,2);
@@ -321,30 +314,6 @@ export default () => {
                         <div style={{display:'inline-block'}}>API Controls:</div>
                     </div>
                     <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
-						<b>Transformer Model Select  </b>
-                        <Select
-                            value={selectedTransformer}
-                            onChange={e => setSelectedTransformer(e.target.value)}
-                            name="labels"
-                            style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                        >
-                            {transformerList.map((name) => {
-								return (
-                                    <MenuItem 
-                                        style={{fontSize:'small'}}
-                                        value={name}>{name}</MenuItem>
-								)
-							})}
-                        </Select>
-                        <GCPrimaryButton
-                            onClick={() => {
-                                updateCurrentTransformer();
-                            }}
-                            disabled={transformerLoading}
-                            style={{float: 'right', minWidth: 'unset'}}
-                        >Set Model</GCPrimaryButton>
-					</div>
-                    <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
 						<b>Download dependencies from s3 Args</b>
                         <GCPrimaryButton
                             onClick={() => {
@@ -356,6 +325,34 @@ export default () => {
                     </div>
                     <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
 						<b>Reload Models</b>
+                        <Select
+                            value={selectedSentence}
+                            onChange={e => setSelectedSentence(e.target.value)}
+                            name="labels"
+                            style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                        >
+                            {downloadedModelsList.sentence.map((name) => {
+								return (
+                                    <MenuItem 
+                                        style={{fontSize:'small'}}
+                                        value={name}>{name}</MenuItem>
+								)
+							})}
+                        </Select>
+                        <Select
+                            value={selectedQEXP}
+                            onChange={e => setSelectedQEXP(e.target.value)}
+                            name="labels"
+                            style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                        >
+                            {downloadedModelsList.qexp.map((name) => {
+								return (
+                                    <MenuItem 
+                                        style={{fontSize:'small'}}
+                                        value={name}>{name}</MenuItem>
+								)
+							})}
+                        </Select>
                         <GCPrimaryButton
                             onClick={() => {
                                 triggerReloadModels();
