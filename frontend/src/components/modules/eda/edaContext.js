@@ -48,7 +48,8 @@ const initState = {
     },
     notificationIds: [],
     componentStepNumbers: [],
-    selectedDocuments: []
+    selectedDocuments: [],
+    totalObligatedAmount: 0
 }
 
 const init = (initialState) => {
