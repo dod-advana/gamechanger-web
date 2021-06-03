@@ -66,12 +66,9 @@ describe('EDAExportHandler', function () {
                     }
                 },
                 constants: {
-                    env: {
-                        GAMECHANGER_ELASTIC_SEARCH_OPTS: {
-                        },
-                        EDA_ELASTIC_SEARCH_OPTS: {
-                            index: 'test index'
-                        }
+                    GAMECHANGER_ELASTIC_SEARCH_OPTS: {},
+                    EDA_ELASTIC_SEARCH_OPTS: {
+                        index: 'test index'
                     }
                 }
             }
@@ -82,7 +79,9 @@ describe('EDAExportHandler', function () {
                 },
                 status(num) {
                     status = num;
-                }
+                    return this;
+                },
+                send(){}
             };
 
             const target = new EDAExportHandler(opts);
