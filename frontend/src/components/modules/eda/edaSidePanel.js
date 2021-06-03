@@ -6,6 +6,7 @@ import {
     FormGroup,
     FormControlLabel,
     Checkbox,
+    TextField
 } from "@material-ui/core";
 import {setState} from "../../../sharedFunctions";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -76,7 +77,7 @@ const styles = {
     container: {
         padding: 15,
     },
-    orgs: {
+    checkboxes: {
         margin: '0 0 0 25px'
     }
 }
@@ -86,7 +87,8 @@ export const EDASidePanel = (props) => {
         dispatch,
         edaSearchSettings,
         issuingOrgs,
-        statsLoading
+        statsLoading,
+        totalObligatedAmount
     } = props;
 
     const setEDASearchSetting = (field, value) => {
@@ -114,6 +116,33 @@ export const EDASidePanel = (props) => {
             case 'organizations':
                 edaSettings.organizations[value] = !edaSettings.organizations[value];
                 break;
+            case 'issueOffice':
+                edaSettings.issueOffice = value;
+                break;
+            case 'allYears':
+                edaSettings.allYearsSelected = true;
+                break;
+            case 'specYears':
+                edaSettings.allYearsSelected = false;
+                break;
+            case 'fiscalYear':
+                const index = edaSettings.fiscalYears.indexOf(value);
+                if (index !== -1) {
+                    edaSettings.fiscalYears.splice(index, 1);
+                }
+                else {
+                    edaSettings.fiscalYears.push(value);
+                }
+                break;
+            case 'allData':
+                edaSettings.allDataSelected = true;
+                break;
+            case 'specData':
+                edaSettings.allDataSelected = false;
+                break;
+            case 'contractData':
+                edaSettings.contractData[value] = !edaSettings.contractData[value];
+                break;
             default:
                 break;
         }
@@ -121,30 +150,15 @@ export const EDASidePanel = (props) => {
 		setState(dispatch, { edaSearchSettings: edaSettings });
     }
 
-    // const getContractData = () => {
-    //     const agencyContracts = {};
-
-    //     for (const result of searchResults) {
-    //         const agency = result.contract_issue_name_eda_ext;
-
-    //         if (agency) {
-    //             if (agencyContracts[agency]) {
-    //                 agencyContracts[agency] += 1;
-    //             }
-    //             else {
-    //                 agencyContracts[agency] = 1;
-    //             }
-    //         }
-    //     }
-
-    //     const data = Object.keys(agencyContracts).map(agency => ({ "Key": agency, "Value": agencyContracts[agency]}));
-    //     data.push({"Key": "Total Amount $", "Value": "Data Not Available"});
-    //     data.sort((a, b) => (a.Value > b.Value) ? -1 : 1 )
-    //     return data;
-    // }
-
     const getIssuingOrgData = () => {
         return Object.keys(issuingOrgs).map(org => ({ "Key": org, "Value": issuingOrgs[org] }))
+    }
+
+    const getStatsData = () => {
+        const issuingOrgData = getIssuingOrgData();
+        const totalObligation = [{Key: "Total Obligated Amount", Value: "$" + totalObligatedAmount.toLocaleString()}];
+
+        return issuingOrgData.concat(totalObligation);
     }
 
     const renderStats = () => {
@@ -152,7 +166,7 @@ export const EDASidePanel = (props) => {
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
                 // headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-                rows={getIssuingOrgData()}
+                rows={getStatsData()}
                 height={'auto'}
                 dontScroll={true}
                 // colWidth={colWidth}
@@ -177,7 +191,7 @@ export const EDASidePanel = (props) => {
                                 icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
                                 checked={edaSearchSettings.allOrgsSelected}
                                 checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-                                name='All sources'
+                                name='All organizations'
                                 style={styles.filterBox}
                             />}
                             label='All organizations'
@@ -202,7 +216,7 @@ export const EDASidePanel = (props) => {
                     </FormGroup>
 
                     {!edaSearchSettings.allOrgsSelected && 
-                    <FormGroup style={styles.orgs}>
+                    <FormGroup style={styles.checkboxes}>
                         <FormControlLabel
                             name='Air Force'
                             value='Air Force'
@@ -299,6 +313,187 @@ export const EDASidePanel = (props) => {
         )
     }
 
+    const renderIssueOfficeFilter = () => {
+        return (
+            <TextField
+                placeholder="Issue Office DoDAAC"
+                variant="outlined"
+                defaultValue={edaSearchSettings.issueOffice}
+                style={{ backgroundColor: 'white', width: '100%' }}
+                fullWidth={true}
+                onBlur={(event) => setEDASearchSetting('issueOffice', event.target.value)}
+                inputProps={{
+                    style: {
+                        height: 19,
+                        width: '100%'
+                    }
+                }}
+            />
+        )
+    }
+
+    const renderFiscalYearFilter = () => {
+        const now = new Date();
+        const yearCheckboxes = [];
+
+        const start = 2000;
+        const end = now.getFullYear();
+
+        for (let i = end; i >= start; i--) {
+            yearCheckboxes.push(
+                <FormControlLabel
+                    name={i.toString()}
+                    value={i.toString()}
+                    style={styles.titleText}
+                    control={<Checkbox
+                        style={styles.filterBox}
+                        onClick={() => setEDASearchSetting('fiscalYear', i.toString())}
+                        icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                        checked={edaSearchSettings && edaSearchSettings.fiscalYears && edaSearchSettings.fiscalYears.indexOf(i.toString()) !== -1}
+                        checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
+                        name={i.toString()}
+                    />}
+                    label={i.toString()}
+                    labelPlacement="end"                        
+                />
+            )
+        }
+
+        return (
+            <div style={styles.container}>
+            <FormControl>
+                <FormGroup>
+                    <FormControlLabel
+                        name='All years'
+                        value='All years'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('allYears', '')}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={edaSearchSettings.allYearsSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='All years'
+                            style={styles.filterBox}
+                        />}
+                        label='All fiscal years'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                    <FormControlLabel
+                        name='Specific fiscal year(s)'
+                        value='Specific fiscal year(s)'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('specYears', '')}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={!edaSearchSettings.allYearsSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='Specific fiscal year(s)'
+                            style={styles.filterBox}
+                        />}    
+                        label='Specific fiscal year(s)'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                </FormGroup>
+
+                {!edaSearchSettings.allYearsSelected && 
+                <FormGroup style={styles.checkboxes}>
+                    {yearCheckboxes}
+                </FormGroup>}
+            </FormControl>
+        </div>
+        )
+    }
+
+    const renderContractDataFilter = () => {
+        return (
+            <div style={styles.container}>
+            <FormControl>
+                <FormGroup>
+                    <FormControlLabel
+                        name='All data sources'
+                        value='All data sources'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('allData', '')}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={edaSearchSettings.allDataSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='All data sources'
+                            style={styles.filterBox}
+                        />}
+                        label='All data sources'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                    <FormControlLabel
+                        name='Specific data source(s)'
+                        value='Specific data source(s)'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('specData', '')}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={!edaSearchSettings.allDataSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='Specific data source(s)'
+                            style={styles.filterBox}
+                        />}
+                        label='Specific data source(s)'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                </FormGroup>
+
+                {!edaSearchSettings.allDataSelected && 
+                <FormGroup style={styles.checkboxes}>
+                    <FormControlLabel
+                        name='PDS'
+                        value='PDS'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'pds')}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={edaSearchSettings && edaSearchSettings.contractData && edaSearchSettings.contractData.pds}
+                            checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                            name='PDS'
+                        />}
+                        label='PDS'
+                        labelPlacement="end"                        
+                    />
+                    <FormControlLabel
+                        name='SYN'
+                        value='SYN'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'syn')}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={edaSearchSettings && edaSearchSettings.contractData && edaSearchSettings.contractData.syn}
+                            checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                            name='SYN'
+                        />}    
+                        label='SYN'
+                        labelPlacement="end"                    
+                    />
+                    <FormControlLabel
+                        name='None'
+                        value='None'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'none')}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={edaSearchSettings && edaSearchSettings.contractData && edaSearchSettings.contractData.none}
+                            checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
+                            name='None'
+                        />}        
+                        label='None'
+                        labelPlacement="end"                
+                    />
+                </FormGroup>}
+            </FormControl>
+        </div>
+        )
+    }
+
     return (
         <div>
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 15 }}>FILTERS</div>
@@ -306,14 +501,22 @@ export const EDASidePanel = (props) => {
                 { renderOrganizationFilters() }
             </GCAccordion>
 
-            {/* <GCAccordion contentPadding={0} expanded={false} header={'ISSUE ORGANIZATION'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-                { renderOrganizationFilters() }
-            </GCAccordion> */}
+            <GCAccordion contentPadding={15} expanded={false} header={'ISSUE OFFICE DODAAC'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                { renderIssueOfficeFilter() }
+            </GCAccordion>
+
+            <GCAccordion contentPadding={15} expanded={false} header={'FISCAL YEAR'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                { renderFiscalYearFilter() }
+            </GCAccordion>
+
+            <GCAccordion contentPadding={15} expanded={false} header={'EDA CONTRACT DATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                { renderContractDataFilter() }
+            </GCAccordion>
 
             <GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={() => { setState(dispatch, { runSearch: true })}}>Update Search</GCButton>
 
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 5 }}>STATISTICS</div>
-            <GCAccordion contentPadding={0} expanded={false} header={'CONTRACTS PER AGENCY'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
+            <GCAccordion contentPadding={0} expanded={false} header={'CONTRACT TOTALS'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
                 {statsLoading &&
                     <div style={{ margin: '0 auto' }}>
                         <LoadingIndicator customColor={gcOrange} />

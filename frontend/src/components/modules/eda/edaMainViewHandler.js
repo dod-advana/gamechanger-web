@@ -3,6 +3,7 @@ import EDASummaryView from "./edaSummaryView";
 import EDASidePanel from "./edaSidePanel";
 import JumpButton from '../globalSearch/JumpButton';
 
+import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
@@ -14,7 +15,6 @@ import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
 import {Card} from "../../cards/GCCard";
 import ViewHeader from "../../mainView/ViewHeader";
-
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 
 
@@ -55,6 +55,17 @@ const styles = {
 }
 
 const EdaMainViewHandler = {
+	async handlePageLoad(props) {
+		await defaultMainViewHandler.handlePageLoad(props);
+	},
+	
+	getMainView(props) {
+		return defaultMainViewHandler.getMainView(props);
+	},
+	
+	handleCategoryTabChange(props) {
+		defaultMainViewHandler.handleCategoryTabChange(props);
+	},
 
 	getViewNames(props) {
 		const viewNames = defaultMainViewHandler.getViewNames(props);
@@ -80,12 +91,41 @@ const EdaMainViewHandler = {
 			edaSearchSettings,
 			docSearchResults,
 			loading,
+			cloneData,
+			resultsPage,
+			searchText,
+			prevSearchText,
+			count,
 			currentViewName,
 			summaryCardView
 		} = state;
 
-
-		const viewPanels = defaultMainViewHandler.getExtraViewPanels(props);
+		const viewPanels = [];
+		viewPanels.push(
+			{
+				panelName: 'Explorer',
+				panel:
+					<StyledCenterContainer showSideFilters={false}>
+						<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
+							<ViewHeader {...props} mainStyles={{margin:'20px 0 0 0'}} resultsText=' '/>
+							<EDADocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
+								data={docSearchResults}
+								searchText={searchText}
+								prevSearchText={prevSearchText}
+								totalCount={count}
+								loading={loading}
+								resultsPage={resultsPage}
+								resultsPerPage={RESULTS_PER_PAGE}
+								onPaginationClick={(page) => {
+									setState(dispatch, { resultsPage: page, runSearch: true });
+								}}
+								isClone={true}
+								cloneData={cloneData}
+							/>
+						</div>
+					</StyledCenterContainer>
+			}
+		);
 		viewPanels.push({panelName: 'Summary', panel:
 			<div>
 				{!loading && <StyledCenterContainer>
@@ -101,6 +141,7 @@ const EdaMainViewHandler = {
 				</StyledCenterContainer>}
 			</div>
 		});
+		
 
 		return viewPanels;
 	},
@@ -128,7 +169,8 @@ const EdaMainViewHandler = {
 			statsLoading,
 			summaryCardView,
 			summaryCardData,
-			resultsText
+			resultsText,
+			totalObligatedAmount
 		} = state;
 		
 		let sideScroll = {
@@ -180,6 +222,7 @@ const EdaMainViewHandler = {
 											edaSearchSettings={edaSearchSettings}
 											issuingOrgs={issuingOrgs}
 											statsLoading={statsLoading}
+											totalObligatedAmount={totalObligatedAmount}
 										/>
 									}
 								</div>

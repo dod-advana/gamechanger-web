@@ -40,7 +40,7 @@ module.exports = Object.freeze({
 		}
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
-	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.GAMECHANGER_BACKEND_EDA_HOST}:8990`,
+	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}:8990`,
 	EDL_UPLOAD_DIRECTORY: path.dirname(require.main.filename) + '/volumes/uploads/',
 	LOG_FILE: path.dirname(require.main.filename) + '/logs/gc-node-api/gc-node-api',
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
@@ -99,6 +99,7 @@ module.exports = Object.freeze({
 		// index: 'eda'
 		requestTimeout: 60000
 	},
+
 	S3_REGION: process.env.S3_REGION ? process.env.S3_REGION : undefined,
 	GRAPH_DB_CONFIG: {
 		url: 'neo4j://10.194.9.69:7687',
@@ -119,9 +120,9 @@ module.exports = Object.freeze({
 	QLIK_OPTS: {
 		QLIK_URL: 'https://10.194.9.96:4242',
 		QLIK_WS_URL: 'wss://EC2AMAZ-53VQBQF.drced.local:4747',
-		CA: 'ssl/qlik/dev/root.pem',
-		KEY: 'ssl/qlik/dev/client_key.pem',
-		CERT: 'ssl/qlik/dev/client.pem',
+		CA: process.env.QLIK_CERT_CA,
+		KEY:  process.env.QLIK_CERT_KEY,
+		CERT:  process.env.QLIK_CERT_CERT,
 		QLIK_SYS_ACCOUNT: 'Administrator',
 		AD_DOMAIN: 'ec2amaz-53vqbqf'
 	},

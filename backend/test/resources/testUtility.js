@@ -59,7 +59,16 @@ const constructorOptionsMock = {
 	async_redis: {
 		createClient(){
 			return new AsyncRedisMock();
-		}
+		},
+		select() {},
+		get() {}
+	},
+	sep_async_redis: {
+		createClient(){
+			return new AsyncRedisMock();
+		},
+		select() {},
+		get() {}
 	},
 	emailUtility: {
 		sendEmail(){
