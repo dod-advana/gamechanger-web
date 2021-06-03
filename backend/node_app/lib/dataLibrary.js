@@ -139,7 +139,7 @@ class DataLibrary {
 			reqConfig.httpsAgent = new https.Agent({
 				rejectUnauthorized: false,
 				keepAlive: true,
-				ca: fs.readFileSync(ca),
+				ca,
 			});
 			reqConfig.auth = {
 				username: user,
@@ -149,7 +149,7 @@ class DataLibrary {
 			reqConfig.httpsAgent = new https.Agent({
 				rejectUnauthorized: false,
 				keepAlive: true,
-				ca: fs.readFileSync(ca),
+				ca,
 			});
 		}
 		return reqConfig;
@@ -164,7 +164,7 @@ class DataLibrary {
 				return new https.Agent({
 					rejectUnauthorized: false,
 					keepAlive: true,
-					ca: fs.readFileSync(ca),
+					ca,
 				});
 			};
 			config.auth = {
