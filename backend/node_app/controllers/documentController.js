@@ -209,7 +209,7 @@ class DocumentController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { path, dest, filekey, samplingType, samplingLines } = req.query;
-
+	
 			if (!(dest && filekey && path)) {
 				throw new Error('Both destination and filekey are required query parameters');
 			}
