@@ -147,14 +147,6 @@ class EDASearchUtility {
 				stored_fields: storedFields,
 				from: offset,
 				size: limit,
-				// aggregations: {
-				// 	doc_type_aggs: {
-				// 		terms: {
-				// 			field: 'doc_type',
-				// 			size: 10000
-				// 		}
-				// 	}
-				// },
 				track_total_hits: true,
 				query: {
 					bool: {
