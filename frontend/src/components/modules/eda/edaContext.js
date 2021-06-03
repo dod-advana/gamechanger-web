@@ -14,7 +14,16 @@ const initState = {
         aggregations: [],
         startDate: null,
         endDate: null,
-        issueAgency: null
+        issueAgency: null,
+        issueOffice: null,
+        allYearsSelected: true,
+        fiscalYears: [],
+        allDataSelected: true,
+        contractData: {
+            pds: false,
+            syn: false,
+            none: false
+        }
     },
     showDialog: false,
     resultsPage: 1,
@@ -24,6 +33,7 @@ const initState = {
     summaryCardView: false,
     summaryCardData: [],
     resultsText: '',
+    resetSettingsSwitch: false,
     
     // not part of EDA (yet) but currently required in NewGameChangerPage: 
     notifications: [],
@@ -37,7 +47,8 @@ const initState = {
     },
     notificationIds: [],
     componentStepNumbers: [],
-    selectedDocuments: []
+    selectedDocuments: [],
+    totalObligatedAmount: 0
 }
 
 const init = (initialState) => {

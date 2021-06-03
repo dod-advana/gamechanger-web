@@ -18,6 +18,7 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 const useStyles = makeStyles({
 	root: {
 		marginTop: '1px',
+		marginRight: '10px',
 		'& .MuiInputBase-root':{
 			height: '34px'
 		},
@@ -48,14 +49,19 @@ const ViewHeader = (props) => {
 	
 	const {
 		activeCategoryTab,
+		cloneData,
+		componentStepNumbers,
 		count,
+		currentViewName,
 		entityCount,
+		listView,
+		selectedCategories,
 		topicCount,
 		timeFound,
-		cloneData,
-		listView,
-		currentViewName,
-		viewNames
+		viewNames,
+		categorySorting,
+		currentSort,
+		currentOrder
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -72,7 +78,9 @@ const ViewHeader = (props) => {
 		let tempCount;
 		switch(activeCategoryTab){
 			case 'all':
-				tempCount = count+entityCount+topicCount;
+				tempCount = (selectedCategories['Documents']===true ? count : 0) +
+							(selectedCategories['Organizations']===true ? entityCount : 0) +
+							(selectedCategories['Topics']===true ? topicCount: 0);
 				break;
 			case 'Organizations':
 				tempCount = entityCount;
@@ -84,7 +92,7 @@ const ViewHeader = (props) => {
 				tempCount = count;
 		}
 		setDisplayCount(tempCount)
-	},[activeCategoryTab, count, entityCount, topicCount])
+	},[activeCategoryTab, count, entityCount, topicCount, selectedCategories])
 	
 	const setDrawer = (open) => {
 		setState(dispatch, {docsDrawerOpen: open});
@@ -106,6 +114,15 @@ const ViewHeader = (props) => {
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
+	}
+
+	const handleChangeSort = (event) => {
+		const {target: { value }} = event;
+		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+	}
+
+	const handleChangeOrder = (value) => {
+		setState(dispatch,{currentOrder: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
 	}
 
 	const handleChangeView = (event) => {
@@ -133,15 +150,65 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 			<div className={'view-buttons-container'}>
+				{categorySorting[activeCategoryTab] !== undefined && 
+					<>
+						<FormControl classes={{root:classes.root}}>
+							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
+							<Select
+							labelId="view-name"
+							id="view-name-select"
+							value={currentSort}
+							onChange={handleChangeSort}
+							classes={{root:classes.selectRoot}}
+							autoWidth
+							>
+							{categorySorting[activeCategoryTab].map(sort => {
+								return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
+							})}
+							</Select>
+						</FormControl>
+						{currentSort !== 'Alphabetical' ? 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									class="fa fa-sort-amount-desc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+								<i 
+									class="fa fa-sort-amount-asc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+							</div>) : 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									class="fa fa-sort-alpha-asc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+								<i 
+									class="fa fa-sort-alpha-desc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+							</div>)
+						}
+				</>
+				}
 				<FormControl classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
-					labelId="view-name"
-					id="view-name-select"
-					value={dropdownValue}
-					onChange={handleChangeView}
-					classes={{root:classes.selectRoot}}
-					autoWidth
+						className={`tutorial-step-${componentStepNumbers["Change View"]}`}
+						labelId="view-name"
+						id="view-name-select"
+						value={dropdownValue}
+						onChange={handleChangeView}
+						classes={{root:classes.selectRoot}}
+						autoWidth
 					>
 					{viewNames.map(view => {
 						if(view.name === "Card"){

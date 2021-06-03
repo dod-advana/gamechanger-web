@@ -226,25 +226,51 @@ class DataLibrary {
 
 	getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
+		const { req } = res;
+		const { _parsedOriginalUrl: { query = undefined } } = req;
+		const queryString = query ? `?${query}` : '';
+		// console.log("getFilePDFn",req)
+		
 		try {
-			const params = {
-				Bucket: dest,
-				Key: filekey
-			};
+			
+			if((req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) && req.query.isClone && req.query.clone_name === 'eda'){
 
-			if (samplingType === 'head') {
-				params.Range = 'bytes=0-' + SAMPLING_BYTES;
-			} else if (samplingType === 'tail') {
-				params.Range = 'bytes=-' + SAMPLING_BYTES;
-			}
+				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL+ req.baseUrl + req.path + queryString;
 
-			try {
-				res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
-				this.awsS3Client.getObject(params).createReadStream().pipe(res);
-			} catch (err) {
-				this.logger.error(err, 'IPOQHZS', userId);
-				throw err;
+				this.axios({
+					method: 'get',
+					url: edaUrl,
+						responseType:'stream'
+					})
+					.then(response => {
+					response.data.pipe(res);
+					})
+					.catch(err=>{
+					this.logger.error(err, 'N4BAC3N', userId);
+					throw err;
+				});
 			}
+			else{
+				const params = {
+					Bucket: dest,
+					Key: filekey
+				};
+	
+				if (samplingType === 'head') {
+					params.Range = 'bytes=0-' + SAMPLING_BYTES;
+				} else if (samplingType === 'tail') {
+					params.Range = 'bytes=-' + SAMPLING_BYTES;
+				}
+	
+				try {
+					res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
+					this.awsS3Client.getObject(params).createReadStream().pipe(res);
+				} catch (err) {
+					this.logger.error(err, 'IPOQHZS', userId);
+					throw err;
+				}
+			}
+	
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'PFXO7XD', userId);

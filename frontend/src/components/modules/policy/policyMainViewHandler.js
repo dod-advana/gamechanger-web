@@ -5,7 +5,7 @@ import DefaultGraphView from "../../graph/defaultGraphView";
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
-import { setState } from "../../../sharedFunctions";
+import {setState} from "../../../sharedFunctions";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
@@ -62,6 +62,18 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 
 
 const PolicyMainViewHandler = {
+	async handlePageLoad(props) {
+		await defaultMainViewHandler.handlePageLoad(props);
+	},
+	
+	getMainView(props) {
+		return defaultMainViewHandler.getMainView(props);
+	},
+	
+	handleCategoryTabChange(props) {
+		defaultMainViewHandler.handleCategoryTabChange(props);
+	},
+	
 	getViewNames(props) {
 		const viewNames = defaultMainViewHandler.getViewNames(props);
 		viewNames.push(
@@ -110,7 +122,7 @@ const PolicyMainViewHandler = {
 	getCardViewPanel(props) {
 		const { context } = props;
 		const { state, dispatch } = context;
-		const { 
+		const {
 			activeCategoryTab,
 			cloneData,
 			componentStepNumbers,
@@ -123,11 +135,11 @@ const PolicyMainViewHandler = {
 
 			entityCount,
 			entitySearchResults,
-			entityPage, 
+			entityPage,
 
 			topicCount,
 			topicSearchResults,
-			topicPage, 
+			topicPage,
 
 			hideTabs,
 			iframePreviewLink,
@@ -182,8 +194,8 @@ const PolicyMainViewHandler = {
 														color={'#131E43'}
 													>
 														{activeCategoryTab === 'all' ? <>
-															{!docsLoading ? 
-																getSearchResults(docSearchResults, state, dispatch) : 
+															{!docsLoading && !docsPagination ?
+																getSearchResults(docSearchResults, state, dispatch) :
 																<div className='col-xs-12'>
 																	<LoadingIndicator customColor={gcOrange} />
 																</div>
@@ -204,11 +216,12 @@ const PolicyMainViewHandler = {
 															:
 															<>
 																{
-																	getSearchResults(docSearchResults, state, dispatch) 
+																	getSearchResults(docSearchResults, state, dispatch)
 															
 																}
 																{
-																	docsPagination && <div className='col-xs-12'>
+																	docsPagination  && 
+																	<div className='col-xs-12'>
 																		<LoadingIndicator customColor={gcOrange} containerStyle={{margin:'-100px auto'}}/>
 																	</div>
 																}
