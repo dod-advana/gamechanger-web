@@ -152,7 +152,8 @@ const EdaMainViewHandler = {
 			timeSinceCache,
 			edaSearchSettings,
 			issuingOrgs,
-			statsLoading
+			statsLoading,
+			totalObligatedAmount
 		} = state;
 		
 		let sideScroll = {
@@ -190,6 +191,7 @@ const EdaMainViewHandler = {
 										edaSearchSettings={edaSearchSettings}
 										issuingOrgs={issuingOrgs}
 										statsLoading={statsLoading}
+										totalObligatedAmount={totalObligatedAmount}
 									/>
 								</div>
 							</div>
