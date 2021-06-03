@@ -72,14 +72,14 @@ class AppSettingsController {
 	async setMode(key, req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { value } = req.body;
-		console.log(req.body);
 		try {
 			let updateValues = { value };
 			if (updateValues.value === 'true' || updateValues.value === 'false'){
 				const updatedResult = await this.appSettings.update(updateValues, { where: {key: key} });
 				res.status(200).send({ updatedResult });
+			} else {
+				res.status(500).send('value can only be \'true\' or \'false\'');
 			}
-			res.status(500).send('value can only be \'true\' or \'false\'');
 		} catch (err) {
 			this.logger.error(err, 'PQNAF35', userId);
 			res.status(500).send(err);
@@ -96,7 +96,6 @@ class AppSettingsController {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key} });
-			console.log(dataValues)
 			if (dataValues.value === 'true'){
 				dataValues.value = 'false'
 			}
