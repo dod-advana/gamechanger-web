@@ -71,7 +71,7 @@ router.get('/getThumbnail', document.getThumbnail);
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
-router.get('/reloadModels', transformer.reloadModels);
+router.post('/reloadModels', transformer.reloadModels);
 router.get('/downloadDependencies', transformer.downloadDependencies);
 router.get('/getAPIInformation', transformer.getAPIInformation);
 router.get('/getS3List', transformer.getS3List);
