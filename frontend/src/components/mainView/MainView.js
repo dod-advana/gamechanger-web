@@ -120,7 +120,7 @@ const MainView = (props) => {
 	
 	const getAnalystTools = () => {
 		return (
-			<GCResponsibilityTracker/>
+			<GCResponsibilityTracker state={state} />
 		);
 	}
 	
