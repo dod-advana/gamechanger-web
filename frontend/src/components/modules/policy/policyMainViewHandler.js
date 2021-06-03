@@ -194,7 +194,7 @@ const PolicyMainViewHandler = {
 														color={'#131E43'}
 													>
 														{activeCategoryTab === 'all' ? <>
-															{!docsLoading ?
+															{!docsLoading && !docsPagination ?
 																getSearchResults(docSearchResults, state, dispatch) :
 																<div className='col-xs-12'>
 																	<LoadingIndicator customColor={gcOrange} />
