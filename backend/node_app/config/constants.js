@@ -4,9 +4,9 @@ const dataCatalogConfig = require('./datacatalog');
 module.exports = Object.freeze({
 	VERSION: '#DYNAMIC_VERSION',
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
-	TLS_CERT_FILEPATH: process.env.TLS_CERT_FILEPATH,
-	TLS_CERT_CA_FILEPATH: process.env.TLS_CERT_CA_FILEPATH,
-	TLS_KEY_FILEPATH: process.env.TLS_KEY_FILEPATH,
+	TLS_CERT: process.env.TLS_CERT.replace(/\\n/g, '\n'),
+	TLS_CERT_CA: process.env.TLS_CERT_CA.replace(/\\n/g, '\n'),
+	TLS_KEY: process.env.TLS_KEY.replace(/\\n/g, '\n').replace(/\_\_COLON\_\_/g, ':'),
 	POSTGRES_CONFIG: {
 		databases: {
 			game_changer: {
@@ -21,7 +21,7 @@ module.exports = Object.freeze({
 			},
 			'gc-orchestration': {
 				username: process.env.POSTGRES_USER_GC_ORCHESTRATION,
-				password: process.env.POSTHGRES_PASSWORD_GC_ORCHESTRATION,
+				password: process.env.POSTGRES_PASSWORD_GC_ORCHESTRATION,
 				database: 'gc-orchestration',
 				host: process.env.POSTGRES_HOST_GC_ORCHESTRATION,
 				port: 5432,
@@ -81,7 +81,7 @@ module.exports = Object.freeze({
 		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT,
 		user: process.env.GAMECHANGER_ELASTICSEARCH_USER ? process.env.GAMECHANGER_ELASTICSEARCH_USER : '',
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
-		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA_FILEPATH,
+		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n'),
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
 		history_index: 'search_history',
 		requestTimeout: 60000
@@ -92,7 +92,7 @@ module.exports = Object.freeze({
 		port: process.env.EDA_ELASTICSEARCH_PORT,
 		user: process.env.EDA_ELASTICSEARCH_USER ? process.env.EDA_ELASTICSEARCH_USER : '',
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD,
-		ca: process.env.EDA_ELASTICSEARCH_CA_FILEPATH,
+		ca: process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n'),
 		index: process.env.EDA_ELASTICSEARCH_INDEX,
 		extSearchFields:['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
 		extRetrieveFields:['*_eda_ext'],
