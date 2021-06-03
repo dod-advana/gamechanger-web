@@ -25,6 +25,8 @@ class PolicyExportHandler extends ExportHandler {
 				operator,
 				offset,
 				selectedDocuments,
+				sort, 
+				order,
 				...rest
 			} = req.body;
 
@@ -48,7 +50,6 @@ class PolicyExportHandler extends ExportHandler {
 						searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, index, operator, offset);
 					} catch (e) {
 						this.logger.error(`Error sentence transforming document search results ${e.message}`, 'ZSXYML3', userId);
-
 						const { message } = e;
 						this.logger.error(message, 'JN18ILV', userId);
 						throw e;

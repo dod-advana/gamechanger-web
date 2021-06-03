@@ -614,6 +614,64 @@ describe('SearchUtility', function () {
 			const expected = {_source: {includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']}, aggregations: {doc_org_aggs: {terms: {field: 'display_org_s', size: 10000}}, doc_type_aggs: {terms: {field: 'display_doc_type_s', size: 10000}}}, from: 0, highlight: {fields: {id: {fragment_size: 180, number_of_fragments: 1}, keyw_5: {fragment_size: 180, number_of_fragments: 1}, 'title.search': {fragment_size: 180, number_of_fragments: 1}}, fragmenter: 'span'}, query: {bool: {filter: [{term: {is_revoked_b: 'false'}}], minimum_should_match: 1, must: [], should: [{nested: {inner_hits: {_source: false, from: 0, highlight: {fields: {'paragraphs.filename.search': {number_of_fragments: 0}, 'paragraphs.par_raw_text_t': {fragment_size: 180, number_of_fragments: 1}}, fragmenter: 'span'}, size: 5, stored_fields: ['paragraphs.page_num_i', 'paragraphs.filename', 'paragraphs.par_raw_text_t']}, path: 'paragraphs', query: {bool: {minimum_should_match: 1, should: [{wildcard: {'paragraphs.filename.search': {boost: 50, value: '*artificial intelligence*'}}}, {query_string: {default_field: 'paragraphs.par_raw_text_t', default_operator: 'and', fuzziness: 'AUTO', fuzzy_max_expansions: 100, query: 'artificial intelligence', }}]}}}}, {multi_match: {fields: ['id^5', 'title.search^15', 'keyw_5'], operator: 'AND', query: 'artificial intelligence', type: 'best_fields'}}]}}, size: 20, stored_fields: ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'ref_list', 'id', 'summary_30', 'keyw_5', 'p_text', 'type', 'p_page', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'is_revoked_b', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s', 'download_url_s', 'source_page_url_s', 'source_fqdn_s'], track_total_hits: true};
 			assert.deepStrictEqual(actual, expected);
 		});
+
+		it('should return sorted ES query (pub date)', () => {
+			const tmpOpts = {
+				...opts,
+				constants: {env: { GAME_CHANGER_OPTS: {allow_daterange: false}}}
+			};
+			const parsedQuery = 'artificial intelligence';
+			let target = new SearchUtility(tmpOpts);
+			const actual = target.getElasticsearchQuery({
+				searchText: 'test',
+				searchTerms: 'test',
+				parsedQuery,
+				orgFilterString: [],
+				typeFilterString: [],
+				sort: 'Publishing Date'
+			});
+			assert.deepStrictEqual(actual.sort, [ {"publication_date_dt": {"order" : "desc"}} ]);
+		});
+
+		it('should return sorted ES query (alpha)', () => {
+			const tmpOpts = {
+				...opts,
+				constants: {env: { GAME_CHANGER_OPTS: {allow_daterange: false}}}
+			};
+			const parsedQuery = 'artificial intelligence';
+			let target = new SearchUtility(tmpOpts);
+			const actual = target.getElasticsearchQuery({
+				searchText: 'test',
+				searchTerms: 'test',
+				parsedQuery,
+				orgFilterString: [],
+				typeFilterString: [],
+				sort: 'Alphabetical'
+			});
+			assert.deepStrictEqual(actual.sort, [ {"display_title_s": {"order" : "asc"}} ]);
+		});
+
+		it('should return sorted ES query (References)', () => {
+			const tmpOpts = {
+				...opts,
+				constants: {env: { GAME_CHANGER_OPTS: {allow_daterange: false}}}
+			};
+			const parsedQuery = 'artificial intelligence';
+			let target = new SearchUtility(tmpOpts);
+			const actual = target.getElasticsearchQuery({
+				searchText: 'test',
+				searchTerms: 'test',
+				parsedQuery,
+				orgFilterString: [],
+				typeFilterString: [],
+				sort: 'References'
+			});
+			assert.deepStrictEqual(actual.sort,  [{"_script": {
+				"type": "number",
+				"script": "doc.ref_list.size()",
+				"order": "desc"
+			}}]);
+		});
 	});
 
 	describe('#getElasticsearchQueryForGraphCache', () => {
@@ -681,7 +739,6 @@ describe('SearchUtility', function () {
 	});
 
 	describe('#cleanUpIdEsResultsForGraphCache', function () {
-
 		it('should return with searchData and pageHits when a search is done', () => {
 			const user = 'fake user';
 			const raw = RAW_ES_BODY_SEARCH_RESPONSE;
