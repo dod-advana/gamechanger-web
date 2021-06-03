@@ -92,11 +92,12 @@ const preventDefault = (event) => event.preventDefault();
 const GCResponsibilityTracker = (props) => {
 	
 	const classes = useStyles();
-	
+	const {state} = props;
+	/*
 	const {
-		isClone,
 		cloneData
 	} = props;
+	*/
 	
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -132,7 +133,7 @@ const GCResponsibilityTracker = (props) => {
 	}
 
 	const handleTabClicked = (tabIndex) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', `${tabIndex} tab clicked`);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `${tabIndex} tab clicked`);
 		setTabIndex(tabIndex);
 	}
 
@@ -142,7 +143,7 @@ const GCResponsibilityTracker = (props) => {
 			const rtnResults = results.filter(result => {
 				return selectedIds.includes(result.id);
 			})
-			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', 'ExportCSV', selectedIds.length > 0 ? rtnResults.length : results.length);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'ExportCSV', selectedIds.length > 0 ? rtnResults.length : results.length);
 			exportToCsv('ResponsibilityData.csv', selectedIds.length > 0 ? rtnResults : results, true);
 			setSelectedIds([]);
 			setSelectRows(false);
@@ -162,7 +163,7 @@ const GCResponsibilityTracker = (props) => {
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, isClone, cloneData);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, state.cloneData);
 						}}
 						style={{ color: '#386F94' }}
 						>
@@ -277,8 +278,6 @@ const GCResponsibilityTracker = (props) => {
 					return {
 							onClick: (e, t) => { 
 								// console.log(filters);
-								// console.log(rowInfo.row);
-								// 		window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText}&pageNumber=${pageNumber}&isClone=${isClone}${isClone ? `&cloneIndex=${cloneData?.clone_data?.project_name}` : ''}`);
 							 },
 							onMouseEnter: (e) => {
 								setHoveredRow(rowInfo.index)
@@ -300,11 +299,11 @@ const GCResponsibilityTracker = (props) => {
 		);
 	}
 	
-	const fileClicked = (filename, searchText, pageNumber, isClone, cloneData) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		window.open(`/#/pdfviewer/gamechanger?filename=${filename.replace('.json', '.pdf')}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${cloneData?.clone_name}`);
+	const fileClicked = (filename, searchText, pageNumber) => {
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
+		window.open(`/#/pdfviewer/gamechanger?filename=${filename.replace('.json', '.pdf')}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${state.cloneData?.clone_name}`);
 	};
 	
 	const handleSelected = (id) => {
@@ -315,7 +314,7 @@ const GCResponsibilityTracker = (props) => {
 				result.selected = selected;
 			}
 		});
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', `ID ${selected ? 'Selected' : 'Des-Selected'}`, id);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `ID ${selected ? 'Selected' : 'Des-Selected'}`, id);
 		if (!selected) {
 			selectedIds.splice(selectedIds.indexOf(id), 1);
 		} else {
@@ -324,7 +323,7 @@ const GCResponsibilityTracker = (props) => {
 	}
 	
 	const handleCancelSelect = () => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', 'Cancel Select Rows');
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'Cancel Select Rows');
 		responsibilityTableData.forEach(result => {
 			result.selected = false;
 		});
@@ -333,7 +332,7 @@ const GCResponsibilityTracker = (props) => {
 	}
 	
 	const hideShowReportModal = (show) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', `${show ? 'Opening' : 'Closing'} Reports Modal`);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `${show ? 'Opening' : 'Closing'} Reports Modal`);
 		if (show) {
 			setReportsSent(false);
 		}
@@ -366,7 +365,7 @@ const GCResponsibilityTracker = (props) => {
 				issue_description: issueDescription
 			});
 		}
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ResponsibilityTracker', 'Reports Sent', selectedIds.length);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'Reports Sent', selectedIds.length);
 		setSelectedIds([]);
 		setSelectRows(false);
 		setIssueDescription('');
