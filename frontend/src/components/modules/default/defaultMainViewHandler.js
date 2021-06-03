@@ -2,7 +2,7 @@ import React from "react";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {getSearchObjectFromString, getUserData, setSearchURL, setState} from "../../../sharedFunctions";
-import DocumentExplorer from "../../documentViewer/DocumentExplorer";
+import DefaultDocumentExplorer from "./defaultDocumentExplorer";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {Card} from "../../cards/GCCard";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
@@ -404,7 +404,7 @@ const DefaultMainViewHandler = {
 					<StyledCenterContainer showSideFilters={false}>
 						<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
 							<ViewHeader {...props} mainStyles={{margin:'20px 0 0 0'}} resultsText=' '/>
-							<DocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
+							<DefaultDocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
 								data={docSearchResults}
 								searchText={searchText}
 								prevSearchText={prevSearchText}
@@ -417,7 +417,6 @@ const DefaultMainViewHandler = {
 								}}
 								isClone={true}
 								cloneData={cloneData}
-								isEDA={cloneData.clone_name === 'eda'}
 							/>
 						</div>
 					</StyledCenterContainer>
