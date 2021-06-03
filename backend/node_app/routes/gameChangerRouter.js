@@ -75,7 +75,6 @@ router.post('/reloadModels', transformer.reloadModels);
 router.get('/downloadDependencies', transformer.downloadDependencies);
 router.get('/getAPIInformation', transformer.getAPIInformation);
 router.get('/getS3List', transformer.getS3List);
-router.get('/getTransformerList', transformer.getTransformerList);
 router.get('/getCurrentTransformer', transformer.getCurrentTransformer);
 router.post('/setTransformerModel', transformer.setTransformerModel);
 
