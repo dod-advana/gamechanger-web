@@ -957,6 +957,77 @@ class SearchUtility {
 		}
 	}
 
+	phraseQAEntityQuery (searchTextList, limit) {
+		
+		let bigrams = [];
+		let length = searchTextList.length - 2;
+		for (let i =0; i <= length; i++) {
+			bigrams.push(searchTextList.slice(i, i+2).join(' '));
+		}
+
+		const shouldQueries = [];
+		for (const element of bigrams) {
+			const name_query = {
+				match_phrase: {
+					'name': {
+						query: element,
+						slop: 2,
+						boost: 0.5
+					}
+				}
+			}
+			shouldQueries.push(name_query);
+
+			const alias_query = {
+				match_phrase: {
+					'aliases.name': {
+						query: element,
+						slop: 2,
+						boost: 0.5
+					}
+				}
+			}
+			shouldQueries.push(alias_query);
+
+			//const qs = {
+			//	query_string: {
+			//	  query: element,
+			//	  default_field: 'information',
+			//	  default_operator: 'AND',
+			//	  fuzzy_max_expansions: 100,
+			//	  fuzziness: 'AUTO'
+			//	}
+			//}
+			//shouldQueries.push(qs);
+
+			const multi_query = {
+				multi_match: {
+					fields: ['name', 'aliases.name'], // 'information'
+					query: element,
+					type: 'phrase_prefix'
+				}
+			}
+			shouldQueries.push(multi_query);
+		}
+		
+		try {
+			let query = {
+				from: 0,
+				size: limit,
+					query: {
+						bool: {
+							should: shouldQueries
+						}
+					}
+				};
+			return query;
+			} catch (err) {
+				this.logger.error(err, 'JKLQOPMF', '');
+			}
+		}
+
+	
+
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
 		let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
