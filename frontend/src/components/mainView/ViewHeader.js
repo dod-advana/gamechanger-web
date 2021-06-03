@@ -58,7 +58,10 @@ const ViewHeader = (props) => {
 		selectedCategories,
 		topicCount,
 		timeFound,
-		viewNames
+		viewNames,
+		categorySorting,
+		currentSort,
+		currentOrder
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
