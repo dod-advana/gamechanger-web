@@ -16,7 +16,7 @@ class MLApiClient {
 
 		this.getExpandedSearchTerms = this.getExpandedSearchTerms.bind(this);
 		this.transformResults = this.transformResults.bind(this);
-		this.getTransfomerModelList = this.getTransfomerModelList.bind(this);
+		this.getModelsList = this.getModelsList.bind(this);
 		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
 		this.setTransformerModel = this.setTransformerModel.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
@@ -104,6 +104,24 @@ class MLApiClient {
 			throw e;
 		}
 	}
+	async reloadModels(userId, models) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+		try {
+			const url = `${transformerBaseUrl}/reloadModels`;
+			const { data } = await this.axios({
+				url,
+				method: 'post',
+				headers,
+				data: models
+			});
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'VY3FQBN', userId);
+			throw e;
+		}
+	}
 
 	async getAPIInformation(userId) {
 		const headers = {
@@ -145,13 +163,13 @@ class MLApiClient {
 		}
 	}
 
-	async getTransfomerModelList(userId) {
+	async getModelsList(userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
 		};
 
 		try {
-			const url = `${transformerBaseUrl}/getTransformerList`;
+			const url = `${transformerBaseUrl}/getModelsList`;
 			const { data } = await this.axios({
 				url,
 				method: 'get',
@@ -183,23 +201,7 @@ class MLApiClient {
 		}
 	}
 
-	async reloadModels(userId) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-		try {
-			const url = `${transformerBaseUrl}/reloadModels`;
-			const { data } = await this.axios({
-				url,
-				method: 'get',
-				headers
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'VY3FQBN', userId);
-			throw e;
-		}
-	}
+	
 	async downloadDependencies(userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
