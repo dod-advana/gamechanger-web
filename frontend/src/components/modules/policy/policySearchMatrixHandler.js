@@ -518,10 +518,10 @@ const renderAdvancedFilters = (state, dispatch) => {
 									disabled={!state.searchSettings.searchFields[key]?.field}
 									placeholder="Input"
 									variant="outlined"
-									defaultValue={searchField.input}
+									value={searchField.input}
 									style={{ backgroundColor: 'white', width: '100%' }}
 									fullWidth={true}
-									onBlur={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
+									onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
 									inputProps={{
 										style: {
 											height: 19,
