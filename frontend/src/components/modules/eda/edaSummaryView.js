@@ -1,11 +1,12 @@
 
-import React, {useState} from "react";
+import React, {useState, useEffect } from "react";
 import {
 	MuiPickersUtilsProvider,
 	KeyboardDatePicker
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
+import GCButton from "../../common/GCButton";
 
 
 import {
@@ -67,7 +68,7 @@ const styles = {
     dialogContent: {
         width: 1220,
         height: 600,
-        padding: '30px 30px'
+        padding: '15px 30px'
     },
     detailDiv: {
         margin: '5px auto'
@@ -101,11 +102,22 @@ export const EDASummaryView = (props) => {
         edaSearchSettings,
         searchResults,
         loading,
-        dispatch
+        dispatch,
+        currentViewName,
+        summaryCardView
     } = props;
 
     const [showDialog, setShowDialog] = useState(false);
     const [summaryDetailData, setSummaryDetailData] = useState([]);
+    const [summaryDetailTitle, setSummaryDetailTitle] = useState('');
+
+    useEffect(() => {
+        console.log(currentViewName);
+        console.log(summaryCardView);
+        if (currentViewName === 'Summary' && summaryCardView) {
+            setState(dispatch, { summaryCardView: false, resultsText: '' })
+        }
+    }, [currentViewName])
 
 
     const setEDASearchSetting = (field, value, isStartDate) => {
@@ -113,7 +125,13 @@ export const EDASummaryView = (props) => {
         let doSearch = false;
 
 		if (field === 'aggregations') {
-            edaSettings.aggregations[value] = !edaSettings.aggregations[value];
+            const index = edaSettings.aggregations.indexOf(value);
+            if (index !== -1) {
+                edaSettings.aggregations.splice(index, 1);
+            }
+            else {
+                edaSettings.aggregations.push(value);
+            }
 		}
         else if (field === 'issueDateRange') {
             if(Object.prototype.toString.call(value) === '[object Date]'){
@@ -142,7 +160,6 @@ export const EDASummaryView = (props) => {
 
 
     const renderDetailTable = () => {
-        console.log(summaryDetailData)
         return (
             <ReactTable
                 data={summaryDetailData}
@@ -180,7 +197,7 @@ export const EDASummaryView = (props) => {
                     return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
                 }}
                 style={{
-                    height: "90%",
+                    height: "100%",
                     borderTopRightRadius: 5,
                     borderTopLeftRadius: 5,
                 }}
@@ -209,7 +226,7 @@ export const EDASummaryView = (props) => {
                     </div>
                 ),
                 aggregate: vals => [...new Set(vals)],
-                id: 'officeAgency',
+                id: 'contract_issue_name_eda_ext',
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 }
@@ -260,7 +277,7 @@ export const EDASummaryView = (props) => {
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 },
-                id: 'vendor'
+                id: 'vendor_name_eda_ext'
             },
             {
                 Header: () => <p style={styles.tableColumn}>Parent IDV</p>,
@@ -276,7 +293,7 @@ export const EDASummaryView = (props) => {
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 },
-                id: 'parentIDV'
+                id: 'reference_idv_eda_ext'
             }
 
         ];
@@ -362,9 +379,8 @@ export const EDASummaryView = (props) => {
                     // },
                 ]
             );
-            for (const agg of Object.keys(edaSearchSettings.aggregations)) {
-                if (edaSearchSettings.aggregations[agg] === true) {
-                    summaryColumns.push(            
+            if (edaSearchSettings.aggregations.length > 0) {
+                summaryColumns.push(            
                     {
                         Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
                         filterable: false,
@@ -378,13 +394,33 @@ export const EDASummaryView = (props) => {
                         ),
                         aggregate: vals => vals,
                         Aggregated: row => {
-                            let subRows = row?.row?._subRows;
-                            subRows = subRows.map(row => row._original);
-                            console.log(subRows);
+
+                            let subRows = row.row._subRows;
+                            let resultData = [];
+                            for (let i = 0; i < subRows.length; i++){
+                                let subRow = subRows[i];
+                                for (let j = 0; j < edaSearchSettings.aggregations.length - 1; j++) {
+                                    subRow = subRow._subRows[0];
+                                }
+                                resultData.push(subRow);
+                            }
+                            resultData = resultData.map(row => row._original);
+                            
                             return (
                                 <Link onClick={(event)=> {
                                     setShowDialog(true);
-                                    setSummaryDetailData(subRows);
+                                    setSummaryDetailData(resultData);
+                                    let title = "";
+                                    for (const agg of edaSearchSettings.aggregations) {
+                                        if (resultData && resultData.length  > 0 && resultData[0]) {
+                                            title += "["+resultData[0][agg]+"]";
+                                            if (edaSearchSettings.aggregations.indexOf(agg) !== edaSearchSettings.aggregations.length - 1) {
+                                                title += " - ";
+                                            }
+                                        }
+                                    }
+
+                                    setSummaryDetailTitle(title);
                                 }}
                                 style={{ color: '#386F94', cursor: 'pointer'}}
                                 >
@@ -394,12 +430,12 @@ export const EDASummaryView = (props) => {
                                 </Link>
                             )
                         }
-                    });
-                    break;
-                }
+                    }
+                );
             }
         }
         else {
+            // summary detail columns
             summaryColumns = summaryColumns.concat([
                 // {
                 //     Header: () => <p style={styles.tableColumn}>PIID</p>,
@@ -443,24 +479,6 @@ export const EDASummaryView = (props) => {
                             <p>{row.value}</p>
                         </div>
                     )
-                },
-                {
-                    Header: () => <p style={styles.tableColumn}>Contract Card</p>,
-                    filterable: false,
-                    accessor: 'contractCard',
-                    width: 200,
-                    Cell: row => (
-                        <Link href={"#"} onClick={(event)=> {
-                            event.preventDefault();
-                            // 
-                        }}
-                        style={{ color: '#386F94' }}
-                        >
-                            <div style={{ textAlign: 'left' }}>
-                                <p>{row.value}</p>
-                            </div>
-                        </Link>
-                    )
                 }
             ]
             )
@@ -468,57 +486,6 @@ export const EDASummaryView = (props) => {
 
         return summaryColumns;
     }
-
-    // const renderAggregationPills = () => {
-    //     const pills = [];
-
-    //     const varToName={
-    //         officeAgency: 'Issue Office Agency',
-    //         vendor: 'Vendor',
-    //         parentIDV: 'Parent IDV'
-    //     };
-
-    //     for (const agg of Object.keys(edaSearchSettings.aggregations)) {
-    //         if (edaSearchSettings.aggregations[agg]) {
-    //             pills.push(<div style={styles.pill}>{varToName[agg]}</div>);
-    //         }
-    //     }
-    //     return pills;
-    // }
-
-    // const renderDateRange = () => {
-    //     const start = edaSearchSettings.startDate;
-    //     const end = edaSearchSettings.endDate;
-
-    //     const startDate = start ? `${start.getMonth()}/${start.getDate()}/${start.getFullYear()}` : 'None';
-    //     const endDate = end ? `${end.getMonth()}/${end.getDate()}/${end.getFullYear()}` : 'None';
-
-    //     return <p style={{display: 'inline-block', margin: '0 0 0 10px'}}>{startDate} - {endDate} </p>;
-    // }
-
-    // const filtersPresent = () => {
-
-    //     // this needs to be edaSearchSettings in GameChangerPage.startingState
-    //     const noFilters = {
-    //         aggregations: {
-    //             officeAgency: false,
-    //             vendor: false,
-    //             parentIDV: false
-    //         },
-    //         startDate: null,
-    //         endDate: null,
-    //         contractIssueAgency: null
-    //     };
-
-    //     return !_.isEqual(noFilters,edaSearchSettings);
-    // }
-
-    const summaryColumnNames = [
-        'officeAgency', 
-        'vendor',
-        'parentIDV'
-    ];
-
 
     return (
         <div>
@@ -528,9 +495,12 @@ export const EDASummaryView = (props) => {
                 onClose={() => setShowDialog(false)}
                 style={styles.dialog}
             >
-                <DialogTitle>
+                <DialogTitle style={{ padding: '16px 30px 0'}}>
                     <div style={{display: 'flex', width: '100%'}}>
                         <Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Summary Details</Typography>
+                    </div>
+                    <div style={{display: 'flex', width: '100%', margin: '5px 0'}}>
+                        <Typography variant="h5" display="block" style={{ fontWeight: 400 }}>{summaryDetailTitle}</Typography>
                     </div>
                     <IconButton aria-label="close" style={{ 
 						position: 'absolute',
@@ -549,7 +519,18 @@ export const EDASummaryView = (props) => {
                     {renderDetailTable()}
                 </DialogContent>
                 <DialogActions>
-                    
+                    <GCButton
+                        onClick={() => {
+                            setState(dispatch, 
+                                { 
+                                    summaryCardView: true, 
+                                    summaryCardData: summaryDetailData,
+                                    currentViewName: 'Card',
+                                    listView: false,
+                                    resultsText: `${summaryDetailData.length} results aggregated - ${summaryDetailTitle}`
+                                })
+                        }}
+                    >Open Card View</GCButton>
                 </DialogActions>
             </Dialog>
 
@@ -588,9 +569,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'officeAgency')}
+                                            onClick={() => setEDASearchSetting('aggregations', 'contract_issue_name_eda_ext')}
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.officeAgency}
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('contract_issue_name_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                                             name='Issue Office Agency'
                                             />}
@@ -603,9 +584,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox											
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'vendor')} // need a handle
+                                            onClick={() => setEDASearchSetting('aggregations', 'vendor_name_eda_ext')} 
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.vendor} // need a selected
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('vendor_name_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                                             name='Vendor'
                                             />}
@@ -618,9 +599,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'parentIDV')} // need a handle
+                                            onClick={() => setEDASearchSetting('aggregations', 'reference_idv_eda_ext')} 
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.parentIDV} // need a selected
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('reference_idv_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                                             name='Parent IDV'
                                             />}
@@ -683,7 +664,7 @@ export const EDASummaryView = (props) => {
                     noDataText={"No rows found"}
                     loading={loading}
                     columns={getSummaryColumns(false)}
-                    pivotBy={searchResults ? Object.keys(edaSearchSettings.aggregations).filter(key => edaSearchSettings.aggregations[key] && summaryColumnNames.includes(key)) : []}
+                    pivotBy={searchResults ? edaSearchSettings.aggregations: []}
                     editable={false}
                     filterable={false}
                     minRows={1}
@@ -709,7 +690,7 @@ export const EDASummaryView = (props) => {
                         return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
                     }}
                     style={{
-                        height: "calc(100vh - 395px)",
+                        height: "calc(100vh - 300px)",
                         borderTopRightRadius: 5,
                         borderTopLeftRadius: 5,
                         marginBottom: 10

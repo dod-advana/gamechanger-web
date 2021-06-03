@@ -248,7 +248,8 @@ const EdaSearchHandler = {
 							metricsLoading: false,
 							metricsCounted: true,
 							loadingTinyUrl: false,
-							hideTabs: false
+							hideTabs: false,
+							query: resp.data.query
 						});
 					} else {
 						if (!offset) {
