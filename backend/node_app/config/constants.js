@@ -6,7 +6,7 @@ module.exports = Object.freeze({
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
 	TLS_CERT: process.env.TLS_CERT.replace(/\\n/g, '\n'),
 	TLS_CERT_CA: process.env.TLS_CERT_CA.replace(/\\n/g, '\n'),
-	TLS_KEY: process.env.TLS_KEY.replace(/\\n/g, '\n').replace(/\_\_COLON\_\_/g, ':'),
+	TLS_KEY: process.env.TLS_KEY.replace(/\\n/g, '\n'),
 	POSTGRES_CONFIG: {
 		databases: {
 			game_changer: {
