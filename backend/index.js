@@ -225,7 +225,12 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {
-			res.status(403).send({ code: 'not authorized' });
+			if (req.url.includes('getThumbnail')) {
+				next();
+			}
+			else {
+				res.status(403).send({ code: 'not authorized' });
+			}
 		}
 	});
 }

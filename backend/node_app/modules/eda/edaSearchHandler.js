@@ -1,18 +1,13 @@
 const SearchUtility = require('../../utils/searchUtility');
-const searchUtility = new SearchUtility();
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
-const mlApi = new MLApiClient();
-const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const dataTracker = new DataTrackerController();
 const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
 const {Thesaurus} = require('../../lib/thesaurus');
-const thesaurus = new Thesaurus();
 
 const redisAsyncClientDB = 4;
 const abbreviationRedisAsyncClientDB = 9;
@@ -21,15 +16,25 @@ const SearchHandler = require('../base/searchHandler');
 
 class EdaSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
-		const { 
+		const {
 			dataLibrary = new DataLibrary(opts),
-			edaSearchUtility = new EDASearchUtility(),
-			constants = CONSTANTS
+			edaSearchUtility = new EDASearchUtility(opts),
+			constants = CONSTANTS,
+			mlApi = new MLApiClient(opts),
+			searchUtility = new SearchUtility(opts),
+			thesaurus = new Thesaurus(),
+			sep_async_redis = separatedRedisAsyncClient,
+			async_redis = redisAsyncClient
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 		this.dataLibrary = dataLibrary;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
+		this.mlApi = mlApi;
+		this.searchUtility = searchUtility;
+		this.thesaurus = thesaurus;
+		this.async_redis = async_redis;
+		this.sep_async_redis = sep_async_redis;
 	}
 
 	async searchHelper(req, userId) {
@@ -71,7 +76,7 @@ class EdaSearchHandler extends SearchHandler {
 
 			const operator = 'and';
 
-			const redisDB = separatedRedisAsyncClient;
+			const redisDB = this.sep_async_redis;
 			redisDB.select(redisAsyncClientDB);
 
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
@@ -80,10 +85,10 @@ class EdaSearchHandler extends SearchHandler {
 			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 
 			// try to get search expansion
-			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
+			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = {};
 			try {
-				expansionDict = await mlApi.getExpandedSearchTerms(termsArray, userId);
+				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
 			} catch (e) {
 			// log error and move on, expansions are not required
 				if (forCacheReload){
@@ -98,22 +103,22 @@ class EdaSearchHandler extends SearchHandler {
 				useText = false;
 				lookUpTerm = termsArray[0].replace(/\"/g, '');
 			}
-			const synonyms = thesaurus.lookUp(lookUpTerm);
+			const synonyms = this.thesaurus.lookUp(lookUpTerm);
 			let text = searchText;
 			if (!useText && termsArray && termsArray.length && termsArray[0]) {
 				text = termsArray[0];
 			}
 
 			// get expanded abbreviations
-			await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
+			await this.async_redis.select(abbreviationRedisAsyncClientDB);
 			let abbreviationExpansions = [];
 			let i = 0;
 			for (i = 0; i < termsArray.length; i++) {
 				let term = termsArray[i];
 				let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-				let expandedTerm = await redisAsyncClient.get(upperTerm);
+				let expandedTerm = await this.async_redis.get(upperTerm);
 				let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-				let compressedTerm = await redisAsyncClient.get(lowerTerm);
+				let compressedTerm = await this.async_redis.get(lowerTerm);
 				if (expandedTerm) {
 					if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 						abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
@@ -129,9 +134,9 @@ class EdaSearchHandler extends SearchHandler {
 			// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 			let cleanedAbbreviations = [];
 
-			expansionDict = searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
 			// this.logger.info('exp: ' + expansionDict);
-			await redisAsyncClient.select(redisAsyncClientDB);
+			await this.async_redis.select(redisAsyncClientDB);
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
@@ -145,7 +150,7 @@ class EdaSearchHandler extends SearchHandler {
 				} catch (e) {
 					this.logger.error(e.message, 'ZMVI2TO', userId);
 				}
-			} 
+			}
 
 			return searchResults;
 
@@ -192,7 +197,7 @@ class EdaSearchHandler extends SearchHandler {
 				forGraphCache = false,
 				forStats = false
 			} = body;
-			const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(body);
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 	
@@ -218,11 +223,11 @@ class EdaSearchHandler extends SearchHandler {
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
-					return searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
 	
 				if (forGraphCache){
-					return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
+					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
 					return this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}

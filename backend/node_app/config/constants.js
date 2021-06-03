@@ -119,9 +119,9 @@ module.exports = Object.freeze({
 	QLIK_OPTS: {
 		QLIK_URL: 'https://10.194.9.96:4242',
 		QLIK_WS_URL: 'wss://EC2AMAZ-53VQBQF.drced.local:4747',
-		CA: 'ssl/qlik/dev/root.pem',
-		KEY: 'ssl/qlik/dev/client_key.pem',
-		CERT: 'ssl/qlik/dev/client.pem',
+		CA: process.env.QLIK_CERT_CA,
+		KEY:  process.env.QLIK_CERT_KEY,
+		CERT:  process.env.QLIK_CERT_CERT,
 		QLIK_SYS_ACCOUNT: 'Administrator',
 		AD_DOMAIN: 'ec2amaz-53vqbqf'
 	},

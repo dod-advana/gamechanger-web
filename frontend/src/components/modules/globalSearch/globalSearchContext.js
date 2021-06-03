@@ -67,34 +67,17 @@ const initState = {
 	pageDisplayed: 'main',
 	listView: false,
 	
-	// Documents
-	iframePreviewLink: null,
-	detailViewId: 0,
-	
-	// Export
-	selectedDocuments: new Map(),
-	docsDrawerOpen: false,
-	isSelectedDocs: false,
-	isDrawerReady: false,
 	
 	// Navigation
 	menuOpen: false,
 	tabName: '',
-	hideTabs: true,
+	hideTabs: false,
 	
 	// Graph
 	runGraphSearch: false,
 	
 	// SideBar
-	sidebarDocTypes: [],
-	sidebarOrgs: [],
-	runningEntitySearch: false,
-	metricsCounted: false,
-	metricsLoading: false,
-	entitiesForSearch: [],
-	topicsForSearch: [],
-	runningTopicSearch: false,
-	showSideFilters: false,
+	showSideFilters: true,
 	
 	// Search
 	offset: 0,
@@ -117,17 +100,50 @@ const initState = {
 	isFavoriteSearch: false,
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
-	searchSettings: {
-		showingSearchTypes: {
-			applications: true,
-			dashboards: true,
-			dataSources: true,
-			databases: true,
-			documentation: false,
-			organizations: false,
-			services: false
-		}
-	}
+	
+	// Categories
+	selectedCategories: {
+		Applications: true,
+		Dashboards: true,
+		DataSources: true,
+		Databases: true,
+		Documentation: false,
+		Organizations: false,
+		Services: false,
+	},
+	
+	// category totals
+	categoryMetadata: {},
+
+	activeCategoryTab: 'all',
+	
+	applicationsLoading: false,
+	applicationsPage: 1,
+	applicationsPagination: false,
+	
+	dashboardsLoading: false,
+	dashboardsPage: 1,
+	dashboardsPagination: false,
+	
+	dataSourcesLoading: false,
+	dataSourcesPage: 1,
+	dataSourcesPagination: false,
+	
+	databasesLoading: false,
+	databasesPage: 1,
+	databasesPagination: false,
+	
+	documentationLoading: false,
+	documentationPage: 1,
+	documentationPagination: false,
+	
+	organizationsLoading: false,
+	organizationsPage: 1,
+	organizationsPagination: false,
+	
+	servicesLoading: false,
+	servicesPage: 1,
+	servicesPagination: false
 };
 
 const init = (initialState) => {

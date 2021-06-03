@@ -11,8 +11,8 @@ class EdaExportHandler extends ExportHandler {
 		const {
 			dataLibrary = new DataLibrary(opts),
 			csvStringify = csvStringifyLib,
-			searchUtility = new SearchUtility(),
-			edaSearchUtility = new EDASearchUtility(),
+			searchUtility = new SearchUtility(opts),
+			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS
 		} = opts;
 		super({...opts});
@@ -79,14 +79,14 @@ class EdaExportHandler extends ExportHandler {
 			try {
 				const { docs } = searchResults;
 
-				if (historyId) {
-					await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
-				} else {
-					await this.exportHistory.storeExportHistory(res, req.body, {
-						totalCount: docs.length,
-						searchTerms
-					}, userId);
-				}
+				// if (historyId) {
+				// 	await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
+				// } else {
+				// 	await this.exportHistory.storeExportHistory(res, req.body, {
+				// 		totalCount: docs.length,
+				// 		searchTerms
+				// 	}, userId);
+				// }
 
 				if (format === 'pdf') {
 					const sendDataCallback = (buffer) => {
