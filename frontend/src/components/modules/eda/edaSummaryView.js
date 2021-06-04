@@ -112,12 +112,10 @@ export const EDASummaryView = (props) => {
     const [summaryDetailTitle, setSummaryDetailTitle] = useState('');
 
     useEffect(() => {
-        console.log(currentViewName);
-        console.log(summaryCardView);
         if (currentViewName === 'Summary' && summaryCardView) {
             setState(dispatch, { summaryCardView: false, resultsText: '' })
         }
-    }, [currentViewName])
+    }, [currentViewName, dispatch, summaryCardView])
 
 
     const setEDASearchSetting = (field, value, isStartDate) => {
