@@ -1,13 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import { Typography } from '@material-ui/core'
 import '../export/export-results-dialog.css';
 import GCButton from "../common/GCButton";
 
-//TODO replace orgFilterQuery with orgFilterString when DE has data in for display_org_s in prod
-
-export default ({ open, handleClose, doc }) => {
-
+const DocDialog = ({ open, handleClose, doc }) => {
 	return (
 		<UOTDialog
 			open={open}
@@ -30,3 +28,11 @@ export default ({ open, handleClose, doc }) => {
 		</UOTDialog>
 	)
 }
+
+DocDialog.propTypes = {
+	open: PropTypes.bool.isRequired,
+	handleClose: PropTypes.func.isRequired,
+	doc: PropTypes.object.isRequired
+}
+
+export default DocDialog

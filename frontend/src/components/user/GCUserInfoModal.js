@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField } from "@material-ui/core";
 import GCButton from '../common/GCButton';
 import EmailValidator from "email-validator";
@@ -39,7 +40,7 @@ const styles = {
     },
 }
 
-export default (props) => {
+export default function GCUserInfoModal (props) {
     const {
         context
     } = props;
@@ -158,3 +159,13 @@ export default (props) => {
         </Dialog>   
     )
 };
+
+GCUserInfoModal.propTypes = {
+    context: PropTypes.shape({
+        state: PropTypes.shape({
+            userInfo: PropTypes.objectOf(PropTypes.string),
+            userInfoModalOpen: PropTypes.bool
+        }),
+        dispatch: PropTypes.func
+    })
+}

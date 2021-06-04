@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from "underscore";
 import GCTooltip from "../common/GCToolTip";
 import TextField from "@material-ui/core/TextField";
@@ -493,6 +494,15 @@ class GameChangerSearchBar extends React.Component {
 		);
 
 	}
+}
+
+GameChangerSearchBar.propTypes = {
+	handleSearch: PropTypes.func.isRequired,
+	handleSearchTextUpdate: PropTypes.func,
+	updateSearchTextOnly: PropTypes.func,
+	handleSearchTypeUpdate: PropTypes.func,
+	searchText: PropTypes.string,
+	SEARCH_TYPES: PropTypes.objectOf(PropTypes.string)
 }
 
 export default withStyles(useStyles)(GameChangerSearchBar)
