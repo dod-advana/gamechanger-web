@@ -239,7 +239,7 @@ class EDASearchUtility {
 	
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'is_supplementary_data_included_eda_ext_b']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*']
 				},
 				stored_fields: storedFields,
 				from: offset,
