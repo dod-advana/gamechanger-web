@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -837,6 +838,14 @@ const styles = {
 	}
 	
 
+}
+
+GCDataStatusTracker.propTypes = {
+	state: PropTypes.shape({
+		cloneData: PropTypes.shape({
+			clone_name: PropTypes.string
+		})
+	})
 }
 
 export default GCDataStatusTracker;

@@ -12,7 +12,7 @@ import AuthIcon from "../images/icon/Authority.png";
 import AnalystToolsIcon from '../images/icon/analyticswht.png';
 import ReportIcon from '../images/icon/slideout-menu/reports icon.png';
 import styled from "styled-components";
-import { SearchBanner } from "../components/searchBar/GCSearchBanner";
+import SearchBanner from "../components/searchBar/GCSearchBanner";
 import ReactTable from "react-table";
 import _ from "underscore";
 import "react-table/react-table.css";

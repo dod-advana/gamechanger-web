@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import {gcOrange} from "../../components/common/gc-colors";
 import TutorialOverlay from "advana-tutorial-overlay/dist/TutorialOverlay";
 import {setState} from "../../sharedFunctions";
@@ -59,6 +60,19 @@ const Tutorial = (props) => {
 			setStepIndex={setStepIndex}
 		/>
 	);
+}
+
+Tutorial.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			cloneData: PropTypes.shape({
+				clone_name: PropTypes.string
+			}),
+			tutorialJoyrideSteps: PropTypes.arrayOf(PropTypes.object),
+			showTutorial: PropTypes.bool,
+			tutorialStepIndex: PropTypes.number
+		})
+	})
 }
 
 export default Tutorial;

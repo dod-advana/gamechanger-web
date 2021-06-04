@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import {
 	handleSaveFavoriteSearch,
 	handleSearchTypeUpdate, setState, checkUserInfo
@@ -9,7 +10,7 @@ import {
 	SEARCH_TYPES
 } from "../../gamechangerUtils";
 import {gcBlue} from "../common/gc-colors";
-import {SearchBanner} from "./GCSearchBanner";
+import SearchBanner from "./GCSearchBanner";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import MainViewFactory from "../factories/mainViewFactory";
 
@@ -116,6 +117,38 @@ const SearchBar = (props) => {
 			</SearchBanner>
 		</>
 	);
+}
+
+SearchBar.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			rawSearchResults: PropTypes.arrayOf(PropTypes.object),
+			cloneDataSet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				search_module: PropTypes.string,
+				main_view_module: PropTypes.string,
+				title_bar_module: PropTypes.string,
+				url: PropTypes.string,
+			}),
+			runSearch: PropTypes.bool,
+			menuOpen: PropTypes.bool,
+			pageDisplayed: PropTypes.string,
+			searchText: PropTypes.string,
+			componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+			searchSettings: PropTypes.shape({
+				searchType: PropTypes.string,
+				publicationDateFilter: PropTypes.arrayOf(PropTypes.string),
+				accessDateFilter: PropTypes.arrayOf(PropTypes.string)
+			}),
+			loginModalOpen: PropTypes.bool,
+			expansionDict: PropTypes.object,
+			selectedCategories: PropTypes.objectOf(PropTypes.bool),
+			activeCategoryTab: PropTypes.string,
+			categoryMetadata: PropTypes.objectOf(PropTypes.objectOf(PropTypes.number)),
+			isFavoriteSearch: PropTypes.bool
+		}),
+		dispatch: PropTypes.func
+	})
 }
 
 export default SearchBar;
