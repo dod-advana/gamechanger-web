@@ -34,6 +34,9 @@ const initState = {
     summaryCardData: [],
     resultsText: '',
     resetSettingsSwitch: false,
+    categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
     
     // not part of EDA (yet) but currently required in NewGameChangerPage: 
     notifications: [],
