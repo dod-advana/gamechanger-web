@@ -200,6 +200,7 @@ export const EDASummaryView = (props) => {
                     height: "100%",
                     borderTopRightRadius: 5,
                     borderTopLeftRadius: 5,
+                    width: 1160
                 }}
                 getTableProps={(state, rowInfo, column) => {
                     return { style: { 
