@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
 import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
 import GCButton from "../common/GCButton";
@@ -170,13 +171,13 @@ const ViewHeader = (props) => {
 						{currentSort !== 'Alphabetical' ? 
 							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
 								<i 
-									class="fa fa-sort-amount-desc"
+									className="fa fa-sort-amount-desc"
 									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
 								></i>
 								<i 
-									class="fa fa-sort-amount-asc"
+									className="fa fa-sort-amount-asc"
 									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
@@ -184,13 +185,13 @@ const ViewHeader = (props) => {
 							</div>) : 
 							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
 								<i 
-									class="fa fa-sort-alpha-asc"
+									className="fa fa-sort-alpha-asc"
 									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
 								></i>
 								<i 
-									class="fa fa-sort-alpha-desc"
+									className="fa fa-sort-alpha-desc"
 									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
@@ -260,6 +261,28 @@ const ViewHeader = (props) => {
 			</div>
 		</div>
 	)
+}
+
+ViewHeader.propTypes = {
+	activeCategoryTab: PropTypes.string,
+	cloneData: PropTypes.shape({
+		url: PropTypes.string
+	}),
+	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+	count: PropTypes.number,
+	currentViewName: PropTypes.string,
+	entityCount: PropTypes.number,
+	listView: PropTypes.bool,
+	selectedCategories: PropTypes.objectOf(PropTypes.bool),
+	topicCount: PropTypes.number,
+	timeFound: PropTypes.number,
+	viewNames: PropTypes.arrayOf(PropTypes.shape({
+		name: PropTypes.string,
+		title: PropTypes.string
+	})),
+	categorySorting: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)),
+	currentSort: PropTypes.string,
+	currentOrder: PropTypes.string
 }
 
 export default ViewHeader;
