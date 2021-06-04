@@ -278,7 +278,10 @@ export default function SearchMatrix(props) {
 
 	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm
-		const expansion = JSON.parse(comparableExpansion)
+		let expansion = {};
+		if(comparableExpansion) {
+			expansion = JSON.parse(comparableExpansion)
+		}
 		let expandedTerms = Object.values(expansion || {});
 		const keys = Object.keys(expansion || {});
 		const quotedKeys = keys.map((term) => `"${term}"`);
