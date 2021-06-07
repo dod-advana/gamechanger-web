@@ -785,7 +785,7 @@ export const exactMatch = (phrase, word) => {
 	const wordList = phrase.trim().split(' ')
 	let exists = false
 	wordList.forEach(w => {
-		if(w===word){
+		if(w.toLowerCase()===word.toLowerCase()){
 			exists=true
 		}
 	});
