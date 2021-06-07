@@ -4,9 +4,9 @@ const dataCatalogConfig = require('./datacatalog');
 module.exports = Object.freeze({
 	VERSION: '#DYNAMIC_VERSION',
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
-	TLS_CERT: process.env.TLS_CERT.replace(/\\n/g, '\n'),
-	TLS_CERT_CA: process.env.TLS_CERT_CA.replace(/\\n/g, '\n'),
-	TLS_KEY: process.env.TLS_KEY.replace(/\\n/g, '\n'),
+	TLS_CERT: process.env.TLS_CERT ? process.env.TLS_CERT.replace(/\\n/g, '\n') : '',
+	TLS_CERT_CA: process.env.TLS_CERT_CA ? process.env.TLS_CERT_CA.replace(/\\n/g, '\n') : '',
+	TLS_KEY: process.env.TLS_KEY ? process.env.TLS_KEY.replace(/\\n/g, '\n') : '',
 	POSTGRES_CONFIG: {
 		databases: {
 			game_changer: {
@@ -79,7 +79,7 @@ module.exports = Object.freeze({
 		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT,
 		user: process.env.GAMECHANGER_ELASTICSEARCH_USER ? process.env.GAMECHANGER_ELASTICSEARCH_USER : '',
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
-		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n'),
+		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
 		history_index: 'search_history',
 		requestTimeout: 60000
@@ -90,7 +90,7 @@ module.exports = Object.freeze({
 		port: process.env.EDA_ELASTICSEARCH_PORT,
 		user: process.env.EDA_ELASTICSEARCH_USER ? process.env.EDA_ELASTICSEARCH_USER : '',
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD,
-		ca: process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n'),
+		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.EDA_ELASTICSEARCH_INDEX,
 		extSearchFields:['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
 		extRetrieveFields:['*_eda_ext'],
@@ -118,9 +118,9 @@ module.exports = Object.freeze({
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
-		CA: process.env.QLIK_CERT_CA.replace(/\\n/g, '\n'),
-		KEY:  process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n'),
-		CERT:  process.env.QLIK_CERT.replace(/\\n/g, '\n'),
+		CA: process.env.QLIK_CERT_CA ? process.env.QLIK_CERT_CA.replace(/\\n/g, '\n') : '',
+		KEY:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
+		CERT:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN
 	},

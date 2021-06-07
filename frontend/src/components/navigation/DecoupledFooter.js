@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
 	Button,
@@ -90,7 +91,7 @@ const LinkContainer = styled.div`
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
-export default (props) => {
+const DecoupledFooter = (props) => {
 	
 	const classes = useStyles();
 	
@@ -271,3 +272,9 @@ export default (props) => {
 		</FooterContainer>
 	)
 };
+
+DecoupledFooter.propTypes = {
+	setUserMatomo: PropTypes.bool.isRequired
+}
+
+export default DecoupledFooter;

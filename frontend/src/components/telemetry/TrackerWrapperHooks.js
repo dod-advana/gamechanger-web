@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useMatomo } from '@datapunt/matomo-tracker-react'
 import Auth from 'advana-platform-ui/dist/utilities/Auth';
 import SparkMD5 from "spark-md5";
@@ -26,4 +27,9 @@ export default function TrackerWrapperHooks(ComposedComponent, documentTitle) {
 	}
 
 	return WrappedComponent;
+}
+
+TrackerWrapperHooks.propTypes = {
+	ComposedComponent: PropTypes.element.isRequired,
+	documentTitle: PropTypes.string
 }
