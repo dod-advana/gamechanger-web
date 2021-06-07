@@ -131,7 +131,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			url = url.replace("#/", "");
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
-			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order }});
+			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, classificationMarking: 'CUI Test', options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order }});
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
 		} catch (err) {

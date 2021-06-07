@@ -17,11 +17,12 @@ class ExportHandler {
 		this.appSettings = APP_SETTINGS
 	}
 
-	async export(res, searchText, format, options, cloneName, permissions, userId) {
+	async export(res, searchText, classificationMarking, format, options, cloneName, permissions, userId) {
 		try {
-			this.logger.info(`${userId} is doing a ${cloneName} export for ${searchText} in ${format} format, options ${JSON.stringify(options)}`)
+			this.logger.info(`${userId} is doing a ${cloneName} export for ${searchText} in ${format} format with markings ${classificationMarking}, options ${JSON.stringify(options)}`)
 			const body = options;
 			body.searchText = searchText;
+			body.classificationMarking = classificationMarking;
 			body.format = format;
 			body.cloneName = cloneName;
 			return await this.exportHelper({body, permissions}, res, userId)
