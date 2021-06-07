@@ -28,6 +28,7 @@ import {makeStyles} from "@material-ui/core/styles";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import CheckCircleOutlinedIcon from "@material-ui/icons/CheckCircleOutlined";
 import {getTrackingNameForFactory, exportToCsv} from "../../gamechangerUtils";
+import { setState } from '../../sharedFunctions';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -92,14 +93,8 @@ const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = (props) => {
 	
+	const {state, dispatch} = props;
 	const classes = useStyles();
-	const {state} = props;
-	/*
-	const {
-		cloneData
-	} = props;
-	*/
-	
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
@@ -419,7 +414,7 @@ const GCResponsibilityTracker = (props) => {
 								<GCPrimaryButton onClick={exportCSV}>
 									Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 								</GCPrimaryButton>
-								<GCPrimaryButton buttonColor={'red'} onClick={() => hideShowReportModal(true)}>
+								<GCPrimaryButton buttonColor={'red'} onClick={() => setState(dispatch, {showAssistModal: true})}>
 									Report <Icon className="fa fa-bug" style={styles.buttons}/>
 								</GCPrimaryButton>
 								<div style={styles.spacer}/>
@@ -452,7 +447,7 @@ const GCResponsibilityTracker = (props) => {
                     paperWidthLg: classes.dialogLg
 				}}
             >
-                <DialogTitle >
+				<DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Report Issues with Data</Typography>
 					</div>
