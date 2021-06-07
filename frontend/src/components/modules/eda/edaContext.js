@@ -23,7 +23,9 @@ const initState = {
             pds: false,
             syn: false,
             none: false
-        }
+        },
+        minObligatedAmount: null,
+        maxObligatedAmount: null
     },
     showDialog: false,
     resultsPage: 1,
