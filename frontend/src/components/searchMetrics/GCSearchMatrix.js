@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from "styled-components";
 import { trackEvent } from '../telemetry/Matomo';
 import {makeStyles} from '@material-ui/core/styles';
-import {getTrackingNameForFactory} from '../../gamechangerUtils';
+import {getTrackingNameForFactory, exactMatch} from '../../gamechangerUtils';
 import {setState} from "../../sharedFunctions";
 import _ from "lodash";
 import SearchMatrixFactory from "../factories/searchMatrixFactory";
@@ -306,7 +306,7 @@ export default function SearchMatrix(props) {
 			}
 		}
 		let topFiveArr = Array.from(topFive)
-		topFiveArr = topFiveArr.map(term => {return {...term, checked:state.searchText.includes(term.phrase)}})
+		topFiveArr = topFiveArr.map(term => {return {...term, checked:exactMatch(state.searchText, term.phrase)}})
 		setExpansionTerms(topFiveArr);
 
 	}, [state, comparableExpansion]);
@@ -317,11 +317,11 @@ export default function SearchMatrix(props) {
 		}
 		let newSearchText = state.searchText.trim()
 		expansionTerms.forEach(({phrase, source, checked}) => {
-			if(checked && !newSearchText.includes(phrase)) {
+			if(checked && !exactMatch(newSearchText, phrase)) {
 				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
 				newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 			} 
-			else if(!checked && newSearchText.includes(` OR ${phrase}`)) {
+			else if(!checked && exactMatch(newSearchText,`${phrase}`)) {
 				newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
 			}
 
