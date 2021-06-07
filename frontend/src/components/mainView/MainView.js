@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import { getTrackingNameForFactory, PAGE_DISPLAYED } from "../../gamechangerUtils";
 import {Button} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -120,7 +121,7 @@ const MainView = (props) => {
 	
 	const getAnalystTools = () => {
 		return (
-			<GCResponsibilityTracker/>
+			<GCResponsibilityTracker state={state} />
 		);
 	}
 	
@@ -314,6 +315,35 @@ const styles = {
 		color: '#131E43',
 		paddingTop: '10px'
 	}
+}
+
+MainView.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			cloneDataSet: PropTypes.bool,
+			historySet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				main_view_module: PropTypes.string,
+				search_module: PropTypes.string,
+				clone_name: PropTypes.string
+			}),
+			history: PropTypes.object,
+			userData: PropTypes.shape({
+				favorite_searches: PropTypes.array
+			}),
+			isFavoriteSearch: PropTypes.bool,
+			docsPagination: PropTypes.bool,
+			entityPagination: PropTypes.bool,
+			topicPagination: PropTypes.bool,
+			replaceResults: PropTypes.bool,
+			activeCategoryTab: PropTypes.string,
+			docsLoading: PropTypes.bool,
+			infiniteScrollPage: PropTypes.number,
+			pageDisplayed: PropTypes.string,
+			searchSettings: PropTypes.object
+		}),
+		dispatch: PropTypes.func
+	})
 }
 
 export default MainView;

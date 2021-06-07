@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
 import { Error, Warning, Check as Success, Info } from '@material-ui/icons';
 
@@ -86,7 +87,7 @@ const CloseButton = styled.button`
 	border-bottom-right-radius: inherit;
 `
 
-export default ({ level = 'default', message, dismissFunc }) => {
+const Notification = ({ level = 'default', message, dismissFunc }) => {
 	const Icon = getIcon(level);
 	return (
 		<NotificationWrapper level={level}>
@@ -105,3 +106,11 @@ export default ({ level = 'default', message, dismissFunc }) => {
 		</NotificationWrapper>
 	)
 }
+
+Notification.propTypes = {
+	level: PropTypes.string.isRequired,
+	message: PropTypes.string.isRequired,
+	dismissFunc: PropTypes.func
+}
+
+export default Notification;
