@@ -63,7 +63,7 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 	})
 }
 
-export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) {
+const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) => {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
@@ -330,3 +330,24 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 		</div>
 	);
 }
+
+DocumentExplorer.propTypes = {
+	data: PropTypes.shape({
+		dataIdx: PropTypes.string,
+		key: PropTypes.string
+	}),
+	totalCount: PropTypes.number, 
+	searchText: PropTypes.string, 
+	prevSearchText: PropTypes.string, 
+	loading: PropTypes.bool,
+	resultsPage: PropTypes.number, 
+	resultsPerPage: PropTypes.number, 
+	onPaginationClick: PropTypes.func, 
+	isClone: PropTypes.bool, 
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	}), 
+	isEDA: PropTypes.bool
+}
+
+export default DocumentExplorer;

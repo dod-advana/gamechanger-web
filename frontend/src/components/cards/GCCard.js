@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
 import {Divider, Checkbox} from '@material-ui/core';
@@ -782,6 +783,34 @@ function GCCard (props) {
 		</StyledCardContainer>
     );
 	
+}
+
+GCCard.propTypes = {
+	idx: PropTypes.number.isRequired,
+	state: PropTypes.shape({
+		selectedDocuments: PropTypes.instanceOf(Map).isRequired,
+		listView: PropTypes.bool.isRequired,
+		componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+		showSideFilters: PropTypes.bool.isRequired,
+		cloneData: PropTypes.shape({
+			cardModule: PropTypes.string,
+			clone_name: PropTypes.string.isRequired
+		}),
+		searchText: PropTypes.string
+	}),
+	dispatch: PropTypes.func.isRequired,
+	item: PropTypes.shape({
+		type: PropTypes.string.isRequired,
+		title: PropTypes.string.isRequired,
+		filename: PropTypes.string.isRequired,
+		favorite: PropTypes.bool.isRequired,
+		is_revoked_b: PropTypes.bool.isRequired,
+		search_mode: PropTypes.string
+	}),
+	id: PropTypes.number,
+	graphView: PropTypes.bool,
+	closeGraphCard: PropTypes.func,
+	collection: PropTypes.array
 }
 
 export const Card = React.memo(GCCard);

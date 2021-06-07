@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {SearchBanner} from "../components/searchBar/GCSearchBanner";
+import SearchBanner from "../components/searchBar/GCSearchBanner";
 import {trackEvent, trackPageView} from "../components/telemetry/Matomo";
 import GameChangerAPI from "../components/api/gameChanger-service-api";
 import {gcColors} from "./GameChangerPage";

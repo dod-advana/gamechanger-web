@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
 import styled from 'styled-components';
@@ -110,12 +111,11 @@ export const downloadFile = async (data, format, cloneData) => {
 	}
 }
 
-export default ({ open, handleClose, searchObject, selectedDocuments, isSelectedDocs, orgFilter, orgFilterString, typeFilter, typeFilterString, isClone, cloneData, getUserData, searchType, searchFields, edaSearchSettings, sort, order }) => {
-	
+const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocuments, isSelectedDocs, orgFilter, orgFilterString, typeFilter, typeFilterString, isClone, cloneData, getUserData, searchType, searchFields, edaSearchSettings, sort, order }) => {
 	const [loading, setLoading] = useState(false)
 	const [errorMsg, setErrorMsg] = useState('')
 	const isEda = cloneData.clone_name === 'eda';
-	const [selectedFormat, setSelectedFormat] = isEda ? useState('csv') : useState('pdf')
+	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv': 'pdf');
 	const index = cloneData.clone_name;
 
 	const handleChange = ({ target: { value } }) => {
@@ -194,3 +194,29 @@ export default ({ open, handleClose, searchObject, selectedDocuments, isSelected
 		</UOTDialog>
 	)
 }
+
+ExportResultsDialog.propTypes = {
+	open: PropTypes.bool.isRequired,
+	handleClose: PropTypes.func.isRequired, 
+	searchObject: PropTypes.shape({
+		search: PropTypes.string
+	}),
+	selectedDocuments: PropTypes.instanceOf(Map), 
+	isSelectedDocs: PropTypes.bool, 
+	orgFilter: PropTypes.objectOf(PropTypes.bool), 
+	orgFilterString: PropTypes.array, 
+	typeFilter: PropTypes.objectOf(PropTypes.bool), 
+	typeFilterString: PropTypes.array, 
+	isClone: PropTypes.bool, 
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	}), 
+	getUserData: PropTypes.func, 
+	searchType: PropTypes.string, 
+	searchFields: PropTypes.object, 
+	edaSearchSettings: PropTypes.object, 
+	sort: PropTypes.string, 
+	order: PropTypes.string
+}
+
+export default ExportResultsDialog

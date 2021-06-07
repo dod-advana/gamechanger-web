@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import propTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -555,6 +556,14 @@ const styles = {
 		paddingTop: '20px',
 		paddingBottom: '20px'
 	}
+}
+
+GCResponsibilityTracker.propTypes = {
+	state: propTypes.objectOf({
+		cloneData: propTypes.objectOf({
+			clone_name: propTypes.string
+		})
+	})
 }
 
 export default GCResponsibilityTracker;
