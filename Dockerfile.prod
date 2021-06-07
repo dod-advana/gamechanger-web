@@ -9,7 +9,5 @@ RUN npm install
 RUN npm run build
 RUN mv build ../backend/
 WORKDIR /usr/src/app/backend
-RUN mkdir /etc/secrets/
-COPY ./backend/secrets/* /etc/secrets/
 RUN npm install
-CMD "npm" "start"
+CMD ./startProd.sh

@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import PropTypes from 'prop-types';
 import {FormControl, FormControlLabel, Radio, RadioGroup, Select, MenuItem} from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import {TokenAnnotator} from "react-text-annotate";
@@ -231,3 +232,29 @@ export const GeneralUserAnnotationCard = ({ paragraph, tags, tag, entities, comp
 		</div>
 	)
 }
+
+GeneralUserAnnotationCard.propTypes = {
+	tag: PropTypes.string.isRequired,
+	entities: PropTypes.shape({
+		color: PropTypes.string,
+		end: PropTypes.number,
+		start: PropTypes.number,
+		tag: PropTypes.string,
+		text: PropTypes.string
+	}), 
+	colorMap: PropTypes.instanceOf(Map).isRequired, 
+	handleAnswer: PropTypes.func.isRequired,
+	paragraph: PropTypes.shape({
+		par_raw_text_t: PropTypes.string
+	}),
+	tags: PropTypes.array, 
+	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+	entityAnswer: PropTypes.shape({
+		correct: PropTypes.bool,
+		incorrectReason: PropTypes.string
+	}), 
+	tagDescriptions: PropTypes.objectOf(PropTypes.string), 
+
+}
+
+export default GeneralUserAnnotationCard;

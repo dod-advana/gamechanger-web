@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import html2canvas from 'html2canvas';
 import EmailValidator from "email-validator";
@@ -44,7 +45,7 @@ const CloseButton = styled.div`
     top: 15px;
 `;
 
-export default (props) => {
+export default function UserFeedback (props) {
     
     const {state, dispatch} = props.context;
     
@@ -291,3 +292,13 @@ export default (props) => {
         </Modal>    
     )
 };
+
+UserFeedback.propTypes = {
+    context: PropTypes.shape({
+        state: PropTypes.shape({
+            showFeedbackModal: PropTypes.bool,
+            screenShot: PropTypes.string
+        }),
+        dispatch: PropTypes.func
+    })
+}
