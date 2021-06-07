@@ -780,3 +780,14 @@ export const encode = (filename) => {
         match => encodings[match]
     );
 }
+
+export const exactMatch = (phrase, word) => {
+	const wordList = phrase.trim().split(' ')
+	let exists = false
+	wordList.forEach(w => {
+		if(w===word){
+			exists=true
+		}
+	});
+	return exists;
+}
