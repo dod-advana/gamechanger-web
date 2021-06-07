@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
 import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
 import GCButton from "../common/GCButton";
@@ -18,6 +19,7 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 const useStyles = makeStyles({
 	root: {
 		marginTop: '1px',
+		marginRight: '10px',
 		'& .MuiInputBase-root':{
 			height: '34px'
 		},
@@ -57,7 +59,10 @@ const ViewHeader = (props) => {
 		selectedCategories,
 		topicCount,
 		timeFound,
-		viewNames
+		viewNames,
+		categorySorting,
+		currentSort,
+		currentOrder
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -112,6 +117,15 @@ const ViewHeader = (props) => {
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
 	}
 
+	const handleChangeSort = (event) => {
+		const {target: { value }} = event;
+		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+	}
+
+	const handleChangeOrder = (value) => {
+		setState(dispatch,{currentOrder: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+	}
+
 	const handleChangeView = (event) => {
 		const {target: { value }} = event;
 		switch(value) {
@@ -137,6 +151,55 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 			<div className={'view-buttons-container'}>
+				{categorySorting[activeCategoryTab] !== undefined && 
+					<>
+						<FormControl classes={{root:classes.root}}>
+							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
+							<Select
+							labelId="view-name"
+							id="view-name-select"
+							value={currentSort}
+							onChange={handleChangeSort}
+							classes={{root:classes.selectRoot}}
+							autoWidth
+							>
+							{categorySorting[activeCategoryTab].map(sort => {
+								return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
+							})}
+							</Select>
+						</FormControl>
+						{currentSort !== 'Alphabetical' ? 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									className="fa fa-sort-amount-desc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+								<i 
+									className="fa fa-sort-amount-asc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+							</div>) : 
+							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+								<i 
+									className="fa fa-sort-alpha-asc"
+									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('asc')}	}
+								></i>
+								<i 
+									className="fa fa-sort-alpha-desc"
+									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									aria-hidden="true"
+									onClick={() => {handleChangeOrder('desc')}	}
+								></i>
+							</div>)
+						}
+				</>
+				}
 				<FormControl classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
@@ -198,6 +261,28 @@ const ViewHeader = (props) => {
 			</div>
 		</div>
 	)
+}
+
+ViewHeader.propTypes = {
+	activeCategoryTab: PropTypes.string,
+	cloneData: PropTypes.shape({
+		url: PropTypes.string
+	}),
+	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+	count: PropTypes.number,
+	currentViewName: PropTypes.string,
+	entityCount: PropTypes.number,
+	listView: PropTypes.bool,
+	selectedCategories: PropTypes.objectOf(PropTypes.bool),
+	topicCount: PropTypes.number,
+	timeFound: PropTypes.number,
+	viewNames: PropTypes.arrayOf(PropTypes.shape({
+		name: PropTypes.string,
+		title: PropTypes.string
+	})),
+	categorySorting: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)),
+	currentSort: PropTypes.string,
+	currentOrder: PropTypes.string
 }
 
 export default ViewHeader;

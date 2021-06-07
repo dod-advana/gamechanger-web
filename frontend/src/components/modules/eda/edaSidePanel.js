@@ -87,7 +87,8 @@ export const EDASidePanel = (props) => {
         dispatch,
         edaSearchSettings,
         issuingOrgs,
-        statsLoading
+        statsLoading,
+        totalObligatedAmount
     } = props;
 
     const setEDASearchSetting = (field, value) => {
@@ -153,12 +154,19 @@ export const EDASidePanel = (props) => {
         return Object.keys(issuingOrgs).map(org => ({ "Key": org, "Value": issuingOrgs[org] }))
     }
 
+    const getStatsData = () => {
+        const issuingOrgData = getIssuingOrgData();
+        const totalObligation = [{Key: "Total Obligated Amount", Value: "$" + totalObligatedAmount.toLocaleString()}];
+
+        return issuingOrgData.concat(totalObligation);
+    }
+
     const renderStats = () => {
         return (
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
                 // headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-                rows={getIssuingOrgData()}
+                rows={getStatsData()}
                 height={'auto'}
                 dontScroll={true}
                 // colWidth={colWidth}
@@ -508,7 +516,7 @@ export const EDASidePanel = (props) => {
             <GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={() => { setState(dispatch, { runSearch: true })}}>Update Search</GCButton>
 
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 5 }}>STATISTICS</div>
-            <GCAccordion contentPadding={0} expanded={false} header={'CONTRACTS PER AGENCY'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
+            <GCAccordion contentPadding={0} expanded={false} header={'CONTRACT TOTALS'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
                 {statsLoading &&
                     <div style={{ margin: '0 auto' }}>
                         <LoadingIndicator customColor={gcOrange} />

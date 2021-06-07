@@ -269,30 +269,57 @@ class SearchUtility {
 		}
 	}
 
-	getElasticsearchQuery({ searchText, searchTerms, parsedQuery, orgFilterString = '', typeFilterString = '', index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], publicationDateAllTime = true, storedFields = [
-		'filename',
-		'title',
-		'page_count',
-		'doc_type',
-		'doc_num',
-		'ref_list',
-		'id',
-		'summary_30',
-		'keyw_5',
-		'p_text',
-		'type',
-		'p_page',
-		'display_title_s',
-		'display_org_s',
-		'display_doc_type_s',
-		'is_revoked_b',
-		'access_timestamp_dt',
-		'publication_date_dt',
-		'crawler_used_s',
-		'download_url_s',
-		'source_page_url_s',
-		'source_fqdn_s'
-	], extStoredFields = [], extSearchFields = [], includeRevoked = false }, user) {
+	getElasticsearchQuery(
+		{ searchText, 
+			searchTerms, 
+			parsedQuery, 
+			orgFilterString = '', 
+			typeFilterString = '',
+			index, 
+			offset = 0, 
+			limit = 20, 
+			format = 'json', 
+			getIdList = false, 
+			expandTerms = false, 
+			isClone = false, 
+			cloneData = {}, 
+			charsPadding = 90, 
+			operator = 'and', 
+			searchFields = {}, 
+			accessDateFilter = [], 
+			publicationDateFilter = [], 
+			publicationDateAllTime = true, 
+			storedFields = [
+				'filename',
+				'title',
+				'page_count',
+				'doc_type',
+				'doc_num',
+				'ref_list',
+				'id',
+				'summary_30',
+				'keyw_5',
+				'p_text',
+				'type',
+				'p_page',
+				'display_title_s',
+				'display_org_s',
+				'display_doc_type_s',
+				'is_revoked_b',
+				'access_timestamp_dt',
+				'publication_date_dt',
+				'crawler_used_s',
+				'download_url_s',
+				'source_page_url_s',
+				'source_fqdn_s'
+				], 
+			extStoredFields = [], 
+			extSearchFields = [], 
+			includeRevoked = false,
+			sort = 'Relevance', 
+			order = 'desc',
+		 }, 
+		 user) {
 
 		try {
 			// add additional search fields to the query
@@ -425,6 +452,26 @@ class SearchUtility {
 					fragmenter: 'span'
 				}
 			};
+
+			switch(sort){
+				case 'Relevance':
+					query.sort = [ {"_score": {"order" : order}} ]
+					break;
+				case 'Publishing Date':
+					query.sort = [ {"publication_date_dt": {"order" : order}} ]
+					break;
+				case 'Alphabetical':
+					query.sort = [ {"display_title_s": {"order" : order}} ]
+					break;
+				case 'References':
+					query.sort = [{"_script": {
+						"type": "number",
+						"script": "doc.ref_list.size()",
+						"order": order
+					}}]
+				default: 
+					break;
+			} 
 
 			if (extSearchFields.length > 0){
 				const extQuery = {
@@ -1701,6 +1748,7 @@ class SearchUtility {
 			}
 		}
 		searchResults.sentResults = sentenceResults;
+		console.log(searchResults.expansionDict);
 		return searchResults;
 	}
 
@@ -1774,7 +1822,7 @@ class SearchUtility {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
 
-				return { totalCount: 0, docs: [] };
+				return { totalCount: 0, docs: [], expansionDict: expansionDict ? expansionDict : {} };
 			}
 		} catch (e) {
 			const { message } = e;

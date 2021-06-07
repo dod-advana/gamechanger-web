@@ -1,28 +1,28 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'underscore';
-import GameChangerAPI from "../api/gameChanger-service-api";
+import GameChangerAPI from "../../api/gameChanger-service-api";
 import { Collapse } from 'react-collapse';
-import SimpleTable from '../common/SimpleTable';
+import SimpleTable from '../../common/SimpleTable';
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 // import { primary } from "../experimental/uot-colors";
-import '../cards/keyword-result-card.css';
-import '../../containers/gamechanger.css';
+import '../../cards/keyword-result-card.css';
+import '../../../containers/gamechanger.css';
 import { grey800 } from 'material-ui/styles/colors';
 import {
 	getReferenceListMetadataPropertyTable,
-	getMetadataForPropertyTable,
 	handlePdfOnLoad, getTrackingNameForFactory
-} from '../../gamechangerUtils';
+} from '../../../gamechangerUtils';
 import {
-	getEDAMetadataForPropertyTable
-} from "../modules/eda/edaUtils";
+	getEDAMetadataForPropertyTable,
+    getDisplayTitle
+} from "../../modules/eda/edaUtils";
 import Pagination from 'react-js-pagination';
-import { trackEvent } from "../telemetry/Matomo";
-import GCTooltip from "../common/GCToolTip";
+import { trackEvent } from "../../telemetry/Matomo";
+import GCTooltip from "../../common/GCToolTip";
 import {
 	EDA_FIELDS,
 	EDA_FIELD_JSON_MAP
-} from '../modules/eda/edaCardHandler';
+} from '../../modules/eda/edaCardHandler';
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -63,7 +63,7 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 	})
 }
 
-const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) => {
+export default function EDADocumentExplorer({ data = [], totalCount, prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
@@ -81,7 +81,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 			const rec = data[dataIdx];
 			if (rec) {
 				// const filepath = rec.filepath;
-				const filename = !isEDA ? rec.filename : rec.file_location_eda_ext;
+				const filename = rec.file_location_eda_ext;
 				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 				const pageNumber = pageObj ? pageObj.pageNumber : 1;
 				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
@@ -94,7 +94,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 				}
 			}
 		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, isEDA]);
+	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]);
 
 	useEffect(() => {
 		if (!collapseKeys) {
@@ -162,10 +162,10 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 			}
 		}
 	}
-	// const edaFieldJSONMap = ((cloneData && cloneData.clone_data) && cloneData.clone_data.auxDisplayFieldJSONMap ? JSON.parse(cloneData.clone_data.auxDisplayFieldJSONMap) : {}) || {};
-	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
-	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && ((isEDA && cloneData && cloneData.clone_data) ? getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, data[iframePreviewLink.dataIdx]) : getMetadataForPropertyTable(data[iframePreviewLink.dataIdx]))) || [];
-	const previewDataReflist = (data.length > 0 && data[iframePreviewLink.dataIdx] && getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) || [];
+    const currentDocData = data[iframePreviewLink.dataIdx];
+	const previewPathname = data.length > 0 && currentDocData && currentDocData.filepath;
+	const previewData = (data.length > 0 && currentDocData && getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData)) || [];
+	const previewDataReflist = (data.length > 0 && currentDocData && getReferenceListMetadataPropertyTable(currentDocData.ref_list)) || [];
 	const iframePanelSize = 12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	// This checks if there are any documents loaded and assigns the default collapse keys to the cards default to open.
@@ -176,6 +176,17 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 		}
 		setCollapseKeys(collapseDictionary)
 	}
+
+    // set the tooltip for the right panel
+    let tooltipText = 'No metadata available';
+    if (currentDocData && currentDocData.metadata_type_eda_ext && currentDocData.award_id_eda_ext) {
+        if (currentDocData.metadata_type_eda_ext === 'pds') {
+            tooltipText = 'Pulled from PDS data';
+        }
+        else if (currentDocData.metadata_type_eda_ext === 'syn' && currentDocData.award_id_eda_ext) {
+            tooltipText = 'Pulled from Synopsis data';
+        }
+    }
 
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
@@ -189,7 +200,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 }
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 }
 
-	return (
+    return (
 		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
 			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
 				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
@@ -224,10 +235,9 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 				</div>}
 				{!loading && _.map(data, (item, key) => {
 					const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
-					const displayTitle = item.title === "NA" ? `${item.doc_type} ${item.doc_num}` : `${item.doc_type} ${item.doc_num} - ${item.title}` ;
-					// let contextHtml = item.context;
-					// contextHtml = contextHtml.replace(/<em>/g, '<span class="highlight-search-demo">').replace(/<\/em>/g, '</span>') + '...';
-					if (item.type === 'document'){
+					const displayTitle = getDisplayTitle(item);
+
+                    if (item.type === 'document'){
 						return <div key={key}>
 						<div className="searchdemo-modal-result-header" onClick={(e) => {
 								e.preventDefault();
@@ -301,9 +311,8 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 						/>
 					</div>
 				</div>
-
 			</div>
-			<GCTooltip title={ isEDA ? ((data && data[0] && data[0].acomod_eda_ext) ? 'Pulled from PDS data' : 'No data available') : ''} arrow placement="top" enterDelay={400}>
+			<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
 				<div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
 					<SimpleTable tableClass={'magellan-table'}
 						zoom={0.8}
@@ -314,40 +323,21 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 						colWidth={colWidth}
 						disableWrap={true}
 						title={'Metadata'}
-						hideHeader={isEDA}
+						hideHeader={true}
 					/>
-					<div style={{marginTop: -18}}> <SimpleTable tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewDataReflist}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidthRefTable}
-						disableWrap={true}
-					/></div>
+					<div style={{marginTop: -18}}> 
+                        <SimpleTable tableClass={'magellan-table'}
+                            zoom={0.8}
+                            headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+                            rows={previewDataReflist}
+                            height={'auto'}
+                            dontScroll={true}
+                            colWidth={colWidthRefTable}
+                            disableWrap={true}
+					    />
+                    </div>
 				</div>
 			</GCTooltip>
 		</div>
 	);
 }
-
-DocumentExplorer.propTypes = {
-	data: PropTypes.shape({
-		dataIdx: PropTypes.string,
-		key: PropTypes.string
-	}),
-	totalCount: PropTypes.number, 
-	searchText: PropTypes.string, 
-	prevSearchText: PropTypes.string, 
-	loading: PropTypes.bool,
-	resultsPage: PropTypes.number, 
-	resultsPerPage: PropTypes.number, 
-	onPaginationClick: PropTypes.func, 
-	isClone: PropTypes.bool, 
-	cloneData: PropTypes.shape({
-		clone_name: PropTypes.string
-	}), 
-	isEDA: PropTypes.bool
-}
-
-export default DocumentExplorer;

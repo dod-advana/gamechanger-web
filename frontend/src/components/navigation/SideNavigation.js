@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import SlideOutMenuContent from "advana-side-nav/dist/SlideOutMenuContent";
 import {SlideOutToolContext} from "advana-side-nav/dist/SlideOutMenuContext";
 import NavigationFactory from "../factories/navigationFactory";
@@ -53,6 +54,18 @@ const SideBarNavigation = (props) => {
 			}
 		</>
 	);
+}
+
+SideBarNavigation.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			cloneDataSet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				navigation_module: PropTypes.string,
+			})
+		}),
+		dispatch: PropTypes.func
+	})
 }
 
 export default SideBarNavigation;
