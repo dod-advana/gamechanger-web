@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import styled from "styled-components";
 import { trackEvent } from '../telemetry/Matomo';
 import {makeStyles} from '@material-ui/core/styles';
@@ -278,7 +279,10 @@ export default function SearchMatrix(props) {
 
 	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm
-		const expansion = JSON.parse(comparableExpansion)
+		let expansion = {};
+		if(comparableExpansion) {
+			expansion = JSON.parse(comparableExpansion)
+		}
 		let expandedTerms = Object.values(expansion || {});
 		const keys = Object.keys(expansion || {});
 		const quotedKeys = keys.map((term) => `"${term}"`);
@@ -392,4 +396,21 @@ export default function SearchMatrix(props) {
 			</div>
 		</div>
 	);
+}
+
+SearchMatrix.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			expansionDict: PropTypes.object,
+			cloneDataSet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				main_view_module: PropTypes.string,
+				clone_name: PropTypes.string
+			}),
+			searchText: PropTypes.string,
+			activeCategoryTab: PropTypes.string,
+			selectedCategories: PropTypes.objectOf(PropTypes.bool),
+			componentStepNumbers: PropTypes.objectOf(PropTypes.number)
+		})
+	})
 }

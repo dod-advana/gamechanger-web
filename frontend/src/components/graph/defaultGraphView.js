@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {
 	getOrgToOrgQuery,
 	getTypeQuery,
@@ -89,7 +90,7 @@ const getGraphData = async (setRunningSearch, setGraphResultsFound, graphResults
 	}
 }
 
-export default function DefaultGraphView (props) {
+const DefaultGraphView = (props) => {
 
 	const {context} = props;
 	const {state, dispatch} = context;
@@ -152,3 +153,19 @@ const styles = {
 		borderRadius: '3px'
 	},
 };
+
+DefaultGraphView.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			showSideFilters: PropTypes.bool.isRequired,
+			runGraphSearch: PropTypes.bool,
+			notifications: PropTypes.array,
+			cloneData: PropTypes.object,
+			hasExpansionTerms: PropTypes.bool,
+			searchText: PropTypes.string
+		})
+	}),
+	dispatch: PropTypes.func
+}
+
+export default DefaultGraphView;

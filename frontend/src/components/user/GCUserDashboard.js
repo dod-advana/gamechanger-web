@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
@@ -1513,6 +1514,37 @@ const styles = {
 			marginBottom: '10px'
 		}
 	}
+}
+
+GCUserDashboard.propTypes = {
+	userData: PropTypes.shape({
+		favorite_searches: PropTypes.arrayOf(PropTypes.shape({
+			url: PropTypes.string,
+		})),
+		search_history: PropTypes.arrayOf(PropTypes.shape({
+			url: PropTypes.string
+		})),
+		favorite_documents: PropTypes.arrayOf(PropTypes.object),
+		export_history: PropTypes.arrayOf(PropTypes.shape({
+			download_request_body: PropTypes.shape({
+				orgFilter: PropTypes.objectOf(PropTypes.bool),
+				format: PropTypes.string
+			})
+		})),
+		favorite_topics: PropTypes.arrayOf(PropTypes.object),
+		notifications: PropTypes.objectOf(PropTypes.number),
+		api_key: PropTypes.string
+	}),
+	updateUserData: PropTypes.func,
+	handleSaveFavoriteDocument: PropTypes.func,
+	handleDeleteSearch: PropTypes.func,
+	saveFavoriteSearch: PropTypes.func,
+	clearDashboardNotification: PropTypes.func,
+	handleFavoriteTopic: PropTypes.func,
+	checkUserInfo: PropTypes.func,
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	})
 }
 
 export default GCUserDashboard;

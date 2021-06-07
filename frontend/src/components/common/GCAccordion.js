@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {withStyles} from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import {gcBlue} from "../../components/common/gc-colors";
@@ -131,6 +132,21 @@ const GCAccordion = (props) => {
 			</StyledAccordionDetails>
 		</StyledAccordion>
 	)
+}
+
+GCAccordion.propTypes = {
+	expanded: PropTypes.bool.isRequired,
+	header: PropTypes.string.isRequired,
+	children: PropTypes.element,
+	backgroundColor: PropTypes.string,
+	itemCount: PropTypes.number,
+	headerBackground: PropTypes.string,
+	headerTextColor: PropTypes.string,
+	headerTextWeight: PropTypes.string,
+	contentPadding: PropTypes.string,
+	contentAlign: PropTypes.string,
+	contentHeight: PropTypes.string,
+	notBordered: PropTypes.bool
 }
 
 export default GCAccordion;

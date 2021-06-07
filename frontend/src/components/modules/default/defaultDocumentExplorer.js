@@ -1,28 +1,22 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'underscore';
-import GameChangerAPI from "../api/gameChanger-service-api";
+import GameChangerAPI from "../../api/gameChanger-service-api";
 import { Collapse } from 'react-collapse';
-import SimpleTable from '../common/SimpleTable';
+import SimpleTable from '../../common/SimpleTable';
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 // import { primary } from "../experimental/uot-colors";
-import '../cards/keyword-result-card.css';
-import '../../containers/gamechanger.css';
+import '../../cards/keyword-result-card.css';
+import '../../../containers/gamechanger.css';
 import { grey800 } from 'material-ui/styles/colors';
 import {
 	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,
 	handlePdfOnLoad, getTrackingNameForFactory
-} from '../../gamechangerUtils';
-import {
-	getEDAMetadataForPropertyTable
-} from "../modules/eda/edaUtils";
+} from '../../../gamechangerUtils';
+
 import Pagination from 'react-js-pagination';
-import { trackEvent } from "../telemetry/Matomo";
-import GCTooltip from "../common/GCToolTip";
-import {
-	EDA_FIELDS,
-	EDA_FIELD_JSON_MAP
-} from '../modules/eda/edaCardHandler';
+import { trackEvent } from "../../telemetry/Matomo";
+
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -63,7 +57,7 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 	})
 }
 
-const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {}, isEDA }) => {
+export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
@@ -81,7 +75,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 			const rec = data[dataIdx];
 			if (rec) {
 				// const filepath = rec.filepath;
-				const filename = !isEDA ? rec.filename : rec.file_location_eda_ext;
+				const filename = rec.filename;
 				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 				const pageNumber = pageObj ? pageObj.pageNumber : 1;
 				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
@@ -94,7 +88,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 				}
 			}
 		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, isEDA]);
+	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]);
 
 	useEffect(() => {
 		if (!collapseKeys) {
@@ -162,9 +156,8 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 			}
 		}
 	}
-	// const edaFieldJSONMap = ((cloneData && cloneData.clone_data) && cloneData.clone_data.auxDisplayFieldJSONMap ? JSON.parse(cloneData.clone_data.auxDisplayFieldJSONMap) : {}) || {};
 	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
-	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && ((isEDA && cloneData && cloneData.clone_data) ? getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, data[iframePreviewLink.dataIdx]) : getMetadataForPropertyTable(data[iframePreviewLink.dataIdx]))) || [];
+	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) || [];
 	const previewDataReflist = (data.length > 0 && data[iframePreviewLink.dataIdx] && getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) || [];
 	const iframePanelSize = 12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
@@ -303,51 +296,27 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 				</div>
 
 			</div>
-			<GCTooltip title={ isEDA ? ((data && data[0] && data[0].acomod_eda_ext) ? 'Pulled from PDS data' : 'No data available') : ''} arrow placement="top" enterDelay={400}>
-				<div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
-					<SimpleTable tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewData}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidth}
-						disableWrap={true}
-						title={'Metadata'}
-						hideHeader={isEDA}
-					/>
-					<div style={{marginTop: -18}}> <SimpleTable tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewDataReflist}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidthRefTable}
-						disableWrap={true}
-					/></div>
-				</div>
-			</GCTooltip>
+            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+                <SimpleTable tableClass={'magellan-table'}
+                    zoom={0.8}
+                    headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+                    rows={previewData}
+                    height={'auto'}
+                    dontScroll={true}
+                    colWidth={colWidth}
+                    disableWrap={true}
+                    title={'Metadata'}
+                />
+                <div style={{marginTop: -18}}> <SimpleTable tableClass={'magellan-table'}
+                    zoom={0.8}
+                    headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+                    rows={previewDataReflist}
+                    height={'auto'}
+                    dontScroll={true}
+                    colWidth={colWidthRefTable}
+                    disableWrap={true}
+                /></div>
+            </div>
 		</div>
 	);
 }
-
-DocumentExplorer.propTypes = {
-	data: PropTypes.shape({
-		dataIdx: PropTypes.string,
-		key: PropTypes.string
-	}),
-	totalCount: PropTypes.number, 
-	searchText: PropTypes.string, 
-	prevSearchText: PropTypes.string, 
-	loading: PropTypes.bool,
-	resultsPage: PropTypes.number, 
-	resultsPerPage: PropTypes.number, 
-	onPaginationClick: PropTypes.func, 
-	isClone: PropTypes.bool, 
-	cloneData: PropTypes.shape({
-		clone_name: PropTypes.string
-	}), 
-	isEDA: PropTypes.bool
-}
-
-export default DocumentExplorer;

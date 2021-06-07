@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from 'react';
 import GameChangerAPI from "../api/gameChanger-service-api";
-import {handlePdfOnLoad} from "../../gamechangerUtils";
+import {encode, handlePdfOnLoad} from "../../gamechangerUtils";
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -25,7 +25,7 @@ export default function PDFViewer({location}) {
 			}
 			
 			if (filename) {
-				gameChangerAPI.dataStorageDownloadGET(filename, prevSearchText, pageNumber, isClone, cloneData).then(url => {
+				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
 					node.src = url;
 				});
 			}

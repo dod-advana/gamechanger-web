@@ -1,4 +1,5 @@
 import React, {useEffect, useRef} from 'react';
+import PropTypes from 'prop-types';
 import './node-cluster-view.css';
 import {backgroundWhite} from "../../components/common/gc-colors";
 import {
@@ -386,7 +387,7 @@ const filterGraphData = (nodes, edges, collections) => {
 	return { filteredGraph, docOrgNumbers };
 }
 
-export default function NodeClusterView(props) {
+function NodeClusterView(props) {
 	
 	const {
 		noSearches,
@@ -1465,3 +1466,23 @@ export default function NodeClusterView(props) {
 		</div>
 	);
 }
+
+NodeClusterView.propTypes = {
+	noSearches: PropTypes.bool,
+	graphData: PropTypes.shape({
+		nodes: PropTypes.array,
+		edges: PropTypes.array,
+		timeFound: PropTypes.number
+	}),
+	runningSearch: PropTypes.bool,
+	notificationCountProp: PropTypes.number,
+	expansionTerms: PropTypes.array,
+	state: PropTypes.shape({
+		showSideFilters: PropTypes.bool.isRequired,
+		cloneData: PropTypes.object,
+		searchText: PropTypes.string
+	}),
+	dispatch: PropTypes.func
+}
+
+export default NodeClusterView

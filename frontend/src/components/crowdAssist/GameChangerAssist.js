@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 import { PowerUserAnnotationCard } from './PowerUserAnnotationCard'
-import { GeneralUserAnnotationCard } from '../cards/GeneralUserAnnotationCard'
+import GeneralUserAnnotationCard from '../cards/GeneralUserAnnotationCard'
 import { random } from "underscore"
 import styled from 'styled-components';
 import GameChangerAPI from "../api/gameChanger-service-api";
@@ -62,7 +62,7 @@ const initState = {
 	textIndicies: [],
 	textIndiciesFull: [],
 	tagsList: [[]],
-	tagDescriptions: [],
+	tagDescriptions: {},
 	annotatedTokens: [[]],
 	loading: false,
 	progressText: '0/0',
@@ -71,7 +71,7 @@ const initState = {
 	endOfList: false,
 	voluntary: false,
 	isModalOpen: false,
-	componentStepNumbers: 0,
+	componentStepNumbers: {},
 	isTutorial: false,
 	isPowerUser: false,
 	paragraphs: [],
@@ -552,7 +552,7 @@ class GameChangerAssist extends Component {
 					<GeneralUserAnnotationCard
 						// uses template string for text to read newlines correctly
 						paragraph={paragraphs[currentParagraphIndex]}
-						entities={paragraphEntities[currentParagraphIndex] ? paragraphEntities[currentParagraphIndex][currentEntityIndex] : []}
+						entities={paragraphEntities[currentParagraphIndex] ? paragraphEntities[currentParagraphIndex][currentEntityIndex] : {}}
 						entityAnswer={paragraphEntityAnswers[currentParagraphIndex] ? paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex] : {correct: true, incorrectReason: '0'}}
 						tag={paragraphEntities[currentParagraphIndex] ? paragraphEntities[currentParagraphIndex][currentEntityIndex]?.tag : 'PERSON'}
 						tags={tagsList}

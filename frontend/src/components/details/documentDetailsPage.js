@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Paper from "material-ui/Paper/Paper";
 import SimpleTable from "../common/SimpleTable";
@@ -101,13 +102,13 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 	});
 }
 
-export default function DocumentDetailsPage(props) {
+const DocumentDetailsPage = (props) => {
 	
 	const {
 		document,
 		cloneData
 	} = props;
-	
+	console.log(document);
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({nodes: [], edges: []});
 	
@@ -428,3 +429,16 @@ const styles = {
 		color: '#131E43'
 	},
 }
+
+DocumentDetailsPage.propTypes = {
+	document: PropTypes.shape({
+		id: PropTypes.string,
+		display_title_s: PropTypes.string,
+		details: PropTypes.array,
+		refList: PropTypes.array
+	}),
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	})
+}
+export default DocumentDetailsPage;

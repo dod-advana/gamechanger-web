@@ -2,7 +2,7 @@ import React from "react";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {getSearchObjectFromString, getUserData, setSearchURL, setState} from "../../../sharedFunctions";
-import DocumentExplorer from "../../documentViewer/DocumentExplorer";
+import DefaultDocumentExplorer from "./defaultDocumentExplorer";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {Card} from "../../cards/GCCard";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
@@ -230,7 +230,7 @@ const DefaultMainViewHandler = {
 		
 		if(typeURL) {
 			setFilterVariables(typeFilterObject, typeURL);
-			if (orgURL !== 'ALLTYPES') {
+			if (typeURL !== 'ALLTYPES') {
 				newSearchSettings.allTypesSelected = false;
 				newSearchSettings.specificTypesSelected = true;
 			} else {
@@ -292,7 +292,7 @@ const DefaultMainViewHandler = {
 			getViewPanels
 		} = props;
 		
-		const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings} = state;
+		const {exportDialogVisible, searchSettings, prevSearchText, selectedDocuments, loading, rawSearchResults, viewNames, edaSearchSettings, currentSort, currentOrder} = state;
 		const {allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter,} = searchSettings;
 		
 		const noResults = Boolean(rawSearchResults?.length === 0);
@@ -320,6 +320,8 @@ const DefaultMainViewHandler = {
 							searchType={searchType}
 							searchFields={searchFields}
 							edaSearchSettings={edaSearchSettings}
+							sort={currentSort}
+							order={currentOrder}
 						/>
 					)}
 					{loading &&
@@ -360,14 +362,30 @@ const DefaultMainViewHandler = {
 		} = props;
 		
 		if (tabName === 'all'){
-			setState(dispatch,{
-				activeCategoryTab:tabName,
-				docSearchResults:state.docSearchResults.slice(0,6),
-				resultsPage: 1,
-				replaceResults: true,
-				infiniteScrollPage: 1
-			})
-		} else if (tabName === 'Documents' && state.resultsPage !== 1){
+			// if sort is relevance descending
+			if(state.currentSort === 'Relevance' && state.currentOrder === 'desc'){
+				setState(dispatch,{
+					activeCategoryTab:tabName,
+					docSearchResults:state.docSearchResults.slice(0,6),
+					resultsPage: 1,
+					replaceResults: true,
+					infiniteScrollPage: 1
+				})
+			} else {
+				// if sort isn't relevance, reset
+				setState(dispatch,{
+					activeCategoryTab:tabName,
+					docSearchResults:[],
+					resultsPage: 1,
+					replaceResults: true,
+					infiniteScrollPage: 1,
+					currentSort: 'Relevance',
+					currentOrder: 'desc',
+					docsPagination: true
+				})
+			}
+
+		} else if (tabName === 'Documents' && (state.resultsPage !== 1 || (state.activeCategoryTab === 'all' && (state.currentSort !== 'Relevance' || state.currentOrder !== 'desc')))){ // if pagination is wrong, or current sorting doesn't match
 			setState(dispatch,{activeCategoryTab:tabName, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
 		} else if (tabName === 'Documents'){
 			setState(dispatch,{activeCategoryTab:tabName, replaceResults: false});
@@ -404,7 +422,7 @@ const DefaultMainViewHandler = {
 					<StyledCenterContainer showSideFilters={false}>
 						<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
 							<ViewHeader {...props} mainStyles={{margin:'20px 0 0 0'}} resultsText=' '/>
-							<DocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
+							<DefaultDocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
 								data={docSearchResults}
 								searchText={searchText}
 								prevSearchText={prevSearchText}
@@ -417,7 +435,6 @@ const DefaultMainViewHandler = {
 								}}
 								isClone={true}
 								cloneData={cloneData}
-								isEDA={cloneData.clone_name === 'eda'}
 							/>
 						</div>
 					</StyledCenterContainer>

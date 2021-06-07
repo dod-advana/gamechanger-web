@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-
+import PropTypes from 'prop-types';
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 
 import './sidebar.css';
@@ -272,4 +272,18 @@ export default function SideBar(props) {
 			</div>
 		</div>
 	);
+}
+
+SideBar.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			runningEntitySearch: PropTypes.bool,
+			runningTopicSearch: PropTypes.bool,
+			entitiesForSearch: PropTypes.arrayOf(PropTypes.object),
+			topicsForSearch: PropTypes.arrayOf(PropTypes.object),
+			cloneData: PropTypes.shape({
+				clone_name: PropTypes.string
+			})
+		})
+	})
 }
