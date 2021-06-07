@@ -989,17 +989,6 @@ class SearchUtility {
 			}
 			shouldQueries.push(alias_query);
 
-			//const qs = {
-			//	query_string: {
-			//	  query: element,
-			//	  default_field: 'information',
-			//	  default_operator: 'AND',
-			//	  fuzzy_max_expansions: 100,
-			//	  fuzziness: 'AUTO'
-			//	}
-			//}
-			//shouldQueries.push(qs);
-
 			const multi_query = {
 				multi_match: {
 					fields: ['name', 'aliases.name'], // 'information'
@@ -1025,8 +1014,6 @@ class SearchUtility {
 				this.logger.error(err, 'JKLQOPMF', '');
 			}
 		}
-
-	
 
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
@@ -1072,7 +1059,7 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(contextResults, sentResults, userId, qaParams) {
+	async getQAContext(contextResults, entityQAResults, sentResults, userId, qaParams) {
 		
 		let context = [];
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
@@ -1116,12 +1103,17 @@ class SearchUtility {
 				}
 			}
 			if (sentResults) {
+				//console.log("SENT RESULTS");
+				//console.log(sentResults.length);
+				//console.log(sentResults);
 				for (var i = 0; i < sentResults.length; i++) {
+					console.log(i);
 					try {
 						let [docId, parIdx] = sentResults[i].id.split('_');
 						docId = docId + '_0';
 						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
 						let resultDoc = singleResult.body.hits.hits[0];
+						console.log(resultDoc);
 						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
 						contextPara.parId = parIdx;
 						contextPara.source = "intelligent search";
@@ -1147,7 +1139,20 @@ class SearchUtility {
 						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			} 
+			}
+			if (entityQAResults) {
+				//console.log("ENTITY RESULTS");
+				try{
+					let topEntity = entityQAResults.body.hits.hits[0];
+					//console.log(topEntity);
+					let entity = {filename: topEntity._source.name, docId: topEntity._source.name, docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type} 
+					entity.source = "entity search";
+					entity.text = topEntity._source.information;
+					context.unshift(entity);
+				} catch (e) {
+					LOGGER.error(e.message, 'REXUPFJN', userId);
+				}
+			}
 			return context
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);

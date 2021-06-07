@@ -260,6 +260,7 @@ const PolicySearchHandler = {
 						if(obj && obj.type === 'organization'){
 							const descriptionAPI = await gameChangerAPI.getDescriptionFromWikipedia(obj.name);
 							let description = descriptionAPI.query;
+							console.log(description);
 							if(description.pages){
 								entities[i].description = description.pages[Object.keys(description.pages)[0]].extract
 							}					

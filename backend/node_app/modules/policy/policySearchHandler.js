@@ -381,16 +381,12 @@ class PolicySearchHandler extends SearchHandler {
 					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities';
+					let entitiesIndex = 'entities-new';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
 					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
-					console.log("ENTITY RESULTS");
-					if (entityQAResults) {
-						console.log(entityQAResults.body.hits.hits.map(item => item._source));
-					} else {
-						console.log("NO ENTITIES FOUND");
-					}
-					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
+					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
+					console.log("CONTEXT");
+					console.log(context);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
