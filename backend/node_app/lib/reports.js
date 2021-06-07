@@ -56,8 +56,8 @@ class Reports {
 			stringifier.write(header);
 
 			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_rs, doc.ref_list];
-			stringifier.write(item);
-		});
+				stringifier.write(item);
+			});
 		}
 
 	}
@@ -127,7 +127,7 @@ class Reports {
 					],
 				};
 			});
-			const displayTitle = doc.title === "NA" ? `${doc.doc_type} ${doc.doc_num}` : `${doc.doc_type} ${doc.doc_num} - ${doc.title}`;
+			const displayTitle = doc.title === 'NA' ? `${doc.doc_type} ${doc.doc_num}` : `${doc.doc_type} ${doc.doc_num} - ${doc.title}`;
 			return {
 				stack: [
 					{ text: displayTitle, style: 'title', id: doc.filename, tocItem: true, },
@@ -176,6 +176,7 @@ class Reports {
 							style: 'title',
 							absolutePosition: { x: sideMargin, y: 20 },
 						},
+						{ text: data.classificationMarking, alignment: 'center', style: 'title' },
 					],
 					margin: [0, 0, 0, marginBottom],
 				};
