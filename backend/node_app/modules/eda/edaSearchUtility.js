@@ -239,19 +239,11 @@ class EDASearchUtility {
 	
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'is_supplementary_data_included_eda_ext_b']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*']
 				},
 				stored_fields: storedFields,
 				from: offset,
 				size: limit,
-				// aggregations: {
-				// 	doc_type_aggs: {
-				// 		terms: {
-				// 			field: 'doc_type',
-				// 			size: 10000
-				// 		}
-				// 	}
-				// },
 				track_total_hits: true,
 				query: {
 					bool: {
