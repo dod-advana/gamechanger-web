@@ -479,8 +479,6 @@ export default function PolicyGraphView(props) {
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNodeClicked', node.name);
 		setShouldCenter(false);
 		
-		console.log(node)
-		
 		// Sleep until node is in place
 		const sleep = (milliseconds) => {
 		  return new Promise(resolve => setTimeout(resolve, milliseconds));
