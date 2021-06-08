@@ -1,5 +1,6 @@
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { List, ListItem, Drawer, ListSubheader, Table, TableBody, TableRow, TableCell } from "@material-ui/core";
 import { backgroundGreyDark } from '../../components/common/gc-colors';
@@ -183,4 +184,21 @@ export const SelectedDocsDrawer = (props) => {
             </Drawer>
         </>
     )
+}
+
+SelectedDocsDrawer.propTypes = {
+    selectedDocuments: PropTypes.instanceOf(Map).isRequired,
+    docsDrawerOpen: PropTypes.bool,
+    setDrawer: PropTypes.func,
+    clearSelections: PropTypes.func, 
+    openExport: PropTypes.func,
+    removeSelection: PropTypes.func,
+    componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+    isDrawerReady: PropTypes.bool,
+    setDrawerReady: PropTypes.func,
+    setShowTutorial: PropTypes.func,
+    setStepIndex: PropTypes.func,
+    showTutorial: PropTypes.bool,
+    rawSearchResults: PropTypes.arrayOf(PropTypes.object),
+    checkUserInfo: PropTypes.func
 }

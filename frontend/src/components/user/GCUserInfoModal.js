@@ -1,12 +1,30 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField } from "@material-ui/core";
 import GCButton from '../common/GCButton';
 import EmailValidator from "email-validator";
 import {getUserData, setState} from "../../sharedFunctions";
 import GamechangerUserManagementAPI from "../api/GamechangerUserManagement";
-
+import GameChangerAPI from '../api/gameChanger-service-api';
+import styled from 'styled-components';
+import CloseIcon from '@material-ui/icons/Close'
+const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
-
+const CloseButton = styled.div`
+    padding: 6px;
+    background-color: white;
+    border-radius: 5px;
+    color: #8091A5 !important;
+    border: 1px solid #B0B9BE;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: .4;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+`;
 const styles = {
     modalBody: {
         width: 1000,
@@ -39,7 +57,7 @@ const styles = {
     },
 }
 
-export default (props) => {
+export default function GCUserInfoModal (props) {
     const {
         context
     } = props;
@@ -48,6 +66,9 @@ export default (props) => {
 
     const [emailError, setEmailError] = useState(false);
     const [orgError, setOrgError] = useState(false);
+    const [passedOnInfo, setPassedOnInfo] = useState(true);
+    const [userFeedbackMode, setUserFeedbackMode] = useState(false);
+    
 
     const checkRequired = (field, value) => {
         if (field === 'email') {
@@ -66,13 +87,53 @@ export default (props) => {
     const setUserInfoModal = (isOpen) => {
 		setState(dispatch, { userInfoModalOpen: isOpen });
 	}
+    /**
+     * If the user closes the model that decision 
+     * is put in local storage for a day
+     * @method passOnUserInfo
+     */
+    const passOnUserInfo = () =>{
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
+        const userInfo ={
+            passed:true,
+            expires:tomorrow.toUTCString()
+        }
+        localStorage.setItem('userInfoPassed', JSON.stringify(userInfo));
+        setPassedOnInfo(userInfo.passed)
+    }
+    /**
+     * Check the local storage for a userInfoPassed object
+     * if it hasn't expired return true
+     * @method passedOnUserInfo
+     * @returns boolean
+     */
+    const passedOnUserInfo =() => {
+        const infoPassed =  JSON.parse(localStorage.getItem('userInfoPassed'));
+        let didPass = false;
+        if (infoPassed && (new Date(infoPassed.expires) > new Date())){
+            didPass= infoPassed.passed;
+        }
+        setPassedOnInfo(didPass);
+    }
+
+    const getUserFeedbackMode = async () => {
+		try {
+			const { data } = await gameChangerAPI.getUserFeedbackMode();
+			const value = data.value === 'true';
+			setUserFeedbackMode(value);
+		} catch(e) {
+			console.error('Error getting user feedback mode', e);
+		}
+	}
+    
 	const handleUserInfoInput = (field, text) => {
 		const userInfo = {...state.userInfo};
 		userInfo[field] = text;
 		setState(dispatch, { userInfo })
 	}
-
+    
 	const submitUserInfo = async () => {
 		// save in pg
 		try {
@@ -83,10 +144,13 @@ export default (props) => {
 		}
 		setUserInfoModal(false);
 	}
-
+    useEffect(() => {
+        getUserFeedbackMode();
+		passedOnUserInfo();
+	}, []);
     return (
         <Dialog
-            open={state.userInfoModalOpen}
+            open={state.userInfoModalOpen && !passedOnInfo && userFeedbackMode}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
@@ -94,6 +158,9 @@ export default (props) => {
                     <Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Tell Us About Yourself</Typography>
                 </div>
             </DialogTitle>
+            <CloseButton onClick={passOnUserInfo}>
+				<CloseIcon fontSize="large" />
+			</CloseButton>
 			<p style={styles.disclaimer}>The GAMECHANGER Team is collecting user data to support our research as we continue improving the application. Your responses will not be shared or used for any purposes outside of the GAMECHANGER development team.</p>
             <DialogContent style={styles.modalBody}>
                 <div style={{...styles.inputDiv, height: 60}}>
@@ -158,3 +225,13 @@ export default (props) => {
         </Dialog>   
     )
 };
+
+GCUserInfoModal.propTypes = {
+    context: PropTypes.shape({
+        state: PropTypes.shape({
+            userInfo: PropTypes.objectOf(PropTypes.string),
+            userInfoModalOpen: PropTypes.bool
+        }),
+        dispatch: PropTypes.func
+    })
+}

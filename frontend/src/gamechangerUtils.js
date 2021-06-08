@@ -754,3 +754,40 @@ export const decodeTinyUrl = (url) => {
 
 	return returnData;
 }
+
+export const encode = (filename) => {
+    const encodings = {
+        '+': "%2B",
+        '!': "%21",
+        '"': "%22",
+        '#': "%23",
+        '$': "%24",
+        '&': "%26",
+        '\'': "%27",
+        '(': "%28",
+        ')': "%29",
+        '*': "%2A",
+        ',': "%2C",
+        ':': "%3A",
+        ';': "%3B",
+        '=': "%3D",
+        '?': "%3F",
+        '@': "%40",
+    };
+
+    return filename.replace(
+        /([+!"#$&'()*+,:;=?@])/img,
+        match => encodings[match]
+    );
+}
+
+export const exactMatch = (phrase, word) => {
+	const wordList = phrase.trim().split(' ')
+	let exists = false
+	wordList.forEach(w => {
+		if(w.toLowerCase()===word.toLowerCase()){
+			exists=true
+		}
+	});
+	return exists;
+}

@@ -143,6 +143,12 @@ export const EDASidePanel = (props) => {
             case 'contractData':
                 edaSettings.contractData[value] = !edaSettings.contractData[value];
                 break;
+            case 'minObligatedAmount':
+                edaSettings.minObligatedAmount = value;
+                break;
+            case 'maxObligatedAmount':
+                edaSettings.maxObligatedAmount = value;
+                break;
             default:
                 break;
         }
@@ -494,6 +500,45 @@ export const EDASidePanel = (props) => {
         )
     }
 
+    const renderObligatedAmountFilter = () => {
+        return (
+            <div style={styles.container}>
+                <TextField
+                    placeholder="Min"
+                    variant="outlined"
+                    type="number"
+                    defaultValue={edaSearchSettings && edaSearchSettings.minObligatedAmount}
+                    style={{ backgroundColor: 'white', width: '100%', margin: '0 0 15px 0' }}
+                    fullWidth={true}
+                    onBlur={(event) => setEDASearchSetting('minObligatedAmount', event.target.value)}
+                    inputProps={{
+                        style: {
+                            height: 19,
+                            width: '100%'
+                        }
+                    }}
+                />
+                <TextField
+                    placeholder="Max"
+                    variant="outlined"
+                    type="number"
+                    defaultValue={edaSearchSettings && edaSearchSettings.maxObligatedAmount}
+                    style={{ backgroundColor: 'white', width: '100%' }}
+                    fullWidth={true}
+                    onBlur={(event) => setEDASearchSetting('maxObligatedAmount', event.target.value)}
+                    inputProps={{
+                        style: {
+                            height: 19,
+                            width: '100%'
+                        }
+                    }}
+                />
+            </div>
+        )
+    }
+
+
+
     return (
         <div>
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 15 }}>FILTERS</div>
@@ -511,6 +556,10 @@ export const EDASidePanel = (props) => {
 
             <GCAccordion contentPadding={15} expanded={false} header={'EDA CONTRACT DATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
                 { renderContractDataFilter() }
+            </GCAccordion>
+
+            <GCAccordion contentPadding={15} expanded={false} header={'OBLIGATED AMOUNT'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                { renderObligatedAmountFilter() }
             </GCAccordion>
 
             <GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={() => { setState(dispatch, { runSearch: true })}}>Update Search</GCButton>

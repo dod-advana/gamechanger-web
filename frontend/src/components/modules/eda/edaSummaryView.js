@@ -1,11 +1,12 @@
 
-import React, {useState} from "react";
+import React, {useState, useEffect } from "react";
 import {
 	MuiPickersUtilsProvider,
 	KeyboardDatePicker
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
+import GCButton from "../../common/GCButton";
 
 
 import {
@@ -65,9 +66,9 @@ const styles = {
     dialog: {
     },
     dialogContent: {
-        width: 1000,
+        width: 1220,
         height: 600,
-        padding: '30px 30px'
+        padding: '15px 30px'
     },
     detailDiv: {
         margin: '5px auto'
@@ -87,7 +88,7 @@ const styles = {
     },
     tableHeaderRow: {
         backgroundColor: '#131E43',
-        color: 'white'
+        color: 'white',
     },
     tableColumn: {
         textAlign: 'left',
@@ -101,24 +102,34 @@ export const EDASummaryView = (props) => {
         edaSearchSettings,
         searchResults,
         loading,
-        dispatch
+        dispatch,
+        currentViewName,
+        summaryCardView
     } = props;
 
     const [showDialog, setShowDialog] = useState(false);
+    const [summaryDetailData, setSummaryDetailData] = useState([]);
+    const [summaryDetailTitle, setSummaryDetailTitle] = useState('');
 
-    // const [summaryView, setSummaryView] = useState(true);
-    // const [aggregationPills, setAggregationPills] = useState('');
+    useEffect(() => {
+        if (currentViewName === 'Summary' && summaryCardView) {
+            setState(dispatch, { summaryCardView: false, resultsText: '' })
+        }
+    }, [currentViewName, dispatch, summaryCardView])
 
-    // useEffect(() => {
-    //     setAggregationPills(renderAggregationPills());
-    // }, [edaSearchSettings.aggregations]);
 
     const setEDASearchSetting = (field, value, isStartDate) => {
 		const edaSettings = _.cloneDeep(edaSearchSettings);
         let doSearch = false;
 
 		if (field === 'aggregations') {
-            edaSettings.aggregations[value] = !edaSettings.aggregations[value];
+            const index = edaSettings.aggregations.indexOf(value);
+            if (index !== -1) {
+                edaSettings.aggregations.splice(index, 1);
+            }
+            else {
+                edaSettings.aggregations.push(value);
+            }
 		}
         else if (field === 'issueDateRange') {
             if(Object.prototype.toString.call(value) === '[object Date]'){
@@ -146,119 +157,14 @@ export const EDASummaryView = (props) => {
     }
 
 
-    const summaryDetailColumns = [
-        {
-            Header: () => <p>Office Agency</p>,
-            filterable: false,
-            accessor: 'officeAgency',
-            width: 250,
-            Cell: row => (
-                <Link href={"#"} onClick={(event)=> {
-                    event.preventDefault();
-                    // 
-                }}
-                style={{ color: '#386F94' }}
-                >
-                    <div style={{ textAlign: 'left' }}>
-                        <p>{row.value}</p>
-                    </div>
-                </Link>
-            )
-        },
-        {
-            Header: () => <p>Office DoDAAC</p>,
-            filterable: false,
-            accessor: 'officeDoDAAC',
-            width: 250,
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>Office Command</p>,
-            filterable: false,
-            accessor: 'officeCommand',
-            width: 250,
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>PIID</p>,
-            filterable: false,
-            accessor: 'piid',
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>Vendor Cage</p>,
-            filterable: false,
-            accessor: 'vendorCage',
-            width: 200,
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>Vendor Name</p>,
-            filterable: false,
-            accessor: 'vendorName',
-            width: 200,
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>Obligated Amount ($)</p>,
-            filterable: false,
-            accessor: 'obligatedAmount',
-            width: 250,
-            Cell: row => (
-                <div style={{ textAlign: 'left' }}>
-                    <p>{row.value}</p>
-                </div>
-            )
-        },
-        {
-            Header: () => <p>Contract Card</p>,
-            filterable: false,
-            accessor: 'contractCard',
-            width: 200,
-            Cell: row => (
-                <Link href={"#"} onClick={(event)=> {
-                    event.preventDefault();
-                    // 
-                }}
-                style={{ color: '#386F94' }}
-                >
-                    <div style={{ textAlign: 'left' }}>
-                        <p>{row.value}</p>
-                    </div>
-                </Link>
-            )
-        },
-    ];
-
     const renderDetailTable = () => {
-
         return (
             <ReactTable
-                data={searchResults}
+                data={summaryDetailData}
                 className={'striped'}
                 noDataText={"No rows found"}
                 // loading={loadingTable}
-                columns={summaryDetailColumns}
+                columns={getSummaryColumns(true)}
                 editable={false}
                 filterable={false}
                 minRows={1}
@@ -268,45 +174,46 @@ export const EDASummaryView = (props) => {
                 getTbodyProps={(state, rowInfo, column) => {
                     return {
                         style: {
-                            overflow: 'unset'
+                            overflow: 'auto'
                         }
                     };
                 }}
                 getTdProps={(state, rowInfo, column) => ({
                     style: {
-                        height: '40px',
+                        whiteSpace: 'unset'
                     },
                 })}
                 getTrGroupProps={(state, rowInfo) => {
                     return {
-                        style: { maxHeight: 40 }
+                        style: { maxHeight: 72 }
                     };
                 }}
                 getTheadTrProps={(state, rowInfo, column) => {
                     return { style: styles.tableHeaderRow };
                 }}
                 getTheadThProps={(state, rowInfo, column) => {
-                    return { style: { fontSize: 15, fontWeight: 'bold' } };
+                    return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
                 }}
                 style={{
-                    height: "90%",
+                    height: "100%",
                     borderTopRightRadius: 5,
-                    borderTopLeftRadius: 5
+                    borderTopLeftRadius: 5,
+                    width: 1160
                 }}
                 getTableProps={(state, rowInfo, column) => {
                     return { style: { 
                         borderTopRightRadius: 5,
-                        borderTopLeftRadius: 5
+                        borderTopLeftRadius: 5,
                     }}
                 }}
             />
         )
     }
 
-    const getSummaryColumns = () => {
+    const getSummaryColumns = (isDetailColumns = false) => {
 
 
-        const summaryColumns = [
+        let summaryColumns = [
             {
                 Header: () => <p style={styles.tableColumn}>Office Agency</p>,
                 filterable: false,
@@ -318,7 +225,7 @@ export const EDASummaryView = (props) => {
                     </div>
                 ),
                 aggregate: vals => [...new Set(vals)],
-                id: 'officeAgency',
+                id: 'contract_issue_name_eda_ext',
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 }
@@ -343,7 +250,7 @@ export const EDASummaryView = (props) => {
                 Header: () => <p style={styles.tableColumn}>Office Command</p>,
                 filterable: false,
                 accessor: 'issuing_organization_eda_ext',
-                width: 250,
+                width: 200,
                 Cell: row => (
                     <div style={{ textAlign: 'left' }}>
                         <p>{row.value}</p>
@@ -369,13 +276,13 @@ export const EDASummaryView = (props) => {
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 },
-                id: 'vendor'
+                id: 'vendor_name_eda_ext'
             },
             {
                 Header: () => <p style={styles.tableColumn}>Parent IDV</p>,
                 filterable: false,
                 accessor: 'reference_idv_eda_ext',
-                width: 250,
+                width: 200,
                 Cell: row => (
                     <div style={{ textAlign: 'left' }}>
                         <p>{row.value}</p>
@@ -385,162 +292,199 @@ export const EDASummaryView = (props) => {
                 Aggregated: row => {
                     return <span>{row.value} </span>
                 },
-                id: 'parentIDV'
-            },
-            {
-                Header: () => <p style={styles.tableColumn}>Total Procurement Instruments</p>,
-                filterable: false,
-                accessor: 'procurement',
-                width: 250,
-                Cell: row => (
-                    <div style={{ textAlign: 'left' }}>
-                        <p>1</p>
-                    </div>
-                ),
-                aggregate: (vals, rows) => {
-                    return rows.length;
-                },
-                Aggregated: (row, item) => {
-                    return <span>{row.value}</span>
-                },
-                id: 'totalProcurementInstruments'
-            },
-            // {
-            //     Header: () => <p style={styles.tableColumn}>Total Open</p>,
-            //     filterable: false,
-            //     accessor: 'totalOpen',
-            //     Cell: row => (
-            //         <div style={{ textAlign: 'left' }}>
-            //             <p>{row.value}</p>
-            //         </div>
-            //     ),
-            //     aggregate: vals => _.round(_.mean(vals)),
-            //     Aggregated: row => {
-            //         return <span>{row.value} (avg)</span>
-            //     }
-            // },
-            // {
-            //     Header: () => <p style={styles.tableColumn}>Total Closed</p>,
-            //     filterable: false,
-            //     accessor: 'totalClosed',
-            //     Cell: row => (
-            //         <div style={{ textAlign: 'left' }}>
-            //             <p>{row.value}</p>
-            //         </div>
-            //     ),
-            //     aggregate: vals => _.round(_.mean(vals)),
-            //     Aggregated: row => {
-            //         return <span>{row.value} (avg)</span>
-            //     }
-            // },
-            // {
-            //     Header: () => <p style={styles.tableColumn}>% Closed</p>,
-            //     filterable: false,
-            //     accessor: 'percentClosed',
-            //     Cell: row => (
-            //         <div style={{ textAlign: 'left' }}>
-            //             <p>{row.value}</p>
-            //         </div>
-            //     ),
-            //     aggregate: vals => _.round(_.mean(vals)),
-            //     Aggregated: row => {
-            //         return <span>{row.value} (avg)</span>
-            //     }
-            // },
-            // {
-            //     Header: () => <p style={styles.tableColumn}>Cumulative Obligated Amount ($)</p>,
-            //     filterable: false,
-            //     accessor: 'coa',
-            //     width: 250,
-            //     Cell: row => (
-            //         <div style={{ textAlign: 'left' }}>
-            //             <p>{row.value}</p> 
-            //         </div>
-            //     ),
-            //     aggregate: vals => _.round(_.mean(vals)),
-            //     Aggregated: row => {
-            //         return <span>{row.value} (avg)</span>
-            //     },
-            //     id: 'cumulativeObligatedAmount'
-            // },
-            // {
-            //     Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
-            //     filterable: false,
-            //     accessor: 'procurementList',
-            //     width: 250,
-            //     Cell: row => (
-            //         <Link onClick={(event)=> {
-            //             setShowDialog(true);
-            //             // setSummaryView(false);
-            //         }}
-            //         style={{ color: '#386F94' }}
-            //         >
-            //             <div style={{ textAlign: 'left' }}>
-            //                 <p>{row.value}</p>
-            //             </div>
-            //         </Link>
-    
-            //     ),
-            //     aggregate: vals => {},
-            //     Aggregated: row => {
-            //         return <span>{row.value} </span>
-            //     }
-            // }
+                id: 'reference_idv_eda_ext'
+            }
+
         ];
+
+        if (!isDetailColumns) {
+            summaryColumns = summaryColumns.concat(
+                [
+                    {
+                        Header: () => <p style={styles.tableColumn}>Total Procurement Instruments</p>,
+                        filterable: false,
+                        accessor: 'procurement',
+                        width: 150,
+                        Cell: row => (
+                            <div style={{ textAlign: 'left' }}>
+                                <p>1</p>
+                            </div>
+                        ),
+                        aggregate: (vals, rows) => {
+                            return rows.length;
+                        },
+                        Aggregated: (row, item) => {
+                            return <span>{row.value}</span>
+                        },
+                        id: 'totalProcurementInstruments'
+                    },
+                    // {
+                    //     Header: () => <p style={styles.tableColumn}>Total Open</p>,
+                    //     filterable: false,
+                    //     accessor: 'totalOpen',
+                    //     Cell: row => (
+                    //         <div style={{ textAlign: 'left' }}>
+                    //             <p>{row.value}</p>
+                    //         </div>
+                    //     ),
+                    //     aggregate: vals => _.round(_.mean(vals)),
+                    //     Aggregated: row => {
+                    //         return <span>{row.value} (avg)</span>
+                    //     }
+                    // },
+                    // {
+                    //     Header: () => <p style={styles.tableColumn}>Total Closed</p>,
+                    //     filterable: false,
+                    //     accessor: 'totalClosed',
+                    //     Cell: row => (
+                    //         <div style={{ textAlign: 'left' }}>
+                    //             <p>{row.value}</p>
+                    //         </div>
+                    //     ),
+                    //     aggregate: vals => _.round(_.mean(vals)),
+                    //     Aggregated: row => {
+                    //         return <span>{row.value} (avg)</span>
+                    //     }
+                    // },
+                    // {
+                    //     Header: () => <p style={styles.tableColumn}>% Closed</p>,
+                    //     filterable: false,
+                    //     accessor: 'percentClosed',
+                    //     Cell: row => (
+                    //         <div style={{ textAlign: 'left' }}>
+                    //             <p>{row.value}</p>
+                    //         </div>
+                    //     ),
+                    //     aggregate: vals => _.round(_.mean(vals)),
+                    //     Aggregated: row => {
+                    //         return <span>{row.value} (avg)</span>
+                    //     }
+                    // },
+                    // {
+                    //     Header: () => <p style={styles.tableColumn}>Cumulative Obligated Amount ($)</p>,
+                    //     filterable: false,
+                    //     accessor: 'coa',
+                    //     width: 250,
+                    //     Cell: row => (
+                    //         <div style={{ textAlign: 'left' }}>
+                    //             <p>{row.value}</p> 
+                    //         </div>
+                    //     ),
+                    //     aggregate: vals => _.round(_.mean(vals)),
+                    //     Aggregated: row => {
+                    //         return <span>{row.value} (avg)</span>
+                    //     },
+                    //     id: 'cumulativeObligatedAmount'
+                    // },
+                ]
+            );
+            if (edaSearchSettings.aggregations.length > 0) {
+                summaryColumns.push(            
+                    {
+                        Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
+                        filterable: false,
+                        accessor: 'procurementList',
+                        width: 250,
+                        Cell: row => 
+                        (
+                            <div style={{ textAlign: 'left' }}>
+                                <p>{row.value}</p> 
+                            </div>
+                        ),
+                        aggregate: vals => vals,
+                        Aggregated: row => {
+
+                            let subRows = row.row._subRows;
+                            let resultData = [];
+                            for (let i = 0; i < subRows.length; i++){
+                                let subRow = subRows[i];
+                                for (let j = 0; j < edaSearchSettings.aggregations.length - 1; j++) {
+                                    subRow = subRow._subRows[0];
+                                }
+                                resultData.push(subRow);
+                            }
+                            resultData = resultData.map(row => row._original);
+                            
+                            return (
+                                <Link onClick={(event)=> {
+                                    setShowDialog(true);
+                                    setSummaryDetailData(resultData);
+                                    let title = "";
+                                    for (const agg of edaSearchSettings.aggregations) {
+                                        if (resultData && resultData.length  > 0 && resultData[0]) {
+                                            title += "["+resultData[0][agg]+"]";
+                                            if (edaSearchSettings.aggregations.indexOf(agg) !== edaSearchSettings.aggregations.length - 1) {
+                                                title += " - ";
+                                            }
+                                        }
+                                    }
+
+                                    setSummaryDetailTitle(title);
+                                }}
+                                style={{ color: '#386F94', cursor: 'pointer'}}
+                                >
+                                    <div style={{ textAlign: 'left' }}>
+                                        <p>Open</p>
+                                    </div>
+                                </Link>
+                            )
+                        }
+                    }
+                );
+            }
+        }
+        else {
+            // summary detail columns
+            summaryColumns = summaryColumns.concat([
+                // {
+                //     Header: () => <p style={styles.tableColumn}>PIID</p>,
+                //     filterable: false,
+                //     accessor: 'piid',
+                //     Cell: row => (
+                //         <div style={{ textAlign: 'left' }}>
+                //             <p>{row.value}</p>
+                //         </div>
+                //     )
+                // },
+                {
+                    Header: () => <p style={styles.tableColumn}>Vendor Cage</p>,
+                    filterable: false,
+                    accessor: 'vendor_duns_eda_ext',
+                    width: 200,
+                    Cell: row => (
+                        <div style={{ textAlign: 'left' }}>
+                            <p>{row.value}</p>
+                        </div>
+                    )
+                },
+                {
+                    Header: () => <p style={styles.tableColumn}>Vendor Name</p>,
+                    filterable: false,
+                    accessor: 'vendor_name_eda_ext',
+                    width: 200,
+                    Cell: row => (
+                        <div style={{ textAlign: 'left' }}>
+                            <p>{row.value}</p>
+                        </div>
+                    )
+                },
+                {
+                    Header: () => <p style={styles.tableColumn}>Obligated Amount ($)</p>,
+                    filterable: false,
+                    accessor: 'obligated_amounts_eda_ext',
+                    width: 250,
+                    Cell: row => (
+                        <div style={{ textAlign: 'left' }}>
+                            <p>{row.value}</p>
+                        </div>
+                    )
+                }
+            ]
+            )
+        }
 
         return summaryColumns;
     }
-
-    // const renderAggregationPills = () => {
-    //     const pills = [];
-
-    //     const varToName={
-    //         officeAgency: 'Issue Office Agency',
-    //         vendor: 'Vendor',
-    //         parentIDV: 'Parent IDV'
-    //     };
-
-    //     for (const agg of Object.keys(edaSearchSettings.aggregations)) {
-    //         if (edaSearchSettings.aggregations[agg]) {
-    //             pills.push(<div style={styles.pill}>{varToName[agg]}</div>);
-    //         }
-    //     }
-    //     return pills;
-    // }
-
-    // const renderDateRange = () => {
-    //     const start = edaSearchSettings.startDate;
-    //     const end = edaSearchSettings.endDate;
-
-    //     const startDate = start ? `${start.getMonth()}/${start.getDate()}/${start.getFullYear()}` : 'None';
-    //     const endDate = end ? `${end.getMonth()}/${end.getDate()}/${end.getFullYear()}` : 'None';
-
-    //     return <p style={{display: 'inline-block', margin: '0 0 0 10px'}}>{startDate} - {endDate} </p>;
-    // }
-
-    // const filtersPresent = () => {
-
-    //     // this needs to be edaSearchSettings in GameChangerPage.startingState
-    //     const noFilters = {
-    //         aggregations: {
-    //             officeAgency: false,
-    //             vendor: false,
-    //             parentIDV: false
-    //         },
-    //         startDate: null,
-    //         endDate: null,
-    //         contractIssueAgency: null
-    //     };
-
-    //     return !_.isEqual(noFilters,edaSearchSettings);
-    // }
-
-    const summaryColumnNames = [
-        'officeAgency', 
-        'vendor',
-        'parentIDV'
-    ];
-
 
     return (
         <div>
@@ -550,9 +494,12 @@ export const EDASummaryView = (props) => {
                 onClose={() => setShowDialog(false)}
                 style={styles.dialog}
             >
-                <DialogTitle>
+                <DialogTitle style={{ padding: '16px 30px 0'}}>
                     <div style={{display: 'flex', width: '100%'}}>
                         <Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Summary Details</Typography>
+                    </div>
+                    <div style={{display: 'flex', width: '100%', margin: '5px 0'}}>
+                        <Typography variant="h5" display="block" style={{ fontWeight: 400 }}>{summaryDetailTitle}</Typography>
                     </div>
                     <IconButton aria-label="close" style={{ 
 						position: 'absolute',
@@ -571,7 +518,18 @@ export const EDASummaryView = (props) => {
                     {renderDetailTable()}
                 </DialogContent>
                 <DialogActions>
-                    
+                    <GCButton
+                        onClick={() => {
+                            setState(dispatch, 
+                                { 
+                                    summaryCardView: true, 
+                                    summaryCardData: summaryDetailData,
+                                    currentViewName: 'Card',
+                                    listView: false,
+                                    resultsText: `${summaryDetailData.length} results aggregated - ${summaryDetailTitle}`
+                                })
+                        }}
+                    >Open Card View</GCButton>
                 </DialogActions>
             </Dialog>
 
@@ -610,9 +568,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'officeAgency')}
+                                            onClick={() => setEDASearchSetting('aggregations', 'contract_issue_name_eda_ext')}
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.officeAgency}
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('contract_issue_name_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                                             name='Issue Office Agency'
                                             />}
@@ -625,9 +583,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox											
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'vendor')} // need a handle
+                                            onClick={() => setEDASearchSetting('aggregations', 'vendor_name_eda_ext')} 
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.vendor} // need a selected
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('vendor_name_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                                             name='Vendor'
                                             />}
@@ -640,9 +598,9 @@ export const EDASummaryView = (props) => {
                                         style={styles.titleText}
                                         control={<Checkbox
                                             style={styles.filterBox}
-                                            onClick={() => setEDASearchSetting('aggregations', 'parentIDV')} // need a handle
+                                            onClick={() => setEDASearchSetting('aggregations', 'reference_idv_eda_ext')} 
                                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.parentIDV} // need a selected
+                                            checked={edaSearchSettings && edaSearchSettings.aggregations && edaSearchSettings.aggregations.indexOf('reference_idv_eda_ext') !== -1}
                                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                                             name='Parent IDV'
                                             />}
@@ -704,8 +662,8 @@ export const EDASummaryView = (props) => {
                     className={'striped'}
                     noDataText={"No rows found"}
                     loading={loading}
-                    columns={getSummaryColumns()}
-                    pivotBy={searchResults ? Object.keys(edaSearchSettings.aggregations).filter(key => edaSearchSettings.aggregations[key] && summaryColumnNames.includes(key)) : []}
+                    columns={getSummaryColumns(false)}
+                    pivotBy={searchResults ? edaSearchSettings.aggregations: []}
                     editable={false}
                     filterable={false}
                     minRows={1}
@@ -715,23 +673,23 @@ export const EDASummaryView = (props) => {
                     getTbodyProps={(state, rowInfo, column) => {
                         return {
                             style: {
-                                overflow: 'unset'
+                                overflow: 'auto'
                             }
                         };
                     }}
                     getTdProps={(state, rowInfo, column) => ({
                         style: {
-                            height: '40px',
+                            whiteSpace: 'unset'
                         },
                     })}
                     getTheadTrProps={(state, rowInfo, column) => {
                         return { style: styles.tableHeaderRow };
                     }}
                     getTheadThProps={(state, rowInfo, column) => {
-                        return { style: { fontSize: 15, fontWeight: 'bold' } };
+                        return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
                     }}
                     style={{
-                        height: "calc(100vh - 395px)",
+                        height: "calc(100vh - 300px)",
                         borderTopRightRadius: 5,
                         borderTopLeftRadius: 5,
                         marginBottom: 10
@@ -745,27 +703,6 @@ export const EDASummaryView = (props) => {
                 />
             </div> 
 
-            {/* :
-
-            <div style={styles.detailDiv} id="detailDiv">
-                <Button
-                    style={{
-                        fontFamily: 'Montserrat',
-                        color: '#313541',
-                        margin: '0 0 10px 0'
-                    }}
-                    startIcon={<ArrowBackIcon/>}
-                    onClick={()=> {
-                        setSummaryView(true);
-                    }}
-                    >
-                    Back
-                </Button>
-                <Typography variant="h3" style={{ fontWeight: 700, margin: '0 0 15px 0' }}>Summary Details</Typography>
-                {renderDetailTable()}
-            </div>
-
-            } */}
         </div>
     );
 }

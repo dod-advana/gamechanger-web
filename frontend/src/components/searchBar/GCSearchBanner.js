@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Typography, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import styled from 'styled-components';
@@ -109,7 +110,7 @@ const AdvanaLogo = styled.img`
 	width: 40%;
 `;
 
-export const SearchBanner = (props) => {
+const SearchBanner = (props) => {
 	const {
 		style,
 		children,
@@ -235,3 +236,26 @@ export const SearchBanner = (props) => {
 		</div>
 	);
 }
+
+SearchBanner.propTypes = {
+	style: PropTypes.objectOf(PropTypes.string),
+	children: PropTypes.element,
+	onTitleClick: PropTypes.func,
+	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+	isDataTracker: PropTypes.bool,
+	loginModalOpen: PropTypes.bool,
+	setLoginModal: PropTypes.func,
+	jupiter: PropTypes.bool,
+	cloneData: PropTypes.object,
+	detailsType: PropTypes.string,
+	titleBarModule: PropTypes.string,
+	rawSearchResults: PropTypes.array,
+	selectedCategories: PropTypes.objectOf(PropTypes.bool),
+	categoryMetadata: PropTypes.objectOf(PropTypes.objectOf(PropTypes.number)),
+	activeCategoryTab: PropTypes.string,
+	setActiveCategoryTab: PropTypes.func,
+	pageDisplayed: PropTypes.string,
+	dispatch: PropTypes.func
+}
+
+export default SearchBanner
