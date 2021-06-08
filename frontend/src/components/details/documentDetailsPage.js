@@ -108,7 +108,7 @@ const DocumentDetailsPage = (props) => {
 		document,
 		cloneData
 	} = props;
-	console.log(document);
+	
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({nodes: [], edges: []});
 	
@@ -177,6 +177,7 @@ const DocumentDetailsPage = (props) => {
 					docIds: docIds
 				}
 			}).then(resp => {
+				console.log(resp)
 				const t1 = new Date().getTime();
 				const similarDocs = resp.data.docs.filter(doc => {return docsMap.similar_to.includes(doc.id)});
 				const referencesDocs = resp.data.docs.filter(doc => {return docsMap.references.includes(doc.id)});
