@@ -40,7 +40,8 @@ const securePort = 8443;
 
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
-var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
+// var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
+var keyFileData = constants.TLS_KEY;
 var private_key = '-----BEGIN RSA PRIVATE KEY-----\n' + (RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')).match(/.{1,64}/g).join('\n') + '\n-----END RSA PRIVATE KEY-----';
 
 
@@ -63,7 +64,7 @@ logger.boot(`
 
 const thes = new Thesaurus();
 thes.waitForLoad().then(() => {
-	console.log(thes.lookUp('defense'));
+	console.log(thes.lookUp('win'));
 });
 
 try {
@@ -265,10 +266,11 @@ app.use('/api', require('./node_app/routes/advanaRouter'));
 app.use('/api/gamechanger/modular', require('./node_app/routes/modularGameChangerRouter'));
 
 const options = {
-	key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
+	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
+	key: constants.TLS_KEY,
 	passphrase: constants.TLS_KEY_PASSPHRASE,
-	cert: fs.readFileSync(constants.TLS_CERT_FILEPATH),
-	ca: fs.readFileSync(constants.TLS_CERT_CA_FILEPATH),
+	cert: constants.TLS_CERT,
+	ca: constants.TLS_CERT_CA,
 	requestCert: false,
 	rejectUnauthorized: false
 };

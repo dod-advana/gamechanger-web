@@ -247,9 +247,9 @@ class GlobalSearchHandler extends SearchHandler {
 			headers: { 'content-type': 'application/json', 'X-Qlik-xrfkey': '1234567890123456', 'X-Qlik-user': this.getUserHeader(userid) },
 			httpsAgent: new https.Agent({
 				rejectUnauthorized: false,
-				ca: fs.readFileSync(CA),
-				key: fs.readFileSync(KEY),
-				cert: fs.readFileSync(CERT)
+				ca: CA,
+				key: KEY,
+				cert: CERT
 			})
 		};
 	};

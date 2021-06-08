@@ -209,7 +209,7 @@ class DocumentController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { path, dest, filekey, samplingType, samplingLines } = req.query;
-
+	
 			if (!(dest && filekey && path)) {
 				throw new Error('Both destination and filekey are required query parameters');
 			}
@@ -236,9 +236,9 @@ class DocumentController {
 			headers: { 'content-type': 'application/json', 'X-Qlik-xrfkey': '1234567890123456', 'X-Qlik-user': this.getUserHeader(userid) },
 			httpsAgent: new https.Agent({
 				rejectUnauthorized: false,
-				ca: fs.readFileSync(CA),
-				key: fs.readFileSync(KEY),
-				cert: fs.readFileSync(CERT)
+				ca: CA,
+				key: KEY,
+				cert: CERT
 			})
 		};
 	};
