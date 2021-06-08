@@ -411,6 +411,8 @@ class PolicySearchHandler extends SearchHandler {
 						searchResults.qaResults.answers = cleanedResults;
 						searchResults.qaResults.filenames = contextIds;
 						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
+						console.log(searchResults.qaResults);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
