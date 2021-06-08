@@ -1040,8 +1040,6 @@ class SearchUtility {
 			}
 			mustQueries.push(alias);
 		};
-		console.log("MUST")
-		console.log(mustQueries);
 
 		const aliasQuery = {
 			nested: {
@@ -1129,7 +1127,7 @@ class SearchUtility {
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
 							parIdx = paraHits[x]._nested.offset;
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 							contextPara.parId = parIdx;
 							contextPara.source = "context search";
 							let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
@@ -1148,7 +1146,7 @@ class SearchUtility {
 					parIdx = 0;
 					let singleResult = await this.queryOneDocQA(resultDoc._source.id, userId); // this adds the beginning of the doc
 					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 					contextPara.source = "context search"
 					contextPara.parId = parIdx;
 					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
@@ -1165,7 +1163,7 @@ class SearchUtility {
 						docId = docId + '_0';
 						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
 						let resultDoc = singleResult.body.hits.hits[0];
-						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 						contextPara.parId = parIdx;
 						contextPara.source = "intelligent search";
 						let paraHit = resultDoc._source.paragraphs[parIdx];
@@ -1194,7 +1192,7 @@ class SearchUtility {
 			if (entityQAResults) {
 				try{
 					let topEntity = entityQAResults.body.hits.hits[0];
-					let entity = {filename: topEntity._source.name + ' (Wikipedia)', docId: '', docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type} 
+					let entity = {filename: topEntity._source.name, docId: topEntity._source.name.toLowerCase(), docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: topEntity._source.entity_type};
 					entity.source = "entity search";
 					entity.text = topEntity._source.information;
 					context.unshift(entity);
@@ -1826,7 +1824,6 @@ class SearchUtility {
 			}
 		}
 		searchResults.sentResults = sentenceResults;
-		console.log(searchResults.expansionDict);
 		return searchResults;
 	}
 
