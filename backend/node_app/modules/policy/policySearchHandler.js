@@ -549,9 +549,10 @@ class PolicySearchHandler extends SearchHandler {
 
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 
-				const searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results
-				return {...await this.dataTracker.crawlerDateHelper(searchResults, userId), esQuery};
+				return {...searchResults, esQuery};
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'IH0JGPR', userId);
 				return { totalCount: 0, docs: [], esQuery };
@@ -584,7 +585,10 @@ class PolicySearchHandler extends SearchHandler {
 					'pagerank_r',
 					'display_title_s',
 					'display_org_s',
-					'display_doc_type_s'
+					'display_doc_type_s',
+					'access_timestamp_dt',
+					'publication_date_dt',
+					'crawler_used_s',
 				],
 				track_total_hits: true,
 				size: 100,
