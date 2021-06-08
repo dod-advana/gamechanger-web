@@ -1760,6 +1760,7 @@ class SearchUtility {
 			}
 		}
 		searchResults.sentResults = sentenceResults;
+		console.log(searchResults.expansionDict);
 		return searchResults;
 	}
 
@@ -1833,7 +1834,7 @@ class SearchUtility {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
 
-				return { totalCount: 0, docs: [] };
+				return { totalCount: 0, docs: [], expansionDict: expansionDict ? expansionDict : {} };
 			}
 		} catch (e) {
 			const { message } = e;

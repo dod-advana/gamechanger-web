@@ -1,5 +1,6 @@
 // Package Imports 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Button from "@material-ui/core/Button";
 import CloseIcon from '@material-ui/icons/Close';
@@ -378,6 +379,27 @@ const FavoriteCard = (props) => {
 			</div>
 		</StyledFavoriteDocumentCard>
 	)
+}
+
+FavoriteCard.propTypes = {
+	cardTitle: PropTypes.string.isRequired,
+	handleDeleteFavorite: PropTypes.func.isRequired,
+	summary: PropTypes.string.isRequired,
+	idx: PropTypes.number.isRequired,
+	tiny_url: PropTypes.string,
+	details: PropTypes.element,
+	overlayText: PropTypes.string,
+	reload: PropTypes.bool,
+	setReload: PropTypes.func,
+	active: PropTypes.bool,
+	toggleActive: PropTypes.func,
+	isDocument: PropTypes.bool,
+	documentObject: PropTypes.objectOf(PropTypes.string),
+	updated: PropTypes.bool,
+	isTopic: PropTypes.bool,
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	})
 }
 
 export default FavoriteCard;
