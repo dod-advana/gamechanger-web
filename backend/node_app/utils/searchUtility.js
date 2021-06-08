@@ -1191,8 +1191,17 @@ class SearchUtility {
 			}
 			if (entityQAResults) {
 				try{
+					let docId;
+					let resultType;
 					let topEntity = entityQAResults.body.hits.hits[0];
-					let entity = {filename: topEntity._source.name, docId: topEntity._source.name.toLowerCase(), docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: topEntity._source.entity_type};
+					if (topEntity._source.entity_type === 'topic') {
+						docId = topEntity._source.name.toLowerCase();
+						resultType = 'topic';
+					} else {
+						docId = topEntity._source.name;
+						resultType = 'entity';
+					}
+					let entity = {filename: topEntity._source.name, docId: docId, docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: resultType};
 					entity.source = "entity search";
 					entity.text = topEntity._source.information;
 					context.unshift(entity);
