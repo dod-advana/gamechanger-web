@@ -387,8 +387,6 @@ class PolicySearchHandler extends SearchHandler {
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
 					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
-					console.log("CONTEXT");
-					console.log(context);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
@@ -412,7 +410,6 @@ class PolicySearchHandler extends SearchHandler {
 						searchResults.qaResults.filenames = contextIds;
 						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
 						searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
-						console.log(searchResults.qaResults);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
