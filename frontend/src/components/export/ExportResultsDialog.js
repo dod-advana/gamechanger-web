@@ -184,6 +184,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 					)}
 					style={{ backgroundColor: 'white', width: '100%' }}
 					classes={{ popper: classes.options, paper: classes.labelFont }}
+					defaultValue="CUI"
 					inputValue={classificationMarking}
 					onInputChange={(_, value) => { setClassificationMarking(value) }}
 				/>
