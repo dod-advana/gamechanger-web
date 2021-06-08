@@ -58,6 +58,9 @@ const useStyles = makeStyles(() => ({
 	labelFont: {
 	  fontSize: 16
 	},
+	helperText: {
+		fontSize: 12
+	},
 	options: {
 		zIndex: '1500'
 	}
@@ -128,6 +131,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	const isEda = cloneData.clone_name === 'eda';
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv': 'pdf');
 	const [classificationMarking, setClassificationMarking] = useState('');
+	const [classificationMarkingError, setClassificationMarkingError] = useState(false);
 	const index = cloneData.clone_name;
 	const classes = useStyles();
 
@@ -136,6 +140,13 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	}
 
 	const generateFile = async () => {
+		if (!classificationMarking) {
+			setClassificationMarkingError(true);
+			return;
+		} else {
+			setClassificationMarkingError(false);
+		}
+
 		setLoading(true);
 		setErrorMsg('');
 		try {
@@ -169,7 +180,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 		> 
 			<h2>&nbsp;Export is currently limited to 10000 results</h2>
 
-			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
+			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4% 0 0 0' }}>
 				<Autocomplete
 					freeSolo
 					options={['CUI', 'Unclassified']}
@@ -178,8 +189,11 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 							{...params}
 							InputLabelProps={{ className: classes.labelFont }}
 							InputProps={{ ...params.InputProps, className: classes.labelFont }}
+							FormHelperTextProps={{ className: classes.helperText }}
 							label="Classification Marking"
 							variant="outlined"
+							error={classificationMarkingError}
+							helperText={classificationMarkingError ? 'Classification Marking is Required' : ''}
 						/>
 					)}
 					style={{ backgroundColor: 'white', width: '100%' }}
