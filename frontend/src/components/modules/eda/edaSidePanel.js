@@ -6,10 +6,13 @@ import {
     FormGroup,
     FormControlLabel,
     Checkbox,
-    TextField
+    TextField,
+    Radio
 } from "@material-ui/core";
 import {setState} from "../../../sharedFunctions";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GCButton from "../../common/GCButton";
@@ -79,6 +82,21 @@ const styles = {
     },
     checkboxes: {
         margin: '0 0 0 25px'
+    },
+    radio: {
+        width: 20,
+        height: 20,
+        border: '2px solid rgb(189, 204, 222)',
+        margin: '0 10px 0 0',
+        padding: 1
+    },
+    radioIcon: {
+        visibility: 'hidden'
+    },
+    radioChecked: {
+        color: '#E9691D',
+        width: 12,
+        height: 12,
     }
 }
 
@@ -148,6 +166,9 @@ export const EDASidePanel = (props) => {
                 break;
             case 'maxObligatedAmount':
                 edaSettings.maxObligatedAmount = value;
+                break;
+            case 'contractsOrMods':
+                edaSettings.contractsOrMods = value;
                 break;
             default:
                 break;
@@ -412,7 +433,7 @@ export const EDASidePanel = (props) => {
 
     const renderContractDataFilter = () => {
         return (
-            <div style={styles.container}>
+        <div style={styles.container}>
             <FormControl>
                 <FormGroup>
                     <FormControlLabel
@@ -537,6 +558,67 @@ export const EDASidePanel = (props) => {
         )
     }
 
+    const renderModificationFilter = () => {
+        return (
+            <div style={styles.container}>
+                <FormControl>
+                    <FormGroup>
+                        <FormControlLabel
+                            name='Both'
+                            value='Both'
+                            control={
+                                <Radio
+                                    style={styles.radio}
+                                    icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
+                                    checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+                                    onClick={() => setEDASearchSetting('contractsOrMods', 'both')}
+                                    style={styles.radio}
+                                    checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'both'}
+                                />
+                            }
+                            label='Both'
+                            labelPlacement="end"
+                            style={styles.titleText}
+                        />
+                        <FormControlLabel
+                            name='Contracts Only'
+                            value='Contracts Only'
+                            control={
+                                <Radio
+                                    style={styles.radio}
+                                    icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
+                                    checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+                                    onClick={() => setEDASearchSetting('contractsOrMods', 'contracts')}
+                                    style={styles.radio}
+                                    checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'contracts'}
+                                />
+                            }
+                            label='Contracts Only'
+                            labelPlacement="end"
+                            style={styles.titleText}
+                        />
+                        <FormControlLabel
+                            name='Modifications Only'
+                            value='Modifications Only'
+                            control={
+                                <Radio
+                                    style={styles.radio}
+                                    icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
+                                    checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+                                    onClick={() => setEDASearchSetting('contractsOrMods', 'mods')}
+                                    style={styles.radio}
+                                    checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'mods'}
+                                />
+                            }                            
+                            label='Modifications Only'
+                            labelPlacement="end"
+                            style={styles.titleText}
+                        />
+                    </FormGroup>
+                </FormControl>
+            </div>
+        );
+    }
 
 
     return (
@@ -560,6 +642,10 @@ export const EDASidePanel = (props) => {
 
             <GCAccordion contentPadding={15} expanded={false} header={'OBLIGATED AMOUNT'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
                 { renderObligatedAmountFilter() }
+            </GCAccordion>
+
+            <GCAccordion contentPadding={15} expanded={false} header={'CONTRACTS OR MODS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                { renderModificationFilter() }
             </GCAccordion>
 
             <GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={() => { setState(dispatch, { runSearch: true })}}>Update Search</GCButton>

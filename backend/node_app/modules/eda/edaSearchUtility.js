@@ -182,7 +182,7 @@ class EDASearchUtility {
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-
+			console.log(JSON.stringify(query))
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -555,6 +555,31 @@ class EDASearchUtility {
 			if (push) {
 				mustQueries.push(rangeQuery);
 			}
+		}
+
+		if (settings.contractsOrMods !== 'both') {
+			const nestedQuery = {
+				nested: {
+					path: "extracted_data_eda_n",
+					query: {
+						
+					}
+				}
+			};
+
+			if (settings.contractsOrMods === 'contracts') {
+				nestedQuery.nested.query =  {
+					bool: {
+						must_not: {
+							exists: {
+								field: "extracted_data_eda_n.award_id_eda_ext"
+							}
+						}
+					}
+				}
+			}
+
+			mustQueries.push(nestedQuery);
 		}
 
 		return mustQueries;
