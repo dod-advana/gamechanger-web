@@ -139,7 +139,16 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 		setSelectedFormat(value)
 	}
 
+	const sendNonstandardClassificationAlert = async (classificationMarking) => {
+		try {
+			await gameChangerAPI.sendClassificationAlertPOST({ classificationMarking });
+		} catch(err) {
+				console.log({ err });
+		}
+	}
+
 	const generateFile = async () => {
+		// TODO: only require marking if pdf
 		if (!classificationMarking) {
 			setClassificationMarkingError(true);
 			return;
@@ -158,6 +167,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, classificationMarking, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order }});
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
+			sendNonstandardClassificationAlert(classificationMarking);
 		} catch (err) {
 			console.log(err)
 			setErrorMsg('Error Downloading Results')
