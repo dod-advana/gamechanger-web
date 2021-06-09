@@ -131,11 +131,10 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	const isEda = cloneData.clone_name === 'eda';
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv': 'pdf');
 	const [classificationMarking, setClassificationMarking] = useState('');
-	const [classificationMarkingError, setClassificationMarkingError] = useState(false);
 	const index = cloneData.clone_name;
 	const classes = useStyles();
 
-	const classificationMarkingOptions = ['CUI', 'Unclassified'];
+	const classificationMarkingOptions = ['None', 'CUI'];
 
 	const handleChange = ({ target: { value } }) => {
 		setSelectedFormat(value)
@@ -150,13 +149,6 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	}
 
 	const generateFile = async () => {
-		if (selectedFormat === 'pdf' && !classificationMarking) {
-			setClassificationMarkingError(true);
-			return;
-		} else {
-			setClassificationMarkingError(false);
-		}
-
 		setLoading(true);
 		setErrorMsg('');
 		try {
@@ -165,11 +157,11 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			url = url.replace("#/", "");
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
-			const exportInput = { cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, classificationMarking, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order } };
+			const exportInput = { cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, classificationMarking: classificationMarking === 'None' ? '' : classificationMarking, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order } };
 			const { data } = await gameChangerAPI.modularExport(exportInput);
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
-			if (selectedFormat === 'pdf' && !classificationMarkingOptions.includes(classificationMarking)) {
+			if (selectedFormat === 'pdf' && (classificationMarking && !classificationMarkingOptions.includes(classificationMarking))) {
 				sendNonstandardClassificationAlert(classificationMarking, exportInput);
 			}
 		} catch (err) {
@@ -206,13 +198,11 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 							FormHelperTextProps={{ className: classes.helperText }}
 							label="Classification Marking"
 							variant="outlined"
-							error={classificationMarkingError}
-							helperText={classificationMarkingError ? 'Classification Marking is Required for PDF' : ''}
 						/>
 					)}
 					style={{ backgroundColor: 'white', width: '100%' }}
 					classes={{ popper: classes.options, paper: classes.labelFont }}
-					defaultValue="CUI"
+					defaultValue="None"
 					inputValue={classificationMarking}
 					onInputChange={(_, value) => { setClassificationMarking(value) }}
 					disabled={selectedFormat !== 'pdf'}
