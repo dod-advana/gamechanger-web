@@ -184,7 +184,7 @@ const getTopicData = async (name, cloneName) => {
 		tmpTopic.details = [{key: 'Documents Referenced', value: resp.data.nodeProperties.documentCountsForTopic.low}];
 		
 		data.topic = tmpTopic;
-		
+	
 		const graphResp = await gameChangerAPI.graphQueryPOST(
 		'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
 			'WHERE t.name = $name ' +
@@ -208,8 +208,6 @@ const getDocumentData = async (doc_id, cloneName) => {
 	})
 	
 	data.document = resp.data.docs[0];
-	
-	console.log(resp.data)
 	
 	const docData = getMetadataForPropertyTable(data.document);
 	const { ref_list = [] } = data.document;
