@@ -135,6 +135,8 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	const index = cloneData.clone_name;
 	const classes = useStyles();
 
+	const classificationMarkingOptions = ['CUI', 'Unclassified'];
+
 	const handleChange = ({ target: { value } }) => {
 		setSelectedFormat(value)
 	}
@@ -148,8 +150,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	}
 
 	const generateFile = async () => {
-		// TODO: only require marking if pdf
-		if (!classificationMarking) {
+		if (selectedFormat === 'pdf' && !classificationMarking) {
 			setClassificationMarkingError(true);
 			return;
 		} else {
@@ -167,7 +168,9 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, classificationMarking, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order }});
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
-			sendNonstandardClassificationAlert(classificationMarking);
+			if (selectedFormat === 'pdf' && !classificationMarkingOptions.includes(classificationMarking)) {
+				sendNonstandardClassificationAlert(classificationMarking);
+			}
 		} catch (err) {
 			console.log(err)
 			setErrorMsg('Error Downloading Results')
@@ -193,7 +196,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4% 0 0 0' }}>
 				<Autocomplete
 					freeSolo
-					options={['CUI', 'Unclassified']}
+					options={classificationMarkingOptions}
 					renderInput={(params) => (
 						<TextField
 							{...params}
@@ -203,7 +206,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 							label="Classification Marking"
 							variant="outlined"
 							error={classificationMarkingError}
-							helperText={classificationMarkingError ? 'Classification Marking is Required' : ''}
+							helperText={classificationMarkingError ? 'Classification Marking is Required for PDF' : ''}
 						/>
 					)}
 					style={{ backgroundColor: 'white', width: '100%' }}
@@ -211,6 +214,7 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 					defaultValue="CUI"
 					inputValue={classificationMarking}
 					onInputChange={(_, value) => { setClassificationMarking(value) }}
+					disabled={selectedFormat !== 'pdf'}
 				/>
 			</div>
 			
