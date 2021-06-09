@@ -8,6 +8,7 @@ function useQuery(location) {
   return new URLSearchParams(location.search);
 }
 
+
 export default function PDFViewer({location}) {
 
 	const [filename, setFilename] = React.useState(null);
@@ -15,8 +16,9 @@ export default function PDFViewer({location}) {
 	const [pageNumber, setPageNumber] = React.useState(null);
 	const [isClone, setIsClone] = React.useState(false);
 	const [cloneIndex, setCloneIndex] = React.useState(null);
-
-	let query = useQuery(location);
+    const [fileUrl, setFileUrl] = React.useState(null);
+   
+    let query = useQuery(location);
 
 	const measuredRef = useCallback(node => {
 		if (node !== null && filename) {
@@ -28,20 +30,28 @@ export default function PDFViewer({location}) {
 				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
 					node.src = url;
 				});
+                }
 			}
 		}
-	}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
-
-	useEffect(() => {
+	, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
+   
+    useEffect(() => {
 		setFilename(query.get('filename'));
 		setPrevSearchText(query.get('prevSearchText'));
 		setPageNumber(query.get('pageNumber'));
 		setIsClone(true);
-		setCloneIndex(query.get('cloneIndex'));
+		setFileUrl(query.get('sourceUrl'));
+        setCloneIndex(query.get('cloneIndex'));
 	}, [query, filename]);
 
-	return (
-		<iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} ref={measuredRef} onLoad={() => handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')} style={{width: "100%", height: "100%"}} />
-	);
+    if (filename && filename.endsWith('pdf')){
+        return (
+            <iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} ref={measuredRef} onLoad={() => handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')} style={{width: "100%", height: "100%"}} />
+        );
+    } else {
+        return (
+            <iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}} />
 
+        );
+    }
 }
