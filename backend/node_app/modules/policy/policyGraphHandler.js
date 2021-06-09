@@ -322,7 +322,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneName } = req.body;
-
+			
 			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;

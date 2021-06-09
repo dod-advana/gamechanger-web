@@ -141,7 +141,7 @@ const PolicyNavigationHandler = {
 					</HoverNavItem>
 				</GCTooltip>
 				<GCTooltip title="Clone Request" placement="right" arrow>
-					<a href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '50px' }}>
+					<a href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '40px' }}>
 						<HoverNavItem centered onClick={()=> {
 								// open modal or link
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'CloneRequest');

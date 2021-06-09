@@ -556,7 +556,7 @@ export default class GameChangerAPI {
 	
 	getDocumentsForTopic = async(cloneName, body) => {
 		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {cloneName, unctionName: 'getDocumentsForTopic', options: body});
+		return axiosPOST(this.axios, url, {cloneName, functionName: 'getDocumentsForTopic', options: body});
 	}
 
 	getTextSuggestion = async(body) => {

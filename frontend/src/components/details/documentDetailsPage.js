@@ -108,7 +108,7 @@ const DocumentDetailsPage = (props) => {
 		document,
 		cloneData
 	} = props;
-	console.log(document);
+	
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({nodes: [], edges: []});
 	
