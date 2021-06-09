@@ -149,7 +149,6 @@ const EdaMainViewHandler = {
 	getCardViewPanel(props) {
 		const {
 			context
-			
 		} = props;
 		
 		const {state, dispatch} = context;
