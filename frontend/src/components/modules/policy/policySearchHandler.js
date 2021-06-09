@@ -122,9 +122,6 @@ const PolicySearchHandler = {
 		const recentSearchesParsed = JSON.parse(recentSearches);
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
 		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
-		
-		// Save search settings to postgres
-		gameChangerAPI.setUserSearchSettings({searchSettings});
 	
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);

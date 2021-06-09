@@ -61,7 +61,6 @@ class UserController {
 		this.addInternalUser = this.addInternalUser.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
 		this.setUserBetaStatus = this.setUserBetaStatus.bind(this);
-		this.setUserSearchSettings = this.setUserSearchSettings.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
@@ -280,7 +279,6 @@ class UserController {
 					defaults: {
 						user_id: hashed_user,
 						is_beta: false,
-						search_settings: {},
 						notifications: { total: 0, favorites: 0, history: 0 }
 					},
 					raw: true
@@ -314,29 +312,6 @@ class UserController {
 			res.status(200).send(status);
 		} catch (err) {
 			this.logger.error(err.message, 'NGED0R4', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setUserSearchSettings(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
-			await this.gcUser.update(
-				{
-					search_settings: req.body
-				},
-				{
-					where: {
-						user_id: hashed_user
-					}
-				}
-			);
-			res.status(200).send();
-		} catch (err) {
-			this.logger.error(err.message, 'AXSITXS', userId);
 			res.status(500).send(err);
 		}
 	}

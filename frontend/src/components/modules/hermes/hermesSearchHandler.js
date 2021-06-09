@@ -103,10 +103,7 @@ const HermesSearchHandler = {
 		const searchObject = getSearchObjectFromString(searchText);
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
-		
-		// Save search settings to postgres
-		gameChangerAPI.setUserSearchSettings({searchSettings});
-	
+
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
 			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
