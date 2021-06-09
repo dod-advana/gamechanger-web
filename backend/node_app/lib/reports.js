@@ -176,7 +176,7 @@ class Reports {
 							style: 'title',
 							absolutePosition: { x: sideMargin, y: 20 },
 						},
-						{ text: data.classificationMarking, alignment: 'center', style: 'title' },
+						{ text: data.classificationMarking, alignment: 'center', style: 'classification' },
 					],
 					margin: [0, 0, 0, marginBottom],
 				};
@@ -197,6 +197,7 @@ class Reports {
 						},
 						{ text: currentPage.toString(), alignment: 'right', style: 'pageNum' },
 						{ text: 'GAMECHANGER | REPORT', alignment: 'center', style: 'footer' },
+						{ text: data.classificationMarking, alignment: 'center', style: 'classification' },
 					],
 					margin: [sideMargin, 0, sideMargin - pageNumOffset, 0],
 				};
@@ -255,6 +256,11 @@ class Reports {
 					fontSize: 15,
 					color: '#404040',
 					marginTop: 15
+				},
+				classification: {
+					color: '#404040',
+					fontSize: 11,
+					marginTop: 5
 				},
 				footer: {
 					color: '#404040',
