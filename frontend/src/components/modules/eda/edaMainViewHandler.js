@@ -1,6 +1,8 @@
 import React from "react";
 import EDASummaryView from "./edaSummaryView";
 import EDASidePanel from "./edaSidePanel";
+import JumpButton from '../globalSearch/JumpButton';
+
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
@@ -42,6 +44,14 @@ const styles = {
 	},
 	searchResults: fullWidthCentered,
 	paginationWrapper: fullWidthCentered,
+	leftContainerSummary: {
+		width: '15%',
+		marginTop: 10
+	},
+	rightContainerSummary: {
+		marginLeft: '17.5%',
+		width: '79.7%'
+	}
 }
 
 const EdaMainViewHandler = {
@@ -85,7 +95,9 @@ const EdaMainViewHandler = {
 			resultsPage,
 			searchText,
 			prevSearchText,
-			count
+			count,
+			currentViewName,
+			summaryCardView
 		} = state;
 
 		const viewPanels = [];
@@ -117,12 +129,14 @@ const EdaMainViewHandler = {
 		viewPanels.push({panelName: 'Summary', panel:
 			<div>
 				{!loading && <StyledCenterContainer>
-					<ViewHeader resultsText={" "} mainStyles={{float:'right', marginLeft: '5px', marginTop: '-10px'}}{...props} />
+					<ViewHeader resultsText={' '} mainStyles={{float:'right', marginLeft: '5px', marginTop: '-10px'}}{...props} />
 					<EDASummaryView 
 						edaSearchSettings={edaSearchSettings}
 						searchResults={docSearchResults}
 						loading={loading}
 						dispatch={dispatch}
+						currentViewName={currentViewName}
+						summaryCardView={summaryCardView}
 					/>
 				</StyledCenterContainer>}
 			</div>
@@ -153,6 +167,9 @@ const EdaMainViewHandler = {
 			edaSearchSettings,
 			issuingOrgs,
 			statsLoading,
+			summaryCardView,
+			summaryCardData,
+			resultsText,
 			totalObligatedAmount
 		} = state;
 		
@@ -176,6 +193,8 @@ const EdaMainViewHandler = {
 				);
 			});
 		}
+
+		const searchResults = summaryCardView ? summaryCardData : rawSearchResults;
 		
 		return (
 			<div key={'cardView'} style={{marginTop: hideTabs ? 40 : 'auto'}}>
@@ -183,27 +202,41 @@ const EdaMainViewHandler = {
 					<div id="game-changer-content-top"/>
 					{!loading &&
 						<StyledCenterContainer showSideFilters={true}>
-							<div className={'left-container'}>
+							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
 								<div className={'side-bar-container'}>
-									<EDASidePanel 
-										searchResults={rawSearchResults}
-										dispatch={dispatch}
-										edaSearchSettings={edaSearchSettings}
-										issuingOrgs={issuingOrgs}
-										statsLoading={statsLoading}
-										totalObligatedAmount={totalObligatedAmount}
-									/>
+									{summaryCardView ?
+										<div>
+											<JumpButton style={{ marginTop: 0 }} reverse={false} label="Back to Summary View" action={() => {
+												setState(dispatch, 
+													{ 
+														currentViewName: 'Summary',
+														summaryCardData: [],
+														resultsText: '',
+													})
+											}} />
+										</div>
+										:
+										<EDASidePanel 
+											searchResults={searchResults}
+											dispatch={dispatch}
+											edaSearchSettings={edaSearchSettings}
+											issuingOrgs={issuingOrgs}
+											statsLoading={statsLoading}
+											totalObligatedAmount={totalObligatedAmount}
+										/>
+									}
 								</div>
 							</div>
-							<div className={'right-container'}>
-								{!hideTabs && <ViewHeader {...props}/>
+							<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
+								{!hideTabs && 
+									<ViewHeader resultsText={resultsText} {...props}/>
 								}
 							
 								<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
 									<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
 										<div className="row" style={{marginLeft: 0, marginRight: 0}}>
 											{!loading &&
-												getSearchResults(rawSearchResults)
+												getSearchResults(searchResults)
 											}
 										</div>
 									</div>
@@ -211,7 +244,7 @@ const EdaMainViewHandler = {
 							</div>
 						</StyledCenterContainer>
 					}
-					{!iframePreviewLink &&
+					{!iframePreviewLink && !summaryCardView && 
 						<div style={styles.paginationWrapper} className={'gcPagination'}>
 							<Pagination
 								activePage={resultsPage}
