@@ -165,28 +165,6 @@ const DefaultMainViewHandler = {
 			// Do nothing
 		}
 		
-		// set search settings
-		const newSearchSettings = _.cloneDeep(state.searchSettings);
-		try {
-			const results = await gameChangerAPI.getUserSettings();
-			const searchSettings = results.data.search_settings;
-			
-			if (searchSettings) {
-	
-				const accessAsDates = newSearchSettings.accessDateFilter[0] && newSearchSettings.accessDateFilter[1] ? newSearchSettings.accessDateFilter.map(date => new Date(date)) : [null,null];
-				const publicationAsDates = newSearchSettings.publicationDateFilter[0] && newSearchSettings.publicationDateFilter[1] ? newSearchSettings.publicationDateFilter.map(date => new Date(date)) : [null,null];
-				const publicationDateAllTimeValue = newSearchSettings.publicationDateAllTime === undefined ? true : newSearchSettings.publicationDateAllTime;
-				
-				newSearchSettings.accessDateFilter = accessAsDates;
-				newSearchSettings.publicationDateFilter = publicationAsDates;
-				newSearchSettings.publicationDateAllTime = publicationDateAllTimeValue;
-			} else {
-				console.log('NO SETTINGS')
-			}
-		} catch (e) {
-			// do nothing
-		}
-		
 		// fetch ES index
 		try{
 			const esIndex = await gameChangerAPI.getElasticSearchIndex();
@@ -200,6 +178,9 @@ const DefaultMainViewHandler = {
 		} catch(e) {
 			console.log(e);
 		}
+		
+		// set search settings
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		
 		// get url data and set accordingly
 		const searchText = getQueryVariable('q');
