@@ -346,6 +346,7 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.context = enrichedResults.qaContext.context;
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
+				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
 
@@ -364,7 +365,8 @@ class PolicySearchHandler extends SearchHandler {
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
-		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4}
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
+		searchResults.qaContext.params = qaParams;
 		if (permissions) {
 		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
