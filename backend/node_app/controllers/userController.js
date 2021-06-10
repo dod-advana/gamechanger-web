@@ -32,7 +32,6 @@ class UserController {
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
 			search = new SearchController(opts),
-			sequelize = new Sequelize(constants.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
@@ -52,7 +51,6 @@ class UserController {
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
-		this.sequelize = sequelize;
 		this.search = search;
 		this.externalAPI = externalAPI;
 		this.emailUtility = emailUtility;
@@ -395,7 +393,7 @@ class UserController {
 				username = req.body.username;
 			}
 			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.findAll({ where: { username } });
+			const exists = await this.internalUserTracking.findOne({ where: { username } });
 			if (exists) {
 				const { id, username } = exists;
 				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
@@ -547,7 +545,7 @@ class UserController {
 
 			const hashed_user = this.sparkMD5.hash(userId);
 
-			await this.gcUser.update({ 'api_requests': this.sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
+			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
 			
 			res.status(200).send();
 		} catch(err) {
