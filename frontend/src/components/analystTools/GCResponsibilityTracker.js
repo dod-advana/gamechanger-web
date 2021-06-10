@@ -28,7 +28,7 @@ import {makeStyles} from "@material-ui/core/styles";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import CheckCircleOutlinedIcon from "@material-ui/icons/CheckCircleOutlined";
 import {getTrackingNameForFactory, exportToCsv} from "../../gamechangerUtils";
-import { setState } from '../../sharedFunctions';
+
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -141,6 +141,30 @@ const GCResponsibilityTracker = (props) => {
 			})
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'ExportCSV', selectedIds.length > 0 ? rtnResults.length : results.length);
 			exportToCsv('ResponsibilityData.csv', selectedIds.length > 0 ? rtnResults : results, true);
+			setSelectedIds([]);
+			setSelectRows(false);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	const getRowData = async () => {
+		try {
+			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
+			const rtnResults = results.filter(result => {
+				return selectedIds.includes(result.id);
+			})
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+			var rtn = selectedIds.length > 0 ? rtnResults : results;
+			var filename = rtn[0].filename;
+			var responsibility = rtn[0].responsibilityText;
+			
+			var { data } = await gameChangerAPI.getResponsibilityDoc({ limit: null, offset: 0, filename });
+			
+			console.log(rtn[0]);
+			//console.log(responsibility);
+			console.log(data);  // Now need to take this data and loop through the 
+			console.log(data.paragraphs[0]); 
 			setSelectedIds([]);
 			setSelectRows(false);
 		} catch (e) {
@@ -414,7 +438,7 @@ const GCResponsibilityTracker = (props) => {
 								<GCPrimaryButton onClick={exportCSV}>
 									Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 								</GCPrimaryButton>
-								<GCPrimaryButton buttonColor={'red'} onClick={() => setState(dispatch, {showAssistModal: true})}>
+								<GCPrimaryButton buttonColor={'red'} onClick={getRowData}>
 									Report <Icon className="fa fa-bug" style={styles.buttons}/>
 								</GCPrimaryButton>
 								<div style={styles.spacer}/>
