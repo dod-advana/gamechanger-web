@@ -1,4 +1,5 @@
 const assert = require('assert');
+const { create } = require('underscore');
 const { UserController } = require('../../node_app/controllers/userController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
@@ -32,7 +33,7 @@ describe('UserController', function () {
 			};
 
 			const expectedCode = 500;
-			const expectedMsg = 'Error adding internal user: Cannot destructure property `trackByRequest` of \'undefined\' or \'null\'.';
+			const expectedMsg = /^Error adding internal user: .+/gs; // this message might be js runtime dependent
 
 			try {
 				await target.addInternalUser(req, res);
@@ -42,7 +43,7 @@ describe('UserController', function () {
 			}
 
 			assert.equal(resCode, expectedCode);
-			assert.equal(resMsg, expectedMsg);
+			assert(expectedMsg.test(resMsg))
 
 		});
 
@@ -50,13 +51,16 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({where: { username }}) {
+				findOne({where: { username }}) {
+					return null;
+				},
+				create({username}) {
 					usedUsername = username;
 					return {
 						id: 1,
 						username
 					};
-				}
+				},
 			};
 
 			const newOpts = {
@@ -101,13 +105,16 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({ where: { username } }) {
+				findOne({where: { username }}) {
+					return null;
+				},
+				create({username}) {
 					usedUsername = username;
 					return {
 						id: 1,
 						username
 					};
-				}
+				},
 			};
 
 			const newOpts = {
@@ -391,7 +398,7 @@ describe('UserController', function () {
 			let returnExportHistory = [];
 			const new_opts = {
 				...opts,
-				constants: {env: {GAME_CHANGER_OPTS: {index: 'Test'}}},
+				constants: {GAME_CHANGER_OPTS: {index: 'Test'}},
 				externalAPI : {
 					getAPIKey(user) {
 						return api_key;
