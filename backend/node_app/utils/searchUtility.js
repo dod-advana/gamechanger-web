@@ -4,6 +4,7 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
+const fs = require('fs');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -1189,7 +1190,7 @@ class SearchUtility {
 					}
 				}
 			}
-			if (entityQAResults) {
+			if (entityQAResults.body.hits.total.value > 0) {
 				try{
 					let docId;
 					let resultType;
