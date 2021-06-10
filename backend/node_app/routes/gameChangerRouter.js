@@ -69,6 +69,7 @@ router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotati
 router.get('/getThumbnail', document.getThumbnail);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
+router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
 router.get('/getTransformerList', transformer.getTransformerList);
