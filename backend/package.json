@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@elastic/elasticsearch": "^7.11.0",
-    "advana-api-auth": "0.0.5",
+    "advana-api-auth": "0.0.7",
     "async": "^2.6.0",
     "async-redis": "^1.1.7",
     "aws-sdk": "^2.848.0",

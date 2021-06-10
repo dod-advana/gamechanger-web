@@ -92,6 +92,39 @@ app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
+if (constants.GAME_CHANGER_OPTS.isDecoupled) {
+	app.use(async function (req, res, next) {
+		const cn = req.get('x-env-ssl_client_certificate');
+		if (!cn) {
+			res.sendStatus(401);
+		} else {
+			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
+			req.headers['ssl_client_s_dn_cn'] = cn;
+			req.headers['SSL_CLIENT_S_DN_CN'] = cn;
+
+			redisAsyncClient.select(12);
+			const perms = await redisAsyncClient.get(`${req.user.cn}-perms`);
+
+			if (perms) {
+				req.permissions = perms;
+			} else {
+				req.permissions = [];
+			}
+			next();
+		}
+	});
+} else {
+	app.use(AAA.redisSession());
+	AAA.setupSaml(app)
+	app.use(AAA.ensureAuthenticated);
+
+	app.use(async function (req, res, next) {
+		if (req.user) { req.headers['ssl_client_s_dn_cn'] = req.user.id; };
+		if(req.session && req.session.user) {req.permissions = req.session.user.perms;}
+		next();
+	});
+}
+
 app.use(function (req, res, next) {
 	let approvedClients = constants.APPROVED_API_CALLERS;
 	const { headers, hostname } = req;
@@ -140,36 +173,6 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	});
 
 	app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
-
-	app.use(async function (req, res, next) {
-		const cn = req.get('x-env-ssl_client_certificate');
-		if (!cn) {
-			res.sendStatus(401);
-		} else {
-			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
-			req.headers['ssl_client_s_dn_cn'] = cn;
-			req.headers['SSL_CLIENT_S_DN_CN'] = cn;
-
-			redisAsyncClient.select(12);
-			const perms = await redisAsyncClient.get(`${req.user.cn}-perms`);
-
-			if (perms) {
-				req.permissions = perms;
-			} else {
-				req.permissions = [];
-			}
-			next();
-		}
-	});
-} else {
-	app.use(AAA.redisSession());
-	AAA.setupSaml(app)
-	app.use(AAA.ensureAuthenticated);
-
-	app.use(async function (req, res, next) {
-		req.permissions = req.session.user.perms;
-		next();
-	});
 }
 
 app.post('/api/auth/token', async function (req, res) {
