@@ -177,10 +177,10 @@ class ModularGameChangerController {
 
 	async export(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, searchText, classificationMarking, format, options} = req.body;
+		const {cloneName, searchText, format, options} = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
-			await handler.export(res, searchText, classificationMarking, format, options, cloneName, req.permissions, userId);
+			await handler.export(res, searchText, format, options, cloneName, req.permissions, userId);
 		} catch(error) {
 			res.status(500).send(error);
 			this.logger.error(error, '812U6Q2', userId);

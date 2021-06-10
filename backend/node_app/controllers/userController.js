@@ -486,8 +486,8 @@ class UserController {
 		let userId = 'Unknown_Webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { classificationMarking, exportInput } = req.body.alertData;
-			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${classificationMarking}</p><p>${JSON.stringify(exportInput)}</p>`;
+			const { exportInput } = req.body.alertData;
+			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${exportInput.options.classificationMarking}</p><p>${JSON.stringify(exportInput)}</p>`;
 			this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
 				res.status(200).send({status: 'good'});
 			}).catch(error => {
