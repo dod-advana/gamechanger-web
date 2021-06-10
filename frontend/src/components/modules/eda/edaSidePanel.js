@@ -572,7 +572,6 @@ export const EDASidePanel = (props) => {
                                     icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
                                     checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
                                     onClick={() => setEDASearchSetting('contractsOrMods', 'both')}
-                                    style={styles.radio}
                                     checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'both'}
                                 />
                             }
@@ -589,7 +588,6 @@ export const EDASidePanel = (props) => {
                                     icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
                                     checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
                                     onClick={() => setEDASearchSetting('contractsOrMods', 'contracts')}
-                                    style={styles.radio}
                                     checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'contracts'}
                                 />
                             }
@@ -606,7 +604,6 @@ export const EDASidePanel = (props) => {
                                     icon={<RadioButtonUncheckedIcon style={styles.radioIcon}/>}
                                     checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
                                     onClick={() => setEDASearchSetting('contractsOrMods', 'mods')}
-                                    style={styles.radio}
                                     checked={edaSearchSettings && edaSearchSettings.contractsOrMods === 'mods'}
                                 />
                             }                            
