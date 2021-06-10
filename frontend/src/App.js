@@ -254,6 +254,7 @@ const App = (props) => {
 															route
 														)
 													})}
+													<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
 													<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
 													<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
 													<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
