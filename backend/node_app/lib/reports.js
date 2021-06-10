@@ -63,6 +63,7 @@ class Reports {
 	}
 
 	createPdfBuffer(data, userId, settings, callback=()=>{}){
+		this.logger.info(JSON.stringify(data));
 
 		try {
 			const fonts = {
