@@ -346,6 +346,7 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.context = enrichedResults.qaContext.context;
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
+				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
 
@@ -364,7 +365,8 @@ class PolicySearchHandler extends SearchHandler {
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
-		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
+		searchResults.qaContext.params = qaParams;
 		if (permissions) {
 		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
@@ -380,10 +382,13 @@ class PolicySearchHandler extends SearchHandler {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
 					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
+					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
+					let entitiesIndex = 'entities-new';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
+					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
@@ -406,6 +411,7 @@ class PolicySearchHandler extends SearchHandler {
 						searchResults.qaResults.answers = cleanedResults;
 						searchResults.qaResults.filenames = contextIds;
 						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
@@ -545,9 +551,10 @@ class PolicySearchHandler extends SearchHandler {
 
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 
-				const searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results
-				return {...await this.dataTracker.crawlerDateHelper(searchResults, userId), esQuery};
+				return {...searchResults, esQuery};
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'IH0JGPR', userId);
 				return { totalCount: 0, docs: [], esQuery };
@@ -580,7 +587,10 @@ class PolicySearchHandler extends SearchHandler {
 					'pagerank_r',
 					'display_title_s',
 					'display_org_s',
-					'display_doc_type_s'
+					'display_doc_type_s',
+					'access_timestamp_dt',
+					'publication_date_dt',
+					'crawler_used_s',
 				],
 				track_total_hits: true,
 				size: 100,

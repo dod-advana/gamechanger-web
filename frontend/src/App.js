@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect, Route, HashRouter as Router, Switch } from "react-router-dom";
-import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "react-select/dist/react-select.css";
 // import Config from './config/config';
@@ -47,6 +46,7 @@ import NotFoundPage from 'advana-platform-ui/dist/containers/NotFoundPage';
 import ErrorPage from 'advana-platform-ui/dist/containers/GenericErrorPage';
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
+import "./index.css";
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -255,6 +255,7 @@ const App = (props) => {
 															route
 														)
 													})}
+													<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
 													<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
 													<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
 													<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
