@@ -68,6 +68,7 @@ class UserController {
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
+		this.sendClassificationAlert = this.sendClassificationAlert.bind(this);
 		this.clearDashboardNotification = this.clearDashboardNotification.bind(this);
 		this.updateUserAPIRequestLimit = this.updateUserAPIRequestLimit.bind(this);
 		this.resetAPIRequestLimit = this.resetAPIRequestLimit.bind(this);
@@ -474,6 +475,25 @@ class UserController {
 			// 		password: this.constants.SERVICE_ACCOUNT_OPTS.PASSWORD
 			// 	}
 			// });
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'WH9IUG0', userId);
+			res.status(500).send(message);
+		}
+	}
+
+	async sendClassificationAlert(req, res) {
+		let userId = 'Unknown_Webapp';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { alertData } = req.body;
+			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
+			this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
+				res.status(200).send({status: 'good'});
+			}).catch(error => {
+				this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+				res.status(500).send(error);
+			});
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'WH9IUG0', userId);
