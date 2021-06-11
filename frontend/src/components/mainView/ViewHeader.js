@@ -151,7 +151,7 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 			<div className={'view-buttons-container'}>
-				{categorySorting[activeCategoryTab] !== undefined && 
+				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && 
 					<>
 						<FormControl classes={{root:classes.root}}>
 							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
