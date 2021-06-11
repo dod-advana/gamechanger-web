@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import { getTrackingNameForFactory, PAGE_DISPLAYED } from "../../gamechangerUtils";
-import {Button} from "@material-ui/core";
+import {Button, Typography} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {trackEvent} from "../telemetry/Matomo";
 import GCDataStatusTracker from "../dataTracker/GCDataStatusTracker";
@@ -22,6 +22,8 @@ import MagellanTrendingLinkList from "../common/MagellanTrendingLinkList";
 import MainViewFactory from "../factories/mainViewFactory";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import GameChangerThumbnailRow from "./ThumbnailRow";
+import { AgencyPublicationContainer, TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "./HomePageStyledComponents";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -150,6 +152,13 @@ const MainView = (props) => {
 		await gameChangerAPI.favoriteSearch(search);
 		await getUserData(dispatch);
 	}
+
+	const openDocument = (filename, cloneName, pageNumber = 0) => {
+		const { cloneData } = state
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+		window.open(`/#/pdfviewer/gamechanger?filename=${filename}&pageNumber=${pageNumber}&cloneIndex=${cloneData.clone_name}`);
+	};
 	
 	const handleSaveFavoriteSearchHistory = async (favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count) => {
 		const searchData = {
@@ -239,7 +248,7 @@ const MainView = (props) => {
 		if (trendingStorage) {
 			JSON.parse(trendingStorage).forEach(search => {
 				if (search.search) {
-					trendingLinks.push(search.search.replaceAll('&#039;', '"'));
+					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
 				}
 			});
 		}
@@ -251,7 +260,18 @@ const MainView = (props) => {
 				setSearchURL(state, state.searchSettings)
 			}
 		}
+		const { favorite_documents = [], favorite_searches = [] } = userData;
+		const favorites = favorite_documents.map(favorite=>favorite.filename);
 
+		trendingLinks.forEach(({search},idx) => {
+			favorite_searches.forEach(fav => {
+				if(fav.search_text === search){
+					trendingLinks[idx].favorite = true;
+				}
+			})
+		});
+		console.log(state)
+		
 		return (
 			<div style={{marginTop: '40px'}}>
 			{prevSearchText &&
@@ -265,11 +285,59 @@ const MainView = (props) => {
 				</div>
 			)}
 			{cloneData.clone_name === 'gamechanger' && (
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div className={`tutorial-step-${componentStepNumbers["Trending Searches"]}`} >
-						<MagellanTrendingLinkList onLinkClick={handleLinkListItemClick}
-						links={trendingLinks} title="Trending Searches This Week" padding={10} />
-					</div>
+				<div style={{ margin: '0 70px 0 70px'}}>
+					<GameChangerThumbnailRow
+						title={"Agency Publications"}
+					>
+						{[<AgencyPublicationContainer/>]}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
+						links={trendingLinks}
+						title={"Trending Searches"}
+						width='300px'
+					>
+						{trendingLinks.map(({search,favorite},idx)=>
+							<TrendingSearchContainer>
+								<div style={{display:'flex', justifyContent:'space-between'}}>
+									<Typography style={{ fontSize:16,fontWeight: 'bold' }}>{`#${idx+1} ${search}`}</Typography>
+									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+										cursor: "pointer",
+										fontSize: 20
+									}} />
+								</div>
+							</TrendingSearchContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={favorites} 
+						title="Sources" 
+						onLinkClick={(link) => openDocument(link)}
+					>
+						{[<SourceContainer/>]}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={recentlyOpened} 
+						title="Recent Searches" 
+						onLinkClick={openDocument}
+					>
+						{[<RecentSearchContainer/>]}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={trendingLinks} 
+						title="Major Publications" 
+						onLinkClick={openDocument} 
+						thumbnailWidth='500px' 
+						thumbnailHeight='100px'
+					/>
+						{/* <GameChangerThumbnailRow
+							title="Banner Test"
+							isImgRow={false}
+						>
+							<div style={{width:6000}}>
+								<span>Hi</span>
+							</div>
+						</GameChangerThumbnailRow> */}
 				</div>
 			)}
 			{cloneData.clone_name !== 'gamechanger' && (

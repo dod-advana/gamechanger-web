@@ -508,6 +508,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
+	getRecentlyOpenedDocs = async (clone_name) => {
+		const url = endpoints.getRecentlyOpenedDocs;
+		return axiosPOST(this.axios, url, { clone_name });
+	}
+
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
 		return axiosGET(this.axios, url, {params:body});

@@ -128,6 +128,7 @@ router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
 router.post('/getAppStats', appStatsController.getAppStats);
+router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);

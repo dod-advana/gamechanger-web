@@ -164,6 +164,15 @@ const DefaultMainViewHandler = {
 		} catch (e) {
 			// Do nothing
 		}
+
+		try {
+			gameChangerAPI.getRecentlyOpenedDocs(state.cloneData.clone_name).then(({data}) => {
+				const filenames = data.map(record => record.document)
+				setState(dispatch, {recentlyOpened: filenames})
+			});
+		} catch (e) {
+			// Do nothing
+		}
 		
 		// set search settings
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
