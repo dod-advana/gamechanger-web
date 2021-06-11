@@ -52,7 +52,7 @@ This set up is more advanced and is intended for prepping for releases to produc
 - Run **kubectl port-forward <INSERT_GAMECHANGER-WEB_POD_NAME_HERE> 8990:8990**
 - Your frontend will be available at http://localhost:8990/#/gamechanger
 - To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
-- If you need to troubleshoot postgres, this command will start up a pod with postgres access: **kubectl run -i --tty my_pod --image=postgres:9.6 -- /bin/bash**
+- If you need to troubleshoot postgres, this command will start up a pod with postgres access: **kubectl run -i --tty mypod --image=postgres:9.6 -- /bin/bash**
 - Once in that container you can run **psql -U postgres -h postgres** to inspect the database
 
 ## Known/Common Issues

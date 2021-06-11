@@ -150,7 +150,7 @@ export default function GCUserInfoModal (props) {
 	}, []);
     return (
         <Dialog
-            open={state.userInfoModalOpen && !passedOnInfo && userFeedbackMode}
+            open={false && !passedOnInfo && userFeedbackMode}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
