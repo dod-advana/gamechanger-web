@@ -486,57 +486,80 @@ const removeSearchField = (key, state, dispatch) => {
 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
 }
 
-const renderAdvancedFilters = (state, dispatch) => {
+const renderAdvancedFilters = (state, dispatch, classes) => {
 	const usedPropertyNames = Object.values(state.searchSettings.searchFields).map(field => { return field.field ? field.field.display_name : '' });
 	const unusedProperties = state.documentProperties.filter(prop => usedPropertyNames.indexOf(prop.display_name) === -1);
 	
 	return (
-		<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-			{Object.keys(state.searchSettings.searchFields).map(key => {
-				const searchField = state.searchSettings.searchFields[key];
-				return (
-					<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
-						<div style = {{ marginRight: '15px' }}>
-							<Autocomplete
-								options={unusedProperties}
-								getOptionLabel={(option) => option.display_name}
-								getOptionSelected={(option, value) => { return option.name === value.name }}
-								renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
-								clearOnEscape
-								clearOnBlur
-								blurOnSelect
-								openOnFocus
-								style={{ backgroundColor: 'white', width: '100%' }}
-								value={searchField.field}
-								default
-								onChange={(event, value) => setSearchField(key, value, state, dispatch)}
+		<div className="text-left">
+			<FormControl style={{ padding: '20px', paddingTop: '10px', paddingBottom: '10px' }}>
+						<FormGroup key={`verbatim-key`} row style={{ marginBottom: '10px' }}>
+							<FormControlLabel
+								name={'verbatim'}
+								value={state.searchSettings.verbatimSearch}
+								classes={{ label: classes.titleText }}
+								control={<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={e => {handleVerbatimChange(e, state, dispatch)}}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									checked={state.searchSettings.verbatimSearch}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+									name={`verbatim`}
+									style={styles.filterBox}
+								/>}
+								label={`Verbatim Search`}
+								labelPlacement="end"
+								style={styles.titleText}
 							/>
-						</div>
-						<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-							<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
-								<TextField
-									disabled={!state.searchSettings.searchFields[key]?.field}
-									placeholder="Input"
-									variant="outlined"
-									value={searchField.input}
+						</FormGroup>
+			</FormControl>
+			<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+				{Object.keys(state.searchSettings.searchFields).map(key => {
+					const searchField = state.searchSettings.searchFields[key];
+					return (
+						<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
+							<div style = {{ marginRight: '15px' }}>
+								<Autocomplete
+									options={unusedProperties}
+									getOptionLabel={(option) => option.display_name}
+									getOptionSelected={(option, value) => { return option.name === value.name }}
+									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
+									clearOnEscape
+									clearOnBlur
+									blurOnSelect
+									openOnFocus
 									style={{ backgroundColor: 'white', width: '100%' }}
-									fullWidth={true}
-									onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
-									inputProps={{
-										style: {
-											height: 19,
-											width: '100%'
-										}
-									}}
+									value={searchField.field}
+									default
+									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
 								/>
 							</div>
-							{state.searchSettings.searchFields[key].field !== null &&
-								<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
-							}
+							<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+								<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
+									<TextField
+										disabled={!state.searchSettings.searchFields[key]?.field}
+										placeholder="Input"
+										variant="outlined"
+										value={searchField.input}
+										style={{ backgroundColor: 'white', width: '100%' }}
+										fullWidth={true}
+										onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
+										inputProps={{
+											style: {
+												height: 19,
+												width: '100%'
+											}
+										}}
+									/>
+								</div>
+								{state.searchSettings.searchFields[key].field !== null &&
+									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
+								}
+							</div>
 						</div>
-					</div>
-				);
-			})}
+					);
+				})}
+			</div>
 		</div>
 	);
 }
@@ -562,6 +585,13 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		</div>
 	);
 };
+
+const handleVerbatimChange = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	newSearchSettings.verbatimSearch = event.target.checked;
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+}
+
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_SEARCH_SETTINGS'});
@@ -638,7 +668,7 @@ const PolicySearchMatrixHandler = {
 				
 				<div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderAdvancedFilters(state, dispatch) }
+						{ renderAdvancedFilters(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 
