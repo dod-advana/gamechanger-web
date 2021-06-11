@@ -23,7 +23,10 @@ const initState = {
             pds: false,
             syn: false,
             none: false
-        }
+        },
+        minObligatedAmount: null,
+        maxObligatedAmount: null,
+        contractsOrMods: 'both'
     },
     showDialog: false,
     resultsPage: 1,

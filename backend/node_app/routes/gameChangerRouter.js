@@ -115,6 +115,7 @@ router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/addInternalUser', user.addInternalUser);
 router.post('/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
+router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.get('/admin/populateNewUserId', user.populateNewUserId);
