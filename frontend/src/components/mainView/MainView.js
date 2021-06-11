@@ -240,7 +240,7 @@ const MainView = (props) => {
 	}
 	
 	const renderHideTabs = () => {
-		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading } = state;
+		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading, userData, recentlyOpened } = state;
 		const showDidYouMean = didYouMean && !loading;
 		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
