@@ -11,10 +11,10 @@ class ExportHandler {
 		} = opts;
 
 		this.logger = logger;
-		this.searchUtility = new SearchUtility(opts),
-		this.exportHistory = new ExportHistoryController(opts),
-		this.reports = new Reports(),
-		this.appSettings = APP_SETTINGS
+		this.searchUtility = new SearchUtility(opts);
+		this.exportHistory = new ExportHistoryController(opts);
+		this.reports = new Reports();
+		this.appSettings = APP_SETTINGS;
 	}
 
 	async export(res, searchText, format, options, cloneName, permissions, userId) {
