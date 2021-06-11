@@ -4,6 +4,7 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
+const fs = require('fs');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -1004,6 +1005,71 @@ class SearchUtility {
 		}
 	}
 
+	phraseQAEntityQuery (searchTextList, limit) {
+		
+		let bigrams = [];
+		let length = searchTextList.length - 2;
+		for (let i =0; i <= length; i++) {
+			bigrams.push(searchTextList.slice(i, i+2).join(' '));
+		}
+
+		const shouldQueries = [];
+		const mustQueries = [];
+		for (const element of bigrams) {
+			const nameQuery = {
+				match_phrase: {
+					'name': {
+						query: element,
+						slop: 2,
+						boost: 0.5
+					}
+				}
+			}
+			shouldQueries.push(nameQuery);
+
+			const multiQuery = {
+				multi_match: {
+					fields: ['name', 'aliases.name'], // 'information'
+					query: element,
+					type: 'phrase_prefix'
+				}
+			}
+			shouldQueries.push(multiQuery);
+
+			const alias = {
+				match: { 'aliases.name': element }
+			}
+			mustQueries.push(alias);
+		};
+
+		const aliasQuery = {
+			nested: {
+				path: "aliases",
+				query: {
+					bool: {
+						should: mustQueries
+					}
+				}
+			}
+		}
+		shouldQueries.push(aliasQuery);
+		
+		try {
+			let query = {
+				from: 0,
+				size: limit,
+					query: {
+						bool: {
+							should: shouldQueries
+						}
+					}
+				};
+			return query;
+			} catch (err) {
+				this.logger.error(err, 'JKLQOPMF', '');
+			}
+		}
+
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
 		let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
@@ -1048,7 +1114,7 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(contextResults, sentResults, userId, qaParams) {
+	async getQAContext(contextResults, entityQAResults, sentResults, userId, qaParams) {
 		
 		let context = [];
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
@@ -1062,7 +1128,7 @@ class SearchUtility {
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
 							parIdx = paraHits[x]._nested.offset;
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 							contextPara.parId = parIdx;
 							contextPara.source = "context search";
 							let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
@@ -1081,7 +1147,7 @@ class SearchUtility {
 					parIdx = 0;
 					let singleResult = await this.queryOneDocQA(resultDoc._source.id, userId); // this adds the beginning of the doc
 					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 					contextPara.source = "context search"
 					contextPara.parId = parIdx;
 					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
@@ -1098,7 +1164,7 @@ class SearchUtility {
 						docId = docId + '_0';
 						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
 						let resultDoc = singleResult.body.hits.hits[0];
-						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s};
+						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 						contextPara.parId = parIdx;
 						contextPara.source = "intelligent search";
 						let paraHit = resultDoc._source.paragraphs[parIdx];
@@ -1123,7 +1189,27 @@ class SearchUtility {
 						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			} 
+			}
+			if (entityQAResults.body.hits.total.value > 0) {
+				try{
+					let docId;
+					let resultType;
+					let topEntity = entityQAResults.body.hits.hits[0];
+					if (topEntity._source.entity_type === 'topic') {
+						docId = topEntity._source.name.toLowerCase();
+						resultType = 'topic';
+					} else {
+						docId = topEntity._source.name;
+						resultType = 'entity';
+					}
+					let entity = {filename: topEntity._source.name, docId: docId, docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: resultType};
+					entity.source = "entity search";
+					entity.text = topEntity._source.information;
+					context.unshift(entity);
+				} catch (e) {
+					LOGGER.error(e.message, 'REXUPFJN', userId);
+				}
+			}
 			return context
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
@@ -1748,7 +1834,6 @@ class SearchUtility {
 			}
 		}
 		searchResults.sentResults = sentenceResults;
-		console.log(searchResults.expansionDict);
 		return searchResults;
 	}
 
