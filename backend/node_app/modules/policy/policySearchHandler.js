@@ -251,7 +251,6 @@ class PolicySearchHandler extends SearchHandler {
 			includeRevoked, 
 			sort = 'Relevance',
 			order = 'desc',
-			verbatimSearch = false
 		} = req.body;
 
 		try {
@@ -269,7 +268,7 @@ class PolicySearchHandler extends SearchHandler {
 			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
 
 			const operator = 'and';
-			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
+			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
 				try {
 					searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset);
 				} catch (e) {

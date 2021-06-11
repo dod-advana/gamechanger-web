@@ -84,7 +84,6 @@ const PolicySearchHandler = {
 			publicationDateFilter,
 			publicationDateAllTime,
 			searchFields,
-			verbatimSearch
 		} = searchSettings;
 		
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9 && !showTutorial) {
@@ -238,7 +237,6 @@ const PolicySearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					limit: 6,
-					verbatimSearch
 				},
 			});
 			
@@ -517,7 +515,6 @@ const PolicySearchHandler = {
 			publicationDateFilter,
 			publicationDateAllTime,
 			searchFields,
-			verbatimSearch,
 		} = searchSettings;
 
 		const offset = (((activeCategoryTab === 'all' ? resultsPage : infiniteScrollPage) - 1) * RESULTS_PER_PAGE);
@@ -554,7 +551,6 @@ const PolicySearchHandler = {
 					limit,
 					sort: currentSort,
 					order: currentOrder,
-					verbatimSearch
 				},
 			});
 
