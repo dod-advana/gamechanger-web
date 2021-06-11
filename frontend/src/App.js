@@ -115,7 +115,8 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	const { trackPageView, pushInstruction } = useMatomo();
 	const query = new URLSearchParams(location.search);
 	const filename = query.get('filename');
-	const documentTitle = `PDFViewer - ${filename}`;
+	const clone_name = query.get('cloneIndex');
+	const documentTitle = `PDFViewer - ${filename} - ${clone_name}`;
 	const RenderComponent = Component || Render;
 	useEffect(() => {
 		// On route load we want to log this to matomo, that is all this use effect does
