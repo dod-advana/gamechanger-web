@@ -167,7 +167,6 @@ const PolicyMainViewHandler = {
 			sidebarDocTypes,
 			timeSinceCache,
 		} = state;
-		const { verbatimSearch } = searchSettings;
 
 
 		let sideScroll = {
@@ -175,15 +174,6 @@ const PolicyMainViewHandler = {
 		}
 		if (!iframePreviewLink) sideScroll = {};
 		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`;
-
-
-		const alertMessage = 
-			(<div> 
-				We noticed you used quotes in your search. {' '}
-				<a style={{cursor: 'pointer'}} onClick={ () => {setState(dispatch, { runSearch: true, searchSettings: {...searchSettings, verbatimSearch: true} });}}>
-					Click here to re-run the search with our verbatim search filter on.
-				</a>
-			</div>);
 
 		return (
 			<div key={'cardView'}>
@@ -207,16 +197,6 @@ const PolicyMainViewHandler = {
 								}
 								<div className={'right-container'}>
 									{!hideTabs && <ViewHeader {...props}/>}
-									{	searchText.startsWith('"') && searchText.endsWith('"') && !verbatimSearch &&
-										<UOTAlert 
-											title={''} 
-											type={'info'}
-											isOpen
-											message={alertMessage}
-											top={0}
-											containerStyles={ styles.alert}
-											/>
-									}
 									<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
 										<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
 											<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>

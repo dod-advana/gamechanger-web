@@ -155,7 +155,6 @@ const initState = {
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
 		includeRevoked: false,
-		verbatimSearch: false,
 	},
 
 	// Categories

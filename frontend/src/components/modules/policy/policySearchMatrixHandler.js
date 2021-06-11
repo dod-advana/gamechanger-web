@@ -492,27 +492,6 @@ const renderAdvancedFilters = (state, dispatch, classes) => {
 	
 	return (
 		<div className="text-left">
-			<FormControl style={{ padding: '20px', paddingTop: '10px', paddingBottom: '10px' }}>
-						<FormGroup key={`verbatim-key`} row style={{ marginBottom: '10px' }}>
-							<FormControlLabel
-								name={'verbatim'}
-								value={state.searchSettings.verbatimSearch}
-								classes={{ label: classes.titleText }}
-								control={<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={e => {handleVerbatimChange(e, state, dispatch)}}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.verbatimSearch}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={`verbatim`}
-									style={styles.filterBox}
-								/>}
-								label={`Verbatim Search`}
-								labelPlacement="end"
-								style={styles.titleText}
-							/>
-						</FormGroup>
-			</FormControl>
 			<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
 				{Object.keys(state.searchSettings.searchFields).map(key => {
 					const searchField = state.searchSettings.searchFields[key];
@@ -585,12 +564,6 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		</div>
 	);
 };
-
-const handleVerbatimChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.verbatimSearch = event.target.checked;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
-}
 
 
 const resetAdvancedSettings = (dispatch) => {
