@@ -179,9 +179,6 @@ const App = (props) => {
 			});
 			setGameChangerCloneRoutes(cloneRoutes);
 		} catch (err) {
-			if(`${err}`.includes('401')) {
-				window.location.href = `${window.location.protocol}//${window.location.host}/login`;
-			}
 			console.log(err);
 			console.log('Failed to retrieve GC Clones.');
 		}
