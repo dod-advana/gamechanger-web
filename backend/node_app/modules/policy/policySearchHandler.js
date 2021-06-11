@@ -406,7 +406,7 @@ class PolicySearchHandler extends SearchHandler {
 								return i['text'] !== '';
 							});
 						}
-						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
+						let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType + ')');
 						let cleanedResults = shortenedResults.answers.map(item => item.text);
 						searchResults.qaResults.answers = cleanedResults;
 						searchResults.qaResults.filenames = contextIds;
