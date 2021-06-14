@@ -10,7 +10,6 @@ import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
-import UOTAlert from '../../common/GCAlert';
 import {Card} from "../../cards/GCCard";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
@@ -19,7 +18,6 @@ import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, StyledCenterContainer
 } from "../../../gamechangerUtils";
-import { SearchContext } from '../globalSearch/SearchContext';
 
 const _ = require('lodash');
 
@@ -47,17 +45,6 @@ const styles = {
 	},
 	searchResults: fullWidthCentered,
 	paginationWrapper: fullWidthCentered,
-	alert: {
-		padding: 15,
-		marginLeft: 0,
-		marginBottom: 10,
-		position: 'relative',
-		width: '100%',
-		// border: '2px solid',
-		display: 'flex',
-		justifyContent: 'space-between',
-		zIndex: 10,
-	}
 }
 
 const getSearchResults = (searchResultData, state, dispatch) => {
@@ -139,9 +126,6 @@ const PolicyMainViewHandler = {
 			activeCategoryTab,
 			cloneData,
 			componentStepNumbers,
-
-			searchText,
-			searchSettings,
 
 			count,
 			docSearchResults,

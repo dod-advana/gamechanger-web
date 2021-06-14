@@ -250,7 +250,7 @@ class PolicySearchHandler extends SearchHandler {
 			searchFields = {},
 			includeRevoked, 
 			sort = 'Relevance',
-			order = 'desc',
+			order = 'desc'
 		} = req.body;
 
 		try {
