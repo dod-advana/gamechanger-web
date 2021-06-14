@@ -11,11 +11,7 @@ const initState = {
             navy: false,
             estate: false,
         },
-        aggregations: {
-            officeAgency: false,
-            vendor: false,
-            parentIDV: false
-        },
+        aggregations: [],
         startDate: null,
         endDate: null,
         issueAgency: null,
@@ -27,14 +23,23 @@ const initState = {
             pds: false,
             syn: false,
             none: false
-        }
+        },
+        minObligatedAmount: null,
+        maxObligatedAmount: null,
+        contractsOrMods: 'both'
     },
     showDialog: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
     statsLoading: false,
+    summaryCardView: false,
+    summaryCardData: [],
+    resultsText: '',
     resetSettingsSwitch: false,
+    categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
     
     // not part of EDA (yet) but currently required in NewGameChangerPage: 
     notifications: [],

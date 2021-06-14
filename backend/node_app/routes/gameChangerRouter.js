@@ -119,6 +119,7 @@ router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/addInternalUser', user.addInternalUser);
 router.post('/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
+router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.get('/admin/populateNewUserId', user.populateNewUserId);
@@ -140,6 +141,8 @@ router.get('/appSettings/intelligentAnswers', appSettings.getIntelligentAnswersM
 router.post('/appSettings/intelligentAnswers', appSettings.setIntelligentAnswersMode);
 router.get('/appSettings/entitySearch', appSettings.getEntitySearchMode);
 router.post('/appSettings/entitySearch', appSettings.setEntitySearchMode);
+router.get('/appSettings/userFeedback', appSettings.getUserFeedbackMode);
+router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 

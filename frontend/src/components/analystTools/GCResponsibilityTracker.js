@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import propTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -163,7 +164,7 @@ const GCResponsibilityTracker = (props) => {
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, state.cloneData);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
 						}}
 						style={{ color: '#386F94' }}
 						>
@@ -555,6 +556,14 @@ const styles = {
 		paddingTop: '20px',
 		paddingBottom: '20px'
 	}
+}
+
+GCResponsibilityTracker.propTypes = {
+	state: propTypes.objectOf({
+		cloneData: propTypes.objectOf({
+			clone_name: propTypes.string
+		})
+	})
 }
 
 export default GCResponsibilityTracker;

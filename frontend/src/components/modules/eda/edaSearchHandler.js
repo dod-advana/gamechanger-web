@@ -197,10 +197,6 @@ const EdaSearchHandler = {
 		
 						searchResults = searchResults.concat(docs);
 		
-						const favFilenames = userData.favorite_documents.map(document => {
-							return document.filename;
-						});
-		
 						// if this search is a favorite, turn off notifications of new results
 						if (searchFavorite) {
 							userData.favorite_searches.forEach((search, index) => {
@@ -244,7 +240,8 @@ const EdaSearchHandler = {
 							metricsLoading: false,
 							metricsCounted: true,
 							loadingTinyUrl: false,
-							hideTabs: false
+							hideTabs: false,
+							query: resp.data.query
 						});
 					} else {
 						if (!offset) {

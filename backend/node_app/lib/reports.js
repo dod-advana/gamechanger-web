@@ -56,14 +56,13 @@ class Reports {
 			stringifier.write(header);
 
 			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_rs, doc.ref_list];
-			stringifier.write(item);
-		});
+				stringifier.write(item);
+			});
 		}
 
 	}
 
 	createPdfBuffer(data, userId, settings, callback=()=>{}){
-
 		try {
 			const fonts = {
 				Roboto: {
@@ -127,7 +126,7 @@ class Reports {
 					],
 				};
 			});
-			const displayTitle = doc.title === "NA" ? `${doc.doc_type} ${doc.doc_num}` : `${doc.doc_type} ${doc.doc_num} - ${doc.title}`;
+			const displayTitle = doc.title === 'NA' ? `${doc.doc_type} ${doc.doc_num}` : `${doc.doc_type} ${doc.doc_num} - ${doc.title}`;
 			return {
 				stack: [
 					{ text: displayTitle, style: 'title', id: doc.filename, tocItem: true, },
@@ -176,6 +175,7 @@ class Reports {
 							style: 'title',
 							absolutePosition: { x: sideMargin, y: 20 },
 						},
+						{ text: data.classificationMarking, alignment: 'center', style: 'classification' },
 					],
 					margin: [0, 0, 0, marginBottom],
 				};
@@ -196,6 +196,7 @@ class Reports {
 						},
 						{ text: currentPage.toString(), alignment: 'right', style: 'pageNum' },
 						{ text: 'GAMECHANGER | REPORT', alignment: 'center', style: 'footer' },
+						{ text: data.classificationMarking, alignment: 'center', style: 'classification' },
 					],
 					margin: [sideMargin, 0, sideMargin - pageNumOffset, 0],
 				};
@@ -254,6 +255,11 @@ class Reports {
 					fontSize: 15,
 					color: '#404040',
 					marginTop: 15
+				},
+				classification: {
+					color: '#404040',
+					fontSize: 11,
+					marginTop: 5
 				},
 				footer: {
 					color: '#404040',

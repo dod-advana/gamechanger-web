@@ -17,6 +17,7 @@ const endpoints = {
 	getDocumentsToAnnotate: '/api/gameChanger/assist/getDocumentsToAnnotate',
 	saveDocumentAnnotationsPOST: '/api/gameChanger/assist/saveDocumentAnnotationsPOST',
 	sendFeedbackPOST: '/api/gameChanger/sendFeedback',
+	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
 	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
@@ -87,6 +88,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
+	userFeedback:'/api/gamechanger/appSettings/userFeedback',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
@@ -228,6 +230,11 @@ export default class GameChangerAPI {
 	sendFeedbackPOST =  async(feedbackData) => {
 		const url = endpoints.sendFeedbackPOST;
 		return axiosPOST(this.axios, url, {feedbackData: feedbackData});
+	}
+
+	sendClassificationAlertPOST = async (alertData) => {
+		const url = endpoints.sendClassificationAlertPOST;
+		return axiosPOST(this.axios, url, {alertData: alertData});
 	}
 
 	getAllMatchesBetweenDoubleQuotes = (string) => {
@@ -573,7 +580,7 @@ export default class GameChangerAPI {
 	
 	getDocumentsForTopic = async(cloneName, body) => {
 		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {cloneName, unctionName: 'getDocumentsForTopic', options: body});
+		return axiosPOST(this.axios, url, {cloneName, functionName: 'getDocumentsForTopic', options: body});
 	}
 
 	getTextSuggestion = async(body) => {
@@ -647,6 +654,15 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, {value: bodyValue});
 	}
 
+	getUserFeedbackMode = async () => {
+		const url = endpoints.userFeedback;
+		return axiosGET(this.axios, url)
+	}
+
+	toggleUserFeedbackMode = async () => {
+		const url = endpoints.userFeedback;
+		return axiosPOST(this.axios, url, {})
+	}
 	getTopicSearchMode = async () => {
 		const url = endpoints.topicSearch;
 		return axiosGET(this.axios, url)

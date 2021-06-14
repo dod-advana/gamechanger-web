@@ -6,7 +6,7 @@ const { constructorOptionsMock } = require('../../resources/testUtility');
 describe('EDASearchUtility', function () {
 
     describe('getElasticsearchPagesQuery', function() {
-        it ('should return an ES query for a search with filters included',
+        it ('should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included',
         async (done) => {
 
             const opts = {
@@ -14,17 +14,79 @@ describe('EDASearchUtility', function () {
 			};
 
             // includes issue org filter, date filter, issue office agency filter
-            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":false,"tiny_url":"contractsearch?tiny=304","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":false,"organizations":{"airForce":false,"army":true,"dla":false,"marineCorps":false,"navy":false,"estate":false},"aggregations":{"officeAgency":false,"vendor":false,"parentIDV":false},"startDate":"2017-06-10","endDate":null,"issueAgency":"Dept of Army"},"forStats":true,"searchVersion":1,"searchText":"test","offset":0,"limit":20,"cloneName":"eda","expansionDict":{"test":[{"phrase":"mental","source":"thesaurus"},{"phrase":"psychometric","source":"thesaurus"},{"phrase":"check","source":"ML-QE"},{"phrase":"exam","source":"thesaurus"},{"phrase":"examination","source":"thesaurus"},{"phrase":"result","source":"ML-QE"}]},"operator":"and","searchTerms":["test"],"parsedQuery":"test","extSearchFields":["pdf_filename_eda_ext","pds_contract_eda_ext","pds_filename_eda_ext","pdf_contract_eda_ext","pds_modification_eda_ext"],"extStoredFields":["*_eda_ext"]};
+            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":false,"tiny_url":"contractsearch?tiny=37","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":false,"organizations":{"airForce":false,"army":true,"dla":false,"marineCorps":false,"navy":false,"estate":false},"aggregations":[],"startDate":"2017-06-11","endDate":null,"issueAgency":"Dept of Army","issueOffice":null,"allYearsSelected":true,"fiscalYears":[],"allDataSelected":true,"contractData":{"pds":false,"syn":false,"none":false},"minObligatedAmount":null,"maxObligatedAmount":null},"searchVersion":1,"searchText":"test","offset":0,"limit":18,"cloneName":"eda","expansionDict":{"test":[{"phrase":"mental","source":"thesaurus"},{"phrase":"psychometric","source":"thesaurus"},{"phrase":"check","source":"ML-QE"},{"phrase":"exam","source":"thesaurus"},{"phrase":"examination","source":"thesaurus"},{"phrase":"result","source":"ML-QE"}]},"operator":"and","searchTerms":["test"],"parsedQuery":"test","extSearchFields":["*_eda_ext"],"extStoredFields":["*_eda_ext"]};
             const target = new EDASearchUtility(opts);
             try {
                 const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
-                const expected = {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":20,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"test*","boost":15}}},{"query_string":{"query":"test","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"test","fields":["pdf_filename_eda_ext","pds_contract_eda_ext","pds_filename_eda_ext","pdf_contract_eda_ext","pds_modification_eda_ext"],"operator":"or"}}]}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"should":[{"match":{"extracted_data_eda_n.dodaac_org_type_eda_ext":"army"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.contract_issue_office_name_eda_ext":"Dept of Army"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"range":{"extracted_data_eda_n.signature_date_eda_ext_dt":{"gte":"2017-06-10"}}}}}],"should":[{"multi_match":{"query":"test","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}}
+                const expected = {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":18,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"test*","boost":15}}},{"query_string":{"query":"test","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"test","fields":["*_eda_ext"],"operator":"or"}}]}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.contract_issue_office_name_eda_ext":"Dept of Army"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"should":[{"match":{"extracted_data_eda_n.dodaac_org_type_eda_ext":"army"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"range":{"extracted_data_eda_n.signature_date_eda_ext_dt":{"gte":"2017-06-11"}}}}}],"should":[{"multi_match":{"query":"test","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}}
+
                 assert.deepStrictEqual(actual, expected);
                 done();
             } catch(err) {
                 assert.fail(err);
             }
-        })
+        });
+
+        it('should return an ES query based on the Fiscal Year and EDA Contract Data filters',
+        async (done) => {
+            const opts = {
+				...constructorOptionsMock
+			};
+
+            // includes issue org filter, date filter, issue office agency filter
+            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":false,"tiny_url":"contractsearch?tiny=37","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":true,"organizations":{"airForce":false,"army":false,"dla":false,"marineCorps":false,"navy":false,"estate":false},"aggregations":[],"startDate":null,"endDate":null,"issueAgency":null,"issueOffice":"","allYearsSelected":false,"fiscalYears":["2017"],"allDataSelected":false,"contractData":{"pds":true,"syn":true,"none":false}},"searchVersion":1,"searchText":"test","offset":0,"limit":18,"cloneName":"eda","expansionDict":{"test":[{"phrase":"mental","source":"thesaurus"},{"phrase":"psychometric","source":"thesaurus"},{"phrase":"check","source":"ML-QE"},{"phrase":"exam","source":"thesaurus"},{"phrase":"examination","source":"thesaurus"},{"phrase":"result","source":"ML-QE"}]},"operator":"and","searchTerms":["test"],"parsedQuery":"test","extSearchFields":["*_eda_ext"],"extStoredFields":["*_eda_ext"]};
+            const target = new EDASearchUtility(opts);
+            try {
+                const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
+                const expected = {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":18,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"test*","boost":15}}},{"query_string":{"query":"test","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"test","fields":["*_eda_ext"],"operator":"or"}}]}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"should":[{"range":{"extracted_data_eda_n.signature_date_eda_ext_dt":{"gte":"2017","lte":"2018","format":"yyyy"}}}]}}}},{"bool":{"should":[{"bool":{"must":[{"match":{"metadata_type_eda_ext":"pds, syn"}},{"match":{"is_supplementary_data_included_eda_ext_b":true}}]}}]}}],"should":[{"multi_match":{"query":"test","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}}
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
+
+        it('should return an ES query based on the Issue Office DoDAAC and Obligated Amount filters',
+        async (done) => {
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            // includes issue org filter, date filter, issue office agency filter
+            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":false,"tiny_url":"contractsearch?tiny=37","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":true,"organizations":{"airForce":false,"army":false,"dla":false,"marineCorps":false,"navy":false,"estate":false},"aggregations":[],"startDate":null,"endDate":null,"issueAgency":null,"issueOffice":"N66001","allYearsSelected":true,"fiscalYears":[],"allDataSelected":true,"contractData":{"pds":false,"syn":false,"none":false},"minObligatedAmount":"200000","maxObligatedAmount":null},"searchVersion":1,"searchText":"test","offset":0,"limit":18,"cloneName":"eda","expansionDict":{"test":[{"phrase":"mental","source":"thesaurus"},{"phrase":"psychometric","source":"thesaurus"},{"phrase":"check","source":"ML-QE"},{"phrase":"exam","source":"thesaurus"},{"phrase":"examination","source":"thesaurus"},{"phrase":"result","source":"ML-QE"}]},"operator":"and","searchTerms":["test"],"parsedQuery":"test","extSearchFields":["*_eda_ext"],"extStoredFields":["*_eda_ext"]};
+
+            const target = new EDASearchUtility(opts);
+            try {
+                const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
+                const expected =  {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":18,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"test*","boost":15}}},{"query_string":{"query":"test","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"test","fields":["*_eda_ext"],"operator":"or"}}]}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.contract_issue_office_dodaac_eda_ext":"N66001"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"range":{"extracted_data_eda_n.total_obligated_amount_eda_ext_f":{"gte":"200000"}}}}}],"should":[{"multi_match":{"query":"test","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}};
+
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
+
+        it('should return an ES query based on the contract filter',
+        async (done) => {
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            // includes issue org filter, date filter, issue office agency filter
+            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":false,"tiny_url":"contractsearch?tiny=37","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":true,"organizations":{"airForce":false,"army":false,"dla":false,"marineCorps":false,"navy":false,"estate":false},"aggregations":[],"startDate":null,"endDate":null,"issueAgency":null,"issueOffice":null,"allYearsSelected":true,"fiscalYears":[],"allDataSelected":true,"contractData":{"pds":false,"syn":false,"none":false},"minObligatedAmount":null,"maxObligatedAmount":null,"contractsOrMods":"contracts"},"searchVersion":1,"searchText":"test","offset":0,"limit":18,"cloneName":"eda","expansionDict":{"test":[{"phrase":"mental","source":"thesaurus"},{"phrase":"psychometric","source":"thesaurus"},{"phrase":"check","source":"ML-QE"},{"phrase":"exam","source":"thesaurus"},{"phrase":"examination","source":"thesaurus"},{"phrase":"result","source":"ML-QE"}]},"operator":"and","searchTerms":["test"],"parsedQuery":"test","extSearchFields":["*_eda_ext"],"extStoredFields":["*_eda_ext"]};
+
+            const target = new EDASearchUtility(opts);
+            try {
+                const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
+                const expected =  {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":18,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"test*","boost":15}}},{"query_string":{"query":"test","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"test","fields":["*_eda_ext"],"operator":"or"}}]}},{"match":{"mod_identifier_eda_ext":"base_award"}}],"should":[{"multi_match":{"query":"test","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}};
+
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
     });
 
     describe('getElasticSearchStatsQuery', function () {
