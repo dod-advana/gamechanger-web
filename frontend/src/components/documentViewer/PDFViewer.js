@@ -32,8 +32,7 @@ export default function PDFViewer({location}) {
 				});
                 }
 			}
-		}
-	, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
+		}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
    
     useEffect(() => {
 		setFilename(query.get('filename'));
