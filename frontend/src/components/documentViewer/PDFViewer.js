@@ -11,13 +11,13 @@ function useQuery(location) {
 
 export default function PDFViewer({location}) {
 
-	const [filename, setFilename] = React.useState(null);
-	const [prevSearchText, setPrevSearchText] = React.useState(null);
-	const [pageNumber, setPageNumber] = React.useState(null);
-	const [isClone, setIsClone] = React.useState(false);
+    const [filename, setFilename] = React.useState(null);
+    const [prevSearchText, setPrevSearchText] = React.useState(null);
+    const [pageNumber, setPageNumber] = React.useState(null);
+    const [isClone, setIsClone] = React.useState(false);
     const [cloneIndex, setCloneIndex] = React.useState(null);
     const [fileUrl, setFileUrl] = React.useState(null);
-   
+
     let query = useQuery(location);
 
 	const measuredRef = useCallback(node => {
@@ -30,7 +30,7 @@ export default function PDFViewer({location}) {
 				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
 					node.src = url;
 				});
-                }
+                
 			}
 		}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
    
