@@ -15,7 +15,7 @@ export default function PDFViewer({location}) {
 	const [prevSearchText, setPrevSearchText] = React.useState(null);
 	const [pageNumber, setPageNumber] = React.useState(null);
 	const [isClone, setIsClone] = React.useState(false);
-	const [cloneIndex, setCloneIndex] = React.useState(null);
+    const [cloneIndex, setCloneIndex] = React.useState(null);
     const [fileUrl, setFileUrl] = React.useState(null);
    
     let query = useQuery(location);
