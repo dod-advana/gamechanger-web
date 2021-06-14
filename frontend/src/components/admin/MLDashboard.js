@@ -72,6 +72,8 @@ const apiColumns = [
     }
 ]
 const logs = [];
+let loaded = 0;
+let errored = 0;
 
 /**
  * This class queries the ml api information and provides controls 
@@ -116,19 +118,38 @@ export default () => {
         setApiErrors([].concat(logs));
     }
     /**
+     * Track if all asnyc calls have loaded or errored
+     * @method updateLoadCounter
+     * @param {Boolean} error - just pass in true if there was an error
+     */
+    const updateLoadCounter = (error) => {
+        loaded ++;
+        errored = !error? errored:errored +1;
+        // Set status to OK or ERROR
+        if (loaded>=4){
+            if(errored > 0){
+                setConnectionStatus(2);
+            }
+            else{
+                setConnectionStatus(0);
+            }
+        }
+    }
+    /**
      * Load all the initial data on transformers and s3
      * @method onload
      */
     const onload = async ()=>{
+        loaded = 0;
+        errored = 0;
         try {
             // The awaits are for the try catch 
             // to work and the finally to come last.
-            await getAPIInformation();
-            await getCurrentTransformer();
-            await getS3List();
-            await getModelsList();
-            // Set status to OK
-            setConnectionStatus(0);
+            getAPIInformation();
+            getCurrentTransformer();
+            getS3List();
+            getModelsList();
+
         } catch (e) {
             // Set status to ERROR
             setConnectionStatus(2);
@@ -149,8 +170,10 @@ export default () => {
             // current.data is of the form {sentence_models:{encoder, sim}}
             setCurrentTransformer(current.data.sentence_models);
             updateLogs('Successfully queried current transformer',0);
+            updateLoadCounter();
         }catch (e) {
             updateLogs("Error querying current transformer: " + e.toString() ,2);
+            updateLoadCounter(true);
             throw e;
         }
     }
@@ -174,8 +197,10 @@ export default () => {
             }
             setS3List(setList);
             updateLogs('Successfully queried s3 models',0);
+            updateLoadCounter();
         }catch (e) {
             updateLogs("Error querying s3 models: " + e.toString() ,2);
+            updateLoadCounter(true);
             throw e;
         }
     }
@@ -189,8 +214,10 @@ export default () => {
             const list = await gameChangerAPI.getModelsList();
             setDonwloadedModelsList(list.data);
             updateLogs('Successfully queried models list',0);
+            updateLoadCounter();
         }catch (e) {
             updateLogs("Error querying models list: " + e.toString() ,2);
+            updateLoadCounter(true);
             throw e;
         }
     }
@@ -204,8 +231,10 @@ export default () => {
             const info = await gameChangerAPI.getAPIInformation();
             setAPIData(info.data);
             updateLogs('Successfully queried api information',0);
+            updateLoadCounter();
         }catch (e) {
             updateLogs("Error querying api information: " + e.toString() ,2);
+            updateLoadCounter(true);
             throw e;
         }
     }
@@ -324,35 +353,7 @@ export default () => {
                         >Download</GCPrimaryButton>
                     </div>
                     <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
-						<b>Reload Models</b>
-                        <Select
-                            value={selectedSentence}
-                            onChange={e => setSelectedSentence(e.target.value)}
-                            name="labels"
-                            style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                        >
-                            {downloadedModelsList.sentence.map((name) => {
-								return (
-                                    <MenuItem 
-                                        style={{fontSize:'small'}}
-                                        value={name}>{name}</MenuItem>
-								)
-							})}
-                        </Select>
-                        <Select
-                            value={selectedQEXP}
-                            onChange={e => setSelectedQEXP(e.target.value)}
-                            name="labels"
-                            style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                        >
-                            {downloadedModelsList.qexp.map((name) => {
-								return (
-                                    <MenuItem 
-                                        style={{fontSize:'small'}}
-                                        value={name}>{name}</MenuItem>
-								)
-							})}
-                        </Select>
+						<b>Reload Models</b><br/>
                         <GCPrimaryButton
                             onClick={() => {
                                 triggerReloadModels();
@@ -360,6 +361,39 @@ export default () => {
                             disabled={transformerLoading}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Reload</GCPrimaryButton>
+                        <div>
+                            Sentence Model:
+                            <Select
+                                value={selectedSentence}
+                                onChange={e => setSelectedSentence(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            >
+                                {downloadedModelsList.sentence.map((name) => {
+                                    return (
+                                        <MenuItem 
+                                            style={{fontSize:'small'}}
+                                            value={name}>{name}</MenuItem>
+                                    )
+                                })}
+                            </Select><br/>
+                            QEXP Model:
+                            <Select
+                                value={selectedQEXP}
+                                onChange={e => setSelectedQEXP(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            >
+                                {downloadedModelsList.qexp.map((name) => {
+                                    return (
+                                        <MenuItem 
+                                            style={{fontSize:'small'}}
+                                            value={name}>{name}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </div>
+                        
 					</div>
                 </BorderDiv>
             </div>
