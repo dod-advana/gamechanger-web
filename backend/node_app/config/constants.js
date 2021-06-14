@@ -111,7 +111,7 @@ module.exports = Object.freeze({
 		database: 'matomo'
 	},
 	HERMES_ELASTIC_SEARCH_OPTS: {
-		index: 'hermes_test_1',
+		index: process.env.HERMES_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},

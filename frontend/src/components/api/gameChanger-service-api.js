@@ -17,6 +17,7 @@ const endpoints = {
 	getDocumentsToAnnotate: '/api/gameChanger/assist/getDocumentsToAnnotate',
 	saveDocumentAnnotationsPOST: '/api/gameChanger/assist/saveDocumentAnnotationsPOST',
 	sendFeedbackPOST: '/api/gameChanger/sendFeedback',
+	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
 	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
@@ -225,6 +226,11 @@ export default class GameChangerAPI {
 	sendFeedbackPOST =  async(feedbackData) => {
 		const url = endpoints.sendFeedbackPOST;
 		return axiosPOST(this.axios, url, {feedbackData: feedbackData});
+	}
+
+	sendClassificationAlertPOST = async (alertData) => {
+		const url = endpoints.sendClassificationAlertPOST;
+		return axiosPOST(this.axios, url, {alertData: alertData});
 	}
 
 	getAllMatchesBetweenDoubleQuotes = (string) => {
