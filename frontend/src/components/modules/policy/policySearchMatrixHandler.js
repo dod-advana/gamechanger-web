@@ -486,59 +486,57 @@ const removeSearchField = (key, state, dispatch) => {
 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
 }
 
-const renderAdvancedFilters = (state, dispatch, classes) => {
+const renderAdvancedFilters = (state, dispatch) => {
 	const usedPropertyNames = Object.values(state.searchSettings.searchFields).map(field => { return field.field ? field.field.display_name : '' });
 	const unusedProperties = state.documentProperties.filter(prop => usedPropertyNames.indexOf(prop.display_name) === -1);
 	
 	return (
-		<div className="text-left">
-			<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-				{Object.keys(state.searchSettings.searchFields).map(key => {
-					const searchField = state.searchSettings.searchFields[key];
-					return (
-						<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
-							<div style = {{ marginRight: '15px' }}>
-								<Autocomplete
-									options={unusedProperties}
-									getOptionLabel={(option) => option.display_name}
-									getOptionSelected={(option, value) => { return option.name === value.name }}
-									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
-									clearOnEscape
-									clearOnBlur
-									blurOnSelect
-									openOnFocus
+		<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+			{Object.keys(state.searchSettings.searchFields).map(key => {
+				const searchField = state.searchSettings.searchFields[key];
+				return (
+					<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
+						<div style = {{ marginRight: '15px' }}>
+							<Autocomplete
+								options={unusedProperties}
+								getOptionLabel={(option) => option.display_name}
+								getOptionSelected={(option, value) => { return option.name === value.name }}
+								renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
+								clearOnEscape
+								clearOnBlur
+								blurOnSelect
+								openOnFocus
+								style={{ backgroundColor: 'white', width: '100%' }}
+								value={searchField.field}
+								default
+								onChange={(event, value) => setSearchField(key, value, state, dispatch)}
+							/>
+						</div>
+						<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+							<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
+								<TextField
+									disabled={!state.searchSettings.searchFields[key]?.field}
+									placeholder="Input"
+									variant="outlined"
+									value={searchField.input}
 									style={{ backgroundColor: 'white', width: '100%' }}
-									value={searchField.field}
-									default
-									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
+									fullWidth={true}
+									onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
+									inputProps={{
+										style: {
+											height: 19,
+											width: '100%'
+										}
+									}}
 								/>
 							</div>
-							<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-								<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
-									<TextField
-										disabled={!state.searchSettings.searchFields[key]?.field}
-										placeholder="Input"
-										variant="outlined"
-										value={searchField.input}
-										style={{ backgroundColor: 'white', width: '100%' }}
-										fullWidth={true}
-										onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
-										inputProps={{
-											style: {
-												height: 19,
-												width: '100%'
-											}
-										}}
-									/>
-								</div>
-								{state.searchSettings.searchFields[key].field !== null &&
-									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
-								}
-							</div>
+							{state.searchSettings.searchFields[key].field !== null &&
+								<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
+							}
 						</div>
-					);
-				})}
-			</div>
+					</div>
+				);
+			})}
 		</div>
 	);
 }
@@ -564,7 +562,6 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		</div>
 	);
 };
-
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_SEARCH_SETTINGS'});
@@ -641,7 +638,7 @@ const PolicySearchMatrixHandler = {
 				
 				<div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderAdvancedFilters(state, dispatch, classes) }
+						{ renderAdvancedFilters(state, dispatch) }
 					</GCAccordion>
 				</div>
 

@@ -386,7 +386,7 @@ class SearchUtility {
 										stored_fields: [
 											'paragraphs.page_num_i',
 											'paragraphs.filename',
-											'paragraphs.par_raw_text_t',
+											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
 										size: 5,
@@ -1766,7 +1766,7 @@ class SearchUtility {
 				return [fieldFilenameArray[0].replace(/.pdf/g, ''), true];
 			} else if (verbatimHighlightTextArray.length > 0 && verbatimHighlightTextArray[0]) {
 				return [verbatimHighlightTextArray[0], false];
-		  } else if (verbatimFieldFilenameArray.length > 0 && verbatimFieldFilenameArray[0]) {
+			} else if (verbatimFieldFilenameArray.length > 0 && verbatimFieldFilenameArray[0]) {
 				return [verbatimFieldFilenameArray[0].replace(/.pdf/g, ''), true];
 			} else if (pageHighlightTextArray.length > 0 && pageHighlightTextArray[0]) {
 				return [pageHighlightTextArray[0], false];
