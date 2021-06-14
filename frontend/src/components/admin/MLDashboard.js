@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { Select, TextField, FormControl, Typography, MenuItem, Tooltip } from '@material-ui/core'
+import { Select, MenuItem, Tooltip } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../common/GCButton";
