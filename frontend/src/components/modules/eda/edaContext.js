@@ -25,7 +25,8 @@ const initState = {
             none: false
         },
         minObligatedAmount: null,
-        maxObligatedAmount: null
+        maxObligatedAmount: null,
+        contractsOrMods: 'both'
     },
     showDialog: false,
     resultsPage: 1,

@@ -28,7 +28,6 @@ class EDASearchUtility {
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -54,16 +53,6 @@ class EDASearchUtility {
 		try {
 			// add additional search fields to the query
 			let mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
 
 			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
@@ -182,7 +171,7 @@ class EDASearchUtility {
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-
+			// console.log(JSON.stringify(query))
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -197,7 +186,6 @@ class EDASearchUtility {
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -223,16 +211,6 @@ class EDASearchUtility {
 		try {
 			// add additional search fields to the query
 			let mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
 
 			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
@@ -555,6 +533,34 @@ class EDASearchUtility {
 			if (push) {
 				mustQueries.push(rangeQuery);
 			}
+		}
+
+		if (settings.contractsOrMods !== 'both') {
+			const mustQuery = { 
+				match: {
+					mod_identifier_eda_ext: "base_award"
+				}
+			}
+
+			const boolQuery = {
+				bool: {
+					must_not: [
+						{
+							term: {
+								mod_identifier_eda_ext: "base_award"
+							}
+						}
+					]
+				}
+			}
+
+			if (settings.contractsOrMods === "contracts") {
+				mustQueries.push(mustQuery)
+			}
+			else if (settings.contractsOrMods === "mods") { 
+				mustQueries.push(boolQuery);
+			}
+
 		}
 
 		return mustQueries;
