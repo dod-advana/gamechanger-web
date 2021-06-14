@@ -20,6 +20,7 @@ class MLApiClient {
 		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
 		this.setTransformerModel = this.setTransformerModel.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
+		this.reloadModels = this.reloadModels.bind(this);
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {

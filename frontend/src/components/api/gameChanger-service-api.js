@@ -59,7 +59,7 @@ const endpoints = {
 	downloadDependencies: '/api/gamechanger/downloadDependencies',
 	getS3List: '/api/gamechanger/getS3List',
 	getAPIInformation: '/api/gamechanger/getAPIInformation',
-	getTransformerList: '/api/gameChanger/getTransformerList',
+	getModelsList: '/api/gameChanger/getModelsList',
 	getCurrentTransformer: '/api/gameChanger/getCurrentTransformer',
 	setTransformerModel: '/api/gameChanger/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
@@ -466,9 +466,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
-	reloadModels = async () => {
+	reloadModels = async (data) => {
 		const url = endpoints.reloadModels;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, data);
 	}
 
 	downloadDependencies = async () => {
@@ -486,8 +486,8 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	getTransformerList = async () => {
-		const url = endpoints.getTransformerList;
+	getModelsList = async () => {
+		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	}
 

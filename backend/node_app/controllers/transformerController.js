@@ -17,18 +17,7 @@ class TransformerController {
 		this.getModelsList = this.getModelsList.bind(this);
 		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
 		this.setTransformerModel = this.setTransformerModel.bind(this);
-	}
-
-	async reloadModels(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.reloadModels(userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'UB4F9M4', userId);
-			res.status(500).send(err);
-		}
+		this.reloadModels = this.reloadModels.bind(this);
 	}
 
 	async downloadDependencies(req, res) {
@@ -100,6 +89,19 @@ class TransformerController {
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'WZHXH0L', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async reloadModels(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			const models = req.body;
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const resp = await this.mlApi.reloadModels(userId, models);
+			res.send(resp);
+		} catch (err) {
+			this.logger.error(err.message, 'UB4F9M4', userId);
 			res.status(500).send(err);
 		}
 	}
