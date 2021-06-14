@@ -111,6 +111,10 @@ const initState = {
 		Organizations: false,
 		Services: false,
 	},
+
+	categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
 	
 	// category totals
 	categoryMetadata: {},

@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Paper from "material-ui/Paper/Paper";
 import SimpleTable from "../common/SimpleTable";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
+import GCButton from '../common/GCButton';
 import {MainContainer} from "../../containers/GameChangerDetailsPage";
 import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
 import {trackEvent} from "../telemetry/Matomo";
@@ -101,7 +103,7 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 	});
 }
 
-export default function DocumentDetailsPage(props) {
+const DocumentDetailsPage = (props) => {
 	
 	const {
 		document,
@@ -313,6 +315,20 @@ export default function DocumentDetailsPage(props) {
 				<div className={'details'}>
 					<Paper>
 						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
+
+						<div>
+							<GCButton
+								onClick={(e) => {
+									e.preventDefault();
+									trackEvent(getTrackingNameForFactory(cloneData?.clone_name), 'CardInteraction' , 'PDFOpen');
+									window.open(`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}`);
+								}}
+								style={{ height: 40, width: '75%', fontSize: 14, margin: '16px 0px' }}
+								disabled={!document}
+							>
+								OPEN DOCUMENT
+							</GCButton>
+						</div>
 						
 						<div className={'details-header'}>
 							<span>{'DOCUMENT DETAILS'}</span>
@@ -428,3 +444,16 @@ const styles = {
 		color: '#131E43'
 	},
 }
+
+DocumentDetailsPage.propTypes = {
+	document: PropTypes.shape({
+		id: PropTypes.string,
+		display_title_s: PropTypes.string,
+		details: PropTypes.array,
+		refList: PropTypes.array
+	}),
+	cloneData: PropTypes.shape({
+		clone_name: PropTypes.string
+	})
+}
+export default DocumentDetailsPage;

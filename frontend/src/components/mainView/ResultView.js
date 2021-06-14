@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 import {
 	useMountEffect
 } from "../../gamechangerUtils";
@@ -26,6 +27,16 @@ const ResultView = (props) => {
 			{viewPanels[currentView]}
 		</>
 	);
+}
+
+ResultView.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			currentViewName: PropTypes.string
+		}),
+		dispatch: PropTypes.func
+	}),
+	viewPanels: PropTypes.objectOf(PropTypes.element).isRequired
 }
 
 export default ResultView;

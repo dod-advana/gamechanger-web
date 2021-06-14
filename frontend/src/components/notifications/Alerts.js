@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import UoTAlert from "../common/GCAlert";
 
 const Alerts = (props) => {
@@ -40,6 +41,15 @@ const Alerts = (props) => {
 			}
 		</>
 	);
+}
+
+Alerts.propTypes = {
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			alerts: PropTypes.objectOf(PropTypes.bool)
+		}),
+		dispatch: PropTypes.func
+	})
 }
 
 export default Alerts;
