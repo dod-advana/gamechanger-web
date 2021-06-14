@@ -54,7 +54,7 @@ const GetQAResults = (props) => {
 		context,
 	} = props;
 	const {state} = context;
-	const { question, answers, filenames, docIds }  = state.qaResults;
+	const { question, answers, filenames, docIds, resultTypes }  = state.qaResults;
 	const classes = useStyles();
 	const [feedback, setFeedback] = useState('');
 	
@@ -110,7 +110,6 @@ const GetQAResults = (props) => {
 		width: '100%',
 	}
 	
-	// wikiResults[0]._source.text
 	if (question !== '' && answers.length > 0){
 		return (
 			<div style={wikiContainer}>
@@ -119,7 +118,7 @@ const GetQAResults = (props) => {
 					<p style={{marginTop: '10px', marginBottom: '0'}}>{answers[0]}</p>
 					<Link href={"#"} onClick={(event)=> {
       						preventDefault(event);
-      						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${docIds[0]}`);
+      						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=${resultTypes[0]}&${resultTypes[0]}Name=${docIds[0]}`);
    						}}
 					>
 					<strong><b style={{fontSize: 14}}>{filenames[0]}</b></strong>
