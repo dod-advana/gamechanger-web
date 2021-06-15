@@ -268,7 +268,8 @@ export function numberWithCommas(x) {
 	if (!x) return x;
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
+// no longer need crawlerMapping as we store display_source_s
+/*
 const crawlerMapping = {
 	"dod_issuances":"WHS DoD Directives Division",
 	"army_pubs":"Army Publishing Directorate", 
@@ -300,7 +301,7 @@ const crawlerMapping = {
 export const crawlerMappingFunc = (item) => {
 	return crawlerMapping[item]? crawlerMapping[item] : item
 }
-
+*/
 export const orgColorMap = {
 	'Dept. of Defense': '#636363', // gray
 	'Joint Chiefs of Staff': '#330066', // purple
