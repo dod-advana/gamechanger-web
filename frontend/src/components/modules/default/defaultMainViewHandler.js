@@ -166,9 +166,8 @@ const DefaultMainViewHandler = {
 		}
 
 		try {
-			gameChangerAPI.getRecentlyOpenedDocs(state.cloneData.clone_name).then(({data}) => {
-				const filenames = data.map(record => record.document)
-				setState(dispatch, {recentlyOpened: filenames})
+			gameChangerAPI.recentSearchesPOST(state.cloneData.clone_name).then(({data}) => {
+				setState(dispatch, {recentSearches: data});
 			});
 		} catch (e) {
 			// Do nothing

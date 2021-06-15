@@ -24,6 +24,7 @@ import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import GameChangerThumbnailRow from "./ThumbnailRow";
 import { AgencyPublicationContainer, TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "./HomePageStyledComponents";
+import './main-view.css'
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -239,8 +240,63 @@ const MainView = (props) => {
 		return currentTime;
 	}
 	
+	const renderRecentSearches = (search) => {
+		const {
+			searchText,
+			favorite,
+			orgFilterString,
+			publicationDateAllTime,
+			publicationDateFilter,
+			typeFilterString,
+			includeRevoked,
+			run_at
+		} = search;
+		return (
+			<RecentSearchContainer onClick={()=>{
+				debugger;
+				const orgFilters = {...state.searchSettings.orgFilter}
+				if(orgFilterString.length>1){
+					Object.keys(orgFilters).forEach(key=>{
+						if(orgFilterString.includes(key)){
+							orgFilters[key] = true;
+						} else {
+							orgFilters[key] = false;
+						}
+					})
+				}
+				const currSearchSettings = {
+					...state.searchSettings,
+					orgFilter: orgFilters,
+					specificOrgsSelected: orgFilterString.length>0,
+					allOrgsSelected: orgFilterString.length===0,
+					publicationDateAllTime,
+					publicationDateFilter,
+					includeRevoked
+				}
+				setState(dispatch,{
+					searchText,
+					runSearch:true,
+					searchSettings:currSearchSettings
+				})}}>
+				<div style={{display:'flex', justifyContent:'space-between'}}>
+					<Typography style={styles.containerText}>{searchText}</Typography>
+					<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+						color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+						cursor: "pointer",
+						fontSize: 20
+					}} />
+				</div>
+				<Typography style={styles.recentSearchSubtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
+				<Typography style={styles.recentSearchSubtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
+				<Typography style={styles.recentSearchSubtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
+				<Typography style={styles.recentSearchSubtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
+				<Typography style={styles.recentSearchSubtext}>Search Time: {run_at}</Typography>
+			</RecentSearchContainer>
+		)
+	}
+	
 	const renderHideTabs = () => {
-		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading, userData, recentlyOpened } = state;
+		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading, userData, recentSearches } = state;
 		const showDidYouMean = didYouMean && !loading;
 		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
@@ -260,9 +316,13 @@ const MainView = (props) => {
 				setSearchURL(state, state.searchSettings)
 			}
 		}
-		const { favorite_documents = [], favorite_searches = [] } = userData;
-		const favorites = favorite_documents.map(favorite=>favorite.filename);
-
+		const { 
+			// favorite_documents = [],
+			favorite_searches = [] }
+		= userData;
+		// const favorites = favorite_documents.map(favorite=>favorite.filename);
+		const crawlerSources = ['Army Publishing Directorate', 'Washington Headquarters Service','Director of National Intelligence', 'Joint Cheifs of Staff Library', 'Military Health System', 'Defense Logistics Agency']
+		const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 		trendingLinks.forEach(({search},idx) => {
 			favorite_searches.forEach(fav => {
 				if(fav.search_text === search){
@@ -270,7 +330,12 @@ const MainView = (props) => {
 				}
 			})
 		});
-		console.log(state)
+
+		recentSearches.forEach((search,idx) => {
+			favorite_searches.forEach(fav => {
+				recentSearches[idx].favorite = fav.tiny_url === search.tiny_url;
+			});
+		});
 		
 		return (
 			<div style={{marginTop: '40px'}}>
@@ -287,9 +352,16 @@ const MainView = (props) => {
 			{cloneData.clone_name === 'gamechanger' && (
 				<div style={{ margin: '0 70px 0 70px'}}>
 					<GameChangerThumbnailRow
+						links={agencyPublications}
 						title={"Agency Publications"}
+						width='450px'
 					>
-						{[<AgencyPublicationContainer/>]}
+						{agencyPublications.map(pub => 
+							<AgencyPublicationContainer>
+								<div style={{width:180, height:100}}/>
+								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
+							</AgencyPublicationContainer>
+						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={trendingLinks}
@@ -297,9 +369,9 @@ const MainView = (props) => {
 						width='300px'
 					>
 						{trendingLinks.map(({search,favorite},idx)=>
-							<TrendingSearchContainer>
+							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
 								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={{ fontSize:16,fontWeight: 'bold' }}>{`#${idx+1} ${search}`}</Typography>
+									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
 									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
 										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
 										cursor: "pointer",
@@ -310,18 +382,25 @@ const MainView = (props) => {
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={favorites} 
+						links={crawlerSources} 
 						title="Sources" 
+						width='300px'
 						onLinkClick={(link) => openDocument(link)}
 					>
-						{[<SourceContainer/>]}
+						{crawlerSources.map(source => 
+							<SourceContainer>
+								<div style={{width:100, height:100}}/>
+								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
+							</SourceContainer>
+						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={recentlyOpened} 
+						links={recentSearches} 
 						title="Recent Searches" 
 						onLinkClick={openDocument}
+						width='460px'
 					>
-						{[<RecentSearchContainer/>]}
+						{recentSearches.map((search) => renderRecentSearches(search))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={trendingLinks} 
@@ -382,6 +461,14 @@ const styles = {
 		fontWeight: 'bold',
 		color: '#131E43',
 		paddingTop: '10px'
+	},
+	recentSearchSubtext: {
+		color:'#8091A5',
+		fontSize: 12
+	},
+	containerText: {
+		fontSize: 16,
+		fontWeight: 'bold'
 	}
 }
 

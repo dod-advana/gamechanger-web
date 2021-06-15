@@ -59,13 +59,13 @@ const GameChangerThumbnailRow = (props) => {
 	return (
 		<div>
 			<div style={{display:'flex', justifyContent:'space-between'}}>
-				<Typography variant="h3" style={{ marginBottom: 10, fontSize: 20 }}>{title}</Typography>
+				<Typography variant="h3" style={{fontSize: 12, fontWeight: 800 }}>{title}</Typography>
 				<div>
 					{ maxPage > 0 && 
-					[<IconButton onClick={()=>setPage(page-1)} disabled={page===0}>
+					[<IconButton style={{padding:7}} onClick={()=>setPage(page-1)} disabled={page===0}>
 						<CheveronLeftIcon/>
 					</IconButton>,
-					<IconButton onClick={()=>setPage(page+1)} disabled={page===maxPage}>
+					<IconButton style={{padding:7}} onClick={()=>setPage(page+1)} disabled={page===maxPage}>
 						<CheveronRightIcon/>
 					</IconButton>]
 				}

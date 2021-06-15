@@ -47,6 +47,7 @@ const initState = {
 		q1: '',
 		q2: ''
 	},
+	recentSearches: [],
 	
 	// Tutorial
 	showTutorial: false,

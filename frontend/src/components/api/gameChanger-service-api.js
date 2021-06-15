@@ -49,6 +49,8 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
+	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
+	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
 	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
 	setTrendingBlacklist: '/api/gameChanger/trending/setTrendingBlacklist',
@@ -516,6 +518,11 @@ export default class GameChangerAPI {
 
 	getRecentlyOpenedDocs = async (clone_name) => {
 		const url = endpoints.getRecentlyOpenedDocs;
+		return axiosPOST(this.axios, url, { clone_name });
+	}
+
+	recentSearchesPOST = async (clone_name) => {
+		const url = endpoints.recentSearchesPOST;
 		return axiosPOST(this.axios, url, { clone_name });
 	}
 

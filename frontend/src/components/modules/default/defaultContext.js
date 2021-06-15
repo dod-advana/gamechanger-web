@@ -45,6 +45,7 @@ const initState = {
 		q1: '',
 		q2: ''
 	},
+	recentSearches: [],
 	
 	// Tutorial
 	showTutorial: false,
@@ -158,7 +159,6 @@ const initState = {
 	topicPagination: false,
 	topicsLoading: false,
 
-	categorySorting: {},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
 };
