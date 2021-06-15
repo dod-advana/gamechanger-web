@@ -21,9 +21,11 @@ import {
 } from "../../../gamechangerUtils";
 import ExportResultsDialog from "../../export/ExportResultsDialog";
 import {gcOrange} from "../../common/gc-colors";
+import {DidYouMean} from "../../searchBar/SearchBarStyledComponents";
 import ResultView from "../../mainView/ResultView";
 import QueryDialog from "../../admin/QueryDialog";
 import DocDialog from "../../admin/DocDialog";
+import MagellanTrendingLinkList from "../../common/MagellanTrendingLinkList";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import uuidv4 from "uuid/v4";
@@ -70,6 +72,13 @@ const styles = {
 	spacer: {
 		flex: '0.375'
 	},
+	resultsCount: {
+		fontFamily: 'Noto Sans',
+		fontSize: 22,
+		fontWeight: 'bold',
+		color: '#131E43',
+		paddingTop: '10px'
+	}
 }
 
 const getDocumentProperties = async (dispatch) => {
@@ -135,6 +144,11 @@ const getTrendingSearches = (cloneData) => {
 	}).catch(e => {console.log("error getting internal users: " + e)});
 }
 
+const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
+	setState(dispatch, { searchText: didYouMean, runSearch: true });
+}
+
 const DefaultMainViewHandler = {
 	async handlePageLoad(props) {
 		const {
@@ -170,6 +184,15 @@ const DefaultMainViewHandler = {
 				setState(dispatch, {recentSearches: data});
 			});
 		} catch (e) {
+			// Do nothing
+		}
+		
+		try {
+			gameChangerAPI.gcCrawlerTrackerData().then(({data}) => {
+				const names = data.docs.map(d=>d.crawler_name)
+				setState(dispatch, {crawlerSources: names});
+			});
+		} catch(e) {
 			// Do nothing
 		}
 		
@@ -290,6 +313,64 @@ const DefaultMainViewHandler = {
 		}
 	},
 	
+	renderHideTabs(props){
+		const { state, dispatch } = props;
+		const {
+			componentStepNumbers,
+			cloneData,
+			searchSettings,
+			resetSettingsSwitch,
+			didYouMean,
+			loading,
+			prevSearchText
+		} = state; 
+		const showDidYouMean = didYouMean && !loading;
+		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		let trendingLinks = [];
+		if (trendingStorage) {
+			JSON.parse(trendingStorage).forEach(search => {
+				if (search.search) {
+					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
+				}
+			});
+		}
+
+		if(prevSearchText) {
+			if(!resetSettingsSwitch) {
+				dispatch({type: 'RESET_SEARCH_SETTINGS'});
+				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
+				setSearchURL(state, searchSettings)
+			}
+		}
+
+		const handleLinkListItemClick = (searchText) => {
+			trackEvent(getTrackingNameForFactory(cloneData.clone_name), "TrendingSearchSelected", "text", searchText);
+			setState(dispatch, { searchText, autoCompleteItems: [], metricsCounted: false, runSearch: true });
+		}
+
+		return (
+			<div style={{marginTop: '40px'}}>
+				{prevSearchText &&
+					<div style={{ margin: '10px auto', width: '67%' }}>
+						<div style={styles.resultsCount}><p style={{fontWeight:'normal', display:'inline'}}>Looks like we don't have any matches for </p>"{prevSearchText}"</div>
+					</div>
+				}
+				{showDidYouMean && (
+					<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
+						Did you mean <DidYouMean onClick={()=>handleDidYouMeanClicked(didYouMean, state, dispatch)}>{didYouMean}</DidYouMean>?
+					</div>
+				)}
+				<div style={{ margin: '10px auto', width: '67%' }}>
+					<div className={`tutorial-step-${componentStepNumbers["Recent Searches"]}`} >
+						<MagellanTrendingLinkList onLinkClick={handleLinkListItemClick}
+							links={JSON.parse(latestLinks)} title="Recent Searches" />
+					</div>
+				</div>
+			</div>
+		)
+	},
+	
 	getMainView(props) {
 		const {
 			state,
@@ -337,7 +418,7 @@ const DefaultMainViewHandler = {
 							<LoadingIndicator customColor={gcOrange} />
 						</div>
 					}
-					{hideSearchResults && renderHideTabs()}
+					{hideSearchResults && renderHideTabs(props)}
 					{(!hideSearchResults && pageLoaded) &&
 						<div style={styles.tabButtonContainer}>
 							<ResultView context={{state, dispatch}} viewNames={viewNames} viewPanels={getViewPanels()} />

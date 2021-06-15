@@ -5,19 +5,25 @@ import DefaultGraphView from "../../graph/defaultGraphView";
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
-import {setState} from "../../../sharedFunctions";
+import {Typography} from "@material-ui/core";
+import {setState, setSearchURL} from "../../../sharedFunctions";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import {Card} from "../../cards/GCCard";
+import {DidYouMean} from "../../searchBar/SearchBarStyledComponents";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
 import GetQAResults from '../default/qaResults';
+import GameChangerThumbnailRow from "../../mainView/ThumbnailRow";
+import { AgencyPublicationContainer, TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "../../mainView/HomePageStyledComponents";
 import {
 	getTrackingNameForFactory,
-	RESULTS_PER_PAGE, StyledCenterContainer
+	RESULTS_PER_PAGE, StyledCenterContainer,
+	crawlerMappingFunc
 } from "../../../gamechangerUtils";
+import '../../mainView/main-view.css'
 
 const _ = require('lodash');
 
@@ -45,6 +51,21 @@ const styles = {
 	},
 	searchResults: fullWidthCentered,
 	paginationWrapper: fullWidthCentered,
+	resultsCount: {
+		fontFamily: 'Noto Sans',
+		fontSize: 22,
+		fontWeight: 'bold',
+		color: '#131E43',
+		paddingTop: '10px'
+	},
+	recentSearchSubtext: {
+		color:'#8091A5',
+		fontSize: 12
+	},
+	containerText: {
+		fontSize: 16,
+		fontWeight: 'bold'
+	}
 }
 
 const getSearchResults = (searchResultData, state, dispatch) => {
@@ -60,6 +81,70 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 	});
 }
 
+const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
+	setState(dispatch, { searchText: didYouMean, runSearch: true });
+}
+
+// const openDocument = (filename, cloneData, cloneName, pageNumber = 0) => {
+// 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+// 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+// 	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&pageNumber=${pageNumber}&cloneIndex=${cloneData.clone_name}`);
+// };
+
+const renderRecentSearches = (search, state, dispatch) => {
+	const {
+		searchText,
+		favorite,
+		orgFilterString,
+		publicationDateAllTime,
+		publicationDateFilter,
+		typeFilterString,
+		includeRevoked,
+		run_at
+	} = search;
+	return (
+		<RecentSearchContainer onClick={()=>{
+			const orgFilters = {...state.searchSettings.orgFilter}
+			if(orgFilterString.length>1){
+				Object.keys(orgFilters).forEach(key=>{
+					if(orgFilterString.includes(key)){
+						orgFilters[key] = true;
+					} else {
+						orgFilters[key] = false;
+					}
+				})
+			}
+			const currSearchSettings = {
+				...state.searchSettings,
+				orgFilter: orgFilters,
+				specificOrgsSelected: orgFilterString.length>0,
+				allOrgsSelected: orgFilterString.length===0,
+				publicationDateAllTime,
+				publicationDateFilter,
+				includeRevoked
+			}
+			setState(dispatch,{
+				searchText,
+				runSearch:true,
+				searchSettings:currSearchSettings
+			})}}>
+			<div style={{display:'flex', justifyContent:'space-between'}}>
+				<Typography style={styles.containerText}>{searchText}</Typography>
+				<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+					cursor: "pointer",
+					fontSize: 20
+				}} />
+			</div>
+			<Typography style={styles.recentSearchSubtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
+			<Typography style={styles.recentSearchSubtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
+			<Typography style={styles.recentSearchSubtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
+			<Typography style={styles.recentSearchSubtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
+			<Typography style={styles.recentSearchSubtext}>Search Time: {run_at}</Typography>
+		</RecentSearchContainer>
+	)
+}
 
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
@@ -80,6 +165,130 @@ const PolicyMainViewHandler = {
 			{name: 'Graph', title: 'Graph View', id: 'gcOpenGraphView'}
 		);
 		return viewNames;
+	},
+
+	renderHideTabs(props) {
+		const { state, dispatch } = props;
+		const { cloneData, crawlerSources, prevSearchText, searchSettings, resetSettingsSwitch, didYouMean, loading, userData, recentSearches } = state;
+		const showDidYouMean = didYouMean && !loading;
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		let trendingLinks = [];
+		if (trendingStorage) {
+			JSON.parse(trendingStorage).forEach(search => {
+				if (search.search) {
+					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
+				}
+			});
+		}
+
+		if(prevSearchText) {
+			if(!resetSettingsSwitch) {
+				dispatch({type: 'RESET_SEARCH_SETTINGS'});
+				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
+				setSearchURL(state, searchSettings)
+			}
+		}
+		const { 
+			// favorite_documents = [],
+			favorite_searches = [] }
+		= userData;
+		// const favorites = favorite_documents.map(favorite=>favorite.filename);
+		// const crawlerSources = ['Army Publishing Directorate', 'Washington Headquarters Service','Director of National Intelligence', 'Joint Cheifs of Staff Library', 'Military Health System', 'Defense Logistics Agency']
+		const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
+		trendingLinks.forEach(({search},idx) => {
+			favorite_searches.forEach(fav => {
+				if(fav.search_text === search){
+					trendingLinks[idx].favorite = true;
+				}
+			})
+		});
+
+		recentSearches.forEach((search,idx) => {
+			favorite_searches.forEach(fav => {
+				recentSearches[idx].favorite = fav.tiny_url === search.tiny_url;
+			});
+		});
+
+		const cleanSources = crawlerSources.map(crawl => crawlerMappingFunc(crawl))
+		return(
+			<div style={{marginTop: '40px'}}>
+				{prevSearchText &&
+					<div style={{ margin: '10px auto', width: '67%' }}>
+						<div style={styles.resultsCount}><p style={{fontWeight:'normal', display:'inline'}}>Looks like we don't have any matches for </p>"{prevSearchText}"</div>
+					</div>
+				}
+				{showDidYouMean && (
+					<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
+						Did you mean <DidYouMean onClick={()=>handleDidYouMeanClicked(didYouMean, state, dispatch)}>{didYouMean}</DidYouMean>?
+					</div>
+				)}
+				<div style={{ margin: '0 70px 0 70px'}}>
+					<GameChangerThumbnailRow
+						links={agencyPublications}
+						title={"Agency Publications"}
+						width='450px'
+					>
+						{agencyPublications.map(pub => 
+							<AgencyPublicationContainer>
+								<div style={{width:180, height:100}}/>
+								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
+							</AgencyPublicationContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
+						links={trendingLinks}
+						title={"Trending Searches"}
+						width='300px'
+					>
+						{trendingLinks.map(({search,favorite},idx)=>
+							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
+								<div style={{display:'flex', justifyContent:'space-between'}}>
+									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
+									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+										cursor: "pointer",
+										fontSize: 20
+									}} />
+								</div>
+							</TrendingSearchContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={cleanSources} 
+						title="Sources" 
+						width='300px'
+					>
+						{cleanSources.map(source => 
+							<SourceContainer>
+								<div style={{width:100, height:100}}/>
+								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
+							</SourceContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={recentSearches} 
+						title="Recent Searches" 
+						width='460px'
+					>
+						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={trendingLinks} 
+						title="Major Publications" 
+						thumbnailWidth='500px' 
+						thumbnailHeight='100px'
+					/>
+						{/* <GameChangerThumbnailRow
+							title="Banner Test"
+							isImgRow={false}
+						>
+							<div style={{width:6000}}>
+								<span>Hi</span>
+							</div>
+						</GameChangerThumbnailRow> */}
+				</div>
+			</div>
+		);
 	},
 	
 	getExtraViewPanels(props) {
