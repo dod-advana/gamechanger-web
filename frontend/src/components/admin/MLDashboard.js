@@ -93,13 +93,15 @@ export default () => {
     const [currentTransformer, setCurrentTransformer] = useState({});
     const [selectedSentence, setSelectedSentence] = useState([]);
     const [selectedQEXP, setSelectedQEXP] = useState([]);
-	const [transformerLoading, setTransformerLoading] = useState(true);
+	const [loadingData, setLoadingData] = useState(true);
 
     // flags that parameters have been changed and on 
     // blur or enter press we should update the query
     const [connectionStatus, setConnectionStatus] = useState(1);
     const [lastQueried, setLastQueried] = useState("");
     const [apiErrors, setApiErrors] = useState([]);
+    const [reloading, setReloading] = useState(false);
+    const [downloading, setDownloading] = useState(false);
 
     /**
      * Creates log objects with the inital message, 
@@ -133,6 +135,7 @@ export default () => {
             else{
                 setConnectionStatus(0);
             }
+            setLoadingData(false);
         }
     }
     /**
@@ -155,7 +158,6 @@ export default () => {
             setConnectionStatus(2);
         }
         finally{
-            setTransformerLoading(false);
             setLastQueried(new Date(Date.now()).toLocaleString());
         }
     }
@@ -243,10 +245,14 @@ export default () => {
      */
     const triggerDownload = async () => {
         try{
+            setDownloading(true);
             await gameChangerAPI.downloadDependencies();
             updateLogs('Triggered download dependencies',0);
         } catch(e){
             updateLogs('Error setting transformer model: ' + e.toString() ,2);
+        }
+        finally{
+            setDownloading(false);
         }
     }
     /**
@@ -254,14 +260,18 @@ export default () => {
      */
     const triggerReloadModels = async () => {
         try{
+            setReloading(true);
             await gameChangerAPI.reloadModels({
                 "transformer": "",
                 "sentence": selectedSentence,
                 "qexp": selectedQEXP,
             });
-            updateLogs('Realoading Models',0);
+            updateLogs('Reloaded Models',0);
         } catch(e){
             updateLogs('Error reloading models: ' + e.toString() ,2);
+        }
+        finally{
+            setReloading(false);
         }
     }
 
@@ -348,7 +358,7 @@ export default () => {
                             onClick={() => {
                                 triggerDownload();
                             }}
-                            disabled={transformerLoading}
+                            disabled={loadingData || downloading}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Download</GCPrimaryButton>
                     </div>
@@ -358,7 +368,7 @@ export default () => {
                             onClick={() => {
                                 triggerReloadModels();
                             }}
-                            disabled={transformerLoading}
+                            disabled={loadingData || reloading}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Reload</GCPrimaryButton>
                         <div>
