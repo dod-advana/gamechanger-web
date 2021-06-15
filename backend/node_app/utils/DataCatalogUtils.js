@@ -17,7 +17,7 @@ function getAuthConfig() {
 		authConfig.httpsAgent = new https.Agent({
 			rejectUnauthorized: false,
 			keepAlive: true,
-			ca: fs.readFileSync(constants.DATA_CATALOG_OPTS.ca)
+			ca: constants.DATA_CATALOG_OPTS.ca
 		});
 	};
 
