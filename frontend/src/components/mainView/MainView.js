@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import { getTrackingNameForFactory, PAGE_DISPLAYED } from "../../gamechangerUtils";
-import {Button, Typography} from "@material-ui/core";
+import {Button} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {trackEvent} from "../telemetry/Matomo";
 import GCDataStatusTracker from "../dataTracker/GCDataStatusTracker";
@@ -13,18 +13,12 @@ import {
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
-	setSearchURL,
 	setState
 } from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
-import {DidYouMean} from "../searchBar/SearchBarStyledComponents";
-import MagellanTrendingLinkList from "../common/MagellanTrendingLinkList";
 import MainViewFactory from "../factories/mainViewFactory";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import GameChangerThumbnailRow from "./ThumbnailRow";
-import { AgencyPublicationContainer, TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "./HomePageStyledComponents";
-import './main-view.css'
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -109,19 +103,6 @@ const MainView = (props) => {
 		return viewPanels;
 	}
 	
-	const handleDidYouMeanClicked = () => {
-		const { didYouMean } = state
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
-		setState(dispatch, { searchText: didYouMean, runSearch: true });
-	}
-	
-	const handleLinkListItemClick = (searchText) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), "TrendingSearchSelected", "text", searchText);
-		setState(dispatch, { searchText, autoCompleteItems: [], metricsCounted: false, runSearch: true });
-	}
-	
-
-	
 	const getAnalystTools = () => {
 		return (
 			<GCResponsibilityTracker state={state} />
@@ -153,13 +134,6 @@ const MainView = (props) => {
 		await gameChangerAPI.favoriteSearch(search);
 		await getUserData(dispatch);
 	}
-
-	const openDocument = (filename, cloneName, pageNumber = 0) => {
-		const { cloneData } = state
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-		window.open(`/#/pdfviewer/gamechanger?filename=${filename}&pageNumber=${pageNumber}&cloneIndex=${cloneData.clone_name}`);
-	};
 	
 	const handleSaveFavoriteSearchHistory = async (favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count) => {
 		const searchData = {
@@ -240,195 +214,8 @@ const MainView = (props) => {
 		return currentTime;
 	}
 	
-	const renderRecentSearches = (search) => {
-		const {
-			searchText,
-			favorite,
-			orgFilterString,
-			publicationDateAllTime,
-			publicationDateFilter,
-			typeFilterString,
-			includeRevoked,
-			run_at
-		} = search;
-		return (
-			<RecentSearchContainer onClick={()=>{
-				debugger;
-				const orgFilters = {...state.searchSettings.orgFilter}
-				if(orgFilterString.length>1){
-					Object.keys(orgFilters).forEach(key=>{
-						if(orgFilterString.includes(key)){
-							orgFilters[key] = true;
-						} else {
-							orgFilters[key] = false;
-						}
-					})
-				}
-				const currSearchSettings = {
-					...state.searchSettings,
-					orgFilter: orgFilters,
-					specificOrgsSelected: orgFilterString.length>0,
-					allOrgsSelected: orgFilterString.length===0,
-					publicationDateAllTime,
-					publicationDateFilter,
-					includeRevoked
-				}
-				setState(dispatch,{
-					searchText,
-					runSearch:true,
-					searchSettings:currSearchSettings
-				})}}>
-				<div style={{display:'flex', justifyContent:'space-between'}}>
-					<Typography style={styles.containerText}>{searchText}</Typography>
-					<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-						color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
-						cursor: "pointer",
-						fontSize: 20
-					}} />
-				</div>
-				<Typography style={styles.recentSearchSubtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
-				<Typography style={styles.recentSearchSubtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
-				<Typography style={styles.recentSearchSubtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
-				<Typography style={styles.recentSearchSubtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
-				<Typography style={styles.recentSearchSubtext}>Search Time: {run_at}</Typography>
-			</RecentSearchContainer>
-		)
-	}
-	
-	const renderHideTabs = () => {
-		const { cloneData, componentStepNumbers, prevSearchText, resetSettingsSwitch, didYouMean, loading, userData, recentSearches } = state;
-		const showDidYouMean = didYouMean && !loading;
-		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
-		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-		let trendingLinks = [];
-		if (trendingStorage) {
-			JSON.parse(trendingStorage).forEach(search => {
-				if (search.search) {
-					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
-				}
-			});
-		}
-
-		if(prevSearchText) {
-			if(!resetSettingsSwitch) {
-				dispatch({type: 'RESET_SEARCH_SETTINGS'});
-				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
-				setSearchURL(state, state.searchSettings)
-			}
-		}
-		const { 
-			// favorite_documents = [],
-			favorite_searches = [] }
-		= userData;
-		// const favorites = favorite_documents.map(favorite=>favorite.filename);
-		const crawlerSources = ['Army Publishing Directorate', 'Washington Headquarters Service','Director of National Intelligence', 'Joint Cheifs of Staff Library', 'Military Health System', 'Defense Logistics Agency']
-		const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
-		trendingLinks.forEach(({search},idx) => {
-			favorite_searches.forEach(fav => {
-				if(fav.search_text === search){
-					trendingLinks[idx].favorite = true;
-				}
-			})
-		});
-
-		recentSearches.forEach((search,idx) => {
-			favorite_searches.forEach(fav => {
-				recentSearches[idx].favorite = fav.tiny_url === search.tiny_url;
-			});
-		});
-		
-		return (
-			<div style={{marginTop: '40px'}}>
-			{prevSearchText &&
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div style={styles.resultsCount}><p style={{fontWeight:'normal', display:'inline'}}>Looks like we don't have any matches for </p>"{prevSearchText}"</div>
-				</div>
-			}
-			{showDidYouMean && (
-				<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
-					Did you mean <DidYouMean onClick={handleDidYouMeanClicked}>{didYouMean}</DidYouMean>?
-				</div>
-			)}
-			{cloneData.clone_name === 'gamechanger' && (
-				<div style={{ margin: '0 70px 0 70px'}}>
-					<GameChangerThumbnailRow
-						links={agencyPublications}
-						title={"Agency Publications"}
-						width='450px'
-					>
-						{agencyPublications.map(pub => 
-							<AgencyPublicationContainer>
-								<div style={{width:180, height:100}}/>
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
-							</AgencyPublicationContainer>
-						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={trendingLinks}
-						title={"Trending Searches"}
-						width='300px'
-					>
-						{trendingLinks.map(({search,favorite},idx)=>
-							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
-								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
-									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
-										cursor: "pointer",
-										fontSize: 20
-									}} />
-								</div>
-							</TrendingSearchContainer>
-						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow 
-						links={crawlerSources} 
-						title="Sources" 
-						width='300px'
-						onLinkClick={(link) => openDocument(link)}
-					>
-						{crawlerSources.map(source => 
-							<SourceContainer>
-								<div style={{width:100, height:100}}/>
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
-							</SourceContainer>
-						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow 
-						links={recentSearches} 
-						title="Recent Searches" 
-						onLinkClick={openDocument}
-						width='460px'
-					>
-						{recentSearches.map((search) => renderRecentSearches(search))}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow 
-						links={trendingLinks} 
-						title="Major Publications" 
-						onLinkClick={openDocument} 
-						thumbnailWidth='500px' 
-						thumbnailHeight='100px'
-					/>
-						{/* <GameChangerThumbnailRow
-							title="Banner Test"
-							isImgRow={false}
-						>
-							<div style={{width:6000}}>
-								<span>Hi</span>
-							</div>
-						</GameChangerThumbnailRow> */}
-				</div>
-			)}
-			{cloneData.clone_name !== 'gamechanger' && (
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div className={`tutorial-step-${componentStepNumbers["Recent Searches"]}`} >
-						<MagellanTrendingLinkList onLinkClick={handleLinkListItemClick}
-							links={JSON.parse(latestLinks)} title="Recent Searches" />
-					</div>
-				</div>
-			)}
-			</div>
-		)
+	const renderHideTabs = (props) => {
+		return mainViewHandler.renderHideTabs(props)
 	}
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.analystTools:
@@ -446,29 +233,6 @@ const MainView = (props) => {
 				return <></>
 			}
 			
-	}
-}
-
-
-const styles = {
-	tabContainer: {
-		alignItems: 'center',
-		marginBottom: '14px',
-	},
-	resultsCount: {
-		fontFamily: 'Noto Sans',
-		fontSize: 22,
-		fontWeight: 'bold',
-		color: '#131E43',
-		paddingTop: '10px'
-	},
-	recentSearchSubtext: {
-		color:'#8091A5',
-		fontSize: 12
-	},
-	containerText: {
-		fontSize: 16,
-		fontWeight: 'bold'
 	}
 }
 

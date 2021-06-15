@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import _ from 'underscore';
-import {grey300} from 'material-ui/styles/colors';
 import { IconButton } from '@material-ui/core';
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
@@ -15,17 +13,12 @@ const ThumbnailRow = styled.div`
 	flex-direction: row;
 	margin-bottom: 20px;
 `;
-const ThumbnailRowItem = styled.div`
-	border: 1px solid ${grey300};
-	cursor: pointer;
-	color: #386F94;
-`;
 
 const GameChangerThumbnailRow = (props) => {
 	const {
 		title = 'Thumbnail Row',
 		width = '225px',
-		onLinkClick = _.noop,
+		// onLinkClick = _.noop,
 		children = []
 	} = props;
 

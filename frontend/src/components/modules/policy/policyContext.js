@@ -47,7 +47,10 @@ const initState = {
 		q1: '',
 		q2: ''
 	},
+
+	// Homepage
 	recentSearches: [],
+	crawlerSources: [],
 	
 	// Tutorial
 	showTutorial: false,
