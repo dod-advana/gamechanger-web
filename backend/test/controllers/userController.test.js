@@ -16,6 +16,7 @@ describe('UserController', function () {
 
 			const req = {
 				...reqMock,
+				body: {}
 			};
 
 			let resCode;
@@ -32,7 +33,7 @@ describe('UserController', function () {
 			};
 
 			const expectedCode = 500;
-			const expectedMsg = 'Error adding internal user: Cannot destructure property `trackByRequest` of \'undefined\' or \'null\'.';
+			const expectedMsg = 'Error adding internal user: Cannot read property \'length\' of undefined';
 
 			try {
 				await target.addInternalUser(req, res);
