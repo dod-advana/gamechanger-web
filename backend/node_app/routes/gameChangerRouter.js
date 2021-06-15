@@ -71,13 +71,13 @@ router.get('/getThumbnail', document.getThumbnail);
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
-router.post('/reloadModels', transformer.reloadModels);
-router.get('/downloadDependencies', transformer.downloadDependencies);
-router.get('/getAPIInformation', transformer.getAPIInformation);
-router.get('/getS3List', transformer.getS3List);
-router.get('/getModelsList', transformer.getModelsList);
-router.get('/getCurrentTransformer', transformer.getCurrentTransformer);
-router.post('/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/reloadModels', transformer.reloadModels);
+router.get('/admin/downloadDependencies', transformer.downloadDependencies);
+router.get('/admin/getAPIInformation', transformer.getAPIInformation);
+router.get('/admin/getS3List', transformer.getS3List);
+router.get('/admin/getModelsList', transformer.getModelsList);
+router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
+router.post('/admin/setTransformerModel', transformer.setTransformerModel);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/createNotification', notification.createNotification);
