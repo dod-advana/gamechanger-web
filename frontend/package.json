@@ -13,7 +13,7 @@
 		"accounting-js": "^1.1.1",
 		"ace-builds": "^1.4.7",
 		"advana-platform-ui": "0.0.18",
-		"advana-side-nav": "0.0.5",
+		"advana-side-nav": "0.0.6",
 		"advana-tutorial-overlay": "0.0.5",
 		"axios": "^0.16.1",
 		"axios-cancel": "^0.2.2",
@@ -180,7 +180,5 @@
 			"last 1 safari version"
 		]
 	},
-	"eslintConfig": {
-
-	}
+	"eslintConfig": {}
 }
