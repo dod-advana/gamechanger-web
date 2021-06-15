@@ -1,6 +1,5 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
-import {crawlerMappingFunc} from "../../../gamechangerUtils";
 import {
 	CARD_FONT_SIZE,
 	getDocTypeStyles,
