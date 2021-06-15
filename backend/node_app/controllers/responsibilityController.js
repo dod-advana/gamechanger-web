@@ -4,6 +4,8 @@ const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 class ResponsibilityController {
 
@@ -35,11 +37,16 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {limit = 10, offset = 0, order = [], where = {}} = req.body;
+			const new_where = {}
+			where.forEach((object,idx) => {
+				const col = Object.keys(object)[0]
+				new_where[col] = {[Op.iLike]: where[idx][col]['$iLike']}
+			})
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
 				order,
-				where,
+				where: new_where,
 				attributes: [
 					'id',
 					'filename',
