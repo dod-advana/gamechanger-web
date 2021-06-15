@@ -32,12 +32,12 @@ class UserController {
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
 			search = new SearchController(opts),
-			sequelize = new Sequelize(constants.POSTGRES_CONFIG.databases.game_changer),
+			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			emailUtility = new EmailUtility({
-				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
-				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS
+				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
+				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
+				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
 			}),
 			dataApi = new DataLibrary(opts),
 		} = opts;
