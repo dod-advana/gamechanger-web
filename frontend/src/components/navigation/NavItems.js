@@ -7,6 +7,7 @@ export const NavItem = styled.div`
 	padding: 6px 20px 6px 20px;
 	font-size: 16px;
 	font-family: Montserrat;
+	color: white;
 `
 
 export const HoverNavItem = styled(NavItem)`
@@ -16,5 +17,6 @@ export const HoverNavItem = styled(NavItem)`
 
 	&:hover {
 		background-color: ${props => props.toolTheme.hoverColor};
+		color: white;
 	};
 `
