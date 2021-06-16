@@ -98,6 +98,7 @@
 		"react-slidedown": "^2.4.5",
 		"react-split-pane": "^0.1.89",
 		"react-table": "6.8.0",
+		"react-table-filter": "^2.0.2",
 		"react-table-hoc-draggable-columns": "^1.2.5",
 		"react-tabs": "^2.2.2",
 		"react-tap-event-plugin": "^3.0.2",
