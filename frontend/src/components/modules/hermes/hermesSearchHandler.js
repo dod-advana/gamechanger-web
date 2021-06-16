@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import {
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
 	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE, SEARCH_TYPES
@@ -6,11 +8,13 @@ import {trackSearch} from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getSearchObjectFromString, getUserData, isDecoupled,
-	setState
+	getSearchObjectFromString,
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
+import defaultSearchHandler from "../default/defaultSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -31,22 +35,8 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 }
 
-const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, tabName} = state;
-	const {searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked} = searchSettings;
-	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-
-	const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-	const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const HermesSearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -79,7 +69,7 @@ const HermesSearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL({...state, searchSettings});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -280,7 +270,7 @@ const HermesSearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -302,7 +292,25 @@ const HermesSearchHandler = {
 	
 		const index = 'gamechanger';
 		getAndSetDidYouMean(index, searchText, dispatch);
-	}
+	},
+
+	parseSearchURL(defaultState, url) {
+		return defaultSearchHandler.parseSearchURL(defaultState, url);
+	},
+
+	setSearchURL(state) {
+		const { searchText,  resultsPage, tabName} = state;
+		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } = state.searchSettings;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+	
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
+		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
+		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
+		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
+	
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+		window.history.pushState(null, document.title, linkString);
+	},
 };
 
 export default HermesSearchHandler;

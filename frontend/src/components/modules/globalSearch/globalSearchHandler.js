@@ -1,28 +1,24 @@
+import _ from "lodash";
+
 import {
+	getQueryVariable,
 	getTrackingNameForFactory,
 	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE
 } from "../../../gamechangerUtils";
-import {trackSearch} from "../../telemetry/Matomo";
+import { trackSearch } from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getUserData, isDecoupled,
-	setState
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-const setSearchURL = (state, selectedCategories) => {
-	const { searchText} = state;
-	
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...selectedCategories }).toString()}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const GlobalSearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -47,7 +43,7 @@ const GlobalSearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL(state);
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -234,7 +230,7 @@ const GlobalSearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -253,7 +249,31 @@ const GlobalSearchHandler = {
 				hasExpansionTerms: false
 			});
 		}
-	}
+	},
+
+	parseSearchURL(defaultState, url) {
+		if (!url) url = window.location.href;
+
+		const parsed = {};
+
+		const keyword = getQueryVariable("keyword", url);
+
+		if (keyword) {
+			parsed.searchText = keyword;
+		}
+
+		// categories ???
+
+		return parsed;
+	},
+
+	setSearchURL(state) {
+		const { searchText } = state;
+		const selectedCategories = state.searchSettings;
+		
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...selectedCategories }).toString()}`;
+		window.history.pushState(null, document.title, linkString);
+	},
 };
 
 export default GlobalSearchHandler;
