@@ -294,7 +294,12 @@ const crawlerMapping = {
 	"Memo":"OSD Executive Executive Secretary",
 	"dha_pubs":"Military Health System",
 	"jumbo_FAR":"Federal Acquisition Regulation",
-	"jumbo_DFAR":"Defense Federal Acquisition Regulation"
+	"jumbo_DFAR":"Defense Federal Acquisition Regulation",
+	"National_Guard": "National Guard Bureau Publications Library",
+	"Coast_Guard": "US Coast Guard Directives",
+    "dfar_subpart_regs": "Defense Federal Acquisition Regulation",
+    "far_subpart_regs": "Federal Acquisition Regulation",
+	"Chief_National_Guard_Bureau_Instructions": "National Guard Bureau Instructions"
 } 
 
 export const crawlerMappingFunc = (item) => {
