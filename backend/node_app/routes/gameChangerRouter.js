@@ -71,9 +71,13 @@ router.get('/getThumbnail', document.getThumbnail);
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
-router.get('/getTransformerList', transformer.getTransformerList);
-router.get('/getCurrentTransformer', transformer.getCurrentTransformer);
-router.post('/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/reloadModels', transformer.reloadModels);
+router.get('/admin/downloadDependencies', transformer.downloadDependencies);
+router.get('/admin/getAPIInformation', transformer.getAPIInformation);
+router.get('/admin/getS3List', transformer.getS3List);
+router.get('/admin/getModelsList', transformer.getModelsList);
+router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
+router.post('/admin/setTransformerModel', transformer.setTransformerModel);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/createNotification', notification.createNotification);
@@ -115,6 +119,7 @@ router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/addInternalUser', user.addInternalUser);
 router.post('/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
+router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.get('/admin/populateNewUserId', user.populateNewUserId);
