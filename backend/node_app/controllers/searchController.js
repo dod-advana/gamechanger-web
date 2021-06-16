@@ -933,6 +933,9 @@ class SearchController {
 
 	async convertTiny(url) {
 		const id = parseInt(url, 10);
+		if (isNaN(id)) {
+			return null;
+		}
 		const tinyUrl = await this.gcSearchURLs.findOne({
 			where: {
 				id
