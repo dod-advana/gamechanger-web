@@ -28,7 +28,6 @@ class EDASearchUtility {
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -54,16 +53,6 @@ class EDASearchUtility {
 		try {
 			// add additional search fields to the query
 			let mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
 
 			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
@@ -182,7 +171,7 @@ class EDASearchUtility {
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-
+			// console.log(JSON.stringify(query))
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -197,7 +186,6 @@ class EDASearchUtility {
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -223,16 +211,6 @@ class EDASearchUtility {
 		try {
 			// add additional search fields to the query
 			let mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
 
 			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
@@ -375,7 +353,7 @@ class EDASearchUtility {
 			);
 		}	
 
-		if (!settings.allOrgsSelected && settings.organizations) {
+		if (!settings.allOrgsSelected && settings.organizations && settings.organizations.length > 0) {
 			const matchQuery = 					
 			{ 
 				'nested': {
@@ -388,7 +366,7 @@ class EDASearchUtility {
 				}
 			}
 
-			const orgs = Object.keys(settings.organizations).filter(org => settings.organizations[org]).map(org => org.toLowerCase())
+			const orgs = settings.organizations;
 			for (const org of orgs) {
 				matchQuery.nested.query.bool.should.push(
 					{
@@ -557,6 +535,34 @@ class EDASearchUtility {
 			}
 		}
 
+		if (settings.contractsOrMods !== 'both') {
+			const mustQuery = { 
+				match: {
+					mod_identifier_eda_ext: "base_award"
+				}
+			}
+
+			const boolQuery = {
+				bool: {
+					must_not: [
+						{
+							term: {
+								mod_identifier_eda_ext: "base_award"
+							}
+						}
+					]
+				}
+			}
+
+			if (settings.contractsOrMods === "contracts") {
+				mustQueries.push(mustQuery)
+			}
+			else if (settings.contractsOrMods === "mods") { 
+				mustQueries.push(boolQuery);
+			}
+
+		}
+
 		return mustQueries;
 	}
 
@@ -705,21 +711,7 @@ class EDASearchUtility {
 
 		// Contract Issuing Office Name and Contract Issuing Office DoDaaC
 		result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
-		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext;
-
-		// Issuing Organization
-		if (data.dodaac_org_type_eda_ext) {
-			const orgToDisplay = {
-				army: 'Army',
-				airforce: 'Air Force',
-				dla: 'DLA',
-				marinecorps: 'Marine Corps',
-				navy: 'Navy',
-				estate: '4th Estate'
-			}
-
-			result.issuing_organization_eda_ext = orgToDisplay[data.dodaac_org_type_eda_ext];
-		}
+		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
 
 		// Vendor Name, Vendor DUNS, and Vendor CAGE
 		result.vendor_name_eda_ext = data.vendor_name_eda_ext;
@@ -727,12 +719,16 @@ class EDASearchUtility {
 		result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
 
 		// Contract Admin Agency Name and Contract Admin Office DoDAAC
-		result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
-		result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext;
+		const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
+		if (adminPresent) {
+			result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
+			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
+		}
+
 
 		// Paying Office
 		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
-		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext;
+		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
 
 		// Modifications
 		result.modification_eda_ext = data.modification_number_eda_ext;
@@ -750,7 +746,27 @@ class EDASearchUtility {
 
 		// NAICS
 		result.naics_eda_ext = data.naics_eda_ext;
+		result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
 
+		// get paying, admin, issue
+		if (data.vendor_org_hierarchy_eda_n && data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n) {
+			const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
+
+			for (const org of orgData) {
+				if (org.dodaac_eda_ext) {
+					if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) { // match issue office
+						result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+					else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) { // match paying office
+						result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+					else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) { // match admin office
+						result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+				}
+			}
+		}
+		
 		return result;
 	}
 

@@ -46,6 +46,7 @@ class PolicySearchHandler extends SearchHandler {
 			offset,
 			useGCCache,
 			forCacheReload = false,
+			searchText
 		} = req.body;
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
 		// if using cache
@@ -53,6 +54,12 @@ class PolicySearchHandler extends SearchHandler {
 		// 	console.log('something');
 		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
 		// }
+
+		// cleaning incomplete double quote issue
+		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
+		if(doubleQuoteCount % 2 === 1){
+			req.body.searchText = searchText.replace(/["]+/g,"");
+		}
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
@@ -61,8 +68,13 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName} = req.body;
-
+		const {functionName, searchText} = req.body;
+		// cleaning incomplete double quote issue
+		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
+		if(doubleQuoteCount % 2 === 1){
+			req.body.searchText = searchText.replace(/["]+/g,"");
+		}
+		
 		switch (functionName) {
 			case 'getSingleDocumentFromES':
 				return this.getSingleDocumentFromESHelper(req, userId);
@@ -266,9 +278,10 @@ class PolicySearchHandler extends SearchHandler {
 			const noTypeSpecified = _.isEqual([], typeFilterString);
 			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
+			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 
 			const operator = 'and';
-			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch){
+			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 				try {
 					searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset);
 				} catch (e) {
@@ -346,6 +359,7 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.context = enrichedResults.qaContext.context;
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
+				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
 
@@ -364,7 +378,8 @@ class PolicySearchHandler extends SearchHandler {
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
-		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100}
+		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
+		searchResults.qaContext.params = qaParams;
 		if (permissions) {
 		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
 			// check if search is a question
@@ -380,10 +395,13 @@ class PolicySearchHandler extends SearchHandler {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
 					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
+					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
+					let entitiesIndex = 'entities-new';
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, searchResults.sentResults, userId, qaParams);
+					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					searchResults.qaContext.context = context;
 					if (testing === true) {
 						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
@@ -401,11 +419,12 @@ class PolicySearchHandler extends SearchHandler {
 								return i['text'] !== '';
 							});
 						}
-						let contextIds = shortenedResults.answers.map(item => ' (Source: ' + context[item.context].filename.toUpperCase() + ')');
+						let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
 						let cleanedResults = shortenedResults.answers.map(item => item.text);
 						searchResults.qaResults.answers = cleanedResults;
 						searchResults.qaResults.filenames = contextIds;
 						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+						searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
 					}
 				} catch (e) {
 					this.logger.error(e.message, 'KBBIOYCJ', userId);
