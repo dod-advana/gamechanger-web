@@ -3,14 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
     edaSearchSettings: {
         allOrgsSelected: true,
-        organizations: {
-            airForce: false,
-            army: false,
-            dla: false,
-            marineCorps: false,
-            navy: false,
-            estate: false,
-        },
+        organizations: [],
         aggregations: [],
         startDate: null,
         endDate: null,
@@ -25,7 +18,8 @@ const initState = {
             none: false
         },
         minObligatedAmount: null,
-        maxObligatedAmount: null
+        maxObligatedAmount: null,
+        contractsOrMods: 'both'
     },
     showDialog: false,
     resultsPage: 1,

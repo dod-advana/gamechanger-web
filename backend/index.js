@@ -146,7 +146,9 @@ app.use(function (req, res, next) {
 	if (req.method === 'OPTIONS') {
 		res.sendStatus(200);
 	} else {
-		req.permissions = [];
+		if(!req.permissions) {
+			req.permissions = [];
+		}
 		next();
 	}
 });

@@ -111,7 +111,7 @@ module.exports = Object.freeze({
 		database: 'matomo'
 	},
 	HERMES_ELASTIC_SEARCH_OPTS: {
-		index: 'hermes_test_1',
+		index: process.env.HERMES_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},
@@ -132,7 +132,7 @@ module.exports = Object.freeze({
 		username: process.env.DATA_CATALOG_USER,
 		password: process.env.DATA_CATALOG_PASSWORD,
 		api_config: dataCatalogConfig,
-		ca: process.env.DATA_CATALOG_CA
+		ca: process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n')
 	},
 	TLS_KEY_PASSPHRASE: process.env.TLS_KEY_PASSPHRASE,
 	LOG_LEVELS: {
