@@ -312,8 +312,8 @@ class SearchUtility {
 				'download_url_s',
 				'source_page_url_s',
 				'source_fqdn_s',
-                'display_source_s'
-				], 
+                                'display_source_s'
+			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
 			includeRevoked = false,
