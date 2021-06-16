@@ -1,6 +1,5 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
-import {crawlerMappingFunc} from "../../../gamechangerUtils";
 import {
 	CARD_FONT_SIZE,
 	getDocTypeStyles,
@@ -480,7 +479,6 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
-	
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
@@ -870,15 +868,15 @@ const PolicyCardHandler = {
 			}
 
 			let source_item;
-			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s !== undefined && item.crawler_used_s !== ''){
+			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s!== undefined && item.crawler_used_s!== ''){
 				let source_name;
 				if (item.source_fqdn_s.startsWith("https://")){
 					source_name = item.source
 				} else {
 					source_name = `https://${item.source_fqdn_s}`
 				}
-				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{crawlerMappingFunc(item.crawler_used_s)}</a>)
-			} else {
+				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{item.display_source_s}</a>)
+            } else {
 				source_item = 'unknown';
 			}
 
