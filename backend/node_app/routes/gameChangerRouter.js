@@ -149,6 +149,7 @@ router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
+router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 
 module.exports = router;
