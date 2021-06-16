@@ -30,9 +30,9 @@ export default function PDFViewer({location}) {
 				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
 					node.src = url;
 				});
-                
-			}
-		}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
+            }
+        }
+	}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
    
     useEffect(() => {
 		setFilename(query.get('filename'));
@@ -49,8 +49,9 @@ export default function PDFViewer({location}) {
         );
     } else {
         return (
-            <iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}} />
-
+//           <div>
+            <iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%", padding: "32px"}} />
+//            </div>
         );
     }
 }
