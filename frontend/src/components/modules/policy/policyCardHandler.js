@@ -479,7 +479,6 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
-	console.log(item);
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
