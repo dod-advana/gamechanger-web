@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import {
 	getOrgToOrgQuery,
 	getTrackingNameForFactory, getTypeQuery,
@@ -12,11 +14,13 @@ import {trackSearch} from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getSearchObjectFromString, getUserData, isDecoupled,
-	setState
+	getSearchObjectFromString,
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
+import defaultSearchHandler from "../default/defaultSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -37,29 +41,8 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 }
 
-const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, currentViewName} = state;
-	const {searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked} = searchSettings;
-	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	let orgFilterText = 'ALLORGS';
-	if(!allOrgsSelected) {
-		orgFilterText = Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_');
-	}
-	let typeFilterText = 'ALLTYPES';
-		if(!allTypesSelected) {
-			typeFilterText = Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_');
-		}
-	const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-	const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&viewName=${currentViewName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const PolicySearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -96,7 +79,7 @@ const PolicySearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL({...state, searchSettings});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -462,7 +445,7 @@ const PolicySearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, currentViewName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, currentViewName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -486,7 +469,7 @@ const PolicySearchHandler = {
 		getAndSetDidYouMean(index, searchText, dispatch);
 	},
 
-	handleDocPagination: async (state, dispatch, replaceResults) => {
+	async handleDocPagination(state, dispatch, replaceResults) {
 		const {
 			activeCategoryTab,
 			docSearchResults,
@@ -566,10 +549,9 @@ const PolicySearchHandler = {
 					});
 				}
 			}
-		},
-	
+	},
 
-		handleEntityPagination: async (state, dispatch) => {
+	async handleEntityPagination(state, dispatch) {
 			setState(dispatch, {
 				entityPagination: false,
 			});
@@ -595,9 +577,9 @@ const PolicySearchHandler = {
 						entitiesLoading: false
 					});
 				}
-		},
+	},
 
-		handleTopicPagination: async(state, dispatch) => {
+	async handleTopicPagination(state, dispatch) {
 			setState(dispatch, {
 				topicPagination: false,
 			});
@@ -623,8 +605,39 @@ const PolicySearchHandler = {
 						topicsLoading: false
 					});
 				}
+	},
+
+	parseSearchURL(defaultState, url) {
+		return defaultSearchHandler.parseSearchURL(defaultState, url);
+	},
+
+
+	setSearchURL(state) {
+		const { searchText, resultsPage, currentViewName } = state;
+		const { searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked } = state.searchSettings;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+		let orgFilterText = 'ALLORGS';
+		if(!allOrgsSelected) {
+			orgFilterText = Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_');
 		}
+		let typeFilterText = 'ALLTYPES';
+		if(!allTypesSelected) {
+			typeFilterText = Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_');
+		}
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
+		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
+		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
+		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 	
+		let linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&viewName=${currentViewName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+		
+		const selectedCategories = _.pickBy(state.selectedCategories, value=>!!value);
+		if (!_.isEmpty(selectedCategories)) {
+			linkString += `&categories=${Object.keys(selectedCategories).join('_')}`;
+		}
+		
+		window.history.pushState(null, document.title, linkString);
+	},	
 };
 
 export default PolicySearchHandler;

@@ -1,36 +1,34 @@
 import React from "react";
+import _ from "lodash";
+
 import ViewHeader from "../../mainView/ViewHeader";
-import {trackEvent} from "../../telemetry/Matomo";
-import {getSearchObjectFromString, getUserData, setSearchURL, setState} from "../../../sharedFunctions";
+import { trackEvent } from "../../telemetry/Matomo";
+import { getSearchObjectFromString, getUserData, setState } from "../../../sharedFunctions";
 import DefaultDocumentExplorer from "./defaultDocumentExplorer";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
-import {Card} from "../../cards/GCCard";
+import { Card } from "../../cards/GCCard";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import GameChangerSideBar from "../../searchMetrics/GCSideBar";
 import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
 import {
 	getTrackingNameForFactory,
-	RESULTS_PER_PAGE,
 	StyledCenterContainer,
 	scrollToContentTop,
 	getOrgToOrgQuery,
 	getTypeQuery,
 	getQueryVariable,
-	setFilterVariables, SEARCH_TYPES
+	RESULTS_PER_PAGE,
 } from "../../../gamechangerUtils";
 import ExportResultsDialog from "../../export/ExportResultsDialog";
-import {gcOrange} from "../../common/gc-colors";
+import { gcOrange } from "../../common/gc-colors";
 import ResultView from "../../mainView/ResultView";
 import QueryDialog from "../../admin/QueryDialog";
 import DocDialog from "../../admin/DocDialog";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import uuidv4 from "uuid/v4";
 
 const gameChangerAPI = new GameChangerAPI();
-
-const _ = require('lodash');
 
 const fullWidthCentered = {
 	width: "100%",
@@ -140,13 +138,16 @@ const DefaultMainViewHandler = {
 		const {
 			state,
 			dispatch,
-			history
+			history,
+			searchHandler,
 		} = props;
 		
 		if (state.runSearch) return;
+
+		const documentProperties = await getDocumentProperties(dispatch);
+		let newState = { ...state, documentProperties };
+
 	
-		let documentProperties = await getDocumentProperties(dispatch);
-		
 		// redirect the page if using tinyurl
 		const url = await checkForTinyURL(window.location);
 		if (url) {
@@ -178,88 +179,13 @@ const DefaultMainViewHandler = {
 		} catch(e) {
 			console.log(e);
 		}
-		
-		// set search settings
-		const newSearchSettings = _.cloneDeep(state.searchSettings);
-		
-		// get url data and set accordingly
-		const searchText = getQueryVariable('q');
-		let searchType = getQueryVariable('searchType');
-		let offset = getQueryVariable('offset');
-		let tabName = getQueryVariable('tabName');
-		let orgURL = getQueryVariable('orgFilter');
-		let typeURL = getQueryVariable('typeFilter');
-		let searchFieldsURL = getQueryVariable('searchFields');
-		
-		if (!tabName) {
-			tabName = state.tabName;
-		}
-	
-		let orgFilterObject = _.cloneDeep(newSearchSettings.orgFilter);
-		let typeFilterObject = _.cloneDeep(newSearchSettings.typeFilter);
-	
-		if (orgURL) {
-			setFilterVariables(orgFilterObject, orgURL);
-			if (orgURL !== 'ALLORGS') {
-				newSearchSettings.allOrgsSelected = false;
-				newSearchSettings.specificOrgsSelected = true;
-			} else {
-				newSearchSettings.allOrgsSelected = true;
-				newSearchSettings.specificOrgsSelected = false;
-			}
-		}
-		
-		if(typeURL) {
-			setFilterVariables(typeFilterObject, typeURL);
-			if (typeURL !== 'ALLTYPES') {
-				newSearchSettings.allTypesSelected = false;
-				newSearchSettings.specificTypesSelected = true;
-			} else {
-				newSearchSettings.allTypesSelected = true;
-				newSearchSettings.specificTypesSelected = false;
-			}
-		}
-		
-		let searchFields;
-		
-		if (searchFieldsURL) {
-			const searchFieldPairs = searchFieldsURL.split('_');
-	
-			searchFieldPairs.forEach(pairText => {
-				if (documentProperties) {
-					const pair = pairText.split('-');
-					const field = documentProperties.filter(prop => prop.display_name === pair[0])[0];
-					searchFields[uuidv4()] = { field: field, input: pair[1] }
-				}
-			});
-			searchFields[uuidv4()] = { field: null, input: '' }
-			newSearchSettings.searchFields = searchFields;
-		}
-	
-		if (Object.values(SEARCH_TYPES).indexOf(searchType) === -1) {
-			searchType = 'Keyword';
-		}
-	
-		if (isNaN(offset)) {
-			offset = 0;
-		}
-	
-		const resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
-	
-		if (searchText) {
-			newSearchSettings.searchType = searchType;
-			newSearchSettings.orgFilter = orgFilterObject;
-			newSearchSettings.typeFilter = typeFilterObject;
-			setState(dispatch, {
-				searchText,
-				resultsPage,
-				searchSettings: newSearchSettings,
-				offset,
-				tabName,
-				runSearch: true
-			});
+
+		const parsedURL = searchHandler.parseSearchURL(newState);
+		if (parsedURL.searchText) {
+			newState = { ...newState, ...parsedURL, runSearch: true };
+			setState(dispatch, newState);
 			
-			setSearchURL({searchText, resultsPage, tabName, cloneData: state.cloneData}, newSearchSettings);
+			searchHandler.setSearchURL(newState);
 		}
 	},
 	
@@ -560,8 +486,7 @@ const DefaultMainViewHandler = {
 				</div>
 			</div>
 		)
-	}
-
+	},
 };
 
 export default DefaultMainViewHandler;
