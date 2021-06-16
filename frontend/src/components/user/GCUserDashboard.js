@@ -493,7 +493,6 @@ const GCUserDashboard = (props) => {
 		}
 
 		if (userData.favorite_documents) {
-			console.log(userData.favorite_documents)
 			setFavoriteDocuments(userData.favorite_documents);
 			setDocumentFavoritesTotalCount(userData.favorite_documents ? userData.favorite_documents.length : 0);
 			setFavoriteDocumentsSlice(userData.favorite_documents.slice(0, RESULTS_PER_PAGE));
