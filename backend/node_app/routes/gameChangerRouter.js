@@ -105,6 +105,7 @@ router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
 router.get('/trending/getTrendingBlacklist', trending.getTrendingBlacklist);
 router.post('/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
 router.post('/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
+router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);

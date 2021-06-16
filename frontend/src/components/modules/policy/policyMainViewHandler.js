@@ -17,12 +17,13 @@ import Pagination from "react-js-pagination";
 import GCTooltip from "../../common/GCToolTip";
 import GetQAResults from '../default/qaResults';
 import GameChangerThumbnailRow from "../../mainView/ThumbnailRow";
-import { AgencyPublicationContainer, TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "../../mainView/HomePageStyledComponents";
+import { TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "../../mainView/HomePageStyledComponents";
 import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, StyledCenterContainer,
 	crawlerMappingFunc
 } from "../../../gamechangerUtils";
+import template from '../../mainView/Title 1.png'
 import '../../mainView/main-view.css'
 
 const _ = require('lodash');
@@ -58,7 +59,7 @@ const styles = {
 		color: '#131E43',
 		paddingTop: '10px'
 	},
-	recentSearchSubtext: {
+	subtext: {
 		color:'#8091A5',
 		fontSize: 12
 	},
@@ -137,18 +138,41 @@ const renderRecentSearches = (search, state, dispatch) => {
 					fontSize: 20
 				}} />
 			</div>
-			<Typography style={styles.recentSearchSubtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
-			<Typography style={styles.recentSearchSubtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
-			<Typography style={styles.recentSearchSubtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
-			<Typography style={styles.recentSearchSubtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
-			<Typography style={styles.recentSearchSubtext}>Search Time: {run_at}</Typography>
+			<Typography style={styles.subtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
+			<Typography style={styles.subtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
+			<Typography style={styles.subtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
+			<Typography style={styles.subtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
+			<Typography style={styles.subtext}>Search Time: {run_at}</Typography>
 		</RecentSearchContainer>
 	)
 }
 
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
+		const { state, dispatch } = props;
+		const { cloneData, userData } = state;
+		const { favorite_searches = [] } = userData;
 		await defaultMainViewHandler.handlePageLoad(props);
+
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		let trendingLinks = [];
+		if (trendingStorage) {
+			JSON.parse(trendingStorage).forEach(search => {
+				if (search.search) {
+					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), count: search.count, favorite: false});
+				}
+			});
+		}
+
+		trendingLinks.forEach(({search},idx) => {
+			favorite_searches.forEach(fav => {
+				if(fav.search_text === search){
+					trendingLinks[idx].favorite = true;
+				}
+			})
+		});
+		setState(dispatch, {trendingLinks});
+
 	},
 	
 	getMainView(props) {
@@ -169,17 +193,22 @@ const PolicyMainViewHandler = {
 
 	renderHideTabs(props) {
 		const { state, dispatch } = props;
-		const { cloneData, crawlerSources, prevSearchText, searchSettings, resetSettingsSwitch, didYouMean, loading, userData, recentSearches } = state;
+		const {
+			cloneData,
+			crawlerSources,
+			prevSearchText,
+			searchSettings,
+			resetSettingsSwitch,
+			didYouMean,
+			loading,
+			userData,
+			recentSearches,
+			adminTopics,
+			trendingLinks
+		} = state;
+
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-		let trendingLinks = [];
-		if (trendingStorage) {
-			JSON.parse(trendingStorage).forEach(search => {
-				if (search.search) {
-					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
-				}
-			});
-		}
+
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
@@ -188,20 +217,13 @@ const PolicyMainViewHandler = {
 				setSearchURL(state, searchSettings)
 			}
 		}
+
 		const { 
-			// favorite_documents = [],
+			favorite_topics = [],
 			favorite_searches = [] }
 		= userData;
-		// const favorites = favorite_documents.map(favorite=>favorite.filename);
-		// const crawlerSources = ['Army Publishing Directorate', 'Washington Headquarters Service','Director of National Intelligence', 'Joint Cheifs of Staff Library', 'Military Health System', 'Defense Logistics Agency']
-		const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
-		trendingLinks.forEach(({search},idx) => {
-			favorite_searches.forEach(fav => {
-				if(fav.search_text === search){
-					trendingLinks[idx].favorite = true;
-				}
-			})
-		});
+		
+		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
 		recentSearches.forEach((search,idx) => {
 			favorite_searches.forEach(fav => {
@@ -209,7 +231,13 @@ const PolicyMainViewHandler = {
 			});
 		});
 
+		adminTopics.forEach((topic,idx)=> {
+			favorite_topics.forEach(fav => {
+				adminTopics[idx].favorite = topic.name.toLowerCase() === fav.topic_name.toLowerCase();
+			})
+		})
 		const cleanSources = crawlerSources.map(crawl => crawlerMappingFunc(crawl))
+
 		return(
 			<div style={{marginTop: '40px'}}>
 				{prevSearchText &&
@@ -223,7 +251,7 @@ const PolicyMainViewHandler = {
 					</div>
 				)}
 				<div style={{ margin: '0 70px 0 70px'}}>
-					<GameChangerThumbnailRow
+					{/* <GameChangerThumbnailRow
 						links={agencyPublications}
 						title={"Agency Publications"}
 						width='450px'
@@ -234,13 +262,37 @@ const PolicyMainViewHandler = {
 								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
 							</AgencyPublicationContainer>
 						)}
+					</GameChangerThumbnailRow> */}
+					<GameChangerThumbnailRow
+						links={adminTopics}
+						title={"Topics"}
+						width='300px'
+					>
+						{adminTopics.map(({name, favorite})=>
+							<TrendingSearchContainer 
+								style={{backgroundColor: '#E6ECF4'}} 
+								onClick={(event) => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name}`);
+								}}
+							>
+								<div style={{display:'flex', justifyContent:'space-between'}}>
+									<Typography style={styles.containerText}>{name}</Typography>
+									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+										color: favorite ? "#E9691D" : 'rgb(224,224,224)',
+										cursor: "pointer",
+										fontSize: 20
+									}} />
+								</div>
+							</TrendingSearchContainer>
+						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={trendingLinks}
 						title={"Trending Searches"}
 						width='300px'
 					>
-						{trendingLinks.map(({search,favorite},idx)=>
+						{trendingLinks.map(({search, favorite, count},idx)=>
 							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
 								<div style={{display:'flex', justifyContent:'space-between'}}>
 									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
@@ -250,6 +302,10 @@ const PolicyMainViewHandler = {
 										fontSize: 20
 									}} />
 								</div>
+								<Typography style={styles.subtext}>
+									<i class="fa fa-search" style={{width:16, height:15}}/> 
+									{`${count} searches this week`}
+								</Typography>
 							</TrendingSearchContainer>
 						)}
 					</GameChangerThumbnailRow>
@@ -275,17 +331,12 @@ const PolicyMainViewHandler = {
 					<GameChangerThumbnailRow 
 						links={trendingLinks} 
 						title="Major Publications" 
-						thumbnailWidth='500px' 
-						thumbnailHeight='100px'
-					/>
-						{/* <GameChangerThumbnailRow
-							title="Banner Test"
-							isImgRow={false}
-						>
-							<div style={{width:6000}}>
-								<span>Hi</span>
-							</div>
-						</GameChangerThumbnailRow> */}
+						width='160px' 
+					>
+						{trendingLinks.map(({search}) => 
+							<img style={{height:210, border:'1px solid black', marginLeft: 10}} src={template} alt="thumbnail" title={search}/>
+						)}
+					</GameChangerThumbnailRow>
 				</div>
 			</div>
 		);

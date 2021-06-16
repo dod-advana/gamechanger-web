@@ -55,6 +55,7 @@ const endpoints = {
 	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
 	setTrendingBlacklist: '/api/gameChanger/trending/setTrendingBlacklist',
 	deleteTrendingBlacklist: '/api/gameChanger/trending/deleteTrendingBlacklist',
+	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
@@ -695,5 +696,10 @@ export default class GameChangerAPI {
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
 		return axiosGET(this.axios, url, {params:body});
+	}
+
+	getWeeklySearchCount = async (body) => {
+		const url = endpoints.getWeeklySearchCount;
+		return axiosPOST(this.axios, url, body);
 	}
 }
