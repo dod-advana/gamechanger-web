@@ -20,18 +20,22 @@ import _ from "lodash";
 //
 export const EDA_FIELDS = [
 	"award_id_eda_ext", 
+	"modification_eda_ext",
 	"reference_idv_eda_ext", 
 	"signature_date_eda_ext", 
 	"vendor_name_eda_ext",
 	"vendor_duns_eda_ext",
 	"vendor_cage_eda_ext",
+	"issuing_organization_eda_ext",
 	"contract_issue_name_eda_ext",
 	"contract_issue_dodaac_eda_ext",
+	"contract_issue_majcom_eda_ext",
 	"paying_office_name_eda_ext",
 	"paying_office_dodaac_eda_ext",
-	"modification_eda_ext",
+	"paying_office_majcom_eda_ext",
 	"contract_admin_name_eda_ext",
 	"contract_admin_office_dodaac_eda_ext",
+	"contract_admin_majcom_eda_ext",
 	"effective_date_eda_ext",
 	"naics_eda_ext",
 	"obligated_amounts_eda_ext",
@@ -47,15 +51,19 @@ export const EDA_FIELD_JSON_MAP = {
 	"vendor_duns_eda_ext": "Vendor DUNS",
 	"vendor_cage_eda_ext": "Vendor CAGE",
 	"obligated_amounts_eda_ext": "Total Obligated Amounts",
-	"contract_issue_name_eda_ext": "Contract Issuing Office Name",
-	"contract_issue_dodaac_eda_ext": "Contract Issuing Office DoDaaC",
+	"contract_issue_name_eda_ext": "Issuing Office Name",
+	"contract_issue_dodaac_eda_ext": "Issuing Office DoDaaC",
 	"misc_fsc_eda_ext": "PSC on Contract Header",
 	"paying_office_name_eda_ext": "Paying Office Name",
 	"paying_office_dodaac_eda_ext": "Paying Office DoDAAC",
 	"modification_eda_ext": "Modification Number",
-	"contract_admin_name_eda_ext": "Contract Admin Name",
-	"contract_admin_office_dodaac_eda_ext": "Contract Admin Office DoDAAC",
+	"contract_admin_name_eda_ext": "Admin Office Name",
+	"contract_admin_office_dodaac_eda_ext": "Admin Office DoDAAC",
 	"effective_date_eda_ext": "Effective Date",
+	"contract_issue_majcom_eda_ext": "Issuing Office MAJCOM",
+	"paying_office_majcom_eda_ext": "Paying Office MAJCOM",
+	"contract_admin_majcom_eda_ext": "Admin Office MAJCOM",
+	"issuing_organization_eda_ext": "Issuing Organization"
 };
 
 const styles = {
@@ -491,7 +499,7 @@ const EdaCardHandler = {
 			const currentAsOfText = `Page Count: ${item.page_count}`;
 
 			let tooltipText = 'No metadata available';
-			if (item && item.metadata_type_eda_ext && item.award_id_eda_ext) {
+			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
 				}
@@ -671,7 +679,7 @@ const EdaCardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
-			if (item && item.metadata_type_eda_ext && item.award_id_eda_ext) {
+			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
 				}

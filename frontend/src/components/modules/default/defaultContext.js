@@ -77,6 +77,10 @@ const initState = {
 		Topics: false
 	},	
 
+	categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
+
 	// Documents
 	iframePreviewLink: null,
 	detailViewId: 0,
@@ -153,6 +157,9 @@ const initState = {
 	topicPage: 1,
 	topicPagination: false,
 	topicsLoading: false,
+
+	currentSort: 'Relevance',
+	currentOrder: 'desc',
 };
 
 const init = (initialState) => {

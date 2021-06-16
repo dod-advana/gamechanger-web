@@ -231,7 +231,7 @@ const GCResponsibilityTracker = (props) => {
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, state.cloneData);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
 						}}
 						style={{ color: '#386F94' }}
 						>

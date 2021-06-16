@@ -55,6 +55,7 @@ class SimpleExportHandler extends ExportHandler {
 				} else {
 					searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, index, operator: 'and'}, clientObj, userId);
 				}
+				searchResults.classificationMarking = req.body.classificationMarking;
 			} catch (e) {
 				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'GPLMHKA', userId);
 				throw e;
