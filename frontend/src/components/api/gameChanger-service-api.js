@@ -56,9 +56,13 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
-	getTransformerList: '/api/gameChanger/getTransformerList',
-	getCurrentTransformer: '/api/gameChanger/getCurrentTransformer',
-	setTransformerModel: '/api/gameChanger/setTransformerModel',
+	reloadModels: '/api/gamechanger/admin/reloadModels',
+	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
+	getS3List: '/api/gamechanger/admin/getS3List',
+	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
+	getModelsList: '/api/gameChanger/admin/getModelsList',
+	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
+	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	setUserSearchSettings: '/api/gameChanger/setUserSearchSettings',
@@ -469,8 +473,28 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
-	getTransformerList = async () => {
-		const url = endpoints.getTransformerList;
+	reloadModels = async (data) => {
+		const url = endpoints.reloadModels;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	downloadDependencies = async () => {
+		const url = endpoints.downloadDependencies;
+		return axiosGET(this.axios, url);
+	}
+
+	getAPIInformation = async () => {
+		const url = endpoints.getAPIInformation;
+		return axiosGET(this.axios, url);
+	}
+
+	getS3List = async () => {
+		const url = endpoints.getS3List;
+		return axiosGET(this.axios, url);
+	}
+
+	getModelsList = async () => {
+		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	}
 
