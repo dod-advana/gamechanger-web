@@ -8,3 +8,4 @@ coverage/*
 secrets/*
 .env
 metadata/*
+build/*
