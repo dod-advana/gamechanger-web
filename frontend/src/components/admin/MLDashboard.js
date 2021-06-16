@@ -74,6 +74,7 @@ const apiColumns = [
 const logs = [];
 let loaded = 0;
 let errored = 0;
+const S3_CORPUS_PATH = 's3://advana-raw-zone/gamechanger/json';
 
 /**
  * This class queries the ml api information and provides controls 
@@ -94,6 +95,9 @@ export default () => {
     const [selectedSentence, setSelectedSentence] = useState([]);
     const [selectedQEXP, setSelectedQEXP] = useState([]);
 	const [loadingData, setLoadingData] = useState(true);
+
+    const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
+	const [modelName, setModelName] = useState('msmarco-distilbert-base-v2');
 
     // flags that parameters have been changed and on 
     // blur or enter press we should update the query
@@ -395,6 +399,62 @@ export default () => {
                                 style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
                             >
                                 {downloadedModelsList.qexp.map((name) => {
+                                    return (
+                                        <MenuItem 
+                                            style={{fontSize:'small'}}
+                                            value={name}>{name}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </div>
+                        
+					</div>
+                    <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
+						<b>Download Corpus</b><br/>
+                        <GCPrimaryButton
+                            onClick={() => {
+                                triggerReloadModels();
+                            }}
+                            disabled={loadingData || reloading}
+                            style={{float: 'right', minWidth: 'unset'}}
+                        >Download</GCPrimaryButton>
+                        <div>
+                            Corpus:
+                            <Select
+                                value={corpus}
+                                onChange={e => setSelectedSentence(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            >
+                                {downloadedModelsList.sentence.map((name) => {
+                                    return (
+                                        <MenuItem 
+                                            style={{fontSize:'small'}}
+                                            value={name}>{name}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </div>
+                        
+					</div>
+                    <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
+						<b>Train Model</b><br/>
+                        <GCPrimaryButton
+                            onClick={() => {
+                                triggerReloadModels();
+                            }}
+                            disabled={loadingData || reloading}
+                            style={{float: 'right', minWidth: 'unset'}}
+                        >Train</GCPrimaryButton>
+                        <div>
+                            Sentence Model:
+                            <Select
+                                value={modelName}
+                                onChange={e => setSelectedSentence(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            >
+                                {downloadedModelsList.sentence.map((name) => {
                                     return (
                                         <MenuItem 
                                             style={{fontSize:'small'}}
