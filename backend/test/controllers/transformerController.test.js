@@ -125,4 +125,90 @@ describe('DocumentController', function () {
 
 		});
 	});
+	describe('#getS3List', () => {
+		it('should get a fake list of models in s3', async (done) => {
+
+			const opts = {
+				...constructorOptionsMock,
+				mlApi: {
+					getS3List() {
+						return Promise.resolve(['test']);
+					}
+				}
+			};
+
+			const req = {
+				...reqMock,
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const target = new TransformerController(opts);
+
+			await target.getS3List(req, res);
+
+			assert.strictEqual(JSON.stringify(resMsg), JSON.stringify(['test']));
+			done();
+
+		});
+	});
+	describe('#getAPIInformation', () => {
+		it('should have fake information on the API', async (done) => {
+
+			const opts = {
+				...constructorOptionsMock,
+				mlApi: {
+					getAPIInformation() {
+						return Promise.resolve({
+							"API": "FOR TRANSFORMERS",
+							"API_Name":"GAMECHANGER ML API",
+							"Version": 2
+						});
+					}
+				}
+			};
+
+			const req = {
+				...reqMock,
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const target = new TransformerController(opts);
+
+			await target.getAPIInformation(req, res);
+
+			assert.strictEqual(JSON.stringify(resMsg), JSON.stringify({
+				"API": "FOR TRANSFORMERS",
+				"API_Name":"GAMECHANGER ML API",
+				"Version": 2
+			}));
+			done();
+
+		});
+	});
 });
