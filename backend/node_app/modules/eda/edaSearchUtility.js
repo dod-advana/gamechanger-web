@@ -563,6 +563,32 @@ class EDASearchUtility {
 
 		}
 
+		if (settings.majcoms && settings.majcoms.length > 0) {
+			const matchQuery = 					
+			{ 
+				'nested': {
+					'path': 'extracted_data_eda_n',
+					'query': {
+						'bool': {
+							'should': []
+						}
+					}
+				}
+			}
+
+			const majcoms = settings.majcoms;
+			for (const majcom of majcoms) {
+				matchQuery.nested.query.bool.should.push(
+					{
+						'match': {
+							'extracted_data_eda_n.contract_issue_office_majcom_eda_ext': majcom
+						}
+					}
+				);
+			}
+			mustQueries.push(matchQuery);			
+		}
+
 		return mustQueries;
 	}
 
