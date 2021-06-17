@@ -20,7 +20,12 @@ const initState = {
         minObligatedAmount: null,
         maxObligatedAmount: null,
         contractsOrMods: 'both',
-        majcoms: []
+        majcoms: {
+            "DEPT OF THE AIR FORCE": [],
+            "DEPT OF THE ARMY": [],
+            "DEPARTMENT OF DEFENSE": [],
+            "DEPT OF THE NAVY": []
+        }
     },
     showDialog: false,
     resultsPage: 1,
