@@ -173,8 +173,6 @@ const GlobalSearchHandler = {
 				console.error(err);
 			}
 			
-			console.log(categoryMetadata);
-			
 			const t1 = new Date().getTime();
 			
 			let getUserDataFlag = true;
@@ -257,21 +255,35 @@ const GlobalSearchHandler = {
 		const parsed = {};
 
 		const keyword = getQueryVariable("keyword", url);
+		const categoriesURL = getQueryVariable("categories", url);
 
 		if (keyword) {
 			parsed.searchText = keyword;
 		}
 
-		// categories ???
+		if (categoriesURL) {
+			const categories = categoriesURL.split("_");
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
+			for (const category in selectedCategories) {
+				selectedCategories[category] = categories.includes(category);
+			}
+			if (!_.isEmpty(selectedCategories)) {
+				parsed.selectedCategories = selectedCategories;
+			}
+		}
 
 		return parsed;
 	},
 
 	setSearchURL(state) {
 		const { searchText } = state;
-		const selectedCategories = state.searchSettings;
+		let linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText }).toString()}`;
 		
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...selectedCategories }).toString()}`;
+		const selectedCategories = _.pickBy(state.selectedCategories, value=>!!value);
+		if (!_.isEmpty(selectedCategories)) {
+			linkString += `&categories=${Object.keys(selectedCategories).join('_')}`;
+		}
+
 		window.history.pushState(null, document.title, linkString);
 	},
 };
