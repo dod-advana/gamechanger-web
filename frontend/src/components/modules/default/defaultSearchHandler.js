@@ -274,7 +274,7 @@ const DefaultSearchHandler = {
 					hasExpansionTerms: false
 				});
 			}
-
+	
 			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
@@ -317,6 +317,7 @@ const DefaultSearchHandler = {
 		const revokedURL = getQueryVariable('revoked', url);
 		const viewNameURL = getQueryVariable('viewName', url); // ???
 		const tabNameURL = getQueryVariable('tabName', url); // ???
+		const categoriesURL = getQueryVariable('categories', url);
 	
 		if (searchText) {
 			parsed.searchText = searchText;
@@ -414,6 +415,17 @@ const DefaultSearchHandler = {
 		} else if (revokedURL === "false") {
 			newSearchSettings.includeRevoked = false;
 		}
+
+		if (categoriesURL) {
+			const categories = categoriesURL.split("_");
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
+			for (const category in selectedCategories) {
+				selectedCategories[category] = categories.includes(category);
+			}
+			if (!_.isEmpty(selectedCategories)) {
+				parsed.selectedCategories = selectedCategories;
+			}
+		}
 		
 		parsed.searchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.searchSettings));
 
@@ -430,7 +442,13 @@ const DefaultSearchHandler = {
 		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
 		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 	
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+		let linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+
+		const selectedCategories = _.pickBy(state.selectedCategories, value=>!!value);
+		if (!_.isEmpty(selectedCategories)) {
+			linkString += `&categories=${Object.keys(selectedCategories).join('_')}`;
+		}
+
 		window.history.pushState(null, document.title, linkString);
 	},
 };
