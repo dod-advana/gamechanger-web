@@ -169,12 +169,12 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
             edaSettings.contractsOrMods = value;
             break;
         case 'majcoms':
-            const majIndex = edaSettings.majcoms.indexOf(value);
+            const majIndex = edaSettings.majcoms[value.org].indexOf(value.subOrg);
             if (majIndex !== -1) {
-                edaSettings.majcoms.splice(majIndex, 1);
+                edaSettings.majcoms[value.org].splice(majIndex, 1);
             }
             else {
-                edaSettings.majcoms.push(value);
+                edaSettings.majcoms[value.org].push(value.subOrg);
             }
             break;
         default:
@@ -213,7 +213,7 @@ const renderStats = (state) => {
 
 const renderMajcoms = (state, dispatch, org) => {
     const orgToMajcom = {
-        "air force": [
+        "DEPT OF THE AIR FORCE": [
             "Air Combat Command",
             "Air Education and Training Command",
             "Air Force District Of Washington",
@@ -223,7 +223,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Defense Finance and Accounting Service",
             "Pacific Air Forces"
         ],
-        "army": [
+        "DEPT OF THE ARMY": [
             "Army Contracting Command",
             "Army Corps of Engineers",
             "Army Intelligence and Security Command",
@@ -235,7 +235,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Army Tank-automotive and Armaments Command",
             "Army War College"
         ],
-        "dod": [
+        "DEPARTMENT OF DEFENSE": [
             "Defense Finance Accounting Service",
             "Defense Health Agency",
             "Defense Human Resources Activity (DHRA)",
@@ -244,7 +244,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Other DoD/OASD Activities",
             "US Special Operations  Command"
         ],
-        "navy":[
+        "DEPT OF THE NAVY":[
             "Command, Pacific Fleet",
             "Commander, Atlantic Fleet",
             "Department of the Navy, Assistant for Administration",
@@ -274,9 +274,9 @@ const renderMajcoms = (state, dispatch, org) => {
                 style={styles.titleText}
                 control={<Checkbox
                     style={styles.filterBox}
-                    onClick={() => setEDASearchSetting('majcoms', subOrg, state, dispatch)}
+                    onClick={() => setEDASearchSetting('majcoms', {org: org, subOrg: subOrg}, state, dispatch)}
                     icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                    checked={state.edaSearchSettings && state.edaSearchSettings.majcoms && state.edaSearchSettings.majcoms.indexOf(subOrg) !== -1}
+                    checked={state.edaSearchSettings && state.edaSearchSettings.majcoms && state.edaSearchSettings.majcoms[org].indexOf(subOrg) !== -1}
                     checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                     name={subOrg}
                 />}
@@ -349,7 +349,7 @@ const renderOrganizationFilters = (state, dispatch) => {
                         labelPlacement="end"                        
                     />
                     {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE AIR FORCE') !== -1 &&
-                        renderMajcoms(state, dispatch, 'air force')
+                        renderMajcoms(state, dispatch, 'DEPT OF THE AIR FORCE')
                     }
                     <FormControlLabel
                         name='Army'
@@ -367,7 +367,7 @@ const renderOrganizationFilters = (state, dispatch) => {
                         labelPlacement="end"                    
                     />
                     {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE ARMY') !== -1 &&
-                        renderMajcoms(state, dispatch, 'army')
+                        renderMajcoms(state, dispatch, 'DEPT OF THE ARMY')
                     }
                     <FormControlLabel
                         name='DOD'
@@ -385,7 +385,7 @@ const renderOrganizationFilters = (state, dispatch) => {
                         labelPlacement="end"                
                     />
                     {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPARTMENT OF DEFENSE') !== -1 &&
-                        renderMajcoms(state, dispatch, 'dod')
+                        renderMajcoms(state, dispatch, 'DEPARTMENT OF DEFENSE')
                     }
                     <FormControlLabel
                         name='Navy'
@@ -403,7 +403,7 @@ const renderOrganizationFilters = (state, dispatch) => {
                         labelPlacement="end"                   
                     />
                     {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE NAVY') !== -1 &&
-                        renderMajcoms(state, dispatch, 'navy')
+                        renderMajcoms(state, dispatch, 'DEPT OF THE NAVY')
                     }
                 </FormGroup>}
             </FormControl>

@@ -317,7 +317,7 @@ const EdaSearchHandler = {
 						"Air Force": 0,
 						"Army": 0,
 						"Department of Defense": 0,
-						"Navy": 0,
+						"Navy": 0
 					}
 
 					const orgNames = {

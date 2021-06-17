@@ -182,7 +182,6 @@ class EDASearchUtility {
 		{
 			searchText,
 			parsedQuery,
-			offset = 0,
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
@@ -220,7 +219,7 @@ class EDASearchUtility {
 				_source: {
 					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext']
 				},
-				from: offset,
+				from: 0,
 				size: limit,
 				track_total_hits: true,
 				query: {
@@ -354,7 +353,7 @@ class EDASearchUtility {
 		}	
 
 		if (!settings.allOrgsSelected && settings.organizations && settings.organizations.length > 0) {
-			const matchQuery = 					
+			const orgQuery = 					
 			{ 
 				'nested': {
 					'path': 'extracted_data_eda_n',
@@ -366,9 +365,39 @@ class EDASearchUtility {
 				}
 			}
 
+			const majcomQuery = 
+			{ 
+				'nested': {
+					'path': 'extracted_data_eda_n',
+					'query': {
+						'bool': {
+							'should': []
+						}
+					}
+				}
+			}
+
+			let pushMAJCOM = false;
+
 			const orgs = settings.organizations;
 			for (const org of orgs) {
-				matchQuery.nested.query.bool.should.push(
+
+				// for filtering by MAJCOM
+				if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
+					pushMAJCOM = true;
+					for (const subOrg of settings.majcoms[org]) {
+						majcomQuery.nested.query.bool.should.push(
+							{
+								'match': {
+									'extracted_data_eda_n.contract_issue_office_majcom_eda_ext': subOrg
+								}
+							}						
+						);
+					}
+				}
+
+
+				orgQuery.nested.query.bool.should.push(
 					{
 						'match': {
 							'extracted_data_eda_n.dodaac_org_type_eda_ext': org
@@ -376,7 +405,12 @@ class EDASearchUtility {
 					}
 				);
 			}
-			mustQueries.push(matchQuery);
+
+			mustQueries.push(orgQuery);
+
+			if (pushMAJCOM) {
+				mustQueries.push(majcomQuery);
+			}
 		}
 		
 		if (settings.startDate || settings.endDate) {
@@ -561,32 +595,6 @@ class EDASearchUtility {
 				mustQueries.push(boolQuery);
 			}
 
-		}
-
-		if (settings.majcoms && settings.majcoms.length > 0) {
-			const matchQuery = 					
-			{ 
-				'nested': {
-					'path': 'extracted_data_eda_n',
-					'query': {
-						'bool': {
-							'should': []
-						}
-					}
-				}
-			}
-
-			const majcoms = settings.majcoms;
-			for (const majcom of majcoms) {
-				matchQuery.nested.query.bool.should.push(
-					{
-						'match': {
-							'extracted_data_eda_n.contract_issue_office_majcom_eda_ext': majcom
-						}
-					}
-				);
-			}
-			mustQueries.push(matchQuery);			
 		}
 
 		return mustQueries;
