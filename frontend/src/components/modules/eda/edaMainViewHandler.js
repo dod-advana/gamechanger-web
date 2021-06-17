@@ -1,7 +1,7 @@
 import React from "react";
 import EDASummaryView from "./edaSummaryView";
-import EDASidePanel from "./edaSidePanel";
 import JumpButton from '../globalSearch/JumpButton';
+import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
@@ -163,13 +163,9 @@ const EdaMainViewHandler = {
 			hideTabs,
 			isCachedResult,
 			timeSinceCache,
-			edaSearchSettings,
-			issuingOrgs,
-			statsLoading,
 			summaryCardView,
 			summaryCardData,
-			resultsText,
-			totalObligatedAmount
+			resultsText
 		} = state;
 		
 		let sideScroll = {
@@ -215,13 +211,8 @@ const EdaMainViewHandler = {
 											}} />
 										</div>
 										:
-										<EDASidePanel 
-											searchResults={searchResults}
-											dispatch={dispatch}
-											edaSearchSettings={edaSearchSettings}
-											issuingOrgs={issuingOrgs}
-											statsLoading={statsLoading}
-											totalObligatedAmount={totalObligatedAmount}
+										<GameChangerSearchMatrix 
+											context={context}
 										/>
 									}
 								</div>

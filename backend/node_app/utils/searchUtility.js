@@ -324,8 +324,9 @@ class SearchUtility {
 				'crawler_used_s',
 				'download_url_s',
 				'source_page_url_s',
-				'source_fqdn_s'
-				], 
+				'source_fqdn_s',
+				'display_source_s'
+			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
 			includeRevoked = false,
@@ -348,7 +349,10 @@ class SearchUtility {
 			}
 
 			storedFields = [...storedFields, ...extStoredFields];
-
+			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
+			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
+			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
+			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
@@ -395,7 +399,11 @@ class SearchUtility {
 												'paragraphs.par_raw_text_t': {
 													fragment_size: 2 * charsPadding,
 													number_of_fragments: 1
-												}
+												},
+												'paragraphs.par_raw_text_t.gc_english': {
+													fragment_size: 2 * charsPadding,
+													number_of_fragments: 1
+												},
 											},
 											fragmenter: 'span'
 										}
@@ -414,10 +422,11 @@ class SearchUtility {
 												{
 													query_string: {
 														query: `${parsedQuery}`,
-														default_field: 'paragraphs.par_raw_text_t',
+														default_field,
 														default_operator: `${operator}`,
 														fuzzy_max_expansions: 100,
-														fuzziness: 'AUTO'
+														fuzziness: 'AUTO',
+														analyzer
 													}
 												},
 												
@@ -1743,6 +1752,7 @@ class SearchUtility {
 		try {
 			const { highlight = {} } = parahit;
 			const { 'paragraphs.par_raw_text_t': highlightTextArray = [], 'paragraphs.filename.search': fieldFilenameArray = [] } = highlight;
+			const { 'paragraphs.par_raw_text_t.gc_english': verbatimHighlightTextArray = [], 'paragraphs.filename.search': verbatimFieldFilenameArray = [] } = highlight;
 
 			// If not paragraphs then look at nested pages.
 			const { 'pages.p_raw_text': pageHighlightTextArray = [], 'pages.filename.search': pageFieldFilenameArray = [] } = highlight;
@@ -1755,6 +1765,10 @@ class SearchUtility {
 				return [highlightTextArray[0], false];
 			} else if (fieldFilenameArray.length > 0 && fieldFilenameArray[0]) {
 				return [fieldFilenameArray[0].replace(/.pdf/g, ''), true];
+			} else if (verbatimHighlightTextArray.length > 0 && verbatimHighlightTextArray[0]) {
+				return [verbatimHighlightTextArray[0], false];
+			} else if (verbatimFieldFilenameArray.length > 0 && verbatimFieldFilenameArray[0]) {
+				return [verbatimFieldFilenameArray[0].replace(/.pdf/g, ''), true];
 			} else if (pageHighlightTextArray.length > 0 && pageHighlightTextArray[0]) {
 				return [pageHighlightTextArray[0], false];
 			} else if (pageFieldFilenameArray.length > 0 && pageFieldFilenameArray[0]) {

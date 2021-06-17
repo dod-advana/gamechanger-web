@@ -1,6 +1,5 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
-import {crawlerMappingFunc} from "../../../gamechangerUtils";
 import {
 	CARD_FONT_SIZE,
 	getDocTypeStyles,
@@ -416,12 +415,11 @@ const StyledEntityTopicFrontCardContent = styled.div`
 		}
 	}
 `;
-
-const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
+    trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
 const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
@@ -480,7 +478,6 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
-	
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
@@ -870,15 +867,15 @@ const PolicyCardHandler = {
 			}
 
 			let source_item;
-			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s !== undefined && item.crawler_used_s !== ''){
+			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s!== undefined && item.crawler_used_s!== ''){
 				let source_name;
 				if (item.source_fqdn_s.startsWith("https://")){
 					source_name = item.source
 				} else {
 					source_name = `https://${item.source_fqdn_s}`
 				}
-				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{crawlerMappingFunc(item.crawler_used_s)}</a>)
-			} else {
+				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{item.display_source_s}</a>)
+            } else {
 				source_item = 'unknown';
 			}
 
@@ -902,7 +899,6 @@ const PolicyCardHandler = {
 										{Key: 'File Orgin', Value: (file_orgin_item)},
 										{Key: 'Source File', Value: (source_file_item)},
 										...addFavoriteTopicToMetadata(data, state.userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, state.cloneData)];
-			
 			return (
 				<div>
 					<SimpleTable tableClass={'magellan-table'}
@@ -930,7 +926,6 @@ const PolicyCardHandler = {
 				</div>
 			);
 		},
-		
 		getFooter: (props) => {
 			
 			const {
@@ -944,14 +939,13 @@ const PolicyCardHandler = {
 				item,
 				searchText
 			} = props;
-			
-			return (
+            return (
 				<>
 					<>
 						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(filename, cloneName, searchText, 0);
+								clickFn(filename, cloneName, searchText, 0, item.download_url_s);
 							}}
 						>
 							Open
