@@ -158,7 +158,6 @@ const initState = {
 	topicPagination: false,
 	topicsLoading: false,
 
-	categorySorting: {},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
 };

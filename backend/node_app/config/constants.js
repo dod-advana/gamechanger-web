@@ -65,12 +65,9 @@ module.exports = Object.freeze({
 	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
 	ADVANA_NOREPLY_EMAIL_ADDRESS: 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
-		host: process.env.EMAIL_TRANSPORT_HOST,
-		port: process.env.EMAIL_TRANSPORT_PORT,
-		secure: false,
-		tls: {
-			rejectUnauthorized: false
-		}
+		sendmail: true,
+		newline: 'unix',
+		secure: true
 	},
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,

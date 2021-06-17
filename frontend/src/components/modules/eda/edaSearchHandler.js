@@ -316,17 +316,24 @@ const EdaSearchHandler = {
 					const issuingOrgs = {
 						"Air Force": 0,
 						"Army": 0,
-						"DLA": 0,
-						"Marine Corps": 0,
+						"Department of Defense": 0,
 						"Navy": 0,
-						"4th Estate": 0
+					}
+
+					const orgNames = {
+						"DEPT OF THE AIR FORCE": "Air Force",
+						"DEPT OF THE ARMY": "Army",
+						"DEPARTMENT OF DEFENSE": "Department of Defense",
+						"DEPT OF THE NAVY": "Navy"
 					}
 
 					let totalObligatedAmount = 0;
 					for (const doc of docs) {
-						if (doc.issuing_organization_eda_ext && issuingOrgs[doc.issuing_organization_eda_ext] !== undefined) {
-							issuingOrgs[doc.issuing_organization_eda_ext] += 1;
+						const org = orgNames[doc.issuing_organization_eda_ext];
+						if (org && issuingOrgs[org] !== undefined) {
+							issuingOrgs[org] += 1;
 						}
+
 						if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
 							totalObligatedAmount += doc.obligated_amounts_eda_ext;
 						}

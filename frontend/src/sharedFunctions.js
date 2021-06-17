@@ -131,27 +131,6 @@ export const getUserData = async (dispatch) => {
 	}
 }
 
-export const creatCopyTinyUrl = (toolUrl, dispatch) => {
-	let url = window.location.hash.toString();
-	url = url.replace("#/", "");
-	gameChangerAPI.shortenSearchURLPOST(url).then(res => {
-		try {
-			// method for copying text to clipboard
-			const element = document.createElement('textarea');
-			element.value = `${window.location.origin}/#/${toolUrl}?tiny=${res.data.tinyURL}`;
-			element.setAttribute('readonly', '');
-			element.style = {position: 'absolute', left: '-9999px'};
-			document.body.appendChild(element);
-			element.select();
-			document.execCommand('copy');
-			document.body.removeChild(element);
-			setState(dispatch, {showSnackbar: true, snackBarMsg: 'Link copied to clipboard'});
-		} catch(err) {
-			console.log(err);
-		}
-	});
-}
-
 export const getSearchObjectFromString = (searchString = '') => {
 	//this search string in the input field on front end...
 	// tmp tag:foo tag:bar prop1:val1 prop2:val2

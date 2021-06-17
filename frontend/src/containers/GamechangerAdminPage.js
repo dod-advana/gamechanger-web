@@ -12,12 +12,14 @@ import AuthIcon from "../images/icon/Authority.png";
 import AnalystToolsIcon from '../images/icon/analyticswht.png';
 import ReportIcon from '../images/icon/slideout-menu/reports icon.png';
 import styled from "styled-components";
+import DashboardIcon from '../images/icon/slideout-menu/dashboard icon.png';
 import SearchBanner from "../components/searchBar/GCSearchBanner";
 import ReactTable from "react-table";
 import _ from "underscore";
 import "react-table/react-table.css";
 import GCButton from "../components/common/GCButton";
 import Modal from 'react-modal';
+import MLDashboard from '../components/admin/MLDashboard';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
 import GCTrendingBlacklist from '../components/admin/GCTrendingBlacklist';
 import InternalUsersManagement from '../components/user/InternalUserManagement';
@@ -114,6 +116,7 @@ const PAGES = {
 	cloneList: 'CloneList',
 	searchPdfMapping: 'searchPdfMapping',
 	adminList: 'AdminList',
+	mlDashboard: 'mlDashboard',
 	notifications: 'Notifications',
 	internalUsers: 'Internal Users',
 	appStats: 'Application Stats',
@@ -183,6 +186,18 @@ const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 					</HoverNavItem>
 				</Tooltip>
 			)}
+			<Tooltip title="ML Dashboard" placement="right" arrow>
+				<HoverNavItem
+					centered
+					onClick={() => {
+						setPageToView(PAGES.mlDashboard);
+						return false;
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={DashboardIcon} />
+				</HoverNavItem>
+			</Tooltip>
 			<Tooltip title="Search PDF Mapping" placement="right" arrow>
 				<HoverNavItem
 					centered
@@ -285,7 +300,17 @@ const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 					</HoverNavItem>
 				</Tooltip>
 			)}
-
+			<Tooltip title="ML Dashboard" placement="right" arrow>
+				<HoverNavItem
+					onClick={() => {
+						setPageToView(PAGES.mlDashboard);
+						return false;
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={DashboardIcon} /><span style={{ marginLeft: '10px' }}>ML Dashboard</span>
+				</HoverNavItem>
+			</Tooltip>
 			<Tooltip title="Search PDF Mapping" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
@@ -416,10 +441,6 @@ const GamechangerAdminPage = props => {
 	const [editAdminData, setEditAdminData] = useState({});
 	// const [useMatomo, setUseMatomo] = useState(JSON.parse(localStorage.getItem('appMatomo')));
 	// const [useGCCache, setUseGCCache] = useState(JSON.parse(localStorage.getItem('useGCCache')));
-	const [transformerList, setTransformerList] = useState([]);
-	const [selectedTransformer, setSelectedTransformer] = useState('');
-	const [currentTransformerDisplayName, setCurrentTransformerDisplayName] = useState('');
-	const [transformerLoading, setTransformerLoading] = useState(false);
 	// const [tutorialModalOpen, setTutorialModalOpen] = useState(false);
 	const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
@@ -478,19 +499,6 @@ const GamechangerAdminPage = props => {
 		}
 	}, [editCloneID,gcCloneTableData])
 
-	const setCurrentTransformer = async () => {
-		try {
-			setTransformerLoading(true);
-			const { data } = await gameChangerAPI.setTransformerModel(selectedTransformer);
-			const { model_name } = data;
-			setCurrentTransformerDisplayName(model_name);
-		} catch(e) {
-			console.error('Error setting transformer model', e);
-		} finally {
-			setTransformerLoading(false);
-		}
-	}
-
 	const setCombinedSearchMode = async () => {
 		try {
 			await gameChangerAPI.setCombinedSearchMode(!combinedSearch);
@@ -530,25 +538,6 @@ const GamechangerAdminPage = props => {
 			console.error('Error setting Topic Search', e);
 		}
 	}
-
-	const getCurrentTransformer = async () => {
-		try {
-			const { data } = await gameChangerAPI.getCurrentTransformer();
-			const { model_name } = data;
-			setCurrentTransformerDisplayName(model_name);
-		} catch (e) {
-			console.error('Error getting current transformer model', e);
-		}
-	};
-
-	const getTransformerList = async () => {
-		try {
-			const { data } = await gameChangerAPI.getTransformerList();
-			setTransformerList(data);
-		} catch(e) {
-			console.error('Error getting transformer list', e);
-		}
-	};
 
 	const getCombinedSearch = async () => {
 		try {
@@ -600,8 +589,6 @@ const GamechangerAdminPage = props => {
 	}
 
 	useEffect(() => {
-		getCurrentTransformer();
-		getTransformerList();
 		getCombinedSearch();
 		getIntelligentAnswers();
 		getEntitySearch();
@@ -939,18 +926,6 @@ const GamechangerAdminPage = props => {
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle User Feedback</span></h2>
 							</Link>
 						</Paper>
-					</div>
-					<div style={{ minWidth: '400px', height: '150px', border: '2px solid darkgray', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
-						<b>Transformer Model Select</b>
-						<select style={{ margin: '0 5px' }} value={selectedTransformer} onChange={({ target: { value } }) => { setSelectedTransformer(value) }}>
-							{transformerList.map((name) => {
-								return (
-									<option key={name} value={name}>{name}</option>
-								)
-							})}
-						</select>
-						<button onClick={() => setCurrentTransformer()} disabled={transformerLoading}> Set Model </button>
-						{transformerLoading ? <span>Loading new model...</span> : <span>Currently using {currentTransformerDisplayName}</span>}
 					</div>
 				</div>
 				
@@ -1458,6 +1433,8 @@ const GamechangerAdminPage = props => {
 				return renderCloneList();
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
+			case PAGES.mlDashboard:
+				return <MLDashboard />;
 			case PAGES.adminList:
 				return renderAdminList();
 			case PAGES.notifications:
