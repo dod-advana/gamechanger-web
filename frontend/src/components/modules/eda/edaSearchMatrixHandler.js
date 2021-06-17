@@ -1,6 +1,8 @@
 import React from "react";
 import GCAccordion from "../../common/GCAccordion";
 import SimpleTable from "../../common/SimpleTable";
+import GCTooltip from "../../common/GCToolTip";
+
 import {
     FormControl,
     FormGroup,
@@ -23,7 +25,6 @@ const _ = require('lodash');
 const styles = {
     titleText: {
 		fontWeight: 900,
-		fontSize: '14px',
         marginBottom: 5
 	},
 	filterBox: {
@@ -167,6 +168,15 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
         case 'contractsOrMods':
             edaSettings.contractsOrMods = value;
             break;
+        case 'majcoms':
+            const majIndex = edaSettings.majcoms.indexOf(value);
+            if (majIndex !== -1) {
+                edaSettings.majcoms.splice(majIndex, 1);
+            }
+            else {
+                edaSettings.majcoms.push(value);
+            }
+            break;
         default:
             break;
     }
@@ -199,6 +209,88 @@ const renderStats = (state) => {
             hideHeader={true}
         />
     );
+}
+
+const renderMajcoms = (state, dispatch, org) => {
+    const orgToMajcom = {
+        "air force": [
+            "Air Combat Command",
+            "Air Education and Training Command",
+            "Air Force District Of Washington",
+            "Air Force Global Strike Command",
+            "Air Force Materiel Command",
+            "Air Force Space Command",
+            "Defense Finance and Accounting Service",
+            "Pacific Air Forces"
+        ],
+        "army": [
+            "Army Contracting Command",
+            "Army Corps of Engineers",
+            "Army Intelligence and Security Command",
+            "Army Joint Munitions Command",
+            "Army Medical Command",
+            "Army National Guard",
+            "Army National Guard Component 1 Units",
+            "Army Pacific Command",
+            "Army Tank-automotive and Armaments Command",
+            "Army War College"
+        ],
+        "dod": [
+            "Defense Finance Accounting Service",
+            "Defense Health Agency",
+            "Defense Human Resources Activity (DHRA)",
+            "Defense Information Systems Agency",
+            "Missile Defense Agency",
+            "Other DoD/OASD Activities",
+            "US Special Operations  Command"
+        ],
+        "navy":[
+            "Command, Pacific Fleet",
+            "Commander, Atlantic Fleet",
+            "Department of the Navy, Assistant for Administration",
+            "Marine Corps Forces Special Operations Command",
+            "Marine Corps Headquarters",
+            "Marine Corps Installations Command",
+            "Marine Corps Installations Pacific",
+            "Marine Corps Logistics Command",
+            "Marine Corps Systems Command",
+            "Naval Air Systems Command Headquarters",
+            "Naval Sea Systems Command",
+            "Naval Supply Systems Command Headquarters",
+            "Office Of Naval Research",
+            "Office of the Chief of Naval Operations",
+            "Space and Naval Warfare Systems Command"
+        ]   
+    }
+
+    const orgCheckboxes = [];
+    const orgs = orgToMajcom[org];
+
+    for (const subOrg of orgs) {
+        orgCheckboxes.push(
+            <FormControlLabel
+                name={subOrg}
+                value={subOrg}
+                style={styles.titleText}
+                control={<Checkbox
+                    style={styles.filterBox}
+                    onClick={() => setEDASearchSetting('majcoms', subOrg, state, dispatch)}
+                    icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                    checked={state.edaSearchSettings && state.edaSearchSettings.majcoms && state.edaSearchSettings.majcoms.indexOf(subOrg) !== -1}
+                    checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                    name={subOrg}
+                />}
+                label={<span style={{ fontSize: 13, marginLeft: 5 }}>{subOrg}</span>}
+                labelPlacement="end"                        
+            />
+        );
+    }
+
+    return (
+        <FormGroup style={{ margin: '0 0 0 28px' }}>
+            {orgCheckboxes}
+        </FormGroup>
+    )
 }
 
 const renderOrganizationFilters = (state, dispatch) => {
@@ -256,6 +348,9 @@ const renderOrganizationFilters = (state, dispatch) => {
                         label='Air Force'
                         labelPlacement="end"                        
                     />
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE AIR FORCE') !== -1 &&
+                        renderMajcoms(state, dispatch, 'air force')
+                    }
                     <FormControlLabel
                         name='Army'
                         value='Army'
@@ -271,6 +366,9 @@ const renderOrganizationFilters = (state, dispatch) => {
                         label='Army'
                         labelPlacement="end"                    
                     />
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE ARMY') !== -1 &&
+                        renderMajcoms(state, dispatch, 'army')
+                    }
                     <FormControlLabel
                         name='DOD'
                         value='DOD'
@@ -286,21 +384,27 @@ const renderOrganizationFilters = (state, dispatch) => {
                         label='DOD'
                         labelPlacement="end"                
                     />
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPARTMENT OF DEFENSE') !== -1 &&
+                        renderMajcoms(state, dispatch, 'dod')
+                    }
                     <FormControlLabel
                         name='Navy'
                         value='Navy'
                         style={styles.titleText}
                         control={<Checkbox
                             style={styles.filterBox}
-                            onClick={() => setEDASearchSetting('organizations', 'DEPT OF NAVY', state, dispatch)}
+                            onClick={() => setEDASearchSetting('organizations', 'DEPT OF THE NAVY', state, dispatch)}
                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF NAVY') !== -1}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE NAVY') !== -1}
                             checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                             name='Navy'
                         />}     
                         label='Navy'
                         labelPlacement="end"                   
                     />
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE NAVY') !== -1 &&
+                        renderMajcoms(state, dispatch, 'navy')
+                    }
                 </FormGroup>}
             </FormControl>
         </div>
@@ -400,91 +504,91 @@ const renderFiscalYearFilter = (state, dispatch) => {
 
 const renderContractDataFilter = (state, dispatch) => {
     return (
-    <div style={styles.container}>
-        <FormControl>
-            <FormGroup>
-                <FormControlLabel
-                    name='All data sources'
-                    value='All data sources'
-                    control={<Checkbox
-                        onClick={() => setEDASearchSetting('allData', '', state, dispatch)}
-                        icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-                        checked={state.edaSearchSettings.allDataSelected}
-                        checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+        <div style={styles.container}>
+            <FormControl>
+                <FormGroup>
+                    <FormControlLabel
                         name='All data sources'
-                        style={styles.filterBox}
-                    />}
-                    label='All data sources'
-                    labelPlacement="end"
-                    style={styles.titleText}
-                />
-                <FormControlLabel
-                    name='Specific data source(s)'
-                    value='Specific data source(s)'
-                    control={<Checkbox
-                        onClick={() => setEDASearchSetting('specData', '', state, dispatch)}
-                        icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-                        checked={!state.edaSearchSettings.allDataSelected}
-                        checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                        value='All data sources'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('allData', '', state, dispatch)}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={state.edaSearchSettings.allDataSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='All data sources'
+                            style={styles.filterBox}
+                        />}
+                        label='All data sources'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                    <FormControlLabel
                         name='Specific data source(s)'
-                        style={styles.filterBox}
-                    />}
-                    label='Specific data source(s)'
-                    labelPlacement="end"
-                    style={styles.titleText}
-                />
-            </FormGroup>
+                        value='Specific data source(s)'
+                        control={<Checkbox
+                            onClick={() => setEDASearchSetting('specData', '', state, dispatch)}
+                            icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+                            checked={!state.edaSearchSettings.allDataSelected}
+                            checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+                            name='Specific data source(s)'
+                            style={styles.filterBox}
+                        />}
+                        label='Specific data source(s)'
+                        labelPlacement="end"
+                        style={styles.titleText}
+                    />
+                </FormGroup>
 
-            {!state.edaSearchSettings.allDataSelected && 
-            <FormGroup style={styles.checkboxes}>
-                <FormControlLabel
-                    name='PDS'
-                    value='PDS'
-                    style={styles.titleText}
-                    control={<Checkbox
-                        style={styles.filterBox}
-                        onClick={() => setEDASearchSetting('contractData', 'pds', state, dispatch)}
-                        icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                        checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.pds}
-                        checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                {!state.edaSearchSettings.allDataSelected && 
+                <FormGroup style={styles.checkboxes}>
+                    <FormControlLabel
                         name='PDS'
-                    />}
-                    label='PDS'
-                    labelPlacement="end"                        
-                />
-                <FormControlLabel
-                    name='SYN'
-                    value='SYN'
-                    style={styles.titleText}
-                    control={<Checkbox
-                        style={styles.filterBox}
-                        onClick={() => setEDASearchSetting('contractData', 'syn', state, dispatch)}
-                        icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                        checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.syn}
-                        checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                        value='PDS'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'pds', state, dispatch)}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.pds}
+                            checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                            name='PDS'
+                        />}
+                        label='PDS'
+                        labelPlacement="end"                        
+                    />
+                    <FormControlLabel
                         name='SYN'
-                    />}    
-                    label='SYN'
-                    labelPlacement="end"                    
-                />
-                <FormControlLabel
-                    name='None'
-                    value='None'
-                    style={styles.titleText}
-                    control={<Checkbox
-                        style={styles.filterBox}
-                        onClick={() => setEDASearchSetting('contractData', 'none', state, dispatch)}
-                        icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                        checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.none}
-                        checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
+                        value='SYN'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'syn', state, dispatch)}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.syn}
+                            checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                            name='SYN'
+                        />}    
+                        label='SYN'
+                        labelPlacement="end"                    
+                    />
+                    <FormControlLabel
                         name='None'
-                    />}        
-                    label='None'
-                    labelPlacement="end"                
-                />
-            </FormGroup>}
-        </FormControl>
-    </div>
+                        value='None'
+                        style={styles.titleText}
+                        control={<Checkbox
+                            style={styles.filterBox}
+                            onClick={() => setEDASearchSetting('contractData', 'none', state, dispatch)}
+                            icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.contractData && state.edaSearchSettings.contractData.none}
+                            checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
+                            name='None'
+                        />}        
+                        label='None'
+                        labelPlacement="end"                
+                    />
+                </FormGroup>}
+            </FormControl>
+        </div>
     )
 }
 

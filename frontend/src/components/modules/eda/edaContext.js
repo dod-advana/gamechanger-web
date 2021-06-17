@@ -19,7 +19,8 @@ const initState = {
         },
         minObligatedAmount: null,
         maxObligatedAmount: null,
-        contractsOrMods: 'both'
+        contractsOrMods: 'both',
+        majcoms: []
     },
     showDialog: false,
     resultsPage: 1,
