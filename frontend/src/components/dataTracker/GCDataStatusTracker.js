@@ -16,6 +16,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import {MemoizedNodeCluster2D}  from "../graph/GraphNodeCluster2D";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
 import {trackEvent} from "../telemetry/Matomo";
+import {crawlerMappingFunc} from "../../gamechangerUtils";
 
 const TableRow = styled.div`
 	text-align: left;
@@ -424,7 +425,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ color: '#386F94' }}
 						>
 						<div>
-							<p>{JSON.parse(props.original.json_metadata).display_source_s}</p>
+							<p>{JSON.parse(props.original.json_metadata).crawler_used}</p>
 						</div>
 						</Link>
 					</TableRow>
@@ -499,7 +500,7 @@ const GCDataStatusTracker = (props) => {
 				width: 350,
 				Cell: row => (
 					<TableRow>
-						{JSON.parse(props.original.json_metadata).display_source_s}
+						{crawlerMappingFunc(row.value)}
 					</TableRow>
 				),
 			},
@@ -583,7 +584,7 @@ const GCDataStatusTracker = (props) => {
 				width: 350,
 				Cell: row => (
 					<TableRow>
-						{JSON.parse(props.original.json_metadata).display_source_s}
+						{crawlerMappingFunc(row.value)}
 					</TableRow>
 				),
 			},
