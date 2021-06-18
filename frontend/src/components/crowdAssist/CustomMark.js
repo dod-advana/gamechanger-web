@@ -10,7 +10,7 @@ export const CustomMark = ({color, start, end, onClick, tag, content, key}) => (
     >
         {content}
         {tag && (
-        <span style={{fontSize: '0.7em', fontWeight: 500, marginLeft: 6}}>{tag}</span>
+        <span style={{fontSize: '0.7em', fontWeight: 500, marginLeft: 6}}></span>
         )}
   </mark>
 )
