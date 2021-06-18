@@ -62,6 +62,9 @@ router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
+router.get('/admin/getHomepageEditorData', admin.getHomepageEditorData);
+router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
+
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);

@@ -51,7 +51,8 @@ const initState = {
 	// Homepage
 	recentSearches: [],
 	crawlerSources: [],
-	adminTopics: [{name:'cybersecurity workforce'}, {name:'artificial'},{name:'bills'},{name:'commission'}],
+	adminTopics: [],
+	adminMajorPubs: [],
 	trendingLinks: [],
 	
 	// Tutorial

@@ -23,10 +23,13 @@ import {
 	RESULTS_PER_PAGE, StyledCenterContainer,
 	crawlerMappingFunc
 } from "../../../gamechangerUtils";
+import GameChangerAPI from "../../api/gameChanger-service-api";
 import template from '../../mainView/Title 1.png'
 import '../../mainView/main-view.css'
 
 const _ = require('lodash');
+
+const gameChangerAPI = new GameChangerAPI();
 
 const fullWidthCentered = {
 	width: "100%",
@@ -149,29 +152,24 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
-		const { state, dispatch } = props;
-		const { cloneData, userData } = state;
-		const { favorite_searches = [] } = userData;
+		const { dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
-
-		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-		let trendingLinks = [];
-		if (trendingStorage) {
-			JSON.parse(trendingStorage).forEach(search => {
-				if (search.search) {
-					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), count: search.count, favorite: false});
+		
+		try {
+			const { data } = await gameChangerAPI.getHomepageEditorData();
+			let topics = [];
+			let pubs = [];
+			data.forEach(obj => {
+				if(obj.key === 'homepage_topics'){
+					topics = JSON.parse(obj.value);
+				} else if(obj.key === 'homepage_major_pubs') {
+					pubs = JSON.parse(obj.value);
 				}
 			});
+			setState(dispatch, {adminTopics:topics, adminMajorPubs: pubs});
+		} catch(e){
+			// Do nothing
 		}
-
-		trendingLinks.forEach(({search},idx) => {
-			favorite_searches.forEach(fav => {
-				if(fav.search_text === search){
-					trendingLinks[idx].favorite = true;
-				}
-			})
-		});
-		setState(dispatch, {trendingLinks});
 
 	},
 	
@@ -194,6 +192,8 @@ const PolicyMainViewHandler = {
 	renderHideTabs(props) {
 		const { state, dispatch } = props;
 		const {
+			adminTopics,
+			adminMajorPubs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -203,12 +203,10 @@ const PolicyMainViewHandler = {
 			loading,
 			userData,
 			recentSearches,
-			adminTopics,
-			trendingLinks
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
@@ -224,6 +222,24 @@ const PolicyMainViewHandler = {
 		= userData;
 		
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
+
+
+		let trendingLinks = [];
+		if (trendingStorage) {
+			JSON.parse(trendingStorage).forEach(search => {
+				if (search.search) {
+					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), count: search.count, favorite: false});
+				}
+			});
+		}
+
+		trendingLinks.forEach(({search},idx) => {
+			favorite_searches.forEach(fav => {
+				if(fav.search_text === search){
+					trendingLinks[idx].favorite = true;
+				}
+			})
+		});
 
 		recentSearches.forEach((search,idx) => {
 			favorite_searches.forEach(fav => {
@@ -271,9 +287,9 @@ const PolicyMainViewHandler = {
 						{adminTopics.map(({name, favorite})=>
 							<TrendingSearchContainer 
 								style={{backgroundColor: '#E6ECF4'}} 
-								onClick={(event) => {
+								onClick={() => {
 									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name}`);
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
 								}}
 							>
 								<div style={{display:'flex', justifyContent:'space-between'}}>
@@ -316,7 +332,7 @@ const PolicyMainViewHandler = {
 					>
 						{cleanSources.map(source => 
 							<SourceContainer>
-								<div style={{width:100, height:100}}/>
+								{/* <div style={{width:100, height:100}}/> */}
 								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
 							</SourceContainer>
 						)}
@@ -329,12 +345,12 @@ const PolicyMainViewHandler = {
 						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={trendingLinks} 
+						links={adminMajorPubs} 
 						title="Major Publications" 
 						width='160px' 
 					>
-						{trendingLinks.map(({search}) => 
-							<img style={{height:210, border:'1px solid black', marginLeft: 10}} src={template} alt="thumbnail" title={search}/>
+						{adminMajorPubs.map(({name}) => 
+							<img style={{height:210, border:'1px solid black', marginLeft: 10}} src={template} alt="thumbnail" title={name}/>
 						)}
 					</GameChangerThumbnailRow>
 				</div>
