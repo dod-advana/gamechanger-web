@@ -67,6 +67,7 @@ router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
+router.post('/thumbnailDownload', document.getHomepageThumbnail);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);
 router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotations);
 router.get('/getThumbnail', document.getThumbnail);

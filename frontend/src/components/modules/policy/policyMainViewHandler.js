@@ -171,6 +171,13 @@ const PolicyMainViewHandler = {
 			// Do nothing
 		}
 
+		try {
+			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('Title 10.png');
+			console.log(png);
+		} catch(e) {
+			console.log(e)
+		}
+
 	},
 	
 	getMainView(props) {

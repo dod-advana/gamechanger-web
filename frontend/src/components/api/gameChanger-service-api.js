@@ -20,6 +20,7 @@ const endpoints = {
 	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
 	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
+	thumbnailStorageDownloadPOST: '/api/gameChanger/thumbnailDownload',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
 	gcCloneTableDataGET: '/api/gamechanger/modular/admin/getCloneTableStructure',
 	reloadHandlerMapGET: '/api/gamechanger/modular/admin/reloadHandlerMap',
@@ -297,6 +298,12 @@ export default class GameChangerAPI {
 				reject(e.message)
 			});
 		});
+	}
+
+	thumbnailStorageDownloadPOST = async (filename) => {
+		const s3Bucket = 'advana-raw-zone';
+		const url = endpoints.thumbnailStorageDownloadPOST;
+		axiosPOST(this.axios, url, {filekey: filename, dest: s3Bucket})
 	}
 
 	getCloneData = async () => {
