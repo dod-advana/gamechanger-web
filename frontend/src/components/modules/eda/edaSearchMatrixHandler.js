@@ -748,7 +748,7 @@ const EDASearchMatrixHandler = {
                         </div>
                     }
                     {!state.statsLoading &&
-                        renderStats(state, dispatch) 
+                        renderStats(state) 
                     }
                 </GCAccordion>
             </div>
