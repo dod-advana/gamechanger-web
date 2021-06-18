@@ -339,7 +339,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			//add topics
-			let topicSearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			let topicSearchOn = await this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
 			if (topicSearchOn.length > 0){
 				topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
 			}
