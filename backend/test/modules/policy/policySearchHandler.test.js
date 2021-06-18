@@ -651,20 +651,19 @@ describe('PolicySearchHandler', function () {
 		});
 	});
 	
-	// describe('#getElasticsearchDocDataFromId', () => {
-	// 	it('should return the right ES query', async (done) => {
-	// 		try {
-	// 			const opts = {
-	// 				...constructorOptionsMock
-	// 			};
-	// 			const target = new PolicySearchHandler(opts);
-	// 			const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
-	// 			const expected = elasticSearchDocDataExpected;
-	// 			assert.deepStrictEqual(actual, expected);
-	// 			done();
-	// 		} catch (e) {
-	// 			console.log(e);
-	// 		}
-	// 	});
-	// });
+	describe('#getElasticsearchDocDataFromId', () => {
+		it('should return the right ES query', () => {
+			try {
+				const opts = {
+					...constructorOptionsMock
+				};
+				const target = new PolicySearchHandler(opts);
+				const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
+				const expected = elasticSearchDocDataExpected;
+				assert.deepStrictEqual(actual, expected);
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	});
 });
