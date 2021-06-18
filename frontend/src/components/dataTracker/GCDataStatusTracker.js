@@ -425,7 +425,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ color: '#386F94' }}
 						>
 						<div>
-							<p>{crawlerMappingFunc(JSON.parse(props.original.json_metadata).crawler_used)}</p>
+							<p>{JSON.parse(props.original.json_metadata).crawler_used}</p>
 						</div>
 						</Link>
 					</TableRow>
