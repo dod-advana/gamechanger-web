@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import {FormControl, FormControlLabel, Radio, RadioGroup} from "@material-ui/core";
-import {TokenAnnotator} from "react-text-annotate";
+import {TokenAnnotator, TextAnnotator} from "react-text-annotate";
 import {CustomMark} from "./CustomMark";
 import LinearProgressWithLabel  from '@material-ui/core/LinearProgress';
 import withStyles from "@material-ui/core/styles/withStyles";
 import {primary, backgroundWhite, backgroundGreyDark, primaryPurple, primaryAlt, tertiaryGoldDarkest,
 	primaryRed, primaryDark, tertiaryGreen} from '../../components/common/gc-colors';
 import { Typography } from "@material-ui/core";
+
 
 const BorderLinearProgress = withStyles((theme) => ({
   root: {
@@ -48,10 +49,10 @@ const StyledRadio = (props) => {
 
 const highlightColors = [primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryRed, primaryDark, tertiaryGreen]
 
-export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, progressText, progressValue, componentStepNumbers, isTutorial }) => {
+export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, progressText, progressValue, componentStepNumbers, isTutorial, colorMap }) => {
 	const [tag, setTag] = useState(tags[0])
 	// const [currentTokens, setCurrentTokens] = useState([])
-	const [tagColorMap, setTagColorMap] = useState(new Map())
+	const [tagColorMap, setTagColorMap] = useState(colorMap)
 
 	useEffect(() => {
 		// when tags prop changes this will create a new Map of colors for each tag
@@ -59,12 +60,12 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 			const j = Math.floor(Math.random() * (i + 1));
 			[highlightColors[i], highlightColors[j]] = [highlightColors[j], highlightColors[i]];
 		}
-		const tagmap = tags.reduce((acc, tag, i) => {
+		/*const tagmap = tags.reduce((acc, tag, i) => {
 			acc.set(tag, highlightColors[i % highlightColors.length])
 			return acc
-		}, new Map())
+		}, new Map())*/
 
-		setTagColorMap(tagmap)
+		setTagColorMap(colorMap)
 		setTag(tags[0])
 	}, [tags])
 
@@ -79,7 +80,7 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 			}}>{tagText}</span>}
 			labelPlacement="start"
 			style={{
-				background: tagColorMap.get(tagText),
+				background: tagColorMap[tagText],
 				border: '1px solid #DDDDDD',
 				borderRadius: '4px',
 				paddingLeft: '5px',
@@ -147,7 +148,7 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 						return {
 							...span,
 							tag: tag,
-							color: tagColorMap.get(tag) || 'red',
+							color: tagColorMap[tag] || 'red',
 						}
 					}}
 					renderMark={CustomMark}
