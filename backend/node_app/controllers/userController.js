@@ -434,12 +434,13 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {feedbackType, feedbackText, screenShot, userEmail} = req.body.feedbackData;
 			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
-			this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
-				res.status(200).send({status: 'good'});
-			}).catch(error => {
-				this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				res.status(500).send(error);
-			});
+			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
+			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
+			res.status(200).send({status: 'good'});
+			// }).catch(error => {
+				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+				// res.status(500).send(error);
+			// });
 
 			// const axios = require('axios');
 			// const axiosInstance = axios.create({
@@ -489,12 +490,13 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { alertData } = req.body;
 			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
-			this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
+			this.logger.info(`Classification alert: ${emailBody}`);
+			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
 				res.status(200).send({status: 'good'});
-			}).catch(error => {
-				this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				res.status(500).send(error);
-			});
+			// }).catch(error => {
+				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+				// res.status(500).send(error);
+			// });
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'WH9IUG0', userId);
