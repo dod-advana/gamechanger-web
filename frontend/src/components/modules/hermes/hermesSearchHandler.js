@@ -295,20 +295,20 @@ const HermesSearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		return defaultSearchHandler.parseSearchURL(defaultState, url);
+		const {searchText, resultsPage} = defaultSearchHandler.parseSearchURL(defaultState, url);
+		return {searchText, resultsPage};
 	},
 
 	setSearchURL(state) {
-		const { searchText,  resultsPage, tabName} = state;
-		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } = state.searchSettings;
+		const { searchText,  resultsPage } = state;
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-	
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
 		window.history.pushState(null, document.title, linkString);
 	},
 };

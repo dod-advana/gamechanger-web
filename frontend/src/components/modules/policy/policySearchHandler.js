@@ -613,29 +613,50 @@ const PolicySearchHandler = {
 
 
 	setSearchURL(state) {
-		const { searchText, resultsPage, currentViewName } = state;
+		const { searchText, resultsPage } = state;
 		const { searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked } = state.searchSettings;
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-		let orgFilterText = 'ALLORGS';
-		if(!allOrgsSelected) {
-			orgFilterText = Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_');
-		}
-		let typeFilterText = 'ALLTYPES';
-		if(!allTypesSelected) {
-			typeFilterText = Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_');
-		}
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 	
-		let linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&viewName=${currentViewName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+		const orgFilterText = (!allOrgsSelected
+			? Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_')
+			: undefined);
+
+		const typeFilterText = (!allTypesSelected
+			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
+			: undefined
+		);
+
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
+			.join('_');
+
+		const accessDateText = ((accessDateFilter && accessDateFilter[0] && accessDateFilter[1])
+			? accessDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const pubDateText = ((!publicationDateAllTime && publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1])
+			? publicationDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const categoriesText = (state.selectedCategories
+			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
+			: undefined);
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		if (searchType) params.append('searchType', searchType);
+		if (orgFilterText) params.append('orgFilter', orgFilterText);
+		if (typeFilterText) params.append('typeFilter', typeFilterText);
+		if (searchFieldText) params.append('searchFields', searchFieldText);
+		if (accessDateText) params.append('accessDate', accessDateText);
+		if (pubDateText) params.append('pubDate', pubDateText);
+		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 		
-		const selectedCategories = _.pickBy(state.selectedCategories, value=>!!value);
-		if (!_.isEmpty(selectedCategories)) {
-			linkString += `&categories=${Object.keys(selectedCategories).join('_')}`;
-		}
-		
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
 		window.history.pushState(null, document.title, linkString);
 	},	
 };

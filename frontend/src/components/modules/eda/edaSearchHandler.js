@@ -355,20 +355,15 @@ const EdaSearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		return defaultSearchHandler.parseSearchURL(defaultState, url);
+		// TODO:
+		return {};
 	},
 
-	setSearchURL (state) {
-		const { searchText, resultsPage, tabName } = state;
-		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } = state.searchSettings;
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-	
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
+	setSearchURL(state) {
+		// TODO:
+		const params = new URLSearchParams();
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
 		window.history.pushState(null, document.title, linkString);
 	},
 };

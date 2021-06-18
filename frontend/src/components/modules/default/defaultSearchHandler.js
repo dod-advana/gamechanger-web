@@ -315,49 +315,40 @@ const DefaultSearchHandler = {
 		const accessDateURL = getQueryVariable('accessDate', url);
 		const pubDateURL = getQueryVariable('pubDate', url);
 		const revokedURL = getQueryVariable('revoked', url);
-		const viewNameURL = getQueryVariable('viewName', url); // ???
-		const tabNameURL = getQueryVariable('tabName', url); // ???
 		const categoriesURL = getQueryVariable('categories', url);
+
+		// in preexisting links some null or undefined params were written out as string literals
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
 	
 		if (searchText) {
 			parsed.searchText = searchText;
 		}
 	
-		if (offsetURL) {
+		if (!isNullish(offsetURL)) {
 			const offset = parseInt(offsetURL);
 			if (!isNaN(offset))
 				parsed.offset = offset;
 			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
 		}
 	
-		if (searchTypeURL && Object.values(SEARCH_TYPES).includes(searchTypeURL)) {
+		if (!isNullish(searchTypeURL) && Object.values(SEARCH_TYPES).includes(searchTypeURL)) {
 			newSearchSettings.searchType = searchTypeURL;
 		}
 	
-		if (orgURL) {
-			if (orgURL === 'ALLORGS') {
-				newSearchSettings.allOrgsSelected = true;
-				newSearchSettings.specificOrgsSelected = false;
-			} else {
-				newSearchSettings.allOrgsSelected = false;
-				newSearchSettings.specificOrgsSelected = true;
-				newSearchSettings.orgFilter = Object.assign({}, ...orgURL.split("_").map(org => ({[org]: true})));
-			}
+		if (!isNullish(orgURL) && orgURL !== 'ALLORGS' /* legacy  value */) {
+			newSearchSettings.allOrgsSelected = false;
+			newSearchSettings.specificOrgsSelected = true;
+			newSearchSettings.orgFilter = Object.assign({}, ...orgURL.split("_").map(org => ({[org]: true})));
 		}
 		
-		if(typeURL) {
-			if (typeURL === 'ALLTYPES') {
-				newSearchSettings.allTypesSelected = true;
-				newSearchSettings.specificTypesSelected = false;			
-			} else {
-				newSearchSettings.allTypesSelected = false;
-				newSearchSettings.specificTypesSelected = true;
-				newSearchSettings.typeFilter = {};
-				newSearchSettings.typeFilter = Object.assign({}, ...typeURL.split("_").map(org => ({[org]: true})));
-			}
+		if (!isNullish(typeURL) && typeURL !== 'ALLTYPES' /* legacy value */) {
+			newSearchSettings.allTypesSelected = false;
+			newSearchSettings.specificTypesSelected = true;
+			newSearchSettings.typeFilter = {};
+			newSearchSettings.typeFilter = Object.assign({}, ...typeURL.split("_").map(org => ({[org]: true})));
 		}
 		
-		if (searchFieldsURL) {
+		if (!isNullish(searchFieldsURL)) {
 			const searchFields = {};
 			const searchFieldPairs = searchFieldsURL.split("_");
 			for (const pair of searchFieldPairs) {
@@ -381,28 +372,15 @@ const DefaultSearchHandler = {
 				newSearchSettings.searchFields = searchFields;
 			}
 		}
-	
-		if (viewNameURL) {
-			parsed.currentViewName = viewNameURL;		
-		}
-	
-		if (tabNameURL) {
-			parsed.tabName = tabNameURL;		
-		}
-	
-		if (accessDateURL === "ALL") {
-			newSearchSettings.accessDateFilter = [null, null];
-		} else if (accessDateURL && accessDateURL !== "null") {
+
+		if (!isNullish(accessDateURL) && accessDateURL !== "ALL" /* legacy value */) {
 			const parsedDates = accessDateURL.split("_").map(dateStr => new Date(parseInt(dateStr)));
 			if (parsedDates.length === 2 && parsedDates.every(date=>!isNaN(date.getTime()))) {
 				newSearchSettings.accessDateFilter = parsedDates;
 			}
 		}
 	
-		if (pubDateURL === "ALL") {
-			newSearchSettings.publicationDateAllTime = true;
-			newSearchSettings.publicationDateFilter = [null, null];
-		} else if (pubDateURL && pubDateURL !== "null") {
+		if (!isNullish(pubDateURL) && pubDateURL !== "ALL" /* legacy value */) {
 			const parsedDates = pubDateURL.split("_").map(dateStr => new Date(parseInt(dateStr)));
 			if (parsedDates.length === 2 && parsedDates.every(date=>!isNaN(date.getTime()))) {
 				newSearchSettings.publicationDateAllTime = false;
@@ -416,7 +394,7 @@ const DefaultSearchHandler = {
 			newSearchSettings.includeRevoked = false;
 		}
 
-		if (categoriesURL) {
+		if (categoriesURL === '' || !isNullish(categoriesURL)) { // '' means all false vs null as default
 			const categories = categoriesURL.split("_");
 			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
 			for (const category in selectedCategories) {
@@ -433,21 +411,38 @@ const DefaultSearchHandler = {
 	},
 
 	setSearchURL(state) {
-		const { searchText, resultsPage, tabName } = state;
+		const { searchText, resultsPage } = state;
 		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } = state.searchSettings;
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-		const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-		const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-	
-		let linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
 
-		const selectedCategories = _.pickBy(state.selectedCategories, value=>!!value);
-		if (!_.isEmpty(selectedCategories)) {
-			linkString += `&categories=${Object.keys(selectedCategories).join('_')}`;
-		}
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
+			.join('_');
+
+		const accessDateText = ((accessDateFilter && accessDateFilter[0] && accessDateFilter[1])
+			? accessDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const publicationDateText = ((publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1])
+			? publicationDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
+
+		const categoriesText = (state.selectedCategories
+			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
+			: undefined);
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		if (searchFieldText) params.append('searchFields', searchFieldText);
+		if (accessDateText) params.append('accessDate', accessDateText);
+		if (pubDateText) params.append('pubDate', pubDateText);
+		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 
 		window.history.pushState(null, document.title, linkString);
 	},
