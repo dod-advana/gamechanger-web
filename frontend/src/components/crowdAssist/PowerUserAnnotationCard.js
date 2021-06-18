@@ -108,12 +108,6 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 					</li>
 				</ol>
 			</div>
-			<div className={'row'}>
-				<div className={'col-xs-3'} style={{marginTop: '5px'}}>
-					<BorderLinearProgress variant="determinate" value={progressValue} className={`tutorial-step-${componentStepNumbers["Paragraph Progress"]}`} />
-				</div>
-				<p className={'col-xs-3'}>{progressText}</p>
-			</div>
 
 			<div className={'row'} style={{ margin: '10px 0 '}}>
 				<Typography variant="h5" display="outline">Please select an option</Typography>
@@ -142,7 +136,7 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 						padding: 20,
 						whiteSpace: 'pre-wrap'
 					}}
-					tokens={text.split(' ')}
+					tokens={text.trim().split(' ')}
 					value={currentTokens || []}
 					onChange={updatedTokens => { setCurrentTokens(updatedTokens); }}
 					getSpan={span => {

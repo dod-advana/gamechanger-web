@@ -83,7 +83,9 @@ const initState = {
 	canMoveForward: true,
 	canSubmit: true,
 	startPar: 0,
-	endPar: 0
+	endPar: 0,
+	atStart: false,
+	atEnd: false
 }
 
 class ResponsibilityAssist extends Component {
@@ -152,12 +154,20 @@ class ResponsibilityAssist extends Component {
 		let startPar = 0;
 		let paraLen = data.paragraphs.length;
 		let endPar = paraLen;
+		let atStart = false;
+		let atEnd = false;
+
 		if ( data.par_num !== 0) {
 			startPar = data.par_num - 1;
+		}else{
+			atStart = true;
 		}
+		
 
-		if ( data.par_num !== paraLen ) {
+		if ( data.par_num !== paraLen - 1 ) {
 			endPar = data.par_num + 1;
+		}else{
+			atEnd = true;
 		}
 
 		const texts = data.paragraphs.map(paragraph => {
@@ -188,7 +198,9 @@ class ResponsibilityAssist extends Component {
 			doc_id: data.doc_id,
 			doc_num: data.doc_num,
 			doc_type: data.doc_type,
-			type: data.type
+			type: data.type,
+			atStart: atStart,
+			atEnd: atEnd
 		});
 	}
 
@@ -217,20 +229,24 @@ class ResponsibilityAssist extends Component {
 	}
 
 	handlePreviousNext = (change) => {
-		let { textsList, startPar, endPar } = this.state;
+		let { textsList, startPar, endPar, atStart, atEnd } = this.state;
 		let paraLen = textsList.length;
 
 		if ( change > 0 ) { // next, viewing 1 more after
 			if ( endPar !== paraLen - 1) {
 				endPar = endPar + change;
+			}else{
+				atEnd = true;
 			}
 		} else if ( change < 0 ) {//previous, viewing 1 more before
 			if ( startPar !== 0) {
 				startPar = startPar + change;
+			}else{
+				atStart = true;
 			}
 		}
 
-		this.setState({ startPar, endPar });
+		this.setState({ startPar, endPar, atStart, atEnd });
 	}
 
 	setCurrentTokens = (newTokens) => {
@@ -322,18 +338,16 @@ class ResponsibilityAssist extends Component {
 
 		return (
 			<>
-				{isPowerUser && 
-					<PowerUserAnnotationCard
-						// uses template string for text to read newlines correctly
-						text={displayText}
-						currentTokens={annotatedTokens}
-						setCurrentTokens={this.setCurrentTokens}
-						tags={tagsList}
-						componentStepNumbers={componentStepNumbers}
-						isTutorial={isTutorial}
-						colorMap={colorMap}
-					/>
-				}
+				<PowerUserAnnotationCard
+					// uses template string for text to read newlines correctly
+					text={displayText}
+					currentTokens={annotatedTokens}
+					setCurrentTokens={this.setCurrentTokens}
+					tags={tagsList}
+					componentStepNumbers={componentStepNumbers}
+					isTutorial={isTutorial}
+					colorMap={colorMap}
+				/>
 			</>
 		)
 	}
@@ -347,7 +361,8 @@ class ResponsibilityAssist extends Component {
 			paragraphEntityAnswers,
 			progressText,
 			progressValue,
-			canMoveForward
+			atStart,
+			atEnd
 		} = this.state
 
 		const classes = this.props.classes;
@@ -385,14 +400,7 @@ class ResponsibilityAssist extends Component {
                 </DialogContent>
 
                 <DialogActions>
-					<div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', margin: '0px 18px' }}>
-						<div style={{ display: 'flex', marginTop: '5px' }}>
-							<div style={{ marginTop: '5px', width: 800, marginRight: '5px' }}>
-								<BorderLinearProgress variant="determinate" value={progressValue} className={`tutorial-step-${componentStepNumbers["Paragraph Progress"]}`} />
-							</div>
-							<p style={{ width: '100%' }}>{progressText}</p>
-						</div>
-						
+					<div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', margin: '0px 18px' }}>						
 						<div>
 							<GCButton
 								id={'gcAssistPrevious'}
@@ -401,18 +409,36 @@ class ResponsibilityAssist extends Component {
 								textStyle={{color: 'grey'}}
 								buttonColor={'white'}
 								borderColor={primaryGreyLight}
-								disabled={false}
+								disabled={atStart}
 							>
-								Previous
+								More Context Above
 							</GCButton>
 							<GCButton
 								id={'gcAssistNext'}
 								className={`tutorial-step-${componentStepNumbers["Next Button"]}`}
 								onClick={() => { (currentEntityIndex + 1 ===  paragraphEntityAnswers[currentParagraphIndex]?.length) ? this.handleSave() : this.handlePreviousNext(1) }}
-								disabled={!canMoveForward}
-								textStyle={{color: !canMoveForward ? 'grey' : 'white'}}
+								buttonColor={'teal'}
+								disabled={atEnd}
 							>
-								{ (currentEntityIndex + 1 ===  paragraphEntityAnswers[currentParagraphIndex]?.length) ? 'Submit' : 'Next' }
+								More Context Below
+							</GCButton>
+							<GCButton
+								id={'gcReject'}
+								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								onClick={() => { this.handlePreviousNext(-1) }}
+								buttonColor={'red'}
+								borderColor={primaryGreyLight}
+							>
+								No Responsibility
+							</GCButton>
+							
+							<GCButton
+								id={'gcSubmit'}
+								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								onClick={() => { this.handlePreviousNext(-1) }}
+								borderColor={primaryGreyLight}
+							>
+								Submit
 							</GCButton>
 						</div>
 					</div>
