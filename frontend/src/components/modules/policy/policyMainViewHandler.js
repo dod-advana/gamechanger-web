@@ -171,12 +171,13 @@ const PolicyMainViewHandler = {
 			// Do nothing
 		}
 
-		try {
-			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('Title 10.png');
-			console.log(png);
-		} catch(e) {
-			console.log(e)
-		}
+		// testing thumbnail download
+		// try {
+		// 	const png = await gameChangerAPI.thumbnailStorageDownloadPOST('Title 10.png');
+		// 	console.log(png);
+		// } catch(e) {
+		// 	console.log(e)
+		// }
 
 	},
 	
@@ -357,7 +358,16 @@ const PolicyMainViewHandler = {
 						width='160px' 
 					>
 						{adminMajorPubs.map(({name}) => 
-							<img style={{height:210, border:'1px solid black', marginLeft: 10}} src={template} alt="thumbnail" title={name}/>
+							<img 
+								style={{height:210, border:'1px solid black', marginLeft: 10}} 
+								src={template} 
+								alt="thumbnail" 
+								title={name}
+								onClick={()=>{
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
+								}}
+							/>
 						)}
 					</GameChangerThumbnailRow>
 				</div>
