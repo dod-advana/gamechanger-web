@@ -21,10 +21,10 @@ const initState = {
         maxObligatedAmount: null,
         contractsOrMods: 'both',
         majcoms: {
-            "DEPT OF THE AIR FORCE": [],
-            "DEPT OF THE ARMY": [],
-            "DEPARTMENT OF DEFENSE": [],
-            "DEPT OF THE NAVY": []
+            "air force": [],
+            "army": [],
+            "defense": [],
+            "navy": []
         }
     },
     showDialog: false,
@@ -32,7 +32,7 @@ const initState = {
     showSideFilters: true,
     issuingOrgs: {},
     statsLoading: false,
-    summaryCardView: false,
+    summaryCardView: false, 
     summaryCardData: [],
     resultsText: '',
     resetSettingsSwitch: false,

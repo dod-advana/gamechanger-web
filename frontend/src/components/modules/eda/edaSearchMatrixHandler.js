@@ -213,7 +213,7 @@ const renderStats = (state) => {
 
 const renderMajcoms = (state, dispatch, org) => {
     const orgToMajcom = {
-        "DEPT OF THE AIR FORCE": [
+        "air force": [
             "Air Combat Command",
             "Air Education and Training Command",
             "Air Force District Of Washington",
@@ -223,7 +223,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Defense Finance and Accounting Service",
             "Pacific Air Forces"
         ],
-        "DEPT OF THE ARMY": [
+        "army": [
             "Army Contracting Command",
             "Army Corps of Engineers",
             "Army Intelligence and Security Command",
@@ -235,7 +235,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Army Tank-automotive and Armaments Command",
             "Army War College"
         ],
-        "DEPARTMENT OF DEFENSE": [
+        "defense": [
             "Defense Finance Accounting Service",
             "Defense Health Agency",
             "Defense Human Resources Activity (DHRA)",
@@ -244,7 +244,7 @@ const renderMajcoms = (state, dispatch, org) => {
             "Other DoD/OASD Activities",
             "US Special Operations  Command"
         ],
-        "DEPT OF THE NAVY":[
+        "navy":[
             "Command, Pacific Fleet",
             "Commander, Atlantic Fleet",
             "Department of the Navy, Assistant for Administration",
@@ -267,6 +267,22 @@ const renderMajcoms = (state, dispatch, org) => {
     const orgs = orgToMajcom[org];
 
     for (const subOrg of orgs) {
+        let searchQuery = subOrg.toLowerCase();
+
+        // in order to properly filter, have to remove common words between options
+        if (org === 'air force') {
+            searchQuery = searchQuery.replace('air', '').replace('force', '').replace('command', '');
+        }
+        else if (org === 'army') {
+            searchQuery = searchQuery.replace('army', '');
+        }
+        else if (org === 'defense') {
+            searchQuery = searchQuery.replace('defense');
+        }
+        else if (org === 'navy') {
+            searchQuery = searchQuery.replace('marine', '').replace('naval', '').replace('office', '');
+        }
+
         orgCheckboxes.push(
             <FormControlLabel
                 name={subOrg}
@@ -274,9 +290,9 @@ const renderMajcoms = (state, dispatch, org) => {
                 style={styles.titleText}
                 control={<Checkbox
                     style={styles.filterBox}
-                    onClick={() => setEDASearchSetting('majcoms', {org: org, subOrg: subOrg}, state, dispatch)}
+                    onClick={() => setEDASearchSetting('majcoms', {org: org, subOrg: searchQuery}, state, dispatch)}
                     icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                    checked={state.edaSearchSettings && state.edaSearchSettings.majcoms && state.edaSearchSettings.majcoms[org].indexOf(subOrg) !== -1}
+                    checked={state.edaSearchSettings && state.edaSearchSettings.majcoms && state.edaSearchSettings.majcoms[org].indexOf(searchQuery) !== -1}
                     checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                     name={subOrg}
                 />}
@@ -339,17 +355,17 @@ const renderOrganizationFilters = (state, dispatch) => {
                         style={styles.titleText}
                         control={<Checkbox
                             style={styles.filterBox}
-                            onClick={() => setEDASearchSetting('organizations', 'DEPT OF THE AIR FORCE', state, dispatch)}
+                            onClick={() => setEDASearchSetting('organizations', 'air force', state, dispatch)}
                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE AIR FORCE') !== -1}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('air force') !== -1}
                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                             name='Air Force'
                         />}
                         label='Air Force'
                         labelPlacement="end"                        
                     />
-                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE AIR FORCE') !== -1 &&
-                        renderMajcoms(state, dispatch, 'DEPT OF THE AIR FORCE')
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('air force') !== -1 &&
+                        renderMajcoms(state, dispatch, 'air force')
                     }
                     <FormControlLabel
                         name='Army'
@@ -357,17 +373,17 @@ const renderOrganizationFilters = (state, dispatch) => {
                         style={styles.titleText}
                         control={<Checkbox
                             style={styles.filterBox}
-                            onClick={() => setEDASearchSetting('organizations', 'DEPT OF THE ARMY', state, dispatch)}
+                            onClick={() => setEDASearchSetting('organizations', 'army', state, dispatch)}
                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE ARMY') !== -1}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('army') !== -1}
                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                             name='Army'
                         />}    
                         label='Army'
                         labelPlacement="end"                    
                     />
-                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE ARMY') !== -1 &&
-                        renderMajcoms(state, dispatch, 'DEPT OF THE ARMY')
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('army') !== -1 &&
+                        renderMajcoms(state, dispatch, 'army')
                     }
                     <FormControlLabel
                         name='DOD'
@@ -375,17 +391,17 @@ const renderOrganizationFilters = (state, dispatch) => {
                         style={styles.titleText}
                         control={<Checkbox
                             style={styles.filterBox}
-                            onClick={() => setEDASearchSetting('organizations', 'DEPARTMENT OF DEFENSE', state, dispatch)}
+                            onClick={() => setEDASearchSetting('organizations', 'defense', state, dispatch)}
                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPARTMENT OF DEFENSE') !== -1}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('defense') !== -1}
                             checkedIcon={<i style={{color:'#E9691D'}}className="fa fa-check"/>}
                             name='DOD'
                         />}        
                         label='DOD'
                         labelPlacement="end"                
                     />
-                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPARTMENT OF DEFENSE') !== -1 &&
-                        renderMajcoms(state, dispatch, 'DEPARTMENT OF DEFENSE')
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('defense') !== -1 &&
+                        renderMajcoms(state, dispatch, 'defense')
                     }
                     <FormControlLabel
                         name='Navy'
@@ -393,17 +409,17 @@ const renderOrganizationFilters = (state, dispatch) => {
                         style={styles.titleText}
                         control={<Checkbox
                             style={styles.filterBox}
-                            onClick={() => setEDASearchSetting('organizations', 'DEPT OF THE NAVY', state, dispatch)}
+                            onClick={() => setEDASearchSetting('organizations', 'navy', state, dispatch)}
                             icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE NAVY') !== -1}
+                            checked={state.edaSearchSettings && state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('navy') !== -1}
                             checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
                             name='Navy'
                         />}     
                         label='Navy'
                         labelPlacement="end"                   
                     />
-                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('DEPT OF THE NAVY') !== -1 &&
-                        renderMajcoms(state, dispatch, 'DEPT OF THE NAVY')
+                    {state.edaSearchSettings.organizations && state.edaSearchSettings.organizations.indexOf('navy') !== -1 &&
+                        renderMajcoms(state, dispatch, 'navy')
                     }
                 </FormGroup>}
             </FormControl>
