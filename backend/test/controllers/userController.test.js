@@ -51,7 +51,7 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({where: { username }}) {
+				findAll({where: { username }}) {
 					usedUsername = username;
 					return {
 						id: 1,
@@ -102,7 +102,7 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({ where: { username } }) {
+				findAll({ where: { username } }) {
 					usedUsername = username;
 					return {
 						id: 1,
@@ -287,7 +287,8 @@ describe('UserController', function () {
 						return Promise.resolve([user, true]);
 					}
 				}
-			}
+			},
+			constants: { GAME_CHANGER_OPTS: {index: 'gamechanger'}}
 		};
 
 		it('should return fake user data for a new user', async () => {
@@ -320,7 +321,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {api_key: "", export_history: [], favorite_documents: [], favorite_searches: [], notifications: {favorites: 0, history: 0, total: 0}, search_history: [], user_id: '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {api_key: '', export_history: [], favorite_documents: [], favorite_searches: [], notifications: {favorites: 0, history: 0, total: 0}, search_history: [], user_id: '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(resMsg, expected);
 		});
 
@@ -523,6 +524,7 @@ describe('UserController', function () {
 						return Promise.resolve(returnExportHistory);
 					}
 				},
+				constants: { GAME_CHANGER_OPTS: {index: 'gamechanger'}}
 			};
 
 			const target = new UserController(new_opts);
