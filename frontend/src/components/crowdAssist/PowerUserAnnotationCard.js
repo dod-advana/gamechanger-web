@@ -139,7 +139,8 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 						lineHeight: 1.5,
 						height: '100%',
 						overflowY: 'auto',
-						padding: 20
+						padding: 20,
+						whiteSpace: 'pre-wrap'
 					}}
 					tokens={text.split(' ')}
 					value={currentTokens || []}
