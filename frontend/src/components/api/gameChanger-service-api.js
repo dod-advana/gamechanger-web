@@ -30,6 +30,8 @@ const endpoints = {
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
 	gcAdminDataDeletePOST: '/api/gameChanger/admin/deleteAdminData',
+	getHomepageEditorData: '/api/gameChanger/admin/getHomepageEditorData',
+	setHomepageEditorData: '/api/gameChanger/admin/setHomepageEditorData',
 	getGCCacheStatus: '/api/gameChanger/admin/getGCCacheStatus',
 	toggleGCCacheStatus: '/api/gameChanger/admin/toggleGCCacheStatus',
 	getElasticSearchIndex: '/api/gameChanger/admin/getElasticSearchIndex',
@@ -701,5 +703,15 @@ export default class GameChangerAPI {
 	getWeeklySearchCount = async (body) => {
 		const url = endpoints.getWeeklySearchCount;
 		return axiosPOST(this.axios, url, body);
+	}
+
+	getHomepageEditorData = async () => {
+		const url = endpoints.getHomepageEditorData;
+		return axiosGET(this.axios, url);
+	}
+
+	setHomepageEditorData = async (body) => {
+		const url = endpoints.setHomepageEditorData;
+		return axiosPOST(this.axios, url, body)
 	}
 }

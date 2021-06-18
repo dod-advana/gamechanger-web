@@ -49,6 +49,9 @@ const initState = {
 	// Homepage
 	recentSearches: [],
 	crawlerSources: [],
+	adminTopics: [],
+	adminMajorPubs: [],
+	trendingLinks: [],
 	
 	// Tutorial
 	showTutorial: false,

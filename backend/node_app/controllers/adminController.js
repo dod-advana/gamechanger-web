@@ -1,6 +1,7 @@
 const GC_ADMINS = require('../models').admin;
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
+const APP_SETTINGS = require('../models').app_settings;
 
 class AdminController {
 
@@ -9,15 +10,20 @@ class AdminController {
 			logger = LOGGER,
 			gcAdmins = GC_ADMINS,
 			sparkMD5 = sparkMD5Lib,
+			appSettings = APP_SETTINGS,
 		} = opts;
 
 		this.logger = logger;
 		this.gcAdmins = gcAdmins;
 		this.sparkMD5 = sparkMD5;
+		this.appSettings = appSettings;
+
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
 		this.storeGCAdminData = this.storeGCAdminData.bind(this);
 		this.deleteGCAdminData = this.deleteGCAdminData.bind(this);
+		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
+		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
 	}
 
 	async getGCAdminData(req, res) {
@@ -78,6 +84,50 @@ class AdminController {
 		} catch (err) {
 			this.logger.error(err, 'QH2QBDU', userId);
 			res.status(500).send(err);
+		}
+	}
+
+	async getHomepageEditorData(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const results = await this.appSettings.findAll({
+				where: {
+					key: [
+						'homepage_topics',
+						'homepage_major_pubs'
+					]
+				}
+			});
+
+			res.status(200).send(results);
+		} catch (err) {
+			this.logger.error(err, '7R9BUO3', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async setHomepageEditorData(req, res) {
+		let userId = 'webapp_unknown'
+
+		try {
+			const { key, tableData } = req.body;
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			console.log(key)
+			console.log(tableData)
+			await this.appSettings.update(
+				{
+					value: JSON.stringify(tableData)
+				}, {
+					where:{
+						key: `homepage_${key}`
+					}
+				})
+			res.status(200).send();
+		} catch (err) {
+			this.logger.error(err, 'QKTBF4J', userId);
+			res.status(500).send(err)
 		}
 	}
 }
