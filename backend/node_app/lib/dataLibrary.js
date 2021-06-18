@@ -240,15 +240,15 @@ class DataLibrary {
 				this.axios({
 					method: 'get',
 					url: edaUrl,
-						responseType:'stream'
-					})
+					responseType:'stream'
+				})
 					.then(response => {
-					response.data.pipe(res);
+						response.data.pipe(res);
 					})
 					.catch(err=>{
-					this.logger.error(err, 'N4BAC3N', userId);
-					throw err;
-				});
+						this.logger.error(err, 'N4BAC3N', userId);
+						throw err;
+					});
 			}
 			else{
 				const params = {
@@ -275,6 +275,23 @@ class DataLibrary {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'PFXO7XD', userId);
 			throw msg;
+		}
+	}
+
+	getFileThumbnail(res, data, userId){
+		let { dest, filekey } = data;
+		
+		const params = {
+			Bucket: dest,
+			Key: filekey
+		};
+
+		try {
+			res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
+			this.awsS3Client.getObject(params).createReadStream().pipe(res);
+		} catch (err) {
+			this.logger.error(err, '7ZQABVQ', userId);
+			throw err;
 		}
 	}
 
