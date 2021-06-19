@@ -211,6 +211,23 @@ const renderStats = (state) => {
     );
 }
 
+const getCommonWords = (phrases) => {
+    const dictionary = {};
+    for (const phrase of phrases) {
+        const words = phrase.toLowerCase().split(' ');
+        for (const word of words) {
+            if (dictionary[word]) {
+                dictionary[word] += 1;
+            }
+            else {
+                dictionary[word] = 1;
+            }
+        }
+    }
+
+    return Object.keys(dictionary).filter(word => dictionary[word] > 1);
+}
+
 const renderMajcoms = (state, dispatch, org) => {
     const orgToMajcom = {
         "air force": [
@@ -268,19 +285,11 @@ const renderMajcoms = (state, dispatch, org) => {
 
     for (const subOrg of orgs) {
         let searchQuery = subOrg.toLowerCase();
+        const commonWords = getCommonWords(orgs);
 
-        // in order to properly filter, have to remove common words between options
-        if (org === 'air force') {
-            searchQuery = searchQuery.replace('air', '').replace('force', '').replace('command', '');
-        }
-        else if (org === 'army') {
-            searchQuery = searchQuery.replace('army', '');
-        }
-        else if (org === 'defense') {
-            searchQuery = searchQuery.replace('defense');
-        }
-        else if (org === 'navy') {
-            searchQuery = searchQuery.replace('marine', '').replace('naval', '').replace('office', '');
+        // in order to properly filter, have to remove any common words between options
+        for (const word of commonWords) {
+            searchQuery = searchQuery.replace(word, '');
         }
 
         orgCheckboxes.push(
