@@ -1,7 +1,6 @@
 import React from "react";
 import GCAccordion from "../../common/GCAccordion";
 import SimpleTable from "../../common/SimpleTable";
-import GCTooltip from "../../common/GCToolTip";
 
 import {
     FormControl,
