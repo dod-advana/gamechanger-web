@@ -1,6 +1,8 @@
 const { MLApiClient } = require('../lib/mlApiClient');
 const LOGGER = require('../lib/logger');
-
+/**
+ * @class TransformerController
+ */
 class TransformerController {
 
 	constructor(opts = {}) {
@@ -12,13 +14,16 @@ class TransformerController {
 		this.logger = logger;
 		this.mlApi = mlApi;
 
+		// A mapping to the methods in MLApiClient 
 		this.Registry = {
 			'getAPIInformation': this.mlApi.getAPIInformation,
 			'getS3List': this.mlApi.getS3List,
 			'getModelsList': this.mlApi.getModelsList,
 			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
 			'setTransformerModel': this.mlApi.setTransformerModel,
-			'reloadModels': this.mlApi.reloadModels
+			'reloadModels': this.mlApi.reloadModels,
+			'downloadCorpus': this.mlApi.downloadCorpus,
+			'trainModel': this.mlApi.trainModel
 		}
 
 		// Get methods
@@ -30,8 +35,15 @@ class TransformerController {
 		// Post methods
 		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
+		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
+		this.trainModel = this.postData.bind(this, 'trainModel');
 	}
-
+	/**
+	 * @method getData
+	 * @param {string} key 
+	 * @param {*} req 
+	 * @param {*} res 
+	 */
 	async getData(key, req, res){
 		let userId = 'webapp_unknown';
 		try {
@@ -43,6 +55,12 @@ class TransformerController {
 			res.status(500).send(err);
 		}
 	}
+	/**
+	 * @method postData
+	 * @param {string} key 
+	 * @param {*} req 
+	 * @param {*} res 
+	 */
 	async postData(key, req, res){
 		let userId = 'webapp_unknown';
 		try {

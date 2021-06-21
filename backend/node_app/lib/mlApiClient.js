@@ -2,12 +2,16 @@ const constants = require('../config/constants');
 const loggerLib = require('../lib/logger');
 const axiosLib = require('axios');
 
-const MLRoutes = {
-
-}
-
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
+
+const MLRoutes = {
+	'downloadCorpus':`${transformerBaseUrl}/downloadCorpus`,
+	'trainModel':`${transformerBaseUrl}/trainModel`,
+}
+/**
+ * @class MLApiClient
+ */
 class MLApiClient {
 	constructor(opts = {}) {
 		const {
@@ -28,6 +32,9 @@ class MLApiClient {
 		this.getAPIInformation = this.getAPIInformation.bind(this);
 		this.getS3List = this.getS3List.bind(this);
 		this.downloadDependencies = this.downloadDependencies.bind(this);
+
+		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
+		this.trainModel = this.postData.bind(this, 'trainModel');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
@@ -234,6 +241,25 @@ class MLApiClient {
 		};
 		try {
 			const url = `${transformerBaseUrl}/updateModel`;
+			const { data } = await this.axios({
+				url,
+				method: 'post',
+				headers,
+				data: postData
+			});
+			return data;
+		} catch (e) {
+			this.logger.error(e, 'QWU3KOP', userId);
+			throw e;
+		}
+	}
+
+	async postData(key, userId, postData) {
+		const headers = {
+			ssl_client_s_dn_cn: userId
+		};
+		try {
+			const url = MLRoutes[key];
 			const { data } = await this.axios({
 				url,
 				method: 'post',
