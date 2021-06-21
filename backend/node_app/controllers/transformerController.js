@@ -1,6 +1,9 @@
 const { MLApiClient } = require('../lib/mlApiClient');
 const LOGGER = require('../lib/logger');
 /**
+ * This class takes HTTP requests and passes needed 
+ * data onto the MLApiClient to get information 
+ * or update the ML API.
  * @class TransformerController
  */
 class TransformerController {
@@ -15,7 +18,7 @@ class TransformerController {
 		this.mlApi = mlApi;
 
 		// A mapping to the methods in MLApiClient 
-		this.Registry = {
+		this.registry = {
 			'getAPIInformation': this.mlApi.getAPIInformation,
 			'getS3List': this.mlApi.getS3List,
 			'getModelsList': this.mlApi.getModelsList,
@@ -39,8 +42,11 @@ class TransformerController {
 		this.trainModel = this.postData.bind(this, 'trainModel');
 	}
 	/**
+	 * A generic get method to query the ML API. 
+	 * A key is bound to this method to dynamically call 
+	 * the differnet MLApiClient methods.
 	 * @method getData
-	 * @param {string} key 
+	 * @param {string} key - bound in constructor, maps to a MLApiClient method
 	 * @param {*} req 
 	 * @param {*} res 
 	 */
@@ -48,7 +54,7 @@ class TransformerController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.Registry[key](userId);
+			const resp = await this.registry[key](userId);
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'UB4F9M4', userId);
@@ -56,9 +62,12 @@ class TransformerController {
 		}
 	}
 	/**
+	 * A generic post method to update the ML API
+	 * A key is bound to this method to dynamically call 
+	 * the differnet MLApiClient methods.
 	 * @method postData
-	 * @param {string} key 
-	 * @param {*} req 
+	 * @param {string} key - bound in constructor, maps to a MLApiClient method
+	 * @param {*} req - all post data is in req.body
 	 * @param {*} res 
 	 */
 	async postData(key, req, res){
@@ -66,7 +75,7 @@ class TransformerController {
 		try {
 			const data = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.Registry[key](userId, data);
+			const resp = await this.registry[key](userId, data);
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'UB4F9M4', userId);
