@@ -6,8 +6,21 @@ const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 
 const MLRoutes = {
+	'getCurrentTransformer':`${transformerBaseUrl}/getCurrentTransformer`,
+	'getS3List':`${transformerBaseUrl}/s3?function=models`,
+	'downloadDependencies':`${transformerBaseUrl}/getCurrentTransformer`,
+	'getAPIInformation':`${transformerBaseUrl}/`,
+	'getModelsList': `${transformerBaseUrl}/getModelsList`,
+
+	'expandTerms':`${mlBaseUrl}/expandTerms`,
+	'questionAnswer':`${mlBaseUrl}/questionAnswer`,
+	'transSentenceSearch':`${transformerBaseUrl}/transSentenceSearch`,
+	'transformResults':`${transformerBaseUrl}/transformerSearch`,
+	'setTransformerModel':`${transformerBaseUrl}/updateModel`,
+	'reloadModels':`${transformerBaseUrl}/reloadModels`,
 	'downloadCorpus':`${transformerBaseUrl}/downloadCorpus`,
 	'trainModel':`${transformerBaseUrl}/trainModel`,
+	
 }
 /**
  * @class MLApiClient
@@ -24,186 +37,48 @@ class MLApiClient {
 
 		this.getExpandedSearchTerms = this.getExpandedSearchTerms.bind(this);
 		this.transformResults = this.transformResults.bind(this);
-		this.getModelsList = this.getModelsList.bind(this);
-		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
-		this.setTransformerModel = this.setTransformerModel.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
-		this.reloadModels = this.reloadModels.bind(this);
-		this.getAPIInformation = this.getAPIInformation.bind(this);
-		this.getS3List = this.getS3List.bind(this);
-		this.downloadDependencies = this.downloadDependencies.bind(this);
-
+		
+		
+		// Get methods
+		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
+		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
+		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
+		// Post methods
+		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
+		this.reloadModels = this.postData.bind(this, 'reloadModels');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${mlBaseUrl}/expandTerms`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: { termsList, docIdsOnly: true }
-			});
-
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'cPq9c3xw', userId);
-			throw e;
-		}
+		const data = { termsList, docIdsOnly: true }
+		return await this.postData('expandTerms', userId, data);
 	}
 
 	async getIntelAnswer(searchQuery, searchContext, userId = 'unknown') {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${mlBaseUrl}/questionAnswer`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: { query: searchQuery, search_context: searchContext }
-			});
-
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'HBJJU7I', userId);
-			throw e;
-		}
+		const data = { query: searchQuery, search_context: searchContext }
+		return await this.postData('questionAnswer', userId, data);
 	}
 
 	async getSentenceTransformerResults(searchText, userId = 'unknown') {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${transformerBaseUrl}/transSentenceSearch`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: { text: searchText }
-			});
-
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'ENGJUAU', userId);
-			throw e;
-		}
+		const data = { text: searchText }
+		return await this.postData('transSentenceSearch', userId, data);
 	}
 
 	async transformResults(searchText, docs, userId = 'unknown') {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${transformerBaseUrl}/transformerSearch`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: { query: searchText, documents: docs}
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'ENGJUAU', userId);
-			throw e;
-		}
-	}
-	async reloadModels(userId, models) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-		try {
-			const url = `${transformerBaseUrl}/reloadModels`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: models
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'VY3FQBN', userId);
-			throw e;
-		}
+		const data = { query: searchText, documents: docs}
+		return await this.postData('transformResults', userId, data);
 	}
 
-	async getAPIInformation(userId) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${mlBaseUrl}/`;
-			const { data } = await this.axios({
-				url,
-				method: 'get',
-				headers
-			});
-
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'cPq9c3xw', userId);
-			throw e;
-		}
-	}
-
-	async getS3List(userId) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${mlBaseUrl}/s3?function=models`;
-			const { data } = await this.axios({
-				url,
-				method: 'get',
-				headers
-			});
-
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'cPq9c3xw', userId);
-			throw e;
-		}
-	}
-
-	async getModelsList(userId) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-
-		try {
-			const url = `${transformerBaseUrl}/getModelsList`;
-			const { data } = await this.axios({
-				url,
-				method: 'get',
-				headers
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'EQZVNKP', userId);
-			throw e;
-		}
-
-	}
-
-	async getCurrentTransformer(userId) {
+	async getData(key, userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
 		};
 		try {
-			const url = `${transformerBaseUrl}/getCurrentTransformer`;
+			const url = MLRoutes[key];
 			const { data } = await this.axios({
 				url,
 				method: 'get',
@@ -212,44 +87,6 @@ class MLApiClient {
 			return data;
 		} catch (e) {
 			this.logger.error(e, 'VY3FQBN', userId);
-			throw e;
-		}
-	}
-
-	
-	async downloadDependencies(userId) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-		try {
-			const url = `${transformerBaseUrl}/getCurrentTransformer`;
-			const { data } = await this.axios({
-				url,
-				method: 'get',
-				headers
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'VY3FQBN', userId);
-			throw e;
-		}
-	}
-	
-	async setTransformerModel(userId, postData) {
-		const headers = {
-			ssl_client_s_dn_cn: userId
-		};
-		try {
-			const url = `${transformerBaseUrl}/updateModel`;
-			const { data } = await this.axios({
-				url,
-				method: 'post',
-				headers,
-				data: postData
-			});
-			return data;
-		} catch (e) {
-			this.logger.error(e, 'QWU3KOP', userId);
 			throw e;
 		}
 	}
