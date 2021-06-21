@@ -2,6 +2,10 @@ const constants = require('../config/constants');
 const loggerLib = require('../lib/logger');
 const axiosLib = require('axios');
 
+const MLRoutes = {
+
+}
+
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 class MLApiClient {
@@ -21,6 +25,9 @@ class MLApiClient {
 		this.setTransformerModel = this.setTransformerModel.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
 		this.reloadModels = this.reloadModels.bind(this);
+		this.getAPIInformation = this.getAPIInformation.bind(this);
+		this.getS3List = this.getS3List.bind(this);
+		this.downloadDependencies = this.downloadDependencies.bind(this);
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
@@ -221,7 +228,7 @@ class MLApiClient {
 		}
 	}
 	
-	async setTransformerModel(model_name, userId) {
+	async setTransformerModel(userId, postData) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
 		};
@@ -231,7 +238,7 @@ class MLApiClient {
 				url,
 				method: 'post',
 				headers,
-				data: { model_name }
+				data: postData
 			});
 			return data;
 		} catch (e) {
