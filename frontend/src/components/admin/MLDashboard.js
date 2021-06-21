@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { Select, MenuItem, Tooltip } from '@material-ui/core'
+import { Select, MenuItem, Tooltip, Input } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../common/GCButton";
@@ -75,6 +75,8 @@ const logs = [];
 let loaded = 0;
 let errored = 0;
 const S3_CORPUS_PATH = 's3://advana-raw-zone/gamechanger/json';
+const DEFAULT_MODEL_NAME = 'msmarco-distilbert-base-v2';
+const DEFAULT_CORPUS_PATH = '../corpus_dir/gc_corpus'
 
 /**
  * This class queries the ml api information and provides controls 
@@ -97,7 +99,8 @@ export default () => {
 	const [loadingData, setLoadingData] = useState(true);
 
     const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
-	const [modelName, setModelName] = useState('msmarco-distilbert-base-v2');
+    const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
+	const [corpusPath, setCorpusPath] = useState(DEFAULT_CORPUS_PATH);
 
     // flags that parameters have been changed and on 
     // blur or enter press we should update the query
@@ -106,6 +109,8 @@ export default () => {
     const [apiErrors, setApiErrors] = useState([]);
     const [reloading, setReloading] = useState(false);
     const [downloading, setDownloading] = useState(false);
+    const [downloadingCorpus, setDownloadingCorpus] = useState(false);
+    const [training, setTraining] = useState(false);
 
     /**
      * Creates log objects with the inital message, 
@@ -245,9 +250,9 @@ export default () => {
         }
     }
     /**
-     * @method triggerDownload
+     * @method triggerDownloadModel
      */
-    const triggerDownload = async () => {
+    const triggerDownloadModel = async () => {
         try{
             setDownloading(true);
             await gameChangerAPI.downloadDependencies();
@@ -257,6 +262,41 @@ export default () => {
         }
         finally{
             setDownloading(false);
+        }
+    }
+    /**
+     * @method triggerDownloadCorpus
+     */
+     const triggerDownloadCorpus = async () => {
+        try{
+            setDownloadingCorpus(true);
+            await gameChangerAPI.downloadCorpus({
+                "corpus": corpus
+            });
+            updateLogs('Downloaded Corpus: '+ corpus,0);
+        } catch(e){
+            updateLogs('Error downloading corpus: ' + e.toString() ,2);
+        }
+        finally{
+            setDownloadingCorpus(false);
+        }
+    }
+    /**
+     * @method triggerTrainModel
+     */
+     const triggerTrainModel = async () => {
+        try{
+            setTraining(true);
+            await gameChangerAPI.trainModel({
+                "corpus_path": corpusPath,
+                "model_name": modelName
+            });
+            updateLogs('Trained Model: '+ corpus,0);
+        } catch(e){
+            updateLogs('Error training model: ' + e.toString() ,2);
+        }
+        finally{
+            setTraining(false);
         }
     }
     /**
@@ -360,7 +400,7 @@ export default () => {
 						<b>Download dependencies from s3 Args</b>
                         <GCPrimaryButton
                             onClick={() => {
-                                triggerDownload();
+                                triggerDownloadModel();
                             }}
                             disabled={loadingData || downloading}
                             style={{float: 'right', minWidth: 'unset'}}
@@ -413,27 +453,19 @@ export default () => {
 						<b>Download Corpus</b><br/>
                         <GCPrimaryButton
                             onClick={() => {
-                                triggerReloadModels();
+                                triggerDownloadCorpus();
                             }}
-                            disabled={loadingData || reloading}
+                            disabled={loadingData || downloadingCorpus}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Download</GCPrimaryButton>
                         <div>
                             Corpus:
-                            <Select
+                            <Input
                                 value={corpus}
-                                onChange={e => setSelectedSentence(e.target.value)}
+                                onChange={e => setCorpus(e.target.value)}
                                 name="labels"
                                 style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                            >
-                                {downloadedModelsList.sentence.map((name) => {
-                                    return (
-                                        <MenuItem 
-                                            style={{fontSize:'small'}}
-                                            value={name}>{name}</MenuItem>
-                                    )
-                                })}
-                            </Select>
+                            />
                         </div>
                         
 					</div>
@@ -441,29 +473,29 @@ export default () => {
 						<b>Train Model</b><br/>
                         <GCPrimaryButton
                             onClick={() => {
-                                triggerReloadModels();
+                                triggerTrainModel();
                             }}
-                            disabled={loadingData || reloading}
+                            disabled={loadingData || training}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Train</GCPrimaryButton>
                         <div>
-                            Sentence Model:
-                            <Select
-                                value={modelName}
-                                onChange={e => setSelectedSentence(e.target.value)}
+                            Corpus Path:
+                            <Input
+                                value={corpusPath}
+                                onChange={e => setCorpusPath(e.target.value)}
                                 name="labels"
                                 style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                            >
-                                {downloadedModelsList.sentence.map((name) => {
-                                    return (
-                                        <MenuItem 
-                                            style={{fontSize:'small'}}
-                                            value={name}>{name}</MenuItem>
-                                    )
-                                })}
-                            </Select>
+                            />
                         </div>
-                        
+                        <div>
+                            Model Name:
+                            <Input
+                                value={modelName}
+                                onChange={e => setModelName(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            />
+                        </div>
 					</div>
                 </BorderDiv>
             </div>

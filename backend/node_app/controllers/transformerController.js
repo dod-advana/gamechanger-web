@@ -12,93 +12,43 @@ class TransformerController {
 		this.logger = logger;
 		this.mlApi = mlApi;
 
-		this.getAPIInformation = this.getAPIInformation.bind(this);
-		this.getS3List = this.getS3List.bind(this);
-		this.getModelsList = this.getModelsList.bind(this);
-		this.getCurrentTransformer = this.getCurrentTransformer.bind(this);
-		this.setTransformerModel = this.setTransformerModel.bind(this);
-		this.reloadModels = this.reloadModels.bind(this);
+		this.Registry = {
+			'getAPIInformation': this.mlApi.getAPIInformation,
+			'getS3List': this.mlApi.getS3List,
+			'getModelsList': this.mlApi.getModelsList,
+			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
+			'setTransformerModel': this.mlApi.setTransformerModel,
+			'reloadModels': this.mlApi.reloadModels
+		}
+
+		// Get methods
+		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
+		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
+		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
+		// Post methods
+		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
+		this.reloadModels = this.postData.bind(this, 'reloadModels');
 	}
 
-	async downloadDependencies(req, res) {
+	async getData(key, req, res){
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.downloadDependencies(userId);
+			const resp = await this.Registry[key](userId);
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'UB4F9M4', userId);
 			res.status(500).send(err);
 		}
 	}
-
-	async getAPIInformation(req, res) {
+	async postData(key, req, res){
 		let userId = 'webapp_unknown';
 		try {
+			const data = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.getAPIInformation(userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'UB4F9M4', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async getS3List(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.getS3List(userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'UB4F9M4', userId);
-			res.status(500).send(err);
-		}
-	}
-	
-	async getModelsList(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.getModelsList(userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'UB4F9M4', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async getCurrentTransformer(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.getCurrentTransformer(userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'CC6PRTN', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setTransformerModel(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			const { model_name } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.setTransformerModel(model_name, userId);
-			res.send(resp);
-		} catch (err) {
-			this.logger.error(err.message, 'WZHXH0L', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async reloadModels(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			const models = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const resp = await this.mlApi.reloadModels(userId, models);
+			const resp = await this.Registry[key](userId, data);
 			res.send(resp);
 		} catch (err) {
 			this.logger.error(err.message, 'UB4F9M4', userId);
