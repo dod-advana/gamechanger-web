@@ -72,7 +72,13 @@ class MLApiClient {
 		const data = { query: searchText, documents: docs}
 		return await this.postData('transformResults', userId, data);
 	}
-
+	/**
+	 * A generic get method to query the ML API. 
+	 * @method getData
+	 * @param {string} key - a string mapping to a ml route
+	 * @param {string} userId - the id of the user
+	 * @returns an object with the ml api response data
+	 */
 	async getData(key, userId) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
@@ -90,7 +96,14 @@ class MLApiClient {
 			throw e;
 		}
 	}
-
+	/**
+	 * A generic post method to update the ML API
+	 * @method postData
+	 * @param {string} key - a string mapping to a ml route
+	 * @param {string} userId - the id of the user
+	 * @param {Object} postData 
+	 * @returns an object with the ml api response data
+	 */
 	async postData(key, userId, postData) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
