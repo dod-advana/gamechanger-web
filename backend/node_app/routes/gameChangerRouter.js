@@ -78,6 +78,8 @@ router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
 router.post('/admin/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/downloadCorpus', transformer.downloadCorpus);
+router.post('/admin/trainModel', transformer.trainModel);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/createNotification', notification.createNotification);
