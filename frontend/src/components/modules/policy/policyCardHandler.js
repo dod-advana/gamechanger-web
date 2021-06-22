@@ -16,6 +16,7 @@ import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import {crawlerMappingFunc} from "../../../gamechangerUtils";
 
 const styles = {
     footerButtonBack: {
@@ -419,7 +420,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => 
     trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` :null}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
 const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
@@ -867,14 +868,14 @@ const PolicyCardHandler = {
 			}
 
 			let source_item;
-			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s!== undefined && item.crawler_used_s!== ''){
+			if(item.source_fqdn_s !== undefined && item.source_fqdn_s !== '' && item.crawler_used_s !== undefined && item.crawler_used_s !== ''){
 				let source_name;
 				if (item.source_fqdn_s.startsWith("https://")){
 					source_name = item.source
 				} else {
 					source_name = `https://${item.source_fqdn_s}`
 				}
-				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{item.display_source_s}</a>)
+				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{crawlerMappingFunc(item.crawler_used_s)}</a>)
             } else {
 				source_item = 'unknown';
 			}
