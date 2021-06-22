@@ -22,6 +22,13 @@ const styles = {
 	infoCircleDiv: {
 		flexGrow: 1,
 	},
+	docTitle: {
+		fontSize: '0.8em'
+	},
+	dateText: {
+		fontSize: 14,
+		color: 'gray',
+	}
 }
 const useStyles = makeStyles((theme) => ({
 	infoCircle: {
@@ -55,19 +62,37 @@ const GetQAResults = (props) => {
 	} = props;
 	const {state} = context;
 	const { question, answers, filenames, docIds, resultTypes }  = state.qaResults;
+	const {intelligentSearchResult} = state;
+
+	let publicationDate;
+	if(intelligentSearchResult.publication_date_dt !== undefined && intelligentSearchResult.publication_date_dt !== ''){
+		const currentDate = new Date(intelligentSearchResult.publication_date_dt);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
+		publicationDate = `${month}-${day}-${year}`;
+	} else {
+		publicationDate = `unknown`;
+	}
+
 	const classes = useStyles();
 	const [feedback, setFeedback] = useState('');
 	
 	const preventDefault = (event) => event.preventDefault();
 	
-	const qaFeedbackComponent = (answer, filename, docId) => {
+	const feedbackComponent = (input, type) => {
+		const { answer, filename, docId } = input;
+		const { title } = input;
 		return(
 		<div style={styles.tooltipRow}>
 			<GCTooltip
 				enterDelay={100}
 				title={
 				<div style={{textAlign: 'center'}}>
-					<span>This answer was retrieved based on beta artificial intelligent answering. <br />User discretion is encouraged while we continue maturing this capability.</span>
+					{type === 'QA' ? 
+						(<span>This answer was retrieved based on beta artificial intelligent answering. <br />User discretion is encouraged while we continue maturing this capability.</span>) :
+						(<span>This card was retrieved based on a new machine learning algorithm. {feedback === '' && 'Was this result relevant?'}</span>)
+					}
 				</div>
 			} placement='right' arrow>
 					<i className={classes.infoCircle + " fa fa-info-circle"} aria-hidden="true"/>
@@ -80,8 +105,14 @@ const GetQAResults = (props) => {
 						onClick={() => {
 							if(feedback === ''){
 								setFeedback('thumbsUp');
-								gameChangerAPI.sendQAFeedback('qa_thumbs_up', question, answer, filename, docId);
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsUp', `question : ${question}, answer: ${answer}`);
+								if(type === 'QA'){
+									gameChangerAPI.sendQAFeedback('qa_thumbs_up', question, answer, filename, docId);
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsUp', `question : ${question}, answer: ${answer}`);
+								} else {
+									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', title, state.searchText);
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${state.searchText}, title: ${title}`);
+								}
+								
 							}
 						}}>
 	
@@ -92,8 +123,13 @@ const GetQAResults = (props) => {
 						onClick={() => {
 							if(feedback === ''){
 								setFeedback('thumbsDown');
-								gameChangerAPI.sendQAFeedback('qa_thumbs_down', question, answer, filename, docId);
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsDown', `question : ${question}, title: ${answer}`);
+								if(type === 'QA'){
+									gameChangerAPI.sendQAFeedback('qa_thumbs_down', question, answer, filename, docId);
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsDown', `question : ${question}, title: ${answer}`);
+								} else {
+									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', title, state.searchText);
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${state.searchText}, title: ${title}`);
+								}
 							}
 						}}>
 					</i>
@@ -123,9 +159,25 @@ const GetQAResults = (props) => {
 					>
 					<strong><b style={{fontSize: 14}}>{filenames[0]}</b></strong>
 					</Link>
-					{qaFeedbackComponent(answers[0], filenames[0], docIds[0])}
+					{feedbackComponent({answer: answers[0], filename: filenames[0], docId: docIds[0]}, "QA")}
 			</div>);
-	} 
+	} else if( Object.keys(intelligentSearchResult).length !== 0){
+		return 	(
+			<div style={wikiContainer}>
+				<strong>DOCUMENT {' '}</strong><strong>{intelligentSearchResult.display_title_s}</strong><br/>
+				<strong>{intelligentSearchResult.display_org_s}</strong><br/>
+				<b style={styles.dateText}>Verified on: {publicationDate}</b>
+				<p style={{marginTop: '10px', marginBottom: '0', padding: '10px', backgroundColor: 'white'}}>{intelligentSearchResult.pageHits[0].snippet}</p>
+				<Link href={"#"} onClick={(event)=> {
+      						preventDefault(event);
+									window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${intelligentSearchResult.id}`);
+   						}}
+					>
+					<strong><b style={{fontSize: 14}}>{intelligentSearchResult.id}</b></strong>
+					</Link>
+				{feedbackComponent({title: intelligentSearchResult.display_title_s}, "intelligentSearch")}
+			</div>);
+	}
 	return <></>;
 }
 

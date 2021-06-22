@@ -35,6 +35,7 @@ class SearchUtility {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
 		this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
+		this.intelligentSearchHandler = this.intelligentSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.phraseQAQuery = this.phraseQAQuery.bind(this);
@@ -1836,15 +1837,12 @@ class SearchUtility {
 			}
 		}
 		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
-		// const resultArray = await Promise.all([sentenceResults, searchResults]);
-		// sentenceResults = resultArray[0];
-		// searchResults = resultArray[1];
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
 			searchResults.totalCount += 1;
 		}
 
-		const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
+		const topSentenceFind = searchResults.docs.findIndex((item) => item.id === filename);
 		if (sentenceResults === TRANSFORM_ERRORED) {
 			searchResults.transformFailed = true;
 		} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
@@ -1861,6 +1859,20 @@ class SearchUtility {
 		}
 		searchResults.sentResults = sentenceResults;
 		return searchResults;
+	}
+
+	async intelligentSearchHandler(searchText, userId, req, clientObj){
+		let filename;
+		let result;
+		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+			filename = sentenceResults[0].id;
+			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
+			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
+			result = sentenceSearchRes.docs[0];
+			return result;
+		}
+		return {};
 	}
 
 	async documentSearchOneID(req, body, clientObj, userId) {
