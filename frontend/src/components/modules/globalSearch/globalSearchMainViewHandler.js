@@ -1,15 +1,18 @@
 import React from "react";
+import _ from "lodash";
+
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
-import {trackEvent} from "../../telemetry/Matomo";
+import { trackEvent } from "../../telemetry/Matomo";
 import { setState } from "../../../sharedFunctions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
-import {backgroundWhite, gcOrange} from "../../common/gc-colors";
-import {Card} from "../../cards/GCCard";
+import { backgroundWhite, gcOrange } from "../../common/gc-colors";
+import { Card } from "../../cards/GCCard";
 import Pagination from "react-js-pagination";
 import {
 	getTrackingNameForFactory,
-	RESULTS_PER_PAGE, StyledCenterContainer
+	RESULTS_PER_PAGE,
+	StyledCenterContainer,
 } from "../../../gamechangerUtils";
 import { Typography } from '@material-ui/core';
 import '../../../containers/gamechanger.css';
@@ -17,8 +20,6 @@ import ResultView from "../../mainView/ResultView";
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
 import GCButton from "../../common/GCButton";
-
-const _ = require('lodash');
 
 const fullWidthCentered = {
 	width: "100%",
@@ -154,7 +155,19 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 
 const GlobalSearchMainViewHandler = {
 	async handlePageLoad(props) {
-	
+		const {
+			state,
+			dispatch,
+			searchHandler,
+		} = props;
+
+		const parsedURL = searchHandler.parseSearchURL(state);
+		if (parsedURL.searchText) {
+			const newState = { ...state, ...parsedURL, runSearch: true };
+			setState(dispatch, newState);
+			
+			searchHandler.setSearchURL(newState);
+		}
 	},
 	
 	getMainView(props) {
