@@ -297,7 +297,6 @@ class PolicySearchHandler extends SearchHandler {
 			} else {
 				searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
 			}
-			//console.log(JSON.stringify(searchResults, null, 4));
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			return searchResults;
