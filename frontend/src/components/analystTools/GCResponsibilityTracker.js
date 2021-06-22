@@ -30,6 +30,7 @@ import CheckCircleOutlinedIcon from "@material-ui/icons/CheckCircleOutlined";
 import {getTrackingNameForFactory, exportToCsv} from "../../gamechangerUtils";
 import { setState } from '../../sharedFunctions';
 
+
 const useStyles = makeStyles((theme) => ({
 	root: {
 		display: 'flex',
@@ -84,7 +85,8 @@ const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = 
 	try {
 		const { data } = await gameChangerAPI.getResponsibilityData({ limit, offset, order, where });
 		return data;
-	} catch (e) {
+	} catch (err) {
+		this.logger.error(err.message, 'GEADAKS');
 		return []
 	}
 }
@@ -148,6 +150,31 @@ const GCResponsibilityTracker = (props) => {
 		}
 	}
 
+	const reportButtonAction = async () => {
+		getRowData();
+	}
+
+	const getRowData = async () => {
+		try {
+			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
+			const rtnResults = results.filter(result => {
+				return selectedIds.includes(result.id);
+			})
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+			const rtn = selectedIds.length > 0 ? rtnResults : results;
+			const filename = rtn[0].filename;
+			const responsibilityText = rtn[0].responsibilityText;
+			
+
+			setState(dispatch, {showResponsibilityAssistModal: true, filename, responsibilityText});
+
+			setSelectedIds([]);
+			setSelectRows(false);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
 	const renderDataTable = () => {
 		const dataColumns = [
 			{
@@ -159,7 +186,7 @@ const GCResponsibilityTracker = (props) => {
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							fileClicked(row.row._original.filename, row.row.responsibilityText, 1, state.cloneData);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
 						}}
 						style={{ color: '#386F94' }}
 						>
@@ -414,7 +441,7 @@ const GCResponsibilityTracker = (props) => {
 								<GCPrimaryButton onClick={exportCSV}>
 									Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 								</GCPrimaryButton>
-								<GCPrimaryButton buttonColor={'red'} onClick={() => setState(dispatch, {showAssistModal: true})}>
+								<GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
 									Report <Icon className="fa fa-bug" style={styles.buttons}/>
 								</GCPrimaryButton>
 								<div style={styles.spacer}/>
