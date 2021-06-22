@@ -947,10 +947,10 @@ class SearchController {
 	}
 
 	async shortenSearchURL(req, res) {
-
+		let userId = 'webapp_unknown';
 		try {
 			const { url } = req.body;
-
+			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const [tiny] = await this.gcSearchURLs.findOrCreate(
 				{
 					where: { url: url },
@@ -961,7 +961,7 @@ class SearchController {
 				}
 			);
 
-			const tinyURL = tiny.id;
+			const tinyURL = tiny ? tiny.id : '';
 
 			res.status(200).send({tinyURL});
 

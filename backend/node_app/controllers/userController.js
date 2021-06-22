@@ -198,7 +198,9 @@ class UserController {
 						search.favorited = countData[0].favorited_count;
 						const tiny = this.searchUtility.getQueryVariable('tiny', search.tiny_url);
 						const url = await this.search.convertTiny(tiny);
-						search.url = url.url;
+						if (url) {
+							search.url = url.url;
+						}
 					}
 
 					user.favorite_searches = favorite_searches;
