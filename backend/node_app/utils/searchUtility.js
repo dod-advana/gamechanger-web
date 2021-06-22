@@ -921,11 +921,12 @@ class SearchUtility {
 		}
 	}
 
-	phraseQAQuery (searchText, searchTextList, maxLength, user) {
+	phraseQAQuery (searchTextList, maxLength, user) {
 		// breaks up a question query into bigrams for ES search
 		let bigrams = [];
 		let length = searchTextList.length - 2;
-		for (let i =0; i <= length; i++) {
+		let searchText = searchTextList.join(' ');
+		for (let i = 0; i <= length; i++) {
 			bigrams.push(searchTextList.slice(i, i+2).join(' '));
 		}
 
@@ -1025,70 +1026,197 @@ class SearchUtility {
 		}
 	}
 
-	phraseQAEntityQuery (searchTextList, limit) {
-		
-		let bigrams = [];
-		let length = searchTextList.length - 2;
-		for (let i =0; i <= length; i++) {
-			bigrams.push(searchTextList.slice(i, i+2).join(' '));
-		}
+	// makes phrases to add to ES queries for entities or gamechanger indices
+	makeBigramQueries (searchTextList) {
 
-		const shouldQueries = [];
-		const mustQueries = [];
-		for (const element of bigrams) {
-			const nameQuery = {
-				match_phrase: {
-					'name': {
-						query: element,
-						slop: 2,
-						boost: 0.5
-					}
-				}
-			}
-			shouldQueries.push(nameQuery);
-
-			const multiQuery = {
-				multi_match: {
-					fields: ['name', 'aliases.name'], // 'information'
-					query: element,
-					type: 'phrase_prefix'
-				}
-			}
-			shouldQueries.push(multiQuery);
-
-			const alias = {
-				match: { 'aliases.name': element }
-			}
-			mustQueries.push(alias);
-		};
-
-		const aliasQuery = {
-			nested: {
-				path: "aliases",
-				query: {
-					bool: {
-						should: mustQueries
-					}
-				}
-			}
-		}
-		shouldQueries.push(aliasQuery);
-		
 		try {
-			let query = {
-				from: 0,
-				size: limit,
-					query: {
-						bool: {
-							should: shouldQueries
+			let bigrams = [];
+			let searchText = searchTextList.join(' ');
+			let length = searchTextList.length - 2;
+			for (let i =0; i <= length; i++) {
+				bigrams.push(searchTextList.slice(i, i+2).join(' '));
+			}
+			
+			// make one object for all queries
+			const bigramQueries = {aliasQuery: '', entityShouldQueries: [],  docMustQueries: [], 
+				docShouldQueries: [
+					{
+						multi_match: {
+							query: searchText,
+							fields: [
+							'keyw_5^2',
+							'id^2',
+							'summary_30',
+							'paragraphs.par_raw_text_t'
+							],
+							operator: 'or'
 						}
 					}
-				};
-			return query;
-			} catch (err) {
-				this.logger.error(err, 'JKLQOPMF', '');
+				]
 			}
+
+			// make alias queries for each word
+			const entityMustQueries = [];
+
+			for (const word of searchTextList) {
+
+				const alias = {
+					match: { 'aliases.name': word }
+				}
+				entityMustQueries.push(alias);
+			};
+
+			const aliasQuery = {
+				nested: {
+					path: "aliases",
+					query: {
+						bool: {
+							should: entityMustQueries
+						}
+					}
+				}
+			};
+
+			bigramQueries.entityShouldQueries.push(aliasQuery);
+			bigramQueries.aliasQuery = aliasQuery;
+			
+			// make phrase queries for each bigram
+			for (const element of bigrams) {
+
+				// documents
+				const wildcard = {
+					wildcard: {
+						'paragraphs.filename.search': { 
+							value:  element,
+							boost: 15
+						}
+					}
+				}
+				bigramQueries.docMustQueries.push(wildcard);
+
+				const qs = {
+					query_string: {
+					query: element,
+					default_field: 'paragraphs.par_raw_text_t',
+					default_operator: 'AND',
+					fuzzy_max_expansions: 100,
+					fuzziness: 'AUTO'
+					}
+				}
+				bigramQueries.docMustQueries.push(qs);
+
+				const mm = {
+					multi_match: {
+					query: element,
+					fields: ["summary_30","title", "keyw_5"],
+					type: "phrase",
+					boost: 5
+					}
+				}
+				bigramQueries.docShouldQueries.push(mm);
+
+				// entities 
+				const nameEntityQuery = {
+					match_phrase: {
+						'name': {
+							query: element,
+							slop: 2,
+							boost: 0.5
+						}
+					}
+				}
+				bigramQueries.entityShouldQueries.push(nameEntityQuery);
+
+				const multiEntityQuery = {
+					multi_match: {
+						fields: ['name', 'aliases.name'], // 'information'
+						query: element,
+						type: 'phrase_prefix'
+					}
+				}
+				bigramQueries.entityShouldQueries.push(multiEntityQuery);
+			};
+
+			return bigramQueries;
+
+		} catch (e) {
+			this.logger.error(e, 'LWPOT5F', '');
 		}
+	}
+
+	// make ES query for QA documents/entities/aliases
+	phraseQAQuery (bigramQueries, queryType, entityLimit, maxLength, user) {
+
+		let query;
+		try {
+			if (queryType === 'alias_only') {
+				query = {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: bigramQueries.aliasQuery
+							}
+						}
+					};
+			} else if (queryType === 'entities') {
+				query = {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: bigramQueries.entityShouldQueries
+							}
+						}
+					};
+			} else if (queryType === 'documents') {
+				query = {
+					query: {
+						bool: {
+							must: [
+								{
+									nested: {
+										path: 'paragraphs',
+										inner_hits: {
+											_source: false,
+											stored_fields: [
+												'paragraphs.page_num_i',
+												'paragraphs.filename',
+												'paragraphs.par_raw_text_t'
+											],
+											from: 0,
+											size: 5,
+											highlight: {
+												fields: {
+													'paragraphs.filename.search': {
+														number_of_fragments: 0
+													},
+													'paragraphs.par_raw_text_t': {
+														fragment_size: maxLength,
+														number_of_fragments: 1
+													}
+												},
+												fragmenter: 'span'
+											}
+										},
+										query: {
+											bool: {
+												should: bigramQueries.docMustQueries
+											}
+										}
+									}
+								}
+							],
+							should: bigramQueries.docShouldQueries
+						}
+					}
+				}
+			};
+			return query;
+		} catch (e) {
+		this.logger.error(e, 'TJDDKH5F', user);
+		}
+	}
 
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
