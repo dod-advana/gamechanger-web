@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
 import { PowerUserAnnotationCard } from './PowerUserAnnotationCard'
-import GeneralUserAnnotationCard from '../cards/GeneralUserAnnotationCard'
+import GeneralUserAnnotationCard from './GeneralUserAnnotationCard'
 import { random } from "underscore"
 import styled from 'styled-components';
 import GameChangerAPI from "../api/gameChanger-service-api";
