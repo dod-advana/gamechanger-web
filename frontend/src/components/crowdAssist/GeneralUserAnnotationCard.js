@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import {FormControl, FormControlLabel, Radio, RadioGroup, Select, MenuItem} from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import {TokenAnnotator} from "react-text-annotate";
-import {CustomMark} from "../crowdAssist/CustomMark";
+import {CustomMark} from "./CustomMark";
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Typography } from "@material-ui/core";
-import {backgroundWhite, tertiaryRed, tertiaryGreen, secondaryAlt} from '../../components/common/gc-colors';
+import {backgroundWhite, tertiaryRed, tertiaryGreen, secondaryAlt} from '../common/gc-colors';
 import GCButton from '../common/GCButton';
 
 const useStyles = makeStyles((theme) => ({
