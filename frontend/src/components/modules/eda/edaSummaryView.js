@@ -533,27 +533,7 @@ export const EDASummaryView = (props) => {
                 </DialogActions>
             </Dialog>
 
-            {/* {summaryView ?  */}
             <div>
-                
-                {/* <div style={{ margin: '0 0 5px 0'}}>
-                    {filtersPresent() ? <>
-                    <div style={{ margin: '15px 0', display: 'flex', alignItems: 'center'}}>
-                        {aggregationPills.length > 0 && <div style={{...styles.filterDiv, padding: '0 10px 0 0'}}>
-                            <Typography style={styles.filterTitle}> Aggregations: </Typography>
-                            {aggregationPills}
-                        </div>}
-                        {(edaSearchSettings.startDate || edaSearchSettings.endDate) && <div style={{...styles.filterDiv, padding: '0 10px', borderLeft: aggregationPills.length > 0 ? 'solid 1px lightgray' : '', borderRight: edaSearchSettings.contractIssueAgency ? 'solid 1px lightgray' : ''}}>
-                            <Typography style={styles.filterTitle}> PIID Issue Date Range: </Typography>
-                            {renderDateRange()}
-                        </div>}
-                        {edaSearchSettings.contractIssueAgency && <div style={{...styles.filterDiv, padding: '0 10px'}}>
-                            <Typography style={{ ...styles.filterTitle, margin: '0 15px 0 0'}}> Contract Issue Agency: </Typography>
-                            {edaSearchSettings.contractIssueAgency}
-                        </div>}
-                    </div></>
-                     : <div style={{ margin: '15px 0'}}>No filters applied</div> }
-                </div> */}
                 <div style={{ margin: '0 0 5px 0'}}>
                     <div style={{ padding: '0 15px 0 0', margin: '10px 0 0 0', display: 'flex', alignItems: 'center'}}>
                         <div style={{display: 'flex'}}>
