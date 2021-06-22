@@ -100,7 +100,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 
 			<div className={'row'} style={{ margin: '15px 0 '}}>
 				<div className={'row'}>
-					<Typography variant="h5" display="outline" style={{ margin: '15px 5px 0 0' }}>Highlight text for:</Typography>
+					<Typography variant="h5" display="outline" style={{ margin: '15px 5px 0 15px' }}>Highlight text for:</Typography>
 					<RadioGroup
 						row
 						onChange={({ target: { value } }) => { setTag(value) }}
