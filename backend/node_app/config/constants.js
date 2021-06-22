@@ -129,8 +129,8 @@ module.exports = Object.freeze({
 		username: process.env.DATA_CATALOG_USER,
 		password: process.env.DATA_CATALOG_PASSWORD,
 		api_config: dataCatalogConfig,
-		ca: process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n')
-	},
+		ca: process.env.DATA_CATALOG_CA ? process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n') : ''
+		},
 	TLS_KEY_PASSPHRASE: process.env.TLS_KEY_PASSPHRASE,
 	LOG_LEVELS: {
 		levels: {

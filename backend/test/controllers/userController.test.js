@@ -1,4 +1,5 @@
 const assert = require('assert');
+const { create } = require('underscore');
 const { UserController } = require('../../node_app/controllers/userController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
@@ -32,7 +33,7 @@ describe('UserController', function () {
 			};
 
 			const expectedCode = 500;
-			const expectedMsg = 'Error adding internal user: Cannot destructure property `trackByRequest` of \'undefined\' or \'null\'.';
+			const expectedMsg = /^Error adding internal user: .+/gs; // this message might be js runtime dependent
 
 			try {
 				await target.addInternalUser(req, res);
@@ -42,7 +43,7 @@ describe('UserController', function () {
 			}
 
 			assert.equal(resCode, expectedCode);
-			assert.equal(resMsg, expectedMsg);
+			assert(expectedMsg.test(resMsg))
 
 		});
 
@@ -50,13 +51,16 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({where: { username }}) {
+				findOne({where: { username }}) {
+					return null;
+				},
+				create({username}) {
 					usedUsername = username;
 					return {
 						id: 1,
 						username
 					};
-				}
+				},
 			};
 
 			const newOpts = {
@@ -101,13 +105,16 @@ describe('UserController', function () {
 
 			let usedUsername;
 			const internalUserTracking = {
-				find({ where: { username } }) {
+				findOne({where: { username }}) {
+					return null;
+				},
+				create({username}) {
 					usedUsername = username;
 					return {
 						id: 1,
 						username
 					};
-				}
+				},
 			};
 
 			const newOpts = {
@@ -391,7 +398,7 @@ describe('UserController', function () {
 			let returnExportHistory = [];
 			const new_opts = {
 				...opts,
-				constants: {env: {GAME_CHANGER_OPTS: {index: 'Test'}}},
+				constants: {GAME_CHANGER_OPTS: {index: 'Test'}},
 				externalAPI : {
 					getAPIKey(user) {
 						return api_key;
@@ -578,7 +585,6 @@ describe('UserController', function () {
 						user = {
 							user_id: data.defaults.user_id,
 							is_beta: false,
-							search_settings: {},
 							notifications: { total: 0, favorites: 0, history: 0 }
 						};
 						users.push(user);
@@ -618,7 +624,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {is_beta: false, notifications: {favorites: 0, history: 0, total: 0}, search_settings: {}, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {is_beta: false, notifications: {favorites: 0, history: 0, total: 0}, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
@@ -682,67 +688,8 @@ describe('UserController', function () {
 		});
 	});
 
-	describe('#setUserSearchSettings', () => {
-		let users = [{user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { total: 0, favorites: 0, history: 0 }, search_settings: {}}];
-		const opts = {
-			...constructorOptionsMock,
-			dataApi: {},
-			gcUser: {
-				update(data, where) {
-					let user;
-
-					users.forEach(tmpUser => {
-						if (tmpUser.user_id === where.where.user_id) {
-							user = tmpUser;
-						}
-					});
-
-					if (user) {
-						user.search_settings = data.search_settings;
-						return Promise.resolve(data.search_settings);
-					} else {
-						return Promise.resolve('Fail');
-					}
-				}
-			}
-		};
-
-		it('updates a users search settings', async () => {
-			const target = new UserController(opts);
-
-			const req = {
-				...reqMock,
-				body: {
-					test: 'test'
-				}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			try {
-				await target.setUserSearchSettings(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			const expected = {notifications: {favorites: 0, history: 0, total: 0}, search_settings: {test: 'test'}, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
-			assert.deepStrictEqual(users[0], expected);
-		});
-	});
-
 	describe('#clearDashboardNotification', () => {
-		let users = [{user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { total: 0, favorites: 5, history: 0 }, search_settings: {}}];
+		let users = [{user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { total: 0, favorites: 5, history: 0 }}];
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
@@ -806,7 +753,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {notifications: {favorites: 0, history: 0, total: 0}, search_settings: {}, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {notifications: {favorites: 0, history: 0, total: 0}, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(users[0], expected);
 		});
 	});
