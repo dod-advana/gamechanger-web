@@ -1,27 +1,14 @@
 import React, {useEffect, useState} from 'react'
-import {FormControl, FormControlLabel, Radio, RadioGroup} from "@material-ui/core";
-import {TokenAnnotator, TextAnnotator} from "react-text-annotate";
-import {CustomMark} from "./CustomMark";
-import LinearProgressWithLabel  from '@material-ui/core/LinearProgress';
+import {FormControlLabel, Radio, RadioGroup, Typography} from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
-import {primary, backgroundWhite, backgroundGreyDark, primaryPurple, primaryAlt, tertiaryGoldDarkest,
-	primaryRed, primaryDark, tertiaryGreen} from '../../components/common/gc-colors';
-import { Typography } from "@material-ui/core";
+import GCAccordion from "../common/GCAccordion";
 
+import {TokenAnnotator} from "react-text-annotate";
+import {CustomMark} from "./CustomMark";
+import {backgroundWhite, primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryGreyLight,
+	primaryRed, primaryDark, tertiaryGreen} from '../common/gc-colors';
+import GCButton from '../common/GCButton';
 
-const BorderLinearProgress = withStyles((theme) => ({
-  root: {
-    height: 15,
-    borderRadius: 10,
-  },
-  colorPrimary: {
-    backgroundColor: backgroundGreyDark,
-  },
-  bar: {
-    borderRadius: 10,
-    backgroundColor: primary,
-  },
-}))(LinearProgressWithLabel);
 
 const CustomFormControlLabel = withStyles((theme) => ({
   label: {
@@ -49,7 +36,7 @@ const StyledRadio = (props) => {
 
 const highlightColors = [primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryRed, primaryDark, tertiaryGreen]
 
-export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, progressText, progressValue, componentStepNumbers, isTutorial, colorMap }) => {
+export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, componentStepNumbers, colorMap, moreTextClick, aboveDisabled, belowDisabled}) => {
 	const [tag, setTag] = useState(tags[0])
 	// const [currentTokens, setCurrentTokens] = useState([])
 	const [tagColorMap, setTagColorMap] = useState(colorMap)
@@ -90,28 +77,30 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 	))
 
 	return (
-		<div className={`tutorial-step-${componentStepNumbers["Crowd Assist Panel"]}`}>
-
-			<div style={{ backgroundColor: '#DFE6EE', padding: '20px 15px', margin: '15px 0'}}>
-				<p style={{ margin: 0 }}>
-					Help the community! Highlight text you're familiar with, and tag it with a corresponding opinion.
-				</p>
-				<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600}}>
-					<li>
-						Select one option
-					</li>
-					<li>
-						Highlight words, sentences, or parts of text that apply.
-					</li>
-					<li>
-						Submit Assist to tag text with options.
-					</li>
-				</ol>
+		<div className={`tutorial-step-${componentStepNumbers["Crowd Assist Panel"]}`} >
+			<div className={'section'}>
+				<GCAccordion expanded={true} header={'How to use this tool:'}
+								backgroundColor={'rgb(238,241,242)'}>
+					<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600}}>
+					<li style={{ textAlign: "justify" }}>
+							If this line was improperly labelled as a Responsibility, select the No Responsibility button; otherwise:
+						</li>
+						<li style={{ textAlign: "justify" }}>
+							Select an Hightlight Type.
+						</li>
+						<li style={{ textAlign: "justify" }}>
+							Highlight words, sentences, or parts of text that apply.
+						</li>
+						<li style={{ textAlign: "justify" }}>
+							Submit Assist to tag text with for review.
+						</li>
+					</ol>
+				</GCAccordion>
 			</div>
 
-			<div className={'row'} style={{ margin: '10px 0 '}}>
-				<Typography variant="h5" display="outline">Please select an option</Typography>
-				<FormControl className={`tutorial-step-${componentStepNumbers["Tag Selection"]}`} component="fieldset" style={{width: '100%', padding: '10px 0' }}>
+			<div className={'row'} style={{ margin: '15px 0 '}}>
+				<div className={'row'}>
+					<Typography variant="h5" display="outline" style={{ margin: '15px 5px 0 0' }}>Highlight text for:</Typography>
 					<RadioGroup
 						row
 						onChange={({ target: { value } }) => { setTag(value) }}
@@ -120,13 +109,22 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 					>
 						{options}
 					</RadioGroup>
-				</FormControl>
-				<Typography variant="h5" display="outline" style={{ margin: '15px 0 0 0' }}>Highlight text for: {tag}</Typography>
+				</div>
+				
 
 			</div>
-
+			<GCButton className={'row'} style={{height: '25%', width: '100%', margin: '0 0'}}
+				id={'gcAssistPrevious'}
+				className={"Above Button"}
+				onClick={() => { moreTextClick(-1) }}
+				textStyle={{color: 'grey'}}
+				buttonColor={'white'}
+				borderColor={primaryGreyLight}
+				disabled={aboveDisabled}
+			>
+				More Context Above
+			</GCButton>
 			<div style={{ border: '2px solid #B0BAC5', boxShadow: '1px 1px gray', borderRadius: '5px', height: 200 }}>
-
 				<TokenAnnotator
 					className={`tutorial-step-${componentStepNumbers["Paragraph to Tag"]}`}
 					style={{
@@ -147,8 +145,19 @@ export const PowerUserAnnotationCard = ({ text, tags, currentTokens, setCurrentT
 						}
 					}}
 					renderMark={CustomMark}
-				/>
+				/>				
 			</div>
+			<GCButton className={'row'} style={{height: '25%',width: '100%', margin: '0 0'}}
+				id={'gcAssistPrevious'}
+				className={"Below Button"}
+				onClick={() => { moreTextClick(1) }}
+				textStyle={{color: 'grey'}}
+				buttonColor={'white'}
+				borderColor={primaryGreyLight}
+				disabled={belowDisabled}
+			>
+				More Context Below
+			</GCButton>
 		</div>
 	)
 }
