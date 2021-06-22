@@ -65,7 +65,6 @@ const endpoints = {
 	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
-	setUserSearchSettings: '/api/gameChanger/setUserSearchSettings',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/deleteInternalUser',
@@ -528,11 +527,6 @@ export default class GameChangerAPI {
 	setUserBetaStatus = async (checked) => {
 		const url = endpoints.setUserBetaStatus;
 		return axiosPOST(this.axios, url, {status: checked});
-	}
-
-	setUserSearchSettings = async (data) => {
-		const url = endpoints.setUserSearchSettings;
-		return axiosPOST(this.axios, url, data);
 	}
 	
 	getInternalUsers = async () => {

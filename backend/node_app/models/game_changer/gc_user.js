@@ -14,9 +14,6 @@ module.exports = (sequelize, DataTypes) => {
 			is_beta: {
 				type: DataTypes.BOOLEAN,
 			},
-			search_settings: {
-				type: DataTypes.JSONB
-			},
 			notifications: {
 				type: DataTypes.JSONB
 			},
