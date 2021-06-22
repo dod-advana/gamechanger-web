@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
-import { RespExplAnnotationCard } from './RespExplAnnotationCard'
+import { PowerUserAnnotationCard } from './PowerUserAnnotationCard'
 import GeneralUserAnnotationCard from './GeneralUserAnnotationCard'
 import { random } from "underscore"
 import styled from 'styled-components';
@@ -535,7 +535,7 @@ class GameChangerAssist extends Component {
 		return (
 			<>
 				{isPowerUser && 
-					<RespExplAnnotationCard
+					<PowerUserAnnotationCard
 						// uses template string for text to read newlines correctly
 						text={`${textsList[currentTextIndex]}`}
 						currentTokens={annotatedTokens[currentTextIndex]}
