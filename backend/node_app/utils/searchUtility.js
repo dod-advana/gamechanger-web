@@ -189,9 +189,9 @@ class SearchUtility {
 } 
 
 	getEsSearchTerms({ searchText }) {
-		const stopwordsRemoved = this.remove_stopwords(searchText);
-		const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
-		return this.getQueryAndSearchTerms(cleanedSearchText);
+		//const stopwordsRemoved = this.remove_stopwords(searchText);
+		//const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
+		return this.getQueryAndSearchTerms(searchText);
 	}
 
 	getQueryAndSearchTerms (searchText) {
@@ -347,12 +347,11 @@ class SearchUtility {
 					mustQueries.push(wildcard);
 				}
 			}
-
+			console.log(searchTerms)
 			storedFields = [...storedFields, ...extStoredFields];
 			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
-			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
@@ -386,23 +385,24 @@ class SearchUtility {
 										_source: false,
 										stored_fields: [
 											'paragraphs.page_num_i',
-											'paragraphs.filename',
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
 										size: 5,
 										highlight: {
 											fields: {
-												'paragraphs.filename.search': {
-													number_of_fragments: 0
-												},
 												'paragraphs.par_raw_text_t': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
+
 												},
 												'paragraphs.par_raw_text_t.gc_english': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
 												},
 											},
 											fragmenter: 'span'
@@ -412,14 +412,6 @@ class SearchUtility {
 										bool: {
 											should: [
 												{
-													wildcard: {
-														'paragraphs.filename.search': {
-															value: `*${parsedQuery}*`,
-															boost: 50
-														}
-													}
-												},
-												{
 													query_string: {
 														query: `${parsedQuery}`,
 														default_field,
@@ -428,26 +420,42 @@ class SearchUtility {
 														fuzziness: 'AUTO',
 														analyzer
 													}
-												},
-												
-												
-											],
-											minimum_should_match: 1
+												}
+											]										
 										}
+									}
+								}
+							},
+							{
+								wildcard: {
+									'keyw_5': {
+										value: `*${parsedQuery}*`
+									}
+								}
+							},
+							{
+								wildcard: {
+									'title.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
+									'filename.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+
 									}
 								}
 							},
 							{
 								multi_match: {
 									query: `${parsedQuery}`,
-									fields: [
-										'id^5',
-										'title.search^15',
-										'keyw_5'
-									],
-									operator: 'AND',
-									type: "best_fields"
-								}
+									fields: ['title.search', 'filename.search'],
+									type: 'phrase'
+								  }
 							}
 						],
 						minimum_should_match: 1,
@@ -457,21 +465,18 @@ class SearchUtility {
 					}
 				},
 				highlight: {
+					require_field_match: false,
 					fields: {
-						'title.search': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'keyw_5': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'id': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						}
+						'title.search': {},
+						'keyw_5': {},
+						'id': {},
+						'filename.search': {}
 					},
-					fragmenter: 'span'
+					fragment_size: 10,
+					fragmenter: 'simple',
+					type: 'unified',
+					boundary_scanner: 'word'
+
 				}
 			};
 
@@ -551,6 +556,7 @@ class SearchUtility {
 					}
 				);
 			}
+			console.log(JSON.stringify(query,null,4))
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
@@ -1292,12 +1298,25 @@ class SearchUtility {
 					size: 2,
 					_source: [filename],
 					query: {
-						wildcard: {
-							'filename.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
+						bool: {
+							must: [
+								{
+								wildcard: {
+									'filename.search': {
+										value: `*${searchTextCaps}*`,
+										boost: 1.0,
+										rewrite: 'constant_score'
+									}
+								}
 							}
+						],
+							filter: [
+								{
+								term: {
+									'is_revoked_b': false
+								}
+							}
+							]
 						}
 					}
 				},
@@ -1658,6 +1677,9 @@ class SearchUtility {
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
 								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
 							}
 							result.pageHitCount = pageSet.size;
 							
@@ -1689,6 +1711,9 @@ class SearchUtility {
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1836,6 +1861,7 @@ class SearchUtility {
 			}
 		}
 		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+		
 		// const resultArray = await Promise.all([sentenceResults, searchResults]);
 		// sentenceResults = resultArray[0];
 		// searchResults = resultArray[1];
@@ -1917,7 +1943,6 @@ class SearchUtility {
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
