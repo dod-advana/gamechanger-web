@@ -324,8 +324,7 @@ class SearchUtility {
 				'crawler_used_s',
 				'download_url_s',
 				'source_page_url_s',
-				'source_fqdn_s',
-                                'display_source_s'
+				'source_fqdn_s'
 			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
