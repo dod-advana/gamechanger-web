@@ -1,6 +1,5 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
-import {crawlerMappingFunc} from "../../../gamechangerUtils";
 import {
 	CARD_FONT_SIZE,
 	getDocTypeStyles,
@@ -17,6 +16,7 @@ import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import {crawlerMappingFunc} from "../../../gamechangerUtils";
 
 const styles = {
     footerButtonBack: {
@@ -420,7 +420,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => 
     trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` :null}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
 const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
@@ -479,7 +479,6 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
-	
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
@@ -877,7 +876,7 @@ const PolicyCardHandler = {
 					source_name = `https://${item.source_fqdn_s}`
 				}
 				source_item = (<a href= {source_name} target="_blank" rel="noopener noreferrer">{crawlerMappingFunc(item.crawler_used_s)}</a>)
-			} else {
+            } else {
 				source_item = 'unknown';
 			}
 
