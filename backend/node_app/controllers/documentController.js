@@ -27,7 +27,6 @@ class DocumentController {
 
 		// need to bind to have <this> in context, mostly for logger
 		this.getDocumentsToAnnotate = this.getDocumentsToAnnotate.bind(this);
-		this.getRowDocs = this.getRowDocs.bind(this);
 		this.saveDocumentAnnotations = this.saveDocumentAnnotations.bind(this);
 		this.getPDF = this.getPDF.bind(this);
 		this.getThumbnail = this.getThumbnail.bind(this);
@@ -49,69 +48,6 @@ class DocumentController {
 			const esQuery = {
 				_source: {
 					includes: ['filename', 'id', 'doc_type', 'doc_num', 'p_text', 'type', 'p_page', 'paragraphs']
-				},
-				query: {
-					bool: {
-						must: [
-							{
-								exists: {
-									field: 'filename'
-								}
-							}
-						]
-					}
-				}
-			};
-
-			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
-			switch (cloneData.clone_name) {
-				case 'eda':
-					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
-						esClientName = 'eda';
-						esIndex = 'eda';
-					} else {
-						throw 'Unauthorized';
-					}
-					break;
-				default:
-					esClientName = 'gamechanger';
-					esIndex = this.constants.GAME_CHANGER_OPTS.index;
-			}
-
-			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
-			const results = await this.cleanUpEsResultsForAssist(rawResults, userId);
-
-			const documents = results.docs;
-
-			// Randomly Pick a file
-			const randomDoc = documents[Math.floor(Math.random() * Math.floor(documents.length))];
-
-			const returnObj = this.cleanDocumentForCrowdAssist(randomDoc, userId);
-
-			res.send(returnObj);
-
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'ixmxFNYyAL', userId);
-
-			res.status(500).send(err);
-		}
-	}
-
-	async getRowDocs(req, res) {
-		let userId = 'webapp_unknown';
-
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const permissions = req.permissions ? req.permissions : [];
-
-			const { cloneData = {} } = req.body;
-
-			const esQuery = {
-				_source: {
-					includes: ['filename', 'id', 'doc_type', 'doc_num', 'paragraphs']
 				},
 				query: {
 					bool: {
