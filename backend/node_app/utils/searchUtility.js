@@ -283,7 +283,8 @@ class SearchUtility {
 	}
 
 	getElasticsearchQuery(
-		{ searchText, 
+		{ 
+			searchText, 
 			searchTerms, 
 			parsedQuery, 
 			orgFilterString = '', 
@@ -346,7 +347,6 @@ class SearchUtility {
 					mustQueries.push(wildcard);
 				}
 			}
-			console.log(searchTerms)
 			storedFields = [...storedFields, ...extStoredFields];
 			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
@@ -555,7 +555,6 @@ class SearchUtility {
 					}
 				);
 			}
-			console.log(JSON.stringify(query,null,4))
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
