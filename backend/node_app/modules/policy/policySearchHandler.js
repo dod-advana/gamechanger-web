@@ -362,6 +362,8 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
+			console.log("entities", enrichedResults.entities);
+			console.log("topics", enrichedResults.topics);
 
 			return enrichedResults;
 		} catch (e) {
@@ -394,8 +396,10 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
-					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
+					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList);
+					// aliasQuery
+					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchTextList, qaParams.maxLength, userId);
+					let qaEntityQuery = this.searchUtility.phraseQAQuery(qaSearchTextList, qaParams.entityLimit, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
 					let entitiesIndex = 'entities-new';
