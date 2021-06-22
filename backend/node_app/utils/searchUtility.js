@@ -1054,10 +1054,10 @@ class SearchUtility {
 						],
 							filter: [
 								{
-								term: {
-									'is_revoked_b': false
+									term: {
+										'is_revoked_b': false
+									}
 								}
-							}
 							]
 						}
 					}
@@ -1069,14 +1069,26 @@ class SearchUtility {
 					size: 2,
 					_source: [title],
 					query: {
-						wildcard: {
-							'title.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
+						bool: {
+							must: [
+								{
+									wildcard: {
+										'title.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
+									}
+								}
+							],
+						}, 
+						filter: [
+							{
+								term: {
+									'is_revoked_b': false
+								}
 							}
-
-						}
+						]
 					}
 				},
 
