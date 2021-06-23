@@ -358,7 +358,7 @@ describe('PolicySearchHandler', function () {
 				},
 				mlApi: {},
 				searchUtility: {
-					combinedSearchHandler: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
+					// combinedSearchHandler: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
 					documentSearch: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
 				},
 				async_redis: {select() {}},
