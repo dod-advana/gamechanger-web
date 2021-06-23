@@ -394,35 +394,36 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities-new';
+					let entitiesIndex = 'entities';
 					let queryType;
 					let entityQAResults;
 					let qaEntityQuery;
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
+					searchResults.qaResults.question = qaSearchText + '?';
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
 					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, userId);
 					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList, alias);
-					if (alias === {}) {
+					if (alias._source) {
+						entityQAResults = alias;
+						qaSearchText = qaSearchText.replace(alias.match.toLowerCase(), alias._source.name);
+					} else {
 						qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
-						entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+						let entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 						if (entities) {
 							entityQAResults = entities.body.hits.hits[0]._source
-						} else {
-							entityQAResults = alias;
 						}
 					}
 					let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
 					let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
 					let context = await this.searchUtility.getQAContext(docQAResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					if (context.length > 0) { // if context results, query QA model
-						console.log("\n\nCONTEXT: ", context)
 						searchResults.qaContext.context = context;
+						console.log("\n\nCONTEXT: ", context)
 						if (testing === true) {
 							this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 						}
 						let qaContext = context.map(item => item.text);
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
-						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
 							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
 								return i['status'] == 'passed' && i['text'] !== '';
