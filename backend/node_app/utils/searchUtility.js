@@ -874,7 +874,7 @@ class SearchUtility {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
 			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
 			return singleResult;
@@ -1043,15 +1043,15 @@ class SearchUtility {
 						bool: {
 							must: [
 								{
-								wildcard: {
-									'filename.search': {
-										value: `*${searchTextCaps}*`,
-										boost: 1.0,
-										rewrite: 'constant_score'
+									wildcard: {
+										'filename.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
 									}
 								}
-							}
-						],
+							],
 							filter: [
 								{
 									term: {
@@ -1081,17 +1081,16 @@ class SearchUtility {
 									}
 								}
 							],
-						}, 
-						filter: [
-							{
-								term: {
-									'is_revoked_b': false
+							filter: [
+								{
+									term: {
+										'is_revoked_b': false
+									}
 								}
-							}
-						]
+							]
+						}
 					}
 				},
-
 				{
 					index: this.constants.GAME_CHANGER_OPTS.historyIndex
 				},
