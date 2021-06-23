@@ -333,7 +333,8 @@ class SearchUtility {
 			includeRevoked = false,
 			sort = 'Relevance', 
 			order = 'desc',
-			includeHighlights = true
+			includeHighlights = true,
+			docIds = {}
 		 }, 
 		 user) {
 
@@ -561,6 +562,12 @@ class SearchUtility {
 			if (includeHighlights == false) {
 				delete query.query.bool.should[0].nested.inner_hits;
 				delete query.highlight;
+			}
+			if (Object.keys(docIds).length !== 0){
+				query.query.bool.must.push(
+					{terms: {id: docIds}}
+					)
+
 			}
 			return query;
 		} catch (err) {
