@@ -332,7 +332,8 @@ const linkColorMap = {
 export const typeColorMap = {
 	document: '#386F94',
 	organization: '#386f94',
-	topic: '#ffbf00'
+	topic: '#ffbf00',
+	uknDocument: '#000000'
 };
 
 const typeTextColorMap = {
