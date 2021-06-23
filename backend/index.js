@@ -226,7 +226,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
 		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.originalUrl, userToken));
+		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {
