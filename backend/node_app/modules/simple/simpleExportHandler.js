@@ -82,7 +82,6 @@ class SimpleExportHandler extends ExportHandler {
 		}
 	}
 
-
 }
 
 module.exports = SimpleExportHandler;
