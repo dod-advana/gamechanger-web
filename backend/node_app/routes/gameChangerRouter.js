@@ -114,7 +114,6 @@ router.post('/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklis
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/setUserBetaStatus', user.setUserBetaStatus);
-router.post('/setUserSearchSettings', user.setUserSearchSettings);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/addInternalUser', user.addInternalUser);
@@ -149,6 +148,7 @@ router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
+router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 
 module.exports = router;
