@@ -288,7 +288,7 @@ class PolicySearchHandler extends SearchHandler {
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
-			if(intelligentSearchOn){ // add intelligent search result if QA empty
+			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults, {question: '', answers: [], filenames: [], docIds: []})){ // add intelligent search result if QA empty
 				const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
