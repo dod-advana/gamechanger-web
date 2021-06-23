@@ -5,7 +5,6 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
-const { PassThrough } = require('stream');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
