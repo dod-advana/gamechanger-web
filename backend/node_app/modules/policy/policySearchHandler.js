@@ -399,8 +399,8 @@ class PolicySearchHandler extends SearchHandler {
 					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
+					let entitiesIndex = 'entities';
 					try {
-						let entitiesIndex = 'entities';
 						entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 					} catch (e) {
 						this.logger.error(e.message, 'KQ68CHSU');
