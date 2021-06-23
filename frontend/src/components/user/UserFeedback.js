@@ -227,6 +227,7 @@ export default function UserFeedback (props) {
                     <FormControl variant="outlined" style={{width:'30%', margin: '0px 0px 0px 20px'}}>
                         <Select value={feedbackType} onChange={handleTypeChange} IconComponent={KeyboardArrowDown}>
                             <MenuItem value="Report a technical issue">Report a technical issue</MenuItem>
+                            <MenuItem value="Request new data sources">Request new data sources</MenuItem>
                             <MenuItem value="Ask a question">Ask a question</MenuItem>
                             <MenuItem value="Request training or related materials">Request training or related materials</MenuItem>
                             <MenuItem value="Submit a suggestion">Submit a suggestion</MenuItem>

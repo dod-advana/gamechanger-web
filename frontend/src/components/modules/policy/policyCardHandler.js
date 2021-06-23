@@ -420,7 +420,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => 
     trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : null}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${filename}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
 const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked, cloneData) => {
