@@ -1,28 +1,24 @@
+import _ from "lodash";
+
 import {
+	getQueryVariable,
 	getTrackingNameForFactory,
 	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE
 } from "../../../gamechangerUtils";
-import {trackSearch} from "../../telemetry/Matomo";
+import { trackSearch } from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getUserData, isDecoupled,
-	setState
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-const setSearchURL = (state, selectedCategories) => {
-	const { searchText} = state;
-	
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?${new URLSearchParams({ keyword: searchText, ...selectedCategories }).toString()}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const GlobalSearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -47,7 +43,7 @@ const GlobalSearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL(state);
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -69,9 +65,6 @@ const GlobalSearchHandler = {
 		
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
-		
-		// Save search settings to postgres
-		gameChangerAPI.setUserSearchSettings({searchSettings});
 	
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
@@ -180,8 +173,6 @@ const GlobalSearchHandler = {
 				console.error(err);
 			}
 			
-			console.log(categoryMetadata);
-			
 			const t1 = new Date().getTime();
 			
 			let getUserDataFlag = true;
@@ -237,7 +228,7 @@ const GlobalSearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -256,7 +247,51 @@ const GlobalSearchHandler = {
 				hasExpansionTerms: false
 			});
 		}
-	}
+	},
+
+	parseSearchURL(defaultState, url) {
+		if (!url) url = window.location.href;
+
+		const parsed = {};
+
+		const keyword = getQueryVariable("keyword", url);
+		const categoriesURL = getQueryVariable("categories", url);
+
+		if (keyword) {
+			parsed.searchText = keyword;
+		}
+
+		if (categoriesURL) {
+			const categories = categoriesURL.split("_");
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
+			for (const category in selectedCategories) {
+				selectedCategories[category] = categories.includes(category);
+			}
+			if (!_.isEmpty(selectedCategories)) {
+				parsed.selectedCategories = selectedCategories;
+			}
+		}
+
+		return parsed;
+	},
+
+	setSearchURL(state) {
+		const { searchText,  resultsPage } = state;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+		const categoriesText = (state.selectedCategories
+			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
+			: undefined);
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('keyword', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
+		window.history.pushState(null, document.title, linkString);
+	},
 };
 
 export default GlobalSearchHandler;

@@ -65,7 +65,6 @@ const endpoints = {
 	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
-	setUserSearchSettings: '/api/gameChanger/setUserSearchSettings',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/deleteInternalUser',
@@ -93,6 +92,7 @@ const endpoints = {
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
+	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 
 
 	exportHistoryDELETE: function(id){
@@ -528,11 +528,6 @@ export default class GameChangerAPI {
 		const url = endpoints.setUserBetaStatus;
 		return axiosPOST(this.axios, url, {status: checked});
 	}
-
-	setUserSearchSettings = async (data) => {
-		const url = endpoints.setUserSearchSettings;
-		return axiosPOST(this.axios, url, data);
-	}
 	
 	getInternalUsers = async () => {
 		const url = endpoints.getInternalUsers;
@@ -708,6 +703,11 @@ export default class GameChangerAPI {
 	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+	}
+
+	getFeedbackData = async () => {
+		const url = endpoints.getFeedbackData;
+		return axiosGET(this.axios, url);
 	}
 	
 	getThumbnail = async (body) => {
