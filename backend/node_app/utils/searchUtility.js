@@ -5,6 +5,7 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
+const { include } = require('underscore');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -332,6 +333,7 @@ class SearchUtility {
 			includeRevoked = false,
 			sort = 'Relevance', 
 			order = 'desc',
+			includeHighlights = true
 		 }, 
 		 user) {
 
@@ -453,6 +455,7 @@ class SearchUtility {
 								multi_match: {
 									query: `${parsedQuery}`,
 									fields: ['title.search', 'filename.search'],
+									operator: 'AND',
 									type: 'phrase'
 								  }
 							}
@@ -554,6 +557,10 @@ class SearchUtility {
 						}
 					}
 				);
+			}
+			if (includeHighlights == false) {
+				delete query.query.bool.should[0].nested.inner_hits;
+				delete query.highlight;
 			}
 			return query;
 		} catch (err) {
@@ -1497,7 +1504,6 @@ class SearchUtility {
 	
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-	
 			if (esQuery === '') {
 				if (forGraphCache) {
 					esQuery = this.getElasticsearchQueryForGraphCache(body, userId);
