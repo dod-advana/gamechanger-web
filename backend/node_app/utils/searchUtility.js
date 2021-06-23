@@ -5,6 +5,7 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
+const { PassThrough } = require('stream');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -1176,7 +1177,7 @@ class SearchUtility {
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
-			}
+			};
 			if (sentResults) {
 				for (var i = 0; i < sentResults.length; i++) {
 					try {
@@ -1209,8 +1210,8 @@ class SearchUtility {
 						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			}
-			if (entityQAResults.body.hits.total.value > 0) {
+			};
+			if (entityQAResults.body) {
 				try{
 					let docId;
 					let resultType;
