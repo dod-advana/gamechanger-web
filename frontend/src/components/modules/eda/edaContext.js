@@ -19,14 +19,20 @@ const initState = {
         },
         minObligatedAmount: null,
         maxObligatedAmount: null,
-        contractsOrMods: 'both'
+        contractsOrMods: 'both',
+        majcoms: {
+            "air force": [],
+            "army": [],
+            "defense": [],
+            "navy": []
+        }
     },
     showDialog: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
     statsLoading: false,
-    summaryCardView: false,
+    summaryCardView: false, 
     summaryCardData: [],
     resultsText: '',
     resetSettingsSwitch: false,

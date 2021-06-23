@@ -197,7 +197,7 @@ const EdaMainViewHandler = {
 					<div id="game-changer-content-top"/>
 					{!loading &&
 						<StyledCenterContainer showSideFilters={true}>
-							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
+							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : { width: '22%' }}>
 								<div className={'side-bar-container'}>
 									{summaryCardView ?
 										<div>
@@ -219,10 +219,10 @@ const EdaMainViewHandler = {
 							</div>
 							<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
 								{!hideTabs && 
-									<ViewHeader resultsText={resultsText} {...props}/>
+									<ViewHeader resultsText={resultsText} {...props} mainStyles={{ margin: '20px 28px 30px', padding: '5px 0 0 0' }} />
 								}
 							
-								<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
+								<div className={`tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
 									<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
 										<div className="row" style={{marginLeft: 0, marginRight: 0}}>
 											{!loading &&
