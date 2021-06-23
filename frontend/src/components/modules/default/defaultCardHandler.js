@@ -374,12 +374,13 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						}
 					</div>
 				</GCTooltip>
-				<div className={'selected-favorite'}>
+				{/* // export and favoriting not currently working for default
+					<div className={'selected-favorite'}>
 					<div style={{display: "flex"}}>
 						{checkboxComponent(item.filename, item.display_title_s ?? item.title, idx)}
 						{favoriteComponent()}
 					</div>
-				</div>
+				</div> */}
 			</div>
 			{docListView &&
 				<div className={'list-view-sub-header'}>
