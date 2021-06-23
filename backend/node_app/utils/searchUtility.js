@@ -37,6 +37,9 @@ class SearchUtility {
 		this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
+		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
+		this.findAliases = this.findAliases.bind(this);
+		this.makeBigramQueries = this.makeBigramQueries.bind(this);
 		this.phraseQAQuery = this.phraseQAQuery.bind(this);
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
@@ -921,113 +924,8 @@ class SearchUtility {
 		}
 	}
 
-	phraseQAQuery (searchTextList, maxLength, user) {
-		// breaks up a question query into bigrams for ES search
-		let bigrams = [];
-		let length = searchTextList.length - 2;
-		let searchText = searchTextList.join(' ');
-		for (let i = 0; i <= length; i++) {
-			bigrams.push(searchTextList.slice(i, i+2).join(' '));
-		}
-
-		try {
-			// add additional search fields to the query
-			const mustQueries = [];
-			const shouldQueries = [
-				{
-				  multi_match: {
-					query: searchText,
-					fields: [
-					  'keyw_5^2',
-					  'id^2',
-					  'summary_30',
-					  'paragraphs.par_raw_text_t'
-					],
-					operator: 'or'
-				  }
-				}
-			  ]
-			for (const element of bigrams) {
-				const wildcard = {
-					wildcard: {
-						'paragraphs.filename.search': { 
-							value:  element,
-							boost: 15
-						}
-					}
-				}
-				mustQueries.push(wildcard);
-				const qs = {
-					query_string: {
-					  query: element,
-					  default_field: 'paragraphs.par_raw_text_t',
-					  default_operator: 'AND',
-					  fuzzy_max_expansions: 100,
-					  fuzziness: 'AUTO'
-					}
-				}
-				mustQueries.push(qs);
-				const mm = {
-					multi_match: {
-					  query: element,
-					  fields: ["summary_30","title", "keyw_5"],
-					  type: "phrase",
-					  boost: 5
-					}
-				}
-				shouldQueries.push(mm);
-			}
-
-			let query = {
-				
-				query: {
-				  bool: {
-					must: [
-					  {
-						nested: {
-						  path: 'paragraphs',
-						  inner_hits: {
-							_source: false,
-							stored_fields: [
-							  'paragraphs.page_num_i',
-							  'paragraphs.filename',
-							  'paragraphs.par_raw_text_t'
-							],
-							from: 0,
-							size: 5,
-							highlight: {
-							  fields: {
-								'paragraphs.filename.search': {
-								  number_of_fragments: 0
-								},
-								'paragraphs.par_raw_text_t': {
-								  fragment_size: maxLength,
-								  number_of_fragments: 1
-								}
-							  },
-							  fragmenter: 'span'
-							}
-						  },
-						  query: {
-							bool: {
-							  should: mustQueries
-							}
-						  }
-						}
-					  }
-					],
-					should: shouldQueries
-				  }
-				}
-			  }
-			return query;
-		} catch (e) {
-			this.logger.error(e, 'TJDDKH5F', user);
-		}
-	}
-
 	// makes phrases to add to ES queries for entities or gamechanger indices
-	makeBigramQueries (searchTextList) {
+	makeBigramQueries (searchTextList, alias) {
 
 		try {
 			let bigrams = [];
@@ -1036,9 +934,12 @@ class SearchUtility {
 			for (let i =0; i <= length; i++) {
 				bigrams.push(searchTextList.slice(i, i+2).join(' '));
 			}
-			
+			if (alias !== {}) {
+				bigrams.push(alias._source.name);
+			} 
+
 			// make one object for all queries
-			const bigramQueries = {aliasQuery: '', entityShouldQueries: [],  docMustQueries: [], 
+			const bigramQueries = {entityShouldQueries: [],  docMustQueries: [], 
 				docShouldQueries: [
 					{
 						multi_match: {
@@ -1054,31 +955,6 @@ class SearchUtility {
 					}
 				]
 			}
-
-			// make alias queries for each word
-			const entityMustQueries = [];
-
-			for (const word of searchTextList) {
-
-				const alias = {
-					match: { 'aliases.name': word }
-				}
-				entityMustQueries.push(alias);
-			};
-
-			const aliasQuery = {
-				nested: {
-					path: "aliases",
-					query: {
-						bool: {
-							should: entityMustQueries
-						}
-					}
-				}
-			};
-
-			bigramQueries.entityShouldQueries.push(aliasQuery);
-			bigramQueries.aliasQuery = aliasQuery;
 			
 			// make phrase queries for each bigram
 			for (const element of bigrams) {
@@ -1136,7 +1012,7 @@ class SearchUtility {
 				}
 				bigramQueries.entityShouldQueries.push(multiEntityQuery);
 			};
-
+			console.log(JSON.stringify(bigramQueries));
 			return bigramQueries;
 
 		} catch (e) {
@@ -1215,6 +1091,66 @@ class SearchUtility {
 			return query;
 		} catch (e) {
 		this.logger.error(e, 'TJDDKH5F', user);
+		}
+	}
+
+	makeAliasesQuery (searchTextList, entityLimit) {
+
+		try {
+			// make alias queries for each word
+			const mustQueries = [];
+
+			for (const word of searchTextList) {
+				const alias = {
+					match: { 'aliases.name': word }
+				}
+				mustQueries.push(alias);
+			};
+
+			const aliasQuery = {
+				nested: {
+					path: "aliases",
+					query: {
+						bool: {
+							should: mustQueries
+						}
+					}
+				}
+			};
+			return {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: aliasQuery
+							}
+						}
+					};
+		} catch (e) {
+			this.logger.error(e, 'LQPRYTUOF', '');
+		}
+	}
+
+	async findAliases (searchTextList, entityLimit, user) {
+
+		let matchingAlias = {};
+		let esClientName = 'gamechanger';
+		let entitiesIndex = 'entities-new';
+		try {
+			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit)
+			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
+			if (aliasResults) {
+				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map(item => item.name);
+				for (var i = 0; i < aliases.length; i++) {
+					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
+						matchingAlias = aliasResults.body.hits.hits[0];
+						break
+					}
+				}
+			};
+			return matchingAlias
+		} catch (e) {
+		this.logger.error(e, 'MBWYH5F', user);
 		}
 	}
 
@@ -1338,11 +1274,11 @@ class SearchUtility {
 					}
 				}
 			}
-			if (entityQAResults.body.hits.total.value > 0) {
+			if (entityQAResults) {
 				try{
 					let docId;
 					let resultType;
-					let topEntity = entityQAResults.body.hits.hits[0];
+					let topEntity = entityQAResults;
 					if (topEntity._source.entity_type === 'topic') {
 						docId = topEntity._source.name.toLowerCase();
 						resultType = 'topic';

@@ -362,8 +362,6 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
-			//console.log("entities", enrichedResults.entities);
-			//console.log("topics", enrichedResults.topics);
 
 			return enrichedResults;
 		} catch (e) {
@@ -398,23 +396,31 @@ class PolicySearchHandler extends SearchHandler {
 					let esIndex = 'gamechanger';
 					let entitiesIndex = 'entities-new';
 					let queryType;
+					let entityQAResults;
+					let qaEntityQuery;
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList);
-					let aliasesQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='alias_only', qaParams.entityLimit, qaParams.maxLength, userId);
-					let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasesQuery, userId);
-					console.log("\naliases", aliasResults.body.hits.hits);
-					let qaQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
-					let qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
-					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
-					searchResults.qaContext.context = context;
-					if (testing === true) {
-						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, userId);
+					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList, alias);
+					if (alias === {}) {
+						qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
+						entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+						if (entities) {
+							entityQAResults = entities.body.hits.hits[0]._source
+						} else {
+							entityQAResults = alias;
+						}
 					}
-					let qaContext = context.map(item => item.text);
+					let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
+					let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
+					let context = await this.searchUtility.getQAContext(docQAResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					if (context.length > 0) { // if context results, query QA model
+						console.log("\n\nCONTEXT: ", context)
+						searchResults.qaContext.context = context;
+						if (testing === true) {
+							this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+						}
+						let qaContext = context.map(item => item.text);
 						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
 						searchResults.qaResults.question = qaSearchText + '?';
 						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
