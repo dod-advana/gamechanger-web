@@ -359,17 +359,15 @@ function GCCard (props) {
 		}
 	}, [state, loaded, cardType, item]);
 
-    useEffect(() => {
-
-	}, [popperIsOpen, popperAnchorEl, favorite]);
+	useEffect(() => {	}, [popperIsOpen, popperAnchorEl, favorite]);
     
-    useEffect(() => {
+	useEffect(() => {
 		if (state.listView) {
 			setToggledMore(false);
 		}
 	}, [state.listView]);
     
-    let searchText = state.searchText;
+  let searchText = state.searchText;
 
 	const tutorialComponent = "Search Result Card";
 	
@@ -436,8 +434,8 @@ function GCCard (props) {
 					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
 					cursor: "pointer",
-					marginTop: 9,
-					fontSize: 26
+					fontSize: 26,
+					alignSelf: 'center'
 				}}/>
 			</GCTooltip>
 		);
@@ -520,7 +518,6 @@ function GCCard (props) {
 			selected={selected} allowScroll={allowScroll} showSideFilters={state.showSideFilters}
 		 	ntelligentSearch={intelligentSearch} graphView={graphView}
 		>
-			
 			<Popover
 				onClose={() => handleCancelFavorite()}
 				id={idx}
