@@ -58,7 +58,7 @@ class PolicyGraphHandler extends GraphHandler {
 			// const searchResults = this.searchUtility.cleanUpIdEsResults(esResults, parsedTerms, userId, expandTerms);
 			const searchResults = this.cleanUpEsResultsForGraph(esResults, parsedTerms, userId, expandTerms);
 
-			const gT1 = new Date().getTime();
+			// const gT1 = new Date().getTime();
 
 			// const { docIds, pubIds, searchTerms } = searchResults;
 			const { docs, searchTerms } = searchResults;
@@ -75,9 +75,9 @@ class PolicyGraphHandler extends GraphHandler {
 			const query = 'Mocked from ES';
 			const params = [];
 
-			console.log(`Time for ES Search = ${(gT1 - gT0) / 1000}`);
-			const gT2 = new Date().getTime();
-			console.log(`Time for Graph Query = ${(gT2 - gT1) / 1000}`);
+			// console.log(`Time for ES Search = ${(gT1 - gT0) / 1000}`);
+			// const gT2 = new Date().getTime();
+			// console.log(`Time for Graph Query = ${(gT2 - gT1) / 1000}`);
 
 			const graphData = { graphData: results, searchTerms };
 
@@ -92,8 +92,8 @@ class PolicyGraphHandler extends GraphHandler {
 			// 	// node.vy = 0;
 			// });
 
-			const gT3 = new Date().getTime();
-			console.log(`Time for Overall = ${(gT3 - gT0) / 1000}`);
+			// const gT3 = new Date().getTime();
+			// console.log(`Time for Overall = ${(gT3 - gT0) / 1000}`);
 
 			// try to store to cache
 			if (useGCCache && graphData) {
