@@ -9,6 +9,8 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from "@material-ui/core/styles/withStyles";
 import {setState} from "../../sharedFunctions";
+import {trackEvent} from "../telemetry/Matomo";
+import {getTrackingNameForFactory} from "../../gamechangerUtils";
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -42,7 +44,6 @@ const initState = {
 	textsList: [' '],
 	currentTextIndex: 0,
 	textIndicies: [],
-	textIndiciesFull: [],
 	tagsList: [[]],
 	tagDescriptions: {},
 	annotatedTokens: [],
@@ -64,7 +65,10 @@ const initState = {
 	startPar: 0,
 	endPar: 0,
 	atStart: false,
-	atEnd: false
+	atEnd: false,
+	filename: '',
+	pageNumber: 0,
+	searchText: ''
 }
 
 class ResponsibilityAssist extends Component {
@@ -96,26 +100,6 @@ class ResponsibilityAssist extends Component {
 		setState(this.props.context.dispatch, {showResponsibilityAssistModal: false});
 	}
 
-	countWords(str) {
-		let tmpStr = str.replace(/(^\s*)|(\s*$)/gi,"");
-		tmpStr = tmpStr.replace(/[.]/gi, "");
-		tmpStr = tmpStr.replace(/[ ]{2,}/gi," ");
-		tmpStr = tmpStr.replace(/\n /,"\n");
-		const count = tmpStr.split(' ').length;
-
-		return count
-	}
-
-	countEntities(entities) {
-
-		let count = 0;
-
-		Object.keys(entities).forEach(key => {
-			if (entities[key].length > 0) count += 1;
-		});
-
-		return count;
-	}
 
 	getAnnotationData = async () => {
 		this.setState({ loading: true, canMoveForward: true, canSubmit: true });
@@ -125,10 +109,12 @@ class ResponsibilityAssist extends Component {
 			filename: this.props.context.state.filename,
 			text: this.props.context.state.responsibilityText
 		});
+		console.log(data);
 		this.setupPowerUserData(data);
 	}
 
 	setupPowerUserData = (data) => {
+		console.log(data);
 		let startPar = 0;
 		let paraLen = data.paragraphs.length;
 		let endPar = paraLen;
@@ -152,10 +138,9 @@ class ResponsibilityAssist extends Component {
 			return paragraph.par_raw_text_t;
 		});
 		
-		const textIndiciesWithRealParagraphs = [];
-		texts.forEach((text, index) => {
-			textIndiciesWithRealParagraphs.push(index);
-		});
+		const filename = data.paragraphs[data.par_num]?.filename;
+		const pageNumber = data.paragraphs[data.par_num]?.page_num_i + 1;
+		const searchText = this.props.context.state.responsibilityText;
 
 		const tagsList = [ "Entity", "Verb", "Responsibility"];
 		const tagmap = {"Entity": highlightColors[3],
@@ -166,7 +151,6 @@ class ResponsibilityAssist extends Component {
 			startPar: startPar,
 			endPar: endPar,
 			textsListsFull: texts,
-			textIndiciesFull: textIndiciesWithRealParagraphs,
 			textsList: texts,
 			tagsList: tagsList,
 			colorMap: tagmap,
@@ -176,7 +160,10 @@ class ResponsibilityAssist extends Component {
 			doc_type: data.doc_type,
 			type: data.type,
 			atStart: atStart,
-			atEnd: atEnd
+			atEnd: atEnd,
+			filename: filename,
+			pageNumber: pageNumber,
+			searchText: searchText
 		});
 	}
 
@@ -186,7 +173,6 @@ class ResponsibilityAssist extends Component {
 			textsList: [' '],
 			currentTextIndex: 0,
 			textIndicies: [],
-			textIndiciesFull: [],
 			tagsList: [[]],
 			tagDescriptions: {},
 			annotatedTokens: [],
@@ -211,7 +197,10 @@ class ResponsibilityAssist extends Component {
 			startPar: 0,
 			endPar: 0,
 			atStart: false,
-			atEnd: false
+			atEnd: false,
+			filename: '',
+			pageNumber: 0,
+			searchText: ''
 		});
 	}
 
@@ -296,6 +285,17 @@ class ResponsibilityAssist extends Component {
 	handleReject = () => {
 		//TODO... this function properly
 		this.handleSave(true);
+	}
+
+	handleOpen = () => {
+		const { filename, pageNumber, searchText} = this.state;
+		//this.handleSave(true);
+		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
+		//window.open(`/#/pdfviewer/gamechanger?filename=${filename}&cloneIndex=${state.cloneData?.clone_name}`);
+		console.log(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
+		//window.open(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
 	}
 
 	handleSave = (closing = false) => {
@@ -385,8 +385,18 @@ class ResponsibilityAssist extends Component {
                 </DialogContent>
 
                 <DialogActions>
-					<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>						
+					<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>
 						<div style={{ justifyContent: 'flex-end' }}>
+							<GCButton
+								id={'gcOpenDoc'}
+								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								onClick={() => { this.handleOpen() }}
+								textStyle={{color: 'grey'}}
+								buttonColor={'white'}
+								borderColor={primaryGreyLight}
+							>
+								Open PDF
+							</GCButton>
 							<GCButton
 								id={'gcReject'}
 								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
