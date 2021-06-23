@@ -68,7 +68,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName, searchText} = req.body;
+		const {functionName, searchText = ''} = req.body;
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
 		if(doubleQuoteCount % 2 === 1){
@@ -545,7 +545,7 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'Z9DWH7K', userId);
-			throw msg;
+			return { totalCount: 0, docs: [] };
 		}
 	}
 
