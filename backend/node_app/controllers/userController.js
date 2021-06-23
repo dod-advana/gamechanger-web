@@ -32,12 +32,12 @@ class UserController {
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
 			search = new SearchController(opts),
-			sequelize = new Sequelize(constants.POSTGRES_CONFIG.databases.game_changer),
+			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			emailUtility = new EmailUtility({
-				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
-				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS
+				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
+				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
+				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
 			}),
 			dataApi = new DataLibrary(opts),
 		} = opts;
@@ -52,7 +52,6 @@ class UserController {
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
-		this.sequelize = sequelize;
 		this.search = search;
 		this.externalAPI = externalAPI;
 		this.emailUtility = emailUtility;
@@ -63,7 +62,6 @@ class UserController {
 		this.addInternalUser = this.addInternalUser.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
 		this.setUserBetaStatus = this.setUserBetaStatus.bind(this);
-		this.setUserSearchSettings = this.setUserSearchSettings.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
@@ -201,7 +199,9 @@ class UserController {
 						search.favorited = countData[0].favorited_count;
 						const tiny = this.searchUtility.getQueryVariable('tiny', search.tiny_url);
 						const url = await this.search.convertTiny(tiny);
-						search.url = url.url;
+						if (url) {
+							search.url = url.url;
+						}
 					}
 
 					user.favorite_searches = favorite_searches;
@@ -282,7 +282,6 @@ class UserController {
 					defaults: {
 						user_id: hashed_user,
 						is_beta: false,
-						search_settings: {},
 						notifications: { total: 0, favorites: 0, history: 0 }
 					},
 					raw: true
@@ -316,29 +315,6 @@ class UserController {
 			res.status(200).send(status);
 		} catch (err) {
 			this.logger.error(err.message, 'NGED0R4', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setUserSearchSettings(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
-			await this.gcUser.update(
-				{
-					search_settings: req.body
-				},
-				{
-					where: {
-						user_id: hashed_user
-					}
-				}
-			);
-			res.status(200).send();
-		} catch (err) {
-			this.logger.error(err.message, 'AXSITXS', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -395,7 +371,7 @@ class UserController {
 				username = req.body.username;
 			}
 			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.findAll({ where: { username } });
+			const exists = await this.internalUserTracking.findOne({ where: { username } });
 			if (exists) {
 				const { id, username } = exists;
 				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
@@ -547,7 +523,7 @@ class UserController {
 
 			const hashed_user = this.sparkMD5.hash(userId);
 
-			await this.gcUser.update({ 'api_requests': this.sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
+			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
 			
 			res.status(200).send();
 		} catch(err) {
