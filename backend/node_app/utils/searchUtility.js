@@ -934,9 +934,13 @@ class SearchUtility {
 			for (let i =0; i <= length; i++) {
 				bigrams.push(searchTextList.slice(i, i+2).join(' '));
 			}
-			if (alias !== {}) {
-				bigrams.push(alias._source.name);
-			} 
+			try {
+				if (alias._source) {
+					bigrams.push(alias._source.name);
+				}
+			} catch (e) {
+				this.logger.error(e, 'DYWPQMCSW', '');
+			}
 
 			// make one object for all queries
 			const bigramQueries = {entityShouldQueries: [],  docMustQueries: [], 
@@ -1012,7 +1016,6 @@ class SearchUtility {
 				}
 				bigramQueries.entityShouldQueries.push(multiEntityQuery);
 			};
-			console.log(JSON.stringify(bigramQueries));
 			return bigramQueries;
 
 		} catch (e) {
@@ -1135,19 +1138,22 @@ class SearchUtility {
 
 		let matchingAlias = {};
 		let esClientName = 'gamechanger';
-		let entitiesIndex = 'entities-new';
+		let entitiesIndex = 'entities';
 		try {
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit)
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
-			if (aliasResults) {
+			if (aliasResults.body.hits.hits[0]) {
 				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map(item => item.name);
 				for (var i = 0; i < aliases.length; i++) {
 					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
 						matchingAlias = aliasResults.body.hits.hits[0];
+						matchingAlias.match = aliases[i]
 						break
 					}
 				}
-			};
+			} else {
+				console.log("No matching aliases")
+			}
 			return matchingAlias
 		} catch (e) {
 		this.logger.error(e, 'MBWYH5F', user);
@@ -1198,7 +1204,7 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(contextResults, entityQAResults, sentResults, userId, qaParams) {
+	async getQAContext(contextResults, entity, sentResults, userId, qaParams) {
 		
 		let context = [];
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
@@ -1274,22 +1280,21 @@ class SearchUtility {
 					}
 				}
 			}
-			if (entityQAResults) {
+			if (entity._source) {
 				try{
 					let docId;
 					let resultType;
-					let topEntity = entityQAResults;
-					if (topEntity._source.entity_type === 'topic') {
-						docId = topEntity._source.name.toLowerCase();
+					if (entity._source.entity_type === 'topic') {
+						docId = entity._source.name.toLowerCase();
 						resultType = 'topic';
 					} else {
-						docId = topEntity._source.name;
+						docId = entity._source.name;
 						resultType = 'entity';
 					}
-					let entity = {filename: topEntity._source.name, docId: docId, docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: resultType};
-					entity.source = "entity search";
-					entity.text = topEntity._source.information;
-					context.unshift(entity);
+					let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType};
+					entityObj.source = "entity search";
+					entityObj.text = entity._source.information;
+					context.unshift(entityObj);
 				} catch (e) {
 					LOGGER.error(e.message, 'REXUPFJN', userId);
 				}
