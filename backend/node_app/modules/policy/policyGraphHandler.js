@@ -48,13 +48,25 @@ class PolicyGraphHandler extends GraphHandler {
 			const [parsedQuery, parsedTerms] = await this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
+			req.body.limit = 10000;
+			req.body.storedFields = [
+				'id',
+				'doc_type',
+				'doc_num',
+				'display_doc_type_s',
+				'display_org_s',
+				'display_title_s',
+				'ref_list',
+				'pagerank_r'
+			]
+			req.body.includeHighlights = false;
 
-			const esQuery = this.getElasticsearchQueryForGraph(req.body, userId);
-
+			//const esQuery = this.getElasticsearchQueryForGraph(req.body, userId);
+			const esQuery = this.searchUtility.getElasticsearchQuery(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneData.clone_name, permissions);
 
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-
+		
 			// const searchResults = this.searchUtility.cleanUpIdEsResults(esResults, parsedTerms, userId, expandTerms);
 			const searchResults = this.cleanUpEsResultsForGraph(esResults, parsedTerms, userId, expandTerms);
 
@@ -195,8 +207,8 @@ class PolicyGraphHandler extends GraphHandler {
 			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
-
-			const esQuery = this.getElasticsearchQueryForGraph(searchBody, userId);
+			
+			const esQuery = this.searchUtility.getElasticsearchQuery(searchBody, userId);
 
 			let clientObj = this.searchUtility.getESClient(cloneData.clone_name, permissions);
 
