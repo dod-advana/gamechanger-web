@@ -374,7 +374,9 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
-		
+		let esClientName = 'gamechanger';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
@@ -397,14 +399,12 @@ class PolicySearchHandler extends SearchHandler {
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
 					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
-					let esClientName = 'gamechanger';
-					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities';
 					try {
 						entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 					} catch (e) {
 						this.logger.error(e.message, 'KQ68CHSU');
 					}
+
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
 					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					searchResults.qaContext.context = context;
@@ -628,8 +628,9 @@ class PolicySearchHandler extends SearchHandler {
 	// uses searchtext to get entity + parent, return entitySearch object
 	async entitySearch(searchText, offset, limit = 6, userId) {
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
+
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (entityResults.body.hits.hits.length > 0){
@@ -675,7 +676,7 @@ class PolicySearchHandler extends SearchHandler {
 
 	async topicSearch(searchText, offset, limit = 6, userId){
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getTopicQuery(searchText, offset, limit);
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
