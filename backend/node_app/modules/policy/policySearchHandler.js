@@ -375,10 +375,10 @@ class PolicySearchHandler extends SearchHandler {
 			searchText,
 		} = req.body;
 		let esClientName = 'gamechanger';
-		let esIndex = 'gamechanger';
-		let entitiesIndex = 'entities-new';
-		//let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-		//let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		//let esIndex = 'gamechanger';
+		//let entitiesIndex = 'entities-new';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
@@ -417,7 +417,7 @@ class PolicySearchHandler extends SearchHandler {
 							this.logger.error(e.message, 'I9XPQL2W');
 						}
 						if (entities.body) {
-							entityQAResults = entities.body.hits.hits[0]._source
+							entityQAResults = entities.body.hits.hits[0]
 						}
 					}
 					let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
