@@ -57,6 +57,8 @@ const endpoints = {
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
+	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
+	trainModel: '/api/gamechanger/admin/trainModel',
 	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
 	getS3List: '/api/gamechanger/admin/getS3List',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
@@ -487,6 +489,16 @@ export default class GameChangerAPI {
 	downloadDependencies = async () => {
 		const url = endpoints.downloadDependencies;
 		return axiosGET(this.axios, url);
+	}
+
+	downloadCorpus = async (data) => {
+		const url = endpoints.downloadCorpus;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	trainModel = async (data) =>{
+		const url = endpoints.trainModel;
+		return axiosPOST(this.axios, url, data);
 	}
 
 	getAPIInformation = async () => {
