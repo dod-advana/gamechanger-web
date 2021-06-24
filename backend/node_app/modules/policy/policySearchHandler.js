@@ -407,9 +407,11 @@ class PolicySearchHandler extends SearchHandler {
 					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, esClientName, entitiesIndex, userId);
 					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList, alias);
 					if (alias._source) {
+						console.log("FOUND ALIAS");
 						entityQAResults = alias;
 						qaSearchText = qaSearchText.replace(alias.match.toLowerCase(), alias._source.name);
 					} else {
+						console.log("NO ALIAS")
 						qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
 						try {
 							entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);

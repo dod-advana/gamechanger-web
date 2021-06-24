@@ -912,9 +912,7 @@ class SearchUtility {
 						break
 					}
 				}
-			} else {
-				console.log("No matching aliases")
-			}
+			};
 			return matchingAlias
 		} catch (e) {
 		this.logger.error(e, 'MBWYH5F', user);
@@ -1038,8 +1036,9 @@ class SearchUtility {
 						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			}
+			};
 			if (entity._source) {
+				console.log("ENTITY", entity);
 				try{
 					let docId;
 					let resultType;
