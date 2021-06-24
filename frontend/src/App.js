@@ -232,6 +232,14 @@ const App = (props) => {
 		return (<LoadingIndicator />);
 	}
 
+	async function errorHandler(error) {
+		try {
+			await gameChangerAPI.sendFrontendErrorPOST(error.stack);
+		} catch(err) {
+				console.log({ err });
+		}
+	}
+
 	return (
 		<Router>
 			<MatomoProvider value={instance}>
@@ -246,6 +254,7 @@ const App = (props) => {
 										<>
 											<ErrorBoundary
 												FallbackComponent={ErrorPage}
+												onError={errorHandler}
 											>
 												{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
 												<Switch >
