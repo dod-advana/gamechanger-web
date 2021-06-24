@@ -79,6 +79,7 @@ const styles = {
     },
     container: {
         padding: 15,
+        margin: '0 0 0 15px'
     },
     checkboxes: {
         margin: '0 0 0 25px'
