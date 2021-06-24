@@ -1134,11 +1134,9 @@ class SearchUtility {
 		}
 	}
 
-	async findAliases (searchTextList, entityLimit, user) {
+	async findAliases (searchTextList, entityLimit, esClientName, entitiesIndex, user) {
 
 		let matchingAlias = {};
-		let esClientName = 'gamechanger';
-		let entitiesIndex = 'entities';
 		try {
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit)
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
@@ -1191,11 +1189,9 @@ class SearchUtility {
 		}
 	}
 
-	async queryOneDocQA(docId, userId) {
+	async queryOneDocQA(docId, esClientName, esIndex, userId) {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
-			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
 			return singleResult;
@@ -1204,7 +1200,7 @@ class SearchUtility {
 		}
 	}
 
-	async getQAContext(contextResults, entity, sentResults, userId, qaParams) {
+	async getQAContext(contextResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
 		
 		let context = [];
 		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
@@ -1235,7 +1231,7 @@ class SearchUtility {
 					}
 				} else {
 					parIdx = 0;
-					let singleResult = await this.queryOneDocQA(resultDoc._source.id, userId); // this adds the beginning of the doc
+					let singleResult = await this.queryOneDocQA(resultDoc._source.id, esClientName, esIndex, userId); // this adds the beginning of the doc
 					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
 					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 					contextPara.source = "context search"

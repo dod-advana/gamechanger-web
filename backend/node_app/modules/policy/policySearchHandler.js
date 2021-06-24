@@ -394,14 +394,14 @@ class PolicySearchHandler extends SearchHandler {
 				try {
 					let esClientName = 'gamechanger';
 					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities';
+					let entitiesIndex = 'entities-new';
 					let queryType;
 					let entityQAResults;
 					let qaEntityQuery;
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					searchResults.qaResults.question = qaSearchText + '?';
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, userId);
+					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, esClientName, entitiesIndex, userId);
 					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList, alias);
 					if (alias._source) {
 						entityQAResults = alias;
@@ -415,7 +415,7 @@ class PolicySearchHandler extends SearchHandler {
 					}
 					let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
 					let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-					let context = await this.searchUtility.getQAContext(docQAResults, entityQAResults, searchResults.sentResults, userId, qaParams);
+					let context = await this.searchUtility.getQAContext(docQAResults, entityQAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
 					if (context.length > 0) { // if context results, query QA model
 						searchResults.qaContext.context = context;
 						console.log("\n\nCONTEXT: ", context)
