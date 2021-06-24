@@ -725,7 +725,6 @@ class EDASearchUtility {
 			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
 		}
 
-
 		// Paying Office
 		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
 		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
@@ -734,7 +733,12 @@ class EDASearchUtility {
 		result.modification_eda_ext = data.modification_number_eda_ext;
 
 		// Award ID and Reference IDV
-		result.award_id_eda_ext = data.award_id_eda_ext;
+		if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
+			result.award_id_eda_ext = data.referenced_idv_eda_ext + "-" + data.award_id_eda_ext;
+		}
+		else {
+			result.award_id_eda_ext = data.award_id_eda_ext;
+		}
 		result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
 
 		// Signature Date and Effective Date
@@ -768,6 +772,72 @@ class EDASearchUtility {
 		}
 		
 		return result;
+	}
+
+	getEDAContractQuery(award = "", idv = "", user) {
+		try {
+			let query = {
+				"_source": {
+					"includes": [
+						"extracted_data_eda_n.modification_number_eda_ext"
+					]
+				},
+				"from": 0,
+				"size": 10000,
+				"track_total_hits": true,
+				"query": {
+					"bool": {
+						"must": [
+							{
+								"nested": {
+									"path": "extracted_data_eda_n",
+									"query": {
+										"bool": {
+											"must": [
+												{
+													"match": {
+														"extracted_data_eda_n.award_id_eda_ext": {
+															"query": award
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+
+			if (idv !== "") {
+				query.query.bool.must.push(
+				{
+					"nested": {
+						"path": "extracted_data_eda_n",
+						"query": {
+							"bool": {
+								"must": [
+									{
+										"match": {
+											"extracted_data_eda_n.referenced_idv_eda_ext": {
+												"query": idv
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+				)
+			}
+			console.log(JSON.stringify(query))
+			return query;
+		} catch(err) {
+			this.logger.error(err, 'S5PJASQ', user)
+		}
 	}
 
 }
