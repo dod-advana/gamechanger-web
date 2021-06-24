@@ -68,7 +68,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName, searchText} = req.body;
+		const {functionName, searchText = ''} = req.body;
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
 		if(doubleQuoteCount % 2 === 1){
@@ -371,10 +371,16 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 		} = req.body;
+		let esClientName = 'gamechanger';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		
 		const QA = {};
 		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		QA.qaContext = {params: {}, context: []};
+
 		const permissions = req.permissions ? req.permissions : [];
+		let entityQAResults = {};
 		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
 		QA.qaContext.params = qaParams;
 		if (permissions) {
@@ -393,11 +399,13 @@ class PolicySearchHandler extends SearchHandler {
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
 					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
 					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
-					let esClientName = 'gamechanger';
-					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities-new';
+					try {
+						entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+					} catch (e) {
+						this.logger.error(e.message, 'KQ68CHSU');
+					}
+
 					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
 					QA.qaContext.context = context;
 					if (testing === true) {
@@ -542,7 +550,7 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'Z9DWH7K', userId);
-			throw msg;
+			return { totalCount: 0, docs: [] };
 		}
 	}
 
@@ -620,8 +628,9 @@ class PolicySearchHandler extends SearchHandler {
 	// uses searchtext to get entity + parent, return entitySearch object
 	async entitySearch(searchText, offset, limit = 6, userId) {
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
+
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (entityResults.body.hits.hits.length > 0){
@@ -667,7 +676,7 @@ class PolicySearchHandler extends SearchHandler {
 
 	async topicSearch(searchText, offset, limit = 6, userId){
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getTopicQuery(searchText, offset, limit);
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);

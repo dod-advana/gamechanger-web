@@ -736,6 +736,7 @@ export default function PolicyGraphView(props) {
 			case 'Publication':
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -747,6 +748,7 @@ export default function PolicyGraphView(props) {
 			case 'Document':
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -762,6 +764,7 @@ export default function PolicyGraphView(props) {
 				}
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -773,11 +776,12 @@ export default function PolicyGraphView(props) {
 				if (!graphCardData.done) {
 					getTopicCardData();
 				} else {
-					selectedItem.doc_count = graphCardData.doc_count;
-					selectedItem.entities = graphCardData.entities;
+					selectedItem.relatedTopics = graphCardData.relatedTopics;
+					selectedItem.documentCount = graphCardData.documentCount;
 				}
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -821,43 +825,32 @@ export default function PolicyGraphView(props) {
 	}
 	
 	const getTopicCardData = async () => {
-		const docData = await gameChangerAPI.graphQueryPOST(
-			`MATCH (n:Topic)-[:IS_IN]->(d:Document)
-			WHERE n.name = $name
-			WITH COUNT(d) as docs, collect(d.doc_id) as doc_ids
-			return sum(docs) as doc_count, doc_ids;`, 'S484S8B', cloneData.clone_name, {params: {name: selectedItem.name}}
+		const topicDocumentCount = gameChangerAPI.graphQueryPOST(
+			`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
+				RETURN t2.name as topic_name, count(d) as doc_count
+				ORDER BY doc_count DESC LIMIT 5;`, 'S484S8B', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
 		);
 		
-		const { doc_count, doc_ids } = docData.data;
+		const documentCount = gameChangerAPI.graphQueryPOST(
+			`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
+				RETURN count(d) as doc_count`, 'NTDC5KE', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
+		);
 		
-		const convertedIds = doc_ids.map(docId => {
-			return docId.replace(/'/g, '');
-		});
+		const results = await Promise.all([topicDocumentCount, documentCount]);
 		
-		const entityData = await gameChangerAPI.graphQueryPOST(`
-			MATCH (d:Document)-[m:MENTIONS]->(e:Entity)
-			WHERE d.doc_id in $ids AND EXISTS(e.aliases)
-			WITH e
-			MATCH (e)<-[:MENTIONS]-(d:Document)
-			WHERE d.doc_id in $ids
-			RETURN e as node, count(d) as entityScore, count(e) as mentions
-			ORDER BY mentions DESC LIMIT 10;
-		`, 'NTDC5KE', cloneData.clone_name, {params: {ids: convertedIds}});
+		const relatedTopics = results[0].data.graph_metadata;
+		const documentCountData = results[1].data.graph_metadata;
 		
-		const entities = entityData.data.nodes || [];
-		entities.forEach(entity => {
-			const aliases = entity.aliases ? entity.aliases.split(';') : [];
-			aliases.sort((a, b) => a.length - b.length)
-			entity.aliase = aliases[0];
-		});
 		if (selectedItem) {
-			selectedItem.entities = entities;
-			selectedItem.doc_count = doc_count;
+			selectedItem.relatedTopics = relatedTopics;
+			selectedItem.documentCount = documentCountData;
 			selectedItem.done = true;
 		}
 		setGraphCardData({
-			entities,
-			doc_count,
+			relatedTopics,
+			documentCount: documentCountData,
 			done: true
 		});
 	}
