@@ -1005,13 +1005,13 @@ class SearchUtility {
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
-			}
+			};
 			if (sentResults) {
 				for (var i = 0; i < sentResults.length; i++) {
 					try {
 						let [docId, parIdx] = sentResults[i].id.split('_');
 						docId = docId + '_0';
-						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
+						let singleResult = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
 						let resultDoc = singleResult.body.hits.hits[0];
 						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
 						contextPara.parId = parIdx;

@@ -375,12 +375,14 @@ class PolicySearchHandler extends SearchHandler {
 			searchText,
 		} = req.body;
 		let esClientName = 'gamechanger';
-		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-		//let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let esIndex = 'gamechanger';
 		let entitiesIndex = 'entities-new';
+		//let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		//let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
+		let entityQAResults = {};
 		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
 		searchResults.qaContext.params = qaParams;
 		if (permissions) {
@@ -398,6 +400,7 @@ class PolicySearchHandler extends SearchHandler {
 					let queryType;
 					let entityQAResults;
 					let qaEntityQuery;
+					let entities;
 					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 					searchResults.qaResults.question = qaSearchText + '?';
 					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
@@ -408,8 +411,12 @@ class PolicySearchHandler extends SearchHandler {
 						qaSearchText = qaSearchText.replace(alias.match.toLowerCase(), alias._source.name);
 					} else {
 						qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
-						let entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
-						if (entities) {
+						try {
+							entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+						} catch (e) {
+							this.logger.error(e.message, 'I9XPQL2W');
+						}
+						if (entities.body) {
 							entityQAResults = entities.body.hits.hits[0]._source
 						}
 					}
