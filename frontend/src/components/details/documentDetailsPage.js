@@ -265,8 +265,8 @@ const DocumentDetailsPage = (props) => {
 					<Card key={idx}
 						item={item}
 						idx={idx}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true}}
-						//dispatch={dispatch}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false}}
+						dispatch={() => {}}
 					/>
 				);
 			});

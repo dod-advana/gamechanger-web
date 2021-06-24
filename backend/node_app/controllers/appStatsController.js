@@ -270,9 +270,17 @@ class AppStatsController {
 				const idSearches = searchMap[document.idvisit];
 				for (let i = 0; i < idSearches.length; i++) {
 					if (idSearches[i].searchtime < document.documenttime) {
-						searchPdfMapping.push({ ...document, ...idSearches[i] });
+						searchPdfMapping.push({ ...document, ...idSearches[i], visited: undefined });
+						searchMap[document.idvisit][i].visited = true;
 						break;
 					}
+				}
+			}
+		}
+		for (const [key, value] of Object.entries(searchMap)) {
+			for ( let search of value){
+				if(search.visited === undefined){
+					searchPdfMapping.push(search);
 				}
 			}
 		}
@@ -310,7 +318,7 @@ class AppStatsController {
 			});
 			connection.connect();
 			const results = {
-				daysBack: 3,
+				daysBack,
 				data: []
 			};
 			results.data = await this.querySearchPdfMapping(opts, connection);

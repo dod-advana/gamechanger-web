@@ -58,4 +58,33 @@ describe('feedbackController', function () {
       }
     })
   });
+
+  describe('#getFeedback', () => {
+    it('should get feedback from postgres', async (done) => {
+      try {
+        const opts = { };
+        const req = {
+          ...reqMock,
+          body: {
+            limit: 100, offset: 0, order: [], where: {}
+          }
+        };
+        let resData;
+        const res = {
+          ...resMock,
+          send: (data) => {
+            resData = data;
+            return data;
+          }
+        };        
+        const target = new FeedbackController(opts);
+        target.feedback.findAndCountAll = () => Promise.resolve({count: 4, rows:  ['testing', 'one', 'two', 'three']});
+        const actual = await target.getFeedbackData(req, res);
+        assert.deepStrictEqual(resData, {totalCount: 4, results: ['testing', 'one', 'two', 'three']})
+        done();
+      } catch (e) {
+        console.log(e);
+      }
+    })
+  });
 });

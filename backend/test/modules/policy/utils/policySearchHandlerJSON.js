@@ -561,50 +561,15 @@ const createRecObjectExpected = { historyRec:
  clientObj: { esClientName: 'gamechanger', esIndex: 'gamechanger' } };
 
  const enrichSearchResultsExpected = {
-   "body":{
-      "cloneName":"gamechanger",
-      "offset":0,
-      "options":{
-         "accessDateFilter":[
-            null,
-            null
-         ],
-         "charsPadding":90,
-         "includeRevoked":false,
-         "limit":6,
-         "orgFilterString":[
-            
-         ],
-         "publicationDateAllTime":true,
-         "publicationDateFilter":[
-            null,
-            null
-         ],
-         "searchFields":{
-            "initial":{
-               "field":null,
-               "input":""
-            }
-         },
-         "searchType":"Keyword",
-         "searchVersion":1,
-         "showTutorial":false,
-         "tiny_url":"gamechanger?tiny=282",
-         "transformResults":false,
-         "typeFilterString":[
-            
-         ],
-         "useGCCache":false
-      },
-      "searchText":"shark"
+   "entities":[],
+   'qaContext': {
+      'context': [],
+      'params': {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4}
    },
-   "entities":[
-      
-   ],
    "qaResults":{
-      "answers":[
-         
-      ],
+      "answers":[],
+      "docIds":[],
+      "filenames":[],
       "question":""
    },
    "topics":[

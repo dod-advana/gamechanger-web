@@ -79,6 +79,8 @@ router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
 router.post('/admin/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/downloadCorpus', transformer.downloadCorpus);
+router.post('/admin/trainModel', transformer.trainModel);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/createNotification', notification.createNotification);
@@ -114,7 +116,6 @@ router.post('/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklis
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/setUserBetaStatus', user.setUserBetaStatus);
-router.post('/setUserSearchSettings', user.setUserSearchSettings);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/addInternalUser', user.addInternalUser);
@@ -150,6 +151,7 @@ router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
+router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 
 module.exports = router;
