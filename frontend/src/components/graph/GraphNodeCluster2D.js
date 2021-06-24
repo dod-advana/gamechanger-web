@@ -272,7 +272,7 @@ export default function GraphNodeCluster2D(props) {
 	
 	const [edgeThickness, setEdgeThickness] = React.useState(2);
 	const [chargeStrength, setChargeStrength] = React.useState(-5);
-	const [linkDistance, setLinkDistance] = React.useState(45);
+	const [linkDistance, setLinkDistance] = React.useState(20);
 	const [linkIterations, setLinkIterations] = React.useState(4);
 	const [nodeRelativeSize, setNodeRelativeSize] = React.useState(1);
 	const [nodeLabelColors, setNodeLabelColors] = React.useState({});

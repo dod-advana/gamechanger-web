@@ -260,6 +260,8 @@ class UserController {
 				user.api_key = '';
 			}
 
+			user.submitted_info = true;
+
 			res.send(user);
 
 		} catch (err) {
@@ -287,6 +289,7 @@ class UserController {
 					raw: true
 				}
 			);
+			user.submitted_info = true;
 			res.status(200).send(user);
 		} catch (err) {
 			this.logger.error(err.message, 'ZX1SWBU', userId);
