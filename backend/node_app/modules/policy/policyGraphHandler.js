@@ -41,7 +41,7 @@ class PolicyGraphHandler extends GraphHandler {
 			}
 
 			// get results
-			const { isTest = false, expandTerms = false } = req.body;
+			const { isTest = false, expandTerms = false, searchText } = req.body;
 
 			const gT0 = new Date().getTime();
 			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
