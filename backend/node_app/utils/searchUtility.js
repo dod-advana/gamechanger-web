@@ -1037,8 +1037,7 @@ class SearchUtility {
 					}
 				}
 			};
-			if (entity._source) {
-				console.log("ENTITY", entity);
+			if (entity) {
 				try{
 					let docId;
 					let resultType;
