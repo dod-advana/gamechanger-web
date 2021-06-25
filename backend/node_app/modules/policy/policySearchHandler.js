@@ -170,7 +170,6 @@ class PolicySearchHandler extends SearchHandler {
 			const {synonyms, text} = await this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
-			console.log(expansionDict);
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
@@ -380,8 +379,6 @@ class PolicySearchHandler extends SearchHandler {
 		let esClientName = 'gamechanger';
 		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-		console.log("USING GC INDEX: ", esIndex);
-		console.log("USING ENTITIES INDEX: ", entitiesIndex);
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];

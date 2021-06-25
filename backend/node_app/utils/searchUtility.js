@@ -6,6 +6,7 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
+const { Console } = require('console');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -45,6 +46,7 @@ class SearchUtility {
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
+		this.filterEmptyDocs = this.filterEmptyDocs.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -192,14 +194,10 @@ class SearchUtility {
     return(res.join(' '));
 } 
 
-	getEsSearchTerms({ searchText, questionFlag }) {
-		let terms = searchText;
-		if (questionFlag){
-			const stopwordsRemoved = this.remove_stopwords(searchText);
-			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
-			terms = cleanedText
-		}
-		return this.getQueryAndSearchTerms(terms);
+	getEsSearchTerms({ searchText }) {
+		//const stopwordsRemoved = this.remove_stopwords(searchText);
+		//const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
+		return this.getQueryAndSearchTerms(searchText);
 	}
 
 	getQueryAndSearchTerms (searchText) {
@@ -701,6 +699,8 @@ class SearchUtility {
 			for (let i =0; i <= length; i++) {
 				bigrams.push(searchTextList.slice(i, i+2).join(' '));
 			}
+
+			// if alias search came back with a result, this adds the full unabbreviated name
 			try {
 				if (alias._source) {
 					bigrams.push(alias._source.name);
@@ -923,9 +923,29 @@ class SearchUtility {
 		}
 	}
 
+	filterEmptyDocs(docResults, filterLength) {
+		// filters out results that have no text or very short amount of text in the paragraphs
+		try {
+			let filteredResults = [];
+			let docs = docResults.body.hits.hits
+			for (let i = 0; i < docs.length; i++) {
+				let paragraphs = docs[i]._source.paragraphs;
+				let parText = paragraphs.map(item => item.par_raw_text_t).join(" ");
+				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
+					filteredResults.push(docs[i])
+				} else { // pass
+					//console.log("REMOVING DOC: ", docs[i])
+				}
+			};
+			return filteredResults;
+		} catch (e) {
+			this.logger.error(e, 'SPW29NTY', '');
+		}
+	}
+
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
-		let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
+		let qaResults = singleResult._source.paragraphs; // get just the paragraph text into list
 		let qaTextList = qaResults.map(item => item.par_raw_text_t);
 		let start = parIdx;
 		let end = +start + +1;
@@ -950,7 +970,7 @@ class SearchUtility {
 			}
 			return context;
 		} catch (e) {
-			LOGGER.error(e.message, 'BVD4546JN', userId);
+			LOGGER.error(e.message, 'BVD4546JN', '');
 		}
 	}
 
@@ -959,108 +979,219 @@ class SearchUtility {
 		try {
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
-			return singleResult;
+			return singleResult.body.hits.hits[0];
 		} catch (e) {
 			LOGGER.error(e.message, 'COP4546JN', userId);
 		}
 	}
 
-	async getQAContext(contextResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
-		
-		let context = [];
-		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
-		let parIdx = 0;
+	addDummyTest (results) {
+		// for testing removal of empty or short documents
+		let dummyOne = {
+			_source: {
+				filename: "dummy one (empty)",
+				paragraphs: [
+					{par_raw_text_t: ""},
+					{par_raw_text_t: ""}
+				]
+			}
+		};
+		results.body.hits.hits.push(dummyOne);
+		let dummyTwo = {
+			_source: {
+				filename: "dummy two (short)",
+				paragraphs: [
+					{par_raw_text_t: "Title example short sentence"},
+					{par_raw_text_t: "Introduction"}
+				]
+			}
+		};
+		results.body.hits.hits.push(dummyTwo);
+		let dummyThree = {
+			_source: {
+				filename: "dummy three (messy paragraphs)",
+				paragraphs: [
+					{par_raw_text_t: "Title example short sentence"},
+					{par_raw_text_t: "Introduction"}
+				],
+				inner_hits: {
+					paragraphs: {
+						hits: {
+							hits: [
+								{
+									fields: {
+										'paragraphs.par_raw_text_t': [
+											"AS 0205 Radar System 2  Active A/S Radar Modes 2.0 X X X X X X  AS 0206 SAR Map Theory  Pilot Techniques & Procedures 3.0 X X X X X X  AS 0207 TFLIR/LASER 2.0 X X X X X X  AS 0208 TFLIR/DAS/NVC A/S Interpretation 1.5 X X X X X X  AS 0209 Laser Guided Bombs 2.0 X X X X X  AS 0210 GPS Guided Bombs 4.0 X X X X X  AS 0211 Small Diameter Bomb 2.5 X X X X X  AS 0212 Weaponeering / Ballistic Weapons Planner 2.5 X X X X X "
+										]
+									}
+								},
+								{
+									fields: {
+										'paragraphs.par_raw_text_t': [
+											"1 . Security Forces Culture/History - - - - - - - - - - - - - - - * # 1.1 . Career Field History TR : SFTRG 1 X  A A - - - - - # 1.2 . Security Forces Career Path and Force Development TR : CFETP 3P0X1/X1A/X1B X X  - A B - C - - * # 1.3 . Security Forces Ethics TR : SFTRG 1 X  B C B C C - - * # 1.4 . Security Forces Mission  Vision and Mission Essential Tasks TR : SFTRG 1 X  A A - A C - - * # 1.5 . Understand Security Forces Ethos and Perform Practices Specific to Security Forces ( Pledge  Post Briefing and General Orders ) TR : SFTRG 1 X  2b - - - - - -  1.6 . Recite Security Forces Oath TR : SFTRG 1 X  1a - "
+										]
+									}
+								},
+								{
+									fields: {
+										'paragraphs.par_raw_text_t': [
+											"2 ‚Ä¢ HR 6950 IH ( 1 ) STUDY REQUIRED.‚ÄîNot later than 2 years 1 after the date of the enactment of this Act  the Sec - 2 retary of Commerce and the Federal Trade Commis - 3 sion  in coordination with the head of any other ap - 4 propriate Federal agency  shall conduct a study on 5 the impact of artificial intelligence  including ma - 6 chine learning  on United States businesses con - 7 ducting interstate commerce .8 ( 2 ) REQUIREMENTS FOR STUDY.‚ÄîIn con"
+										]
+									}
+								},
+								{
+									fields: {
+										'paragraphs.par_raw_text_t': [
+											"GENERAL ISSUANCE INFORMATION . . . . . . . . . . . . . . . . . . . . . . 3 1.1 . Applicability ..................................................................................................................... 3 1.2 . Summary of Change 2 ...................................................................................................... 3 SECTION 2 : RESPONSIBILITIES ......................................................................................................... 4 2.1 . Assistant Secretary of Defense for Research and Engineering ( ASD ( R&E ) ) .................. 4 2.2 . Do D Component Heads .................................................................................................... 4 SECTION 3 : PROCEDURES ................................................................................................................ 5 3.1 . General .............................................................................................................................. 5 3.2 . FAPIIS Language in Notices of Funding Opportunity ..................................................... 5 3.3 . Determination of Recipient Qualifications ....................................................................... 5 3.4 . FAPIIS Award Term and Condition ................................................................................. 6 3.5 "
+										]
+									}
+								}
+							]
+						}
+					}
+				}
+			}
+		};
+		results.body.hits.hits.push(dummyThree);
+		return results
+	}
+
+	cleanParagraph (paragraph) {
+		// remove extra punctuation
+		try {
+			// check if all letters in caps, skip
+			paragraph = paragraph.replace(/\.\s{0,2}(?=\.)/g,''); // remove TOC periods
+			//paragraph = paragraph.replace(/-\s{0,2}(?=\-)/g,''); // remove repeating dash
+			//paragraph = paragraph.replace(/(X\s{0,2}(?=\X)){2,}/g,''); // remove repeating X
+			//paragraph = paragraph.replace(/[^a-zA-Z0-9 ]/g, ''); // ascii
+		} catch (e) {
+			LOGGER.error(e.message, 'NQODF78X', '');
+		};
+		return paragraph
+	}
+
+	getInnerHitHighlight (paragraph) {
+		// gets just the highlight from an inner hit
+		try {
+			return paragraph.highlight['paragraphs.par_raw_text_t'][0]
+		} catch (e) {
+			LOGGER.error(e.message, 'NPLWDQCX', '');
+		}
+	}
+
+	getInnerHitParagraph (paragraph) {
+		// get the paragraph text from an inner hit
+		try {
+			return paragraph.fields['paragraphs.par_raw_text_t'][0]
+		} catch (e) {
+			LOGGER.error(e.message, 'NQCPQBX', '');
+		}
+	}
+
+	processQAEntity (entity, context, userId) {
+		try {
+			let docId = '';
+			let resultType = '';
+			if (entity._source.entity_type === 'topic') {
+				docId = entity._source.name.toLowerCase();
+				resultType = 'topic';
+			} else if (entity._source.entity_type === 'organization') {
+				docId = entity._source.name;
+				resultType = 'entity';
+			}
+			let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType, source: "entity search", text: entity._source.information};
+			context.unshift(entityObj);
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'PQXUOSDF9', userId);
+		}
+	}
+
+	async processQASentenceResults (sentResults, context, esClientName, esIndex, userId, qaParams) {
+		for (var i = 0; i < sentResults.length; i++) {
+			try {
+				let [docId, parIdx] = sentResults[i].id.split('_');
+				docId = docId + '_0';
+				let resultDoc = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
+				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
+				let paraHit = resultDoc._source.paragraphs[parIdx];
+				let para = this.cleanParagraph(paraHit.par_raw_text_t);
+				if (para.length > qaParams.maxLength) { // if paragraph is too long, take beginning
+					contextPara.text = para.substring(0,qaParams.maxLength);
+				} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
+					contextPara.text = para;
+				} else {
+					let qaSubset = await this.expandParagraphs(resultDoc, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+					contextPara.text = this.cleanParagraph(qaSubset.join(' ')); 
+				}
+				if (sentResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
+					context.unshift(contextPara);
+				} else {
+					context.push(contextPara);
+				};
+				return context;
+			} catch (e) {
+				LOGGER.error(e.message, 'LOQXIPY', userId);
+			}
+		}
+	}
+
+	async processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams) {
+
+		let filterLength = 15;
+		docResults = this.addDummyTest(docResults);
+		let filteredResults = this.filterEmptyDocs(docResults, filterLength);
+		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
-				let resultDoc = contextResults.body.hits.hits[i];
-				if (resultDoc._score > qaParams.scoreThreshold) {
+				let resultDoc = filteredResults[i];
+				if (resultDoc._score > qaParams.scoreThreshold) { // if doc scores high, retrieve paragraphs
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
-							parIdx = paraHits[x]._nested.offset;
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-							contextPara.parId = parIdx;
-							contextPara.source = "context search";
-							let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
-							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
+							let para = this.cleanParagraph(this.getInnerHitParagraph(paraHits[x]));
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
-								para = paraHits[x].highlight['paragraphs.par_raw_text_t'][0];
-								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-								contextPara.text = para
+								contextPara.text = this.cleanParagraph(this.getInnerHitHighlight(paraHits[x]));
 							} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
 								contextPara.text = para
 							}
 							context.push(contextPara);
 						}
 					}
-				} else {
-					parIdx = 0;
+				} else { // if doc doesn't score high, retrieve the intro
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: 0};
 					let singleResult = await this.queryOneDocQA(resultDoc._source.id, esClientName, esIndex, userId); // this adds the beginning of the doc
-					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-					contextPara.source = "context search"
-					contextPara.parId = parIdx;
-					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
+					let qaSubset = await this.expandParagraphs(singleResult, contextPara.parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+					let text = this.cleanParagraph(qaSubset.join(' ')); 
 					if (text.length > 200) {
 						contextPara.text = text;
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
 			};
-			if (sentResults) {
-				for (var i = 0; i < sentResults.length; i++) {
-					try {
-						let [docId, parIdx] = sentResults[i].id.split('_');
-						docId = docId + '_0';
-						let singleResult = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
-						let resultDoc = singleResult.body.hits.hits[0];
-						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-						contextPara.parId = parIdx;
-						contextPara.source = "intelligent search";
-						let paraHit = resultDoc._source.paragraphs[parIdx];
-						let para = paraHit.par_raw_text_t;
-						para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-						if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
-							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-							contextPara.text = para;
-						} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
-							contextPara.text = para;
-						} else {
-							let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-							let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods
-							contextPara.text = text;
-						}
-						if (sentResults[i].score >= 0.95) {
-							context.unshift(contextPara);
-						} else {
-							context.push(contextPara);
-						}
-					} catch (e) {
-						LOGGER.error(e.message, 'LOQXIPY', userId);
-					}
-				}
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'QAPTFJN', userId);
+		}
+	}
+	
+	async getQAContext(docResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
+		
+		let context = [];
+		try {
+			if (docResults) {
+				context = await this.processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams);
 			};
-			if (entity) {
-				try{
-					let docId;
-					let resultType;
-					if (entity._source.entity_type === 'topic') {
-						docId = entity._source.name.toLowerCase();
-						resultType = 'topic';
-					} else {
-						docId = entity._source.name;
-						resultType = 'entity';
-					}
-					let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType};
-					entityObj.source = "entity search";
-					entityObj.text = entity._source.information;
-					context.unshift(entityObj);
-				} catch (e) {
-					LOGGER.error(e.message, 'REXUPFJN', userId);
-				}
-			}
-			return context
+			if (sentResults && sentResults.length > 0) { // if sentence results, add them to context
+				context = await this.processQASentenceResults(sentResults, context, esClientName, esIndex, userId, qaParams);
+			};
+			if (entity) { // if entity, add to context
+				context = this.processQAEntity(entity, context, userId);
+			};
+			console.log(context);
+			return context;
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
 		}
@@ -1495,7 +1626,6 @@ class SearchUtility {
 		catch {
 			this.logger.error(e, '17I8XO8', user);
 		}
-		
 	}
 
 	async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
@@ -1572,8 +1702,7 @@ class SearchUtility {
 				forGraphCache = false,
 				searchType
 			} = body;
-
-			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body, userId);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 	
@@ -1959,6 +2088,7 @@ class SearchUtility {
 			else return false;
 		}
 	}
+
 	isQuestion(searchText){
 		const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
 		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
