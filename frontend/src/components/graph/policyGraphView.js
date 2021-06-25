@@ -224,6 +224,7 @@ const filterGraphData = (nodes, edges) => {
 	const docOrgNumbers = {};
 	
 	const edgeCount = edges.length;
+	const edgeIds = [];
 	
 	const idToNodeMap = {};
 	const edgeToNodeCountMap = {};
@@ -268,19 +269,26 @@ const filterGraphData = (nodes, edges) => {
 	});
 
 	_.forEach(edges, (edge) => {
-		filteredGraph.edges.push(edge);
-		
-		const source = edge.source.id || edge.source;
-		const target = edge.target.id || edge.target;
-		
-		edgeToNodeCountMap[source] += 1;
-		edgeToNodeCountMap[target] += 1;
-		
-		idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
-		idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
-		
-		if (!filteredGraph.relationships.includes(edge.label)) {
-			filteredGraph.relationships.push(edge.label);
+		if (!edgeIds.includes(edge.id)) {
+			try {
+				filteredGraph.edges.push(edge);
+				edgeIds.push(edge.id);
+				
+				const source = edge.source.hasOwnProperty('id') ? edge.source.id : edge.source;
+				const target = edge.target.hasOwnProperty('id') ? edge.target.id : edge.target;
+				
+				edgeToNodeCountMap[source] += 1;
+				edgeToNodeCountMap[target] += 1;
+				
+				idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
+				idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
+				
+				if (!filteredGraph.relationships.includes(edge.label)) {
+					filteredGraph.relationships.push(edge.label);
+				}
+			} catch (e) {
+				gameChangerAPI.sendFrontendErrorPOST(e.stack);
+			}
 		}
 	});
 
@@ -892,9 +900,9 @@ export default function PolicyGraphView(props) {
 		}
 		
 		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document)-[m:MENTIONS]->(e:Entity) ' +
-			'WHERE d.doc_id = $doc_id AND size(m.pars) > 5 ' +
-			'RETURN d, m, e;', 'I1JJI2D', cloneData.clone_name, {params: {doc_id: node.doc_id}}
+			'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' +
+			'WHERE d.doc_id = $doc_id ' +
+			'RETURN pt;', 'I1JJI2D', cloneData.clone_name, {params: {doc_id: node.doc_id}}
 		).then((data) => {
 			const graphData = data.data;
 			const nodeIds = graph.nodes.map(node => {
@@ -912,11 +920,15 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(tmpNode.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
 				edge.source = parentId;
 				edge.target = 200000 + edge.target;
-				edge.notInOriginalSearch = true;
-				graph.edges.push(edge);
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
+					edge.notInOriginalSearch = true;
+					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
+				}
 			});
 			
 			lockNodeInPlace(node, true);
@@ -964,9 +976,7 @@ export default function PolicyGraphView(props) {
 			const nodeIds = graph.nodes.map(node => {
 				return node.id;
 			});
-			const edgeIds = graph.edges.map(edge => {
-				return edge.id;
-			});
+			const parentId = node.id;
 			graphData.nodes.forEach(node => {
 				if (!nodeIds.includes(node.id)) {
 					node.notInOriginalSearch = true;
@@ -974,10 +984,14 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(node.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
-				if (!edgeIds.includes(edge.id)) {
+				edge.source = parentId;
+				edge.target = 200000 + edge.target;
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
 					edge.notInOriginalSearch = true;
 					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
 				}
 			});
 			
@@ -1039,11 +1053,15 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(tmpNode.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
 				edge.source = parentId;
 				edge.target = 200000 + edge.target;
-				edge.notInOriginalSearch = true;
-				graph.edges.push(edge);
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
+					edge.notInOriginalSearch = true;
+					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
+				}
 			});
 			
 			lockNodeInPlace(node, true);
