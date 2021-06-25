@@ -169,6 +169,7 @@ class PolicySearchHandler extends SearchHandler {
 			const {synonyms, text} = await this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+			console.log(expansionDict);
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
@@ -354,12 +355,13 @@ class PolicySearchHandler extends SearchHandler {
 
 			// add results to search report
 			if (testing === true) {
-				let saveResults = {}
-				saveResults.regular = searchResults.docs.slice(0, 10);
-				saveResults.context = enrichedResults.qaContext.context;
-				saveResults.entities = enrichedResults.entities;
-				saveResults.topics = enrichedResults.topics;
-				saveResults.qaResponses = enrichedResults.qaResults;
+				let saveResults = {
+					regular: searchResults.docs.slice(0, 10),
+					context: enrichedResults.qaContext.context,
+					entities: enrichedResults.entities,
+					topics: enrichedResults.topics,
+					qaResponses: enrichedResults.qaResults
+				}
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
 
@@ -375,14 +377,13 @@ class PolicySearchHandler extends SearchHandler {
 			searchText,
 		} = req.body;
 		let esClientName = 'gamechanger';
-		//let esIndex = 'gamechanger';
-		//let entitiesIndex = 'entities-new';
 		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		console.log("USING GC INDEX: ", esIndex);
+		console.log("USING ENTITIES INDEX: ", entitiesIndex);
 		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		searchResults.qaContext = {params: {}, context: []};
 		const permissions = req.permissions ? req.permissions : [];
-		let entityQAResults = {};
 		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
 		searchResults.qaContext.params = qaParams;
 		if (permissions) {
@@ -407,11 +408,9 @@ class PolicySearchHandler extends SearchHandler {
 					let alias = await this.searchUtility.findAliases(qaSearchTextList, qaParams.entityLimit, esClientName, entitiesIndex, userId);
 					let bigramQueries = this.searchUtility.makeBigramQueries(qaSearchTextList, alias);
 					if (alias._source) {
-						console.log("FOUND ALIAS");
 						entityQAResults = alias;
 						qaSearchText = qaSearchText.replace(alias.match.toLowerCase(), alias._source.name);
 					} else {
-						console.log("NO ALIAS")
 						qaEntityQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='entities', qaParams.entityLimit, qaParams.maxLength, userId);
 						try {
 							entities = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
@@ -427,7 +426,6 @@ class PolicySearchHandler extends SearchHandler {
 					let context = await this.searchUtility.getQAContext(docQAResults, entityQAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
 					if (context.length > 0) { // if context results, query QA model
 						searchResults.qaContext.context = context;
-						console.log("\n\nCONTEXT: ", context)
 						if (testing === true) {
 							this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 						}
@@ -651,6 +649,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			console.log("ENTITY RESULTS: ", entityResults.body.hits.hits);
 			if (entityResults.body.hits.hits.length > 0){
 				const entityList = entityResults.body.hits.hits.map(async obj => {
 					let returnEntity = {};
