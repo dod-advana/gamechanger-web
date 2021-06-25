@@ -643,81 +643,48 @@ class EDASearchUtility {
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits.paragraphs) {
-						r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-							const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(parahit, user);
-								// use page 0 for title matches or errors
-								// but only allow 1
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
+
+
+					r.inner_hits.pages.hits.hits.forEach((phit) => {
+						const pageIndex = phit._nested.offset;
+						// const snippet =  phit.fields["pages.p_raw_text"][0];
+						let pageNumber = pageIndex + 1;
+						// one hit per page max
+						if (!pageSet.has(pageNumber)) {
+							const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+							if (usePageZero) {
+								if (pageSet.has(0)) {
+									return;
+								} else {
+									pageNumber = 0;
+									pageSet.add(0);
 								}
-	
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber});
 							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
-							}
+							pageSet.add(pageNumber);
+							result.pageHits.push({snippet, pageNumber });
 						}
-						result.pageHitCount = pageSet.size;
-	
-					} else {
-						r.inner_hits.pages.hits.hits.forEach((phit) => {
-							const pageIndex = phit._nested.offset;
-							// const snippet =  phit.fields["pages.p_raw_text"][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
-								}
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber });
-							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-							}
-						}
-						result.pageHitCount = pageSet.size;
-	
-						try {
-							const {metadata_type_eda_ext} = fields;
-							result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
-							result = this.getExtractedFields(_source, result);
-						}
-						catch(err) {
-							console.log(err);
-							console.log('Error parsing EDA fields')
+					});
+					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+					if(r.highlight){
+						if(r.highlight['title.search']){
+							result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+						}						
+						if(r.highlight.keyw_5){
+							result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
 						}
 					}
-	
+					result.pageHitCount = pageSet.size;
+
+					try {
+						const {metadata_type_eda_ext} = fields;
+						result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
+						result = this.getExtractedFields(_source, result);
+					}
+					catch(err) {
+						console.log(err);
+						console.log('Error parsing EDA fields')
+					}
+					
 					result.esIndex = index;
 	
 					if (Array.isArray(result['keyw_5'])){
