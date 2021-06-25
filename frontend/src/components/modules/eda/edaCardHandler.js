@@ -708,6 +708,19 @@ const EdaCardHandler = {
 				}
 			}
 
+			// grab award ID from filename
+			if (!item.award_id_eda_ext) {
+				const splitFilename = item.filename.split('-');
+				if (splitFilename[1].length > 8) {
+					item.award_id_eda_ext = splitFilename[2];
+				}
+				else {
+					item.award_id_eda_ext = splitFilename[6];
+				}
+				console.log(splitFilename);
+				console.log(item.award_id_eda_ext);
+			}
+
 			const loadContractAward = async (open) => {
 				if (open && item.award_id_eda_ext !== "empty") {
 					const contractAwards = _.cloneDeep(state.contractAwards);
@@ -716,10 +729,17 @@ const EdaCardHandler = {
 						contractAwards[awardID] = 'loading';
 						setState(dispatch, { contractAwards });
 
-						const contractMods = await edaAPI.queryEDAContractAward(item.award_id_eda_ext);
-						contractAwards[awardID] = contractMods.data;
-
-						setState(dispatch, { contractAwards });
+						try {
+							const contractMods = await edaAPI.queryEDAContractAward(item.award_id_eda_ext);
+							contractAwards[awardID] = contractMods.data.length ? contractMods.data.sort() : [];
+	
+							setState(dispatch, { contractAwards });
+						}
+						catch(err) {
+							console.log(err);
+							contractAwards[awardID] = [];
+							setState(dispatch, { contractAwards });
+						}
 					}
 				}
 			}
@@ -727,14 +747,14 @@ const EdaCardHandler = {
 			const renderContractMods = () => {
 				const contractMods = state.contractAwards && state.contractAwards[item.award_id_eda_ext] ? state.contractAwards[item.award_id_eda_ext] : [];
 				const listItems = [];
-				if (contractMods !== 'loading') {
+				if (contractMods && contractMods !== 'loading') {
 					for (const mod of contractMods) {
 						if (mod !== "Award") {
 							listItems.push(
 							<>
 								<ListItem>
 									{item.modification_eda_ext === mod &&
-										<ListItemIcon>
+										<ListItemIcon style={{ minWidth: '54px'}}>
 											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
