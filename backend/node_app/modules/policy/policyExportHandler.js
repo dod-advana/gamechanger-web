@@ -69,6 +69,7 @@ class PolicyExportHandler extends ExportHandler {
 				} else {
 					searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator: 'and'}, clientObj, userId);
 				}
+				searchResults.classificationMarking = req.body.classificationMarking;
 			} catch (e) {
 				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L0V3LYT', userId);
 				res.status(500).send(err);
