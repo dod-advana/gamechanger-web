@@ -272,7 +272,6 @@ class EdaSearchHandler extends SearchHandler {
 
 			// use the award ID to get the related mod numbers
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 				const hits = results.body.hits.hits;
 				const contractMods = [];
@@ -284,7 +283,7 @@ class EdaSearchHandler extends SearchHandler {
 				return contractMods;
 			} else {
 				this.logger.error('Error with contract award Elasticsearch results', '3ZCEAYJ', userId);
-				return { };
+				return [];
 			}
 		} catch(err) {
 			const { message } = err;

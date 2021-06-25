@@ -717,8 +717,6 @@ const EdaCardHandler = {
 				else {
 					item.award_id_eda_ext = splitFilename[6];
 				}
-				console.log(splitFilename);
-				console.log(item.award_id_eda_ext);
 			}
 
 			const loadContractAward = async (open) => {

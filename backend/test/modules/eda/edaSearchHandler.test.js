@@ -61,4 +61,84 @@ describe('EDASearchHandler', function () {
 				}
 			});
 	});
+
+	describe('queryContractAward', function () {
+		it ('should return contract mod data from a contract award ID',
+		async (done) => {
+			const mockQuery = {"_source":{"includes":["extracted_data_eda_n.modification_number_eda_ext"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"1"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"2"}}}]}}}}]}}}
+			const mockResults = {"body":{"took":2,"timed_out":false,"_shards":{"total":3,"successful":3,"skipped":0,"failed":0},"hits":{"total":{"value":9,"relation":"eq"},"max_score":9.468405,"hits":[{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"e6dc17f1789026890e830cf2fd554b69af052f828809047297bed2067f78d6e0","_score":9.468405,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"09"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"23ff5e32957a159d41266ddd05b179bd28006190a6b51c539b30d61cd40ef28e","_score":9.206535,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"05"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"0d3661a9013681842327cd8c400f37211dac3592d1a06f045a0720702af62370","_score":9.206535,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"Award"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"d878717c383937c3c4ebbc5a9973147799e0a46a35c27ef610f68124c8dedba7","_score":9.206535,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"10"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"d95b0bf7880b0a1aa4e6b7ff1e0f56d4adf7f3c591064cc1c7a29a8ce5440f35","_score":8.812053,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"06"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"89c5fb435224b4c06d481800a935ea7cce84c4388eb07461101cdafe50530b40","_score":8.812053,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"08"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"8c7283871732c58360637dbbe37d1693a9e4ff4a35e870171cb252159a814eb0","_score":8.812053,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"12"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"14e01c6efe410cf115bd3a9f2af49a34cb9042c3ef906a3d61da9b3d4db473ba","_score":8.812053,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"07"}}},{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"800a31a32cf3b2eddd679cff5f9a60724a059a64f75db77a691d3e3625ecf999","_score":8.812053,"_source":{"extracted_data_eda_n":{"modification_number_eda_ext":"01"}}}]}},"statusCode":200,"headers":{"date":"Fri, 25 Jun 2021 22:24:06 GMT","content-type":"application/json; charset=UTF-8","content-length":"2047","connection":"keep-alive","access-control-allow-origin":"*"},"meta":{"context":null,"request":{"params":{"method":"POST","path":"/gc_eda_2021_apple/_search","body":"{\"_source\":{\"includes\":[\"extracted_data_eda_n.modification_number_eda_ext\"]},\"from\":0,\"size\":10000,\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.award_id_eda_ext\":{\"query\":\"0003\"}}}]}}}},{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.referenced_idv_eda_ext\":{\"query\":\"N6600116D0071\"}}}]}}}}]}}}","querystring":"","headers":{"user-agent":"elasticsearch-js/7.13.0 (linux 4.19.76-linuxkit-x64; Node.js v14.17.0)","x-elastic-client-meta":"es=7.13.0,js=14.17.0,t=7.13.0,hc=14.17.0","content-type":"application/json","content-length":"446"},"timeout":30000},"options":{},"id":1},"name":"elasticsearch-js","connection":{"url":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","id":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","headers":{},"deadCount":0,"resurrectTimeout":0,"_openRequests":0,"status":"alive","roles":{"master":true,"data":true,"ingest":true,"ml":false}},"attempts":0,"aborted":false}}
+			const opts = {
+				...constructorOptionsMock,
+				edaSearchUtility: {
+					getEDAContractQuery() {
+						return Promise.resolve(mockQuery)
+					}
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(mockResults)
+					}
+				},
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: {
+						index: 'test index'
+					}
+				}
+			}
+
+			const req = {
+				permissions: ['View EDA'],
+				body: {
+					awardID: '1-2'
+				}
+			}
+			const target = new EDASearchHandler(opts);
+			try {
+				const actual = await target.queryContractAward(req, 'test user');
+				const expected = ["09","05","Award","10","06","08","12","07","01"];
+				assert.deepStrictEqual(actual, expected);
+				done();
+			} catch(err) {
+				assert.fail(err);
+			}
+		});
+
+		it ('should return ES error',
+		async (done) => {
+			const mockQuery = {"_source":{"includes":["extracted_data_eda_n.modification_number_eda_ext"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"1"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"2"}}}]}}}}]}}}
+			const opts = {
+				...constructorOptionsMock,
+				edaSearchUtility: {
+					getEDAContractQuery() {
+						return Promise.resolve(mockQuery)
+					}
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve({})
+					}
+				},
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: {
+						index: 'test index'
+					}
+				}
+			}
+
+			const req = {
+				permissions: ['View EDA'],
+				body: {
+					awardID: '1-2'
+				}
+			}
+			const target = new EDASearchHandler(opts);
+			try {
+				const actual = await target.queryContractAward(req, 'test user');
+				assert.deepStrictEqual(actual, []);
+				done();
+			} catch(err) {
+				assert.fail(err);
+			}
+		})
+	})
 });
