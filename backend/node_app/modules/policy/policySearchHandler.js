@@ -60,6 +60,7 @@ class PolicySearchHandler extends SearchHandler {
 		if(doubleQuoteCount % 2 === 1){
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
+		req.body.questionFlag = this.searchUtility.isQuestion(searchText)
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
@@ -393,10 +394,7 @@ class PolicySearchHandler extends SearchHandler {
 			if (intelligentQuestions.length > 0){
 				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 			}
-			const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
-			const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
-			const isQuestion = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
-			if (intelligentQuestions && isQuestion){
+			if (intelligentQuestions && req.body.questionFlag){
 				try {
 					let queryType;
 					let entityQAResults;
@@ -454,7 +452,7 @@ class PolicySearchHandler extends SearchHandler {
 		}
 		return searchResults;
 	}
-
+	
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId){
 		const {
 			searchText,

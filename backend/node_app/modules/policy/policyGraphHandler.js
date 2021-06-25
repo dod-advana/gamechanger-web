@@ -44,7 +44,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const { isTest = false, expandTerms = false } = req.body;
 
 			const gT0 = new Date().getTime();
-
+			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
 			const [parsedQuery, parsedTerms] = await this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -203,7 +203,7 @@ class PolicyGraphHandler extends GraphHandler {
 			};
 
 			// const gT0 = new Date().getTime();
-
+			searchBody.questionFlag = this.searchUtility.isQuestion(searchText)
 			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
@@ -262,6 +262,7 @@ class PolicyGraphHandler extends GraphHandler {
 				}
 			} else {
 				this.logger.error(`Error with Elasticsearch results`, 'V053I6O', userId);
+				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
 				return { entities: [], topics: [] };
 			}
 		} catch (err) {
