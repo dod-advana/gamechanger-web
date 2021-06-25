@@ -192,10 +192,14 @@ class SearchUtility {
     return(res.join(' '));
 } 
 
-	getEsSearchTerms({ searchText }) {
-		//const stopwordsRemoved = this.remove_stopwords(searchText);
-		//const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
-		return this.getQueryAndSearchTerms(searchText);
+	getEsSearchTerms({ searchText, questionFlag }) {
+		let terms = searchText;
+		if (questionFlag){
+			const stopwordsRemoved = this.remove_stopwords(searchText);
+			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
+			terms = cleanedText
+		}
+		return this.getQueryAndSearchTerms(terms);
 	}
 
 	getQueryAndSearchTerms (searchText) {
@@ -1568,7 +1572,8 @@ class SearchUtility {
 				forGraphCache = false,
 				searchType
 			} = body;
-			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body, userId);
+
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 	
@@ -1953,6 +1958,12 @@ class SearchUtility {
 			else if (v instanceof Array) return 'Array';
 			else return false;
 		}
+	}
+	isQuestion(searchText){
+		const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
+		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
+		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
+	return question;
 	}
 
 }

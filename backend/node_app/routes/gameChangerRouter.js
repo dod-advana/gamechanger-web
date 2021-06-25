@@ -147,6 +147,7 @@ router.get('/appSettings/userFeedback', appSettings.getUserFeedbackMode);
 router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
+router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
