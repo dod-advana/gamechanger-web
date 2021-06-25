@@ -735,10 +735,10 @@ const EdaCardHandler = {
 								<ListItem>
 									{item.modification_eda_ext === mod &&
 										<ListItemIcon>
-											<Star />
+											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
-									<ListItemText style={{ margin: '0 0 0 54px'}} primary={mod} />
+									<ListItemText style={{ margin: item.modification_eda_ext !== mod ? '0 0 0 54px' : ''}} primary={mod} />
 								</ListItem>
 								<Divider light={true}/>
 							</>
