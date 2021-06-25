@@ -95,6 +95,7 @@ const endpoints = {
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
+	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 
 
 	exportHistoryDELETE: function(id){
@@ -725,5 +726,10 @@ export default class GameChangerAPI {
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
 		return axiosGET(this.axios, url, {params:body});
+	}
+
+	sendFrontendErrorPOST = async (error) => {
+		const url = endpoints.sendFrontendErrorPOST;
+		return axiosPOST(this.axios, url, error);
 	}
 }
