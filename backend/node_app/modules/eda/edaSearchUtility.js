@@ -833,7 +833,6 @@ class EDASearchUtility {
 				}
 				)
 			}
-			console.log(JSON.stringify(query))
 			return query;
 		} catch(err) {
 			this.logger.error(err, 'S5PJASQ', user)
