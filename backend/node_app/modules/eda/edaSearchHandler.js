@@ -252,10 +252,19 @@ class EdaSearchHandler extends SearchHandler {
 
 			// award ID can be a combination of 2 fields
 			const awardIDSplit = awardID.split("-");
+			let id = "";
+			let idv = "";
+			if (awardIDSplit.length > 1) {
+				id = awardIDSplit[1];
+				idv = awardIDSplit[0];
+			}
+			else {
+				id = awardID;
+			}
 
 			let esQuery = '';
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				esQuery = this.edaSearchUtility.getEDAContractQuery(awardIDSplit[1], awardIDSplit[0], userId);
+				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, userId);
 			} else {
 				throw 'Unauthorized';
 			}

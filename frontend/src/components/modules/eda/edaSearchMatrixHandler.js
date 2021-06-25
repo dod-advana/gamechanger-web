@@ -594,7 +594,10 @@ const EDASearchMatrixHandler = {
 
         return (
             <div>
-                <div className={'filters-container sidebar-section-title'} style={{ marginBottom: 15 }}>FILTERS</div>
+                <div className={'filters-container sidebar-section-title'} >
+                    FILTERS
+                    <p style={{ fontSize: 10, color: 'gray' }}>Data sources: PDS, SYN</p>
+                </div>
                 <GCAccordion contentPadding={0} expanded={false} header={'ISSUE ORGANIZATION'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
                     { renderOrganizationFilters(state, dispatch) }
                 </GCAccordion>
