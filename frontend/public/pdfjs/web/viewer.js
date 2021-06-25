@@ -7791,9 +7791,9 @@ function () {
         this._maxUid = this._uid;
 
         if (newUrl) {
-          window.history.pushState(newState, '', newUrl);
+          window.history.pushState(newState, document.title, newUrl);
         } else {
-          window.history.pushState(newState, '');
+          window.history.pushState(newState, document.title);
         }
       }
     }
