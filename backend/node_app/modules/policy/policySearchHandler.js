@@ -323,7 +323,6 @@ class PolicySearchHandler extends SearchHandler {
 			includeRevoked
 		} = req.body;
 		try {
-			//let enrichedResults;
 			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
 			searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: [], resultTypes: []};
 			searchResults.qaContext = {params: qaParams, context: []};
@@ -399,7 +398,6 @@ class PolicySearchHandler extends SearchHandler {
 					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 				};
 				if (context.length > 0) { // if context results, query QA model
-					console.log("HAVE CONTEXT")
 					searchResults.qaContext.context = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
 					searchResults = this.searchUtility.cleanQAResults(searchResults, shortenedResults, context);
@@ -409,7 +407,6 @@ class PolicySearchHandler extends SearchHandler {
 				this.logger.error(e.message, 'KBBIOYCJ', userId);
 			};
 		};
-		console.log(searchResults);
 		return searchResults;
 	}
 	
@@ -607,7 +604,6 @@ class PolicySearchHandler extends SearchHandler {
 
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			console.log("ENTITY RESULTS: ", entityResults.body.hits.hits);
 			if (entityResults.body.hits.hits.length > 0){
 				const entityList = entityResults.body.hits.hits.map(async obj => {
 					let returnEntity = {};
