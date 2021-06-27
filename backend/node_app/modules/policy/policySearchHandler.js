@@ -389,6 +389,7 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams, esClientName, entitiesIndex, userId);
+				searchResults.qaResults.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				let entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
@@ -403,12 +404,13 @@ class PolicySearchHandler extends SearchHandler {
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
 					searchResults = this.searchUtility.cleanQAResults(searchResults, shortenedResults, context);
 				};
-				console.log(searchResults);
-				return searchResults;
+				
 			} catch (e) {
 				this.logger.error(e.message, 'KBBIOYCJ', userId);
 			};
-		}
+		};
+		console.log(searchResults);
+		return searchResults;
 	}
 	
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId){
