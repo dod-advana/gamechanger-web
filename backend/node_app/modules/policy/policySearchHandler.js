@@ -323,58 +323,47 @@ class PolicySearchHandler extends SearchHandler {
 			includeRevoked
 		} = req.body;
 		try {
-			let esClientName = 'gamechanger';
-			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-			let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-			let enrichedResults = {};
-			let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			if (intelligentQuestions.length > 0) {
-				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
+			//let enrichedResults;
+			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
+			searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: [], resultTypes: []};
+			searchResults.qaContext = {params: qaParams, context: []};
+			let enrichedResults = await this.qaEnrichment(req, searchResults, qaParams, userId);
+			// add entities
+			let entitySearchOn = await this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
+			if (entitySearchOn.length > 0){
+				entitySearchOn = entitySearchOn[0].dataValues.value === 'true';
 			}
-			if (intelligentQuestions && req.body.questionFlag){
-				try {
-					enrichedResults = await this.qaEnrichment(req, searchResults, esClientName, esIndex, entitiesIndex, userId);
-				} catch (e) {
-					this.logger.error(e.message, 'LWXPRITU');
-				}
+			if (entitySearchOn) {
+				const entities = await this.entitySearch(searchText, offset, 6, userId);
+				enrichedResults.entities = entities.entities;
+				enrichedResults.totalEntities = entities.totalEntities;
 			} else {
-				let entitySearchOn = await this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
-				if (entitySearchOn.length > 0){
-					entitySearchOn = entitySearchOn[0].dataValues.value === 'true';
-				};
-				if (entitySearchOn) {
-					const entities = await this.entitySearch(searchText, offset, 6, userId);
-					enrichedResults.entities = entities.entities;
-					enrichedResults.totalEntities = entities.totalEntities;
-				} else {
-					enrichedResults.entities = [];
-					enrichedResults.totalEntities = 0;
-				};
+				enrichedResults.entities = [];
+				enrichedResults.totalEntities = 0;
+			}
 
-				//add topics
-				let topicSearchOn = await this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
-				if (topicSearchOn.length > 0){
-					topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
-				};
-				if (topicSearchOn) { // make a topicSearch switch
-					const topics = await this.topicSearch(searchText, offset, 6, userId);
-					enrichedResults.topics = topics.topics;
-					enrichedResults.totalTopics = topics.totalTopics;
-				} else {
-					enrichedResults.topics = [];
-					enrichedResults.totalTopics = 0;
-				};
+			//add topics
+			let topicSearchOn = await this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			if (topicSearchOn.length > 0){
+				topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
+			}
+			if (topicSearchOn) { // make a topicSearch switch
+				const topics = await this.topicSearch(searchText, offset, 6, userId);
+				enrichedResults.topics = topics.topics;
+				enrichedResults.totalTopics = topics.totalTopics;
+			} else {
+				enrichedResults.topics = [];
+				enrichedResults.totalTopics = 0;
 			}
 
 			// add results to search report
 			if (testing === true) {
-				let saveResults = {
-					regular: searchResults.docs.slice(0, 10),
-					context: enrichedResults.qaContext.context,
-					entities: enrichedResults.entities,
-					topics: enrichedResults.topics,
-					qaResponses: enrichedResults.qaResults
-				}
+				let saveResults = {}
+				saveResults.regular = searchResults.docs.slice(0, 10);
+				saveResults.context = enrichedResults.qaContext.context;
+				saveResults.entities = enrichedResults.entities;
+				saveResults.topics = enrichedResults.topics;
+				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
 			};
 
@@ -385,35 +374,41 @@ class PolicySearchHandler extends SearchHandler {
 		return searchResults;
 	}
 
-	async qaEnrichment(req, searchResults, esClientName, esIndex, entitiesIndex, userId){
+	async qaEnrichment(req, searchResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
-		try {
-			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
-			searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-			searchResults.qaContext = {params: qaParams, context: []};
-			let queryType;
-			let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams, esClientName, entitiesIndex, userId);
-			let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
-			let entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
-			let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType='documents', qaParams.entityLimit, qaParams.maxLength, userId);
-			let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-			let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
-			if (testing === true) {
-				this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+		let esClientName = 'gamechanger';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+		if (intelligentQuestions.length > 0) {
+			intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
+		}
+		if (intelligentQuestions && req.body.questionFlag){
+			try {
+				let queryType = 'documents';
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams, esClientName, entitiesIndex, userId);
+				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				let entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
+				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
+				if (testing === true) {
+					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+				};
+				if (context.length > 0) { // if context results, query QA model
+					console.log("HAVE CONTEXT")
+					searchResults.qaContext.context = context;
+					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
+					searchResults = this.searchUtility.cleanQAResults(searchResults, shortenedResults, context);
+				};
+				console.log(searchResults);
+				return searchResults;
+			} catch (e) {
+				this.logger.error(e.message, 'KBBIOYCJ', userId);
 			};
-			if (context.length > 0) { // if context results, query QA model
-				console.log("HAVE CONTEXT")
-				searchResults.qaContext.context = context;
-				let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
-				searchResults = this.searchUtility.cleanQAResults(searchResults, shortenedResults, context);
-			};
-			console.log(searchResults);
-			return searchResults;
-		} catch (e) {
-			this.logger.error(e.message, 'KBBIOYCJ', userId);
-		};
+		}
 	}
 	
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId){
