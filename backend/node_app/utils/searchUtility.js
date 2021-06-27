@@ -990,89 +990,17 @@ class SearchUtility {
 		}
 	}
 
-	addDummyTest (results) {
-		// for testing removal of empty or short documents
-		let dummyOne = {
-			_source: {
-				filename: "dummy one (empty)",
-				paragraphs: [
-					{par_raw_text_t: ""},
-					{par_raw_text_t: ""}
-				]
-			}
-		};
-		results.body.hits.hits.push(dummyOne);
-		let dummyTwo = {
-			_source: {
-				filename: "dummy two (short)",
-				paragraphs: [
-					{par_raw_text_t: "Title example short sentence"},
-					{par_raw_text_t: "Introduction"}
-				]
-			}
-		};
-		results.body.hits.hits.push(dummyTwo);
-		let dummyThree = {
-			_source: {
-				filename: "dummy three (messy paragraphs)",
-				paragraphs: [
-					{par_raw_text_t: "Title example short sentence"},
-					{par_raw_text_t: "Introduction"}
-				],
-				inner_hits: {
-					paragraphs: {
-						hits: {
-							hits: [
-								{
-									fields: {
-										'paragraphs.par_raw_text_t': [
-											"AS 0205 Radar System 2  Active A/S Radar Modes 2.0 X X X X X X  AS 0206 SAR Map Theory  Pilot Techniques & Procedures 3.0 X X X X X X  AS 0207 TFLIR/LASER 2.0 X X X X X X  AS 0208 TFLIR/DAS/NVC A/S Interpretation 1.5 X X X X X X  AS 0209 Laser Guided Bombs 2.0 X X X X X  AS 0210 GPS Guided Bombs 4.0 X X X X X  AS 0211 Small Diameter Bomb 2.5 X X X X X  AS 0212 Weaponeering / Ballistic Weapons Planner 2.5 X X X X X "
-										]
-									}
-								},
-								{
-									fields: {
-										'paragraphs.par_raw_text_t': [
-											"1 . Security Forces Culture/History - - - - - - - - - - - - - - - * # 1.1 . Career Field History TR : SFTRG 1 X  A A - - - - - # 1.2 . Security Forces Career Path and Force Development TR : CFETP 3P0X1/X1A/X1B X X  - A B - C - - * # 1.3 . Security Forces Ethics TR : SFTRG 1 X  B C B C C - - * # 1.4 . Security Forces Mission  Vision and Mission Essential Tasks TR : SFTRG 1 X  A A - A C - - * # 1.5 . Understand Security Forces Ethos and Perform Practices Specific to Security Forces ( Pledge  Post Briefing and General Orders ) TR : SFTRG 1 X  2b - - - - - -  1.6 . Recite Security Forces Oath TR : SFTRG 1 X  1a - "
-										]
-									}
-								},
-								{
-									fields: {
-										'paragraphs.par_raw_text_t': [
-											"2 ‚Ä¢ HR 6950 IH ( 1 ) STUDY REQUIRED.‚ÄîNot later than 2 years 1 after the date of the enactment of this Act  the Sec - 2 retary of Commerce and the Federal Trade Commis - 3 sion  in coordination with the head of any other ap - 4 propriate Federal agency  shall conduct a study on 5 the impact of artificial intelligence  including ma - 6 chine learning  on United States businesses con - 7 ducting interstate commerce .8 ( 2 ) REQUIREMENTS FOR STUDY.‚ÄîIn con"
-										]
-									}
-								},
-								{
-									fields: {
-										'paragraphs.par_raw_text_t': [
-											"GENERAL ISSUANCE INFORMATION . . . . . . . . . . . . . . . . . . . . . . 3 1.1 . Applicability ..................................................................................................................... 3 1.2 . Summary of Change 2 ...................................................................................................... 3 SECTION 2 : RESPONSIBILITIES ......................................................................................................... 4 2.1 . Assistant Secretary of Defense for Research and Engineering ( ASD ( R&E ) ) .................. 4 2.2 . Do D Component Heads .................................................................................................... 4 SECTION 3 : PROCEDURES ................................................................................................................ 5 3.1 . General .............................................................................................................................. 5 3.2 . FAPIIS Language in Notices of Funding Opportunity ..................................................... 5 3.3 . Determination of Recipient Qualifications ....................................................................... 5 3.4 . FAPIIS Award Term and Condition ................................................................................. 6 3.5 "
-										]
-									}
-								}
-							]
-						}
-					}
-				}
-			}
-		};
-		results.body.hits.hits.push(dummyThree);
-		return results
-	}
-
 	cleanParagraph (paragraph) {
-		// remove extra punctuation
+		// remove extra punctuation/weird characters
 		try {
-			// check if all letters in caps, skip
-			paragraph = paragraph.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-			//paragraph = paragraph.replace(/-\s{0,2}(?=\-)/g,''); // remove repeating dash
-			//paragraph = paragraph.replace(/(X\s{0,2}(?=\X)){2,}/g,''); // remove repeating X
-			//paragraph = paragraph.replace(/[^a-zA-Z0-9 ]/g, ''); // ascii
+			paragraph = paragraph.replace(/((\.)(\s)?(?=\.))/g,''); // remove TOC periods
+			paragraph = paragraph.replace(/([xX](\s)?(?=[xX]))/g,''); // remove TOC periods
+			paragraph = paragraph.replace(/[^a-zA-Z0-9 \(\)\/-:;,"?!\.]/g, ' '); // ascii
+			paragraph = paragraph.replace(/(\s\s+)/g, ' '); // replace multiple spaces with one space
 		} catch (e) {
 			LOGGER.error(e.message, 'NQODF78X', '');
 		};
-		return paragraph
+		return paragraph;
 	}
 
 	async formatQAquery (searchText, qaParams, esClientName, entitiesIndex, userId) {
@@ -1203,7 +1131,6 @@ class SearchUtility {
 	async processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams) {
 
 		let filterLength = 15;
-		docResults = this.addDummyTest(docResults);
 		let filteredResults = this.filterEmptyDocs(docResults, filterLength);
 		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
 		try {
