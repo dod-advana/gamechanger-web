@@ -47,6 +47,7 @@ class SearchUtility {
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
 		this.filterEmptyDocs = this.filterEmptyDocs.bind(this);
+		this.cleanQAResults = this.cleanQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1060,7 +1061,7 @@ class SearchUtility {
 		// remove extra punctuation
 		try {
 			// check if all letters in caps, skip
-			paragraph = paragraph.replace(/\.\s{0,2}(?=\.)/g,''); // remove TOC periods
+			paragraph = paragraph.replace(/\.\s(?=\.)/g,''); // remove TOC periods
 			//paragraph = paragraph.replace(/-\s{0,2}(?=\-)/g,''); // remove repeating dash
 			//paragraph = paragraph.replace(/(X\s{0,2}(?=\X)){2,}/g,''); // remove repeating X
 			//paragraph = paragraph.replace(/[^a-zA-Z0-9 ]/g, ''); // ascii
@@ -1068,6 +1069,65 @@ class SearchUtility {
 			LOGGER.error(e.message, 'NQODF78X', '');
 		};
 		return paragraph
+	}
+
+	async formatQAquery (searchText, qaParams, esClientName, entitiesIndex, userId) {
+		try {
+			let text = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
+			let display = text + '?';
+			let list = text.split(/\s+/); // get list of query terms
+			let alias = await this.findAliases(list, qaParams.entityLimit, esClientName, entitiesIndex, userId);
+			if (alias._source) {
+				text = text.replace(alias.match.toLowerCase(), alias._source.name);
+			};
+			let qaQueries = {text: text, display: display, list: list, alias: alias};
+			return qaQueries;
+		} catch (e) {
+			LOGGER.error(e.message, 'SRUVBNX', '');
+		};
+	}
+
+	async getQAEntities (qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
+		try {
+			let entities = {};
+			if (qaQueries.alias._source) {
+				entities.QAResults = qaQueries.alias;
+			} else {
+				let queryType='entities';
+				let qaEntityQuery = this.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
+				entities.allResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+			};
+			if (entities.allResults) {
+				entities.QAResults = entities.allResults.body.hits.hits[0]
+			};
+			return entities;
+		} catch (e) {
+			this.logger.error(e.message, 'I9XPQL2W');
+		}
+	}
+
+	cleanQAResults (searchResults, shortenedResults, context) {
+		// formats QA results
+		try {
+			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+				shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+					return i['status'] == 'passed' && i['text'] !== '';
+				});
+			} else {
+				shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+					return i['text'] !== '';
+				});
+			}
+			let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
+			let cleanedResults = shortenedResults.answers.map(item => item.text);
+			searchResults.qaResults.answers = cleanedResults;
+			searchResults.qaResults.filenames = contextIds;
+			searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+			searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
+		} catch (e) {
+			LOGGER.error(e.message, 'AJEPRUTY', '');
+		}
+		return searchResults;
 	}
 
 	getInnerHitHighlight (paragraph) {
@@ -1190,7 +1250,6 @@ class SearchUtility {
 			if (entity) { // if entity, add to context
 				context = this.processQAEntity(entity, context, userId);
 			};
-			console.log(context);
 			return context;
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
