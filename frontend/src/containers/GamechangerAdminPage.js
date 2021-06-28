@@ -830,6 +830,7 @@ const GamechangerAdminPage = props => {
 
 	const handleAddRow = (key, value) => {
 		const tmp = {...editorTableData};
+		console.log(tmp);
 		tmp[key].push({name:value});
 		setEditorTableData(tmp);
 
