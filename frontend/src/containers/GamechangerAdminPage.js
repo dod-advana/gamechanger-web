@@ -33,6 +33,7 @@ import UOTToggleSwitch from "../components/common/GCToggleSwitch";
 import CloseIcon from "@material-ui/icons/Close";
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import CreateIcon from '@material-ui/icons/Create';
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from 'advana-side-nav/dist/SlideOutMenuContent';
 // import TutorialOverlayModal from 'advana-tutorial-overlay/dist/TutorialOverlayModal';
@@ -246,7 +247,7 @@ const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 					}}
 						toolTheme={toolTheme}
 					>
-						<VpnKeyIcon style={{ fontSize: 30 }} />
+						<CreateIcon style={{ fontSize: 30 }} />
 					</HoverNavItem>
 				</Tooltip>
 			)}
@@ -372,7 +373,7 @@ const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 					}}
 						toolTheme={toolTheme}
 					>
-						<VpnKeyIcon style={{ fontSize: 30 }} />
+						<CreateIcon style={{ fontSize: 30 }} />
 						<span style={{ marginLeft: '5px' }}>Homepage Editor</span>
 					</HoverNavItem>
 				</Tooltip>

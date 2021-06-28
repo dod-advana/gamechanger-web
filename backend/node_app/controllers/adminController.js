@@ -100,7 +100,6 @@ class AdminController {
 					]
 				}
 			});
-
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
@@ -114,8 +113,6 @@ class AdminController {
 		try {
 			const { key, tableData } = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			console.log(key)
-			console.log(tableData)
 			await this.appSettings.update(
 				{
 					value: JSON.stringify(tableData)

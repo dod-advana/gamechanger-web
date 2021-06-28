@@ -221,7 +221,7 @@ const DefaultMainViewHandler = {
 	},
 	
 	renderHideTabs(props){
-		const { state, dispatch } = props;
+		const { state, dispatch, searchHandler } = props;
 		const {
 			componentStepNumbers,
 			cloneData,

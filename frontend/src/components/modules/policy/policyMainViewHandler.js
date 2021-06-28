@@ -6,7 +6,7 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {Typography} from "@material-ui/core";
-import {setState, setSearchURL} from "../../../sharedFunctions";
+import {setState} from "../../../sharedFunctions";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
@@ -198,14 +198,13 @@ const PolicyMainViewHandler = {
 	},
 
 	renderHideTabs(props) {
-		const { state, dispatch } = props;
+		const { state, dispatch, searchHandler } = props;
 		const {
 			adminTopics,
 			adminMajorPubs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
-			searchSettings,
 			resetSettingsSwitch,
 			didYouMean,
 			loading,
@@ -220,7 +219,7 @@ const PolicyMainViewHandler = {
 			if(!resetSettingsSwitch) {
 				dispatch({type: 'RESET_SEARCH_SETTINGS'});
 				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
-				setSearchURL(state, searchSettings)
+				if (searchHandler) searchHandler.setSearchURL(state)
 			}
 		}
 

@@ -143,7 +143,7 @@ class TrendingSearchesController {
 		let userId = 'Unknown';
 
 		try {
-			userId = req.get('SSL_CLINET_S_DN_CN');
+			userId = req.get('SSL_CLIENT_S_DN_CN');
 			
 			const { trendingLinks=[] } = req.body;
 			const results = await new Promise((resolve, reject) => {
