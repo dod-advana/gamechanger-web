@@ -387,10 +387,15 @@ class PolicySearchHandler extends SearchHandler {
 		if (intelligentQuestions && req.body.questionFlag){
 			try {
 				let queryType = 'documents';
+				let entities;
 				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams, esClientName, entitiesIndex, userId);
 				searchResults.qaResults.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
-				let entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+				try {
+					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+				} catch (e) {
+					this.logger.error(e.message, 'FLPQX67M')
+				}
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
 				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);

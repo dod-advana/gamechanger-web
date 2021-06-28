@@ -6,7 +6,6 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
-const { Console } = require('console');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
