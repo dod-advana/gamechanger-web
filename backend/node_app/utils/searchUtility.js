@@ -1087,7 +1087,7 @@ class SearchUtility {
 			if (entity._source.entity_type === 'topic') {
 				docId = entity._source.name.toLowerCase();
 				resultType = 'topic';
-			} else if (entity._source.entity_type === 'organization') {
+			} else {
 				docId = entity._source.name;
 				resultType = 'entity';
 			}
