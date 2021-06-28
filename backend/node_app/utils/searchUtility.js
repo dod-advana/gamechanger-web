@@ -927,11 +927,10 @@ class SearchUtility {
 		}
 	}
 
-	filterEmptyDocs(docResults, filterLength) {
+	filterEmptyDocs(docs, filterLength) {
 		// filters out results that have no text or very short amount of text in the paragraphs
 		try {
 			let filteredResults = [];
-			let docs = docResults.body.hits.hits
 			for (let i = 0; i < docs.length; i++) {
 				let paragraphs = docs[i]._source.paragraphs;
 				let parText = paragraphs.map(item => item.par_raw_text_t).join(" ");
@@ -1057,7 +1056,7 @@ class SearchUtility {
 			searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
 		} catch (e) {
 			LOGGER.error(e.message, 'AJEPRUTY', '');
-		}
+		};
 		return searchResults;
 	}
 
@@ -1130,7 +1129,8 @@ class SearchUtility {
 	async processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams) {
 
 		let filterLength = 15;
-		let filteredResults = this.filterEmptyDocs(docResults, filterLength);
+		let docs = docResults.body.hits.hits
+		let filteredResults = this.filterEmptyDocs(docs, filterLength);
 		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
@@ -1171,7 +1171,7 @@ class SearchUtility {
 		
 		let context = [];
 		try {
-			if (docResults) {
+			if (docResults.body) {
 				context = await this.processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams);
 			};
 			if (sentResults && sentResults.length > 0) { // if sentence results, add them to context
