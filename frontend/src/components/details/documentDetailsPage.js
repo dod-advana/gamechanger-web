@@ -52,13 +52,13 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 		gameChangerAPI.graphQueryPOST(
 			'MATCH (d:Document) ' +
 			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
+			'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
 			'RETURN pt;', 'FP2FLNB', cloneName, {params: {doc_id: document.id}}
 		),
 		gameChangerAPI.graphQueryPOST(
 			'MATCH (d:Document) ' +
 			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
+			'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
 			'RETURN pt;', 'PWALNKF', cloneName, {params: {doc_id: document.id}}
 		)
 	]).then(resps => {
@@ -265,8 +265,8 @@ const DocumentDetailsPage = (props) => {
 					<Card key={idx}
 						item={item}
 						idx={idx}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true}}
-						//dispatch={dispatch}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false}}
+						dispatch={() => {}}
 					/>
 				);
 			});

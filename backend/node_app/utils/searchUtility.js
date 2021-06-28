@@ -5,6 +5,7 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
+const { include } = require('underscore');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -188,10 +189,14 @@ class SearchUtility {
     return(res.join(' '));
 } 
 
-	getEsSearchTerms({ searchText }) {
-		const stopwordsRemoved = this.remove_stopwords(searchText);
-		const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
-		return this.getQueryAndSearchTerms(cleanedSearchText);
+	getEsSearchTerms({ searchText, questionFlag }) {
+		let terms = searchText;
+		if (questionFlag){
+			const stopwordsRemoved = this.remove_stopwords(searchText);
+			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
+			terms = cleanedText
+		}
+		return this.getQueryAndSearchTerms(terms);
 	}
 
 	getQueryAndSearchTerms (searchText) {
@@ -283,7 +288,8 @@ class SearchUtility {
 	}
 
 	getElasticsearchQuery(
-		{ searchText, 
+		{ 
+			searchText, 
 			searchTerms, 
 			parsedQuery, 
 			orgFilterString = '', 
@@ -331,6 +337,8 @@ class SearchUtility {
 			includeRevoked = false,
 			sort = 'Relevance', 
 			order = 'desc',
+			includeHighlights = true,
+			docIds = {}
 		 }, 
 		 user) {
 
@@ -346,12 +354,10 @@ class SearchUtility {
 					mustQueries.push(wildcard);
 				}
 			}
-
 			storedFields = [...storedFields, ...extStoredFields];
 			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
-			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
@@ -385,23 +391,24 @@ class SearchUtility {
 										_source: false,
 										stored_fields: [
 											'paragraphs.page_num_i',
-											'paragraphs.filename',
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
 										size: 5,
 										highlight: {
 											fields: {
-												'paragraphs.filename.search': {
-													number_of_fragments: 0
-												},
 												'paragraphs.par_raw_text_t': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
+
 												},
 												'paragraphs.par_raw_text_t.gc_english': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
 												},
 											},
 											fragmenter: 'span'
@@ -411,14 +418,6 @@ class SearchUtility {
 										bool: {
 											should: [
 												{
-													wildcard: {
-														'paragraphs.filename.search': {
-															value: `*${parsedQuery}*`,
-															boost: 50
-														}
-													}
-												},
-												{
 													query_string: {
 														query: `${parsedQuery}`,
 														default_field,
@@ -427,26 +426,43 @@ class SearchUtility {
 														fuzziness: 'AUTO',
 														analyzer
 													}
-												},
-												
-												
-											],
-											minimum_should_match: 1
+												}
+											]										
 										}
+									}
+								}
+							},
+							{
+								wildcard: {
+									'keyw_5': {
+										value: `*${parsedQuery}*`
+									}
+								}
+							},
+							{
+								wildcard: {
+									'title.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
+									'filename.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+
 									}
 								}
 							},
 							{
 								multi_match: {
 									query: `${parsedQuery}`,
-									fields: [
-										'id^5',
-										'title.search^15',
-										'keyw_5'
-									],
+									fields: ['title.search', 'filename.search'],
 									operator: 'AND',
-									type: "best_fields"
-								}
+									type: 'phrase'
+								  }
 							}
 						],
 						minimum_should_match: 1,
@@ -456,21 +472,18 @@ class SearchUtility {
 					}
 				},
 				highlight: {
+					require_field_match: false,
 					fields: {
-						'title.search': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'keyw_5': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'id': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						}
+						'title.search': {},
+						'keyw_5': {},
+						'id': {},
+						'filename.search': {}
 					},
-					fragmenter: 'span'
+					fragment_size: 10,
+					fragmenter: 'simple',
+					type: 'unified',
+					boundary_scanner: 'word'
+
 				}
 			};
 
@@ -550,265 +563,19 @@ class SearchUtility {
 					}
 				);
 			}
+			if (includeHighlights == false) {
+				delete query.query.bool.should[0].nested.inner_hits;
+				delete query.highlight;
+			}
+			if (Object.keys(docIds).length !== 0){
+				query.query.bool.must.push(
+					{terms: {id: docIds}}
+					)
+
+			}
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
-		}
-	}
-
-	getSimpleSyntaxElasticsearchQuery({ searchText, searchTerms, parsedQuery, orgFilterString, index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], storedFields = [
-		'filename',
-		'title',
-		'page_count',
-		'doc_type',
-		'doc_num',
-		'ref_list',
-		'id',
-		'summary_30',
-		'keyw_5',
-		'p_text',
-		'type',
-		'p_page',
-		'display_title_s',
-		'display_org_s',
-		'display_doc_type_s'
-	], extStoredFields = [], extSearchFields = [] }, user) {
-
-		try {
-			const lowerSearchText = searchText.toLowerCase();
-			const query = {
-				_source: {
-					includes: [
-						'pagerank_r',
-						'kw_doc_score_r',
-						'orgs_rs'
-					]
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'p_text',
-					'type',
-					'p_page',
-					'display_title_s',
-					'display_org_s',
-					'display_doc_type_s'
-				],
-				from: offset,
-				size: limit,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'doc_type',
-							size: 10000
-						}
-					}
-				},
-				query: {
-					bool: {
-						must: [
-							{
-								bool: {
-									should: [
-										{
-											nested: {
-												path: 'paragraphs',
-												inner_hits: {
-													stored_fields: [
-														'paragraphs.page_num_i',
-														'paragraphs.filename',
-														'paragraphs.par_raw_text_t'
-													],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'paragraphs.filename.search': {
-																number_of_fragments: 0
-															},
-															'paragraphs.par_raw_text_t': {
-																fragment_size: 180,
-																number_of_fragments: 1
-															}
-														},
-														fragmenter: 'span'
-													}
-												},
-												query: {
-													match: {
-														'paragraphs.par_raw_text_t': {
-															query: lowerSearchText,
-															operator: 'AND'
-														}
-													}
-												}
-											}
-										},
-										{
-											fuzzy: {
-												'title.search': {
-													value: searchText,
-												}
-											}
-										},
-										{
-											terms: {
-												'title.search': searchTerms,
-											}
-										}
-									]
-								}
-							}
-						],
-						should: [
-							{
-								match_phrase: {
-									'paragraphs.par_raw_text_t': lowerSearchText,
-								}
-							},
-							{
-								multi_match: {
-									query: lowerSearchText,
-									fields: [
-										'keyw_5^2',
-										'id^2',
-										'summary_30'
-									],
-									operator: 'and'
-								}
-							},
-							{
-								rank_feature: {
-									field: 'pagerank_r',
-									boost: 0.5
-								}
-							},
-							{
-								rank_feature: {
-									field: 'kw_doc_score_r',
-									boost: 0.1
-								}
-							}
-						]
-					}
-				}
-			};
-
-			return query;
-		} catch (err) {
-			this.logger.error(err, 'DEVUWWJ', user);
-		}
-	}
-
-	getElasticsearchQueryUsingParagraphId({ paraIds, parsedQuery }, user) {
-		try {
-			return {
-				_source: {
-					includes: [
-						'pagerank_r',
-						'kw_doc_score_r',
-						'pagerank'
-					]
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'type',
-					'pagerank_r'
-				],
-				track_total_hits: true,
-				size: 100,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'display_doc_type_s',
-							size: 10000
-						}
-					},
-					doc_org_aggs: {
-						terms: {
-							field: 'display_org_s',
-							size: 10000
-						}
-					}
-				},
-				query: {
-					bool: {
-						should: {
-							nested: {
-								path: 'paragraphs',
-								inner_hits: {
-									_source: false,
-									stored_fields: [
-										'paragraphs.page_num_i',
-										'paragraphs.filename',
-										'paragraphs.par_raw_text_t'
-									],
-									from: 0,
-									size: 5,
-									highlight: {
-										fields: {
-											'paragraphs.filename.search': {
-												number_of_fragments: 0
-											},
-											'paragraphs.par_raw_text_t': {
-												fragment_size: 180,
-												number_of_fragments: 1
-											}
-										},
-										fragmenter: 'span'
-									}
-								},
-								query: {
-									bool: {
-										must: [{
-											terms: {
-												'paragraphs.id': paraIds
-											}
-										}],
-										should: [
-											{
-												wildcard: {
-													'paragraphs.filename.search': {
-														value: `*${parsedQuery}*`,
-														boost: 15
-													}
-												}
-											},
-											{
-												query_string: {
-													query: `${parsedQuery}`,
-													default_field: 'paragraphs.par_raw_text_t',
-													default_operator: 'and',
-													fuzzy_max_expansions: 100,
-													fuzziness: 'AUTO'
-												}
-											}
-										]
-									}
-								}
-							}
-						}
-					}
-				}
-			};
-
-		} catch (err) {
-			this.logger.error(err, 'JYEOSCU', user);
 		}
 	}
 
@@ -1125,7 +892,7 @@ class SearchUtility {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
 			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
 			return singleResult;
@@ -1176,7 +943,7 @@ class SearchUtility {
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
-			}
+			};
 			if (sentResults) {
 				for (var i = 0; i < sentResults.length; i++) {
 					try {
@@ -1209,8 +976,8 @@ class SearchUtility {
 						LOGGER.error(e.message, 'LOQXIPY', userId);
 					}
 				}
-			}
-			if (entityQAResults.body.hits.total.value > 0) {
+			};
+			if (entityQAResults.body) {
 				try{
 					let docId;
 					let resultType;
@@ -1291,12 +1058,25 @@ class SearchUtility {
 					size: 2,
 					_source: [filename],
 					query: {
-						wildcard: {
-							'filename.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
-							}
+						bool: {
+							must: [
+								{
+									wildcard: {
+										'filename.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
+									}
+								}
+							],
+							filter: [
+								{
+									term: {
+										'is_revoked_b': false
+									}
+								}
+							]
 						}
 					}
 				},
@@ -1307,17 +1087,28 @@ class SearchUtility {
 					size: 2,
 					_source: [title],
 					query: {
-						wildcard: {
-							'title.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
-							}
-
+						bool: {
+							must: [
+								{
+									wildcard: {
+										'title.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
+									}
+								}
+							],
+							filter: [
+								{
+									term: {
+										'is_revoked_b': false
+									}
+								}
+							]
 						}
 					}
 				},
-
 				{
 					index: this.constants.GAME_CHANGER_OPTS.historyIndex
 				},
@@ -1370,192 +1161,6 @@ class SearchUtility {
 		}
 	}
 
-	getElasticsearchPagesQuery({ searchText, searchTerms, parsedQuery, orgFilterString, index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], publicationDateAllTime = true, storedFields = [
-		'filename',
-		'title',
-		'page_count',
-		'doc_type',
-		'doc_num',
-		'ref_list',
-		'id',
-		'summary_30',
-		'keyw_5',
-		'p_text',
-		'type',
-		'p_page',
-		'display_title_s',
-		'display_org_s',
-		'display_doc_type_s'
-	], extStoredFields = [], extSearchFields = [] }, user) {
-
-		try {
-			// add additional search fields to the query
-			const mustQueries = [];
-
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-
-					mustQueries.push(wildcard);
-				}
-			}
-
-			storedFields = [...storedFields, ...extStoredFields];
-
-			let query = {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs']
-				},
-				stored_fields: storedFields,
-				from: offset,
-				size: limit,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'doc_type',
-							size: 10000
-						}
-					}
-				},
-				track_total_hits: true,
-				query: {
-					bool: {
-						must: [
-							{
-								bool: {
-									should: [
-									  	{
-											nested: {
-												path: 'pages',
-												inner_hits: {
-													_source: false,
-													stored_fields: [
-														'pages.filename',
-														'pages.p_raw_text'
-													],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'pages.filename.search': {
-																number_of_fragments: 0
-															},
-															'pages.p_raw_text': {
-																fragment_size: 2 * charsPadding,
-																number_of_fragments: 1
-															}
-														},
-														fragmenter: 'span'
-													}
-												},
-												query: {
-													bool: {
-														should: [
-															{
-																wildcard: {
-																	'pages.filename.search': {
-																		value: `${parsedQuery}*`,
-																		boost: 15
-																	}
-																}
-															},
-															{
-																query_string: {
-																	query: `${parsedQuery}`,
-																	default_field: 'pages.p_raw_text',
-																	default_operator: `${operator}`,
-																	fuzzy_max_expansions: 100,
-																	fuzziness: 'AUTO'
-																}
-															}
-														]
-													}
-												}
-											}
-										}
-									]
-								}
-							}
-						],
-						should: [
-							{
-								multi_match: {
-									query: `${parsedQuery}`,
-									fields: [
-										'keyw_5^2',
-										'id^2',
-										'summary_30',
-										'pages.p_raw_text'
-									],
-									operator: 'or'
-								}
-							},
-							{
-								rank_feature: {
-									field: 'pagerank_r',
-									boost: 0.5
-								}
-							},
-							{
-								rank_feature: {
-									field: 'kw_doc_score_r',
-									boost: 0.1
-								}
-							}
-						]
-					}
-				}
-			};
-
-			if (isClone && cloneData && cloneData.clone_data.esCluster.toLowerCase() === 'eda') {
-				query._source.includes.push('*eda_ext_n.*')
-			}
-
-			if (extSearchFields.length > 0){
-				const extQuery = {
-					multi_match: {
-						query: searchText,
-						fields: [],
-						operator: 'or'
-					}
-				};
-				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				// query.query.bool.should = query.query.bool.should.concat(extQuery);
-				query.query.bool.must[0].bool.should = query.query.bool.must[0].bool.should.concat(extQuery);
-			}
-
-			if (this.constants.GAME_CHANGER_OPTS.allow_daterange && !publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]){
-				query.query.bool.must = query.query.bool.must.concat([
-					{
-						range: {
-							publication_date: {
-								gte: publicationDateFilter[0],
-								lte: publicationDateFilter[1]
-							}
-						}
-					}
-				]);
-			}
-
-			if (mustQueries.length > 0) {
-				query.query.bool.must = query.query.bool.must.concat(mustQueries);
-			}
-
-			query.query.bool.must.push(
-				{
-					query_string: {
-						query: `display_org_s:(${orgFilterString})`
-					}
-				}
-			);
-
-			return query;
-		} catch (err) {
-			this.logger.error(err, 'N8TJIOJ', user);
-		}
-	}
 
 	cleanUpIdEsResultsForGraphCache(raw, user) {
 		try {
@@ -1657,6 +1262,9 @@ class SearchUtility {
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
 								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
 							}
 							result.pageHitCount = pageSet.size;
 							
@@ -1688,6 +1296,9 @@ class SearchUtility {
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1835,6 +1446,7 @@ class SearchUtility {
 			}
 		}
 		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+		
 		// const resultArray = await Promise.all([sentenceResults, searchResults]);
 		// sentenceResults = resultArray[0];
 		// searchResults = resultArray[1];
@@ -1897,26 +1509,22 @@ class SearchUtility {
 				forGraphCache = false,
 				searchType
 			} = body;
-			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body, userId);
+
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 	
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-	
 			if (esQuery === '') {
 				if (forGraphCache) {
 					esQuery = this.getElasticsearchQueryForGraphCache(body, userId);
-				} else if (searchType === 'Simple') {
-					esQuery = this.getSimpleSyntaxElasticsearchQuery(body, userId);
-					esIndex = constants.GAME_CHANGER_OPTS.simpleIndex;
 				} else {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
@@ -1985,9 +1593,9 @@ class SearchUtility {
 			} catch (err) {
 				this.logger.error(err, 'JAEIWMF', '');
 			}
-		}
+	}
 
-		getTopicQuery(searchText, offset = 0, limit = 6) {
+	getTopicQuery(searchText, offset = 0, limit = 6) {
 			try {
 				let query = {
 					from: offset,
@@ -2003,7 +1611,7 @@ class SearchUtility {
 				} catch (err) {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
-			}
+	}
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
@@ -2287,6 +1895,12 @@ class SearchUtility {
 			else if (v instanceof Array) return 'Array';
 			else return false;
 		}
+	}
+	isQuestion(searchText){
+		const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
+		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
+		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
+	return question;
 	}
 
 }

@@ -63,6 +63,8 @@ const endpoints = {
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
+	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
+	trainModel: '/api/gamechanger/admin/trainModel',
 	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
 	getS3List: '/api/gamechanger/admin/getS3List',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
@@ -71,7 +73,6 @@ const endpoints = {
 	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
-	setUserSearchSettings: '/api/gameChanger/setUserSearchSettings',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/deleteInternalUser',
@@ -99,6 +100,8 @@ const endpoints = {
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
+	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
+	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 
 
 	exportHistoryDELETE: function(id){
@@ -501,6 +504,16 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
+	downloadCorpus = async (data) => {
+		const url = endpoints.downloadCorpus;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	trainModel = async (data) =>{
+		const url = endpoints.trainModel;
+		return axiosPOST(this.axios, url, data);
+	}
+
 	getAPIInformation = async () => {
 		const url = endpoints.getAPIInformation;
 		return axiosGET(this.axios, url);
@@ -539,11 +552,6 @@ export default class GameChangerAPI {
 	setUserBetaStatus = async (checked) => {
 		const url = endpoints.setUserBetaStatus;
 		return axiosPOST(this.axios, url, {status: checked});
-	}
-
-	setUserSearchSettings = async (data) => {
-		const url = endpoints.setUserSearchSettings;
-		return axiosPOST(this.axios, url, data);
 	}
 	
 	getInternalUsers = async () => {
@@ -731,6 +739,11 @@ export default class GameChangerAPI {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
 	}
+
+	getFeedbackData = async () => {
+		const url = endpoints.getFeedbackData;
+		return axiosGET(this.axios, url);
+	}
 	
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
@@ -750,5 +763,10 @@ export default class GameChangerAPI {
 	setHomepageEditorData = async (body) => {
 		const url = endpoints.setHomepageEditorData;
 		return axiosPOST(this.axios, url, body)
+	}
+	
+	sendFrontendErrorPOST = async (error) => {
+		const url = endpoints.sendFrontendErrorPOST;
+		return axiosPOST(this.axios, url, error);
 	}
 }

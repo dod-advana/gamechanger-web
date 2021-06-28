@@ -38,13 +38,6 @@ const columns = [
         )
     },
     {
-        Header: 'Document Time',
-        accessor: 'documenttime',
-        Cell: row => (
-            <TableRow>{row.value}</TableRow>
-        )
-    },
-    {
         Header: 'Search',
         accessor: 'search',
         Cell: row => (
@@ -57,8 +50,53 @@ const columns = [
         Cell: row => (
             <TableRow>{row.value}</TableRow>
         )
-    }
+    },
+    {
+        Header: 'Document Time',
+        accessor: 'documenttime',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
 ]
+
+const feedbackColumns = [
+    {
+        Header: 'Feedback Event',
+        accessor: 'event_name',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'User ID',
+        accessor: 'user_id',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'Feedback Time',
+        accessor: 'createdAt',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'Search',
+        accessor: 'value_1',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'Returned',
+        accessor: 'value_2',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+];
 
 /**
  * This method queries Matomo for documents based on search.
@@ -77,6 +115,22 @@ const getSearchPdfMapping = async (daysBack, setMappingData) => {
 }
 
 /**
+ * This method queries postgres for feedback data.
+ * The query is handled in gamechanger-api.
+ * @method getFeedbackData
+ */
+ const getFeedbackData = async (setFeedbackData) => {
+	try {
+		// daysBack, offset, filters, sorting, pageSize
+		const data = await gameChangerAPI.getFeedbackData();
+        setFeedbackData(data.data.results);
+        console.log(data);
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+/**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
  * to download as a csv
@@ -86,6 +140,7 @@ export default () => {
 
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
+    const [feedbackData, setFeedbackData] = useState([]);
     const [daysBack, setDaysBack] = useState(3);
 
     // flags that parameters have been changed and on 
@@ -147,8 +202,17 @@ export default () => {
         XLSX.writeFile(wb, name + ".csv");
     }
 
+    const exportFeedback = () => {
+        const name = 'Feedback';
+        var ws = XLSX.utils.json_to_sheet(feedbackData);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, name);
+        XLSX.writeFile(wb, name + ".csv");
+    }
+
 	useEffect(() => {
 		getSearchPdfMapping(daysBack, setMappingData);
+        getFeedbackData(setFeedbackData);
 	}, [daysBack]);
     
 
@@ -177,6 +241,22 @@ export default () => {
                 columns={columns}
                 style={{margin: '0 80px 20px 80px', height: 700}}
                 defaultSorted = {[ { id: "searchtime", desc: true } ]}
+            />
+            <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
+                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Feedback Data</p>
+                <GCPrimaryButton
+						onClick={() => {
+							trackEvent('GAMECHANGER', "ExportFeedback", "onClick");
+							exportFeedback();
+						}}
+						style={{minWidth: 'unset'}}
+					>Export Feedback</GCPrimaryButton>
+            </div>
+            <ReactTable
+                data={feedbackData}
+                columns={feedbackColumns}
+                style={{margin: '0 80px 20px 80px', height: 700}}
+                defaultSorted = {[ { id: "event_name", desc: false } ]}
             />
         </div>
     )

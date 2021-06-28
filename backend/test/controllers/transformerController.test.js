@@ -3,13 +3,13 @@ const { TransformerController } = require('../../node_app/controllers/transforme
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
 describe('DocumentController', function () {
-	describe('#getTransformerList', () => {
-		it('should return a fake transformer list', async (done) => {
+	describe('#getModelsList', () => {
+		it('should return a model list', async (done) => {
 
 			const opts = {
 				...constructorOptionsMock,
 				mlApi: {
-					getTransfomerModelList(userId) {
+					getModelsList(userId) {
 						return Promise.resolve('Test');
 					}
 				}
@@ -35,7 +35,7 @@ describe('DocumentController', function () {
 
 			const target = new TransformerController(opts);
 
-			await target.getTransformerList(req, res);
+			await target.getModelsList(req, res);
 
 			assert.strictEqual(resMsg, 'Test');
 			done();

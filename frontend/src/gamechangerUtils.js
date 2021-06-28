@@ -337,7 +337,8 @@ const linkColorMap = {
 export const typeColorMap = {
 	document: '#386F94',
 	organization: '#386f94',
-	topic: '#ffbf00'
+	topic: '#ffbf00',
+	uknDocument: '#000000'
 };
 
 const typeTextColorMap = {
@@ -681,12 +682,8 @@ export const axiosDELETE = async (axios, url, options = {}) => {
 
 export const getQueryVariable = (name, url) => {
 	if (!url) url = window.location.href;
-	name = name.replace(/[[\]]/g, "\\$&");
-	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-		results = regex.exec(url);
-	if (!results) return null;
-	if (!results[2]) return '';
-	return decodeURIComponent(results[2].replace(/\+/g, " "));
+	const params = new URLSearchParams(url.split('?')[1] || '');
+	return params.get(name);
 }
 
 export const decodeTinyUrl = (url) => {
