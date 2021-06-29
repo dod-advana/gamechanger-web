@@ -374,7 +374,7 @@ class PolicySearchHandler extends SearchHandler {
 			searchText,
 		} = req.body;
 
-		const QA = {};
+		let QA = {};
 		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		QA.qaContext = {params: {}, context: []};
 		
