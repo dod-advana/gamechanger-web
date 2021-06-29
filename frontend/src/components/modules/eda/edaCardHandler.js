@@ -729,7 +729,7 @@ const EdaCardHandler = {
 
 						try {
 							const contractMods = await edaAPI.queryEDAContractAward(item.award_id_eda_ext);
-							contractAwards[awardID] = contractMods.data.length ? contractMods.data.sort() : [];
+							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data.sort() : [];
 	
 							setState(dispatch, { contractAwards });
 						}
