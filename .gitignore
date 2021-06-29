@@ -3,3 +3,4 @@ values.*.yaml
 matomo
 .vscode
 .npmrc
+mysql
