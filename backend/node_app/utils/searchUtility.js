@@ -35,7 +35,8 @@ class SearchUtility {
 		this.cleanUpIdEsResults = this.cleanUpIdEsResults.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
-		this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
+		// this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
+		this.intelligentSearchHandler = this.intelligentSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.phraseQAQuery = this.phraseQAQuery.bind(this);
@@ -1435,43 +1436,53 @@ class SearchUtility {
 		
 	}
 
-	async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
+	// async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
+	// 	let filename;
+	// 	let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+	// 	if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){ // if there is a result, shift offset / limits accordingly. 
+	// 		if(req.body.offset === 0){
+	// 			req.body.limit = 5
+	// 		} else {
+	// 			req.body.offset -= 1;
+	// 		}
+	// 	}
+	// 	let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+	// 	if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+	// 		filename = sentenceResults[0].id;
+	// 		searchResults.totalCount += 1;
+	// 	}
+
+	// 	const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
+	// 	if (sentenceResults === TRANSFORM_ERRORED) {
+	// 		searchResults.transformFailed = true;
+	// 	} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
+	// 		topSentenceFind.search_mode = 'Intelligent Search';
+	// 		searchResults.docs.unshift(topSentenceFind);
+	// 	} else if (offset === 0 && filename) { // if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
+	// 		try {
+	// 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
+	// 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
+	// 			searchResults.docs.unshift(sentenceSearchRes.docs[0]);
+	// 		} catch (err) {
+	// 			this.logger.error('Error with sentence search results', 'ALRATR8', userId);
+	// 		}
+	// 	}
+	// 	searchResults.sentResults = sentenceResults;
+	// 	return searchResults;
+	// }
+
+	async intelligentSearchHandler(searchText, userId, req, clientObj){
 		let filename;
+		let result;
 		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){ // if there is a result, shift offset / limits accordingly. 
-			if(req.body.offset === 0){
-				req.body.limit = 5
-			} else {
-				req.body.offset -= 1;
-			}
-		}
-		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
-		
-		// const resultArray = await Promise.all([sentenceResults, searchResults]);
-		// sentenceResults = resultArray[0];
-		// searchResults = resultArray[1];
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
-			searchResults.totalCount += 1;
+			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
+			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
+			result = sentenceSearchRes.docs[0];
+			return result;
 		}
-
-		const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
-		if (sentenceResults === TRANSFORM_ERRORED) {
-			searchResults.transformFailed = true;
-		} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
-			topSentenceFind.search_mode = 'Intelligent Search';
-			searchResults.docs.unshift(topSentenceFind);
-		} else if (offset === 0 && filename) { // if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
-			try {
-				const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
-				sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
-				searchResults.docs.unshift(sentenceSearchRes.docs[0]);
-			} catch (err) {
-				this.logger.error('Error with sentence search results', 'ALRATR8', userId);
-			}
-		}
-		searchResults.sentResults = sentenceResults;
-		return searchResults;
+		return {};
 	}
 
 	async documentSearchOneID(req, body, clientObj, userId) {

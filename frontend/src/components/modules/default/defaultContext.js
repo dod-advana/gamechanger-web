@@ -71,6 +71,7 @@ const initState = {
 	pageDisplayed: 'main',
 	listView: false,
 	qaResults: { question: [], answers: [] },
+	qaContext: {params: {}, context: []},
 	selectedCategories: {
 		Documents: true,
 		Organizations: false,
@@ -160,6 +161,8 @@ const initState = {
 
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
+
+	intelligentSearchResults: {}
 };
 
 const init = (initialState) => {
