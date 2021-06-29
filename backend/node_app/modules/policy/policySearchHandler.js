@@ -279,9 +279,10 @@ class PolicySearchHandler extends SearchHandler {
 
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, searchResults, userId);
+				const QA = await this.qaEnrichment(req, searchResults, qaParams, userId);
 				enrichedResults.qaResults = QA.qaResults;
 				enrichedResults.qaContext = QA.qaContext;
 			}
@@ -368,72 +369,50 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, searchResults, userId){
+	async qaEnrichment(req, searchResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
-		let esClientName = 'gamechanger';
-		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-		
+
 		const QA = {};
 		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
 		QA.qaContext = {params: {}, context: []};
-
-		const permissions = req.permissions ? req.permissions : [];
-		let entityQAResults = {};
-		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
-		QA.qaContext.params = qaParams;
-		if (permissions) {
-		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
-			// check if search is a question
-			let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			if (intelligentQuestions.length > 0){
-				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
-			}
-			if (intelligentQuestions && req.body.questionFlag){
-				try {
-					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
-					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
-					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
-					try {
-						entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
-					} catch (e) {
-						this.logger.error(e.message, 'KQ68CHSU');
-					}
-
-					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
-					QA.qaContext.context = context;
-					if (testing === true) {
-						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
-					}
-					let qaContext = context.map(item => item.text);
-					if (context.length > 0) { // if context results, query QA model
-						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
-						QA.qaResults.question = qaSearchText + '?';
-						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
-							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['status'] == 'passed' && i['text'] !== '';
-							});
-						} else {
-							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['text'] !== '';
-							});
-						}
-						let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
-						let cleanedResults = shortenedResults.answers.map(item => item.text);
-						QA.qaResults.answers = cleanedResults;
-						QA.qaResults.filenames = contextIds;
-						QA.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
-						QA.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
-					}
-				} catch (e) {
-					this.logger.error(e.message, 'KBBIOYCJ', userId);
-				}
-			}
+		
+		let esClientName = 'gamechanger';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+		if (intelligentQuestions.length > 0) {
+			intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 		}
+		if (intelligentQuestions && req.body.questionFlag){
+			try {
+				let queryType = 'documents';
+				let entities;
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
+				QA.qaResults.question = qaQueries.display;
+				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				try {
+					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+				} catch (e) {
+					this.logger.error(e.message, 'FLPQX67M')
+				}
+				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
+				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
+				if (testing === true) {
+					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+				};
+				if (context.length > 0) { // if context results, query QA model
+					QA.qaContext.context = context;
+					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
+					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
+				};
+				
+			} catch (e) {
+				this.logger.error(e.message, 'KBBIOYCJ', userId);
+			};
+		};
 		return QA;
 	}
 	
