@@ -491,7 +491,7 @@ const GamechangerAdminPage = props => {
 	const [topicSearch, setTopicSearch] = useState(true);
 	const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
-	const [editorTableData, setEditorTableData] = useState({});
+	const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
