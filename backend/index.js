@@ -249,7 +249,7 @@ app.all('/api/gamechanger/admin/*', async function (req, res, next) {
 });
 
 app.all('/api/gamechanger/eda/*', async function (req, res, next) {
-	if (req.permissions.includes('View EDA') || req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
+	if (req.permissions.includes('View EDA') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
 		res.sendStatus(403);
