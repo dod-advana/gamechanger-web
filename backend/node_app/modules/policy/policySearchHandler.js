@@ -323,7 +323,7 @@ class PolicySearchHandler extends SearchHandler {
 			includeRevoked
 		} = req.body;
 		try {
-			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
+			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
 			searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: [], resultTypes: []};
 			searchResults.qaContext = {params: qaParams, context: []};
 			let enrichedResults = await this.qaEnrichment(req, searchResults, qaParams, userId);
@@ -388,7 +388,7 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities;
-				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams, esClientName, entitiesIndex, userId);
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
 				searchResults.qaResults.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
