@@ -130,6 +130,8 @@ const PolicySearchHandler = {
 			entitySearchResults: [],
 			categoryMetadata: {},
 			qaResults: {question: '', answers: [], filenames: [], docIds: []},
+			qaContext: {params: {}, context: []},
+			intelligentSearchResult: {},
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
@@ -225,7 +227,7 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
 
 				const categoryMetadata = 
 				{
@@ -388,6 +390,8 @@ const PolicySearchHandler = {
 						entitySearchResults: entities,
 						topicSearchResults: topics, 
 						qaResults: qaResults,
+						qaContext: qaContext,
+						intelligentSearchResult: intelligentSearch,
 						searchResultsCount: searchResults.length,
 						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
@@ -421,6 +425,8 @@ const PolicySearchHandler = {
 						topicSearchResults: [],
 						categoryMetadata: {},
 						qaResults: {question: '', answers: [], filenames: [], docIds: []},
+						qaContext: {params: {}, context: []},
+						intelligentSearchResult: {},
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
