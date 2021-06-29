@@ -444,7 +444,7 @@ class SearchUtility {
 								wildcard: {
 									'title.search': {
 										value: `*${parsedQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},
@@ -452,7 +452,7 @@ class SearchUtility {
 								wildcard: {
 									'filename.search': {
 										value: `*${parsedQuery}*`,
-										boost: 2
+										boost: 4
 
 									}
 								}
@@ -462,7 +462,8 @@ class SearchUtility {
 									query: `${parsedQuery}`,
 									fields: ['title.search', 'filename.search'],
 									operator: 'AND',
-									type: 'phrase'
+									type: 'phrase',
+									boost: 2
 								  }
 							}
 						],
