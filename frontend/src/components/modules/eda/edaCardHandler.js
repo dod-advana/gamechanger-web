@@ -725,7 +725,6 @@ const EdaCardHandler = {
 					if (!contractAwards[awardID] || !contractAwards[awardID].length > 0) {
 						contractAwards[awardID] = 'loading';
 						setState(dispatch, { contractAwards });
-						console.log('try function')
 						try {
 							const contractMods = await gameChangerAPI.callSearchFunction({
 								functionName: 'queryContractAward',
