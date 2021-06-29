@@ -37,6 +37,8 @@ services:
             - mysql
         ports:
             - 80:80
+        volumes:
+            - ./matomo:/var/www/html
         networks:
             - app-net
     gamechanger-web-node:
