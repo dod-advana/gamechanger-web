@@ -1,2 +1,4 @@
 elasticsearch
 values.*.yaml
+matomo
+.vscode
