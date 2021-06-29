@@ -30,7 +30,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 const ApiKey = models.api_key;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
-const AAA = require('advana-api-auth');
+const AAA = require('@dod-advana/advana-api-auth');
 
 const app = express();
 const jsonParser = bodyParser.json();

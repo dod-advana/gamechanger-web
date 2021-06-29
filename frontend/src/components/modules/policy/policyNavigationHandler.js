@@ -12,7 +12,7 @@ import {
 	NotificationsClosed,
 	PageLink,
 	StyledBadgeSmall
-} from "advana-side-nav/dist/SlideOutMenu";
+} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
 import {clearDashboardNotification, getUserData, setState} from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
@@ -22,7 +22,7 @@ import CrowdSourcingAppIcon from "../../../images/icon/NewCrowdSourcingIcon.png"
 import DataStatusTrackerIcon from "../../../images/icon/NewDataStatusTrackerIcon.png";
 import AnalystToolsIcon from "../../../images/icon/analyticswht.png";
 import CloneRequest from "../../../images/icon/CloneRequest.png";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
 import GamechangerTextIcon from "../../../images/icon/GamechangerText.png";
 import ResourcesIcon from "../../../images/icon/slideout-menu/resources icon.png";

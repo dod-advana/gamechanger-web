@@ -3,7 +3,7 @@ import _ from 'underscore';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import { Collapse } from 'react-collapse';
 import SimpleTable from '../common/SimpleTable';
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 // import { primary } from "../experimental/uot-colors";
 import '../cards/keyword-result-card.css';
 import '../../containers/gamechanger.css';

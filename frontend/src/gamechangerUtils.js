@@ -7,7 +7,7 @@ import Config from './config/config.js';
 import {getTextColorBasedOnBackground} from "./graphUtils";
 import {useEffect} from "react";
 import styled from "styled-components";
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
