@@ -404,11 +404,9 @@ class PolicySearchHandler extends SearchHandler {
 					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 				};
 				if (context.length > 0) { // if context results, query QA model
-					console.log("CONTEXT", context);
 					QA.qaContext.context = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
 					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
-					console.log(QA.qaResults)
 				};
 				
 			} catch (e) {
