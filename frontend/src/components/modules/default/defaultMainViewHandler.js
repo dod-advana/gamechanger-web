@@ -5,7 +5,7 @@ import ViewHeader from "../../mainView/ViewHeader";
 import { trackEvent } from "../../telemetry/Matomo";
 import { getSearchObjectFromString, getUserData, setState } from "../../../sharedFunctions";
 import DefaultDocumentExplorer from "./defaultDocumentExplorer";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import { Card } from "../../cards/GCCard";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import GameChangerSideBar from "../../searchMetrics/GCSideBar";
@@ -25,7 +25,7 @@ import { gcOrange } from "../../common/gc-colors";
 import ResultView from "../../mainView/ResultView";
 import QueryDialog from "../../admin/QueryDialog";
 import DocDialog from "../../admin/DocDialog";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 
 const gameChangerAPI = new GameChangerAPI();

@@ -10,7 +10,7 @@ import {CardButton} from "../../common/CardButton";
 import {trackEvent} from "../../telemetry/Matomo";
 import {Link, Typography} from "@material-ui/core";
 import _ from "underscore";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import CONFIG from "../../../config/config";
 import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import BetaModal from "../../common/BetaModal";

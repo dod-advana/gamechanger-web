@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {gcOrange} from "../../components/common/gc-colors";
-import TutorialOverlay from "advana-tutorial-overlay/dist/TutorialOverlay";
+import TutorialOverlay from "@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay";
 import {setState} from "../../sharedFunctions";
-import {initializeTutorial} from "advana-tutorial-overlay/dist/TutorialOverlayHelper";
+import {initializeTutorial} from "@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper";
 import {useMountEffect} from "../../gamechangerUtils";
 
 async function initTutorial(dispatch, cloneName) {

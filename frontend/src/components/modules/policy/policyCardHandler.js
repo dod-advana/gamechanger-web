@@ -15,7 +15,7 @@ import styled from "styled-components";
 import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {crawlerMappingFunc} from "../../../gamechangerUtils";
 
 const styles = {
