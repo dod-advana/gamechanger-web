@@ -248,14 +248,6 @@ app.all('/api/gamechanger/admin/*', async function (req, res, next) {
 	}
 });
 
-app.all('/api/gamechanger/eda/*', async function (req, res, next) {
-	if (req.permissions.includes('View EDA') || req.permissions.includes('Webapp Super Admin')) {
-		next();
-	} else {
-		res.sendStatus(403);
-	}
-})
-
 const cron = new CronJobs();
 try {
 	// setup cron job to reload cache nightly
@@ -277,7 +269,6 @@ app.use('/api/gamechanger', require('./node_app/routes/gameChangerRouter'));
 
 app.use('/api', require('./node_app/routes/advanaRouter'));
 app.use('/api/gamechanger/modular', require('./node_app/routes/modularGameChangerRouter'));
-app.use('/api/gamechanger/eda', require('./node_app/routes/edaRouter'));
 
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),

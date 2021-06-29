@@ -292,6 +292,33 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
+	async callFunctionHelper(req, userId) {
+		const {functionName} = req.body;
+
+		try {
+			const permissions = req.permissions ? req.permissions : [];
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				switch (functionName) {
+					case 'queryContractAward':
+						return this.queryContractAward(req, userId);
+					default:
+						this.logger.error(
+							`There is no function called ${functionName} defined in the edaSearchHandler`,
+							'W8A5BE0',
+							userId
+						);
+				}
+			}
+		} catch (err) {
+			console.log(e);
+			const { message } = e;
+			this.logger.error(message, 'V2L9KW5', userId);
+			throw e;
+		}
+		
+
+	}
+
 }
 
 module.exports = EdaSearchHandler;

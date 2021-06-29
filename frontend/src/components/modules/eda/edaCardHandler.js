@@ -16,7 +16,6 @@ import {
 	Divider
 } from "@material-ui/core";
 
-import EDAAPI from "../../api/eda-service-api.js";
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from "../../common/GCAccordion";
 import {primary} from "../../../components/common/gc-colors";
@@ -29,8 +28,8 @@ import _ from "lodash";
 import {setState} from "../../../sharedFunctions";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
-
-const edaAPI = new EDAAPI();
+import GameChangerAPI from "../../api/gameChanger-service-api";
+const gameChangerAPI = new GameChangerAPI();
 
 //
 export const EDA_FIELDS = [
@@ -726,9 +725,15 @@ const EdaCardHandler = {
 					if (!contractAwards[awardID] || !contractAwards[awardID].length > 0) {
 						contractAwards[awardID] = 'loading';
 						setState(dispatch, { contractAwards });
-
+						console.log('try function')
 						try {
-							const contractMods = await edaAPI.queryEDAContractAward(item.award_id_eda_ext);
+							const contractMods = await gameChangerAPI.callSearchFunction({
+								functionName: 'queryContractAward',
+								cloneName: state.cloneData.clone_name,
+								options: {
+									awardID: item.award_id_eda_ext
+								}
+							});
 							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data.sort() : [];
 	
 							setState(dispatch, { contractAwards });
