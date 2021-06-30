@@ -79,6 +79,7 @@ const styles = {
     },
     container: {
         padding: 15,
+        margin: '0 0 0 15px'
     },
     checkboxes: {
         margin: '0 0 0 25px'
@@ -721,7 +722,10 @@ const EDASearchMatrixHandler = {
 
         return (
             <div>
-                <div className={'filters-container sidebar-section-title'} style={{ marginBottom: 15 }}>FILTERS</div>
+                <div className={'sidebar-section-title'} >
+                    FILTERS
+                    <p style={{ fontSize: 10, color: 'gray', margin: '0px' }}>Data sources: PDS, SYN</p>
+                </div>
                 <GCAccordion contentPadding={0} expanded={false} header={'ISSUE ORGANIZATION'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
                     { renderOrganizationFilters(state, dispatch) }
                 </GCAccordion>

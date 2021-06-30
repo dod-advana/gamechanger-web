@@ -643,81 +643,48 @@ class EDASearchUtility {
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits.paragraphs) {
-						r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-							const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(parahit, user);
-								// use page 0 for title matches or errors
-								// but only allow 1
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
+
+
+					r.inner_hits.pages.hits.hits.forEach((phit) => {
+						const pageIndex = phit._nested.offset;
+						// const snippet =  phit.fields["pages.p_raw_text"][0];
+						let pageNumber = pageIndex + 1;
+						// one hit per page max
+						if (!pageSet.has(pageNumber)) {
+							const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+							if (usePageZero) {
+								if (pageSet.has(0)) {
+									return;
+								} else {
+									pageNumber = 0;
+									pageSet.add(0);
 								}
-	
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber});
 							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
-							}
+							pageSet.add(pageNumber);
+							result.pageHits.push({snippet, pageNumber });
 						}
-						result.pageHitCount = pageSet.size;
-	
-					} else {
-						r.inner_hits.pages.hits.hits.forEach((phit) => {
-							const pageIndex = phit._nested.offset;
-							// const snippet =  phit.fields["pages.p_raw_text"][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
-								}
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber });
-							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-							}
-						}
-						result.pageHitCount = pageSet.size;
-	
-						try {
-							const {metadata_type_eda_ext} = fields;
-							result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
-							result = this.getExtractedFields(_source, result);
-						}
-						catch(err) {
-							console.log(err);
-							console.log('Error parsing EDA fields')
+					});
+					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+					if(r.highlight){
+						if(r.highlight['title.search']){
+							result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+						}						
+						if(r.highlight.keyw_5){
+							result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
 						}
 					}
-	
+					result.pageHitCount = pageSet.size;
+
+					try {
+						const {metadata_type_eda_ext} = fields;
+						result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
+						result = this.getExtractedFields(_source, result);
+					}
+					catch(err) {
+						console.log(err);
+						console.log('Error parsing EDA fields')
+					}
+					
 					result.esIndex = index;
 	
 					if (Array.isArray(result['keyw_5'])){
@@ -765,7 +732,6 @@ class EDASearchUtility {
 			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
 		}
 
-
 		// Paying Office
 		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
 		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
@@ -774,7 +740,12 @@ class EDASearchUtility {
 		result.modification_eda_ext = data.modification_number_eda_ext;
 
 		// Award ID and Reference IDV
-		result.award_id_eda_ext = data.award_id_eda_ext;
+		if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
+			result.award_id_eda_ext = data.referenced_idv_eda_ext + "-" + data.award_id_eda_ext;
+		}
+		else {
+			result.award_id_eda_ext = data.award_id_eda_ext;
+		}
 		result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
 
 		// Signature Date and Effective Date
@@ -808,6 +779,71 @@ class EDASearchUtility {
 		}
 		
 		return result;
+	}
+
+	getEDAContractQuery(award = "", idv = "", user) {
+		try {
+			let query = {
+				"_source": {
+					"includes": [
+						"extracted_data_eda_n.modification_number_eda_ext"
+					]
+				},
+				"from": 0,
+				"size": 10000,
+				"track_total_hits": true,
+				"query": {
+					"bool": {
+						"must": [
+							{
+								"nested": {
+									"path": "extracted_data_eda_n",
+									"query": {
+										"bool": {
+											"must": [
+												{
+													"match": {
+														"extracted_data_eda_n.award_id_eda_ext": {
+															"query": award
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+
+			if (idv !== "") {
+				query.query.bool.must.push(
+				{
+					"nested": {
+						"path": "extracted_data_eda_n",
+						"query": {
+							"bool": {
+								"must": [
+									{
+										"match": {
+											"extracted_data_eda_n.referenced_idv_eda_ext": {
+												"query": idv
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+				)
+			}
+			return query;
+		} catch(err) {
+			this.logger.error(err, 'S5PJASQ', user)
+		}
 	}
 
 }
