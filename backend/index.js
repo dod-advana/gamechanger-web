@@ -221,8 +221,9 @@ app.post('/api/auth/token', async function (req, res) {
 	}
 });
 
-if (!constants.GAME_CHANGER_OPTS.isDecoupled) {
+if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
+		console.log(req.get('x-ua-signature'));
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
 		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
