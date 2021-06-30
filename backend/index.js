@@ -223,11 +223,13 @@ app.post('/api/auth/token', async function (req, res) {
 
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
-		console.log(req);
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
 		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
 		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+		console.log(userToken);
+		console.log(calculatedSignature);
+		console.log(signatureFromApp);
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {
