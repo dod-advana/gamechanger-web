@@ -666,7 +666,7 @@ export const axiosPOST = async (axios, url, data, options = {}) => {
 }
 
 export const axiosGET = async (axios, url, options = {}) => {
-	getSignature(options, url);
+	getSignature(options, url.split('?')[0]);
 	return axios.get(url, options);
 }
 
