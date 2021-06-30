@@ -27,6 +27,7 @@ const initState = {
             "navy": []
         }
     },
+    contractAwards: {},
     showDialog: false,
     resultsPage: 1,
     showSideFilters: true,
