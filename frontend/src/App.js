@@ -212,12 +212,15 @@ const App = (props) => {
 
 			// fetch tutorial overlay data
 			let tutorialData = [];
-			try {
-				const data = await tutorialOverlayAPI.tutorialOverlaysGET();
-				tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
-			} catch (err) {
-				console.log(err);
-				console.log("Failed to retrieve Tutorial Overlay data");
+			const doTutorial = window?.__env__?.REACT_APP_ENABLE_TUTORIAL === 'true' || process.env.REACT_APP_ENABLE_TUTORIAL === 'true';
+			if(doTutorial) {
+				try {
+					const data = await tutorialOverlayAPI.tutorialOverlaysGET();
+					tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
+				} catch (err) {
+					console.log(err);
+					console.log("Failed to retrieve Tutorial Overlay data");
+				}
 			}
 
 			getGamechangerClones(tutorialData);

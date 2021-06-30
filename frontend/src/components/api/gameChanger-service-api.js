@@ -291,6 +291,7 @@ export default class GameChangerAPI {
 				const redirectUrl = this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
 				resolve(redirectUrl);
 			}).catch(e => {
+				console.error(e);
 				console.error('ERROR GC-service-api storageDownloadBlobGET', e.message)
 				reject(e.message)
 			});
