@@ -308,7 +308,7 @@ const GetQAResults = (props) => {
 					</div>
 					<div style={styles.flex}>
 						<Popover
-							onClose={() => handleCancelFavorite(null)}
+							onClose={() => handleCancelFavorite()}
 							id={0}
 							open={popperIsOpen} anchorEl={popperAnchorEl}
 							anchorOrigin={{
@@ -323,7 +323,7 @@ const GetQAResults = (props) => {
 							{isFavorite ?
 								<div style={{padding: '0px 15px 10px'}}>
 									<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-										<CloseButton onClick={() => handleCancelFavorite(null)}>
+										<CloseButton onClick={() => handleCancelFavorite()}>
 											<CloseIcon fontSize="small"/>
 										</CloseButton>
 									</div>
@@ -333,7 +333,7 @@ const GetQAResults = (props) => {
 										</div>
 										<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 											<GCButton
-												onClick={() => handleCancelFavorite(null)}
+												onClick={() => handleCancelFavorite()}
 												style={{
 													height: 40,
 													minWidth: 40,
