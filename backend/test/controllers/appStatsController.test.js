@@ -9,13 +9,11 @@ describe('AppStatsController', function () {
 		it('should get application stats', async (done) => {
 
 			let constants = {
-				env: {
-					MATOMO_DB_CONFIG: {
-						host: 'fakeHost',
-						user: 'fakeUser',
-						password: 'fakePassword',
-						database: 'fakeDatabase'
-					}
+				MATOMO_DB_CONFIG: {
+					host: 'fakeHost',
+					user: 'fakeUser',
+					password: 'fakePassword',
+					database: 'fakeDatabase'
 				}
 			};
 			let mysqlParams = null;
@@ -84,13 +82,11 @@ describe('AppStatsController', function () {
 		it('should get application stats with clone data', async (done) => {
 
 			let constants = {
-				env: {
-					MATOMO_DB_CONFIG: {
-						host: 'fakeHost',
-						user: 'fakeUser',
-						password: 'fakePassword',
-						database: 'fakeDatabase'
-					}
+				MATOMO_DB_CONFIG: {
+					host: 'fakeHost',
+					user: 'fakeUser',
+					password: 'fakePassword',
+					database: 'fakeDatabase'
 				}
 			};
 			let mysqlParams = null;
@@ -157,13 +153,11 @@ describe('AppStatsController', function () {
 		it('should get application stats with internal users to exclude', async (done) => {
 
 			let constants = {
-				env: {
-					MATOMO_DB_CONFIG: {
-						host: 'fakeHost',
-						user: 'fakeUser',
-						password: 'fakePassword',
-						database: 'fakeDatabase'
-					}
+				MATOMO_DB_CONFIG: {
+					host: 'fakeHost',
+					user: 'fakeUser',
+					password: 'fakePassword',
+					database: 'fakeDatabase'
 				}
 			};
 			let mysqlParams = null;
@@ -230,13 +224,11 @@ describe('AppStatsController', function () {
 		it('should get application stats with queries to exclude for top queries', async (done) => {
 
 			let constants = {
-				env: {
-					MATOMO_DB_CONFIG: {
-						host: 'fakeHost',
-						user: 'fakeUser',
-						password: 'fakePassword',
-						database: 'fakeDatabase'
-					}
+				MATOMO_DB_CONFIG: {
+					host: 'fakeHost',
+					user: 'fakeUser',
+					password: 'fakePassword',
+					database: 'fakeDatabase'
 				}
 			};
 			let mysqlParams = null;

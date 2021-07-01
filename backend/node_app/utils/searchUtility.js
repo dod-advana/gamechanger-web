@@ -5,6 +5,7 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
+const { include } = require('underscore');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -34,13 +35,19 @@ class SearchUtility {
 		this.cleanUpIdEsResults = this.cleanUpIdEsResults.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
-		this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
+		// this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
+		this.intelligentSearchHandler = this.intelligentSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
+		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
+		this.findAliases = this.findAliases.bind(this);
+		this.makeBigramQueries = this.makeBigramQueries.bind(this);
 		this.phraseQAQuery = this.phraseQAQuery.bind(this);
 		this.expandParagraphs = this.expandParagraphs.bind(this);
 		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
+		this.filterEmptyDocs = this.filterEmptyDocs.bind(this);
+		this.cleanQAResults = this.cleanQAResults.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -188,10 +195,14 @@ class SearchUtility {
     return(res.join(' '));
 } 
 
-	getEsSearchTerms({ searchText }) {
-		const stopwordsRemoved = this.remove_stopwords(searchText);
-		const cleanedSearchText = stopwordsRemoved.replace(/\?/g, '');
-		return this.getQueryAndSearchTerms(cleanedSearchText);
+	getEsSearchTerms({ searchText, questionFlag }) {
+		let terms = searchText;
+		if (questionFlag){
+			const stopwordsRemoved = this.remove_stopwords(searchText);
+			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
+			terms = cleanedText
+		}
+		return this.getQueryAndSearchTerms(terms);
 	}
 
 	getQueryAndSearchTerms (searchText) {
@@ -283,7 +294,8 @@ class SearchUtility {
 	}
 
 	getElasticsearchQuery(
-		{ searchText, 
+		{ 
+			searchText, 
 			searchTerms, 
 			parsedQuery, 
 			orgFilterString = '', 
@@ -331,6 +343,8 @@ class SearchUtility {
 			includeRevoked = false,
 			sort = 'Relevance', 
 			order = 'desc',
+			includeHighlights = true,
+			docIds = {}
 		 }, 
 		 user) {
 
@@ -346,12 +360,10 @@ class SearchUtility {
 					mustQueries.push(wildcard);
 				}
 			}
-
 			storedFields = [...storedFields, ...extStoredFields];
 			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
-			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
@@ -385,23 +397,24 @@ class SearchUtility {
 										_source: false,
 										stored_fields: [
 											'paragraphs.page_num_i',
-											'paragraphs.filename',
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
 										size: 5,
 										highlight: {
 											fields: {
-												'paragraphs.filename.search': {
-													number_of_fragments: 0
-												},
 												'paragraphs.par_raw_text_t': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
+
 												},
 												'paragraphs.par_raw_text_t.gc_english': {
-													fragment_size: 2 * charsPadding,
-													number_of_fragments: 1
+													fragment_size: 3 * charsPadding,
+													number_of_fragments: 1,
+													type: 'plain'
+
 												},
 											},
 											fragmenter: 'span'
@@ -411,14 +424,6 @@ class SearchUtility {
 										bool: {
 											should: [
 												{
-													wildcard: {
-														'paragraphs.filename.search': {
-															value: `*${parsedQuery}*`,
-															boost: 50
-														}
-													}
-												},
-												{
 													query_string: {
 														query: `${parsedQuery}`,
 														default_field,
@@ -427,26 +432,44 @@ class SearchUtility {
 														fuzziness: 'AUTO',
 														analyzer
 													}
-												},
-												
-												
-											],
-											minimum_should_match: 1
+												}
+											]										
 										}
+									}
+								}
+							},
+							{
+								wildcard: {
+									'keyw_5': {
+										value: `*${parsedQuery}*`
+									}
+								}
+							},
+							{
+								wildcard: {
+									'title.search': {
+										value: `*${parsedQuery}*`,
+										boost: 4
+									}
+								}
+							},
+							{
+								wildcard: {
+									'filename.search': {
+										value: `*${parsedQuery}*`,
+										boost: 4
+
 									}
 								}
 							},
 							{
 								multi_match: {
 									query: `${parsedQuery}`,
-									fields: [
-										'id^5',
-										'title.search^15',
-										'keyw_5'
-									],
+									fields: ['title.search', 'filename.search'],
 									operator: 'AND',
-									type: "best_fields"
-								}
+									type: 'phrase',
+									boost: 2
+								  }
 							}
 						],
 						minimum_should_match: 1,
@@ -456,21 +479,18 @@ class SearchUtility {
 					}
 				},
 				highlight: {
+					require_field_match: false,
 					fields: {
-						'title.search': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'keyw_5': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						},
-						'id': {
-							fragment_size: 2 * charsPadding,
-							number_of_fragments: 1
-						}
+						'title.search': {},
+						'keyw_5': {},
+						'id': {},
+						'filename.search': {}
 					},
-					fragmenter: 'span'
+					fragment_size: 10,
+					fragmenter: 'simple',
+					type: 'unified',
+					boundary_scanner: 'word'
+
 				}
 			};
 
@@ -550,265 +570,19 @@ class SearchUtility {
 					}
 				);
 			}
+			if (includeHighlights == false) {
+				delete query.query.bool.should[0].nested.inner_hits;
+				delete query.highlight;
+			}
+			if (Object.keys(docIds).length !== 0){
+				query.query.bool.must.push(
+					{terms: {id: docIds}}
+					)
+
+			}
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
-		}
-	}
-
-	getSimpleSyntaxElasticsearchQuery({ searchText, searchTerms, parsedQuery, orgFilterString, index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], storedFields = [
-		'filename',
-		'title',
-		'page_count',
-		'doc_type',
-		'doc_num',
-		'ref_list',
-		'id',
-		'summary_30',
-		'keyw_5',
-		'p_text',
-		'type',
-		'p_page',
-		'display_title_s',
-		'display_org_s',
-		'display_doc_type_s'
-	], extStoredFields = [], extSearchFields = [] }, user) {
-
-		try {
-			const lowerSearchText = searchText.toLowerCase();
-			const query = {
-				_source: {
-					includes: [
-						'pagerank_r',
-						'kw_doc_score_r',
-						'orgs_rs'
-					]
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'p_text',
-					'type',
-					'p_page',
-					'display_title_s',
-					'display_org_s',
-					'display_doc_type_s'
-				],
-				from: offset,
-				size: limit,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'doc_type',
-							size: 10000
-						}
-					}
-				},
-				query: {
-					bool: {
-						must: [
-							{
-								bool: {
-									should: [
-										{
-											nested: {
-												path: 'paragraphs',
-												inner_hits: {
-													stored_fields: [
-														'paragraphs.page_num_i',
-														'paragraphs.filename',
-														'paragraphs.par_raw_text_t'
-													],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'paragraphs.filename.search': {
-																number_of_fragments: 0
-															},
-															'paragraphs.par_raw_text_t': {
-																fragment_size: 180,
-																number_of_fragments: 1
-															}
-														},
-														fragmenter: 'span'
-													}
-												},
-												query: {
-													match: {
-														'paragraphs.par_raw_text_t': {
-															query: lowerSearchText,
-															operator: 'AND'
-														}
-													}
-												}
-											}
-										},
-										{
-											fuzzy: {
-												'title.search': {
-													value: searchText,
-												}
-											}
-										},
-										{
-											terms: {
-												'title.search': searchTerms,
-											}
-										}
-									]
-								}
-							}
-						],
-						should: [
-							{
-								match_phrase: {
-									'paragraphs.par_raw_text_t': lowerSearchText,
-								}
-							},
-							{
-								multi_match: {
-									query: lowerSearchText,
-									fields: [
-										'keyw_5^2',
-										'id^2',
-										'summary_30'
-									],
-									operator: 'and'
-								}
-							},
-							{
-								rank_feature: {
-									field: 'pagerank_r',
-									boost: 0.5
-								}
-							},
-							{
-								rank_feature: {
-									field: 'kw_doc_score_r',
-									boost: 0.1
-								}
-							}
-						]
-					}
-				}
-			};
-
-			return query;
-		} catch (err) {
-			this.logger.error(err, 'DEVUWWJ', user);
-		}
-	}
-
-	getElasticsearchQueryUsingParagraphId({ paraIds, parsedQuery }, user) {
-		try {
-			return {
-				_source: {
-					includes: [
-						'pagerank_r',
-						'kw_doc_score_r',
-						'pagerank'
-					]
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'type',
-					'pagerank_r'
-				],
-				track_total_hits: true,
-				size: 100,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'display_doc_type_s',
-							size: 10000
-						}
-					},
-					doc_org_aggs: {
-						terms: {
-							field: 'display_org_s',
-							size: 10000
-						}
-					}
-				},
-				query: {
-					bool: {
-						should: {
-							nested: {
-								path: 'paragraphs',
-								inner_hits: {
-									_source: false,
-									stored_fields: [
-										'paragraphs.page_num_i',
-										'paragraphs.filename',
-										'paragraphs.par_raw_text_t'
-									],
-									from: 0,
-									size: 5,
-									highlight: {
-										fields: {
-											'paragraphs.filename.search': {
-												number_of_fragments: 0
-											},
-											'paragraphs.par_raw_text_t': {
-												fragment_size: 180,
-												number_of_fragments: 1
-											}
-										},
-										fragmenter: 'span'
-									}
-								},
-								query: {
-									bool: {
-										must: [{
-											terms: {
-												'paragraphs.id': paraIds
-											}
-										}],
-										should: [
-											{
-												wildcard: {
-													'paragraphs.filename.search': {
-														value: `*${parsedQuery}*`,
-														boost: 15
-													}
-												}
-											},
-											{
-												query_string: {
-													query: `${parsedQuery}`,
-													default_field: 'paragraphs.par_raw_text_t',
-													default_operator: 'and',
-													fuzzy_max_expansions: 100,
-													fuzziness: 'AUTO'
-												}
-											}
-										]
-									}
-								}
-							}
-						}
-					}
-				}
-			};
-
-		} catch (err) {
-			this.logger.error(err, 'JYEOSCU', user);
 		}
 	}
 
@@ -921,32 +695,48 @@ class SearchUtility {
 		}
 	}
 
-	phraseQAQuery (searchText, searchTextList, maxLength, user) {
-		// breaks up a question query into bigrams for ES search
-		let bigrams = [];
-		let length = searchTextList.length - 2;
-		for (let i =0; i <= length; i++) {
-			bigrams.push(searchTextList.slice(i, i+2).join(' '));
-		}
+	// makes phrases to add to ES queries for entities or gamechanger indices
+	makeBigramQueries (searchTextList, alias) {
 
 		try {
-			// add additional search fields to the query
-			const mustQueries = [];
-			const shouldQueries = [
-				{
-				  multi_match: {
-					query: searchText,
-					fields: [
-					  'keyw_5^2',
-					  'id^2',
-					  'summary_30',
-					  'paragraphs.par_raw_text_t'
-					],
-					operator: 'or'
-				  }
+			let bigrams = [];
+			let searchText = searchTextList.join(' ');
+			let length = searchTextList.length - 2;
+			for (let i =0; i <= length; i++) {
+				bigrams.push(searchTextList.slice(i, i+2).join(' '));
+			}
+
+			// if alias search came back with a result, this adds the full unabbreviated name
+			try {
+				if (alias._source) {
+					bigrams.push(alias._source.name);
 				}
-			  ]
+			} catch (e) {
+				this.logger.error(e, 'DYWPQMCSW', '');
+			}
+
+			// make one object for all queries
+			const bigramQueries = {entityShouldQueries: [],  docMustQueries: [], 
+				docShouldQueries: [
+					{
+						multi_match: {
+							query: searchText,
+							fields: [
+							'keyw_5^2',
+							'id^2',
+							'summary_30',
+							'paragraphs.par_raw_text_t'
+							],
+							operator: 'or'
+						}
+					}
+				]
+			}
+			
+			// make phrase queries for each bigram
 			for (const element of bigrams) {
+
+				// documents
 				const wildcard = {
 					wildcard: {
 						'paragraphs.filename.search': { 
@@ -955,144 +745,212 @@ class SearchUtility {
 						}
 					}
 				}
-				mustQueries.push(wildcard);
+				bigramQueries.docMustQueries.push(wildcard);
+
 				const qs = {
 					query_string: {
-					  query: element,
-					  default_field: 'paragraphs.par_raw_text_t',
-					  default_operator: 'AND',
-					  fuzzy_max_expansions: 100,
-					  fuzziness: 'AUTO'
+					query: element,
+					default_field: 'paragraphs.par_raw_text_t',
+					default_operator: 'AND',
+					fuzzy_max_expansions: 100,
+					fuzziness: 'AUTO'
 					}
 				}
-				mustQueries.push(qs);
+				bigramQueries.docMustQueries.push(qs);
+
 				const mm = {
 					multi_match: {
-					  query: element,
-					  fields: ["summary_30","title", "keyw_5"],
-					  type: "phrase",
-					  boost: 5
+					query: element,
+					fields: ["summary_30","title", "keyw_5"],
+					type: "phrase",
+					boost: 5
 					}
 				}
-				shouldQueries.push(mm);
-			}
+				bigramQueries.docShouldQueries.push(mm);
 
-			let query = {
-				
-				query: {
-				  bool: {
-					must: [
-					  {
-						nested: {
-						  path: 'paragraphs',
-						  inner_hits: {
-							_source: false,
-							stored_fields: [
-							  'paragraphs.page_num_i',
-							  'paragraphs.filename',
-							  'paragraphs.par_raw_text_t'
-							],
-							from: 0,
-							size: 5,
-							highlight: {
-							  fields: {
-								'paragraphs.filename.search': {
-								  number_of_fragments: 0
-								},
-								'paragraphs.par_raw_text_t': {
-								  fragment_size: maxLength,
-								  number_of_fragments: 1
-								}
-							  },
-							  fragmenter: 'span'
-							}
-						  },
-						  query: {
-							bool: {
-							  should: mustQueries
-							}
-						  }
+				// entities 
+				const nameEntityQuery = {
+					match_phrase: {
+						'name': {
+							query: element,
+							slop: 2,
+							boost: 0.5
 						}
-					  }
-					],
-					should: shouldQueries
-				  }
+					}
 				}
-			  }
-			return query;
+				bigramQueries.entityShouldQueries.push(nameEntityQuery);
+
+				const multiEntityQuery = {
+					multi_match: {
+						fields: ['name', 'aliases.name'], // 'information'
+						query: element,
+						type: 'phrase_prefix'
+					}
+				}
+				bigramQueries.entityShouldQueries.push(multiEntityQuery);
+			};
+			return bigramQueries;
+
 		} catch (e) {
-			this.logger.error(e, 'TJDDKH5F', user);
+			this.logger.error(e, 'LWPOT5F', '');
 		}
 	}
 
-	phraseQAEntityQuery (searchTextList, limit) {
-		
-		let bigrams = [];
-		let length = searchTextList.length - 2;
-		for (let i =0; i <= length; i++) {
-			bigrams.push(searchTextList.slice(i, i+2).join(' '));
-		}
+	// make ES query for QA documents/entities/aliases
+	phraseQAQuery (bigramQueries, queryType, entityLimit, maxLength, user) {
 
-		const shouldQueries = [];
-		const mustQueries = [];
-		for (const element of bigrams) {
-			const nameQuery = {
-				match_phrase: {
-					'name': {
-						query: element,
-						slop: 2,
-						boost: 0.5
-					}
-				}
-			}
-			shouldQueries.push(nameQuery);
-
-			const multiQuery = {
-				multi_match: {
-					fields: ['name', 'aliases.name'], // 'information'
-					query: element,
-					type: 'phrase_prefix'
-				}
-			}
-			shouldQueries.push(multiQuery);
-
-			const alias = {
-				match: { 'aliases.name': element }
-			}
-			mustQueries.push(alias);
-		};
-
-		const aliasQuery = {
-			nested: {
-				path: "aliases",
-				query: {
-					bool: {
-						should: mustQueries
-					}
-				}
-			}
-		}
-		shouldQueries.push(aliasQuery);
-		
+		let query;
 		try {
-			let query = {
-				from: 0,
-				size: limit,
+			if (queryType === 'alias_only') {
+				query = {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: bigramQueries.aliasQuery
+							}
+						}
+					};
+			} else if (queryType === 'entities') {
+				query = {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: bigramQueries.entityShouldQueries
+							}
+						}
+					};
+			} else if (queryType === 'documents') {
+				query = {
 					query: {
 						bool: {
-							should: shouldQueries
+							must: [
+								{
+									nested: {
+										path: 'paragraphs',
+										inner_hits: {
+											_source: false,
+											stored_fields: [
+												'paragraphs.page_num_i',
+												'paragraphs.filename',
+												'paragraphs.par_raw_text_t'
+											],
+											from: 0,
+											size: 5,
+											highlight: {
+												fields: {
+													'paragraphs.filename.search': {
+														number_of_fragments: 0
+													},
+													'paragraphs.par_raw_text_t': {
+														fragment_size: maxLength,
+														number_of_fragments: 1
+													}
+												},
+												fragmenter: 'span'
+											}
+										},
+										query: {
+											bool: {
+												should: bigramQueries.docMustQueries
+											}
+										}
+									}
+								}
+							],
+							should: bigramQueries.docShouldQueries
 						}
 					}
-				};
+				}
+			};
 			return query;
-			} catch (err) {
-				this.logger.error(err, 'JKLQOPMF', '');
-			}
+		} catch (e) {
+		this.logger.error(e, 'TJDDKH5F', user);
 		}
+	}
+
+	makeAliasesQuery (searchTextList, entityLimit) {
+
+		try {
+			// make alias queries for each word
+			const mustQueries = [];
+
+			for (const word of searchTextList) {
+				const alias = {
+					match: { 'aliases.name': word }
+				}
+				mustQueries.push(alias);
+			};
+
+			const aliasQuery = {
+				nested: {
+					path: "aliases",
+					query: {
+						bool: {
+							should: mustQueries
+						}
+					}
+				}
+			};
+			return {
+					from: 0,
+					size: entityLimit,
+						query: {
+							bool: {
+								should: aliasQuery
+							}
+						}
+					};
+		} catch (e) {
+			this.logger.error(e, 'LQPRYTUOF', '');
+		}
+	}
+
+	async findAliases (searchTextList, entityLimit, esClientName, entitiesIndex, user) {
+
+		let matchingAlias = {};
+		try {
+			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
+			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
+			if (aliasResults.body.hits.hits[0]) {
+				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map(item => item.name);
+				for (var i = 0; i < aliases.length; i++) {
+					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
+						matchingAlias = aliasResults.body.hits.hits[0];
+						matchingAlias.match = aliases[i]
+						break
+					}
+				}
+			};
+			return matchingAlias
+		} catch (e) {
+		this.logger.error(e, 'MBWYH5F', user);
+		}
+	}
+
+	filterEmptyDocs(docs, filterLength) {
+		// filters out results that have no text or very short amount of text in the paragraphs
+		try {
+			let filteredResults = [];
+			for (let i = 0; i < docs.length; i++) {
+				let paragraphs = docs[i]._source.paragraphs;
+				let parText = paragraphs.map(item => item.par_raw_text_t).join(" ");
+				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
+					filteredResults.push(docs[i])
+				} else { // pass
+					//console.log("REMOVING DOC: ", docs[i])
+				}
+			};
+			return filteredResults;
+		} catch (e) {
+			this.logger.error(e, 'SPW29NTY', '');
+		}
+	}
 
 	expandParagraphs (singleResult, parIdx, minLength) {
 		// adds context around short paragraphs to make them longer
-		let qaResults = singleResult.body.hits.hits[0]._source.paragraphs; // get just the paragraph text into list
+		let qaResults = singleResult._source.paragraphs; // get just the paragraph text into list
 		let qaTextList = qaResults.map(item => item.par_raw_text_t);
 		let start = parIdx;
 		let end = +start + +1;
@@ -1117,120 +975,214 @@ class SearchUtility {
 			}
 			return context;
 		} catch (e) {
-			LOGGER.error(e.message, 'BVD4546JN', userId);
+			LOGGER.error(e.message, 'BVD4546JN', '');
 		}
 	}
 
-	async queryOneDocQA(docId, userId) {
+	async queryOneDocQA(docId, esClientName, esIndex, userId) {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
-			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
 			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
-			return singleResult;
+			return singleResult.body.hits.hits[0];
 		} catch (e) {
 			LOGGER.error(e.message, 'COP4546JN', userId);
 		}
 	}
 
-	async getQAContext(contextResults, entityQAResults, sentResults, userId, qaParams) {
-		
-		let context = [];
-		let docLimit = Math.min(qaParams.maxDocContext, contextResults.body.hits.hits.length);
-		let parIdx = 0;
+	cleanParagraph (paragraph) {
+		// remove extra punctuation/weird characters
+		try {
+			paragraph = paragraph.replace(/((\.)(\s)?(?=\.))/g,''); // remove TOC periods
+			paragraph = paragraph.replace(/([xX](\s)?(?=[xX]))/g,''); // remove TOC periods
+			paragraph = paragraph.replace(/[^a-zA-Z0-9 \(\)\/-:;,"?!\.]/g, ' '); // ascii
+			paragraph = paragraph.replace(/(\s\s+)/g, ' '); // replace multiple spaces with one space
+		} catch (e) {
+			LOGGER.error(e.message, 'NQODF78X', '');
+		};
+		return paragraph;
+	}
+
+	async formatQAquery (searchText, entityLimit, esClientName, entitiesIndex, userId) {
+		try {
+			let text = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
+			let display = text + '?';
+			let list = text.split(/\s+/); // get list of query terms
+			let alias = await this.findAliases(list, entityLimit, esClientName, entitiesIndex, userId);
+			if (alias._source) {
+				text = text.replace(alias.match.toLowerCase(), alias._source.name);
+			};
+			let qaQueries = {text: text, display: display, list: list, alias: alias};
+			return qaQueries;
+		} catch (e) {
+			LOGGER.error(e.message, 'SRUVBNX', '');
+		};
+	}
+
+	async getQAEntities (qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
+		try {
+			let entities = {};
+			if (qaQueries.alias._source) {
+				entities.QAResults = qaQueries.alias;
+			} else {
+				let queryType='entities';
+				let qaEntityQuery = this.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
+				entities.allResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
+			};
+			if (entities.allResults) {
+				entities.QAResults = entities.allResults.body.hits.hits[0]
+			};
+			return entities;
+		} catch (e) {
+			this.logger.error(e.message, 'I9XPQL2W');
+		}
+	}
+
+	cleanQAResults (searchResults, shortenedResults, context) {
+		// formats QA results
+		try {
+			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+				shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+					return i['status'] == 'passed' && i['text'] !== '';
+				});
+			} else {
+				shortenedResults.answers = shortenedResults.answers.filter(function(i) {
+					return i['text'] !== '';
+				});
+			}
+			let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
+			let cleanedResults = shortenedResults.answers.map(item => item.text);
+			searchResults.qaResults.answers = cleanedResults;
+			searchResults.qaResults.filenames = contextIds;
+			searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
+			searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
+		} catch (e) {
+			LOGGER.error(e.message, 'AJEPRUTY', '');
+		};
+		return searchResults;
+	}
+
+	getInnerHitHighlight (paragraph) {
+		// gets just the highlight from an inner hit
+		try {
+			return paragraph.highlight['paragraphs.par_raw_text_t'][0]
+		} catch (e) {
+			LOGGER.error(e.message, 'NPLWDQCX', '');
+		}
+	}
+
+	getInnerHitParagraph (paragraph) {
+		// get the paragraph text from an inner hit
+		try {
+			return paragraph.fields['paragraphs.par_raw_text_t'][0]
+		} catch (e) {
+			LOGGER.error(e.message, 'NQCPQBX', '');
+		}
+	}
+
+	processQAEntity (entity, context, userId) {
+		try {
+			let docId = '';
+			let resultType = '';
+			if (entity._source.entity_type === 'topic') {
+				docId = entity._source.name.toLowerCase();
+				resultType = 'topic';
+			} else {
+				docId = entity._source.name;
+				resultType = 'entity';
+			}
+			let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType, source: "entity search", text: entity._source.information};
+			context.unshift(entityObj);
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'PQXUOSDF9', userId);
+		}
+	}
+
+	async processQASentenceResults (sentResults, context, esClientName, esIndex, userId, qaParams) {
+		for (var i = 0; i < sentResults.length; i++) {
+			try {
+				let [docId, parIdx] = sentResults[i].id.split('_');
+				docId = docId + '_0';
+				let resultDoc = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
+				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
+				let paraHit = resultDoc._source.paragraphs[parIdx];
+				let para = this.cleanParagraph(paraHit.par_raw_text_t);
+				if (para.length > qaParams.maxLength) { // if paragraph is too long, take beginning
+					contextPara.text = para.substring(0,qaParams.maxLength);
+				} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
+					contextPara.text = para;
+				} else {
+					let qaSubset = await this.expandParagraphs(resultDoc, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+					contextPara.text = this.cleanParagraph(qaSubset.join(' ')); 
+				}
+				if (sentResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
+					context.unshift(contextPara);
+				} else {
+					context.push(contextPara);
+				};
+				return context;
+			} catch (e) {
+				LOGGER.error(e.message, 'LOQXIPY', userId);
+			}
+		}
+	}
+
+	async processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams) {
+
+		let filterLength = 15;
+		let docs = docResults.body.hits.hits
+		let filteredResults = this.filterEmptyDocs(docs, filterLength);
+		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
 		try {
 			for (var i = 0; i < docLimit; i++) {
-				let resultDoc = contextResults.body.hits.hits[i];
-				if (resultDoc._score > qaParams.scoreThreshold) {
+				let resultDoc = filteredResults[i];
+				if (resultDoc._score > qaParams.scoreThreshold) { // if doc scores high, retrieve paragraphs
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
-							parIdx = paraHits[x]._nested.offset;
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-							contextPara.parId = parIdx;
-							contextPara.source = "context search";
-							let para = paraHits[x].fields['paragraphs.par_raw_text_t'][0];
-							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
+							let para = this.cleanParagraph(this.getInnerHitParagraph(paraHits[x]));
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
-								para = paraHits[x].highlight['paragraphs.par_raw_text_t'][0];
-								para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-								contextPara.text = para
+								contextPara.text = this.cleanParagraph(this.getInnerHitHighlight(paraHits[x]));
 							} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
 								contextPara.text = para
 							}
 							context.push(contextPara);
 						}
 					}
-				} else {
-					parIdx = 0;
-					let singleResult = await this.queryOneDocQA(resultDoc._source.id, userId); // this adds the beginning of the doc
-					let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-					contextPara.source = "context search"
-					contextPara.parId = parIdx;
-					let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods;
+				} else { // if doc doesn't score high, retrieve the intro
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: 0};
+					let singleResult = await this.queryOneDocQA(resultDoc._source.id, esClientName, esIndex, userId); // this adds the beginning of the doc
+					let qaSubset = await this.expandParagraphs(singleResult, contextPara.parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
+					let text = this.cleanParagraph(qaSubset.join(' ')); 
 					if (text.length > 200) {
 						contextPara.text = text;
 						context.push(contextPara); // only keep actual paragraphs not empty strings/titles/headers
 					}
 				}
-			}
-			if (sentResults) {
-				for (var i = 0; i < sentResults.length; i++) {
-					try {
-						let [docId, parIdx] = sentResults[i].id.split('_');
-						docId = docId + '_0';
-						let singleResult = await this.queryOneDocQA(docId, userId); // this adds the beginning of the doc
-						let resultDoc = singleResult.body.hits.hits[0];
-						let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document'};
-						contextPara.parId = parIdx;
-						contextPara.source = "intelligent search";
-						let paraHit = resultDoc._source.paragraphs[parIdx];
-						let para = paraHit.par_raw_text_t;
-						para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-						if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
-							para = para.replace(/\.\s(?=\.)/g,''); // remove TOC periods
-							contextPara.text = para;
-						} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
-							contextPara.text = para;
-						} else {
-							let qaSubset = await this.expandParagraphs(singleResult, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
-							let text = qaSubset.join(' ').replace(/\.\s(?=\.)/g,''); // remove TOC periods
-							contextPara.text = text;
-						}
-						if (sentResults[i].score >= 0.95) {
-							context.unshift(contextPara);
-						} else {
-							context.push(contextPara);
-						}
-					} catch (e) {
-						LOGGER.error(e.message, 'LOQXIPY', userId);
-					}
-				}
-			}
-			if (entityQAResults.body.hits.total.value > 0) {
-				try{
-					let docId;
-					let resultType;
-					let topEntity = entityQAResults.body.hits.hits[0];
-					if (topEntity._source.entity_type === 'topic') {
-						docId = topEntity._source.name.toLowerCase();
-						resultType = 'topic';
-					} else {
-						docId = topEntity._source.name;
-						resultType = 'entity';
-					}
-					let entity = {filename: topEntity._source.name, docId: docId, docScore: topEntity._score, retrievedDate: topEntity._source.information_retrieved, type: topEntity._source.entity_type, resultType: resultType};
-					entity.source = "entity search";
-					entity.text = topEntity._source.information;
-					context.unshift(entity);
-				} catch (e) {
-					LOGGER.error(e.message, 'REXUPFJN', userId);
-				}
-			}
-			return context
+			};
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'QAPTFJN', userId);
+		}
+	}
+	
+	async getQAContext(docResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
+		
+		let context = [];
+		try {
+			if (docResults.body) {
+				context = await this.processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams);
+			};
+			if (sentResults && sentResults.length > 0) { // if sentence results, add them to context
+				context = await this.processQASentenceResults(sentResults, context, esClientName, esIndex, userId, qaParams);
+			};
+			if (entity) { // if entity, add to context
+				context = this.processQAEntity(entity, context, userId);
+			};
+			return context;
 		} catch (e) {
 			LOGGER.error(e.message, 'CPQ4FFJN', userId);
 		}
@@ -1291,12 +1243,25 @@ class SearchUtility {
 					size: 2,
 					_source: [filename],
 					query: {
-						wildcard: {
-							'filename.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
-							}
+						bool: {
+							must: [
+								{
+									wildcard: {
+										'filename.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
+									}
+								}
+							],
+							filter: [
+								{
+									term: {
+										'is_revoked_b': false
+									}
+								}
+							]
 						}
 					}
 				},
@@ -1307,17 +1272,28 @@ class SearchUtility {
 					size: 2,
 					_source: [title],
 					query: {
-						wildcard: {
-							'title.search': {
-								value: `*${searchTextCaps}*`,
-								boost: 1.0,
-								rewrite: 'constant_score'
-							}
-
+						bool: {
+							must: [
+								{
+									wildcard: {
+										'title.search': {
+											value: `*${searchTextCaps}*`,
+											boost: 1.0,
+											rewrite: 'constant_score'
+										}
+									}
+								}
+							],
+							filter: [
+								{
+									term: {
+										'is_revoked_b': false
+									}
+								}
+							]
 						}
 					}
 				},
-
 				{
 					index: this.constants.GAME_CHANGER_OPTS.historyIndex
 				},
@@ -1370,192 +1346,6 @@ class SearchUtility {
 		}
 	}
 
-	getElasticsearchPagesQuery({ searchText, searchTerms, parsedQuery, orgFilterString, index, offset = 0, limit = 20, format = 'json', getIdList = false, expandTerms = false, isClone = false, cloneData = {}, charsPadding = 90, operator = 'and', searchFields = {}, accessDateFilter = [], publicationDateFilter = [], publicationDateAllTime = true, storedFields = [
-		'filename',
-		'title',
-		'page_count',
-		'doc_type',
-		'doc_num',
-		'ref_list',
-		'id',
-		'summary_30',
-		'keyw_5',
-		'p_text',
-		'type',
-		'p_page',
-		'display_title_s',
-		'display_org_s',
-		'display_doc_type_s'
-	], extStoredFields = [], extSearchFields = [] }, user) {
-
-		try {
-			// add additional search fields to the query
-			const mustQueries = [];
-
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-
-					mustQueries.push(wildcard);
-				}
-			}
-
-			storedFields = [...storedFields, ...extStoredFields];
-
-			let query = {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs']
-				},
-				stored_fields: storedFields,
-				from: offset,
-				size: limit,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'doc_type',
-							size: 10000
-						}
-					}
-				},
-				track_total_hits: true,
-				query: {
-					bool: {
-						must: [
-							{
-								bool: {
-									should: [
-									  	{
-											nested: {
-												path: 'pages',
-												inner_hits: {
-													_source: false,
-													stored_fields: [
-														'pages.filename',
-														'pages.p_raw_text'
-													],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'pages.filename.search': {
-																number_of_fragments: 0
-															},
-															'pages.p_raw_text': {
-																fragment_size: 2 * charsPadding,
-																number_of_fragments: 1
-															}
-														},
-														fragmenter: 'span'
-													}
-												},
-												query: {
-													bool: {
-														should: [
-															{
-																wildcard: {
-																	'pages.filename.search': {
-																		value: `${parsedQuery}*`,
-																		boost: 15
-																	}
-																}
-															},
-															{
-																query_string: {
-																	query: `${parsedQuery}`,
-																	default_field: 'pages.p_raw_text',
-																	default_operator: `${operator}`,
-																	fuzzy_max_expansions: 100,
-																	fuzziness: 'AUTO'
-																}
-															}
-														]
-													}
-												}
-											}
-										}
-									]
-								}
-							}
-						],
-						should: [
-							{
-								multi_match: {
-									query: `${parsedQuery}`,
-									fields: [
-										'keyw_5^2',
-										'id^2',
-										'summary_30',
-										'pages.p_raw_text'
-									],
-									operator: 'or'
-								}
-							},
-							{
-								rank_feature: {
-									field: 'pagerank_r',
-									boost: 0.5
-								}
-							},
-							{
-								rank_feature: {
-									field: 'kw_doc_score_r',
-									boost: 0.1
-								}
-							}
-						]
-					}
-				}
-			};
-
-			if (isClone && cloneData && cloneData.clone_data.esCluster.toLowerCase() === 'eda') {
-				query._source.includes.push('*eda_ext_n.*')
-			}
-
-			if (extSearchFields.length > 0){
-				const extQuery = {
-					multi_match: {
-						query: searchText,
-						fields: [],
-						operator: 'or'
-					}
-				};
-				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				// query.query.bool.should = query.query.bool.should.concat(extQuery);
-				query.query.bool.must[0].bool.should = query.query.bool.must[0].bool.should.concat(extQuery);
-			}
-
-			if (this.constants.GAME_CHANGER_OPTS.allow_daterange && !publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]){
-				query.query.bool.must = query.query.bool.must.concat([
-					{
-						range: {
-							publication_date: {
-								gte: publicationDateFilter[0],
-								lte: publicationDateFilter[1]
-							}
-						}
-					}
-				]);
-			}
-
-			if (mustQueries.length > 0) {
-				query.query.bool.must = query.query.bool.must.concat(mustQueries);
-			}
-
-			query.query.bool.must.push(
-				{
-					query_string: {
-						query: `display_org_s:(${orgFilterString})`
-					}
-				}
-			);
-
-			return query;
-		} catch (err) {
-			this.logger.error(err, 'N8TJIOJ', user);
-		}
-	}
 
 	cleanUpIdEsResultsForGraphCache(raw, user) {
 		try {
@@ -1657,6 +1447,9 @@ class SearchUtility {
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
 								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
 							}
 							result.pageHitCount = pageSet.size;
 							
@@ -1688,6 +1481,9 @@ class SearchUtility {
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
+								if(r.highlight['filename.search']){
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1821,45 +1617,55 @@ class SearchUtility {
 		catch {
 			this.logger.error(e, '17I8XO8', user);
 		}
-		
 	}
 
-	async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
+	// async combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset) {
+	// 	let filename;
+	// 	let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+	// 	if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){ // if there is a result, shift offset / limits accordingly. 
+	// 		if(req.body.offset === 0){
+	// 			req.body.limit = 5
+	// 		} else {
+	// 			req.body.offset -= 1;
+	// 		}
+	// 	}
+	// 	let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+	// 	if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+	// 		filename = sentenceResults[0].id;
+	// 		searchResults.totalCount += 1;
+	// 	}
+
+	// 	const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
+	// 	if (sentenceResults === TRANSFORM_ERRORED) {
+	// 		searchResults.transformFailed = true;
+	// 	} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
+	// 		topSentenceFind.search_mode = 'Intelligent Search';
+	// 		searchResults.docs.unshift(topSentenceFind);
+	// 	} else if (offset === 0 && filename) { // if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
+	// 		try {
+	// 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
+	// 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
+	// 			searchResults.docs.unshift(sentenceSearchRes.docs[0]);
+	// 		} catch (err) {
+	// 			this.logger.error('Error with sentence search results', 'ALRATR8', userId);
+	// 		}
+	// 	}
+	// 	searchResults.sentResults = sentenceResults;
+	// 	return searchResults;
+	// }
+
+	async intelligentSearchHandler(searchText, userId, req, clientObj){
 		let filename;
+		let result;
 		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){ // if there is a result, shift offset / limits accordingly. 
-			if(req.body.offset === 0){
-				req.body.limit = 5
-			} else {
-				req.body.offset -= 1;
-			}
-		}
-		let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
-		// const resultArray = await Promise.all([sentenceResults, searchResults]);
-		// sentenceResults = resultArray[0];
-		// searchResults = resultArray[1];
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
-			searchResults.totalCount += 1;
+			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
+			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
+			result = sentenceSearchRes.docs[0];
+			return result;
 		}
-
-		const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
-		if (sentenceResults === TRANSFORM_ERRORED) {
-			searchResults.transformFailed = true;
-		} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
-			topSentenceFind.search_mode = 'Intelligent Search';
-			searchResults.docs.unshift(topSentenceFind);
-		} else if (offset === 0 && filename) { // if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
-			try {
-				const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
-				sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
-				searchResults.docs.unshift(sentenceSearchRes.docs[0]);
-			} catch (err) {
-				this.logger.error('Error with sentence search results', 'ALRATR8', userId);
-			}
-		}
-		searchResults.sentResults = sentenceResults;
-		return searchResults;
+		return {};
 	}
 
 	async documentSearchOneID(req, body, clientObj, userId) {
@@ -1897,26 +1703,21 @@ class SearchUtility {
 				forGraphCache = false,
 				searchType
 			} = body;
-			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body, userId);
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 	
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-	
 			if (esQuery === '') {
 				if (forGraphCache) {
 					esQuery = this.getElasticsearchQueryForGraphCache(body, userId);
-				} else if (searchType === 'Simple') {
-					esQuery = this.getSimpleSyntaxElasticsearchQuery(body, userId);
-					esIndex = constants.GAME_CHANGER_OPTS.simpleIndex;
 				} else {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
@@ -1985,9 +1786,9 @@ class SearchUtility {
 			} catch (err) {
 				this.logger.error(err, 'JAEIWMF', '');
 			}
-		}
+	}
 
-		getTopicQuery(searchText, offset = 0, limit = 6) {
+	getTopicQuery(searchText, offset = 0, limit = 6) {
 			try {
 				let query = {
 					from: offset,
@@ -2003,7 +1804,7 @@ class SearchUtility {
 				} catch (err) {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
-			}
+	}
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
@@ -2287,6 +2088,13 @@ class SearchUtility {
 			else if (v instanceof Array) return 'Array';
 			else return false;
 		}
+	}
+
+	isQuestion(searchText){
+		const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
+		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
+		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
+	return question;
 	}
 
 }

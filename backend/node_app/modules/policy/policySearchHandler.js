@@ -60,15 +60,16 @@ class PolicySearchHandler extends SearchHandler {
 		if(doubleQuoteCount % 2 === 1){
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
+		req.body.questionFlag = this.searchUtility.isQuestion(searchText)
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
-		let enrichedResults = await this.enrichSearchResults(req, searchResults, userId);
+		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		return enrichedResults;
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName, searchText} = req.body;
+		const {functionName, searchText = ''} = req.body;
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
 		if(doubleQuoteCount % 2 === 1){
@@ -245,58 +246,13 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async doSearch(req, expansionDict, clientObj, userId) {
-		const {
-			searchText,
-			searchType,
-			searchVersion,
-			cloneName,
-			offset,
-			orgFilter = 'Department of Defense_Joint Chiefs of Staff_Intelligence Community_United States Code',
-			orgFilterString = [],
-			typeFilterString = [],
-			typeFilter,
-			useGCCache,
-			showTutorial = false,
-			tiny_url,
-			forCacheReload = false,
-			searchFields = {},
-			includeRevoked, 
-			sort = 'Relevance',
-			order = 'desc'
-		} = req.body;
-
 		try {
-			// this.logger.info('exp: ' + expansionDict);
 			// caching db
 			await this.async_redis.select(redisAsyncClientDB);
 
 			let searchResults;
-			// combined search: run if not clone + sort === 'relevance' + flag enabled
-			const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
-			const noSourceSpecified = _.isEqual([], orgFilterString);
-			const noPubDateSpecified = req.body.publicationDateAllTime;
-			const noTypeSpecified = _.isEqual([], typeFilterString);
-			let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
-			combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
-			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
-
 			const operator = 'and';
-			if (sort === 'Relevance' && order === 'desc' &&noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
-				try {
-					searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, clientObj, operator, offset);
-				} catch (e) {
-					if (forCacheReload) {
-						throw Error('Cannot transform document search terms in cache reload');
-					}
-					this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L6SPJU9', userId);
-
-					const { message } = e;
-					this.logger.error(message, 'H6XFEIW', userId);
-					throw e;
-				}
-			} else {
-				searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
-			}
+			searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			return searchResults;
@@ -305,51 +261,56 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	async enrichSearchResults(req, searchResults, userId) {
+	async enrichSearchResults(req, searchResults, clientObj,  userId) {
 		const {
 			searchText,
-			searchType,
-			searchVersion,
-			cloneName,
 			offset,
-			orgFilter = 'Department of Defense_Joint Chiefs of Staff_Intelligence Community_United States Code',
-			typeFilter,
-			useGCCache,
-			showTutorial = false,
-			tiny_url,
-			forCacheReload = false,
-			searchFields = {},
-			includeRevoked
 		} = req.body;
 		try {
-			let enrichedResults = await this.qaEnrichment(req, searchResults, userId);
+			let enrichedResults = searchResults;
+			//set empty values
+			enrichedResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+			enrichedResults.qaContext = {params: {}, context: []};
+			enrichedResults.intelligentSearch = {};
+			enrichedResults.entities = [];
+			enrichedResults.totalEntities = 0;
+			enrichedResults.topics = [];
+			enrichedResults.totalTopics = 0;
+
+			// QA data
+			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
+			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
+			if(intelligentAnswersOn){
+				const QA = await this.qaEnrichment(req, searchResults, qaParams, userId);
+				enrichedResults.qaResults = QA.qaResults;
+				enrichedResults.qaContext = QA.qaContext;
+			}
+
+			// intelligent search data
+			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
+			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
+			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults, {question: '', answers: [], filenames: [], docIds: []})){ // add intelligent search result if QA empty
+				const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
+				enrichedResults.intelligentSearch = intelligentSearchResult;
+			}
 
 			// add entities
 			let entitySearchOn = await this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
-			if (entitySearchOn.length > 0){
-				entitySearchOn = entitySearchOn[0].dataValues.value === 'true';
-			}
+			entitySearchOn = entitySearchOn.length > 0 ? entitySearchOn[0].dataValues.value === 'true' : false;
 			if (entitySearchOn) {
 				const entities = await this.entitySearch(searchText, offset, 6, userId);
 				enrichedResults.entities = entities.entities;
 				enrichedResults.totalEntities = entities.totalEntities;
-			} else {
-				enrichedResults.entities = [];
-				enrichedResults.totalEntities = 0;
 			}
 
 			//add topics
 			let topicSearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
-			if (topicSearchOn.length > 0){
-				topicSearchOn = topicSearchOn[0].dataValues.value === 'true';
-			}
+			topicSearchOn = topicSearchOn.length > 0 ? topicSearchOn[0].dataValues.value === 'true' : false;
 			if (topicSearchOn) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
 				enrichedResults.topics = topics.topics;
 				enrichedResults.totalTopics = topics.totalTopics;
-			} else {
-				enrichedResults.topics = [];
-				enrichedResults.totalTopics = 0;
 			}
 
 			// add results to search report
@@ -370,70 +331,91 @@ class PolicySearchHandler extends SearchHandler {
 		return searchResults;
 	}
 
-	async qaEnrichment(req, searchResults, userId){
+	async intelligentSearch(req, clientObj, userId){
+		const {
+			searchText,
+			orgFilterString = [],
+			typeFilterString = [],
+			forCacheReload = false,
+			searchFields = {},
+			sort = 'Relevance',
+			order = 'desc'
+		} = req.body;
+		let intelligentSearchResult = {};
+
+		// combined search: run if not clone + sort === 'relevance' + flag enabled
+		const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
+		const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
+		const noSourceSpecified = _.isEqual([], orgFilterString);
+		const noPubDateSpecified = req.body.publicationDateAllTime;
+		const noTypeSpecified = _.isEqual([], typeFilterString);
+		let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
+		combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
+		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
+			try {
+				// get intelligent search result
+				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				return intelligentSearchResult;
+			} catch (e) {
+				if (forCacheReload) {
+					throw Error('Cannot transform document search terms in cache reload');
+				}
+				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L6SPJU9', userId);
+				const { message } = e;
+				this.logger.error(message, 'H6XFEIW', userId);
+				return intelligentSearchResult;
+			}
+		}
+		return intelligentSearchResult;
+	}
+
+	async qaEnrichment(req, searchResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
-		
-		searchResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-		searchResults.qaContext = {params: {}, context: []};
-		const permissions = req.permissions ? req.permissions : [];
-		let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4};
-		searchResults.qaContext.params = qaParams;
-		if (permissions) {
-		// if (permissions.includes('Gamechanger Admin') || permissions.includes('Webapp Super Admin')){
-			// check if search is a question
-			let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			if (intelligentQuestions.length > 0){
-				intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
-			}
-			const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
-			const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
-			const isQuestion = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
-			if (intelligentQuestions && isQuestion){
-				try {
-					let qaSearchText = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
-					let qaSearchTextList = qaSearchText.split(/\s+/); // get list of query terms
-					let qaQuery = this.searchUtility.phraseQAQuery(qaSearchText, qaSearchTextList, qaParams.maxLength, userId);
-					let qaEntityQuery = this.searchUtility.phraseQAEntityQuery(qaSearchTextList, qaParams.entityLimit, userId);
-					let esClientName = 'gamechanger';
-					let esIndex = 'gamechanger';
-					let entitiesIndex = 'entities-new';
-					let contextResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaQuery, userId);
-					let entityQAResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
-					let context = await this.searchUtility.getQAContext(contextResults, entityQAResults, searchResults.sentResults, userId, qaParams);
-					searchResults.qaContext.context = context;
-					if (testing === true) {
-						this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
-					}
-					let qaContext = context.map(item => item.text);
-					if (context.length > 0) { // if context results, query QA model
-						let shortenedResults = await this.mlApi.getIntelAnswer(qaSearchText, qaContext, userId);
-						searchResults.qaResults.question = qaSearchText + '?';
-						if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
-							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['status'] == 'passed' && i['text'] !== '';
-							});
-						} else {
-							shortenedResults.answers = shortenedResults.answers.filter(function(i) {
-								return i['text'] !== '';
-							});
-						}
-						let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
-						let cleanedResults = shortenedResults.answers.map(item => item.text);
-						searchResults.qaResults.answers = cleanedResults;
-						searchResults.qaResults.filenames = contextIds;
-						searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
-						searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
-					}
-				} catch (e) {
-					this.logger.error(e.message, 'KBBIOYCJ', userId);
-				}
-			}
-		}
-		return searchResults;
-	}
 
+		let QA = {};
+		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
+		QA.qaContext = {params: {}, context: []};
+		
+		let esClientName = 'gamechanger';
+		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+		if (intelligentQuestions.length > 0) {
+			intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
+		}
+		if (intelligentQuestions && req.body.questionFlag){
+			try {
+				let queryType = 'documents';
+				let entities;
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
+				QA.qaResults.question = qaQueries.display;
+				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				try {
+					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+				} catch (e) {
+					this.logger.error(e.message, 'FLPQX67M')
+				}
+				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
+				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
+				if (testing === true) {
+					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
+				};
+				if (context.length > 0) { // if context results, query QA model
+					QA.qaContext.context = context;
+					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
+					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
+				};
+				
+			} catch (e) {
+				this.logger.error(e.message, 'KBBIOYCJ', userId);
+			};
+		};
+		return QA;
+	}
+	
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId){
 		const {
 			searchText,
@@ -545,7 +527,7 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'Z9DWH7K', userId);
-			throw msg;
+			return { totalCount: 0, docs: [] };
 		}
 	}
 
@@ -623,8 +605,9 @@ class PolicySearchHandler extends SearchHandler {
 	// uses searchtext to get entity + parent, return entitySearch object
 	async entitySearch(searchText, offset, limit = 6, userId) {
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
+
 			const esQuery = this.searchUtility.getEntityQuery(searchText, offset, limit);
 			const entityResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (entityResults.body.hits.hits.length > 0){
@@ -670,7 +653,7 @@ class PolicySearchHandler extends SearchHandler {
 
 	async topicSearch(searchText, offset, limit = 6, userId){
 		try {
-			let esIndex = 'entities';
+			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getTopicQuery(searchText, offset, limit);
 			const topicResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);

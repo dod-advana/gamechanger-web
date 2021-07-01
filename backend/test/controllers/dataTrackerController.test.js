@@ -5,13 +5,11 @@ const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 describe('DataTrackerController', function () {
 	describe('#getTrackedData', () => {
 
-		it('should get the first page of the document corpus history', (done) => {
+		it('should get the first page of the document corpus history', async (done) => {
 
 			const constants = {
-				env: {
-					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					version: 'version'
 				}
 			};
 
@@ -56,27 +54,24 @@ describe('DataTrackerController', function () {
 					return res;
 				},
 			};
-			target.getTrackedData(req, res).then(() => {
-				assert.equal(status, 200);
-				assert.equal(resData.totalCount, 2);
-				assert.deepEqual(resData.docs, fakeDocumentCorpusResponse);
-				assert.deepEqual(passedCountParams.where, {});
-				assert.deepEqual(passedFindAllParams.offset, 0);
-				assert.deepEqual(passedFindAllParams.limit, 10);
-				assert.deepEqual(passedFindAllParams.order, []);
-				done();
-			}).catch((err) => {
-				console.error(err);
-			});
+
+			await target.getTrackedData(req, res);
+
+			assert.equal(status, 200);
+			assert.equal(resData.totalCount, 2);
+			assert.deepEqual(resData.docs, fakeDocumentCorpusResponse);
+			assert.deepEqual(passedCountParams.where, {});
+			assert.deepEqual(passedFindAllParams.offset, 0);
+			assert.deepEqual(passedFindAllParams.limit, 10);
+			assert.deepEqual(passedFindAllParams.order, []);
+			done();
 		});
 
-		it('should get a different page of the document corpus history', (done) => {
+		it('should get a different page of the document corpus history', async (done) => {
 
 			const constants = {
-				env: {
-					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					version: 'version'
 				}
 			};
 
@@ -123,27 +118,24 @@ describe('DataTrackerController', function () {
 					return res;
 				},
 			};
-			target.getTrackedData(req, res).then(() => {
-				assert.equal(status, 200);
-				assert.equal(resData.totalCount, 2);
-				assert.deepEqual(resData.docs, fakeDocumentCorpusResponse);
-				assert.deepEqual(passedCountParams.where, {});
-				assert.deepEqual(passedFindAllParams.offset, 10);
-				assert.deepEqual(passedFindAllParams.limit, 20);
-				assert.deepEqual(passedFindAllParams.order, []);
-				done();
-			}).catch((err) => {
-				console.error(err);
-			});
+
+			await target.getTrackedData(req, res);
+
+			assert.equal(status, 200);
+			assert.equal(resData.totalCount, 2);
+			assert.deepEqual(resData.docs, fakeDocumentCorpusResponse);
+			assert.deepEqual(passedCountParams.where, {});
+			assert.deepEqual(passedFindAllParams.offset, 10);
+			assert.deepEqual(passedFindAllParams.limit, 20);
+			assert.deepEqual(passedFindAllParams.order, []);
+			done();
 		});
 
-		it('should handle the database throwing an error', (done) => {
+		it('should handle the database throwing an error', async (done) => {
 
 			const constants = {
-				env: {
-					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					version: 'version'
 				}
 			};
 
@@ -188,13 +180,12 @@ describe('DataTrackerController', function () {
 					return res;
 				},
 			};
-			target.getTrackedData(req, res).then(() => {
-				assert.equal(status, 500);
-				assert.equal(resData, 'My fake error');
-				done();
-			}).catch((err) => {
-				console.error(err);
-			});
+			
+			await target.getTrackedData(req, res);
+
+			assert.equal(status, 500);
+			assert.equal(resData, 'My fake error');
+			done();
 		});
 	});
 

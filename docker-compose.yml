@@ -41,6 +41,7 @@ services:
             context: ./backend/
             args:
                 MIGRATION_HOST: postgres
+        restart: always
         environment:
             - CHOKIDAR_USEPOLLING=true
         ports:
@@ -59,6 +60,7 @@ services:
             context: ./frontend/
         ports:
             - "8080:8080"
+        restart: always
         environment:
             - CHOKIDAR_USEPOLLING=true
         volumes:
