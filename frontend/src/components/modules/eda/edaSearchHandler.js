@@ -14,7 +14,6 @@ import {
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import defaultSearchHandler from "../default/defaultSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
