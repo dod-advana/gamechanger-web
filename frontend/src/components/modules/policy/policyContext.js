@@ -147,6 +147,7 @@ const initState = {
 	rawSearchResults: [],
 	docSearchResults: [],
 	qaResults: {question: '', answers: []},
+	qaContext: {params: {}, context: []},
 	isFavoriteSearch: false,
 	resetSettingsSwitch: false,
 	snackBarMsg: '',

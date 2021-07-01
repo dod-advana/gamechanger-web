@@ -32,7 +32,7 @@ fs
 		db[model.name] = model;
 	});
 
-// Add models from uot folder
+// Add models from gc-orchestration folder
 fs
 	.readdirSync(__dirname + '/gc-orchestration')
 	.filter(file =>
@@ -42,6 +42,19 @@ fs
 	.forEach(file => {
 		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
 		const model = require(path.join(__dirname + '/gc-orchestration', file))(db['gc-orchestration'], DataTypes);
+		db[model.name] = model;
+	});
+
+// Add models from uot folder
+fs
+	.readdirSync(__dirname + '/uot')
+	.filter(file =>
+		(file.indexOf('.') !== 0) &&
+        (file !== basename) &&
+        (file.slice(-3) === '.js'))
+	.forEach(file => {
+		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
+		const model = require(path.join(__dirname + '/uot', file))(db['uot'], DataTypes);
 		db[model.name] = model;
 	});
 

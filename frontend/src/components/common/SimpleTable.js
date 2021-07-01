@@ -144,7 +144,7 @@ export default class SimpleTable extends React.Component {
 	}
 
 	render() {
-		const { rows, colKeys, columnMap, onRowClick, height, zoom, tableClass, dontScroll, inheritOverflow } = this.props;
+		const { rows, colKeys, columnMap, onRowClick, height, zoom, tableClass, dontScroll, inheritOverflow, margin } = this.props;
 		if (rows.length === 0) return <i></i>
 		const cols = colKeys || _.keys(rows[0]);
 		const head = this.getHeader(cols, columnMap);
@@ -161,6 +161,7 @@ export default class SimpleTable extends React.Component {
 				width: '100%',
 				height,
 				overflow: 'auto',
+				margin
 			}
 		}
 		if (dontScroll) s.container.overflow = 'hidden';
