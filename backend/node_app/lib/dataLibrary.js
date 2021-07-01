@@ -288,6 +288,7 @@ class DataLibrary {
 
 		try {
 			res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
+			res.setHeader('content-type', 'image/png')
 			this.awsS3Client.getObject(params).createReadStream().pipe(res);
 		} catch (err) {
 			this.logger.error(err, '7ZQABVQ', userId);
