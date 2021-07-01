@@ -1,16 +1,25 @@
+import uuidv4 from "uuid/v4";
+import _ from "lodash";
+
 import {
-	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
-	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE, SEARCH_TYPES
+	getTrackingNameForFactory,
+	getQueryVariable,
+	NO_RESULTS_MESSAGE,
+	PAGE_DISPLAYED,
+	RECENT_SEARCH_LIMIT,
+	RESULTS_PER_PAGE,
+	SEARCH_TYPES,
 } from "../../../gamechangerUtils";
-import {trackSearch} from "../../telemetry/Matomo";
+import { trackSearch } from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getSearchObjectFromString, getUserData, isDecoupled,
-	setState
+	getSearchObjectFromString,
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -31,22 +40,8 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 }
 
-const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, tabName} = state;
-	const {searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked} = searchSettings;
-	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-
-	const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-	const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&tabName=${tabName}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const DefaultSearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -79,7 +74,7 @@ const DefaultSearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL({...state, searchSettings});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -103,9 +98,6 @@ const DefaultSearchHandler = {
 		const searchObject = getSearchObjectFromString(searchText);
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
-		
-		// Save search settings to postgres
-		gameChangerAPI.setUserSearchSettings({searchSettings});
 	
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
@@ -283,7 +275,7 @@ const DefaultSearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, tabName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -305,7 +297,155 @@ const DefaultSearchHandler = {
 	
 		const index = 'gamechanger';
 		getAndSetDidYouMean(index, searchText, dispatch);
-	}
+	},
+
+	parseSearchURL(defaultState, url) {
+		if (!url) url = window.location.href;
+
+		const parsed = {};
+		const newSearchSettings = {};
+	
+		// get url data and set accordingly
+		const searchText = getQueryVariable('q', url);
+		const offsetURL = getQueryVariable('offset', url);
+		const searchTypeURL = getQueryVariable('searchType', url);
+		const orgURL = getQueryVariable('orgFilter', url);
+		const typeURL = getQueryVariable('typeFilter', url);
+		const searchFieldsURL = getQueryVariable('searchFields', url);
+		const accessDateURL = getQueryVariable('accessDate', url);
+		const pubDateURL = getQueryVariable('pubDate', url);
+		const revokedURL = getQueryVariable('revoked', url);
+		const categoriesURL = getQueryVariable('categories', url);
+
+		// in preexisting links some null or undefined params were written out as string literals
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
+	
+		if (searchText) {
+			parsed.searchText = searchText;
+		}
+	
+		if (!isNullish(offsetURL)) {
+			const offset = parseInt(offsetURL);
+			if (!isNaN(offset))
+				parsed.offset = offset;
+			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
+		}
+	
+		if (!isNullish(searchTypeURL) && Object.values(SEARCH_TYPES).includes(searchTypeURL)) {
+			newSearchSettings.searchType = searchTypeURL;
+		}
+	
+		if (!isNullish(orgURL) && orgURL !== 'ALLORGS' /* legacy  value */) {
+			newSearchSettings.allOrgsSelected = false;
+			newSearchSettings.specificOrgsSelected = true;
+			newSearchSettings.orgFilter = Object.assign({}, ...orgURL.split("_").map(org => ({[org]: true})));
+		}
+		
+		if (!isNullish(typeURL) && typeURL !== 'ALLTYPES' /* legacy value */) {
+			newSearchSettings.allTypesSelected = false;
+			newSearchSettings.specificTypesSelected = true;
+			newSearchSettings.typeFilter = {};
+			newSearchSettings.typeFilter = Object.assign({}, ...typeURL.split("_").map(org => ({[org]: true})));
+		}
+		
+		if (!isNullish(searchFieldsURL)) {
+			const searchFields = {};
+			const searchFieldPairs = searchFieldsURL.split("_");
+			for (const pair of searchFieldPairs) {
+				const keyValue = pair.split("-");
+				if (keyValue && keyValue.length === 2) {
+					const [field, input] = keyValue;
+					searchFields[uuidv4()] = {field, input};
+				}
+			}
+			if (!_.isEmpty(searchFields)) {
+				for (const id in searchFields) {
+					const field = searchFields[id];
+					const prop = defaultState.documentProperties.find(prop => prop.display_name === field.field);
+					if (prop) {
+						field.field = prop;
+					} else {
+						delete searchFields[id];
+					}
+				}
+				searchFields[uuidv4()] = { field: null, input: '' };  // :/
+				newSearchSettings.searchFields = searchFields;
+			}
+		}
+
+		if (!isNullish(accessDateURL) && accessDateURL !== "ALL" /* legacy value */) {
+			const parsedDates = accessDateURL.split("_").map(dateStr => new Date(parseInt(dateStr)));
+			if (parsedDates.length === 2 && parsedDates.every(date=>!isNaN(date.getTime()))) {
+				newSearchSettings.accessDateFilter = parsedDates;
+			}
+		}
+	
+		if (!isNullish(pubDateURL) && pubDateURL !== "ALL" /* legacy value */) {
+			const parsedDates = pubDateURL.split("_").map(dateStr => new Date(parseInt(dateStr)));
+			if (parsedDates.length === 2 && parsedDates.every(date=>!isNaN(date.getTime()))) {
+				newSearchSettings.publicationDateAllTime = false;
+				newSearchSettings.publicationDateFilter = parsedDates;
+			}
+		}
+	
+		if (revokedURL === "true") {
+			newSearchSettings.includeRevoked = true;
+		} else if (revokedURL === "false") {
+			newSearchSettings.includeRevoked = false;
+		}
+
+		if (categoriesURL === '' || !isNullish(categoriesURL)) { // '' means all false vs null as default
+			const categories = categoriesURL.split("_");
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
+			for (const category in selectedCategories) {
+				selectedCategories[category] = categories.includes(category);
+			}
+			if (!_.isEmpty(selectedCategories)) {
+				parsed.selectedCategories = selectedCategories;
+			}
+		}
+		
+		parsed.searchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.searchSettings));
+
+		return parsed;
+	},
+
+	setSearchURL(state) {
+		const { searchText, resultsPage } = state;
+		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } = state.searchSettings;
+
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
+			.join('_');
+
+		const accessDateText = ((accessDateFilter && accessDateFilter[0] && accessDateFilter[1])
+			? accessDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const publicationDateText = ((publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1])
+			? publicationDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
+
+		const categoriesText = (state.selectedCategories
+			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
+			: undefined);
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		if (searchFieldText) params.append('searchFields', searchFieldText);
+		if (accessDateText) params.append('accessDate', accessDateText);
+		if (pubDateText) params.append('pubDate', pubDateText);
+		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
+		window.history.pushState(null, document.title, linkString);
+	},
 };
 
 export default DefaultSearchHandler;

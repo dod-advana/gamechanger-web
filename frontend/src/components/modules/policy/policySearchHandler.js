@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import {
 	getOrgToOrgQuery,
 	getTrackingNameForFactory, getTypeQuery,
@@ -12,11 +14,13 @@ import {trackSearch} from "../../telemetry/Matomo";
 import {
 	checkUserInfo,
 	createTinyUrl,
-	getSearchObjectFromString, getUserData, isDecoupled,
-	setState
+	getSearchObjectFromString,
+	getUserData,
+	isDecoupled,
+	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-const _ = require('lodash');
+import defaultSearchHandler from "../default/defaultSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -37,29 +41,8 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 }
 
-const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, currentViewName} = state;
-	const {searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked} = searchSettings;
-	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	let orgFilterText = 'ALLORGS';
-	if(!allOrgsSelected) {
-		orgFilterText = Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_');
-	}
-	let typeFilterText = 'ALLTYPES';
-		if(!allTypesSelected) {
-			typeFilterText = Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_');
-		}
-	const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-	const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&viewName=${currentViewName}&orgFilter=${orgFilterText}&typeFilter=${typeFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
-	window.history.pushState(null, null, linkString);
-}
-
 const PolicySearchHandler = {
-	handleSearch: async (state, dispatch) => {
+	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
 		const {
@@ -96,7 +79,7 @@ const PolicySearchHandler = {
 			return search.url;
 		});
 		
-		setSearchURL(state, searchSettings);
+		this.setSearchURL({...state, searchSettings});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -122,9 +105,6 @@ const PolicySearchHandler = {
 		const recentSearchesParsed = JSON.parse(recentSearches);
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
 		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
-		
-		// Save search settings to postgres
-		gameChangerAPI.setUserSearchSettings({searchSettings});
 	
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
@@ -150,6 +130,8 @@ const PolicySearchHandler = {
 			entitySearchResults: [],
 			categoryMetadata: {},
 			qaResults: {question: '', answers: [], filenames: [], docIds: []},
+			qaContext: {params: {}, context: []},
+			intelligentSearchResult: {},
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
@@ -245,7 +227,7 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
 
 				const categoryMetadata = 
 				{
@@ -408,6 +390,8 @@ const PolicySearchHandler = {
 						entitySearchResults: entities,
 						topicSearchResults: topics, 
 						qaResults: qaResults,
+						qaContext: qaContext,
+						intelligentSearchResult: intelligentSearch,
 						searchResultsCount: searchResults.length,
 						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
@@ -441,6 +425,8 @@ const PolicySearchHandler = {
 						topicSearchResults: [],
 						categoryMetadata: {},
 						qaResults: {question: '', answers: [], filenames: [], docIds: []},
+						qaContext: {params: {}, context: []},
+						intelligentSearchResult: {},
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
@@ -465,7 +451,7 @@ const PolicySearchHandler = {
 				});
 			}
 	
-			setSearchURL({searchText, resultsPage, currentViewName, cloneData}, searchSettings);
+			this.setSearchURL({...state, searchText, resultsPage, currentViewName, cloneData, searchSettings});
 	
 			if (getUserDataFlag) {
 				getUserData(dispatch);
@@ -489,7 +475,7 @@ const PolicySearchHandler = {
 		getAndSetDidYouMean(index, searchText, dispatch);
 	},
 
-	handleDocPagination: async (state, dispatch, replaceResults) => {
+	async handleDocPagination(state, dispatch, replaceResults) {
 		const {
 			activeCategoryTab,
 			docSearchResults,
@@ -569,10 +555,9 @@ const PolicySearchHandler = {
 					});
 				}
 			}
-		},
-	
+	},
 
-		handleEntityPagination: async (state, dispatch) => {
+	async handleEntityPagination(state, dispatch) {
 			setState(dispatch, {
 				entityPagination: false,
 			});
@@ -598,9 +583,9 @@ const PolicySearchHandler = {
 						entitiesLoading: false
 					});
 				}
-		},
+	},
 
-		handleTopicPagination: async(state, dispatch) => {
+	async handleTopicPagination(state, dispatch) {
 			setState(dispatch, {
 				topicPagination: false,
 			});
@@ -626,8 +611,60 @@ const PolicySearchHandler = {
 						topicsLoading: false
 					});
 				}
-		}
+	},
+
+	parseSearchURL(defaultState, url) {
+		return defaultSearchHandler.parseSearchURL(defaultState, url);
+	},
+
+
+	setSearchURL(state) {
+		const { searchText, resultsPage } = state;
+		const { searchType, orgFilter, typeFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, allTypesSelected, includeRevoked } = state.searchSettings;
 	
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+		const orgFilterText = (!allOrgsSelected
+			? Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_')
+			: undefined);
+
+		const typeFilterText = (!allTypesSelected
+			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
+			: undefined
+		);
+
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
+			.join('_');
+
+		const accessDateText = ((accessDateFilter && accessDateFilter[0] && accessDateFilter[1])
+			? accessDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const pubDateText = ((!publicationDateAllTime && publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1])
+			? publicationDateFilter.map(date => date.getTime()).join('_')
+			: undefined);
+
+		const categoriesText = (state.selectedCategories
+			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
+			: undefined);
+
+		const params = new URLSearchParams();
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset)); // 0 is default
+		if (searchType) params.append('searchType', searchType);
+		if (orgFilterText) params.append('orgFilter', orgFilterText);
+		if (typeFilterText) params.append('typeFilter', typeFilterText);
+		if (searchFieldText) params.append('searchFields', searchFieldText);
+		if (accessDateText) params.append('accessDate', accessDateText);
+		if (pubDateText) params.append('pubDate', pubDateText);
+		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+		
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+
+		window.history.pushState(null, document.title, linkString);
+	},	
 };
 
 export default PolicySearchHandler;

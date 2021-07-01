@@ -44,6 +44,8 @@ class AppSettingsController {
 		// Binding the key for topic search mode to get and set
 		this.getTopicSearchMode = this.getMode.bind(this, this.keys.topicSearch);
 		this.setTopicSearchMode = this.setMode.bind(this, this.keys.topicSearch);
+
+		this.logFrontendError = this.logFrontendError.bind(this);
 	}
 	/**
 	 * A generic get method to grab a key's value
@@ -108,6 +110,10 @@ class AppSettingsController {
 			this.logger.error(err, 'PQNAF35', userId);
 			res.status(500).send(err);
 		}
+	}
+
+	async logFrontendError(req) {
+		this.logger.error(`[FRONTEND] ${JSON.stringify(req.body)}`);
 	}
 }
 
