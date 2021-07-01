@@ -5,6 +5,7 @@ const router = express.Router();
 const { DocumentController } = require('../controllers/documentController');
 const { SearchController } = require('../controllers/searchController');
 const { ExportHistoryController } = require('../controllers/exportHistoryController');
+const { MegaMenuController } = require('../controllers/megaMenuController');
 const { UserController } = require('../controllers/userController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
@@ -33,6 +34,7 @@ const clone = new CloneController();
 const dataTracker = new DataTrackerController();
 const admin = new AdminController();
 const notification = new NotificationController();
+const megamenu = new MegaMenuController();
 const transformer = new TransformerController();
 const textSuggest = new TextSuggestionController();
 const apiController = new ExternalAPIController();
@@ -86,6 +88,8 @@ router.get('/getNotifications', notification.getNotifications);
 router.post('/createNotification', notification.createNotification);
 router.post('/deleteNotification', notification.deleteNotification);
 router.post('/editNotificationActive', notification.editNotificationActive);
+
+router.get('/megamenu/links', megamenu.getLinks);
 
 router.get('/admin/createSearchHistoryCache', cache.createSearchHistoryCache);
 router.get('/admin/clearSearchHistoryCache', cache.clearSearchHistoryCache);
