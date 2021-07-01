@@ -272,8 +272,6 @@ class DocumentController {
 		try {
 			const { filekey, dest } = req.body
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			console.log(filekey)
-			console.log(dest);
 			if (!(dest && filekey)) {
 				throw new Error('Both destination and filekey are required query parameters');
 			}

@@ -173,7 +173,7 @@ const PolicyMainViewHandler = {
 
 		// testing thumbnail download
 		try {
-			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('Title 10.png');
+			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
 			console.log(png);
 		} catch(e) {
 			console.log(e)
