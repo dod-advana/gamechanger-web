@@ -164,7 +164,7 @@ const initState = {
 	selectedCategories: {
 		Documents: true,
 		Organizations: true,
-		Topics: false
+		Topics: true
 	},
 
 	categorySorting: {
