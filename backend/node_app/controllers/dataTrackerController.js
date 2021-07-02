@@ -3,6 +3,7 @@ const CRAWLER_STATUS = require('../models').crawler_status;
 const VERSIONED_DOCS = require('../models').versioned_docs;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 
 class DataTrackerController {
 
