@@ -147,8 +147,10 @@ const initState = {
 	searchSettings: {
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
+		allCategoriesSelected: true,
 		allOrgsSelected: true,
 		searchFields: {'initial': {field: null, input: ''}},
+		specificCategoriesSelected: false,
 		specificOrgsSelected: false,
 		allTypesSelected: true,
 		specificTypesSelected: false,

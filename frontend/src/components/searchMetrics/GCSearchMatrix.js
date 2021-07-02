@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 import { trackEvent } from '../telemetry/Matomo';
@@ -14,6 +14,8 @@ import {
 	Checkbox
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import { SearchContext } from '../modules/globalSearch/SearchContext';
+import {commaThousands} from '../../gamechangerUtils';
 
 const styles = {
 	innerContainer: {
@@ -345,32 +347,128 @@ export default function SearchMatrix(props) {
 		setExpansionTerms(temp);
 	}
 	
+	// const renderCategories = () => {
+	// 	return (
+	// 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+	// 			{Object.keys(state.selectedCategories).map(category => {
+	// 				return (
+	// 					<FormGroup key={`${category}-key`} row style={{ marginBottom: '10px' }}>
+	// 						<FormControlLabel
+	// 							name={category}
+	// 							value={category}
+	// 							classes={{ label: classes.titleText }}
+	// 							control={<Checkbox
+	// 								classes={{ root: classes.filterBox }}
+	// 								onClick={handleSelectCategory}
+	// 								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+	// 								checked={state.selectedCategories[category]}
+	// 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+	// 								name={category}
+	// 								style={styles.filterBox}
+	// 							/>}
+	// 							label={category}
+	// 							labelPlacement="end"
+	// 							style={styles.titleText}
+	// 						/>
+	// 					</FormGroup>
+	// 				)
+	// 			})}
+	// 		</FormControl>
+	// 	)
+	// }
+	const { resultMetaData } = useContext(SearchContext);
+
+	const handleSelectAllCategories = (state, dispatch) => {
+		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificCategoriesSelected = false;
+		newSearchSettings.allCategoriesSelected = true;
+		Object.keys(newSelectedCategories).forEach(category => newSelectedCategories[category] = true);
+		setState(dispatch, { selectedCategories: newSelectedCategories, searchSettings: newSearchSettings, metricsCounted: false });
+	}
+
+	const handleSelectSpecificCategories = (state, dispatch) =>{
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificCategoriesSelected = true;
+		newSearchSettings.allCategoriesSelected = false;
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	}
+
+	const formatMetaData = (meta = {}, tab) => {
+		if (_.isEmpty(meta))
+			return null;
+	
+		if (tab === 'all')
+			return ` (${commaThousands(calculatSumTotal(meta))})`;
+	
+		if (!_.isNil(meta?.[tab]?.total))
+			return ` (${commaThousands(meta[tab]?.total)})`;
+	
+		return null;
+	};
+	const calculatSumTotal = (meta) => {
+		return _.sum(_.map(Object.values(meta), 'total'));
+	};
+
+	const handleCategoriesFilterChange = () => {
+
+	}
+
 	const renderCategories = () => {
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-				{Object.keys(state.selectedCategories).map(category => {
-					return (
-						<FormGroup key={`${category}-key`} row style={{ marginBottom: '10px' }}>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name='All categories'
+						value='All categories'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllCategories(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.allCategoriesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='All categories'
+							style={styles.filterBox}
+						/>}
+						label='All categories'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row>
+					<FormControlLabel
+						name='Specific category(s)'
+						value='Specific category(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificCategories(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.specificCategoriesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='Specific category(s)'
+							style={styles.filterBox}
+						/>}
+						label='Specific category(s)'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+					{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
+						return (
 							<FormControlLabel
-								name={category}
-								value={category}
-								classes={{ label: classes.titleText }}
-								control={<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={handleSelectCategory}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.selectedCategories[category]}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={category}
-									style={styles.filterBox}
-								/>}
-								label={category}
+								key={`${category} (${formatMetaData(resultMetaData, category)})`}
+								value={`${category} (${formatMetaData(resultMetaData, category)})`}
+								classes={{ label: classes.checkboxPill }}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category} (${formatMetaData(resultMetaData, category)})`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
+								label={`${category} (${formatMetaData(resultMetaData, category)})`}
 								labelPlacement="end"
-								style={styles.titleText}
 							/>
-						</FormGroup>
-					)
-				})}
+						)
+					})}
+				</FormGroup>
 			</FormControl>
 		)
 	}
