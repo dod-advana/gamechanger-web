@@ -17,6 +17,8 @@ import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
+import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -301,6 +303,10 @@ const GameChangerDetailsPage = (props) => {
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
 	
+	const [contractAwardID, setContractAwardID] = useState(null);
+	const [showContractContainer, setShowContractContainer] = useState(false);
+	const [edaPermissions, setEDAPermissions] = useState(false);
+
 	const graphRef = useRef();
 	
 	useQuery(location, setQuery, query);
@@ -355,6 +361,16 @@ const GameChangerDetailsPage = (props) => {
 					setDocument(data.document);
 				});
 				
+				break;
+			case 'contract':
+				const permissions = Permissions.allowGCClone('eda')
+				setEDAPermissions(permissions);
+				if (permissions) {
+					setDetailsType('Contract');
+					const awardID = query.get('awardID');
+					setContractAwardID(awardID);
+					setShowContractContainer(true);
+				}
 				break;
 			default:
 				break;
@@ -613,6 +629,11 @@ const GameChangerDetailsPage = (props) => {
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
 									 graphData={graph}
+				/>
+			}
+
+			{showContractContainer && edaPermissions &&
+				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData}
 				/>
 			}
 			

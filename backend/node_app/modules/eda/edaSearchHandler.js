@@ -244,28 +244,18 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
-	async queryContractAward(req, userId) {
+	async queryContractMods(req, userId) {
 		try {
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
-			const { awardID } = req.body;
+			const { awardID, isSearch } = req.body;
 
-			// award ID can be a combination of 2 fields
-			const awardIDSplit = awardID.split("-");
-			let id = "";
-			let idv = "";
-			if (awardIDSplit.length > 1) {
-				id = awardIDSplit[1];
-				idv = awardIDSplit[0];
-			}
-			else {
-				id = awardID;
-			}
+			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, userId);
+				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
 			} else {
 				throw 'Unauthorized';
 			}
@@ -274,13 +264,18 @@ class EdaSearchHandler extends SearchHandler {
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 				const hits = results.body.hits.hits;
-				const contractMods = [];
 
-				// grab the contract modification number
-				for (let hit of hits) {
-					contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
+				if (isSearch) {
+					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], [], esIndex, esQuery);
+				} else {
+					const contractMods = [];
+					// grab the contract modification number
+					for (let hit of hits) {
+						contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
+					}
+					return contractMods;
 				}
-				return contractMods;
+
 			} else {
 				this.logger.error('Error with contract award Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
@@ -292,6 +287,46 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
+	async queryBaseAwardContract(req, userId) {
+		try {
+			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const permissions = req.permissions ? req.permissions : [];
+			const { esClientName, esIndex } = clientObj;
+			const { awardID } = req.body;
+
+			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
+
+			let esQuery = '';
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
+			} else {
+				throw 'Unauthorized';
+			}
+
+			// use the award ID to get the base award data only
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+				const hits = results.body.hits.hits;
+				if (hits && hits.length > 0) {
+					const data = hits[0];
+					const metadata = data._source && data._source.extracted_data_eda_n ? data._source.extracted_data_eda_n : {}
+					return { ...data._source, ...data.fields, ...metadata };
+				}
+				else { 
+					return {}
+				}
+			} else {
+				this.logger.error('Error with contract base award Elasticsearch results', '3ZCEAYJ', userId);
+				return [];
+			}
+		} catch(err) {
+			const { message } = err;
+			this.logger.error(message, 'MKNUZQR', userId);
+			throw err;
+		}
+
+	}
+
 	async callFunctionHelper(req, userId) {
 		const {functionName} = req.body;
 
@@ -299,8 +334,10 @@ class EdaSearchHandler extends SearchHandler {
 			const permissions = req.permissions ? req.permissions : [];
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 				switch (functionName) {
-					case 'queryContractAward':
-						return this.queryContractAward(req, userId);
+					case 'queryContractMods':
+						return this.queryContractMods(req, userId);
+					case 'queryBaseAwardContract':
+						return this.queryBaseAwardContract(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,
