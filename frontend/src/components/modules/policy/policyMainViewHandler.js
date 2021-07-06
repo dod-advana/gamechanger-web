@@ -173,8 +173,9 @@ const PolicyMainViewHandler = {
 
 		// testing thumbnail download
 		try {
-			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
-			console.log(png);
+			debugger;
+			const blob = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
+			console.log(blob)
 		} catch(e) {
 			console.log(e)
 		}
@@ -359,7 +360,7 @@ const PolicyMainViewHandler = {
 						{adminMajorPubs.map(({name}) => 
 							<img 
 								style={{height:210, border:'1px solid black', marginLeft: 10}} 
-								src={template} 
+								src={''} 
 								alt="thumbnail" 
 								title={name}
 								onClick={()=>{
