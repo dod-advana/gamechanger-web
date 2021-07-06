@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 import { trackEvent } from '../telemetry/Matomo';
@@ -14,7 +14,6 @@ import {
 	Checkbox
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { SearchContext } from '../modules/globalSearch/SearchContext';
 import {commaThousands} from '../../gamechangerUtils';
 
 const styles = {
@@ -376,7 +375,6 @@ export default function SearchMatrix(props) {
 	// 		</FormControl>
 	// 	)
 	// }
-	const { resultMetaData } = useContext(SearchContext);
 
 	const handleSelectAllCategories = (state, dispatch) => {
 		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
@@ -397,17 +395,11 @@ export default function SearchMatrix(props) {
 	const formatMetaData = (meta = {}, tab) => {
 		if (_.isEmpty(meta))
 			return null;
-	
-		if (tab === 'all')
-			return ` (${commaThousands(calculatSumTotal(meta))})`;
-	
+
 		if (!_.isNil(meta?.[tab]?.total))
 			return ` (${commaThousands(meta[tab]?.total)})`;
 	
 		return null;
-	};
-	const calculatSumTotal = (meta) => {
-		return _.sum(_.map(Object.values(meta), 'total'));
 	};
 
 	const handleCategoriesFilterChange = (event, state, dispatch) => {
@@ -419,7 +411,6 @@ export default function SearchMatrix(props) {
 	}
 
 	const renderCategories = () => {
-		console.log("Result Meta Data: ", resultMetaData);
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '10px' }}>
@@ -464,11 +455,11 @@ export default function SearchMatrix(props) {
 					{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
 						return (
 							<FormControlLabel
-								key={`${category} (${formatMetaData(resultMetaData, category)})`}
-								value={`${category} (${formatMetaData(resultMetaData, category)})`}
+								key={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
+								value={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
 								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category} (${formatMetaData(resultMetaData, category)})`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
-								label={`${category} (${formatMetaData(resultMetaData, category)})`}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category} (${formatMetaData(state.categoryMetadataa, category)})`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
+								label={`${category} ${formatMetaData(state.categoryMetadata, category)}`}
 								labelPlacement="end"
 							/>
 						)
