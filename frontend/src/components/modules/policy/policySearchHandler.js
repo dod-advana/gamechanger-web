@@ -94,7 +94,8 @@ const PolicySearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: ''
+			trending: '',
+			infiniteScrollPage: 1
 		});
 		
 		const trimmed = searchText.trim();
@@ -218,8 +219,8 @@ const PolicySearchHandler = {
 					publicationDateFilter,
 					publicationDateAllTime,
 					includeRevoked,
-					limit: 6,
 				},
+				limit: 18,
 			});
 			
 			const t1 = new Date().getTime();
@@ -511,7 +512,7 @@ const PolicySearchHandler = {
 		let modifiedOrgFilter = allOrgsSelected ? {} : orgFilter;
 		let modifiedTypeFilter = allTypesSelected ? {} : typeFilter;
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
-		const limit = (activeCategoryTab === 'all' || infiniteScrollPage === 1) ? 6 : 18;
+		const limit = 18;
 
 		const resp = await gameChangerAPI.callSearchFunction( 
 			{
