@@ -54,11 +54,11 @@ class DataTrackerController {
 		const new_where = {}
 		where.forEach((object,idx) => {
 			const col = Object.keys(object)[0]
-			new_where[col] = {[Op.iLike]: where[idx][col]['$iLike']}
-		})
+			new_where[col] = {[Sequelize.Op.iLike]: where[idx][col]['$iLike']}
+		});
 		try {
-			const totalCount = await this.documentCorpus.count({ where });
-			const docs = await this.documentCorpus.findAll({ limit, offset, order, where });
+			const totalCount = await this.documentCorpus.count({ where: new_where });
+			const docs = await this.documentCorpus.findAll({ limit, offset, order, where: new_where });
 
 			res.status(200).send({ totalCount, docs });
 
