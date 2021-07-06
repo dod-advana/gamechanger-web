@@ -159,7 +159,6 @@ const PolicyMainViewHandler = {
 		if (!iframePreviewLink) sideScroll = {};
 		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`;
 
-		console.log({docsPagination});
 		return (
 			<div key={'cardView'}>
 				<div key={'cardView'} style={{marginTop: hideTabs ? 40 : 'auto'}}>
