@@ -410,11 +410,16 @@ export default function SearchMatrix(props) {
 		return _.sum(_.map(Object.values(meta), 'total'));
 	};
 
-	const handleCategoriesFilterChange = () => {
-
+	const handleCategoriesFilterChange = (event, state, dispatch) => {
+		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+		let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+		newSelectedCategories[categoryName] = event.target.checked;
+		setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
+		// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 	}
 
 	const renderCategories = () => {
+		console.log("Result Meta Data: ", resultMetaData);
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '10px' }}>
