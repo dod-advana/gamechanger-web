@@ -92,14 +92,23 @@ const EDAContractDetailsPage = (props) => {
             setModLoading(false);
             setTimeFound(((t1 - t0) / 1000).toFixed(2));
             const contractModData = contractMods?.data?.docs;
+
+            // for the contract modifications section
             contractModData.sort((first, second) => {
-                if (!first.signature_date_eda_ext) {
+
+                if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {
                     return -1;
                 }
-                if (!second.signature_date_eda_ext) {
+                if (second.modification_eda_ext && second.modification_eda_ext === 'Award') {
                     return 1;
                 }
-                if (first.signature_date_eda_ext < second.signature_date_eda_ext) {
+                if (!first.modification_eda_ext) {
+                    return -1;
+                }
+                if (!second.modification_eda_ext) {
+                    return 1;
+                }
+                if (first.modification_eda_ext < second.modification_eda_ext) {
                     return -1;
                 }
                 else {
@@ -108,14 +117,27 @@ const EDAContractDetailsPage = (props) => {
             });
             setContractModData(contractModData);
 
-            const timelineData = contractModData.map(doc => {
+            // data points on the timeline view section
+            let timelineData = contractModData.map(doc => {
+                let date = doc.signature_date_eda_ext;
+                if (!date) {
+                    if (doc.effective_date_eda_ext) {
+                        date = doc.effective_date_eda_ext;
+                    }
+                    else {
+                        date = "";
+                    }
+                }
+
                 const modData = {
                     "Mod Number": doc.modification_eda_ext,
-                    "Obligated Amount": doc.obligated_amounts_eda_ext,
-                    "Signature Date": doc.signature_date_eda_ext
+                    "Obligated Amount": doc.obligated_amounts_eda_ext ?? "",
+                    "Date": date
                 };
                 return modData;
             });
+
+            timelineData = timelineData.filter(doc => doc["Date"] !== "" && doc["Obligated Amount"] !== "");
             setTimelineViewData(timelineData);
         }
 
@@ -129,29 +151,32 @@ const EDAContractDetailsPage = (props) => {
 
     const renderTimeline = () => {
         return (
-            <div style={{ width: "100%", height: 500 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                        width={500}
-                        height={300}
-                        data={timelineViewData}
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                        >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="Signature Date" />
-                        <YAxis dataKey="Obligated Amount"/>
-                        <Tooltip /> 
-                        <Legend />
-                        <Line type="monotone" dataKey="Obligated Amount" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    </LineChart>
-                </ResponsiveContainer>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%'}}>
+                <p style={{ width: '100%' }}>Contract Obligated Amount over Time</p>
+                <div style={{ width: "100%", height: 500 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                            width={500}
+                            height={300}
+                            data={timelineViewData}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                            >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="Signature Date" />
+                            <YAxis dataKey="Obligated Amount"/>
+                            <Tooltip /> 
+                            <Legend />
+                            <Line type="monotone" dataKey="Obligated Amount" stroke="#8884d8" activeDot={{ r: 8 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+                <p style={{ width: '100%' }}>*contract mods with missing data have been removed</p>
             </div>
-
         );
     }
 
