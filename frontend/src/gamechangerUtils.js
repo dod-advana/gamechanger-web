@@ -12,7 +12,7 @@ const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
 
-export const RESULTS_PER_PAGE = 20;
+export const RESULTS_PER_PAGE = 18;
 
 export const RECENT_SEARCH_LIMIT = 6;
 
@@ -666,7 +666,7 @@ export const axiosPOST = async (axios, url, data, options = {}) => {
 }
 
 export const axiosGET = async (axios, url, options = {}) => {
-	getSignature(options, url);
+	getSignature(options, url.split('?')[0]);
 	return axios.get(url, options);
 }
 

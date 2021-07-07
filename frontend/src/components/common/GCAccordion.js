@@ -99,7 +99,8 @@ const GCAccordion = (props) => {
 		contentPadding,
 		contentAlign,
 		contentHeight,
-		notBordered
+		notBordered,
+		onChange
 	} = props;
 	
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -112,6 +113,9 @@ const GCAccordion = (props) => {
 	
 	const handleExpandAccordion = (expanded) => {
 		setIsExpanded(expanded);
+		if (onChange) {
+			onChange(expanded);
+		}
 	}
 
 	const borderString = notBordered ? '0px' : '1px solid rgba(0, 0, 0, .125)';
