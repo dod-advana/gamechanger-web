@@ -278,22 +278,23 @@ class DataLibrary {
 		}
 	}
 
-	getFileThumbnail(res, data, userId){
+	getFileThumbnail(data, userId){
 		let { dest, filekey } = data;
 		
 		const params = {
 			Bucket: dest,
-			Key: filekey
+			Key: `gamechanger/thumbnails/${filekey}.png`
 		};
 
-		try {
-			res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
-			res.setHeader('content-type', 'image/png')
-			this.awsS3Client.getObject(params).createReadStream().pipe(res);
-		} catch (err) {
-			this.logger.error(err, '7ZQABVQ', userId);
-			throw err;
-		}
+		return new Promise((resolve,reject) => {
+			this.awsS3Client.getObject(params, (err, data) => {
+				if(err) {
+					reject(err, err.stack);
+				} else {
+					resolve(data);
+				}
+			})
+		});
 	}
 
 	async queryGraph(query, parameters = {}, userId) {
