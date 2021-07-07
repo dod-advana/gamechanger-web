@@ -288,7 +288,7 @@ const GetQAResults = (props) => {
 						onClick={() => {setOpen(false)}}>
 							<CloseIcon fontSize="large" />
 						</CloseButton>
-					<p style={{marginTop: '10px', marginBottom: '0'}}>{answers[0]}</p>
+					<p style={{marginTop: '10px', marginBottom: '0'}}>{_.truncate(answers[0], {length: 300})}</p>
 					<Link href={"#"} onClick={(event)=> {
       						preventDefault(event);
       						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=${resultTypes[0]}&${resultTypes[0]}Name=${docIds[0]}`);
@@ -420,7 +420,7 @@ const GetQAResults = (props) => {
 
 					</div>
 				</div>
-				<p style={{marginTop: '10px', marginBottom: '0', padding: '10px', backgroundColor: 'white'}}>{intelligentSearchResult.pageHits[0].snippet}</p>
+				<p style={{marginTop: '10px', marginBottom: '0', padding: '10px', backgroundColor: 'white'}}>{_.truncate(intelligentSearchResult.pageHits[0].snippet, {length: 300})}</p>
 				<Link href={"#"} onClick={(event)=> {
 									preventDefault(event);
 									window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${intelligentSearchResult.id}`);
