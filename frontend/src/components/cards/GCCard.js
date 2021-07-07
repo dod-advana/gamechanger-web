@@ -721,6 +721,7 @@ function GCCard (props) {
 								{loaded && cardHandler.getCardBack({
 									item,
 									state,
+									dispatch,
 									setFavoriteTopic,
 									setFavorite,
 									handleFavoriteTopicClicked

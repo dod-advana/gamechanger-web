@@ -288,7 +288,7 @@ const GetQAResults = (props) => {
 						onClick={() => {setOpen(false)}}>
 							<CloseIcon fontSize="large" />
 						</CloseButton>
-					<p style={{marginTop: '10px', marginBottom: '0'}}>{answers[0]}</p>
+					<p style={{marginTop: '10px', marginBottom: '0'}}>{_.truncate(answers[0], {length: 300})}</p>
 					<Link href={"#"} onClick={(event)=> {
       						preventDefault(event);
       						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=${resultTypes[0]}&${resultTypes[0]}Name=${docIds[0]}`);
@@ -308,7 +308,7 @@ const GetQAResults = (props) => {
 					</div>
 					<div style={styles.flex}>
 						<Popover
-							onClose={() => handleCancelFavorite(null)}
+							onClose={() => handleCancelFavorite()}
 							id={0}
 							open={popperIsOpen} anchorEl={popperAnchorEl}
 							anchorOrigin={{
@@ -323,7 +323,7 @@ const GetQAResults = (props) => {
 							{isFavorite ?
 								<div style={{padding: '0px 15px 10px'}}>
 									<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-										<CloseButton onClick={() => handleCancelFavorite(null)}>
+										<CloseButton onClick={() => handleCancelFavorite()}>
 											<CloseIcon fontSize="small"/>
 										</CloseButton>
 									</div>
@@ -333,7 +333,7 @@ const GetQAResults = (props) => {
 										</div>
 										<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 											<GCButton
-												onClick={() => handleCancelFavorite(null)}
+												onClick={() => handleCancelFavorite()}
 												style={{
 													height: 40,
 													minWidth: 40,
@@ -420,7 +420,7 @@ const GetQAResults = (props) => {
 
 					</div>
 				</div>
-				<p style={{marginTop: '10px', marginBottom: '0', padding: '10px', backgroundColor: 'white'}}>{intelligentSearchResult.pageHits[0].snippet}</p>
+				<p style={{marginTop: '10px', marginBottom: '0', padding: '10px', backgroundColor: 'white'}}>{_.truncate(intelligentSearchResult.pageHits[0].snippet, {length: 300})}</p>
 				<Link href={"#"} onClick={(event)=> {
 									preventDefault(event);
 									window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${intelligentSearchResult.id}`);

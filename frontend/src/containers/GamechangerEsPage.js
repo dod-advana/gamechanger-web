@@ -60,7 +60,7 @@ const GamechangerEsPage = (props) => {
 					inputProps={{style: {fontSize: 12, fontFamily: 'Noto Sans'}}}
 				/>
 				{!loading ? <Button variant="contained" onClick={() => {handleSubmit()}}>Submit</Button> : <p>Querying...</p>}
-				{Permissions.allowGCClone('contractsearch') && !loading ?
+				{Permissions.allowGCClone('eda') && !loading ?
 					<Select value={esClient} style={{marginLeft: 30}} inputProps={{style: {fontSize: 10, fontFamily: 'Noto Sans'}}}
 					onChange={handleClientChange}>
 						<MenuItem value={'gamechanger'} inputProps={{style: {fontSize: 10, fontFamily: 'Noto Sans'}}}>gamechanger</MenuItem>
