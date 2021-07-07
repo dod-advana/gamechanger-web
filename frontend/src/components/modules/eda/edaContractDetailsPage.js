@@ -12,7 +12,8 @@ import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import {Card} from "../../cards/GCCard";
 import {numberWithCommas} from "../../../gamechangerUtils";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 
 import {
 	getEDAMetadataForPropertyTable,
@@ -30,11 +31,16 @@ const styles = {
 	}
 }
 
-const DetailPaper = withStyles((theme) => ({
-    root: {
-        borderTopRadius: 5
-    }
-})) ((props) => <Paper {...props} />);
+const CustomTooltip = ({ active, payload, label }) => {
+    console.log(payload);
+    console.log(label);
+      return (
+        <div className="custom-tooltip">
+          <p className="label">{`${label} : ${payload}`}</p>
+          <p className="desc">Anything you want can be displayed here.</p>
+        </div>
+      );
+}
 
 const EDAContractDetailsPage = (props) => {
 
@@ -43,9 +49,14 @@ const EDAContractDetailsPage = (props) => {
         cloneData
     } = props;
 
+    // left column metadata
     const [contractAwardData, setContractAwardData] = useState(null);
     const [awardLoading, setAwardLoading] = useState(false);
 
+    // timeline view data
+    const [timelineViewData, setTimelineViewData] = useState(null);
+
+    // contract mod data
     const [contractModData, setContractModData] = useState(null);
     const [modLoading, setModLoading] = useState(false);
     const [timeFound, setTimeFound] = useState(null);
@@ -79,8 +90,33 @@ const EDAContractDetailsPage = (props) => {
             });
             const t1 = new Date().getTime();
             setModLoading(false);
-            setTimeFound(((t1 - t0) / 1000).toFixed(2))
-            setContractModData(contractMods?.data?.docs);
+            setTimeFound(((t1 - t0) / 1000).toFixed(2));
+            const contractModData = contractMods?.data?.docs;
+            contractModData.sort((first, second) => {
+                if (!first.signature_date_eda_ext) {
+                    return -1;
+                }
+                if (!second.signature_date_eda_ext) {
+                    return 1;
+                }
+                if (first.signature_date_eda_ext < second.signature_date_eda_ext) {
+                    return -1;
+                }
+                else {
+                    return 1;
+                }
+            });
+            setContractModData(contractModData);
+
+            const timelineData = contractModData.map(doc => {
+                const modData = {
+                    "Mod Number": doc.modification_eda_ext,
+                    "Obligated Amount": doc.obligated_amounts_eda_ext,
+                    "Signature Date": doc.signature_date_eda_ext
+                };
+                return modData;
+            });
+            setTimelineViewData(timelineData);
         }
 
         try {
@@ -90,6 +126,34 @@ const EDAContractDetailsPage = (props) => {
             console.log(err);
         }
     }, [awardID, cloneData]);
+
+    const renderTimeline = () => {
+        return (
+            <div style={{ width: "100%", height: 500 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                        width={500}
+                        height={300}
+                        data={timelineViewData}
+                        margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                        }}
+                        >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="Signature Date" />
+                        <YAxis dataKey="Obligated Amount"/>
+                        <Tooltip /> 
+                        <Legend />
+                        <Line type="monotone" dataKey="Obligated Amount" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+
+        );
+    }
 
     const renderContractMods = () => {
         return contractModData.map((item, idx) => {
@@ -108,7 +172,7 @@ const EDAContractDetailsPage = (props) => {
     return (
         <MainContainer>
             <div className={'details'} style={{borderTopLeftRadius: 5, borderTopRightRadius: 5}}>
-                <DetailPaper>
+                <Paper>
                     <div className={'details-header'} style={{ margin: '0' }}>
                         <span>{'BASE AWARD METADATA'}</span>
                     </div>
@@ -132,12 +196,12 @@ const EDAContractDetailsPage = (props) => {
                             {awardLoading && <LoadingIndicator customColor={gcOrange} />}
                         </div>
                     </div>
-                </DetailPaper>
+                </Paper>
             </div>
             <div className={'graph-top-docs'}>
                 <div className={'section'}>
                     <GCAccordion expanded={true} header={'TIMELINE VIEW'} backgroundColor={'rgb(238, 241, 242'}>
-                        line graph goes here
+                        {timelineViewData && renderTimeline()}
                     </GCAccordion>
                 </div>
                 <div className={'section'}>
