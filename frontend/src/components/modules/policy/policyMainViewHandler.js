@@ -166,19 +166,15 @@ const PolicyMainViewHandler = {
 					pubs = JSON.parse(obj.value);
 				}
 			});
+			
+			// KRISHNA I ADDED THIS JUST TO SHOW YOU LOOK IN THE MAJOR PUBLICATIONS SECTION TO SEE IT
+			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
+			pubs.push({name: 'test', imgSrc: png.data})
+			
 			setState(dispatch, {adminTopics:topics, adminMajorPubs: pubs});
 		} catch(e){
 			// Do nothing
 		}
-
-		// testing thumbnail download
-		try {
-			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
-			console.log(png);
-		} catch(e) {
-			console.log(e)
-		}
-
 	},
 	
 	getMainView(props) {
@@ -356,10 +352,10 @@ const PolicyMainViewHandler = {
 						title="Major Publications" 
 						width='160px' 
 					>
-						{adminMajorPubs.map(({name}) => 
+						{adminMajorPubs.map(({name, imgSrc}) =>
 							<img 
 								style={{height:210, border:'1px solid black', marginLeft: 10}} 
-								src={template} 
+								src={URL.createObjectURL(imgSrc)}
 								alt="thumbnail" 
 								title={name}
 								onClick={()=>{
