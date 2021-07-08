@@ -13,8 +13,10 @@ import AdvancedDropdown from "./AdvancedDropdown";
 import SearchBarDropdown from './SearchBarDropdown';
 import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
-import {getTrackingNameForFactory, getQueryVariable} from "../../gamechangerUtils";
-import { handleSaveFavoriteSearch, setState, checkUserInfo } from '../../sharedFunctions';
+import { ConstrainedIcon } from "advana-side-nav/dist/SlideOutMenu";
+import UserIcon from "../../images/icon/UserIcon.png";
+import {getTrackingNameForFactory, getQueryVariable, PAGE_DISPLAYED} from "../../gamechangerUtils";
+import { handleSaveFavoriteSearch, setState, checkUserInfo, getUserData, clearDashboardNotification } from '../../sharedFunctions';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -471,6 +473,17 @@ const GameChangerSearchBar = (props) => {
 			<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 				<i className="fa fa-search" />
 			</SearchButton>
+
+			<GCButton
+			onClick={()=>{
+				getUserData(dispatch);
+				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+				clearDashboardNotification('total', state, dispatch);
+			}}
+			style={{height: 50, width: 60, minWidth:'none'}}
+			>
+				<ConstrainedIcon src={UserIcon} />
+			</GCButton>
 
 			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
 				open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
