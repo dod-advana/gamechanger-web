@@ -1,25 +1,22 @@
-import React from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import PropTypes from 'prop-types';
 import _ from "underscore";
-import GCTooltip from "../common/GCToolTip";
 import TextField from "@material-ui/core/TextField";
-import withStyles from "@material-ui/core/styles/withStyles";
-import GCButton from "../common/GCButton";
+import {makeStyles} from "@material-ui/core/styles";
 import Popover from "@material-ui/core/Popover";
-
+import { AccessTime, Search } from '@material-ui/icons';
+import GCButton from "../common/GCButton";
+import GCTooltip from "../common/GCToolTip";
 import { trackEvent } from "../telemetry/Matomo";
 import GameChangerAPI from "../api/gameChanger-service-api";
-
+import AdvancedDropdown from "./AdvancedDropdown";
 import SearchBarDropdown from './SearchBarDropdown';
-import { SearchBarForm, SearchBarInput, SearchButton } from './SearchBarStyledComponents';
-
-import {
-	AccessTime,
-	Search
-} from '@material-ui/icons';
+import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
+import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import {getTrackingNameForFactory, getQueryVariable} from "../../gamechangerUtils";
+import { handleSaveFavoriteSearch, setState, checkUserInfo } from '../../sharedFunctions';
 
-const useStyles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
 	root: {
 		'& > *': {
 			margin: theme.spacing(1),
@@ -76,102 +73,116 @@ const useStyles = (theme) => ({
 			}
 		},
 	}
-});
-
+}));
 const gameChangerAPI = new GameChangerAPI();
-
 const inputBorder = '1px solid lightgrey';
 
-class GameChangerSearchBar extends React.Component {
-	constructor(props) {
-		super(props)
-		this.SEARCH_TYPES = Object.values(props.SEARCH_TYPES).map(name => ({ value: name, label: name }))
-		this.handleKeyDown = this.handleKeyDown.bind(this)
-		this.debouncedFetchSearchSuggestions = _.debounce(this.debouncedFetchSearchSuggestions, 400);
-	}
+const GameChangerSearchBar = (props) => {
+	const { context  } = props;
+	const {state, dispatch} = context;
+	const isEDA = state.cloneData.clone_name === 'eda';
+	const isGamechanger = state.cloneData.clone_name === 'gamechanger';
+	const classes = useStyles();
+	const useDebounce = (value, delay) => {
+		const [debouncedValue, setDebouncedValue] = useState(value);
+		useEffect(() => {
+			const handler = setTimeout(() => {setDebouncedValue(value);}, delay);
+			return () => {clearTimeout(handler);};
+		}, [value]);
+	 return debouncedValue;
+	}; 
+	const [searchHandler, setSearchHandler] = useState();
+	const [loaded, setLoaded] = useState(false);
+	const [searchText, setSearchText] = useState(getQueryVariable('q') || '');
+	const debouncedSearchTerm = useDebounce(searchText, 300);
+	const [userSearchHistory, setUserSearchHistory] = useState([]);
+	const [autocorrect, setAutocorrect] = useState([]);
+	const [presearchFile, setPresearchFile] = useState([]);
+	const [presearchTitle, setPresearchTitle] = useState([]);
+	const [presearchTopic, setPresearchTopic] = useState([]);
+	const [presearchOrg, setPresearchOrg] = useState([]);
+	const [predictions, setPredictions] = useState([]);
+	const [dataRows, setDataRows] = useState([]);
+	const [favoriteName, setFavoriteName] = useState('');
+	const [favoriteSummary, setFavoriteSummary] = useState('')
+	const [searchFavoritePopperOpen, setSearchFavoritePopperOpen] = useState(false);
+	const [searchFavoritePopperAnchorEl, setSearchFavoritePopperAnchorEl] = useState(null);
+	const [cursor, setCursor] = useState(null);
+	const [originalText, setOriginalText] = useState(null);
 
-	static defaultProps = {
-		handleSearch: _.noop,
-		handleSearchTextUpdate: _.noop,
-		updateSearchTextOnly: _.noop,
-		handleSearchTypeUpdate: _.noop,
-		searchText: '',
-		SEARCH_TYPES: []
-	}
+	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+	const [dropdownOpen, setDropdownOpen] = useState(false);
 
-	state = {
-		highlightedRow: null,
-		open: false,
-		favoriteName: '',
-		favoriteSummary: '',
-		searchFavoritePopperOpen: false,
-		searchFavoritePopperAnchorEl: null,
-		userSearchHistory: [],
-		autocorrect: [],
-		predictions: [],
-		presearchFile: [],
-		presearchTitle: [],
-		presearchOrg: [],
-		presearchTopic: [],
-		searchText: getQueryVariable('q') || '',
-		originalText: null, // describes text used before using arrow keys
-		cursor: null, // describes cursor position when using arrow keys
-		dataRows: []
-	}
+	useEffect(() => { // initial loading of user search history
+			if(!loaded){
+				const userSearchHistory = JSON.parse(localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) || '[]');
+				const historyWithIds = userSearchHistory.map((item, index) => ({ id: String(index), text: item }));
+				setUserSearchHistory(historyWithIds);
+				setLoaded(true);
 
-	componentDidMount() {
+				if (state.cloneDataSet) {
+					const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
+					const tmpSearchHandler = searchFactory.createHandler();
+					setSearchHandler(tmpSearchHandler)
+				}
+			}
+		},
+	 [state, dispatch, loaded]);
+
+	useEffect(() => { // getting dropdown data when searchText changes
+			const newDataRows = getDropdownData(debouncedSearchTerm);
+			setDataRows(newDataRows);
+		},
+		[ 
+			debouncedSearchTerm,
+			userSearchHistory,
+			autocorrect,
+			presearchFile,
+			presearchTitle,
+			presearchTopic,
+			presearchOrg,
+			setDataRows
+		]
+	);
+
+	const debouncedFetchSearchSuggestions = async (value) => {
 		try {
-			const userSearchHistory = JSON.parse(localStorage.getItem(`recent${this.props.cloneData.clone_name}Searches`) || '[]');
-			const historyWithIds = userSearchHistory.map((item, index) => ({ id: String(index), text: item }));
-			this.setState({ userSearchHistory: historyWithIds});
-		} catch (e) {
-			console.error('Failed to parse latest links', e)
-		}
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		// check if search is different, or any of the search history results have changed.
-		if ( this.state.originalText === null && // if we are using arrow keys, do not update dropdown data
-			(this.state.searchText !== prevState.searchText || 
-			!_.isEqual(this.state.userSearchHistory, prevState.userSearchHistory) ||
-			!_.isEqual(this.state.autocorrect, prevState.autocorrect) ||
-			!_.isEqual(this.state.presearchFile, prevState.presearchFile) ||
-			!_.isEqual(this.state.presearchTitle, prevState.presearchTitle) ||
-			!_.isEqual(this.state.presearchTopic, prevState.presearchTopic) ||
-			!_.isEqual(this.state.presearchOrg, prevState.presearchOrg) )
-			) {
-			const newDataRows = this.getDropdownData(this.state.searchText);
-			this.setState({ dataRows: newDataRows});
-		}
-		if ( this.props.searchText !== prevProps.searchText ) {
-			this.setState({ searchText: this.props.searchText });
-		}
-	}
-
-	debouncedFetchSearchSuggestions = async (value) => {
-		try {
-			const index = this.props.cloneData?.clone_data?.esCluster ?? '';
-			const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
-			this.setState({ autocorrect: data?.autocorrect?.map(item => ({ text: item })) ?? [], 
-			presearchFile: data?.presearchFile?.map(item => ({ text: item })) ?? [], 
-			presearchTitle: data?.presearchTitle?.map(item => ({ text: item })) ?? [],
-			presearchTopic: data?.presearchTopic?.map(item => ({ text: item })) ?? [],
-			presearchOrg: data?.presearchOrg?.map(item => ({ text: item })) ?? [],
-			predictions: data?.predictions?.map(item => ({ text: item })) ?? []});
+			if(cursor === null){
+				const index = state.cloneData?.clone_data?.esCluster ?? '';
+				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
+				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
+				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
+				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
+				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
+				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
+				setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
+			}
 		} catch (e) {
 			console.log('debouncedFetchSearchSuggestions err', e);
 		}
 	}
 
-	onKeyDown = (event) => {
-		if(event.key === 'Enter') {
-			this.props.handleSearch();
-		}
-	}
+	useEffect(()=> { debouncedFetchSearchSuggestions(debouncedSearchTerm);}, [debouncedSearchTerm]); // run when debounce value changes;
 
-	handleKeyDown(e) {
+	useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === 'Enter'){
+				setState(dispatch, {
+					searchText: searchText,
+					resultsPage: 1,
+					metricsCounted: false,
+					runSearch: true
+				});
+				document.activeElement.blur();
+			}
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [setState, dispatch, searchText]);
+
+	const handleKeyDown = (e) => {
 		let data = [];
-		this.state.dataRows.forEach(item => {
+		dataRows.forEach(item => {
 			item.rows.forEach((row) => {
 				data.push(row.text);
 			});
@@ -180,108 +191,125 @@ class GameChangerSearchBar extends React.Component {
 		if(e.keyCode === 38 || e.keyCode === 40) {
 			e.preventDefault(); // keep cursor at front 
 		}
-		if(e.keyCode === 40 && this.state.cursor === null && data[0] !== undefined ){
-			this.setState({cursor: 0, originalText: this.state.searchText});
-			this.setState({searchText:data[0].toLowerCase()})
+		if(e.keyCode === 40 && cursor === null && data[0] !== undefined ){
+			setCursor(0);
+			setOriginalText(searchText);
+			setSearchText(data[0].toLowerCase());
 		}
-		else if(e.keyCode === 38 && this.state.cursor === null && data[0] !== undefined ){
-			this.setState({cursor: data.length-1, originalText: this.state.searchText});
-			this.setState({searchText:data[data.length-1].toLowerCase()})
+		else if(e.keyCode === 38 && cursor === null && data[0] !== undefined ){
+			setCursor(data.length-1);
+			setOriginalText(searchText);
+			setSearchText(data[data.length-1].toLowerCase());
 		}
-		else if (e.keyCode === 38 && this.state.cursor === 0) {
-			this.setState({cursor: null, originalText: null, searchText: this.state.originalText}); // return to original state
+		else if (e.keyCode === 38 && cursor === 0) { // return to original state
+			setSearchText(originalText);
+			setCursor(null);
+			setOriginalText(null);
 		}
-		else if (e.keyCode === 38 && this.state.cursor > 0) {
-			this.setState( prevState => ({ cursor: prevState.cursor - 1}));
-			this.setState({searchText: data[this.state.cursor - 1].toLowerCase()})
+		else if (e.keyCode === 38 && cursor > 0) {
+			setCursor(cursor - 1);
+			setSearchText(data[cursor - 1].toLowerCase());
 		} 
-		else if (e.keyCode === 40 && this.state.cursor < data.length -1 ) {
-			this.setState( prevState => ({ cursor: prevState.cursor + 1}));
-			this.setState({searchText: data[this.state.cursor + 1].toLowerCase()})
+		else if (e.keyCode === 40 && cursor < data.length -1 ) {
+			setCursor(cursor + 1);
+			setSearchText(data[cursor + 1].toLowerCase());
 		}
-		else if (e.keyCode === 40 && this.state.cursor === data.length-1 ) {
-			this.setState({cursor: null, originalText: null, searchText: this.state.originalText}); // return to original state by wrapping
+		else if (e.keyCode === 40 && cursor === data.length-1 ) {// return to original state by wrapping
+			setSearchText(originalText);
+			setCursor(null);
+			setOriginalText(null);
 		}
 	}
 
 
-	handleFavoriteSearchClicked = (anchorEL, favorite) => {
-		const { searchFavoritePopperOpen } = this.state;
-
+	const handleFavoriteSearchClicked = (anchorEL, favorite) => {
 		if (favorite) {
-			this.handleSaveSearch(false)
+			handleSaveSearch(false)
 			return;
 		}
 
 		if (!searchFavoritePopperOpen) {
-			if (this.props.checkUserInfo()) {
+			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
-			this.setState({ searchFavoritePopperOpen: true, searchFavoritePopperAnchorEl: anchorEL });
+			setSearchFavoritePopperOpen(true);
+			setSearchFavoritePopperAnchorEl(anchorEL);
 		} else {
-			this.setState({ searchFavoritePopperOpen: false, searchFavoritePopperAnchorEl: null });
+			setSearchFavoritePopperOpen(false);
+			setSearchFavoritePopperAnchorEl(null);
 		}
 	}
 
-	handleSaveSearch = (favorite) => {
-		this.props.saveFavoriteSearch(this.state.favoriteName, this.state.favoriteSummary, favorite);
-		this.setState({ favoriteName: '', favoriteSummary: '', searchFavoritePopperOpen: false, searchFavoritePopperAnchorEl: null });
+	const handleSaveSearch = (favorite) => {
+		handleSaveFavoriteSearch(favoriteName, favoriteSummary, favorite, dispatch, state)
+		setFavoriteName('');
+		setFavoriteSummary('')
+		setSearchFavoritePopperOpen(false);
+		setSearchFavoritePopperAnchorEl(null);
 	}
 
-	handleOnType = (event) => {
+	const handleOnType = (event) => {
 		const { target: { value } } = event;
 		if (value && value.length > 3) {
-			if(this.state.cursor !== null){
-				this.setState({cursor: null, originalText: null}); // return to typing state
+			if(cursor !== null){// return to typing state
+				setCursor(null);
+				setOriginalText(null);
 			}
-			this.debouncedFetchSearchSuggestions(value);
 		} else {
-			this.clearLiveSuggestions();
+			clearLiveSuggestions();
 		}
-
-		this.setState({ searchText: value });
+		setSearchText(value);
 	}
 
-	clearLiveSuggestions = () => {
-		this.setState({
-			autocorrect: [],
-			predictions: [],
-			presearchFile: [],
-			presearchOrg: [],
-			presearchTopic: [],
-			presearchTitle: []
-		})
+	const clearLiveSuggestions = () => {
+		setAutocorrect([]);
+		setPredictions([]);
+		setPresearchFile([]);
+		setPresearchOrg([]);
+		setPresearchTopic([]);
+		setPresearchTitle([]);
 	}
 
-	handleRowPressed = ({ text, rowType }) => {
-		this.props.handleSearchTextUpdate(text, true);
-		this.setState({searchText: text});
+	const handleRowPressed = ({ text, rowType }) => {
+		setState(dispatch, {
+			searchText: text,
+			resultsPage: 1,
+			metricsCounted: false,
+			runSearch: true
+		});
+		setSearchText(text);
 		document.activeElement.blur();
 
 		if (rowType) {
-			trackEvent(getTrackingNameForFactory(this.props.cloneData), 'SearchSuggestionSelected', rowType, text)
+			trackEvent(getTrackingNameForFactory(state.cloneData), 'SearchSuggestionSelected', rowType, text)
 		}
 	}
 
-	handleOnBlur = (event) => {
-		this.setState({cursor: null, originalText: null });
+	const handleOnBlur = (e) => {
+		setCursor(null);
+		setOriginalText(null);
 	}
 
-	handleSubmit = (event) => {
+	const handleSubmit = (event) => {
 		if (event) {
 			event.preventDefault();
 		}
-		this.props.handleSearchTextUpdate(this.state.searchText, true);
+		setState(dispatch, {
+			searchText: searchText,
+			resultsPage: 1,
+			metricsCounted: false,
+			runSearch: true
+		});
 		document.activeElement.blur();
 	}
 
-	getDropdownData = (searchText) => {
+	const getDropdownData = (text) => {
 		let data = [];
 		let textArray = [];
 		// order of suggestions in dropdwon
-		if (searchText.length > 0 && this.state.autocorrect?.length > 0) {
+		if (text.length > 0 && autocorrect.length > 0) {
 			const rows = [];
-			this.state.autocorrect.forEach(o => {
+			autocorrect.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -290,13 +318,13 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'autocorrect'
 			});
 		}
-		if (searchText.length > 0 && this.state.presearchFile?.length > 0) {
+		if (text.length > 0 && presearchFile.length > 0) {
 			const rows = [];
-			this.state.presearchFile.forEach(o => {
+			presearchFile.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -305,13 +333,13 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'presearchFile'
 			});
 		}
-		if (searchText.length > 0 && this.state.presearchTitle?.length > 0) {
+		if (text.length > 0 && presearchTitle.length > 0) {
 			const rows = [];
-			this.state.presearchTitle.forEach(o => {
+			presearchTitle.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -320,13 +348,13 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'presearchTitle'
 			});
 		}
-		if (searchText.length > 0 && this.state.predictions?.length > 0) {
+		if (text.length > 0 && predictions.length > 0) {
 			const rows = [];
-			this.state.predictions.forEach(o => {
+			predictions.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -335,13 +363,13 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'predictions'
 			});
 		}
-		if (searchText.length > 0 && this.state.presearchTopic?.length > 0) {
+		if (text.length > 0 && presearchTopic.length > 0) {
 			const rows = [];
-			this.state.presearchTopic.forEach(o => {
+			presearchTopic.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -350,13 +378,13 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'presearchTopic'
 			});
 		}
-		if (searchText.length > 0 && this.state.presearchOrg?.length > 0) {
+		if (text.length > 0 && presearchOrg.length > 0) {
 			const rows = [];
-			this.state.presearchOrg.forEach(o => {
+			presearchOrg.forEach(o => {
 				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
 					rows.push(o);
 					textArray.push(o.text.toLowerCase());
@@ -365,20 +393,20 @@ class GameChangerSearchBar extends React.Component {
 			data.push({
 				IconComponent: Search,
 				rows: rows,
-				handleRowPressed: this.handleRowPressed,
+				handleRowPressed: handleRowPressed,
 				rowType: 'presearchOrg'
 			});
 		}
-		if ((this.state.userSearchHistory?.length > 0) && (searchText.length === 0)){
-			let filteredRows = this.state.userSearchHistory;
+		if ((userSearchHistory?.length > 0) && (searchText.length === 0)){
+			let filteredRows = userSearchHistory;
 			// if scrolling using arrow keys, use original text
-			const textToUse = this.state.originalText === null ? searchText : this.state.originalText;
+			const textToUse = originalText === null ? text : originalText;
 			// filter rows to make sure it includes
 			filteredRows = _.filter(filteredRows, (o) =>  o.text.toLowerCase().includes(textToUse.toLowerCase()));
 			data.push({
 				IconComponent: AccessTime,
-				rows: searchText.length > 0 ? filteredRows : this.state.userSearchHistory, // if there's no text, give all the history
-				handleRowPressed: this.handleRowPressed,
+				rows: text.length > 0 ? filteredRows : userSearchHistory, // if there's no text, give all the history
+				handleRowPressed: handleRowPressed,
 				rowType: 'user_search_history',
 				// for future feature where history can be removed from suggestions
 				// handleDeletePressed: this.handleHistoryDelete,
@@ -387,113 +415,116 @@ class GameChangerSearchBar extends React.Component {
 		return data;
 	}
 
-	render() {
-		const {
-			searchText,
-			componentStepNumbers,
-			// rawSearchResults,
-			favorite,
-			isEDA
-		} = this.props;
-		const classes = this.props.classes;
+	const noResults = Boolean(state.rawSearchResults?.length === 0);
+	const hideSearchResults = noResults && !state.loading;
+	console.log('DROPDOWN' + dropdownOpen);
+	return (
+		<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }}>
+			<SearchBarForm
+				id="GamechangerSearchBarForm"
+				className={state.componentStepNumbers ? `tutorial-step-${state.componentStepNumbers["Search Input"]}` : null}
+				onSubmit={handleSubmit}
+				autoComplete="off"
+				onKeyDown={handleKeyDown}
+			>
+				<SearchBarInput
+					type="text"
+					value={searchText}
+					onChange={handleOnType}
+					onBlur={handleOnBlur}
+					onFocus={() => {setDropdownOpen(true)}}
+					placeholder="Search..."
+					id="gcSearchInput"
+				/>
 
-		return (
-			<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }}>
+				{!isEDA &&
+					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement='top' arrow>
+						<button
+							type="button"
+							style={{ border: inputBorder, borderLeft: 'none', height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', padding: '0 15px' }}
+							onClick={(event) => handleFavoriteSearchClicked(event.target, state.isFavoriteSearch)}
+						>
+							<i className={state.isFavoriteSearch ? "fa fa-star" : "fa fa-star-o"} style={{
+								color: state.isFavoriteSearch ? "#E9691D" : 'rgb(224, 224, 224)',
+								cursor: "pointer",
+								fontSize: 26
+							}} />
+						</button>
+					</GCTooltip>
+				}
+				{!advancedSearchOpen && dropdownOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
+				{ isGamechanger && advancedSearchOpen && hideSearchResults &&
+					<AdvancedDropdown
+						context={context}
+						open={advancedSearchOpen}
+						handleSubmit={handleSubmit}
+						close={() => {setAdvancedSearchOpen(false)}}
+						>
+					</AdvancedDropdown>}
+				{ isGamechanger && hideSearchResults && 
+					<AdvancedSearchButton id='advancedSearchButton' onClick={() => {console.log(!advancedSearchOpen); setAdvancedSearchOpen(!advancedSearchOpen)}}>
+						Advanced Options
+						<i className="fa fa-chevron-down" style={{marginLeft: '5px'}}/>
+					</AdvancedSearchButton>
+				}
+			</SearchBarForm>
+			<SearchButton id="gcSearchButton" onClick={handleSubmit}>
+				<i className="fa fa-search" />
+			</SearchButton>
 
-				<SearchBarForm
-					id="GamechangerSearchBarForm"
-					className={componentStepNumbers ? `tutorial-step-${componentStepNumbers["Search Input"]}` : null}
-					onSubmit={this.handleSubmit}
-					autoComplete="off"
-					onKeyDown={this.handleKeyDown}
-				>
-					<SearchBarInput
-						type="text"
-						value={this.state.searchText}
-						onChange={this.handleOnType}
-						onBlur={this.handleOnBlur}
-						placeholder="Search..."
-						id="gcSearchInput"
-					/>
-
-					{!isEDA &&
-						<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement='top' arrow>
-							<button
-								type="button"
-								style={{ border: inputBorder, borderLeft: 'none', height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', padding: '0 15px' }}
-								onClick={(event) => this.handleFavoriteSearchClicked(event.target, favorite)}
-							>
-								<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-									color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
-									cursor: "pointer",
-									fontSize: 26
-								}} />
-							</button>
-						</GCTooltip>
-					}
-					{!isEDA && <SearchBarDropdown searchText={searchText} rowData={this.state.dataRows} cursor={this.state.cursor} /> }
-					
-				</SearchBarForm>
-				
-				<SearchButton id="gcSearchButton" onClick={this.handleSubmit}>
-					<i className="fa fa-search" />
-				</SearchButton>
-
-				<Popover onClose={() => { this.handleFavoriteSearchClicked(null); }}
-					open={this.state.searchFavoritePopperOpen} anchorEl={this.state.searchFavoritePopperAnchorEl}
-					anchorOrigin={{
-						vertical: 'bottom',
-						horizontal: 'right',
-					}}
-					transformOrigin={{
-						vertical: 'top',
-						horizontal: 'right',
-					}}
-				>
-					<div className={classes.paper}>
-						<div style={{ width: 330, margin: 5 }}>
-							<TextField
-								label={'Favorite Name'}
-								value={this.state.favoriteName}
-								onChange={(event) => { this.setState({ favoriteName: event.target.value }); }}
-								className={classes.textField}
-								margin='none'
-								size='small'
-								variant='outlined'
-							/>
-							<TextField
-								label={'Favorite Summary'}
-								value={this.state.favoriteSummary}
-								onChange={(event) => { this.setState({ favoriteSummary: event.target.value }); }}
-								className={classes.textArea}
-								margin='none'
-								size='small'
-								variant='outlined'
-								multiline={true}
-								rows={4}
-							/>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => this.handleSaveSearch(true)}
-									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-								>Save
-								</GCButton>
-								<GCButton
-									onClick={() => this.handleFavoriteSearchClicked(null)}
-									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-									textStyle={{ color: '#8091A5' }}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
-								>Cancel
-								</GCButton>
-							</div>
+			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
+				open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+			>
+				<div className={classes.paper}>
+					<div style={{ width: 330, margin: 5 }}>
+						<TextField
+							label={'Favorite Name'}
+							value={favoriteName}
+							onChange={(event) => { setFavoriteName(event.target.value); }}
+							className={classes.textField}
+							margin='none'
+							size='small'
+							variant='outlined'
+						/>
+						<TextField
+							label={'Favorite Summary'}
+							value={favoriteSummary}
+							onChange={(event) => { setFavoriteSummary(event.target.value) }}
+							className={classes.textArea}
+							margin='none'
+							size='small'
+							variant='outlined'
+							multiline={true}
+							rows={4}
+						/>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<GCButton
+								onClick={() => handleSaveSearch(true)}
+								style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+							>Save
+							</GCButton>
+							<GCButton
+								onClick={() => handleFavoriteSearchClicked(null)}
+								style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+								textStyle={{ color: '#8091A5' }}
+								buttonColor={'#FFFFFF'}
+								borderColor={'#B0B9BE'}
+							>Cancel
+							</GCButton>
 						</div>
 					</div>
-				</Popover>
-			</div>
-		);
-
-	}
+				</div>
+			</Popover>
+		</div>
+	);
 }
 
 GameChangerSearchBar.propTypes = {
@@ -505,4 +536,4 @@ GameChangerSearchBar.propTypes = {
 	SEARCH_TYPES: PropTypes.objectOf(PropTypes.string)
 }
 
-export default withStyles(useStyles)(GameChangerSearchBar)
+export default GameChangerSearchBar;

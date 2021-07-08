@@ -15,8 +15,22 @@ export const DropdownWrapper = styled.ul`
 	font-size: 22px;
 	padding: 3px 0;
 	font-family: "Montserrat";
+`;
+
+export const AdvDropdownWrapper = styled.div`
+	background-color: white;
+	border-radius: 6px;
+	position: absolute;
+	top: 100%;
+	width: 100%;
+	z-index: 1000;
+	box-shadow: 0 6px 8px 3px rgba(0,0,0,0.5);
+	font-size: 22px;
+	padding: 10px;
+	font-family: "Montserrat";
 	display: none;
 `;
+
 
 export const SearchBarInput = styled.input`
 	flex: 1;
@@ -38,13 +52,6 @@ export const SearchBarForm = styled.form`
 	align-items: center;
 	position: relative;
 	flex: 1;
-
-	&:focus-within {
-		${DropdownWrapper} {
-			display: block;	
-		};
-	};
-
 `;
 
 export const Row = styled.li`
@@ -98,6 +105,20 @@ export const SearchButton = styled.button`
 	border: none;
 	border-radius: 0 5px 5px 0;
 	width: 60px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+`;
+
+export const AdvancedSearchButton = styled.button`
+	font-size: 1em;
+	background-color: rgb(182,197,216);
+	color: #131E43;
+	padding: 4px 18px;
+	border: none;
+	border-radius: 0 5px 5px 0;
+	width: 190px;
 	height: 50px;
 	display: flex;
 	align-items: center;
