@@ -154,11 +154,10 @@ const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 		const { dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
-		
+		let topics = [];
+		let pubs = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
-			let topics = [];
-			let pubs = [];
 			data.forEach(obj => {
 				if(obj.key === 'homepage_topics'){
 					topics = JSON.parse(obj.value);
@@ -166,15 +165,24 @@ const PolicyMainViewHandler = {
 					pubs = JSON.parse(obj.value);
 				}
 			});
-			
-			// KRISHNA I ADDED THIS JUST TO SHOW YOU LOOK IN THE MAJOR PUBLICATIONS SECTION TO SEE IT
-			const png = await gameChangerAPI.thumbnailStorageDownloadPOST('gamechanger/thumbnails/Title 10.png');
-			pubs.push({name: 'test', imgSrc: png.data})
-			
-			setState(dispatch, {adminTopics:topics, adminMajorPubs: pubs});
+
 		} catch(e){
 			// Do nothing
 		}
+
+		try {
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs);
+			const buffers = pngs.data
+			buffers.forEach((buf,idx) => {
+				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf;
+			})
+			
+		} catch(e) {
+			//Do nothing
+		}
+		
+		setState(dispatch, {adminTopics:topics, adminMajorPubs: pubs});
+
 	},
 	
 	getMainView(props) {
@@ -322,7 +330,7 @@ const PolicyMainViewHandler = {
 									}} />
 								</div>
 								<Typography style={styles.subtext}>
-									<i class="fa fa-search" style={{width:16, height:15}}/> 
+									<i className="fa fa-search" style={{width:16, height:15}}/> 
 									{`${count} searches this week`}
 								</Typography>
 							</TrendingSearchContainer>
@@ -355,12 +363,13 @@ const PolicyMainViewHandler = {
 						{adminMajorPubs.map(({name, imgSrc}) =>
 							<img 
 								style={{height:210, border:'1px solid black', marginLeft: 10}} 
-								src={URL.createObjectURL(imgSrc)}
+								src={imgSrc}
 								alt="thumbnail" 
 								title={name}
 								onClick={()=>{
 									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
+									window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+									// window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
 								}}
 							/>
 						)}
