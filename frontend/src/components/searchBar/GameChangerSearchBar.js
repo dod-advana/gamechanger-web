@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import PropTypes from 'prop-types';
 import _ from "underscore";
 import TextField from "@material-ui/core/TextField";
@@ -81,6 +81,7 @@ const GameChangerSearchBar = (props) => {
 	const { context  } = props;
 	const {state, dispatch} = context;
 	const isEDA = state.cloneData.clone_name === 'eda';
+	const isGamechanger = state.cloneData.clone_name === 'gamechanger';
 	const classes = useStyles();
 	const useDebounce = (value, delay) => {
 		const [debouncedValue, setDebouncedValue] = useState(value);
@@ -108,7 +109,9 @@ const GameChangerSearchBar = (props) => {
 	const [searchFavoritePopperAnchorEl, setSearchFavoritePopperAnchorEl] = useState(null);
 	const [cursor, setCursor] = useState(null);
 	const [originalText, setOriginalText] = useState(null);
+
 	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
@@ -120,7 +123,6 @@ const GameChangerSearchBar = (props) => {
 				if (state.cloneDataSet) {
 					const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 					const tmpSearchHandler = searchFactory.createHandler();
-					console.log(tmpSearchHandler);
 					setSearchHandler(tmpSearchHandler)
 				}
 			}
@@ -145,14 +147,16 @@ const GameChangerSearchBar = (props) => {
 
 	const debouncedFetchSearchSuggestions = async (value) => {
 		try {
-			const index = state.cloneData?.clone_data?.esCluster ?? '';
-			const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
-			setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
-			setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
-			setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
-			setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
-			setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
-			setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
+			if(cursor === null){
+				const index = state.cloneData?.clone_data?.esCluster ?? '';
+				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
+				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
+				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
+				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
+				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
+				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
+				setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
+			}
 		} catch (e) {
 			console.log('debouncedFetchSearchSuggestions err', e);
 		}
@@ -163,13 +167,18 @@ const GameChangerSearchBar = (props) => {
 	useEffect(() => {
     function onKeyDown(e) {
       if (e.key === 'Enter'){
-				console.log('HANDLE SEARCH')
-				handleSubmit();
+				setState(dispatch, {
+					searchText: searchText,
+					resultsPage: 1,
+					metricsCounted: false,
+					runSearch: true
+				});
+				document.activeElement.blur();
 			}
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [setState, dispatch, searchText]);
 
 	const handleKeyDown = (e) => {
 		let data = [];
@@ -220,7 +229,7 @@ const GameChangerSearchBar = (props) => {
 		}
 
 		if (!searchFavoritePopperOpen) {
-			if (checkUserInfo()) {
+			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
 			setSearchFavoritePopperOpen(true);
@@ -232,7 +241,7 @@ const GameChangerSearchBar = (props) => {
 	}
 
 	const handleSaveSearch = (favorite) => {
-		handleSaveFavoriteSearch(state.favoriteName, state.favoriteSummary, favorite, dispatch, state)
+		handleSaveFavoriteSearch(favoriteName, favoriteSummary, favorite, dispatch, state)
 		setFavoriteName('');
 		setFavoriteSummary('')
 		setSearchFavoritePopperOpen(false);
@@ -276,7 +285,7 @@ const GameChangerSearchBar = (props) => {
 		}
 	}
 
-	const handleOnBlur = () => {
+	const handleOnBlur = (e) => {
 		setCursor(null);
 		setOriginalText(null);
 	}
@@ -406,9 +415,11 @@ const GameChangerSearchBar = (props) => {
 		return data;
 	}
 
+	const noResults = Boolean(state.rawSearchResults?.length === 0);
+	const hideSearchResults = noResults && !state.loading;
+	console.log('DROPDOWN' + dropdownOpen);
 	return (
 		<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }}>
-
 			<SearchBarForm
 				id="GamechangerSearchBarForm"
 				className={state.componentStepNumbers ? `tutorial-step-${state.componentStepNumbers["Search Input"]}` : null}
@@ -421,6 +432,7 @@ const GameChangerSearchBar = (props) => {
 					value={searchText}
 					onChange={handleOnType}
 					onBlur={handleOnBlur}
+					onFocus={() => {setDropdownOpen(true)}}
 					placeholder="Search..."
 					id="gcSearchInput"
 				/>
@@ -440,18 +452,22 @@ const GameChangerSearchBar = (props) => {
 						</button>
 					</GCTooltip>
 				}
-					
+				{!advancedSearchOpen && dropdownOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
+				{ isGamechanger && advancedSearchOpen && hideSearchResults &&
 					<AdvancedDropdown
-						open={advancedSearchOpen}>
-					</AdvancedDropdown>
-				{!isEDA && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
+						context={context}
+						open={advancedSearchOpen}
+						handleSubmit={handleSubmit}
+						close={() => {setAdvancedSearchOpen(false)}}
+						>
+					</AdvancedDropdown>}
+				{ isGamechanger && hideSearchResults && 
+					<AdvancedSearchButton id='advancedSearchButton' onClick={() => {console.log(!advancedSearchOpen); setAdvancedSearchOpen(!advancedSearchOpen)}}>
+						Advanced Options
+						<i className="fa fa-chevron-down" style={{marginLeft: '5px'}}/>
+					</AdvancedSearchButton>
+				}
 			</SearchBarForm>
-
-			<AdvancedSearchButton onClick={() => {setAdvancedSearchOpen(!advancedSearchOpen)}}>
-				Advanced Options
-				<i className="fa fa-chevron-down" style={{marginLeft: '5px'}}/>
-			</AdvancedSearchButton>
-			
 			<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 				<i className="fa fa-search" />
 			</SearchButton>
