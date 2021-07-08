@@ -86,27 +86,33 @@ import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 // }
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.specificOrgsSelected = true;
 	newSearchSettings.allOrgsSelected = false;
 	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 }
 
 const handleSelectAllOrgs = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.specificOrgsSelected = false;
 	newSearchSettings.allOrgsSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+    setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+//	const newSelectedOrgs = _.cloneDeep(state.searchSettings.orgFilter);
+        
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked
 	};
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+    state.runSearch = true;
+
+    //newSelectedOrgs[orgName] = event.target.checked;
+    setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false});
+	//setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
