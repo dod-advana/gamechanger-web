@@ -283,7 +283,8 @@ class DataLibrary {
 		
 		const params = {
 			Bucket: dest,
-			Key: `gamechanger/thumbnails/${filekey}.png`
+			Key: `gamechanger/thumbnails/${filekey}.png`,
+			ResponseContentType: 'image/png'
 		};
 
 		return new Promise((resolve,reject) => {
@@ -291,7 +292,7 @@ class DataLibrary {
 				if(err) {
 					reject(err, err.stack);
 				} else {
-					resolve(data);
+					resolve(data[0].body.toString('base64'));
 				}
 			})
 		});
