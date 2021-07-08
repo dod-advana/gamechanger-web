@@ -292,7 +292,7 @@ class DataLibrary {
 				if(err) {
 					reject(err, err.stack);
 				} else {
-					resolve(data[0].body.toString('base64'));
+					resolve(data[0].Body.toString('base64'));
 				}
 			})
 		});
