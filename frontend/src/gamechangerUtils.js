@@ -236,7 +236,7 @@ export const getCloneTitleForFactory = (cloneData, upperCase) => {
 export const useMountEffect = (fun) => useEffect(fun, []);
 
 export const typeFilters = {
-	'Document': false
+	'Documents': false
 };
 
 export const getReferenceListMetadataPropertyTable = (ref_list = []) => {

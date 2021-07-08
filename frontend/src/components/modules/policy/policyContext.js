@@ -6,7 +6,7 @@ const initState = {
 	cloneData: {
 		clone_name: 'gamechanger',
 		search_module: 'policy/policySearchHandler',
-		export_module: 'simple/simpleExportHandler',
+		export_module: 'policy/policyExportHandler',
 		title_bar_module: 'policy/policyTitleBarHandler',
 		navigation_module: 'policy/policyNavigationHandler',
 		card_module: 'policy/policyCardHandler',
