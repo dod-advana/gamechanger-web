@@ -7,6 +7,7 @@ import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
 import GCButton from '../common/GCButton';
+import GCErrorSnackbar from '../common/GCErrorSnackbar';
 import {MainContainer} from "../../containers/GameChangerDetailsPage";
 import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
 import {trackEvent} from "../telemetry/Matomo";
@@ -26,7 +27,7 @@ const colWidth = {
 
 const RESULTS_PER_PAGE = 10;
 
-const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) => {
+const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
 	Promise.all([
 		gameChangerAPI.graphQueryPOST(
 			'MATCH (d:Document) ' +
@@ -66,6 +67,7 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 		const nodeIds = [];
 		const edgeIds = [];
 		resps.forEach(resp => {
+			if (resp?.data?.error) setBackendError(resp.data.error);
 			resp.data.labels.forEach(label => {
 				if (!graph.labels.includes(label)) {
 					graph.labels.push(label);
@@ -124,6 +126,8 @@ const DocumentDetailsPage = (props) => {
 	const [referencedByDocs, setReferencedByDocs] = useState({docCount: 0, timeFound: '0.0', docs: []});
 	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] = useState(true);
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
+
+	const [backendError, setBackendError] = useState(null);
 	
 	useEffect(() => {
 		setRunningQuery(true);
@@ -131,7 +135,7 @@ const DocumentDetailsPage = (props) => {
 	
 	useEffect(() => {
 		if (!document || !cloneData) return;
-		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery);
+		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery, setBackendError);
 	}, [document, cloneData]);
 	
 	useEffect(() => {
@@ -411,6 +415,12 @@ const DocumentDetailsPage = (props) => {
 				
 				</div>
 			</MainContainer>
+
+			<GCErrorSnackbar
+				open={!!backendError}
+				message={`An error occurred with ${backendError}, but we are working to fix it!`}
+				onClose={() => setBackendError(null)}
+			/>
 		</div>
 	);
 }

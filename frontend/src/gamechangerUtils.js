@@ -8,6 +8,7 @@ import {getTextColorBasedOnBackground} from "./graphUtils";
 import {useEffect} from "react";
 import styled from "styled-components";
 import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import {setState} from './sharedFunctions';
 const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
@@ -787,4 +788,10 @@ export const exactMatch = (phrase, word) => {
 		}
 	});
 	return exists;
+}
+
+export const displayBackendError = (resp, dispatch = () => {}) => {
+	if (resp?.data?.error) {
+		setState(dispatch, {showBackendError: true, backendErrorMsg: `An error occurred with ${resp.data.error}, but we are working to fix it!`});
+ 	}
 }
