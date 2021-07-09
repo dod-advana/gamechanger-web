@@ -353,15 +353,17 @@ const PolicySearchHandler = {
 								typeFilter[t.name] = !allTypesSelected;
 							});
 						}
-						if(!searchSettings.isFilterUpdate){
-							searchSettings.originalOrgFilters = orgFilter;
-						}
+						
 						searchSettings.orgFilter = orgFilter;
 						searchSettings.typeFilter = typeFilter;
 	
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
+						}
+
+						if(!searchSettings.isFilterUpdate){
+							searchSettings.originalOrgFilters = sidebarOrgData;
 						}
 						
 						setState(dispatch, {
