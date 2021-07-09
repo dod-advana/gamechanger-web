@@ -63,6 +63,10 @@ const EdaMainViewHandler = {
 		return defaultMainViewHandler.getMainView(props);
 	},
 	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
+	},
+	
 	handleCategoryTabChange(props) {
 		defaultMainViewHandler.handleCategoryTabChange(props);
 	},

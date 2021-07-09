@@ -362,7 +362,7 @@ const PolicyMainViewHandler = {
 					>
 						{adminMajorPubs.map(({name, imgSrc}) =>
 							<img 
-								style={{height:210, border:'1px solid black', marginLeft: 10}} 
+								style={{height:210, border:'1px solid black', marginLeft: 10, cursor:'pointer'}} 
 								src={imgSrc}
 								alt="thumbnail" 
 								title={name}
