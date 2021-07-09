@@ -5,7 +5,6 @@ import { Select, MenuItem, Tooltip, Input } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../common/GCButton";
-import { trackEvent } from '../telemetry/Matomo';
 import styles from './GCAdminStyles';
 import './index.scss';
 const status = ['ok', 'loading', 'error'];
@@ -321,7 +320,7 @@ export default () => {
 
 	useEffect(() => {
 		onload();
-	}, []);
+	});
     
 
     return (			
