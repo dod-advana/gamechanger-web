@@ -220,9 +220,13 @@ class ResponsibilityController {
 	async getParagraphNum(raw, user) {
 		try {
 			console.log(raw);
-			let fields = raw.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields;
-
-			return fields['paragraphs.par_inc_count'][0]
+			if (raw.body.hits.hits.length === 0 ){
+				return -1
+			} else {
+				let fields = raw.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields;
+				return fields['paragraphs.par_inc_count'][0]
+			}
+			
 		} catch (err) {
 			this.logger.error(err.message, 'FSDEW78', user);
 		}
@@ -313,7 +317,7 @@ class ResponsibilityController {
 					}
 				}
 			});
-
+			tmpWhere['status'] = {[Op.eq]: 'active'};
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
@@ -332,7 +336,7 @@ class ResponsibilityController {
 			res.status(200).send({totalCount: results.count, results: results.rows});
 
 		} catch (err) {
-			this.logger.error(err, 'DPDA9Y3', userId);
+			this.logger.error(err, 'ASDED20', userId);
 			res.status(500).send(err);
 		}
 	}

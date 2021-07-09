@@ -105,9 +105,7 @@ const PAGE_SIZE = 10
 
 const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = [] }) => {
 	const order = sorted.map(({ id, desc }) => ([id, desc ? 'DESC' : 'ASC']));
-	let where = filtered.map(({ id, value }) => ({ [id]: (id !== 'id' ? {'$iLike': `%${value}%`} : value) }));
-	where.push({ status: 'active' });
-	console.log(where);
+	let where = filtered
 
 	try {
 		const { data } = await gameChangerAPI.getResponsibilityData({ limit, offset, order, where });
