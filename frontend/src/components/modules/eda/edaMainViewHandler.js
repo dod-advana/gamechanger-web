@@ -1,7 +1,7 @@
 import React from "react";
 import EDASummaryView from "./edaSummaryView";
-import EDASidePanel from "./edaSidePanel";
 import JumpButton from '../globalSearch/JumpButton';
+import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
@@ -149,7 +149,6 @@ const EdaMainViewHandler = {
 	getCardViewPanel(props) {
 		const {
 			context
-			
 		} = props;
 		
 		const {state, dispatch} = context;
@@ -164,13 +163,9 @@ const EdaMainViewHandler = {
 			hideTabs,
 			isCachedResult,
 			timeSinceCache,
-			edaSearchSettings,
-			issuingOrgs,
-			statsLoading,
 			summaryCardView,
 			summaryCardData,
-			resultsText,
-			totalObligatedAmount
+			resultsText
 		} = state;
 		
 		let sideScroll = {
@@ -202,7 +197,7 @@ const EdaMainViewHandler = {
 					<div id="game-changer-content-top"/>
 					{!loading &&
 						<StyledCenterContainer showSideFilters={true}>
-							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
+							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : { width: '22%' }}>
 								<div className={'side-bar-container'}>
 									{summaryCardView ?
 										<div>
@@ -216,23 +211,18 @@ const EdaMainViewHandler = {
 											}} />
 										</div>
 										:
-										<EDASidePanel 
-											searchResults={searchResults}
-											dispatch={dispatch}
-											edaSearchSettings={edaSearchSettings}
-											issuingOrgs={issuingOrgs}
-											statsLoading={statsLoading}
-											totalObligatedAmount={totalObligatedAmount}
+										<GameChangerSearchMatrix 
+											context={context}
 										/>
 									}
 								</div>
 							</div>
 							<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
 								{!hideTabs && 
-									<ViewHeader resultsText={resultsText} {...props}/>
+									<ViewHeader resultsText={resultsText} {...props} mainStyles={{ margin: '20px 28px 30px', padding: '5px 0 0 0' }} />
 								}
 							
-								<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
+								<div className={`tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
 									<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
 										<div className="row" style={{marginLeft: 0, marginRight: 0}}>
 											{!loading &&

@@ -12,7 +12,7 @@ const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
 
-export const RESULTS_PER_PAGE = 20;
+export const RESULTS_PER_PAGE = 18;
 
 export const RECENT_SEARCH_LIMIT = 6;
 
@@ -197,6 +197,38 @@ export const getTrackingNameForFactory = (cloneName) => {
 	return `GAMECHANGER_${cloneName}`;
 }
 
+const crawlerMapping = {
+	"dod_issuances":"WHS DoD Directives Division",
+	"army_pubs":"Army Publishing Directorate", 
+	"jcs_pubs":"Joint Chiefs of Staff Library",
+	"jcs_manual_uploads":"Joint Chiefs of Staff",
+	"dod_manual_uploads":"Dept. of Defense",
+	"army_manual_uploads":"US Army",
+	"ic_policies":"Director of National Intelligence",
+	"us_code":"Office of the Law Revision Counsel",
+	"ex_orders":"Federal Register",
+	"opm_pubs":"OMB Publication",
+	"air_force_pubs":"Dept. of the Air Force E-Publishing",
+	"marine_pubs":"Marine Corps Publications Electronic Library",
+	"secnav_pubs":"Dept. of the Navy Issuances",
+	"navy_reserves":"U.S. Navy Reserve Publications",
+	"navy_med_pubs":"Navy Medicine Directives",
+	"Bupers_Crawler":"Bureau of Naval Personnel Instructions",
+	"milpersman_crawler":"Navy Personnel Command Instructions",
+	"nato_stanag":"NATO Publications",
+	"fmr_pubs":"DoD Financial Management Regulation",
+	"legislation_pubs":"Congressional Legislation",
+	"Army_Reserve":"U.S. Army Reserve Publications",
+	"Memo":"OSD Executive Executive Secretary",
+	"dha_pubs":"Military Health System",
+	"jumbo_FAR":"Federal Acquisition Regulation",
+	"jumbo_DFAR":"Defense Federal Acquisition Regulation"
+} 
+
+export const crawlerMappingFunc = (item) => {
+	return crawlerMapping[item]? crawlerMapping[item] : item
+}
+
 export const getCloneTitleForFactory = (cloneData, upperCase) => {
 	return upperCase ? cloneData.clone_name.toUpperCase() : cloneData.clone_name;
 }
@@ -269,38 +301,6 @@ export function numberWithCommas(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-const crawlerMapping = {
-	"dod_issuances":"WHS DoD Directives Division",
-	"army_pubs":"Army Publishing Directorate", 
-	"jcs_pubs":"Joint Chiefs of Staff Library",
-	"jcs_manual_uploads":"Joint Chiefs of Staff",
-	"dod_manual_uploads":"Dept. of Defense",
-	"army_manual_uploads":"US Army",
-	"ic_policies":"Director of National Intelligence",
-	"us_code":"Office of the Law Revision Counsel",
-	"ex_orders":"Federal Register",
-	"opm_pubs":"OMB Publication",
-	"air_force_pubs":"Dept. of the Air Force E-Publishing",
-	"marine_pubs":"Marine Corps Publications Electronic Library",
-	"secnav_pubs":"Dept. of the Navy Issuances",
-	"navy_reserves":"U.S. Navy Reserve Publications",
-	"navy_med_pubs":"Navy Medicine Directives",
-	"Bupers_Crawler":"Bureau of Naval Personnel Instructions",
-	"milpersman_crawler":"Navy Personnel Command Instructions",
-	"nato_stanag":"NATO Publications",
-	"fmr_pubs":"DoD Financial Management Regulation",
-	"legislation_pubs":"Congressional Legislation",
-	"Army_Reserve":"U.S. Army Reserve Publications",
-	"Memo":"OSD Executive Executive Secretary",
-	"dha_pubs":"Military Health System",
-	"jumbo_FAR":"Federal Acquisition Regulation",
-	"jumbo_DFAR":"Defense Federal Acquisition Regulation"
-} 
-
-export const crawlerMappingFunc = (item) => {
-	return crawlerMapping[item]? crawlerMapping[item] : item
-}
-
 export const orgColorMap = {
 	'Dept. of Defense': '#636363', // gray
 	'Joint Chiefs of Staff': '#330066', // purple
@@ -332,7 +332,8 @@ const linkColorMap = {
 export const typeColorMap = {
 	document: '#386F94',
 	organization: '#386f94',
-	topic: '#ffbf00'
+	topic: '#ffbf00',
+	uknDocument: '#000000'
 };
 
 const typeTextColorMap = {
@@ -665,7 +666,7 @@ export const axiosPOST = async (axios, url, data, options = {}) => {
 }
 
 export const axiosGET = async (axios, url, options = {}) => {
-	getSignature(options, url);
+	getSignature(options, url.split('?')[0]);
 	return axios.get(url, options);
 }
 
@@ -676,12 +677,8 @@ export const axiosDELETE = async (axios, url, options = {}) => {
 
 export const getQueryVariable = (name, url) => {
 	if (!url) url = window.location.href;
-	name = name.replace(/[[\]]/g, "\\$&");
-	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-		results = regex.exec(url);
-	if (!results) return null;
-	if (!results[2]) return '';
-	return decodeURIComponent(results[2].replace(/\+/g, " "));
+	const params = new URLSearchParams(url.split('?')[1] || '');
+	return params.get(name);
 }
 
 export const decodeTinyUrl = (url) => {
@@ -779,4 +776,15 @@ export const encode = (filename) => {
         /([+!"#$&'()*+,:;=?@])/img,
         match => encodings[match]
     );
+}
+
+export const exactMatch = (phrase, word) => {
+	const wordList = phrase.trim().split(' ')
+	let exists = false
+	wordList.forEach(w => {
+		if(w.toLowerCase()===word.toLowerCase()){
+			exists=true
+		}
+	});
+	return exists;
 }

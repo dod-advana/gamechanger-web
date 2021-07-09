@@ -1,9 +1,9 @@
-import {getTrackingNameForFactory, RESULTS_PER_PAGE, SEARCH_TYPES} from "./gamechangerUtils";
+import _ from "lodash";
+
+import {getTrackingNameForFactory, SEARCH_TYPES} from "./gamechangerUtils";
 import {trackEvent} from "./components/telemetry/Matomo";
 import GameChangerAPI from "./components/api/gameChanger-service-api";
 import GamechangerUserManagementAPI from "./components/api/GamechangerUserManagement";
-
-const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -131,27 +131,6 @@ export const getUserData = async (dispatch) => {
 	}
 }
 
-export const creatCopyTinyUrl = (toolUrl, dispatch) => {
-	let url = window.location.hash.toString();
-	url = url.replace("#/", "");
-	gameChangerAPI.shortenSearchURLPOST(url).then(res => {
-		try {
-			// method for copying text to clipboard
-			const element = document.createElement('textarea');
-			element.value = `${window.location.origin}/#/${toolUrl}?tiny=${res.data.tinyURL}`;
-			element.setAttribute('readonly', '');
-			element.style = {position: 'absolute', left: '-9999px'};
-			document.body.appendChild(element);
-			element.select();
-			document.execCommand('copy');
-			document.body.removeChild(element);
-			setState(dispatch, {showSnackbar: true, snackBarMsg: 'Link copied to clipboard'});
-		} catch(err) {
-			console.log(err);
-		}
-	});
-}
-
 export const getSearchObjectFromString = (searchString = '') => {
 	//this search string in the input field on front end...
 	// tmp tag:foo tag:bar prop1:val1 prop2:val2
@@ -185,23 +164,6 @@ export const getSearchObjectFromString = (searchString = '') => {
 			properties: undefined
 		}
 	}
-}
-
-export const setSearchURL = (state, searchSettings) => {
-	const { searchText,  resultsPage, tabName} = state;
-	const {searchType, orgFilter, searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, allOrgsSelected, includeRevoked} = searchSettings;
-	const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
-	let orgFilterText = 'ALLORGS';
-	if(!allOrgsSelected) {
-		orgFilterText = Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_');
-	}
-	const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field)).map(key => `${searchFields[key].field.display_name}-${searchFields[key].input}`).join('_');
-	const accessDateText = (accessDateFilter && accessDateFilter[0] && accessDateFilter[1]) ? accessDateFilter.map(date => date.getTime()).join('_') : null;
-	const publicationDateText = (publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]) ? publicationDateFilter.map(date => date.getTime()).join('_') : null;
-	const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
-
-	const linkString = `/#/${state.cloneData.url.toLowerCase()}?q=${searchText}&offset=${offset}&searchType=${searchType}&tabName=${tabName}&orgFilter=${orgFilterText}&searchFields=${searchFieldText}&accessDate=${accessDateText}&pubDate=${pubDateText}&revoked=${includeRevoked}`;
-	window.history.pushState(null, null, linkString);
 }
 
 // return true if they need to fill out the form

@@ -32,12 +32,12 @@ class UserController {
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
 			search = new SearchController(opts),
-			sequelize = new Sequelize(constants.POSTGRES_CONFIG.databases.game_changer),
+			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			emailUtility = new EmailUtility({
-				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
-				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS
+				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
+				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
+				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
 			}),
 			dataApi = new DataLibrary(opts),
 		} = opts;
@@ -52,7 +52,6 @@ class UserController {
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
-		this.sequelize = sequelize;
 		this.search = search;
 		this.externalAPI = externalAPI;
 		this.emailUtility = emailUtility;
@@ -63,11 +62,11 @@ class UserController {
 		this.addInternalUser = this.addInternalUser.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
 		this.setUserBetaStatus = this.setUserBetaStatus.bind(this);
-		this.setUserSearchSettings = this.setUserSearchSettings.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
+		this.sendClassificationAlert = this.sendClassificationAlert.bind(this);
 		this.clearDashboardNotification = this.clearDashboardNotification.bind(this);
 		this.updateUserAPIRequestLimit = this.updateUserAPIRequestLimit.bind(this);
 		this.resetAPIRequestLimit = this.resetAPIRequestLimit.bind(this);
@@ -200,7 +199,9 @@ class UserController {
 						search.favorited = countData[0].favorited_count;
 						const tiny = this.searchUtility.getQueryVariable('tiny', search.tiny_url);
 						const url = await this.search.convertTiny(tiny);
-						search.url = url.url;
+						if (url) {
+							search.url = url.url;
+						}
 					}
 
 					user.favorite_searches = favorite_searches;
@@ -259,6 +260,8 @@ class UserController {
 				user.api_key = '';
 			}
 
+			user.submitted_info = true;
+
 			res.send(user);
 
 		} catch (err) {
@@ -281,12 +284,12 @@ class UserController {
 					defaults: {
 						user_id: hashed_user,
 						is_beta: false,
-						search_settings: {},
 						notifications: { total: 0, favorites: 0, history: 0 }
 					},
 					raw: true
 				}
 			);
+			user.submitted_info = true;
 			res.status(200).send(user);
 		} catch (err) {
 			this.logger.error(err.message, 'ZX1SWBU', userId);
@@ -315,29 +318,6 @@ class UserController {
 			res.status(200).send(status);
 		} catch (err) {
 			this.logger.error(err.message, 'NGED0R4', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setUserSearchSettings(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
-			await this.gcUser.update(
-				{
-					search_settings: req.body
-				},
-				{
-					where: {
-						user_id: hashed_user
-					}
-				}
-			);
-			res.status(200).send();
-		} catch (err) {
-			this.logger.error(err.message, 'AXSITXS', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -394,7 +374,7 @@ class UserController {
 				username = req.body.username;
 			}
 			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.findAll({ where: { username } });
+			const exists = await this.internalUserTracking.findOne({ where: { username } });
 			if (exists) {
 				const { id, username } = exists;
 				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
@@ -432,12 +412,13 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {feedbackType, feedbackText, screenShot, userEmail} = req.body.feedbackData;
 			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
-			this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
-				res.status(200).send({status: 'good'});
-			}).catch(error => {
-				this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				res.status(500).send(error);
-			});
+			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
+			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
+			res.status(200).send({status: 'good'});
+			// }).catch(error => {
+				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+				// res.status(500).send(error);
+			// });
 
 			// const axios = require('axios');
 			// const axiosInstance = axios.create({
@@ -473,6 +454,26 @@ class UserController {
 			// 		username: this.constants.SERVICE_ACCOUNT_OPTS.USERNAME,
 			// 		password: this.constants.SERVICE_ACCOUNT_OPTS.PASSWORD
 			// 	}
+			// });
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'WH9IUG0', userId);
+			res.status(500).send(message);
+		}
+	}
+
+	async sendClassificationAlert(req, res) {
+		let userId = 'Unknown_Webapp';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { alertData } = req.body;
+			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
+			this.logger.info(`Classification alert: ${emailBody}`);
+			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
+				res.status(200).send({status: 'good'});
+			// }).catch(error => {
+				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+				// res.status(500).send(error);
 			// });
 		} catch (err) {
 			const { message } = err;
@@ -525,7 +526,7 @@ class UserController {
 
 			const hashed_user = this.sparkMD5.hash(userId);
 
-			await this.gcUser.update({ 'api_requests': this.sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
+			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
 			
 			res.status(200).send();
 		} catch(err) {
