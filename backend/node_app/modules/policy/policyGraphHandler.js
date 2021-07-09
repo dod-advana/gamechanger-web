@@ -19,6 +19,7 @@ class PolicyGraphHandler extends GraphHandler {
 		this.constants = constants;
 		this.dataLibrary = dataLibrary;
 		this.dataTracker = dataTracker;
+		this.error = null;
 	}
 
 	async searchHelper(req, userId) {
@@ -140,6 +141,7 @@ class PolicyGraphHandler extends GraphHandler {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, tmpCode, userId);
+			this.error = 'Neo4j';
 			return graphData;
 		}
 	}
@@ -258,11 +260,12 @@ class PolicyGraphHandler extends GraphHandler {
 					return { entities: entities, topics: topics, entityQuery: {query: entityQuery, params: entityParams}, topicQuery: {query: topicQuery, params: topicParams} };
 				} catch (err) {
 					this.logger.error(`Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
+					this.error = 'Neo4j';
 					return { entities: [], topics: [] };
 				}
 			} else {
 				this.logger.error(`Error with Elasticsearch results`, 'V053I6O', userId);
-				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn('Search has no hits') }
 				return { entities: [], topics: [] };
 			}
 		} catch (err) {
@@ -304,6 +307,7 @@ class PolicyGraphHandler extends GraphHandler {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '594CVDD', userId);
+			this.error = 'Neo4j';
 			return message;
 		}
 	}
@@ -520,7 +524,9 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-
+	getError() {
+		return this.error;
+	}
 }
 
 function generateFieldLookup (keys) {
