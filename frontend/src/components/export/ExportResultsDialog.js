@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
 import styled from 'styled-components';
-import { Select, InputLabel, FormControl, MenuItem, Typography } from '@material-ui/core'
+import { Select, InputLabel, FormControl, MenuItem, Typography, TextField } from '@material-ui/core'
 import GameChangerAPI from "../api/gameChanger-service-api";
 import LoadingBar from '../common/LoadingBar';
 import { backgroundGreyDark } from '../../components/common/gc-colors';
@@ -12,6 +12,8 @@ import './export-results-dialog.css';
 import moment from 'moment';
 import {trackEvent} from "../telemetry/Matomo";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { makeStyles } from '@material-ui/core/styles';
 
 const gameChangerAPI = new GameChangerAPI()
 const autoDownloadFile = ({ data, filename = "results", extension = "txt" }) => {
@@ -51,6 +53,18 @@ const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 	const blob = new Blob(byteArrays, { type: contentType });
 	return blob;
 }
+
+const useStyles = makeStyles(() => ({
+	labelFont: {
+	  fontSize: 16
+	},
+	helperText: {
+		fontSize: 12
+	},
+	options: {
+		zIndex: '1500'
+	}
+}));
 
 const styles = {
 	menuItem: {
@@ -116,10 +130,22 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 	const [errorMsg, setErrorMsg] = useState('')
 	const isEda = cloneData.clone_name === 'eda';
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv': 'pdf');
+	const [classificationMarking, setClassificationMarking] = useState('');
 	const index = cloneData.clone_name;
+	const classes = useStyles();
+
+	const classificationMarkingOptions = ['None', 'CUI'];
 
 	const handleChange = ({ target: { value } }) => {
 		setSelectedFormat(value)
+	}
+
+	const sendNonstandardClassificationAlert = async (exportInput) => {
+		try {
+			await gameChangerAPI.sendClassificationAlertPOST(exportInput);
+		} catch(err) {
+				console.log({ err });
+		}
 	}
 
 	const generateFile = async () => {
@@ -131,9 +157,13 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			url = url.replace("#/", "");
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
-			const { data } = await gameChangerAPI.modularExport({cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, options:{ limit: 10000, searchType, index,  cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order }});
+			const exportInput = { cloneName: cloneData.clone_name, format: selectedFormat, searchText: searchObject.search, options:{ limit: 10000, searchType, index, classificationMarking: classificationMarking === 'None' ? '' : classificationMarking, cloneData, orgFilter: orgFilter, orgFilterString: orgFilterString, typeFilter, typeFilterString, selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [], tiny_url : tiny_url_send, searchFields, edaSearchSettings, sort, order } };
+			const { data } = await gameChangerAPI.modularExport(exportInput);
 			downloadFile(data, selectedFormat, cloneData);
 			getUserData();
+			if (selectedFormat === 'pdf' && (classificationMarking && !classificationMarkingOptions.includes(classificationMarking))) {
+				sendNonstandardClassificationAlert(exportInput);
+			}
 		} catch (err) {
 			console.log(err)
 			setErrorMsg('Error Downloading Results')
@@ -154,12 +184,35 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			primaryLabel=''
 			primaryAction={() => { }}
 		> 
-		<h2>&nbsp;Export is currently limited to 10000 results</h2>
+			<h2>&nbsp;Export is currently limited to 10000 results</h2>
+
+			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4% 0 0 0' }}>
+				<Autocomplete
+					freeSolo
+					options={classificationMarkingOptions}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							InputLabelProps={{ className: classes.labelFont }}
+							InputProps={{ ...params.InputProps, className: classes.labelFont }}
+							FormHelperTextProps={{ className: classes.helperText }}
+							label="Classification Marking"
+							variant="outlined"
+						/>
+					)}
+					style={{ backgroundColor: 'white', width: '100%' }}
+					classes={{ popper: classes.options, paper: classes.labelFont }}
+					defaultValue="None"
+					inputValue={classificationMarking}
+					onInputChange={(_, value) => { setClassificationMarking(value) }}
+					disabled={selectedFormat !== 'pdf'}
+				/>
+			</div>
 			
 			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
 				<div style={styles.leftButtonGroup}>
 					<FormControl variant="outlined" style={{ width: '115px' }}>
-						<InputLabel style={{ color: 'black' }}>File Format</InputLabel>
+						<InputLabel className={classes.labelFont}>File Format</InputLabel>
 						<Select label="File Format" style={{ height: '45px', fontSize: '16px' }} value={selectedFormat} onChange={handleChange}>
 							{!isEda && <MenuItem style={styles.menuItem} value='pdf' key='pdf'>PDF</MenuItem>}
 							<MenuItem style={styles.menuItem} value='json' key='json'>JSON</MenuItem>

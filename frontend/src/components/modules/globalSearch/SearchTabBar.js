@@ -47,6 +47,8 @@ const SearchTabBar = (props) => {
 			{_.map(searchTypesWithAll, (enabled, searchType) => {
 				if (!enabled)
 					return null;
+				if (resultMetaData[searchType]?.total <= 0)
+					return null;
 
 				let style = styles.tab;
 

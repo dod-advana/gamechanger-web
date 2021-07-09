@@ -1,12 +1,14 @@
 const { MLApiClient } = require('../../lib/mlApiClient');
 const ExportHandler = require('../base/exportHandler');
-const _ = require('lodash');
 
 class SimpleExportHandler extends ExportHandler {
 	constructor(opts={}) {
-        super();
+		const {
+			mlApi = new MLApiClient(opts),
+		} = opts;
+    super();
 
-		this.mlApi = new MLApiClient(opts);
+		this.mlApi = mlApi;
 	}
 
 	async exportHelper(req, res, userId) {
@@ -31,30 +33,10 @@ class SimpleExportHandler extends ExportHandler {
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
-
 			let searchResults;
 			try {
-				const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
-				const noSourceSpecified = _.isEqual({}, orgFilter);
-				const noTypeSpecified = _.isEqual({}, typeFilter);
-				const noPubDateSpecified = req.body.publicationDateAllTime;
-				let combinedSearch = await this.appSettings.findAll({ attributes: ['value'], where: { key: 'combined_search'} });
-				if (combinedSearch.length > 0){
-					combinedSearch = combinedSearch[0].dataValues.value === 'true';
-				}
-				if (combinedSearch && noFilters && noSourceSpecified && noTypeSpecified && noPubDateSpecified){
-					try {
-						searchResults = await this.searchUtility.combinedSearchHandler(searchText, userId, req, expansionDict, index, operator, offset);
-					} catch (e) {
-						this.logger.error(`Error sentence transforming document search results ${e.message}`, 'IT7ZUJ4', userId);
-
-						const { message } = e;
-						this.logger.error(message, 'H4AGBOK', userId);
-						throw e;
-					}
-				} else {
-					searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, index, operator: 'and'}, clientObj, userId);
-				}
+				searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator: 'and'}, clientObj, userId);
+				searchResults.classificationMarking = req.body.classificationMarking;
 			} catch (e) {
 				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'GPLMHKA', userId);
 				throw e;

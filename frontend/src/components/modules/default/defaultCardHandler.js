@@ -6,7 +6,7 @@ import {
 	capitalizeFirst,
 	CARD_FONT_SIZE, getDocTypeStyles,
 	getTrackingNameForFactory, getTypeDisplay, getTypeIcon, getTypeTextColor,
-	orgAlias
+	orgAlias, getMetadataForPropertyTable,
 } from "../../../gamechangerUtils";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import SimpleTable from "../../common/SimpleTable";
@@ -374,12 +374,13 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						}
 					</div>
 				</GCTooltip>
-				<div className={'selected-favorite'}>
+				{/* // export and favoriting not currently working for default
+					<div className={'selected-favorite'}>
 					<div style={{display: "flex"}}>
-						{checkboxComponent(item.filename, item.display_title_s, idx)}
+						{checkboxComponent(item.filename, item.display_title_s ?? item.title, idx)}
 						{favoriteComponent()}
 					</div>
-				</div>
+				</div> */}
 			</div>
 			{docListView &&
 				<div className={'list-view-sub-header'}>
@@ -443,6 +444,9 @@ const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable 
 		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
 		const displayName = displayNameMap?.[fieldName] ?? fieldName;
 		let value = itemWithValues[cleanFieldName] ?? "Unknown";
+		if (Array.isArray(value)) {
+			value = value.join(', ');
+		}
 
 		if (cleanFieldName === 'body') {
 			let splitValue = value.split('-----');
@@ -644,16 +648,12 @@ const DefaultCardHandler = {
 		
 		getCardBack: (props) => {
 			const {item} = props;
+			const metadata = getMetadataForPropertyTable(item);
+
+			const fields = metadata.map(d => d.Key);
+			const displayItem = Object.fromEntries(metadata.map(d => [d.Key, d.Value]));
 			
-			const fields = [];
-			
-			Object.keys(item).forEach(key => {
-				if (key !== 'pageHits') {
-					fields.push(key);
-				}
-			});
-			
-			const backItemsTable = makeRows(fields, item, null, true);
+			const backItemsTable = makeRows(fields, displayItem, null, true);
 			
 			return (
 				<SimpleTable tableClass={'magellan-table'}

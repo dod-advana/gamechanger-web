@@ -65,12 +65,9 @@ module.exports = Object.freeze({
 	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
 	ADVANA_NOREPLY_EMAIL_ADDRESS: 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
-		host: process.env.EMAIL_TRANSPORT_HOST,
-		port: process.env.EMAIL_TRANSPORT_PORT,
-		secure: false,
-		tls: {
-			rejectUnauthorized: false
-		}
+		sendmail: true,
+		newline: 'unix',
+		secure: true
 	},
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
@@ -111,7 +108,7 @@ module.exports = Object.freeze({
 		database: 'matomo'
 	},
 	HERMES_ELASTIC_SEARCH_OPTS: {
-		index: 'hermes_test_1',
+		index: process.env.HERMES_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},
@@ -132,7 +129,7 @@ module.exports = Object.freeze({
 		username: process.env.DATA_CATALOG_USER,
 		password: process.env.DATA_CATALOG_PASSWORD,
 		api_config: dataCatalogConfig,
-		ca: process.env.DATA_CATALOG_CA
+		ca: process.env.DATA_CATALOG_CA ? process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n') : ''
 	},
 	TLS_KEY_PASSPHRASE: process.env.TLS_KEY_PASSPHRASE,
 	LOG_LEVELS: {
