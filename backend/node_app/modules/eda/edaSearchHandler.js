@@ -1,16 +1,16 @@
 const SearchUtility = require('../../utils/searchUtility');
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
-const asyncRedisLib = require('async-redis');
-const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
-const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
+// const asyncRedisLib = require('async-redis');
+// const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
+// const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
-const {Thesaurus} = require('../../lib/thesaurus');
+// const {Thesaurus} = require('../../lib/thesaurus');
 
-const redisAsyncClientDB = 4;
-const abbreviationRedisAsyncClientDB = 9;
+// const redisAsyncClientDB = 4;
+// const abbreviationRedisAsyncClientDB = 9;
 
 const SearchHandler = require('../base/searchHandler');
 
@@ -22,19 +22,19 @@ class EdaSearchHandler extends SearchHandler {
 			constants = CONSTANTS,
 			mlApi = new MLApiClient(opts),
 			searchUtility = new SearchUtility(opts),
-			thesaurus = new Thesaurus(),
-			sep_async_redis = separatedRedisAsyncClient,
-			async_redis = redisAsyncClient
+			// thesaurus = new Thesaurus(),
+			// sep_async_redis = separatedRedisAsyncClient,
+			// async_redis = redisAsyncClient
 		} = opts;
-		super({redisClientDB: redisAsyncClientDB, ...opts});
+		super({ ...opts}); //redisClientDB: redisAsyncClientDB,
 		this.dataLibrary = dataLibrary;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
 		this.mlApi = mlApi;
 		this.searchUtility = searchUtility;
-		this.thesaurus = thesaurus;
-		this.async_redis = async_redis;
-		this.sep_async_redis = sep_async_redis;
+		// this.thesaurus = thesaurus;
+		// this.async_redis = async_redis;
+		// this.sep_async_redis = sep_async_redis;
 	}
 
 	async searchHelper(req, userId) {
@@ -72,74 +72,71 @@ class EdaSearchHandler extends SearchHandler {
 			historyRec.request_body = req.body;
 			historyRec.showTutorial = showTutorial;
 
-			const cloneSpecificObject = { };
-
 			const operator = 'and';
-
-			const redisDB = this.sep_async_redis;
-			redisDB.select(redisAsyncClientDB);
-
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
-
 			// log query to ES
 			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			
+			// EXPANSION TERM CODE
 
-			// try to get search expansion
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
-			let expansionDict = {};
-			try {
-				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
-			} catch (e) {
-			// log error and move on, expansions are not required
-				if (forCacheReload){
-					throw Error('Cannot get expanded search terms in cache reload');
-				}
-				this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
-			}
+			// const redisDB = this.sep_async_redis;
+			// redisDB.select(redisAsyncClientDB);
 
-			let lookUpTerm = searchText.replace(/\"/g, '');
-			let useText = true;
-			if (termsArray && termsArray.length && termsArray[0]) {
-				useText = false;
-				lookUpTerm = termsArray[0].replace(/\"/g, '');
-			}
-			const synonyms = this.thesaurus.lookUp(lookUpTerm);
-			let text = searchText;
-			if (!useText && termsArray && termsArray.length && termsArray[0]) {
-				text = termsArray[0];
-			}
+			// // try to get search expansion
+			// const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
+			// let expansionDict = {};
+			// try {
+			// 	expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
+			// } catch (e) {
+			// // log error and move on, expansions are not required
+			// 	if (forCacheReload){
+			// 		throw Error('Cannot get expanded search terms in cache reload');
+			// 	}
+			// 	this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
+			// }
 
-			// get expanded abbreviations
-			await this.async_redis.select(abbreviationRedisAsyncClientDB);
-			let abbreviationExpansions = [];
-			let i = 0;
-			for (i = 0; i < termsArray.length; i++) {
-				let term = termsArray[i];
-				let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-				let expandedTerm = await this.async_redis.get(upperTerm);
-				let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-				let compressedTerm = await this.async_redis.get(lowerTerm);
-				if (expandedTerm) {
-					if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-					}
-				}
-				if (compressedTerm) {
-					if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-					}
-				}
-			}
+			// let lookUpTerm = searchText.replace(/\"/g, '');
+			// let useText = true;
+			// if (termsArray && termsArray.length && termsArray[0]) {
+			// 	useText = false;
+			// 	lookUpTerm = termsArray[0].replace(/\"/g, '');
+			// }
+			// const synonyms = this.thesaurus.lookUp(lookUpTerm);
+			// let text = searchText;
+			// if (!useText && termsArray && termsArray.length && termsArray[0]) {
+			// 	text = termsArray[0];
+			// }
 
-			// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-			let cleanedAbbreviations = [];
+			// // get expanded abbreviations
+			// await this.async_redis.select(abbreviationRedisAsyncClientDB);
+			// let abbreviationExpansions = [];
+			// let i = 0;
+			// for (i = 0; i < termsArray.length; i++) {
+			// 	let term = termsArray[i];
+			// 	let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+			// 	let expandedTerm = await this.async_redis.get(upperTerm);
+			// 	let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+			// 	let compressedTerm = await this.async_redis.get(lowerTerm);
+			// 	if (expandedTerm) {
+			// 		if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
+			// 			abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
+			// 		}
+			// 	}
+			// 	if (compressedTerm) {
+			// 		if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
+			// 			abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
+			// 		}
+			// 	}
+			// }
 
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
-			// this.logger.info('exp: ' + expansionDict);
-			await this.async_redis.select(redisAsyncClientDB);
+			// // removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
+			// let cleanedAbbreviations = [];
+
+			// expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+
 
 			let searchResults;
-			searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
 			// try storing results record
 			if (!forCacheReload) {
 				try {
@@ -244,28 +241,17 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
-	async queryContractAward(req, userId) {
+	async queryContractMods(req, userId) {
 		try {
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
-			const { awardID } = req.body;
-
-			// award ID can be a combination of 2 fields
-			const awardIDSplit = awardID.split("-");
-			let id = "";
-			let idv = "";
-			if (awardIDSplit.length > 1) {
-				id = awardIDSplit[1];
-				idv = awardIDSplit[0];
-			}
-			else {
-				id = awardID;
-			}
+			const { awardID, isSearch } = req.body;
+			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, userId);
+				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
 			} else {
 				throw 'Unauthorized';
 			}
@@ -274,13 +260,19 @@ class EdaSearchHandler extends SearchHandler {
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 				const hits = results.body.hits.hits;
-				const contractMods = [];
 
-				// grab the contract modification number
-				for (let hit of hits) {
-					contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
+				if (isSearch) {
+					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], [], esIndex, esQuery);
+				} else {
+					const contractMods = [];
+					// grab the contract modification number
+					for (let hit of hits) {
+						contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
+					}
+					contractMods.sort();
+					return contractMods;
 				}
-				return contractMods;
+
 			} else {
 				this.logger.error('Error with contract award Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
@@ -292,6 +284,47 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
+	async queryBaseAwardContract(req, userId) {
+		try {
+			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const permissions = req.permissions ? req.permissions : [];
+			const { esClientName, esIndex } = clientObj;
+			const { awardID } = req.body;
+
+			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
+
+			let esQuery = '';
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
+			} else {
+				throw 'Unauthorized';
+			}
+
+
+			// use the award ID to get the base award data only
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+				const hits = results.body.hits.hits;
+				if (hits && hits.length > 0) {
+					const data = hits[0];
+					const metadata = data._source && data._source.extracted_data_eda_n ? data._source.extracted_data_eda_n : {}
+					return { ...data._source, ...data.fields, ...metadata };
+				}
+				else { 
+					return {}
+				}
+			} else {
+				this.logger.error('Error with contract base award Elasticsearch results', '3ZCEAYJ', userId);
+				return [];
+			}
+		} catch(err) {
+			const { message } = err;
+			this.logger.error(message, 'MKNUZQR', userId);
+			throw err;
+		}
+
+	}
+
 	async callFunctionHelper(req, userId) {
 		const {functionName} = req.body;
 
@@ -299,14 +332,17 @@ class EdaSearchHandler extends SearchHandler {
 			const permissions = req.permissions ? req.permissions : [];
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 				switch (functionName) {
-					case 'queryContractAward':
-						return this.queryContractAward(req, userId);
+					case 'queryContractMods':
+						return this.queryContractMods(req, userId);
+					case 'queryBaseAwardContract':
+						return this.queryBaseAwardContract(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,
 							'W8A5BE0',
 							userId
 						);
+						return {};
 				}
 			}
 		} catch (err) {
