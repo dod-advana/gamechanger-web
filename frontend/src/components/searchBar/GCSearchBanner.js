@@ -172,7 +172,7 @@ const SearchBanner = (props) => {
 								</PillButton>
 							) : (
 								<AdvanaMegaMenuPill
-									margin='0 0 0 4%'
+									margin='0 0 0 5px'
 									defaultHeader='Applications'
 								/>
 							)}
