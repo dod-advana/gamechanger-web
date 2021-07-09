@@ -101,7 +101,9 @@ const MainView = (props) => {
 		const extraViewPanels = mainViewHandler.getExtraViewPanels({context});
 		extraViewPanels.forEach(({panelName, panel}) => {
 			viewPanels[panelName] = panel;
-		})
+		});
+
+		console.log(viewPanels);
 	
 		return viewPanels;
 	}
