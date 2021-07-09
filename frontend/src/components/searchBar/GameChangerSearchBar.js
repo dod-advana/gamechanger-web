@@ -495,7 +495,7 @@ const GameChangerSearchBar = (props) => {
 				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				clearDashboardNotification('total', state, dispatch);
 			}}
-			style={{height: 50, width: 60, minWidth:'none'}}
+			style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
 			>
 				<ConstrainedIcon src={UserIcon} />
 			</GCButton>
