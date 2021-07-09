@@ -36,7 +36,7 @@ class SearchHandler {
 
 	async callFunction(functionName, options, cloneName, permissions, userId, res) {
 		// Setup the request
-		console.log(`${userId} is calling ${functionName} in the ${cloneName} search module with options ${options}`);
+		console.log(`${userId} is calling ${functionName} in the ${cloneName} search module with options ${JSON.stringify(options)}`);
 		const proxyBody = options;
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;

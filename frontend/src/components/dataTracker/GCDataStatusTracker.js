@@ -416,6 +416,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'json_metadata',
 				width: 350,
+				filterable: false,
 				Cell: props => (
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
@@ -434,6 +435,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Publication Date',
 				accessor: 'publication_date',
+				filterable: false,
 				width: 150,
 				Cell: row => (
 					<TableRow>
@@ -444,6 +446,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingestion Date',
 				accessor: 'upload_date',
+				filterable: false,
 				width: 150,
 				Cell: row => (
 					<TableRow>
@@ -454,6 +457,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Next update',
 				width: 150,
+				filterable: false,
 				Cell: row => (
 					<TableRow>
 						{moment(Date.parse(nextFriday.toISOString())).format("YYYY-MM-DD")}

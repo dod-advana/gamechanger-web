@@ -12,7 +12,7 @@ const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
 
-export const RESULTS_PER_PAGE = 20;
+export const RESULTS_PER_PAGE = 18;
 
 export const RECENT_SEARCH_LIMIT = 6;
 
