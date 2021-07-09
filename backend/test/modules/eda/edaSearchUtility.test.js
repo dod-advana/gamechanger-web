@@ -166,7 +166,7 @@ describe('EDASearchUtility', function () {
             const target = new EDASearchUtility(opts);
 
             try {
-                const actual = await target.getEDAContractQuery(award, idv, 'test user');
+                const actual = await target.getEDAContractQuery(award, idv, false, false, 'test user');
                 const expected = {"_source":{"includes":["extracted_data_eda_n.modification_number_eda_ext"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"1"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"2"}}}]}}}}]}}}
                 assert.deepStrictEqual(actual, expected);
                 done();
@@ -174,5 +174,45 @@ describe('EDASearchUtility', function () {
                 assert.fail(err);
             }
         });
+
+        it('should return a query just to retrieve a base award and its data',
+        async (done) => {
+            const award = "1";
+            const idv = "2";
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            const target = new EDASearchUtility(opts);
+
+            try {
+                const actual = await target.getEDAContractQuery(award, idv, true, true, 'test user');
+                const expected = {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"1"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"2"}}}]}}}},{"match":{"mod_identifier_eda_ext":"base_award"}}]}},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","metadata_type_eda_ext"]}
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
     });
+
+    describe('splitAwardID', function () {
+        it ('should return an id and idv', 
+        async (done) => {
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            const target = new EDASearchUtility(opts);
+
+            try {
+                const actual = await target.splitAwardID('abc-123');
+                const expected = { id: '123', idv: 'abc'};
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
+    })
 });
