@@ -3,14 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
     edaSearchSettings: {
         allOrgsSelected: true,
-        organizations: {
-            airForce: false,
-            army: false,
-            dla: false,
-            marineCorps: false,
-            navy: false,
-            estate: false,
-        },
+        organizations: [],
         aggregations: [],
         startDate: null,
         endDate: null,
@@ -23,14 +16,24 @@ const initState = {
             pds: false,
             syn: false,
             none: false
+        },
+        minObligatedAmount: null,
+        maxObligatedAmount: null,
+        contractsOrMods: 'both',
+        majcoms: {
+            "air force": [],
+            "army": [],
+            "defense": [],
+            "navy": []
         }
     },
+    contractAwards: {},
     showDialog: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
     statsLoading: false,
-    summaryCardView: false,
+    summaryCardView: false, 
     summaryCardData: [],
     resultsText: '',
     resetSettingsSwitch: false,

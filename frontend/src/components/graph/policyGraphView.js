@@ -224,6 +224,7 @@ const filterGraphData = (nodes, edges) => {
 	const docOrgNumbers = {};
 	
 	const edgeCount = edges.length;
+	const edgeIds = [];
 	
 	const idToNodeMap = {};
 	const edgeToNodeCountMap = {};
@@ -268,19 +269,26 @@ const filterGraphData = (nodes, edges) => {
 	});
 
 	_.forEach(edges, (edge) => {
-		filteredGraph.edges.push(edge);
-		
-		const source = edge.source.id || edge.source;
-		const target = edge.target.id || edge.target;
-		
-		edgeToNodeCountMap[source] += 1;
-		edgeToNodeCountMap[target] += 1;
-		
-		idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
-		idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
-		
-		if (!filteredGraph.relationships.includes(edge.label)) {
-			filteredGraph.relationships.push(edge.label);
+		if (!edgeIds.includes(edge.id)) {
+			try {
+				filteredGraph.edges.push(edge);
+				edgeIds.push(edge.id);
+				
+				const source = edge.source.hasOwnProperty('id') ? edge.source.id : edge.source;
+				const target = edge.target.hasOwnProperty('id') ? edge.target.id : edge.target;
+				
+				edgeToNodeCountMap[source] += 1;
+				edgeToNodeCountMap[target] += 1;
+				
+				idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
+				idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
+				
+				if (!filteredGraph.relationships.includes(edge.label)) {
+					filteredGraph.relationships.push(edge.label);
+				}
+			} catch (e) {
+				gameChangerAPI.sendFrontendErrorPOST(e.stack);
+			}
 		}
 	});
 
@@ -478,8 +486,6 @@ export default function PolicyGraphView(props) {
 	const handleNodeClick = async (node, event) => {
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNodeClicked', node.name);
 		setShouldCenter(false);
-		
-		console.log(node)
 		
 		// Sleep until node is in place
 		const sleep = (milliseconds) => {
@@ -738,6 +744,7 @@ export default function PolicyGraphView(props) {
 			case 'Publication':
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -749,6 +756,7 @@ export default function PolicyGraphView(props) {
 			case 'Document':
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -764,6 +772,7 @@ export default function PolicyGraphView(props) {
 				}
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -775,11 +784,12 @@ export default function PolicyGraphView(props) {
 				if (!graphCardData.done) {
 					getTopicCardData();
 				} else {
-					selectedItem.doc_count = graphCardData.doc_count;
-					selectedItem.entities = graphCardData.entities;
+					selectedItem.relatedTopics = graphCardData.relatedTopics;
+					selectedItem.documentCount = graphCardData.documentCount;
 				}
 				return (
 					<Card
+						idx={0}
 						item={selectedItem}
 						closeGraphCard={handleCloseGraphCard}
 						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, searchText}}
@@ -823,43 +833,32 @@ export default function PolicyGraphView(props) {
 	}
 	
 	const getTopicCardData = async () => {
-		const docData = await gameChangerAPI.graphQueryPOST(
-			`MATCH (n:Topic)-[:IS_IN]->(d:Document)
-			WHERE n.name = $name
-			WITH COUNT(d) as docs, collect(d.doc_id) as doc_ids
-			return sum(docs) as doc_count, doc_ids;`, 'S484S8B', cloneData.clone_name, {params: {name: selectedItem.name}}
+		const topicDocumentCount = gameChangerAPI.graphQueryPOST(
+			`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
+				RETURN t2.name as topic_name, count(d) as doc_count
+				ORDER BY doc_count DESC LIMIT 5;`, 'S484S8B', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
 		);
 		
-		const { doc_count, doc_ids } = docData.data;
+		const documentCount = gameChangerAPI.graphQueryPOST(
+			`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
+				RETURN count(d) as doc_count`, 'NTDC5KE', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
+		);
 		
-		const convertedIds = doc_ids.map(docId => {
-			return docId.replace(/'/g, '');
-		});
+		const results = await Promise.all([topicDocumentCount, documentCount]);
 		
-		const entityData = await gameChangerAPI.graphQueryPOST(`
-			MATCH (d:Document)-[m:MENTIONS]->(e:Entity)
-			WHERE d.doc_id in $ids AND EXISTS(e.aliases)
-			WITH e
-			MATCH (e)<-[:MENTIONS]-(d:Document)
-			WHERE d.doc_id in $ids
-			RETURN e as node, count(d) as entityScore, count(e) as mentions
-			ORDER BY mentions DESC LIMIT 10;
-		`, 'NTDC5KE', cloneData.clone_name, {params: {ids: convertedIds}});
+		const relatedTopics = results[0].data.graph_metadata;
+		const documentCountData = results[1].data.graph_metadata;
 		
-		const entities = entityData.data.nodes || [];
-		entities.forEach(entity => {
-			const aliases = entity.aliases ? entity.aliases.split(';') : [];
-			aliases.sort((a, b) => a.length - b.length)
-			entity.aliase = aliases[0];
-		});
 		if (selectedItem) {
-			selectedItem.entities = entities;
-			selectedItem.doc_count = doc_count;
+			selectedItem.relatedTopics = relatedTopics;
+			selectedItem.documentCount = documentCountData;
 			selectedItem.done = true;
 		}
 		setGraphCardData({
-			entities,
-			doc_count,
+			relatedTopics,
+			documentCount: documentCountData,
 			done: true
 		});
 	}
@@ -901,9 +900,9 @@ export default function PolicyGraphView(props) {
 		}
 		
 		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document)-[m:MENTIONS]->(e:Entity) ' +
-			'WHERE d.doc_id = $doc_id AND size(m.pars) > 5 ' +
-			'RETURN d, m, e;', 'I1JJI2D', cloneData.clone_name, {params: {doc_id: node.doc_id}}
+			'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' +
+			'WHERE d.doc_id = $doc_id ' +
+			'RETURN pt;', 'I1JJI2D', cloneData.clone_name, {params: {doc_id: node.doc_id}}
 		).then((data) => {
 			const graphData = data.data;
 			const nodeIds = graph.nodes.map(node => {
@@ -921,11 +920,15 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(tmpNode.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
 				edge.source = parentId;
 				edge.target = 200000 + edge.target;
-				edge.notInOriginalSearch = true;
-				graph.edges.push(edge);
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
+					edge.notInOriginalSearch = true;
+					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
+				}
 			});
 			
 			lockNodeInPlace(node, true);
@@ -973,9 +976,7 @@ export default function PolicyGraphView(props) {
 			const nodeIds = graph.nodes.map(node => {
 				return node.id;
 			});
-			const edgeIds = graph.edges.map(edge => {
-				return edge.id;
-			});
+			const parentId = node.id;
 			graphData.nodes.forEach(node => {
 				if (!nodeIds.includes(node.id)) {
 					node.notInOriginalSearch = true;
@@ -983,10 +984,14 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(node.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
-				if (!edgeIds.includes(edge.id)) {
+				edge.source = parentId;
+				edge.target = 200000 + edge.target;
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
 					edge.notInOriginalSearch = true;
 					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
 				}
 			});
 			
@@ -1048,11 +1053,15 @@ export default function PolicyGraphView(props) {
 				 	nodeIds.push(tmpNode.id);
 				}
 			});
+			const edgeIds = [];
 			graphData.edges.forEach(edge => {
 				edge.source = parentId;
 				edge.target = 200000 + edge.target;
-				edge.notInOriginalSearch = true;
-				graph.edges.push(edge);
+				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
+					edge.notInOriginalSearch = true;
+					graph.edges.push(edge);
+					edgeIds.push(`${edge.source},${edge.target}`)
+				}
 			});
 			
 			lockNodeInPlace(node, true);

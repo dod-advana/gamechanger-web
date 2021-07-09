@@ -17,6 +17,7 @@ const endpoints = {
 	getDocumentsToAnnotate: '/api/gameChanger/assist/getDocumentsToAnnotate',
 	saveDocumentAnnotationsPOST: '/api/gameChanger/assist/saveDocumentAnnotationsPOST',
 	sendFeedbackPOST: '/api/gameChanger/sendFeedback',
+	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
 	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
@@ -35,9 +36,9 @@ const endpoints = {
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
 	notificationsGET: '/api/gameChanger/getNotifications',
-	notificationCreatePOST: '/api/gameChanger/createNotification',
-	notificationEditActivePOST: '/api/gameChanger/editNotificationActive',
-	notificationDeletePOST: '/api/gameChanger/deleteNotification',
+	notificationCreatePOST: '/api/gameChanger/admin/createNotification',
+	notificationEditActivePOST: '/api/gameChanger/admin/editNotificationActive',
+	notificationDeletePOST: '/api/gameChanger/admin/deleteNotification',
 	gcCreateSearchHistoryCache: '/api/gameChanger/admin/createSearchHistoryCache',
 	gcClearSearchHistoryCache: '/api/gameChanger/admin/clearSearchHistoryCache',
 	gcCreateAbbreviationsCache: '/api/gameChanger/admin/createAbbreviationsCache',
@@ -50,20 +51,25 @@ const endpoints = {
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
 	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
-	setTrendingBlacklist: '/api/gameChanger/trending/setTrendingBlacklist',
-	deleteTrendingBlacklist: '/api/gameChanger/trending/deleteTrendingBlacklist',
+	setTrendingBlacklist: '/api/gameChanger/admin/trending/setTrendingBlacklist',
+	deleteTrendingBlacklist: '/api/gameChanger/admin/trending/deleteTrendingBlacklist',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
-	getTransformerList: '/api/gameChanger/getTransformerList',
-	getCurrentTransformer: '/api/gameChanger/getCurrentTransformer',
-	setTransformerModel: '/api/gameChanger/setTransformerModel',
+	reloadModels: '/api/gamechanger/admin/reloadModels',
+	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
+	trainModel: '/api/gamechanger/admin/trainModel',
+	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
+	getS3List: '/api/gamechanger/admin/getS3List',
+	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
+	getModelsList: '/api/gameChanger/admin/getModelsList',
+	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
+	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
-	setUserSearchSettings: '/api/gameChanger/setUserSearchSettings',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
-	addInternalUser: '/api/gameChanger/addInternalUser',
-	deleteInternalUser: '/api/gameChanger/deleteInternalUser',
+	addInternalUser: '/api/gameChanger/admin/addInternalUser',
+	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
@@ -74,6 +80,7 @@ const endpoints = {
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
@@ -88,6 +95,8 @@ const endpoints = {
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
+	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
+	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 
 
 	exportHistoryDELETE: function(id){
@@ -228,6 +237,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, {feedbackData: feedbackData});
 	}
 
+	sendClassificationAlertPOST = async (alertData) => {
+		const url = endpoints.sendClassificationAlertPOST;
+		return axiosPOST(this.axios, url, {alertData: alertData});
+	}
+
 	getAllMatchesBetweenDoubleQuotes = (string) => {
 		const pattern = /".*?"/g;
 		let current;
@@ -337,6 +351,11 @@ export default class GameChangerAPI {
 	getResponsibilityDoc = async (options) => {
 		const url = endpoints.getResponsibilityDoc;
 		return axiosPOST(this.axios, url, options);
+	}
+	
+	getOtherEntityFilterList = async (options) => {
+		const url = endpoints.getOtherEntityFilterList;
+		return axiosGET(this.axios, url, options);
 	}
 	
 	storeResponsibilityReportData = async (data) => {
@@ -469,8 +488,38 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
-	getTransformerList = async () => {
-		const url = endpoints.getTransformerList;
+	reloadModels = async (data) => {
+		const url = endpoints.reloadModels;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	downloadDependencies = async () => {
+		const url = endpoints.downloadDependencies;
+		return axiosGET(this.axios, url);
+	}
+
+	downloadCorpus = async (data) => {
+		const url = endpoints.downloadCorpus;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	trainModel = async (data) =>{
+		const url = endpoints.trainModel;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	getAPIInformation = async () => {
+		const url = endpoints.getAPIInformation;
+		return axiosGET(this.axios, url);
+	}
+
+	getS3List = async () => {
+		const url = endpoints.getS3List;
+		return axiosGET(this.axios, url);
+	}
+
+	getModelsList = async () => {
+		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	}
 
@@ -497,11 +546,6 @@ export default class GameChangerAPI {
 	setUserBetaStatus = async (checked) => {
 		const url = endpoints.setUserBetaStatus;
 		return axiosPOST(this.axios, url, {status: checked});
-	}
-
-	setUserSearchSettings = async (data) => {
-		const url = endpoints.setUserSearchSettings;
-		return axiosPOST(this.axios, url, data);
 	}
 	
 	getInternalUsers = async () => {
@@ -556,7 +600,7 @@ export default class GameChangerAPI {
 	
 	getDocumentsForTopic = async(cloneName, body) => {
 		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {cloneName, unctionName: 'getDocumentsForTopic', options: body});
+		return axiosPOST(this.axios, url, {cloneName, functionName: 'getDocumentsForTopic', options: body});
 	}
 
 	getTextSuggestion = async(body) => {
@@ -679,9 +723,19 @@ export default class GameChangerAPI {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
 	}
+
+	getFeedbackData = async () => {
+		const url = endpoints.getFeedbackData;
+		return axiosGET(this.axios, url);
+	}
 	
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
 		return axiosGET(this.axios, url, {params:body});
+	}
+
+	sendFrontendErrorPOST = async (error) => {
+		const url = endpoints.sendFrontendErrorPOST;
+		return axiosPOST(this.axios, url, error);
 	}
 }

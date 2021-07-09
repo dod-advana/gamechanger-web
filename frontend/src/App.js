@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect, Route, HashRouter as Router, Switch } from "react-router-dom";
-import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "react-select/dist/react-select.css";
 // import Config from './config/config';
@@ -47,6 +46,7 @@ import NotFoundPage from 'advana-platform-ui/dist/containers/NotFoundPage';
 import ErrorPage from 'advana-platform-ui/dist/containers/GenericErrorPage';
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
+import "./index.css";
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -148,32 +148,53 @@ const App = (props) => {
 	const getGamechangerClones = async (tutorialData) => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
-			const cloneRoutes = _.map(data.data, (clone, idx) => {
-				if (clone.is_live && clone.clone_to_advana) {
+			const cloneRoutes = [];
+			_.forEach(data.data, (clone, idx) => {
+				if (clone.is_live) {
 					// gameChangerClones.push(clone);
-
 					const name = clone.clone_name;
 					const GamechangerProvider = getProvider(name);
-					if (clone.permissions_required) {
-						return (
-							<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
-								tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
-								history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
-								allowFunction={() => {
-									return Permissions.allowGCClone(clone.clone_name);
-								}}
-							/>
-						)
+
+					if (isDecoupled) {
+						if (clone.clone_to_gamechanger) {
+							cloneRoutes.push((
+								<PrivateTrackedRoute key={idx} path={`/${clone.url}`}
+								                     render={(props) => <GamechangerProvider><GamechangerPage {...props}
+								                                                                              tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+								                                                                              history={history}
+								                                                                              isClone={true}
+								                                                                              cloneData={clone}/></GamechangerProvider>}
+								                     pageName={clone.display_name}
+								                     allowFunction={() => {
+									                     return true;
+								                     }}
+								/>
+							));
+						}
 					} else {
-						return (
-							<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
-								tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
-								history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
-								allowFunction={() => {
-									return true;
-								}}
-							/>
-						);
+						if (clone.clone_to_advana) {
+							if (clone.permissions_required) {
+								cloneRoutes.push((
+									<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
+									                                                                                                               tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+									                                                                                                               history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
+									                     allowFunction={() => {
+										                     return Permissions.allowGCClone(clone.clone_name);
+									                     }}
+									/>
+								));
+							} else {
+								cloneRoutes.push((
+									<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
+									                                                                                                               tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+									                                                                                                               history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
+									                     allowFunction={() => {
+										                     return true;
+									                     }}
+									/>
+								));
+							}
+						}
 					}
 				}
 			});
@@ -232,6 +253,14 @@ const App = (props) => {
 		return (<LoadingIndicator />);
 	}
 
+	async function errorHandler(error) {
+		try {
+			await gameChangerAPI.sendFrontendErrorPOST(error.stack);
+		} catch(err) {
+				console.log({ err });
+		}
+	}
+
 	return (
 		<Router>
 			<MatomoProvider value={instance}>
@@ -246,6 +275,7 @@ const App = (props) => {
 										<>
 											<ErrorBoundary
 												FallbackComponent={ErrorPage}
+												onError={errorHandler}
 											>
 												{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
 												<Switch >
@@ -254,6 +284,7 @@ const App = (props) => {
 															route
 														)
 													})}
+													<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
 													<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
 													<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
 													<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />

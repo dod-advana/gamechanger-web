@@ -181,10 +181,9 @@ const PolicyMainViewHandler = {
 								}
 								<div className={'right-container'}>
 									{!hideTabs && <ViewHeader {...props}/>}
-								
-									<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
+									<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`} style={{padding: 0}}>
 										<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
-											<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+											<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
 												{!loading && <GetQAResults context={context} />}
 											</div>
 											{!loading && (activeCategoryTab === 'Documents' || activeCategoryTab === 'all') && selectedCategories['Documents'] &&

@@ -358,7 +358,7 @@ describe('PolicySearchHandler', function () {
 				},
 				mlApi: {},
 				searchUtility: {
-					combinedSearchHandler: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
+					// combinedSearchHandler: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
 					documentSearch: () => Promise.resolve({docs: ['test doc'], totalCount: 1}),
 				},
 				async_redis: {select() {}},
@@ -413,9 +413,6 @@ describe('PolicySearchHandler', function () {
 				}
 			};
 			const target = new PolicySearchHandler(opts);
-			target.qaEnrichment = async (input) => Promise.resolve({...input, qaResults: {question: '', answers: []} });
-			target.entitySearch = async (input) => Promise.resolve({entities: [], totalEntities: 0});
-			target.topicSearch = async (input) => Promise.resolve({topics: [], totalTopics: 0});
 			const actual = await target.enrichSearchResults(req, {}, 'test');
 			const expected = enrichSearchResultsExpected;
 			assert.deepStrictEqual(actual, expected);
@@ -467,6 +464,9 @@ describe('PolicySearchHandler', function () {
 					phraseQAQuery() {
 						return Promise.resolve();
 					},
+					phraseQAEntityQuery() {
+						return Promise.resolve();
+					},
 					getQAContext() {
 						return Promise.resolve([{name: 'test object'}]);
 					},
@@ -482,7 +482,7 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.qaEnrichment(req, {}, 'test');
-			const expected = {"qaContext": {"context": [{"name": "test object"}], "params": {}}, "qaResults": {"answers": [], "docIds": [], "filenames": [], "question": "what is this?"}};
+			const expected = {'qaContext': {'context': [{'name': 'test object'}], 'params': {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4}}, 'qaResults': {'answers': [], 'docIds': [], 'filenames': [], 'question': 'what is this?'}};
 			assert.deepStrictEqual(actual, expected);
 			done();
 		});
@@ -650,48 +650,17 @@ describe('PolicySearchHandler', function () {
 			}
 		});
 	});
+	
 	describe('#getElasticsearchDocDataFromId', () => {
-		it('should return the right ES query', async (done) => {
+		it('should return the right ES query', () => {
 			try {
-				const req = {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				};
 				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					mlApi: {
-						getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
-					}
+					...constructorOptionsMock
 				};
 				const target = new PolicySearchHandler(opts);
 				const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
 				const expected = elasticSearchDocDataExpected;
 				assert.deepStrictEqual(actual, expected);
-				done();
 			} catch (e) {
 				console.log(e);
 			}

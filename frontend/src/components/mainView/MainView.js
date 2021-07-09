@@ -13,7 +13,6 @@ import {
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
-	setSearchURL,
 	setState
 } from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
@@ -42,14 +41,15 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			handler.handlePageLoad({state, dispatch, history: state.history});
 			const viewNames = handler.getViewNames();
 
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
-			setSearchHandler(searchHandler)
+			setSearchHandler(searchHandler);
+
+			handler.handlePageLoad({state, dispatch, history: state.history, searchHandler});
 			
-			setState(dispatch, {viewNames})
+			setState(dispatch, {viewNames});
 		}
 		
 		if (state.userData.favorite_searches?.length > 0) {
@@ -248,7 +248,7 @@ const MainView = (props) => {
 			if(!resetSettingsSwitch) {
 				dispatch({type: 'RESET_SEARCH_SETTINGS'});
 				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
-				setSearchURL(state, state.searchSettings)
+				if (searchHandler) searchHandler.setSearchURL(state)
 			}
 		}
 

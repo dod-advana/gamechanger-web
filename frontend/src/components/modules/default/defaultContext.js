@@ -71,11 +71,16 @@ const initState = {
 	pageDisplayed: 'main',
 	listView: false,
 	qaResults: { question: [], answers: [] },
+	qaContext: {params: {}, context: []},
 	selectedCategories: {
 		Documents: true,
 		Organizations: false,
 		Topics: false
 	},	
+
+	categorySorting: {
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+	},
 
 	// Documents
 	iframePreviewLink: null,
@@ -153,6 +158,11 @@ const initState = {
 	topicPage: 1,
 	topicPagination: false,
 	topicsLoading: false,
+
+	currentSort: 'Relevance',
+	currentOrder: 'desc',
+
+	intelligentSearchResults: {}
 };
 
 const init = (initialState) => {

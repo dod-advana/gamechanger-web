@@ -92,55 +92,7 @@ app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-app.use(function (req, res, next) {
-	let approvedClients = constants.APPROVED_API_CALLERS;
-	const { headers, hostname } = req;
-	const { origin } = headers;
-	const userId = constants.GAME_CHANGER_OPTS.isDecoupled ? req.get('x-env-ssl_client_certificate') : req.get('SSL_CLIENT_S_DN_CN');
-	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-	if (approvedClients.includes(hostname)) {
-		res.setHeader('Access-Control-Allow-Origin', hostname);
-	} else if (origin) {
-		res.setHeader('Access-Control-Allow-Origin', origin);
-	}
-	// res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-	// res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, x-env-ssl_client_certificate');
-	res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions');
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
-	// intercepts OPTIONS method
-	if (req.method === 'OPTIONS') {
-		res.sendStatus(200);
-	} else {
-		req.permissions = [];
-		next();
-	}
-});
-
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	// Setting up swagger
-	const swaggerSpec = swaggerJSDoc(SwaggerDefinition);
-	app.use('/api/gamechanger/external/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions));
-
-	// External API Middleware to validate the API Key and pass the user to the headers
-	app.use('/api/gamechanger/external', async function (req, res, next) {
-		if (!req.headers['x-api-key']) {
-			res.sendStatus(403);
-		} else {
-			const key = await ApiKey.findAll({ where: { apiKey: req.headers['x-api-key'] }, raw: true });
-			if (key && key.active) {
-				req.headers['ssl_client_s_dn_cn'] = key.username;
-				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
-				next();
-			} else {
-				res.sendStatus(403);
-			}
-		}
-	});
-
-	app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
-
 	app.use(async function (req, res, next) {
 		const cn = req.get('x-env-ssl_client_certificate');
 		if (!cn) {
@@ -167,9 +119,62 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(AAA.ensureAuthenticated);
 
 	app.use(async function (req, res, next) {
-		req.permissions = req.session.user.perms;
+		if (req.user) { req.headers['ssl_client_s_dn_cn'] = req.user.id; };
+		if(req.session && req.session.user) {req.permissions = req.session.user.perms;}
 		next();
 	});
+}
+
+app.use(function (req, res, next) {
+	let approvedClients = constants.APPROVED_API_CALLERS;
+	const { headers, hostname } = req;
+	const { origin } = headers;
+	const userId = constants.GAME_CHANGER_OPTS.isDecoupled ? req.get('x-env-ssl_client_certificate') : req.get('SSL_CLIENT_S_DN_CN');
+	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+	if (approvedClients.includes(hostname)) {
+		res.setHeader('Access-Control-Allow-Origin', hostname);
+	} else if (origin) {
+		res.setHeader('Access-Control-Allow-Origin', origin);
+	}
+	// res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+	// res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, x-env-ssl_client_certificate');
+	res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions');
+	res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
+	// intercepts OPTIONS method
+	if (req.method === 'OPTIONS') {
+		res.sendStatus(200);
+	} else {
+		if(!req.permissions) {
+			req.permissions = [];
+		}
+		next();
+	}
+});
+
+if (constants.GAME_CHANGER_OPTS.isDecoupled) {
+	// Setting up swagger
+	const swaggerSpec = swaggerJSDoc(SwaggerDefinition);
+	app.use('/api/gamechanger/external/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions));
+
+	// External API Middleware to validate the API Key and pass the user to the headers
+	app.use('/api/gamechanger/external', async function (req, res, next) {
+		if (!req.headers['x-api-key']) {
+			res.sendStatus(403);
+		} else {
+			const key = await ApiKey.findAll({ where: { apiKey: req.headers['x-api-key'] }, raw: true });
+			if (key && key.active) {
+				req.headers['ssl_client_s_dn_cn'] = key.username;
+				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
+				next();
+			} else {
+				res.sendStatus(403);
+			}
+		}
+	});
+
+	app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
 }
 
 app.post('/api/auth/token', async function (req, res) {
@@ -221,7 +226,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
 		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.originalUrl, userToken));
+		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {

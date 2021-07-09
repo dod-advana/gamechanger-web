@@ -6,6 +6,7 @@ import SimpleTable from "../common/SimpleTable";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
+import GCButton from '../common/GCButton';
 import {MainContainer} from "../../containers/GameChangerDetailsPage";
 import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
 import {trackEvent} from "../telemetry/Matomo";
@@ -51,13 +52,13 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 		gameChangerAPI.graphQueryPOST(
 			'MATCH (d:Document) ' +
 			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
+			'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
 			'RETURN pt;', 'FP2FLNB', cloneName, {params: {doc_id: document.id}}
 		),
 		gameChangerAPI.graphQueryPOST(
 			'MATCH (d:Document) ' +
 			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
+			'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
 			'RETURN pt;', 'PWALNKF', cloneName, {params: {doc_id: document.id}}
 		)
 	]).then(resps => {
@@ -108,7 +109,7 @@ const DocumentDetailsPage = (props) => {
 		document,
 		cloneData
 	} = props;
-	console.log(document);
+	
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({nodes: [], edges: []});
 	
@@ -264,8 +265,8 @@ const DocumentDetailsPage = (props) => {
 					<Card key={idx}
 						item={item}
 						idx={idx}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true}}
-						//dispatch={dispatch}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false}}
+						dispatch={() => {}}
 					/>
 				);
 			});
@@ -314,6 +315,20 @@ const DocumentDetailsPage = (props) => {
 				<div className={'details'}>
 					<Paper>
 						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
+
+						<div>
+							<GCButton
+								onClick={(e) => {
+									e.preventDefault();
+									trackEvent(getTrackingNameForFactory(cloneData?.clone_name), 'CardInteraction' , 'PDFOpen');
+									window.open(`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}`);
+								}}
+								style={{ height: 40, width: '75%', fontSize: 14, margin: '16px 0px' }}
+								disabled={!document}
+							>
+								OPEN DOCUMENT
+							</GCButton>
+						</div>
 						
 						<div className={'details-header'}>
 							<span>{'DOCUMENT DETAILS'}</span>
