@@ -63,6 +63,7 @@ const renderSources = (state, dispatch, classes) => {
 		for(let i=0; i<state.sidebarOrgs.length; i++) {
 			betterOrgData[state.sidebarOrgs[i][0]] = state.sidebarOrgs[i][1];
 		}
+		const { originalOrgFilters } = state.searchSettings;
 
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -105,14 +106,14 @@ const renderSources = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificOrgsSelected && Object.keys(state.searchSettings.originalOrgFilters).map(org => {
+					{state.searchSettings.specificOrgsSelected && Object.keys(originalOrgFilters).map(org => {
 						return (
 							<FormControlLabel
-								key={`${org} (${betterOrgData[org]})`}
-								value={`${org} (${betterOrgData[org]})`}
+								key={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
+								value={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
 								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
-								label={`${org} (${betterOrgData[org]})`}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`} checked={state.searchSettings.orgFilter[originalOrgFilters[org][0]]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+								label={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
 								labelPlacement="end"
 							/>
 						)
