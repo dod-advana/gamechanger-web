@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 import {
 	handleSaveFavoriteSearch,
 	handleSearchTypeUpdate, setState, checkUserInfo
@@ -52,7 +53,10 @@ const SearchBar = (props) => {
 	}
 	
 	const handleSearchTextUpdate = (searchText, runSearch) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = false;
 		setState(dispatch, {
+			searchSettings: newSearchSettings,
 			searchText: searchText,
 			resultsPage: 1,
 			metricsCounted: false,

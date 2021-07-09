@@ -353,7 +353,9 @@ const PolicySearchHandler = {
 								typeFilter[t.name] = !allTypesSelected;
 							});
 						}
-						
+						if(!searchSettings.isFilterUpdate){
+							searchSettings.originalOrgFilters = orgFilter;
+						}
 						searchSettings.orgFilter = orgFilter;
 						searchSettings.typeFilter = typeFilter;
 	

@@ -145,6 +145,8 @@ const initState = {
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
 	searchSettings: {
+		isFilterUpdate: false,
+		originalOrgFilters: orgFilters,
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
