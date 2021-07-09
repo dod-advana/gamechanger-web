@@ -195,4 +195,24 @@ describe('EDASearchUtility', function () {
             }
         });
     });
+
+    describe('splitAwardID', function () {
+        it ('should return an id and idv', 
+        async (done) => {
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            const target = new EDASearchUtility(opts);
+
+            try {
+                const actual = await target.splitAwardID('abc-123');
+                const expected = { id: '123', idv: 'abc'};
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
+    })
 });

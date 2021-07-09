@@ -192,5 +192,131 @@ describe('EDASearchHandler', function () {
 				assert.fail(err);
 			}
 		})
+	});
+
+	describe('queryBaseAwardContract', function () {
+		it ('should return data for a base award contract using awardID',
+		async (done) => {
+			const mockQuery =  {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"0003"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"N6600116D0071"}}}]}}}},{"match":{"mod_identifier_eda_ext":"base_award"}}]}},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","metadata_type_eda_ext"]}
+			const mockResults = {"body":{"took":3,"timed_out":false,"_shards":{"total":3,"successful":3,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":9.207895,"hits":[{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"0d3661a9013681842327cd8c400f37211dac3592d1a06f045a0720702af62370","_score":9.207895,"_source":{"extracted_data_eda_n":{"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"},"pagerank_r":0.00001},"fields":{"metadata_type_eda_ext":["pds"],"filename":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"doc_num":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"id":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf_0"],"doc_type":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"type":["document"],"title":["N6600116D0071-0003-empty"],"page_count":[29]}}]}},"statusCode":200,"headers":{"date":"Fri, 09 Jul 2021 17:20:24 GMT","content-type":"application/json; charset=UTF-8","content-length":"2811","connection":"keep-alive","access-control-allow-origin":"*"},"meta":{"context":null,"request":{"params":{"method":"POST","path":"/gc_eda_2021_apple/_search","body":"{\"_source\":{\"includes\":[\"pagerank_r\",\"kw_doc_score_r\",\"orgs_rs\",\"*_eda_n*\"]},\"from\":0,\"size\":10000,\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.award_id_eda_ext\":{\"query\":\"0003\"}}}]}}}},{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.referenced_idv_eda_ext\":{\"query\":\"N6600116D0071\"}}}]}}}},{\"match\":{\"mod_identifier_eda_ext\":\"base_award\"}}]}},\"stored_fields\":[\"filename\",\"title\",\"page_count\",\"doc_type\",\"doc_num\",\"ref_list\",\"id\",\"summary_30\",\"keyw_5\",\"p_text\",\"type\",\"p_page\",\"display_title_s\",\"display_org_s\",\"display_doc_type_s\",\"metadata_type_eda_ext\"]}","querystring":"","headers":{"user-agent":"elasticsearch-js/7.13.0 (linux 4.19.76-linuxkit-x64; Node.js v14.17.0)","x-elastic-client-meta":"es=7.13.0,js=14.17.0,t=7.13.0,hc=14.17.0","content-type":"application/json","content-length":"709"},"timeout":30000},"options":{},"id":1},"name":"elasticsearch-js","connection":{"url":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","id":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","headers":{},"deadCount":0,"resurrectTimeout":0,"_openRequests":0,"status":"alive","roles":{"master":true,"data":true,"ingest":true,"ml":false}},"attempts":0,"aborted":false}}
+			const mockSplitAwardID = { id: "0003", idv: "N6600116D0071"}
+			const opts = {
+				...constructorOptionsMock,
+				edaSearchUtility: {
+					getEDAContractQuery() {
+						return Promise.resolve(mockQuery)
+					},
+					splitAwardID() {
+						return mockSplitAwardID;
+					}
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(mockResults)
+					}
+				},
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: {
+						index: 'test index'
+					}
+				}
+			}
+
+			const req = {
+				permissions: ['View EDA'],
+				body: {"awardID":"FA807514D0016-0012","isSearch":false,"functionName":"queryContractMods","cloneName":"eda"}
+			}
+			const target = new EDASearchHandler(opts);
+			try {
+				const actual = await target.queryBaseAwardContract(req, 'test user');
+				const expected = {"extracted_data_eda_n":{"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"},"pagerank_r":0.00001,"metadata_type_eda_ext":["pds"],"filename":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"doc_num":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"id":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf_0"],"doc_type":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"type":["document"],"title":["N6600116D0071-0003-empty"],"page_count":[29],"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"}
+
+				assert.deepStrictEqual(actual, expected);
+				done();
+			} catch(err) {
+				assert.fail(err);
+			}
+		});
+	});
+
+	describe('callFunctionHelper', function () {
+		it ('should call the correct function (queryBaseAwardContract)', 
+		async (done) => {
+			const mockQuery =  {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"from":0,"size":10000,"track_total_hits":true,"query":{"bool":{"must":[{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.award_id_eda_ext":{"query":"0003"}}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.referenced_idv_eda_ext":{"query":"N6600116D0071"}}}]}}}},{"match":{"mod_identifier_eda_ext":"base_award"}}]}},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","metadata_type_eda_ext"]}
+			const mockResults = {"body":{"took":3,"timed_out":false,"_shards":{"total":3,"successful":3,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":9.207895,"hits":[{"_index":"gc_eda_2021_apple","_type":"_doc","_id":"0d3661a9013681842327cd8c400f37211dac3592d1a06f045a0720702af62370","_score":9.207895,"_source":{"extracted_data_eda_n":{"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"},"pagerank_r":0.00001},"fields":{"metadata_type_eda_ext":["pds"],"filename":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"doc_num":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"id":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf_0"],"doc_type":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"type":["document"],"title":["N6600116D0071-0003-empty"],"page_count":[29]}}]}},"statusCode":200,"headers":{"date":"Fri, 09 Jul 2021 17:20:24 GMT","content-type":"application/json; charset=UTF-8","content-length":"2811","connection":"keep-alive","access-control-allow-origin":"*"},"meta":{"context":null,"request":{"params":{"method":"POST","path":"/gc_eda_2021_apple/_search","body":"{\"_source\":{\"includes\":[\"pagerank_r\",\"kw_doc_score_r\",\"orgs_rs\",\"*_eda_n*\"]},\"from\":0,\"size\":10000,\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.award_id_eda_ext\":{\"query\":\"0003\"}}}]}}}},{\"nested\":{\"path\":\"extracted_data_eda_n\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"extracted_data_eda_n.referenced_idv_eda_ext\":{\"query\":\"N6600116D0071\"}}}]}}}},{\"match\":{\"mod_identifier_eda_ext\":\"base_award\"}}]}},\"stored_fields\":[\"filename\",\"title\",\"page_count\",\"doc_type\",\"doc_num\",\"ref_list\",\"id\",\"summary_30\",\"keyw_5\",\"p_text\",\"type\",\"p_page\",\"display_title_s\",\"display_org_s\",\"display_doc_type_s\",\"metadata_type_eda_ext\"]}","querystring":"","headers":{"user-agent":"elasticsearch-js/7.13.0 (linux 4.19.76-linuxkit-x64; Node.js v14.17.0)","x-elastic-client-meta":"es=7.13.0,js=14.17.0,t=7.13.0,hc=14.17.0","content-type":"application/json","content-length":"709"},"timeout":30000},"options":{},"id":1},"name":"elasticsearch-js","connection":{"url":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","id":"https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/","headers":{},"deadCount":0,"resurrectTimeout":0,"_openRequests":0,"status":"alive","roles":{"master":true,"data":true,"ingest":true,"ml":false}},"attempts":0,"aborted":false}}
+			const mockSplitAwardID = { id: "0003", idv: "N6600116D0071"}
+			
+			const req = {
+				body: {
+					functionName: 'queryBaseAwardContract'
+				},
+				permissions: ['View EDA'],
+				
+			}
+
+			const opts = {
+				...constructorOptionsMock,
+				edaSearchUtility: {
+					getEDAContractQuery() {
+						return Promise.resolve(mockQuery)
+					},
+					splitAwardID() {
+						return mockSplitAwardID;
+					}
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(mockResults)
+					}
+				},
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: {
+						index: 'test index'
+					}
+				}
+			}
+
+			const target = new EDASearchHandler(opts);
+			try {
+				const actual = await target.callFunctionHelper(req, 'test user');
+				const expected = {"extracted_data_eda_n":{"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"},"pagerank_r":0.00001,"metadata_type_eda_ext":["pds"],"filename":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"doc_num":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"id":["EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf_0"],"doc_type":["/var//tmp/tmp.aaB4rxMCIq/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-40DEC257BAC00CA9E05400215A9BA3BA-N6600116D0071-0003-empty-empty-PDS-2016-11-09.pdf"],"type":["document"],"title":["N6600116D0071-0003-empty"],"page_count":[29],"contract_payment_office_dodaac_eda_ext":"HQ0338","vendor_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC","contract_issue_office_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","dodaac_org_type_eda_ext":"DEPT OF THE NAVY","vendor_duns_eda_ext":"075916762","contract_admin_office_dodaac_eda_ext":"S2101A","contract_issue_office_dodaac_eda_ext":"N66001","effective_date_eda_ext_dt":"2016-11-08","contract_admin_agency_name_eda_ext":"DCMA MARYLAND","signature_date_eda_ext_dt":"2016-11-07","naics_eda_ext":"541330","modification_number_eda_ext":"Award","vendor_cage_eda_ext":"1WAV4","award_id_eda_ext":"0003","referenced_idv_eda_ext":"N6600116D0071","vendor_org_hierarchy_eda_n":{"cage_code_eda_ext_n":[{"cage_code_name_eda_ext":"BOOZ ALLEN HAMILTON ENGINEERING SERVICES, LLC"}],"vendor_org_eda_ext_n":[{"dodaac_name_eda_ext":"SPAWAR SYSTEMS CENTER PACIFIC","cgac_eda_ext":"017","dodaac_eda_ext":"N66001","maj_command_eda_ext":"NF","cgac_agency_name_eda_ext":"DEPT OF THE NAVY","majcom_display_name_eda_ext":"Space and Naval Warfare Systems Command"},{"dodaac_name_eda_ext":"DCMA MARYLAND","cgac_eda_ext":"097","dodaac_eda_ext":"S2101A","maj_command_eda_ext":"DR","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"},{"dodaac_name_eda_ext":"DFAS COLUMBUS CENTER","cgac_eda_ext":"097","dodaac_eda_ext":"HQ0338","maj_command_eda_ext":"DT","cgac_agency_name_eda_ext":"DEPARTMENT OF DEFENSE","majcom_display_name_eda_ext":"Defense Finance Accounting Service"}]},"header_details_id_eda_ext":"b75fbfa5ee96ee51854558312cfef5d302bc451a","total_obligated_amount_eda_ext_f":275000,"contract_issue_office_majcom_eda_ext":"Space and Naval Warfare Systems Command","contract_payment_office_name_eda_ext":"DFAS COLUMBUS CENTER"}
+				assert.deepStrictEqual(actual, expected);
+				done();
+			} catch(err) {
+				assert.fail(err);
+			}
+		});
+
+		it ('should not find the function', 
+		async (done) => {
+			const req = {
+				body: {
+					functionName: 'test'
+				},
+				permissions: ['View EDA'],
+
+			}
+
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: {
+						index: 'test index'
+					},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {
+						
+					}
+				}
+			}
+
+			const target = new EDASearchHandler(opts);
+			try {
+				const actual = await target.callFunctionHelper(req, 'test user');
+				assert.deepStrictEqual(actual, {});
+				done();
+			} catch(err) {
+				assert.fail(err);
+			}
+		});
 	})
 });
