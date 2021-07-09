@@ -40,21 +40,17 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 	const [tag, setTag] = useState(tags[0])
 	// const [currentTokens, setCurrentTokens] = useState([])
 	const [tagColorMap, setTagColorMap] = useState(colorMap)
-
+	/*
 	useEffect(() => {
 		// when tags prop changes this will create a new Map of colors for each tag
 		for (let i = highlightColors.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[highlightColors[i], highlightColors[j]] = [highlightColors[j], highlightColors[i]];
 		}
-		/*const tagmap = tags.reduce((acc, tag, i) => {
-			acc.set(tag, highlightColors[i % highlightColors.length])
-			return acc
-		}, new Map())*/
 
 		setTagColorMap(colorMap)
 		setTag(tags[0])
-	}, [tags])
+	}, [tags])*/
 
 	const options = tags.map((tagText) => (
 		<CustomFormControlLabel

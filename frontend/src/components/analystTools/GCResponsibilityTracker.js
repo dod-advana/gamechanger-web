@@ -80,8 +80,9 @@ const PAGE_SIZE = 10
 
 const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = [] }) => {
 	const order = sorted.map(({ id, desc }) => ([id, desc ? 'DESC' : 'ASC']));
-	const where = filtered.map(({ id, value }) => ({ [id]: (id !== 'id' ? {'$iLike': `%${value}%`} : value) }));
-	
+	let where = filtered.map(({ id, value }) => ({ [id]: (id !== 'id' ? {'$iLike': `%${value}%`} : value) }));
+	where.push({ status: 'active' });
+	console.log(where);
 	try {
 		const { data } = await gameChangerAPI.getResponsibilityData({ limit, offset, order, where });
 		return data;
@@ -143,8 +144,7 @@ const GCResponsibilityTracker = (props) => {
 			})
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'ExportCSV', selectedIds.length > 0 ? rtnResults.length : results.length);
 			exportToCsv('ResponsibilityData.csv', selectedIds.length > 0 ? rtnResults : results, true);
-			setSelectedIds([]);
-			setSelectRows(false);
+			deselectRows();
 		} catch (e) {
 			console.error(e);
 		}
@@ -156,23 +156,38 @@ const GCResponsibilityTracker = (props) => {
 
 	const getRowData = async () => {
 		try {
+			console.log("**********");
+			console.log("getRowData");
+			console.log("Selected Ids:");
+			console.log(selectedIds);
 			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
 			const rtnResults = results.filter(result => {
 				return selectedIds.includes(result.id);
 			})
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+			console.log("Selected Results:");
+			console.log(rtnResults);
 			const rtn = selectedIds.length > 0 ? rtnResults : results;
+			console.log(rtn);
 			const filename = rtn[0].filename;
 			const responsibilityText = rtn[0].responsibilityText;
 			
 
 			setState(dispatch, {showResponsibilityAssistModal: true, filename, responsibilityText});
 
-			setSelectedIds([]);
-			setSelectRows(false);
+			deselectRows();
+			console.log("**********");
 		} catch (e) {
 			console.error(e);
 		}
+	}
+
+	const deselectRows = async () => {
+		responsibilityTableData.forEach(result => {
+			result.selected = false;
+		});
+		setSelectRows(false);
+		setSelectedIds([]);
 	}
 
 	const renderDataTable = () => {
@@ -330,28 +345,20 @@ const GCResponsibilityTracker = (props) => {
 	};
 	
 	const handleSelected = (id) => {
-		let selected;
-		responsibilityTableData.forEach(result => {
-			if (result.id === id) {
-				selected = !result.selected;
-				result.selected = selected;
-			}
-		});
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `ID ${selected ? 'Selected' : 'Des-Selected'}`, id);
-		if (!selected) {
-			selectedIds.splice(selectedIds.indexOf(id), 1);
-		} else {
+		responsibilityTableData[id].selected = !responsibilityTableData[id].selected; // swap current selected status
+
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `ID ${responsibilityTableData[id].selected ? 'Selected' : 'Des-Selected'}`, id);
+
+		if (responsibilityTableData[id].selected) {
 			selectedIds.push(id);
+		} else {
+			selectedIds.splice(selectedIds.indexOf(id), 1);
 		}
 	}
 	
 	const handleCancelSelect = () => {
+		deselectRows();
 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'Cancel Select Rows');
-		responsibilityTableData.forEach(result => {
-			result.selected = false;
-		});
-		setSelectRows(false);
-		setSelectedIds([]);
 	}
 	
 	const hideShowReportModal = (show) => {
