@@ -250,7 +250,6 @@ class EdaSearchHandler extends SearchHandler {
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
 			const { awardID, isSearch } = req.body;
-
 			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
@@ -273,6 +272,7 @@ class EdaSearchHandler extends SearchHandler {
 					for (let hit of hits) {
 						contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
 					}
+					contractMods.sort();
 					return contractMods;
 				}
 

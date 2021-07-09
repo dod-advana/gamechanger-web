@@ -783,7 +783,7 @@ class EDASearchUtility {
 		return result;
 	}
 
-	getEDAContractQuery(award = "", idv = "", isAward, isSearch, user) {
+	getEDAContractQuery(award = "", idv = "", isAward = false, isSearch = false, user) {
 		try {
 			let query = {
 				"_source": {
