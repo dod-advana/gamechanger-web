@@ -48,6 +48,7 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked
 	};
+	newSearchSettings.isFilterUpdate = true;
     state.runSearch = true;
 
     //newSelectedOrgs[orgName] = event.target.checked;
@@ -104,7 +105,7 @@ const renderSources = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificOrgsSelected && Object.keys(state.searchSettings.orgFilter).map(org => {
+					{state.searchSettings.specificOrgsSelected && Object.keys(state.searchSettings.originalOrgFilters).map(org => {
 						return (
 							<FormControlLabel
 								key={`${org} (${betterOrgData[org]})`}
