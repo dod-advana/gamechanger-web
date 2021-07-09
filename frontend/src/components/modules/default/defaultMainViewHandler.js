@@ -273,7 +273,6 @@ const DefaultMainViewHandler = {
 			if(state.currentSort === 'Relevance' && state.currentOrder === 'desc'){
 				setState(dispatch,{
 					activeCategoryTab:tabName,
-					docSearchResults:state.docSearchResults.slice(0,6),
 					resultsPage: 1,
 					replaceResults: true,
 					infiniteScrollPage: 1
