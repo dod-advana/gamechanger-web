@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import _ from "underscore";
 import TextField from "@material-ui/core/TextField";
@@ -12,7 +12,6 @@ import GameChangerAPI from "../api/gameChanger-service-api";
 import AdvancedDropdown from "./AdvancedDropdown";
 import SearchBarDropdown from './SearchBarDropdown';
 import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
-import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import { ConstrainedIcon } from "advana-side-nav/dist/SlideOutMenu";
 import UserIcon from "../../images/icon/UserIcon.png";
 import {getTrackingNameForFactory, getQueryVariable, PAGE_DISPLAYED} from "../../gamechangerUtils";
@@ -93,10 +92,13 @@ const GameChangerSearchBar = (props) => {
 		}, [value]);
 	 return debouncedValue;
 	}; 
-	const [searchHandler, setSearchHandler] = useState();
+	const ref = useRef();
+
 	const [loaded, setLoaded] = useState(false);
 	const [searchText, setSearchText] = useState(getQueryVariable('q') || '');
 	const debouncedSearchTerm = useDebounce(searchText, 300);
+	const [debounceOn, setDebounceOn] = useState(true);
+
 	const [userSearchHistory, setUserSearchHistory] = useState([]);
 	const [autocorrect, setAutocorrect] = useState([]);
 	const [presearchFile, setPresearchFile] = useState([]);
@@ -121,21 +123,18 @@ const GameChangerSearchBar = (props) => {
 				const historyWithIds = userSearchHistory.map((item, index) => ({ id: String(index), text: item }));
 				setUserSearchHistory(historyWithIds);
 				setLoaded(true);
-
-				if (state.cloneDataSet) {
-					const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-					const tmpSearchHandler = searchFactory.createHandler();
-					setSearchHandler(tmpSearchHandler)
-				}
 			}
 		},
 	 [state, dispatch, loaded]);
 
 	useEffect(() => { // getting dropdown data when searchText changes
-			const newDataRows = getDropdownData(debouncedSearchTerm);
-			setDataRows(newDataRows);
+			if(cursor === null && debounceOn){
+				const newDataRows = getDropdownData(debouncedSearchTerm);
+				setDataRows(newDataRows);
+			}
 		},
 		[ 
+			cursor,
 			debouncedSearchTerm,
 			userSearchHistory,
 			autocorrect,
@@ -149,16 +148,14 @@ const GameChangerSearchBar = (props) => {
 
 	const debouncedFetchSearchSuggestions = async (value) => {
 		try {
-			if(cursor === null){
-				const index = state.cloneData?.clone_data?.esCluster ?? '';
-				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
-				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
-				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
-				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
-				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
-				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
-				setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
-			}
+			const index = state.cloneData?.clone_data?.esCluster ?? '';
+			const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
+			setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
+			setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
+			setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
+			setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
+			setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
+			setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
 		} catch (e) {
 			console.log('debouncedFetchSearchSuggestions err', e);
 		}
@@ -182,6 +179,19 @@ const GameChangerSearchBar = (props) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [setState, dispatch, searchText]);
 
+	useEffect(() => { // if clicked outside of searchbar, close dropdown
+    const handleClick = e => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }; 
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, []);
+  
+
 	const handleKeyDown = (e) => {
 		let data = [];
 		dataRows.forEach(item => {
@@ -192,6 +202,7 @@ const GameChangerSearchBar = (props) => {
 		// arrow up/down button should select next/previous list element
 		if(e.keyCode === 38 || e.keyCode === 40) {
 			e.preventDefault(); // keep cursor at front 
+			setDebounceOn(false);
 		}
 		if(e.keyCode === 40 && cursor === null && data[0] !== undefined ){
 			setCursor(0);
@@ -220,6 +231,9 @@ const GameChangerSearchBar = (props) => {
 			setSearchText(originalText);
 			setCursor(null);
 			setOriginalText(null);
+		}
+		else {
+			setDebounceOn(true);
 		}
 	}
 
@@ -281,6 +295,7 @@ const GameChangerSearchBar = (props) => {
 		});
 		setSearchText(text);
 		document.activeElement.blur();
+		setDropdownOpen(false);
 
 		if (rowType) {
 			trackEvent(getTrackingNameForFactory(state.cloneData), 'SearchSuggestionSelected', rowType, text)
@@ -303,6 +318,7 @@ const GameChangerSearchBar = (props) => {
 			runSearch: true
 		});
 		document.activeElement.blur();
+		setDropdownOpen(false);
 	}
 
 	const getDropdownData = (text) => {
@@ -419,9 +435,8 @@ const GameChangerSearchBar = (props) => {
 
 	const noResults = Boolean(state.rawSearchResults?.length === 0);
 	const hideSearchResults = noResults && !state.loading;
-	console.log('DROPDOWN' + dropdownOpen);
 	return (
-		<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }}>
+		<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }} ref={ref}>
 			<SearchBarForm
 				id="GamechangerSearchBarForm"
 				className={state.componentStepNumbers ? `tutorial-step-${state.componentStepNumbers["Search Input"]}` : null}
@@ -454,18 +469,18 @@ const GameChangerSearchBar = (props) => {
 						</button>
 					</GCTooltip>
 				}
-				{!advancedSearchOpen && dropdownOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
-				{ isGamechanger && advancedSearchOpen && hideSearchResults &&
+				{ dropdownOpen && !advancedSearchOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
+				{ isGamechanger && hideSearchResults &&
 					<AdvancedDropdown
 						context={context}
-						open={advancedSearchOpen}
 						handleSubmit={handleSubmit}
+						open={advancedSearchOpen}
 						close={() => {setAdvancedSearchOpen(false)}}
 						>
 					</AdvancedDropdown>}
 				{ isGamechanger && hideSearchResults && 
-					<AdvancedSearchButton id='advancedSearchButton' onClick={() => {console.log(!advancedSearchOpen); setAdvancedSearchOpen(!advancedSearchOpen)}}>
-						Advanced Options
+					<AdvancedSearchButton type='button' id='advancedSearchButton' onClick={() => {setAdvancedSearchOpen(!advancedSearchOpen)}}>
+						Advanced
 						<i className="fa fa-chevron-down" style={{marginLeft: '5px'}}/>
 					</AdvancedSearchButton>
 				}

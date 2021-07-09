@@ -85,6 +85,47 @@ import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 // 	);
 // }
 
+const handleSelectCategory = (event, state, dispatch) => {
+	if(state.activeCategoryTab === event.target.name){
+		setState(dispatch, { 
+			selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked},
+			activeCategoryTab: 'all'
+		})
+	}
+	setState(dispatch, { selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked}})
+}
+
+const renderCategories = (state, dispatch, classes) => {
+	return (
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+			<FormGroup key={`categories-key`} row style={{ marginBottom: '10px' }}>
+
+			{Object.keys(state.selectedCategories).map(category => {
+				return (
+						<FormControlLabel
+							name={category}
+							value={category}
+							classes={{ label: classes.titleText }}
+							control={<Checkbox
+								classes={{ root: classes.filterBox }}
+								onClick={(event) => handleSelectCategory(event, state, dispatch)}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								checked={state.selectedCategories[category]}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								name={category}
+								style={styles.filterBox}
+							/>}
+							label={category}
+							labelPlacement="end"
+							style={styles.titleText}
+						/>
+				)
+			})}
+			</FormGroup>
+		</FormControl>
+	)
+}
+
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.specificOrgsSelected = true;
@@ -846,10 +887,13 @@ const PolicySearchMatrixHandler = {
 
 		return (
 			<>
-				{/* <div style={styles.filterDiv}>
+				<div style={styles.filterDiv}>
 					<strong style={styles.boldText}>CATEGORIES</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
-				</div> */}
+					<div>
+						{renderCategories(state, dispatch, classes, true)}
+					</div>
+				</div>
 
 				<div style={styles.filterDiv}>
 					<strong style={styles.boldText}>SELECT THE SOURCE</strong>
@@ -877,13 +921,13 @@ const PolicySearchMatrixHandler = {
 					{renderStatus(state, dispatch, classes)}
 				</div>
 
-				<div style={styles.filterDiv}>
+				{/* <div style={styles.filterDiv}>
 					<strong style={styles.boldText}>ADVANCED FILTERS</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderAdvancedFilters(state, dispatch, true)}
-				</div>
+				</div> */}
 
-				<div style ={{display: 'flex'}}>
+				<div style ={{display: 'flex', margin: '10px'}}>
 					<div style={{width: '250px', marginRight: '20px'}}>
 						<button
 							type="button"
@@ -936,8 +980,12 @@ const styles = {
 	},
 	filterDiv: {
 		display: 'block',
-		 margin: '10px'
+		margin: '10px'
+	},
+	boldText: {
+		fontSize: '0.8em'
 	}
+
 };
 
 export default PolicySearchMatrixHandler;
