@@ -28,7 +28,6 @@ export const AdvDropdownWrapper = styled.div`
 	font-size: 22px;
 	padding: 10px;
 	font-family: "Montserrat";
-	display: none;
 `;
 
 
@@ -118,7 +117,7 @@ export const AdvancedSearchButton = styled.button`
 	padding: 4px 18px;
 	border: none;
 	border-radius: 0 5px 5px 0;
-	width: 190px;
+	width: 150px;
 	height: 50px;
 	display: flex;
 	align-items: center;

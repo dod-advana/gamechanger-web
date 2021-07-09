@@ -1,9 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core/styles';
-import { trackEvent } from '../telemetry/Matomo';
-import {getTrackingNameForFactory, exactMatch} from '../../gamechangerUtils';
-import {setState} from "../../sharedFunctions";
+import { exactMatch} from '../../gamechangerUtils';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
 import SearchMatrixFactory from "../factories/searchMatrixFactory";
 
@@ -199,14 +197,13 @@ const AdvancedDropdown = (props) => {
 
   useEffect(() => {
     const handleClick = e => {
-      console.log(e.target.id)
       if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option')) {
         close();
       }
     }; 
-    document.addEventListener("click", handleClick);
+    document.addEventListener("mousedown", handleClick);
     return () => {
-      document.removeEventListener("click", handleClick);
+      document.removeEventListener("mousedown", handleClick);
     };
   }, []);
   

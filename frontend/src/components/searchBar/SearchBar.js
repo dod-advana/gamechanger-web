@@ -1,15 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
-import {
-	handleSaveFavoriteSearch,
-	handleSearchTypeUpdate, setState, checkUserInfo
-} from "../../sharedFunctions";
+import { setState } from "../../sharedFunctions";
 import GameChangerSearchBar from "./GameChangerSearchBar";
-import {
-	PAGE_BORDER_RADIUS,
-	SEARCH_TYPES
-} from "../../gamechangerUtils";
-import {gcBlue} from "../common/gc-colors";
 import SearchBanner from "./GCSearchBanner";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import MainViewFactory from "../factories/mainViewFactory";
