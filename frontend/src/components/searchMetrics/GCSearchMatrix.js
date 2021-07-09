@@ -330,52 +330,12 @@ export default function SearchMatrix(props) {
 		setState(dispatch, { searchText: newSearchText, runSearch: true });
 	}
 
-	const handleSelectCategory = (event) => {
-		if(state.activeCategoryTab === event.target.name){
-			setState(dispatch, { 
-				selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked},
-				activeCategoryTab: 'all'
-			})
-		}
-		setState(dispatch, { selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked}})
-	}
-
-	const handleAddSearchTerm = (phrase,source,idx) => {
+	const handleAddSearchTerm = (phrase, source, idx) => {
 		const temp = _.cloneDeep(expansionTerms)
 		temp[idx].checked = !temp[idx].checked
 		setExpansionTerms(temp);
 	}
 	
-	// const renderCategories = () => {
-	// 	return (
-	// 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-	// 			{Object.keys(state.selectedCategories).map(category => {
-	// 				return (
-	// 					<FormGroup key={`${category}-key`} row style={{ marginBottom: '10px' }}>
-	// 						<FormControlLabel
-	// 							name={category}
-	// 							value={category}
-	// 							classes={{ label: classes.titleText }}
-	// 							control={<Checkbox
-	// 								classes={{ root: classes.filterBox }}
-	// 								onClick={handleSelectCategory}
-	// 								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-	// 								checked={state.selectedCategories[category]}
-	// 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-	// 								name={category}
-	// 								style={styles.filterBox}
-	// 							/>}
-	// 							label={category}
-	// 							labelPlacement="end"
-	// 							style={styles.titleText}
-	// 						/>
-	// 					</FormGroup>
-	// 				)
-	// 			})}
-	// 		</FormControl>
-	// 	)
-	// }
-
 	const handleSelectAllCategories = (state, dispatch) => {
 		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
