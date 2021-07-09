@@ -11,7 +11,7 @@ import {gcOrange} from "../../components/common/gc-colors";
 import styled from 'styled-components'
 import {Typography} from "@material-ui/core";
 import GCButton from "../common/GCButton";
-import {checkUserInfo, creatCopyTinyUrl, setState} from "../../sharedFunctions";
+import {checkUserInfo, createCopyTinyUrl, setState} from "../../sharedFunctions";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
 
 const StyledTabsList = styled(TabList)`
@@ -134,7 +134,7 @@ const TabView = (props) => {
 					<GCButton
 						className={`tutorial-step-${state.componentStepNumbers["Share Search"]}`}
 						id={"gcShareSearch"}
-						onClick={() => creatCopyTinyUrl(cloneData.url, dispatch)}
+						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
 						style={{height: 50, margin: '16px 0px 0px 10px', minWidth: 0}}
 						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>

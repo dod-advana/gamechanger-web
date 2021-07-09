@@ -704,10 +704,8 @@ describe('DocumentController', function () {
 			};
 
 			const constants = {
-				env: {
-					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					version: 'version'
 				}
 			};
 
@@ -786,10 +784,8 @@ describe('DocumentController', function () {
 				}
 			}};
 			const constants = {
-				env: {
-					GAME_CHANGER_OPTS: {
-						index: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					index: 'version'
 				}
 			};
 
@@ -1004,10 +1000,8 @@ describe('DocumentController', function () {
 			...constructorOptionsMock,
 			dataApi,
 			constants: {
-				env: {
-					GAME_CHANGER_OPTS: {
-						index: 'version'
-					}
+				GAME_CHANGER_OPTS: {
+					index: 'version'
 				}
 			}
 		};

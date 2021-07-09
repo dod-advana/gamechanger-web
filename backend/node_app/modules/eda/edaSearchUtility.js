@@ -28,7 +28,6 @@ class EDASearchUtility {
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -53,187 +52,9 @@ class EDASearchUtility {
 	
 		try {
 			// add additional search fields to the query
-			const mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
+			let mustQueries = [];
 
-			if (edaSearchSettings.allOrgsSelected === false && edaSearchSettings.organizations) {
-				const matchQuery = 					
-				{ 
-					'nested': {
-						'path': 'extracted_data_eda_n',
-						'query': {
-							'bool': {
-								'should': []
-							}
-						}
-					}
-				}
-
-				const orgs = Object.keys(edaSearchSettings.organizations).filter(org => edaSearchSettings.organizations[org]).map(org => org.toLowerCase())
-				for (const org of orgs) {
-					matchQuery.nested.query.bool.should.push(
-						{
-							'match': {
-								'extracted_data_eda_n.dodaac_org_type_eda_ext': org
-							}
-						}
-					);
-				}
-				mustQueries.push(matchQuery);
-			}
-	
-			if (edaSearchSettings.issueAgency) {
-				mustQueries.push( 
-					{
-						'nested': {
-							'path': 'extracted_data_eda_n',
-							'query': {
-								'bool': {
-									'must': [
-										{ 'match' : { 'extracted_data_eda_n.contract_issue_office_name_eda_ext': edaSearchSettings.issueAgency}}
-									]
-								}
-							}
-						}
-					}
-				);
-			}	
-			
-			if (edaSearchSettings.startDate || edaSearchSettings.endDate) {
-				const rangeQuery = {
-					nested: {
-						path: 'extracted_data_eda_n',
-						query: {
-							range: {
-								'extracted_data_eda_n.signature_date_eda_ext_dt': {}
-							}
-						}
-					}
-	
-				};
-	
-				let push = false;
-	
-				if (edaSearchSettings.startDate) {
-					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].gte = edaSearchSettings.startDate; //Math.round(start.getTime() / 1000)
-					push = true;
-				}
-				
-				if (edaSearchSettings.endDate) {
-					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].lte = edaSearchSettings.endDate // Math.round(end.getTime() / 1000)
-					push = true;	
-				}
-	
-				if (push) {
-					mustQueries.push(rangeQuery);
-				}
-			}
-
-			if (edaSearchSettings.issueOffice && edaSearchSettings.issueOffice.length > 0) {
-				mustQueries.push ({
-					nested: {
-						path: "extracted_data_eda_n",
-						query: {
-							bool: {
-								must: [
-									{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": edaSearchSettings.issueOffice}}
-								]
-							}
-						}
-					}
-				});
-			}
-
-			if (edaSearchSettings.allYearsSelected === false && edaSearchSettings.fiscalYears) {
-				const nestedQuery = {
-					nested: {
-						path: "extracted_data_eda_n",
-						query: {
-							bool: {
-								should: []
-							}
-						}
-					}
-				}
-
-				for (const year of edaSearchSettings.fiscalYears) {
-					const ceil = parseInt(year) + 1;
-					nestedQuery.nested.query.bool.should.push({
-						range: {
-							"extracted_data_eda_n.signature_date_eda_ext_dt": {
-								gte: year,
-								lte: ceil.toString(),
-								format: 'yyyy'
-							}
-						}
-					})
-				}
-				mustQueries.push(nestedQuery);
-			}
-
-			if (edaSearchSettings.allDataSelected === false && edaSearchSettings.contractData) {
-				const contractTypes = Object.keys(edaSearchSettings.contractData);
-				const mustQuery = {
-					bool: {
-						should: []
-					}
-				}
-				let metadataText = '';
-
-				// set up query based on PDS, SYN, or PDF selected
-				for (const contractType of contractTypes) {
-					if (edaSearchSettings.contractData[contractType]) {
-						if (contractType === 'none') { // PDF
-							mustQuery.bool.should.push(
-								{
-									match: {
-										is_supplementary_data_included_eda_ext_b: false
-									}
-								}
-							)
-						}
-						else { // PDS or SYN
-							metadataText += contractType + ", ";
-						}
-					}
-				}
-
-				if (metadataText != '') {
-					metadataText = metadataText.substring(0, metadataText.length - 2);
-					mustQuery.bool.should.push(
-						{
-							bool: {
-								must: [
-									{
-										match: {
-											metadata_type_eda_ext: metadataText
-										}
-									},
-									{
-										match: {
-											is_supplementary_data_included_eda_ext_b: true
-										}
-									}
-								]
-							}
-						}
-						
-					)
-				}
-
-				if (mustQuery.bool.should.length > 0) {
-					mustQueries.push(mustQuery);
-				}
-			}
+			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
@@ -343,7 +164,6 @@ class EDASearchUtility {
 					}
 				};
 				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				// query.query.bool.should = query.query.bool.should.concat(extQuery);
 				query.query.bool.must[0].bool.should = query.query.bool.must[0].bool.should.concat(extQuery);
 			}
 
@@ -351,7 +171,7 @@ class EDASearchUtility {
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-
+			// console.log(JSON.stringify(query))
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -362,11 +182,9 @@ class EDASearchUtility {
 		{
 			searchText,
 			parsedQuery,
-			offset = 0,
 			limit = 20,
 			charsPadding = 90,
 			operator = 'and',
-			searchFields = {},
 			storedFields = [
 				'filename',
 				'title',
@@ -391,191 +209,9 @@ class EDASearchUtility {
 	
 		try {
 			// add additional search fields to the query
-			const mustQueries = [];
-	
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { wildcard: {} };
-					wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
-	
-					mustQueries.push(wildcard);
-				}
-			}
-	
-			if (edaSearchSettings.issueAgency) {
-				mustQueries.push( 
-					{
-						'nested': {
-							'path': 'extracted_data_eda_n',
-							'query': {
-								'bool': {
-									'must': [
-										{ 'match' : { 'extracted_data_eda_n.contract_issue_office_name_eda_ext': edaSearchSettings.issueAgency}}
-									]
-								}
-							}
-						}
-					}
-				);
-			}	
+			let mustQueries = [];
 
-			if (!edaSearchSettings.allOrgsSelected && edaSearchSettings.organizations) {
-				const matchQuery = 					
-				{ 
-					'nested': {
-						'path': 'extracted_data_eda_n',
-						'query': {
-							'bool': {
-								'should': []
-							}
-						}
-					}
-				}
-
-				const orgs = Object.keys(edaSearchSettings.organizations).filter(org => edaSearchSettings.organizations[org]).map(org => org.toLowerCase())
-				for (const org of orgs) {
-					matchQuery.nested.query.bool.should.push(
-						{
-							'match': {
-								'extracted_data_eda_n.dodaac_org_type_eda_ext': org
-							}
-						}
-					);
-				}
-				mustQueries.push(matchQuery);
-			}
-			
-			if (edaSearchSettings.startDate || edaSearchSettings.endDate) {
-				const rangeQuery = {
-					nested: {
-						path: 'extracted_data_eda_n',
-						query: {
-							range: {
-								'extracted_data_eda_n.signature_date_eda_ext_dt': {}
-							}
-						}
-					}
-	
-				};
-	
-				let push = false;
-	
-				if (edaSearchSettings.startDate) {
-					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'] = {
-						gte: edaSearchSettings.startDate //Math.round(start.getTime() / 1000)
-					}
-					push = true;
-				}
-				
-				if (edaSearchSettings.endDate) {
-					rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'] = {
-						lte: edaSearchSettings.endDate // Math.round(end.getTime() / 1000)
-					}
-					push = true;	
-				}
-	
-				if (push) {
-					mustQueries.push(rangeQuery);
-				}
-			}
-
-			if (edaSearchSettings.issueOffice && edaSearchSettings.issueOffice.length > 0) {
-				mustQueries.push ({
-					nested: {
-						path: "extracted_data_eda_n",
-						query: {
-							bool: {
-								must: [
-									{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": edaSearchSettings.issueOffice}}
-								]
-							}
-						}
-					}
-				});
-			}
-
-			if (edaSearchSettings.allYearsSelected === false && edaSearchSettings.fiscalYears) {
-				const nestedQuery = {
-					nested: {
-						path: "extracted_data_eda_n",
-						query: {
-							bool: {
-								should: []
-							}
-						}
-					}
-				}
-
-				for (const year of edaSearchSettings.fiscalYears) {
-					const ceil = parseInt(year) + 1;
-					nestedQuery.nested.query.bool.should.push({
-						range: {
-							"extracted_data_eda_n.signature_date_eda_ext_dt": {
-								gte: year,
-								lte: ceil.toString(),
-								format: 'yyyy'
-							}
-						}
-					})
-				}
-				mustQueries.push(nestedQuery);
-			}
-
-			if (edaSearchSettings.allDataSelected === false && edaSearchSettings.contractData) {
-				const contractTypes = Object.keys(edaSearchSettings.contractData);
-				const mustQuery = {
-					bool: {
-						should: []
-					}
-				}
-				let metadataText = '';
-
-				// set up query based on PDS, SYN, or PDF selected
-				for (const contractType of contractTypes) {
-					if (edaSearchSettings.contractData[contractType]) {
-						if (contractType === 'none') { // PDF
-							mustQuery.bool.should.push(
-								{
-									match: {
-										is_supplementary_data_included_eda_ext_b: false
-									}
-								}
-							)
-						}
-						else { // PDS or SYN
-							metadataText += contractType + ", ";
-						}
-					}
-				}
-
-				if (metadataText != '') {
-					metadataText = metadataText.substring(0, metadataText.length - 2);
-					mustQuery.bool.should.push(
-						{
-							bool: {
-								must: [
-									{
-										match: {
-											metadata_type_eda_ext: metadataText
-										}
-									},
-									{
-										match: {
-											is_supplementary_data_included_eda_ext_b: true
-										}
-									}
-								]
-							}
-						}
-						
-					)
-				}
-
-				if (mustQuery.bool.should.length > 0) {
-					mustQueries.push(mustQuery);
-				}
-			}
+			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
@@ -583,7 +219,7 @@ class EDASearchUtility {
 				_source: {
 					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext']
 				},
-				from: offset,
+				from: 0,
 				size: limit,
 				track_total_hits: true,
 				query: {
@@ -684,19 +320,290 @@ class EDASearchUtility {
 					}
 				};
 				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				// query.query.bool.should = query.query.bool.should.concat(extQuery);
 				query.query.bool.must[0].bool.should = query.query.bool.must[0].bool.should.concat(extQuery);
 			}
 
-	
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M7THI27', user);
 		}
+	}
+
+	getEDASearchQuery(settings) {
+		const mustQueries = [];
+
+		if (settings.issueAgency) {
+			mustQueries.push( 
+				{
+					'nested': {
+						'path': 'extracted_data_eda_n',
+						'query': {
+							'bool': {
+								'must': [
+									{ 'match' : { 'extracted_data_eda_n.contract_issue_office_name_eda_ext': settings.issueAgency}}
+								]
+							}
+						}
+					}
+				}
+			);
+		}	
+
+		if (!settings.allOrgsSelected && settings.organizations && settings.organizations.length > 0) {
+			const orgQuery = 					
+			{ 
+				'nested': {
+					'path': 'extracted_data_eda_n',
+					'query': {
+						'bool': {
+							'should': []
+						}
+					}
+				}
+			}
+
+			const majcomQuery = 
+			{ 
+				'nested': {
+					'path': 'extracted_data_eda_n',
+					'query': {
+						'bool': {
+							'should': []
+						}
+					}
+				}
+			}
+
+			let pushMAJCOM = false;
+
+			const orgs = settings.organizations;
+			for (const org of orgs) {
+
+				// for filtering by MAJCOM
+				if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
+					pushMAJCOM = true;
+					for (const subOrg of settings.majcoms[org]) {
+						majcomQuery.nested.query.bool.should.push(
+							{
+								'match': {
+									'extracted_data_eda_n.contract_issue_office_majcom_eda_ext': {
+										'query': subOrg,
+										'fuzziness': 0
+									}
+								}
+							}						
+						);
+					}
+				}
+
+
+				orgQuery.nested.query.bool.should.push(
+					{
+						'match': {
+							'extracted_data_eda_n.dodaac_org_type_eda_ext': {
+								'query': org,
+								'fuzziness': 0
+							}
+						}
+					}
+				);
+			}
+
+			mustQueries.push(orgQuery);
+
+			if (pushMAJCOM) {
+				mustQueries.push(majcomQuery);
+			}
+		}
+		
+		if (settings.startDate || settings.endDate) {
+			const rangeQuery = {
+				nested: {
+					path: 'extracted_data_eda_n',
+					query: {
+						range: {
+							'extracted_data_eda_n.signature_date_eda_ext_dt': {}
+						}
+					}
+				}
+
+			};
+
+			let push = false;
+
+			if (settings.startDate) {
+				rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].gte = settings.startDate;
+				push = true;
+			}
+			
+			if (settings.endDate) {
+				rangeQuery.nested.query.range['extracted_data_eda_n.signature_date_eda_ext_dt'].lte = settings.endDate;
+				push = true;	
+			}
+
+			if (push) {
+				mustQueries.push(rangeQuery);
+			}
+		}
+
+		if (settings.issueOffice && settings.issueOffice.length > 0) {
+			mustQueries.push ({
+				nested: {
+					path: "extracted_data_eda_n",
+					query: {
+						bool: {
+							must: [
+								{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": settings.issueOffice}}
+							]
+						}
+					}
+				}
+			});
+		}
+
+		if (settings.allYearsSelected === false && settings.fiscalYears) {
+			const nestedQuery = {
+				nested: {
+					path: "extracted_data_eda_n",
+					query: {
+						bool: {
+							should: []
+						}
+					}
+				}
+			}
+
+			for (const year of settings.fiscalYears) {
+				const ceil = parseInt(year) + 1;
+				nestedQuery.nested.query.bool.should.push({
+					range: {
+						"extracted_data_eda_n.signature_date_eda_ext_dt": {
+							gte: year,
+							lte: ceil.toString(),
+							format: 'yyyy'
+						}
+					}
+				})
+			}
+			mustQueries.push(nestedQuery);
+		}
+
+		if (settings.allDataSelected === false && settings.contractData) {
+			const contractTypes = Object.keys(settings.contractData);
+			const mustQuery = {
+				bool: {
+					should: []
+				}
+			}
+			let metadataText = '';
+
+			// set up query based on PDS, SYN, or PDF selected
+			for (const contractType of contractTypes) {
+				if (settings.contractData[contractType]) {
+					if (contractType === 'none') { // PDF
+						mustQuery.bool.should.push(
+							{
+								match: {
+									is_supplementary_data_included_eda_ext_b: false
+								}
+							}
+						)
+					}
+					else { // PDS or SYN
+						metadataText += contractType + ", ";
+					}
+				}
+			}
+
+			if (metadataText != '') {
+				metadataText = metadataText.substring(0, metadataText.length - 2);
+				mustQuery.bool.should.push(
+					{
+						bool: {
+							must: [
+								{
+									match: {
+										metadata_type_eda_ext: metadataText
+									}
+								},
+								{
+									match: {
+										is_supplementary_data_included_eda_ext_b: true
+									}
+								}
+							]
+						}
+					}
+					
+				)
+			}
+
+			if (mustQuery.bool.should.length > 0) {
+				mustQueries.push(mustQuery);
+			}
+		}
+
+		if ((settings.minObligatedAmount && settings.minObligatedAmount.length > 0) || (settings.maxObligatedAmount && settings.maxObligatedAmount.length > 0)) {
+			const rangeQuery = {
+				nested: {
+					path: "extracted_data_eda_n",
+					query: {
+						range: {
+							"extracted_data_eda_n.total_obligated_amount_eda_ext_f": {}
+						}
+					}
+				}
+			}
+
+			let push = false;
+
+			if (settings.minObligatedAmount && settings.minObligatedAmount.length > 0) {
+				rangeQuery.nested.query.range["extracted_data_eda_n.total_obligated_amount_eda_ext_f"].gte = settings.minObligatedAmount;
+				push = true;
+			}
+
+			if (settings.maxObligatedAmount && settings.maxObligatedAmount.length > 0) {
+				rangeQuery.nested.query.range["extracted_data_eda_n.total_obligated_amount_eda_ext_f"].lte = settings.maxObligatedAmount;
+				push = true;
+			}
+
+			if (push) {
+				mustQueries.push(rangeQuery);
+			}
+		}
+
+		if (settings.contractsOrMods !== 'both') {
+			const mustQuery = { 
+				match: {
+					mod_identifier_eda_ext: "base_award"
+				}
+			}
+
+			const boolQuery = {
+				bool: {
+					must_not: [
+						{
+							term: {
+								mod_identifier_eda_ext: "base_award"
+							}
+						}
+					]
+				}
+			}
+
+			if (settings.contractsOrMods === "contracts") {
+				mustQueries.push(mustQuery)
+			}
+			else if (settings.contractsOrMods === "mods") { 
+				mustQueries.push(boolQuery);
+			}
+
+		}
+
+		return mustQueries;
 	}
 
 	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
@@ -736,81 +643,48 @@ class EDASearchUtility {
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits.paragraphs) {
-						r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-							const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(parahit, user);
-								// use page 0 for title matches or errors
-								// but only allow 1
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
+
+
+					r.inner_hits.pages.hits.hits.forEach((phit) => {
+						const pageIndex = phit._nested.offset;
+						// const snippet =  phit.fields["pages.p_raw_text"][0];
+						let pageNumber = pageIndex + 1;
+						// one hit per page max
+						if (!pageSet.has(pageNumber)) {
+							const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+							if (usePageZero) {
+								if (pageSet.has(0)) {
+									return;
+								} else {
+									pageNumber = 0;
+									pageSet.add(0);
 								}
-	
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber});
 							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
-							}
+							pageSet.add(pageNumber);
+							result.pageHits.push({snippet, pageNumber });
 						}
-						result.pageHitCount = pageSet.size;
-	
-					} else {
-						r.inner_hits.pages.hits.hits.forEach((phit) => {
-							const pageIndex = phit._nested.offset;
-							// const snippet =  phit.fields["pages.p_raw_text"][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
-								}
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber });
-							}
-						});
-						result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-						if(r.highlight){
-							if(r.highlight['title.search']){
-								result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-							}						
-							if(r.highlight.keyw_5){
-								result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-							}
-						}
-						result.pageHitCount = pageSet.size;
-	
-						try {
-							const {metadata_type_eda_ext} = fields;
-							result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
-							result = this.getExtractedFields(_source, result);
-						}
-						catch(err) {
-							console.log(err);
-							console.log('Error parsing EDA fields')
+					});
+					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+					if(r.highlight){
+						if(r.highlight['title.search']){
+							result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+						}						
+						if(r.highlight.keyw_5){
+							result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
 						}
 					}
-	
+					result.pageHitCount = pageSet.size;
+
+					try {
+						const {metadata_type_eda_ext} = fields;
+						result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
+						result = this.getExtractedFields(_source, result);
+					}
+					catch(err) {
+						console.log(err);
+						console.log('Error parsing EDA fields')
+					}
+					
 					result.esIndex = index;
 	
 					if (Array.isArray(result['keyw_5'])){
@@ -844,21 +718,7 @@ class EDASearchUtility {
 
 		// Contract Issuing Office Name and Contract Issuing Office DoDaaC
 		result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
-		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext;
-
-		// Issuing Organization
-		if (data.dodaac_org_type_eda_ext) {
-			const orgToDisplay = {
-				army: 'Army',
-				airforce: 'Air Force',
-				dla: 'DLA',
-				marinecorps: 'Marine Corps',
-				navy: 'Navy',
-				estate: '4th Estate'
-			}
-
-			result.issuing_organization_eda_ext = orgToDisplay[data.dodaac_org_type_eda_ext];
-		}
+		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
 
 		// Vendor Name, Vendor DUNS, and Vendor CAGE
 		result.vendor_name_eda_ext = data.vendor_name_eda_ext;
@@ -866,18 +726,26 @@ class EDASearchUtility {
 		result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
 
 		// Contract Admin Agency Name and Contract Admin Office DoDAAC
-		result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
-		result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext;
+		const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
+		if (adminPresent) {
+			result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
+			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
+		}
 
 		// Paying Office
 		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
-		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext;
+		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
 
 		// Modifications
 		result.modification_eda_ext = data.modification_number_eda_ext;
 
 		// Award ID and Reference IDV
-		result.award_id_eda_ext = data.award_id_eda_ext;
+		if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
+			result.award_id_eda_ext = data.referenced_idv_eda_ext + "-" + data.award_id_eda_ext;
+		}
+		else {
+			result.award_id_eda_ext = data.award_id_eda_ext;
+		}
 		result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
 
 		// Signature Date and Effective Date
@@ -889,8 +757,93 @@ class EDASearchUtility {
 
 		// NAICS
 		result.naics_eda_ext = data.naics_eda_ext;
+		result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
 
+		// get paying, admin, issue
+		if (data.vendor_org_hierarchy_eda_n && data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n) {
+			const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
+
+			for (const org of orgData) {
+				if (org.dodaac_eda_ext) {
+					if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) { // match issue office
+						result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+					else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) { // match paying office
+						result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+					else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) { // match admin office
+						result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+					}
+				}
+			}
+		}
+		
 		return result;
+	}
+
+	getEDAContractQuery(award = "", idv = "", user) {
+		try {
+			let query = {
+				"_source": {
+					"includes": [
+						"extracted_data_eda_n.modification_number_eda_ext"
+					]
+				},
+				"from": 0,
+				"size": 10000,
+				"track_total_hits": true,
+				"query": {
+					"bool": {
+						"must": [
+							{
+								"nested": {
+									"path": "extracted_data_eda_n",
+									"query": {
+										"bool": {
+											"must": [
+												{
+													"match": {
+														"extracted_data_eda_n.award_id_eda_ext": {
+															"query": award
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+
+			if (idv !== "") {
+				query.query.bool.must.push(
+				{
+					"nested": {
+						"path": "extracted_data_eda_n",
+						"query": {
+							"bool": {
+								"must": [
+									{
+										"match": {
+											"extracted_data_eda_n.referenced_idv_eda_ext": {
+												"query": idv
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+				)
+			}
+			return query;
+		} catch(err) {
+			this.logger.error(err, 'S5PJASQ', user)
+		}
 	}
 
 }

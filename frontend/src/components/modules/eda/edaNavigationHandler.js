@@ -8,8 +8,7 @@ import {
 	PAGE_DISPLAYED
 } from "../../../gamechangerUtils";
 import {
-	ConstrainedIcon, Notifications,
-	NotificationsClosed,
+	ConstrainedIcon,
 	PageLink,
 	StyledBadgeSmall
 } from "advana-side-nav/dist/SlideOutMenu";
@@ -86,7 +85,8 @@ const EdaNavigationHandler = {
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name),'SidebarInteraction',  'ShowNotifications');
 							}} toolTheme={toolTheme}
 						>
-							<NotificationsClosed src={BellIcon} notificationCount={state.notifications.length} />
+							{/* <NotificationsClosed src={BellIcon} notificationCount={state.notifications.length} /> */}
+							<ConstrainedIcon src={UserIcon} />
 						</HoverNavItem>
 					</GCTooltip>
 				}
@@ -120,7 +120,8 @@ const EdaNavigationHandler = {
 							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction',  'showUserDashboard');
 						}} active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard} toolTheme={toolTheme}
 					>
-						<NotificationsClosed src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0}/>
+						{/* <NotificationsClosed src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0}/> */}
+						<ConstrainedIcon src={UserIcon} />
 					</HoverNavItem>
 				</GCTooltip>
 				{state.cloneData?.show_crowd_source &&
@@ -157,7 +158,7 @@ const EdaNavigationHandler = {
 					</GCTooltip>
 				}
 				<GCTooltip title="Clone Request" placement="right" arrow>
-					<a href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '50px' }}>
+					<a href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '40px' }}>
 						<HoverNavItem centered onClick={()=> {
 								// open modal or link
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'CloneRequest');
@@ -194,7 +195,8 @@ const EdaNavigationHandler = {
 						}}
 							toolTheme={toolTheme}
 						>
-							<Notifications src={BellIcon} notificationCount={state.notifications.length} />
+							{/* <Notifications src={BellIcon} notificationCount={state.notifications.length} /> */}
+							<ConstrainedIcon src={BellIcon} />
 							<span style={{ marginLeft: '10px' }}>Notifications</span>
 						</HoverNavItem>
 					</GCTooltip>
@@ -234,7 +236,8 @@ const EdaNavigationHandler = {
 							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'showUserDashboardSelected');
 						}} active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard} toolTheme={toolTheme}
 					>
-						<Notifications src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0} />
+						{/* <Notifications src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0} /> */}
+						<ConstrainedIcon src={UserIcon} />
 						<span style={{marginLeft: '10px'}}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>

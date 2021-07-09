@@ -50,9 +50,14 @@ class DataTrackerController {
 	async getTrackedData(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { limit = 10, offset = 0, order = [], where = {} } = req.body;
+		const new_where = {}
+		where.forEach((object,idx) => {
+			const col = Object.keys(object)[0]
+			new_where[col] = {[Sequelize.Op.iLike]: where[idx][col]['$iLike']}
+		});
 		try {
-			const totalCount = await this.documentCorpus.count({ where });
-			const docs = await this.documentCorpus.findAll({ limit, offset, order, where });
+			const totalCount = await this.documentCorpus.count({ where: new_where });
+			const docs = await this.documentCorpus.findAll({ limit, offset, order, where: new_where });
 
 			res.status(200).send({ totalCount, docs });
 
@@ -129,67 +134,67 @@ class DataTrackerController {
 		
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-				if (option === 'all'){
-					const crawlerData = await this.crawlerStatus.findAndCountAll({
-						raw: true,
-						attributes: ['crawler_name', 'status', 'datetime'],
-						where,
-						offset,
-						order,
-						limit
-						});
-					res.status(200).send({totalCount: crawlerData.count, docs: crawlerData.rows});
-				}else if (option === 'status'){
-					let level_value;
-					let crawlerData = {};
-					level_value = await this.crawlerStatus.findAll({
-						attributes: ['crawler_name', 'status', 'datetime'],
-						}).then(data=>{
-							data.map(item =>{
-								if (crawlerData[item.crawler_name] ){
-									if (crawlerData[item.crawler_name].datetime <item.datetime){
-										crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
-									}
-								}else{
-									crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
-								}
-							})
-							return crawlerData
-						})
-						let resp = []
-						Object.keys(level_value).map(data =>{
-										resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
-						})
-						res.status(200).send({totalCount: resp.length, docs: resp});
-				}else if (option === 'last'){
-					let level_value;
-					let crawlerData = {};
-					level_value = await this.crawlerStatus.findAll({
-						attributes: ['crawler_name', 'status', 'datetime'],
-						where: {
-							status: 'Ingest Complete'
+			if (option === 'all'){
+				const crawlerData = await this.crawlerStatus.findAndCountAll({
+					raw: true,
+					attributes: ['crawler_name', 'status', 'datetime'],
+					where,
+					offset,
+					order,
+					limit
+				});
+				res.status(200).send({totalCount: crawlerData.count, docs: crawlerData.rows});
+			}else if (option === 'status'){
+				let level_value;
+				let crawlerData = {};
+				level_value = await this.crawlerStatus.findAll({
+					attributes: ['crawler_name', 'status', 'datetime'],
+				}).then(data=>{
+					data.map(item =>{
+						if (crawlerData[item.crawler_name] ){
+							if (crawlerData[item.crawler_name].datetime <item.datetime){
+								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+							}
+						}else{
+							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
 						}
-					}).then(data=>{
-						data.map(item =>{
-								if (crawlerData[item.crawler_name] ){
-										if (crawlerData[item.crawler_name].datetime <item.datetime){
-												crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
-										}
-								}else{
-										crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
-								}
-						})
-						return crawlerData
 					})
-					let resp = []
-					Object.keys(level_value).map(data =>{
-									resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
+					return crawlerData
+				})
+				let resp = []
+				Object.keys(level_value).map(data =>{
+					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
+				})
+				res.status(200).send({totalCount: resp.length, docs: resp});
+			}else if (option === 'last'){
+				let level_value;
+				let crawlerData = {};
+				level_value = await this.crawlerStatus.findAll({
+					attributes: ['crawler_name', 'status', 'datetime'],
+					where: {
+						status: 'Ingest Complete'
+					}
+				}).then(data=>{
+					data.map(item =>{
+						if (crawlerData[item.crawler_name] ){
+							if (crawlerData[item.crawler_name].datetime <item.datetime){
+								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+							}
+						}else{
+							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+						}
 					})
-					res.status(200).send({totalCount: resp.length, docs: resp});
-				}
+					return crawlerData
+				})
+				let resp = []
+				Object.keys(level_value).map(data =>{
+					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
+				})
+				res.status(200).send({totalCount: resp.length, docs: resp});
+			}
 		} catch (e) {
-				this.logger.error(e.message, 'UXV7V8R', userId);
-				res.status(502).send({ error: e.message, message: 'Error retrieving crawler metadata' });
+			this.logger.error(e.message, 'UXV7V8R', userId);
+			res.status(502).send({ error: e.message, message: 'Error retrieving crawler metadata' });
 		}
 	}
 

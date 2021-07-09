@@ -119,7 +119,7 @@ const ViewHeader = (props) => {
 
 	const handleChangeSort = (event) => {
 		const {target: { value }} = event;
-		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
+		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true, infiniteScrollPage: 1});
 	}
 
 	const handleChangeOrder = (value) => {
@@ -151,7 +151,7 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 			<div className={'view-buttons-container'}>
-				{categorySorting[activeCategoryTab] !== undefined && 
+				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && 
 					<>
 						<FormControl classes={{root:classes.root}}>
 							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>

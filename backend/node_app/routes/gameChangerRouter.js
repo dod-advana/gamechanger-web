@@ -5,6 +5,7 @@ const router = express.Router();
 const { DocumentController } = require('../controllers/documentController');
 const { SearchController } = require('../controllers/searchController');
 const { ExportHistoryController } = require('../controllers/exportHistoryController');
+const { MegaMenuController } = require('../controllers/megaMenuController');
 const { UserController } = require('../controllers/userController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
@@ -33,6 +34,7 @@ const clone = new CloneController();
 const dataTracker = new DataTrackerController();
 const admin = new AdminController();
 const notification = new NotificationController();
+const megamenu = new MegaMenuController();
 const transformer = new TransformerController();
 const textSuggest = new TextSuggestionController();
 const apiController = new ExternalAPIController();
@@ -70,16 +72,25 @@ router.get('/getThumbnail', document.getThumbnail);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
+router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
-router.get('/getTransformerList', transformer.getTransformerList);
-router.get('/getCurrentTransformer', transformer.getCurrentTransformer);
-router.post('/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/reloadModels', transformer.reloadModels);
+router.get('/admin/downloadDependencies', transformer.downloadDependencies);
+router.get('/admin/getAPIInformation', transformer.getAPIInformation);
+router.get('/admin/getS3List', transformer.getS3List);
+router.get('/admin/getModelsList', transformer.getModelsList);
+router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
+router.post('/admin/setTransformerModel', transformer.setTransformerModel);
+router.post('/admin/downloadCorpus', transformer.downloadCorpus);
+router.post('/admin/trainModel', transformer.trainModel);
 
 router.get('/getNotifications', notification.getNotifications);
-router.post('/createNotification', notification.createNotification);
-router.post('/deleteNotification', notification.deleteNotification);
-router.post('/editNotificationActive', notification.editNotificationActive);
+router.post('/admin/createNotification', notification.createNotification);
+router.post('/admin/deleteNotification', notification.deleteNotification);
+router.post('/admin/editNotificationActive', notification.editNotificationActive);
+
+router.get('/megamenu/links', megamenu.getLinks);
 
 router.get('/admin/createSearchHistoryCache', cache.createSearchHistoryCache);
 router.get('/admin/clearSearchHistoryCache', cache.clearSearchHistoryCache);
@@ -91,7 +102,7 @@ router.get('/admin/createGraphDataCache', cache.createGraphDataCache);
 router.get('/admin/clearGraphDataCache', cache.clearGraphDataCache);
 
 router.get('/tutorialOverlay', tutorialOverlay.fetchTutorialOverlays);
-router.post('/tutorialOverlay/save', tutorialOverlay.saveTutorialOverlays);
+router.post('/admin/tutorialOverlay/save', tutorialOverlay.saveTutorialOverlays);
 
 router.get('/user/exportHistory', exportHistory.getExportHistory);
 router.delete('/user/exportHistory/:historyId', exportHistory.deleteExportHistory);
@@ -104,18 +115,18 @@ router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
 router.get('/trending/getTrendingBlacklist', trending.getTrendingBlacklist);
-router.post('/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
-router.post('/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
+router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
+router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
 
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/setUserBetaStatus', user.setUserBetaStatus);
-router.post('/setUserSearchSettings', user.setUserSearchSettings);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
-router.post('/addInternalUser', user.addInternalUser);
-router.post('/deleteInternalUser', user.deleteInternalUser);
+router.post('/admin/addInternalUser', user.addInternalUser);
+router.post('/admin/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
+router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.get('/admin/populateNewUserId', user.populateNewUserId);
@@ -141,9 +152,11 @@ router.get('/appSettings/userFeedback', appSettings.getUserFeedbackMode);
 router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
+router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
+router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 
 module.exports = router;
