@@ -732,7 +732,7 @@ const EdaCardHandler = {
 									isSearch: false
 								}
 							});
-							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data.sort() : [];
+							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
 	
 							setState(dispatch, { contractAwards });
 						}
@@ -750,16 +750,18 @@ const EdaCardHandler = {
 				const listItems = [];
 				if (contractMods && contractMods !== 'loading') {
 					for (const mod of contractMods) {
-						if (mod !== "Award") {
+						const { modNumber, signatureDate, effectiveDate } = mod;
+						if (modNumber !== "Award") {
+							const date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
 							listItems.push(
 							<>
 								<ListItem>
-									{item.modification_eda_ext === mod &&
+									{item.modification_eda_ext === modNumber &&
 										<ListItemIcon style={{ minWidth: '54px'}}>
 											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
-									<ListItemText style={{ margin: item.modification_eda_ext !== mod ? '0 0 0 54px' : ''}} primary={mod} />
+									<ListItemText style={{ margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : ''}} primary={modNumber} secondary={date ? `${date}` : ''} />
 								</ListItem>
 								<Divider light={true}/>
 							</>
