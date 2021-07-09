@@ -179,6 +179,7 @@ class ResponsibilityController {
 
 	async getParagraphNum(raw, user) {
 		try {
+			console.log(raw);
 			let fields = raw.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields;
 
 			return fields['paragraphs.par_inc_count'][0]
@@ -244,6 +245,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {limit = 10, offset = 0, order = [], where = {}} = req.body;
+			console.log(where);
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,

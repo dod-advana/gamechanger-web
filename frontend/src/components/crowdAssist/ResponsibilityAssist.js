@@ -109,12 +109,11 @@ class ResponsibilityAssist extends Component {
 			filename: this.props.context.state.filename,
 			text: this.props.context.state.responsibilityText
 		});
-		console.log(data);
+
 		this.setupPowerUserData(data);
 	}
 
 	setupPowerUserData = (data) => {
-		console.log(data);
 		let startPar = 0;
 		let paraLen = data.paragraphs.length;
 		let endPar = paraLen;

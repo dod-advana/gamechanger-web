@@ -31,7 +31,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.ARRAY(DataTypes.TEXT),
 				allowNull: true
 			},
-
+			status: {
+				type: DataTypes.TEXT,
+				defaultValue: "active"
+			},
 		},
 		{
 			freezeTableName: true,
