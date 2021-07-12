@@ -289,7 +289,6 @@ const DocumentDetailsPage = (props) => {
 									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DetailsPaginationChanged', 'page', page);
 									handleChangeDocsPage(section, page);
 								}}
-								className='gcPagination'
 							/>
 						}
 					</div>
