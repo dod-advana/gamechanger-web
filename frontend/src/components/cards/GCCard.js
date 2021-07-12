@@ -310,7 +310,8 @@ function GCCard (props) {
 		item,
 		graphView = false,
 		closeGraphCard = () => {},
-		collection = []
+		collection = [],
+		detailPage = false
     } = props;
     
     const cardType = item.type;
@@ -664,7 +665,8 @@ function GCCard (props) {
 										state,
 										setFavoriteTopic,
 										setFavorite,
-										handleFavoriteTopicClicked
+										handleFavoriteTopicClicked,
+										detailPage
 									}),
 									hitsExpanded,
 									setHitsExpanded,
@@ -724,7 +726,8 @@ function GCCard (props) {
 									dispatch,
 									setFavoriteTopic,
 									setFavorite,
-									handleFavoriteTopicClicked
+									handleFavoriteTopicClicked,
+									detailPage
 								})}
 							</div>
 	
