@@ -6,7 +6,6 @@ import {
 	getMetadataForPropertyTable, getReferenceListMetadataPropertyTable,
 	getTrackingNameForFactory, getTypeDisplay, getTypeIcon, getTypeTextColor
 } from "../../../gamechangerUtils";
-import {primary} from "../../../components/common/gc-colors";
 import {CardButton} from "../../common/CardButton";
 import GCTooltip from "../../common/GCToolTip";
 import SimpleTable from "../../common/SimpleTable";
@@ -25,13 +24,13 @@ const styles = {
 	},
 	viewMoreChevron: {
 		fontSize: 14,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'normal',
 		marginLeft: 5
     },
 	viewMoreButton: {
 		fontSize: 16,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'bold',
 		cursor: 'pointer',
 		minWidth: 60
