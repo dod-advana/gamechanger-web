@@ -529,7 +529,7 @@ const PolicySearchMatrixHandler = {
 			handleSubmit
 		} = props;
 		
-		return (
+        return (
 			<>
 				{/*{false &&*/}
 				{/*	<div style={styles.subHead}>*/}
@@ -562,19 +562,19 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderSources(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
