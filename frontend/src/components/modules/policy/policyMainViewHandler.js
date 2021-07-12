@@ -74,6 +74,10 @@ const PolicyMainViewHandler = {
 		defaultMainViewHandler.handleCategoryTabChange(props);
 	},
 	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
+	},
+	
 	getViewNames(props) {
 		const viewNames = defaultMainViewHandler.getViewNames(props);
 		viewNames.push(
