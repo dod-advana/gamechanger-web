@@ -14,6 +14,7 @@ import {
 	Checkbox
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import {commaThousands} from '../../gamechangerUtils';
 
 const styles = {
 	innerContainer: {
@@ -329,48 +330,101 @@ export default function SearchMatrix(props) {
 		setState(dispatch, { searchText: newSearchText, runSearch: true });
 	}
 
-	const handleSelectCategory = (event) => {
-		if(state.activeCategoryTab === event.target.name){
-			setState(dispatch, { 
-				selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked},
-				activeCategoryTab: 'all'
-			})
-		}
-		setState(dispatch, { selectedCategories: {...state.selectedCategories, [event.target.name]:event.target.checked}})
-	}
-
-	const handleAddSearchTerm = (phrase,source,idx) => {
+	const handleAddSearchTerm = (phrase, source, idx) => {
 		const temp = _.cloneDeep(expansionTerms)
 		temp[idx].checked = !temp[idx].checked
 		setExpansionTerms(temp);
 	}
 	
+	const handleSelectAllCategories = (state, dispatch) => {
+		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificCategoriesSelected = false;
+		newSearchSettings.allCategoriesSelected = true;
+		Object.keys(newSelectedCategories).forEach(category => newSelectedCategories[category] = true);
+		setState(dispatch, { selectedCategories: newSelectedCategories, searchSettings: newSearchSettings, metricsCounted: false });
+	}
+
+	const handleSelectSpecificCategories = (state, dispatch) =>{
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificCategoriesSelected = true;
+		newSearchSettings.allCategoriesSelected = false;
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	}
+
+	const formatMetaData = (meta = {}, tab) => {
+		if (_.isEmpty(meta))
+			return null;
+
+		if (!_.isNil(meta?.[tab]?.total))
+			return ` (${commaThousands(meta[tab]?.total)})`;
+	
+		return null;
+	};
+
+	const handleCategoriesFilterChange = (event, state, dispatch) => {
+		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+		let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+		newSelectedCategories[categoryName] = event.target.checked;
+		setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
+		// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
+	}
+
 	const renderCategories = () => {
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-				{Object.keys(state.selectedCategories).map(category => {
-					return (
-						<FormGroup key={`${category}-key`} row style={{ marginBottom: '10px' }}>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name='All categories'
+						value='All categories'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllCategories(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.allCategoriesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='All categories'
+							style={styles.filterBox}
+						/>}
+						label='All categories'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row>
+					<FormControlLabel
+						name='Specific category(s)'
+						value='Specific category(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificCategories(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.specificCategoriesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='Specific category(s)'
+							style={styles.filterBox}
+						/>}
+						label='Specific category(s)'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+					{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
+						return (
 							<FormControlLabel
-								name={category}
-								value={category}
-								classes={{ label: classes.titleText }}
-								control={<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={handleSelectCategory}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.selectedCategories[category]}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={category}
-									style={styles.filterBox}
-								/>}
-								label={category}
+								key={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
+								value={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
+								classes={{ label: classes.checkboxPill }}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category} (${formatMetaData(state.categoryMetadataa, category)})`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
+								label={`${category} ${formatMetaData(state.categoryMetadata, category)}`}
 								labelPlacement="end"
-								style={styles.titleText}
 							/>
-						</FormGroup>
-					)
-				})}
+						)
+					})}
+				</FormGroup>
 			</FormControl>
 		)
 	}
