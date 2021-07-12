@@ -33,15 +33,20 @@ const handleSelectSpecificOrgs = (state, dispatch) => {
 }
 
 const handleSelectAllOrgs = (state, dispatch) => {
-    const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificOrgsSelected = false;
-	newSearchSettings.allOrgsSelected = true;
-    setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificOrgsSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificOrgsSelected = false;
+		newSearchSettings.allOrgsSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.orgFilter).forEach(org => {
+			runSearch = newSearchSettings.orgFilter[org] ? true : false
+			newSearchSettings.orgFilter[org] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
-//	const newSelectedOrgs = _.cloneDeep(state.searchSettings.orgFilter);
-        
     const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 	newSearchSettings.orgFilter = {
@@ -50,19 +55,17 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	};
 	newSearchSettings.isFilterUpdate = true;
 
-    //newSelectedOrgs[orgName] = event.target.checked;
     setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
-	//setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
 const renderSources = (state, dispatch, classes) => {
 		
-		const betterOrgData = {};
-		for(let i=0; i<state.sidebarOrgs.length; i++) {
-			betterOrgData[state.sidebarOrgs[i][0]] = state.sidebarOrgs[i][1];
-		}
 		const { originalOrgFilters } = state.searchSettings;
+		const betterOrgData = {};
+		for(let i=0; i<originalOrgFilters.length; i++) {
+			betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
+		}
 
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -105,14 +108,14 @@ const renderSources = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificOrgsSelected && Object.keys(originalOrgFilters).map(org => {
+					{state.searchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
 						return (
 							<FormControlLabel
-								key={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
-								value={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
+								key={`${org} (${betterOrgData[org]})`}
+								value={`${org} (${betterOrgData[org]})`}
 								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`} checked={state.searchSettings.orgFilter[originalOrgFilters[org][0]]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
-								label={`${originalOrgFilters[org][0]} (${originalOrgFilters[org][1]})`}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+								label={`${org} (${betterOrgData[org]})`}
 								labelPlacement="end"
 							/>
 						)
@@ -130,10 +133,17 @@ const handleSelectSpecificTypes = (state, dispatch) => {
 }
 
 const handleSelectAllTypes = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificTypesSelected = false;
-	newSearchSettings.allTypesSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificTypesSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificTypesSelected = false;
+		newSearchSettings.allTypesSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.typeFilter).forEach(type => {
+			runSearch = newSearchSettings.typeFilter[type] ? true : false;
+			newSearchSettings.typeFilter[type] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
 const handleTypeFilterChangeLocal = (event, state, dispatch) => {
@@ -150,11 +160,12 @@ const handleTypeFilterChangeLocal = (event, state, dispatch) => {
 
 const renderTypes = (state, dispatch, classes) => {
 
-	const betterTypeData = {};
-	for(let i=0; i<state.sidebarDocTypes.length; i++) {
-		betterTypeData[state.sidebarDocTypes[i][0]] = state.sidebarDocTypes[i][1];
-	}
+
 	const { originalTypeFilters } = state.searchSettings;
+	const betterTypeData = {};
+	for(let i=0; i<originalTypeFilters.length; i++) {
+		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
+	}
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -197,14 +208,14 @@ const renderTypes = (state, dispatch, classes) => {
 				/>
 			</FormGroup>
 			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-				{state.searchSettings.specificTypesSelected && Object.keys(originalTypeFilters).map(type => {
+				{state.searchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
 					return (
 						<FormControlLabel
-							key={`${originalTypeFilters[type][0]} (${originalTypeFilters[type][1]})`}
-							value={`${originalTypeFilters[type][0]} (${originalTypeFilters[type][1]})`}
+							key={`${type} (${betterTypeData[type]})`}
+							value={`${type} (${betterTypeData[type]})`}
 							classes={{ label: classes.checkboxPill }}
-							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${originalTypeFilters[type][0]} (${originalTypeFilters[type][1]})`} checked={state.searchSettings.typeFilter[originalTypeFilters[type][0]]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)} />}
-							label={`${originalTypeFilters[type][0]} (${originalTypeFilters[type][1]})`}
+							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type} (${betterTypeData[type]})`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)} />}
+							label={`${type} (${betterTypeData[type]})`}
 							labelPlacement="end"
 						/>
 					)
