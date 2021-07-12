@@ -361,6 +361,11 @@ const PolicySearchHandler = {
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
+
+						if(!searchSettings.isFilterUpdate){
+							searchSettings.originalOrgFilters = sidebarOrgData;
+							searchSettings.originalTypeFilters = sidebarTypes;
+						}
 						
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
