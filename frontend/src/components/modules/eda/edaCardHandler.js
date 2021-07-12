@@ -748,11 +748,27 @@ const EdaCardHandler = {
 			const renderContractMods = () => {
 				const contractMods = state.contractAwards && state.contractAwards[item.award_id_eda_ext] ? state.contractAwards[item.award_id_eda_ext] : [];
 				const listItems = [];
+				listItems.push(
+
+				);
 				if (contractMods && contractMods !== 'loading') {
 					for (const mod of contractMods) {
 						const { modNumber, signatureDate, effectiveDate } = mod;
 						if (modNumber !== "Award") {
-							const date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
+							let date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
+							let dateText = "";
+							if (signatureDate) {
+								date = signatureDate;
+								dateText = "(S)"
+							}
+							else if (effectiveDate) {
+								date = effectiveDate;
+								dateText = "(E)";
+							}
+							else {
+								date = null;
+								dateText = ""
+							}
 							listItems.push(
 							<>
 								<ListItem>
@@ -761,7 +777,11 @@ const EdaCardHandler = {
 											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
-									<ListItemText style={{ margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : ''}} primary={modNumber} secondary={date ? `${date}` : ''} />
+									<ListItemText style={{ 
+										margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
+										display: 'flex',
+										justifyContent: 'space-between'
+										}} primary={modNumber} secondary={date ? `${dateText}  ${date}` : ''} />
 								</ListItem>
 								<Divider light={true}/>
 							</>
@@ -783,6 +803,10 @@ const EdaCardHandler = {
 											<img src={AwardIcon}  style={{ width: 15 }} alt="award"/>
 										</ListItemIcon>
 										<ListItemText primary={item.award_id_eda_ext} />
+									</ListItem>
+									<Divider light={true} />
+									<ListItem>
+										<ListItemText secondary={"(S) Signature Date | (E) Effective Date"} />
 									</ListItem>
 									<Divider light={true} />
 									{renderContractMods()}
