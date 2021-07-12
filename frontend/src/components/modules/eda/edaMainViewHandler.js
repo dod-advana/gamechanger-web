@@ -1,6 +1,5 @@
 import React from "react";
 import EDASummaryView from "./edaSummaryView";
-import EDATimelineView from "./edaTimelineView";
 import JumpButton from '../globalSearch/JumpButton';
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
@@ -79,14 +78,6 @@ const EdaMainViewHandler = {
 			}
 		);
 
-		viewNames.push(
-			{
-				name: 'Timeline',
-				title: 'Timeline View',
-				className: '',
-				id: 'edaTimelineView'
-			}
-		)
 		return viewNames;
 	},
 	
@@ -153,19 +144,6 @@ const EdaMainViewHandler = {
 				</StyledCenterContainer>}
 			</div>
 		});
-
-		viewPanels.push({panelName: 'Timeline', panel:
-			<div>
-				{!loading && 
-				<StyledCenterContainer
-					showSideFilters={true}
-				>
-					<EDATimelineView
-						{...props}
-					/>	
-				</StyledCenterContainer>}
-			</div>
-		});
 		
 		return viewPanels;
 	},
@@ -185,7 +163,6 @@ const EdaMainViewHandler = {
 			resultsPage,
 			componentStepNumbers,
 			hideTabs,
-			isCachedResult,
 			timeSinceCache,
 			summaryCardView,
 			summaryCardData,
@@ -272,13 +249,7 @@ const EdaMainViewHandler = {
 						/>
 					</div>
 				}
-				{isCachedResult &&
-					<div style={styles.cachedResultIcon}>
-						<GCTooltip title={cacheTip} placement="right" arrow>
-							<i style={styles.image} className="fa fa-bolt fa-2x"/>
-						</GCTooltip>
-					</div>
-				}
+
 				{Permissions.isGameChangerAdmin() && !loading &&
 					<div style={styles.cachedResultIcon}>
 						<i style={{...styles.image, cursor: 'pointer'}} className="fa fa-rocket" onClick={() => setState(dispatch, { showEsQueryDialog: true })}/>

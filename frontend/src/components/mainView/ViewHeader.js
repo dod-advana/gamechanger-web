@@ -144,8 +144,6 @@ const ViewHeader = (props) => {
 		}
 		setDropdownValue(value)
 	}
-
-	console.log(viewNames);
 	
 	return (
 		<div className={'results-count-view-buttons-container'} style={{...mainStyles}}>
