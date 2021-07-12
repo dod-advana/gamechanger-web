@@ -151,7 +151,7 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 			<div className={'view-buttons-container'}>
-				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && 
+				{categorySorting !== undefined && categorySorting['Documents'] !== undefined && selectedCategories['Documents'] && 
 					<>
 						<FormControl classes={{root:classes.root}}>
 							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
@@ -163,7 +163,7 @@ const ViewHeader = (props) => {
 							classes={{root:classes.selectRoot}}
 							autoWidth
 							>
-							{categorySorting[activeCategoryTab].map(sort => {
+							{categorySorting['Documents'].map(sort => {
 								return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
 							})}
 							</Select>

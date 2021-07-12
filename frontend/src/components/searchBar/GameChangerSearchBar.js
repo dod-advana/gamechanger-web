@@ -87,7 +87,7 @@ const GameChangerSearchBar = (props) => {
 		useEffect(() => {
 			const handler = setTimeout(() => {setDebouncedValue(value);}, delay);
 			return () => {clearTimeout(handler);};
-		}, [value]);
+		}, [value, delay]);
 	 return debouncedValue;
 	}; 
 	const ref = useRef();
@@ -125,41 +125,26 @@ const GameChangerSearchBar = (props) => {
 		},
 	 [state, dispatch, loaded]);
 
-	useEffect(() => { // getting dropdown data when searchText changes
-			if(cursor === null && debounceOn){
-				const newDataRows = getDropdownData(debouncedSearchTerm);
-				setDataRows(newDataRows);
+	
+
+	useEffect(()=> { 
+		const debouncedFetchSearchSuggestions = async (value) => {
+			try {
+				const index = state.cloneData?.clone_data?.esCluster ?? '';
+				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
+				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
+				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
+				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
+				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
+				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
+				setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
+			} catch (e) {
+				console.log('debouncedFetchSearchSuggestions err', e);
 			}
-		},
-		[ 
-			cursor,
-			debouncedSearchTerm,
-			userSearchHistory,
-			autocorrect,
-			presearchFile,
-			presearchTitle,
-			presearchTopic,
-			presearchOrg,
-			setDataRows
-		]
-	);
-
-	const debouncedFetchSearchSuggestions = async (value) => {
-		try {
-			const index = state.cloneData?.clone_data?.esCluster ?? '';
-			const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
-			setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
-			setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
-			setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
-			setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
-			setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
-			setPredictions(data?.predictions?.map(item => ({ text: item })) ?? []);
-		} catch (e) {
-			console.log('debouncedFetchSearchSuggestions err', e);
 		}
-	}
-
-	useEffect(()=> { debouncedFetchSearchSuggestions(debouncedSearchTerm);}, [debouncedSearchTerm]); // run when debounce value changes;
+		
+		debouncedFetchSearchSuggestions(debouncedSearchTerm);
+	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
 
 	useEffect(() => {
     function onKeyDown(e) {
@@ -175,7 +160,7 @@ const GameChangerSearchBar = (props) => {
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [setState, dispatch, searchText]);
+  }, [dispatch, searchText]);
 
 	useEffect(() => { // if clicked outside of searchbar, close dropdown
     const handleClick = e => {
@@ -284,21 +269,7 @@ const GameChangerSearchBar = (props) => {
 		setPresearchTitle([]);
 	}
 
-	const handleRowPressed = ({ text, rowType }) => {
-		setState(dispatch, {
-			searchText: text,
-			resultsPage: 1,
-			metricsCounted: false,
-			runSearch: true
-		});
-		setSearchText(text);
-		document.activeElement.blur();
-		setDropdownOpen(false);
 
-		if (rowType) {
-			trackEvent(getTrackingNameForFactory(state.cloneData), 'SearchSuggestionSelected', rowType, text)
-		}
-	}
 
 	const handleOnBlur = (e) => {
 		setCursor(null);
@@ -319,117 +290,158 @@ const GameChangerSearchBar = (props) => {
 		setDropdownOpen(false);
 	}
 
-	const getDropdownData = (text) => {
-		let data = [];
-		let textArray = [];
-		// order of suggestions in dropdwon
-		if (text.length > 0 && autocorrect.length > 0) {
-			const rows = [];
-			autocorrect.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
-			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'autocorrect'
-			});
+	useEffect(() => { // getting dropdown data when searchText changes
+		const getDropdownData = (text) => {
+			let data = [];
+			let textArray = [];
+			// order of suggestions in dropdwon
+			if (text.length > 0 && autocorrect.length > 0) {
+				const rows = [];
+				autocorrect.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'autocorrect'
+				});
+			}
+			if (text.length > 0 && presearchFile.length > 0) {
+				const rows = [];
+				presearchFile.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'presearchFile'
+				});
+			}
+			if (text.length > 0 && presearchTitle.length > 0) {
+				const rows = [];
+				presearchTitle.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'presearchTitle'
+				});
+			}
+			if (text.length > 0 && predictions.length > 0) {
+				const rows = [];
+				predictions.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'predictions'
+				});
+			}
+			if (text.length > 0 && presearchTopic.length > 0) {
+				const rows = [];
+				presearchTopic.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'presearchTopic'
+				});
+			}
+			if (text.length > 0 && presearchOrg.length > 0) {
+				const rows = [];
+				presearchOrg.forEach(o => {
+					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
+						rows.push(o);
+						textArray.push(o.text.toLowerCase());
+					}
+				});
+				data.push({
+					IconComponent: Search,
+					rows: rows,
+					handleRowPressed: handleRowPressed,
+					rowType: 'presearchOrg'
+				});
+			}
+			if ((userSearchHistory?.length > 0) && (searchText.length === 0)){
+				let filteredRows = userSearchHistory;
+				// if scrolling using arrow keys, use original text
+				const textToUse = originalText === null ? text : originalText;
+				// filter rows to make sure it includes
+				filteredRows = _.filter(filteredRows, (o) =>  o.text.toLowerCase().includes(textToUse.toLowerCase()));
+				data.push({
+					IconComponent: AccessTime,
+					rows: text.length > 0 ? filteredRows : userSearchHistory, // if there's no text, give all the history
+					handleRowPressed: handleRowPressed,
+					rowType: 'user_search_history',
+					// for future feature where history can be removed from suggestions
+					// handleDeletePressed: this.handleHistoryDelete,
+				})
+			}
+			return data;
 		}
-		if (text.length > 0 && presearchFile.length > 0) {
-			const rows = [];
-			presearchFile.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
+
+		const handleRowPressed = ({ text, rowType }) => {
+			setState(dispatch, {
+				searchText: text,
+				resultsPage: 1,
+				metricsCounted: false,
+				runSearch: true
 			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'presearchFile'
-			});
+			setSearchText(text);
+			document.activeElement.blur();
+			setDropdownOpen(false);
+	
+			if (rowType) {
+				trackEvent(getTrackingNameForFactory(state.cloneData), 'SearchSuggestionSelected', rowType, text)
+			}
 		}
-		if (text.length > 0 && presearchTitle.length > 0) {
-			const rows = [];
-			presearchTitle.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
-			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'presearchTitle'
-			});
+
+		if(cursor === null && debounceOn){
+			const newDataRows = getDropdownData(debouncedSearchTerm);
+			setDataRows(newDataRows);
 		}
-		if (text.length > 0 && predictions.length > 0) {
-			const rows = [];
-			predictions.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
-			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'predictions'
-			});
-		}
-		if (text.length > 0 && presearchTopic.length > 0) {
-			const rows = [];
-			presearchTopic.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
-			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'presearchTopic'
-			});
-		}
-		if (text.length > 0 && presearchOrg.length > 0) {
-			const rows = [];
-			presearchOrg.forEach(o => {
-				if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-					rows.push(o);
-					textArray.push(o.text.toLowerCase());
-				}
-			});
-			data.push({
-				IconComponent: Search,
-				rows: rows,
-				handleRowPressed: handleRowPressed,
-				rowType: 'presearchOrg'
-			});
-		}
-		if ((userSearchHistory?.length > 0) && (searchText.length === 0)){
-			let filteredRows = userSearchHistory;
-			// if scrolling using arrow keys, use original text
-			const textToUse = originalText === null ? text : originalText;
-			// filter rows to make sure it includes
-			filteredRows = _.filter(filteredRows, (o) =>  o.text.toLowerCase().includes(textToUse.toLowerCase()));
-			data.push({
-				IconComponent: AccessTime,
-				rows: text.length > 0 ? filteredRows : userSearchHistory, // if there's no text, give all the history
-				handleRowPressed: handleRowPressed,
-				rowType: 'user_search_history',
-				// for future feature where history can be removed from suggestions
-				// handleDeletePressed: this.handleHistoryDelete,
-			})
-		}
-		return data;
-	}
+	},
+	[ 
+		dispatch,
+		cursor,
+		originalText, 
+		predictions, 
+		searchText, 
+		state.cloneData,
+		debounceOn,
+		debouncedSearchTerm,
+		userSearchHistory,
+		autocorrect,
+		presearchFile,
+		presearchTitle,
+		presearchTopic,
+		presearchOrg,
+		setDataRows
+	]
+);
 
 	const noResults = Boolean(state.rawSearchResults?.length === 0);
 	const hideSearchResults = noResults && !state.loading;
@@ -543,12 +555,32 @@ const GameChangerSearchBar = (props) => {
 }
 
 GameChangerSearchBar.propTypes = {
-	handleSearch: PropTypes.func.isRequired,
-	handleSearchTextUpdate: PropTypes.func,
-	updateSearchTextOnly: PropTypes.func,
-	handleSearchTypeUpdate: PropTypes.func,
-	searchText: PropTypes.string,
-	SEARCH_TYPES: PropTypes.objectOf(PropTypes.string)
+	context: PropTypes.shape({
+		state: PropTypes.shape({
+			cloneDataSet: PropTypes.bool,
+			historySet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				main_view_module: PropTypes.string,
+				search_module: PropTypes.string,
+				clone_name: PropTypes.string
+			}),
+			history: PropTypes.object,
+			userData: PropTypes.shape({
+				favorite_searches: PropTypes.array
+			}),
+			isFavoriteSearch: PropTypes.bool,
+			docsPagination: PropTypes.bool,
+			entityPagination: PropTypes.bool,
+			topicPagination: PropTypes.bool,
+			replaceResults: PropTypes.bool,
+			activeCategoryTab: PropTypes.string,
+			docsLoading: PropTypes.bool,
+			infiniteScrollPage: PropTypes.number,
+			pageDisplayed: PropTypes.string,
+			searchSettings: PropTypes.object
+		}),
+		dispatch: PropTypes.func
+	})
 }
 
 export default GameChangerSearchBar;

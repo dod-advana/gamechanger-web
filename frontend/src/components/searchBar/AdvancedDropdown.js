@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core/styles';
-import { exactMatch} from '../../gamechangerUtils';
+import { exactMatch } from '../../gamechangerUtils';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
 import SearchMatrixFactory from "../factories/searchMatrixFactory";
 
@@ -197,7 +197,7 @@ const AdvancedDropdown = (props) => {
 
   useEffect(() => {
     const handleClick = e => {
-      if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option')) {
+      if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton') {
         close();
       }
     }; 
@@ -214,5 +214,34 @@ const AdvancedDropdown = (props) => {
 	)
 }
 
-
+AdvancedDropdown.propTypes = {
+  context: PropTypes.shape({
+		state: PropTypes.shape({
+			cloneDataSet: PropTypes.bool,
+			historySet: PropTypes.bool,
+			cloneData: PropTypes.shape({
+				main_view_module: PropTypes.string,
+				search_module: PropTypes.string,
+				clone_name: PropTypes.string
+			}),
+			history: PropTypes.object,
+			userData: PropTypes.shape({
+				favorite_searches: PropTypes.array
+			}),
+			isFavoriteSearch: PropTypes.bool,
+			docsPagination: PropTypes.bool,
+			entityPagination: PropTypes.bool,
+			topicPagination: PropTypes.bool,
+			replaceResults: PropTypes.bool,
+			activeCategoryTab: PropTypes.string,
+			docsLoading: PropTypes.bool,
+			infiniteScrollPage: PropTypes.number,
+			pageDisplayed: PropTypes.string,
+			searchSettings: PropTypes.object
+		}),
+		handleSubmit: PropTypes.func,
+    open: PropTypes.bool,
+    close: PropTypes.func
+	})
+}
 export default AdvancedDropdown;
