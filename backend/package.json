@@ -15,8 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.11.0",
     "@dod-advana/advana-api-auth": "0.0.9",
+    "@elastic/elasticsearch": "^7.11.0",
     "async": "^2.6.0",
     "async-redis": "^1.1.7",
     "aws-sdk": "^2.848.0",
@@ -77,21 +77,38 @@
   "eslintConfig": {
     "rules": {
       "max-len": 0,
-      "indent": [1, "tab", {"SwitchCase": 1}],
+      "indent": [
+        1,
+        "tab",
+        {
+          "SwitchCase": 1
+        }
+      ],
       "space-before-function-paren": 0,
       "radix": 0,
       "comma-dangle": 0,
       "strict": 0,
       "no-throw-literal": 0,
-      "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+      "quotes": [
+        "error",
+        "single",
+        {
+          "allowTemplateLiterals": true
+        }
+      ],
       "no-eval": 0,
-      "no-irregular-whitespace": ["error", { "skipComments": true }]
+      "no-irregular-whitespace": [
+        "error",
+        {
+          "skipComments": true
+        }
+      ]
     },
     "env": {
-        "es6": true
+      "es6": true
     },
     "parserOptions": {
-        "ecmaVersion": 2018
+      "ecmaVersion": 2018
     }
   }
 }
