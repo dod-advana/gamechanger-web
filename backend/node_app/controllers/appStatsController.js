@@ -107,11 +107,11 @@ class AppStatsController {
 	htmlDecode(encodedString) {
 		var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
 		var translate = {
-			"nbsp":" ",
-			"amp" : "&",
-			"quot": "\"",
-			"lt"  : "<",
-			"gt"  : ">"
+			'nbsp':' ',
+			'amp' : '&',
+			'quot': '"',
+			'lt'  : '<',
+			'gt'  : '>'
 		};
 		return encodedString.replace(translate_re, function(match, entity) {
 			return translate[entity];
@@ -202,14 +202,52 @@ class AppStatsController {
 				order by 
 					idvisit,
 					documenttime desc;`,
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(self.cleanFilePath(results));
-				});
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
+				}
+				resolve(self.cleanFilePath(results));
+			});
 		});
+	}
+	/**
+	 * This method gets an array of the 10 most recently opened PDFS
+	 * by a specific user based on userID
+	 * @method queryPDFOpenedByUserId
+	 * @param {String} userId  
+	 */
+	async queryPDFOpenedByUserId(userId, clone_name, connection) {
+		return new Promise((resolve, reject) => {
+			const self = this;
+			connection.query(`
+			SELECT DISTINCT
+				idaction_name, 
+				b.name as document, 
+				MAX(a.server_time) as documenttime 
+			FROM 
+				matomo_log_link_visit_action a, 
+				matomo_log_action b,
+				matomo_log_visit c
+			WHERE 
+				a.idaction_name = b.idaction  
+				and b.name like 'PDFViewer%'
+				and b.name like '% - ${clone_name}'
+				and c.user_id = '${userId}'
+			GROUP BY 
+				document,
+				a.idaction_name
+			ORDER BY 
+				documenttime desc
+			LIMIT 10;`,
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'B07IQHT');
+					throw error;
+				}
+				resolve(self.cleanFilePath(results));
+			});
+		})
 	}
 	/**
 	 * This method gets an array of searches made with a timestamp and idvisit
@@ -237,13 +275,13 @@ class AppStatsController {
 				order by
 					idvisit,
 					searchtime desc;`,
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(results);
-				});
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
+				}
+				resolve(results);
+			});
 		});
 	}
 	/**
@@ -294,8 +332,10 @@ class AppStatsController {
 	 */
 	cleanFilePath(results) {
 		for (let result of results) {
-			let filename = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
+			let action = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
+			const [filename, clone_name] = action.split(' - ');
 			result['document'] = filename;
+			result['clone_name'] = clone_name;
 		}
 		return results;
 	}
@@ -326,6 +366,35 @@ class AppStatsController {
 		} catch (err) {
 			this.logger.error(err, '88ZHUHU');
 			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
+	/**
+	 * This method is called by an endpoint to query matomo to find the most recently opened documents
+	 * by a user
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	async getRecentlyOpenedDocs(req, res) {
+		let userId = 'Unknown';
+		let connection;
+		try {
+			const { clone_name } = req.body
+			const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database
+			});
+			connection.connect();
+			const results = await this.queryPDFOpenedByUserId(userId, clone_name, connection);
+			res.status(200).send(results);
+		} catch (err) {
+			this.logger.error(err, '1CZPASK', userId)
+			res.status(500).send(err)
 		} finally {
 			connection.end();
 		}
