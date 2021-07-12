@@ -364,6 +364,7 @@ const PolicySearchHandler = {
 
 						if(!searchSettings.isFilterUpdate){
 							searchSettings.originalOrgFilters = sidebarOrgData;
+							searchSettings.originalTypeFilters = sidebarTypes;
 						}
 						
 						setState(dispatch, {

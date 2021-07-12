@@ -147,6 +147,7 @@ const initState = {
 	searchSettings: {
 		isFilterUpdate: false,
 		originalOrgFilters: orgFilters,
+		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
