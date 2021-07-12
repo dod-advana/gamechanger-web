@@ -748,10 +748,19 @@ const EdaCardHandler = {
 			const renderContractMods = () => {
 				const contractMods = state.contractAwards && state.contractAwards[item.award_id_eda_ext] ? state.contractAwards[item.award_id_eda_ext] : [];
 				const listItems = [];
-				listItems.push(
-
-				);
+				
 				if (contractMods && contractMods !== 'loading') {
+					if (contractMods.length > 0) {
+						listItems.push(
+							<>
+								<ListItem>
+									<ListItemText style={{ textAlign: 'end' }} secondary={"(S) Signature Date | (E) Effective Date"} />
+								</ListItem>
+								<Divider light={true} />
+							</>
+						)
+					}
+					
 					for (const mod of contractMods) {
 						const { modNumber, signatureDate, effectiveDate } = mod;
 						if (modNumber !== "Award") {
@@ -803,10 +812,6 @@ const EdaCardHandler = {
 											<img src={AwardIcon}  style={{ width: 15 }} alt="award"/>
 										</ListItemIcon>
 										<ListItemText primary={item.award_id_eda_ext} />
-									</ListItem>
-									<Divider light={true} />
-									<ListItem>
-										<ListItemText secondary={"(S) Signature Date | (E) Effective Date"} />
 									</ListItem>
 									<Divider light={true} />
 									{renderContractMods()}
