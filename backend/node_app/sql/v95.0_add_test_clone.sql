@@ -3,4 +3,4 @@ navigation_module,card_module,is_live,url,permissions_required,clone_to_advana,c
 show_graph,clone_to_jupiter,show_tutorial,show_crowd_source,show_feedback,config,graph_module,main_view_module)
 VALUES (6,'gamechanger-test','policy/policySearchHandler','policy/policyExportHandler','GAMECHANGER','policy/policyTitleBarHandler',
 'policy/policyNavigationHandler','policy/policyCardHandler',TRUE,'gamechanger-test',TRUE,TRUE,TRUE,FALSE,
-TRUE,FALSE,FALSE,TRUE,TRUE,'{"esindex": "gamechanger"}', 'policy/policyGraphHandler','policy/policyMainViewHandler');
+TRUE,FALSE,FALSE,TRUE,TRUE,'{"esindex": "gamechanger"}', 'policy/policyGraphHandler','policy/policyTestMainViewHandler');

@@ -237,7 +237,7 @@ const DefaultMainViewHandler = {
 		if (trendingStorage) {
 			JSON.parse(trendingStorage).forEach(search => {
 				if (search.search) {
-					trendingLinks.push({search:search.search.replaceAll('&#039;', '"'), favorite: false});
+					trendingLinks.push(search.search.replaceAll('&#039;', '"'));
 				}
 			});
 		}
