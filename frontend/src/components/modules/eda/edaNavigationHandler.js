@@ -13,7 +13,7 @@ import {
 	StyledBadgeSmall
 } from "advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
-import {clearDashboardNotification, getUserData, setState} from "../../../sharedFunctions";
+import { setState } from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import UserIcon from "../../../images/icon/UserIcon.png";
