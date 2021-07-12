@@ -292,7 +292,11 @@ class DataLibrary {
 				if(err) {
 					reject(err, err.stack);
 				} else {
-					resolve(data[0].Body.toString('base64'));
+					try {
+						resolve(data.Body.toString('base64'));
+					} catch (e) {
+						reject(e)
+					}
 				}
 			})
 		});
