@@ -140,7 +140,6 @@ const PolicyMainViewHandler = {
 			topicCount,
 			topicSearchResults,
 			topicPage,
-            searchSettings,
 			hideTabs,
 			iframePreviewLink,
 			isCachedResult,
