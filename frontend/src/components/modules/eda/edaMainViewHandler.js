@@ -5,7 +5,6 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
-import GCTooltip from "../../common/GCToolTip";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {
 	getTrackingNameForFactory,
@@ -163,7 +162,6 @@ const EdaMainViewHandler = {
 			resultsPage,
 			componentStepNumbers,
 			hideTabs,
-			timeSinceCache,
 			summaryCardView,
 			summaryCardData,
 			resultsText
@@ -174,8 +172,6 @@ const EdaMainViewHandler = {
 		}
 		if (!iframePreviewLink) sideScroll = {};
 		
-		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`;
-
 		const getSearchResults = (searchResultData) => {
 
 			return _.map(searchResultData, (item, idx) => {
