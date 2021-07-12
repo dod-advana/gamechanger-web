@@ -85,9 +85,9 @@ router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
 
 router.get('/getNotifications', notification.getNotifications);
-router.post('/createNotification', notification.createNotification);
-router.post('/deleteNotification', notification.deleteNotification);
-router.post('/editNotificationActive', notification.editNotificationActive);
+router.post('/admin/createNotification', notification.createNotification);
+router.post('/admin/deleteNotification', notification.deleteNotification);
+router.post('/admin/editNotificationActive', notification.editNotificationActive);
 
 router.get('/megamenu/links', megamenu.getLinks);
 
@@ -101,7 +101,7 @@ router.get('/admin/createGraphDataCache', cache.createGraphDataCache);
 router.get('/admin/clearGraphDataCache', cache.clearGraphDataCache);
 
 router.get('/tutorialOverlay', tutorialOverlay.fetchTutorialOverlays);
-router.post('/tutorialOverlay/save', tutorialOverlay.saveTutorialOverlays);
+router.post('/admin/tutorialOverlay/save', tutorialOverlay.saveTutorialOverlays);
 
 router.get('/user/exportHistory', exportHistory.getExportHistory);
 router.delete('/user/exportHistory/:historyId', exportHistory.deleteExportHistory);
@@ -114,16 +114,16 @@ router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
 router.get('/trending/getTrendingBlacklist', trending.getTrendingBlacklist);
-router.post('/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
-router.post('/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
+router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
+router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
 
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/setUserBetaStatus', user.setUserBetaStatus);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
-router.post('/addInternalUser', user.addInternalUser);
-router.post('/deleteInternalUser', user.deleteInternalUser);
+router.post('/admin/addInternalUser', user.addInternalUser);
+router.post('/admin/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
 router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
