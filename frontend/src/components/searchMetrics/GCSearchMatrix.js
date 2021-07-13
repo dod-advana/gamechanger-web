@@ -367,7 +367,6 @@ export default function SearchMatrix(props) {
 		let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 		newSelectedCategories[categoryName] = event.target.checked;
 		setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
-		// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 	}
 
 	const renderCategories = () => {

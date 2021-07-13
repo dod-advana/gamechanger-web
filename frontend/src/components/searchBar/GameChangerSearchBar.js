@@ -157,6 +157,7 @@ const GameChangerSearchBar = (props) => {
 					metricsCounted: false,
 					runSearch: true
 				});
+				setDropdownOpen(false);
 				document.activeElement.blur();
 			}
     }

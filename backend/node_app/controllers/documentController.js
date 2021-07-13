@@ -30,6 +30,7 @@ class DocumentController {
 		this.saveDocumentAnnotations = this.saveDocumentAnnotations.bind(this);
 		this.getPDF = this.getPDF.bind(this);
 		this.getThumbnail = this.getThumbnail.bind(this);
+		this.getHomepageThumbnail = this.getHomepageThumbnail.bind(this);
 		this.cleanDocumentForCrowdAssist = this.cleanDocumentForCrowdAssist.bind(this);
 		this.getDocumentProperties = this.getDocumentProperties.bind(this);
 		this.cleanUpEsResultsForAssist = this.cleanUpEsResultsForAssist.bind(this);
@@ -266,6 +267,29 @@ class DocumentController {
 		}
 	};
 
+	async getHomepageThumbnail(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			const { filenames, dest } = req.body
+			const promises = []
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			filenames.forEach(({name}) => {
+				const filekey = name;
+				if (!(dest && filekey)) {
+					throw new Error('Both destination and filekey are required query parameters');
+				}
+	
+				promises.push(this.dataApi.getFileThumbnail({dest, filekey}, userId));
+			});
+			
+			Promise.all(promises).then(values => {
+				res.status(200).send(values)
+			})
+		} catch (err) {
+			this.logger.error(err, 'TJJUFQC', userId)
+			res.status(500).send(err);
+		}
+	}
 	async getDocumentProperties(req, res) {
 		let userId = 'webapp_unknown';
 		try {
