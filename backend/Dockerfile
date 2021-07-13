@@ -31,7 +31,7 @@ ENV APP_BIN="${APP_DIR}/node_modules/.bin"
 ENV PATH="${APP_BIN}:${PATH}"
 
 WORKDIR "${APP_DIR}"
-COPY package.json "${APP_DIR}"
+COPY --chown=node package.json "${APP_DIR}"
 
 ARG NPM_REGISTRY="http://10.194.9.122"
 RUN npm install nodemon \
@@ -40,7 +40,7 @@ RUN npm install nodemon \
     && npm config set registry "$NPM_REGISTRY" \
     && npm install
 
-COPY . "${APP_DIR}"
+COPY --chown=node . "${APP_DIR}"
 
 EXPOSE 8990
 CMD ./start.sh
