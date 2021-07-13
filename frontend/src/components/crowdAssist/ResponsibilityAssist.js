@@ -40,6 +40,7 @@ const CloseButton = styled.div`
 `;
 
 const initState = {
+	id: null,
 	textsListFull: [' '],
 	textsList: [' '],
 	currentTextIndex: 0,
@@ -68,7 +69,7 @@ const initState = {
 	atEnd: false,
 	filename: '',
 	pageNumber: 0,
-	searchText: ''
+	searchText: '',
 }
 
 class ResponsibilityAssist extends Component {
@@ -109,7 +110,6 @@ class ResponsibilityAssist extends Component {
 			filename: this.props.context.state.filename,
 			text: this.props.context.state.responsibilityText
 		});
-
 		this.setupPowerUserData(data);
 	}
 
@@ -137,6 +137,7 @@ class ResponsibilityAssist extends Component {
 			return paragraph.par_raw_text_t;
 		});
 		
+		const id = this.props.context.state.id;
 		const filename = data.paragraphs[data.par_num]?.filename;
 		const pageNumber = data.paragraphs[data.par_num]?.page_num_i + 1;
 		const searchText = this.props.context.state.responsibilityText;
@@ -147,6 +148,7 @@ class ResponsibilityAssist extends Component {
 						"Responsibility": highlightColors[4]};
 
 		this.setState({
+			id: id,
 			startPar: startPar,
 			endPar: endPar,
 			textsListsFull: texts,
@@ -168,6 +170,7 @@ class ResponsibilityAssist extends Component {
 
 	resetAnnotationState = () => {
 		this.setState({
+			id: null,
 			textsListFull: [' '],
 			textsList: [' '],
 			currentTextIndex: 0,
@@ -199,7 +202,7 @@ class ResponsibilityAssist extends Component {
 			atEnd: false,
 			filename: '',
 			pageNumber: 0,
-			searchText: ''
+			searchText: '',
 		});
 	}
 
@@ -231,9 +234,8 @@ class ResponsibilityAssist extends Component {
 	}
 
 	handlePowerSave = () => {
-		/*
-		const { doc_id, doc_num, doc_type, voluntary, annotatedTokens, textsList, isTutorial } = this.state;
-
+		
+			/*
 		if (isTutorial) return;
 
 		const userId = Auth.getUserId();
@@ -276,33 +278,53 @@ class ResponsibilityAssist extends Component {
 		this.closeModal();
 	}
 
+	handleClose = () => {
+		this.resetAnnotationState();
+		this.closeModal();
+	}
+
 	handleSubmit = () => {
-		//TODO... this function
-		this.handleSave(true);
+		console.log('jere');
+		const {id,  annotatedTokens } = this.state; // get the things for the query
+		
+		let annotatedEntity = '';
+		let annotatedResponsibilityText = '';
+
+		annotatedTokens.forEach(annotation => {
+			if( annotation['tag'] === 'Entity'){
+				annotation['tokens'].forEach(t => {
+					annotatedEntity = annotatedEntity.concat(t, ' ');
+				})
+				
+			}else if( annotation['tag'] === 'Responsibility'){
+				annotation['tokens'].forEach(t => {
+					annotatedResponsibilityText = annotatedResponsibilityText.concat(t, ' ');
+				})
+			}
+		});
+		console.log(id);
+		console.log(annotatedEntity);
+		console.log(annotatedResponsibilityText);
+		gameChangerAPI.updateResponsibility({id: id, annotatedEntity: annotatedEntity, annotatedResponsibilityText: annotatedResponsibilityText}).then(() => {
+			setState(this.props.context.dispatch, {reloadResponsibilityTable: true});
+			this.handleClose(true);
+		}); 
 	}
 	
 	handleReject = () => {
-		//TODO... this function properly
-		this.handleSave(true);
+		const { id } = this.state;
+		gameChangerAPI.setRejectionStatus({id: id}).then(() => {
+			setState(this.props.context.dispatch, {reloadResponsibilityTable: true});
+			this.handleClose(true);
+		});
 	}
 
 	handleOpen = () => {
 		const { filename, pageNumber, searchText} = this.state;
-		//this.handleSave(true);
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		//window.open(`/#/pdfviewer/gamechanger?filename=${filename}&cloneIndex=${state.cloneData?.clone_name}`);
 		console.log(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
-		//window.open(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
-	}
-
-	handleSave = (closing = false) => {
-		const { canSubmit } = this.state;
-
-		if ( !canSubmit && !closing) return;
-		
-		this.handlePowerSave();		
 	}
 
 	renderAnnotationCard = () => {
@@ -366,7 +388,7 @@ class ResponsibilityAssist extends Component {
 					<div style={{display: 'flex', width: '100%'}}>
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Responsibility Labeler: </Typography>
 					</div>
-					<CloseButton onClick={() => this.handleSave(true)}>
+					<CloseButton onClick={() => this.handleClose(true)}>
 						<CloseIcon fontSize="large" />
 					</CloseButton>
                 </DialogTitle>
