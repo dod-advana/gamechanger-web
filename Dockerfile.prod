@@ -1,13 +1,29 @@
-FROM node:14
-RUN npm config set registry http://10.194.9.122
-RUN npm install -g nodemon
-RUN npm install -g sequelize-cli
-RUN npm install -g jest
+ARG BASE_IMAGE="node:14"
+FROM $BASE_IMAGE
+
+SHELL ["/bin/bash", "-c"]
+
+ARG NPM_REGISTRY="http://10.194.9.122"
+RUN npm config set registry "$NPM_REGISTRY"
+
+RUN npm install -g nodemon \
+    && npm install -g sequelize-cli \
+    && npm install -g jest
+
+RUN mkdir -p /usr/src/app/{backend,frontend}
+
+COPY ./frontend/package.json /usr/src/app/frontend/package.json
+RUN cd /usr/src/app/frontend/ \
+    && npm install
+
+COPY ./backend/package.json /usr/src/app/backend/package.json
+RUN cd /usr/src/app/backend/ \
+    && npm install
+
 COPY . /usr/src/app
-WORKDIR /usr/src/app/frontend
-RUN npm install
-RUN npm run build
-RUN mv build ../backend/
+RUN cd /usr/src/app/frontend \
+    npm run build \
+    mv build ../backend/
+
 WORKDIR /usr/src/app/backend
-RUN npm install
 CMD ./startProd.sh
