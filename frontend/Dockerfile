@@ -1,15 +1,36 @@
 ARG BASE_IMAGE="node:14"
 FROM $BASE_IMAGE
 
-WORKDIR /usr/src/app
-COPY package.json /usr/src/app
+SHELL ["/bin/bash", "-c"]
+
+USER root
+RUN (type -P "yum" &> /dev/null) && ( \
+        yum install -y \
+            git \
+        && yum clean all \
+        && rm -rf /var/cache/yum \
+     ) || ((type -P "apt-get" &> /dev/null) && ( \
+        apt-get update \
+        && apt-get install -y \
+            git \
+        && apt-get clean \
+        && rm -rf /var/cache/apt/lists \
+    )) || ( \
+        >&2 echo "[ERROR] Unsupported Base Image" \
+        && exit 1 \
+    )
+USER node
+
+ENV APP_DIR="${HOME:-/home/node/app}"
+WORKDIR "${APP_DIR}"
+COPY --chown=node package.json "${APP_DIR}"
 
 ARG NPM_REGISTRY="http://10.194.9.122"
 RUN npm config set registry "$NPM_REGISTRY" \
-    && npm install -g jest \
+    && npm install jest \
     && npm install
 
-COPY . /usr/src/app
+COPY --chown=node . "${APP_DIR}"
 EXPOSE 8080
 
 CMD PORT=8080 yarn start
