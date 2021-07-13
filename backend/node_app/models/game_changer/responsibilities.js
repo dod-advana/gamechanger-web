@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			freezeTableName: true,
 			tableName: 'responsibilities',
-			timestamps: true
+			timestamps: false
 		}
 	);
 	return RESPONSIBILITIES;

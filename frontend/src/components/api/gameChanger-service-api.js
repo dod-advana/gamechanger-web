@@ -80,6 +80,8 @@ const endpoints = {
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
+	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
 	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
@@ -350,6 +352,16 @@ export default class GameChangerAPI {
 
 	getResponsibilityDoc = async (options) => {
 		const url = endpoints.getResponsibilityDoc;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	setRejectionStatus = async (options) => {
+		const url = endpoints.setRejectionStatus;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	updateResponsibility = async (options) => {
+		const url = endpoints.updateResponsibility;
 		return axiosPOST(this.axios, url, options);
 	}
 	

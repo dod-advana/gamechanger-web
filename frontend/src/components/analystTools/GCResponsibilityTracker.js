@@ -175,6 +175,13 @@ const GCResponsibilityTracker = (props) => {
 		handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
 	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
+	useEffect(() => {
+		if (state.reloadResponsibilityTable) {
+			handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
+			setState(dispatch, {reloadResponsibilityTable: false});
+		}
+	 }, [state]);
+
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
@@ -223,27 +230,20 @@ const GCResponsibilityTracker = (props) => {
 
 	const getRowData = async () => {
 		try {
-			console.log("**********");
-			console.log("getRowData");
-			console.log("Selected Ids:");
-			console.log(selectedIds);
 			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
 			const rtnResults = results.filter(result => {
 				return selectedIds.includes(result.id);
 			})
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
-			console.log("Selected Results:");
-			console.log(rtnResults);
+
 			const rtn = selectedIds.length > 0 ? rtnResults : results;
-			console.log(rtn);
+			const id = rtn[0].id;
 			const filename = rtn[0].filename;
 			const responsibilityText = rtn[0].responsibilityText;
-			
 
-			setState(dispatch, {showResponsibilityAssistModal: true, filename, responsibilityText});
+			setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
 
 			deselectRows();
-			console.log("**********");
 		} catch (e) {
 			console.error(e);
 		}
@@ -438,15 +438,19 @@ const GCResponsibilityTracker = (props) => {
 	};
 	
 	const handleSelected = (id) => {
-		responsibilityTableData[id].selected = !responsibilityTableData[id].selected; // swap current selected status
-
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `ID ${responsibilityTableData[id].selected ? 'Selected' : 'Des-Selected'}`, id);
-
-		if (responsibilityTableData[id].selected) {
-			selectedIds.push(id);
-		} else {
-			selectedIds.splice(selectedIds.indexOf(id), 1);
-		}
+		console.log(id);
+		console.log(responsibilityTableData);
+		responsibilityTableData.forEach(row => {
+			if(row['id'] === id){
+				row.selected = !row.selected;
+				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `ID ${row.selected ? 'Selected' : 'Des-Selected'}`, id);
+				if (row.selected) {
+					selectedIds.push(id);
+				} else {
+					selectedIds.splice(selectedIds.indexOf(id), 1);
+				}
+			}
+		})
 	}
 	
 	const handleCancelSelect = () => {

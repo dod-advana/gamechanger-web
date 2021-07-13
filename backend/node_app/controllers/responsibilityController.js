@@ -39,7 +39,9 @@ class ResponsibilityController {
 		this.cleanDocument = this.cleanDocument.bind(this);
 		this.getResponsibilityData = this.getResponsibilityData.bind(this);
 		this.storeResponsibilityReports = this.storeResponsibilityReports.bind(this);
-		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this)
+		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this);
+		this.rejectResponsibility = this.rejectResponsibility.bind(this);
+		this.updateResponsibility = this.updateResponsibility.bind(this);
 	}
 	
 	async getOtherEntResponsibilityFilterList(req, res) {
@@ -219,7 +221,6 @@ class ResponsibilityController {
 
 	async getParagraphNum(raw, user) {
 		try {
-			console.log(raw);
 			if (raw.body.hits.hits.length === 0 ){
 				return -1
 			} else {
@@ -290,6 +291,7 @@ class ResponsibilityController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const {limit = 10, offset = 0, order = [], where = []} = req.body;
+			order.push(['id', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
 				if (id === 'id') {
@@ -317,11 +319,11 @@ class ResponsibilityController {
 					}
 				}
 			});
-			tmpWhere['status'] = {[Op.eq]: 'active'};
+			tmpWhere['status'] = {[Op.not]: 'rejected'};
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
-				order,
+				order: order,
 				where: tmpWhere,
 				attributes: [
 					'id',
@@ -337,6 +339,62 @@ class ResponsibilityController {
 
 		} catch (err) {
 			this.logger.error(err, 'ASDED20', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async rejectResponsibility(req, res) {
+		// 1. have id of row
+		// 2. use id to write status to 'rejected'
+
+		// UPDATE RESPONSIBILITIES
+		// SET status = 'rejected'
+		// where id = <id>
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+
+		try {
+			const { id } = req.body;
+
+			const result = await this.responsibilities.update({status: 'rejected'},
+				{
+					where: { id: id },
+					subQuery: false
+				}
+			);
+			res.status(200).send();
+
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'UYDC4856', userId);
+
+			res.status(500).send(err);
+		}
+	}
+
+	async updateResponsibility(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+
+		try {
+			const { id, annotatedEntity, annotatedResponsibilityText } = req.body;
+			console.log(id);
+			console.log(annotatedEntity);
+			console.log(annotatedResponsibilityText);
+			const result = await this.responsibilities.update({
+				organizationPersonnel: annotatedEntity,
+				responsibilityText: annotatedResponsibilityText,
+				status: 'revised'
+			},
+				{
+					where: { id: id },
+					subQuery: false
+				}
+			);
+			res.status(200).send();
+
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'IORFMS75', userId);
+
 			res.status(500).send(err);
 		}
 	}
