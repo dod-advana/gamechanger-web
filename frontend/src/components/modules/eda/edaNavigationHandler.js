@@ -13,7 +13,7 @@ import {
 	StyledBadgeSmall
 } from "advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
-import {clearDashboardNotification, getUserData, setState} from "../../../sharedFunctions";
+import { setState } from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import UserIcon from "../../../images/icon/UserIcon.png";
@@ -110,18 +110,6 @@ const EdaNavigationHandler = {
 						}} toolTheme={toolTheme}
 					>
 						<ConstrainedIcon src={UserFeedbackIcon} />
-					</HoverNavItem>
-				</GCTooltip>
-				<GCTooltip title="User Dashboard" placement="right" arrow>
-					<HoverNavItem centered onClick={() => {
-							getUserData(dispatch);
-							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-							clearDashboardNotification('total', state, dispatch);
-							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction',  'showUserDashboard');
-						}} active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard} toolTheme={toolTheme}
-					>
-						{/* <NotificationsClosed src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0}/> */}
-						<ConstrainedIcon src={UserIcon} />
 					</HoverNavItem>
 				</GCTooltip>
 				{state.cloneData?.show_crowd_source &&
@@ -226,19 +214,6 @@ const EdaNavigationHandler = {
 					>
 						<ConstrainedIcon src={UserFeedbackIcon} />
 						<span style={{ marginLeft: '10px' }}>User Feedback</span>
-					</HoverNavItem>
-				</GCTooltip>
-				<GCTooltip title="User Dashboard" placement="right" arrow>
-					<HoverNavItem onClick={() => {
-							getUserData(dispatch);
-							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-							clearDashboardNotification('total', state, dispatch);
-							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'showUserDashboardSelected');
-						}} active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard} toolTheme={toolTheme}
-					>
-						{/* <Notifications src={UserIcon} notificationCount={state.userData.notifications ? state.userData.notifications.total : 0} /> */}
-						<ConstrainedIcon src={UserIcon} />
-						<span style={{marginLeft: '10px'}}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{state.cloneData?.show_crowd_source &&
