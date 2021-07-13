@@ -25,96 +25,46 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from "../../telemetry/Matomo";
 import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 
-// const renderSearchTypes = (classes) => {
-//
-// 	return (
-// 		<div style={{width: '100%'}}>
-// 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}>
-// 			<FormGroup style={{width: '100%'}}>
-// 				<FormControlLabel
-// 					name='Documentations'
-// 					value='Documentations'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Documentations'
-// 					/>}
-// 					label='Documentations'
-// 					labelPlacement="end"
-// 				/>
-// 				<FormControlLabel
-// 					name='Organizations'
-// 					value='Organizations'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Organizations'
-// 					/>}
-// 					label='Organizations'
-// 					labelPlacement="end"
-// 				/>
-// 				<FormControlLabel
-// 					name='Topics'
-// 					value='Topics'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Topics'
-// 					/>}
-// 					label='Topics'
-// 					labelPlacement="end"
-// 				/>
-// 			</FormGroup>
-// 		</FormControl>
-// 		</div>
-// 	);
-// }
-
 const handleSelectSpecificOrgs = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.specificOrgsSelected = true;
 	newSearchSettings.allOrgsSelected = false;
 	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 }
 
 const handleSelectAllOrgs = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificOrgsSelected = false;
-	newSearchSettings.allOrgsSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificOrgsSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificOrgsSelected = false;
+		newSearchSettings.allOrgsSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.orgFilter).forEach(org => {
+			runSearch = newSearchSettings.orgFilter[org] ? true : false
+			newSearchSettings.orgFilter[org] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked
 	};
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	newSearchSettings.isFilterUpdate = true;
+
+    setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
 const renderSources = (state, dispatch, classes) => {
 		
+		const { originalOrgFilters } = state.searchSettings;
 		const betterOrgData = {};
-		for(let i=0; i<state.sidebarOrgs.length; i++) {
-			betterOrgData[state.sidebarOrgs[i][0]] = state.sidebarOrgs[i][1];
+		for(let i=0; i<originalOrgFilters.length; i++) {
+			betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
 		}
 
 		return (
@@ -158,7 +108,7 @@ const renderSources = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificOrgsSelected && Object.keys(state.searchSettings.orgFilter).map(org => {
+					{state.searchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
 						return (
 							<FormControlLabel
 								key={`${org} (${betterOrgData[org]})`}
@@ -183,10 +133,17 @@ const handleSelectSpecificTypes = (state, dispatch) => {
 }
 
 const handleSelectAllTypes = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificTypesSelected = false;
-	newSearchSettings.allTypesSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificTypesSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificTypesSelected = false;
+		newSearchSettings.allTypesSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.typeFilter).forEach(type => {
+			runSearch = newSearchSettings.typeFilter[type] ? true : false;
+			newSearchSettings.typeFilter[type] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
 const handleTypeFilterChangeLocal = (event, state, dispatch) => {
@@ -196,15 +153,18 @@ const handleTypeFilterChangeLocal = (event, state, dispatch) => {
 		...newSearchSettings.typeFilter,
 		[typeName]: event.target.checked
 	};
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	newSearchSettings.isFilterUpdate = true;
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TypeFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
 const renderTypes = (state, dispatch, classes) => {
 
+
+	const { originalTypeFilters } = state.searchSettings;
 	const betterTypeData = {};
-	for(let i=0; i<state.sidebarDocTypes.length; i++) {
-		betterTypeData[state.sidebarDocTypes[i][0]] = state.sidebarDocTypes[i][1];
+	for(let i=0; i<originalTypeFilters.length; i++) {
+		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
 	}
 
 	return (
@@ -248,7 +208,7 @@ const renderTypes = (state, dispatch, classes) => {
 				/>
 			</FormGroup>
 			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-				{state.searchSettings.specificTypesSelected && Object.keys(state.searchSettings.typeFilter).map(type => {
+				{state.searchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
 					return (
 						<FormControlLabel
 							key={`${type} (${betterTypeData[type]})`}
@@ -580,7 +540,7 @@ const PolicySearchMatrixHandler = {
 			handleSubmit
 		} = props;
 		
-		return (
+        return (
 			<>
 				{/*{false &&*/}
 				{/*	<div style={styles.subHead}>*/}
@@ -613,19 +573,19 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderSources(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>

@@ -81,8 +81,8 @@ const initState = {
 	qaContext: {params: {}, context: []},
 	selectedCategories: {
 		Documents: true,
-		Organizations: false,
-		Topics: false
+		Organizations: true,
+		Topics: true
 	},	
 
 	categorySorting: {
