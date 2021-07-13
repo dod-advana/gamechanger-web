@@ -25,6 +25,9 @@ USER node
 # thou shall not root
 
 ENV APP_DIR="${HOME:-/home/node/app}"
+ENV APP_BIN="${APP_DIR}/node_modules/.bin"
+ENV PATH="${APP_BIN}:${PATH}"
+
 WORKDIR "${APP_DIR}"
 COPY --chown=node package.json "${APP_DIR}"
 
