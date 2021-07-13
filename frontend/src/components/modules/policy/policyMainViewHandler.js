@@ -74,6 +74,10 @@ const PolicyMainViewHandler = {
 		defaultMainViewHandler.handleCategoryTabChange(props);
 	},
 	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
+	},
+	
 	getViewNames(props) {
 		const viewNames = defaultMainViewHandler.getViewNames(props);
 		viewNames.push(
@@ -140,7 +144,6 @@ const PolicyMainViewHandler = {
 			topicCount,
 			topicSearchResults,
 			topicPage,
-            searchSettings,
 			hideTabs,
 			iframePreviewLink,
 			isCachedResult,
@@ -199,7 +202,7 @@ const PolicyMainViewHandler = {
 																	<LoadingIndicator customColor={gcOrange} />
 																</div>
 															}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={resultsPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}
@@ -236,7 +239,7 @@ const PolicyMainViewHandler = {
 														color={'#376f94'}
 														>
 															{getSearchResults(entitySearchResults, state, dispatch)}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={entityPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}
@@ -258,7 +261,7 @@ const PolicyMainViewHandler = {
 														color={'#4da593'}
 														>
 															{getSearchResults(topicSearchResults, state, dispatch)}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={topicPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}

@@ -15,6 +15,7 @@ import {trackEvent} from "../../telemetry/Matomo";
 import {primary} from "../../../components/common/gc-colors";
 import _ from "lodash";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import sanitizeHtml from 'sanitize-html';
 
 const colWidth = {
 	maxWidth: '900px',
@@ -544,7 +545,7 @@ const DefaultCardHandler = {
 									}).value()}
 								</div>
 								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 								</div>
 							</div>
 						}
@@ -591,7 +592,7 @@ const DefaultCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+								<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 							</div>
 						</div>
 						<button type="button" className={'list-view-button'}
@@ -638,7 +639,7 @@ const DefaultCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: contextHtml }}/>
+								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }}/>
 							</div>
 						</div>
 					</StyledFrontCardContent>

@@ -46,6 +46,7 @@ const SearchBar = (props) => {
 	const handleCategoryTabChange = (tabName) => {
 		mainViewHandler.handleCategoryTabChange({tabName, state, dispatch});
 	}
+
 	return (
 		<>
 			<SearchBanner
