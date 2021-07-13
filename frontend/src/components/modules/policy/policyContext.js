@@ -152,10 +152,15 @@ const initState = {
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
 	searchSettings: {
+		isFilterUpdate: false,
+		originalOrgFilters: orgFilters,
+		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
+		allCategoriesSelected: true,
 		allOrgsSelected: true,
 		searchFields: {'initial': {field: null, input: ''}},
+		specificCategoriesSelected: false,
 		specificOrgsSelected: false,
 		allTypesSelected: true,
 		specificTypesSelected: false,
@@ -169,7 +174,7 @@ const initState = {
 	selectedCategories: {
 		Documents: true,
 		Organizations: true,
-		Topics: false
+		Topics: true
 	},
 
 	categorySorting: {
