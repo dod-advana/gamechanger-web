@@ -3,12 +3,13 @@ FROM $BASE_IMAGE
 
 SHELL ["/bin/bash", "-c"]
 
+# to support RHEL-based and DEBIAN-based version of node
+# e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
 USER root
 RUN (type -P "yum" &> /dev/null) && ( \
         yum install -y \
             git \
-            vim \
-            postgresql
+            vim-enhanced
         && yum clean all \
         && rm -rf /var/cache/yum \
      ) || ((type -P "apt-get" &> /dev/null) && ( \
@@ -24,6 +25,7 @@ RUN (type -P "yum" &> /dev/null) && ( \
         && exit 1 \
     )
 USER node
+# thou shall not root
 
 ENV APP_DIR="${HOME:-/home/node}"
 ENV APP_BIN="${APP_DIR}/node_modules/.bin"
