@@ -9,7 +9,6 @@ USER root
 RUN (type -P "yum" &> /dev/null) && ( \
         yum install -y \
             git \
-            vim-enhanced
         && yum clean all \
         && rm -rf /var/cache/yum \
      ) || ((type -P "apt-get" &> /dev/null) && ( \
