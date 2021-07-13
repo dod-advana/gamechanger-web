@@ -46,11 +46,11 @@ COPY --chown=$USER ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm install
 
-COPY --chown=node ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+COPY --chown=$USER ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 RUN cd "${APP_BACKEND_DIR}" \
     && npm install
 
-COPY --chown=node . "${APP_DIR}"
+COPY --chown=$USER . "${APP_DIR}"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm run build \
     && mv build "${APP_BACKEND_DIR}"
