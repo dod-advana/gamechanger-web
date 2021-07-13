@@ -177,7 +177,7 @@ const GCResponsibilityTracker = (props) => {
 
 	useEffect(() => {
 		if (state.reloadResponsibilityTable) {
-			handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
+			this.handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
 			setState(dispatch, {reloadResponsibilityTable: false});
 		}
 	 }, [state]);
@@ -397,7 +397,6 @@ const GCResponsibilityTracker = (props) => {
 					if (rowInfo && rowInfo.row) {
 						return {
 							onClick: (e, t) => {
-								// console.log(filters);
 							 },
 							onMouseEnter: (e) => {
 								setHoveredRow(rowInfo.index)
@@ -438,8 +437,6 @@ const GCResponsibilityTracker = (props) => {
 	};
 	
 	const handleSelected = (id) => {
-		console.log(id);
-		console.log(responsibilityTableData);
 		responsibilityTableData.forEach(row => {
 			if(row['id'] === id){
 				row.selected = !row.selected;

@@ -1,12 +1,11 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import {FormControlLabel, Radio, RadioGroup, Typography} from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
 import GCAccordion from "../common/GCAccordion";
 
 import {TokenAnnotator} from "react-text-annotate";
 import {CustomMark} from "./CustomMark";
-import {backgroundWhite, primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryGreyLight,
-	primaryRed, primaryDark, tertiaryGreen} from '../common/gc-colors';
+import {backgroundWhite, primaryGreyLight} from '../common/gc-colors';
 import GCButton from '../common/GCButton';
 
 
@@ -34,23 +33,10 @@ const StyledRadio = (props) => {
 	)
 }
 
-const highlightColors = [primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryRed, primaryDark, tertiaryGreen]
-
 export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, componentStepNumbers, colorMap, moreTextClick, aboveDisabled, belowDisabled}) => {
 	const [tag, setTag] = useState(tags[0])
-	// const [currentTokens, setCurrentTokens] = useState([])
 	const [tagColorMap, setTagColorMap] = useState(colorMap)
-	/*
-	useEffect(() => {
-		// when tags prop changes this will create a new Map of colors for each tag
-		for (let i = highlightColors.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[highlightColors[i], highlightColors[j]] = [highlightColors[j], highlightColors[i]];
-		}
 
-		setTagColorMap(colorMap)
-		setTag(tags[0])
-	}, [tags])*/
 
 	const options = tags.map((tagText) => (
 		<CustomFormControlLabel

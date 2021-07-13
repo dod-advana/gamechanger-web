@@ -229,7 +229,6 @@ class ResponsibilityAssist extends Component {
 	}
 
 	setCurrentTokens = (newTokens) => {
-		console.log(newTokens);
 		this.setState({ annotatedTokens: newTokens});
 	}
 
@@ -284,7 +283,6 @@ class ResponsibilityAssist extends Component {
 	}
 
 	handleSubmit = () => {
-		console.log('jere');
 		const {id,  annotatedTokens } = this.state; // get the things for the query
 		
 		let annotatedEntity = '';
@@ -302,13 +300,10 @@ class ResponsibilityAssist extends Component {
 				})
 			}
 		});
-		console.log(id);
-		console.log(annotatedEntity);
-		console.log(annotatedResponsibilityText);
 		gameChangerAPI.updateResponsibility({id: id, annotatedEntity: annotatedEntity, annotatedResponsibilityText: annotatedResponsibilityText}).then(() => {
 			setState(this.props.context.dispatch, {reloadResponsibilityTable: true});
 			this.handleClose(true);
-		}); 
+		});
 	}
 	
 	handleReject = () => {
@@ -319,12 +314,12 @@ class ResponsibilityAssist extends Component {
 		});
 	}
 
-	handleOpen = () => {
+	handleOpen = () => { // TODO,  Need to test on server with PDFs
 		const { filename, pageNumber, searchText} = this.state;
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
 		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		console.log(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
+		window.open(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
 	}
 
 	renderAnnotationCard = () => {

@@ -376,9 +376,6 @@ class ResponsibilityController {
 
 		try {
 			const { id, annotatedEntity, annotatedResponsibilityText } = req.body;
-			console.log(id);
-			console.log(annotatedEntity);
-			console.log(annotatedResponsibilityText);
 			const result = await this.responsibilities.update({
 				organizationPersonnel: annotatedEntity,
 				responsibilityText: annotatedResponsibilityText,
