@@ -16,7 +16,7 @@ RUN (type -P "yum" &> /dev/null) && ( \
         && apt-get install -y \
             git \
             vim \
-            postgresql
+            postgresql \
         && apt-get clean \
         && rm -rf /var/cache/apt/lists \
     )) || ( \
