@@ -73,9 +73,9 @@ const apiColumns = [
 const logs = [];
 let loaded = 0;
 let errored = 0;
-const S3_CORPUS_PATH = 's3://advana-raw-zone/gamechanger/json';
+const S3_CORPUS_PATH = 'gamechanger/json';
 const DEFAULT_MODEL_NAME = 'msmarco-distilbert-base-v2';
-const DEFAULT_CORPUS_PATH = '../corpus_dir/gc_corpus'
+const DEFAULT_CORPUS_PATH = 'corpus'
 
 /**
  * This class queries the ml api information and provides controls 
@@ -320,7 +320,7 @@ export default () => {
 
 	useEffect(() => {
 		onload();
-	});
+	}, []);
     
 
     return (			
