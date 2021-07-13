@@ -54,7 +54,6 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 		[orgName]: event.target.checked
 	};
 	newSearchSettings.isFilterUpdate = true;
-
     setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
