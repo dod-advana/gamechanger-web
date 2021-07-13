@@ -1,2 +1,5 @@
 elasticsearch
 values.*.yaml
+/.idea/
+/.dev/
+/tmp/
