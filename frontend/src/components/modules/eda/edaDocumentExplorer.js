@@ -23,6 +23,7 @@ import {
 	EDA_FIELDS,
 	EDA_FIELD_JSON_MAP
 } from '../../modules/eda/edaCardHandler';
+import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -266,7 +267,7 @@ export default function EDADocumentExplorer({ data = [], totalCount, prevSearchT
 										<a href="#noref" className="searchdemo-quote-link" onClick={(e) => {
 											handleQuoteLinkClick(e, pageKey, key);
 										}}>
-											<div className={blockquoteClass} dangerouslySetInnerHTML={{ __html: page.snippet.replace(/<em>/g, '<span class="highlight-search-demo" style="background-color: #E9691D;">').replace(/<\/em>/g, '</span>') + '...' }}></div>
+											<div className={blockquoteClass} dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.snippet.replace(/<em>/g, '<span class="highlight-search-demo" style="background-color: #E9691D;">').replace(/<\/em>/g, '</span>') + '...') }}></div>
 										</a>
 										{isHighlighted && <span className="searchdemo-arrow-right-sm"></span>}
 									</div>

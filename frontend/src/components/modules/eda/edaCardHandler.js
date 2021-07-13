@@ -29,6 +29,7 @@ import {setState} from "../../../sharedFunctions";
 import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GameChangerAPI from "../../api/gameChanger-service-api";
+import sanitizeHtml from 'sanitize-html';
 const gameChangerAPI = new GameChangerAPI();
 
 //
@@ -563,7 +564,7 @@ const EdaCardHandler = {
 										}).value()}
 									</div>
 									<div className={'expanded-metadata'}>
-										<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 									</div>
 								</div>
 							}
@@ -614,7 +615,7 @@ const EdaCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+								<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 							</div>
 						</div>
 						<button type="button" className={'list-view-button'}
@@ -676,7 +677,7 @@ const EdaCardHandler = {
 								</div>
 								<div className={'expanded-metadata'}>
 									<blockquote className="searchdemo-blockquote"
-												dangerouslySetInnerHTML={{__html: contextHtml}}/>
+												dangerouslySetInnerHTML={{__html: sanitizeHtml(contextHtml)}}/>
 								</div>
 							</div>
 						}
