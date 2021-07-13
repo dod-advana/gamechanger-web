@@ -3,27 +3,54 @@ FROM $BASE_IMAGE
 
 SHELL ["/bin/bash", "-c"]
 
+USER root
+RUN (type -P "yum" &> /dev/null) && ( \
+        yum install -y \
+            git \
+        && yum clean all \
+        && rm -rf /var/cache/yum \
+     ) || ((type -P "apt-get" &> /dev/null) && ( \
+        apt-get update \
+        && apt-get install -y \
+            git \
+        && apt-get clean \
+        && rm -rf /var/cache/apt/lists \
+    )) || ( \
+        >&2 echo "[ERROR] Unsupported Base Image" \
+        && exit 1 \
+    )
+USER node
+
 ARG NPM_REGISTRY="http://10.194.9.122"
 RUN npm config set registry "$NPM_REGISTRY"
 
-RUN npm install -g nodemon \
-    && npm install -g sequelize-cli \
-    && npm install -g jest
+ENV BASE_DIR="${HOME:-/home/node}"
+ENV APP_SHARED_DIR="${BASE_DIR}/app-shared"
+ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin"
+ENV PATH="${APP_SHARED_BIN}:${PATH}"
+RUN mkdir -p "$APP_SHARED_DIR" \
+    && cd "$APP_SHARED_DIR" \
+    && npm install nodemon \
+    && npm install sequelize-cli \
+    && npm install jest
 
-RUN mkdir -p /usr/src/app/{backend,frontend}
+ENV APP_DIR="${BASE_DIR:-/usr/src}/app"
+ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
+ENV APP_BACKEND_DIR="${APP_DIR}/backend"
+RUN mkdir -p "${APP_FRONTEND_DIR}" "${APP_BACKEND_DIR}"
 
-COPY ./frontend/package.json /usr/src/app/frontend/package.json
-RUN cd /usr/src/app/frontend/ \
+COPY --chown=$USER ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+RUN cd "${APP_FRONTEND_DIR}" \
     && npm install
 
-COPY ./backend/package.json /usr/src/app/backend/package.json
-RUN cd /usr/src/app/backend/ \
+COPY --chown=node ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+RUN cd "${APP_BACKEND_DIR}" \
     && npm install
 
-COPY . /usr/src/app
-RUN cd /usr/src/app/frontend \
-    npm run build \
-    mv build ../backend/
+COPY --chown=node . "${APP_DIR}"
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm run build \
+    && mv build "${APP_BACKEND_DIR}"
 
-WORKDIR /usr/src/app/backend
+WORKDIR "${APP_BACKEND_DIR}"
 CMD ./startProd.sh
