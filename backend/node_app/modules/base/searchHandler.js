@@ -150,7 +150,7 @@ class SearchHandler {
 	}
 
 	getError() {
-		return null;
+		return {};
 	}
 }
 

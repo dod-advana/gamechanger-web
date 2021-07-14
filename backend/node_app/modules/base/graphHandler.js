@@ -179,7 +179,7 @@ class GraphHandler {
 	}
 
 	getError() {
-		return null;
+		return {};
 	}
 }
 
