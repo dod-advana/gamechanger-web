@@ -299,12 +299,12 @@ logger.boot(`
 
 if(process.env.PRINT_ROUTES === 'true') {
 	let routers = {};
-	routers['http://localhost:8990'] = app._router;
-	routers['http://localhost:8990/api/gamechanger'] = require('./node_app/routes/gameChangerRouter');
-	routers['http://localhost:8990/api/gamechanger/external'] = require('./node_app/routes/externalGraphRouter');
-	routers['http://localhost:8990//api/gamechanger/external'] = require('./node_app/routes/externalSearchRouter');
-	routers['http://localhost:8990/api'] = require('./node_app/routes/advanaRouter');
-	routers['http://localhost:8990/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
+	routers['/'] = app._router;
+	routers['/api/gamechanger'] = require('./node_app/routes/gameChangerRouter');
+	routers['/api/gamechanger/external'] = require('./node_app/routes/externalGraphRouter');
+	routers['//api/gamechanger/external'] = require('./node_app/routes/externalSearchRouter');
+	routers['/api'] = require('./node_app/routes/advanaRouter');
+	routers['/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
 
 	console.log('BEGIN ROUTES');
 	for(let base in routers) {

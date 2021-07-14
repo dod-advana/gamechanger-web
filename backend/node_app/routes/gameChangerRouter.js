@@ -64,8 +64,12 @@ router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
+router.get('/admin/getHomepageEditorData', admin.getHomepageEditorData);
+router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
+
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
+router.post('/thumbnailDownload', document.getHomepageThumbnail);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);
 router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotations);
 router.get('/getThumbnail', document.getThumbnail);
@@ -116,6 +120,7 @@ router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
 router.get('/trending/getTrendingBlacklist', trending.getTrendingBlacklist);
 router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklist);
 router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
+router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
@@ -129,6 +134,7 @@ router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.get('/admin/populateNewUserId', user.populateNewUserId);
+router.post('/getRecentSearches', user.getRecentSearches);
 
 router.post('/textSuggestion', textSuggest.getTextSuggestion);
 // router.post('/presearchSuggestion', presearchSuggest.getpresearchSuggestion);
@@ -139,6 +145,7 @@ router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
 router.post('/getAppStats', appStatsController.getAppStats);
+router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);

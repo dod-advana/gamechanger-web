@@ -45,6 +45,13 @@ const initState = {
 		q1: '',
 		q2: ''
 	},
+
+	// Homepage
+	recentSearches: [],
+	crawlerSources: [],
+	adminTopics: [],
+	adminMajorPubs: [],
+	trendingLinks: [],
 	
 	// Tutorial
 	showTutorial: false,
@@ -74,8 +81,8 @@ const initState = {
 	qaContext: {params: {}, context: []},
 	selectedCategories: {
 		Documents: true,
-		Organizations: false,
-		Topics: false
+		Organizations: true,
+		Topics: true
 	},	
 
 	categorySorting: {

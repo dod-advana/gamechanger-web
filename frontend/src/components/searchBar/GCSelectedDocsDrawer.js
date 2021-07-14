@@ -183,7 +183,7 @@ export const SelectedDocsDrawer = (props) => {
                 </ButtonRow>
             </Drawer>
         </>
-    )
+    );
 }
 
 SelectedDocsDrawer.propTypes = {
@@ -201,4 +201,4 @@ SelectedDocsDrawer.propTypes = {
     showTutorial: PropTypes.bool,
     rawSearchResults: PropTypes.arrayOf(PropTypes.object),
     checkUserInfo: PropTypes.func
-}
+};
