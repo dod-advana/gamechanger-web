@@ -156,7 +156,7 @@ class ModularGameChangerController {
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId);
 			const error = handler.getError();
-			if (error) results.error = error;
+			if (error.code) results.error = error;
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
@@ -209,7 +209,7 @@ class ModularGameChangerController {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
 			const results = await handler.query(query, code, options, cloneName, req.permissions, userId);
 			const error = handler.getError();
-			if (error) results.error = error;
+			if (error.code) results.error = error;
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
