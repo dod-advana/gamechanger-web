@@ -19,6 +19,7 @@ class PolicyGraphHandler extends GraphHandler {
 		this.constants = constants;
 		this.dataLibrary = dataLibrary;
 		this.dataTracker = dataTracker;
+		this.error = {};
 	}
 
 	async searchHelper(req, userId) {
@@ -132,14 +133,16 @@ class PolicyGraphHandler extends GraphHandler {
 
 		try {
 			const { code, query, params, isTest = false } = req.body;
-			tmpCode = code;
+			tmpCode = code || tmpCode;
 
 			const [graphData] = await this.getGraphData(query, params, isTest, userId);
 			graphData.query = {query, params};
 			return graphData;
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, tmpCode, userId);
+			this.logger.error('DETECTED ERROR:', message, tmpCode, userId);
+			this.error.category = 'Neo4j';
+			this.error.code = tmpCode;
 			return graphData;
 		}
 	}
@@ -581,12 +584,14 @@ class PolicyGraphHandler extends GraphHandler {
 					const topics = topicResp.nodes;
 					return { entities: entities, topics: topics, entityQuery: {query: entityQuery, params: entityParams}, topicQuery: {query: topicQuery, params: topicParams} };
 				} catch (err) {
-					this.logger.error(`Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
+					this.logger.error(`DETECTED ERROR: Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
+					this.error.category = 'Neo4j';
+					this.error.code = 'PUTA0E1';
 					return { entities: [], topics: [] };
 				}
 			} else {
 				this.logger.error(`Error with Elasticsearch results`, 'V053I6O', userId);
-				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn('Search has no hits') }
 				return { entities: [], topics: [] };
 			}
 		} catch (err) {
@@ -627,7 +632,9 @@ class PolicyGraphHandler extends GraphHandler {
 			return docResp;
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, '594CVDD', userId);
+			this.logger.error('DETECTED ERROR:', message, '594CVDD', userId);
+			this.error.category = 'Neo4j';
+			this.error.code = '594CVDD';
 			return message;
 		}
 	}
@@ -844,7 +851,9 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-
+	getError() {
+		return this.error;
+	}
 }
 
 function generateFieldLookup (keys) {
