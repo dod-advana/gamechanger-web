@@ -42,15 +42,16 @@ ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
 ENV APP_BACKEND_DIR="${APP_DIR}/backend"
 RUN mkdir -p "${APP_FRONTEND_DIR}" "${APP_BACKEND_DIR}"
 
-COPY --chown=$USER ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chown=node ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm install
 
-COPY --chown=$USER ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+COPY --chown=node ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 RUN cd "${APP_BACKEND_DIR}" \
     && npm install
 
-COPY --chown=$USER . "${APP_DIR}"
+COPY --chown=node . "${APP_DIR}"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm run build \
     && mv build "${APP_BACKEND_DIR}"

@@ -28,15 +28,17 @@ ENV APP_DIR="${HOME:-/home/node/app}"
 ENV APP_BIN="${APP_DIR}/node_modules/.bin"
 ENV PATH="${APP_BIN}:${PATH}"
 
+RUN mkdir -p "${APP_DIR}"
 WORKDIR "${APP_DIR}"
-COPY --chown=$USER package.json "${APP_DIR}"
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chown=node package.json "${APP_DIR}"
 
 ARG NPM_REGISTRY="http://10.194.9.122"
 RUN npm config set registry "$NPM_REGISTRY" \
     && npm install jest \
     && npm install
 
-COPY --chown=$USER . "${APP_DIR}"
+COPY --chown=node . "${APP_DIR}"
 EXPOSE 8080
 
 CMD PORT=8080 yarn start
