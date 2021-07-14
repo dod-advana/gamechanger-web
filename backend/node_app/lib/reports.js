@@ -74,13 +74,11 @@ class Reports {
 				},
 			};
 			const printer = new this.pdfMake(fonts);
-			console.log('call contruct cover page');
 			const docDefinition = this.constructCoverPage(data, settings);
 			const doc = printer.createPdfKitDocument(docDefinition);
 
 			let chunks = [];
 			let result;
-			console.log('called')
 			doc.on('data', (chunk) => {
 				chunks.push(chunk);
 			});
@@ -104,8 +102,6 @@ class Reports {
 	};
 
 	constructCoverPage(data, settings) {
-
-		console.log(data);
 
 		const filters = Object.keys(settings.orgFilter);
 		const orgFilter = filters.filter(function (key) {
