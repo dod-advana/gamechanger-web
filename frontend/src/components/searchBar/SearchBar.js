@@ -1,23 +1,14 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
-import _ from 'lodash';
-import {
-	handleSaveFavoriteSearch,
-	handleSearchTypeUpdate, setState, checkUserInfo
-} from "../../sharedFunctions";
+import { setState } from "../../sharedFunctions";
 import GameChangerSearchBar from "./GameChangerSearchBar";
-import {
-	PAGE_BORDER_RADIUS,
-	SEARCH_TYPES
-} from "../../gamechangerUtils";
-import {gcBlue} from "../common/gc-colors";
 import SearchBanner from "./GCSearchBanner";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import MainViewFactory from "../factories/mainViewFactory";
 
 const SearchBar = (props) => {
-	
-	const {state, dispatch} = props.context;
+	const { context } = props;
+	const { state, dispatch} = context;
 
 	const { rawSearchResults } = state;
 	const [searchHandler, setSearchHandler] = useState();
@@ -51,23 +42,6 @@ const SearchBar = (props) => {
 	const setLoginModal = (open) => {
 		setState(dispatch, { loginModalOpen: open });
 	}
-	
-	const handleSearchTextUpdate = (searchText, runSearch) => {
-		const newSearchSettings = _.cloneDeep(state.searchSettings);
-		newSearchSettings.isFilterUpdate = false;
-		setState(dispatch, {
-			searchSettings: newSearchSettings,
-			searchText: searchText,
-			resultsPage: 1,
-			metricsCounted: false,
-			runSearch
-		});
-	};
-	
-	// function for search dropdown: updates searchText when using arrow keys
-	const updateSearchTextOnly = (searchText) => {
-		setState(dispatch, {searchText});
-	}
 
 	const handleCategoryTabChange = (tabName) => {
 		mainViewHandler.handleCategoryTabChange({tabName, state, dispatch});
@@ -100,25 +74,7 @@ const SearchBar = (props) => {
 				pageDisplayed={state.pageDisplayed}
 				dispatch={dispatch}
 			>
-				<GameChangerSearchBar
-					handleSearch={() => searchHandler.handleSearch(state, dispatch)}
-					updateSearchTextOnly={updateSearchTextOnly}
-					handleSearchTextUpdate={handleSearchTextUpdate}
-					searchText={state.searchText}
-					componentStepNumbers={state.componentStepNumbers}
-					handleSearchTypeUpdate={(value) => handleSearchTypeUpdate(value, dispatch, state)}
-					searchType={state.searchSettings?.searchType || SEARCH_TYPES.keyword}
-					SEARCH_TYPES={SEARCH_TYPES}
-					buttonColor={gcBlue}
-					rawSearchResults={state.rawSearchResults}
-					borderRadius={PAGE_BORDER_RADIUS}
-					cloneData={state.cloneData}
-					saveFavoriteSearch={(favoriteName, favoriteSummary, favorite) => handleSaveFavoriteSearch(favoriteName, favoriteSummary, favorite, dispatch, state)}
-					favorite={state.isFavoriteSearch}
-					publicationDateFilter={state.searchSettings?.publicationDateFilter || [null, null]}
-					accessDateFilter={state.searchSettings?.accessDateFilter || [null, null]}
-					checkUserInfo={() => { return checkUserInfo(state, dispatch)}}
-				/>
+				<GameChangerSearchBar context={context}/>
 			</SearchBanner>
 		</>
 	);
