@@ -6,7 +6,6 @@ import {
 	getMetadataForPropertyTable, getReferenceListMetadataPropertyTable,
 	getTrackingNameForFactory, getTypeDisplay, getTypeIcon, getTypeTextColor
 } from "../../../gamechangerUtils";
-import {primary} from "../../../components/common/gc-colors";
 import {CardButton} from "../../common/CardButton";
 import GCTooltip from "../../common/GCToolTip";
 import SimpleTable from "../../common/SimpleTable";
@@ -17,6 +16,7 @@ import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import {crawlerMappingFunc} from "../../../gamechangerUtils";
+import sanitizeHtml from 'sanitize-html';
 
 const styles = {
     footerButtonBack: {
@@ -25,13 +25,13 @@ const styles = {
 	},
 	viewMoreChevron: {
 		fontSize: 14,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'normal',
 		marginLeft: 5
     },
 	viewMoreButton: {
 		fontSize: 16,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'bold',
 		cursor: 'pointer',
 		minWidth: 60
@@ -725,7 +725,7 @@ const PolicyCardHandler = {
 									}).value()}
 								</div>
 								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 								</div>
 							</div>
 						}
@@ -772,7 +772,7 @@ const PolicyCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+								<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 							</div>
 						</div>
 						<button type="button" className={'list-view-button'}
@@ -832,7 +832,7 @@ const PolicyCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: contextHtml }}/>
+								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }}/>
 							</div>
 						</div>
 					</StyledFrontCardContent>

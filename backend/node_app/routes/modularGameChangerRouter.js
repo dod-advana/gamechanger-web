@@ -17,7 +17,7 @@ router.post('/export', (req, res) => {
 	controller.export(req, res);
 });
 router.post('/graphSearch', controller.graphSearch);
-router.post('/graphQuery', controller.graphQuery);
+//router.post('/graphQuery', controller.graphQuery);
 router.post('/callGraphFunction', controller.callGraphFunction);
 router.post('/querySuggester', controller.querySuggester);
 router.post('/docFetcher', controller.docFetcher);

@@ -29,79 +29,15 @@ const colWidth = {
 const RESULTS_PER_PAGE = 10;
 
 const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
-	Promise.all([
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
-			'WHERE d2.is_revoked_b = false ' +
-			'RETURN pt;', 'C64E7R1', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
-			'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
-			'RETURN pt;', 'UQBRSK9', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
-			'WHERE NOT d = d2 ' +
-			'RETURN pt;', 'DPVCZWM', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
-			'RETURN pt;', 'FP2FLNB', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
-			'RETURN pt;', 'PWALNKF', cloneName, {params: {doc_id: document.id}}
-		)
-	]).then(resps => {
-		const graph = {nodes: [], edges: [], labels: []};
-		const nodeIds = [];
-		const edgeIds = [];
-		resps.forEach(resp => {
-			if (resp?.data?.error) setBackendError(resp.data.error);
-			resp.data.labels.forEach(label => {
-				if (!graph.labels.includes(label)) {
-					graph.labels.push(label);
-				}
-			})
-			resp.data.nodes.forEach(node => {
-				if (!nodeIds.includes(node.id)) {
-					graph.nodes.push(node);
-					nodeIds.push(node.id);
-				}
-			});
-			resp.data.edges.forEach(edge => {
-				if (!edgeIds.includes(edge.id)) {
-					let source = edge.source;
-					let target = edge.target;
-					if (typeof source !== {}) {
-						source = graph.nodes.filter(node => {
-							return node.id === source;
-						})[0];
-					}
-					if (typeof target !== {}) {
-						target = graph.nodes.filter(node => {
-							return node.id === target;
-						})[0];
-					}
-					edge.source = source;
-					edge.target = target;
-					graph.edges.push(edge);
-					edgeIds.push(edge.id)
-				}
-			});
-		});
-		setGraphData(graph);
+	gameChangerAPI.callGraphFunction({
+		functionName: 'getDocumentDetailsPageDataFull',
+		cloneName: cloneName,
+		options: {
+			doc_id: document.id,
+		}
+	}).then(graph => {
+		if (graph?.data?.error) setBackendError(graph.data.error);
+		setGraphData(graph.data.graph);
 		setRunningQuery(false);
 	});
 }
@@ -294,7 +230,6 @@ const DocumentDetailsPage = (props) => {
 									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DetailsPaginationChanged', 'page', page);
 									handleChangeDocsPage(section, page);
 								}}
-								className='gcPagination'
 							/>
 						}
 					</div>
