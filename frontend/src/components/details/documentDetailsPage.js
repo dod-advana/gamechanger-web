@@ -14,7 +14,7 @@ import {trackEvent} from "../telemetry/Matomo";
 import Pagination from "react-js-pagination";
 import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
 import {Card} from "../cards/GCCard";
-import Permissions from 'advana-platform-ui/dist/utilities/permissions';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
 const gameChangerAPI = new GameChangerAPI();
