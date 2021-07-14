@@ -17,6 +17,8 @@ import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
+import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -132,11 +134,16 @@ function useQuery(location, setQuery, query) {
 
 const getEntityData = async (name, cloneName) => {
 	const data = {};
-	const resp = await gameChangerAPI.graphQueryPOST(
-		`MATCH (e:Entity) WHERE e.name = $name RETURN e;`, '03JLGOM', cloneName, {params: {name: name}}
-	);
 	
-	if (resp.data.nodes){
+	const resp = await gameChangerAPI.callGraphFunction({
+		functionName: 'getEntityDataDetailsPage',
+		cloneName: cloneName,
+		options: {
+			entityName: name,
+		}
+	})
+	
+	if (resp.data.nodes) {
 		const tmpEntity = resp.data.nodes[0];
 		tmpEntity.details = [];
 		Object.keys(tmpEntity).forEach(key => {
@@ -159,13 +166,7 @@ const getEntityData = async (name, cloneName) => {
 		data.entity = tmpEntity;
 	}
 	
-	const graphResp = await gameChangerAPI.graphQueryPOST(
-	'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
-		'WHERE c.name = $name ' +
-		'RETURN pc;', 'WHB0K4M', cloneName, {params: {name: name}}
-	);
-	
-	data.graph = graphResp.data;
+	data.graph = resp.data.graph;
 	
 	return data;
 				
@@ -173,25 +174,22 @@ const getEntityData = async (name, cloneName) => {
 
 const getTopicData = async (name, cloneName) => {
 	const data = {topic: {}, graph: {nodes: [], edges: []}};
-	const resp = await gameChangerAPI.graphQueryPOST(
-		'MATCH (t:Topic) WHERE t.name = $name ' +
-			'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
-			'RETURN t as topic, count(d) as documentCountsForTopic;', '8SJ22U3', cloneName, {params: {name: name}}
-	);
 	
-	if (resp.data.nodes && resp.data.nodes.length > 0){
-		const tmpTopic = resp.data.nodes[0];
-		tmpTopic.details = [{key: 'Documents Referenced', value: resp.data.nodeProperties.documentCountsForTopic.low}];
+	const resp = await gameChangerAPI.callGraphFunction({
+		functionName: 'getTopicDataDetailsPage',
+		cloneName: cloneName,
+		options: {
+			topicName: name,
+		}
+	});
+	
+	if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0){
+		const tmpTopic = resp.data.topicData.nodes[0];
+		tmpTopic.details = [{key: 'Documents Referenced', value: resp.data.topicData.nodeProperties.documentCountsForTopic.low}];
 		
 		data.topic = tmpTopic;
 	
-		const graphResp = await gameChangerAPI.graphQueryPOST(
-		'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
-			'WHERE t.name = $name ' +
-			'RETURN pt;', 'KRH4Q7C', cloneName, {params: {name: name}}
-		);
-	
-		data.graph = graphResp.data;
+		data.graph = resp.data.graph;
 	}
 	
 	return data;
@@ -301,6 +299,10 @@ const GameChangerDetailsPage = (props) => {
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
 	
+	const [contractAwardID, setContractAwardID] = useState(null);
+	const [showContractContainer, setShowContractContainer] = useState(false);
+	const [edaPermissions, setEDAPermissions] = useState(false);
+
 	const graphRef = useRef();
 	
 	useQuery(location, setQuery, query);
@@ -355,6 +357,16 @@ const GameChangerDetailsPage = (props) => {
 					setDocument(data.document);
 				});
 				
+				break;
+			case 'contract':
+				const permissions = Permissions.allowGCClone('eda')
+				setEDAPermissions(permissions);
+				if (permissions) {
+					setDetailsType('Contract');
+					const awardID = query.get('awardID');
+					setContractAwardID(awardID);
+					setShowContractContainer(true);
+				}
 				break;
 			default:
 				break;
@@ -613,6 +625,11 @@ const GameChangerDetailsPage = (props) => {
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
 									 graphData={graph}
+				/>
+			}
+
+			{showContractContainer && edaPermissions &&
+				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData}
 				/>
 			}
 			

@@ -20,6 +20,7 @@ import ResultView from "../../mainView/ResultView";
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
 import GCButton from "../../common/GCButton";
+import defaultMainViewHandler from "../default/defaultMainViewHandler";
 
 const fullWidthCentered = {
 	width: "100%",
@@ -215,6 +216,10 @@ const GlobalSearchMainViewHandler = {
 				</div>
 			</div>
 		)
+	},
+	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
 	},
 	
 	handleCategoryTabChange(props) {

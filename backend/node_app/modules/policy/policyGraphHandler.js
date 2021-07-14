@@ -159,12 +159,336 @@ class PolicyGraphHandler extends GraphHandler {
 				return this.getDocumentsForTopicHelper(req, userId);
 			case 'getSingleDocument':
 				return this.getSingleDocumentHelper(req, userId);
+			case 'getDocumentDetailsPageDataFull':
+				return this.getDocumentDetailsPageDataFullHelper(req, userId);
+			case 'getEntityDataDetailsPage':
+				return this.getEntityDataDetailsPageHelper(req, userId);
+			case 'getTopicDataDetailsPage':
+				return this.getTopicDataDetailsPageHelper(req, userId);
+			case 'getTopicDataPolicyGraph':
+				return this.getTopicDataPolicyGraphHelper(req, userId);
+			case 'getReferencesPolicyGraph':
+				return this.getReferencesPolicyGraphHelper(req, userId);
+			case 'getEntitiesForNode':
+				return this.getEntitiesForNodeHelper(req, userId);
+			case 'getTopicsForNode':
+				return this.getTopicsForNodeHelper(req, userId);
+			case 'getGraphSchema':
+				return this.getGraphSchemaHelper(req, userId);
+			case 'getTopicCardData':
+				return this.getTopicCardDataHelper(req, userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policyGraphHandler`,
 					'8ZLENZO',
 					userId
 				);
+		}
+	}
+	
+	async getReferencesPolicyGraphHelper(req, userId) {
+		try {
+			const { ref_name, isUnknown, isTest = false } = req.body;
+			
+			const [refData] = await this.getGraphData(
+				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${isUnknown ? 'UKN_Document' : 'Document'})
+				WHERE d2.ref_name = $ref_name AND NOT d = d2
+				RETURN ref;`, {ref_name: ref_name}, isTest, userId
+			);
+			
+			return refData;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '9F2QSP6', userId);
+			return message;
+		}
+	}
+	
+	async getTopicCardDataHelper(req, userId) {
+		try {
+			const { topicName, isTest = false } = req.body;
+			
+			const data = {};
+
+			const [topicData] = await this.getGraphData(
+				`MATCH (n:Topic)-[:IS_IN]->(d:Document)
+				WHERE n.name = $name
+				WITH COUNT(d) as docs, collect(d.doc_id) as doc_ids
+				return sum(docs) as doc_count, doc_ids;`, {name: topicName}, isTest, userId
+			);
+			
+			const { doc_count, doc_ids } = topicData;
+		
+			const convertedIds = doc_ids.map(docId => {
+				return docId.replace(/'/g, '');
+			});
+			
+			const [entityData] = await this.getGraphData(
+				`MATCH (d:Document)-[m:MENTIONS]->(e:Entity)
+				WHERE d.doc_id in $ids AND EXISTS(e.aliases)
+				WITH e
+				MATCH (e)<-[:MENTIONS]-(d:Document)
+				WHERE d.doc_id in $ids
+				RETURN e as node, count(d) as entityScore, count(e) as mentions
+				ORDER BY mentions DESC LIMIT 10;`, {ids: convertedIds}, isTest, userId
+			);
+			
+			data.doc_count = doc_count;
+			data.entityData = entityData;
+			
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '25QQM71', userId);
+			return message;
+		}
+	}
+	
+	async getGraphSchemaHelper(req, userId) {
+		try {
+			const { isTest = false } = req.body;
+			
+			const data = {};
+
+			const [schemaData] = await this.getGraphData(
+				'CALL apoc.meta.schema() YIELD value as schemaMap ' +
+					'UNWIND keys(schemaMap) as label ' +
+					'WITH label, schemaMap[label] as data ' +
+					'WHERE data.type = "node" OR data.type = "relationship" ' +
+					'UNWIND keys(data.properties) as property ' +
+					'WITH label, property, data.properties[property] as propData ' +
+					'RETURN label, ' +
+					'property, ' +
+					'propData.type as type, ' +
+					'propData.indexed as primary_key;', {}, isTest, userId
+			);
+			
+			const [graphData] = await this.getGraphData(
+				'call apoc.meta.graph', {}, isTest, userId
+			);
+			
+			const [statData] = await this.getGraphData(
+				'CALL apoc.meta.stats() YIELD labels, relTypesCount', {}, isTest, userId
+			);
+			
+			data.schema = schemaData;
+			data.graph = graphData;
+			data.stats = statData;
+			
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '25QQM71', userId);
+			return message;
+		}
+	}
+	
+	async getEntitiesForNodeHelper(req, userId) {
+		try {
+			const { doc_id, isTest = false } = req.body;
+
+			const [graphData] = await this.getGraphData(
+				'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' +
+				'WHERE d.doc_id = $doc_id ' +
+				'RETURN pt;', {doc_id: doc_id}, isTest, userId
+			);
+			
+			return graphData;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '5T6H86X', userId);
+			return message;
+		}
+	}
+	
+	async getTopicsForNodeHelper(req, userId) {
+		try {
+			const { doc_id, isTest = false } = req.body;
+
+			const [graphData] = await this.getGraphData(
+				'MATCH mt = (d:Document)-[c:CONTAINS]->(:Topic) ' +
+				'WHERE d.doc_id = $doc_id RETURN mt;', {doc_id: doc_id}, isTest, userId
+			);
+			
+			return graphData;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '5YPYYUX', userId);
+			return message;
+		}
+	}
+	
+	async getTopicDataPolicyGraphHelper(req, userId) {
+		try {
+			const { topicName, isTest = false } = req.body;
+			
+			const data = {};
+
+			const topicDocumentCount = this.getGraphData(
+				`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
+				RETURN t2.name as topic_name, count(d) as doc_count
+				ORDER BY doc_count DESC LIMIT 5;`, {name: topicName}, isTest, userId
+			);
+			
+			const documentCount = this.getGraphData(
+				`MATCH (t:Topic) where t.name = $name
+				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
+				RETURN count(d) as doc_count`, {name: topicName}, isTest, userId
+			);
+			
+			const results = await Promise.all([topicDocumentCount, documentCount]);
+			
+			data.relatedTopics = results[0][0];
+			data.documentCountData = results[1][0];
+			
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '7GWYH85', userId);
+			return message;
+		}
+	}
+	
+	async getTopicDataDetailsPageHelper(req, userId) {
+		try {
+			const { topicName, isTest = false } = req.body;
+			
+			const data = {};
+
+			const [topicData] = await this.getGraphData(
+				'MATCH (t:Topic) WHERE t.name = $name ' +
+				'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
+				'RETURN t as topic, count(d) as documentCountsForTopic;', {name: topicName}, isTest, userId
+			);
+			
+			data.topicData = topicData;
+			
+			const [graphData] = await this.getGraphData(
+				'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
+			'WHERE t.name = $name ' +
+			'RETURN pt;', {name: topicName}, isTest, userId
+			);
+			
+			data.graph = graphData
+			
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'XAXUO60', userId);
+			return message;
+		}
+	}
+	
+	async getEntityDataDetailsPageHelper(req, userId) {
+		try {
+			const { entityName, isTest = false } = req.body;
+			
+			const data = {};
+
+			const [entData, entQuery, entParams] = await this.getGraphData(
+				`MATCH (e:Entity) WHERE e.name = $name RETURN e;`, {name: entityName}, isTest, userId
+			);
+			
+			data.nodes = entData.nodes;
+			
+			const [graphData] = await this.getGraphData(
+				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
+				'WHERE c.name = $name ' +
+				'RETURN pc;', {name: entityName}, isTest, userId
+			);
+			
+			data.graph = graphData
+			
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'SLYZBZ5', userId);
+			return message;
+		}
+	}
+	
+	async getDocumentDetailsPageDataFullHelper(req, userId) {
+		try {
+			const { doc_id, isTest = false } = req.body;
+			
+			const resps = await Promise.all([
+				this.getGraphData(
+					'MATCH (d:Document) ' +
+					'WHERE d.doc_id = $doc_id ' +
+					'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
+					'WHERE d2.is_revoked_b = false ' +
+					'RETURN pt;', {doc_id}, isTest, userId
+				),
+				this.getGraphData(
+					'MATCH (d:Document) ' +
+					'WHERE d.doc_id = $doc_id ' +
+					'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
+					'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
+					'RETURN pt;', {doc_id}, isTest, userId
+				),
+				this.getGraphData(
+					'MATCH (d:Document) ' +
+					'WHERE d.doc_id = $doc_id ' +
+					'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
+					'WHERE NOT d = d2 ' +
+					'RETURN pt;', {doc_id}, isTest, userId
+				),
+				this.getGraphData(
+					'MATCH (d:Document) ' +
+					'WHERE d.doc_id = $doc_id ' +
+					'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
+					'RETURN pt;', {doc_id}, isTest, userId
+				),
+				this.getGraphData(
+					'MATCH (d:Document) ' +
+					'WHERE d.doc_id = $doc_id ' +
+					'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
+					'RETURN pt;', {doc_id}, isTest, userId
+				)
+			]);
+			
+			const graph = {nodes: [], edges: [], labels: []};
+			const nodeIds = [];
+			const edgeIds = [];
+			resps.forEach(resp => {
+				resp[0].labels.forEach(label => {
+					if (!graph.labels.includes(label)) {
+						graph.labels.push(label);
+					}
+				})
+				resp[0].nodes.forEach(node => {
+					if (!nodeIds.includes(node.id)) {
+						graph.nodes.push(node);
+						nodeIds.push(node.id);
+					}
+				});
+				resp[0].edges.forEach(edge => {
+					if (!edgeIds.includes(edge.id)) {
+						// let source = edge.source;
+						// let target = edge.target;
+						// if (typeof source !== {}) {
+						// 	source = graph.nodes.filter(node => {
+						// 		return node.id === source;
+						// 	})[0];
+						// }
+						// if (typeof target !== {}) {
+						// 	target = graph.nodes.filter(node => {
+						// 		return node.id === target;
+						// 	})[0];
+						// }
+						// edge.source = source;
+						// edge.target = target;
+						graph.edges.push(edge);
+						edgeIds.push(edge.id)
+					}
+				});
+			});
+			return {graph};
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'OHS2VPT', userId);
+			return message;
 		}
 	}
 
