@@ -14,6 +14,7 @@ import {trackEvent} from "../telemetry/Matomo";
 import Pagination from "react-js-pagination";
 import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
 import {Card} from "../cards/GCCard";
+import Permissions from 'advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -127,7 +128,7 @@ const DocumentDetailsPage = (props) => {
 	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] = useState(true);
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
 
-	const [backendError, setBackendError] = useState(null);
+	const [backendError, setBackendError] = useState({});
 	
 	useEffect(() => {
 		setRunningQuery(true);
@@ -417,9 +418,13 @@ const DocumentDetailsPage = (props) => {
 			</MainContainer>
 
 			<GCErrorSnackbar
-				open={!!backendError}
-				message={`An error occurred with ${backendError}, but we are working to fix it!`}
-				onClose={() => setBackendError(null)}
+				open={!!backendError.code}
+				message={
+					Permissions.isGameChangerAdmin() ?
+					`An error occurred with ${backendError.category}. Error code ${backendError.code}` :
+					`An error has occurred in the application, but we are working to fix it!`
+				}
+				onClose={() => setBackendError({})}
 			/>
 		</div>
 	);
