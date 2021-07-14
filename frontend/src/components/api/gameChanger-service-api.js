@@ -222,10 +222,10 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
-		const url = endpoints.graphQueryPOST;
-		return axiosPOST(this.axios, url, { query, code, cloneName, options });
-	}
+	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
+	// 	const url = endpoints.graphQueryPOST;
+	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
+	// }
 	
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
