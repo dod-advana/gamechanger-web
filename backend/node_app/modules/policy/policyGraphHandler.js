@@ -140,7 +140,7 @@ class PolicyGraphHandler extends GraphHandler {
 			return graphData;
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, tmpCode, userId);
+			this.logger.error('DETECTED ERROR:', message, tmpCode, userId);
 			this.error.category = 'Neo4j';
 			this.error.code = tmpCode;
 			return graphData;
@@ -584,7 +584,7 @@ class PolicyGraphHandler extends GraphHandler {
 					const topics = topicResp.nodes;
 					return { entities: entities, topics: topics, entityQuery: {query: entityQuery, params: entityParams}, topicQuery: {query: topicQuery, params: topicParams} };
 				} catch (err) {
-					this.logger.error(`Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
+					this.logger.error(`DETECTED ERROR: Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
 					this.error.category = 'Neo4j';
 					this.error.code = 'PUTA0E1';
 					return { entities: [], topics: [] };
@@ -632,7 +632,7 @@ class PolicyGraphHandler extends GraphHandler {
 			return docResp;
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, '594CVDD', userId);
+			this.logger.error('DETECTED ERROR:', message, '594CVDD', userId);
 			this.error.category = 'Neo4j';
 			this.error.code = '594CVDD';
 			return message;
