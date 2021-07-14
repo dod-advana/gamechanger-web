@@ -263,7 +263,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 									key={`${org} (${betterOrgData[org]})`}
 									value={`${org} (${betterOrgData[org]})`}
 									classes={{ label: classes.checkboxPill }}
-									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[originalOrgFilters[org]]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
 									label={`${org} (${betterOrgData[org]})`}
 									labelPlacement="end"
 								/>
