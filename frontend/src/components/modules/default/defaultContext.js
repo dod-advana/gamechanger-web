@@ -142,6 +142,8 @@ const initState = {
 	docSearchResults: [],
 	isFavoriteSearch: false,
 	searchSettings: {
+		allCategoriesSelected: true,
+		specificCategoriesSelected: false,
 		searchType: SEARCH_TYPES.keyword,
 		orgFilter: orgFilters,
 		allOrgsSelected: true,
