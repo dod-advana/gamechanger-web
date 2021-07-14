@@ -19,30 +19,6 @@ services:
             - "6379:6379"
         networks:
             - app-net
-    mysql:
-        image: mysql
-        environment:
-            - MYSQL_ROOT_PASSWORD=password
-        command: --default-authentication-plugin=mysql_native_password
-        volumes:
-            - mysql:/var/lib/mysql
-        networks:
-            - app-net
-    matomo:
-        image: matomo
-        environment: 
-            - MATOMO_DATABASE_HOST=mysql
-            - MATOMO_DATABASE_USERNAME=root
-            - MATOMO_DATABASE_PASSWORD=password
-            - MATOMO_DATABASE_DBNAME=matomo
-        depends_on: 
-            - mysql
-        ports:
-            - 80:80
-        volumes:
-            - matomo:/var/www/html
-        networks:
-            - app-net
     gamechanger-web:
         container_name: gamechanger-web
         build:
