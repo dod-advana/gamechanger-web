@@ -17,7 +17,7 @@ import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
 
 const gameChangerAPI = new GameChangerAPI();
