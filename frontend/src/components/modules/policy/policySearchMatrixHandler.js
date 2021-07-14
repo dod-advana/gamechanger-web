@@ -45,7 +45,6 @@ const handleCategoriesFilterChange = (event, state, dispatch) => {
 	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
 	let categoryName = event.target.name;
 	newSelectedCategories[categoryName] = event.target.checked;
-	console.log(newSelectedCategories);
 	setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
 	// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
