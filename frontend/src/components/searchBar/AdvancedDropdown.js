@@ -21,7 +21,8 @@ const useStyles = makeStyles({
 	},
 	titleText: {
 		fontWeight: 900,
-		fontSize: '14px'
+		fontSize: '14px',
+		fontFamily: 'Montserrat'
 	},
 	tipText: {
 		maxWidth: '250px',
@@ -146,6 +147,8 @@ const AdvancedDropdown = (props) => {
 	const [matrixHandler, setMatrixHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
+	const [datePickerOpen, setDatePicker] = useState(false);
+
 	const comparableExpansion = JSON.stringify(state.expansionDict);
 
 	useEffect(() => {
@@ -192,7 +195,7 @@ const AdvancedDropdown = (props) => {
 
 	useEffect(() => {
 		const handleClick = e => {
-			if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton') {
+			if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton' && !datePickerOpen) {
 				close();
 			}
 		};
@@ -200,11 +203,15 @@ const AdvancedDropdown = (props) => {
 		return () => {
 			document.removeEventListener("mousedown", handleClick);
 		};
-	}, [close]);
+	}, [close, datePickerOpen]);
+
+	const setDatePickerOpen = () => {setDatePicker(true)}
+	const setDatePickerClosed = () => {setDatePicker(false)}
+
 
 	return (
 		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{ display: (open ? 'block' : 'none') }}>
-			{matrixHandler && matrixHandler.getAdvancedOptions({ state, dispatch, classes, handleSubmit })}
+			{matrixHandler && matrixHandler.getAdvancedOptions({ state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed })}
 		</AdvDropdownWrapper>
 	)
 }
