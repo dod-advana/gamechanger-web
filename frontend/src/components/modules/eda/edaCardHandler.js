@@ -26,7 +26,7 @@ import {KeyboardArrowRight, Star} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 import {setState} from "../../../sharedFunctions";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import sanitizeHtml from 'sanitize-html';

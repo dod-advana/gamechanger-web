@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Paper from "material-ui/Paper/Paper";
 import SimpleTable from "../common/SimpleTable";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
 import GCButton from '../common/GCButton';
@@ -14,7 +14,7 @@ import {trackEvent} from "../telemetry/Matomo";
 import Pagination from "react-js-pagination";
 import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
 import {Card} from "../cards/GCCard";
-import Permissions from 'advana-platform-ui/dist/utilities/permissions';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
 const gameChangerAPI = new GameChangerAPI();

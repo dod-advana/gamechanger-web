@@ -10,3 +10,4 @@ secrets/*
 metadata/*
 build/*
 cobertura/
+.npmrc
