@@ -54,12 +54,9 @@ class PolicyExportHandler extends ExportHandler {
 				let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 				intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 				searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator: 'and'}, clientObj, userId);
-				console.log(searchResults)
 				if(intelligentSearchOn){ // add intelligent search result if QA empty
 					const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
 					const intelligentSearchFound = searchResults.docs.findIndex((item) => item.id === intelligentSearchResult.id);
-					console.log(intelligentSearchResult);
-					console.log(intelligentSearchFound);
 					if(intelligentSearchFound !== -1){ // if found, remove that entry from list
 						searchResults.docs.splice(intelligentSearchFound, 1);
 											
@@ -86,8 +83,6 @@ class PolicyExportHandler extends ExportHandler {
 
 				docs = cleanedDocs;
 
-				console.log(docs)
-
 				if (historyId) {
 					await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
 				} else {
@@ -110,7 +105,6 @@ class PolicyExportHandler extends ExportHandler {
 					};
 					rest.index = index;
 					rest.orgFilter = orgFilter;
-					console.log(searchResults);
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
 				} else if (format === 'csv') {
 					const csvStream = this.reports.createCsvStream(searchResults, userId);
