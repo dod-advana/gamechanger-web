@@ -833,32 +833,22 @@ export default function PolicyGraphView(props) {
 	}
 	
 	const getTopicCardData = async () => {
-		const topicDocumentCount = gameChangerAPI.graphQueryPOST(
-			`MATCH (t:Topic) where t.name = $name
-				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
-				RETURN t2.name as topic_name, count(d) as doc_count
-				ORDER BY doc_count DESC LIMIT 5;`, 'S484S8B', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
-		);
-		
-		const documentCount = gameChangerAPI.graphQueryPOST(
-			`MATCH (t:Topic) where t.name = $name
-				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
-				RETURN count(d) as doc_count`, 'NTDC5KE', cloneData.clone_name, {params: {name: selectedItem.name.toLowerCase()}}
-		);
-		
-		const results = await Promise.all([topicDocumentCount, documentCount]);
-		
-		const relatedTopics = results[0].data.graph_metadata;
-		const documentCountData = results[1].data.graph_metadata;
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getTopicDataPolicyGraph',
+			cloneName: cloneData.clone_name,
+			options: {
+				topicName: selectedItem.name.toLowerCase(),
+			}
+		});
 		
 		if (selectedItem) {
-			selectedItem.relatedTopics = relatedTopics;
-			selectedItem.documentCount = documentCountData;
+			selectedItem.relatedTopics = resp.data.relatedTopics.graph_metadata;
+			selectedItem.documentCount = resp.data.documentCountData.graph_metadata;
 			selectedItem.done = true;
 		}
 		setGraphCardData({
-			relatedTopics,
-			documentCount: documentCountData,
+			relatedTopics: resp.data.relatedTopics.graph_metadata,
+			documentCount: resp.data.documentCountData.graph_metadata,
 			done: true
 		});
 	}
@@ -899,11 +889,13 @@ export default function PolicyGraphView(props) {
 			return;
 		}
 		
-		gameChangerAPI.graphQueryPOST(
-			'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'RETURN pt;', 'I1JJI2D', cloneData.clone_name, {params: {doc_id: node.doc_id}}
-		).then((data) => {
+		gameChangerAPI.callGraphFunction({
+			functionName: 'getEntitiesForNode',
+			cloneName: cloneData.clone_name,
+			options: {
+				doc_id: node.doc_id,
+			}
+		}).then((data) => {
 			const graphData = data.data;
 			const nodeIds = graph.nodes.map(node => {
 				return node.id;
@@ -938,7 +930,7 @@ export default function PolicyGraphView(props) {
 		});
 	}
 	
-	const showReferencesForNode = (isUKN = false) => {
+	const showReferencesForNode = async (isUKN = false) => {
 		
 		const node = graph.nodes.filter(node => {
 			return node.id === selectedID;
@@ -969,36 +961,43 @@ export default function PolicyGraphView(props) {
 		
 		const refName = node.ref_name;
 		
-		gameChangerAPI.graphQueryPOST(`MATCH ref = (d:Document)<-[:${isUKN ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${isUKN ? 'UKN_Document' : 'Document'})
-				WHERE d2.ref_name = $ref_name AND NOT d = d2
-				RETURN ref;`, 'RX1V6Q8', cloneData.clone_name, {params: {ref_name: refName}}).then((data) => {
-			const graphData = data.data;
-			const nodeIds = graph.nodes.map(node => {
-				return node.id;
-			});
-			const parentId = node.id;
-			graphData.nodes.forEach(node => {
-				if (!nodeIds.includes(node.id)) {
-					node.notInOriginalSearch = true;
-				 	graph.nodes.push(node);
-				 	nodeIds.push(node.id);
-				}
-			});
-			const edgeIds = [];
-			graphData.edges.forEach(edge => {
-				edge.source = parentId;
-				edge.target = 200000 + edge.target;
-				if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
-					edge.notInOriginalSearch = true;
-					graph.edges.push(edge);
-					edgeIds.push(`${edge.source},${edge.target}`)
-				}
-			});
-			
-			reloadAndRunSimulation();
-			
-			node.showingReferences = true;
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getReferencesPolicyGraph',
+			cloneName: cloneData.clone_name,
+			options: {
+				ref_name: refName,
+				isUnknown: isUKN
+			}
 		});
+		
+		console.log(resp)
+		
+		const graphData = resp.data;
+		const nodeIds = graph.nodes.map(node => {
+			return node.id;
+		});
+		const parentId = node.id;
+		graphData.nodes.forEach(node => {
+			if (!nodeIds.includes(node.id)) {
+				node.notInOriginalSearch = true;
+			    graph.nodes.push(node);
+			    nodeIds.push(node.id);
+			}
+		});
+		const edgeIds = [];
+		graphData.edges.forEach(edge => {
+			edge.source = parentId;
+			edge.target = 200000 + edge.target;
+			if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
+				edge.notInOriginalSearch = true;
+				graph.edges.push(edge);
+				edgeIds.push(`${edge.source},${edge.target}`)
+			}
+		});
+		
+		reloadAndRunSimulation();
+		
+		node.showingReferences = true;
 	}
 	
 	const showTopicsForNode = () => {
@@ -1033,10 +1032,13 @@ export default function PolicyGraphView(props) {
 			return;
 		}
 		
-		gameChangerAPI.graphQueryPOST(
-			'MATCH mt = (d:Document)-[c:CONTAINS]->(:Topic) ' +
-			'WHERE d.doc_id = $doc_id RETURN mt;', '5YPYYUX', cloneData.clone_name, {params: {doc_id: node.doc_id}}
-		).then((data) => {
+		gameChangerAPI.callGraphFunction({
+			functionName: 'getTopicsForNode',
+			cloneName: cloneData.clone_name,
+			options: {
+				doc_id: node.doc_id,
+			}
+		}).then((data) => {
 			const graphData = data.data;
 			const nodeIds = graph.nodes.map(node => {
 				return node.id;
