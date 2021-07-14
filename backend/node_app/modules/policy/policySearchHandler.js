@@ -39,6 +39,7 @@ class PolicySearchHandler extends SearchHandler {
 		this.async_redis = async_redis;
 		this.app_settings = app_settings;
 		this.constants = constants;
+		this.error = {};
 	}
 
 	async searchHelper(req, userId) {
@@ -191,7 +192,9 @@ class PolicySearchHandler extends SearchHandler {
 			if (forCacheReload){
 				throw Error('Cannot get expanded search terms in cache reload');
 			}
-			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
+			this.error.category = 'ML API';
+			this.error.code = '93SQB38';
+			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', '93SQB38', userId);
 		}
 		return expansionDict;
 	}
@@ -416,7 +419,9 @@ class PolicySearchHandler extends SearchHandler {
 				};
 				
 			} catch (e) {
-				this.logger.error(e.message, 'KBBIOYCJ', userId);
+				this.error.category = 'ML API'
+				this.error.code = 'KBBIOYCJ';
+				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			};
 		};
 		return QA;
@@ -726,6 +731,9 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
+	getError() {
+		return this.error;
+	}
 }
 
 // const policySearchHandler = new PolicySearchHandler();

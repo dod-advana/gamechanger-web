@@ -248,15 +248,15 @@ class DataLibrary {
 				this.axios({
 					method: 'get',
 					url: edaUrl,
-						responseType:'stream'
-					})
+					responseType:'stream'
+				})
 					.then(response => {
-					response.data.pipe(res);
+						response.data.pipe(res);
 					})
 					.catch(err=>{
-					this.logger.error(err, 'N4BAC3N', userId);
-					throw err;
-				});
+						this.logger.error(err, 'N4BAC3N', userId);
+						throw err;
+					});
 			}
 			else{
 				const params = {
@@ -284,6 +284,30 @@ class DataLibrary {
 			this.logger.error(msg, 'PFXO7XD', userId);
 			throw msg;
 		}
+	}
+
+	getFileThumbnail(data, userId){
+		let { dest, filekey } = data;
+		
+		const params = {
+			Bucket: dest,
+			Key: `gamechanger/thumbnails/${filekey}.png`,
+			ResponseContentType: 'image/png'
+		};
+
+		return new Promise((resolve,reject) => {
+			this.awsS3Client.getObject(params, (err, data) => {
+				if(err) {
+					reject(err, err.stack);
+				} else {
+					try {
+						resolve(data.Body.toString('base64'));
+					} catch (e) {
+						reject(e)
+					}
+				}
+			})
+		});
 	}
 
 	async queryGraph(query, parameters = {}, userId) {

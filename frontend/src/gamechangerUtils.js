@@ -8,6 +8,8 @@ import {getTextColorBasedOnBackground} from "./graphUtils";
 import {useEffect} from "react";
 import styled from "styled-components";
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import {setState} from './sharedFunctions';
 const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
@@ -197,38 +199,6 @@ export const getTrackingNameForFactory = (cloneName) => {
 	return `GAMECHANGER_${cloneName}`;
 }
 
-const crawlerMapping = {
-	"dod_issuances":"WHS DoD Directives Division",
-	"army_pubs":"Army Publishing Directorate", 
-	"jcs_pubs":"Joint Chiefs of Staff Library",
-	"jcs_manual_uploads":"Joint Chiefs of Staff",
-	"dod_manual_uploads":"Dept. of Defense",
-	"army_manual_uploads":"US Army",
-	"ic_policies":"Director of National Intelligence",
-	"us_code":"Office of the Law Revision Counsel",
-	"ex_orders":"Federal Register",
-	"opm_pubs":"OMB Publication",
-	"air_force_pubs":"Dept. of the Air Force E-Publishing",
-	"marine_pubs":"Marine Corps Publications Electronic Library",
-	"secnav_pubs":"Dept. of the Navy Issuances",
-	"navy_reserves":"U.S. Navy Reserve Publications",
-	"navy_med_pubs":"Navy Medicine Directives",
-	"Bupers_Crawler":"Bureau of Naval Personnel Instructions",
-	"milpersman_crawler":"Navy Personnel Command Instructions",
-	"nato_stanag":"NATO Publications",
-	"fmr_pubs":"DoD Financial Management Regulation",
-	"legislation_pubs":"Congressional Legislation",
-	"Army_Reserve":"U.S. Army Reserve Publications",
-	"Memo":"OSD Executive Executive Secretary",
-	"dha_pubs":"Military Health System",
-	"jumbo_FAR":"Federal Acquisition Regulation",
-	"jumbo_DFAR":"Defense Federal Acquisition Regulation"
-} 
-
-export const crawlerMappingFunc = (item) => {
-	return crawlerMapping[item]? crawlerMapping[item] : item
-}
-
 export const getCloneTitleForFactory = (cloneData, upperCase) => {
 	return upperCase ? cloneData.clone_name.toUpperCase() : cloneData.clone_name;
 }
@@ -236,7 +206,14 @@ export const getCloneTitleForFactory = (cloneData, upperCase) => {
 export const useMountEffect = (fun) => useEffect(fun, []);
 
 export const typeFilters = {
-	'Document': false
+	'Documents': true,
+	'Legislations': false,
+	'Memorandums': false,
+	'Titles': false,
+	'Orders': false,
+	'Instructions': false,
+	'Manuals': false,
+	'Directives': false,
 };
 
 export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
@@ -299,6 +276,43 @@ export const getCurrentView = (view, list) => {
 export function numberWithCommas(x) {
 	if (!x) return x;
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+const crawlerMapping = {
+	"dod_issuances":"WHS DoD Directives Division",
+	"army_pubs":"Army Publishing Directorate", 
+	"jcs_pubs":"Joint Chiefs of Staff Library",
+	"jcs_manual_uploads":"Joint Chiefs of Staff",
+	"dod_manual_uploads":"Dept. of Defense",
+	"army_manual_uploads":"US Army",
+	"ic_policies":"Director of National Intelligence",
+	"us_code":"Office of the Law Revision Counsel",
+	"ex_orders":"Federal Register",
+	"opm_pubs":"OMB Publication",
+	"air_force_pubs":"Dept. of the Air Force E-Publishing",
+	"marine_pubs":"Marine Corps Publications Electronic Library",
+	"secnav_pubs":"Dept. of the Navy Issuances",
+	"navy_reserves":"U.S. Navy Reserve Publications",
+	"navy_med_pubs":"Navy Medicine Directives",
+	"Bupers_Crawler":"Bureau of Naval Personnel Instructions",
+	"milpersman_crawler":"Navy Personnel Command Instructions",
+	"nato_stanag":"NATO Publications",
+	"fmr_pubs":"DoD Financial Management Regulation",
+	"legislation_pubs":"Congressional Legislation",
+	"Army_Reserve":"U.S. Army Reserve Publications",
+	"Memo":"OSD Executive Executive Secretary",
+	"dha_pubs":"Military Health System",
+	"jumbo_FAR":"Federal Acquisition Regulation",
+	"jumbo_DFAR":"Defense Federal Acquisition Regulation",
+	"National_Guard": "National Guard Bureau Publications Library",
+	"Coast_Guard": "US Coast Guard Directives",
+    "dfar_subpart_regs": "Defense Federal Acquisition Regulation",
+    "far_subpart_regs": "Federal Acquisition Regulation",
+	"Chief_National_Guard_Bureau_Instructions": "National Guard Bureau Instructions"
+} 
+
+export const crawlerMappingFunc = (item) => {
+	return crawlerMapping[item]? crawlerMapping[item] : item
 }
 
 export const orgColorMap = {
@@ -787,4 +801,13 @@ export const exactMatch = (phrase, word) => {
 		}
 	});
 	return exists;
+}
+
+export const displayBackendError = (resp, dispatch = () => {}) => {
+	if (resp?.data?.error) {
+		const errorMessage = Permissions.isGameChangerAdmin() ?
+			`An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}` :
+			`An error has occurred in the application, but we are working to fix it!`;
+		setState(dispatch, {showBackendError: true, backendErrorMsg: errorMessage});
+ 	}
 }
