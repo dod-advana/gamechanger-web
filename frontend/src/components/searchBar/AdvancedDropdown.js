@@ -1,7 +1,6 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import {makeStyles} from '@material-ui/core/styles';
-import { exactMatch } from '../../gamechangerUtils';
+import { makeStyles } from '@material-ui/core/styles';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
 import SearchMatrixFactory from "../factories/searchMatrixFactory";
 
@@ -133,38 +132,37 @@ const useStyles = makeStyles({
 });
 
 const AdvancedDropdown = (props) => {
-  // import context, add matrix handler stuff in here
+	// import context, add matrix handler stuff in here
 	const {
 		context,
-    open,
-    handleSubmit,
-    close
+		open,
+		handleSubmit,
+		close
 	} = props;
-  const ref = useRef();
-  const {state, dispatch} = context;
-  const classes = useStyles();
+	const ref = useRef();
+	const { state, dispatch } = context;
+	const classes = useStyles();
 
-  const [matrixHandler, setMatrixHandler] = useState();
+	const [matrixHandler, setMatrixHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
-  const [expansionTerms, setExpansionTerms] = React.useState([]);
 	const comparableExpansion = JSON.stringify(state.expansionDict);
 
-  useEffect(() => {
+	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
 			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
-			
+
 			setMatrixHandler(handler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
 
-  useEffect(() => {
+	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm
 		let expansion = {};
-		if(comparableExpansion) {
+		if (comparableExpansion) {
 			expansion = JSON.parse(comparableExpansion)
 		}
 		let expandedTerms = Object.values(expansion || {});
@@ -173,49 +171,46 @@ const AdvancedDropdown = (props) => {
 		const exclude = new Set([...keys, ...quotedKeys]);
 		let topFive = new Set();
 
-		while(topFive.size < 7){
-			if(expandedTerms.length === 0){
+		while (topFive.size < 7) {
+			if (expandedTerms.length === 0) {
 				break;
 			}
 			const frontArr = expandedTerms[0];
 			const term = frontArr.shift();
 			const [a, ...rest] = expandedTerms;
-			if(!term){
+			if (!term) {
 				expandedTerms = [...rest];
 			} else {
-				if(!exclude.has(term)){
+				if (!exclude.has(term)) {
 					topFive.add(term);
 				}
 				expandedTerms = [...rest, a];
 			}
 		}
-		let topFiveArr = Array.from(topFive)
-		topFiveArr = topFiveArr.map(term => {return {...term, checked:exactMatch(state.searchText, term.phrase)}})
-		setExpansionTerms(topFiveArr);
 
 	}, [state, comparableExpansion]);
 
-  useEffect(() => {
-    const handleClick = e => {
-      if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton') {
-        close();
-      }
-    }; 
-    document.addEventListener("mousedown", handleClick);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-    };
-  }, []);
-  
+	useEffect(() => {
+		const handleClick = e => {
+			if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton') {
+				close();
+			}
+		};
+		document.addEventListener("mousedown", handleClick);
+		return () => {
+			document.removeEventListener("mousedown", handleClick);
+		};
+	}, [close]);
+
 	return (
-		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{display: (open ? 'block' : 'none') }}>
-      {matrixHandler && matrixHandler.getAdvancedOptions({state, dispatch, classes, handleSubmit})}
-    </AdvDropdownWrapper>
+		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{ display: (open ? 'block' : 'none') }}>
+			{matrixHandler && matrixHandler.getAdvancedOptions({ state, dispatch, classes, handleSubmit })}
+		</AdvDropdownWrapper>
 	)
 }
 
 AdvancedDropdown.propTypes = {
-  context: PropTypes.shape({
+	context: PropTypes.shape({
 		state: PropTypes.shape({
 			cloneDataSet: PropTypes.bool,
 			historySet: PropTypes.bool,
@@ -240,8 +235,8 @@ AdvancedDropdown.propTypes = {
 			searchSettings: PropTypes.object
 		}),
 		handleSubmit: PropTypes.func,
-    open: PropTypes.bool,
-    close: PropTypes.func
+		open: PropTypes.bool,
+		close: PropTypes.func
 	})
 }
 export default AdvancedDropdown;
