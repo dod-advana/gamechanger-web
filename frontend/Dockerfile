@@ -3,7 +3,7 @@ FROM node:14
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
 COPY .npmrc /usr/src/app
-RUN npm config set @dod-advana:registry https://npm.pkg.github.com && npm install -g jest && npm install
+RUN npm install -g jest && npm install
 COPY . /usr/src/app
 EXPOSE 8080
 # EXPOSE 5860
