@@ -1,5 +1,5 @@
 FROM node:14
-RUN npm config set registry http://10.194.9.122
+COPY .npmrc .npmrc
 RUN npm install -g nodemon
 RUN npm install -g sequelize-cli
 RUN npm install -g jest
@@ -10,4 +10,5 @@ RUN npm run build
 RUN mv build ../backend/
 WORKDIR /usr/src/app/backend
 RUN npm install
+RUN rm -f .npmrc
 CMD ./startProd.sh

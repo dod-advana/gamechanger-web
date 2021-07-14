@@ -30,7 +30,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 const ApiKey = models.api_key;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
-const AAA = require('advana-api-auth');
+const AAA = require('@dod-advana/advana-api-auth');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -220,8 +220,7 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
-
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
+if (!constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
