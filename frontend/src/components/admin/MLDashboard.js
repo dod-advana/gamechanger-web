@@ -83,7 +83,6 @@ const DEFAULT_VERSION = 'v4'
  * @class MLDashboard
  */
 export default () => {
-
 	// Set state variables
     const [downloadedModelsList, setDonwloadedModelsList] = useState({
         "transformers": [],
@@ -180,7 +179,7 @@ export default () => {
             // set currentTransformer
             const current = await gameChangerAPI.getCurrentTransformer();
             // current.data is of the form {sentence_models:{encoder, sim}}
-            setCurrentTransformer(current.data.sentence_models);
+            setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:{});
             updateLogs('Successfully queried current transformer',0);
             updateLoadCounter();
         }catch (e) {
@@ -323,8 +322,9 @@ export default () => {
     }
 
 	useEffect(() => {
-		onload();
-	}, []);
+        onload();
+         // eslint-disable-next-line
+	},[]);
     
 
     return (			
