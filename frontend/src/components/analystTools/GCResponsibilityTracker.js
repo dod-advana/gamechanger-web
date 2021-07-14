@@ -172,15 +172,15 @@ const GCResponsibilityTracker = (props) => {
 	}, [otherEntRespSearchText, otherEntRespFilters]);
 	
 	useEffect(() => {
-		handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
+		handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
 	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (state.reloadResponsibilityTable) {
-			this.handleFetchData({ page:pageIndex, sorted: sorts, filtered: filters });
+			this.handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
 			setState(dispatch, {reloadResponsibilityTable: false});
 		}
-	 }, [state]);
+	 }, [state, dispatch, pageIndex, sorts, filters]);
 
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {

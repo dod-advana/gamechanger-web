@@ -35,7 +35,7 @@ const StyledRadio = (props) => {
 
 export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, componentStepNumbers, colorMap, moreTextClick, aboveDisabled, belowDisabled}) => {
 	const [tag, setTag] = useState(tags[0])
-	const [tagColorMap, setTagColorMap] = useState(colorMap)
+	const [tagColorMap] = useState(colorMap)
 
 
 	const options = tags.map((tagText) => (
@@ -96,8 +96,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 
 			</div>
 			<GCButton className={'row'} style={{height: '25%', width: '100%', margin: '0 0'}}
-				id={'gcAssistPrevious'}
-				className={"Above Button"}
+				id={'gcAssistAbove'}
 				onClick={() => { moreTextClick(-1) }}
 				textStyle={{color: 'grey'}}
 				buttonColor={'white'}
@@ -130,8 +129,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 				/>				
 			</div>
 			<GCButton className={'row'} style={{height: '25%',width: '100%', margin: '0 0'}}
-				id={'gcAssistPrevious'}
-				className={"Below Button"}
+				id={'gcAssistBelow'}
 				onClick={() => { moreTextClick(1) }}
 				textStyle={{color: 'grey'}}
 				buttonColor={'white'}
