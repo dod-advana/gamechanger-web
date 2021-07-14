@@ -103,6 +103,7 @@ class PolicyExportHandler extends ExportHandler {
 					};
 					rest.index = index;
 					rest.orgFilter = orgFilter;
+					console.log(searchResults);
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
 				} else if (format === 'csv') {
 					const csvStream = this.reports.createCsvStream(searchResults, userId);
