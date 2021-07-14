@@ -1,5 +1,4 @@
 FROM node:14
-RUN npm config set @dod-advana:registry https://npm.pkg.github.com
 COPY .npmrc .npmrc
 RUN npm install -g nodemon
 RUN npm install -g sequelize-cli
