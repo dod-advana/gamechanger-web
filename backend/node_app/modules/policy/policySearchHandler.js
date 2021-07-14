@@ -188,7 +188,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 			this.error.category = 'ML API';
 			this.error.code = '93SQB38';
-			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
+			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', '93SQB38', userId);
 		}
 		return expansionDict;
 	}
@@ -415,7 +415,7 @@ class PolicySearchHandler extends SearchHandler {
 			} catch (e) {
 				this.error.category = 'ML API'
 				this.error.code = 'KBBIOYCJ';
-				this.logger.error(e.message, 'KBBIOYCJ', userId);
+				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			};
 		};
 		return QA;
