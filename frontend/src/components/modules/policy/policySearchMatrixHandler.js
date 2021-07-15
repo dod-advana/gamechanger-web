@@ -122,7 +122,9 @@ const handleSelectAllOrgs = (state, dispatch) => {
 		newSearchSettings.allOrgsSelected = true;
 		let runSearch = false;
 		Object.keys(state.searchSettings.orgFilter).forEach(org => {
-			runSearch = newSearchSettings.orgFilter[org] ? true : false
+			if(newSearchSettings.orgFilter[org]){
+				runSearch = true;
+			}
 			newSearchSettings.orgFilter[org] = false;
 		});
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
@@ -289,7 +291,9 @@ const handleSelectAllTypes = (state, dispatch) => {
 		newSearchSettings.allTypesSelected = true;
 		let runSearch = false;
 		Object.keys(state.searchSettings.typeFilter).forEach(type => {
-			runSearch = newSearchSettings.typeFilter[type] ? true : false;
+			if(newSearchSettings.typeFilter[type]){
+				runSearch = true;
+			}
 			newSearchSettings.typeFilter[type] = false;
 		});
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
