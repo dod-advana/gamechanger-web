@@ -218,9 +218,6 @@ class EdaSearchHandler extends SearchHandler {
 	
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
-
-			console.log('--- edaSearchHandler ---')
-			console.log(results.body.hits);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
 				if (getIdList) {
@@ -230,7 +227,9 @@ class EdaSearchHandler extends SearchHandler {
 				if (forGraphCache){
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+					const d = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+					console.log(d);
+					return d;
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
