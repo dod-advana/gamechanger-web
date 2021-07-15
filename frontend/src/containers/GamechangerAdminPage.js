@@ -495,6 +495,7 @@ const GamechangerAdminPage = props => {
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
+	const [loginModalOpen, setLoginModalOpen] = useState(false);
 
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
@@ -1706,6 +1707,10 @@ const GamechangerAdminPage = props => {
 		}
 	}
 	
+	const setLoginModal = (open) => {
+		setLoginModalOpen(open);
+	}
+	
 	return (
 		<div style={{ minHeight: '100%' }}>
 
@@ -1720,6 +1725,8 @@ const GamechangerAdminPage = props => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
+				loginModalOpen={loginModalOpen}
+				setLoginModal={setLoginModal}
 			>
 			</SearchBanner>
 
