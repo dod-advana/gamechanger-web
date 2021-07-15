@@ -681,6 +681,7 @@ class EDASearchUtility {
 						const {metadata_type_eda_ext} = fields;
 						result.metadata_type_eda_ext = metadata_type_eda_ext && metadata_type_eda_ext[0];
 						result = this.getExtractedFields(_source, result);
+						console.log(result);
 					}
 					catch(err) {
 						console.log(err);
