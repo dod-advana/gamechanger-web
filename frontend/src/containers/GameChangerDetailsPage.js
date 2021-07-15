@@ -19,7 +19,6 @@ import DocumentDetailsPage from "../components/details/documentDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 import Permissions from "advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
-import {setState} from "../sharedFunctions";
 
 const gameChangerAPI = new GameChangerAPI();
 
