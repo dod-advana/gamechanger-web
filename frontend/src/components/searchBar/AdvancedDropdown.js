@@ -50,7 +50,7 @@ const useStyles = makeStyles({
 	rootButton: {
 		visibility: 'hidden',
 		width: '0px',
-		// padding: '0px',
+		padding: '0px',
 		border: '0px',
 		cursor: 'default'
 	},
