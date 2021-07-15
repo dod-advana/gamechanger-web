@@ -137,6 +137,7 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 		[orgName]: event.target.checked
 	};
 	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings.orgUpdate = true;
     setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
@@ -262,7 +263,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 									key={`${org} (${betterOrgData[org]})`}
 									value={`${org} (${betterOrgData[org]})`}
 									classes={{ label: classes.checkboxPill }}
-									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[originalOrgFilters[org]]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
 									label={`${org} (${betterOrgData[org]})`}
 									labelPlacement="end"
 								/>
@@ -309,6 +310,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false});
 	} else {
 		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings.typeUpdate = true;
 		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
 	}
 	
