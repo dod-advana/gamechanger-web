@@ -18,10 +18,10 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const useStyles = makeStyles({
 	root: {
-		marginTop: '1px',
+		paddingTop: '16px',
 		marginRight: '10px',
 		'& .MuiInputBase-root':{
-			height: '34px'
+			height: '50px'
 		},
 		'&:hover .MuiInput-underline:before':{
 			borderBottom: `3px solid ${gcOrange}`
@@ -36,8 +36,11 @@ const useStyles = makeStyles({
 	selectRoot: {
 		color: '#3F4A56',
 	},
+	selectIcon: {
+		marginTop: '4px'
+	},
 	formlabel: {
-		fontSize: '16px'
+		paddingTop: '16px'
 	}
 })
 
@@ -153,46 +156,47 @@ const ViewHeader = (props) => {
 			<div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting['Documents'] !== undefined && selectedCategories['Documents'] && 
 					<>
-						<FormControl classes={{root:classes.root}}>
+						<FormControl variant="outlined" classes={{root:classes.root}}>
 							<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
 							<Select
-							labelId="view-name"
-							id="view-name-select"
-							value={currentSort}
-							onChange={handleChangeSort}
-							classes={{root:classes.selectRoot}}
-							autoWidth
+								labelId="view-name"
+								label="Sort"
+								id="view-name-select"
+								value={currentSort}
+								onChange={handleChangeSort}
+								classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+								autoWidth
 							>
-							{categorySorting['Documents'].map(sort => {
-								return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
-							})}
+								{categorySorting['Documents'].map(sort => {
+									return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
+								})}
 							</Select>
 						</FormControl>
 						{currentSort !== 'Alphabetical' ? 
-							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+							(<div style={{width: '40px', marginRight: '6px', display: 'flex'}}>
 								<i 
 									className="fa fa-sort-amount-desc"
-									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									style={{marginTop: '80%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
 								></i>
 								<i 
 									className="fa fa-sort-amount-asc"
-									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									style={{marginTop: '80%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
 								></i>
 							</div>) : 
-							(<div style={{width: '40px', marginRight: '25px', display: 'flex'}}>
+							(<div style={{width: '40px', marginRight: '6px', display: 'flex'}}>
 								<i 
 									className="fa fa-sort-alpha-asc"
-									style={{marginTop: '60%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									style={{marginTop: '80%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
 								></i>
 								<i 
 									className="fa fa-sort-alpha-desc"
-									style={{marginTop: '60%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+									style={{marginTop: '80%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
 								></i>
@@ -200,15 +204,16 @@ const ViewHeader = (props) => {
 						}
 				</>
 				}
-				<FormControl classes={{root:classes.root}}>
+				<FormControl variant="outlined" classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
 						className={`tutorial-step-${componentStepNumbers["Change View"]}`}
 						labelId="view-name"
+						label="View"
 						id="view-name-select"
 						value={dropdownValue}
 						onChange={handleChangeView}
-						classes={{root:classes.selectRoot}}
+						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
 						autoWidth
 					>
 					{viewNames.map(view => {
@@ -234,7 +239,7 @@ const ViewHeader = (props) => {
 						className={`tutorial-step-${state.componentStepNumbers["Share Search"]}`}
 						id={"gcShareSearch"}
 						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
-						style={{height: 34, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 0}}
+						style={{height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50}}
 						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>
 					<GCTooltip title='Share' placement="bottom" arrow>
