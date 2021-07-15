@@ -92,6 +92,9 @@ const PolicyMainViewHandler = {
 		} = props;
 		
 		const {state} = context;
+
+		console.log('policyMainViewHandler')
+		console.log(state.showSideFilters);
 		
 		const viewPanels = defaultMainViewHandler.getExtraViewPanels(props);
 		viewPanels.push({panelName: 'Graph', panel:
