@@ -8,6 +8,7 @@ class SearchMatrixFactory {
 		try {
 			switch (module) {
 				case 'policy/policyMainViewHandler':
+				case 'policy/policyTestMainViewHandler':
 					this.handler = policySearchMatrixHandler;
 					break;
 				case 'globalSearch/globalSearchMainViewHandler':

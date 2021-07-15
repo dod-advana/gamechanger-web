@@ -112,6 +112,11 @@ const initState = {
 		Services: false,
 	},
 
+	searchSettings: {
+		allCategoriesSelected: true,
+		specificCategoriesSelected: false,
+	},
+
 	categorySorting: {
 		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
 	},
