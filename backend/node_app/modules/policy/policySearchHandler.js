@@ -60,7 +60,7 @@ class PolicySearchHandler extends SearchHandler {
 		if(doubleQuoteCount % 2 === 1){
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
-		req.body.questionFlag = this.searchUtility.isQuestion(searchText)
+		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
@@ -84,6 +84,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
