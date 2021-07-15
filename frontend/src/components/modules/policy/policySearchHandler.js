@@ -5,6 +5,7 @@ import {
 	getTrackingNameForFactory, getTypeQuery,
 	NO_RESULTS_MESSAGE,
 	numberWithCommas,
+	orgFilters,
 	PAGE_DISPLAYED,
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
@@ -337,21 +338,24 @@ const PolicySearchHandler = {
 						let sortedOrgs = orgData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
 						});
-						
-						let orgFilter = searchSettings.orgFilter;
-						if(sortedOrgs && sortedOrgs.length) {
-							orgFilter = {};
-							sortedOrgs.forEach((o) => {
-								orgFilter[o.name] = !allOrgsSelected;
-							});
-						}
-						
+
+
 						let typeFilter = searchSettings.typeFilter;
-						if(sortedTypes && sortedTypes.length) {
-							typeFilter = {};
-							sortedTypes.forEach((t) => {
-								typeFilter[t.name] = !allTypesSelected;
-							});
+						let orgFilter = searchSettings.orgFilter;
+						if(!searchSettings.isFilterUpdate){
+							if(sortedOrgs && sortedOrgs.length) {
+								orgFilter = {};
+								sortedOrgs.forEach((o) => {
+									orgFilter[o.name] = !allOrgsSelected;
+								});
+							}
+							
+							if(sortedTypes && sortedTypes.length) {
+								typeFilter = {};
+								sortedTypes.forEach((t) => {
+									typeFilter[t.name] = !allTypesSelected;
+								});
+							}
 						}
 						
 						searchSettings.orgFilter = orgFilter;
@@ -362,9 +366,11 @@ const PolicySearchHandler = {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
 
-						if(!searchSettings.isFilterUpdate){
-							searchSettings.originalOrgFilters = sidebarOrgData;
+						if(!searchSettings.isFilterUpdate || searchSettings.orgUpdate){
 							searchSettings.originalTypeFilters = sidebarTypes;
+						}
+						if(!searchSettings.isFilterUpdate || searchSettings.typeUpdate){
+							searchSettings.originalOrgFilters = sidebarOrgData;
 						}
 						
 						setState(dispatch, {
