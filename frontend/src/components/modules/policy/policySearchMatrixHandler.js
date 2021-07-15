@@ -913,7 +913,10 @@ const PolicySearchMatrixHandler = {
 				<button
 					type="button"
 					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
-					onClick={() => resetAdvancedSettings(dispatch)}
+					onClick={() => {
+						resetAdvancedSettings(dispatch);
+						setState(dispatch, { runSearch: true });
+					}}
 				>
 					<span style={{
 						fontFamily: 'Montserrat',
