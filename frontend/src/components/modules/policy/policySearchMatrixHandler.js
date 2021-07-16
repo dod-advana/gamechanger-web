@@ -618,7 +618,7 @@ const renderDates = (state, dispatch, classes, searchbar = false) => {
 const handleRevokedChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.includeRevoked = event.target.checked;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
 }
 
 const renderStatus = (state, dispatch, classes) => {
