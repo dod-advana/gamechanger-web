@@ -309,6 +309,14 @@ const crawlerMapping = {
 	"Chief_National_Guard_Bureau_Instructions": "National Guard Bureau Instructions"
 } 
 
+export const invertedCrawlerMappingFunc = (item) => {
+	const inverted = {}
+	Object.keys(crawlerMapping).forEach(key => {
+	  inverted[crawlerMapping[key].toLowerCase()] = key;
+	});
+	return inverted[item];
+}
+
 export const crawlerMappingFunc = (item) => {
 	return crawlerMapping[item]? crawlerMapping[item] : item
 }

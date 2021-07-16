@@ -8,7 +8,8 @@ import Paper from 'material-ui/Paper/Paper';
 import SimpleTable from "../components/common/SimpleTable";
 import {MemoizedNodeCluster2D} from "../components/graph/GraphNodeCluster2D";
 import {	numberWithCommas, getMetadataForPropertyTable,
-	getReferenceListMetadataPropertyTable, getTrackingNameForFactory} from "../gamechangerUtils";
+	getReferenceListMetadataPropertyTable, getTrackingNameForFactory, 
+	invertedCrawlerMappingFunc} from "../gamechangerUtils";
 import Pagination from "react-js-pagination";
 import {Card} from "../components/cards/GCCard";
 import GCAccordion from "../components/common/GCAccordion";
@@ -244,6 +245,18 @@ const getDocumentData = async (doc_id, cloneName) => {
 	return data;
 }
 
+const getSourceData = async (searchText, cloneName) => {
+	const { data } = await gameChangerAPI.callSearchFunction({
+		functionName: 'getDocumentsBySourceFromESHelper',
+		cloneName,
+		options: {
+			searchText: invertedCrawlerMappingFunc(searchText)
+		}
+	});
+
+	return data
+}
+
 const addFavoriteTopicToMetadata = (data, cloneName) => {
 		const temp = _.cloneDeep(data);
 		temp.map(metaData => {
@@ -302,6 +315,9 @@ const GameChangerDetailsPage = (props) => {
 	
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
+
+	const [source, setSource] = useState(null);
+	const [showSourceContainer, setShowSourceContainer] = useState(false);
 	
 	const [contractAwardID, setContractAwardID] = useState(null);
 	const [showContractContainer, setShowContractContainer] = useState(false);
@@ -317,7 +333,7 @@ const GameChangerDetailsPage = (props) => {
 	
 	useEffect(() => {
 		const cloneName = query.get('cloneName');
-		gameChangerAPI.getCloneMeta({cloneName: query.get('cloneName')}).then(data => {
+		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
 		});
 		
@@ -372,6 +388,26 @@ const GameChangerDetailsPage = (props) => {
 					setShowContractContainer(true);
 				}
 				break;
+			case 'source':
+				setDetailsType('Source');
+				name = query.get('sourceName');
+				setRunningQuery(true);
+				setGettingDocuments(true);
+				const t0 = new Date().getTime();
+				getSourceData(name, cloneName).then(data => {
+					const t1 = new Date().getTime();
+					setShowSourceContainer(true);
+					setSource({...data, name});
+					setDocCount(data.totalCount);
+					setDocResultsPage(1);
+					setDocResults(data.docs);
+					setVisibleDocs(data.docs.slice(1, RESULTS_PER_PAGE + 1));
+					setRunningQuery(false);
+					if(data.docs.length > 0) {
+						setTimeFound(((t1 - t0) / 1000).toFixed(2));
+						setGettingDocuments(false);
+					}
+				});
 			default:
 				break;
 		}
@@ -428,10 +464,18 @@ const GameChangerDetailsPage = (props) => {
 		});
 
 	}, [topic, graph, cloneData]);
+
+	useEffect(() => {
+
+		if (!source || !cloneData) return;
+		let searchText = `"${source.name}"`
+
+
+	})
 	
 	const renderDocuments = () => {
 		return visibleDocs.map((item, idx) => {
-			
+			debugger;
 			return (
 				<Card key={idx}
 					item={item}
@@ -526,7 +570,8 @@ const GameChangerDetailsPage = (props) => {
 		);
 	}
 	
-	const renderTopicContainer =() => {
+	const renderTopicContainer = () => {
+		debugger;
 		return (
 			<div>
 				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Topic Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
@@ -607,6 +652,77 @@ const GameChangerDetailsPage = (props) => {
 			</div>
 		);
 	}
+
+	const renderSourceContainer = () => {
+		return (
+			<div>
+				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Source Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
+				{source &&
+					<MainContainer>
+						<div className={'details'}>
+							<Paper>
+								<div className={'name'}>{source.name || ''}</div>
+								
+								<div className={'details-header'}>
+									<span>{'SOURCE DETAILS'}</span>
+								</div>
+								
+								<div className={'details-table'}>
+									<SimpleTable tableClass={'sidebar-table'}
+												 zoom={1}
+												 headerExtraStyle={{backgroundColor: '#313541', color: 'white'}}
+												 rows={[{key:'Total', value:source.totalCount}] || []}
+												 height={'auto'}
+												 dontScroll={true}
+												 colWidth={colWidth}
+												 disableWrap={true}
+												 title={'SOURCE Statistics'}
+												 hideHeader={true}
+									/>
+								</div>
+							</Paper>
+						</div>
+						<div className={'graph-top-docs'}>
+							
+							<div className={'section'}>
+								<GCAccordion expanded={true} header={'RELATED DOCUMENTS'}
+											 backgroundColor={'rgb(238,241,242)'}>
+									<div className={'related-documents'} style={{width: '100%'}}>
+										<div style={{display: 'flex', justifyContent: 'space-between'}}>
+											<div
+												style={styles.resultsCount}>{gettingDocuments ? 'Searching for documents...' :
+												`${numberWithCommas(docCount)} results found in ${timeFound} seconds`}</div>
+											<div style={{marginTop: '-14px', display: 'flex'}} className={'gcPagination'}>
+												<Pagination
+													activePage={docResultsPage}
+													itemsCountPerPage={18}
+													totalItemsCount={docCount}
+													pageRangeDisplayed={8}
+													onChange={page => {
+														trackEvent('GAMECHANGER', 'DetailsPaginationChanged', 'page', page);
+														handleChangeDocsPage(page);
+													}}
+													className='gcPagination'
+												/>
+											</div>
+										</div>
+										<div className="row" style={{marginLeft: 0, marginRight: -15}}>
+											{gettingDocuments ?
+												<div style={{margin: '0 auto'}}>
+													<LoadingIndicator customColor={gcColors.buttonColor2}/>
+												</div> :
+												renderDocuments()}
+										</div>
+									</div>
+								</GCAccordion>
+							</div>
+						
+						</div>
+					</MainContainer>
+				}
+			</div>
+		);
+	}
 	
 	return (
 		<div style={{minHeight: 'calc(100% - 89px)', background: 'white'}}>
@@ -624,6 +740,10 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showTopicContainer &&
 				renderTopicContainer()
+			}
+
+			{showSourceContainer &&
+				renderSourceContainer()
 			}
 			
 			{showDocumentContainer &&
