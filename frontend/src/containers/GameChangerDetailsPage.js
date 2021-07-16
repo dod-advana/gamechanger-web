@@ -292,6 +292,7 @@ const GameChangerDetailsPage = (props) => {
 	const [showEntityContainer, setShowEntityContainer] = useState(false);
 	const [detailsType, setDetailsType] = useState('');
 	const [hierarchyView, setHierarchyView] = useState(false);
+	const [loginModalOpen, setLoginModalOpen] = useState(false);
 	
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
@@ -604,6 +605,10 @@ const GameChangerDetailsPage = (props) => {
 		);
 	}
 	
+	const setLoginModal = (open) => {
+		setLoginModalOpen(open);
+	}
+	
 	return (
 		<div style={{minHeight: 'calc(100% - 89px)', background: 'white'}}>
 
@@ -611,6 +616,8 @@ const GameChangerDetailsPage = (props) => {
 				detailsType={detailsType}
 				titleBarModule={'details/detailsTitleBarHandler'}
 				rawSearchResults={[]}
+				loginModalOpen={loginModalOpen}
+				setLoginModal={setLoginModal}
 			>
 			</SearchBanner>
 			

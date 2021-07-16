@@ -62,10 +62,7 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
 		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
-		let expansionDict = null;
-		if(process.env.ENABLE_QUERY_EXPANSION === 'true') {
-			expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		}
+		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
@@ -87,10 +84,8 @@ class PolicySearchHandler extends SearchHandler {
 				return this.getDocumentsForDetailsPageFromESHelper(req, userId);
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
-				let expansionDict = null;
-				if(process.env.ENABLE_QUERY_EXPANSION === 'true') {
-					expansionDict = await this.gatherExpansionTerms(req.body, userId);
-				}
+				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
