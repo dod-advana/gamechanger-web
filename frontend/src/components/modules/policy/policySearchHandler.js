@@ -5,7 +5,6 @@ import {
 	getTrackingNameForFactory, getTypeQuery,
 	NO_RESULTS_MESSAGE,
 	numberWithCommas,
-	orgFilters,
 	PAGE_DISPLAYED,
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
@@ -372,6 +371,9 @@ const PolicySearchHandler = {
 						if(!searchSettings.isFilterUpdate || searchSettings.typeUpdate){
 							searchSettings.originalOrgFilters = sidebarOrgData;
 						}
+
+						searchSettings.orgUpdate = false;
+						searchSettings.typeUpdate = false;
 						
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
