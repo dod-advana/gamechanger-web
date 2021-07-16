@@ -227,9 +227,7 @@ class EdaSearchHandler extends SearchHandler {
 				if (forGraphCache){
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					const d = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
-					console.log(d);
-					return d;
+					return this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
