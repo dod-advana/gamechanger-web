@@ -117,6 +117,13 @@ const GameChangerSearchBar = (props) => {
 	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
+	useEffect(() => {
+		const queryText = getQueryVariable('q');
+		if (queryText) {
+			setSearchText(queryText);
+		}
+	}, [getQueryVariable('q')]);
+
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
 				const userSearchHistory = JSON.parse(localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) || '[]');
@@ -193,30 +200,36 @@ const GameChangerSearchBar = (props) => {
 		if(e.keyCode === 40 && cursor === null && data[0] !== undefined ){
 			setCursor(0);
 			setOriginalText(searchText);
+			console.log(data[0].toLowerCase())
 			setSearchText(data[0].toLowerCase());
 		}
 		else if(e.keyCode === 38 && cursor === null && data[0] !== undefined ){
 			setCursor(data.length-1);
 			setOriginalText(searchText);
+			console.log(data[data.length-1].toLowerCase())
 			setSearchText(data[data.length-1].toLowerCase());
 		}
 		else if (e.keyCode === 38 && cursor === 0) { // return to original state
+			console.log(originalText)
 			setSearchText(originalText);
 			setCursor(null);
 			setOriginalText(null);
 		}
 		else if (e.keyCode === 38 && cursor > 0) {
 			setCursor(cursor - 1);
+			console.log(data[cursor - 1].toLowerCase())
 			setSearchText(data[cursor - 1].toLowerCase());
 		} 
 		else if (e.keyCode === 40 && cursor < data.length -1 ) {
 			setCursor(cursor + 1);
+			console.log(data[cursor + 1].toLowerCase())
 			setSearchText(data[cursor + 1].toLowerCase());
 		}
 		else if (e.keyCode === 40 && cursor === data.length-1 ) {// return to original state by wrapping
 			setSearchText(originalText);
 			setCursor(null);
 			setOriginalText(null);
+			console.log(originalText)
 		}
 		else {
 			setDebounceOn(true);
@@ -260,6 +273,7 @@ const GameChangerSearchBar = (props) => {
 		} else {
 			clearLiveSuggestions();
 		}
+		console.log(value);
 		setSearchText(value);
 	}
 
@@ -407,6 +421,7 @@ const GameChangerSearchBar = (props) => {
 		}
 
 		const handleRowPressed = ({ text, rowType }) => {
+			console.log('handleRowPressed: ' + text);
 			setState(dispatch, {
 				searchText: text,
 				resultsPage: 1,
@@ -448,6 +463,7 @@ const GameChangerSearchBar = (props) => {
 
 	const noResults = Boolean(state.rawSearchResults?.length === 0);
 	const hideSearchResults = noResults && !state.loading;
+	console.log(getQueryVariable('q') || '');
 	return (
 		<div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: "relative" }} ref={ref}>
 			<SearchBarForm
