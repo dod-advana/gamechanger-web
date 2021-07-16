@@ -24,5 +24,5 @@ docker system prune -f
 if (($VOLUMES)); then
   docker system prune --volumes -f
 fi
-docker-compose $COMPOSE_FILES_ARGS build
+docker-compose $COMPOSE_FILES_ARGS build --no-cache
 docker-compose $COMPOSE_FILES_ARGS up
