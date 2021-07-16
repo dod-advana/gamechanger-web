@@ -166,7 +166,6 @@ const EdaSearchHandler = {
 					edaSearchSettings
 				},
 			}).then(resp => {
-				console.log(resp);
 				const t1 = new Date().getTime();
 			
 				let getUserDataFlag = true;
