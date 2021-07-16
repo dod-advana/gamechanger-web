@@ -307,7 +307,9 @@ export default function SearchMatrix(props) {
 			}
 		}
 		let topFiveArr = Array.from(topFive)
-		topFiveArr = topFiveArr.map(term => {return {...term, checked:exactMatch(state.searchText, term.phrase)}})
+		topFiveArr = topFiveArr.map(term => {
+			return {...term, checked:exactMatch(state.searchText, term.phrase, " OR ")}
+		})
 		setExpansionTerms(topFiveArr);
 
 	}, [state, comparableExpansion]);
@@ -318,11 +320,11 @@ export default function SearchMatrix(props) {
 		}
 		let newSearchText = state.searchText.trim()
 		expansionTerms.forEach(({phrase, source, checked}) => {
-			if(checked && !exactMatch(newSearchText, phrase)) {
+			if(checked && !exactMatch(newSearchText, phrase, " OR ")) {
 				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
 				newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 			} 
-			else if(!checked && exactMatch(newSearchText,`${phrase}`)) {
+			else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
 				newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
 			}
 
