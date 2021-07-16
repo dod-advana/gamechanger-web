@@ -120,6 +120,8 @@ const handleSelectAllOrgs = (state, dispatch) => {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificOrgsSelected = false;
 		newSearchSettings.allOrgsSelected = true;
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings.orgUpdate = true;
 		let runSearch = false;
 		Object.keys(state.searchSettings.orgFilter).forEach(org => {
 			if(newSearchSettings.orgFilter[org]){
@@ -289,6 +291,8 @@ const handleSelectAllTypes = (state, dispatch) => {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificTypesSelected = false;
 		newSearchSettings.allTypesSelected = true;
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings.typeUpdate = true;
 		let runSearch = false;
 		Object.keys(state.searchSettings.typeFilter).forEach(type => {
 			if(newSearchSettings.typeFilter[type]){
