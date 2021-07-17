@@ -74,13 +74,11 @@ class Reports {
 				},
 			};
 			const printer = new this.pdfMake(fonts);
-
 			const docDefinition = this.constructCoverPage(data, settings);
 			const doc = printer.createPdfKitDocument(docDefinition);
 
 			let chunks = [];
 			let result;
-
 			doc.on('data', (chunk) => {
 				chunks.push(chunk);
 			});
@@ -112,7 +110,7 @@ class Reports {
 
 		const dataContent = data.docs.map(function (doc) {
 
-			const snippets = doc.pageHits.map(function (snip) {
+			const snippets = doc.pageHits ? doc.pageHits.map(function (snip) {
 				const splitReplace = snip.snippet.replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
 				return {
 					stack: [
@@ -125,7 +123,7 @@ class Reports {
 						{ text: ' ' },
 					],
 				};
-			});
+			}) : [];
 			const displayTitle = doc.title === 'NA' ? `${doc.doc_type} ${doc.doc_num}` : `${doc.doc_type} ${doc.doc_num} - ${doc.title}`;
 			return {
 				stack: [

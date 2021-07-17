@@ -34,6 +34,7 @@ RUN mkdir -p "${APP_DIR}"
 WORKDIR "${APP_DIR}"
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chown=node package.json "${APP_DIR}"
+COPY --chown=node .npmrc "${APP_DIR}"
 
 ARG NPM_REGISTRY="http://10.194.9.122"
 RUN npm install nodemon \

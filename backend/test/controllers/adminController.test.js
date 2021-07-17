@@ -228,4 +228,103 @@ describe('AdminController', function () {
 			assert.deepStrictEqual(admins, expected);
 		});
 	});
+
+	describe('#getHomepageEditorData', () => {
+		it('should return editor data', async () => {
+			const editorData = [{
+				id: 1, key: 'homepage_topics', value: '[test1,test2]'
+			}];
+			const opts = {
+				...constructorOptionsMock,
+				dataApi: {},
+				appSettings: {
+					findAll(data) {
+						return Promise.resolve(editorData);
+					}
+				}
+			};
+			const target = new AdminController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+				}
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getHomepageEditorData(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.deepStrictEqual(resMsg, editorData);
+		});
+	});
+
+	describe('#setHomepageEditorData', () => {
+		it('should update homepage_topics key with new data', async () => {
+			const editorData = [{
+				id: 1, key: 'homepage_topics', value: ['test1','test2']
+			}];
+			const opts = {
+				...constructorOptionsMock,
+				dataApi: {},
+				appSettings: {
+					update({value},{where}) {
+						editorData.forEach((obj,idx) => {
+							if(obj.key === where.key){
+								editorData[idx].value = value;
+							}
+						});
+						return Promise.resolve(editorData);
+					}
+				}
+			};
+			const target = new AdminController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					key: 'topics',
+					tableData: ['test3','test4']
+				}
+			};
+
+			const ans = [{ ...editorData[0] }]
+			ans[0].value = JSON.stringify(req.body.tableData);
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.setHomepageEditorData(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.deepStrictEqual(ans, editorData);
+		})
+	})
 });

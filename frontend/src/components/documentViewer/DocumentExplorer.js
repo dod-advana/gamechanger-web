@@ -3,7 +3,8 @@ import _ from 'underscore';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import { Collapse } from 'react-collapse';
 import SimpleTable from '../common/SimpleTable';
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
+import sanitizeHtml from 'sanitize-html';
 // import { primary } from "../experimental/uot-colors";
 import '../cards/keyword-result-card.css';
 import '../../containers/gamechanger.css';
@@ -256,7 +257,7 @@ const DocumentExplorer = ({ data = [], totalCount, searchText = '', prevSearchTe
 										<a href="#noref" className="searchdemo-quote-link" onClick={(e) => {
 											handleQuoteLinkClick(e, pageKey, key);
 										}}>
-											<div className={blockquoteClass} dangerouslySetInnerHTML={{ __html: page.snippet.replace(/<em>/g, '<span class="highlight-search-demo" style="background-color: #E9691D;">').replace(/<\/em>/g, '</span>') + '...' }}></div>
+											<div className={blockquoteClass} dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.snippet.replace(/<em>/g, '<span class="highlight-search-demo" style="background-color: #E9691D;">').replace(/<\/em>/g, '</span>') + '...') }}></div>
 										</a>
 										{isHighlighted && <span className="searchdemo-arrow-right-sm"></span>}
 									</div>

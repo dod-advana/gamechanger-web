@@ -267,14 +267,35 @@ class EdaSearchHandler extends SearchHandler {
 					const contractMods = [];
 					// grab the contract modification number
 					for (let hit of hits) {
-						contractMods.push(hit._source.extracted_data_eda_n.modification_number_eda_ext);
+						contractMods.push(
+							{
+								modNumber: hit._source.extracted_data_eda_n.modification_number_eda_ext ?? null,
+								signatureDate: hit._source.extracted_data_eda_n.signature_date_eda_ext_dt ?? null,
+								effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null
+							}
+						);
 					}
-					contractMods.sort();
+					contractMods.sort((a, b) => { 
+						if (!a.modNumber) {
+							return 1;
+						}
+						if (!b.modNumber) {
+							return -1;
+						}
+
+						if (a.modNumber < b.modNumber) {
+							return -1;
+						}
+						else {
+							return 1;
+						}
+					});
+
 					return contractMods;
 				}
 
 			} else {
-				this.logger.error('Error with contract award Elasticsearch results', '3ZCEAYJ', userId);
+				this.logger.error('Error with contract mods Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
 			}
 		} catch(err) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { Select, MenuItem, Tooltip, Input } from '@material-ui/core'
+import { Select, MenuItem, Tooltip, Input, Checkbox } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../common/GCButton";
@@ -73,9 +73,9 @@ const apiColumns = [
 const logs = [];
 let loaded = 0;
 let errored = 0;
-const S3_CORPUS_PATH = 's3://advana-raw-zone/gamechanger/json';
+const S3_CORPUS_PATH = 'gamechanger/json';
 const DEFAULT_MODEL_NAME = 'msmarco-distilbert-base-v2';
-const DEFAULT_CORPUS_PATH = '../corpus_dir/gc_corpus'
+const DEFAULT_VERSION = 'v4'
 
 /**
  * This class queries the ml api information and provides controls 
@@ -83,7 +83,6 @@ const DEFAULT_CORPUS_PATH = '../corpus_dir/gc_corpus'
  * @class MLDashboard
  */
 export default () => {
-
 	// Set state variables
     const [downloadedModelsList, setDonwloadedModelsList] = useState({
         "transformers": [],
@@ -99,7 +98,9 @@ export default () => {
 
     const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
     const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
-	const [corpusPath, setCorpusPath] = useState(DEFAULT_CORPUS_PATH);
+	const [version, setVersion] = useState(DEFAULT_VERSION);
+    const [gpu, setgpu] = useState(true);
+    const [upload, setUpload] = useState(false);
 
     // flags that parameters have been changed and on 
     // blur or enter press we should update the query
@@ -178,7 +179,7 @@ export default () => {
             // set currentTransformer
             const current = await gameChangerAPI.getCurrentTransformer();
             // current.data is of the form {sentence_models:{encoder, sim}}
-            setCurrentTransformer(current.data.sentence_models);
+            setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:{});
             updateLogs('Successfully queried current transformer',0);
             updateLoadCounter();
         }catch (e) {
@@ -287,10 +288,12 @@ export default () => {
         try{
             setTraining(true);
             await gameChangerAPI.trainModel({
-                "corpus_path": corpusPath,
-                "model_name": modelName
+                "version": version,
+                "encoder_model": modelName,
+                "gpu":gpu,
+                "upload":upload
             });
-            updateLogs('Trained Model: '+ corpus,0);
+            updateLogs('Started training',0);
         } catch(e){
             updateLogs('Error training model: ' + e.toString() ,2);
         }
@@ -319,8 +322,9 @@ export default () => {
     }
 
 	useEffect(() => {
-		onload();
-	});
+        onload();
+         // eslint-disable-next-line
+	},[]);
     
 
     return (			
@@ -477,24 +481,36 @@ export default () => {
                             disabled={loadingData || training}
                             style={{float: 'right', minWidth: 'unset'}}
                         >Train</GCPrimaryButton>
+                        
                         <div>
-                            Corpus Path:
-                            <Input
-                                value={corpusPath}
-                                onChange={e => setCorpusPath(e.target.value)}
-                                name="labels"
-                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                            />
-                        </div>
-                        <div>
-                            Model Name:
+                            <div style={{width: '110px', display: 'inline-block'}}>Encoder Model:</div>
                             <Input
                                 value={modelName}
                                 onChange={e => setModelName(e.target.value)}
                                 name="labels"
                                 style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
                             />
+                            <div style={{width: '60px', display: 'inline-block', marginLeft:'20px'}}>GPU:</div>
+                            <Checkbox
+                                checked = {gpu}
+                                onChange={e => setgpu(e.target.checked)}
+                            />
                         </div>
+                        <div>
+                            <div style={{width: '110px', display: 'inline-block'}}>Version:</div>
+                            <Input
+                                value={version}
+                                onChange={e => setVersion(e.target.value)}
+                                name="labels"
+                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                            />
+                            <div style={{width: '60px', display: 'inline-block', marginLeft:'20px'}}>Upload:</div>
+                            <Checkbox
+                                checked = {upload}
+                                onChange={e => setUpload(e.target.checked)}
+                            />
+                        </div>
+                        
 					</div>
                 </BorderDiv>
             </div>

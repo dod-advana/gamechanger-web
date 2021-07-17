@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 
 import './sidebar.css';
 import styled from "styled-components";
