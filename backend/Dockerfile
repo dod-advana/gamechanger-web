@@ -23,27 +23,32 @@ RUN (type -P "yum" &> /dev/null) && ( \
         >&2 echo "[ERROR] Unsupported Base Image" \
         && exit 1 \
     )
-USER node
+
+# non-root app USER/GROUP
+ARG APP_UID=1000
+ARG APP_GID=1000
+
+USER "$APP_UID:$APP_GID"
 # thou shall not root
 
-ENV APP_DIR="${HOME:-/home/node}"
-ENV APP_BIN="${APP_DIR}/node_modules/.bin"
-ENV PATH="${APP_BIN}:${PATH}"
+ENV APP_DIR="${HOME:-/home/node}" \
+    APP_BIN="${APP_DIR}/node_modules/.bin" \
+    PATH="${APP_BIN}:${PATH}"
+RUN mkdir -p \
+    "${APP_DIR}"
 
-RUN mkdir -p "${APP_DIR}"
 WORKDIR "${APP_DIR}"
-# note on copy+chown: do not use $USER var, it will - surprisingly - be root
-COPY --chown=node package.json "${APP_DIR}"
-COPY --chown=node .npmrc "${APP_DIR}"
 
-ARG NPM_REGISTRY="http://10.194.9.122"
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chown="$APP_UID:$APP_GID" package.json "${APP_DIR}"
+COPY --chown="$APP_UID:$APP_GID" .npmrc "${APP_DIR}"
+
 RUN npm install nodemon \
     && npm install sequelize-cli \
     && npm install jest \
-    && npm config set registry "$NPM_REGISTRY" \
     && npm install
 
-COPY --chown=node . "${APP_DIR}"
+COPY --chown="$APP_UID:$APP_GID" . "${APP_DIR}"
 
 EXPOSE 8990
 CMD ./start.sh
