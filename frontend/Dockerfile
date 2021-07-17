@@ -29,9 +29,9 @@ ARG APP_GID=1000
 USER "$APP_UID:$APP_GID"
 # thou shall not root
 
-ENV APP_DIR="${HOME:-/home/node/app}" \
-    APP_BIN="${APP_DIR}/node_modules/.bin" \
-    PATH="${APP_BIN}:${PATH}"
+ENV APP_DIR="${HOME:-/home/node/app}" 
+ENV APP_BIN="${APP_DIR}/node_modules/.bin" 
+ENV PATH="${APP_BIN}:${PATH}"
 RUN mkdir -p \
     "${APP_DIR}"
 
