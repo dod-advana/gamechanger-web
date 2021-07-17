@@ -6,9 +6,9 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import {Card} from "../../cards/GCCard";
 import Pagination from "react-js-pagination";
@@ -72,6 +72,10 @@ const PolicyMainViewHandler = {
 	
 	handleCategoryTabChange(props) {
 		defaultMainViewHandler.handleCategoryTabChange(props);
+	},
+	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
 	},
 	
 	getViewNames(props) {
@@ -140,7 +144,6 @@ const PolicyMainViewHandler = {
 			topicCount,
 			topicSearchResults,
 			topicPage,
-
 			hideTabs,
 			iframePreviewLink,
 			isCachedResult,
@@ -199,7 +202,7 @@ const PolicyMainViewHandler = {
 																	<LoadingIndicator customColor={gcOrange} />
 																</div>
 															}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={resultsPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}
@@ -236,7 +239,7 @@ const PolicyMainViewHandler = {
 														color={'#376f94'}
 														>
 															{getSearchResults(entitySearchResults, state, dispatch)}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={entityPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}
@@ -258,7 +261,7 @@ const PolicyMainViewHandler = {
 														color={'#4da593'}
 														>
 															{getSearchResults(topicSearchResults, state, dispatch)}
-															<div className='col-xs-12 text-center'>
+															<div className='gcPagination col-xs-12 text-center'>
 																<Pagination
 																	activePage={topicPage}
 																	itemsCountPerPage={RESULTS_PER_PAGE}

@@ -1,4 +1,4 @@
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GCAuth from '../common/GCAuth';
 import React, { useEffect } from 'react';
 import Config from '../../config/config'

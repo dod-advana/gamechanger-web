@@ -26,9 +26,10 @@ import {KeyboardArrowRight, Star} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 import {setState} from "../../../sharedFunctions";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GameChangerAPI from "../../api/gameChanger-service-api";
+import sanitizeHtml from 'sanitize-html';
 const gameChangerAPI = new GameChangerAPI();
 
 //
@@ -563,7 +564,7 @@ const EdaCardHandler = {
 										}).value()}
 									</div>
 									<div className={'expanded-metadata'}>
-										<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 									</div>
 								</div>
 							}
@@ -614,7 +615,7 @@ const EdaCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+								<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 							</div>
 						</div>
 						<button type="button" className={'list-view-button'}
@@ -676,7 +677,7 @@ const EdaCardHandler = {
 								</div>
 								<div className={'expanded-metadata'}>
 									<blockquote className="searchdemo-blockquote"
-												dangerouslySetInnerHTML={{__html: contextHtml}}/>
+												dangerouslySetInnerHTML={{__html: sanitizeHtml(contextHtml)}}/>
 								</div>
 							</div>
 						}
@@ -732,7 +733,7 @@ const EdaCardHandler = {
 									isSearch: false
 								}
 							});
-							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data.sort() : [];
+							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
 	
 							setState(dispatch, { contractAwards });
 						}
@@ -748,18 +749,49 @@ const EdaCardHandler = {
 			const renderContractMods = () => {
 				const contractMods = state.contractAwards && state.contractAwards[item.award_id_eda_ext] ? state.contractAwards[item.award_id_eda_ext] : [];
 				const listItems = [];
+				
 				if (contractMods && contractMods !== 'loading') {
+					if (contractMods.length > 0) {
+						listItems.push(
+							<>
+								<ListItem>
+									<ListItemText style={{ textAlign: 'end' }} secondary={"(S) Signature Date | (E) Effective Date"} />
+								</ListItem>
+								<Divider light={true} />
+							</>
+						)
+					}
+					
 					for (const mod of contractMods) {
-						if (mod !== "Award") {
+						const { modNumber, signatureDate, effectiveDate } = mod;
+						if (modNumber !== "Award") {
+							let date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
+							let dateText = "";
+							if (signatureDate) {
+								date = signatureDate;
+								dateText = "(S)"
+							}
+							else if (effectiveDate) {
+								date = effectiveDate;
+								dateText = "(E)";
+							}
+							else {
+								date = null;
+								dateText = ""
+							}
 							listItems.push(
 							<>
 								<ListItem>
-									{item.modification_eda_ext === mod &&
+									{item.modification_eda_ext === modNumber &&
 										<ListItemIcon style={{ minWidth: '54px'}}>
 											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
-									<ListItemText style={{ margin: item.modification_eda_ext !== mod ? '0 0 0 54px' : ''}} primary={mod} />
+									<ListItemText style={{ 
+										margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
+										display: 'flex',
+										justifyContent: 'space-between'
+										}} primary={modNumber} secondary={date ? `${dateText}  ${date}` : ''} />
 								</ListItem>
 								<Divider light={true}/>
 							</>

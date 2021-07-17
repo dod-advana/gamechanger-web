@@ -11,7 +11,7 @@ import CloseIcon from '@material-ui/icons/Close'
 import { KeyboardArrowDown } from '@material-ui/icons';
 
 import GCButton from '../common/GCButton';
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import GameChangerAPI from "../api/gameChanger-service-api";
 
 import {setState} from "../../sharedFunctions";

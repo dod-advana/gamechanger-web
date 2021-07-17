@@ -11,6 +11,7 @@ import SimpleTable from "../../common/SimpleTable";
 import {CardButton} from "../../common/CardButton";
 import {primary} from "../../../components/common/gc-colors";
 import {trackEvent} from "../../telemetry/Matomo";
+import sanitizeHtml from 'sanitize-html';
 
 const colWidth = {
 	maxWidth: '900px',
@@ -385,7 +386,7 @@ const HermesCardHandler = {
 								{renderHighlights(item.highlight, capitalizeFirst, hoveredHit, setHoveredHit, setHighlightText)}
 							</div>
 							<div style={{ height: 150, border: '1px solid rgb(189, 189, 189)', borderLeft: 0, width: '100%' }}>
-								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: highlightText}}></blockquote>
+								<blockquote className="searchdemo-blockquote" dangerouslySetInnerHTML={{ __html: sanitizeHtml(highlightText)}}></blockquote>
 							</div>
 						</div>
 					}

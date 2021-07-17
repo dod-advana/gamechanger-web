@@ -8,6 +8,7 @@ import Alerts from "../components/notifications/Alerts";
 import Notifications from "../components/notifications/Notifications";
 import UserFeedback from "../components/user/UserFeedback";
 import {gcOrange} from "../components/common/gc-colors";
+import GCErrorSnackbar from '../components/common/GCErrorSnackbar';
 import GameChangerAssist from "../components/crowdAssist/GameChangerAssist";
 import Tutorial from "../components/tutorial/Tutorial";
 import SearchBar from "../components/searchBar/SearchBar";
@@ -88,6 +89,12 @@ const GameChangerPage = (props) => {
 							message={state.snackBarMsg}
 						/>
 					</div>
+
+					<GCErrorSnackbar
+						open={state.showBackendError}
+						message={state.backendErrorMsg}
+						onClose={() => setState(dispatch, {showBackendError: false})}
+					/>
 				</>
 			}
 		</div>

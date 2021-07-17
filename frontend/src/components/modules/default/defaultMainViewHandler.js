@@ -5,7 +5,7 @@ import ViewHeader from "../../mainView/ViewHeader";
 import { trackEvent } from "../../telemetry/Matomo";
 import { getSearchObjectFromString, getUserData, setState } from "../../../sharedFunctions";
 import DefaultDocumentExplorer from "./defaultDocumentExplorer";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import { Card } from "../../cards/GCCard";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import GameChangerSideBar from "../../searchMetrics/GCSideBar";
@@ -21,11 +21,13 @@ import {
 	RESULTS_PER_PAGE,
 } from "../../../gamechangerUtils";
 import ExportResultsDialog from "../../export/ExportResultsDialog";
-import { gcOrange } from "../../common/gc-colors";
+import {gcOrange} from "../../common/gc-colors";
+import {DidYouMean} from "../../searchBar/SearchBarStyledComponents";
 import ResultView from "../../mainView/ResultView";
 import QueryDialog from "../../admin/QueryDialog";
 import DocDialog from "../../admin/DocDialog";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
+import MagellanTrendingLinkList from "../../common/MagellanTrendingLinkList";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 
 const gameChangerAPI = new GameChangerAPI();
@@ -68,6 +70,13 @@ const styles = {
 	spacer: {
 		flex: '0.375'
 	},
+	resultsCount: {
+		fontFamily: 'Noto Sans',
+		fontSize: 22,
+		fontWeight: 'bold',
+		color: '#131E43',
+		paddingTop: '10px'
+	}
 }
 
 const getDocumentProperties = async (dispatch) => {
@@ -133,6 +142,11 @@ const getTrendingSearches = (cloneData) => {
 	}).catch(e => {console.log("error getting internal users: " + e)});
 }
 
+const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
+	setState(dispatch, { searchText: didYouMean, runSearch: true });
+}
+
 const DefaultMainViewHandler = {
 	async handlePageLoad(props) {
 		const {
@@ -165,6 +179,23 @@ const DefaultMainViewHandler = {
 		} catch (e) {
 			// Do nothing
 		}
+
+		try {
+			gameChangerAPI.recentSearchesPOST(state.cloneData.clone_name).then(({data}) => {
+				setState(dispatch, {recentSearches: data});
+			});
+		} catch (e) {
+			// Do nothing
+		}
+		
+		try {
+			gameChangerAPI.gcCrawlerTrackerData().then(({data}) => {
+				const names = data.docs.map(d=>d.crawler_name)
+				setState(dispatch, {crawlerSources: names});
+			});
+		} catch(e) {
+			// Do nothing
+		}
 		
 		// fetch ES index
 		try{
@@ -187,6 +218,73 @@ const DefaultMainViewHandler = {
 			
 			searchHandler.setSearchURL(newState);
 		}
+	},
+	
+	renderHideTabs(props){
+		const { state, dispatch, searchHandler } = props;
+		const {
+			componentStepNumbers,
+			cloneData,
+			resetSettingsSwitch,
+			didYouMean,
+			loading,
+			prevSearchText
+		} = state; 
+		const showDidYouMean = didYouMean && !loading;
+		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		let trendingLinks = [];
+		if (trendingStorage) {
+			JSON.parse(trendingStorage).forEach(search => {
+				if (search.search) {
+					trendingLinks.push(search.search.replaceAll('&#039;', '"'));
+				}
+			});
+		}
+
+		if(prevSearchText) {
+			if(!resetSettingsSwitch) {
+				dispatch({type: 'RESET_SEARCH_SETTINGS'});
+				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
+				if (searchHandler) searchHandler.setSearchURL(state)
+			}
+		}
+
+		const handleLinkListItemClick = (searchText) => {
+			trackEvent(getTrackingNameForFactory(cloneData.clone_name), "TrendingSearchSelected", "text", searchText);
+			setState(dispatch, { searchText, autoCompleteItems: [], metricsCounted: false, runSearch: true });
+		}
+
+		return (
+			<div style={{marginTop: '40px'}}>
+			{prevSearchText &&
+				<div style={{ margin: '10px auto', width: '67%' }}>
+					<div style={styles.resultsCount}><p style={{fontWeight:'normal', display:'inline'}}>Looks like we don't have any matches for </p>"{prevSearchText}"</div>
+				</div>
+			}
+			{showDidYouMean && (
+				<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
+					Did you mean <DidYouMean onClick={handleDidYouMeanClicked}>{didYouMean}</DidYouMean>?
+				</div>
+			)}
+			{cloneData.clone_name === 'gamechanger' && (
+				<div style={{ margin: '10px auto', width: '67%' }}>
+					<div className={`tutorial-step-${componentStepNumbers["Trending Searches"]}`} >
+						<MagellanTrendingLinkList onLinkClick={handleLinkListItemClick}
+						links={trendingLinks} title="Trending Searches This Week" padding={10} />
+					</div>
+				</div>
+			)}
+			{cloneData.clone_name !== 'gamechanger' && (
+				<div style={{ margin: '10px auto', width: '67%' }}>
+					<div className={`tutorial-step-${componentStepNumbers["Recent Searches"]}`} >
+						<MagellanTrendingLinkList onLinkClick={handleLinkListItemClick}
+							links={JSON.parse(latestLinks)} title="Recent Searches" />
+					</div>
+				</div>
+			)}
+			</div>
+		)
 	},
 	
 	getMainView(props) {
@@ -236,7 +334,7 @@ const DefaultMainViewHandler = {
 							<LoadingIndicator customColor={gcOrange} />
 						</div>
 					}
-					{hideSearchResults && renderHideTabs()}
+					{hideSearchResults && renderHideTabs(props)}
 					{(!hideSearchResults && pageLoaded) &&
 						<div style={styles.tabButtonContainer}>
 							<ResultView context={{state, dispatch}} viewNames={viewNames} viewPanels={getViewPanels()} />

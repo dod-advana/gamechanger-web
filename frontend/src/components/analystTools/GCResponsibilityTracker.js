@@ -25,7 +25,7 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CloseIcon from "@material-ui/icons/Close";
 import {makeStyles, withStyles} from "@material-ui/core/styles";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import CheckCircleOutlinedIcon from "@material-ui/icons/CheckCircleOutlined";
 import {getTrackingNameForFactory, exportToCsv} from "../../gamechangerUtils";
 import FormControlLabel from "@material-ui/core/FormControlLabel";

@@ -788,7 +788,9 @@ class EDASearchUtility {
 			let query = {
 				"_source": {
 					"includes": [
-						"extracted_data_eda_n.modification_number_eda_ext"
+						"extracted_data_eda_n.modification_number_eda_ext", 
+						"extracted_data_eda_n.signature_date_eda_ext_dt",
+						"extracted_data_eda_n.effective_date_eda_ext_dt"
 					]
 				},
 				"from": 0,
