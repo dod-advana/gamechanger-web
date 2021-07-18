@@ -32,14 +32,14 @@ USER "$APP_UID:$APP_GID"
 ENV APP_DIR="${HOME:-/home/node/app}" 
 ENV APP_BIN="${APP_DIR}/node_modules/.bin" 
 ENV PATH="${APP_BIN}:${PATH}"
-RUN mkdir -p \
-    "${APP_DIR}"
+ENV NPM_CONFIG_USERCONFIG="${APP_DIR}/.npmrc"
+RUN mkdir -p "${APP_DIR}"
 
 WORKDIR "${APP_DIR}"
 
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chown="$APP_UID:$APP_GID" package.json "${APP_DIR}"
-COPY --chown="$APP_UID:$APP_GID" .npmrc "${APP_DIR}"
+COPY --chown="$APP_UID:$APP_GID" "${NPM_CONFIG_USERCONFIG}" "${APP_DIR}"
 
 RUN npm install jest \
     npm install
