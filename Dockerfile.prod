@@ -33,16 +33,15 @@ ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
 ENV APP_BACKEND_DIR="${APP_DIR}/backend" 
 ENV APP_SHARED_DIR="${APP_ROOT}/shared"
 ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin" 
-ENV PATH="${APP_SHARED_BIN}:${PATH}" 
-ENV NPM_CONFIG_GLOBALCONFIG="${APP_ROOT}/.npmrc"
+ENV PATH="${APP_SHARED_BIN}:${PATH}"
+ENV NPM_CONFIG_USERCONFIG="${APP_ROOT}/.nmprc"
 
 RUN mkdir -p \
         "${APP_DIR}" \
         "${APP_BACKEND_DIR}" \
         "${APP_FRONTEND_DIR}" \
         "${APP_SHARED_DIR}" \
-    && touch \
-        "$NPM_CONFIG_GLOBALCONFIG" \
+    && touch "${NPM_CONFIG_USERCONFIG}" \
     && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}"
 
 USER "$APP_UID:$APP_GID"
@@ -52,7 +51,10 @@ ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
-    && ([[ -n "$NPM_AUTH_TOKEN" ]] && npm set "//${NPM_REGISTRY}/:_authToken" "${NPM_AUTH_TOKEN}")
+    && ([[ -n "$NPM_AUTH_TOKEN" ]] && ( \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+    ))
 
 RUN cd "$APP_SHARED_DIR" \
     && npm install nodemon \
