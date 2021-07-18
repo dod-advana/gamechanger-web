@@ -40,7 +40,6 @@ ENV PATH="${APP_SHARED_BIN}:${PATH}"
 ENV NPM_CONFIG_GLOBALCONFIG="${BASE_DIR}/.npmrc"
 
 RUN mkdir -p \
-        "${BASE_DIR}" \
         "${APP_DIR}" \
         "${APP_BACKEND_DIR}" \
         "${APP_FRONTEND_DIR}" \
