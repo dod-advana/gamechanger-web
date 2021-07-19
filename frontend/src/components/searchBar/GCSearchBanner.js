@@ -6,12 +6,12 @@ import styled from 'styled-components';
 import Modal from 'react-modal';
 import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
-import AdvanaStackedLogo from 'advana-platform-ui/dist/images/Stackedlogo.png';
+import AdvanaStackedLogo from '@dod-advana/advana-platform-ui/dist/images/Stackedlogo.png';
 import TitleBarFactory from "../factories/titleBarFactory";
 import AdvanaMegaMenuPill, { 
 	PillButton,
 	TitleText
-} from 'advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
+} from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 import GCButton from "../common/GCButton";
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
@@ -167,12 +167,12 @@ const SearchBanner = (props) => {
 					{!jupiter &&
 						<>
 							{isDecoupled ? (
-								<PillButton margin={'0 60px 0 4%'} justifyContent='center' onClick={() => setLoginModal(true)}>
+								<PillButton margin={'0 60px 0 5px'} justifyContent='center' onClick={() => setLoginModal(true)}>
 									<TitleText>ADVANA</TitleText>
 								</PillButton>
 							) : (
 								<AdvanaMegaMenuPill
-									margin='0 0 0 4%'
+									margin='0 0 0 5px'
 									defaultHeader='Applications'
 								/>
 							)}

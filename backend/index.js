@@ -30,7 +30,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 const ApiKey = models.api_key;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
-const AAA = require('advana-api-auth');
+const AAA = require('@dod-advana/advana-api-auth');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -220,8 +220,7 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
-
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
+if (!constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
@@ -240,7 +239,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	});
 }
 
-app.all('/api/gamechanger/admin/*', async function (req, res, next) {
+app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
@@ -297,5 +296,25 @@ logger.boot(`
 ====> Postgres host: ${constants.POSTGRES_CONFIG.host}
 ====> Postgres port: ${constants.POSTGRES_CONFIG.port}
 `);
+
+if(process.env.PRINT_ROUTES === 'true') {
+	let routers = {};
+	routers['/'] = app._router;
+	routers['/api/gamechanger'] = require('./node_app/routes/gameChangerRouter');
+	routers['/api/gamechanger/external'] = require('./node_app/routes/externalGraphRouter');
+	routers['//api/gamechanger/external'] = require('./node_app/routes/externalSearchRouter');
+	routers['/api'] = require('./node_app/routes/advanaRouter');
+	routers['/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
+
+	console.log('BEGIN ROUTES');
+	for(let base in routers) {
+		routers[base].stack.forEach(function(r){
+		if (r.route && r.route.path && !r.route.path.includes('*')){
+			console.log(`${base}${r.route.path}`.replace(/\/\//g, '/'));
+		}
+		});
+	}
+	console.log('END ROUTES');
+}
 
 setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick'); }, 10000);

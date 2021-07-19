@@ -6,6 +6,7 @@ import { EDAContext, EDAProvider } from "../modules/eda/edaContext";
 const getContext = (cloneName) => {
 	switch (cloneName) {
 		case 'gamechanger':
+		case 'gamechanger-test':
 			return PolicyContext;
 		case 'globalSearch':
 			return GlobalSearchContext;
@@ -19,6 +20,7 @@ const getContext = (cloneName) => {
 const getProvider = (cloneName) => {
 	switch (cloneName) {
 		case 'gamechanger':
+		case 'gamechanger-test':
 			return PolicyProvider;
 		case 'globalSearch':
 			return GlobalSearchProvider;
