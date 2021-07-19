@@ -59,9 +59,11 @@ class PolicyExportHandler extends ExportHandler {
 					const intelligentSearchFound = searchResults.docs.findIndex((item) => item.id === intelligentSearchResult.id);
 					if(intelligentSearchFound !== -1){ // if found, remove that entry from list
 						searchResults.docs.splice(intelligentSearchFound, 1);
+											
+						// then put intelligent search at front
+						searchResults.docs.unshift(intelligentSearchResult);
 					}
-					// then put intelligent search at front
-					searchResults.docs.unshift(intelligentSearchResult);
+
 				}
 				searchResults.classificationMarking = req.body.classificationMarking;
 			} catch (e) {
