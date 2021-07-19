@@ -142,7 +142,7 @@ const GCResponsibilityTracker = (props) => {
 	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
 	const [visibleOtherEntRespFilters, setVisibleOtherEntRespFilters] = useState({});
 	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
-	
+
 	useEffect(() => {
 		gameChangerAPI.getOtherEntityFilterList().then(resp => {
 			const tmpFilters = {'Select All': {name: 'Select All', checked: true}};
@@ -177,12 +177,13 @@ const GCResponsibilityTracker = (props) => {
 
 	useEffect(() => {
 		if (state.reloadResponsibilityTable) {
-			this.handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
+			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
 			setState(dispatch, {reloadResponsibilityTable: false});
 		}
-	 }, [state, dispatch, pageIndex, sorts, filters]);
+	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	                                                // TODO : Resolve ^^^ correctly
 
-	const handleFetchData = async ({ page, sorted, filtered }) => {
+	 const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
