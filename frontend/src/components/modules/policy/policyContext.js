@@ -6,7 +6,7 @@ const initState = {
 	cloneData: {
 		clone_name: 'gamechanger',
 		search_module: 'policy/policySearchHandler',
-		export_module: 'simple/simpleExportHandler',
+		export_module: 'policy/policyExportHandler',
 		title_bar_module: 'policy/policyTitleBarHandler',
 		navigation_module: 'policy/policyNavigationHandler',
 		card_module: 'policy/policyCardHandler',
@@ -47,6 +47,13 @@ const initState = {
 		q1: '',
 		q2: ''
 	},
+
+	// Homepage
+	recentSearches: [],
+	crawlerSources: [],
+	adminTopics: [],
+	adminMajorPubs: [],
+	trendingLinks: [],
 	
 	// Tutorial
 	showTutorial: false,
@@ -147,10 +154,15 @@ const initState = {
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
 	searchSettings: {
+		isFilterUpdate: false,
+		originalOrgFilters: orgFilters,
+		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
+		allCategoriesSelected: true,
 		allOrgsSelected: true,
 		searchFields: {'initial': {field: null, input: ''}},
+		specificCategoriesSelected: false,
 		specificOrgsSelected: false,
 		allTypesSelected: true,
 		specificTypesSelected: false,
@@ -164,7 +176,7 @@ const initState = {
 	selectedCategories: {
 		Documents: true,
 		Organizations: true,
-		Topics: false
+		Topics: true
 	},
 
 	categorySorting: {

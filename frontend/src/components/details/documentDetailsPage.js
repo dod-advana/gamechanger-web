@@ -3,16 +3,18 @@ import PropTypes from 'prop-types';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Paper from "material-ui/Paper/Paper";
 import SimpleTable from "../common/SimpleTable";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
 import GCButton from '../common/GCButton';
+import GCErrorSnackbar from '../common/GCErrorSnackbar';
 import {MainContainer} from "../../containers/GameChangerDetailsPage";
 import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
 import {trackEvent} from "../telemetry/Matomo";
 import Pagination from "react-js-pagination";
 import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
 import {Card} from "../cards/GCCard";
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -26,79 +28,16 @@ const colWidth = {
 
 const RESULTS_PER_PAGE = 10;
 
-const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) => {
-	Promise.all([
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
-			'WHERE d2.is_revoked_b = false ' +
-			'RETURN pt;', 'C64E7R1', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
-			'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
-			'RETURN pt;', 'UQBRSK9', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
-			'WHERE NOT d = d2 ' +
-			'RETURN pt;', 'DPVCZWM', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
-			'RETURN pt;', 'FP2FLNB', cloneName, {params: {doc_id: document.id}}
-		),
-		gameChangerAPI.graphQueryPOST(
-			'MATCH (d:Document) ' +
-			'WHERE d.doc_id = $doc_id ' +
-			'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
-			'RETURN pt;', 'PWALNKF', cloneName, {params: {doc_id: document.id}}
-		)
-	]).then(resps => {
-		const graph = {nodes: [], edges: [], labels: []};
-		const nodeIds = [];
-		const edgeIds = [];
-		resps.forEach(resp => {
-			resp.data.labels.forEach(label => {
-				if (!graph.labels.includes(label)) {
-					graph.labels.push(label);
-				}
-			})
-			resp.data.nodes.forEach(node => {
-				if (!nodeIds.includes(node.id)) {
-					graph.nodes.push(node);
-					nodeIds.push(node.id);
-				}
-			});
-			resp.data.edges.forEach(edge => {
-				if (!edgeIds.includes(edge.id)) {
-					let source = edge.source;
-					let target = edge.target;
-					if (typeof source !== {}) {
-						source = graph.nodes.filter(node => {
-							return node.id === source;
-						})[0];
-					}
-					if (typeof target !== {}) {
-						target = graph.nodes.filter(node => {
-							return node.id === target;
-						})[0];
-					}
-					edge.source = source;
-					edge.target = target;
-					graph.edges.push(edge);
-					edgeIds.push(edge.id)
-				}
-			});
-		});
-		setGraphData(graph);
+const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
+	gameChangerAPI.callGraphFunction({
+		functionName: 'getDocumentDetailsPageDataFull',
+		cloneName: cloneName,
+		options: {
+			doc_id: document.id,
+		}
+	}).then(graph => {
+		if (graph?.data?.error) setBackendError(graph.data.error);
+		setGraphData(graph.data.graph);
 		setRunningQuery(false);
 	});
 }
@@ -124,6 +63,8 @@ const DocumentDetailsPage = (props) => {
 	const [referencedByDocs, setReferencedByDocs] = useState({docCount: 0, timeFound: '0.0', docs: []});
 	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] = useState(true);
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
+
+	const [backendError, setBackendError] = useState({});
 	
 	useEffect(() => {
 		setRunningQuery(true);
@@ -131,7 +72,7 @@ const DocumentDetailsPage = (props) => {
 	
 	useEffect(() => {
 		if (!document || !cloneData) return;
-		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery);
+		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery, setBackendError);
 	}, [document, cloneData]);
 	
 	useEffect(() => {
@@ -289,7 +230,6 @@ const DocumentDetailsPage = (props) => {
 									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DetailsPaginationChanged', 'page', page);
 									handleChangeDocsPage(section, page);
 								}}
-								className='gcPagination'
 							/>
 						}
 					</div>
@@ -411,6 +351,16 @@ const DocumentDetailsPage = (props) => {
 				
 				</div>
 			</MainContainer>
+
+			<GCErrorSnackbar
+				open={!!backendError.code}
+				message={
+					Permissions.isGameChangerAdmin() ?
+					`An error occurred with ${backendError.category}. Error code ${backendError.code}` :
+					`An error has occurred in the application, but we are working to fix it!`
+				}
+				onClose={() => setBackendError({})}
+			/>
 		</div>
 	);
 }

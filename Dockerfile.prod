@@ -1,13 +1,79 @@
-FROM node:14
-RUN npm config set registry http://10.194.9.122
-RUN npm install -g nodemon
-RUN npm install -g sequelize-cli
-RUN npm install -g jest
-COPY . /usr/src/app
-WORKDIR /usr/src/app/frontend
-RUN npm install
-RUN npm run build
-RUN mv build ../backend/
-WORKDIR /usr/src/app/backend
-RUN npm install
+ARG BASE_IMAGE="node:14"
+FROM $BASE_IMAGE
+
+SHELL ["/bin/bash", "-c"]
+
+# to support RHEL-based and DEBIAN-based version of node
+# e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
+USER root
+RUN (type -P "yum" &> /dev/null) && ( \
+        yum install -y \
+            git \
+        && yum clean all \
+        && rm -rf /var/cache/yum \
+     ) || ((type -P "apt-get" &> /dev/null) && ( \
+        apt-get update \
+        && apt-get install -y \
+            git \
+        && apt-get clean \
+        && rm -rf /var/cache/apt/lists \
+    )) || ( \
+        >&2 echo "[ERROR] Unsupported Base Image" \
+        && exit 1 \
+    )
+
+# non-root app USER/GROUP
+ARG APP_UID=1000
+ARG APP_GID=1000
+
+# key dirs & globally usable binaries/packages
+ENV APP_ROOT="/opt/app-root"
+ENV APP_DIR="${APP_ROOT}/src"
+ENV APP_FRONTEND_DIR="${APP_DIR}/frontend" 
+ENV APP_BACKEND_DIR="${APP_DIR}/backend" 
+ENV APP_SHARED_DIR="${APP_ROOT}/shared"
+ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin" 
+ENV PATH="${APP_SHARED_BIN}:${PATH}"
+ENV NPM_CONFIG_USERCONFIG="${APP_ROOT}/.nmprc"
+
+RUN mkdir -p \
+        "${APP_DIR}" \
+        "${APP_BACKEND_DIR}" \
+        "${APP_FRONTEND_DIR}" \
+        "${APP_SHARED_DIR}" \
+    && touch "${NPM_CONFIG_USERCONFIG}" \
+    && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}"
+
+USER "$APP_UID:$APP_GID"
+# thou shall not root
+
+ARG NPM_PROFILE="dod-advana"
+ARG NPM_REGISTRY="https://npm.pkg.github.com"
+ARG NPM_AUTH_TOKEN=""
+RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
+    && ([[ -n "$NPM_AUTH_TOKEN" ]] && ( \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+    ))
+
+RUN cd "$APP_SHARED_DIR" \
+    && npm install nodemon \
+    && npm install sequelize-cli \
+    && npm install jest
+
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm install
+
+COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+RUN cd "${APP_BACKEND_DIR}" \
+    && npm install
+
+COPY --chown="$APP_UID:$APP_GID" . "${APP_DIR}"
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm run build \
+    && mv build "${APP_BACKEND_DIR}"
+
+WORKDIR "${APP_BACKEND_DIR}"
 CMD ./startProd.sh

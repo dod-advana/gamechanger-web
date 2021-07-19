@@ -71,6 +71,7 @@ class UserController {
 		this.updateUserAPIRequestLimit = this.updateUserAPIRequestLimit.bind(this);
 		this.resetAPIRequestLimit = this.resetAPIRequestLimit.bind(this);
 		this.populateNewUserId = this.populateNewUserId.bind(this);
+		this.getRecentSearches = this.getRecentSearches.bind(this);
 	}
 
 	async getUserData(req, res) {
@@ -520,7 +521,7 @@ class UserController {
 	}
 
 	async updateUserAPIRequestLimit(req, res){
-		let userId = "unknown_webapp"
+		let userId = 'unknown_webapp'
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
@@ -557,7 +558,7 @@ class UserController {
 	}
 
 	async populateNewUserId(req, res) {
-		let userId = "unknown_webapp"
+		let userId = 'unknown_webapp'
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const tableArr = [this.gcHistory, this.exportHistory, this.favoriteDocument, this.favoriteSearch, this.favoriteTopic];
@@ -593,6 +594,44 @@ class UserController {
 			res.status(200).send({});
 		} catch(e) {
 			this.logger.error(e, 'LTKT9WZ', userId);
+			res.status(500).send(e)
+		}
+	}
+
+	async getRecentSearches(req, res) {
+		let userId = 'unknown_webapp';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { clone_name } = req.body;
+			let ids = await this.gcHistory.findAll({
+				attributes: [
+					[Sequelize.fn('MAX', Sequelize.col('id')), 'id']
+				],
+				where: {
+					clone_name,
+					had_error: 'f'
+				},
+				group: ['search'],
+				order: [[Sequelize.col('id'), 'DESC']],
+				limit: 10
+			});
+			ids = ids.map(id=>id.id);
+			let searches = await this.gcHistory.findAll({
+				attributes: ['request_body','search','run_at'],
+				where: {
+					clone_name,
+					had_error: 'f',
+					id: ids
+				},
+				order: [['run_at', 'DESC']],
+				limit: 10
+			});
+			searches = searches.map(search=>{
+				return({...search.request_body, run_at: search.run_at});
+			});
+			res.status(200).send(searches);
+		} catch(e) {
+			this.logger.error(e, '6RN417M', userId);
 			res.status(500).send(e)
 		}
 	}

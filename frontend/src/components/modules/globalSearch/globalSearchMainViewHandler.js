@@ -5,7 +5,7 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import { trackEvent } from "../../telemetry/Matomo";
 import { setState } from "../../../sharedFunctions";
 import SearchSection from "../globalSearch/SearchSection";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import { backgroundWhite, gcOrange } from "../../common/gc-colors";
 import { Card } from "../../cards/GCCard";
 import Pagination from "react-js-pagination";
@@ -20,6 +20,7 @@ import ResultView from "../../mainView/ResultView";
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
 import GCButton from "../../common/GCButton";
+import defaultMainViewHandler from "../default/defaultMainViewHandler";
 
 const fullWidthCentered = {
 	width: "100%",
@@ -215,6 +216,10 @@ const GlobalSearchMainViewHandler = {
 				</div>
 			</div>
 		)
+	},
+	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
 	},
 	
 	handleCategoryTabChange(props) {

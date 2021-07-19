@@ -1,20 +1,24 @@
 version: '3'
 services:
-    postgres:
-        container_name: postgres
+    web-postgres:
+        container_name: web-postgres
         build:
             context: ./postgres/
         ports:
-            - "5432:5432"
+            - "5433:5432"
         volumes:
-            - ./postgres/data:/var/lib/postgresql/data
+            - postgres:/var/lib/postgresql/data
         environment:
             - POSTGRES_HOST_AUTH_METHOD=trust
+        networks:
+            - app-net
     redis:
         container_name: redis
         image: redis
         ports: 
-           - "6379:6379"
+            - "6379:6379"
+        networks:
+            - app-net
     gamechanger-web:
         container_name: gamechanger-web
         build:
@@ -23,10 +27,10 @@ services:
             args:
                 MIGRATION_HOST: postgres
         environment:
-            - POSTGRES_HOST_GAME_CHANGER=postgres
+            - POSTGRES_HOST_GAME_CHANGER=web-postgres
             - POSTGRES_USER_GAME_CHANGER=postgres
             - POSTGRES_PASSWORD_GAME_CHANGER=password
-            - POSTGRES_HOST_GC_ORCHESTRATION=postgres
+            - POSTGRES_HOST_GC_ORCHESTRATION=web-postgres
             - POSTGRES_USER_GC_ORCHESTRATION=postgres
             - POSTGRES_PASSWORD_GC_ORCHESTRATION=password
         ports:
@@ -35,6 +39,17 @@ services:
         volumes:
             - ./:/usr/app/
             # - /usr/app/backend/node_modules
+        networks:
+            - app-net
         depends_on:
-            - postgres
+            - web-postgres
             - redis
+
+networks:
+    app-net:
+        name: "${COMPOSE_PROJECT_NAME:-gc-dev}-network"
+
+volumes:
+    postgres:
+    mysql:
+    matomo:
