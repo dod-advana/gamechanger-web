@@ -450,8 +450,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 
 const handleSelectPublicationDateAllTime = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	const runSearch = !state.publicationDateAllTime;
 	newSearchSettings.publicationDateAllTime = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
 }
 
 const handleSelectPublicationDateSpecificDates = (state, dispatch) => {
@@ -490,13 +491,15 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	} else {
 		temp[1] = date
 	}
-	
+	let runSearch = false;
+	if(!isNaN(temp[0]?.getTime()) && !isNaN(temp[1]?.getTime())) runSearch = true;
+
 	if(filterType === 'publication'){
 		newSearchSettings.publicationDateFilter = temp;
 	} else {
 		newSearchSettings.accessDateFilter = temp;
 	}
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
 }
 
 const renderDates = (state, dispatch, classes, searchbar = false) => {
