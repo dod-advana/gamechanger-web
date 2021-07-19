@@ -220,7 +220,7 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
-if (!constants.GAME_CHANGER_OPTS.isDecoupled) {
+if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
@@ -306,15 +306,17 @@ if(process.env.PRINT_ROUTES === 'true') {
 	routers['/api'] = require('./node_app/routes/advanaRouter');
 	routers['/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
 
-	console.log('BEGIN ROUTES');
+	let output = 'Route\n';
 	for(let base in routers) {
 		routers[base].stack.forEach(function(r){
-		if (r.route && r.route.path && !r.route.path.includes('*')){
-			console.log(`${base}${r.route.path}`.replace(/\/\//g, '/'));
-		}
+			if (r.route && r.route.path && !r.route.path.includes('*')){
+				output += `${base}${r.route.path}\n`.replace(/\/\//g, '/');
+			}
 		});
 	}
-	console.log('END ROUTES');
+	fs.writeFile(__dirname + '/route_check/routes.csv', output, (err) => {
+		console.error(err);
+	});
 }
 
 setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick'); }, 10000);
