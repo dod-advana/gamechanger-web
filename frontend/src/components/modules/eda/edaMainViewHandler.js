@@ -5,8 +5,7 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
-import GCTooltip from "../../common/GCToolTip";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, scrollToContentTop, StyledCenterContainer
@@ -63,6 +62,10 @@ const EdaMainViewHandler = {
 		return defaultMainViewHandler.getMainView(props);
 	},
 	
+	renderHideTabs(props) {
+		return defaultMainViewHandler.renderHideTabs(props);
+	},
+	
 	handleCategoryTabChange(props) {
 		defaultMainViewHandler.handleCategoryTabChange(props);
 	},
@@ -77,6 +80,7 @@ const EdaMainViewHandler = {
 				id: 'edaSummaryView'
 			}
 		);
+
 		return viewNames;
 	},
 	
@@ -126,9 +130,11 @@ const EdaMainViewHandler = {
 					</StyledCenterContainer>
 			}
 		);
+
 		viewPanels.push({panelName: 'Summary', panel:
 			<div>
-				{!loading && <StyledCenterContainer>
+				{!loading && 
+				<StyledCenterContainer>
 					<ViewHeader resultsText={' '} mainStyles={{float:'right', marginLeft: '5px', marginTop: '-10px'}}{...props} />
 					<EDASummaryView 
 						edaSearchSettings={edaSearchSettings}
@@ -142,7 +148,6 @@ const EdaMainViewHandler = {
 			</div>
 		});
 		
-
 		return viewPanels;
 	},
 
@@ -161,8 +166,6 @@ const EdaMainViewHandler = {
 			resultsPage,
 			componentStepNumbers,
 			hideTabs,
-			isCachedResult,
-			timeSinceCache,
 			summaryCardView,
 			summaryCardData,
 			resultsText
@@ -173,8 +176,6 @@ const EdaMainViewHandler = {
 		}
 		if (!iframePreviewLink) sideScroll = {};
 		
-		const cacheTip = `Cached result from ${timeSinceCache>0 ? timeSinceCache + " hour(s) ago": "less than an hour ago"}`;
-
 		const getSearchResults = (searchResultData) => {
 
 			return _.map(searchResultData, (item, idx) => {
@@ -193,75 +194,67 @@ const EdaMainViewHandler = {
 		
 		return (
 			<div key={'cardView'} style={{marginTop: hideTabs ? 40 : 'auto'}}>
-				<div>
-					<div id="game-changer-content-top"/>
-					{!loading &&
-						<StyledCenterContainer showSideFilters={true}>
-							<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : { width: '22%' }}>
-								<div className={'side-bar-container'}>
-									{summaryCardView ?
-										<div>
-											<JumpButton style={{ marginTop: 0 }} reverse={false} label="Back to Summary View" action={() => {
-												setState(dispatch, 
-													{ 
-														currentViewName: 'Summary',
-														summaryCardData: [],
-														resultsText: '',
-													})
-											}} />
-										</div>
-										:
-										<GameChangerSearchMatrix 
-											context={context}
-										/>
-									}
-								</div>
-							</div>
-							<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
-								{!hideTabs && 
-									<ViewHeader resultsText={resultsText} {...props} mainStyles={{ margin: '20px 28px 30px', padding: '5px 0 0 0' }} />
+				<div id="game-changer-content-top"/>
+				{!loading &&
+					<StyledCenterContainer showSideFilters={true}>
+						<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
+							<div className={'side-bar-container'}>
+								{summaryCardView ?
+									<div>
+										<JumpButton style={{ marginTop: 0 }} reverse={false} label="Back to Summary View" action={() => {
+											setState(dispatch, 
+												{ 
+													currentViewName: 'Summary',
+													summaryCardData: [],
+													resultsText: '',
+												})
+										}} />
+									</div>
+									:
+									<GameChangerSearchMatrix 
+										context={context}
+									/>
 								}
-							
-								<div className={`tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
-									<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
-										<div className="row" style={{marginLeft: 0, marginRight: 0}}>
-											{!loading &&
-												getSearchResults(searchResults)
-											}
-										</div>
+							</div>
+						</div>
+						<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
+							{!hideTabs && 
+								<ViewHeader resultsText={resultsText} {...props}/>
+							}
+						
+							<div className={`tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
+								<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
+									<div className="row" style={{marginLeft: 0, marginRight: 0}}>
+										{!loading &&
+											getSearchResults(searchResults)
+										}
 									</div>
 								</div>
 							</div>
-						</StyledCenterContainer>
-					}
-					{!iframePreviewLink && !summaryCardView && 
-						<div style={styles.paginationWrapper} className={'gcPagination'}>
-							<Pagination
-								activePage={resultsPage}
-								itemsCountPerPage={RESULTS_PER_PAGE}
-								totalItemsCount={count}
-								pageRangeDisplayed={8}
-								onChange={page => {
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-									setState(dispatch, { resultsPage: page, runSearch: true });
-									scrollToContentTop();
-								}}
-							/>
 						</div>
-					}
-					{isCachedResult &&
-						<div style={styles.cachedResultIcon}>
-							<GCTooltip title={cacheTip} placement="right" arrow>
-								<i style={styles.image} className="fa fa-bolt fa-2x"/>
-							</GCTooltip>
-						</div>
-					}
-					{Permissions.isGameChangerAdmin() && !loading &&
-						<div style={styles.cachedResultIcon}>
-							<i style={{...styles.image, cursor: 'pointer'}} className="fa fa-rocket" onClick={() => setState(dispatch, { showEsQueryDialog: true })}/>
-						</div>
-					}
-				</div>
+					</StyledCenterContainer>
+				}
+				{!iframePreviewLink && !summaryCardView && 
+					<div style={styles.paginationWrapper} className={'gcPagination'}>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={RESULTS_PER_PAGE}
+							totalItemsCount={count}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+								setState(dispatch, { resultsPage: page, runSearch: true });
+								scrollToContentTop();
+							}}
+						/>
+					</div>
+				}
+
+				{Permissions.isGameChangerAdmin() && !loading &&
+					<div style={styles.cachedResultIcon}>
+						<i style={{...styles.image, cursor: 'pointer'}} className="fa fa-rocket" onClick={() => setState(dispatch, { showEsQueryDialog: true })}/>
+					</div>
+				}
 			</div>
 		)
 	}

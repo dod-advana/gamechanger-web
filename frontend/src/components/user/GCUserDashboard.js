@@ -11,7 +11,7 @@ import GCTooltip from "../common/GCToolTip"
 import { backgroundGreyDark, backgroundWhite } from "../../components/common/gc-colors";
 import { gcOrange } from "../../components/common/gc-colors";
 import Pagination from "react-js-pagination";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Icon from "@material-ui/core/Icon";
 import GCButton from "../common/GCButton";
@@ -58,32 +58,6 @@ const CloseButton = styled.div`
 	position: absolute;
 	right: 15px;
 	top: 15px;
-`;
-
-const StyledPagination = styled.div`
-	margin-left: auto;
-    margin-right: auto;
-    width: 400px;
-    text-align: -webkit-center;
-
-	> .pagination {
-		margin: 0 0;
-	}
-
-	> .pagination > .active > a {
-		background-color: #E9691D !important;
-		border-color: #E9691D !important;
-		color: white !important;
-	}
-	
-	> .pagination > li > a {
-		color: black !important;
-	}
-	
-	> .pagination > .active > a:hover {
-		background-color: #E9691D !important;
-		border-color: #E9691D !important;
-	}
 `;
 
 const StyledPlaceHolder = styled.div`
@@ -612,7 +586,7 @@ const GCUserDashboard = (props) => {
 				}
 
 				{favoriteSearchesSlice.length > 0 &&
-					<StyledPagination id={'searchFavoritesPagination'}>
+					<div className='gcPagination'>
 						<Pagination
 							activePage={searchFavoritesPage}
 							itemsCountPerPage={RESULTS_PER_PAGE}
@@ -622,9 +596,8 @@ const GCUserDashboard = (props) => {
 								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardSearchFavorites','pagination', page);
 								handlePaginationChange(page, 'searchFavorites');
 							}}
-							classname="gcPagination"
 						/>
-					</StyledPagination>
+					</div>
 				}
 			</div>
 		);
@@ -735,7 +708,7 @@ const GCUserDashboard = (props) => {
 				)}
 
 				{favoriteDocumentsSlice.length > 0 &&
-					<StyledPagination id={'documentFavoritesPagination'}>
+					<div className='gcPagination'>
 						<Pagination
 							activePage={documentFavoritesPage}
 							itemsCountPerPage={RESULTS_PER_PAGE}
@@ -745,9 +718,8 @@ const GCUserDashboard = (props) => {
 								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardDocumentFavorites', 'pagination', page);
 								handlePaginationChange(page, 'documentsFavorites');
 							}}
-							classname="gcPagination"
 						/>
-					</StyledPagination>
+					</div>
 				}
 			</div>
 		);
@@ -854,7 +826,7 @@ const GCUserDashboard = (props) => {
 			 }
 
 				{favoriteTopicsSlice.length > 0 &&
-					<StyledPagination id={'topicFavoritesPagination'}>
+					<div className='gcPagination'>
 						<Pagination
 							activePage={topicFavoritesPage}
 							itemsCountPerPage={RESULTS_PER_PAGE}
@@ -864,9 +836,8 @@ const GCUserDashboard = (props) => {
 								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTopicFavorites', 'pagination', page);
 								handlePaginationChange(page, 'topicFavorites');
 							}}
-							classname="gcPagination"
 						/>
-					</StyledPagination>
+					</div>
 				}
 			</div>
 		)

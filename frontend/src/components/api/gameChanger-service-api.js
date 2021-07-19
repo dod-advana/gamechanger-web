@@ -20,6 +20,7 @@ const endpoints = {
 	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
 	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
+	thumbnailStorageDownloadPOST: '/api/gameChanger/thumbnailDownload',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
 	gcCloneTableDataGET: '/api/gamechanger/modular/admin/getCloneTableStructure',
 	reloadHandlerMapGET: '/api/gamechanger/modular/admin/reloadHandlerMap',
@@ -30,6 +31,8 @@ const endpoints = {
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
 	gcAdminDataDeletePOST: '/api/gameChanger/admin/deleteAdminData',
+	getHomepageEditorData: '/api/gameChanger/admin/getHomepageEditorData',
+	setHomepageEditorData: '/api/gameChanger/admin/setHomepageEditorData',
 	getGCCacheStatus: '/api/gameChanger/admin/getGCCacheStatus',
 	toggleGCCacheStatus: '/api/gameChanger/admin/toggleGCCacheStatus',
 	getElasticSearchIndex: '/api/gameChanger/admin/getElasticSearchIndex',
@@ -49,10 +52,13 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
+	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
+	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
 	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
 	setTrendingBlacklist: '/api/gameChanger/admin/trending/setTrendingBlacklist',
 	deleteTrendingBlacklist: '/api/gameChanger/admin/trending/deleteTrendingBlacklist',
+	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
@@ -219,10 +225,10 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
-		const url = endpoints.graphQueryPOST;
-		return axiosPOST(this.axios, url, { query, code, cloneName, options });
-	}
+	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
+	// 	const url = endpoints.graphQueryPOST;
+	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
+	// }
 	
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
@@ -294,10 +300,17 @@ export default class GameChangerAPI {
 				const redirectUrl = this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
 				resolve(redirectUrl);
 			}).catch(e => {
+				console.error(e);
 				console.error('ERROR GC-service-api storageDownloadBlobGET', e.message)
 				reject(e.message)
 			});
 		});
+	}
+
+	thumbnailStorageDownloadPOST = async (filenames) => {
+		const s3Bucket = 'advana-raw-zone';
+		const url = endpoints.thumbnailStorageDownloadPOST;
+		return axiosPOST(this.axios, url, {filenames, dest: s3Bucket}, {timeout: 10000})
 	}
 
 	getCloneData = async () => {
@@ -570,6 +583,16 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
+	getRecentlyOpenedDocs = async (clone_name) => {
+		const url = endpoints.getRecentlyOpenedDocs;
+		return axiosPOST(this.axios, url, { clone_name });
+	}
+
+	recentSearchesPOST = async (clone_name) => {
+		const url = endpoints.recentSearchesPOST;
+		return axiosPOST(this.axios, url, { clone_name });
+	}
+
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
 		return axiosGET(this.axios, url, {params:body});
@@ -746,6 +769,21 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, {params:body});
 	}
 
+	getWeeklySearchCount = async (body) => {
+		const url = endpoints.getWeeklySearchCount;
+		return axiosPOST(this.axios, url, body);
+	}
+
+	getHomepageEditorData = async () => {
+		const url = endpoints.getHomepageEditorData;
+		return axiosGET(this.axios, url);
+	}
+
+	setHomepageEditorData = async (body) => {
+		const url = endpoints.setHomepageEditorData;
+		return axiosPOST(this.axios, url, body)
+	}
+	
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);

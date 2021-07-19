@@ -2,10 +2,10 @@ import React, {useState, useContext, useEffect} from 'react';
 import Paper from 'material-ui/Paper';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import UOTAlert from '../components/common/GCAlert';
-import { SlideOutToolContext } from "advana-side-nav/dist/SlideOutMenuContext";
+import { SlideOutToolContext } from "@dod-advana/advana-side-nav/dist/SlideOutMenuContext";
 import { TextField, Tooltip, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link } from "@material-ui/core";
-import {ConstrainedIcon, PageLink} from "advana-side-nav/dist/SlideOutMenu";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import {ConstrainedIcon, PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdminIcon from "../images/icon/AdminIcon.png";
 import CloneIcon from "../images/icon/CloneIcon.png";
 import AuthIcon from "../images/icon/Authority.png";
@@ -17,6 +17,7 @@ import SearchBanner from "../components/searchBar/GCSearchBanner";
 import ReactTable from "react-table";
 import _ from "underscore";
 import "react-table/react-table.css";
+import {Snackbar} from "@material-ui/core";
 import GCButton from "../components/common/GCButton";
 import Modal from 'react-modal';
 import MLDashboard from '../components/admin/MLDashboard';
@@ -32,9 +33,10 @@ import UOTToggleSwitch from "../components/common/GCToggleSwitch";
 import CloseIcon from "@material-ui/icons/Close";
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import CreateIcon from '@material-ui/icons/Create';
 import { trackEvent } from '../components/telemetry/Matomo';
-import SlideOutMenuContent from 'advana-side-nav/dist/SlideOutMenuContent';
-// import TutorialOverlayModal from 'advana-tutorial-overlay/dist/TutorialOverlayModal';
+import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
+// import TutorialOverlayModal from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayModal';
 import { HoverNavItem } from '../components/navigation/NavItems'
 // import UoTAPI from '../components/advana/api/api';
 import GCAccordion from "../components/common/GCAccordion";
@@ -120,10 +122,12 @@ const PAGES = {
 	notifications: 'Notifications',
 	internalUsers: 'Internal Users',
 	appStats: 'Application Stats',
-	apiKeys: 'API Keys'
+	apiKeys: 'API Keys',
+	homepageEditor: 'Homepage Editor'
+
 }
 
-const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData }) => {
+const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData, getEditorData }) => {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
@@ -234,11 +238,24 @@ const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 					</HoverNavItem>
 				</Tooltip>
 			)}
+
+			{Permissions.isGameChangerAdmin() && (
+				<Tooltip title="Homepage Editor" placement="right" arrow>
+					<HoverNavItem centered onClick={() => {
+						getEditorData();
+						setPageToView(PAGES.homepageEditor);
+					}}
+						toolTheme={toolTheme}
+					>
+						<CreateIcon style={{ fontSize: 30 }} />
+					</HoverNavItem>
+				</Tooltip>
+			)}
 		</div>
 	);
 }
 
-const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData }) => {
+const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData, getEditorData }) => {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
 
@@ -348,6 +365,20 @@ const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 				</Tooltip>
 			)}
 
+			{Permissions.isGameChangerAdmin() && (
+				<Tooltip title="Homepage Editor" placement="right" arrow>
+					<HoverNavItem onClick={() => {
+						getEditorData();
+						setPageToView(PAGES.homepageEditor);
+					}}
+						toolTheme={toolTheme}
+					>
+						<CreateIcon style={{ fontSize: 30 }} />
+						<span style={{ marginLeft: '5px' }}>Homepage Editor</span>
+					</HoverNavItem>
+				</Tooltip>
+			)}
+
 		</div>
 	);
 }
@@ -415,6 +446,17 @@ const getApiKeyRequestData = async (setGCAPIRequestData) => {
 	setGCAPIRequestData(resp.data || {approved: [], pending: []});
 }
 
+const getHomepageEditorData = async (setEditorTableData) => {
+	const tableData = {};
+	const { data } = await gameChangerAPI.getHomepageEditorData();
+	data.forEach(obj => {
+		obj.key = obj.key.replace('homepage_','');
+		tableData[obj.key] = JSON.parse(obj.value)
+	});
+
+	setEditorTableData(tableData);
+}
+
 const GamechangerAdminPage = props => {
 
 	const classes = useStyles();
@@ -449,6 +491,11 @@ const GamechangerAdminPage = props => {
 	const [topicSearch, setTopicSearch] = useState(true);
 	const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
+	const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
+	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
+	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
+	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
+	const [loginModalOpen, setLoginModalOpen] = useState(false);
 
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
@@ -764,6 +811,38 @@ const GamechangerAdminPage = props => {
 		setShowTrendingBlacklistModal(false);
 	}
 
+	const handleShiftRowDown = (key, index) => {
+		const curr = editorTableData[key][index];
+		const next = editorTableData[key][index+1];
+		const tmp = {...editorTableData}
+		tmp[key][index] = next;
+		tmp[key][index+1] = curr;
+		setEditorTableData(tmp);
+	}
+
+	const handleShiftRowUp = (key, index) => {
+		const curr = editorTableData[key][index];
+		const prev = editorTableData[key][index-1];
+		const tmp = {...editorTableData}
+		tmp[key][index] = prev;
+		tmp[key][index-1] = curr;
+		setEditorTableData(tmp);
+	}
+
+	const handleAddRow = (key, value) => {
+		const tmp = {...editorTableData};
+		tmp[key].push({name:value});
+		setEditorTableData(tmp);
+	}
+
+	const saveHomepageEditor = async (key) => {
+		try{
+			await gameChangerAPI.setHomepageEditorData({key, tableData:editorTableData[key]});
+		} catch(e) {
+			console.log(e)
+			console.log('failed to save');
+		}
+	}
 	const changeEsIndex = async (setDefault) => {
 		try {
 			if(setDefault){
@@ -1410,6 +1489,182 @@ const GamechangerAdminPage = props => {
 			</div>
 		)
 	}
+
+	const renderHomepageEditor = () => {
+		const topicColumns = [
+			{
+				Header: 'Name',
+				accessor: 'name',
+				Cell: row => (
+					<TableRow>{row.value}</TableRow>
+				)
+			},
+			{
+				Header: ' ',
+				accessor: 'id',
+				Cell: row => (
+					<TableRow>
+						<GCButton
+							onClick={() => {
+								handleShiftRowUp('topics', row.index)
+							}}
+							disabled={row.index===0}
+							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
+						>Up</GCButton>
+						<GCButton
+							onClick={() => {
+								handleShiftRowDown('topics', row.index)
+							}}
+							disabled={row.index===editorTableData['topics'].length-1}
+							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
+						>Down</GCButton>
+						<GCButton
+							onClick={() => {
+								editorTableData['topics'].splice(row.index,1)
+								setEditorTableData({...editorTableData,topics:editorTableData['topics']})
+							}}
+							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
+						>Remove</GCButton>
+					</TableRow>
+				)
+			}
+		]
+		
+		const majorPubColumns = [
+			{
+				Header: 'Name',
+				accessor: 'name',
+				width: 200,
+				Cell: row => (
+					<TableRow>{row.value}</TableRow>
+				)
+			},
+			{
+				Header: 'Reason',
+				accessor: 'reason',
+				Cell: row => (
+					<TableRow>{row.value}</TableRow>
+				)
+			},
+			{
+				Header: ' ',
+				accessor: 'id',
+				width: 230,
+				Cell: row => (
+					<TableRow>
+						<GCButton
+							onClick={() => {
+								handleShiftRowUp('major_pubs', row.index)
+							}}
+							disabled={row.index===0}
+							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
+						>Up</GCButton>
+						<GCButton
+							onClick={() => {
+								handleShiftRowDown('major_pubs', row.index)
+							}}
+							disabled={row.index===editorTableData['major_pubs'].length-1}
+							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
+						>Down</GCButton>
+						<GCButton
+							onClick={() => {
+								editorTableData['major_pubs'].splice(row.index,1)
+								setEditorTableData({...editorTableData,major_pubs:editorTableData['major_pubs']})
+							}}
+							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
+						>Remove</GCButton>
+					</TableRow>
+				)
+			}
+		]
+
+		return (
+			<div style={{height: '100%'}}>
+				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
+					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Homepage Editor</p>
+				</div>
+				
+				<div style={{margin: '10px 80px'}}>
+					<GCAccordion expanded={true} header={'Topics'}>
+						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
+							<ReactTable
+								data={editorTableData.topics}
+								columns={topicColumns}
+								pageSize={10}
+								style={{width: '100%'}}
+								getTheadTrProps={() => {
+									return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
+								}}
+								getTheadThProps={() => {
+									return { style: { fontSize: 15, fontWeight: 'bold' } };
+								}}
+							/>
+							<div style={{display:'flex'}}>
+								<GCButton
+									id={'addTopic'}
+									onClick={()=>{
+										setEditorAddTerm({...editorAddTerm, section:'topics'})
+										setShowAddEditorTermDialog(true)
+									}}
+									style={{ width:200, margin:'10px'}}
+								>
+									Add Term
+								</GCButton>
+								<GCButton
+									id={'saveTopic'}
+									onClick={()=>{
+										saveHomepageEditor('topics');
+										setShowSavedSnackbar(true);
+									}}
+									style={{ width:200, margin:'10px'}}
+								>
+									Save
+								</GCButton>
+							</div>
+						</div>
+					</GCAccordion>
+					<GCAccordion expanded={true} header={'Major Publications'}>
+						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
+							<ReactTable
+								data={editorTableData.major_pubs}
+								columns={majorPubColumns}
+								pageSize={10}
+								style={{width: '100%'}}
+								getTheadTrProps={() => {
+									return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
+								}}
+								getTheadThProps={() => {
+									return { style: { fontSize: 15, fontWeight: 'bold' } };
+								}}
+							/>
+							<div style={{display:'flex'}}>
+								<GCButton
+									id={'addMajorPub'}
+									onClick={()=>{
+										setEditorAddTerm({...editorAddTerm, section:'major_pubs'})
+										setShowAddEditorTermDialog(true)
+									}}
+									style={{ width:200, margin:'10px'}}
+								>
+									Add Term
+								</GCButton>
+								<GCButton
+									id={'saveMajorPub'}
+									onClick={()=>{
+										saveHomepageEditor('major_pubs');
+										setShowSavedSnackbar(true);
+									}}
+									style={{ width:200, margin:'10px'}}
+								>
+									Save
+								</GCButton>
+							</div>
+						</div>
+					</GCAccordion>
+				</div>
+			</div>
+		)
+	}
 	
 	const revokeAPIKeyRequestData = async (id) => {
 		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
@@ -1445,16 +1700,22 @@ const GamechangerAdminPage = props => {
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
 				return renderAPIRequests();
+			case PAGES.homepageEditor:
+				return renderHomepageEditor();
 			default:
 				return renderGeneralAdminButtons();
 		}
 	}
 	
+	const setLoginModal = (open) => {
+		setLoginModalOpen(open);
+	}
+	
 	return (
 		<div style={{ minHeight: '100%' }}>
 
-			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData),  getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData) })}</SlideOutMenuContent>
-			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData), getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData) })}</SlideOutMenuContent>
+			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData),  getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData), getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
 
 			<SearchBanner
 				onTitleClick={() => {
@@ -1464,6 +1725,8 @@ const GamechangerAdminPage = props => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
+				loginModalOpen={loginModalOpen}
+				setLoginModal={setLoginModal}
 			>
 			</SearchBanner>
 
@@ -1525,6 +1788,53 @@ const GamechangerAdminPage = props => {
 					</div>
                 </DialogActions>
             </Dialog>
+
+			<Dialog
+				open={showAddEditorTermDialog}
+				scroll={'paper'}
+				maxWidth='300px'
+			>
+				<TextField
+					id="margin-dense"
+					onBlur={event => setEditorAddTerm({...editorAddTerm, value:event.target.value})}
+					className={classes.textField}
+					style={{padding:10}}
+					helperText="Term to add..."
+					margin="dense"
+				/>
+				<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding:10}}>
+					<GCButton
+						id={'addTermSubmit'}
+						onClick={()=>{
+							setEditorAddTerm({value:'', section:'topic'});
+							handleAddRow(editorAddTerm.section, editorAddTerm.value)
+							setShowAddEditorTermDialog(false);
+						}}
+						style={{margin:'10px'}}
+					>
+						Submit
+					</GCButton>
+					<GCButton
+						id={'addTermCancel'}
+						onClick={()=>{
+							setEditorAddTerm({value:'', section:'topic'});
+							setShowAddEditorTermDialog(false);
+						}}
+						style={{margin:'10px'}}
+					>
+						Cancel
+					</GCButton>
+				</div>
+			</Dialog>
+
+			<Snackbar
+				style={{marginTop: 20}}
+				anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+				open={showSavedSnackbar}
+				autoHideDuration={3000}
+				onClose={() => setShowSavedSnackbar(false)}
+				message={`Saved`}
+			/>
 
 			<Modal
 				isOpen={showCreateEditAdminModal}

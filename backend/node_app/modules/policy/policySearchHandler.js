@@ -39,6 +39,7 @@ class PolicySearchHandler extends SearchHandler {
 		this.async_redis = async_redis;
 		this.app_settings = app_settings;
 		this.constants = constants;
+		this.error = {};
 	}
 
 	async searchHelper(req, userId) {
@@ -60,7 +61,7 @@ class PolicySearchHandler extends SearchHandler {
 		if(doubleQuoteCount % 2 === 1){
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
-		req.body.questionFlag = this.searchUtility.isQuestion(searchText)
+		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
@@ -84,6 +85,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
@@ -185,7 +187,9 @@ class PolicySearchHandler extends SearchHandler {
 			if (forCacheReload){
 				throw Error('Cannot get expanded search terms in cache reload');
 			}
-			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
+			this.error.category = 'ML API';
+			this.error.code = '93SQB38';
+			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', '93SQB38', userId);
 		}
 		return expansionDict;
 	}
@@ -410,7 +414,9 @@ class PolicySearchHandler extends SearchHandler {
 				};
 				
 			} catch (e) {
-				this.logger.error(e.message, 'KBBIOYCJ', userId);
+				this.error.category = 'ML API'
+				this.error.code = 'KBBIOYCJ';
+				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			};
 		};
 		return QA;
@@ -720,6 +726,9 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
+	getError() {
+		return this.error;
+	}
 }
 
 // const policySearchHandler = new PolicySearchHandler();

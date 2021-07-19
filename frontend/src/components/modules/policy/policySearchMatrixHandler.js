@@ -23,67 +23,88 @@ import DateFnsUtils from '@date-io/date-fns';
 import uuidv4 from "uuid/v4";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from "../../telemetry/Matomo";
-import {getTrackingNameForFactory} from "../../../gamechangerUtils";
+import {getTrackingNameForFactory, typeFilters, orgFilters} from "../../../gamechangerUtils";
 
-// const renderSearchTypes = (classes) => {
-//
-// 	return (
-// 		<div style={{width: '100%'}}>
-// 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}>
-// 			<FormGroup style={{width: '100%'}}>
-// 				<FormControlLabel
-// 					name='Documentations'
-// 					value='Documentations'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Documentations'
-// 					/>}
-// 					label='Documentations'
-// 					labelPlacement="end"
-// 				/>
-// 				<FormControlLabel
-// 					name='Organizations'
-// 					value='Organizations'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Organizations'
-// 					/>}
-// 					label='Organizations'
-// 					labelPlacement="end"
-// 				/>
-// 				<FormControlLabel
-// 					name='Topics'
-// 					value='Topics'
-// 					classes={{ label: classes.titleText }}
-// 					control={<Checkbox
-// 						classes={{ root: classes.filterBox }}
-// 						onClick={_.noop}
-// 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-// 						checked={false}
-// 						checkedIcon={<i style={{ color: '#E9691D' }}
-// 							className="fa fa-check" />}
-// 						name='Topics'
-// 					/>}
-// 					label='Topics'
-// 					labelPlacement="end"
-// 				/>
-// 			</FormGroup>
-// 		</FormControl>
-// 		</div>
-// 	);
-// }
+const handleSelectAllCategories = (state, dispatch) => {
+	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	newSearchSettings.specificCategoriesSelected = false;
+	newSearchSettings.allCategoriesSelected = true;
+	Object.keys(newSelectedCategories).forEach(category => newSelectedCategories[category] = true);
+	setState(dispatch, { selectedCategories: newSelectedCategories, searchSettings: newSearchSettings, metricsCounted: false });
+}
+
+const handleSelectSpecificCategories = (state, dispatch) =>{
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	newSearchSettings.specificCategoriesSelected = true;
+	newSearchSettings.allCategoriesSelected = false;
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+}
+
+const handleCategoriesFilterChange = (event, state, dispatch) => {
+	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
+	let categoryName = event.target.name;
+	newSelectedCategories[categoryName] = event.target.checked;
+	setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
+	// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
+}
+
+const renderCategories = (state, dispatch, classes) => {
+	return (
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+			<FormGroup row style={{ marginBottom: '10px' }}>
+				<FormControlLabel
+					name='All categories'
+					value='All categories'
+					classes={{ label: classes.titleText }}
+					control={<Checkbox
+						classes={{ root: classes.filterBox }}
+						onClick={() => handleSelectAllCategories(state, dispatch)}
+						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+						checked={state.searchSettings.allCategoriesSelected}
+						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						name='All categories'
+						style={styles.filterBox}
+					/>}
+					label='All categories'
+					labelPlacement="end"
+					style={styles.titleText}
+				/>
+				<FormControlLabel
+					name='Specific category(s)'
+					value='Specific category(s)'
+					classes={{ label: classes.titleText }}
+					control={<Checkbox
+						classes={{ root: classes.filterBox }}
+						onClick={() => handleSelectSpecificCategories(state, dispatch)}
+						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+						checked={state.searchSettings.specificCategoriesSelected}
+						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						name='Specific category(s)'
+						style={styles.filterBox}
+					/>}
+					label='Specific category(s)'
+					labelPlacement="end"
+					style={styles.titleText}
+				/>
+			</FormGroup>
+			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+				{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
+					return (
+						<FormControlLabel
+							key={`${category}`}
+							value={`${category}`}
+							classes={{ label: classes.checkboxPill }}
+							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category}`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
+							label={`${category}`}
+							labelPlacement="end"
+						/>
+					)
+				})}
+			</FormGroup>
+		</FormControl>
+	)
+}
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
@@ -93,84 +114,161 @@ const handleSelectSpecificOrgs = (state, dispatch) => {
 }
 
 const handleSelectAllOrgs = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificOrgsSelected = false;
-	newSearchSettings.allOrgsSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificOrgsSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificOrgsSelected = false;
+		newSearchSettings.allOrgsSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.orgFilter).forEach(org => {
+			runSearch = newSearchSettings.orgFilter[org] ? true : false
+			newSearchSettings.orgFilter[org] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked
 	};
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	newSearchSettings.isFilterUpdate = true;
+
+    setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
-const renderSources = (state, dispatch, classes) => {
+	const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		let orgName = event.target.name;
+		newSearchSettings.orgFilter = {
+			...newSearchSettings.orgFilter,
+			[orgName]: event.target.checked
+		};
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
+	}
+
+const renderSources = (state, dispatch, classes, searchbar = false) => {
 		
+		const { originalOrgFilters } = state.searchSettings;
 		const betterOrgData = {};
-		for(let i=0; i<state.sidebarOrgs.length; i++) {
-			betterOrgData[state.sidebarOrgs[i][0]] = state.sidebarOrgs[i][1];
+		for(let i=0; i<originalOrgFilters.length; i++) {
+			betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
 		}
 
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-				<FormGroup row style={{ marginBottom: '10px' }}>
-					<FormControlLabel
-						name='All sources'
-						value='All sources'
-						classes={{ label: classes.titleText }}
-						control={<Checkbox
-							classes={{ root: classes.filterBox }}
-							onClick={() => handleSelectAllOrgs(state, dispatch)}
-							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.searchSettings.allOrgsSelected}
-							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-							name='All sources'
-							style={styles.filterBox}
-						/>}
-						label='All sources'
-						labelPlacement="end"
-						style={styles.titleText}
-					/>
-				</FormGroup>
-				<FormGroup row>
-					<FormControlLabel
-						name='Specific source(s)'
-						value='Specific source(s)'
-						classes={{ label: classes.titleText }}
-						control={<Checkbox
-							classes={{ root: classes.filterBox }}
-							onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.searchSettings.specificOrgsSelected}
-							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-							name='Specific source(s)'
-							style={styles.filterBox}
-						/>}
-						label='Specific source(s)'
-						labelPlacement="end"
-						style={styles.titleText}
-					/>
-				</FormGroup>
-				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificOrgsSelected && Object.keys(state.searchSettings.orgFilter).map(org => {
-						return (
+				{searchbar ? (
+					<>
+						<FormGroup row style={{ marginBottom: '10px' }}>
 							<FormControlLabel
-								key={`${org} (${betterOrgData[org]})`}
-								value={`${org} (${betterOrgData[org]})`}
-								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
-								label={`${org} (${betterOrgData[org]})`}
+								name='All sources'
+								value='All sources'
+								classes={{ label: classes.titleText }}
+								control={<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={() => handleSelectAllOrgs(state, dispatch)}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									checked={state.searchSettings.allOrgsSelected}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+									name='All sources'
+									style={styles.filterBox}
+								/>}
+								label='All sources'
 								labelPlacement="end"
+								style={styles.titleText}
 							/>
-						)
-					})}
-				</FormGroup>
+							<FormControlLabel
+								name='Specific source(s)'
+								value='Specific source(s)'
+								classes={{ label: classes.titleText }}
+								control={<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={() => handleSelectSpecificOrgs(state, dispatch)}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									checked={state.searchSettings.specificOrgsSelected}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+									name='Specific source(s)'
+									style={styles.filterBox}
+								/>}
+								label='Specific source(s)'
+								labelPlacement="end"
+								style={styles.titleText}
+							/>
+						</FormGroup>
+						<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilters).map(org => {
+								return (
+									<FormControlLabel
+										key={`${org}`}
+										value={`${originalOrgFilters[org]}`}
+										classes={{ label: classes.checkboxPill }}
+										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
+										label={`${org}`}
+										labelPlacement="end"
+									/>
+								)
+							})}
+						</FormGroup>
+					</>
+					) : (
+				<>
+					<FormGroup row style={{ marginBottom: '10px' }}>
+						<FormControlLabel
+							name='All sources'
+							value='All sources'
+							classes={{ label: classes.titleText }}
+							control={<Checkbox
+								classes={{ root: classes.filterBox }}
+								onClick={() => handleSelectAllOrgs(state, dispatch)}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								checked={state.searchSettings.allOrgsSelected}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								name='All sources'
+								style={styles.filterBox}
+							/>}
+							label='All sources'
+							labelPlacement="end"
+							style={styles.titleText}
+						/>
+					</FormGroup>
+					<FormGroup row>
+						<FormControlLabel
+							name='Specific source(s)'
+							value='Specific source(s)'
+							classes={{ label: classes.titleText }}
+							control={<Checkbox
+								classes={{ root: classes.filterBox }}
+								onClick={() => handleSelectSpecificOrgs(state, dispatch)}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								checked={state.searchSettings.specificOrgsSelected}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								name='Specific source(s)'
+								style={styles.filterBox}
+							/>}
+							label='Specific source(s)'
+							labelPlacement="end"
+							style={styles.titleText}
+						/>
+					</FormGroup>
+					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+						{state.searchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
+							return (
+								<FormControlLabel
+									key={`${org} (${betterOrgData[org]})`}
+									value={`${org} (${betterOrgData[org]})`}
+									classes={{ label: classes.checkboxPill }}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+									label={`${org} (${betterOrgData[org]})`}
+									labelPlacement="end"
+								/>
+							)
+						})}
+					</FormGroup>
+				</>)}
 			</FormControl>
 		);
 	}
@@ -183,63 +281,136 @@ const handleSelectSpecificTypes = (state, dispatch) => {
 }
 
 const handleSelectAllTypes = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificTypesSelected = false;
-	newSearchSettings.allTypesSelected = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(state.searchSettings.specificTypesSelected){
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.specificTypesSelected = false;
+		newSearchSettings.allTypesSelected = true;
+		let runSearch = false;
+		Object.keys(state.searchSettings.typeFilter).forEach(type => {
+			runSearch = newSearchSettings.typeFilter[type] ? true : false;
+			newSearchSettings.typeFilter[type] = false;
+		});
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	}
 }
 
-const handleTypeFilterChangeLocal = (event, state, dispatch) => {
+const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let typeName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+	let typeName = event.target.name;
+	if(typeName.includes('(')){
+		typeName = typeName.substring(0, event.target.name.lastIndexOf('(')-1);
+	}
 	newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
 		[typeName]: event.target.checked
 	};
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
+	if(searchbar){
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false});
+	} else {
+		newSearchSettings.isFilterUpdate = true;
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
+	}
+	
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TypeFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
-const renderTypes = (state, dispatch, classes) => {
 
+const renderTypes = (state, dispatch, classes, searchbar = false) => {
+	const { originalTypeFilters } = state.searchSettings;
 	const betterTypeData = {};
-	for(let i=0; i<state.sidebarDocTypes.length; i++) {
-		betterTypeData[state.sidebarDocTypes[i][0]] = state.sidebarDocTypes[i][1];
+	for(let i=0; i<originalTypeFilters.length; i++) {
+		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
 	}
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			<FormGroup row style={{ marginBottom: '10px' }}>
-				<FormControlLabel
-					name='All types'
-					value='All types'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={() => handleSelectAllTypes(state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={state.searchSettings.allTypesSelected}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+			{searchbar ? (
+				<>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
 						name='All types'
-						style={styles.filterBox}
-					/>}
-					label='All types'
-					labelPlacement="end"
-					style={styles.titleText}
-				/>
-			</FormGroup>
-			<FormGroup row>
-				<FormControlLabel
-					name='Specific type(s)'
-					value='Specific type(s)'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={() => handleSelectSpecificTypes(state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={state.searchSettings.specificTypesSelected}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						value='All types'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.allTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='All types'
+							style={styles.filterBox}
+						/>}
+						label='All types'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+					<FormControlLabel
 						name='Specific type(s)'
+						value='Specific type(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.specificTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='Specific type(s)'
+							style={styles.filterBox}
+						/>}
+						label='Specific type(s)'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+					{state.searchSettings.specificTypesSelected && Object.keys(typeFilters).map(type => {
+						return (
+							<FormControlLabel
+								key={`${type}`}
+								value={`${type}`}
+								classes={{ label: classes.checkboxPill }}
+								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
+								label={`${type}`}
+								labelPlacement="end"
+							/>
+						)
+					})}
+				</FormGroup>
+			</>
+			) 
+			: (
+			<>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name='All types'
+						value='All types'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.allTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='All types'
+							style={styles.filterBox}
+						/>}
+						label='All types'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row>
+					<FormControlLabel
+						name='Specific type(s)'
+						value='Specific type(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.searchSettings.specificTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name='Specific type(s)'
 						style={styles.filterBox}
 					/>}
 					label='Specific type(s)'
@@ -248,7 +419,7 @@ const renderTypes = (state, dispatch, classes) => {
 				/>
 			</FormGroup>
 			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-				{state.searchSettings.specificTypesSelected && Object.keys(state.searchSettings.typeFilter).map(type => {
+				{state.searchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
 					return (
 						<FormControlLabel
 							key={`${type} (${betterTypeData[type]})`}
@@ -261,6 +432,7 @@ const renderTypes = (state, dispatch, classes) => {
 					)
 				})}
 			</FormGroup>
+			</>)}
 		</FormControl>
 	);
 }
@@ -316,7 +488,7 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
 }
 
-const renderDates = (state, dispatch, classes) => {
+const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
 	const pubAllTime = state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
 	
 	return (
@@ -324,56 +496,99 @@ const renderDates = (state, dispatch, classes) => {
 			<div style={{ padding: '10px' }}>
 				<ThemeProvider theme={themeDatePicker}>
 					<div>
-						<div style={{ float: 'left' }}>
+						<div style={{ display: 'flex' }}>
 						<FormControl>
-							<FormGroup row style={{ marginBottom: '10px' }}>
-								<FormControlLabel
-									name='All time'
-									value='All time'
-									classes={{ label: classes.titleText }}
-									control={<Checkbox
-										classes={{ root: classes.filterBox }}
-										onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
-										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-										checked={pubAllTime}
-										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							{searchbar ? (
+								<FormGroup row style={{ marginBottom: '10px' }}>
+									<FormControlLabel
 										name='All time'
-										style={styles.filterBox}
-									/>}
-									label='All time'
-									labelPlacement="end"
-									style={styles.titleText}
-								/>
-							</FormGroup>
-							<FormGroup row>
-								<FormControlLabel
-									name='Specific dates'
-									value='Specific dates'
-									classes={{ label: classes.titleText }}
-									control={<Checkbox
-										classes={{ root: classes.filterBox }}
-										onClick={() => handleSelectPublicationDateSpecificDates(state, dispatch)}
-										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-										checked={!pubAllTime}
-										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+										value='All time'
+										classes={{ label: classes.titleText }}
+										control={<Checkbox
+											classes={{ root: classes.filterBox }}
+											onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
+											icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+											checked={pubAllTime}
+											checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+											name='All time'
+											style={styles.filterBox}
+										/>}
+										label='All time'
+										labelPlacement="end"
+										style={styles.titleText}
+									/>
+									<FormControlLabel
 										name='Specific dates'
-										style={styles.filterBox}
-									/>}
-									label='Specific dates'
-									labelPlacement="end"
-									style={styles.titleText}
-								/>
-							</FormGroup>
+										value='Specific dates'
+										classes={{ label: classes.titleText }}
+										control={<Checkbox
+											classes={{ root: classes.filterBox }}
+											onClick={() => handleSelectPublicationDateSpecificDates(state, dispatch)}
+											icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+											checked={!pubAllTime}
+											checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+											name='Specific dates'
+											style={styles.filterBox}
+										/>}
+										label='Specific dates'
+										labelPlacement="end"
+										style={styles.titleText}
+									/>
+								</FormGroup>
+							) : (
+								<>
+									<FormGroup row style={{ marginBottom: '10px' }}>
+										<FormControlLabel
+											name='All time'
+											value='All time'
+											classes={{ label: classes.titleText }}
+											control={<Checkbox
+												classes={{ root: classes.filterBox }}
+												onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
+												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+												checked={pubAllTime}
+												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+												name='All time'
+												style={styles.filterBox}
+											/>}
+											label='All time'
+											labelPlacement="end"
+											style={styles.titleText}
+										/>
+									</FormGroup>
+									<FormGroup row>
+										<FormControlLabel
+											name='Specific dates'
+											value='Specific dates'
+											classes={{ label: classes.titleText }}
+											control={<Checkbox
+												classes={{ root: classes.filterBox }}
+												onClick={() => handleSelectPublicationDateSpecificDates(state, dispatch)}
+												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+												checked={!pubAllTime}
+												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+												name='Specific dates'
+												style={styles.filterBox}
+											/>}
+											label='Specific dates'
+											labelPlacement="end"
+											style={styles.titleText}
+										/>
+									</FormGroup>
+								</>
+							)}
 						</FormControl>
 						</div>
-						{!pubAllTime && <div style={{clear: 'both'}}>
+						{!pubAllTime && <div style={{display: 'flex'}}>
 							<KeyboardDatePicker
 								margin="normal"
 								label="Start Date"
 								format="MM/dd/yyyy"
-								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
+								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px', marginRight: '15px' } }}
 								value={state.searchSettings.publicationDateFilter[0]}
 								onChange={date => handleDateRangeChange(date, true, 'publication', state, dispatch)}
+								onOpen={setDatePickerOpen}
+								onClose={setDatePickerClosed}
 							/>
 							<KeyboardDatePicker
 								margin="normal"
@@ -382,6 +597,8 @@ const renderDates = (state, dispatch, classes) => {
 								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
 								value={state.searchSettings.publicationDateFilter[1]}
 								onChange={date => handleDateRangeChange(date, false, 'publication', state, dispatch)}
+								onOpen={setDatePickerOpen}
+								onClose={setDatePickerClosed}
 							/>
 						</div>}
 					</div>
@@ -486,56 +703,101 @@ const removeSearchField = (key, state, dispatch) => {
 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
 }
 
-const renderAdvancedFilters = (state, dispatch) => {
+const renderAdvancedFilters = (state, dispatch, searchbar = false) => {
 	const usedPropertyNames = Object.values(state.searchSettings.searchFields).map(field => { return field.field ? field.field.display_name : '' });
 	const unusedProperties = state.documentProperties.filter(prop => usedPropertyNames.indexOf(prop.display_name) === -1);
-	
 	return (
 		<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
 			{Object.keys(state.searchSettings.searchFields).map(key => {
 				const searchField = state.searchSettings.searchFields[key];
-				return (
-					<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
-						<div style = {{ marginRight: '15px' }}>
-							<Autocomplete
-								options={unusedProperties}
-								getOptionLabel={(option) => option.display_name}
-								getOptionSelected={(option, value) => { return option.name === value.name }}
-								renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
-								clearOnEscape
-								clearOnBlur
-								blurOnSelect
-								openOnFocus
-								style={{ backgroundColor: 'white', width: '100%' }}
-								value={searchField.field}
-								default
-								onChange={(event, value) => setSearchField(key, value, state, dispatch)}
-							/>
-						</div>
-						<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-							<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
-								<TextField
-									disabled={!state.searchSettings.searchFields[key]?.field}
-									placeholder="Input"
-									variant="outlined"
-									value={searchField.input}
+				if(searchbar){
+					return (
+						<div key={key} style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+							<div style={{ flexGrow: 1, marginRight: '10px'}}>
+								<Autocomplete
+									options={unusedProperties}
+									getOptionLabel={(option) => option.display_name}
+									getOptionSelected={(option, value) => { return option.name === value.name }}
+									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
+									clearOnEscape
+									clearOnBlur
+									blurOnSelect
+									openOnFocus
+									style={{ backgroundColor: 'white', width: '100%'}}
+									value={searchField.field}
+									default
+									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
+								/>
+								</div>
+								<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', flexGrow: 1 }}>
+									<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
+										<TextField
+											disabled={!state.searchSettings.searchFields[key]?.field}
+											placeholder="Input"
+											variant="outlined"
+											value={searchField.input}
+											style={{ backgroundColor: 'white', width: '100%'}}
+											fullWidth={true}
+											onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
+											inputProps={{
+												style: {
+													height: 19,
+													width: '100%'
+												}
+											}}
+										/>
+									</div>
+									{state.searchSettings.searchFields[key].field !== null &&
+										<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
+									}
+							</div>
+							</div>
+					);
+				} else {
+					return (
+						<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
+							<div style = {{ marginRight: '15px' }}>
+								<Autocomplete
+									options={unusedProperties}
+									getOptionLabel={(option) => option.display_name}
+									getOptionSelected={(option, value) => { return option.name === value.name }}
+									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
+									clearOnEscape
+									clearOnBlur
+									blurOnSelect
+									openOnFocus
 									style={{ backgroundColor: 'white', width: '100%' }}
-									fullWidth={true}
-									onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
-									inputProps={{
-										style: {
-											height: 19,
-											width: '100%'
-										}
-									}}
+									value={searchField.field}
+									default
+									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
 								/>
 							</div>
-							{state.searchSettings.searchFields[key].field !== null &&
-								<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
-							}
+							<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+								<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
+									<TextField
+										disabled={!state.searchSettings.searchFields[key]?.field}
+										placeholder="Input"
+										variant="outlined"
+										value={searchField.input}
+										style={{ backgroundColor: 'white', width: '100%' }}
+										fullWidth={true}
+										onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
+										inputProps={{
+											style: {
+												height: 19,
+												width: '100%'
+											}
+										}}
+									/>
+								</div>
+								{state.searchSettings.searchFields[key].field !== null &&
+									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
+								}
+							</div>
 						</div>
-					</div>
-				);
+					);
+				}
+				
 			})}
 		</div>
 	);
@@ -580,7 +842,7 @@ const PolicySearchMatrixHandler = {
 			handleSubmit
 		} = props;
 		
-		return (
+        return (
 			<>
 				{/*{false &&*/}
 				{/*	<div style={styles.subHead}>*/}
@@ -613,19 +875,19 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderSources(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
@@ -664,6 +926,84 @@ const PolicySearchMatrixHandler = {
 				</button>
 			</>
 		);
+	},
+
+	getAdvancedOptions(props) {
+		const {
+			state,
+			dispatch,
+			classes,
+			handleSubmit,
+			setDatePickerOpen,
+			setDatePickerClosed
+		} = props;
+
+		return (
+			<>
+				<div style={styles.filterDiv}>
+					<strong style={styles.boldText}>CATEGORIES</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					<div>
+						{renderCategories(state, dispatch, classes)}
+					</div>
+				</div>
+
+				<div style={styles.filterDiv}>
+					<strong style={styles.boldText}>SELECT THE SOURCE</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					<div>
+					{renderSources(state, dispatch, classes, true)}
+					</div>
+				</div>
+				
+				<div style={styles.filterDiv}>
+					<strong style={styles.boldText}>SEARCH TYPES</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					{renderTypes(state, dispatch, classes, true)}
+				</div>
+
+				<div style={styles.filterDiv}>
+					<strong style={styles.boldText}>PUBLICATION DATE</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
+				</div>
+
+				<div style={styles.filterDiv}>
+					<strong style={styles.boldText}>STATUS</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					{renderStatus(state, dispatch, classes)}
+				</div>
+
+				{/* <div style={styles.filterDiv}>
+					<strong style={styles.boldText}>ADVANCED FILTERS</strong>
+					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
+					{renderAdvancedFilters(state, dispatch, true)}
+				</div> */}
+
+				<div style ={{display: 'flex', margin: '10px'}}>
+					<div style={{width: '250px', marginRight: '20px'}}>
+						<button
+							type="button"
+							style={{ border: 'none', backgroundColor: '#B0BAC5', width: '100%', marginTop:'20px', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
+							onClick={() => resetAdvancedSettings(dispatch)}
+						>
+							<span style={{
+								fontFamily: 'Montserrat',
+								fontWeight: 600,
+								fontSize: '0.8em',
+								width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
+							}}>
+								Clear Filters
+							</span>
+						</button>
+					</div>
+					<div style={{width: '250px'}}>
+						<GCButton style={{width: '100%', marginTop:'20px', marginBottom: '10px', marginLeft: '-1px', height: '50px'}} onClick={handleSubmit}>Search</GCButton>
+					</div>
+				</div>
+				
+			</>
+		);
 	}
 }
 
@@ -690,7 +1030,15 @@ const styles = {
 		backgroundColor: 'rgb(50,53,64)',
 		display: 'flex',
 		alignItems: 'center'
+	},
+	filterDiv: {
+		display: 'block',
+		margin: '10px'
+	},
+	boldText: {
+		fontSize: '0.8em'
 	}
+
 };
 
 export default PolicySearchMatrixHandler;
