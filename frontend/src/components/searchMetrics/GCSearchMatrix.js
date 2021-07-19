@@ -314,6 +314,25 @@ export default function SearchMatrix(props) {
 
 	}, [state, comparableExpansion]);
 
+	useEffect(() => {
+		if(state.searchSettings.isFilterUpdate & state.searchSettings.expansionTermAdded){
+			let newSearchText = state.searchText.trim()
+			expansionTerms.forEach(({phrase, source, checked}) => {
+				if(checked && !exactMatch(newSearchText, phrase, " OR ")) {
+					trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
+					newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
+				} 
+				else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
+					newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
+				}
+
+			})
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.expansionTermAdded = false;
+			setState(dispatch, { searchText: newSearchText, runSearch: true, searchSettings: newSearchSettings });
+		}
+	}, [state, expansionTerms, dispatch])
+
 	const handleSubmit = (event) => {
 		if (event) {
 			event.preventDefault();
@@ -335,6 +354,10 @@ export default function SearchMatrix(props) {
 	const handleAddSearchTerm = (phrase, source, idx) => {
 		const temp = _.cloneDeep(expansionTerms)
 		temp[idx].checked = !temp[idx].checked
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.expansionTermAdded = true;
+		newSearchSettings.isFilterUpdate = true;
+		setState(dispatch, { searchSettings: newSearchSettings });
 		setExpansionTerms(temp);
 	}
 	

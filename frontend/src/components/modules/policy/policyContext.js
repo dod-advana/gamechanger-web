@@ -155,6 +155,7 @@ const initState = {
 		isFilterUpdate: false,
 		orgUpdate: false,
 		typeUpdate: false,
+		expansionTermAdded: false,
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,

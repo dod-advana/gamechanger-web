@@ -46,7 +46,6 @@ const handleCategoriesFilterChange = (event, state, dispatch) => {
 	let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
 	newSelectedCategories[categoryName] = event.target.checked;
 	setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
-	// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
 const renderCategories = (state, dispatch, classes) => {
@@ -650,7 +649,7 @@ const renderStatus = (state, dispatch, classes) => {
 		</div>
 	);
 }
-
+// // Temporarily removing advanced search filter
 // const setSearchField = (key, value, state, dispatch) => {
 // 	const { searchSettings, documentProperties } = state;
 // 	const {searchFields} = searchSettings;
