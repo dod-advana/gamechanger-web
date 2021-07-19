@@ -39,7 +39,7 @@ WORKDIR "${APP_DIR}"
 
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chown="$APP_UID:$APP_GID" package.json "${APP_DIR}"
-COPY --chown="$APP_UID:$APP_GID" "${NPM_CONFIG_USERCONFIG}" "${APP_DIR}"
+COPY --chown="$APP_UID:$APP_GID" .npmrc "${NPM_CONFIG_USERCONFIG}"
 
 RUN npm install jest \
     npm install
