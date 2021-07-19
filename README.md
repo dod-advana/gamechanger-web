@@ -31,6 +31,7 @@ These are the recommended steps if you are just trying to get coding.
 - Pull down the code
 - In gamechanger-web/backend, copy .env.template to .env and fill in the values to point to your databases appropriately
 - In gamechanger-web/frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
+- In gamechanger-web/backend _and_ frontend, copy .npmrc.template to .npmrc and edit the files to contain a valid GitHub Personal Access Token with "read:packages" permissions (you can generate a new token by visiting https://github.com/settings/tokens)
 - **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
 - At the top level run **./resetDocker.sh**
 - Your frontend will be available at http://localhost:8080/#/gamechanger

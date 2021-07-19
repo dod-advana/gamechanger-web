@@ -26,9 +26,10 @@ import {KeyboardArrowRight, Star} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 import {setState} from "../../../sharedFunctions";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GameChangerAPI from "../../api/gameChanger-service-api";
+import sanitizeHtml from 'sanitize-html';
 const gameChangerAPI = new GameChangerAPI();
 
 //
@@ -530,66 +531,63 @@ const EdaCardHandler = {
 				return (
 						<StyledListViewFrontCardContent>
 							{item.pageHits && item.pageHits.length > 0 &&
-								<>
+								<button type="button" className={'list-view-button'}
+									onClick={() => {
+										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
+										setHitsExpanded(!hitsExpanded);
+									}}
+								>
+									<span className = "buttonText">Page Hits</span>
+									<i className= {hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
+								</button>
+							}
+							{hitsExpanded &&
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>
+										{_.chain(item.pageHits).map((page, key) => {
+											return (
+												<div className={'page-hit'} key={key} style={{
+														...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
+													}}
+													onMouseEnter={() => setHoveredHit(key) }
+													onClick={e => {
+														e.preventDefault();
+														clickFn(item.filename, page.pageNumber);
+													}}
+												>
+													<span>
+														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													</span>
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
+									</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
+								</div>
+							}
+							<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
+								<div>
 									<button type="button" className={'list-view-button'}
 										onClick={() => {
-											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
-											setHitsExpanded(!hitsExpanded);
+											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
+											setMetadataExpanded(!metadataExpanded);
 										}}
 									>
-										<span className = "buttonText">Page Hits</span>
-										<i className= {hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
+										<span className="buttonText">Document Metadata</span>
+										<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
 									</button>
-									{hitsExpanded &&
-										<div className={'expanded-hits'}>
-											<div className={'page-hits'}>
-												{_.chain(item.pageHits).map((page, key) => {
-													return (
-														<div className={'page-hit'} key={key} style={{
-																...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
-															}}
-															onMouseEnter={() => setHoveredHit(key) }
-															onClick={e => {
-																e.preventDefault();
-																clickFn(item.filename, page.pageNumber);
-															}}
-														>
-															<span>
-																{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
-															</span>
-															<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
-														</div>
-													);
-												}).value()}
-											</div>
-											<div className={'expanded-metadata'}>
-												<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+									{metadataExpanded &&
+										<div className={'metadata'}>
+											<div className={'inner-scroll-container'}>
+												{backBody}
 											</div>
 										</div>
 									}
-									<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
-										<div>
-											<button type="button" className={'list-view-button'}
-												onClick={() => {
-													trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-													setMetadataExpanded(!metadataExpanded);
-												}}
-											>
-												<span className="buttonText">Document Metadata</span>
-												<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-											</button>
-											{metadataExpanded &&
-												<div className={'metadata'}>
-													<div className={'inner-scroll-container'}>
-														{backBody}
-													</div>
-												</div>
-											}
-										</div>
-									</GCTooltip>
-
-								</>
-							}
+								</div>
+							</GCTooltip>
 						</StyledListViewFrontCardContent>
 				);
 			} else if (state.listView && intelligentSearch) {
@@ -617,7 +615,7 @@ const EdaCardHandler = {
 								}).value()}
 							</div>
 							<div className={'expanded-metadata'}>
-								<blockquote dangerouslySetInnerHTML={{ __html: contextHtml }} />
+								<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 							</div>
 						</div>
 						<button type="button" className={'list-view-button'}
@@ -679,7 +677,7 @@ const EdaCardHandler = {
 								</div>
 								<div className={'expanded-metadata'}>
 									<blockquote className="searchdemo-blockquote"
-												dangerouslySetInnerHTML={{__html: contextHtml}}/>
+												dangerouslySetInnerHTML={{__html: sanitizeHtml(contextHtml)}}/>
 								</div>
 							</div>
 						}
@@ -693,7 +691,8 @@ const EdaCardHandler = {
 			const {
 				item,
 				state, 
-				dispatch
+				dispatch,
+				detailPage = false
 			} = props;
 
 			let tooltipText = 'No metadata available';
@@ -707,7 +706,7 @@ const EdaCardHandler = {
 				}
 			}
 
-			// grab award ID from filename
+			// grab award ID from filename if missing
 			if (!item.award_id_eda_ext) {
 				const splitFilename = item.filename.split('-');
 				if (splitFilename[1].length > 8) {
@@ -720,20 +719,21 @@ const EdaCardHandler = {
 
 			const loadContractAward = async (open) => {
 				if (open && item.award_id_eda_ext !== "empty") {
-					const contractAwards = _.cloneDeep(state.contractAwards);
+					const contractAwards = _.cloneDeep(state.contractAwards) ?? {};
 					const awardID = item.award_id_eda_ext;
 					if (!contractAwards[awardID] || !contractAwards[awardID].length > 0) {
 						contractAwards[awardID] = 'loading';
 						setState(dispatch, { contractAwards });
 						try {
 							const contractMods = await gameChangerAPI.callSearchFunction({
-								functionName: 'queryContractAward',
+								functionName: 'queryContractMods',
 								cloneName: state.cloneData.clone_name,
 								options: {
-									awardID: item.award_id_eda_ext
+									awardID: item.award_id_eda_ext,
+									isSearch: false
 								}
 							});
-							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data.sort() : [];
+							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
 	
 							setState(dispatch, { contractAwards });
 						}
@@ -749,18 +749,49 @@ const EdaCardHandler = {
 			const renderContractMods = () => {
 				const contractMods = state.contractAwards && state.contractAwards[item.award_id_eda_ext] ? state.contractAwards[item.award_id_eda_ext] : [];
 				const listItems = [];
+				
 				if (contractMods && contractMods !== 'loading') {
+					if (contractMods.length > 0) {
+						listItems.push(
+							<>
+								<ListItem>
+									<ListItemText style={{ textAlign: 'end' }} secondary={"(S) Signature Date | (E) Effective Date"} />
+								</ListItem>
+								<Divider light={true} />
+							</>
+						)
+					}
+					
 					for (const mod of contractMods) {
-						if (mod !== "Award") {
+						const { modNumber, signatureDate, effectiveDate } = mod;
+						if (modNumber !== "Award") {
+							let date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
+							let dateText = "";
+							if (signatureDate) {
+								date = signatureDate;
+								dateText = "(S)"
+							}
+							else if (effectiveDate) {
+								date = effectiveDate;
+								dateText = "(E)";
+							}
+							else {
+								date = null;
+								dateText = ""
+							}
 							listItems.push(
 							<>
 								<ListItem>
-									{item.modification_eda_ext === mod &&
+									{item.modification_eda_ext === modNumber &&
 										<ListItemIcon style={{ minWidth: '54px'}}>
 											<Star style={{fontSize: 20 }}/>
 										</ListItemIcon>
 									}
-									<ListItemText style={{ margin: item.modification_eda_ext !== mod ? '0 0 0 54px' : ''}} primary={mod} />
+									<ListItemText style={{ 
+										margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
+										display: 'flex',
+										justifyContent: 'space-between'
+										}} primary={modNumber} secondary={date ? `${dateText}  ${date}` : ''} />
 								</ListItem>
 								<Divider light={true}/>
 							</>
@@ -774,7 +805,7 @@ const EdaCardHandler = {
 			return (
 				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
 					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
-						{item.award_id_eda_ext && item.award_id_eda_ext !== "empty" &&
+						{item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage &&
 							<GCAccordion onChange={loadContractAward}contentPadding={0} expanded={false} header={'Show Contract Modifications'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'} style={{ marginBottom: '0px !important' }}>
 								<List style={{ width: '100%', padding: '0' }}>
 									<ListItem>
@@ -802,7 +833,7 @@ const EdaCardHandler = {
 							disableWrap={true}
 							title={'Metadata'}
 							hideHeader={true}
-							margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" ? '-10px 0 0 0' : ''}
+							margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage ? '-10px 0 0 0' : ''}
 						/>
 					</div>
 				</GCTooltip>
@@ -817,7 +848,8 @@ const EdaCardHandler = {
 				cloneName,
 				filename,
 				setToggledMore = () => {},
-				closeGraphCard = () => {}
+				closeGraphCard = () => {},
+				item
 			} = props
 			
 			return (
@@ -842,17 +874,17 @@ const EdaCardHandler = {
 						>
 							Close
 						</CardButton>}
-						<GCTooltip title={'Check back soon for a new document details page.'}>
+						<GCTooltip title={'Click here to view the contract award details page'}>
 							 <CardButton
-								disabled={true}
 								style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
 								href={'#'}
 								onClick={(e) => {
 									trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
+									window.open(`#/gamechanger-details?cloneName=${cloneName}&type=contract&awardID=${item.award_id_eda_ext}`);
 									e.preventDefault();
 								}}
 							 >
-								 Details
+								Contract
 							</CardButton>
 						</GCTooltip>
 					</>

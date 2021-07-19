@@ -121,7 +121,7 @@ export const SelectedDocsDrawer = (props) => {
                 id='gcOpenSelectedDocsDrawer'
                 className={`tutorial-step-${componentStepNumbers["Open Selected Documents Drawer"]}`}
                 onClick={() => handleExportButtonClick()}
-                style={{minWidth: 0, padding: '0px 7px', margin: '16px 0px 0px 10px', height: 34}}
+                style={{minWidth: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', height: 50}}
                 disabled={!rawSearchResults || rawSearchResults.length <= 0 ? true : false}
             >
                 <GCToolTip title='Export' placement="bottom" arrow>
@@ -183,7 +183,7 @@ export const SelectedDocsDrawer = (props) => {
                 </ButtonRow>
             </Drawer>
         </>
-    )
+    );
 }
 
 SelectedDocsDrawer.propTypes = {
@@ -201,4 +201,4 @@ SelectedDocsDrawer.propTypes = {
     showTutorial: PropTypes.bool,
     rawSearchResults: PropTypes.arrayOf(PropTypes.object),
     checkUserInfo: PropTypes.func
-}
+};
