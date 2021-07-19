@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import { PowerUserAnnotationCard } from './PowerUserAnnotationCard'
 import GeneralUserAnnotationCard from '../cards/GeneralUserAnnotationCard'
 import { random } from "underscore"
 import styled from 'styled-components';
 import GameChangerAPI from "../api/gameChanger-service-api";
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GCButton from '../common/GCButton';
 import { primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryDark, tertiaryGreen, primaryGreyLight, backgroundGreyDark, primaryRedDark } from '../../components/common/gc-colors';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@material-ui/core";

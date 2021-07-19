@@ -3,16 +3,18 @@ import PropTypes from 'prop-types';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Paper from "material-ui/Paper/Paper";
 import SimpleTable from "../common/SimpleTable";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcColors} from "../../containers/GameChangerPage";
 import GCAccordion from "../common/GCAccordion";
 import GCButton from '../common/GCButton';
+import GCErrorSnackbar from '../common/GCErrorSnackbar';
 import {MainContainer} from "../../containers/GameChangerDetailsPage";
 import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
 import {trackEvent} from "../telemetry/Matomo";
 import Pagination from "react-js-pagination";
 import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
 import {Card} from "../cards/GCCard";
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -26,7 +28,7 @@ const colWidth = {
 
 const RESULTS_PER_PAGE = 10;
 
-const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) => {
+const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
 	gameChangerAPI.callGraphFunction({
 		functionName: 'getDocumentDetailsPageDataFull',
 		cloneName: cloneName,
@@ -34,6 +36,7 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery) =>
 			doc_id: document.id,
 		}
 	}).then(graph => {
+		if (graph?.data?.error) setBackendError(graph.data.error);
 		setGraphData(graph.data.graph);
 		setRunningQuery(false);
 	});
@@ -60,6 +63,8 @@ const DocumentDetailsPage = (props) => {
 	const [referencedByDocs, setReferencedByDocs] = useState({docCount: 0, timeFound: '0.0', docs: []});
 	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] = useState(true);
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
+
+	const [backendError, setBackendError] = useState({});
 	
 	useEffect(() => {
 		setRunningQuery(true);
@@ -67,7 +72,7 @@ const DocumentDetailsPage = (props) => {
 	
 	useEffect(() => {
 		if (!document || !cloneData) return;
-		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery);
+		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery, setBackendError);
 	}, [document, cloneData]);
 	
 	useEffect(() => {
@@ -346,6 +351,16 @@ const DocumentDetailsPage = (props) => {
 				
 				</div>
 			</MainContainer>
+
+			<GCErrorSnackbar
+				open={!!backendError.code}
+				message={
+					Permissions.isGameChangerAdmin() ?
+					`An error occurred with ${backendError.category}. Error code ${backendError.code}` :
+					`An error has occurred in the application, but we are working to fix it!`
+				}
+				onClose={() => setBackendError({})}
+			/>
 		</div>
 	);
 }

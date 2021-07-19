@@ -12,12 +12,12 @@ import {	numberWithCommas, getMetadataForPropertyTable,
 import Pagination from "react-js-pagination";
 import {Card} from "../components/cards/GCCard";
 import GCAccordion from "../components/common/GCAccordion";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
 
 const gameChangerAPI = new GameChangerAPI();

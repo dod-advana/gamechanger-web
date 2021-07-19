@@ -8,7 +8,7 @@ import {
     EDA_FIELD_JSON_MAP,
     EDA_FIELDS
 } from "./edaCardHandler";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import {Card} from "../../cards/GCCard";
 import {numberWithCommas} from "../../../gamechangerUtils";
