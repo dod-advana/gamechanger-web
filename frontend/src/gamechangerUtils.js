@@ -7,7 +7,9 @@ import Config from './config/config.js';
 import {getTextColorBasedOnBackground} from "./graphUtils";
 import {useEffect} from "react";
 import styled from "styled-components";
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import {setState} from './sharedFunctions';
 const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
@@ -799,4 +801,13 @@ export const exactMatch = (phrase, word) => {
 		}
 	});
 	return exists;
+}
+
+export const displayBackendError = (resp, dispatch = () => {}) => {
+	if (resp?.data?.error) {
+		const errorMessage = Permissions.isGameChangerAdmin() ?
+			`An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}` :
+			`An error has occurred in the application, but we are working to fix it!`;
+		setState(dispatch, {showBackendError: true, backendErrorMsg: errorMessage});
+ 	}
 }

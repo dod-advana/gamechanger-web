@@ -148,6 +148,10 @@ class SearchHandler {
 			this.logger.error(err, 'UQ5B8CP', userId);
 		}
 	}
+
+	getError() {
+		return {};
+	}
 }
 
 module.exports = SearchHandler;

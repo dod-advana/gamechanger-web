@@ -944,7 +944,7 @@ const PolicySearchMatrixHandler = {
 					<strong style={styles.boldText}>CATEGORIES</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
-						{renderCategories(state, dispatch, classes, true)}
+						{renderCategories(state, dispatch, classes)}
 					</div>
 				</div>
 

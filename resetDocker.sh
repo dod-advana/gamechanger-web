@@ -1,5 +1,28 @@
+#!/usr/bin/env bash
+
+VOLUMES=0
+COMPOSE_FILES_ARGS="-f docker-compose.yml"
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    --volumes)
+      VOLUMES=1
+      shift # past argument
+      ;;
+    --matomo)
+      COMPOSE_FILES_ARGS="$COMPOSE_FILES_ARGS -f docker-compose.matomo.yml"
+      shift # past argument
+      ;;
+    *)    # unknown option
+      shift # past argument
+      ;;
+  esac
+done
+
 docker-compose down
 docker system prune -f
-docker system prune --volumes -f
-docker-compose build
-docker-compose up
+if (($VOLUMES)); then
+  docker system prune --volumes -f
+fi
+docker-compose $COMPOSE_FILES_ARGS build
+docker-compose $COMPOSE_FILES_ARGS up

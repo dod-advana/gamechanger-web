@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import PropTypes from 'prop-types';
-import SlideOutMenuContent from "advana-side-nav/dist/SlideOutMenuContent";
-import {SlideOutToolContext} from "advana-side-nav/dist/SlideOutMenuContext";
+import SlideOutMenuContent from "@dod-advana/advana-side-nav/dist/SlideOutMenuContent";
+import {SlideOutToolContext} from "@dod-advana/advana-side-nav/dist/SlideOutMenuContext";
 import NavigationFactory from "../factories/navigationFactory";
 
 const SideBarNavigation = (props) => {
