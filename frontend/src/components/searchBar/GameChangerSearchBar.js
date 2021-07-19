@@ -117,6 +117,13 @@ const GameChangerSearchBar = (props) => {
 	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
+	useEffect(() => {
+		const queryText = getQueryVariable('q');
+		if (queryText) {
+			setSearchText(queryText);
+		}
+	}, [getQueryVariable('q')]);
+
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
 				const userSearchHistory = JSON.parse(localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) || '[]');
