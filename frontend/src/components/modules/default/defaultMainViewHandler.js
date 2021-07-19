@@ -264,7 +264,7 @@ const DefaultMainViewHandler = {
 			}
 			{showDidYouMean && (
 				<div style={{ margin: '10px auto', fontSize: '25px', width: '67%', paddingLeft: 'auto'}}>
-					Did you mean <DidYouMean onClick={handleDidYouMeanClicked}>{didYouMean}</DidYouMean>?
+					Did you mean <DidYouMean onClick={() => handleDidYouMeanClicked(didYouMean, state, dispatch)}>{didYouMean}</DidYouMean>?
 				</div>
 			)}
 			{cloneData.clone_name === 'gamechanger' && (
