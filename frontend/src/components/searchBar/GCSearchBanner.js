@@ -167,7 +167,7 @@ const SearchBanner = (props) => {
 					{!jupiter &&
 						<>
 							{isDecoupled ? (
-								<PillButton margin={'0 60px 0 4%'} justifyContent='center' onClick={() => setLoginModal(true)}>
+								<PillButton margin={'0 60px 0 5px'} justifyContent='center' onClick={() => setLoginModal(true)}>
 									<TitleText>ADVANA</TitleText>
 								</PillButton>
 							) : (
