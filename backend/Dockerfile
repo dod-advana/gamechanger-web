@@ -28,8 +28,8 @@ RUN (type -P "yum" &> /dev/null) && ( \
 ARG APP_UID=1000
 ARG APP_GID=1000
 
-USER "$APP_UID:$APP_GID"
-# thou shall not root
+# USER "$APP_UID:$APP_GID"
+# thou shall not root -- root by default for dev purposes
 
 ENV APP_DIR="${HOME:-/home/node}" 
 ENV APP_BIN="${APP_DIR}/node_modules/.bin" 
