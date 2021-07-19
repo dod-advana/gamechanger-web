@@ -220,7 +220,7 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
-if (!constants.GAME_CHANGER_OPTS.isDecoupled) {
+if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
 		redisAsyncClient.select(12);
