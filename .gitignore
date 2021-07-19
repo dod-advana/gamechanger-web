@@ -1,5 +1,8 @@
 elasticsearch
 values.*.yaml
+/.idea/
+/.dev/
+/tmp/
 matomo
 .vscode
 .npmrc
