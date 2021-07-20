@@ -869,43 +869,43 @@ const PolicySearchMatrixHandler = {
 				{/*}*/}
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderCategories() }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderSources(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderStatus(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderAdvancedFilters(state, dispatch) }
 					</GCAccordion>
 				</div>
 
 				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 					</GCAccordion>
 				</div>}
@@ -941,7 +941,7 @@ const PolicySearchMatrixHandler = {
 		return (
 			<>
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>CATEGORIES</strong>
+					<strong style={styles.boldText}>CATEGORY</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
 						{renderCategories(state, dispatch, classes)}
@@ -949,7 +949,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>SELECT THE SOURCE</strong>
+					<strong style={styles.boldText}>SOURCE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
 					{renderSources(state, dispatch, classes, true)}
@@ -957,7 +957,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>SEARCH TYPES</strong>
+					<strong style={styles.boldText}>TYPE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderTypes(state, dispatch, classes, true)}
 				</div>
@@ -975,30 +975,17 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				{/* <div style={styles.filterDiv}>
-					<strong style={styles.boldText}>ADVANCED FILTERS</strong>
+					<strong style={styles.boldText}>ADVANCED</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderAdvancedFilters(state, dispatch, true)}
 				</div> */}
 
 				<div style ={{display: 'flex', margin: '10px'}}>
-					<div style={{width: '250px', marginRight: '20px'}}>
-						<button
-							type="button"
-							style={{ border: 'none', backgroundColor: '#B0BAC5', width: '100%', marginTop:'20px', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
-							onClick={() => resetAdvancedSettings(dispatch)}
-						>
-							<span style={{
-								fontFamily: 'Montserrat',
-								fontWeight: 600,
-								fontSize: '0.8em',
-								width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
-							}}>
-								Clear Filters
-							</span>
-						</button>
+					<div style={{width: '120px', height: '40px', marginRight: '20px'}}>
+						<GCButton style={{border: 'none', width: '100%', height: '100%', padding: '0px', color: 'black', backgroundColor: '#B0BAC5'}} onClick={() => resetAdvancedSettings(dispatch)}>Clear Filters</GCButton>
 					</div>
-					<div style={{width: '250px'}}>
-						<GCButton style={{width: '100%', marginTop:'20px', marginBottom: '10px', marginLeft: '-1px', height: '50px'}} onClick={handleSubmit}>Search</GCButton>
+					<div style={{width: '120px', height: '40px'}}>
+						<GCButton style={{width: '100%', height: '100%'}} onClick={handleSubmit}>Search</GCButton>
 					</div>
 				</div>
 				

@@ -20,7 +20,6 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 	},
 	titleText: {
-		fontWeight: 900,
 		fontSize: '14px',
 		fontFamily: 'Montserrat'
 	},
