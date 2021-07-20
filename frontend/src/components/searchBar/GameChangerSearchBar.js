@@ -122,7 +122,7 @@ const GameChangerSearchBar = (props) => {
 		if (queryText) {
 			setSearchText(queryText);
 		}
-	}, [context.state.searchText]);
+	}, [context.state.searchText, context.state.runSearch]);
 
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
