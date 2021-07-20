@@ -185,7 +185,10 @@ const initState = {
 
 	// category totals
 	categoryMetadata: {},
-	activeCategoryTab: 'all'
+	activeCategoryTab: 'all',
+	
+	backendErrorMsg: '',
+	showBackendError: false
 };
 
 const init = (initialState) => {
