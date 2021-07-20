@@ -451,6 +451,7 @@ const handleSelectPublicationDateAllTime = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	const runSearch = !state.publicationDateAllTime;
 	newSearchSettings.publicationDateAllTime = true;
+	newSearchSettings.publicationDateFilter = [null, null];
 	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
 }
 
@@ -897,7 +898,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={!state.searchSettings.publicationDateAllTime} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
