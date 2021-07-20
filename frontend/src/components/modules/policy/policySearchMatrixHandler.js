@@ -846,7 +846,6 @@ const PolicySearchMatrixHandler = {
 	getSearchMatrixItems(props) {
 		
 		const {
-			renderCategories,
 			state,
 			dispatch,
 			classes,
@@ -885,12 +884,6 @@ const PolicySearchMatrixHandler = {
 				{/*		</GCAccordion>*/}
 				{/*	</div>*/}
 				{/*}*/}
-				
-				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderCategories() }
-					</GCAccordion>
-				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
