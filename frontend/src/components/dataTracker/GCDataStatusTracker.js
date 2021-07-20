@@ -17,6 +17,7 @@ import {MemoizedNodeCluster2D}  from "../graph/GraphNodeCluster2D";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
 import {trackEvent} from "../telemetry/Matomo";
 import {crawlerMappingFunc} from "../../gamechangerUtils";
+import {generateRandomColors} from "../../graphUtils";
 
 const TableRow = styled.div`
 	text-align: left;
@@ -239,6 +240,7 @@ const GCDataStatusTracker = (props) => {
 		setLoading(true);
 		setLoadingNeo4jPropertiesData(true);
 		setLoadingNeo4jCounts(true);
+		setNeo4jGraphData({nodes: [], edges: []})
 		const resp = await gameChangerAPI.callGraphFunction({
 			functionName: 'getGraphSchema',
 			cloneName: state.cloneData.clone_name,
@@ -252,6 +254,10 @@ const GCDataStatusTracker = (props) => {
 		const nodes = resp.data.graph.nodes;
 		
 		const usedIds = [];
+		
+		const labels = Array.from(new Set(nodes.map(node => {
+			return node.label;
+		})));
 		
 		resp.data.graph.edges.forEach(edge => {
 			if (edge.source === edge.target) {
@@ -281,7 +287,7 @@ const GCDataStatusTracker = (props) => {
 			
 			edges.push(edge);
 		})
-		setNeo4jGraphData({nodes, edges});
+		setNeo4jGraphData({nodes, edges, labels});
 		setLoadingNeo4jGraphData(false);
 		
 		const metaData = resp.data.stats.graph_metadata[0] || {};
@@ -303,11 +309,11 @@ const GCDataStatusTracker = (props) => {
 		setLoadingNeo4jCounts(false);
 	}
 
-	const handleTabClicked = (tabIndex) => {
+	const handleTabClicked = async (tabIndex) => {
 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker' , tabIndex);
 		setTabIndex(tabIndex);
 		if (tabIndex === 'neo4j') {
-			handleGetNeo4jData();
+			await handleGetNeo4jData();
 		}
 	}
 
@@ -688,9 +694,19 @@ const GCDataStatusTracker = (props) => {
 				</div>
 					<div className={'right-column'}>
 					<div className={'graph-schema'}>
-						<MemoizedNodeCluster2D graphWidth={width} graphHeight={height} runningQuery={loadingNeo4jGraphData}
-							displayLinkLabel={true} graph={neo4jGraphData} hierarchyView={false} showSettingsMenu={false}
-							shouldHighlightNodes={false} shouldShowLegend={false} showBasic={true} cloneData={state.cloneData} />
+						<MemoizedNodeCluster2D
+							graphWidth={width}
+							graphHeight={height}
+							runningQuery={loadingNeo4jGraphData}
+							displayLinkLabel={true}
+							graph={neo4jGraphData}
+							hierarchyView={false}
+							showSettingsMenu={false}
+							shouldHighlightNodes={false}
+							shouldShowLegend={false}
+							showBasic={true}
+							cloneData={state.cloneData}
+						/>
 					</div>
 					<div className={'node-rel-counts'}>
 						<ReactTable
