@@ -8,13 +8,13 @@ import {
 	getTrackingNameForFactory, getTypeDisplay, getTypeIcon, getTypeTextColor,
 	orgAlias, getMetadataForPropertyTable,
 } from "../../../gamechangerUtils";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import SimpleTable from "../../common/SimpleTable";
 import {CardButton} from "../../common/CardButton";
 import {trackEvent} from "../../telemetry/Matomo";
 import {primary} from "../../../components/common/gc-colors";
 import _ from "lodash";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import sanitizeHtml from 'sanitize-html';
 
 const colWidth = {

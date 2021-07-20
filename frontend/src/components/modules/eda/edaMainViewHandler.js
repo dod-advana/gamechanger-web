@@ -5,7 +5,7 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 
 import EDADocumentExplorer from "./edaDocumentExplorer";
 import Pagination from "react-js-pagination";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, scrollToContentTop, StyledCenterContainer

@@ -12,7 +12,7 @@ import GameChangerAPI from "../api/gameChanger-service-api";
 import AdvancedDropdown from "./AdvancedDropdown";
 import SearchBarDropdown from './SearchBarDropdown';
 import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
-import { ConstrainedIcon } from "advana-side-nav/dist/SlideOutMenu";
+import { ConstrainedIcon } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import UserIcon from "../../images/icon/UserIcon.png";
 import {getTrackingNameForFactory, getQueryVariable, PAGE_DISPLAYED} from "../../gamechangerUtils";
 import { handleSaveFavoriteSearch, setState, checkUserInfo, getUserData, clearDashboardNotification } from '../../sharedFunctions';
@@ -116,6 +116,13 @@ const GameChangerSearchBar = (props) => {
 
 	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
+
+	useEffect(() => {
+		const queryText = getQueryVariable('q');
+		if (queryText) {
+			setSearchText(queryText);
+		}
+	}, [getQueryVariable('q')]);
 
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){

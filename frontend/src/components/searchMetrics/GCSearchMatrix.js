@@ -437,6 +437,7 @@ export default function SearchMatrix(props) {
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 					{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
+						if(!state.categoryMetadata?.[category]?.total) return <></>;
 						return (
 							<FormControlLabel
 								key={`${category} (${formatMetaData(state.categoryMetadata, category)})`}

@@ -11,7 +11,7 @@ import GCTooltip from "../common/GCToolTip"
 import { backgroundGreyDark, backgroundWhite } from "../../components/common/gc-colors";
 import { gcOrange } from "../../components/common/gc-colors";
 import Pagination from "react-js-pagination";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Icon from "@material-ui/core/Icon";
 import GCButton from "../common/GCButton";
