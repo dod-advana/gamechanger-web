@@ -855,6 +855,11 @@ const PolicySearchMatrixHandler = {
 			handleSubmit
 		} = props;
 		
+		let expansionTermSelected = false;
+		expansionTerms.forEach(term => {
+			if(term.checked === true) expansionTermSelected = true;
+		})
+
         return (
 			<>
 				{/*{false &&*/}
@@ -918,7 +923,7 @@ const PolicySearchMatrixHandler = {
 				</div> */}
 
 				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={expansionTermSelected} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 					</GCAccordion>
 				</div>}
