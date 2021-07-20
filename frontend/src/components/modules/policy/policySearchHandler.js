@@ -119,14 +119,16 @@ const PolicySearchHandler = {
 		let searchResults = [];
 	
 		const transformResults = searchType === SEARCH_TYPES.contextual;
-		
-		setState(dispatch, {
+
+        setState(dispatch, {
 			selectedDocuments: new Map(),
-			loading: true,
-			metricsLoading: true,
+			loading: searchSettings.isFilterUpdate ? false: true,
+            replaceResults: searchSettings.isFilterUpdate ? true: false,
+            docsPagination: searchSettings.isFilterUpdate ? true: false,
+            metricsLoading: false,
 			noResultsMessage: null,
 			autocompleteItems: [],
-			rawSearchResults: [],
+			rawSearchResults: searchSettings.isFilterUpdate ? true : [],
 			docSearchResults: [],
 			topicSearchResults: [],
 			entitySearchResults: [],
@@ -146,7 +148,7 @@ const PolicySearchHandler = {
 			docTypeData: {},
 			runningEntitySearch: true,
 			runningTopicSearch: true,
-			hideTabs: true
+			hideTabs: false
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
