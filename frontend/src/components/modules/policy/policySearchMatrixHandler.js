@@ -903,7 +903,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.includeRevoked} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderStatus(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
