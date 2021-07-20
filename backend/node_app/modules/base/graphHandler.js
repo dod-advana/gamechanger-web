@@ -177,6 +177,10 @@ class GraphHandler {
 			this.logger.error(message, 'PCCZEDC', user);
 		}
 	}
+
+	getError() {
+		return {};
+	}
 }
 
 module.exports = GraphHandler;

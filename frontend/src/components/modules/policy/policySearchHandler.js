@@ -8,7 +8,8 @@ import {
 	PAGE_DISPLAYED,
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
-	SEARCH_TYPES
+	SEARCH_TYPES,
+	displayBackendError
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
@@ -230,6 +231,7 @@ const PolicySearchHandler = {
 			if (_.isObject(resp.data)) {
 				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
 
+				displayBackendError(resp, dispatch);
 				const categoryMetadata = 
 				{
 					Documents: {total: totalCount},

@@ -45,7 +45,10 @@ const initState = {
     notifications: [],
     alerts: {},
     userInfo: {},
-    searchSettings: {},
+    searchSettings: {
+        allCategoriesSelected: true,
+		specificCategoriesSelected: false,
+    },
     rawSearchResults: [],
     userData: {
         favorite_searches: [],

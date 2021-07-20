@@ -43,7 +43,7 @@ const handleSelectSpecificCategories = (state, dispatch) =>{
 
 const handleCategoriesFilterChange = (event, state, dispatch) => {
 	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
-	let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+	let categoryName = event.target.name;
 	newSelectedCategories[categoryName] = event.target.checked;
 	setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
 }
@@ -69,8 +69,6 @@ const renderCategories = (state, dispatch, classes) => {
 					labelPlacement="end"
 					style={styles.titleText}
 				/>
-			</FormGroup>
-			<FormGroup row>
 				<FormControlLabel
 					name='Specific category(s)'
 					value='Specific category(s)'
@@ -502,7 +500,7 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
 }
 
-const renderDates = (state, dispatch, classes, searchbar = false) => {
+const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
 	const pubAllTime = state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
 	
 	return (
@@ -601,6 +599,8 @@ const renderDates = (state, dispatch, classes, searchbar = false) => {
 								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px', marginRight: '15px' } }}
 								value={state.searchSettings.publicationDateFilter[0]}
 								onChange={date => handleDateRangeChange(date, true, 'publication', state, dispatch)}
+								onOpen={setDatePickerOpen}
+								onClose={setDatePickerClosed}
 							/>
 							<KeyboardDatePicker
 								margin="normal"
@@ -609,6 +609,8 @@ const renderDates = (state, dispatch, classes, searchbar = false) => {
 								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
 								value={state.searchSettings.publicationDateFilter[1]}
 								onChange={date => handleDateRangeChange(date, false, 'publication', state, dispatch)}
+								onOpen={setDatePickerOpen}
+								onClose={setDatePickerClosed}
 							/>
 						</div>}
 					</div>
@@ -948,6 +950,8 @@ const PolicySearchMatrixHandler = {
 			dispatch,
 			classes,
 			handleSubmit,
+			setDatePickerOpen,
+			setDatePickerClosed
 		} = props;
 
 		return (
@@ -956,7 +960,7 @@ const PolicySearchMatrixHandler = {
 					<strong style={styles.boldText}>CATEGORIES</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
-						{renderCategories(state, dispatch, classes, true)}
+						{renderCategories(state, dispatch, classes)}
 					</div>
 				</div>
 
@@ -977,7 +981,7 @@ const PolicySearchMatrixHandler = {
 				<div style={styles.filterDiv}>
 					<strong style={styles.boldText}>PUBLICATION DATE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
-					{renderDates(state, dispatch, classes, true)}
+					{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
 				</div>
 
 				<div style={styles.filterDiv}>
