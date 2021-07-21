@@ -23,7 +23,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import uuidv4 from "uuid/v4";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from "../../telemetry/Matomo";
-import {getTrackingNameForFactory, typeFilters, orgFilters} from "../../../gamechangerUtils";
+import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 
 const handleSelectAllCategories = (state, dispatch) => {
 	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
@@ -152,12 +152,12 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	}
 
 const renderSources = (state, dispatch, classes, searchbar = false) => {
-		
-		const { originalOrgFilters } = state.searchSettings;
+		const { originalOrgFilters, orgFilter } = state.searchSettings;
 		const betterOrgData = {};
 		for(let i=0; i<originalOrgFilters.length; i++) {
 			betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
 		}
+
 
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -200,7 +200,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							/>
 						</FormGroup>
 						<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilters).map(org => {
+							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map(org => {
 								return (
 									<FormControlLabel
 										key={`${org}`}
@@ -297,6 +297,7 @@ const handleSelectAllTypes = (state, dispatch) => {
 const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let typeName = event.target.name;
+	console.log(typeName);
 	if(typeName.includes('(')){
 		typeName = typeName.substring(0, event.target.name.lastIndexOf('(')-1);
 	}
@@ -316,7 +317,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 
 
 const renderTypes = (state, dispatch, classes, searchbar = false) => {
-	const { originalTypeFilters } = state.searchSettings;
+	const { originalTypeFilters, typeFilter } = state.searchSettings;
 	const betterTypeData = {};
 	for(let i=0; i<originalTypeFilters.length; i++) {
 		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
@@ -363,7 +364,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificTypesSelected && Object.keys(typeFilters).map(type => {
+					{state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map(type => {
 						return (
 							<FormControlLabel
 								key={`${type}`}

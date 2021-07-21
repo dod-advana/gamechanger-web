@@ -92,6 +92,8 @@ class PolicySearchHandler extends SearchHandler {
 				return this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'topicPagination':
 				return this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+			case 'getPresearchData':
+				return this.getPresearchData(userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policySearchHandler`,
@@ -701,6 +703,26 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (e) {
 			this.logger.error(e.message, 'OICE7JS');
 			return {topics: [], totalTopics: 0};
+		}
+	}
+
+	async getPresearchData(userId) {
+		try {
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			let esClientName = 'gamechanger';
+			const orgQuery = this.searchUtility.getOrgQuery(userId);
+			const typeQuery = this.searchUtility.getTypeQuery(userId);
+
+			const orgResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, orgQuery, userId);
+			const typeResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, typeQuery, userId);
+			const results = await Promise.all([orgResults, typeResults]);
+
+			const orgsCleaned = results[0].body.aggregations.display_org.buckets.map(item => item.key.type);
+			const typesCleaned = results[1].body.aggregations.display_type.buckets.map(item => item.key.type);
+			return {orgs: orgsCleaned, types: typesCleaned};
+		} catch (e) {
+			this.logger.error(e.message, 'OICE7JS');
+			return {orgs: [], types: []}
 		}
 	}
 
