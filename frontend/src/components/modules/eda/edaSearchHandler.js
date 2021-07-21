@@ -50,14 +50,6 @@ const EdaSearchHandler = {
 			edaSearchSettings
 		} = state;
 		
-		const {
-			searchType,
-			includeRevoked,
-			accessDateFilter,
-			publicationDateFilter,
-			publicationDateAllTime,
-			searchFields,
-		} = searchSettings;
 		
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
@@ -69,7 +61,7 @@ const EdaSearchHandler = {
 			return search.url;
 		});
 		
-		this.setSearchURL({...state, searchSettings});
+		this.setSearchURL(state);
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -105,7 +97,6 @@ const EdaSearchHandler = {
 		let searchResults = [];
 		let foundEntity = false;
 	
-		const transformResults = searchType === SEARCH_TYPES.contextual;
 		
 		setState(dispatch, {
 			selectedDocuments: new Map(),
@@ -134,8 +125,6 @@ const EdaSearchHandler = {
 	
 		const charsPadding = listView ? 750 : 90;
 	
-		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
-	
 		const tiny_url = await createTinyUrl(cloneData);
 		
 		try {
@@ -152,16 +141,9 @@ const EdaSearchHandler = {
 				searchText: searchObject.search,
 				offset,
 				options: {
-					transformResults,
 					charsPadding,
 					showTutorial,
-					useGCCache,
 					tiny_url,
-					searchFields,
-					accessDateFilter,
-					publicationDateFilter,
-					publicationDateAllTime,
-					includeRevoked,
 					combinedSearch,
 					edaSearchSettings
 				},
@@ -282,16 +264,8 @@ const EdaSearchHandler = {
 				offset,
 				limit: 10000,
 				options: {
-					transformResults,
 					charsPadding,
-					showTutorial,
-					useGCCache,
 					tiny_url,
-					searchFields,
-					accessDateFilter,
-					publicationDateFilter,
-					publicationDateAllTime,
-					includeRevoked,
 					combinedSearch,
 					edaSearchSettings,
 					forStats: true,
@@ -366,7 +340,8 @@ const EdaSearchHandler = {
 			startDate,
 			endDate,
 			issueAgency,
-			issueOffice,
+			issueOfficeDoDAAC,
+			issueOfficeName,
 			allYearsSelected,
 			fiscalYears,
 			allDataSelected,
@@ -377,10 +352,43 @@ const EdaSearchHandler = {
 			majcoms
 		} = state.edaSearchSettings;
 
-		const orgFilterText = organizations.join('_');
-		
-		
+		let orgFilterText = undefined;
+		const majcomFilter = organizations && majcoms ? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1) : undefined;
+		if (majcomFilter && Object.keys(majcomFilter).length > 0) {
+			orgFilterText = '';
+			for (const key of Object.keys(majcomFilter)) {
+				let separator = Object.keys(majcomFilter).indexOf(key) !== 0 ? '|' : '';
+				orgFilterText += `${separator}${key}:${majcomFilter[key].join('_')}`
+			}
+		}
+		else {
+			orgFilterText = !allOrgsSelected && organizations && organizations.length > 0 ? organizations.join('_') : undefined;
+		}
+
+		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
+		const issueOfficeNameText = issueOfficeName ?? undefined;
+		const fiscalYearsText = !allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
+		const contractDataText = !allDataSelected && contractData ? Object.keys(_.pickBy(contractData, (value, key) => value)).join('_') : undefined;
+		const minObligatedAmountText = minObligatedAmount ?? undefined;
+		const maxObligatedAmountText = maxObligatedAmount ?? undefined;
+		const modTypeText = contractsOrMods ?? undefined;
+		const startDateText = startDate ?? undefined; 
+		const endDateText = endDate ?? undefined;
+		const issueAgencyText = issueAgency ?? undefined;
+
 		const params = new URLSearchParams();
+		if (orgFilterText) params.append('orgFilter', orgFilterText);
+		if (issueOfficeDoDAACText) params.append('dodaac', issueOfficeDoDAACText);
+		if (issueOfficeNameText) params.append('officeName', issueOfficeNameText);
+		if (fiscalYearsText) params.append('fiscalYears', fiscalYearsText);
+		if (contractDataText) params.append('contractData', contractDataText);
+		if (minObligatedAmountText) params.append('minAmount', minObligatedAmountText);
+		if (maxObligatedAmountText) params.append('maxAmount', maxObligatedAmountText);
+		if (modTypeText) params.append('modType', modTypeText);
+		if (startDateText) params.append('startDate', startDateText);
+		if (endDateText) params.append('endDate', endDateText);
+		if (issueAgencyText) params.append('issueAgency', issueAgencyText);
+
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 
 		window.history.pushState(null, document.title, linkString);

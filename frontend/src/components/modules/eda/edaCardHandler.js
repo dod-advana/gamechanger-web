@@ -650,9 +650,6 @@ const EdaCardHandler = {
 									<RevokedTag>Canceled</RevokedTag>
 								</GCTooltip>
 							}
-							{item.pageHits.length === 0 &&
-								<p>Matched on PDS data</p>
-							}
 						</div>
 						{item.pageHits.length > 0 &&
 							<div className={'hits-container'}>
