@@ -171,12 +171,13 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
             edaSettings.contractsOrMods = value;
             break;
         case 'majcoms':
-            const majIndex = edaSettings.majcoms[value.org].indexOf(value.subOrg);
+            const subOrg = value.subOrg.trim();
+            const majIndex = edaSettings.majcoms[value.org].indexOf(subOrg);
             if (majIndex !== -1) {
                 edaSettings.majcoms[value.org].splice(majIndex, 1);
             }
             else {
-                edaSettings.majcoms[value.org].push(value.subOrg);
+                edaSettings.majcoms[value.org].push(subOrg);
             }
             break;
         default:
@@ -294,6 +295,7 @@ const renderMajcoms = (state, dispatch, org) => {
             searchQuery = searchQuery.replace(word, '');
         }
 
+        searchQuery = searchQuery.trim();
         orgCheckboxes.push(
             <FormControlLabel
                 name={subOrg}
