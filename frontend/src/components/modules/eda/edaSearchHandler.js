@@ -359,7 +359,27 @@ const EdaSearchHandler = {
 	},
 
 	setSearchURL(state) {
-		// TODO:
+		const { searchText, resultsPage } = state;
+		const {
+			allOrgsSelected,
+			organizations,
+			startDate,
+			endDate,
+			issueAgency,
+			issueOffice,
+			allYearsSelected,
+			fiscalYears,
+			allDataSelected,
+			contractData,
+			minObligatedAmount,
+			maxObligatedAmount,
+			contractsOrMods,
+			majcoms
+		} = state.edaSearchSettings;
+
+		const orgFilterText = organizations.join('_');
+		
+		
 		const params = new URLSearchParams();
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 
