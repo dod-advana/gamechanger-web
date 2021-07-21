@@ -621,6 +621,37 @@ const PolicySearchHandler = {
 				}
 	},
 
+	async getPresearchData(state, dispatch) {
+		const {
+			cloneData
+		} = state;
+
+		const resp = await gameChangerAPI.callSearchFunction({
+			functionName: 'getPresearchData',
+			cloneName: cloneData.clone_name,
+			options: {},
+		});
+
+		const orgFilters = {};
+		for(const key in resp.data.orgs){
+			orgFilters[resp.data.orgs[[key]]] = false;
+		}
+
+		const typeFilters = {};
+		for(const key in resp.data.types){
+			let name = resp.data.types[key];
+			if (name.slice(-1) !== 's') {
+				name = name + 's';
+			}
+			typeFilters[name] = false;
+		}
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.orgFilter = orgFilters;
+		newSearchSettings.typeFilter = typeFilters;
+
+		setState(dispatch, {searchSettings: newSearchSettings})
+	},
+
 	parseSearchURL(defaultState, url) {
 		return defaultSearchHandler.parseSearchURL(defaultState, url);
 	},
