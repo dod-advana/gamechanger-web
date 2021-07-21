@@ -1814,6 +1814,7 @@ class SearchUtility {
 			"aggs": {
 				"display_org": {
 					"composite": {
+						"size": 100,
 						"sources": [
 							{
 								"type": {
@@ -1835,6 +1836,7 @@ class SearchUtility {
 			"aggs": {
 				"display_type": {
 					"composite": {
+						"size": 100,
 						"sources": [
 							{
 								"type": {
