@@ -170,6 +170,10 @@ const initState = {
 		includeRevoked: false
 	},
 
+  // Presearch Filters
+	seeMoreSources: false,
+	seeMoreTypes: false,
+
 	// Categories
 	selectedCategories: {
 		Documents: true,

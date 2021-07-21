@@ -200,19 +200,26 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							/>
 						</FormGroup>
 						<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map(org => {
-								return (
-									<FormControlLabel
-										key={`${org}`}
-										value={`${originalOrgFilters[org]}`}
-										classes={{ label: classes.checkboxPill }}
-										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
-										label={`${org}`}
-										labelPlacement="end"
-									/>
-								)
+							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
+								if(index < 10 || state.seeMoreSources){
+									return (
+										<FormControlLabel
+											key={`${org}`}
+											value={`${originalOrgFilters[org]}`}
+											classes={{ label: classes.checkboxPill }}
+											control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
+											label={`${org}`}
+											labelPlacement="end"
+										/>
+									)
+								} else {
+									return null;
+								}
 							})}
 						</FormGroup>
+						{state.searchSettings.specificOrgsSelected &&
+							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> 
+						}
 					</>
 					) : (
 				<>
@@ -364,19 +371,26 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map(type => {
-						return (
-							<FormControlLabel
-								key={`${type}`}
-								value={`${type}`}
-								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
-								label={`${type}`}
-								labelPlacement="end"
-							/>
-						)
+					{state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+						if(index < 10 || state.seeMoreTypes){
+							return (
+								<FormControlLabel
+									key={`${type}`}
+									value={`${type}`}
+									classes={{ label: classes.checkboxPill }}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
+									label={`${type}`}
+									labelPlacement="end"
+								/>
+							)
+						} else {
+							return null;
+						}
 					})}
 				</FormGroup>
+				{state.searchSettings.specificTypesSelected &&
+					<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
+				}
 			</>
 			) 
 			: (
