@@ -171,7 +171,7 @@ class EDASearchUtility {
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
-			// console.log(JSON.stringify(query))
+			console.log(JSON.stringify(query))
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -449,14 +449,29 @@ class EDASearchUtility {
 			}
 		}
 
-		if (settings.issueOffice && settings.issueOffice.length > 0) {
+		if (settings.issueOfficeDoDAAC && settings.issueOfficeDoDAAC.length > 0) {
 			mustQueries.push ({
 				nested: {
 					path: "extracted_data_eda_n",
 					query: {
 						bool: {
 							must: [
-								{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": settings.issueOffice}}
+								{ "match" : { "extracted_data_eda_n.contract_issue_office_dodaac_eda_ext": settings.issueOfficeDoDAAC}}
+							]
+						}
+					}
+				}
+			});
+		}
+
+		if (settings.issueOfficeName && settings.issueOfficeName.length > 0) {
+			mustQueries.push ({
+				nested: {
+					path: "extracted_data_eda_n",
+					query: {
+						bool: {
+							must: [
+								{ "match" : { "extracted_data_eda_n.contract_issue_office_name_eda_ext": settings.issueOfficeName}}
 							]
 						}
 					}
