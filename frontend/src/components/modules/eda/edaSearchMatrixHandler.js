@@ -137,6 +137,7 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
             break;
         case 'issueOfficeName':
             edaSettings.issueOfficeName = value;
+            break;
         case 'allYears':
             edaSettings.allYearsSelected = true;
             break;
