@@ -209,7 +209,9 @@ class EdaSearchHandler extends SearchHandler {
 					esQuery = this.edaSearchUtility.getElasticsearchStatsQuery(body, userId);
 				}
 				else {
+					console.log(JSON.stringify(body));
 					esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
+					console.log(JSON.stringify(esQuery))
 				}
 	
 			} else {
