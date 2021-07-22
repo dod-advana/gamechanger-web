@@ -261,6 +261,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 						{state.searchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
 							return (
 								<FormControlLabel
+									disabled={!betterOrgData[org]}
 									key={`${org} (${betterOrgData[org]})`}
 									value={`${org} (${betterOrgData[org]})`}
 									classes={{ label: classes.checkboxPill }}
@@ -325,6 +326,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 
 const renderTypes = (state, dispatch, classes, searchbar = false) => {
 	const { originalTypeFilters } = state.searchSettings;
+
 	const betterTypeData = {};
 	for(let i=0; i<originalTypeFilters.length; i++) {
 		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
@@ -430,6 +432,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 				{state.searchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
 					return (
 						<FormControlLabel
+							disabled={!betterTypeData[type]}
 							key={`${type} (${betterTypeData[type]})`}
 							value={`${type} (${betterTypeData[type]})`}
 							classes={{ label: classes.checkboxPill }}
