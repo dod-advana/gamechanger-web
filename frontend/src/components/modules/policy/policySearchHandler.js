@@ -136,11 +136,11 @@ const PolicySearchHandler = {
 			qaResults: {question: '', answers: [], filenames: [], docIds: []},
 			qaContext: {params: {}, context: []},
 			intelligentSearchResult: {},
-			searchResultsCount: 0,
-			count: 0,
-			entityCount: 0,
+			searchResultsCount: undefined,
+			count: undefined,
+			entityCount: undefined,
 			resultsDownloadURL: '',
-			timeFound: 0.0,
+			timeFound: undefined,
 			iframePreviewLink: null,
 			graph: { nodes: [], edges: [] },
 			runningSearch: true,
@@ -369,12 +369,11 @@ const PolicySearchHandler = {
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
-
+						
 						if(!searchSettings.isFilterUpdate){
 							newSearchSettings.originalTypeFilters = sidebarTypes;
 							newSearchSettings.originalOrgFilters = sidebarOrgData;
-						}
-						if(!searchSettings.typeUpdate && searchSettings.isFilterUpdate){
+						}else if(searchSettings.orgUpdate){
 
 							const typeFilterObject = {};
 							newSearchSettings.originalTypeFilters.forEach(type => typeFilterObject[type[0]] = 0);
@@ -384,8 +383,8 @@ const PolicySearchHandler = {
 							})
 							
 							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map(type => [type, typeFilterObject[type]]);
-						}
-						if(!searchSettings.orgUpdate && searchSettings.isFilterUpdate){
+							newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
+						}else if(searchSettings.typeUpdate){
 
 							const orgFilterObject = {};
 							newSearchSettings.originalOrgFilters.forEach(org => orgFilterObject[org[0]] = 0);
@@ -395,9 +394,8 @@ const PolicySearchHandler = {
 							})
 							
 							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map(obj => [obj, orgFilterObject[obj]]);
+							newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
 						}
-						newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
-						newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
 
 						newSearchSettings.orgUpdate = false;
 						newSearchSettings.typeUpdate = false;
