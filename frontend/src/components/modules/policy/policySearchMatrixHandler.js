@@ -493,7 +493,11 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 		temp[1] = date
 	}
 	let runSearch = false;
-	if(!isNaN(temp[0]?.getTime()) && !isNaN(temp[1]?.getTime())) runSearch = true;
+	let isFilterUpdate = false;
+	if(!isNaN(temp[0]?.getTime()) && !isNaN(temp[1]?.getTime())) {
+		runSearch = true;
+		newSearchSettings.isFilterUpdate = true;
+	}
 
 	if(filterType === 'publication'){
 		newSearchSettings.publicationDateFilter = temp;
