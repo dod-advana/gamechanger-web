@@ -369,11 +369,12 @@ const PolicySearchHandler = {
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
-						
+
 						if(!searchSettings.isFilterUpdate){
 							newSearchSettings.originalTypeFilters = sidebarTypes;
 							newSearchSettings.originalOrgFilters = sidebarOrgData;
-						}else if(searchSettings.orgUpdate){
+						}
+						if(!searchSettings.typeUpdate && searchSettings.isFilterUpdate){
 
 							const typeFilterObject = {};
 							newSearchSettings.originalTypeFilters.forEach(type => typeFilterObject[type[0]] = 0);
@@ -384,7 +385,8 @@ const PolicySearchHandler = {
 							
 							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map(type => [type, typeFilterObject[type]]);
 							newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
-						}else if(searchSettings.typeUpdate){
+						}
+						if(!searchSettings.orgUpdate && searchSettings.isFilterUpdate){
 
 							const orgFilterObject = {};
 							newSearchSettings.originalOrgFilters.forEach(org => orgFilterObject[org[0]] = 0);
