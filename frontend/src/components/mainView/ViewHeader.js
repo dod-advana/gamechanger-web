@@ -147,12 +147,18 @@ const ViewHeader = (props) => {
 		}
 		setDropdownValue(value)
 	}
-	
-	return (
-		<div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
+
+    return (
+
+        <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
         { state.count && state.timeFound && 
 			<div className={'sidebar-section-title'}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
+            </div>
+        }
+        { state.count == undefined &&
+            <div className={'sidebar-section-title'}>
+                {resultsText ? resultsText: 'Loading results ...'}
             </div>
         }
 	
@@ -268,7 +274,8 @@ const ViewHeader = (props) => {
 				/>
 			</div>
 		</div>
-	)
+        )
+
 }
 
 ViewHeader.propTypes = {
