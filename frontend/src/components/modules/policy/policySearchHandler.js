@@ -384,7 +384,6 @@ const PolicySearchHandler = {
 							})
 							
 							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map(type => [type, typeFilterObject[type]]);
-							newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
 						}
 						if(!searchSettings.orgUpdate && searchSettings.isFilterUpdate){
 
@@ -396,8 +395,9 @@ const PolicySearchHandler = {
 							})
 							
 							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map(obj => [obj, orgFilterObject[obj]]);
-							newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
 						}
+						newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
+						newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
 
 						newSearchSettings.orgUpdate = false;
 						newSearchSettings.typeUpdate = false;
