@@ -261,7 +261,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 						{state.searchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
 							return (
 								<FormControlLabel
-									disabled={!betterOrgData[org]}
+									disabled={!betterOrgData[org] && !state.searchSettings.orgFilter[org]}
 									key={`${org} (${betterOrgData[org]})`}
 									value={`${org} (${betterOrgData[org]})`}
 									classes={{ label: classes.checkboxPill }}
@@ -432,7 +432,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 				{state.searchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
 					return (
 						<FormControlLabel
-							disabled={!betterTypeData[type]}
+							disabled={!betterTypeData[type] && !state.searchSettings.typeFilter[type]}
 							key={`${type} (${betterTypeData[type]})`}
 							value={`${type} (${betterTypeData[type]})`}
 							classes={{ label: classes.checkboxPill }}
