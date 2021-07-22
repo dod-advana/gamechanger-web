@@ -666,7 +666,9 @@ export default function GraphNodeCluster2D(props) {
 	
 	const handleCreateGraphLink = createGraphLink ? createGraphLink : (link, ctx, globalScale) => {
 
-		calcLinkControlPoints(link);
+		if (!showBasic) {
+			calcLinkControlPoints(link);
+		}
 
 		const start = link.source;
 		const end = link.target;
@@ -712,6 +714,7 @@ export default function GraphNodeCluster2D(props) {
 	}
 	
 	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
+		
 		const MAX_FONT_SIZE = 4;
 		const LABEL_NODE_MARGIN = nodeRelativeSize * 1.5;
 		
@@ -1006,66 +1009,37 @@ export default function GraphNodeCluster2D(props) {
 	 */
 	
 	const renderNodeViewer = () => {
-		if (showBasic) {
-			const ref = graphRefProp ? graphRefProp : graphRef;
-			return (
-				<ForceGraph2D
-					ref={graphRefProp ? graphRefProp : graphRef}
-					graphData={graphData}
-					width={graphWidth}
-					height={graphHeight}
-					backgroundColor={backgroundWhite}
-					linkCanvasObjectMode={() => 'after'}
-					linkCanvasObject={handleCreateGraphLinkText}
-					nodeCanvasObjectMode={() => 'after'}
-					nodeCanvasObject={handleCreateNodeText}
-					nodeVal={2}
-					linkDirectionalArrowLength={3.5}
-					linkDirectionalArrowRelPos={1}
-					linkCurvature={0.2}
-					enableNodeDrag={false}
-					enableZoomPanInteraction={true}
-					nodeLabel={handleCreateNodeLabel}
-					cooldownTicks={100}
-      				onEngineStop={() => ref.current.zoomToFit(400)}
-					nodeAutoColorBy={'name'}
-					linkAutoColorBy={'type'}
-				/>
-			);
-		} else {
-			
-			const forceGraphRef = graphRefProp ? graphRefProp.current : graphRef.current;
-			if (forceGraphRef) {
-				// forceGraphRef.d3Force('charge').strength(chargeStrength);
-				// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
-			}
-			
-			return (
-				<ForceGraph2D
-					ref={graphRefProp ? graphRefProp : graphRef}
-					graphData={graphData}
-					width={graphWidth}
-					height={graphHeight}
-					backgroundColor={backgroundWhite}
-					nodeCanvasObject={handleCreateGraphNode}
-					onNodeHover={handleNodeHover}
-					linkCanvasObject={handleCreateGraphLink}
-					cooldownTicks={shouldRunSimulation ? 60 : 0}
-					onEngineStop={handleSimulationStop}
-					// onEngineTick={handleSimulationTick}
-					enableNodeDrag={!contextMenuOpen}
-					onNodeClick={handleNodeClick}
-					onNodeDrag={handleNodeDrag}
-					onNodeDragEnd={handleNodeDragEnd}
-					onBackgroundClick={handleBackgroundClick}
-					enableZoomPanInteraction={!contextMenuOpen}
-					nodeLabel={handleCreateNodeLabel}
-					onZoom={handleOnZoom}
-					dagMode={dagMode? 'bu' : null}
-					dagLevelDistance={20}
-				/>
-			);
+		const forceGraphRef = graphRefProp ? graphRefProp.current : graphRef.current;
+		if (forceGraphRef) {
+			// forceGraphRef.d3Force('charge').strength(chargeStrength);
+			// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
 		}
+		
+		return (
+			<ForceGraph2D
+				ref={graphRefProp ? graphRefProp : graphRef}
+				graphData={graphData}
+				width={graphWidth}
+				height={graphHeight}
+				backgroundColor={backgroundWhite}
+				nodeCanvasObject={handleCreateGraphNode}
+				onNodeHover={handleNodeHover}
+				linkCanvasObject={handleCreateGraphLink}
+				cooldownTicks={shouldRunSimulation ? 60 : 0}
+				onEngineStop={handleSimulationStop}
+				// onEngineTick={handleSimulationTick}
+				enableNodeDrag={!contextMenuOpen}
+				onNodeClick={handleNodeClick}
+				onNodeDrag={handleNodeDrag}
+				onNodeDragEnd={handleNodeDragEnd}
+				onBackgroundClick={handleBackgroundClick}
+				enableZoomPanInteraction={!contextMenuOpen}
+				nodeLabel={handleCreateNodeLabel}
+				onZoom={handleOnZoom}
+				dagMode={dagMode? 'bu' : null}
+				dagLevelDistance={20}
+			/>
+		);
 	}
 
 	return (
