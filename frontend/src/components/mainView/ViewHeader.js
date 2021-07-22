@@ -77,7 +77,7 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-
+    //if searchSettings.isFilterUpdate
 	useEffect(()=> {
 		let tempCount;
 		switch(activeCategoryTab){
@@ -149,11 +149,14 @@ const ViewHeader = (props) => {
 	}
 	
 	return (
-		<div className={'results-count-view-buttons-container'} style={{...mainStyles}}>
+		<div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
+        { state.count && state.timeFound && 
 			<div className={'sidebar-section-title'}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-			</div>
-			<div className={'view-buttons-container'}>
+            </div>
+        }
+	
+            <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>
