@@ -360,29 +360,50 @@ const PolicySearchHandler = {
 								});
 							}
 						}
-						
-						searchSettings.orgFilter = orgFilter;
-						searchSettings.typeFilter = typeFilter;
+
+						const newSearchSettings = _.cloneDeep(searchSettings);
+						newSearchSettings.orgFilter = orgFilter;
+						newSearchSettings.typeFilter = typeFilter;
 	
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
+						
+						if(!searchSettings.isFilterUpdate){
+							newSearchSettings.originalTypeFilters = sidebarTypes;
+							newSearchSettings.originalOrgFilters = sidebarOrgData;
+						}else if(searchSettings.orgUpdate){
 
-						if(!searchSettings.isFilterUpdate || searchSettings.orgUpdate){
-							searchSettings.originalTypeFilters = sidebarTypes;
-						}
-						if(!searchSettings.isFilterUpdate || searchSettings.typeUpdate){
-							searchSettings.originalOrgFilters = sidebarOrgData;
+							const typeFilterObject = {};
+							newSearchSettings.originalTypeFilters.forEach(type => typeFilterObject[type[0]] = 0);
+
+							sidebarTypes.forEach(type => {
+								typeFilterObject[type[0]] = type[1];
+							})
+							
+							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map(type => [type, typeFilterObject[type]]);
+							newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
+						}else if(searchSettings.typeUpdate){
+
+							const orgFilterObject = {};
+							newSearchSettings.originalOrgFilters.forEach(org => orgFilterObject[org[0]] = 0);
+
+							sidebarOrgData.forEach(org => {
+								orgFilterObject[org[0]] = org[1];
+							})
+							
+							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map(obj => [obj, orgFilterObject[obj]]);
+							newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
 						}
 
-						searchSettings.orgUpdate = false;
-						searchSettings.typeUpdate = false;
+						newSearchSettings.orgUpdate = false;
+						newSearchSettings.typeUpdate = false;
 						
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
 							sidebarOrgs: sidebarOrgData,
-							searchSettings
+							searchSettings: newSearchSettings
 						});
 					}
 					
