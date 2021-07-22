@@ -377,14 +377,11 @@ class EDASearchUtility {
 				}
 			}
 
-			let pushMAJCOM = false;
-
 			const orgs = settings.organizations;
 			for (const org of orgs) {
 
 				// for filtering by MAJCOM
 				if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
-					pushMAJCOM = true;
 					for (const subOrg of settings.majcoms[org]) {
 						majcomQuery.nested.query.bool.should.push(
 							{
@@ -397,25 +394,23 @@ class EDASearchUtility {
 							}						
 						);
 					}
+					mustQueries.push(majcomQuery);
 				}
 
-
-				orgQuery.nested.query.bool.should.push(
-					{
-						'match': {
-							'extracted_data_eda_n.dodaac_org_type_eda_ext': {
-								'query': org,
-								'fuzziness': 0
+				if (!settings.majcoms[org] || settings.majcoms[org].length === 0) {
+					orgQuery.nested.query.bool.should.push(
+						{
+							'match': {
+								'extracted_data_eda_n.dodaac_org_type_eda_ext': {
+									'query': org,
+									'fuzziness': 0
+								}
 							}
 						}
-					}
-				);
-			}
+					);
+					mustQueries.push(orgQuery);
+				}
 
-			mustQueries.push(orgQuery);
-
-			if (pushMAJCOM) {
-				mustQueries.push(majcomQuery);
 			}
 		}
 		
