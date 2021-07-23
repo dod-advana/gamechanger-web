@@ -18,7 +18,6 @@ const PolicyTitleBarHandler = {
 	
 	getCategoryTabs(props) {
 		const {
-			rawSearchResults = [],
 			pageDisplayed,
 			selectedCategories,
 			activeCategoryTab,
@@ -30,7 +29,7 @@ const PolicyTitleBarHandler = {
 		
 		return (
 			<>
-				{rawSearchResults.length > 0 && pageDisplayed === 'main' &&
+				{pageDisplayed === 'main' &&
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,

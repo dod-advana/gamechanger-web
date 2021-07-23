@@ -151,17 +151,23 @@ const ViewHeader = (props) => {
     return (
 
         <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
-        { state.count && state.timeFound && 
+		{state.cloneData.clone_name === "gamechanger" ?
+			<>
+			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
+				<div className={'sidebar-section-title'}>
+					{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
+				</div>
+			:
+				<div className={'sidebar-section-title'}>
+					{'Loading results ...'}
+				</div>
+			}
+			</>
+		:
 			<div className={'sidebar-section-title'}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-            </div>
-        }
-        { state.count == undefined &&
-            <div className={'sidebar-section-title'}>
-                {resultsText ? resultsText: 'Loading results ...'}
-            </div>
-        }
-	
+			</div>
+		}
             <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
