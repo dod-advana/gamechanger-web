@@ -171,6 +171,8 @@ const initState = {
 	},
 
   // Presearch Filters
+	presearchSources: {},
+	presearchTypes: {},
 	seeMoreSources: false,
 	seeMoreTypes: false,
 
