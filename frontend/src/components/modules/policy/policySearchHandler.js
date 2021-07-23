@@ -124,7 +124,6 @@ const PolicySearchHandler = {
 			selectedDocuments: new Map(),
 			loading: searchSettings.isFilterUpdate ? false: true,
             replaceResults: searchSettings.isFilterUpdate ? true: false,
-            docsPagination: searchSettings.isFilterUpdate ? true: false,
             metricsLoading: false,
 			noResultsMessage: null,
 			autocompleteItems: [],
@@ -136,11 +135,12 @@ const PolicySearchHandler = {
 			qaResults: {question: '', answers: [], filenames: [], docIds: []},
 			qaContext: {params: {}, context: []},
 			intelligentSearchResult: {},
-			searchResultsCount: undefined,
-			count: undefined,
-			entityCount: undefined,
+			searchResultsCount: 0,
+			count: 0,
+			entityCount: 0,
+			topicCount: 0,
 			resultsDownloadURL: '',
-			timeFound: undefined,
+			timeFound: 0.0,
 			iframePreviewLink: null,
 			graph: { nodes: [], edges: [] },
 			runningSearch: true,
@@ -286,6 +286,8 @@ const PolicySearchHandler = {
 						})
 					}
 	
+					const newSearchSettings = _.cloneDeep(searchSettings);
+
 					if (doc_types && doc_orgs) {
 						// get doc types (memorandum, issuance, etc.). also get top org.
 						let orgCountMap = new Map();
@@ -361,7 +363,6 @@ const PolicySearchHandler = {
 							}
 						}
 
-						const newSearchSettings = _.cloneDeep(searchSettings);
 						newSearchSettings.orgFilter = orgFilter;
 						newSearchSettings.typeFilter = typeFilter;
 	
@@ -399,11 +400,11 @@ const PolicySearchHandler = {
 
 						newSearchSettings.orgUpdate = false;
 						newSearchSettings.typeUpdate = false;
+						newSearchSettings.isFilterUpdate = false;
 						
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
-							sidebarOrgs: sidebarOrgData,
-							searchSettings: newSearchSettings
+							sidebarOrgs: sidebarOrgData
 						});
 					}
 					
@@ -415,8 +416,9 @@ const PolicySearchHandler = {
 							false
 						);
 					}
-	
+
 					setState(dispatch, {
+						searchSettings: newSearchSettings,
 						activeCategoryTab: (entities.length === 0 && topics.length === 0) ? 'Documents' : 'all',
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
