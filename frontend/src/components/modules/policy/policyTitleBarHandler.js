@@ -18,18 +18,20 @@ const PolicyTitleBarHandler = {
 	
 	getCategoryTabs(props) {
 		const {
+			rawSearchResults = [],
 			pageDisplayed,
 			selectedCategories,
 			activeCategoryTab,
 			setActiveCategoryTab,
 			categoryMetadata,
 			cloneData,
-			dispatch
+			dispatch,
+			loading
 		} = props;
 		
 		return (
 			<>
-				{pageDisplayed === 'main' &&
+				{rawSearchResults?.length !== 0 && !loading && pageDisplayed === 'main' &&
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,
