@@ -52,9 +52,9 @@ class EDASearchUtility {
 	
 		try {
 			// add additional search fields to the query
-			let mustQueries = [];
+			let filterQueries = [];
 
-			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
@@ -168,8 +168,8 @@ class EDASearchUtility {
 			}
 
 	
-			if (mustQueries.length > 0) {
-				query.query.bool.must = query.query.bool.must.concat(mustQueries);
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
 			}
 			return query;
 		} catch (err) {
@@ -208,9 +208,9 @@ class EDASearchUtility {
 	
 		try {
 			// add additional search fields to the query
-			let mustQueries = [];
+			let filterQueries = [];
 
-			mustQueries = mustQueries.concat(this.getEDASearchQuery(edaSearchSettings));
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
 	
 			storedFields = [...storedFields, ...extStoredFields];
 	
@@ -322,8 +322,8 @@ class EDASearchUtility {
 				query.query.bool.must[0].bool.should = query.query.bool.must[0].bool.should.concat(extQuery);
 			}
 
-			if (mustQueries.length > 0) {
-				query.query.bool.must = query.query.bool.must.concat(mustQueries);
+			if (filterQueries.length > 0) {
+				query.query.bool.must = query.query.bool.must.concat(filterQueries);
 			}
 			return query;
 		} catch (err) {
@@ -332,10 +332,10 @@ class EDASearchUtility {
 	}
 
 	getEDASearchQuery(settings) {
-		const mustQueries = [];
+		const filterQueries = [];
 
 		if (settings.issueAgency) {
-			mustQueries.push( 
+			filterQueries.push( 
 				{
 					'nested': {
 						'path': 'extracted_data_eda_n',
@@ -393,7 +393,7 @@ class EDASearchUtility {
 							}						
 						);
 					}
-					mustQueries.push(majcomQuery);
+					filterQueries.push(majcomQuery);
 				}
 
 				if (!settings.majcoms[org] || settings.majcoms[org].length === 0) {
@@ -407,9 +407,8 @@ class EDASearchUtility {
 							}
 						}
 					);
-					mustQueries.push(orgQuery);
+					filterQueries.push(orgQuery);
 				}
-
 			}
 		}
 		
@@ -439,12 +438,12 @@ class EDASearchUtility {
 			}
 
 			if (push) {
-				mustQueries.push(rangeQuery);
+				filterQueries.push(rangeQuery);
 			}
 		}
 
 		if (settings.issueOfficeDoDAAC && settings.issueOfficeDoDAAC.length > 0) {
-			mustQueries.push ({
+			filterQueries.push ({
 				nested: {
 					path: "extracted_data_eda_n",
 					query: {
@@ -459,7 +458,7 @@ class EDASearchUtility {
 		}
 
 		if (settings.issueOfficeName && settings.issueOfficeName.length > 0) {
-			mustQueries.push ({
+			filterQueries.push ({
 				nested: {
 					path: "extracted_data_eda_n",
 					query: {
@@ -497,12 +496,12 @@ class EDASearchUtility {
 					}
 				})
 			}
-			mustQueries.push(nestedQuery);
+			filterQueries.push(nestedQuery);
 		}
 
 		if (settings.allDataSelected === false && settings.contractData) {
 			const contractTypes = Object.keys(settings.contractData);
-			const mustQuery = {
+			const filterQuery = {
 				bool: {
 					should: []
 				}
@@ -513,7 +512,7 @@ class EDASearchUtility {
 			for (const contractType of contractTypes) {
 				if (settings.contractData[contractType]) {
 					if (contractType === 'none') { // PDF
-						mustQuery.bool.should.push(
+						filterQuery.bool.should.push(
 							{
 								match: {
 									is_supplementary_data_included_eda_ext_b: false
@@ -529,7 +528,7 @@ class EDASearchUtility {
 
 			if (metadataText != '') {
 				metadataText = metadataText.substring(0, metadataText.length - 2);
-				mustQuery.bool.should.push(
+				filterQuery.bool.should.push(
 					{
 						bool: {
 							must: [
@@ -550,8 +549,8 @@ class EDASearchUtility {
 				)
 			}
 
-			if (mustQuery.bool.should.length > 0) {
-				mustQueries.push(mustQuery);
+			if (filterQuery.bool.should.length > 0) {
+				filterQueries.push(filterQuery);
 			}
 		}
 
@@ -580,12 +579,12 @@ class EDASearchUtility {
 			}
 
 			if (push) {
-				mustQueries.push(rangeQuery);
+				filterQueries.push(rangeQuery);
 			}
 		}
 
 		if (settings.contractsOrMods !== 'both') {
-			const mustQuery = { 
+			const filterQuery = { 
 				match: {
 					mod_identifier_eda_ext: "base_award"
 				}
@@ -604,15 +603,15 @@ class EDASearchUtility {
 			}
 
 			if (settings.contractsOrMods === "contracts") {
-				mustQueries.push(mustQuery)
+				filterQueries.push(filterQuery)
 			}
 			else if (settings.contractsOrMods === "mods") { 
-				mustQueries.push(boolQuery);
+				filterQueries.push(boolQuery);
 			}
 
 		}
 
-		return mustQueries;
+		return filterQueries;
 	}
 
 	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
