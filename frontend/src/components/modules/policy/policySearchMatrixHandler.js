@@ -304,7 +304,6 @@ const handleSelectAllTypes = (state, dispatch) => {
 const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let typeName = event.target.name;
-	console.log(typeName);
 	if(typeName.includes('(')){
 		typeName = typeName.substring(0, event.target.name.lastIndexOf('(')-1);
 	}
