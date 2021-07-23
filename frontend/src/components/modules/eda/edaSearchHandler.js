@@ -3,7 +3,7 @@ import _ from "lodash";
 import {
 	getQueryVariable,
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
-	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE, SEARCH_TYPES
+	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE,
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
