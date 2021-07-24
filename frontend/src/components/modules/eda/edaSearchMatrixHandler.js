@@ -172,13 +172,12 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
             edaSettings.contractsOrMods = value;
             break;
         case 'majcoms':
-            const subOrg = value.subOrg.trim();
-            const majIndex = edaSettings.majcoms[value.org].indexOf(subOrg);
+            const majIndex = edaSettings.majcoms[value.org].indexOf(value.subOrg);
             if (majIndex !== -1) {
                 edaSettings.majcoms[value.org].splice(majIndex, 1);
             }
             else {
-                edaSettings.majcoms[value.org].push(subOrg);
+                edaSettings.majcoms[value.org].push(value.subOrg);
             }
             break;
         default:
@@ -215,22 +214,7 @@ const renderStats = (state) => {
     );
 }
 
-const getCommonWords = (phrases) => {
-    const dictionary = {};
-    for (const phrase of phrases) {
-        const words = phrase.toLowerCase().split(' ');
-        for (const word of words) {
-            if (dictionary[word]) {
-                dictionary[word] += 1;
-            }
-            else {
-                dictionary[word] = 1;
-            }
-        }
-    }
 
-    return Object.keys(dictionary).filter(word => dictionary[word] > 1);
-}
 
 const renderMajcoms = (state, dispatch, org) => {
     const orgToMajcom = {
@@ -289,14 +273,7 @@ const renderMajcoms = (state, dispatch, org) => {
 
     for (const subOrg of orgs) {
         let searchQuery = subOrg.toLowerCase();
-        const commonWords = getCommonWords(orgs);
 
-        // in order to properly filter, have to remove any common words between options
-        for (const word of commonWords) {
-            searchQuery = searchQuery.replace(word, '');
-        }
-
-        searchQuery = searchQuery.trim();
         orgCheckboxes.push(
             <FormControlLabel
                 name={subOrg}
