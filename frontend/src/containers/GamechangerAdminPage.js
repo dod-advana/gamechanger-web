@@ -863,7 +863,7 @@ const GamechangerAdminPage = props => {
 		return (
 			<div>
 				<p style={styles.sectionHeader}>General Actions</p>
-				<div className="row" style={{padding: "40px"}}>
+				<div className="row" style={{paddingLeft: "80px"}}>
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
