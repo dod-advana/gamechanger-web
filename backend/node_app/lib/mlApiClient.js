@@ -11,12 +11,13 @@ const MLRoutes = {
 	'downloadDependencies':`${transformerBaseUrl}/getCurrentTransformer`,
 	'getAPIInformation':`${transformerBaseUrl}/`,
 	'getModelsList': `${transformerBaseUrl}/getModelsList`,
+	'getFilesInCorpus':`${transformerBaseUrl}/getFilesInCorpus`,
+	'getProcessStatus':`${transformerBaseUrl}/getProcessStatus`,
 
 	'expandTerms':`${mlBaseUrl}/expandTerms`,
 	'questionAnswer':`${mlBaseUrl}/questionAnswer`,
 	'transSentenceSearch':`${transformerBaseUrl}/transSentenceSearch`,
 	'transformResults':`${transformerBaseUrl}/transformerSearch`,
-	'setTransformerModel':`${transformerBaseUrl}/updateModel`,
 	'reloadModels':`${transformerBaseUrl}/reloadModels`,
 	'downloadCorpus':`${transformerBaseUrl}/downloadCorpus`,
 	'trainModel':`${transformerBaseUrl}/trainModel`,
@@ -46,8 +47,9 @@ class MLApiClient {
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
+		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
+		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		// Post methods
-		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
