@@ -93,9 +93,9 @@ export default (props) => {
             const current = await gameChangerAPI.getCurrentTransformer();
             // current.data is of the form {sentence_models:{encoder, sim}}
             setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:initTransformer);
-            setCurrentSentenceIndex(current.data.sentence_index?current.data.sentence_index.replace(/^.*[\\\/]/, ''):'');
-            setCurrentQexp(current.data.qexp_model?current.data.qexp_model.replace(/^.*[\\\/]/, ''):'');
-            setCurrentQa(current.data.qa_model?current.data.qa_model.replace(/^.*[\\\/]/, ''):'');
+            setCurrentSentenceIndex(current.data.sentence_index?current.data.sentence_index.replace(/^.*[\\/]/, ''):'');
+            setCurrentQexp(current.data.qexp_model?current.data.qexp_model.replace(/^.*[\\/]/, ''):'');
+            setCurrentQa(current.data.qa_model?current.data.qa_model.replace(/^.*[\\/]/, ''):'');
             props.updateLogs('Successfully queried current transformer',0);
         }catch (e) {
             props.updateLogs("Error querying current transformer: " + e.toString() ,2);
@@ -192,13 +192,13 @@ export default (props) => {
                                 Version: <br />
                                 Connection Status: <br />
                                 Last Queried: <br />
-                                <br />
-                                Sentence Index:<br />
-                                Query Expansion:<br />
-                                Question Answer:<br />
-                                Transformer:<br /> 
-                                <div style={{paddingLeft:'15px'}}>Encoder:</div> 
-                                <div style={{paddingLeft:'15px'}}>Sim:</div>
+                                Loaded Models:<br />
+                                <div style={{paddingLeft:'15px'}}>Sentence Index:</div> 
+                                <div style={{paddingLeft:'15px'}}>Query Expansion:</div> 
+                                <div style={{paddingLeft:'15px'}}>Question Answer:</div> 
+                                <div style={{paddingLeft:'15px'}}>Transformer:</div> 
+                                <div style={{paddingLeft:'30px'}}>Encoder:</div> 
+                                <div style={{paddingLeft:'30px'}}>Sim:</div>
                             </div>
                             <div style={{width:'65%'}} className='half'>
                                 {APIData.API_Name} <br />
@@ -210,8 +210,8 @@ export default (props) => {
                                 {currentQexp} <br />
                                 {currentQa} <br />
                                 <br />
-                                {currentTransformer.encoder.replace(/^.*[\\\/]/, '')}<br />
-                                {currentTransformer.sim.replace(/^.*[\\\/]/, '')}
+                                {currentTransformer.encoder.replace(/^.*[\\/]/, '')}<br />
+                                {currentTransformer.sim.replace(/^.*[\\/]/, '')}
                             </div>
                         </div>           
                     </fieldset>
