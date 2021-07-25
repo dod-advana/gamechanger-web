@@ -863,7 +863,7 @@ const GamechangerAdminPage = props => {
 		return (
 			<div>
 				<p style={styles.sectionHeader}>General Actions</p>
-				<div className="row" style={styles.applicationsRow}>
+				<div className="row" style={{padding: "40px"}}>
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
@@ -1712,7 +1712,7 @@ const GamechangerAdminPage = props => {
 	}
 	
 	return (
-		<div style={{ minHeight: '100%' }}>
+		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
 
 			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData),  getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
 			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData), getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
