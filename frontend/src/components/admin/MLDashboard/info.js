@@ -55,7 +55,10 @@ const apiColumns = [
         )
     }
 ]
-
+const initTransformer = {
+    encoder:'',
+    sim:''
+}
 
 /**
  * This class queries the ml api information and provides controls 
@@ -65,7 +68,10 @@ const apiColumns = [
 export default (props) => {
 	// Set state variables
     const [APIData, setAPIData] = useState({});
-    const [currentTransformer, setCurrentTransformer] = useState({});
+    const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
+    const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
+    const [currentQexp, setCurrentQexp] = useState('');
+    const [currentQa, setCurrentQa] = useState('');
 
 
     /**
@@ -86,7 +92,10 @@ export default (props) => {
             // set currentTransformer
             const current = await gameChangerAPI.getCurrentTransformer();
             // current.data is of the form {sentence_models:{encoder, sim}}
-            setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:{});
+            setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:initTransformer);
+            setCurrentSentenceIndex(current.data.sentence_index?current.data.sentence_index.replace(/^.*[\\\/]/, ''):'');
+            setCurrentQexp(current.data.qexp_model?current.data.qexp_model.replace(/^.*[\\\/]/, ''):'');
+            setCurrentQa(current.data.qa_model?current.data.qa_model.replace(/^.*[\\\/]/, ''):'');
             props.updateLogs('Successfully queried current transformer',0);
         }catch (e) {
             props.updateLogs("Error querying current transformer: " + e.toString() ,2);
@@ -183,7 +192,11 @@ export default (props) => {
                                 Version: <br />
                                 Connection Status: <br />
                                 Last Queried: <br />
-                                Current Transformer: <br />
+                                <br />
+                                Sentence Index:<br />
+                                Query Expansion:<br />
+                                Question Answer:<br />
+                                Transformer:<br /> 
                                 <div style={{paddingLeft:'15px'}}>Encoder:</div> 
                                 <div style={{paddingLeft:'15px'}}>Sim:</div>
                             </div>
@@ -193,8 +206,12 @@ export default (props) => {
                                 {status[getConnectionStatus()].toUpperCase()} <br />
                                 {getLastQueried()} <br />
                                 <br />
-                                {currentTransformer.encoder} <br />
-                                {currentTransformer.sim} <br />
+                                {currentSentenceIndex} <br />
+                                {currentQexp} <br />
+                                {currentQa} <br />
+                                <br />
+                                {currentTransformer.encoder.replace(/^.*[\\\/]/, '')}<br />
+                                {currentTransformer.sim.replace(/^.*[\\\/]/, '')}
                             </div>
                         </div>           
                     </fieldset>
