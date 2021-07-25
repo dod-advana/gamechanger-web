@@ -7,7 +7,7 @@ import Info from './info';
 import S3 from './s3';
 import Models from './models';
 
-const status = ['ok', 'loading', 'error'];
+const status = ['ok', 'warning', 'error'];
 const logs = [];
 
 /**

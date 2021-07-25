@@ -8,7 +8,7 @@ import GCPrimaryButton from "../../common/GCButton";
 import styles from '../GCAdminStyles';
 import "react-table/react-table.css";
 import './index.scss';
-const status = ['ok', 'loading', 'error'];
+const status = ['ok', 'warning', 'error', 'loading'];
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -68,12 +68,6 @@ export default (props) => {
     const [currentTransformer, setCurrentTransformer] = useState({});
 
 
-    // flags that parameters have been changed and on 
-    // blur or enter press we should update the query
-    const [connectionStatus, setConnectionStatus] = useState(1);
-    const [lastQueried, setLastQueried] = useState("");
-
-
     /**
      * Load all the initial data on transformers and s3
      * @method onload
@@ -81,7 +75,7 @@ export default (props) => {
     const onload = async ()=>{
         getAPIInformation();
         getCurrentTransformer();
-        setLastQueried(new Date(Date.now()).toLocaleString());
+        
     }
     /**
      * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
@@ -94,7 +88,6 @@ export default (props) => {
             // current.data is of the form {sentence_models:{encoder, sim}}
             setCurrentTransformer(current.data.sentence_models?current.data.sentence_models:{});
             props.updateLogs('Successfully queried current transformer',0);
-            setConnectionStatus(0);
         }catch (e) {
             props.updateLogs("Error querying current transformer: " + e.toString() ,2);
             throw e;
@@ -110,11 +103,53 @@ export default (props) => {
             const info = await gameChangerAPI.getAPIInformation();
             setAPIData(info.data);
             props.updateLogs('Successfully queried api information',0);
-            setConnectionStatus(0);
         }catch (e) {
             props.updateLogs("Error querying api information: " + e.toString() ,2);
             throw e;
         }
+    }
+    /**
+     * @method getLastQueried
+     * @returns 
+     */
+    const getLastQueried = () =>{
+        let mostRecent = '';
+        for(const message of props.apiErrors){
+            if(mostRecent === ''){
+                mostRecent= message.timeStamp
+            }
+            else if(Date.parse(message.timeStamp) > Date.parse(mostRecent)){
+                mostRecent= message.timeStamp
+            }
+        }
+        return mostRecent
+    }
+    /**
+     * @method getConnectionStatus
+     * @return integer 0-3
+     */
+    const getConnectionStatus = () =>{
+        let success = false;
+        let error = false;
+        for(const message of props.apiErrors){
+            if(message.status === "OK"){
+                success = true
+            }
+            if(message.status === "ERROR"){
+                error = true
+            }
+        }
+        //setLastQueried(new Date(Date.now()).toLocaleString());
+        if(success && error){
+            return 1
+        }
+        else if(!success && error){
+            return 2
+        }
+        else if(!success && ! error){
+            return 3
+        }
+        return 0
     }
 
 	useEffect(() => {
@@ -126,7 +161,7 @@ export default (props) => {
     return (			
         <div>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Machine Learning API</p>
+                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>General Information</p>
                 
                 <GCPrimaryButton
 						onClick={() => {
@@ -139,7 +174,7 @@ export default (props) => {
                 <BorderDiv className='half'>
                     <div style={{width:'100%', display:'inline-block', paddingBottom:'5px'}}>
                         <div style={{display:'inline-block'}}>Current State:</div>
-                        <Tooltip title={"Connection " + status[connectionStatus].toUpperCase()} placement="right" arrow><StatusCircle className = {status[connectionStatus]}/></Tooltip>
+                        <Tooltip title={"Connection " + status[getConnectionStatus()].toUpperCase()} placement="right" arrow><StatusCircle className = {status[getConnectionStatus()]}/></Tooltip>
                     </div>
                     <fieldset className={'field'}>
                         <div className='info-container'>
@@ -155,8 +190,8 @@ export default (props) => {
                             <div style={{width:'65%'}} className='half'>
                                 {APIData.API_Name} <br />
                                 {APIData.Version} <br />
-                                {status[connectionStatus].toUpperCase()} <br />
-                                {lastQueried} <br />
+                                {status[getConnectionStatus()].toUpperCase()} <br />
+                                {getLastQueried()} <br />
                                 <br />
                                 {currentTransformer.encoder} <br />
                                 {currentTransformer.sim} <br />
