@@ -471,7 +471,7 @@ const EdaSearchHandler = {
 
 		let orgFilterText = undefined;
 		const majcomFilter = organizations && majcoms ? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1) : undefined;
-		if (majcomFilter && Object.keys(majcomFilter).length > 0) {
+		if (!allOrgsSelected && majcomFilter && Object.keys(majcomFilter).length > 0) {
 			orgFilterText = '';
 			for (const org of organizations) {
 				let separator = Object.keys(majcomFilter).indexOf(org) !== 0 ? '|' : '';
