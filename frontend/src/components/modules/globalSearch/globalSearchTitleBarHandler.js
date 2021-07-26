@@ -1,5 +1,5 @@
 import React from "react";
-import {Typography} from "@material-ui/core";
+import AdvanaLightTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaLightTheme.png';
 import {SearchContext} from "./SearchContext";
 import SearchTabBar from "./SearchTabBar";
 
@@ -11,15 +11,14 @@ const GlobalSearchTitleBarHandler = {
 			cloneData
 		} = props;
 		return (
-			<div className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
-				 onClick={onTitleClick}>
-				<Typography variant="h1" style={styles.wording} display="inline">
-					{cloneData.display_name}
-				</Typography>
-				<Typography variant="h6" style={styles.wording} display="inline">
-					Powered by GAMECHANGER
-				</Typography>
-			</div>
+			<img
+				src={AdvanaLightTheme}
+				style={styles.title}
+				onClick={onTitleClick}
+				alt='globalsearch'
+				id={'titleButton'}
+				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}` : null}
+			/>
 		);
 	},
 	
@@ -77,4 +76,10 @@ const styles = {
 		minHeight: 80,
 		width: '100%'
 	},
+	title: {
+		margin: '-10px 50px -10px 55px',
+		cursor: 'pointer',
+		width: '255px',
+		height: '65x'
+	}
 };
