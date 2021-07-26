@@ -16,11 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - run: cd backend
     - name: Use Node.js '14.x'
       uses: actions/setup-node@v2
       with:
         node-version: '14.x'
         cache: 'npm'
-    - run: cd backend
-    - run: ls
-    
+    - run: npm install
+    - run: npm test    
