@@ -9,7 +9,7 @@ jobs:
       run: docker build --file DockerfileTest --build-arg NPMRC_FILE="${{secrets.NPMRC_FILE}}" --tag gamechanger/gamechanger-web:latest .
     - uses: anchore/scan-action@v1
       with:
-        image-reference: "gamechanger/gamechanger-web:latest
+        image-reference: "gamechanger/gamechanger-web:latest"
         dockerfile-path: "./DockerfileTest"
         fail-build: true
      # Runs a set of commands using the runners shell
