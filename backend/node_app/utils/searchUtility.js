@@ -48,6 +48,8 @@ class SearchUtility {
 		this.getQAContext = this.getQAContext.bind(this);
 		this.filterEmptyDocs = this.filterEmptyDocs.bind(this);
 		this.cleanQAResults = this.cleanQAResults.bind(this);
+		this.getOrgQuery = this.getOrgQuery.bind(this);
+		this.getTypeQuery = this.getTypeQuery.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1804,6 +1806,50 @@ class SearchUtility {
 				} catch (err) {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
+	}
+
+	getOrgQuery() {
+		return {
+			"size": 0,
+			"aggs": {
+				"display_org": {
+					"composite": {
+						"size": 100,
+						"sources": [
+							{
+								"type": {
+									"terms": {
+										"field": "display_org_s"
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+		};
+	}
+
+	getTypeQuery() {
+		return {
+			"size": 0,
+			"aggs": {
+				"display_type": {
+					"composite": {
+						"size": 100,
+						"sources": [
+							{
+								"type": {
+									"terms": {
+										"field": "display_doc_type_s"
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+		};
 	}
 
 	getESClient(cloneName, permissions){

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
 import SearchMatrixFactory from "../factories/searchMatrixFactory";
+import SearchHandlerFactory from "../factories/searchHandlerFactory"
 
 const useStyles = makeStyles({
 	radioButtonLabel: {
@@ -20,7 +21,6 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 	},
 	titleText: {
-		fontWeight: 900,
 		fontSize: '14px',
 		fontFamily: 'Montserrat'
 	},
@@ -156,6 +156,11 @@ const AdvancedDropdown = (props) => {
 		if (state.cloneDataSet && !loaded) {
 			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
+
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
+			const searchHandlerTmp = searchFactory.createHandler();
+			// get pre-search data
+			searchHandlerTmp.getPresearchData(state, dispatch);
 
 			setMatrixHandler(handler);
 			setLoaded(true);
