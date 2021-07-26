@@ -856,8 +856,7 @@ const PolicySearchMatrixHandler = {
 			dispatch,
 			classes,
 			expansionTerms,
-			handleAddSearchTerm,
-			handleSubmit
+			handleAddSearchTerm
 		} = props;
 		
 		let expansionTermSelected = false;
@@ -927,7 +926,6 @@ const PolicySearchMatrixHandler = {
 					</GCAccordion>
 				</div>}
 
-				<GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={handleSubmit}>Update Search</GCButton>
 				<button
 					type="button"
 					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
