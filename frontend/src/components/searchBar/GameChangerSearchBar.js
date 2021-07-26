@@ -14,7 +14,7 @@ import SearchBarDropdown from './SearchBarDropdown';
 import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
 import { ConstrainedIcon } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import UserIcon from "../../images/icon/UserIcon.png";
-import {getTrackingNameForFactory, getQueryVariable, PAGE_DISPLAYED} from "../../gamechangerUtils";
+import {getTrackingNameForFactory, PAGE_DISPLAYED} from "../../gamechangerUtils";
 import { handleSaveFavoriteSearch, setState, checkUserInfo, getUserData, clearDashboardNotification } from '../../sharedFunctions';
 
 const useStyles = makeStyles((theme) => ({
@@ -95,7 +95,7 @@ const GameChangerSearchBar = (props) => {
 	const ref = useRef();
 
 	const [loaded, setLoaded] = useState(false);
-	const [searchText, setSearchText] = useState(getQueryVariable('q') || '');
+	const [searchText, setSearchText] = useState(context.state.searchText || '');
 	const debouncedSearchTerm = useDebounce(searchText, 300);
 	const [debounceOn, setDebounceOn] = useState(true);
 
@@ -118,11 +118,11 @@ const GameChangerSearchBar = (props) => {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	useEffect(() => {
-		const queryText = getQueryVariable('q');
+		const queryText = context.state.searchText ? context.state.searchText : null;
 		if (queryText) {
 			setSearchText(queryText);
 		}
-	}, [getQueryVariable('q')]);
+	}, [context.state.searchText, context.state.runSearch]);
 
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
