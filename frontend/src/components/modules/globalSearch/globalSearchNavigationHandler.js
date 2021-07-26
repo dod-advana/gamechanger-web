@@ -4,8 +4,7 @@ import {HoverNavItem, NavItem} from "../../navigation/NavItems";
 import {trackEvent} from "../../telemetry/Matomo";
 import {
 	getCloneTitleForFactory,
-	getTrackingNameForFactory,
-	PAGE_DISPLAYED
+	getTrackingNameForFactory
 } from "../../../gamechangerUtils";
 import {
 	ConstrainedIcon,
@@ -13,27 +12,15 @@ import {
 	StyledBadgeSmall
 } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
-import {clearDashboardNotification, getUserData, setState} from "../../../sharedFunctions";
+import {setState} from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
-import UserIcon from "../../../images/icon/UserIcon.png";
-import CrowdSourcingAppIcon from "../../../images/icon/NewCrowdSourcingIcon.png";
-import DataStatusTrackerIcon from "../../../images/icon/NewDataStatusTrackerIcon.png";
-import AnalystToolsIcon from "../../../images/icon/analyticswht.png";
-import CloneRequest from "../../../images/icon/CloneRequest.png";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
 import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
-
-const styles = {
-	wording: {
-		color: 'white',
-		marginRight: 15
-	},
-}
 
 const getToolTheme = (cloneData) => {
 	return {
