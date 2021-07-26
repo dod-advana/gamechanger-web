@@ -1,0 +1,77 @@
+ARG BASE_IMAGE="node:14"
+FROM $BASE_IMAGE
+
+ARG NPMRC_FILE
+
+SHELL ["/bin/bash", "-c"]
+
+# to support RHEL-based and DEBIAN-based version of node
+# e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
+USER root
+RUN (type -P "yum" &> /dev/null) && ( \
+        yum install -y \
+            git \
+        && yum clean all \
+        && rm -rf /var/cache/yum \
+     ) || ((type -P "apt-get" &> /dev/null) && ( \
+        apt-get update \
+        && apt-get install -y \
+            git \
+        && apt-get clean \
+        && rm -rf /var/cache/apt/lists \
+    )) || ( \
+        >&2 echo "[ERROR] Unsupported Base Image" \
+        && exit 1 \
+    )
+
+# non-root app USER/GROUP
+ARG APP_UID=1000
+ARG APP_GID=1000
+
+# key dirs & globally usable binaries/packages
+ENV APP_ROOT="/opt/app-root"
+ENV APP_DIR="${APP_ROOT}/src"
+ENV APP_FRONTEND_DIR="${APP_DIR}/frontend" 
+ENV APP_BACKEND_DIR="${APP_DIR}/backend" 
+ENV APP_SHARED_DIR="${APP_ROOT}/shared"
+ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin" 
+ENV PATH="${APP_SHARED_BIN}:${PATH}"
+ENV NPM_CONFIG_USERCONFIG="${APP_ROOT}/.nmprc"
+
+RUN mkdir -p \
+        "${APP_DIR}" \
+        "${APP_BACKEND_DIR}" \
+        "${APP_FRONTEND_DIR}" \
+        "${APP_SHARED_DIR}" \
+    && touch "${NPM_CONFIG_USERCONFIG}" \
+    && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}"
+
+USER "$APP_UID:$APP_GID"
+# thou shall not root
+
+RUN cd "$APP_SHARED_DIR" \
+    && npm install nodemon \
+    && npm install sequelize-cli \
+    && npm install jest
+
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+COPY --chown=node ./frontend/.npmrc.template "${APP_FRONTEND_DIR}/.npmrc"
+RUN sed -i 's/<get_personal_token>/'"${NPMRC_FILE}"'/g' "${APP_FRONTEND_DIR}/.npmrc"
+
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm install
+
+COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+COPY --chown=node ./backend/.npmrc.template "${APP_BACKEND_DIR}/.npmrc"
+RUN sed -i 's/<get_personal_token>/'"${NPMRC_FILE}"'/g' "${APP_BACKEND_DIR}/.npmrc"
+RUN cd "${APP_BACKEND_DIR}" \
+    && npm install
+
+COPY --chown="$APP_UID:$APP_GID" . "${APP_DIR}"
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm run build \
+    && mv build "${APP_BACKEND_DIR}"
+
+WORKDIR "${APP_BACKEND_DIR}"
+CMD ./startProd.sh
