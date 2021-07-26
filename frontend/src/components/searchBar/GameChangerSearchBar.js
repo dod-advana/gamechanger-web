@@ -152,7 +152,9 @@ const GameChangerSearchBar = (props) => {
 			}
 		}
 		
-		debouncedFetchSearchSuggestions(debouncedSearchTerm);
+		if (state.cloneData?.clone_name !== 'globalSearch') {
+			debouncedFetchSearchSuggestions(debouncedSearchTerm);
+		}
 	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
 
 	useEffect(() => {
