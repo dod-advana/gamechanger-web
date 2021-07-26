@@ -317,7 +317,15 @@ const PolicySearchHandler = {
 								name: key,
 								value: docTypeMap[key]
 							});
+						}
+						for(let key in state.presearchTypes){
+							if(!_.has( docTypeMap, key)){
+								typeData.push({
+									name: key,
+									value: 0
+								});
 							}
+						}
 							
 						let sortedTypes = typeData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
@@ -327,13 +335,21 @@ const PolicySearchHandler = {
 						for (let elt in sortedTypes) {
 							sidebarTypes.push([sortedTypes[elt].name, numberWithCommas(sortedTypes[elt].value)]);
 						}
-	
 						let orgData = [];
 						for (let key in orgCountMap) {
 							orgData.push({
 								name: key,
 								value: orgCountMap[key]
 							});
+						}
+
+						for(let key in state.presearchSources){
+							if(!_.has( orgCountMap, key)){
+								orgData.push({
+									name: key,
+									value: 0
+								});
+							}
 						}
 						
 						let sortedOrgs = orgData.sort(function(a, b) {
@@ -344,7 +360,7 @@ const PolicySearchHandler = {
 						if(sortedOrgs && sortedOrgs.length) {
 							orgFilter = {};
 							sortedOrgs.forEach((o) => {
-								orgFilter[o.name] = !allOrgsSelected;
+								orgFilter[o.name] = o.value > 0 ? !allOrgsSelected : false;
 							});
 						}
 						
@@ -352,7 +368,7 @@ const PolicySearchHandler = {
 						if(sortedTypes && sortedTypes.length) {
 							typeFilter = {};
 							sortedTypes.forEach((t) => {
-								typeFilter[t.name] = !allTypesSelected;
+								typeFilter[t.name] = t.value > 0 ? !allTypesSelected : false;
 							});
 						}
 						
@@ -619,6 +635,47 @@ const PolicySearchHandler = {
 						topicsLoading: false
 					});
 				}
+	},
+
+	async getPresearchData(state, dispatch) {
+		const {
+			cloneData
+		} = state;
+		if(_.isEmpty(state.presearchSources)){
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getPresearchData',
+				cloneName: cloneData.clone_name,
+				options: {},
+			});
+	
+			const orgFilters = {};
+			for(const key in resp.data.orgs){
+				orgFilters[resp.data.orgs[[key]]] = false;
+			}
+			const typeFilters = {};
+			for(const key in resp.data.types){
+				let name = resp.data.types[key];
+				if (name.slice(-1) !== 's') {
+					name = name + 's';
+				}
+				typeFilters[name] = false;
+			}
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.orgFilter = orgFilters;
+			newSearchSettings.typeFilter = typeFilters;
+			if(_.isEmpty(state.presearchSources)){
+				setState(dispatch, {presearchSources: orgFilters});
+			}
+			if(_.isEmpty(state.presearchTypes)){
+				setState(dispatch, {presearchTypes: typeFilters});
+			}
+			setState(dispatch, {searchSettings: newSearchSettings})
+		} else {
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.orgFilter = state.presearchSources;
+			newSearchSettings.typeFilter = state.presearchTypes;
+			setState(dispatch, {searchSettings: newSearchSettings});
+		}
 	},
 
 	parseSearchURL(defaultState, url) {

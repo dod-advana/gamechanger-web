@@ -23,7 +23,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import uuidv4 from "uuid/v4";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from "../../telemetry/Matomo";
-import {getTrackingNameForFactory, typeFilters, orgFilters} from "../../../gamechangerUtils";
+import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 
 const handleSelectAllCategories = (state, dispatch) => {
 	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
@@ -152,12 +152,12 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	}
 
 const renderSources = (state, dispatch, classes, searchbar = false) => {
-		
-		const { originalOrgFilters } = state.searchSettings;
+		const { originalOrgFilters, orgFilter } = state.searchSettings;
 		const betterOrgData = {};
 		for(let i=0; i<originalOrgFilters.length; i++) {
 			betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
 		}
+
 
 		return (
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -200,19 +200,26 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							/>
 						</FormGroup>
 						<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilters).map(org => {
-								return (
-									<FormControlLabel
-										key={`${org}`}
-										value={`${originalOrgFilters[org]}`}
-										classes={{ label: classes.checkboxPill }}
-										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
-										label={`${org}`}
-										labelPlacement="end"
-									/>
-								)
+							{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
+								if(index < 10 || state.seeMoreSources){
+									return (
+										<FormControlLabel
+											key={`${org}`}
+											value={`${originalOrgFilters[org]}`}
+											classes={{ label: classes.checkboxPill }}
+											control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
+											label={`${org}`}
+											labelPlacement="end"
+										/>
+									)
+								} else {
+									return null;
+								}
 							})}
 						</FormGroup>
+						{state.searchSettings.specificOrgsSelected &&
+							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> 
+						}
 					</>
 					) : (
 				<>
@@ -316,7 +323,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 
 
 const renderTypes = (state, dispatch, classes, searchbar = false) => {
-	const { originalTypeFilters } = state.searchSettings;
+	const { originalTypeFilters, typeFilter } = state.searchSettings;
 	const betterTypeData = {};
 	for(let i=0; i<originalTypeFilters.length; i++) {
 		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
@@ -363,19 +370,26 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.searchSettings.specificTypesSelected && Object.keys(typeFilters).map(type => {
-						return (
-							<FormControlLabel
-								key={`${type}`}
-								value={`${type}`}
-								classes={{ label: classes.checkboxPill }}
-								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
-								label={`${type}`}
-								labelPlacement="end"
-							/>
-						)
+					{state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+						if(index < 10 || state.seeMoreTypes){
+							return (
+								<FormControlLabel
+									key={`${type}`}
+									value={`${type}`}
+									classes={{ label: classes.checkboxPill }}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
+									label={`${type}`}
+									labelPlacement="end"
+								/>
+							)
+						} else {
+							return null;
+						}
 					})}
 				</FormGroup>
+				{state.searchSettings.specificTypesSelected &&
+					<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
+				}
 			</>
 			) 
 			: (
@@ -869,43 +883,43 @@ const PolicySearchMatrixHandler = {
 				{/*}*/}
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={true} header={'CATEGORY'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderCategories() }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderSources(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={state.searchSettings.isFilterUpdate} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderDates(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderStatus(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderAdvancedFilters(state, dispatch) }
 					</GCAccordion>
 				</div>
 
 				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+					<GCAccordion expanded={false} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 					</GCAccordion>
 				</div>}
@@ -941,7 +955,7 @@ const PolicySearchMatrixHandler = {
 		return (
 			<>
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>CATEGORIES</strong>
+					<strong style={styles.boldText}>CATEGORY</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
 						{renderCategories(state, dispatch, classes)}
@@ -949,7 +963,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>SELECT THE SOURCE</strong>
+					<strong style={styles.boldText}>SOURCE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					<div>
 					{renderSources(state, dispatch, classes, true)}
@@ -957,7 +971,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>SEARCH TYPES</strong>
+					<strong style={styles.boldText}>TYPE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderTypes(state, dispatch, classes, true)}
 				</div>
@@ -975,30 +989,17 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				{/* <div style={styles.filterDiv}>
-					<strong style={styles.boldText}>ADVANCED FILTERS</strong>
+					<strong style={styles.boldText}>ADVANCED</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderAdvancedFilters(state, dispatch, true)}
 				</div> */}
 
 				<div style ={{display: 'flex', margin: '10px'}}>
-					<div style={{width: '250px', marginRight: '20px'}}>
-						<button
-							type="button"
-							style={{ border: 'none', backgroundColor: '#B0BAC5', width: '100%', marginTop:'20px', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
-							onClick={() => resetAdvancedSettings(dispatch)}
-						>
-							<span style={{
-								fontFamily: 'Montserrat',
-								fontWeight: 600,
-								fontSize: '0.8em',
-								width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
-							}}>
-								Clear Filters
-							</span>
-						</button>
+					<div style={{width: '120px', height: '40px', marginRight: '20px'}}>
+						<GCButton style={{border: 'none', width: '100%', height: '100%', padding: '0px', color: 'black', backgroundColor: '#B0BAC5'}} onClick={() => resetAdvancedSettings(dispatch)}>Clear Filters</GCButton>
 					</div>
-					<div style={{width: '250px'}}>
-						<GCButton style={{width: '100%', marginTop:'20px', marginBottom: '10px', marginLeft: '-1px', height: '50px'}} onClick={handleSubmit}>Search</GCButton>
+					<div style={{width: '120px', height: '40px'}}>
+						<GCButton style={{width: '100%', height: '100%'}} onClick={handleSubmit}>Search</GCButton>
 					</div>
 				</div>
 				
