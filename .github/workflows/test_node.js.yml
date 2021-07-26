@@ -24,4 +24,4 @@ jobs:
         node-version: '14'
         cache: 'npm'
     - run: |
-            ls
+            cd backend && npm install && run test
