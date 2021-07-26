@@ -17,6 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: cd backend
+    - run: cp backend/package-lock.json package-lock.json
     - name: Use Node.js '14'
       uses: actions/setup-node@v2
       with:
