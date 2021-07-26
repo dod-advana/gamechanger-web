@@ -104,6 +104,26 @@ describe('EDASearchUtility', function () {
                 assert.fail(err);
             }
         });
+
+        it('should return an ES query based on the issue office dodaac and issue office name',
+        async (done) => {
+            const opts = {
+                ...constructorOptionsMock
+            };
+
+            const mockBody = {"transformResults":false,"charsPadding":90,"useGCCache":null,"tiny_url":"contractsearch?tiny=4","combinedSearch":"false","edaSearchSettings":{"allOrgsSelected":true,"organizations":[],"aggregations":[],"startDate":null,"endDate":null,"issueAgency":null,"issueOfficeDoDAAC":"FA8075","issueOfficeName":"AFICA/KD","allYearsSelected":true,"fiscalYears":[],"allDataSelected":true,"contractData":{"pds":false,"syn":false,"none":false},"minObligatedAmount":null,"maxObligatedAmount":null,"contractsOrMods":"both","majcoms":{"air force":[],"army":[],"defense":[],"navy":[]}},"searchVersion":1};
+
+            const target = new EDASearchUtility(opts);
+            try {
+                const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
+                const expected =  {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","*_eda_n*"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","*_eda_ext"],"from":0,"size":18,"track_total_hits":true,"query":{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"pages","inner_hits":{"_source":false,"stored_fields":["pages.filename","pages.p_raw_text"],"from":0,"size":5,"highlight":{"fields":{"pages.filename.search":{"number_of_fragments":0},"pages.p_raw_text":{"fragment_size":180,"number_of_fragments":1}},"fragmenter":"span"}},"query":{"bool":{"should":[{"wildcard":{"pages.filename.search":{"value":"defense*","boost":15}}},{"query_string":{"query":"defense","default_field":"pages.p_raw_text","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO"}}]}}}},{"multi_match":{"query":"defense","fields":["*_eda_ext"],"operator":"or"}}]}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.contract_issue_office_dodaac_eda_ext":"FA8075"}}]}}}},{"nested":{"path":"extracted_data_eda_n","query":{"bool":{"must":[{"match":{"extracted_data_eda_n.contract_issue_office_name_eda_ext":"AFICA/KD"}}]}}}}],"should":[{"multi_match":{"query":"defense","fields":["keyw_5^2","id^2","summary_30","pages.p_raw_text"],"operator":"or"}},{"rank_feature":{"field":"pagerank_r","boost":0.5}},{"rank_feature":{"field":"kw_doc_score_r","boost":0.1}}]}}};
+
+                assert.deepStrictEqual(actual, expected);
+                done();
+            } catch(err) {
+                assert.fail(err);
+            }
+        });
     });
 
     describe('getElasticSearchStatsQuery', function () {
