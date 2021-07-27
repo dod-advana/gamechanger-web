@@ -13,6 +13,7 @@ import {setState} from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
 import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
@@ -30,9 +31,12 @@ const getToolTheme = (cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<div>
-				<Typography variant="h1">Search</Typography>
-			</div>
+			<img
+				src={AdvanaDarkTheme}
+				style={{ width: '196px' }}
+				alt='search'
+				id={'titleLogo'}
+			/>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`
 	};
