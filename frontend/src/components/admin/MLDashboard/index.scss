@@ -13,6 +13,9 @@
     }
     .info-container{
         text-align: left;
+        .rt-expander:after {
+            border-top: 7px solid whitesmoke;
+        }
     }
     .field{
         box-sizing: border-box;
@@ -53,6 +56,9 @@
         }
         input{
             background-color: rgba(255, 255, 255, 0.05);
+        }
+        option {
+            background-color: rgba(0, 0, 0, 0.85);
         }
         select{
             background-color: rgba(255, 255, 255, 0.05);
@@ -120,4 +126,20 @@
 }
 .even{
     background:rgba(255, 255, 255, 0.05);
+}
+.code-container{
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.15);
+    -webkit-transition: max-height 1s; 
+    -moz-transition: max-height 1s; 
+    -ms-transition: max-height 1s; 
+    -o-transition: max-height 1s; 
+    transition: max-height 1s;  
+    overflow: hidden;
+    .code-block{
+        width: fit-content;
+        margin: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 }

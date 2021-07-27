@@ -1,34 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-
 import { Tooltip} from '@material-ui/core'
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
-import GCPrimaryButton from "../../common/GCButton";
+
+import {TableRow, StatusCircle, BorderDiv} from './util/styledDivs';
 import styles from '../GCAdminStyles';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import GCPrimaryButton from "../../common/GCButton";
 import "react-table/react-table.css";
 import './index.scss';
 const status = ['ok', 'warning', 'error', 'loading'];
 
 const gameChangerAPI = new GameChangerAPI();
-
-const TableRow = styled.div`
-	text-align: center;
-`
-
-const StatusCircle = styled.div`
-    height: 25px;
-    width: 25px;
-    border-radius: 50%;
-    display: inline-block;
-    float: right;
-    padding:15px;
-`
-
-const BorderDiv = styled.div`
-    border: 2px solid grey;
-    border-radius: 8px;
-`
 
 const apiColumns = [
     {
@@ -63,7 +45,7 @@ const initTransformer = {
 /**
  * This class queries the ml api information and provides controls 
  * for the different endpoints
- * @class MLDashboard
+ * @class Info
  */
 export default (props) => {
 	// Set state variables
