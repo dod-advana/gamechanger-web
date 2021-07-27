@@ -11,3 +11,5 @@ metadata/*
 build/*
 cobertura/
 .npmrc
+route_check/output.txt
+route_check/routes.csv
