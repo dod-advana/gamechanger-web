@@ -57,7 +57,6 @@ class EdaSearchHandler extends SearchHandler {
 			searchVersion,
 			cloneName,
 			offset,
-			useGCCache,
 			showTutorial = false,
 			tiny_url,
 			forCacheReload = false

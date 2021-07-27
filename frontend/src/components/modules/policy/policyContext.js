@@ -153,6 +153,9 @@ const initState = {
 	snackBarMsg: '',
 	searchSettings: {
 		isFilterUpdate: false,
+		orgUpdate: false,
+		typeUpdate: false,
+		expansionTermAdded: false,
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
@@ -169,6 +172,12 @@ const initState = {
 		accessDateFilter: [null, null],
 		includeRevoked: false
 	},
+
+  // Presearch Filters
+	presearchSources: {},
+	presearchTypes: {},
+	seeMoreSources: false,
+	seeMoreTypes: false,
 
 	// Categories
 	selectedCategories: {
