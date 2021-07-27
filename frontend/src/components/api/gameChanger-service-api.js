@@ -526,12 +526,6 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	getFilesInCorpus = async () => {
-		const url = endpoints.getAPIInformation;
-		return axiosGET(this.axios, url);
-	}
-
-
 	getS3List = async () => {
 		const url = endpoints.getS3List;
 		return axiosGET(this.axios, url);

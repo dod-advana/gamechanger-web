@@ -2,22 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import { Typography } from "@material-ui/core";
 import TabStyles from '../../common/TabStyles';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 import styles from '../GCAdminStyles';
 import Info from './info';
 import S3 from './s3';
 import Models from './models';
+import Processes from './processes'
 
+const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
 const logs = [];
-
+let processTimer;
 /**
  * This class queries the ml api information and provides controls 
  * for the different endpoints
  * @class MLDashboard
  */
  export default () => {
-	const [tabIndex, setTabIndex] = useState('documents');
+	const [tabIndex, setTabIndex] = useState('info');
 	const [apiErrors, setApiErrors] = useState([]);
+	const [processes, setProcesses] = useState({})
 	/**
      * Creates log objects with the inital message, 
      * status level, and time it was triggered.
@@ -35,9 +39,45 @@ const logs = [];
         setApiErrors([].concat(logs));
     }
 
+	/**
+     * Get the current and past processes and flags for the API
+     * @method getProcesses
+     */
+     const getProcesses = async () =>{
+        try{
+            // set processes
+            const processesData = await gameChangerAPI.getProcessStatus();
+            setProcesses(processesData.data);
+            updateLogs('Successfully queried processes',0);
+			checkProcesses(processesData.data)
+        }catch (e) {
+            updateLogs("Error querying processes: " + e.toString() ,2);
+            throw e;
+        }
+    }
+	/**
+	 * Checks all of the flags. If any of them are true then check again in 5 seconds.
+	 * @method
+	 */
+	const checkProcesses = (processesData) =>{
+		if(processesData && processesData.process_status && processesData.process_status.flags) {
+			let checkProcess = false;
+			const flags  = processesData.process_status.flags
+			for(const key in flags){
+				if(flags[key]){
+					checkProcess = true;
+				}
+			}
+			if(checkProcess){
+				clearTimeout(processTimer)
+				processTimer = setTimeout(getProcesses, 5000)
+			}
+		}
+	}
+
 	useEffect(() => {
-        
-         // eslint-disable-next-line
+        getProcesses()
+        // eslint-disable-next-line
 	},[]);
     
 
@@ -50,30 +90,30 @@ const logs = [];
 				<div style={TabStyles.tabButtonContainer}>
 					<TabList style={TabStyles.tabsList}>
 						<Tab style={{...TabStyles.tabStyle,
-							...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
+							...(tabIndex === 'info' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `5px 0 0 0`
-							}} title="userHistory" onClick={() => setTabIndex('documents')}>
-							<Typography variant="h6" display="inline" title="cardView">INFORMATION</Typography>
+							}} title="info" onClick={() => setTabIndex('info')}>
+							<Typography variant="h6" display="inline" >INFORMATION</Typography>
 						</Tab>
 						<Tab style={{...TabStyles.tabStyle,
-							...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
+							...(tabIndex === 'processes' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: '0 0 0 0'}}
-							title="crawlerTable" onClick={() => setTabIndex('crawler')}>
-							<Typography variant="h6" display="inline">PROGRESS</Typography>
+							title="processes" onClick={() => setTabIndex('processes')}>
+							<Typography variant="h6" display="inline">PROCESSES</Typography>
 						</Tab>
 						<Tab style={{
 							...TabStyles.tabStyle,
-							...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
+							...(tabIndex === 's3' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 0 0 0`
-						}} title="versionDocs" onClick={() => setTabIndex('version')}>
-							<Typography variant="h6" display="inline" title="cardView">S3</Typography>
+						}} title="s3" onClick={() => setTabIndex('s3')}>
+							<Typography variant="h6" display="inline" >S3</Typography>
 						</Tab>
 						<Tab style={{
 							...TabStyles.tabStyle,
 							...(tabIndex === 'models' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 5px 0 0`
 						}} title="models" onClick={() => setTabIndex('models')}>
-							<Typography variant="h6" display="inline" title="cardView">MODELS</Typography>
+							<Typography variant="h6" display="inline" >MODELS</Typography>
 						</Tab>
 					</TabList>
 
@@ -85,13 +125,13 @@ const logs = [];
 						<Info apiErrors={apiErrors} updateLogs={updateLogs}/>
 					</TabPanel>
 					<TabPanel>
-						<Info apiErrors={apiErrors} updateLogs={updateLogs}/>
+						<Processes processes={processes} getProcesses={getProcesses} updateLogs={updateLogs}/>
 					</TabPanel>
 					<TabPanel>
-						<S3 updateLogs={updateLogs}/>
+						<S3 processes={processes} getProcesses={getProcesses} updateLogs={updateLogs}/>
 					</TabPanel>
 					<TabPanel>
-						<Models updateLogs={updateLogs}/>
+						<Models processes={processes} getProcesses={getProcesses} updateLogs={updateLogs}/>
 					</TabPanel>
 				</div>
 			</Tabs>
