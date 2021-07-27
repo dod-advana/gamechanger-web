@@ -2,10 +2,7 @@ import React from "react";
 import GCTooltip from "../../common/GCToolTip";
 import {HoverNavItem, NavItem} from "../../navigation/NavItems";
 import {trackEvent} from "../../telemetry/Matomo";
-import {
-	getCloneTitleForFactory,
-	getTrackingNameForFactory
-} from "../../../gamechangerUtils";
+import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 import {
 	ConstrainedIcon,
 	PageLink,
@@ -34,7 +31,7 @@ const getToolTheme = (cloneData) => {
 		hoverColor: '#E9691D',
 		toolLogo: (
 			<div>
-				<Typography variant="h1">Global Search</Typography>
+				<Typography variant="h1">Search</Typography>
 			</div>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`
@@ -126,7 +123,7 @@ const GlobalSearchNavigationHandler = {
 					</GCTooltip>
 				}
 				<NavItem style={{ justifyContent: 'space-between' }}>
-					<span>{getCloneTitleForFactory(state.cloneData, true)} MENU</span>
+					<span>MENU</span>
 				</NavItem>
 				<GCTooltip title="Tell us what you think!" placement="right" arrow>
 					<HoverNavItem onClick={() => {
