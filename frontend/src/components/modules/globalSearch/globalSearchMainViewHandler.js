@@ -205,7 +205,9 @@ const GlobalSearchMainViewHandler = {
 										{(!hideSearchResults && pageLoaded) &&
 											<>
 												{!loading && getViewHeader(state, dispatch)}
-												<ResultView context={{state, dispatch}} viewNames={viewNames} viewPanels={getViewPanels()} />
+												<div style={{ margin: '0 -75px 0 -52px' }}>
+													<ResultView context={{state, dispatch}} viewNames={viewNames} viewPanels={getViewPanels()} />
+												</div>
 												<div style={styles.spacer} />
 											</>
 										}
