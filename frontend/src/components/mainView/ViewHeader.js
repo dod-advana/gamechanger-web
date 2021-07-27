@@ -77,7 +77,7 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-    //if searchSettings.isFilterUpdate
+    
 	useEffect(()=> {
 		let tempCount;
 		switch(activeCategoryTab){
