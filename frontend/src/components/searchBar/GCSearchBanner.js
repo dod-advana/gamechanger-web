@@ -129,7 +129,8 @@ const SearchBanner = (props) => {
 		activeCategoryTab,
 		setActiveCategoryTab,
 		pageDisplayed,
-		dispatch
+		dispatch,
+		loading
 	} = props;
 
 	const [titleBarHandler, setTitleBarHandler] = useState();
@@ -189,7 +190,8 @@ const SearchBanner = (props) => {
 				setActiveCategoryTab,
 				categoryMetadata,
 				cloneData,
-				dispatch}
+				dispatch,
+				loading}
 			)}
 
 			<Modal 

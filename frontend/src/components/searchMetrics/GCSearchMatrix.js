@@ -58,7 +58,6 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 	},
 	titleText: {
-		fontWeight: 900,
 		fontSize: '14px'
 	},
 	tipText: {
@@ -307,10 +306,31 @@ export default function SearchMatrix(props) {
 			}
 		}
 		let topFiveArr = Array.from(topFive)
-		topFiveArr = topFiveArr.map(term => {return {...term, checked:exactMatch(state.searchText, term.phrase)}})
+		topFiveArr = topFiveArr.map(term => {
+			return {...term, checked:exactMatch(state.searchText, term.phrase, " OR ")}
+		})
 		setExpansionTerms(topFiveArr);
 
 	}, [state, comparableExpansion]);
+
+	useEffect(() => {
+		if(state.searchSettings.isFilterUpdate & state.searchSettings.expansionTermAdded){
+			let newSearchText = state.searchText.trim()
+			expansionTerms.forEach(({phrase, source, checked}) => {
+				if(checked && !exactMatch(newSearchText, phrase, " OR ")) {
+					trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
+					newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
+				} 
+				else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
+					newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
+				}
+
+			})
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.expansionTermAdded = false;
+			setState(dispatch, { searchText: newSearchText, runSearch: true, searchSettings: newSearchSettings });
+		}
+	}, [state, expansionTerms, dispatch])
 
 	const handleSubmit = (event) => {
 		if (event) {
@@ -318,11 +338,11 @@ export default function SearchMatrix(props) {
 		}
 		let newSearchText = state.searchText.trim()
 		expansionTerms.forEach(({phrase, source, checked}) => {
-			if(checked && !exactMatch(newSearchText, phrase)) {
+			if(checked && !exactMatch(newSearchText, phrase, " OR ")) {
 				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
 				newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 			} 
-			else if(!checked && exactMatch(newSearchText,`${phrase}`)) {
+			else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
 				newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
 			}
 
@@ -333,6 +353,10 @@ export default function SearchMatrix(props) {
 	const handleAddSearchTerm = (phrase, source, idx) => {
 		const temp = _.cloneDeep(expansionTerms)
 		temp[idx].checked = !temp[idx].checked
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.expansionTermAdded = true;
+		newSearchSettings.isFilterUpdate = true;
+		setState(dispatch, { searchSettings: newSearchSettings });
 		setExpansionTerms(temp);
 	}
 	

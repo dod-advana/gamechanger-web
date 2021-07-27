@@ -168,7 +168,6 @@ const GlobalSearchHandler = {
 				})
 				totalCount += data.databases.total;
 				categoryMetadata.Databases.total = data.databases.total || 0;
-				console.log(data)
 			} catch (err) {
 				console.error(err);
 			}

@@ -155,6 +155,9 @@ const initState = {
 	snackBarMsg: '',
 	searchSettings: {
 		isFilterUpdate: false,
+		orgUpdate: false,
+		typeUpdate: false,
+		expansionTermAdded: false,
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
@@ -172,6 +175,12 @@ const initState = {
 		includeRevoked: false
 	},
 
+  // Presearch Filters
+	presearchSources: {},
+	presearchTypes: {},
+	seeMoreSources: false,
+	seeMoreTypes: false,
+
 	// Categories
 	selectedCategories: {
 		Documents: true,
@@ -187,7 +196,10 @@ const initState = {
 
 	// category totals
 	categoryMetadata: {},
-	activeCategoryTab: 'all'
+	activeCategoryTab: 'all',
+	
+	backendErrorMsg: '',
+	showBackendError: false
 };
 
 const init = (initialState) => {
