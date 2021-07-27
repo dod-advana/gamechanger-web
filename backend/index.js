@@ -284,7 +284,6 @@ http.createServer(app).listen(port);
 
 // shoutout to the user
 logger.boot(`
-====> App version: ${constants.VERSION}
 ====> Is decoupled? ${constants.GAME_CHANGER_OPTS.isDecoupled}
 ====> http port: ${port}
 ====> https port: ${securePort}
@@ -293,8 +292,10 @@ logger.boot(`
 ====> Using Kerberos: ${process.env.APP_USE_KERBEROS === 'true' ? 'yes' : 'no'}
 ====> Using Docker: ${process.env.DOCKER === 'true' ? 'yes' : 'no'}
 ====> Redis url: ${process.env.REDIS_URL || 'redis://localhost'}
-====> Postgres host: ${constants.POSTGRES_CONFIG.host}
-====> Postgres port: ${constants.POSTGRES_CONFIG.port}
+====> game_changer postgres host: ${process.env.POSTGRES_HOST_GAME_CHANGER}
+====> gc-orchestration postgres host: ${process.env.POSTGRES_HOST_GC_ORCHESTRATION}
+====> uot postgres host: ${process.env.POSTGRES_HOST_UOT}
+====> module postgres host: ${process.env.PG_HOST}
 `);
 
 if(process.env.PRINT_ROUTES === 'true') {
@@ -315,7 +316,9 @@ if(process.env.PRINT_ROUTES === 'true') {
 		});
 	}
 	fs.writeFile(__dirname + '/security_scan/route_check/routes.csv', output, (err) => {
-		console.error(err);
+		if(err) {
+			console.error(err);
+		}
 	});
 }
 
