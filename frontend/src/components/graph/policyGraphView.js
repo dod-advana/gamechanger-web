@@ -527,8 +527,6 @@ export default function PolicyGraphView(props) {
 			zIndex: 99
 		};
 		
-		console.log(mouseXY)
-		
 		if (!graph || !graph.nodes) return;
 		
 		const node = graph.nodes.filter(node => {
