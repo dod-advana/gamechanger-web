@@ -1,16 +1,21 @@
 import React from 'react';
-import { Tooltip} from '@material-ui/core'
 import ReactTable from 'react-table';
 
 import ProgressBar from './util/ProgressBar';
-import {TableRow, StatusCircle, BorderDiv} from './util/styledDivs';
+import {TableRow, BorderDiv} from './util/styledDivs';
 import styles from '../GCAdminStyles';
 
 import "react-table/react-table.css";
 import './index.scss';
-const status = ['ok', 'loading', 'error'];
 
 const currentColumns = [
+    {
+        Header: 'Category',
+        accessor: 'category',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
     {
         Header: 'Process',
         accessor: 'process',
@@ -20,21 +25,28 @@ const currentColumns = [
     },
     {
         Header: 'Progress',
-        accessor: 'progress',
+        id: 'progress',
         Cell: row => (
-            <TableRow>{row.value}</TableRow>
+            <TableRow>{row.original.progress} of {row.original.total}</TableRow>
         )
     },
     {
         Header: 'Percentage',
         accessor: 'date',
         Cell: row => (
-            <TableRow>{row.value}</TableRow>
+            <TableRow><ProgressBar progress={100*row.original.progress/row.original.total}/></TableRow>
         )
     }
 ]
 
 const completedColumns = [
+    {
+        Header: 'Category',
+        accessor: 'category',
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
     {
         Header: 'Process',
         accessor: 'process',
@@ -66,38 +78,48 @@ const completedColumns = [
 const Process = (props) => {
     /**
      * Get the general information for the API
-     * @method getAPIInformation
+     * @method getProcessData
      */
      const getProcessData = () =>{
         const processList = [];
-        if(props.processes.process_status && props.processes.process_status.flags){
-            
+        if(props.processes.process_status){
+            for(const key in props.processes.process_status){
+                if(key !== 'flags'){
+                    const status = key.split(': ')
+                    processList.push({
+                        ...props.processes.process_status[key],
+                        process:status[1],
+                        category:status[0]
+                    })
+                }
+            } 
         }
         return processList;
     } 
     /**
-     * @method getProcessStatus
-     * @returns 
+     * Get the general information for the API
+     * @method getCompletedData
      */
-    const getProcessStatus = () =>{
-        if(props.processes.process_status && props.processes.process_status.flags){
-            const flags = props.processes.process_status.flags
-            for(const key in flags){
-                if(flags[key]){
-                    // if a flag is true a process is running
-                    return 1;
-                }
-            }
+     const getCompletedData = () =>{
+        const processList = [];
+        if(props.processes && props.processes.completed_process){
+            for(const completed of props.processes.completed_process){
+                const completed_process = completed.process.split(': ')
+                processList.push({
+                    ...completed,
+                    process:completed_process[1],
+                    category:completed_process[0]
+                })
+            } 
         }
-        // 0 is a good status that nothing is running
-        return 0;
-    }
+        
+        return processList;
+    } 
 
     return (			
         <div>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
                 <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>General Information</p>
-                <Tooltip title={"Connection " + status[getProcessStatus()].toUpperCase()} placement="right" arrow><StatusCircle className = {status[getProcessStatus()]}/></Tooltip>
             </div>
             <div className='info'>
                 <BorderDiv className='half'>
@@ -110,7 +132,7 @@ const Process = (props) => {
                                 data={getProcessData()}
                                 columns={currentColumns}
                                 className='striped -highlight'
-                                defaultPageSize={5}
+                                defaultPageSize={10}
                             />
                         </div>           
                     </fieldset>
@@ -122,11 +144,11 @@ const Process = (props) => {
                     <fieldset className={'field'}>
                         <div className='info-container'>
                             <ReactTable
-                                data={props.processes.completed_process?props.processes.completed_process:[]}
+                                data={getCompletedData()}
                                 columns={completedColumns}
                                 className='striped -highlight'
                                 defaultSorted = {[ { id: "date", desc: true } ]}
-                                defaultPageSize={5}
+                                defaultPageSize={10}
                             />
                         </div>           
                     </fieldset>
