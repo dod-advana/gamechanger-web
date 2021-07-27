@@ -132,8 +132,11 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
                 edaSettings.organizations.push(value);
             }                
             break;
-        case 'issueOffice':
-            edaSettings.issueOffice = value;
+        case 'issueOfficeDoDAAC':
+            edaSettings.issueOfficeDoDAAC = value;
+            break;
+        case 'issueOfficeName':
+            edaSettings.issueOfficeName = value;
             break;
         case 'allYears':
             edaSettings.allYearsSelected = true;
@@ -211,22 +214,7 @@ const renderStats = (state) => {
     );
 }
 
-const getCommonWords = (phrases) => {
-    const dictionary = {};
-    for (const phrase of phrases) {
-        const words = phrase.toLowerCase().split(' ');
-        for (const word of words) {
-            if (dictionary[word]) {
-                dictionary[word] += 1;
-            }
-            else {
-                dictionary[word] = 1;
-            }
-        }
-    }
 
-    return Object.keys(dictionary).filter(word => dictionary[word] > 1);
-}
 
 const renderMajcoms = (state, dispatch, org) => {
     const orgToMajcom = {
@@ -285,12 +273,6 @@ const renderMajcoms = (state, dispatch, org) => {
 
     for (const subOrg of orgs) {
         let searchQuery = subOrg.toLowerCase();
-        const commonWords = getCommonWords(orgs);
-
-        // in order to properly filter, have to remove any common words between options
-        for (const word of commonWords) {
-            searchQuery = searchQuery.replace(word, '');
-        }
 
         orgCheckboxes.push(
             <FormControlLabel
@@ -436,15 +418,34 @@ const renderOrganizationFilters = (state, dispatch) => {
     )
 }
 
-const renderIssueOfficeFilter = (state, dispatch) => {
+const renderIssueOfficeDoDAACFilter = (state, dispatch) => {
     return (
         <TextField
             placeholder="Issue Office DoDAAC"
             variant="outlined"
-            defaultValue={state.edaSearchSettings.issueOffice}
+            defaultValue={state.edaSearchSettings.issueOfficeDoDAAC}
             style={{ backgroundColor: 'white', width: '100%' }}
             fullWidth={true}
-            onBlur={(event) => setEDASearchSetting('issueOffice', event.target.value, state, dispatch)}
+            onBlur={(event) => setEDASearchSetting('issueOfficeDoDAAC', event.target.value, state, dispatch)}
+            inputProps={{
+                style: {
+                    height: 19,
+                    width: '100%'
+                }
+            }}
+        />
+    )
+}
+
+const renderIssueOfficeNameFilter = (state, dispatch) => {
+    return (
+        <TextField
+            placeholder="Issue Office Name"
+            variant="outlined"
+            defaultValue={state.edaSearchSettings.issueOfficeName}
+            style={{ backgroundColor: 'white', width: '100%' }}
+            fullWidth={true}
+            onBlur={(event) => setEDASearchSetting('issueOfficeName', event.target.value, state, dispatch)}
             inputProps={{
                 style: {
                     height: 19,
@@ -731,7 +732,11 @@ const EDASearchMatrixHandler = {
                 </GCAccordion>
     
                 <GCAccordion contentPadding={15} expanded={false} header={'ISSUE OFFICE DODAAC'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-                    { renderIssueOfficeFilter(state, dispatch) }
+                    { renderIssueOfficeDoDAACFilter(state, dispatch) }
+                </GCAccordion>
+
+                <GCAccordion contentPadding={15} expanded={false} header={'ISSUE OFFICE NAME'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                    { renderIssueOfficeNameFilter(state, dispatch) }
                 </GCAccordion>
     
                 <GCAccordion contentPadding={15} expanded={false} header={'FISCAL YEAR'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
@@ -753,7 +758,7 @@ const EDASearchMatrixHandler = {
                 <GCButton style={{width: '100%', marginBottom: '10px', marginLeft: '-1px' }} onClick={() => { setState(dispatch, { runSearch: true })}}>Update Search</GCButton>
     
                 <div className={'filters-container sidebar-section-title'} style={{ marginBottom: 5 }}>STATISTICS</div>
-                <GCAccordion contentPadding={0} expanded={false} header={'CONTRACT TOTALS'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
+                <GCAccordion contentPadding={0} expanded={true} header={'CONTRACT TOTALS'} headerBackground={'rgb(56,63,64)'} headerTextColor={'white'} headerTextWeight={'normal'}>
                     {state.statsLoading &&
                         <div style={{ margin: '0 auto' }}>
                             <LoadingIndicator customColor={gcOrange} />

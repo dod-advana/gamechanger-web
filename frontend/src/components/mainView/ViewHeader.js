@@ -77,7 +77,7 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-
+    
 	useEffect(()=> {
 		let tempCount;
 		switch(activeCategoryTab){
@@ -147,13 +147,28 @@ const ViewHeader = (props) => {
 		}
 		setDropdownValue(value)
 	}
-	
-	return (
-		<div className={'results-count-view-buttons-container'} style={{...mainStyles}}>
+
+    return (
+
+        <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
+		{state.cloneData.clone_name === "gamechanger" ?
+			<>
+			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
+				<div className={'sidebar-section-title'}>
+					{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
+				</div>
+			:
+				<div className={'sidebar-section-title'}>
+					{'Loading results ...'}
+				</div>
+			}
+			</>
+		:
 			<div className={'sidebar-section-title'}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
-			<div className={'view-buttons-container'}>
+		}
+            <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>
@@ -265,7 +280,8 @@ const ViewHeader = (props) => {
 				/>
 			</div>
 		</div>
-	)
+        )
+
 }
 
 ViewHeader.propTypes = {

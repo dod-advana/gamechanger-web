@@ -13,7 +13,6 @@ jest/
 
 # production
 /build
-package-lock.json
 
 # misc
 .DS_Store

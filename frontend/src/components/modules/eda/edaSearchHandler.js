@@ -1,8 +1,9 @@
 import _ from "lodash";
 
 import {
+	getQueryVariable,
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
-	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE, SEARCH_TYPES
+	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE,
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
@@ -50,14 +51,6 @@ const EdaSearchHandler = {
 			edaSearchSettings
 		} = state;
 		
-		const {
-			searchType,
-			includeRevoked,
-			accessDateFilter,
-			publicationDateFilter,
-			publicationDateAllTime,
-			searchFields,
-		} = searchSettings;
 		
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
@@ -69,7 +62,7 @@ const EdaSearchHandler = {
 			return search.url;
 		});
 		
-		this.setSearchURL({...state, searchSettings});
+		this.setSearchURL(state);
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
@@ -105,7 +98,6 @@ const EdaSearchHandler = {
 		let searchResults = [];
 		let foundEntity = false;
 	
-		const transformResults = searchType === SEARCH_TYPES.contextual;
 		
 		setState(dispatch, {
 			selectedDocuments: new Map(),
@@ -134,8 +126,6 @@ const EdaSearchHandler = {
 	
 		const charsPadding = listView ? 750 : 90;
 	
-		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
-	
 		const tiny_url = await createTinyUrl(cloneData);
 		
 		try {
@@ -152,16 +142,9 @@ const EdaSearchHandler = {
 				searchText: searchObject.search,
 				offset,
 				options: {
-					transformResults,
 					charsPadding,
 					showTutorial,
-					useGCCache,
 					tiny_url,
-					searchFields,
-					accessDateFilter,
-					publicationDateFilter,
-					publicationDateAllTime,
-					includeRevoked,
 					combinedSearch,
 					edaSearchSettings
 				},
@@ -282,16 +265,8 @@ const EdaSearchHandler = {
 				offset,
 				limit: 10000,
 				options: {
-					transformResults,
 					charsPadding,
-					showTutorial,
-					useGCCache,
 					tiny_url,
-					searchFields,
-					accessDateFilter,
-					publicationDateFilter,
-					publicationDateAllTime,
-					includeRevoked,
 					combinedSearch,
 					edaSearchSettings,
 					forStats: true,
@@ -354,13 +329,186 @@ const EdaSearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		// TODO:
-		return {};
+		if (!url) url = window.location.href;
+
+		const parsed = {};
+		const newSearchSettings = {};
+
+		const searchText = getQueryVariable('q', url);
+		const offsetURL = getQueryVariable('offset', url);
+		const orgURL = getQueryVariable('orgFilter', url);
+		const dodaacURL = getQueryVariable('dodaac', url);
+		const officeNameURL = getQueryVariable('officeName', url);
+		const fiscalYearsURL = getQueryVariable('fiscalYears', url);
+		const contractDataURL = getQueryVariable('contractData', url);
+		const minAmountURL = getQueryVariable('minAmount', url);
+		const maxAmountURL = getQueryVariable('maxAmount', url);
+		const modTypeURL = getQueryVariable('modType', url);
+		const startDateURL = getQueryVariable('startDate', url);
+		const endDateURL = getQueryVariable('endDate', url);
+		const issueAgencyURL = getQueryVariable('issueAgency', url);
+
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
+
+		if (searchText) {
+			parsed.searchText = searchText;
+		}
+
+		if (!isNullish(offsetURL)) {
+			const offset = parseInt(offsetURL);
+			if (!isNaN(offset))
+				parsed.offset = offset;
+			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
+		}
+
+		if (!isNullish(orgURL)) {
+			const hasSubOrgs = orgURL.indexOf(':') !== -1;
+			const orgs = orgURL.split('|');
+			newSearchSettings.allOrgsSelected = false;
+			if (!hasSubOrgs) {
+				newSearchSettings.organizations = orgs[0].split("_");
+			}
+			else {
+				const organizations = [];
+				const majcoms = {
+					"air force": [],
+					"army": [],
+					"defense": [],
+					"navy": []
+				}
+
+				for (const org of orgs) {
+					const orgWithSubOrgs = org.split(':');
+					organizations.push(orgWithSubOrgs[0]);
+					if (orgWithSubOrgs.length > 1) {
+						const subOrgs = orgWithSubOrgs[1].split('_');
+						for (const subOrg of subOrgs) {
+							majcoms[orgWithSubOrgs[0]].push(subOrg);
+						}
+					}
+				}
+				newSearchSettings.organizations = organizations;
+				newSearchSettings.majcoms = majcoms;
+			}
+		}
+
+		if (!isNullish(dodaacURL)) {
+			newSearchSettings.issueOfficeDoDAAC = dodaacURL;
+		}
+
+		if (!isNullish(officeNameURL)) {
+			newSearchSettings.issueOfficeName = officeNameURL;
+		}
+
+		if (!isNullish(fiscalYearsURL)) {
+			newSearchSettings.allYearsSelected = false;
+			newSearchSettings.fiscalYears = fiscalYearsURL.split('_');
+		}
+
+		if (!isNullish(contractDataURL)) {
+			newSearchSettings.allDataSelected = false;
+			const dataSources = contractDataURL.split('_');
+			const contractData = {
+				pds: false,
+				syn: false,
+				none: false
+			}
+			for (const source of dataSources) {
+				contractData[source] = true;
+			}
+
+			newSearchSettings.contractData = contractData;
+		}
+
+		if (!isNullish(minAmountURL)) {
+			newSearchSettings.minObligatedAmount = minAmountURL;
+		}
+
+		if (!isNullish(maxAmountURL)) {
+			newSearchSettings.maxObligatedAmount = maxAmountURL;
+		}
+
+		if (!isNullish(modTypeURL)) {
+			newSearchSettings.contractsOrMods = modTypeURL;
+		}
+
+		if (!isNullish(startDateURL)) {
+			newSearchSettings.startDate = startDateURL;
+		}
+
+		if (!isNullish(endDateURL)) {
+			newSearchSettings.endDate = endDateURL;
+		}
+
+		if (!isNullish(issueAgencyURL)) {
+			newSearchSettings.issueAgency = issueAgencyURL;
+		}
+
+		parsed.edaSearchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.edaSearchSettings));
+
+		return parsed;
 	},
 
 	setSearchURL(state) {
-		// TODO:
+		const { searchText, resultsPage } = state;
+		const {
+			allOrgsSelected,
+			organizations,
+			startDate,
+			endDate,
+			issueAgency,
+			issueOfficeDoDAAC,
+			issueOfficeName,
+			allYearsSelected,
+			fiscalYears,
+			allDataSelected,
+			contractData,
+			minObligatedAmount,
+			maxObligatedAmount,
+			contractsOrMods,
+			majcoms
+		} = state.edaSearchSettings;
+
+		let orgFilterText = undefined;
+		const majcomFilter = organizations && majcoms ? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1) : undefined;
+		if (!allOrgsSelected && majcomFilter && Object.keys(majcomFilter).length > 0) {
+			orgFilterText = '';
+			for (const org of organizations) {
+				let separator = Object.keys(majcomFilter).indexOf(org) !== 0 ? '|' : '';
+				orgFilterText += `${separator}${org}${majcomFilter[org] ? ':'+majcomFilter[org].join('_') : ''}`;
+			}
+		}
+		else {
+			orgFilterText = !allOrgsSelected && organizations && organizations.length > 0 ? organizations.join('_') : undefined;
+		}
+		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
+		const issueOfficeNameText = issueOfficeName ?? undefined;
+		const fiscalYearsText = !allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
+		const contractDataText = !allDataSelected && contractData ? Object.keys(_.pickBy(contractData, (value, key) => value)).join('_') : undefined;
+		const minObligatedAmountText = minObligatedAmount ?? undefined;
+		const maxObligatedAmountText = maxObligatedAmount ?? undefined;
+		const modTypeText = contractsOrMods ?? undefined;
+		const startDateText = startDate ?? undefined; 
+		const endDateText = endDate ?? undefined;
+		const issueAgencyText = issueAgency ?? undefined;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
 		const params = new URLSearchParams();
+
+		if (searchText) params.append('q', searchText);
+		if (offset) params.append('offset', String(offset));
+		if (orgFilterText) params.append('orgFilter', orgFilterText);
+		if (issueOfficeDoDAACText) params.append('dodaac', issueOfficeDoDAACText);
+		if (issueOfficeNameText) params.append('officeName', issueOfficeNameText);
+		if (fiscalYearsText) params.append('fiscalYears', fiscalYearsText);
+		if (contractDataText) params.append('contractData', contractDataText);
+		if (minObligatedAmountText) params.append('minAmount', minObligatedAmountText);
+		if (maxObligatedAmountText) params.append('maxAmount', maxObligatedAmountText);
+		if (modTypeText) params.append('modType', modTypeText);
+		if (startDateText) params.append('startDate', startDateText);
+		if (endDateText) params.append('endDate', endDateText);
+		if (issueAgencyText) params.append('issueAgency', issueAgencyText);
+
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 
 		window.history.pushState(null, document.title, linkString);

@@ -109,10 +109,10 @@ export const exportToCsv = (filename, data, isJson=false) => {
 }
 
 export const orgFilters = {
-	'Dept. of Defense': true,
-	'Joint Chiefs of Staff': true,
-	'Intelligence Community': true,
-	'United States Code': true,
+	'Dept. of Defense': false,
+	'Joint Chiefs of Staff': false,
+	'Intelligence Community': false,
+	'United States Code': false,
 	'Executive Branch': false,
 	'Dept. of the Air Force': false,
 	'US Army': false,
@@ -206,7 +206,7 @@ export const getCloneTitleForFactory = (cloneData, upperCase) => {
 export const useMountEffect = (fun) => useEffect(fun, []);
 
 export const typeFilters = {
-	'Documents': true,
+	'Documents': false,
 	'Legislations': false,
 	'Memorandums': false,
 	'Titles': false,
@@ -792,8 +792,8 @@ export const encode = (filename) => {
     );
 }
 
-export const exactMatch = (phrase, word) => {
-	const wordList = phrase.trim().split(' ')
+export const exactMatch = (phrase, word, split) => {
+	const wordList = phrase.trim().split(split)
 	let exists = false
 	wordList.forEach(w => {
 		if(w.toLowerCase()===word.toLowerCase()){
