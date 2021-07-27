@@ -190,12 +190,12 @@ const GlobalSearchMainViewHandler = {
 					<div key={'cardView'} style={{marginTop: 'auto'}}>
 						<div>
 							<div id="game-changer-content-top"/>
-							<StyledCenterContainer showSideFilters={state.showSideFilters}>
-								<div className={'left-container'}>
+							<StyledCenterContainer showSideFilters={false}>
+								{/* <div className={'left-container'}>
 										<div className={'side-bar-container'}>
 											<GameChangerSearchMatrix context={{state, dispatch}} />
 										</div>
-								</div>
+								</div> */}
 								<div className={'right-container'}>
 										{loading &&
 											<div style={{ margin: '0 auto' }}>
