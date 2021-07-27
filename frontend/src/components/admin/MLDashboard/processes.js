@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ReactTable from 'react-table';
 
 import ProgressBar from './util/ProgressBar';
@@ -116,6 +116,10 @@ const Process = (props) => {
         return processList;
     } 
 
+    useEffect(() => {
+        props.getProcesses();
+         // eslint-disable-next-line
+	},[]);
     return (			
         <div>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
