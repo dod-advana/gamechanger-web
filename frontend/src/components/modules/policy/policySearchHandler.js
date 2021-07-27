@@ -119,14 +119,15 @@ const PolicySearchHandler = {
 		let searchResults = [];
 	
 		const transformResults = searchType === SEARCH_TYPES.contextual;
-		
-		setState(dispatch, {
+
+        setState(dispatch, {
 			selectedDocuments: new Map(),
-			loading: true,
-			metricsLoading: true,
+			loading: searchSettings.isFilterUpdate ? false: true,
+            replaceResults: searchSettings.isFilterUpdate ? true: false,
+            metricsLoading: false,
 			noResultsMessage: null,
 			autocompleteItems: [],
-			rawSearchResults: [],
+			rawSearchResults: searchSettings.isFilterUpdate ? true : [],
 			docSearchResults: [],
 			topicSearchResults: [],
 			entitySearchResults: [],
@@ -137,6 +138,7 @@ const PolicySearchHandler = {
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
+			topicCount: 0,
 			resultsDownloadURL: '',
 			timeFound: 0.0,
 			iframePreviewLink: null,
@@ -146,7 +148,7 @@ const PolicySearchHandler = {
 			docTypeData: {},
 			runningEntitySearch: true,
 			runningTopicSearch: true,
-			hideTabs: true
+			hideTabs: false
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
@@ -284,6 +286,8 @@ const PolicySearchHandler = {
 						})
 					}
 	
+					const newSearchSettings = _.cloneDeep(searchSettings);
+
 					if (doc_types && doc_orgs) {
 						// get doc types (memorandum, issuance, etc.). also get top org.
 						let orgCountMap = new Map();
@@ -317,7 +321,15 @@ const PolicySearchHandler = {
 								name: key,
 								value: docTypeMap[key]
 							});
+						}
+						for(let key in state.presearchTypes){
+							if(!_.has( docTypeMap, key)){
+								typeData.push({
+									name: key,
+									value: 0
+								});
 							}
+						}
 							
 						let sortedTypes = typeData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
@@ -327,7 +339,6 @@ const PolicySearchHandler = {
 						for (let elt in sortedTypes) {
 							sidebarTypes.push([sortedTypes[elt].name, numberWithCommas(sortedTypes[elt].value)]);
 						}
-	
 						let orgData = [];
 						for (let key in orgCountMap) {
 							orgData.push({
@@ -335,44 +346,81 @@ const PolicySearchHandler = {
 								value: orgCountMap[key]
 							});
 						}
+
+						for(let key in state.presearchSources){
+							if(!_.has( orgCountMap, key)){
+								orgData.push({
+									name: key,
+									value: 0
+								});
+							}
+						}
 						
 						let sortedOrgs = orgData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
 						});
-						
-						let orgFilter = searchSettings.orgFilter;
-						if(sortedOrgs && sortedOrgs.length) {
-							orgFilter = {};
-							sortedOrgs.forEach((o) => {
-								orgFilter[o.name] = !allOrgsSelected;
-							});
-						}
-						
+
+
 						let typeFilter = searchSettings.typeFilter;
-						if(sortedTypes && sortedTypes.length) {
-							typeFilter = {};
-							sortedTypes.forEach((t) => {
-								typeFilter[t.name] = !allTypesSelected;
-							});
+						let orgFilter = searchSettings.orgFilter;
+						if(!searchSettings.isFilterUpdate){
+							if(sortedOrgs && sortedOrgs.length) {
+								orgFilter = {};
+								sortedOrgs.forEach((o) => {
+									orgFilter[o.name] = !allOrgsSelected;
+								});
+							}
+							
+							if(sortedTypes && sortedTypes.length) {
+								typeFilter = {};
+								sortedTypes.forEach((t) => {
+									typeFilter[t.name] = !allTypesSelected;
+								});
+							}
 						}
-						
-						searchSettings.orgFilter = orgFilter;
-						searchSettings.typeFilter = typeFilter;
+
+						newSearchSettings.orgFilter = orgFilter;
+						newSearchSettings.typeFilter = typeFilter;
 	
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
-
+						
 						if(!searchSettings.isFilterUpdate){
-							searchSettings.originalOrgFilters = sidebarOrgData;
-							searchSettings.originalTypeFilters = sidebarTypes;
+							newSearchSettings.originalTypeFilters = sidebarTypes;
+							newSearchSettings.originalOrgFilters = sidebarOrgData;
+						}else if(searchSettings.orgUpdate){
+
+							const typeFilterObject = {};
+							newSearchSettings.originalTypeFilters.forEach(type => typeFilterObject[type[0]] = 0);
+
+							sidebarTypes.forEach(type => {
+								typeFilterObject[type[0]] = type[1];
+							})
+							
+							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map(type => [type, typeFilterObject[type]]);
+							newSearchSettings.originalTypeFilters.sort((a,b) => b[1] - a[1]);
+						}else if(searchSettings.typeUpdate){
+
+							const orgFilterObject = {};
+							newSearchSettings.originalOrgFilters.forEach(org => orgFilterObject[org[0]] = 0);
+
+							sidebarOrgData.forEach(org => {
+								orgFilterObject[org[0]] = org[1];
+							})
+							
+							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map(obj => [obj, orgFilterObject[obj]]);
+							newSearchSettings.originalOrgFilters.sort((a,b) => b[1] - a[1]);
 						}
+
+						newSearchSettings.orgUpdate = false;
+						newSearchSettings.typeUpdate = false;
+						newSearchSettings.isFilterUpdate = false;
 						
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
-							sidebarOrgs: sidebarOrgData,
-							searchSettings
+							sidebarOrgs: sidebarOrgData
 						});
 					}
 					
@@ -384,8 +432,9 @@ const PolicySearchHandler = {
 							false
 						);
 					}
-	
+
 					setState(dispatch, {
+						searchSettings: newSearchSettings,
 						activeCategoryTab: (entities.length === 0 && topics.length === 0) ? 'Documents' : 'all',
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
@@ -619,6 +668,47 @@ const PolicySearchHandler = {
 						topicsLoading: false
 					});
 				}
+	},
+
+	async getPresearchData(state, dispatch) {
+		const {
+			cloneData
+		} = state;
+		if(_.isEmpty(state.presearchSources)){
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getPresearchData',
+				cloneName: cloneData.clone_name,
+				options: {},
+			});
+	
+			const orgFilters = {};
+			for(const key in resp.data.orgs){
+				orgFilters[resp.data.orgs[[key]]] = false;
+			}
+			const typeFilters = {};
+			for(const key in resp.data.types){
+				let name = resp.data.types[key];
+				if (name.slice(-1) !== 's') {
+					name = name + 's';
+				}
+				typeFilters[name] = false;
+			}
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.orgFilter = orgFilters;
+			newSearchSettings.typeFilter = typeFilters;
+			if(_.isEmpty(state.presearchSources)){
+				setState(dispatch, {presearchSources: orgFilters});
+			}
+			if(_.isEmpty(state.presearchTypes)){
+				setState(dispatch, {presearchTypes: typeFilters});
+			}
+			setState(dispatch, {searchSettings: newSearchSettings})
+		} else {
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.orgFilter = state.presearchSources;
+			newSearchSettings.typeFilter = state.presearchTypes;
+			setState(dispatch, {searchSettings: newSearchSettings});
+		}
 	},
 
 	parseSearchURL(defaultState, url) {

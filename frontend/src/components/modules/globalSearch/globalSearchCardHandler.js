@@ -615,8 +615,6 @@ const GlobalSearchCardHandler = {
 			
 			const {item, state, graphView} = props;
 			
-			console.log(props)
-			
 			const docListView = state.listView && !graphView;
 			
 			let { name, id } = item.resource;
