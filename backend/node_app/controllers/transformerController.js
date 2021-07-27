@@ -23,7 +23,8 @@ class TransformerController {
 			'getS3List': this.mlApi.getS3List,
 			'getModelsList': this.mlApi.getModelsList,
 			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
-			'setTransformerModel': this.mlApi.setTransformerModel,
+			'getFilesInCorpus': this.mlApi.getFilesInCorpus,
+			'getProcessStatus': this.mlApi.getProcessStatus,
 			'reloadModels': this.mlApi.reloadModels,
 			'downloadCorpus': this.mlApi.downloadCorpus,
 			'trainModel': this.mlApi.trainModel
@@ -35,6 +36,8 @@ class TransformerController {
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
+		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
+		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
 		// Post methods
 		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
