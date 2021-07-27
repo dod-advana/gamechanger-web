@@ -314,7 +314,7 @@ if(process.env.PRINT_ROUTES === 'true') {
 			}
 		});
 	}
-	fs.writeFile(__dirname + '/route_check/routes.csv', output, (err) => {
+	fs.writeFile(__dirname + '/security_scan/route_check/routes.csv', output, (err) => {
 		console.error(err);
 	});
 }
