@@ -123,7 +123,7 @@ const Process = (props) => {
     return (			
         <div>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>General Information</p>
+                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>ML Processes</p>
             </div>
             <div className='info'>
                 <BorderDiv className='half'>
