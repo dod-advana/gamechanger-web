@@ -57,8 +57,11 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 		})
 	})
 }
+function useQuery(location) {
+	return new URLSearchParams(location.search);
+  }
 
-export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }) {
+export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }, location) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
@@ -157,6 +160,15 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 			}
 		}
 	}
+
+	let query = useQuery(location);
+
+	const [fileUrl, setFileUrl] = React.useState(null);
+	const [filename, setFilename] = React.useState(null);
+	useEffect(() => {
+		setFileUrl(query.get('sourceUrl'));
+	}, [query, filename]);
+
 	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
 	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) || [];
 	const previewDataReflist = (data.length > 0 && data[iframePreviewLink.dataIdx] && getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) || [];
@@ -278,9 +290,13 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
 						/>
 					</div>
-					{!iframeLoading && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
+					{!iframeLoading && filename && filename.endsWith('pdf') && !filename.endsWith('html') && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
 					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: '100%' }}>
 						<iframe className="aref" id={'docPdfViewer'} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+					</div>
+					{!iframeLoading && filename && filename.endsWith('html')&& <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
+					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: '100%' }}>
+						<iframe className="aref" id={'pdfViewer'} src={fileUrl} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
 					</div>
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
 					<div className="searchdemo-vertical-bar-toggle" style={rightBarExtraStyles} onClick={() => handleRightPanelToggle()}>
