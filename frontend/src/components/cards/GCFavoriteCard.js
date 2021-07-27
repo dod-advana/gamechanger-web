@@ -12,7 +12,7 @@ import Chip from "@material-ui/core/Chip";
 import GCTooltip from "../common/GCToolTip"
 import GCButton from "../common/GCButton";
 import { trackEvent } from "../telemetry/Matomo";
-import {getTrackingNameForFactory} from "../../gamechangerUtils";
+import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 
 
 const StyledFavoriteDocumentCard = styled.div`
@@ -297,7 +297,7 @@ const FavoriteCard = (props) => {
 					<GCTooltip title={cardTitle} placement="top">
 						<div className={'summary-title'} onClick={isDocument ? () =>{
 							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardFavoritesInteraction', 'PDFOpen', documentObject.filename);
-							window.open(`/#/pdfviewer/gamechanger?filename=${documentObject.filename}&prevSearchText=${documentObject.search_text}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`);
+							window.open(`/#/pdfviewer/gamechanger?filename=${encode(documentObject.filename)}&prevSearchText=${documentObject.search_text}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`);
 						} : isTopic ? () => {
 							trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
 							window.open(`#/gamechanger/details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`);
