@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
+// import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import { trackEvent } from "../../telemetry/Matomo";
 import { setState } from "../../../sharedFunctions";
 import SearchSection from "../globalSearch/SearchSection";
