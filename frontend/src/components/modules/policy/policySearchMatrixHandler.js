@@ -221,7 +221,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							})}
 						</FormGroup>
 						{state.searchSettings.specificOrgsSelected &&
-							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> 
+							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a>
 						}
 					</>
 					) : (
