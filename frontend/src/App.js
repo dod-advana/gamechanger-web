@@ -87,7 +87,7 @@ const styles = {
 	newContainer: {
 		minHeight: 'calc(100% - 30px)',
 		marginLeft: '50px',
-		marginTop: '2em'
+		paddingTop: '2em'
 	}
 };
 
