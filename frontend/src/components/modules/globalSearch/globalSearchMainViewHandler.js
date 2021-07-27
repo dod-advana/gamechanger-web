@@ -21,6 +21,10 @@ import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
 import GCButton from "../../common/GCButton";
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
+import ApplicationsIcon from "../../../images/icon/slideout-menu/applications icon.png";
+import DashboardsIcon from "../../../images/icon/slideout-menu/dashboard icon.png";
+import DatabasesIcon from "../../../images/icon/slideout-menu/database icon.png";
+import DataSourcesIcon from "../../../images/icon/slideout-menu/resources icon.png";
 
 const fullWidthCentered = {
 	width: "100%",
@@ -326,8 +330,9 @@ const GlobalSearchMainViewHandler = {
 					{applications && applications.length > 0 && (activeCategoryTab === 'Applications' || activeCategoryTab === 'all') && selectedCategories['Applications'] &&
 						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
 							<SearchSection
-							section={'Applications'}
-							color={'rgb(50, 18, 77)'}
+								section={'Applications'}
+								color={'rgb(50, 18, 77)'}
+								icon={ApplicationsIcon}
 							>
 								{getSearchResults(applications, state, dispatch)}
 								<div className='gcPagination col-xs-12 text-center'>
@@ -348,8 +353,9 @@ const GlobalSearchMainViewHandler = {
 					{dashboards && dashboards.length > 0 && (activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') && selectedCategories['Dashboards'] &&
 						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
 							<SearchSection
-							section={'Dashboards'}
-							color={'rgb(11, 167, 146)'}
+								section={'Dashboards'}
+								color={'rgb(11, 167, 146)'}
+								icon={DashboardsIcon}
 							>
 								{getSearchResults(dashboards, state, dispatch)}
 								<div className='gcPagination col-xs-12 text-center'>
@@ -370,8 +376,9 @@ const GlobalSearchMainViewHandler = {
 					{dataSources && dataSources.length > 0 && (activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') && selectedCategories['DataSources'] &&
 						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
 							<SearchSection
-							section={'Data Sources'}
-							color={'rgb(5, 159, 217)'}
+								section={'Data Sources'}
+								color={'rgb(5, 159, 217)'}
+								icon={DataSourcesIcon}
 							>
 								{getSearchResults(dataSources, state, dispatch)}
 								<div className='gcPagination col-xs-12 text-center'>
@@ -392,8 +399,9 @@ const GlobalSearchMainViewHandler = {
 					{databases && databases.length > 0 && (activeCategoryTab === 'Databases' || activeCategoryTab === 'all') && selectedCategories['Databases'] &&
 						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
 							<SearchSection
-							section={'Databases'}
-							color={'rgb(233, 105, 29)'}
+								section={'Databases'}
+								color={'rgb(233, 105, 29)'}
+								icon={DatabasesIcon}
 							>
 								{getSearchResults(databases, state, dispatch)}
 								<div className='gcPagination col-xs-12 text-center'>
