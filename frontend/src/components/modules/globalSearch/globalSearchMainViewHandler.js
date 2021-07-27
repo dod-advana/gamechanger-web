@@ -298,7 +298,7 @@ const GlobalSearchMainViewHandler = {
 										<LoadingIndicator customColor={gcOrange} />
 									</div>
 								}
-								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
+								<div className='gcPagination col-xs-12 text-center'>
 									<Pagination
 										activePage={applicationsPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
@@ -326,7 +326,7 @@ const GlobalSearchMainViewHandler = {
 										<LoadingIndicator customColor={gcOrange} />
 									</div>
 								}
-								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
+								<div className='gcPagination col-xs-12 text-center'>
 									<Pagination
 										activePage={dashboardsPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
@@ -354,7 +354,7 @@ const GlobalSearchMainViewHandler = {
 										<LoadingIndicator customColor={gcOrange} />
 									</div>
 								}
-								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
+								<div className='gcPagination col-xs-12 text-center'>
 									<Pagination
 										activePage={dataSourcesPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
@@ -382,7 +382,7 @@ const GlobalSearchMainViewHandler = {
 										<LoadingIndicator customColor={gcOrange} />
 									</div>
 								}
-								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
+								<div className='gcPagination col-xs-12 text-center'>
 									<Pagination
 										activePage={databasesPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
