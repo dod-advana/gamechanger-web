@@ -522,10 +522,12 @@ export default function PolicyGraphView(props) {
 	const showNodeContextMenu = () => {
 		const myStyle = {
 			position: 'absolute',
-			top: `${mouseXY.y + 99 + (notificationCount * 50) + (expansionTerms ? 41 : 0) + (detailsView ? -175 : 0)}px`,
+			top: `${mouseXY.y + 154 + (notificationCount * 50) + (expansionTerms ? 41 : 0) + (detailsView ? -175 : 0)}px`,
 			left:`${mouseXY.x - 20 + (showSideFilters ? 372 : detailsView ? -100 : 0)}px`,
 			zIndex: 99
 		};
+		
+		console.log(mouseXY)
 		
 		if (!graph || !graph.nodes) return;
 		
@@ -1392,7 +1394,7 @@ export default function PolicyGraphView(props) {
 	}
 	
 	return (
-		<>
+		<div style={{height: 'calc(100vh - 30px)'}}>
 			{show2DView &&
 				<MemoizedNodeCluster2D renderContextMenu={showNodeContextMenu} runningQuery={runningSearch} cloneData={cloneData}
 					graph={filteredGraph} graphRefProp={graph2DRef} createGraphNode={create2dGraphNode}
@@ -1414,9 +1416,9 @@ export default function PolicyGraphView(props) {
 					<div style={styles.noResultsMessage}>{NO_RESULTS_MESSAGE}</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
-}
+};
 
 const styles = {
 	centeredContent: {

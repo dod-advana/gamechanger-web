@@ -16,7 +16,6 @@ import {MemoizedNodeCluster2D}  from "../graph/GraphNodeCluster2D";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
 import {trackEvent} from "../telemetry/Matomo";
 import {crawlerMappingFunc} from "../../gamechangerUtils";
-import {generateRandomColors} from "../../graphUtils";
 
 const TableRow = styled.div`
 	text-align: left;
