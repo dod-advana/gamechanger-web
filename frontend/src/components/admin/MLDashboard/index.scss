@@ -17,6 +17,7 @@
             border-top: 7px solid rgb(245, 245, 245);
         }
     }
+    
     .field{
         box-sizing: border-box;
         background: #171A23;
@@ -55,12 +56,15 @@
             padding: 7px 5px;
         }
         input{
+            color:rgb(245, 245, 245);
             background-color: rgba(255, 255, 255, 0.05);
         }
         option {
+            color:rgb(245, 245, 245);
             background-color: rgba(0, 0, 0, 0.85);
         }
         select{
+            color:rgb(245, 245, 245);
             background-color: rgba(255, 255, 255, 0.05);
         }
         .-btn{
