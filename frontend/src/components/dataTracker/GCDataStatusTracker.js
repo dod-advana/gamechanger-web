@@ -5,8 +5,7 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import { Typography } from "@material-ui/core";
-import { backgroundGreyDark, backgroundWhite} from "../../components/common/gc-colors";
-import { gcOrange} from "../../components/common/gc-colors";
+import TabStyles from '../common/TabStyles'
 import moment from 'moment'
 import Link from "@material-ui/core/Link";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -17,7 +16,6 @@ import {MemoizedNodeCluster2D}  from "../graph/GraphNodeCluster2D";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
 import {trackEvent} from "../telemetry/Matomo";
 import {crawlerMappingFunc} from "../../gamechangerUtils";
-import {generateRandomColors} from "../../graphUtils";
 
 const TableRow = styled.div`
 	text-align: left;
@@ -735,42 +733,42 @@ const GCDataStatusTracker = (props) => {
 	}
 	
 	return (
-		<div style={styles.tabContainer}>
+		<div style={TabStyles.tabContainer}>
 			<Tabs>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'documents' ? styles.tabSelectedStyle : {}),
+				<div style={TabStyles.tabButtonContainer}>
+					<TabList style={TabStyles.tabsList}>
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `5px 0 0 0`
 							}} title="userHistory" onClick={() => handleTabClicked('documents')}>
 							<Typography variant="h6" display="inline" title="cardView">DOCUMENTS</Typography>
 						</Tab>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'crawler' ? styles.tabSelectedStyle : {}),
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: '0 0 0 0'}}
 							title="crawlerTable" onClick={() => handleTabClicked('crawler')}>
 							<Typography variant="h6" display="inline">PROGRESS</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'version' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 0 0 0`
 						}} title="versionDocs" onClick={() => handleTabClicked('version')}>
 							<Typography variant="h6" display="inline" title="cardView">UPDATES</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'neo4j' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'neo4j' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 5px 0 0`
 						}} title="neo4jDataTracker" onClick={() => handleTabClicked('neo4j')}>
 							<Typography variant="h6" display="inline" title="cardView">KNOWLEDGE GRAPH</Typography>
 						</Tab>
 					</TabList>
 
-					<div style={styles.spacer}  />
+					<div style={TabStyles.spacer}  />
 				</div>
 
-				<div style={styles.panelContainer}>
+				<div style={TabStyles.panelContainer}>
 					<TabPanel>
 						{renderDataTable()}
 					</TabPanel>
@@ -787,63 +785,6 @@ const GCDataStatusTracker = (props) => {
 			</Tabs>
 		</div>
 	);
-}
-
-const styles = {
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px'
-	},
-	tabStyle: {
-		width: '140px',
-		border: '1px solid',
-		borderColor: backgroundGreyDark,
-		borderBottom: 'none !important',
-		borderRadius: `6px 6px 0px 0px`,
-		position: ' relative',
-		listStyle: 'none',
-		padding: '2px 12px',
-		cursor: 'pointer',
-		textAlign: 'center',
-		backgroundColor: backgroundWhite,
-		marginRight: '2px',
-		marginLeft: '2px',
-		height: 45,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	tabSelectedStyle: {
-		border: '1px solid transparent',
-		backgroundColor: gcOrange,
-		borderColor: 'none',
-		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
-	},
-	panelContainer: {
-		alignItems: 'center',
-		marginTop: 10,
-		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20
-	}
-	
-
 }
 
 GCDataStatusTracker.propTypes = {
