@@ -254,27 +254,28 @@ const GlobalSearchMainViewHandler = {
 			iframePreviewLink,
 			selectedCategories,
 			rawSearchResults,
+			applicationsSearchResults,
 			applicationsPage,
+			applicationsLoading,
+			applicationsPagination,
+			dashboardsSearchResults,
 			dashboardsPage,
+			dashboardsLoading,
+			dashboardsPagination,
+			dataSourcesSearchResults,
 			dataSourcesPage,
-			databasesPage
+			dataSourcesLoading,
+			dataSourcesPagination,
+			databasesSearchResults,
+			databasesPage,
+			databasesLoading,
+			databasesPagination
 		} = state;
 		
-		const applications = rawSearchResults.filter(result => {
-			return result.type === 'application';
-		});
-		
-		const dashboards = rawSearchResults.filter(result => {
-			return result.type === 'dashboard';
-		});
-		
-		const dataSources = rawSearchResults.filter(result => {
-			return result.type === 'dataSource';
-		});
-		
-		const databases = rawSearchResults.filter(result => {
-			return result.type === 'database';
-		});
+		const applications = applicationsSearchResults;		
+		const dashboards = dashboardsSearchResults;
+		const dataSources = dataSourcesSearchResults;		
+		const databases = databasesSearchResults;
 		
 		let sideScroll = {
 			height: '72vh'
@@ -284,49 +285,6 @@ const GlobalSearchMainViewHandler = {
 		return (
 			<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`} style={{marginTop: 0}}>
 				<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
-					{/*{!loading && (activeCategoryTab === 'Applications' || activeCategoryTab === 'All') && selectedCategories['Applications'] &&*/}
-					{/*	<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>*/}
-					{/*		<SearchSection*/}
-					{/*			section={'Applications'}*/}
-					{/*			color={'#131E43'}*/}
-					{/*		>*/}
-					{/*			{activeCategoryTab === 'All' ? <>*/}
-					{/*				{!applicationsLoading ?*/}
-					{/*					getSearchResults(applications, state, dispatch) :*/}
-					{/*					<div className='col-xs-12'>*/}
-					{/*						<LoadingIndicator customColor={gcOrange} />*/}
-					{/*					</div>*/}
-					{/*				}*/}
-					{/*				<div className='gcPagination col-xs-12 text-center'>*/}
-					{/*					<Pagination*/}
-					{/*						activePage={applicationsPage}*/}
-					{/*						itemsCountPerPage={RESULTS_PER_PAGE}*/}
-					{/*						totalItemsCount={applications.length}*/}
-					{/*						pageRangeDisplayed={8}*/}
-					{/*						onChange={async page => {*/}
-					{/*							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);*/}
-					{/*							setState(dispatch, { applicationsLoading: true, applicationsPage: page, applicationsPagination: true });*/}
-					{/*						}}/>*/}
-					
-					{/*				</div>*/}
-					{/*				</>*/}
-					{/*				:*/}
-					{/*				<>*/}
-					{/*					{*/}
-					{/*						getSearchResults(applications, state, dispatch)*/}
-					{/*				*/}
-					{/*					}*/}
-					{/*					{*/}
-					{/*						applicationsPagination && <div className='col-xs-12'>*/}
-					{/*							<LoadingIndicator customColor={gcOrange} containerStyle={{margin:'-100px auto'}}/>*/}
-					{/*						</div>*/}
-					{/*					}*/}
-					{/*				</>*/}
-					{/*			}*/}
-					{/*		</SearchSection>*/}
-					{/*	</div>*/}
-					{/*}*/}
-					
 					{applications && applications.length > 0 && (activeCategoryTab === 'Applications' || activeCategoryTab === 'all') && selectedCategories['Applications'] &&
 						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
 							<SearchSection
@@ -334,12 +292,17 @@ const GlobalSearchMainViewHandler = {
 								color={'rgb(50, 18, 77)'}
 								icon={ApplicationsIcon}
 							>
-								{getSearchResults(applications, state, dispatch)}
-								<div className='gcPagination col-xs-12 text-center'>
+								{!applicationsLoading && !applicationsPagination ?
+									getSearchResults(applications, state, dispatch) :
+									<div className='col-xs-12'>
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								}
+								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
 									<Pagination
 										activePage={applicationsPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={applications.length}
+										totalItemsCount={state.applicationsTotalCount}
 										pageRangeDisplayed={8}
 										onChange={async page => {
 											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
@@ -357,12 +320,17 @@ const GlobalSearchMainViewHandler = {
 								color={'rgb(11, 167, 146)'}
 								icon={DashboardsIcon}
 							>
-								{getSearchResults(dashboards, state, dispatch)}
-								<div className='gcPagination col-xs-12 text-center'>
+								{!dashboardsLoading && !dashboardsPagination ?
+									getSearchResults(dashboards, state, dispatch) :
+									<div className='col-xs-12'>
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								}
+								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
 									<Pagination
 										activePage={dashboardsPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={dashboards.length}
+										totalItemsCount={state.dashboardsTotalCount}
 										pageRangeDisplayed={8}
 										onChange={async page => {
 											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
@@ -380,12 +348,17 @@ const GlobalSearchMainViewHandler = {
 								color={'rgb(5, 159, 217)'}
 								icon={DataSourcesIcon}
 							>
-								{getSearchResults(dataSources, state, dispatch)}
-								<div className='gcPagination col-xs-12 text-center'>
+								{!dataSourcesLoading && !dataSourcesPagination ?
+									getSearchResults(dataSources, state, dispatch) :
+									<div className='col-xs-12'>
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								}
+								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
 									<Pagination
 										activePage={dataSourcesPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={dataSources.length}
+										totalItemsCount={state.dataSourcesTotalCount}
 										pageRangeDisplayed={8}
 										onChange={async page => {
 											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
@@ -403,12 +376,17 @@ const GlobalSearchMainViewHandler = {
 								color={'rgb(233, 105, 29)'}
 								icon={DatabasesIcon}
 							>
-								{getSearchResults(databases, state, dispatch)}
-								<div className='gcPagination col-xs-12 text-center'>
+								{!databasesLoading && !databasesPagination ?
+									getSearchResults(databases, state, dispatch) :
+									<div className='col-xs-12'>
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								}
+								<div className='gcPagination col-xs-12 text-center' style={{ marginTop: 15 }}>
 									<Pagination
 										activePage={databasesPage}
 										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={databases.length}
+										totalItemsCount={state.databasesTotalCount}
 										pageRangeDisplayed={8}
 										onChange={async page => {
 											trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
