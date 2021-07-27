@@ -153,6 +153,9 @@ const initState = {
 	snackBarMsg: '',
 	searchSettings: {
 		isFilterUpdate: false,
+		orgUpdate: false,
+		typeUpdate: false,
+		expansionTermAdded: false,
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,

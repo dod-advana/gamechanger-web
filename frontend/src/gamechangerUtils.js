@@ -792,8 +792,8 @@ export const encode = (filename) => {
     );
 }
 
-export const exactMatch = (phrase, word) => {
-	const wordList = phrase.trim().split(' ')
+export const exactMatch = (phrase, word, split) => {
+	const wordList = phrase.trim().split(split)
 	let exists = false
 	wordList.forEach(w => {
 		if(w.toLowerCase()===word.toLowerCase()){
