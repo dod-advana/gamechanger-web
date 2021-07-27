@@ -43,8 +43,7 @@ const initTransformer = {
 }
 
 /**
- * This class queries the ml api information and provides controls 
- * for the different endpoints
+ * This class queries the ml api information
  * @class Info
  */
 export default (props) => {

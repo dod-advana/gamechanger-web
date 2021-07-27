@@ -14,13 +14,13 @@
     .info-container{
         text-align: left;
         .rt-expander:after {
-            border-top: 7px solid whitesmoke;
+            border-top: 7px solid rgb(245, 245, 245);
         }
     }
     .field{
         box-sizing: border-box;
         background: #171A23;
-        color: whitesmoke;
+        color: rgb(245, 245, 245);
         border-radius: 8px;
         text-align: center;
         min-height: 50px;
@@ -36,7 +36,7 @@
             margin: 1.5%;
             padding:6px;
             box-sizing: border-box;
-            color: whitesmoke !important;
+            color: rgb(245, 245, 245) !important;
             cursor: pointer;
             float: left;
             box-shadow:none;
@@ -64,7 +64,7 @@
             background-color: rgba(255, 255, 255, 0.05);
         }
         .-btn{
-            color: whitesmoke;
+            color: rgb(245, 245, 245);
             background-color: rgba(255, 255, 255, 0.05);
         }
         
@@ -91,7 +91,7 @@
     position: relative;
     background-color: #333333;
     box-shadow: 0 0 5px #333333;
-    color: whitesmoke !important;
+    color: rgb(245, 245, 245) !important;
     border-radius: 5px;
     border-width: 1px;
     overflow: hidden;
@@ -118,6 +118,7 @@
     height: 100%;
     transition: all .5s linear;
     box-shadow: none !important;
+    background:darkcyan;
     
 }
 .row{

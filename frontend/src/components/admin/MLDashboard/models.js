@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Select, MenuItem, Tooltip, Input, Checkbox } from '@material-ui/core'
+import { Select, MenuItem, Input, Checkbox } from '@material-ui/core'
 import ReactTable from 'react-table';
 import {BorderDiv, TableRow} from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
@@ -7,7 +7,6 @@ import GCPrimaryButton from "../../common/GCButton";
 import styles from '../GCAdminStyles';
 import "react-table/react-table.css";
 import './index.scss';
-const status = ['ok', 'loading', 'error'];
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -36,9 +35,9 @@ const modelColumns = [
 ]
 
 /**
- * This class queries the ml api information and provides controls 
- * for the different endpoints
- * @class MLDashboard
+ * This class provides controls to veiw and control the 
+ * resouces loaded locally to the ml api.
+ * @class Models
  */
 export default (props) => {
 	// Set state variables
@@ -180,7 +179,13 @@ export default (props) => {
     const checkReloading = () =>{
         return checkFlag('models:');
     }
-
+    /**
+     * Takes a String and checks if it is in any of the flag keys and checks 
+     * those values. If any of them are true it returns true
+     * @method checkFlag
+     * @param {String} flag 
+     * @returns boolean
+     */
     const checkFlag = (flag) =>{
         let flagged = false;
         if(props.processes.process_status && props.processes.process_status.flags){
