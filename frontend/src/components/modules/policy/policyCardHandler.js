@@ -1492,7 +1492,7 @@ const PolicyCardHandler = {
 							onClick={(e) => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${name}DetailsPage`);
 									e.preventDefault();
-									// window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
+									window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
 							}}
 						>
 							Open

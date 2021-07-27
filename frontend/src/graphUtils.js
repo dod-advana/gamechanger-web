@@ -1,4 +1,4 @@
-import {default as Bezier} from "bezier-js";
+import {Bezier} from "bezier-js";
 import {convertHexToRgbA} from "./gamechangerUtils";
 const Color = require('color');
 
