@@ -6,7 +6,7 @@ import {
 	capitalizeFirst,
 	CARD_FONT_SIZE, getDocTypeStyles,
 	getTrackingNameForFactory, getTypeDisplay, getTypeIcon, getTypeTextColor,
-	orgAlias, getMetadataForPropertyTable,
+	orgAlias, getMetadataForPropertyTable, encode,
 } from "../../../gamechangerUtils";
 import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import SimpleTable from "../../common/SimpleTable";
@@ -427,7 +427,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText.replace(/"/gi, '')}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText.replace(/"/gi, '')}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 };
 
 const Row = ({ label, value, minWidth = 'inherit' }) => {
