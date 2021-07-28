@@ -512,7 +512,7 @@ const GameChangerSearchBar = (props) => {
 				<i className="fa fa-search" />
 			</SearchButton>
 
-			{!isGlobalSearch &&
+			{!isGlobalSearch ?
 				<GCButton
 					onClick={()=>{
 						getUserData(dispatch);
@@ -523,6 +523,8 @@ const GameChangerSearchBar = (props) => {
 				>
 					<ConstrainedIcon src={UserIcon} />
 				</GCButton>
+				:
+				<div style={{ width: 60, margin: '0 0 0 4%' }} />
 			}
 
 			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
