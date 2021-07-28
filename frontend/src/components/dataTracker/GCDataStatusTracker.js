@@ -5,8 +5,7 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import { Typography } from "@material-ui/core";
-import { backgroundGreyDark, backgroundWhite} from "../../components/common/gc-colors";
-import { gcOrange} from "../../components/common/gc-colors";
+import TabStyles from '../common/TabStyles'
 import moment from 'moment'
 import Link from "@material-ui/core/Link";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -239,89 +238,80 @@ const GCDataStatusTracker = (props) => {
 		setLoading(true);
 		setLoadingNeo4jPropertiesData(true);
 		setLoadingNeo4jCounts(true);
-		gameChangerAPI.graphQueryPOST(
-				'CALL apoc.meta.schema() YIELD value as schemaMap ' +
-					'UNWIND keys(schemaMap) as label ' +
-					'WITH label, schemaMap[label] as data ' +
-					'WHERE data.type = "node" OR data.type = "relationship" ' +
-					'UNWIND keys(data.properties) as property ' +
-					'WITH label, property, data.properties[property] as propData ' +
-					'RETURN label, ' +
-					'property, ' +
-					'propData.type as type, ' +
-					'propData.indexed as primary_key;', '25QQM71', state.cloneData.clone_name, {}
-		).then(resp => {
-			setNeo4jPropertiesData(resp.data.graph_metadata || []);
-			setLoadingNeo4jPropertiesData(false);
+		setNeo4jGraphData({nodes: [], edges: []})
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getGraphSchema',
+			cloneName: state.cloneData.clone_name,
+			options: {}
 		});
 		
-		gameChangerAPI.graphQueryPOST(
-			'call apoc.meta.graph', '5HVIT3C', state.cloneData.clone_name, {}
-		).then(resp => {
-			const edges = [];
-			const nodes = resp.data.nodes;
-			
-			const usedIds = [];
-			
-			resp.data.edges.forEach(edge => {
-				if (edge.source === edge.target) {
-					const sourceNode = nodes.filter(node => {
-						return node.id === edge.source;
-					})[0];
-					const targetNode = {};
-					Object.keys(sourceNode).forEach(key => {
-						if (key === 'id') {
-							let newId = -sourceNode.id;
-							while (usedIds.includes(newId)) {
-								newId += 1;
-							}
-							usedIds.push(newId);
-							targetNode.id = newId;
-						} else {
-							targetNode[key] = sourceNode[key];
+		setNeo4jPropertiesData(resp.data.schema.graph_metadata || []);
+		setLoadingNeo4jPropertiesData(false);
+
+		const edges = [];
+		const nodes = resp.data.graph.nodes;
+		
+		const usedIds = [];
+		
+		const labels = Array.from(new Set(nodes.map(node => {
+			return node.label;
+		})));
+		
+		resp.data.graph.edges.forEach(edge => {
+			if (edge.source === edge.target) {
+				const sourceNode = nodes.filter(node => {
+					return node.id === edge.source;
+				})[0];
+				const targetNode = {};
+				Object.keys(sourceNode).forEach(key => {
+					if (key === 'id') {
+						let newId = -sourceNode.id;
+						while (usedIds.includes(newId)) {
+							newId += 1;
 						}
-					})
-					
-					nodes.push(targetNode);
-					edge.target = targetNode.id;
-				} else {
-					usedIds.push(edge.source);
-					usedIds.push(edge.target);
-				}
+						usedIds.push(newId);
+						targetNode.id = newId;
+					} else {
+						targetNode[key] = sourceNode[key];
+					}
+				})
 				
-				edges.push(edge);
-			})
-			setNeo4jGraphData({nodes, edges});
-			setLoadingNeo4jGraphData(false);
-		});
+				nodes.push(targetNode);
+				edge.target = targetNode.id;
+			} else {
+				usedIds.push(edge.source);
+				usedIds.push(edge.target);
+			}
+			
+			edges.push(edge);
+		})
+		setNeo4jGraphData({nodes, edges, labels});
+		setLoadingNeo4jGraphData(false);
 		
-		gameChangerAPI.graphQueryPOST(
-			'CALL apoc.meta.stats() YIELD labels, relTypesCount', 'IJYSAEM00', state.cloneData.clone_name, {}).then(resp => {
-				const metaData = resp.data.graph_metadata[0] || {};
-				const countsTableData = [];
-				
-				Object.keys(metaData.node_counts).forEach(countKey => {
-					countsTableData.push({
-						name: countKey,
-						count: metaData.node_counts[countKey].low
-					});
-				});
-				Object.keys(metaData.relationship_counts).forEach(countKey => {
-					countsTableData.push({
-						name: countKey,
-						count: metaData.relationship_counts[countKey].low
-					});
-				});
-				setNeo4jCountsData(countsTableData);
-				setLoadingNeo4jCounts(false);
+		const metaData = resp.data.stats.graph_metadata[0] || {};
+		const countsTableData = [];
+		
+		Object.keys(metaData.node_counts).forEach(countKey => {
+			countsTableData.push({
+				name: countKey,
+				count: metaData.node_counts[countKey].low
+			});
 		});
+		Object.keys(metaData.relationship_counts).forEach(countKey => {
+			countsTableData.push({
+				name: countKey,
+				count: metaData.relationship_counts[countKey].low
+			});
+		});
+		setNeo4jCountsData(countsTableData);
+		setLoadingNeo4jCounts(false);
 	}
 
-	const handleTabClicked = (tabIndex) => {
+	const handleTabClicked = async (tabIndex) => {
 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker' , tabIndex);
 		setTabIndex(tabIndex);
 		if (tabIndex === 'neo4j') {
-			handleGetNeo4jData();
+			await handleGetNeo4jData();
 		}
 	}
 
@@ -702,9 +692,19 @@ const GCDataStatusTracker = (props) => {
 				</div>
 					<div className={'right-column'}>
 					<div className={'graph-schema'}>
-						<MemoizedNodeCluster2D graphWidth={width} graphHeight={height} runningQuery={loadingNeo4jGraphData}
-							displayLinkLabel={true} graph={neo4jGraphData} hierarchyView={false} showSettingsMenu={false}
-							shouldHighlightNodes={false} shouldShowLegend={false} showBasic={true} cloneData={state.cloneData} />
+						<MemoizedNodeCluster2D
+							graphWidth={width}
+							graphHeight={height}
+							runningQuery={loadingNeo4jGraphData}
+							displayLinkLabel={true}
+							graph={neo4jGraphData}
+							hierarchyView={false}
+							showSettingsMenu={false}
+							shouldHighlightNodes={false}
+							shouldShowLegend={false}
+							showBasic={true}
+							cloneData={state.cloneData}
+						/>
 					</div>
 					<div className={'node-rel-counts'}>
 						<ReactTable
@@ -733,42 +733,42 @@ const GCDataStatusTracker = (props) => {
 	}
 	
 	return (
-		<div style={styles.tabContainer}>
+		<div style={TabStyles.tabContainer}>
 			<Tabs>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'documents' ? styles.tabSelectedStyle : {}),
+				<div style={TabStyles.tabButtonContainer}>
+					<TabList style={TabStyles.tabsList}>
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `5px 0 0 0`
 							}} title="userHistory" onClick={() => handleTabClicked('documents')}>
 							<Typography variant="h6" display="inline" title="cardView">DOCUMENTS</Typography>
 						</Tab>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'crawler' ? styles.tabSelectedStyle : {}),
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: '0 0 0 0'}}
 							title="crawlerTable" onClick={() => handleTabClicked('crawler')}>
 							<Typography variant="h6" display="inline">PROGRESS</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'version' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 0 0 0`
 						}} title="versionDocs" onClick={() => handleTabClicked('version')}>
 							<Typography variant="h6" display="inline" title="cardView">UPDATES</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'neo4j' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'neo4j' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 5px 0 0`
 						}} title="neo4jDataTracker" onClick={() => handleTabClicked('neo4j')}>
 							<Typography variant="h6" display="inline" title="cardView">KNOWLEDGE GRAPH</Typography>
 						</Tab>
 					</TabList>
 
-					<div style={styles.spacer}  />
+					<div style={TabStyles.spacer}  />
 				</div>
 
-				<div style={styles.panelContainer}>
+				<div style={TabStyles.panelContainer}>
 					<TabPanel>
 						{renderDataTable()}
 					</TabPanel>
@@ -785,63 +785,6 @@ const GCDataStatusTracker = (props) => {
 			</Tabs>
 		</div>
 	);
-}
-
-const styles = {
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px'
-	},
-	tabStyle: {
-		width: '140px',
-		border: '1px solid',
-		borderColor: backgroundGreyDark,
-		borderBottom: 'none !important',
-		borderRadius: `6px 6px 0px 0px`,
-		position: ' relative',
-		listStyle: 'none',
-		padding: '2px 12px',
-		cursor: 'pointer',
-		textAlign: 'center',
-		backgroundColor: backgroundWhite,
-		marginRight: '2px',
-		marginLeft: '2px',
-		height: 45,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	tabSelectedStyle: {
-		border: '1px solid transparent',
-		backgroundColor: gcOrange,
-		borderColor: 'none',
-		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
-	},
-	panelContainer: {
-		alignItems: 'center',
-		marginTop: 10,
-		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20
-	}
-	
-
 }
 
 GCDataStatusTracker.propTypes = {

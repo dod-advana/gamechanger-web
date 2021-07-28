@@ -47,6 +47,14 @@ class DataLibrary {
 			s3Opt.region = this.constants.S3_REGION;
 		}
 
+		if(process.env.S3_IS_MINIO === 'true') {
+			s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
+			s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
+			s3Opt.endpoint = process.env.S3_ENDPOINT;
+			s3Opt.s3ForcePathStyle = true;
+			s3Opt.signatureVersion = 'v4';
+		}
+
 		try {
 			this.awsS3Client = new AWS.S3(s3Opt);
 		} catch (err) {

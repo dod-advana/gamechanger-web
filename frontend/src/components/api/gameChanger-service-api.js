@@ -70,7 +70,8 @@ const endpoints = {
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
-	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
+	getProcessStatus:'/api/gameChanger/admin/getProcessStatus',
+	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
@@ -222,10 +223,10 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
-		const url = endpoints.graphQueryPOST;
-		return axiosPOST(this.axios, url, { query, code, cloneName, options });
-	}
+	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
+	// 	const url = endpoints.graphQueryPOST;
+	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
+	// }
 	
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
@@ -297,6 +298,7 @@ export default class GameChangerAPI {
 				const redirectUrl = this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
 				resolve(redirectUrl);
 			}).catch(e => {
+				console.error(e);
 				console.error('ERROR GC-service-api storageDownloadBlobGET', e.message)
 				reject(e.message)
 			});
@@ -493,7 +495,7 @@ export default class GameChangerAPI {
 		const url = endpoints.deleteTrendingBlacklist;
 		return axiosPOST(this.axios, url, data);
 	}
-
+	// Starting ML endpoints
 	reloadModels = async (data) => {
 		const url = endpoints.reloadModels;
 		return axiosPOST(this.axios, url, data);
@@ -519,6 +521,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
+	getProcessStatus = async () => {
+		const url = endpoints.getProcessStatus;
+		return axiosGET(this.axios, url);
+	}
+
 	getS3List = async () => {
 		const url = endpoints.getS3List;
 		return axiosGET(this.axios, url);
@@ -534,11 +541,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	setTransformerModel = async (modelName) => {
-		const url = endpoints.setTransformerModel;
-		return axiosPOST(this.axios, url, { model_name: modelName });
+	getFilesInCorpus = async () => {
+		const url = endpoints.getFilesInCorpus;
+		return axiosGET(this.axios, url);
 	}
-
+	// End ML endpoints
 	getUserSettings = async () => {
 		const url = endpoints.getUserSettings;
 		return axiosGET(this.axios, url);

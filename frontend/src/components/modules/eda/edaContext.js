@@ -8,7 +8,8 @@ const initState = {
         startDate: null,
         endDate: null,
         issueAgency: null,
-        issueOffice: null,
+        issueOfficeDoDAAC: null,
+        issueOfficeName: null,
         allYearsSelected: true,
         fiscalYears: [],
         allDataSelected: true,
@@ -45,7 +46,10 @@ const initState = {
     notifications: [],
     alerts: {},
     userInfo: {},
-    searchSettings: {},
+    searchSettings: {
+        allCategoriesSelected: true,
+		specificCategoriesSelected: false,
+    },
     rawSearchResults: [],
     userData: {
         favorite_searches: [],

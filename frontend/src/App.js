@@ -5,7 +5,7 @@ import "react-select/dist/react-select.css";
 // import Config from './config/config';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
 import { getProvider } from "./components/factories/contextFactory";
-import ConsentAgreement from 'advana-platform-ui/dist/ConsentAgreement';
+import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement'; 
 import GamechangerPage from './containers/GameChangerPage';
 import GamechangerAdminPage from './containers/GamechangerAdminPage';
 import GamechangerEsPage from './containers/GamechangerEsPage';
@@ -19,7 +19,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { useMatomo } from '@datapunt/matomo-tracker-react'
 import { createBrowserHistory } from 'history';
-import SlideOutMenuContextHandler from 'advana-side-nav/dist/SlideOutMenuContext';
+import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from "spark-md5";
 import _ from 'underscore';
 import GCAuth from './components/common/GCAuth';
@@ -27,23 +27,23 @@ import './styles.css';
 import 'font-awesome/css/font-awesome.css';
 import 'flexboxgrid/css/flexboxgrid.css';
 // import ThemeDefault from './components/advana/theme-default';
-import SlideOutMenu from 'advana-side-nav/dist/SlideOutMenu';
-import TutorialOverlayAPI from "advana-tutorial-overlay/dist/api/TutorialOverlay";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import TutorialOverlayAPI from "@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import Config from './config/config';
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
-import AdvanaFooter from 'advana-platform-ui/dist/AdvanaFooter';
-import ThemeDefault from 'advana-platform-ui/dist/theme-default';
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
+import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 
-import ClassificationBanner from 'advana-platform-ui/dist/ClassificationBanner';
-// import SlideOutMenu from 'advana-side-nav/dist/SlideOutMenu';
-// import SlideOutMenuContextHandler from 'advana-side-nav/dist/SlideOutMenuContext';
+import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
+// import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+// import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 
-// import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator';
+// import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
-import NotFoundPage from 'advana-platform-ui/dist/containers/NotFoundPage';
-import ErrorPage from 'advana-platform-ui/dist/containers/GenericErrorPage';
+import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoundPage';
+import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
 import "./index.css";
@@ -87,7 +87,7 @@ const styles = {
 	newContainer: {
 		minHeight: 'calc(100% - 30px)',
 		marginLeft: '50px',
-		marginTop: '2em'
+		paddingTop: '2em'
 	}
 };
 
@@ -234,12 +234,15 @@ const App = (props) => {
 
 			// fetch tutorial overlay data
 			let tutorialData = [];
-			try {
-				const data = await tutorialOverlayAPI.tutorialOverlaysGET();
-				tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
-			} catch (err) {
-				console.log(err);
-				console.log("Failed to retrieve Tutorial Overlay data");
+			const doTutorial = window?.__env__?.REACT_APP_ENABLE_TUTORIAL === 'true' || process.env.REACT_APP_ENABLE_TUTORIAL === 'true';
+			if(doTutorial) {
+				try {
+					const data = await tutorialOverlayAPI.tutorialOverlaysGET();
+					tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
+				} catch (err) {
+					console.log(err);
+					console.log("Failed to retrieve Tutorial Overlay data");
+				}
 			}
 
 			getGamechangerClones(tutorialData);

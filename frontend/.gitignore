@@ -34,3 +34,5 @@ dump.rdb
 yarn.lock
 yarn.lock
 .idea
+
+.npmrc

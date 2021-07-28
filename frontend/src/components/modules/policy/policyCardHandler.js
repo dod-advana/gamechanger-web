@@ -14,7 +14,7 @@ import styled from "styled-components";
 import GCButton from "../../common/GCButton";
 import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {crawlerMappingFunc} from "../../../gamechangerUtils";
 import sanitizeHtml from 'sanitize-html';
 
@@ -1492,7 +1492,7 @@ const PolicyCardHandler = {
 							onClick={(e) => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${name}DetailsPage`);
 									e.preventDefault();
-									// window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
+									window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
 							}}
 						>
 							Open

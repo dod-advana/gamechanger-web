@@ -6,9 +6,9 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import {Card} from "../../cards/GCCard";
 import Pagination from "react-js-pagination";
@@ -153,6 +153,7 @@ const PolicyMainViewHandler = {
 			sidebarOrgs,
 			sidebarDocTypes,
 			timeSinceCache,
+			searchSettings
 		} = state;
 
 
@@ -191,6 +192,7 @@ const PolicyMainViewHandler = {
 											</div>
 											{!loading && (activeCategoryTab === 'Documents' || activeCategoryTab === 'all') && selectedCategories['Documents'] &&
 												<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
+													{!searchSettings.isFilterUpdate ?
 													<SearchSection
 														section={'Documents'}
 														color={'#131E43'}
@@ -230,6 +232,10 @@ const PolicyMainViewHandler = {
 															</>
 														}
 													</SearchSection>
+													: 
+													<div className='col-xs-12'>
+														<LoadingIndicator customColor={gcOrange} />
+													</div>}
 												</div>}
 												
 												{entitySearchResults && entitySearchResults.length > 0 && (activeCategoryTab === 'Organizations' || activeCategoryTab === 'all') && selectedCategories['Organizations'] &&
