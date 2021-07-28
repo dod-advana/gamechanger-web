@@ -12,8 +12,10 @@ import GameChangerAPI from "../api/gameChanger-service-api";
 import AdvancedDropdown from "./AdvancedDropdown";
 import SearchBarDropdown from './SearchBarDropdown';
 import { SearchBarForm, SearchBarInput, SearchButton, AdvancedSearchButton } from './SearchBarStyledComponents';
-import {getTrackingNameForFactory, getQueryVariable} from "../../gamechangerUtils";
-import { handleSaveFavoriteSearch, setState, checkUserInfo } from '../../sharedFunctions';
+import { ConstrainedIcon } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
+import UserIcon from "../../images/icon/UserIcon.png";
+import {getTrackingNameForFactory, PAGE_DISPLAYED} from "../../gamechangerUtils";
+import { handleSaveFavoriteSearch, setState, checkUserInfo, getUserData, clearDashboardNotification } from '../../sharedFunctions';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -93,7 +95,7 @@ const GameChangerSearchBar = (props) => {
 	const ref = useRef();
 
 	const [loaded, setLoaded] = useState(false);
-	const [searchText, setSearchText] = useState(getQueryVariable('q') || '');
+	const [searchText, setSearchText] = useState(context.state.searchText || '');
 	const debouncedSearchTerm = useDebounce(searchText, 300);
 	const [debounceOn, setDebounceOn] = useState(true);
 
@@ -114,6 +116,13 @@ const GameChangerSearchBar = (props) => {
 
 	const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
+
+	useEffect(() => {
+		const queryText = context.state.searchText ? context.state.searchText : null;
+		if (queryText) {
+			setSearchText(queryText);
+		}
+	}, [context.state.searchText, context.state.runSearch]);
 
 	useEffect(() => { // initial loading of user search history
 			if(!loaded){
@@ -143,7 +152,9 @@ const GameChangerSearchBar = (props) => {
 			}
 		}
 		
-		debouncedFetchSearchSuggestions(debouncedSearchTerm);
+		if (state.cloneData?.clone_name !== 'globalSearch') {
+			debouncedFetchSearchSuggestions(debouncedSearchTerm);
+		}
 	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
 
 	useEffect(() => {
@@ -499,6 +510,17 @@ const GameChangerSearchBar = (props) => {
 			<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 				<i className="fa fa-search" />
 			</SearchButton>
+
+			<GCButton
+			onClick={()=>{
+				getUserData(dispatch);
+				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+				clearDashboardNotification('total', state, dispatch);
+			}}
+			style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
+			>
+				<ConstrainedIcon src={UserIcon} />
+			</GCButton>
 
 			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
 				open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}

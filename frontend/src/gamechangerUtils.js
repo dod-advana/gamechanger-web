@@ -7,7 +7,9 @@ import Config from './config/config.js';
 import {getTextColorBasedOnBackground} from "./graphUtils";
 import {useEffect} from "react";
 import styled from "styled-components";
-import Auth from 'advana-platform-ui/dist/utilities/Auth';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import {setState} from './sharedFunctions';
 const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
@@ -107,10 +109,10 @@ export const exportToCsv = (filename, data, isJson=false) => {
 }
 
 export const orgFilters = {
-	'Dept. of Defense': true,
-	'Joint Chiefs of Staff': true,
-	'Intelligence Community': true,
-	'United States Code': true,
+	'Dept. of Defense': false,
+	'Joint Chiefs of Staff': false,
+	'Intelligence Community': false,
+	'United States Code': false,
 	'Executive Branch': false,
 	'Dept. of the Air Force': false,
 	'US Army': false,
@@ -204,7 +206,7 @@ export const getCloneTitleForFactory = (cloneData, upperCase) => {
 export const useMountEffect = (fun) => useEffect(fun, []);
 
 export const typeFilters = {
-	'Documents': true,
+	'Documents': false,
 	'Legislations': false,
 	'Memorandums': false,
 	'Titles': false,
@@ -798,8 +800,8 @@ export const encode = (filename) => {
     );
 }
 
-export const exactMatch = (phrase, word) => {
-	const wordList = phrase.trim().split(' ')
+export const exactMatch = (phrase, word, split) => {
+	const wordList = phrase.trim().split(split)
 	let exists = false
 	wordList.forEach(w => {
 		if(w.toLowerCase()===word.toLowerCase()){
@@ -807,4 +809,13 @@ export const exactMatch = (phrase, word) => {
 		}
 	});
 	return exists;
+}
+
+export const displayBackendError = (resp, dispatch = () => {}) => {
+	if (resp?.data?.error) {
+		const errorMessage = Permissions.isGameChangerAdmin() ?
+			`An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}` :
+			`An error has occurred in the application, but we are working to fix it!`;
+		setState(dispatch, {showBackendError: true, backendErrorMsg: errorMessage});
+ 	}
 }

@@ -73,6 +73,7 @@ const SearchBar = (props) => {
 				categoryMetadata={state.categoryMetadata}
 				pageDisplayed={state.pageDisplayed}
 				dispatch={dispatch}
+				loading={state.loading}
 			>
 				<GameChangerSearchBar context={context}/>
 			</SearchBanner>

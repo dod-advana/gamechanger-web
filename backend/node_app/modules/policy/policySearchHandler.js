@@ -39,6 +39,7 @@ class PolicySearchHandler extends SearchHandler {
 		this.async_redis = async_redis;
 		this.app_settings = app_settings;
 		this.constants = constants;
+		this.error = {};
 	}
 
 	async searchHelper(req, userId) {
@@ -60,7 +61,7 @@ class PolicySearchHandler extends SearchHandler {
 		if(doubleQuoteCount % 2 === 1){
 			req.body.searchText = searchText.replace(/["]+/g,"");
 		}
-		req.body.questionFlag = this.searchUtility.isQuestion(searchText)
+		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
@@ -86,12 +87,15 @@ class PolicySearchHandler extends SearchHandler {
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
 				return this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'topicPagination':
 				return this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+			case 'getPresearchData':
+				return this.getPresearchData(userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policySearchHandler`,
@@ -187,7 +191,9 @@ class PolicySearchHandler extends SearchHandler {
 			if (forCacheReload){
 				throw Error('Cannot get expanded search terms in cache reload');
 			}
-			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
+			this.error.category = 'ML API';
+			this.error.code = '93SQB38';
+			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', '93SQB38', userId);
 		}
 		return expansionDict;
 	}
@@ -412,7 +418,9 @@ class PolicySearchHandler extends SearchHandler {
 				};
 				
 			} catch (e) {
-				this.logger.error(e.message, 'KBBIOYCJ', userId);
+				this.error.category = 'ML API'
+				this.error.code = 'KBBIOYCJ';
+				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			};
 		};
 		return QA;
@@ -728,6 +736,26 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
+	async getPresearchData(userId) {
+		try {
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			let esClientName = 'gamechanger';
+			const orgQuery = this.searchUtility.getOrgQuery(userId);
+			const typeQuery = this.searchUtility.getTypeQuery(userId);
+
+			const orgResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, orgQuery, userId);
+			const typeResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, typeQuery, userId);
+			const results = await Promise.all([orgResults, typeResults]);
+
+			const orgsCleaned = results[0].body.aggregations.display_org.buckets.map(item => item.key.type);
+			const typesCleaned = results[1].body.aggregations.display_type.buckets.map(item => item.key.type);
+			return {orgs: orgsCleaned, types: typesCleaned};
+		} catch (e) {
+			this.logger.error(e.message, 'OICE7JS');
+			return {orgs: [], types: []}
+		}
+	}
+
 
 	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
 		try {
@@ -750,6 +778,9 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
+	getError() {
+		return this.error;
+	}
 }
 
 // const policySearchHandler = new PolicySearchHandler();

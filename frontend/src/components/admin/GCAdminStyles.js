@@ -32,9 +32,10 @@ const styles = {
 		justifyContent: 'space-between',
 		zIndex: 10,
 	},
-	features: {
+	feature: {
 		display: 'flex',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		width:'fit-content'
 	},
 	image: {
 		display: 'flex',

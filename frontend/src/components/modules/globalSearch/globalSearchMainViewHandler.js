@@ -5,7 +5,7 @@ import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import { trackEvent } from "../../telemetry/Matomo";
 import { setState } from "../../../sharedFunctions";
 import SearchSection from "../globalSearch/SearchSection";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import { backgroundWhite, gcOrange } from "../../common/gc-colors";
 import { Card } from "../../cards/GCCard";
 import Pagination from "react-js-pagination";

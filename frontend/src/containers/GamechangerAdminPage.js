@@ -2,10 +2,10 @@ import React, {useState, useContext, useEffect} from 'react';
 import Paper from 'material-ui/Paper';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import UOTAlert from '../components/common/GCAlert';
-import { SlideOutToolContext } from "advana-side-nav/dist/SlideOutMenuContext";
+import { SlideOutToolContext } from "@dod-advana/advana-side-nav/dist/SlideOutMenuContext";
 import { TextField, Tooltip, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link } from "@material-ui/core";
-import {ConstrainedIcon, PageLink} from "advana-side-nav/dist/SlideOutMenu";
-import Permissions from "advana-platform-ui/dist/utilities/permissions";
+import {ConstrainedIcon, PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdminIcon from "../images/icon/AdminIcon.png";
 import CloneIcon from "../images/icon/CloneIcon.png";
 import AuthIcon from "../images/icon/Authority.png";
@@ -35,8 +35,8 @@ import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';
 import { trackEvent } from '../components/telemetry/Matomo';
-import SlideOutMenuContent from 'advana-side-nav/dist/SlideOutMenuContent';
-// import TutorialOverlayModal from 'advana-tutorial-overlay/dist/TutorialOverlayModal';
+import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
+// import TutorialOverlayModal from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayModal';
 import { HoverNavItem } from '../components/navigation/NavItems'
 // import UoTAPI from '../components/advana/api/api';
 import GCAccordion from "../components/common/GCAccordion";
@@ -495,6 +495,7 @@ const GamechangerAdminPage = props => {
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
+	const [loginModalOpen, setLoginModalOpen] = useState(false);
 
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
@@ -862,7 +863,7 @@ const GamechangerAdminPage = props => {
 		return (
 			<div>
 				<p style={styles.sectionHeader}>General Actions</p>
-				<div className="row" style={styles.applicationsRow}>
+				<div className="row" style={{paddingLeft: "80px"}}>
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
@@ -1706,8 +1707,12 @@ const GamechangerAdminPage = props => {
 		}
 	}
 	
+	const setLoginModal = (open) => {
+		setLoginModalOpen(open);
+	}
+	
 	return (
-		<div style={{ minHeight: '100%' }}>
+		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
 
 			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData),  getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
 			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData), getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
@@ -1720,6 +1725,8 @@ const GamechangerAdminPage = props => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
+				loginModalOpen={loginModalOpen}
+				setLoginModal={setLoginModal}
 			>
 			</SearchBanner>
 

@@ -116,7 +116,6 @@ export const AdvancedSearchButton = styled.button`
 	color: #131E43;
 	padding: 4px 18px;
 	border: none;
-	border-radius: 0 5px 5px 0;
 	width: 150px;
 	height: 50px;
 	display: flex;

@@ -10,3 +10,6 @@ secrets/*
 metadata/*
 build/*
 cobertura/
+.npmrc
+security_scan/route_check/output.txt
+security_scan/route_check/routes.csv

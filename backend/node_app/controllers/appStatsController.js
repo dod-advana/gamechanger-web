@@ -48,11 +48,11 @@ class AppStatsController {
 			const startDate = this.getDateNDaysAgo(daysAgo);
 			connection.query(`select SUM(search_count)/COUNT(search_count) as avg_search_count from (select distinct idvisit, 0 as search_count
 				from matomo_log_link_visit_action where idaction_name in (select idaction from matomo_log_action where name = 'GamechangerPage') 
-				and server_time > '${startDate}' and idvisit not in (select a.idvisit from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c 
+				and server_time > ? and idvisit not in (select a.idvisit from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c 
 					where a.idaction_name = b.idaction and a.idvisit = c.idvisit and a.search_cat like 'GAMECHANGER%' group by a.idvisit, c.user_id) 
 					UNION select a.idvisit, count(a.search_cat) as search_count from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c 
-					where a.idaction_name = b.idaction and a.idvisit = c.idvisit and c.visit_last_action_time > '${startDate}' and a.search_cat like 'GAMECHANGER%' 
-					group by a.idvisit, c.user_id)x;`, (error, results, fields) => {
+					where a.idaction_name = b.idaction and a.idvisit = c.idvisit and c.visit_last_action_time > ? and a.search_cat like 'GAMECHANGER%' 
+					group by a.idvisit, c.user_id)x;`, [`${startDate}`, `${startDate}`], (error, results, fields) => {
 				if (error) {
 					this.logger.error(error, '5LR23WU');
 					throw error;
@@ -74,10 +74,14 @@ class AppStatsController {
 		return new Promise((resolve, reject) => {
 			let cloneNameAdd = cloneData.clone_name.toLowerCase();
 
-			let excludingString = '\'placeholder\',';
+			let excludeValues = ['totallyfakethisisnotrealyesiwanttomergethis'];
+			let blacklistValues = [];
+
+			let excludingString = '?,';
 			if (excluding.length > 0) {
 				excluding.forEach(user => {
-					excludingString += '\'' + user + '\'' + ',';
+					excludingString += '?,';
+					excludeValues.push(user);
 				});
 			}
 
@@ -86,15 +90,25 @@ class AppStatsController {
 			let blacklistString = 'lower(b.name) not like ';
 			if (blacklist.length > 0) {
 				blacklist.forEach(q => {
-					blacklistString += '\'%' + q.toLowerCase() + '%\'' + ' and b.name not like ';
+					blacklistString += '? and b.name not like ';
+					blacklistValues.push(`%${q.toLowerCase()}%`);
 				});
 			}
 
-			blacklistString += '\'%placeholder%\'';
+			blacklistString += '?';
+			blacklistValues.push('%totallyfakethisisnotrealyesiwanttomergethis%');
 
 			const startDate = this.getDateNDaysAgo(daysAgo);
-			const query = `select trim(lower(b.name)) as search, count(b.name) as count from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c where a.idaction_name = b.idaction and a.idvisit = c.idvisit and lower(search_cat) like 'gamechanger_${cloneNameAdd}%' and a.server_time > '${startDate}' and c.user_id not in (${excludingString}) and ${blacklistString} group by b.name order by count desc limit ${topN};`;
-			connection.query(query, (error, results, fields) => {
+
+			let queryValues = [];
+			queryValues.push(`gamechanger_${cloneNameAdd}%`);
+			queryValues.push(`${startDate}`);
+			queryValues = queryValues.concat(excludeValues);
+			queryValues = queryValues.concat(blacklistValues);
+			queryValues.push(topN);
+
+			const query = `select trim(lower(b.name)) as search, count(b.name) as count from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c where a.idaction_name = b.idaction and a.idvisit = c.idvisit and lower(search_cat) like ? and a.server_time > ? and c.user_id not in (${excludingString}) and ${blacklistString} group by b.name order by count desc limit ?;`;
+			connection.query(query, queryValues, (error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
 					throw error;
@@ -198,10 +212,11 @@ class AppStatsController {
 				where 
 					a.idaction_name = b.idaction  
 					and b.name like 'PDFViewer%'
-					and a.server_time > '${startDate}'
+					and a.server_time > ?
 				order by 
 					idvisit,
 					documenttime desc;`,
+			[`${startDate}`],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -232,14 +247,15 @@ class AppStatsController {
 			WHERE 
 				a.idaction_name = b.idaction  
 				and b.name like 'PDFViewer%'
-				and b.name like '% - ${clone_name}'
-				and c.user_id = '${userId}'
+				and b.name like '% - ?'
+				and c.user_id = ?
 			GROUP BY 
 				document,
 				a.idaction_name
 			ORDER BY 
 				documenttime desc
 			LIMIT 10;`,
+			[`${clone_name}`, `${userId}`],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'B07IQHT');
@@ -271,10 +287,11 @@ class AppStatsController {
 				where
 					a.idaction_name = b.idaction
 					and (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
-					and a.server_time > '${startDate}'
+					and a.server_time > ?
 				order by
 					idvisit,
 					searchtime desc;`,
+			[`${startDate}`],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');

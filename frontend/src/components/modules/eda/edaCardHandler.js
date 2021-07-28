@@ -26,7 +26,7 @@ import {KeyboardArrowRight, Star} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 import {setState} from "../../../sharedFunctions";
-import LoadingIndicator from "advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import {gcOrange} from "../../common/gc-colors";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import sanitizeHtml from 'sanitize-html';
@@ -41,10 +41,10 @@ export const EDA_FIELDS = [
 	"vendor_name_eda_ext",
 	"vendor_duns_eda_ext",
 	"vendor_cage_eda_ext",
-	"issuing_organization_eda_ext",
-	"contract_issue_name_eda_ext",
 	"contract_issue_dodaac_eda_ext",
+	"contract_issue_name_eda_ext",
 	"contract_issue_majcom_eda_ext",
+	"issuing_organization_eda_ext",
 	"paying_office_name_eda_ext",
 	"paying_office_dodaac_eda_ext",
 	"paying_office_majcom_eda_ext",
@@ -649,9 +649,6 @@ const EdaCardHandler = {
 								<GCTooltip title={'This version of the document is no longer in effect'} placement='top' arrow>
 									<RevokedTag>Canceled</RevokedTag>
 								</GCTooltip>
-							}
-							{item.pageHits.length === 0 &&
-								<p>Matched on PDS data</p>
 							}
 						</div>
 						{item.pageHits.length > 0 &&
