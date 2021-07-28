@@ -68,11 +68,14 @@ const styles = {
 		width: '100%',
 		display: 'inline-flex',
 		justifyContent: 'space-between',
-		marginBottom: 15,
-		marginTop: 10
+		marginBottom: 10,
+		marginTop: 15
 	},
 	container: {
 		minWidth: 148
+	},
+	listViewContainer: {
+		paddingRight: 40
 	},
 	text: {
 		margin: 'auto 0px'
@@ -95,17 +98,15 @@ const styles = {
 const getViewHeader = (state, dispatch) => {
 	return (
 		<div style={styles.showingResultsRow}>
-			<div>
-				{state.searchText && !_.isEmpty(state.categoryMetadata) &&
-					<Typography variant="h3" style={styles.text}>
-						{_.sum(_.map(Object.values(state.categoryMetadata), 'total')) ?
-							'Showing results for ' :
-							"Looks like we don't have any matches for "
-						}
-						<b>{state.searchText}</b>
-					</Typography>
-				}
-			</div>
+			{state.searchText && !_.isEmpty(state.categoryMetadata) &&
+				<Typography variant="h3" style={styles.text}>
+					{_.sum(_.map(Object.values(state.categoryMetadata), 'total')) ?
+						'Showing results for ' :
+						"Looks like we don't have any matches for "
+					}
+					<b>{state.searchText}</b>
+				</Typography>
+			}
 			<div className={`tutorial-step-${state.componentStepNumbers["Tile Buttons"]}`}>
 				<div style={styles.container}>
 					<GCButton
@@ -286,7 +287,7 @@ const GlobalSearchMainViewHandler = {
 			<div className={`row tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`} style={{marginTop: 0}}>
 				<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
 					{applications && applications.length > 0 && (activeCategoryTab === 'Applications' || activeCategoryTab === 'all') && selectedCategories['Applications'] &&
-						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
+						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}, state.listView ? styles.listViewContainer : {}}>
 							<SearchSection
 								section={'Applications'}
 								color={'rgb(50, 18, 77)'}
@@ -314,7 +315,7 @@ const GlobalSearchMainViewHandler = {
 					}
 					
 					{dashboards && dashboards.length > 0 && (activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') && selectedCategories['Dashboards'] &&
-						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
+						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}, state.listView ? styles.listViewContainer : {}}>
 							<SearchSection
 								section={'Dashboards'}
 								color={'rgb(11, 167, 146)'}
@@ -342,7 +343,7 @@ const GlobalSearchMainViewHandler = {
 					}
 					
 					{dataSources && dataSources.length > 0 && (activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') && selectedCategories['DataSources'] &&
-						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
+						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}, state.listView ? styles.listViewContainer : {}}>
 							<SearchSection
 								section={'Data Sources'}
 								color={'rgb(5, 159, 217)'}
@@ -370,7 +371,7 @@ const GlobalSearchMainViewHandler = {
 					}
 
 					{databases && databases.length > 0 && (activeCategoryTab === 'Databases' || activeCategoryTab === 'all') && selectedCategories['Databases'] &&
-						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}}>
+						<div className={"col-xs-12"} style={{marginTop: 10, marginLeft: 0, marginRight: 0}, state.listView ? styles.listViewContainer : {}}>
 							<SearchSection
 								section={'Databases'}
 								color={'rgb(233, 105, 29)'}
