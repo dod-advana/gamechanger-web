@@ -15,7 +15,6 @@ import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
-import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
