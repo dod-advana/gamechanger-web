@@ -77,6 +77,19 @@ const MainView = (props) => {
 			if(state.topicPagination && searchHandler){
 				searchHandler.handleTopicPagination(state, dispatch);
 			}
+		} else if (state.cloneData.clone_name === 'globalSearch') {
+			if (state.applicationsPagination && searchHandler) {
+				searchHandler.handleApplicationsPagination(state, dispatch);
+			}
+			if (state.dashboardsPagination && searchHandler) {
+				searchHandler.handleDashboardsPagination(state, dispatch);
+			}
+			if (state.dataSourcesPagination && searchHandler) {
+				searchHandler.handleDataSourcesPagination(state, dispatch);
+			}
+			if (state.databasesPagination && searchHandler) {
+				searchHandler.handleDatabasesPagination(state, dispatch);
+			}
 		}
 	}, [state, dispatch, searchHandler]);
 
