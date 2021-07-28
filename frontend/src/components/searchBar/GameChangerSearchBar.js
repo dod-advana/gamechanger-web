@@ -156,7 +156,7 @@ const GameChangerSearchBar = (props) => {
 		if (!isGlobalSearch) {
 			debouncedFetchSearchSuggestions(debouncedSearchTerm);
 		}
-	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
+	}, [state.cloneData, debouncedSearchTerm, isGlobalSearch]); // run when debounce value changes;
 
 	useEffect(() => {
     function onKeyDown(e) {
