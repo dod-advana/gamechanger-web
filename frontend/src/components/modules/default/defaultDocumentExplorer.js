@@ -17,7 +17,7 @@ import {
 import Pagination from 'react-js-pagination';
 import { trackEvent } from "../../telemetry/Matomo";
 import sanitizeHtml from 'sanitize-html';
-
+import PDFViewer from '../../documentViewer/PDFViewer';
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -57,21 +57,21 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 		})
 	})
 }
-function useQuery(location) {
-	return new URLSearchParams(location.search);
-  }
+
 
 export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }, location) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
-
 	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({ dataIdx: -1, pageHitIdx: -1 });
 	const [iframeLoading, setIframeLoading] = React.useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = React.useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
 	const [pdfLoaded, setPdfLoaded] = React.useState(false);
 	const [viewTogle, setViewTogle] = React.useState(false);
+	const [fileUrl, setFileUrl] = React.useState(null);
+	const [filename, setFilename] = React.useState(null);
+
 
 	const measuredRef = useCallback(node => {
 		if (node !== null) {
@@ -79,7 +79,8 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 			const rec = data[dataIdx];
 			if (rec) {
 				// const filepath = rec.filepath;
-				const filename = rec.filename;
+				setFilename(rec.filename);
+				setFileUrl(rec.source_page_url_s);
 				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 				const pageNumber = pageObj ? pageObj.pageNumber : 1;
 				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
@@ -143,15 +144,19 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	 		dataIdx: key
 	 	});
 	}
-
+	
 	function handlePdfOnLoadStart () {
+		
 		if (!iframeLoading && !pdfLoaded){
 			const { dataIdx } = iframePreviewLink;
 			const rec = data[dataIdx];
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
+					if (rec.filename.endsWith('pdf')){
+						handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
+						//setPdfLoaded(true);
+					}
 					setPdfLoaded(true);
 				}
 			} catch(err) {
@@ -159,15 +164,8 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				console.log('Doc Explorer: failed to load pdf')
 			}
 		}
+		
 	}
-
-	let query = useQuery(location);
-
-	const [fileUrl, setFileUrl] = React.useState(null);
-	const [filename, setFilename] = React.useState(null);
-	useEffect(() => {
-		setFileUrl(query.get('sourceUrl'));
-	}, [query, filename]);
 
 	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
 	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) || [];
@@ -290,13 +288,14 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
 						/>
 					</div>
+
 					{!iframeLoading && filename && filename.endsWith('pdf') && !filename.endsWith('html') && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
 					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: '100%' }}>
-						<iframe className="aref" id={'docPdfViewer'} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+						<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
 					</div>
-					{!iframeLoading && filename && filename.endsWith('html')&& <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
+					{!iframeLoading && filename && filename.endsWith('html')}
 					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: '100%' }}>
-						<iframe className="aref" id={'pdfViewer'} src={fileUrl} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+					<iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}}></iframe>
 					</div>
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
 					<div className="searchdemo-vertical-bar-toggle" style={rightBarExtraStyles} onClick={() => handleRightPanelToggle()}>
@@ -337,3 +336,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 		</div>
 	);
 }
+//
+// //</div>{handlePdfOnLoad} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+//onLoad={() => handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')} style={{width: "100%", height: "100%"}} />
+//{!iframeLoading && filename && filename.endsWith('html')&& <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
