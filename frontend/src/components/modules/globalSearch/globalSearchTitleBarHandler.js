@@ -6,7 +6,7 @@ import SearchTabBar from "./SearchTabBar";
 const GlobalSearchTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
-			onTitleClick,
+			// onTitleClick,
 			componentStepNumbers,
 			cloneData
 		} = props;
@@ -28,8 +28,8 @@ const GlobalSearchTitleBarHandler = {
 			activeCategoryTab,
 			setActiveCategoryTab,
 			categoryMetadata,
-			cloneData,
-			dispatch
+			// cloneData,
+			// dispatch
 		} = props;
 		
 		return (
