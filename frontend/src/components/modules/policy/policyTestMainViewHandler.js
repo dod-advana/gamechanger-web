@@ -219,7 +219,9 @@ const PolicyMainViewHandler = {
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		// get trending from gamechanger, change it back when we move to main.
+		// const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${'gamechanger'}Searches`) || '[]';
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
@@ -294,7 +296,7 @@ const PolicyMainViewHandler = {
 					</GameChangerThumbnailRow> */}
 					<GameChangerThumbnailRow
 						links={adminTopics}
-						title={"Topics"}
+						title={"Editor's Choice: Top Topics"}
 						width='300px'
 					>
 						{adminTopics.map(({name, favorite})=>
@@ -359,21 +361,29 @@ const PolicyMainViewHandler = {
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={adminMajorPubs} 
-						title="Major Publications" 
+						title="Editor's Choice: Top Publications" 
 						width='180px' 
 					>
 						{adminMajorPubs.map(({name, imgSrc}) =>
-							<img 
-								style={{height:210, border:'1px solid black', marginLeft: 10, cursor:'pointer'}} 
-								src={imgSrc}
-								alt="thumbnail" 
-								title={name}
-								onClick={()=>{
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-									// window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
-								}}
-							/>
+							<div className="topPublication"
+							>
+								<img 
+									className="image"
+									src={imgSrc}
+									alt="thumbnail" 
+									title={name}
+								/>
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
+									}}
+								>
+									<div className="hover-text">{name}</div>
+								</div>
+							</div>
 						)}
 					</GameChangerThumbnailRow>
 				</div>

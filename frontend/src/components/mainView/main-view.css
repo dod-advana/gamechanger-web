@@ -2,3 +2,47 @@
     font-family: 'Montserrat', Arial, Helvetica, sans-serif !important;
     font-weight: 600;
 }
+
+
+.topPublication {
+    position: relative;
+    height: 210px;
+    margin-left: 10px;
+    cursor: pointer;
+    border: 1px solid black;
+    
+}
+
+.image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.hover-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    display: none;
+    transition: .5s ease;
+    background-color: white;
+    flex-direction: column-reverse;
+    justify-content: space-between; 
+}
+
+.hover-text {
+    color: white;
+    font-size: 2em;
+    margin: 10px;
+    font-family: 'Montserrat';
+    font-weight: 600;
+}
+
+.topPublication:hover .hover-overlay {
+    display: flex;
+    background-color: rgba(56, 111, 148, 0.7);
+  }
