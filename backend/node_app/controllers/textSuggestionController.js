@@ -46,17 +46,9 @@ class TextSuggestionController {
 			}
 			const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
 
-			let presearchFile;
-			try {
-				presearchFile = this.getPreFileCorrected(data_presearch.responses[0].hits.hits);
-			} catch (err) {
-				const { message } = err;
-				this.logger.error(message, 'M341BKC', userId);
-			}
-
 			let presearchTitle;
 			try {
-				presearchTitle = this.getPreTitleCorrected(data_presearch.responses[1].hits.hits);
+				presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
 			} catch (err) {
 				const { message } = err;
 				this.logger.error(message, 'JBVZKTF', userId);
@@ -64,7 +56,7 @@ class TextSuggestionController {
 
 			let presearchHistory;
 			try {
-				presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[2].aggregations.search_query.buckets);
+				presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[1].aggregations.search_query.buckets);
 			} catch (err) {
 				const { message } = err;
 				this.logger.error(message, 'JBVZKTG', userId);
@@ -73,14 +65,13 @@ class TextSuggestionController {
 			// let predictions = [];
 			let presearchEntity;
 			try {
-				presearchEntity = this.getPreEntityCorrected(data_presearch.responses[3].hits.hits);
+				presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
 			} catch (err) {
 				const { message } = err;
 				this.logger.error(message, 'JBVZKTF', userId);
 			}
 			return res.send({
 				autocorrect: corrected ? [corrected] : [],
-				presearchFile: presearchFile || [],
 				presearchTitle: presearchTitle || [],
 				presearchTopic: presearchEntity.presearchTopic || [],
 				presearchOrg: presearchEntity.presearchOrg || [],
@@ -165,19 +156,10 @@ class TextSuggestionController {
 		}
 	}
 
-	getPreFileCorrected(suggesterArray) {
-		const presearch = [];
-		suggesterArray.forEach(suggestion => {
-			presearch.push(suggestion['_source'].filename.substr(0, suggestion['_source'].filename.lastIndexOf('.')));
-		}
-		);
-		return presearch;
-	}
-
 	getPreTitleCorrected(suggesterArray) {
 		const presearch = [];
 		suggesterArray.forEach(suggestion => {
-			presearch.push(suggestion['_source'].title);
+			presearch.push(suggestion['_source'].display_title_s);
 		}
 		);
 		return presearch;
