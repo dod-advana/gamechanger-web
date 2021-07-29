@@ -53,8 +53,8 @@ export default (props) => {
     const [currentQa, setCurrentQa] = useState('');
     const [corpusCount, setCorpusCount] = useState(0);
 
-    const [selectedSentence, setSelectedSentence] = useState([]);
-    const [selectedQEXP, setSelectedQEXP] = useState([]);
+    const [selectedSentence, setSelectedSentence] = useState('');
+    const [selectedQEXP, setSelectedQEXP] = useState('');
 
     const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
@@ -155,11 +155,14 @@ export default (props) => {
      */
     const triggerReloadModels = async () => {
         try{
-            await gameChangerAPI.reloadModels({
-                "transformer": "",
-                "sentence": selectedSentence,
-                "qexp": selectedQEXP,
-            });
+            const params = {}
+            if(selectedSentence){
+                params["sentence"] = selectedSentence
+            }
+            if(selectedQEXP){
+                params["qexp"] = selectedQEXP
+            }
+            await gameChangerAPI.reloadModels(params);
             props.updateLogs('Reloaded Models',0);
             props.getProcesses()
         } catch(e){
@@ -174,7 +177,7 @@ export default (props) => {
         return (''+downloading).toUpperCase()
     }
     const checkTraining = () =>{
-        return checkFlag('training:');
+        return checkFlag('training:') || checkFlag('corpus:');
     }
     const checkReloading = () =>{
         return checkFlag('models:');
@@ -283,38 +286,42 @@ export default (props) => {
                             style={{float: 'right', minWidth: 'unset'}}
                         >Reload</GCPrimaryButton>
                         <div>
-                            Sentence Model:
-                            <Select
-                                value={selectedSentence}
-                                onChange={e => setSelectedSentence(e.target.value)}
-                                name="labels"
-                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                            >
-                                {Object.keys(downloadedModelsList.sentence).map((name) => {
-                                    return (
-                                        <MenuItem 
-                                            style={{fontSize:'small'}}
-                                            value={name}>{name}</MenuItem>
-                                    )
-                                })}
-                            </Select><br/>
-                            QEXP Model:
-                            <Select
-                                value={selectedQEXP}
-                                onChange={e => setSelectedQEXP(e.target.value)}
-                                name="labels"
-                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
-                            >
-                                {Object.keys(downloadedModelsList.qexp).map((name) => {
-                                    return (
-                                        <MenuItem 
-                                            style={{fontSize:'small'}}
-                                            value={name}>{name}</MenuItem>
-                                    )
-                                })}
-                            </Select>
+                            <div>
+                                <div style={{width: '120px', display: 'inline-block'}}>Sentence Model:</div>
+                                <Select
+                                    value={selectedSentence}
+                                    onChange={e => setSelectedSentence(e.target.value)}
+                                    name="labels"
+                                    style={{fontSize:'small',  minWidth: '200px', margin:'10px'}}
+                                >
+                                    {Object.keys(downloadedModelsList.sentence).map((name) => {
+                                        return (
+                                            <MenuItem 
+                                                style={{fontSize:'small'}}
+                                                value={name}>{name}</MenuItem>
+                                        )
+                                    })}
+                                </Select>
+                            </div>
+                            
+                            <div>
+                                <div style={{width: '120px', display: 'inline-block'}}>QEXP Model:</div>
+                                <Select
+                                    value={selectedQEXP}
+                                    onChange={e => setSelectedQEXP(e.target.value)}
+                                    name="labels"
+                                    style={{fontSize:'small',  minWidth: '200px', margin:'10px'}}
+                                >
+                                    {Object.keys(downloadedModelsList.qexp).map((name) => {
+                                        return (
+                                            <MenuItem 
+                                                style={{fontSize:'small'}}
+                                                value={name}>{name}</MenuItem>
+                                        )
+                                    })}
+                                </Select>
+                            </div>
                         </div>
-                        
 					</div>
 
                     <div style={{ width: '100%', padding: '20px', marginBottom: '10px', border: '2px solid darkgray', borderRadius: '6px', display: 'inline-block', justifyContent: 'space-between' }}>
@@ -328,12 +335,12 @@ export default (props) => {
                         >Train</GCPrimaryButton>
                         
                         <div>
-                            <div style={{width: '110px', display: 'inline-block'}}>Encoder Model:</div>
+                            <div style={{width: '120px', display: 'inline-block'}}>Encoder Model:</div>
                             <Input
                                 value={modelName}
                                 onChange={e => setModelName(e.target.value)}
                                 name="labels"
-                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                                style={{fontSize:'small',  minWidth: '200px', margin:'10px'}}
                             />
                             <div style={{width: '60px', display: 'inline-block', marginLeft:'20px'}}>GPU:</div>
                             <Checkbox
@@ -342,12 +349,12 @@ export default (props) => {
                             />
                         </div>
                         <div>
-                            <div style={{width: '110px', display: 'inline-block'}}>Version:</div>
+                            <div style={{width: '120px', display: 'inline-block'}}>Version:</div>
                             <Input
                                 value={version}
                                 onChange={e => setVersion(e.target.value)}
                                 name="labels"
-                                style={{fontSize:'small',  minWidth: 'unset', margin:'10px'}}
+                                style={{fontSize:'small',  minWidth: '200px', margin:'10px'}}
                             />
                             <div style={{width: '60px', display: 'inline-block', marginLeft:'20px'}}>Upload:</div>
                             <Checkbox
