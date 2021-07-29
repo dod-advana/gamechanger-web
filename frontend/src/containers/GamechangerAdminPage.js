@@ -20,7 +20,7 @@ import "react-table/react-table.css";
 import {Snackbar} from "@material-ui/core";
 import GCButton from "../components/common/GCButton";
 import Modal from 'react-modal';
-import MLDashboard from '../components/admin/MLDashboard';
+import MLDashboard from '../components/admin/MLDashboard/index';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
 import GCTrendingBlacklist from '../components/admin/GCTrendingBlacklist';
 import InternalUsersManagement from '../components/user/InternalUserManagement';
@@ -831,7 +831,11 @@ const GamechangerAdminPage = props => {
 
 	const handleAddRow = (key, value) => {
 		const tmp = {...editorTableData};
-		tmp[key].push({name:value});
+		if(tmp[key]){
+			tmp[key].push({name:value});
+		} else {
+			tmp[key] = [{name:value}];
+		}
 		setEditorTableData(tmp);
 	}
 
