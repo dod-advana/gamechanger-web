@@ -305,16 +305,17 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 					{!iframeLoading && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}				
 					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: "100%" }}>
 					
+						<div style ={{height: "100%"}}> 
 						{filename && filename.endsWith('pdf') && 
-						<div>
+
 						<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
-						</div>}
-						
+						}
 						{filename && filename.endsWith('html') &&
-						<div>
 							<iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}}></iframe>
-						</div>}
+						}
+						</div>
 					</div>
+
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
 					<div className="searchdemo-vertical-bar-toggle" style={rightBarExtraStyles} onClick={() => handleRightPanelToggle()}>
 						<i
