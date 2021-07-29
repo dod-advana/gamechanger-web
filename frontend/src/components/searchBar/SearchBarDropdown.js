@@ -12,8 +12,6 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 		switch(rowType){
 			case 'autocorrect':
 				return;
-			case 'presearchFile':
-				return <SubText>File</SubText>
 			case 'presearchTitle':
 				return <SubText>Title</SubText>
 			case 'predictions':
