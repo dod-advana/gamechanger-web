@@ -17,7 +17,6 @@ import {
 import Pagination from 'react-js-pagination';
 import { trackEvent } from "../../telemetry/Matomo";
 import sanitizeHtml from 'sanitize-html';
-import PDFViewer from '../../documentViewer/PDFViewer';
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -101,7 +100,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				setFilename(rec.filename);
 				setFileUrl(rec.source_page_url_s);
 			}
-	}, [data, iframePreviewLink]);
+	}, [filename, data, iframePreviewLink]);
 
 	useEffect(() => {
 		
@@ -313,7 +312,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 							}
 						</div>
 					</div>
-					
+
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
 					<div className="searchdemo-vertical-bar-toggle" style={{...rightBarExtraStyles, bottom:'0px'}} onClick={() => handleRightPanelToggle()}>
 						<i
