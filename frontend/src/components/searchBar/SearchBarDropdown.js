@@ -81,8 +81,6 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 				}, [])
 			}
 
-			<Beta>(Beta)</Beta>
-
 		</DropdownWrapper>
 	)
 }
