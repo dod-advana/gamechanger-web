@@ -48,7 +48,6 @@ let processTimer;
             // set processes
             const processesData = await gameChangerAPI.getProcessStatus();
             setProcesses(processesData.data);
-            updateLogs('Successfully queried processes',0);
 			checkProcesses(processesData.data)
         }catch (e) {
             updateLogs("Error querying processes: " + e.toString() ,2);
