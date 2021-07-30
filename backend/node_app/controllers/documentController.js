@@ -282,7 +282,7 @@ class DocumentController {
 				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder}, userId));
 			});
 			
-			Promise.all(promises).then(values => {
+			Promise.allSettled(promises).then(values => {
 				res.status(200).send(values)
 			})
 		} catch (err) {
