@@ -18,6 +18,9 @@ import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE, StyledCenterContainer
 } from "../../../gamechangerUtils";
+import DocumentIcon from '../../../images/icon/Document.png';
+import OrganizationIcon from '../../../images/icon/Organization.png';
+import ApplicationsIcon from '../../../images/icon/slideout-menu/applications icon.png';
 
 const _ = require('lodash');
 
@@ -196,6 +199,7 @@ const PolicyMainViewHandler = {
 													<SearchSection
 														section={'Documents'}
 														color={'#131E43'}
+														icon={DocumentIcon}
 													>
 														{activeCategoryTab === 'all' ? <>
 															{!docsLoading && !docsPagination ?
@@ -243,6 +247,7 @@ const PolicyMainViewHandler = {
 														<SearchSection
 														section={'Organizations'}
 														color={'#376f94'}
+														icon={OrganizationIcon}
 														>
 															{getSearchResults(entitySearchResults, state, dispatch)}
 															<div className='gcPagination col-xs-12 text-center'>
@@ -265,6 +270,7 @@ const PolicyMainViewHandler = {
 														<SearchSection
 														section={'Topics'}
 														color={'#4da593'}
+														icon={ApplicationsIcon}
 														>
 															{getSearchResults(topicSearchResults, state, dispatch)}
 															<div className='gcPagination col-xs-12 text-center'>
