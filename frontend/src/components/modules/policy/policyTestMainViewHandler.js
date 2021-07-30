@@ -188,12 +188,14 @@ const PolicyMainViewHandler = {
 		try {
 			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 			crawlerSources = crawlerSources.data;
+			let folder = crawlerSources[0].image_link.split('/');
+			folder = folder[folder.length - 2];
 			const thumbnailList = crawlerSources.map(item => {
 				let filename = item.image_link.split('/').pop();
 				filename = filename.substring(0, filename.lastIndexOf('.')) || filename;
 				return {name: filename}
 			});
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: 'crawler_images'});
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: folder});
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf;
