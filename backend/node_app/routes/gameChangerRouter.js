@@ -59,6 +59,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
+router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);

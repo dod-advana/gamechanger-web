@@ -152,7 +152,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
-		const { dispatch } = props;
+		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
@@ -173,7 +173,7 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 
 		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs);
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: pubs, folder: 'thumbnails'});
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf;
@@ -185,6 +185,24 @@ const PolicyMainViewHandler = {
 		
 		setState(dispatch, {adminMajorPubs: pubs});
 
+		try {
+			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+			crawlerSources = crawlerSources.data;
+			const thumbnailList = crawlerSources.map(item => {
+				let filename = item.image_link.split('/').pop();
+				filename = filename.substring(0, filename.lastIndexOf('.')) || filename;
+				return {name: filename}
+			});
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: 'crawler_images'});
+			const buffers = pngs.data
+			buffers.forEach((buf,idx) => {
+				crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf;
+			});
+			setState(dispatch, {crawlerSources});
+		} catch(e) {
+			//Do nothing
+			console.log(e)
+		}
 	},
 	
 	getMainView(props) {
@@ -267,7 +285,6 @@ const PolicyMainViewHandler = {
 				adminTopics[idx].favorite = topic.name.toLowerCase() === fav.topic_name.toLowerCase();
 			})
 		})
-		const cleanSources = crawlerSources.map(crawl => crawlerMappingFunc(crawl))
 
 		return(
 			<div style={{marginTop: '40px'}}>
@@ -341,14 +358,15 @@ const PolicyMainViewHandler = {
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={cleanSources} 
+						links={crawlerSources} 
 						title="Sources" 
 						width='300px'
 					>
-						{cleanSources.map(source => 
+						{crawlerSources.map(source => 
 							<SourceContainer>
 								{/* <div style={{width:100, height:100}}/> */}
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
+								<img src={source.imgSrc}></img>
+								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
 					</GameChangerThumbnailRow>
