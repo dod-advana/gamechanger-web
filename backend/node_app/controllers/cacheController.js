@@ -193,7 +193,7 @@ class CacheController {
 				}
 				try {
 					body.forCacheReload = true;
-					await this.search.documentSearchHelper({body}, userId);
+					//await this.search.documentSearchHelper({body}, userId);
 				} catch (e) {
 					hadError = true;
 					this.logger.error(`Error re-creating a search for cache reload: ${e.message}`, 'P93QCCD', userId);
