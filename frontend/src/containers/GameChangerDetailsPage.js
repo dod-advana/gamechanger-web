@@ -17,6 +17,7 @@ import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/Loadin
 import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
+import SourceDetailsPage from "../components/details/sourceDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
@@ -242,6 +243,7 @@ const getDocumentData = async (doc_id, cloneName) => {
 }
 
 const getSourceData = async (searchText, cloneName) => {
+	const t0 = new Date().getTime();
 	const { data } = await gameChangerAPI.callSearchFunction({
 		functionName: 'getDocumentsBySourceFromESHelper',
 		cloneName,
@@ -249,7 +251,8 @@ const getSourceData = async (searchText, cloneName) => {
 			searchText: invertedCrawlerMappingFunc(searchText)
 		}
 	});
-
+	const t1 = new Date().getTime();
+	data.timeFound = ((t1 - t0) / 1000).toFixed(2);
 	return data
 }
 
@@ -315,6 +318,7 @@ const GameChangerDetailsPage = (props) => {
 
 	const [source, setSource] = useState(null);
 	const [showSourceContainer, setShowSourceContainer] = useState(false);
+	const [initialSourceData, setInitialSourceData] = useState({});
 	
 	const [contractAwardID, setContractAwardID] = useState(null);
 	const [showContractContainer, setShowContractContainer] = useState(false);
@@ -388,23 +392,12 @@ const GameChangerDetailsPage = (props) => {
 			case 'source':
 				setDetailsType('Source');
 				name = query.get('sourceName');
-				setRunningQuery(true);
-				setGettingDocuments(true);
-				const t0 = new Date().getTime();
+				setShowSourceContainer(true);
 				getSourceData(name, cloneName).then(data => {
-					const t1 = new Date().getTime();
-					setShowSourceContainer(true);
-					setSource({...data, name});
-					setDocCount(data.totalCount);
-					setDocResultsPage(1);
-					setDocResults(data.docs);
-					setVisibleDocs(data.docs.slice(1, RESULTS_PER_PAGE + 1));
-					setRunningQuery(false);
-					if(data.docs.length > 0) {
-						setTimeFound(((t1 - t0) / 1000).toFixed(2));
-						setGettingDocuments(false);
-					}
+					setSource(name);
+					setInitialSourceData(data);
 				});
+				break;
 			default:
 				break;
 		}
@@ -461,18 +454,9 @@ const GameChangerDetailsPage = (props) => {
 		});
 
 	}, [topic, graph, cloneData]);
-
-	useEffect(() => {
-
-		if (!source || !cloneData) return;
-		let searchText = `"${source.name}"`
-
-
-	})
 	
 	const renderDocuments = () => {
 		return visibleDocs.map((item, idx) => {
-			debugger;
 			return (
 				<Card key={idx}
 					item={item}
@@ -649,77 +633,6 @@ const GameChangerDetailsPage = (props) => {
 			</div>
 		);
 	}
-
-	const renderSourceContainer = () => {
-		return (
-			<div>
-				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Source Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
-				{source &&
-					<MainContainer>
-						<div className={'details'}>
-							<Paper>
-								<div className={'name'}>{source.name || ''}</div>
-								
-								<div className={'details-header'}>
-									<span>{'SOURCE DETAILS'}</span>
-								</div>
-								
-								<div className={'details-table'}>
-									<SimpleTable tableClass={'sidebar-table'}
-												 zoom={1}
-												 headerExtraStyle={{backgroundColor: '#313541', color: 'white'}}
-												 rows={[{key:'Total', value:source.totalCount}] || []}
-												 height={'auto'}
-												 dontScroll={true}
-												 colWidth={colWidth}
-												 disableWrap={true}
-												 title={'SOURCE Statistics'}
-												 hideHeader={true}
-									/>
-								</div>
-							</Paper>
-						</div>
-						<div className={'graph-top-docs'}>
-							
-							<div className={'section'}>
-								<GCAccordion expanded={true} header={'RELATED DOCUMENTS'}
-											 backgroundColor={'rgb(238,241,242)'}>
-									<div className={'related-documents'} style={{width: '100%'}}>
-										<div style={{display: 'flex', justifyContent: 'space-between'}}>
-											<div
-												style={styles.resultsCount}>{gettingDocuments ? 'Searching for documents...' :
-												`${numberWithCommas(docCount)} results found in ${timeFound} seconds`}</div>
-											<div style={{marginTop: '-14px', display: 'flex'}} className={'gcPagination'}>
-												<Pagination
-													activePage={docResultsPage}
-													itemsCountPerPage={18}
-													totalItemsCount={docCount}
-													pageRangeDisplayed={8}
-													onChange={page => {
-														trackEvent('GAMECHANGER', 'DetailsPaginationChanged', 'page', page);
-														handleChangeDocsPage(page);
-													}}
-													className='gcPagination'
-												/>
-											</div>
-										</div>
-										<div className="row" style={{marginLeft: 0, marginRight: -15}}>
-											{gettingDocuments ?
-												<div style={{margin: '0 auto'}}>
-													<LoadingIndicator customColor={gcColors.buttonColor2}/>
-												</div> :
-												renderDocuments()}
-										</div>
-									</div>
-								</GCAccordion>
-							</div>
-						
-						</div>
-					</MainContainer>
-				}
-			</div>
-		);
-	}
 	
 	const setLoginModal = (open) => {
 		setLoginModalOpen(open);
@@ -745,8 +658,8 @@ const GameChangerDetailsPage = (props) => {
 				renderTopicContainer()
 			}
 
-			{showSourceContainer &&
-				renderSourceContainer()
+			{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) &&
+				<SourceDetailsPage source={source} cloneData={cloneData} initialSourceData={initialSourceData}/>
 			}
 			
 			{showDocumentContainer &&
