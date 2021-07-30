@@ -1792,7 +1792,7 @@ const GamechangerAdminPage = props => {
 			<Dialog
 				open={showAddEditorTermDialog}
 				scroll={'paper'}
-				maxWidth='300px'
+				maxWidth='sm'
 			>
 				<TextField
 					id="margin-dense"
