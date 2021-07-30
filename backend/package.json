@@ -4,7 +4,7 @@
   "description": "gamechanger backend",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest",
+    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
     "prestart": "npm install",
     "start": "node index.js",
@@ -62,7 +62,8 @@
       "text",
       "cobertura",
       "lcov"
-    ]
+    ],
+    "testTimeout": 10000
   },
   "eslintConfig": {
     "rules": {
