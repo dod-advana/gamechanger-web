@@ -68,6 +68,7 @@ export default function GCUserInfoModal (props) {
     const [orgError, setOrgError] = useState(false);
     const [passedOnInfo, setPassedOnInfo] = useState(true);
     const [userFeedbackMode, setUserFeedbackMode] = useState(false);
+    const [matomoStatus, setMatomoStatus] = useState(false);
     
 
     const checkRequired = (field, value) => {
@@ -127,6 +128,15 @@ export default function GCUserInfoModal (props) {
 			console.error('Error getting user feedback mode', e);
 		}
 	}
+
+    const getUserMatomoStatus = async () => {
+        try {
+            const { data } = await gameChangerAPI.getUserMatomoStatus();
+            setMatomoStatus(data);
+        } catch(e) {
+            console.error('Error getting matomo status', e);
+        }
+    }
     
 	const handleUserInfoInput = (field, text) => {
 		const userInfo = {...state.userInfo};
@@ -147,10 +157,12 @@ export default function GCUserInfoModal (props) {
     useEffect(() => {
         getUserFeedbackMode();
 		passedOnUserInfo();
+        getUserMatomoStatus();
 	}, []);
+
     return (
         <Dialog
-            open={false && !passedOnInfo && userFeedbackMode}
+            open={state.userInfoModalOpen && !passedOnInfo && userFeedbackMode && matomoStatus}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
