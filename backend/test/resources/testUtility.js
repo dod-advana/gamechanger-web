@@ -42,13 +42,19 @@ class AsyncRedisMock {
 const constructorOptionsMock = {
 	constants: {},
 	axios: {},
-	gcHistory: {},
+	gc_history: {
+		create: () => {}
+	},
+	app_settings: {
+		create: () => {}
+	},
+	favorite_search: {},
 	logger: {
 		info: (data) => {
 			// console.log('MOCKED LOGGER-[info]:', data);
 		},
 		error: (data, code) => {
-			console.log(`MOCKED LOGGER-[error][${code}]:`, data);
+			// console.log(`MOCKED LOGGER-[error][${code}]:`, data);
 		},
 		metrics: (data) => {
 			// console.log('MOCKED LOGGER-[metrics]:', data);
@@ -83,7 +89,12 @@ const constructorOptionsMock = {
 			return Promise.resolve(data);
 		}
 	},
-	dataApi: {}
+	dataApi: {},
+	redisDB: {
+		select() {},
+		get() {}
+	},
+	dataTracker: {}
 };
 
 const reqMock = {

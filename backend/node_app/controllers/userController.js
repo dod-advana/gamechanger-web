@@ -372,7 +372,7 @@ class UserController {
 			if (trackByRequest){
 				username = userId;
 			} else {
-				username = req.body.username;
+				username = req.body.username || '';
 			}
 			username = this.sparkMD5.hash(username);
 			const exists = await this.internalUserTracking.findOne({ where: { username } });

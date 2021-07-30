@@ -1,5 +1,4 @@
 const {HandlerFactory} = require('../factories/handlerFactory');
-const handlerFactory = new HandlerFactory();
 const CLONE_META = require('../models').clone_meta;
 const LOGGER = require('../lib/logger');
 
@@ -8,7 +7,7 @@ class ModularGameChangerController {
 		const {
 			logger = LOGGER,
 			clone_meta = CLONE_META,
-			handler_factory = handlerFactory,
+			handler_factory = new HandlerFactory(opts),
 		} = opts;
 
 		this.logger = logger;
