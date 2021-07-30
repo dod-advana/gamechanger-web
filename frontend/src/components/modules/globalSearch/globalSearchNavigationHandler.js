@@ -2,10 +2,7 @@ import React from "react";
 import GCTooltip from "../../common/GCToolTip";
 import {HoverNavItem, NavItem} from "../../navigation/NavItems";
 import {trackEvent} from "../../telemetry/Matomo";
-import {
-	getCloneTitleForFactory,
-	getTrackingNameForFactory
-} from "../../../gamechangerUtils";
+import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 import {
 	ConstrainedIcon,
 	PageLink,
@@ -16,8 +13,8 @@ import {setState} from "../../../sharedFunctions";
 import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
-import {Typography} from "@material-ui/core";
 import {getNotifications} from "../../notifications/Notifications";
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
@@ -33,9 +30,12 @@ const getToolTheme = (cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<div>
-				<Typography variant="h1">Global Search</Typography>
-			</div>
+			<img
+				src={AdvanaDarkTheme}
+				style={{ width: '196px' }}
+				alt='search'
+				id={'titleLogo'}
+			/>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`
 	};
@@ -126,7 +126,7 @@ const GlobalSearchNavigationHandler = {
 					</GCTooltip>
 				}
 				<NavItem style={{ justifyContent: 'space-between' }}>
-					<span>{getCloneTitleForFactory(state.cloneData, true)} MENU</span>
+					<span>MENU</span>
 				</NavItem>
 				<GCTooltip title="Tell us what you think!" placement="right" arrow>
 					<HoverNavItem onClick={() => {
