@@ -127,7 +127,6 @@ const StyledFrontCardHeader = styled.div`
 			font-family: "Noto Sans";
 			font-weight: 400;
 			font-size: ${CARD_FONT_SIZE}px;
-			margin-top: ${({listView}) => listView ? '2px': '0px'};
 		}
 	}
 	
@@ -180,6 +179,31 @@ const StyledFrontCardSubHeader = styled.div`
 			width: 25px;
     		margin: 0px 10px 0px 0px;
 		}
+	}
+
+	.list-sub-header-one {
+		color: ${({typeTextColor}) => typeTextColor ? typeTextColor : '#ffffff'};
+		background-color: ${({docTypeColor}) => docTypeColor ? docTypeColor : '#000000'};
+		width: 150px;
+		padding: 8px;
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		margin-top: 8px;
+		
+		img {
+			width: 16px;
+    		margin: 0px 10px 0px 0px;
+		}
+	}
+	
+	.list-sub-header-two {
+		width: 150px;
+		color: white;
+		padding: 2px 8px 8px;
+		background-color: ${({docOrgColor}) => docOrgColor ? docOrgColor : '#000000'};
+		font-size: 14px;
+		margin-top: 8px;
 	}
 `;
 
@@ -479,6 +503,12 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
+	const cardType = item.type;
+	const iconSrc = getTypeIcon(cardType);
+	const typeTextColor = getTypeTextColor(cardType);
+	
+	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
+
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
@@ -507,17 +537,29 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						}
 					</div>
 				</GCTooltip>
-				<div className={'selected-favorite'}>
-					<div style={{display: "flex"}}>
-						{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-						{checkboxComponent(item.filename, item.display_title_s, idx)}
-						{favoriteComponent()}
+				<div style={{ display: 'flex' }}>
+					{docListView &&
+						<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={docTypeColor} docOrgColor={docOrgColor}>
+							<div className={'list-sub-header-one'}>
+								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo"/>}
+								{displayType}
+							</div>
+							<div className={'list-sub-header-two'}>
+								{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
+							</div>
+						</StyledFrontCardSubHeader>
+					}
+					<div className={'selected-favorite'}>
+						<div style={{display: "flex"}}>
+							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+							{checkboxComponent(item.filename, item.display_title_s, idx)}
+							{favoriteComponent()}
+						</div>
 					</div>
 				</div>
 			</div>
 			{docListView &&
 				<div className={'list-view-sub-header'}>
-					<p> {displayType} | {displayOrg} </p>
 					<p style={{ fontWeight: 400 }}>{`Published on: ${publicationDate ?? 'Unknown'}`}</p>
 				</div>
 			}
