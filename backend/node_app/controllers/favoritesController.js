@@ -7,6 +7,8 @@ const { SearchController } = require('../../node_app/controllers/searchControlle
 const { getTenDigitUserId } = require('../utils/userUtility')
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
+const SearchUtility = require('../utils/searchUtility')
+const constantsFile = require('../config/constants');
 
 class FavoritesController {
 
@@ -19,7 +21,9 @@ class FavoritesController {
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
-			search = new SearchController(opts)
+			search = new SearchController(opts),
+			searchUtility = new SearchUtility(opts),
+			constants = constantsFile
 		} = opts;
 
 		this.logger = logger;
@@ -30,6 +34,8 @@ class FavoritesController {
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
 		this.search = search;
+		this.searchUtility = searchUtility;
+		this.constants = constants;
 
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
@@ -208,12 +214,12 @@ class FavoritesController {
 								});
 
 								if (history.request_body) {
-									const searchResults = await this.search.documentSearchHelper({body:history.request_body}, userId);
+									const searchResults = await this.searchUtility.documentSearch(null, {body:history.request_body}, {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index}, userId);
 									if (searchResults.totalCount > search.document_count) {
 
 										numNotifications += 1;
 
-										this.favoriteSearch.update({
+										await this.favoriteSearch.update({
 											updated_results: true,
 											run_by_cache: false,
 											document_count: searchResults.totalCount
@@ -225,7 +231,7 @@ class FavoritesController {
 										});
 									}
 								} else {
-									console.log('no request body data to make the search');
+									this.logger.log('no request body data to make the search');
 								}
 
 
@@ -234,7 +240,7 @@ class FavoritesController {
 								this.logger.error(err);
 							}
 						} else {
-							this.favoriteSearch.update({ run_by_cache: false },
+							await this.favoriteSearch.update({ run_by_cache: false },
 								{
 									where: {
 										id: search.id
