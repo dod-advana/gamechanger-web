@@ -44,10 +44,6 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 
-router.post('/documentSearch/download', (req, res) => {
-	req.setTimeout(720000);
-	search.documentSearchDownload(req, res);
-});
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
 router.get('/admin/getElasticSearchIndex', search.getElasticSearchIndex);

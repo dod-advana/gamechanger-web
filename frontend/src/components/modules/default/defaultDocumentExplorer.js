@@ -184,8 +184,8 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 }
 
 	return (
-		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
-			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+		<div className="row" style={{ height: 'calc(100% - 62px)', marginTop: '10px' }}>
+			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
 				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{
 						totalCount ?
@@ -265,9 +265,9 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 					}
 				})}
 			</div>
-			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
-				<div style={{ display: 'flex', width: '100%', height: '94%', flexDirection: 'column' }}>
-					<div className="searchdemo-vertical-bar-toggle" style={leftBarExtraStyles} onClick={() => handleLeftPanelToggle()}>
+			<div className={`col-xs-${iframePanelSize}`} style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}>
+				<div style={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column' }}>
+					<div className="searchdemo-vertical-bar-toggle" style={{...leftBarExtraStyles, bottom:'0px'}} onClick={() => handleLeftPanelToggle()}>
 						<i
 							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
@@ -283,7 +283,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 						<iframe className="aref" id={'docPdfViewer'} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
 					</div>
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
-					<div className="searchdemo-vertical-bar-toggle" style={rightBarExtraStyles} onClick={() => handleRightPanelToggle()}>
+					<div className="searchdemo-vertical-bar-toggle" style={{...rightBarExtraStyles, bottom:'0px'}} onClick={() => handleRightPanelToggle()}>
 						<i
 							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
@@ -297,7 +297,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				</div>
 
 			</div>
-            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
                 <SimpleTable tableClass={'magellan-table'}
                     zoom={0.8}
                     headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
