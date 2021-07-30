@@ -3,14 +3,9 @@
 module.exports = (sequelize, DataTypes) => {
 	const Admin = sequelize.define('crawler_info',
 		{
-			id: {
-				allowNull: false,
-				autoIncrement: true,
-				primaryKey: true,
-				type: DataTypes.INTEGER
-			},
       crawler: {
 				type: DataTypes.STRING,
+				primaryKey: true,
 				allowNull: false
 			},
 			display_org: {
