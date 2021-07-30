@@ -82,6 +82,7 @@ const GameChangerSearchBar = (props) => {
 	const { context  } = props;
 	const {state, dispatch} = context;
 	const isEDA = state.cloneData.clone_name === 'eda';
+	const isGlobalSearch = state.cloneData.clone_name === 'globalSearch';
 	const isGamechanger = state.cloneData.clone_name === 'gamechanger';
 	const classes = useStyles();
 	const useDebounce = (value, delay) => {
@@ -152,10 +153,10 @@ const GameChangerSearchBar = (props) => {
 			}
 		}
 		
-		if (state.cloneData?.clone_name !== 'globalSearch') {
+		if (!isGlobalSearch) {
 			debouncedFetchSearchSuggestions(debouncedSearchTerm);
 		}
-	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
+	}, [state.cloneData, debouncedSearchTerm, isGlobalSearch]); // run when debounce value changes;
 
 	useEffect(() => {
     function onKeyDown(e) {
@@ -476,7 +477,7 @@ const GameChangerSearchBar = (props) => {
 					id="gcSearchInput"
 				/>
 
-				{!isEDA &&
+				{(!isEDA && !isGlobalSearch) &&
 					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement='top' arrow>
 						<button
 							type="button"
@@ -511,16 +512,20 @@ const GameChangerSearchBar = (props) => {
 				<i className="fa fa-search" />
 			</SearchButton>
 
-			<GCButton
-			onClick={()=>{
-				getUserData(dispatch);
-				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-				clearDashboardNotification('total', state, dispatch);
-			}}
-			style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
-			>
-				<ConstrainedIcon src={UserIcon} />
-			</GCButton>
+			{!isGlobalSearch ?
+				<GCButton
+					onClick={()=>{
+						getUserData(dispatch);
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+						clearDashboardNotification('total', state, dispatch);
+					}}
+					style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
+				>
+					<ConstrainedIcon src={UserIcon} />
+				</GCButton>
+				:
+				<div style={{ width: 60, margin: '0 0 0 4%' }} />
+			}
 
 			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
 				open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}

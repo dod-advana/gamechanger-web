@@ -314,7 +314,7 @@ export default function SearchMatrix(props) {
 	}, [state, comparableExpansion]);
 
 	useEffect(() => {
-		if(state.searchSettings.isFilterUpdate & state.searchSettings.expansionTermAdded){
+		if(state.searchSettings.isFilterUpdate && state.searchSettings.expansionTermAdded){
 			let newSearchText = state.searchText.trim()
 			expansionTerms.forEach(({phrase, source, checked}) => {
 				if(checked && !exactMatch(newSearchText, phrase, " OR ")) {

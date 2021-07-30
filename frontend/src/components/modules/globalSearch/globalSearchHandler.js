@@ -84,6 +84,10 @@ const GlobalSearchHandler = {
 			autocompleteItems: [],
 			rawSearchResults: [],
 			docSearchResults: [],
+			applicationsSearchResults: [],
+			dashboardsSearchResults: [],
+			dataSourcesSearchResults: [],
+			databasesSearchResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			resultsDownloadURL: '',
@@ -121,6 +125,7 @@ const GlobalSearchHandler = {
 			
 			// Make the global search calls
 			let totalCount = 0;
+			let respData = {};
 			
 			try {
 				const {data} = await gameChangerAPI.modularSearch({
@@ -138,8 +143,8 @@ const GlobalSearchHandler = {
 						getDatabases: selectedCategories.Databases
 					},
 				});
-				
-				
+
+				respData = data;
 				
 				data.applications.hits.forEach(hit => {
 					hit.type = 'application';
@@ -194,6 +199,14 @@ const GlobalSearchHandler = {
 					count: totalCount,
 					rawSearchResults: searchResults,
 					searchResultsCount: searchResults.length,
+					applicationsSearchResults: respData.applications.hits,
+					applicationsTotalCount: categoryMetadata.Applications.total,
+					dashboardsSearchResults: respData.dashboards.hits,
+					dashboardsTotalCount: categoryMetadata.Dashboards.total,
+					dataSourcesSearchResults: respData.dataSources.results,
+					dataSourcesTotalCount: categoryMetadata.DataSources.total,
+					databasesSearchResults: respData.databases.results,
+					databasesTotalCount: categoryMetadata.Databases.total,
 					autocompleteItems: [],
 					isCachedResult: false,
 					metricsLoading: false,
@@ -218,6 +231,10 @@ const GlobalSearchHandler = {
 					count: 0,
 					rawSearchResults: [],
 					docSearchResults: [],
+					applicationsSearchResults: [],
+					dashboardsSearchResults: [],
+					dataSourcesSearchResults: [],
+					databasesSearchResults: [],
 					searchResultsCount: 0,
 					runningSearch: false,
 					prevSearchText: searchText,
@@ -244,6 +261,170 @@ const GlobalSearchHandler = {
 				runningSearch: false,
 				loadingTinyUrl: false,
 				hasExpansionTerms: false
+			});
+		}
+	},
+
+	async handleApplicationsPagination(state, dispatch) {
+		const {
+			searchText = "",
+			applicationsPage,
+			listView,
+			showTutorial,
+			cloneData
+		} = state;
+
+		const offset = ((applicationsPage - 1) * RESULTS_PER_PAGE);
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				getApplications: true,
+				limit
+			}
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				applicationsSearchResults: resp.data.applications.hits.map(hit => {
+					hit.type = 'application';
+					return hit;
+				}),
+				applicationsLoading: false,
+				applicationsPagination: false
+			});
+		}
+	},
+
+	async handleDashboardsPagination(state, dispatch) {
+		const {
+			searchText = "",
+			dashboardsPage,
+			listView,
+			showTutorial,
+			cloneData
+		} = state;
+
+		const offset = ((dashboardsPage - 1) * RESULTS_PER_PAGE);
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				getDashboards: true,
+				limit
+			}
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				dashboardsSearchResults: resp.data.dashboards.hits.map(hit => {
+					hit.type = 'dashboard';
+					return hit;
+				}),
+				dashboardsLoading: false,
+				dashboardsPagination: false
+			});
+		}
+	},
+
+	async handleDataSourcesPagination(state, dispatch) {
+		const {
+			searchText = "",
+			dataSourcesPage,
+			listView,
+			showTutorial,
+			cloneData
+		} = state;
+
+		const offset = ((dataSourcesPage - 1) * RESULTS_PER_PAGE);
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				getDataSources: true,
+				limit
+			}
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				dataSourcesSearchResults: resp.data.dataSources.results.map(result => {
+					result.type = 'dataSource';
+					return result;
+				}),
+				dataSourcesLoading: false,
+				dataSourcesPagination: false
+			});
+		}
+	},
+
+	async handleDatabasesPagination(state, dispatch) {
+		const {
+			searchText = "",
+			databasesPage,
+			listView,
+			showTutorial,
+			cloneData
+		} = state;
+
+		const offset = ((databasesPage - 1) * RESULTS_PER_PAGE);
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				getDatabases: true,
+				limit
+			}
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				databasesSearchResults: resp.data.databases.results.map(result => {
+					result.type = 'database';
+					return result;
+				}),
+				databasesLoading: false,
+				databasesPagination: false
 			});
 		}
 	},

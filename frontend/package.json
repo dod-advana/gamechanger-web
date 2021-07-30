@@ -64,6 +64,9 @@
 		"xlsx": "^0.17.0"
 	},
 	"devDependencies": {
+		"eslint": "^7.31.0",
+		"eslint-plugin-import": "^2.23.4",
+		"eslint-plugin-react": "^7.24.0",
 		"react-scripts": "3.4.0",
 		"sonarqube-scanner": "^2.5.0"
 	},
@@ -109,5 +112,45 @@
 			"last 1 safari version"
 		]
 	},
-	"eslintConfig": {}
+	"eslintConfig": {
+		"extends": [
+			"react-app"
+		],
+		"rules": {
+			"max-len": 0,
+			"indent": [
+				1,
+				"tab",
+				{
+					"SwitchCase": 1
+				}
+			],
+			"space-before-function-paren": 0,
+			"radix": 0,
+			"comma-dangle": 0,
+			"strict": 0,
+			"no-throw-literal": 0,
+			"quotes": [
+				"error",
+				"single",
+				{
+					"allowTemplateLiterals": true
+				}
+			],
+			"no-eval": 0,
+			"no-irregular-whitespace": [
+				"error",
+				{
+					"skipComments": true
+				}
+			]
+		},
+		"env": {
+			"es6": true
+		},
+		"parserOptions": {
+			"ecmaVersion": 2018,
+			"sourceType": "module"
+		}
+	}
 }

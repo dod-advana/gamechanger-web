@@ -1,7 +1,7 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
 import {
-	CARD_FONT_SIZE,
+	CARD_FONT_SIZE, encode,
 	getTrackingNameForFactory, getTypeIcon, getTypeTextColor
 } from "../../../gamechangerUtils";
 import {
@@ -413,7 +413,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${filename}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
+	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 };
 
 const EdaCardHandler = {
