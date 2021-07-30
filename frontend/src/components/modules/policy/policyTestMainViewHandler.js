@@ -176,7 +176,11 @@ const PolicyMainViewHandler = {
 			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: pubs, folder: 'thumbnails'});
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
-				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf;
+				if(buf.status === "fulfilled"){
+					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				} else {
+					pubs[idx].imgSrc = ''
+				}
 			})
 			
 		} catch(e) {
