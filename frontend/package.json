@@ -64,6 +64,9 @@
 		"xlsx": "^0.17.0"
 	},
 	"devDependencies": {
+		"eslint": "^7.31.0",
+		"eslint-plugin-import": "^2.23.4",
+		"eslint-plugin-react": "^7.24.0",
 		"react-scripts": "3.4.0",
 		"sonarqube-scanner": "^2.5.0"
 	},
