@@ -38,7 +38,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const cloneSpecificObject = { orgFilter, searchFields: Object.values(searchFields), includeRevoked };
 
 			if (!forCacheReload && useGCCache) {
-				return this.getCachedResults(req, cloneSpecificObject, userId);
+				return await this.getCachedResults(req, cloneSpecificObject, userId);
 			}
 
 			// get results
@@ -46,7 +46,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const gT0 = new Date().getTime();
 			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
-			const [parsedQuery, parsedTerms] = await this.searchUtility.getEsSearchTerms(req.body);
+			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
 			req.body.limit = 10000;
@@ -152,31 +152,31 @@ class PolicyGraphHandler extends GraphHandler {
 
 		switch (functionName) {
 			case 'getDataForSearch':
-				return this.getDataForSearchHelper(req, userId);
+				return await this.getDataForSearchHelper(req, userId);
 			case 'getDocumentsForEntity':
-				return this.getDocumentsForEntityHelper(req, userId);
+				return await this.getDocumentsForEntityHelper(req, userId);
 			case 'getDocumentsForTopic':
-				return this.getDocumentsForTopicHelper(req, userId);
+				return await this.getDocumentsForTopicHelper(req, userId);
 			case 'getSingleDocument':
-				return this.getSingleDocumentHelper(req, userId);
+				return await this.getSingleDocumentHelper(req, userId);
 			case 'getDocumentDetailsPageDataFull':
-				return this.getDocumentDetailsPageDataFullHelper(req, userId);
+				return await this.getDocumentDetailsPageDataFullHelper(req, userId);
 			case 'getEntityDataDetailsPage':
-				return this.getEntityDataDetailsPageHelper(req, userId);
+				return await this.getEntityDataDetailsPageHelper(req, userId);
 			case 'getTopicDataDetailsPage':
-				return this.getTopicDataDetailsPageHelper(req, userId);
+				return await this.getTopicDataDetailsPageHelper(req, userId);
 			case 'getTopicDataPolicyGraph':
-				return this.getTopicDataPolicyGraphHelper(req, userId);
+				return await this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
-				return this.getReferencesPolicyGraphHelper(req, userId);
+				return await this.getReferencesPolicyGraphHelper(req, userId);
 			case 'getEntitiesForNode':
-				return this.getEntitiesForNodeHelper(req, userId);
+				return await this.getEntitiesForNodeHelper(req, userId);
 			case 'getTopicsForNode':
-				return this.getTopicsForNodeHelper(req, userId);
+				return await this.getTopicsForNodeHelper(req, userId);
 			case 'getGraphSchema':
-				return this.getGraphSchemaHelper(req, userId);
+				return await this.getGraphSchemaHelper(req, userId);
 			case 'getTopicCardData':
-				return this.getTopicCardDataHelper(req, userId);
+				return await this.getTopicCardDataHelper(req, userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policyGraphHandler`,
@@ -531,7 +531,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const gT0 = new Date().getTime();
 			searchBody.questionFlag = this.searchUtility.isQuestion(searchText)
-			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(searchBody);
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
 			

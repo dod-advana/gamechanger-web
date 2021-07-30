@@ -1,5 +1,4 @@
 const asyncRedisLib = require('async-redis');
-const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
 const { getTenDigitUserId } = require('../../utils/userUtility');
@@ -10,7 +9,7 @@ class SearchHandler {
 	constructor(opts = {}) {
 		const {
 			redisClientDB = 1,
-			redisDB = redisAsyncClient,
+			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 			gc_history = GC_HISTORY,
 			logger = LOGGER,
 			searchUtility = new SearchUtility(opts)
@@ -24,7 +23,7 @@ class SearchHandler {
 
 	async search(searchText, offset, limit, options, cloneName, permissions, userId) {
 		// Setup the request
-		console.log(`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(options)}`);
+		this.logger.info(`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(options)}`);
 		const proxyBody = options;
 		proxyBody.searchText = searchText;
 		proxyBody.offset = offset;
@@ -36,7 +35,7 @@ class SearchHandler {
 
 	async callFunction(functionName, options, cloneName, permissions, userId, res) {
 		// Setup the request
-		console.log(`${userId} is calling ${functionName} in the ${cloneName} search module with options ${JSON.stringify(options)}`);
+		this.logger.info(`${userId} is calling ${functionName} in the ${cloneName} search module with options ${JSON.stringify(options)}`);
 		const proxyBody = options;
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;
@@ -58,7 +57,7 @@ class SearchHandler {
 				showTutorial = false,
 			} = req.body;
 
-			this.redisDB.select(this.redisClientDB);
+			await this.redisDB.select(this.redisClientDB);
 
 			// ## try to get cached results
 			const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
@@ -83,7 +82,7 @@ class SearchHandler {
 	}
 
 	async storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, userId) {
-		this.redisDB.select(this.redisClientDB);
+		await this.redisDB.select(this.redisClientDB);
 
 		// ## try to get cached results
 		const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});

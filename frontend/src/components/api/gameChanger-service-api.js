@@ -10,7 +10,6 @@ const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
 	modularSearch: '/api/gameChanger/modular/search',
 	modularExport: '/api/gameChanger/modular/export',
-	gameChangerDocumentSearchDownloadPOST: '/api/gameChanger/documentSearch/download',
 	gameChangerSemanticSearchDownloadPOST: '/api/gameChanger/semanticSearch/download',
 	gameChangerGraphSearchPOST: '/api/gameChanger/modular/graphSearch',
 	graphQueryPOST: '/api/gameChanger/modular/graphQuery',
@@ -174,14 +173,6 @@ export default class GameChangerAPI {
 
 	modularExport = async (data) => {
 		const url = endpoints.modularExport;
-		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
-
-		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
-		return axiosPOST(this.axios, url, data, options);
-	}
-
-	documentSearchDownloadPOST = async (data) => {
-		const url = endpoints.gameChangerDocumentSearchDownloadPOST;
 		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
 
 		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;

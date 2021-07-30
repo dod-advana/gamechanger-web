@@ -85,10 +85,14 @@ const DocumentDetailsPage = (props) => {
 			references: [],
 			referencedBy: []
 		}
+		const nodeIdMap = {}
+		for(const node of graphData.nodes){
+			nodeIdMap[node.id] = node;
+		}
 		graphData.edges.forEach(edge => {
 			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-				const target = edge.target.doc_id;
-				const source = edge.source.doc_id
+				const target = nodeIdMap[edge.target]?nodeIdMap[edge.target].doc_id:'';
+				const source = nodeIdMap[edge.source]?nodeIdMap[edge.source].doc_id:'';
 				if (source === document.id && edge.label === 'SIMILAR_TO') {
 					if (!docsMap.similar_to.includes(target)) {
 						docsMap.similar_to.push(target);
