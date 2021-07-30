@@ -451,7 +451,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${parsedQuery}*`,
-										boost: 5
+										boost: 6
 									}
 								}
 							},
