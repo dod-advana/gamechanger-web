@@ -287,11 +287,11 @@ class DataLibrary {
 	}
 
 	getFileThumbnail(data, userId){
-		let { dest, filekey } = data;
+		let { dest, folder, filename } = data;
 		
 		const params = {
 			Bucket: dest,
-			Key: `gamechanger/thumbnails/${filekey}.png`,
+			Key: `gamechanger/${folder}/${filename}.png`,
 			ResponseContentType: 'image/png'
 		};
 
