@@ -65,6 +65,10 @@ describe('FavoritesController', function () {
 
 			const opts = {
 				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
 				gcUser,
 				favoriteSearch
 			};
@@ -133,10 +137,7 @@ describe('FavoritesController', function () {
 			const searchResultsMock = {
 				totalCount: 10
 			};
-
-			target.documentSearchHelper = () => {
-				return searchResultsMock;
-			};
+			
 
 			let resData;
 			const res = {
@@ -200,18 +201,20 @@ describe('FavoritesController', function () {
 				totalCount: 20
 			};
 
-			const search = {
-				documentSearchHelper: async () => {
-					return Promise.resolve(searchResultsMock);
-				}
-			};
-
 			const opts = {
 				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
 				gcUser,
 				favoriteSearch,
 				gcHistory,
-				search
+				searchUtility: {
+					documentSearch: async () => {
+						return searchResultsMock;
+					}
+				}
 			};
 
 			const target = new FavoritesController(opts);

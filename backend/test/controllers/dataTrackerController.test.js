@@ -36,6 +36,7 @@ describe('DataTrackerController', function () {
 				},
 				body: {
 					username: 'john',
+					where: []
 				},
 				get(key) {
 					return this.headers[key];
@@ -99,7 +100,8 @@ describe('DataTrackerController', function () {
 				body: {
 					username: 'john',
 					offset: 10,
-					limit: 20
+					limit: 20,
+					where: []
 				},
 				get(key) {
 					return this.headers[key];
@@ -162,6 +164,7 @@ describe('DataTrackerController', function () {
 				},
 				body: {
 					username: 'john',
+					where: []
 				},
 				get(key) {
 					return this.headers[key];
