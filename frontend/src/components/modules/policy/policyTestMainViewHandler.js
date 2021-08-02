@@ -163,7 +163,6 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
-					pubs = pubs.map(item => ({name: item.name + '.png' }));
 				}
 			});
 
@@ -197,7 +196,7 @@ const PolicyMainViewHandler = {
 			folder = folder[folder.length - 2];
 			const thumbnailList = crawlerSources.map(item => {
 				let filename = item.image_link.split('/').pop();
-				return {name: filename}
+				return {img_filename: filename}
 			});
 			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: folder});
 			const buffers = pngs.data
@@ -379,7 +378,6 @@ const PolicyMainViewHandler = {
 					>
 						{crawlerSources.map(source => 
 							<SourceContainer>
-								{/* <div style={{width:100, height:100}}/> */}
 								<img src={source.imgSrc}></img>
 								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source.display_source_s}</Typography>
 							</SourceContainer>
@@ -397,24 +395,24 @@ const PolicyMainViewHandler = {
 						title="Editor's Choice: Top Publications" 
 						width='180px' 
 					>
-						{adminMajorPubs.map(({name, imgSrc}) =>
+						{adminMajorPubs.map((pub) =>
 							<div className="topPublication"
 							>
 								<img 
 									className="image"
-									src={imgSrc}
+									src={pub.imgSrc}
 									alt="thumbnail" 
-									title={name}
+									title={pub.name}
 								/>
 								<div 
 									className="hover-overlay"
 									onClick={()=>{
-										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', name)
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
 										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{name}</div>
+									<div className="hover-text">{pub.name}</div>
 								</div>
 							</div>
 						)}
