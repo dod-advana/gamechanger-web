@@ -273,8 +273,8 @@ class DocumentController {
 			const { filenames, folder, dest } = req.body
 			const promises = []
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			filenames.forEach(({name}) => {
-				const filename = name;
+			filenames.forEach(({img_filename}) => {
+				const filename = img_filename;
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}

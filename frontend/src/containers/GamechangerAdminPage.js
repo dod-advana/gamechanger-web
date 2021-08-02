@@ -493,7 +493,8 @@ const GamechangerAdminPage = props => {
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 	const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
-	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
+	const [editorAddTerm, setEditorAddTerm] = useState('topic');
+	const [editorValue, setEditorValue] = useState({name: ''});
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
 	const [loginModalOpen, setLoginModalOpen] = useState(false);
 
@@ -832,9 +833,9 @@ const GamechangerAdminPage = props => {
 	const handleAddRow = (key, value) => {
 		const tmp = {...editorTableData};
 		if(tmp[key]){
-			tmp[key].push({name:value});
+			tmp[key].push(value);
 		} else {
-			tmp[key] = [{name:value}];
+			tmp[key] = [value];
 		}
 		setEditorTableData(tmp);
 	}
@@ -1544,8 +1545,15 @@ const GamechangerAdminPage = props => {
 				)
 			},
 			{
-				Header: 'Reason',
-				accessor: 'reason',
+				Header: 'Image Filename',
+				accessor: 'img_filename',
+				Cell: row => (
+					<TableRow>{row.value}</TableRow>
+				)
+			},
+			{
+				Header: 'Document Filename',
+				accessor: 'doc_filename',
 				Cell: row => (
 					<TableRow>{row.value}</TableRow>
 				)
@@ -1607,7 +1615,7 @@ const GamechangerAdminPage = props => {
 								<GCButton
 									id={'addTopic'}
 									onClick={()=>{
-										setEditorAddTerm({...editorAddTerm, section:'topics'})
+										setEditorAddTerm('topics')
 										setShowAddEditorTermDialog(true)
 									}}
 									style={{ width:200, margin:'10px'}}
@@ -1645,7 +1653,7 @@ const GamechangerAdminPage = props => {
 								<GCButton
 									id={'addMajorPub'}
 									onClick={()=>{
-										setEditorAddTerm({...editorAddTerm, section:'major_pubs'})
+										setEditorAddTerm('major_pubs')
 										setShowAddEditorTermDialog(true)
 									}}
 									style={{ width:200, margin:'10px'}}
@@ -1800,18 +1808,37 @@ const GamechangerAdminPage = props => {
 			>
 				<TextField
 					id="margin-dense"
-					onBlur={event => setEditorAddTerm({...editorAddTerm, value:event.target.value})}
+					onBlur={event => setEditorValue({...editorValue, name: event.target.value})}
 					className={classes.textField}
 					style={{padding:10}}
-					helperText="Term to add..."
+					helperText="Name"
 					margin="dense"
 				/>
+				{editorAddTerm === 'major_pubs' && <>
+					<TextField
+						id="margin-dense"
+						onBlur={event => setEditorValue({...editorValue, img_filename: event.target.value})}
+						className={classes.textField}
+						style={{padding:10}}
+						helperText="filename (in s3)"
+						margin="dense"
+					/>
+					<TextField
+						id="margin-dense"
+						onBlur={event => setEditorValue({...editorValue, doc_filename: event.target.value})}
+						className={classes.textField}
+						style={{padding:10}}
+						helperText="document filename"
+						margin="dense"
+					/>
+				</>}
 				<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding:10}}>
 					<GCButton
 						id={'addTermSubmit'}
 						onClick={()=>{
-							setEditorAddTerm({value:'', section:'topic'});
-							handleAddRow(editorAddTerm.section, editorAddTerm.value)
+							setEditorAddTerm('topic');
+							setEditorValue({name: ''});
+							handleAddRow(editorAddTerm, editorValue)
 							setShowAddEditorTermDialog(false);
 						}}
 						style={{margin:'10px'}}
@@ -1821,7 +1848,8 @@ const GamechangerAdminPage = props => {
 					<GCButton
 						id={'addTermCancel'}
 						onClick={()=>{
-							setEditorAddTerm({value:'', section:'topic'});
+							setEditorAddTerm('topic');
+							setEditorValue({name: ''});
 							setShowAddEditorTermDialog(false);
 						}}
 						style={{margin:'10px'}}
