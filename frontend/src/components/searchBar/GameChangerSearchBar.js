@@ -562,17 +562,15 @@ const GameChangerSearchBar = (props) => {
 						/>
 						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 							<GCButton
+								onClick={() => handleFavoriteSearchClicked(null)}
+								style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+								isSecondaryBtn={true}
+							>Cancel
+							</GCButton>
+							<GCButton
 								onClick={() => handleSaveSearch(true)}
 								style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 							>Save
-							</GCButton>
-							<GCButton
-								onClick={() => handleFavoriteSearchClicked(null)}
-								style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-								textStyle={{ color: '#8091A5' }}
-								buttonColor={'#FFFFFF'}
-								borderColor={'#B0B9BE'}
-							>Cancel
 							</GCButton>
 						</div>
 					</div>
