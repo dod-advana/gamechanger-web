@@ -292,7 +292,7 @@ class DataLibrary {
 		if (filetype === '.png'){
 			filetype = 'image/png'
 		} else if(filetype === 'svg'){
-			filetype = 'svg+html'
+			filetype = 'image/svg+xml'
 		}
 		const params = {
 			Bucket: dest,
