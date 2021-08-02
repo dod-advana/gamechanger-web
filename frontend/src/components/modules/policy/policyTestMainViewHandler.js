@@ -203,7 +203,11 @@ const PolicyMainViewHandler = {
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
-					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+					if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+						crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+					}
 				}
 				else {
 					crawlerSources[idx].imgSrc = ''
