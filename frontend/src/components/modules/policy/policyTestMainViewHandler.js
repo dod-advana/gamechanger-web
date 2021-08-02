@@ -163,7 +163,7 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
-					pubs = pubs.map(item => ({name: item + '.png' }));
+					pubs = pubs.map(item => ({name: item.name + '.png' }));
 				}
 			});
 
@@ -197,7 +197,6 @@ const PolicyMainViewHandler = {
 			folder = folder[folder.length - 2];
 			const thumbnailList = crawlerSources.map(item => {
 				let filename = item.image_link.split('/').pop();
-				filename = filename.substring(0, filename.lastIndexOf('.')) || filename;
 				return {name: filename}
 			});
 			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: folder});
