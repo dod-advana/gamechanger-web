@@ -831,7 +831,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
