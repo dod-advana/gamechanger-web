@@ -379,7 +379,7 @@ const PolicyMainViewHandler = {
 						{crawlerSources.map(source => 
 							<SourceContainer>
 								<img src={source.imgSrc}></img>
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source.display_source_s}</Typography>
+								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
 					</GameChangerThumbnailRow>
