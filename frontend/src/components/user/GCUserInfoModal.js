@@ -38,9 +38,10 @@ const styles = {
     textField: {
         width: '100%'
     },
-    submitBtn: {
+    modalBtn: {
         marginBottom: 16,
-        marginRight: 16
+        marginRight: 10,
+        marginLeft: 0
     },
     modalHeader: {
         padding: '16px 24px 0px'
@@ -215,8 +216,15 @@ export default function GCUserInfoModal (props) {
             </DialogContent>
             <DialogActions>
                 <GCButton
+                    onClick={passOnUserInfo}
+                    style={styles.modalBtn}
+                    isSecondaryBtn={true}
+                >
+                    Close
+				</GCButton>
+                <GCButton
                     onClick={() => submitUserInfo()}
-                    style={styles.submitBtn}
+                    style={{...styles.modalBtn, marginRight: 16}}
                     disabled={!isValid() || emailError || orgError}
                 >
                     Submit
