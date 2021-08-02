@@ -163,7 +163,7 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
-					pubs = pubs.map(item => item + '.png');
+					pubs = pubs.map(item => ({name: item + '.png' }));
 				}
 			});
 
