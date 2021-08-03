@@ -76,7 +76,6 @@ const styles = {
 		paddingRight: '10px',
 		lineHeight: 1.2,
 		fontSize: '12px',
-		marginBottom: '15px',
 		marginLeft: '10px',
 		border: '2px solid #bdccde',
 		backgroundColor: 'white',
