@@ -387,7 +387,7 @@ class EDASearchUtility {
 								'match': {
 									'extracted_data_eda_n.contract_issue_office_majcom_eda_ext': {
 										'query': subOrg,
-										'fuzziness': 0
+										'operator': 'AND'
 									}
 								}
 							}						

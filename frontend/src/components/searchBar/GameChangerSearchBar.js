@@ -493,7 +493,7 @@ const GameChangerSearchBar = (props) => {
 					</GCTooltip>
 				}
 				{ dropdownOpen && !advancedSearchOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} /> }
-				{ isGamechanger && hideSearchResults &&
+				{ (isGamechanger || isEDA) && hideSearchResults &&
 					<AdvancedDropdown
 						context={context}
 						handleSubmit={handleSubmit}
@@ -501,7 +501,7 @@ const GameChangerSearchBar = (props) => {
 						close={() => {setAdvancedSearchOpen(false)}}
 						>
 					</AdvancedDropdown>}
-				{ isGamechanger && hideSearchResults && 
+				{ (isGamechanger || isEDA) && hideSearchResults && 
 					<AdvancedSearchButton type='button' id='advancedSearchButton' onClick={() => {setAdvancedSearchOpen(!advancedSearchOpen)}}>
 						Advanced
 						<i className="fa fa-chevron-down" style={{marginLeft: '5px'}}/>
