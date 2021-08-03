@@ -240,32 +240,6 @@ describe('TextSuggestionController', function () {
 		});
 
 	});
-	describe('#getPreFileCorrected()', () => {
-
-		const opts = {
-			...constructorOptionsMock,
-		};
-
-		const target = new TextSuggestionController(opts);
-
-		it('should returned parsed filename', () => {
-			const data = [
-				{
-					_index: 'gamechanger-20201209-with-display-fields',
-					_type: '_doc',
-					_id: '9cc18990e4c16abfba28ccd2d09f57a5f90c782c5020c047f4113d5f83680027',
-					_score: 1.0,
-					_source: {
-						filename: 'CMDRS COMMANDER\'S GUIDE TO ENVIRONMENTAL MANAGEMENT.pdf_0'
-					}
-				}
-			];
-			const expected = ['CMDRS COMMANDER\'S GUIDE TO ENVIRONMENTAL MANAGEMENT'];
-			const actual = target.getPreFileCorrected(data);
-			assert.deepStrictEqual(actual, expected);
-		});
-
-	});
 	describe('#getPreTitleCorrected()', () => {
 
 		const opts = {
@@ -282,7 +256,7 @@ describe('TextSuggestionController', function () {
 					_id: '5895f0c357f23ef934f5d10415936f40679c81bc2316b381c6bcfc36a14e0f94',
 					_score: 1.0,
 					_source: {
-						title: 'AIR FORCE EQUIPMENT MANAGEMENT'
+						display_title_s: 'AIR FORCE EQUIPMENT MANAGEMENT'
 					}
 				},
 				{
@@ -291,7 +265,7 @@ describe('TextSuggestionController', function () {
 					_id: '0f49dc66f81e89646c63bec4b1d1e3ecb765ea2b76744b08ac3fab91ecad8658',
 					_score: 1.0,
 					_source: {
-						title: 'AICUZ PROGRAM MANAGERS GUIDE'
+						display_title_s: 'AICUZ PROGRAM MANAGERS GUIDE'
 					}
 				}
 			];
