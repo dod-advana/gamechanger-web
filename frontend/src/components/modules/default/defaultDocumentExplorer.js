@@ -98,7 +98,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 		const rec = data[dataIdx];
 			if (rec) {		
 				setFilename(rec.filename);
-				setFileUrl(rec.source_page_url_s);
+				setFileUrl(rec.download_url_s);
 			}
 	}, [filename, data, iframePreviewLink]);
 
