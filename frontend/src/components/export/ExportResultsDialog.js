@@ -177,12 +177,14 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 		<UOTDialog
 			open={open}
 			title={<div><Typography variant="h3" display="inline">Export Results</Typography><CloseButton onClick={handleClose}>
-			<CloseIcon fontSize="large" />
-		</CloseButton></div>}
+			<CloseIcon fontSize="large" /></CloseButton></div>}
 			onRequestClose={handleClose}
 			width="500px"
 			primaryLabel=''
 			primaryAction={() => { }}
+			contentStyle={{padding: 0}}
+			titleStyle={{padding: 0}}
+			mainContainerStyle={{padding: 0, margin: 0}}
 		> 
 			<h2>&nbsp;Export is currently limited to 10000 results</h2>
 
@@ -211,20 +213,21 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			
 			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
 				<div style={styles.leftButtonGroup}>
-					<FormControl variant="outlined" style={{ width: '115px' }}>
+					<FormControl variant="outlined" style={{ width: '100%' }}>
 						<InputLabel className={classes.labelFont}>File Format</InputLabel>
-						<Select label="File Format" style={{ height: '45px', fontSize: '16px' }} value={selectedFormat} onChange={handleChange}>
+						<Select label="File Format" style={{ fontSize: '16px' }} value={selectedFormat} onChange={handleChange}>
 							{!isEda && <MenuItem style={styles.menuItem} value='pdf' key='pdf'>PDF</MenuItem>}
 							<MenuItem style={styles.menuItem} value='json' key='json'>JSON</MenuItem>
 							<MenuItem style={styles.menuItem} value='csv' key='csv'>CSV</MenuItem>
 						</Select>
 					</FormControl>
 				</div>
-
+			</div>
+			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
 				<div style={styles.rightButtonGroup}>
 					<GCButton
 						onClick={handleClose}
-						buttonColor={'#8091A5'}
+						isSecondaryBtn={true}
 					>
 						Close
 					</GCButton>

@@ -5,6 +5,7 @@ import UOTPrimaryButton from './GCPrimaryButton';
 import UOTSecondaryButton from './GCSecondaryButton';
 
 const UOTDialog = (props) => {
+	const hasBtn = props.primaryLabel || props.secondaryLabel || props.tertiaryLabel ? true : false;
 
 	const styles = {
 		dialog: {
@@ -28,7 +29,7 @@ const UOTDialog = (props) => {
 			color: '#555555',
 		},
 		contentRow: {
-			marginBottom: 20,
+			marginBottom: hasBtn ? 20 : 0,
 			maxHeight: props.maxHeight || 400,
 			overflowY: 'auto'
 		},
@@ -51,7 +52,7 @@ const UOTDialog = (props) => {
 		>
 			<div className="row" style={{ ...styles.mainContainer, ...props.mainContainerStyle }}>
 				<div className="col-xs-12">
-					<div className="row">
+					<div className="row" style={props?.titleStyle}>
 						<div className="col-xs-12">
 							<h1 style={styles.title}>{props.title}</h1>
 						</div>
@@ -62,7 +63,7 @@ const UOTDialog = (props) => {
 							{props.children}
 						</div>
 					</div>
-
+					{hasBtn &&
 					<div className="row" style={styles.buttonRow}>
 						<div className="col-xs-12">
 							<div className="pull-right">
@@ -93,6 +94,7 @@ const UOTDialog = (props) => {
 							</div>
 						</div>
 					</div>
+					}
 
 				</div>
 			</div>

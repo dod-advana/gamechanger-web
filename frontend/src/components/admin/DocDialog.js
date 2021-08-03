@@ -18,9 +18,10 @@ const DocDialog = ({ open, handleClose, doc }) => {
 		<div>
 			<p style={{fontSize: '12px'}}>{JSON.stringify(doc)}</p>
 		</div>
-		<div>
+		<div style={{display: 'flex', justifyContent: 'flex-end', width:'100%'}}>
 			<GCButton
 				onClick={handleClose}
+				isSecondaryBtn={true}
 			>
 				Close
 			</GCButton>
