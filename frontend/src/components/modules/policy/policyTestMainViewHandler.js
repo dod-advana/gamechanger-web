@@ -347,7 +347,7 @@ const PolicyMainViewHandler = {
 					<GameChangerThumbnailRow
 						links={trendingLinks}
 						title={"Trending Searches"}
-						width='300px'
+						width={'300px'}
 					>
 						{trendingLinks.map(({search, favorite, count},idx)=>
 							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
@@ -369,10 +369,10 @@ const PolicyMainViewHandler = {
 					<GameChangerThumbnailRow
 						links={adminTopics}
 						title={"Editor's Choice: Top Topics"}
-						width='300px'
+						width='100px'
 						style={{marginLeft: '0'}}
 					>
-						{false && adminTopics.map(({name, favorite})=>
+						{/* {false && adminTopics.map(({name, favorite})=>
 							<TrendingSearchContainer 
 								style={{backgroundColor: '#E6ECF4'}} 
 								onClick={() => {
@@ -389,7 +389,7 @@ const PolicyMainViewHandler = {
 									}} />
 								</div>
 							</TrendingSearchContainer>
-						)}
+						)} */}
 						{adminTopics.map(({name, favorite})=>
 							<div 
 								style={styles.checkboxPill} 
@@ -417,14 +417,14 @@ const PolicyMainViewHandler = {
 					<GameChangerThumbnailRow 
 						links={recentSearches} 
 						title="Recent Searches" 
-						width='460px'
+						width='300px'
 					>
 						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={adminMajorPubs} 
 						title="Editor's Choice: Top Publications" 
-						width='180px' 
+						width='100px' 
 					>
 						{adminMajorPubs.map((pub) =>
 							<div className="topPublication"
