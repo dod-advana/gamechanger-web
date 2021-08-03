@@ -758,7 +758,7 @@ const EDASearchMatrixHandler = {
                     { renderFiscalYearFilter(state, dispatch) }
                 </GCAccordion>
     
-                <GCAccordion contentPadding={15} expanded={!edaSearchSettings.allDataSelected && edaSearchSettings.contractData.pds || edaSearchSettings.contractData.syn || edaSearchSettings.contractData.none} header={'EDA CONTRACT DATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                <GCAccordion contentPadding={15} expanded={!edaSearchSettings.allDataSelected && (edaSearchSettings.contractData.pds || edaSearchSettings.contractData.syn || edaSearchSettings.contractData.none)} header={'EDA CONTRACT DATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
                     { renderContractDataFilter(state, dispatch) }
                 </GCAccordion>
     
