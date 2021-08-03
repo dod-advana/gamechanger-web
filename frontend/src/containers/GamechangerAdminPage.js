@@ -1500,6 +1500,7 @@ const GamechangerAdminPage = props => {
 			{
 				Header: 'Name',
 				accessor: 'name',
+				width: 200,
 				Cell: row => (
 					<TableRow>{row.value}</TableRow>
 				)
@@ -1547,6 +1548,7 @@ const GamechangerAdminPage = props => {
 			{
 				Header: 'Image Filename',
 				accessor: 'img_filename',
+				width: 200,
 				Cell: row => (
 					<TableRow>{row.value}</TableRow>
 				)
@@ -1554,6 +1556,7 @@ const GamechangerAdminPage = props => {
 			{
 				Header: 'Document Filename',
 				accessor: 'doc_filename',
+				width: 200,
 				Cell: row => (
 					<TableRow>{row.value}</TableRow>
 				)
@@ -1561,7 +1564,6 @@ const GamechangerAdminPage = props => {
 			{
 				Header: ' ',
 				accessor: 'id',
-				width: 230,
 				Cell: row => (
 					<TableRow>
 						<GCButton
@@ -1820,7 +1822,7 @@ const GamechangerAdminPage = props => {
 						onBlur={event => setEditorValue({...editorValue, img_filename: event.target.value})}
 						className={classes.textField}
 						style={{padding:10}}
-						helperText="filename (in s3)"
+						helperText="image filename (in s3)"
 						margin="dense"
 					/>
 					<TextField
@@ -1828,7 +1830,7 @@ const GamechangerAdminPage = props => {
 						onBlur={event => setEditorValue({...editorValue, doc_filename: event.target.value})}
 						className={classes.textField}
 						style={{padding:10}}
-						helperText="document filename"
+						helperText="document filename (+ file extension)"
 						margin="dense"
 					/>
 				</>}

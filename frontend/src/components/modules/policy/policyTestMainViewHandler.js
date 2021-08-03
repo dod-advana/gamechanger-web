@@ -68,7 +68,26 @@ const styles = {
 	containerText: {
 		fontSize: 16,
 		fontWeight: 'bold'
-	}
+	},
+	checkboxPill: {
+		textAlign: 'center',
+		borderRadius: '10px',
+		paddingLeft: '10px',
+		paddingRight: '10px',
+		lineHeight: 1.2,
+		fontSize: '12px',
+		marginBottom: '15px',
+		marginLeft: '10px',
+		border: '2px solid #bdccde',
+		backgroundColor: 'white',
+		boxSizing: 'border-box',
+		color: 'black',
+		minHeight: '35px',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		cursor: 'pointer'
+	},
 }
 
 const getSearchResults = (searchResultData, state, dispatch) => {
@@ -326,30 +345,6 @@ const PolicyMainViewHandler = {
 						)}
 					</GameChangerThumbnailRow> */}
 					<GameChangerThumbnailRow
-						links={adminTopics}
-						title={"Editor's Choice: Top Topics"}
-						width='300px'
-					>
-						{adminTopics.map(({name, favorite})=>
-							<TrendingSearchContainer 
-								style={{backgroundColor: '#E6ECF4'}} 
-								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
-								}}
-							>
-								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{name}</Typography>
-									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-										color: favorite ? "#E9691D" : 'rgb(224,224,224)',
-										cursor: "pointer",
-										fontSize: 20
-									}} />
-								</div>
-							</TrendingSearchContainer>
-						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
 						links={trendingLinks}
 						title={"Trending Searches"}
 						width='300px'
@@ -369,6 +364,42 @@ const PolicyMainViewHandler = {
 									{`${count} searches this week`}
 								</Typography>
 							</TrendingSearchContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
+						links={adminTopics}
+						title={"Editor's Choice: Top Topics"}
+						width='300px'
+						style={{marginLeft: '0'}}
+					>
+						{false && adminTopics.map(({name, favorite})=>
+							<TrendingSearchContainer 
+								style={{backgroundColor: '#E6ECF4'}} 
+								onClick={() => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
+								}}
+							>
+								<div style={{display:'flex', justifyContent:'space-between'}}>
+									<Typography style={styles.containerText}>{name}</Typography>
+									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+										color: favorite ? "#E9691D" : 'rgb(224,224,224)',
+										cursor: "pointer",
+										fontSize: 20
+									}} />
+								</div>
+							</TrendingSearchContainer>
+						)}
+						{adminTopics.map(({name, favorite})=>
+							<div 
+								style={styles.checkboxPill} 
+								onClick={() => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
+								}}
+							>
+								{name}
+							</div>
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
