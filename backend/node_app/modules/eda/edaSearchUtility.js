@@ -402,7 +402,7 @@ class EDASearchUtility {
 							'match': {
 								'extracted_data_eda_n.dodaac_org_type_eda_ext': {
 									'query': org,
-									'fuzziness': 0
+									'operator': 'AUTO'
 								}
 							}
 						}
