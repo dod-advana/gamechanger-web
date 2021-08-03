@@ -16,6 +16,7 @@ import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {crawlerMappingFunc} from "../../../gamechangerUtils";
+import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 
 const styles = {
@@ -275,7 +276,7 @@ const StyledListViewFrontCardContent = styled.div`
 		
 		> .expanded-metadata {
 			border: 1px solid rgb(189, 189, 189);
-			border-left: 0px;
+			border-left: 1px solid darkgray;
 			min-height: 126px;
 			width: 100%;
 			
@@ -283,7 +284,6 @@ const StyledListViewFrontCardContent = styled.div`
 				font-size: ${CARD_FONT_SIZE}px;
 				line-height: 20px;
 				
-				background: #eceef1;
 				margin-bottom: 0;
 				height: 165px;
 				border-left: 0;
@@ -307,6 +307,7 @@ const StyledListViewFrontCardContent = styled.div`
 	.metadata {
 		display: flex;
 		height: 100%;
+		width: 100%;
 		flex-direction: column;
 		border-radius: 5px;
 		overflow: auto;
@@ -697,8 +698,6 @@ const PolicyCardHandler = {
 				 item,
 				 state,
 				 backBody,
-				 hitsExpanded,
-				 setHitsExpanded,
 				 hoveredHit,
 				 setHoveredHit,
 				 metadataExpanded,
@@ -729,26 +728,12 @@ const PolicyCardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						{item.pageHits.length > 0 &&
-							<button type="button" className={'list-view-button'}
-									onClick={() => {
-										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
-										setHitsExpanded(!hitsExpanded);
-									}}
-							>
-								<GCTooltip
-									title={'Date GAMECHANGER last verified this document against its originating source'}
-									placement='top' arrow>
-									<span className="buttonText">Page Hits</span>
-								</GCTooltip>
-								<i className={hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-							</button>
-						}
-						{hitsExpanded && item.pageHits.length > 0 &&
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits).map((page, key) => {
-										return (
-											<div className={'page-hit'} key={key} style={{
+							<GCAccordion header={'PAGE HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>
+										{_.chain(item.pageHits).map((page, key) => {
+											return (
+												<div className={'page-hit'} key={key} style={{
 													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
 												}}
 												onMouseEnter={() => setHoveredHit(key) }
@@ -756,37 +741,29 @@ const PolicyCardHandler = {
 													e.preventDefault();
 													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
 												}}
-											>
-												<span>
-													{page.title && <span >{page.title}</span>}
-													{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
-												</span>
-												<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
-											</div>
-										);
-									}).value()}
+												>
+													<span>
+														{page.title && <span >{page.title}</span>}
+														{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
+													</span>
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
+									</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
 								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
+							</GCAccordion>
 						}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Document Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			} else if (state.listView && intelligentSearch) {
