@@ -7,7 +7,6 @@ import CheveronLeftIcon from '@material-ui/icons/ChevronLeft';
 
 
 const ThumbnailRow = styled.div`
-	padding-left: 0;
 	font-family: Noto Sans;
 	display: flex;
 	flex-direction: row;
@@ -49,15 +48,15 @@ const GameChangerThumbnailRow = (props) => {
 			</div>
 			<div style={{display: 'flex', alignItems: 'center'}}>
 				{ scrollable && 
-					<IconButton style={{padding:10}} onClick={()=>scroll(rowWidth)}>
+					<IconButton onClick={()=>scroll(rowWidth)}>
 						<CheveronLeftIcon/>
 					</IconButton>
 				}
-				<ThumbnailRow ref={rowRef} style={scrollable ? {marginLeft:-10} : {margin: '30px'}}>  
+				<ThumbnailRow ref={rowRef} style={scrollable ? {marginTop: '10px', marginRight: '3px', marginLeft: '3px'} : {marginLeft: '40px', marginTop: '10px', marginBottom: '10px'}}>  
 					{children}
 				</ThumbnailRow>
 				{ scrollable && 
-					<IconButton style={{padding:10}} onClick={()=>scroll( rowWidth * -1)}>
+					<IconButton onClick={()=>scroll( rowWidth * -1)}>
 						<CheveronRightIcon/>
 					</IconButton>
 				}
