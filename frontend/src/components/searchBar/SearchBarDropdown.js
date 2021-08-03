@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { DropdownWrapper, Row, IconTextWrapper, Beta, DeleteButton, SuggestionText, SubText } from './SearchBarStyledComponents';
+import { DropdownWrapper, Row, IconTextWrapper, DeleteButton, SuggestionText, SubText } from './SearchBarStyledComponents';
 
 const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 	if( rowData.length < 1){

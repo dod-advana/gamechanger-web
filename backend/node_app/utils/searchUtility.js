@@ -1227,7 +1227,7 @@ class SearchUtility {
 		const searchTextCaps = searchText.toUpperCase();
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
-			return [
+			let query = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.index
 				},
@@ -1302,8 +1302,7 @@ class SearchUtility {
 					},
 				}
 			];
-
-
+			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
 		}

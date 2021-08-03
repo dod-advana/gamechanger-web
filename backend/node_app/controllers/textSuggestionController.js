@@ -45,7 +45,7 @@ class TextSuggestionController {
 				req.body.searchText = corrected;
 			}
 			const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
-
+			
 			let presearchTitle;
 			try {
 				presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
