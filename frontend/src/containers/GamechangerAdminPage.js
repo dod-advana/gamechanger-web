@@ -10,10 +10,9 @@ import CloneIcon from "../images/icon/CloneIcon.png";
 import AuthIcon from "../images/icon/Authority.png";
 import AnalystToolsIcon from '../images/icon/analyticswht.png';
 import ReportIcon from '../images/icon/slideout-menu/reports icon.png';
-import styled from "styled-components";
+
 import DashboardIcon from '../images/icon/slideout-menu/dashboard icon.png';
 import SearchBanner from "../components/searchBar/GCSearchBanner";
-import ReactTable from "react-table";
 import _ from "underscore";
 import "react-table/react-table.css";
 import {Snackbar} from "@material-ui/core";
@@ -26,10 +25,13 @@ import GCTrendingBlacklist from '../components/admin/GCTrendingBlacklist';
 import InternalUsersManagement from '../components/user/InternalUserManagement';
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import Checkbox from "@material-ui/core/Checkbox";
+import CloneList from '../components/admin/CloneList';
+import AdminList from '../components/admin/AdminList';
+import APIRequests from '../components/admin/APIRequests';
+import HomepageEditor from '../components/admin/HomepageEditor';
+import {generateClosedContentArea, generateOpenedContentArea} from '../components/admin/ContentArea';
+
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import UOTToggleSwitch from "../components/common/GCToggleSwitch";
 import CloseIcon from "@material-ui/icons/Close";
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
@@ -40,78 +42,11 @@ import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuCo
 import { HoverNavItem } from '../components/navigation/NavItems'
 // import UoTAPI from '../components/advana/api/api';
 import GCAccordion from "../components/common/GCAccordion";
-import GamechangerTextIcon from "../images/icon/GamechangerText.png";
-import styles from '../components/admin/GCAdminStyles';
+import {styles, TableRow, GCCheckbox, useStyles, toolTheme} from '../components/admin/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
-
-const toolTheme = {
-	menuBackgroundColor: '#171A23',
-	logoBackgroundColor: '#000000',
-	openCloseButtonBackgroundColor: '#000000',
-	allAppsBackgroundColor: '#171A23',
-	openCloseIconColor: '#FFFFFF',
-	sectionSeparatorColor: '#323E4A',
-	fontColor: '#FFFFFF',
-	hoverColor: '#E9691D',
-	toolLogo: (<PageLink href="#/gamechanger"><img src={GamechangerTextIcon} href='#/gamechanger' alt="tool logo" /></PageLink>),
-	toolIconHref: '#/gamechanger'
-};
-
-const useStyles = makeStyles((theme) => ({
-	root: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		margin: '0 20px'
-	},
-	textField: {
-		marginLeft: theme.spacing(1),
-		marginRight: theme.spacing(1),
-		width: '25ch',
-		'& .MuiFormHelperText-root': {
-			fontSize: 12
-		}
-	},
-	textFieldWide: {
-		marginLeft: theme.spacing(1),
-		marginRight: theme.spacing(1),
-		minWidth: '50ch',
-		'& .MuiFormHelperText-root': {
-			fontSize: 12
-		}
-	},
-	dialogLg: {
-		maxWidth: '800px',
-		minWidth: '800px'
-	},
-	closeButton: {
-		position: 'absolute',
-		right: '0px',
-		top: '0px',
-		height: 60,
-		width: 60,
-		color: 'black',
-		backgroundColor: styles.backgroundGreyLight,
-		borderRadius: 0
-    },
-}));
-
-const GCCheckbox = withStyles({
-  root: {
-    color: '#E9691D',
-    '&$checked': {
-      color:'#E9691D',
-    },
-  },
-  checked: {},
-})((props) => <Checkbox color="default" {...props} />);
-
-const TableRow = styled.div`
-	text-align: left;
-	height: 35px;
-`
 
 const PAGES = {
 	general: 'General',
@@ -127,335 +62,7 @@ const PAGES = {
 
 }
 
-const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData, getEditorData }) => {
-	return (
-		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Admin Page" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => { setPageToView(PAGES.general); return false; }}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AdminIcon} />
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			{(Permissions.isGameChangerAdmin() && isDecoupled) && (
-				<Tooltip title="Manage Admins" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => { 
-							getAdminData();
-							setPageToView(PAGES.adminList); 
-							return false; 
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AuthIcon} />
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			<Tooltip title="Clone Gamechanger" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						getCloneData();
-						setPageToView(PAGES.cloneList);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={CloneIcon} />
-				</HoverNavItem>
-			</Tooltip>
-
-			<Tooltip title="Service Notifications" placement="right" arrow>
-				<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
-					<AddAlert style={{ fontSize: 30 }} />
-				</HoverNavItem>
-			</Tooltip>
-
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem centered onClick={() => setPageToView(PAGES.internalUsers)}
-						toolTheme={toolTheme}
-					>
-						<SupervisedUserCircle style={{ fontSize: 30 }} />
-					</HoverNavItem>
-				</Tooltip>
-			)}
-			<Tooltip title="ML Dashboard" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						setPageToView(PAGES.mlDashboard);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={DashboardIcon} />
-				</HoverNavItem>
-			</Tooltip>
-			<Tooltip title="Search PDF Mapping" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						setPageToView(PAGES.searchPdfMapping);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={ReportIcon} />
-				</HoverNavItem>
-			</Tooltip>
-			<Tooltip title="View Stats" placement="right" arrow>
-				<HoverNavItem
-					centered
-					toolTheme={toolTheme}
-					onClick={() => {
-						setPageToView(PAGES.appStats);
-						return false;
-					}}>
-					<ConstrainedIcon src={AnalystToolsIcon} />
-				</HoverNavItem>
-			</Tooltip>
-			
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage API Keys" placement="right" arrow>
-					<HoverNavItem centered onClick={() => {
-						getAPIRequestData();
-						setPageToView(PAGES.apiKeys);
-					}}
-						toolTheme={toolTheme}
-					>
-						<VpnKeyIcon style={{ fontSize: 30 }} />
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Homepage Editor" placement="right" arrow>
-					<HoverNavItem centered onClick={() => {
-						getEditorData();
-						setPageToView(PAGES.homepageEditor);
-					}}
-						toolTheme={toolTheme}
-					>
-						<CreateIcon style={{ fontSize: 30 }} />
-					</HoverNavItem>
-				</Tooltip>
-			)}
-		</div>
-	);
-}
-
-const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, getAPIRequestData, getEditorData }) => {
-	return (
-		<div style={{ display: 'flex', flexDirection: 'column' }}>
-
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Admin Page" placement="right" arrow>
-					<HoverNavItem
-						onClick={() => { setPageToView(PAGES.general); return false; }}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AdminIcon} /><span style={{ marginLeft: '10px' }}>Admin Page</span>
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			{(Permissions.isGameChangerAdmin() && isDecoupled) && (
-				<Tooltip title="Manage Admins" placement="right" arrow>
-					<HoverNavItem
-						onClick={() => { 
-							getAdminData();
-							setPageToView(PAGES.adminList); 
-							return false; 
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AuthIcon} /><span style={{ marginLeft: '10px' }}>Manage Admins</span>
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			<Tooltip title="Clone Gamechanger" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						getCloneData();
-						setPageToView(PAGES.cloneList);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={CloneIcon} /><span style={{ marginLeft: '10px' }}>Clone Gamechanger</span>
-				</HoverNavItem>
-			</Tooltip>
-
-			<Tooltip title="Show Notifications" placement="right" arrow>
-				<HoverNavItem onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
-					<AddAlert style={{ fontSize: 30 }} />
-					<span style={{ marginLeft: '5px' }}>Show Notifications</span>
-				</HoverNavItem>
-			</Tooltip>
-
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem onClick={() => setPageToView(PAGES.internalUsers)}
-						toolTheme={toolTheme}
-					>
-						<SupervisedUserCircle style={{ fontSize: 30 }} />
-						<span style={{ marginLeft: '5px' }}>Manage Internal Users</span>
-					</HoverNavItem>
-				</Tooltip>
-			)}
-			<Tooltip title="ML Dashboard" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						setPageToView(PAGES.mlDashboard);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={DashboardIcon} /><span style={{ marginLeft: '10px' }}>ML Dashboard</span>
-				</HoverNavItem>
-			</Tooltip>
-			<Tooltip title="Search PDF Mapping" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						setPageToView(PAGES.searchPdfMapping);
-						return false;
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={ReportIcon} /><span style={{ marginLeft: '10px' }}>Search PDF Mapping</span>
-				</HoverNavItem>
-			</Tooltip>
-
-			<Tooltip title="View Stats" placement="right" arrow>
-				<HoverNavItem
-					toolTheme={toolTheme}
-					onClick={() => {
-						setPageToView(PAGES.appStats);
-						return false;
-					}}>
-					<ConstrainedIcon src={AnalystToolsIcon} /><span style={{ marginLeft: '10px' }}>View Stats</span>
-				</HoverNavItem>
-			</Tooltip>
-			
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage API Keys" placement="right" arrow>
-					<HoverNavItem onClick={() => {
-						getAPIRequestData();
-						setPageToView(PAGES.apiKeys);
-					}}
-						toolTheme={toolTheme}
-					>
-						<VpnKeyIcon style={{ fontSize: 30 }} />
-						<span style={{ marginLeft: '5px' }}>Manage API Keys</span>
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Homepage Editor" placement="right" arrow>
-					<HoverNavItem onClick={() => {
-						getEditorData();
-						setPageToView(PAGES.homepageEditor);
-					}}
-						toolTheme={toolTheme}
-					>
-						<CreateIcon style={{ fontSize: 30 }} />
-						<span style={{ marginLeft: '5px' }}>Homepage Editor</span>
-					</HoverNavItem>
-				</Tooltip>
-			)}
-
-		</div>
-	);
-}
-
-const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
-	const tableData = [];
-
-	const data = await gameChangerAPI.getCloneData();
-
-	_.forEach(data.data, result => {
-		tableData.push(result);
-	});
-	
-	const tableMetaData = await gameChangerAPI.getCloneTableData();
-	
-	const booleanFields = [];
-	const stringFields = [];
-	const jsonFields = [];
-	
-	tableMetaData.data[0].forEach(meta => {
-		if (meta.column_name !== 'createdAt' && meta.column_name !== 'updatedAt' && meta.column_name !== 'id') {
-			let i, frags = meta.column_name.split('_');
-			for (i=0; i<frags.length; i++) {
-				frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1);
-			}
-			const display_name = frags.join(' ');
-			switch (meta.data_type) {
-				case 'integer':
-					stringFields.push({key: meta.column_name, display_name});
-					break;
-				case 'boolean':
-					booleanFields.push({key: meta.column_name, display_name});
-					break;
-				case 'jsonb':
-					jsonFields.push({key: meta.column_name, display_name});
-					break;
-				case 'character varying':
-				default:
-					stringFields.push({key: meta.column_name, display_name});
-					break;
-			}
-		}
-	});
-	
-	setCloneTableMetaData({booleanFields, stringFields, jsonFields});
-	setGCCloneTableData(tableData);
-}
-
-const getAdminData = async (setGCAdminTableData) => {
-	const tableData = [];
-
-	const data = await gameChangerAPI.getAdminData();
-
-	_.forEach(data.data.admins, result => {
-		tableData.push({
-			username: result.username
-		});
-	});
-
-	setGCAdminTableData(tableData);
-}
-
-const getApiKeyRequestData = async (setGCAPIRequestData) => {
-	const resp = await gameChangerAPI.getAPIKeyRequestData();
-	setGCAPIRequestData(resp.data || {approved: [], pending: []});
-}
-
-const getHomepageEditorData = async (setEditorTableData) => {
-	const tableData = {};
-	const { data } = await gameChangerAPI.getHomepageEditorData();
-	data.forEach(obj => {
-		obj.key = obj.key.replace('homepage_','');
-		tableData[obj.key] = JSON.parse(obj.value)
-	});
-
-	setEditorTableData(tableData);
-}
 
 const GamechangerAdminPage = props => {
 
@@ -479,14 +86,9 @@ const GamechangerAdminPage = props => {
 	const [editEsIndex, setEditEsIndex] = useState('');
 	const [showCreateEditAdminModal, setShowCreateEditAdminModal] = useState(false);
 	const [editAdminID, setEditAdminID] = useState(-99);
-	const [gcAdminTableData, setGCAdminTableData] = useState([]);
 	const [editAdminData, setEditAdminData] = useState({});
-	// const [useMatomo, setUseMatomo] = useState(JSON.parse(localStorage.getItem('appMatomo')));
-	// const [useGCCache, setUseGCCache] = useState(JSON.parse(localStorage.getItem('useGCCache')));
-	// const [tutorialModalOpen, setTutorialModalOpen] = useState(false);
 
-	const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
-	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
+
 	const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
@@ -543,33 +145,17 @@ const GamechangerAdminPage = props => {
 	}, [editCloneID,gcCloneTableData])
 
 	const createAlert = (title, type, message) => {
-		setAlertActive(true);
 		setAlertTitle(title);
 		setAlertType(type);
 		setAlertMessage(message);
+		setAlertActive(true);
 	}
 
 	const closeTrendingBlacklistModal = () => {
 		setShowTrendingBlacklistModal(false);
 	}
 
-	const handleShiftRowDown = (key, index) => {
-		const curr = editorTableData[key][index];
-		const next = editorTableData[key][index+1];
-		const tmp = {...editorTableData}
-		tmp[key][index] = next;
-		tmp[key][index+1] = curr;
-		setEditorTableData(tmp);
-	}
 
-	const handleShiftRowUp = (key, index) => {
-		const curr = editorTableData[key][index];
-		const prev = editorTableData[key][index-1];
-		const tmp = {...editorTableData}
-		tmp[key][index] = prev;
-		tmp[key][index-1] = curr;
-		setEditorTableData(tmp);
-	}
 
 	const handleAddRow = (key, value) => {
 		const tmp = {...editorTableData};
@@ -577,14 +163,7 @@ const GamechangerAdminPage = props => {
 		setEditorTableData(tmp);
 	}
 
-	const saveHomepageEditor = async (key) => {
-		try{
-			await gameChangerAPI.setHomepageEditorData({key, tableData:editorTableData[key]});
-		} catch(e) {
-			console.log(e)
-			console.log('failed to save');
-		}
-	}
+	
 	const changeEsIndex = async (setDefault) => {
 		try {
 			if(setDefault){
@@ -599,178 +178,6 @@ const GamechangerAdminPage = props => {
 		} catch (e) {
 			console.log(e);
 		}
-	}
-
-	const renderGeneralAdminButtons = () => {
-		
-	}
-
-	const renderCloneList = () => {
-
-		const columns = [
-			{
-				Header: 'Name',
-				accessor: 'display_name',
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: 'Url',
-				accessor: 'url',
-				Cell: row => (
-					<TableRow><a href={`#/${row.value}`}>{`#/${row.value}`}</a></TableRow>
-				)
-			},
-			{
-				Header: 'Live',
-				accessor: 'is_live',
-				width: 200,
-				Cell: row => (
-					<TableRow>
-						<UOTToggleSwitch
-				 			leftLabel={'Off'}
-				 			rightLabel={'Live'}
-				 			rightActive={row.value}
-				 			onClick={ () => {
-				 				if (!row.row._original.can_edit) return;
-				 				const filteredClones = _.filter(gcCloneTableData, clone => {
-									return clone.id ===  row.row.id;
-								});
-
-								const cloneToEdit = {...filteredClones[0]};
-
-				 				cloneToEdit.is_live = !row.value;
-				 				trackEvent('GAMECHANGER_Admin', "ToggleCloneIsLive", cloneToEdit.name, cloneToEdit.is_live ? 1 : 0);
-				 				storeCloneData(cloneToEdit);
-							}}
-				 			customColor={'#E9691D'}
-				 		/>
-					</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				width: 150,
-				Cell: row => (
-					<TableRow>
-						{row.row._original.can_edit &&
-							<GCButton
-								onClick={() => {
-									trackEvent('GAMECHANGER_Admin', "EditClone", "onClick", row.value);
-									setEditCloneID(row.value);
-									setShowCreateEditCloneModal(true);
-								}}
-								style={{minWidth: 'unset'}}
-							>Edit</GCButton>
-						}
-					</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				width: 150,
-				Cell: row => (
-					<TableRow>
-						{row.row._original.can_edit &&
-							<GCButton
-								onClick={() => {
-									trackEvent('GAMECHANGER_Admin', "DeleteClone", "onClick", row.value);
-									deleteCloneData(row.value).then(() => {
-										getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
-											setPageToView(PAGES.cloneList);
-										});
-									});
-								}}
-								style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red'}}
-							>Delete</GCButton>
-						}
-					</TableRow>
-				)
-			}
-		];
-
-		return (
-			
-			<div>
-				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Clones</p>
-					<GCButton
-						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', "CreateClone", "onClick");
-							setEditCloneID(-99);
-							setShowCreateEditCloneModal(true);
-						}}
-						style={{minWidth: 'unset'}}
-					>Create Clone</GCButton>
-				</div>
-
-				<ReactTable
-					data={gcCloneTableData}
-					columns={columns}
-					style={{margin: '0 80px 20px 80px', height: 700}}
-					pageSize={10}
-				/>
-			</div>
-		)
-	}
-
-	const renderAdminList = () => {
-
-		const columns = [
-			{
-				Header: 'Username',
-				accessor: 'username',
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'username',
-				width: 150,
-				Cell: row => (
-					<TableRow>
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "DeleteAdmin", "onClick", row.value);
-								deleteAdminData(row.value).then(() => {
-									getAdminData(setGCAdminTableData).then(() => {
-										setPageToView(PAGES.adminList);
-									});
-								});
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red'}}
-						>Delete</GCButton>
-					</TableRow>
-				)
-			}
-		]
-
-		return (
-			<div>
-				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Admins</p>
-					<GCButton
-						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', "CreateAdmin", "onClick");
-							setEditAdminID(-99);
-							setShowCreateEditAdminModal(true);
-						}}
-						style={{minWidth: 'unset'}}
-					>Create Admin</GCButton>
-				</div>
-
-				<ReactTable
-					data={gcAdminTableData}
-					columns={columns}
-					style={{margin: '0 80px 20px 80px', height: 700}}
-					pageSize={10}
-				/>
-			</div>
-		)
 	}
 
 	const renderCloneModal = () => {
@@ -875,11 +282,20 @@ const GamechangerAdminPage = props => {
 		setEditCloneData({});
 		setShowCreateEditCloneModal(false);
 	}
+	const openCloneModal = (num=-99) =>{
+		setEditCloneID(num);
+        setShowCreateEditCloneModal(true);
+	}
 
 	const closeAdminModal = () => {
 		setEditAdminID(-99);
 		setEditAdminData({});
 		setShowCreateEditAdminModal(false);
+	}
+
+	const openAdminModal = (num=-99) =>{
+		setEditAdminID(-99);
+		setShowCreateEditAdminModal(true);
 	}
 
 	const storeCloneData = (cloneToEdit = null) => {
@@ -905,9 +321,7 @@ const GamechangerAdminPage = props => {
 				setEditCloneID(-99);
 				setEditCloneData({});
 				setShowCreateEditCloneModal(false);
-				getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
-					setPageToView(PAGES.cloneList);
-				});
+				setPageToView(PAGES.cloneList);
 				refreshClones();
 			}
 		});
@@ -936,336 +350,13 @@ const GamechangerAdminPage = props => {
 				setEditAdminID(-99);
 				setEditAdminData({});
 				setShowCreateEditAdminModal(false);
-				getAdminData(setGCAdminTableData).then(() => {
-					setPageToView(PAGES.adminList);
-				});
+				setPageToView(PAGES.adminList);
 			}
 		});
 
 	}
-
-	const deleteCloneData = async (id) => {
-		await gameChangerAPI.deleteCloneData(id);
-	}
-
-	const deleteAdminData = async (username) => {
-		await gameChangerAPI.deleteAdminData(username);
-	}
 	
-	const renderAPIRequests = () => {
-		const approvedColumns = [
-			{
-				Header: 'Name',
-				accessor: 'name',
-				width: 200,
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: 'Keys',
-				accessor: 'keys',
-				Cell: row => 
-					{ return (gcAPIKeyVision ? 
-						<TableRow>{row.value.join(", ")}</TableRow> :
-						<TableRow>******************************************</TableRow> )
-					}
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				width: 120,
-				Cell: row => (
-					<TableRow>
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "DeleteAPIKey", row.value);
-								revokeAPIKeyRequestData(row.value);
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Revoke</GCButton>
-					</TableRow>
-				)
-			}
-		]
-		
-		const pendingColumns = [
-			{
-				Header: 'Name',
-				accessor: 'name',
-				width: 200,
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: 'Reason',
-				accessor: 'reason',
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				width: 230,
-				Cell: row => (
-					<TableRow>
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "ApproveAPIKeyRequest", row.value);
-								approveRejectAPIKeyRequestData(row.value, true);
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
-						>Approve</GCButton>
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "RejectAPIKeyRequest", row.value);
-								approveRejectAPIKeyRequestData(row.value, false);
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Reject</GCButton>
-					</TableRow>
-				)
-			}
-		]
-
-		return (
-			<div style={{height: '100%'}}>
-				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>API Key Requests</p>
-				</div>
-				
-				<div style={{margin: '10px 80px'}}>
-					<GCAccordion expanded={false} header={'APPROVED API KEYS'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
-							<ReactTable
-								data={gcAPIRequestData.approved}
-								columns={approvedColumns}
-								pageSize={10}
-								style={{width: '100%'}}
-								getTheadTrProps={() => {
-									return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
-								}}
-								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
-								}}
-							/>
-							{gcAPIRequestData.approved.length>0 && <GCButton
-								id={'editCloneSubmit'}
-								onClick={()=>setGCAPIKeyVision(!gcAPIKeyVision)}
-								style={{margin:'10px'}}
-							>
-								Show/Hide API keys
-							</GCButton>}
-						</div>
-					</GCAccordion>
-					<GCAccordion expanded={true} header={'PENDING API KEYS'}>
-						<ReactTable
-							data={gcAPIRequestData.pending}
-							columns={pendingColumns}
-							pageSize={10}
-							style={{width: '100%'}}
-							getTheadTrProps={() => {
-								return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
-							}}
-							getTheadThProps={() => {
-								return { style: { fontSize: 15, fontWeight: 'bold' } };
-							}}
-						/>
-					</GCAccordion>
-				</div>
-			</div>
-		)
-	}
-
-	const renderHomepageEditor = () => {
-		const topicColumns = [
-			{
-				Header: 'Name',
-				accessor: 'name',
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				Cell: row => (
-					<TableRow>
-						<GCButton
-							onClick={() => {
-								handleShiftRowUp('topics', row.index)
-							}}
-							disabled={row.index===0}
-							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
-						>Up</GCButton>
-						<GCButton
-							onClick={() => {
-								handleShiftRowDown('topics', row.index)
-							}}
-							disabled={row.index===editorTableData['topics'].length-1}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Down</GCButton>
-						<GCButton
-							onClick={() => {
-								editorTableData['topics'].splice(row.index,1)
-								setEditorTableData({...editorTableData,topics:editorTableData['topics']})
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Remove</GCButton>
-					</TableRow>
-				)
-			}
-		]
-		
-		const majorPubColumns = [
-			{
-				Header: 'Name',
-				accessor: 'name',
-				width: 200,
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: 'Reason',
-				accessor: 'reason',
-				Cell: row => (
-					<TableRow>{row.value}</TableRow>
-				)
-			},
-			{
-				Header: ' ',
-				accessor: 'id',
-				width: 230,
-				Cell: row => (
-					<TableRow>
-						<GCButton
-							onClick={() => {
-								handleShiftRowUp('major_pubs', row.index)
-							}}
-							disabled={row.index===0}
-							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
-						>Up</GCButton>
-						<GCButton
-							onClick={() => {
-								handleShiftRowDown('major_pubs', row.index)
-							}}
-							disabled={row.index===editorTableData['major_pubs'].length-1}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Down</GCButton>
-						<GCButton
-							onClick={() => {
-								editorTableData['major_pubs'].splice(row.index,1)
-								setEditorTableData({...editorTableData,major_pubs:editorTableData['major_pubs']})
-							}}
-							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-						>Remove</GCButton>
-					</TableRow>
-				)
-			}
-		]
-
-		return (
-			<div style={{height: '100%'}}>
-				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Homepage Editor</p>
-				</div>
-				
-				<div style={{margin: '10px 80px'}}>
-					<GCAccordion expanded={true} header={'Topics'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
-							<ReactTable
-								data={editorTableData.topics}
-								columns={topicColumns}
-								pageSize={10}
-								style={{width: '100%'}}
-								getTheadTrProps={() => {
-									return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
-								}}
-								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
-								}}
-							/>
-							<div style={{display:'flex'}}>
-								<GCButton
-									id={'addTopic'}
-									onClick={()=>{
-										setEditorAddTerm({...editorAddTerm, section:'topics'})
-										setShowAddEditorTermDialog(true)
-									}}
-									style={{ width:200, margin:'10px'}}
-								>
-									Add Term
-								</GCButton>
-								<GCButton
-									id={'saveTopic'}
-									onClick={()=>{
-										saveHomepageEditor('topics');
-										setShowSavedSnackbar(true);
-									}}
-									style={{ width:200, margin:'10px'}}
-								>
-									Save
-								</GCButton>
-							</div>
-						</div>
-					</GCAccordion>
-					<GCAccordion expanded={true} header={'Major Publications'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
-							<ReactTable
-								data={editorTableData.major_pubs}
-								columns={majorPubColumns}
-								pageSize={10}
-								style={{width: '100%'}}
-								getTheadTrProps={() => {
-									return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
-								}}
-								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
-								}}
-							/>
-							<div style={{display:'flex'}}>
-								<GCButton
-									id={'addMajorPub'}
-									onClick={()=>{
-										setEditorAddTerm({...editorAddTerm, section:'major_pubs'})
-										setShowAddEditorTermDialog(true)
-									}}
-									style={{ width:200, margin:'10px'}}
-								>
-									Add Term
-								</GCButton>
-								<GCButton
-									id={'saveMajorPub'}
-									onClick={()=>{
-										saveHomepageEditor('major_pubs');
-										setShowSavedSnackbar(true);
-									}}
-									style={{ width:200, margin:'10px'}}
-								>
-									Save
-								</GCButton>
-							</div>
-						</div>
-					</GCAccordion>
-				</div>
-			</div>
-		)
-	}
 	
-	const revokeAPIKeyRequestData = async (id) => {
-		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
-			getApiKeyRequestData(setGCAPIRequestData);
-		});
-	}
-	
-	const approveRejectAPIKeyRequestData = async (id, approve) => {
-		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
-			getApiKeyRequestData(setGCAPIRequestData);
-		});
-	}
 	const openTrendingBlacklistModal = () => {
 		setShowTrendingBlacklistModal(true);
 	}
@@ -1279,13 +370,22 @@ const GamechangerAdminPage = props => {
 			case PAGES.general:
 				return <GeneralAdminButtons createAlert={createAlert} openEsIndexModal={openEsIndexModal} openTrendingBlacklistModal={openTrendingBlacklistModal} />;
 			case PAGES.cloneList:
-				return renderCloneList(); //<CloneList />
+				return (<CloneList 
+							openCloneModal={openCloneModal} 
+							setPageToView={()=>setPageToView(PAGES.cloneList)} 
+							setGCCloneTableData={setGCCloneTableData}
+							setCloneTableMetaData={setCloneTableMetaData}
+							storeCloneData={storeCloneData}
+						/>);
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
 			case PAGES.mlDashboard:
 				return <MLDashboard />;
 			case PAGES.adminList:
-				return renderAdminList(); //<AdminList />
+				return (<AdminList 
+							setPageToView={()=>setPageToView(PAGES.adminList)}
+							openAdminModal={openAdminModal}
+						/>)
 			case PAGES.notifications:
 				return <NotificationsManagement />;
 			case PAGES.internalUsers:
@@ -1293,9 +393,16 @@ const GamechangerAdminPage = props => {
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
-				return renderAPIRequests(); // <APIRequests />
+				return <APIRequests />
 			case PAGES.homepageEditor:
-				return renderHomepageEditor(); // <HomepageEditor />
+				return (<HomepageEditor 
+							editorTableData={editorTableData} 
+							setEditorTableData={setEditorTableData} 
+							setEditorAddTerm={setEditorAddTerm} 
+							editorAddTerm={editorAddTerm} 
+							setShowAddEditorTermDialog={setShowAddEditorTermDialog} 
+							setShowSavedSnackbar={setShowSavedSnackbar}
+						/>)
 			default:
 				return <GeneralAdminButtons createAlert={createAlert} openEsIndexModal={openEsIndexModal} openTrendingBlacklistModal={openTrendingBlacklistModal} />
 		}
@@ -1308,8 +415,8 @@ const GamechangerAdminPage = props => {
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
 
-			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData),  getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
-			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView, getCloneData: () => getCloneData(setGCCloneTableData, setCloneTableMetaData), getAdminData: () => getAdminData(setGCAdminTableData), getAPIRequestData: () => getApiKeyRequestData(setGCAPIRequestData), getEditorData: () => getHomepageEditorData(setEditorTableData) })}</SlideOutMenuContent>
+			<SlideOutMenuContent type="closed">{generateClosedContentArea({ setPageToView})}</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">{generateOpenedContentArea({ setPageToView})}</SlideOutMenuContent>
 
 			<SearchBanner
 				onTitleClick={() => {
@@ -1521,17 +628,7 @@ const GamechangerAdminPage = props => {
 					</GCButton>
 				</div>
 			</Modal>
-			
-			{/* {tutorialData && 
-					<TutorialOverlayModal 
-						isOpen={tutorialModalOpen} 
-						closeModal={() => setTutorialModalOpen(false)}
-						allTutorials={tutorialData}
-						fromGC
-					/>
-			}*/}
 		</div>
 	);
 }
-
 export default GamechangerAdminPage;

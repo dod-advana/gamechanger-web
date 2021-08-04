@@ -77,13 +77,13 @@ export default class UoTAlert extends React.Component {
 		const { message, title, onHide, elementId, top, containerStyles } = this.props;
 		const { isOpen } = this.state;
 		if (!isOpen) return <i></i>
-		const type = this.props.type || DEFAULT_ALERT_TYPE;
+		const type = this.props.type? this.props.type:DEFAULT_ALERT_TYPE;
 		const typeStyles = alertStyles[type].styles;
 		const allRootStyles = Object.assign({}, styles.alert, typeStyles, { top }, containerStyles);
 		const icon = alertStyles[type].icon;
 		return <div style={allRootStyles} className='UoTAlert'>
 
-			<div id={elementId || 'alert-message'} style={styles.message}>
+			<div id={elementId? elementId :'alert-message'} style={styles.message}>
 				<div style={styles.iconWrapper}>{icon}</div>
 				<span style={styles.title}>{title}</span>
 				{message}

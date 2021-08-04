@@ -4,7 +4,7 @@ import {TableRow, BorderDiv} from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from "../../common/GCButton";
-import styles from '../GCAdminStyles';
+import {styles} from '../GCAdminStyles';
 import "react-table/react-table.css";
 import './index.scss';
 
