@@ -64,6 +64,10 @@ const EDAContractDetailsPage = (props) => {
     const [modLoading, setModLoading] = useState(false);
     const [timeFound, setTimeFound] = useState(null);
 
+    // similar docs data 
+    const [similarDocsData, setSimilarDocsData] = useState(null);
+    const [similarDocsLoading, setSimilarDocsLoading] = useState(false);
+
     useEffect(() => {
         if (!awardID || !cloneData || !cloneData.clone_name) return;
         
@@ -171,9 +175,23 @@ const EDAContractDetailsPage = (props) => {
 
         }
 
+        async function getSimilarDocsData() {
+            setSimilarDocsLoading(true);
+            const similarDocs = await gameChangerAPI.callSearchFunction({
+                functionName: 'querySimilarDocs',
+                cloneName: cloneData.clone_name,
+                options: {
+
+                }
+            });
+            setSimilarDocsLoading(false);
+            setSimilarDocsData(similarDocs.data);
+        }
+
         try {
             getContractAwardData();
             getContractModData();
+            getSimilarDocsData();
         } catch(err) {
             console.log(err);
         }
@@ -255,6 +273,10 @@ const EDAContractDetailsPage = (props) => {
         })
     }
 
+    const renderSimilarDocs = () => {
+        return {};
+    }
+
     return (
         <MainContainer>
             <div className={'details'} style={{borderTopLeftRadius: 5, borderTopRightRadius: 5}}>
@@ -286,13 +308,18 @@ const EDAContractDetailsPage = (props) => {
             </div>
             <div className={'graph-top-docs'}>
                 <div className={'section'}>
-                    <GCAccordion expanded={false} header={'CONTRACT AMOUNT OVER TIME'} backgroundColor={'rgb(238, 241, 242'}>
+                    <GCAccordion expanded={false} header={'CONTRACT AMOUNT OVER TIME'} backgroundColor={'rgb(238, 241, 242)'}>
                         {timelineViewData && timelineViewData.length > 0 ? renderTimeline() : modLoading ? "Searching for data..." : "Data Not Available"}
                     </GCAccordion>
                 </div>
                 <div className={'section'}>
-                    <GCAccordion expanded={true} header={'CONTRACT MOD AMOUNTS'} backgroundColor={'rgb(238, 241, 242'}>
+                    <GCAccordion expanded={true} header={'CONTRACT MOD AMOUNTS'} backgroundColor={'rgb(238, 241, 242)'}>
                         {barGraphData && barGraphData.length > 0 ? renderBarGraph() : modLoading ? "Searching for data..." : "Data Not Available"}
+                    </GCAccordion>
+                </div>
+                <div className={'section'}>
+                    <GCAccordion expanded={false} header={'SIMILAR DOCUMENTS'} backgroundColor={'rgb(238, 241, 242)'}>
+                        {similarDocsData && similarDocsData.length > 0 ? renderSimilarDocs() : modLoading ? "Searching for data..." : "Data Not Available"}
                     </GCAccordion>
                 </div>
                 <div className={'section'}>
