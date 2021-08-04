@@ -60,7 +60,7 @@ const DEFAULT_MODULE = {
 	s3_bucket: 'advana-raw-zone/bronze'
 }
 
-const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'card_module', 'export_module', 'graph_module', 'main_view_module', 'navigation_module', 'search_module', 'title_bar_module', 's3_bucket', 'config'];
+const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'config'];
 
 const toolTheme = {
 	menuBackgroundColor: '#171A23',
@@ -488,6 +488,7 @@ const GamechangerAdminPage = props => {
 	const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
 	const [editCloneID, setEditCloneID] = useState(-99);
 	const [editCloneData, setEditCloneData] = useState({});
+	const [editCloneDataErrors, setEditCloneDataErrors] = useState({});
 	const [showEditESIndexModal, setShowEditESIndexModal] = useState(false);
 	const [showTrendingBlacklistModal, setShowTrendingBlacklistModal] = useState(false);
 	const [esIndex, setEsIndex] = useState('');
@@ -1207,13 +1208,18 @@ const GamechangerAdminPage = props => {
 		
 		const handleChange = (event, key) => {
 			const tmpData = {...editCloneData};
+			const cloneErrors = {...editCloneDataErrors};
 			tmpData[key] = event.target.value
+			cloneErrors[key] = false;
 			
 			if (key === 'clone_name') {
 				tmpData['config'] = {esIndex: event.target.value};
 				tmpData['url'] = event.target.value;
+				cloneErrors['config'] = false;
+				cloneErrors['url'] = false;
 			}
 			
+			setEditCloneDataErrors(cloneErrors);
 			setEditCloneData(tmpData);
 		};
 		
@@ -1223,7 +1229,7 @@ const GamechangerAdminPage = props => {
 					<Typography variant="h4" style={styles.modalHeaders}>Input Fields</Typography>
 					{cloneTableMetaData.stringFields.map(field => (
 						<TextField
-							label={field.display_name}
+							label={getCloneModalTextDisplayName(field)}
 							id="margin-dense"
 							defaultValue={editCloneData[field.key] || defaultModuleGivenKey(field.key)}
 							value={editCloneData[field.key] || defaultModuleGivenKey(field.key)}
@@ -1231,7 +1237,7 @@ const GamechangerAdminPage = props => {
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
-							error={hasError(field.key)}
+							error={editCloneDataErrors[field.key]}
 						/>
 					))}
 				</div>
@@ -1256,7 +1262,7 @@ const GamechangerAdminPage = props => {
 					<Typography variant="h4" style={styles.modalHeaders}>JSON Fields</Typography>
 					{cloneTableMetaData.jsonFields.map(field => (
 						<TextField
-							label={field.display_name}
+							label={getCloneModalTextDisplayName(field)}
 							id="margin-dense"
 							defaultValue={editCloneData ? JSON.stringify(editCloneData[field.key]) : ''}
 							value={editCloneData && editCloneData[field.key] ? JSON.stringify(editCloneData[field.key]) : '' }
@@ -1264,7 +1270,7 @@ const GamechangerAdminPage = props => {
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
-							error={hasError(field.key)}
+							error={editCloneDataErrors[field.key]}
 						/>
 					))}
 				</div>
@@ -1276,12 +1282,14 @@ const GamechangerAdminPage = props => {
 		return DEFAULT_MODULE[key] || '';
 	}
 	
-	const hasError = (key) => {
+	const getCloneModalTextDisplayName = (field) => {
 		
-		if (CLONE_MUST_BE_FILLED_KEYS.includes(key)) {
-			if ((!editCloneData[key] || editCloneData[key] === '') && defaultModuleGivenKey(key) === '') return true;
+		if (CLONE_MUST_BE_FILLED_KEYS.includes(field.key)) {
+			return `* ${field.display_name}`;
 		}
-		return false;
+		else {
+			return field.display_name;
+		}
 	}
 
 	const renderAdminModal = () => {
@@ -1328,6 +1336,7 @@ const GamechangerAdminPage = props => {
 	const closeCloneModal = () => {
 		setEditCloneID(-99);
 		setEditCloneData({});
+		setEditCloneDataErrors({});
 		setShowCreateEditCloneModal(false);
 	}
 
@@ -1355,17 +1364,31 @@ const GamechangerAdminPage = props => {
 			}
 		})
 		
-		gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
-			if (data.status === 200) {
-				setEditCloneID(-99);
-				setEditCloneData({});
-				setShowCreateEditCloneModal(false);
-				getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
-					setPageToView(PAGES.cloneList);
-				});
+		let error = false;
+		const cloneErrors = {...editCloneDataErrors};
+		CLONE_MUST_BE_FILLED_KEYS.forEach(fieldKey => {
+			if ( !cloneDataToStore[fieldKey] || cloneDataToStore[fieldKey] === '') {
+				error = true;
+				cloneErrors[fieldKey] = true;
+			} else {
+				cloneErrors[fieldKey] = false;
 			}
 		});
-
+		setEditCloneDataErrors(cloneErrors);
+		
+		if (!error) {
+			gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
+				if (data.status === 200) {
+					setEditCloneID(-99);
+					setEditCloneData({});
+					setEditCloneDataErrors({});
+					setShowCreateEditCloneModal(false);
+					getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
+						setPageToView(PAGES.cloneList);
+					});
+				}
+			});
+		}
 	}
 
 	const storeAdminData = (adminToEdit = null) => {
