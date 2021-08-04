@@ -60,6 +60,8 @@ const DEFAULT_MODULE = {
 	s3_bucket: 'advana-raw-zone/bronze'
 }
 
+const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'card_module', 'export_module', 'graph_module', 'main_view_module', 'navigation_module', 'search_module', 'title_bar_module', 's3_bucket', 'config'];
+
 const toolTheme = {
 	menuBackgroundColor: '#171A23',
 	logoBackgroundColor: '#000000',
@@ -82,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
 	textField: {
 		marginLeft: theme.spacing(1),
 		marginRight: theme.spacing(1),
-		width: '25ch',
+		width: '40ch',
 		'& .MuiFormHelperText-root': {
 			fontSize: 12
 		}
@@ -96,8 +98,8 @@ const useStyles = makeStyles((theme) => ({
 		}
 	},
 	dialogLg: {
-		maxWidth: '800px',
-		minWidth: '800px'
+		maxWidth: '1200px',
+		minWidth: '1200px'
 	},
 	closeButton: {
 		position: 'absolute',
@@ -1229,6 +1231,7 @@ const GamechangerAdminPage = props => {
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
+							error={hasError(field.key)}
 						/>
 					))}
 				</div>
@@ -1261,6 +1264,7 @@ const GamechangerAdminPage = props => {
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
+							error={hasError(field.key)}
 						/>
 					))}
 				</div>
@@ -1270,6 +1274,14 @@ const GamechangerAdminPage = props => {
 	
 	const defaultModuleGivenKey = (key) => {
 		return DEFAULT_MODULE[key] || '';
+	}
+	
+	const hasError = (key) => {
+		
+		if (CLONE_MUST_BE_FILLED_KEYS.includes(key)) {
+			if ((!editCloneData[key] || editCloneData[key] === '') && defaultModuleGivenKey(key) === '') return true;
+		}
+		return false;
 	}
 
 	const renderAdminModal = () => {
