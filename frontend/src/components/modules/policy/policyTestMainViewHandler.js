@@ -351,7 +351,7 @@ const PolicyMainViewHandler = {
 						{trendingLinks.map(({search, favorite, count},idx)=>
 							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
 								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
+									<Typography style={styles.containerText}>{`#${idx+1} ${search.length < 20 ? search : search.substring(0,22) + '...'}`}</Typography>
 									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
 										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
 										cursor: "pointer",

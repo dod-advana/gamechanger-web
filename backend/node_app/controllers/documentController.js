@@ -278,7 +278,6 @@ class DocumentController {
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
-	
 				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder}, userId));
 			});
 			
