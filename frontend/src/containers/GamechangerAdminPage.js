@@ -2,23 +2,23 @@ import React, {useState, useContext, useEffect} from 'react';
 import Paper from 'material-ui/Paper';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import UOTAlert from '../components/common/GCAlert';
-import { SlideOutToolContext } from "@dod-advana/advana-side-nav/dist/SlideOutMenuContext";
-import { TextField, Tooltip, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link } from "@material-ui/core";
-import {ConstrainedIcon, PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
-import AdminIcon from "../images/icon/AdminIcon.png";
-import CloneIcon from "../images/icon/CloneIcon.png";
-import AuthIcon from "../images/icon/Authority.png";
+import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
+import { TextField, Tooltip, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link } from '@material-ui/core';
+import {ConstrainedIcon, PageLink} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import AdminIcon from '../images/icon/AdminIcon.png';
+import CloneIcon from '../images/icon/CloneIcon.png';
+import AuthIcon from '../images/icon/Authority.png';
 import AnalystToolsIcon from '../images/icon/analyticswht.png';
 import ReportIcon from '../images/icon/slideout-menu/reports icon.png';
-import styled from "styled-components";
+import styled from 'styled-components';
 import DashboardIcon from '../images/icon/slideout-menu/dashboard icon.png';
-import SearchBanner from "../components/searchBar/GCSearchBanner";
-import ReactTable from "react-table";
-import _ from "underscore";
-import "react-table/react-table.css";
-import {Snackbar} from "@material-ui/core";
-import GCButton from "../components/common/GCButton";
+import SearchBanner from '../components/searchBar/GCSearchBanner';
+import ReactTable from 'react-table';
+import _ from 'underscore';
+import 'react-table/react-table.css';
+import {Snackbar} from '@material-ui/core';
+import GCButton from '../components/common/GCButton';
 import Modal from 'react-modal';
 import MLDashboard from '../components/admin/MLDashboard';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
@@ -26,11 +26,11 @@ import GCTrendingBlacklist from '../components/admin/GCTrendingBlacklist';
 import InternalUsersManagement from '../components/user/InternalUserManagement';
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import UOTToggleSwitch from "../components/common/GCToggleSwitch";
-import CloseIcon from "@material-ui/icons/Close";
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import UOTToggleSwitch from '../components/common/GCToggleSwitch';
+import CloseIcon from '@material-ui/icons/Close';
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';
@@ -39,13 +39,26 @@ import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuCo
 // import TutorialOverlayModal from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayModal';
 import { HoverNavItem } from '../components/navigation/NavItems'
 // import UoTAPI from '../components/advana/api/api';
-import GCAccordion from "../components/common/GCAccordion";
-import GamechangerTextIcon from "../images/icon/GamechangerText.png";
+import GCAccordion from '../components/common/GCAccordion';
+import GamechangerTextIcon from '../images/icon/GamechangerText.png';
 import styles from '../components/admin/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+
+const DEFAULT_MODULE = {
+	clone_name: '',
+	card_module: 'default/defaultCardHandler',
+	display_name: '',
+	export_module: 'simple/simpleExportHandler',
+	graph_module: 'simple/simpleGraphHandler',
+	main_view_module: 'default/defaultMainViewHandler',
+	navigation_module: 'default/defaultNavigationHandler',
+	search_module: 'simple/simpleSearchHandler',
+	title_bar_module: 'default/defaultTitleBarHandler',
+	s3_bucket: 'advana-raw-zone/bronze'
+}
 
 const toolTheme = {
 	menuBackgroundColor: '#171A23',
@@ -95,17 +108,17 @@ const useStyles = makeStyles((theme) => ({
 		color: 'black',
 		backgroundColor: styles.backgroundGreyLight,
 		borderRadius: 0
-    },
+	},
 }));
 
 const GCCheckbox = withStyles({
-  root: {
-    color: '#E9691D',
-    '&$checked': {
-      color:'#E9691D',
-    },
-  },
-  checked: {},
+	root: {
+		color: '#E9691D',
+		'&$checked': {
+			color:'#E9691D',
+		},
+	},
+	checked: {},
 })((props) => <Checkbox color="default" {...props} />);
 
 const TableRow = styled.div`
@@ -232,7 +245,7 @@ const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 						getAPIRequestData();
 						setPageToView(PAGES.apiKeys);
 					}}
-						toolTheme={toolTheme}
+					toolTheme={toolTheme}
 					>
 						<VpnKeyIcon style={{ fontSize: 30 }} />
 					</HoverNavItem>
@@ -245,7 +258,7 @@ const generateClosedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 						getEditorData();
 						setPageToView(PAGES.homepageEditor);
 					}}
-						toolTheme={toolTheme}
+					toolTheme={toolTheme}
 					>
 						<CreateIcon style={{ fontSize: 30 }} />
 					</HoverNavItem>
@@ -357,7 +370,7 @@ const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 						getAPIRequestData();
 						setPageToView(PAGES.apiKeys);
 					}}
-						toolTheme={toolTheme}
+					toolTheme={toolTheme}
 					>
 						<VpnKeyIcon style={{ fontSize: 30 }} />
 						<span style={{ marginLeft: '5px' }}>Manage API Keys</span>
@@ -371,7 +384,7 @@ const generateOpenedContentArea = ({ setPageToView, getCloneData, getAdminData, 
 						getEditorData();
 						setPageToView(PAGES.homepageEditor);
 					}}
-						toolTheme={toolTheme}
+					toolTheme={toolTheme}
 					>
 						<CreateIcon style={{ fontSize: 30 }} />
 						<span style={{ marginLeft: '5px' }}>Homepage Editor</span>
@@ -550,7 +563,7 @@ const GamechangerAdminPage = props => {
 		try {
 			await gameChangerAPI.setCombinedSearchMode(!combinedSearch);
 			setCombinedSearch(!combinedSearch);
-			createAlert("Search Mode", "info", (!combinedSearch ? "Combined" : "Keyword only"));
+			createAlert('Search Mode', 'info', (!combinedSearch ? 'Combined' : 'Keyword only'));
 		} catch(e) {
 			console.error('Error setting combined search mode', e);
 		}
@@ -560,7 +573,7 @@ const GamechangerAdminPage = props => {
 		try {
 			await gameChangerAPI.setIntelligentAnswersMode(!intelligentAnswers);
 			setIntelligentAnswers(!intelligentAnswers);
-			createAlert("Intelligent Answers", "info", (!intelligentAnswers ? "On" : "Off"));
+			createAlert('Intelligent Answers', 'info', (!intelligentAnswers ? 'On' : 'Off'));
 		} catch(e) {
 			console.error('Error setting Intelligent Answers', e);
 		}
@@ -570,7 +583,7 @@ const GamechangerAdminPage = props => {
 		try {
 			await gameChangerAPI.setEntitySearchMode(!entitySearch);
 			setEntitySearch(!entitySearch);
-			createAlert("Entity Search", "info", (!entitySearch ? "On" : "Off"));
+			createAlert('Entity Search', 'info', (!entitySearch ? 'On' : 'Off'));
 		} catch(e) {
 			console.error('Error setting Entity Search', e);
 		}
@@ -580,7 +593,7 @@ const GamechangerAdminPage = props => {
 		try {
 			await gameChangerAPI.setTopicSearchMode(!topicSearch);
 			setTopicSearch(!topicSearch);
-			createAlert("Topic Search", "info", (!topicSearch ? "On" : "Off"));
+			createAlert('Topic Search', 'info', (!topicSearch ? 'On' : 'Off'));
 		} catch(e) {
 			console.error('Error setting Topic Search', e);
 		}
@@ -651,83 +664,83 @@ const GamechangerAdminPage = props => {
 	}
 
 	const createSearchCache = async () => {
-		const title = "Creating cache for searched terms: ";
-		createAlert(title, "info", "Started");
+		const title = 'Creating cache for searched terms: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.createSearchHistoryCache().then(res => {
-				createAlert(title, "success", "Creation complete");
+				createAlert(title, 'success', 'Creation complete');
 				console.log(res);
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Creation failed");
+			createAlert(title, 'error', 'Creation failed');
 		}
 	}
 
 	const clearSearchCache = async () => {
-		const title = "Clearing cache for searched terms: ";
-		createAlert(title, "info", "Started");
+		const title = 'Clearing cache for searched terms: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.clearSearchHistoryCache().then(res => {
-				createAlert(title, "success", "Cache cleared");
+				createAlert(title, 'success', 'Cache cleared');
 			})
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Cache clearing failed");
+			createAlert(title, 'error', 'Cache clearing failed');
 		}
 	}
 	
 	const createAbbreviationsCache = async () => {
-		const title = "Creating cache for abreviations: ";
-		createAlert(title, "info", "Started");
+		const title = 'Creating cache for abreviations: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.createAbbreviationsCache().then(res => {
-				createAlert(title, "success", "Creation Complete");
+				createAlert(title, 'success', 'Creation Complete');
 				console.log(res);
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Creation failed");
+			createAlert(title, 'error', 'Creation failed');
 		}
 	}
 
 	const clearAbbreviationsCache = async () => {
-		const title = "Clearing cache for abbreviations: ";
-		createAlert(title, "info", "Started");
+		const title = 'Clearing cache for abbreviations: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.clearAbbreviationsCache().then(res => {
-				createAlert(title, "success", "Cache cleared");
+				createAlert(title, 'success', 'Cache cleared');
 			})
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Cache clearing failed");
+			createAlert(title, 'error', 'Cache clearing failed');
 		}
 	}
 
 	const createGraphDataCache = async () => {
-		const title = "Creating cache for graph data: ";
-		createAlert(title, "info", "Started");
+		const title = 'Creating cache for graph data: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.createGraphDataCache().then(res => {
-				createAlert(title, "success", "Creation complete");
+				createAlert(title, 'success', 'Creation complete');
 				console.log(res);
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Creation failed");
+			createAlert(title, 'error', 'Creation failed');
 		}
 	}
 
 	const clearGraphDataCache = async () => {
-		const title = "Clearing cache for graph data: ";
-		createAlert(title, "info", "Started");
+		const title = 'Clearing cache for graph data: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.clearGraphDataCache().then(res => {
-				createAlert(title, "success", "Cache cleared");
+				createAlert(title, 'success', 'Cache cleared');
 			})
 		} catch (e) {
 			console.log(e);
-			createAlert(title, "error", "Cache clearing failed");
+			createAlert(title, 'error', 'Cache clearing failed');
 		}
 	}
 	
@@ -751,37 +764,37 @@ const GamechangerAdminPage = props => {
 	const populateNewUserId = async () => {
 		try {
 			await gameChangerAPI.populateNewUserId().then(() => {
-				createAlert('Populating New User IDs', "success", 'Updated new_user_id column')
+				createAlert('Populating New User IDs', 'success', 'Updated new_user_id column')
 			})
 		} catch (e){
 			console.log(e);
-			createAlert('Populating New User IDs', "error", "Failed updating Postgres table")
+			createAlert('Populating New User IDs', 'error', 'Failed updating Postgres table')
 		}
 	}
 	
 	const reloadHandlerMap = async () => {
-		const title = "Reloading Handler Map: ";
-		createAlert(title, "info", "Started");
+		const title = 'Reloading Handler Map: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.reloadHandlerMap().then(res => {
-				createAlert('Reloading Handler Map', "success", 'Updated handler map')
+				createAlert('Reloading Handler Map', 'success', 'Updated handler map')
 			})
 		} catch (e){
 			console.log(e);
-			createAlert('Reloading Handler Map', "error", "Failed updating handler map")
+			createAlert('Reloading Handler Map', 'error', 'Failed updating handler map')
 		}
 	}
 	const toggleUserFeedback = async () => {
-		const title = "Requst User Feedback: ";
-		createAlert(title, "info", "Started");
+		const title = 'Requst User Feedback: ';
+		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.toggleUserFeedbackMode().then(res => {
-				createAlert('Toggling user feedback value', "success", 'updated user feedback mode')
+				createAlert('Toggling user feedback value', 'success', 'updated user feedback mode')
 				getUserFeedback();
 			})
 		} catch (e){
 			console.log(e);
-			createAlert('Toggling user feedback value', "error", "failed updating user feedback mode")
+			createAlert('Toggling user feedback value', 'error', 'failed updating user feedback mode')
 		}
 	}
 
@@ -863,7 +876,7 @@ const GamechangerAdminPage = props => {
 		return (
 			<div>
 				<p style={styles.sectionHeader}>General Actions</p>
-				<div className="row" style={{paddingLeft: "80px"}}>
+				<div className="row" style={{paddingLeft: '80px'}}>
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
@@ -887,9 +900,9 @@ const GamechangerAdminPage = props => {
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={() => {
 								openEsIndexModal();
-								trackEvent('GAMECHANGER_Admin', "AdminPageChangeEsIndex", "onClick");
+								trackEvent('GAMECHANGER_Admin', 'AdminPageChangeEsIndex', 'onClick');
 							}} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa fa-plug fa-2x"></i>
+								<i style={styles.image} className="fa fa fa-plug fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Change ElasticSearch Index</span></h2>
 							</Link>
 						</Paper>
@@ -897,7 +910,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={createSearchCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-search fa-2x"></i>
+								<i style={styles.image} className="fa fa-search fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Search Cache</span></h2>
 							</Link>
 						</Paper>
@@ -905,7 +918,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={clearSearchCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-trash fa-2x"></i>
+								<i style={styles.image} className="fa fa-trash fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Search Cache</span></h2>
 							</Link>
 						</Paper>
@@ -913,7 +926,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={createAbbreviationsCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-search fa-2x"></i>
+								<i style={styles.image} className="fa fa-search fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Abbreviations Cache</span></h2>
 							</Link>
 						</Paper>
@@ -921,7 +934,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={clearAbbreviationsCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-trash fa-2x"></i>
+								<i style={styles.image} className="fa fa-trash fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Abbreviations Cache</span></h2>
 							</Link>
 						</Paper>
@@ -929,7 +942,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={createGraphDataCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-code-fork fa-2x"></i>
+								<i style={styles.image} className="fa fa-code-fork fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Graph Cache</span></h2>
 							</Link>
 						</Paper>
@@ -937,7 +950,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={clearGraphDataCache} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-trash fa-2x"></i>
+								<i style={styles.image} className="fa fa-trash fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Graph Cache</span></h2>
 							</Link>
 						</Paper>
@@ -945,7 +958,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={openTrendingBlacklistModal} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-line-chart fa-2x"></i>
+								<i style={styles.image} className="fa fa-line-chart fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Edit Trending Blacklist</span></h2>
 							</Link>
 						</Paper>
@@ -953,7 +966,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={populateNewUserId} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-users fa-2x"></i>
+								<i style={styles.image} className="fa fa-users fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Populate New User ID Column</span></h2>
 							</Link>
 						</Paper>
@@ -961,7 +974,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link to="#" onClick={reloadHandlerMap} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-map fa-2x"></i>
+								<i style={styles.image} className="fa fa-map fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Reload Handler Map</span></h2>
 							</Link>
 						</Paper>
@@ -969,7 +982,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={combinedSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
 							<Link to="#" onClick={setCombinedSearchMode} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-btc fa-2x"></i>
+								<i style={styles.image} className="fa fa-btc fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Combined Search</span></h2>
 							</Link>
 						</Paper>
@@ -977,7 +990,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={intelligentAnswers?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
 							<Link to="#" onClick={setIntelligentAnswersMode} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-question fa-2x"></i>
+								<i style={styles.image} className="fa fa-question fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Intelligent Answers</span></h2>
 							</Link>
 						</Paper>
@@ -985,7 +998,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={entitySearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
 							<Link to="#" onClick={setEntitySearchMode} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-id-badge fa-2x"></i>
+								<i style={styles.image} className="fa fa-id-badge fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Entity Search</span></h2>
 							</Link>
 						</Paper>
@@ -993,7 +1006,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={topicSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
 							<Link to="#" onClick={setTopicSearchMode} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-id-badge fa-2x"></i>
+								<i style={styles.image} className="fa fa-id-badge fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Topic Search</span></h2>
 							</Link>
 						</Paper>
@@ -1001,7 +1014,7 @@ const GamechangerAdminPage = props => {
 					<div style={styles.feature}>
 						<Paper style={userFeedback?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
 							<Link to="#" onClick={toggleUserFeedback} style={{ textDecoration: 'none' }}>
-							<i style={styles.image} className="fa fa-id-card-o fa-2x"></i>
+								<i style={styles.image} className="fa fa-id-card-o fa-2x"/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle User Feedback</span></h2>
 							</Link>
 						</Paper>
@@ -1052,7 +1065,7 @@ const GamechangerAdminPage = props => {
 								const cloneToEdit = {...filteredClones[0]};
 
 				 				cloneToEdit.is_live = !row.value;
-				 				trackEvent('GAMECHANGER_Admin', "ToggleCloneIsLive", cloneToEdit.name, cloneToEdit.is_live ? 1 : 0);
+				 				trackEvent('GAMECHANGER_Admin', 'ToggleCloneIsLive', cloneToEdit.name, cloneToEdit.is_live ? 1 : 0);
 				 				storeCloneData(cloneToEdit);
 							}}
 				 			customColor={'#E9691D'}
@@ -1069,7 +1082,7 @@ const GamechangerAdminPage = props => {
 						{row.row._original.can_edit &&
 							<GCButton
 								onClick={() => {
-									trackEvent('GAMECHANGER_Admin', "EditClone", "onClick", row.value);
+									trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
 									setEditCloneID(row.value);
 									setShowCreateEditCloneModal(true);
 								}}
@@ -1088,7 +1101,7 @@ const GamechangerAdminPage = props => {
 						{row.row._original.can_edit &&
 							<GCButton
 								onClick={() => {
-									trackEvent('GAMECHANGER_Admin', "DeleteClone", "onClick", row.value);
+									trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
 									deleteCloneData(row.value).then(() => {
 										getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
 											setPageToView(PAGES.cloneList);
@@ -1110,7 +1123,7 @@ const GamechangerAdminPage = props => {
 					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Clones</p>
 					<GCButton
 						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', "CreateClone", "onClick");
+							trackEvent('GAMECHANGER_Admin', 'CreateClone', 'onClick');
 							setEditCloneID(-99);
 							setShowCreateEditCloneModal(true);
 						}}
@@ -1146,7 +1159,7 @@ const GamechangerAdminPage = props => {
 					<TableRow>
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "DeleteAdmin", "onClick", row.value);
+								trackEvent('GAMECHANGER_Admin', 'DeleteAdmin', 'onClick', row.value);
 								deleteAdminData(row.value).then(() => {
 									getAdminData(setGCAdminTableData).then(() => {
 										setPageToView(PAGES.adminList);
@@ -1166,7 +1179,7 @@ const GamechangerAdminPage = props => {
 					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Admins</p>
 					<GCButton
 						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', "CreateAdmin", "onClick");
+							trackEvent('GAMECHANGER_Admin', 'CreateAdmin', 'onClick');
 							setEditAdminID(-99);
 							setShowCreateEditAdminModal(true);
 						}}
@@ -1185,8 +1198,21 @@ const GamechangerAdminPage = props => {
 	}
 
 	const renderCloneModal = () => {
+		
 		const handleCheck = (event) => {
 			setEditCloneData({ ...editCloneData, [event.target.name]: event.target.checked })
+		};
+		
+		const handleChange = (event, key) => {
+			const tmpData = {...editCloneData};
+			tmpData[key] = event.target.value
+			
+			if (key === 'clone_name') {
+				tmpData['config'] = {esIndex: event.target.value};
+				tmpData['url'] = event.target.value;
+			}
+			
+			setEditCloneData(tmpData);
 		};
 		
 		return (
@@ -1197,8 +1223,9 @@ const GamechangerAdminPage = props => {
 						<TextField
 							label={field.display_name}
 							id="margin-dense"
-							defaultValue={editCloneData ? editCloneData[field.key] : ''}
-							onChange={event => {editCloneData[field.key] = event.target.value}}
+							defaultValue={editCloneData[field.key] || defaultModuleGivenKey(field.key)}
+							value={editCloneData[field.key] || defaultModuleGivenKey(field.key)}
+							onChange={event => handleChange(event, field.key)}
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
@@ -1229,6 +1256,7 @@ const GamechangerAdminPage = props => {
 							label={field.display_name}
 							id="margin-dense"
 							defaultValue={editCloneData ? JSON.stringify(editCloneData[field.key]) : ''}
+							value={editCloneData && editCloneData[field.key] ? JSON.stringify(editCloneData[field.key]) : '' }
 							onChange={event => {editCloneData[field.key] = event.target.value}}
 							className={classes.textField}
 							helperText={field.display_name}
@@ -1238,6 +1266,10 @@ const GamechangerAdminPage = props => {
 				</div>
 			</div>
 		)
+	}
+	
+	const defaultModuleGivenKey = (key) => {
+		return DEFAULT_MODULE[key] || '';
 	}
 
 	const renderAdminModal = () => {
@@ -1305,11 +1337,11 @@ const GamechangerAdminPage = props => {
 		delete cloneDataToStore.createdAt;
 		delete cloneDataToStore.updatedAt;
 		
-			cloneTableMetaData.jsonFields.forEach(field => {
-				if (typeof cloneDataToStore[field.key] === 'string') {
-					cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
-				}
-			})
+		cloneTableMetaData.jsonFields.forEach(field => {
+			if (typeof cloneDataToStore[field.key] === 'string') {
+				cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
+			}
+		})
 		
 		gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
 			if (data.status === 200) {
@@ -1319,7 +1351,6 @@ const GamechangerAdminPage = props => {
 				getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
 					setPageToView(PAGES.cloneList);
 				});
-				refreshClones();
 			}
 		});
 
@@ -1377,10 +1408,10 @@ const GamechangerAdminPage = props => {
 				Header: 'Keys',
 				accessor: 'keys',
 				Cell: row => 
-					{ return (gcAPIKeyVision ? 
-						<TableRow>{row.value.join(", ")}</TableRow> :
-						<TableRow>******************************************</TableRow> )
-					}
+				{ return (gcAPIKeyVision ? 
+					<TableRow>{row.value.join(', ')}</TableRow> :
+					<TableRow>******************************************</TableRow> )
+				}
 			},
 			{
 				Header: ' ',
@@ -1390,7 +1421,7 @@ const GamechangerAdminPage = props => {
 					<TableRow>
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "DeleteAPIKey", row.value);
+								trackEvent('GAMECHANGER_Admin', 'AdminPage', 'DeleteAPIKey', row.value);
 								revokeAPIKeyRequestData(row.value);
 							}}
 							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
@@ -1424,14 +1455,14 @@ const GamechangerAdminPage = props => {
 					<TableRow>
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "ApproveAPIKeyRequest", row.value);
+								trackEvent('GAMECHANGER_Admin', 'AdminPage', 'ApproveAPIKeyRequest', row.value);
 								approveRejectAPIKeyRequestData(row.value, true);
 							}}
 							style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
 						>Approve</GCButton>
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', "AdminPage", "RejectAPIKeyRequest", row.value);
+								trackEvent('GAMECHANGER_Admin', 'AdminPage', 'RejectAPIKeyRequest', row.value);
 								approveRejectAPIKeyRequestData(row.value, false);
 							}}
 							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
@@ -1449,7 +1480,7 @@ const GamechangerAdminPage = props => {
 				
 				<div style={{margin: '10px 80px'}}>
 					<GCAccordion expanded={false} header={'APPROVED API KEYS'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
+						<div style={{display:'flex', flexDirection: 'column', width: '100%'}}>
 							<ReactTable
 								data={gcAPIRequestData.approved}
 								columns={approvedColumns}
@@ -1586,7 +1617,7 @@ const GamechangerAdminPage = props => {
 				
 				<div style={{margin: '10px 80px'}}>
 					<GCAccordion expanded={true} header={'Topics'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
+						<div style={{display:'flex', flexDirection: 'column', width: '100%'}}>
 							<ReactTable
 								data={editorTableData.topics}
 								columns={topicColumns}
@@ -1624,7 +1655,7 @@ const GamechangerAdminPage = props => {
 						</div>
 					</GCAccordion>
 					<GCAccordion expanded={true} header={'Major Publications'}>
-						<div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
+						<div style={{display:'flex', flexDirection: 'column', width: '100%'}}>
 							<ReactTable
 								data={editorTableData.major_pubs}
 								columns={majorPubColumns}
@@ -1679,7 +1710,7 @@ const GamechangerAdminPage = props => {
 	}
 
 	const renderSwitch = (page) => {
-		trackEvent('GAMECHANGER_Admin', "ChangeAdminPage", "onChange", page.toString());
+		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
 
 		switch(page) {
 			case PAGES.general:
@@ -1745,16 +1776,16 @@ const GamechangerAdminPage = props => {
 			</div>
 
 			<Dialog
-                open={showCreateEditCloneModal}
-                scroll={'paper'}
-                maxWidth="lg"
-                disableEscapeKeyDown
-                disableBackdropClick
-                classes={{
-                    paperWidthLg: classes.dialogLg
+				open={showCreateEditCloneModal}
+				scroll={'paper'}
+				maxWidth="lg"
+				disableEscapeKeyDown
+				disableBackdropClick
+				classes={{
+					paperWidthLg: classes.dialogLg
 				}}
-            >
-                <DialogTitle >
+			>
+				<DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneID === -99 ? 'Create Clone' : 'Edit Clone'}</Typography>
 					</div>
@@ -1770,13 +1801,13 @@ const GamechangerAdminPage = props => {
 					}} onClick={() => closeCloneModal()}>
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
-                </DialogTitle>
+				</DialogTitle>
 
-                <DialogContent style={{height: 700}}>
+				<DialogContent style={{height: 700}}>
 					{renderCloneModal()}
-                </DialogContent>
+				</DialogContent>
 
-                <DialogActions>
+				<DialogActions>
 					<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>
 						<GCButton
 							id={'editCloneSubmit'}
@@ -1786,8 +1817,8 @@ const GamechangerAdminPage = props => {
 							Submit
 						</GCButton>
 					</div>
-                </DialogActions>
-            </Dialog>
+				</DialogActions>
+			</Dialog>
 
 			<Dialog
 				open={showAddEditorTermDialog}
@@ -1848,24 +1879,24 @@ const GamechangerAdminPage = props => {
 			</Modal>
 
 			<Modal
-					isOpen={showTrendingBlacklistModal}
-					onRequestClose={closeTrendingBlacklistModal}
-					style={styles.esIndexModal}
-					>
-					<IconButton aria-label="close" style={{
-						position: 'absolute',
-						right: '0px',
-						top: '0px',
-						height: 60,
-						width: 60,
-						color: 'black',
-						backgroundColor: styles.backgroundGreyLight,
-						borderRadius: 0
-					}} onClick={() => closeTrendingBlacklistModal()}>
-						<CloseIcon style={{ fontSize: 30 }} />
-					</IconButton>
-					<GCTrendingBlacklist/>
-					<div style={{display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%'}}>
+				isOpen={showTrendingBlacklistModal}
+				onRequestClose={closeTrendingBlacklistModal}
+				style={styles.esIndexModal}
+			>
+				<IconButton aria-label="close" style={{
+					position: 'absolute',
+					right: '0px',
+					top: '0px',
+					height: 60,
+					width: 60,
+					color: 'black',
+					backgroundColor: styles.backgroundGreyLight,
+					borderRadius: 0
+				}} onClick={() => closeTrendingBlacklistModal()}>
+					<CloseIcon style={{ fontSize: 30 }} />
+				</IconButton>
+				<GCTrendingBlacklist/>
+				<div style={{display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%'}}>
 					<GCButton
 						id={'esModalClose'}
 						onClick={()=>setShowTrendingBlacklistModal(false)}
@@ -1880,10 +1911,10 @@ const GamechangerAdminPage = props => {
 				isOpen={showEditESIndexModal}
 				onRequestClose={() => setShowEditESIndexModal(false)}
 				style={styles.esIndexModal}
-				>
+			>
 				<Typography variant="h2" style={{ width: '100%', padding: '20px', paddingLeft: '20px', fontSize:'25px' }}>{'Change Elasticsearch Index'}</Typography>
-					<div style={{margin: '0 20px'}}>
-						<div className={classes.root}>
+				<div style={{margin: '0 20px'}}>
+					<div className={classes.root}>
 						<Typography variant="h4" style={styles.modalHeaders}>Current Elasticsearch Index: {esIndex ? esIndex : 'Default Index'}</Typography>
 						<TextField
 							label="Elasticsearch Index"
@@ -1893,8 +1924,8 @@ const GamechangerAdminPage = props => {
 							helperText="Index To Change To."
 							margin="dense"
 						/>
-						</div>
 					</div>
+				</div>
 				<div style={{display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%'}}>
 					<GCButton
 						id={'esModalClose'}
