@@ -102,7 +102,6 @@ const GameChangerSearchBar = (props) => {
 
 	const [userSearchHistory, setUserSearchHistory] = useState([]);
 	const [autocorrect, setAutocorrect] = useState([]);
-	const [presearchFile, setPresearchFile] = useState([]);
 	const [presearchTitle, setPresearchTitle] = useState([]);
 	const [presearchTopic, setPresearchTopic] = useState([]);
 	const [presearchOrg, setPresearchOrg] = useState([]);
@@ -143,7 +142,6 @@ const GameChangerSearchBar = (props) => {
 				const index = state.cloneData?.clone_data?.esCluster ?? '';
 				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
 				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
-				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
 				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
 				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
 				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
@@ -276,7 +274,6 @@ const GameChangerSearchBar = (props) => {
 	const clearLiveSuggestions = () => {
 		setAutocorrect([]);
 		setPredictions([]);
-		setPresearchFile([]);
 		setPresearchOrg([]);
 		setPresearchTopic([]);
 		setPresearchTitle([]);
@@ -321,21 +318,6 @@ const GameChangerSearchBar = (props) => {
 					rows: rows,
 					handleRowPressed: handleRowPressed,
 					rowType: 'autocorrect'
-				});
-			}
-			if (text.length > 0 && presearchFile.length > 0) {
-				const rows = [];
-				presearchFile.forEach(o => {
-					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-						rows.push(o);
-						textArray.push(o.text.toLowerCase());
-					}
-				});
-				data.push({
-					IconComponent: Search,
-					rows: rows,
-					handleRowPressed: handleRowPressed,
-					rowType: 'presearchFile'
 				});
 			}
 			if (text.length > 0 && presearchTitle.length > 0) {
@@ -448,7 +430,6 @@ const GameChangerSearchBar = (props) => {
 		debouncedSearchTerm,
 		userSearchHistory,
 		autocorrect,
-		presearchFile,
 		presearchTitle,
 		presearchTopic,
 		presearchOrg,
