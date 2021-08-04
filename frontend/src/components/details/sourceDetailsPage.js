@@ -47,7 +47,7 @@ const SourceDetailsPage = (props) => {
 			setDocs(data.docs);
 			setRunningQuery(false);
 		});
-	},[page])
+	},[page, cloneData.clone_name, source])
 
 	const renderDocs = () => {
 		return docs.map((item, idx) => {
