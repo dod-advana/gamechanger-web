@@ -97,8 +97,8 @@ const StyledFrontCardHeader = styled.div`
 	font-family: Montserrat;
 	height: ${({listView}) => listView ? 'fit-content': '59px'};
 	padding: ${({listView}) => listView ? '0px': '5px'};
-	margin-left: ${({listView}) => listView ? '10px': '0px'};
-	margin-right: ${({listView}) => listView ? '10px': '0px'};
+	margin-left: ${({listView}) => listView ? '5px': '0px'};
+	margin-right: ${({listView}) => listView ? '5px': '0px'};
 	
 	.title-text-selected-favorite-div {
 		max-height: ${({listView}) => listView ? '': '50px'};
@@ -1107,7 +1107,6 @@ const PolicyCardHandler = {
 		getCardHeader: (props) => {
 			const {item, state, favoriteComponent} = props;
 			const displayTitle = item.name;
-			const cardType = 'Organization';
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={state.listView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
@@ -1133,11 +1132,6 @@ const PolicyCardHandler = {
 							</div>
 						</div>
 					</div>
-					{state.listView &&
-						<div className={'list-view-sub-header'}>
-							<p> {cardType} </p>
-						</div>
-					}
 				</StyledFrontCardHeader>
 			);
 		},
@@ -1166,9 +1160,7 @@ const PolicyCardHandler = {
 			const {
 				 item,
 				 state,
-				 backBody,
-				 metadataExpanded,
-				 setMetadataExpanded,
+				 backBody
 			} = props;
 			
 			if (state.listView) {
@@ -1185,22 +1177,13 @@ const PolicyCardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						{item.description && <p>{item.description}</p>}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Document Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			}else {
@@ -1366,11 +1349,6 @@ const PolicyCardHandler = {
 						{/*	</div>*/}
 						{/*</div>*/}
 					</div>
-					{state.listView &&
-						<div className={'list-view-sub-header'}>
-							<p> {displayTitle} </p>
-						</div>
-					}
 				</StyledFrontCardHeader>
 			);
 		},
@@ -1399,31 +1377,20 @@ const PolicyCardHandler = {
 			const {
 				 item,
 				 state,
-				 backBody,
-				 metadataExpanded,
-				 setMetadataExpanded,
+				 backBody
 			} = props;
 
 			if(state.listView){
 				return (
 					<StyledListViewFrontCardContent>
 						{item.information && <p>{item.information}</p>}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Topics Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			}else {
