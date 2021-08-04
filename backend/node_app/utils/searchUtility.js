@@ -1768,6 +1768,52 @@ class SearchUtility {
 				}
 	}
 
+	getSourceQuery(searchText, offset, limit) {
+		try {
+			let query = {
+				_source: {
+					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_rs"]
+				},
+				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
+				from: 0,
+				size: 18,
+				track_total_hits: true,
+				query: {
+					bool: {
+						must: [],
+						should: [{
+							  query_string: {
+								  query: "marine_pubs",
+								  default_field: "crawler_used_s"
+							   }
+						  }],
+						minimum_should_match: 1
+					}
+				},
+				highlight: {
+					require_field_match: false,
+					fields: {
+						"title.search": {},
+						"keyw_5": {},
+						"id": {},
+						"filename.search": {}
+					},
+					fragment_size: 10,
+					fragmenter: "simple",
+					type: "unified",
+					boundary_scanner: "word"
+				},
+				sort: [{
+					_score: {
+						order: "desc"
+					}
+				}]
+			}
+			return query
+		} catch(err){
+			this.logger.error(err, 'G3WEJ64','');
+		}
+	}
 	getOrgQuery() {
 		return {
 			"size": 0,
