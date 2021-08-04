@@ -1023,7 +1023,7 @@ const PolicySearchMatrixHandler = {
 
 				<div style ={{display: 'flex', margin: '10px'}}>
 					<div style={{width: '120px', height: '40px', marginRight: '20px'}}>
-						<GCButton style={{border: 'none', width: '100%', height: '100%', padding: '0px', color: 'black', backgroundColor: '#B0BAC5'}} onClick={() => resetAdvancedSettings(dispatch)}>Clear Filters</GCButton>
+						<GCButton style={{border: 'none', width: '100%', height: '100%', padding: '0px'}} isSecondaryBtn={true} onClick={() => resetAdvancedSettings(dispatch)}>Clear Filters</GCButton>
 					</div>
 					<div style={{width: '120px', height: '40px'}}>
 						<GCButton style={{width: '100%', height: '100%'}} onClick={handleSubmit}>Search</GCButton>
