@@ -583,16 +583,17 @@ const getCardExtrasHandler = (props) => {
 					<div>Are you sure you wish to delete this favorite? You will lose any comments made.</div>
 					<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 						<GCButton
+							onClick={()=>handleFavoriteTopicClicked(null)}
+							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+							isSecondaryBtn={true}
+						>No
+						</GCButton>
+						<GCButton
 							onClick={() => {
 								handleSaveTopic(false);
 							}}
 							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 						>Yes
-						</GCButton>
-						<GCButton
-							onClick={()=>handleFavoriteTopicClicked(null)}
-							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-						>No
 						</GCButton>
 					</div>
 				</div>
@@ -613,17 +614,15 @@ const getCardExtrasHandler = (props) => {
 					/>
 					<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 						<GCButton
+							onClick={() => handleFavoriteTopicClicked(null)}
+							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+							isSecondaryBtn={true}
+						>Cancel
+						</GCButton>
+						<GCButton
 							onClick={() => handleSaveTopic(true)}
 							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 						>Save
-						</GCButton>
-						<GCButton
-							onClick={() => handleFavoriteTopicClicked(null)}
-							style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-							textStyle={{ color: '#8091A5' }}
-							buttonColor={ '#FFFFFF' }
-							borderColor={ '#B0B9BE' }
-						>Cancel
 						</GCButton>
 					</div>
 				</div>

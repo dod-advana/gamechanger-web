@@ -14,6 +14,7 @@ const DocDialog = ({ open, handleClose, doc }) => {
 			width="1000px"
 			primaryLabel=''
 			primaryAction={() => { }}
+			handleClose={handleClose}
 		> 
 		<div>
 			<p style={{fontSize: '12px'}}>{JSON.stringify(doc)}</p>

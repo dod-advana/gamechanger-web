@@ -553,9 +553,7 @@ function GCCard (props) {
 										fontSize: 14,
 										margin: '16px 0px 0px 10px'
 									}}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
+									isSecondaryBtn={true}
 								>No
 								</GCButton>
 								<GCButton

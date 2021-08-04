@@ -630,9 +630,7 @@ class GameChangerAssist extends Component {
 								id={'gcAssistPrevious'}
 								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
 								onClick={() => { this.handlePreviousNext(-1) }}
-								textStyle={{color: 'grey'}}
-								buttonColor={'white'}
-								borderColor={primaryGreyLight}
+								isSecondaryBtn={true}
 								disabled={currentEntityIndex === 0}
 							>
 								Previous
