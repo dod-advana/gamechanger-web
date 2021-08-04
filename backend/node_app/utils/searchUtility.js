@@ -449,28 +449,19 @@ class SearchUtility {
 							},
 							{
 								wildcard: {
-									'title.search': {
+									'display_title_s.search': {
 										value: `*${parsedQuery}*`,
-										boost: 4
-									}
-								}
-							},
-							{
-								wildcard: {
-									'filename.search': {
-										value: `*${parsedQuery}*`,
-										boost: 4
-
+										boost: 6
 									}
 								}
 							},
 							{
 								multi_match: {
 									query: `${parsedQuery}`,
-									fields: ['title.search', 'filename.search'],
+									fields: ['display_title_s.search'],
 									operator: 'AND',
 									type: 'phrase',
-									boost: 2
+									boost: 4
 								  }
 							}
 						],
@@ -483,10 +474,9 @@ class SearchUtility {
 				highlight: {
 					require_field_match: false,
 					fields: {
-						'title.search': {},
+						'display_title_s.search': {},
 						'keyw_5': {},
-						'id': {},
-						'filename.search': {}
+						'id': {}
 					},
 					fragment_size: 10,
 					fragmenter: 'simple',
@@ -1232,53 +1222,24 @@ class SearchUtility {
 		}
 	}
 
-	getESpresearchMultiQuery({ searchText, filename = 'filename', title = 'title', name = 'name', aliases = 'aliases' }) {
+	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases' }) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchTextCaps = searchText.toUpperCase();
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
-			return [
+			let query = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.index
 				},
 				{
-					size: 2,
-					_source: [filename],
-					query: {
-						bool: {
-							must: [
-								{
-									wildcard: {
-										'filename.search': {
-											value: `*${searchTextCaps}*`,
-											boost: 1.0,
-											rewrite: 'constant_score'
-										}
-									}
-								}
-							],
-							filter: [
-								{
-									term: {
-										'is_revoked_b': false
-									}
-								}
-							]
-						}
-					}
-				},
-				{
-					index: this.constants.GAME_CHANGER_OPTS.index
-				},
-				{
-					size: 2,
+					size: 4,
 					_source: [title],
 					query: {
 						bool: {
 							must: [
 								{
 									wildcard: {
-										'title.search': {
+										'display_title_s.search': {
 											value: `*${searchTextCaps}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
@@ -1341,8 +1302,7 @@ class SearchUtility {
 					},
 				}
 			];
-
-
+			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
 		}
@@ -1443,8 +1403,8 @@ class SearchUtility {
 							
 							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
 							if(r.highlight){
-								if(r.highlight['title.search']){
-									result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+								if(r.highlight['display_title_s.search']){
+									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
@@ -1478,8 +1438,8 @@ class SearchUtility {
 							
 							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
 							if(r.highlight){
-								if(r.highlight['title.search']){
-									result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
+								if(r.highlight['display_title_s.search']){
+									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
