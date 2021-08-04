@@ -221,7 +221,7 @@ const SearchBanner = (props) => {
 						</LoginModalBodyDiv>
 						<LoginModalBodyDiv width='85%'>
 							<a href="https://advana.data.mil/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', border: 'none', borderRadius: '5px' }}>
-								<GCButton style={{ flex: 1 }} buttonColor={'#8091A5'}>
+								<GCButton style={{ flex: 1 }} isSecondaryBtn={true}>
 									Login here
 								</GCButton>
 							</a>

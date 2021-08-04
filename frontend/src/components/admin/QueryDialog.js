@@ -16,6 +16,7 @@ export default ({ open, handleClose, query }) => {
 			width="1000px"
 			primaryLabel=''
 			primaryAction={() => { }}
+			handleClose={handleClose}
 		> 
 		<div>
 			<p style={{fontSize: '12px'}}>{JSON.stringify(query)}</p>

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Dialog from 'material-ui/Dialog';
 import UOTPrimaryButton from './GCPrimaryButton';
 import UOTSecondaryButton from './GCSecondaryButton';
+import styled from 'styled-components';
+import CloseIcon from '@material-ui/icons/Close';
 
 const UOTDialog = (props) => {
 	const hasBtn = props.primaryLabel || props.secondaryLabel || props.tertiaryLabel ? true : false;
@@ -39,6 +41,22 @@ const UOTDialog = (props) => {
 		}
 	};
 
+	const CloseButton = styled.div`
+		padding: 6px;
+		background-color: white;
+		border-radius: 5px;
+		color: #8091A5 !important;
+		border: 1px solid #B0B9BE;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex: .4;
+		position: absolute;
+		right: 0px;
+		top: 0px;
+	`;
+
 	return (
 		<Dialog
 			modal={false}
@@ -57,6 +75,10 @@ const UOTDialog = (props) => {
 							<h1 style={styles.title}>{props.title}</h1>
 						</div>
 					</div>
+
+					<CloseButton onClick={props.handleClose}>
+						<CloseIcon fontSize="large" />
+					</CloseButton>
 
 					<div className="row" style={props.contentStyle || styles.contentRow}>
 						<div className="col-xs-12" style={props.contentColStyle}>

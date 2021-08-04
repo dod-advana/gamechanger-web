@@ -344,6 +344,7 @@ const FavoriteCard = (props) => {
 										<GCButton
 											onClick={handleStarClicked}
 											style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											isSecondaryBtn={true}
 										>No
 										</GCButton>
 										<GCButton
