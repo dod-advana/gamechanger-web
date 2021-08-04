@@ -7,7 +7,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	IconButton,
 	Modal, TextField,
 	Typography
 } from '@material-ui/core';
@@ -17,7 +16,6 @@ import GamechangerUserManagementAPI from "../api/GamechangerUserManagement";
 import CloseIcon from "@material-ui/icons/Close";
 import GCButton from "../common/GCButton";
 import {makeStyles} from "@material-ui/core/styles";
-import {backgroundGreyLight} from "../common/gc-colors";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -44,18 +42,7 @@ const useStyles = makeStyles((theme) => ({
 	dialogLg: {
 		maxWidth: '800px',
 		minWidth: '800px'
-	},
-	closeButton: {
-		position: 'absolute',
-		right: '0px',
-		top: '0px',
-		height: 60,
-		width: 60,
-		color: 'black',
-		backgroundColor: backgroundGreyLight,
-		borderRadius: 0,
-		borderTopRightRadius: 5
-    },
+	}
 }));
 
 const FooterContainer = styled.div`
@@ -87,6 +74,22 @@ const LinkContainer = styled.div`
 	display: flex;
 	flex: 25;
 	justify-content: flex-end;
+`;
+
+const CloseButton = styled.div`
+    padding: 6px;
+    background-color: white;
+    border-radius: 5px;
+    color: #8091A5 !important;
+    border: 1px solid #B0B9BE;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: .4;
+    position: absolute;
+    right: 15px;
+    top: 15px;
 `;
 
 const gameChangerAPI = new GameChangerAPI();
@@ -205,9 +208,9 @@ const DecoupledFooter = (props) => {
 						position: 'relative'
 					}}
 					>
-						<IconButton aria-label="close" className={classes.closeButton} onClick={() => setTrackingModalOpen(false)}>
-							<CloseIcon style={{ fontSize: 30 }} />
-						</IconButton>
+						<CloseButton onClick={() => setTrackingModalOpen(false)}>
+							<CloseIcon fontSize="large" />
+						</CloseButton>
 						<div style={{paddingTop: 50}}>
 							<p>Advana employs a web measurement and customization technology (WMCT), on this site to remember your online interactions, to conduct measurement and analysis of usage, or to customize your experience. This WMCT activity is categorized as a Tier 2 WMCT: i.e., multi-session tracking without collection of personally identifiable information (PII), and is enabled by default. Advana does not use the information associated with the WMCT to track individual user activity on the Internet outside of Advana websites, nor does it share the data obtained through such technologies, without your explicit consent, with other departments or agencies. Advana keeps a database of information obtained from the use of this WMCT in an encrypted RDS instance, but no personal data is maintained. Opting out of this WMCT does not effect a user's access to information on this website.</p>
 						</div>
@@ -244,9 +247,9 @@ const DecoupledFooter = (props) => {
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Request API Key</Typography>
 						<Typography display="inline" style={{ fontSize: '14px', lineHeight: '33px', marginLeft: '5px'}}>{`Limit 3 per month (${apiRequestLimit} left)`}</Typography>
 					</div>
-					<IconButton aria-label="close" className={classes.closeButton} onClick={() => setShowRequestAPIKeyModal(false)}>
-						<CloseIcon style={{ fontSize: 30 }} />
-					</IconButton>
+					<CloseButton onClick={() => setShowRequestAPIKeyModal(false)}>
+						<CloseIcon fontSize="large" />
+					</CloseButton>
                 </DialogTitle>
 
                 <DialogContent style={{height: '100%'}}>

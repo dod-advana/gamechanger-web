@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GCButton from '../common/GCButton';
-import { primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryDark, tertiaryGreen, primaryGreyLight, backgroundGreyDark, primaryRedDark } from '../../components/common/gc-colors';
+import { primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryDark, tertiaryGreen, backgroundGreyDark, primaryRedDark } from '../../components/common/gc-colors';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@material-ui/core";
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from "@material-ui/core/styles/withStyles";
