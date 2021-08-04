@@ -137,6 +137,7 @@ const DecoupledFooter = (props) => {
 		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then((data) => {
 			setUseMatomo(data.data);
 			setUserMatomo(data.data);
+			console.log("data: ", data.data);
 		}, (err) => {
 			console.log(err);
 		});
@@ -284,7 +285,7 @@ const DecoupledFooter = (props) => {
 };
 
 DecoupledFooter.propTypes = {
-	setUserMatomo: PropTypes.bool.isRequired
+	setUserMatomo: PropTypes.func.isRequired
 }
 
 export default DecoupledFooter;
