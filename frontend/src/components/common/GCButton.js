@@ -15,7 +15,7 @@ const GCButton = (props) => {
         ...remaining
     } = props;
 
-    let primaryColor = isSecondaryBtn ? 'lightGrey' : gcOrange;
+    let primaryColor = isSecondaryBtn ? '#E0E0E0' : gcOrange;
     let fontColor  = isSecondaryBtn ? 'rgb(0, 0, 0, 1)' : 'rgb(255, 255, 255, 1)';
     
 
