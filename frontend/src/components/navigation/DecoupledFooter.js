@@ -53,7 +53,8 @@ const useStyles = makeStyles((theme) => ({
 		width: 60,
 		color: 'black',
 		backgroundColor: backgroundGreyLight,
-		borderRadius: 0
+		borderRadius: 0,
+		borderTopRightRadius: 5
     },
 }));
 
@@ -200,10 +201,14 @@ const DecoupledFooter = (props) => {
 						backgroundColor: 'white',
 						padding: 20,
 						borderRadius: 5,
-						margin: '10% auto'
+						margin: '10% auto',
+						position: 'relative'
 					}}
 					>
-						<div>
+						<IconButton aria-label="close" className={classes.closeButton} onClick={() => setTrackingModalOpen(false)}>
+							<CloseIcon style={{ fontSize: 30 }} />
+						</IconButton>
+						<div style={{paddingTop: 50}}>
 							<p>Advana employs a web measurement and customization technology (WMCT), on this site to remember your online interactions, to conduct measurement and analysis of usage, or to customize your experience. This WMCT activity is categorized as a Tier 2 WMCT: i.e., multi-session tracking without collection of personally identifiable information (PII), and is enabled by default. Advana does not use the information associated with the WMCT to track individual user activity on the Internet outside of Advana websites, nor does it share the data obtained through such technologies, without your explicit consent, with other departments or agencies. Advana keeps a database of information obtained from the use of this WMCT in an encrypted RDS instance, but no personal data is maintained. Opting out of this WMCT does not effect a user's access to information on this website.</p>
 						</div>
 						<div style={{
@@ -213,14 +218,13 @@ const DecoupledFooter = (props) => {
 							<div style={{
 								display: 'flex',
 								width: '30%',
-								justifyContent: 'space-between',
 								margin: '10px 0 0 0'
 							}}
 							>
-							<Button variant="contained" color="primary" onClick={() => { setUserMatomoStatus(!useMatomo); setTrackingModalOpen(false); }}>
+								<GCButton isSecondaryBtn={true} onClick={() => setTrackingModalOpen(false)}>Cancel</GCButton>
+								<GCButton onClick={() => { setUserMatomoStatus(!useMatomo); setTrackingModalOpen(false); }}>
 									{useMatomo ? 'Opt Out' : 'Opt In'}
-								</Button>
-								<Button variant="contained" onClick={() => setTrackingModalOpen(false)}>Cancel</Button>
+								</GCButton>
 							</div>
 						</div>
 					</div>
@@ -255,6 +259,7 @@ const DecoupledFooter = (props) => {
 							id={'editCloneSubmit'}
 							onClick={() => setShowRequestAPIKeyModal(false)}
 							style={{margin:'10px'}}
+							isSecondaryBtn={true}
 						>
 							Cancel
 						</GCButton>
