@@ -223,7 +223,8 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							})}
 						</FormGroup>
 						{state.searchSettings.specificOrgsSelected &&
-							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a>
+							// eslint-disable-next-line
+							<a href={'#'} style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
 						}
 					</>
 					) : (
@@ -401,6 +402,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					})}
 				</FormGroup>
 				{state.searchSettings.specificTypesSelected &&
+					// eslint-disable-next-line
 					<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
 				}
 			</>
