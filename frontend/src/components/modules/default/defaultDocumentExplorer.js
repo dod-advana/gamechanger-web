@@ -91,7 +91,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				}
 			}
 		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]);
+	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]);
 
 	useEffect(() => {
 		const {dataIdx}  = iframePreviewLink;
@@ -303,7 +303,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 						<div style={{height: '100%'}}>
 							{filename && filename.endsWith('pdf') &&
 	
-								<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+								<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} width="100%" height="100%%"></iframe>
 							}
 							
 							{filename && filename.endsWith('html') &&
