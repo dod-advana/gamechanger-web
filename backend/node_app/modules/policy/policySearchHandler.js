@@ -278,7 +278,7 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalTopics = 0;
 
 			// QA data
-			let intelligentAnswersOn = this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
 			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
@@ -288,7 +288,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			// intelligent search data
-			let intelligentSearchOn = this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
+			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults, {question: '', answers: [], filenames: [], docIds: []})){ // add intelligent search result if QA empty
 				const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
@@ -296,7 +296,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			// add entities
-			let entitySearchOn = this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
+			let entitySearchOn = await this.app_settings.findOrCreate({where: { key: 'entity_search'}, defaults: {value: 'true'} });
 			entitySearchOn = entitySearchOn.length > 0 ? entitySearchOn[0].dataValues.value === 'true' : false;
 			if (entitySearchOn) {
 				const entities = await this.entitySearch(searchText, offset, 6, userId);
@@ -305,7 +305,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			//add topics
-			let topicSearchOn = this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			let topicSearchOn = await this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
 			topicSearchOn = topicSearchOn.length > 0 ? topicSearchOn[0].dataValues.value === 'true' : false;
 			if (topicSearchOn) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
@@ -349,7 +349,7 @@ class PolicySearchHandler extends SearchHandler {
 		const noSourceSpecified = _.isEqual([], orgFilterString);
 		const noPubDateSpecified = req.body.publicationDateAllTime;
 		const noTypeSpecified = _.isEqual([], typeFilterString);
-		let combinedSearch = this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
+		let combinedSearch = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 		combinedSearch = combinedSearch.length > 0 ? combinedSearch[0].dataValues.value === 'true' : false;
 		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 			try {
@@ -381,7 +381,7 @@ class PolicySearchHandler extends SearchHandler {
 		let esClientName = 'gamechanger';
 		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 		let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-		let intelligentQuestions = this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+		let intelligentQuestions = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
 		if (intelligentQuestions.length > 0) {
 			intelligentQuestions = intelligentQuestions[0].dataValues.value === 'true';
 		}
