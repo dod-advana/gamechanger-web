@@ -474,7 +474,7 @@ const GamechangerAdminPage = props => {
 
 	const classes = useStyles();
 
-	const { refreshClones, jupiter } = props;
+	const { jupiter } = props;
 
 	const [isAlertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
