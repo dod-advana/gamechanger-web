@@ -344,7 +344,11 @@ const PolicyMainViewHandler = {
 						width='300px'
 					>
 						{cleanSources.map(source => 
-							<SourceContainer>
+							<SourceContainer
+								onClick={()=>{
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.toLowerCase()}`);
+								}}
+							>
 								{/* <div style={{width:100, height:100}}/> */}
 								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
 							</SourceContainer>
