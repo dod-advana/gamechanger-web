@@ -11,28 +11,47 @@ import {styles, TableRow} from './GCAdminStyles';
 const gameChangerAPI = new GameChangerAPI();
 
 /**
- * 
+ * A table to view api keys and requests
  * @class APIRequests
  */
 export default () => {
+    // State Variables
     const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
-    
-    const getApiKeyRequestData = async (setGCAPIRequestData) => {
+    // Comonent Methods
+    /**
+     * Grabs all the data from the backend to populate the table
+     * @method getApiKeyRequestData
+     */
+    const getApiKeyRequestData = async () => {
         const resp = await gameChangerAPI.getAPIKeyRequestData();
         setGCAPIRequestData(resp.data || {approved: [], pending: []});
     }
+    /**
+     * Attemps to revoke a key based on the id
+     * @method revokeAPIKeyRequestData
+     * @param {*} id 
+     */
     const revokeAPIKeyRequestData = async (id) => {
 		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
-			getApiKeyRequestData(setGCAPIRequestData);
+			getApiKeyRequestData();
 		});
 	}
-	
+	/**
+     * Either approves or rejects a key request with an id and boolean
+     * @method approveRejectAPIKeyRequestData
+     * @param {*} id 
+     * @param {boolean} approve 
+     */
 	const approveRejectAPIKeyRequestData = async (id, approve) => {
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
-			getApiKeyRequestData(setGCAPIRequestData);
+			getApiKeyRequestData();
 		});
 	}
+    useEffect(()=>{
+        getApiKeyRequestData()
+    },[]);
+    // Columns 
     const approvedColumns = [
         {
             Header: 'Name',

@@ -1,6 +1,6 @@
 import React from 'react';
-import UOTDialog from '../common/GCDialog';
-import GCButton from '../common/GCButton';
+import UOTDialog from '../../common/GCDialog';
+import GCButton from '../../common/GCButton';
 import { Typography } from '@material-ui/core'
 import '../export/export-results-dialog.css';
 
