@@ -19,10 +19,8 @@ describe('GlobalSearchHandler', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants: {
-					env: {
-						GAME_CHANGER_OPTS: {downloadLimit: 1000},
-						GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-					}
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 				},
 				dataLibrary: {},
 				dataTracker: {},
@@ -34,7 +32,8 @@ describe('GlobalSearchHandler', function () {
 							return Promise.resolve({ hits: [], totalCount: 0, count: 0 });
 						}
 					}
-				}
+				},
+				redisDB: {}
 			};
 			const target = new GlobalSearchHandler(opts);
 

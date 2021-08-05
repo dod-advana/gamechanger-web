@@ -138,8 +138,12 @@ const GCAccordion = (props) => {
 	)
 }
 
+GCAccordion.defaultProps = {
+	expanded: false
+}
+
 GCAccordion.propTypes = {
-	expanded: PropTypes.bool.isRequired,
+	expanded: PropTypes.bool,
 	header: PropTypes.string.isRequired,
 	children: PropTypes.element,
 	backgroundColor: PropTypes.string,

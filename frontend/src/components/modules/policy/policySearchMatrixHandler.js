@@ -118,15 +118,17 @@ const handleSelectAllOrgs = (state, dispatch) => {
 		newSearchSettings.specificOrgsSelected = false;
 		newSearchSettings.allOrgsSelected = true;
 		let runSearch = false;
+		let runGraphSearch = false;
 		Object.keys(state.searchSettings.orgFilter).forEach(org => {
 			if(newSearchSettings.orgFilter[org]){
 				newSearchSettings.isFilterUpdate = true;
 				newSearchSettings.orgUpdate = true;
 				runSearch = true;
+				runGraphSearch = true;
 			}
 			newSearchSettings.orgFilter[org] = false;
 		});
-		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch, runGraphSearch});
 	}
 }
 
@@ -139,7 +141,7 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	};
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings.orgUpdate = true;
-    setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true});
+    setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
@@ -221,7 +223,8 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							})}
 						</FormGroup>
 						{state.searchSettings.specificOrgsSelected &&
-							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a>
+							// eslint-disable-next-line
+							<a href={'#'} style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
 						}
 					</>
 					) : (
@@ -296,16 +299,18 @@ const handleSelectAllTypes = (state, dispatch) => {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificTypesSelected = false;
 		newSearchSettings.allTypesSelected = true;
+		let runGraphSearch = false;
 		let runSearch = false;
 		Object.keys(state.searchSettings.typeFilter).forEach(type => {
 			if(newSearchSettings.typeFilter[type]){
 				newSearchSettings.isFilterUpdate = true;
 				newSearchSettings.typeUpdate = true;
 				runSearch = true;
+				runGraphSearch = true;
 			}
 			newSearchSettings.typeFilter[type] = false;
 		});
-		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch, runGraphSearch});
 	}
 }
 
@@ -324,7 +329,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	} else {
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings.typeUpdate = true;
-		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
+		setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	}
 	
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TypeFilterToggle', event.target.name, event.target.value ? 1 : 0);
@@ -397,6 +402,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					})}
 				</FormGroup>
 				{state.searchSettings.specificTypesSelected &&
+					// eslint-disable-next-line
 					<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
 				}
 			</>
@@ -464,9 +470,10 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 const handleSelectPublicationDateAllTime = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	const runSearch = !state.publicationDateAllTime;
+	const runGraphSearch = !state.publicationDateAllTime;
 	newSearchSettings.publicationDateAllTime = true;
 	newSearchSettings.publicationDateFilter = [null, null];
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch,runGraphSearch });
 }
 
 const handleSelectPublicationDateSpecificDates = (state, dispatch) => {
@@ -506,8 +513,10 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 		temp[1] = date
 	}
 	let runSearch = false;
+	let runGraphSearch = false;
 	if(!isNaN(temp[0]?.getTime()) && !isNaN(temp[1]?.getTime())) {
 		runSearch = true;
+		runGraphSearch = true;
 		newSearchSettings.isFilterUpdate = true;
 	}
 
@@ -516,7 +525,7 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	} else {
 		newSearchSettings.accessDateFilter = temp;
 	}
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch, runGraphSearch });
 }
 
 const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
@@ -643,7 +652,7 @@ const handleRevokedChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.includeRevoked = event.target.checked;
 	newSearchSettings.isFilterUpdate = true;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true });
+	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true });
 }
 
 const renderStatus = (state, dispatch, classes) => {
@@ -945,7 +954,7 @@ const PolicySearchMatrixHandler = {
 					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runSearch: true });
+						setState(dispatch, { runSearch: true, runGraphSearch: true });
 					}}
 				>
 					<span style={{

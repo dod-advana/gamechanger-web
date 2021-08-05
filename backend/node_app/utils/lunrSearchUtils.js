@@ -5,7 +5,7 @@ const parse = (input) => {
 	result = replaceNots(result);
 	result = replaceExactSearch(result);
 
-	return result;
+	return `${result} ${input}`;
 };
 
 const replaceExactSearch = (input) => {

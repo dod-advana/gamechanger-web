@@ -10,7 +10,6 @@ const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
 	modularSearch: '/api/gameChanger/modular/search',
 	modularExport: '/api/gameChanger/modular/export',
-	gameChangerDocumentSearchDownloadPOST: '/api/gameChanger/documentSearch/download',
 	gameChangerSemanticSearchDownloadPOST: '/api/gameChanger/semanticSearch/download',
 	gameChangerGraphSearchPOST: '/api/gameChanger/modular/graphSearch',
 	graphQueryPOST: '/api/gameChanger/modular/graphQuery',
@@ -181,14 +180,6 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data, options);
 	}
 
-	documentSearchDownloadPOST = async (data) => {
-		const url = endpoints.gameChangerDocumentSearchDownloadPOST;
-		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
-
-		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
-		return axiosPOST(this.axios, url, data, options);
-	}
-
 	createSearchHistoryCache = async () => {
 		const url = endpoints.gcCreateSearchHistoryCache;
 		return axiosGET(this.axios, url);
@@ -284,7 +275,7 @@ export default class GameChangerAPI {
 
 	dataStorageDownloadGET = async (fileName, highlightText, pageNumber, isClone = false, cloneData = {clone_name: 'gamechanger'}) => {
 		return new Promise((resolve, reject) => {
-			const s3Bucket = cloneData?.s3Bucket ?? 'advana-raw-zone';
+			const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 			
 			let filename = encodeURIComponent(`gamechanger${cloneData.clone_name !== 'gamechanger' ? `/projects/${cloneData.clone_name}` : ''}/pdf/${fileName}`)
 
@@ -306,8 +297,8 @@ export default class GameChangerAPI {
 		});
 	}
 
-	thumbnailStorageDownloadPOST = async ({filenames, folder}) => {
-		const s3Bucket = 'advana-raw-zone';
+	thumbnailStorageDownloadPOST = async (filenames, cloneData) => {
+		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 		const url = endpoints.thumbnailStorageDownloadPOST;
 		return axiosPOST(this.axios, url, {filenames, folder, dest: s3Bucket}, {timeout: 30000})
 	}

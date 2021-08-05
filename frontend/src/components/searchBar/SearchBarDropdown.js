@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { DropdownWrapper, Row, IconTextWrapper, Beta, DeleteButton, SuggestionText, SubText } from './SearchBarStyledComponents';
+import { DropdownWrapper, Row, IconTextWrapper, DeleteButton, SuggestionText, SubText } from './SearchBarStyledComponents';
 
 const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 	if( rowData.length < 1){
@@ -12,8 +12,6 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 		switch(rowType){
 			case 'autocorrect':
 				return;
-			case 'presearchFile':
-				return <SubText>File</SubText>
 			case 'presearchTitle':
 				return <SubText>Title</SubText>
 			case 'predictions':
@@ -82,8 +80,6 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 
 				}, [])
 			}
-
-			<Beta>(Beta)</Beta>
 
 		</DropdownWrapper>
 	)
