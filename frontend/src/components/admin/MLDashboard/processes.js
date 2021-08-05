@@ -3,7 +3,7 @@ import ReactTable from 'react-table';
 
 import ProgressBar from './util/ProgressBar';
 import {TableRow, BorderDiv} from './util/styledDivs';
-import {styles} from '../GCAdminStyles';
+import {styles} from '../util/GCAdminStyles';
 
 import "react-table/react-table.css";
 import './index.scss';

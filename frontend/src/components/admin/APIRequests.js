@@ -6,7 +6,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import GCAccordion from "../common/GCAccordion";
 import GCButton from "../common/GCButton";
 import { trackEvent } from '../telemetry/Matomo';
-import {styles, TableRow} from './GCAdminStyles';
+import {styles, TableRow} from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 

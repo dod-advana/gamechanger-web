@@ -5,7 +5,7 @@ import _ from "underscore";
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCButton from "../../common/GCButton";
 import { trackEvent } from '../../telemetry/Matomo';
-import {styles, TableRow} from '../GCAdminStyles';
+import {styles, TableRow} from '../util/GCAdminStyles';
 import AdminModal from './AdminModal';
 
 const gameChangerAPI = new GameChangerAPI();

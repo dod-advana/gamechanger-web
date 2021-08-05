@@ -5,7 +5,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import GCTrendingBlacklist from '../HomepageEditor/GCTrendingBlacklist';
 import GCButton from "../common/GCButton";
-import {styles} from './GCAdminStyles';
+import {styles} from '../util/GCAdminStyles';
 
 /**
  * 
