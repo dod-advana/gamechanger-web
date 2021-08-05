@@ -84,7 +84,7 @@ class ModularGameChangerController {
 				});
 			}
 			c.forEach(clone => {
-				clone.can_edit = clone.clone_name !== 'gamechanger';
+				clone.can_edit = true;
 			});
 			res.status(200).send(c);
 		}).catch((e) => {
