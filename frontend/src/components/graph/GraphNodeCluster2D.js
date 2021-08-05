@@ -74,7 +74,7 @@ const styles = {
 
 const useStyles = makeStyles({
 	root: {
-		zIndex: '1000 !important'
+		zIndex: '1000 !important',
 	},
 });
 
@@ -652,7 +652,6 @@ export default function GraphNodeCluster2D(props) {
 	
 	const renderNodeGroupMenu = () => {
 		const nodesInGroup = graphData.nodes.filter(node => {return node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel})
-		console.log(nodesInGroup)
 		return (
 			<Popover
 				onClose={() => handleCloseGroupNodeMenu()}
@@ -670,7 +669,12 @@ export default function GraphNodeCluster2D(props) {
 					root: classes.root
 				}}
 			>
-				<div style={{padding: '0px 15px 10px'}}>
+				<div style={{
+					padding: '0px 15px 10px',
+					border: '1px solid lightgray',
+					borderRadius: '6px',
+					backgroundColor: 'rgba(255, 255, 255, 0.9)'
+				}}>
 					<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 						<CloseButton onClick={() => handleCloseGroupNodeMenu()}>
 							<CloseIcon fontSize="small"/>
@@ -679,13 +683,14 @@ export default function GraphNodeCluster2D(props) {
 					<div style={{width: 250, margin: 5}}>
 						<div style={{margin: '16px 15px 0'}}>
 							<span style={{fontWeight: 'bold'}}>Nodes in Group</span>
-							<div style={{marginTop: 2, marginRight: 10, maxHeight: 400}}>
+							<div style={{marginTop: 2, marginRight: 10, maxHeight: 400, overflow: 'auto'}}>
 								{nodesInGroup.map(node => {
 									return (
 										<GCTooltip title={node.display_title_s} arrow style={{zIndex: 99999}}>
 											<StyledNodeGroupNode
 												onClick={() => {
-												
+													handleNodeClick(node, null);
+													handleCloseGroupNodeMenu();
 												}}
 												onMouseEnter={() => {
 													const ref = graphRefProp ? graphRefProp : graphRef;

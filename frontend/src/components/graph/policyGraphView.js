@@ -974,7 +974,6 @@ export default function PolicyGraphView(props) {
 			}
 		});
 		
-		console.log(resp)
 		
 		const graphData = resp.data;
 		const nodeIds = graph.nodes.map(node => {
