@@ -2,11 +2,11 @@ import React, {useState, useEffect} from 'react';
 import ReactTable from "react-table";
 import _ from "underscore";
 
-import GameChangerAPI from '../api/gameChanger-service-api';
-import GCButton from "../common/GCButton";
-import UOTToggleSwitch from "../common/GCToggleSwitch";
-import { trackEvent } from '../telemetry/Matomo';
-import {styles, TableRow} from './GCAdminStyles';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import GCButton from "../../common/GCButton";
+import UOTToggleSwitch from "../../common/GCToggleSwitch";
+import { trackEvent } from '../../telemetry/Matomo';
+import {styles, TableRow} from '../GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -16,9 +16,16 @@ const gameChangerAPI = new GameChangerAPI();
  */
 export default (props) => {
     // Component Properties
-    const {openCloneModal, storeCloneData, gcCloneTableData, getCloneData, setPageToView, setGCCloneTableData, setCloneTableMetaData} = props;
+    const {setPageToView} = props;
+    const [gcCloneTableData, setGCCloneTableData] = useState([]);
+    const [cloneTableMetaData, setCloneTableMetaData] = useState({stringFields: [], booleanFields: [], jsonFields: []});
+    const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
     // Component Methods
-    const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
+    const openCloneModal = (num=-99) =>{
+		setEditCloneID(num);
+        setShowCreateEditCloneModal(true);
+	}
+    const getCloneData = async () => {
         const tableData = [];
     
         const data = await gameChangerAPI.getCloneData();
@@ -57,12 +64,40 @@ export default (props) => {
                 }
             }
         });
+    }
     const deleteCloneData = async (id) => {
 		await gameChangerAPI.deleteCloneData(id);
 	}
+    useEffect(() => {
+		if (editCloneID >= 0) {
+			const filteredClones = _.filter(gcCloneTableData, clone => {
+				return clone.id === editCloneID;
+			});
+
+			const cloneToEdit = {...filteredClones[0] };
+
+			setEditCloneData(cloneToEdit);
+		} else {
+			setEditCloneData({});
+		}
+	}, [editCloneID,gcCloneTableData])
     useEffect(()=>{
         getCloneData();
     },[]);
+    useEffect(() => {
+
+		if (editCloneID >= 0) {
+			const filteredClones = _.filter(gcCloneTableData, clone => {
+				return clone.id === editCloneID;
+			});
+
+			const cloneToEdit = {...filteredClones[0] };
+
+			setEditCloneData(cloneToEdit);
+		} else {
+			setEditCloneData({});
+		}
+	}, [editCloneID,gcCloneTableData])
     // The table columns
     const columns = [
         {
