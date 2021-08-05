@@ -426,8 +426,7 @@ export default function PolicyGraphView(props) {
 		const { collections } = makeGraphCollections(graph);
 		setCollections(collections);
 		
-		const { filteredGraph, documentsFound, docOrgNumbersTmp, timeFound} = makeFilteredGraph(show2DView, graph, collections);
-		
+		const { filteredGraph, documentsFound, docOrgNumbersTmp, timeFound } = makeFilteredGraph(show2DView, graph, collections);
 		setFilteredGraph(filteredGraph);
 		setDocumentsFound(documentsFound);
 		setDocOrgNumbers(docOrgNumbersTmp);
