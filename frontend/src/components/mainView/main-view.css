@@ -6,11 +6,12 @@
 
 .topPublication {
     position: relative;
-    height: 210px;
+    height: 300px;
+    width: 215px;
     margin-left: 10px;
     cursor: pointer;
     border: 1px solid black;
-    
+    flex: 0 0 auto; 
 }
 
 .image {
@@ -40,6 +41,8 @@
     margin: 10px;
     font-family: 'Montserrat';
     font-weight: 600;
+    word-wrap    : break-word;
+    overflow-wrap: break-word;
 }
 
 .topPublication:hover .hover-overlay {

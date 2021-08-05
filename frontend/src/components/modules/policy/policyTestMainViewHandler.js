@@ -423,7 +423,7 @@ const PolicyMainViewHandler = {
 					<GameChangerThumbnailRow 
 						links={adminMajorPubs} 
 						title="Editor's Choice: Top Publications" 
-						width='100px' 
+						width='215px' 
 					>
 						{adminMajorPubs.map((pub) =>
 							<div className="topPublication"
@@ -434,14 +434,14 @@ const PolicyMainViewHandler = {
 									alt="thumbnail" 
 									title={pub.name}
 								/>
-								<div 
-									className="hover-overlay"
-									onClick={()=>{
-										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
-										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
-									}}
-								>
+									<div 
+										className="hover-overlay"
+										onClick={()=>{
+											trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+											window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+										}}
+									>
 									<div className="hover-text">{pub.name}</div>
 								</div>
 							</div>
