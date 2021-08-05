@@ -1,5 +1,4 @@
 const {HandlerFactory} = require('../factories/handlerFactory');
-const handlerFactory = new HandlerFactory();
 const CLONE_META = require('../models').clone_meta;
 const LOGGER = require('../lib/logger');
 
@@ -8,7 +7,7 @@ class ModularGameChangerController {
 		const {
 			logger = LOGGER,
 			clone_meta = CLONE_META,
-			handler_factory = handlerFactory,
+			handler_factory = new HandlerFactory(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -84,7 +83,7 @@ class ModularGameChangerController {
 				});
 			}
 			c.forEach(clone => {
-				clone.can_edit = clone.clone_name !== 'gamechanger';
+				clone.can_edit = true;
 			});
 			res.status(200).send(c);
 		}).catch((e) => {

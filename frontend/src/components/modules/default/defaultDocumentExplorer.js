@@ -18,7 +18,6 @@ import Pagination from 'react-js-pagination';
 import { trackEvent } from "../../telemetry/Matomo";
 import sanitizeHtml from 'sanitize-html';
 
-
 const gameChangerAPI = new GameChangerAPI()
 
 const SIDEBAR_TOGGLE_WIDTH = 20;
@@ -58,17 +57,20 @@ const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isCl
 	})
 }
 
+
 export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
 	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
-
 	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({ dataIdx: -1, pageHitIdx: -1 });
 	const [iframeLoading, setIframeLoading] = React.useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = React.useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
 	const [pdfLoaded, setPdfLoaded] = React.useState(false);
 	const [viewTogle, setViewTogle] = React.useState(false);
+	const [fileUrl, setFileUrl] = React.useState(null);
+	const [filename, setFilename] = React.useState(null);
+
 
 	const measuredRef = useCallback(node => {
 		if (node !== null) {
@@ -76,7 +78,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 			const rec = data[dataIdx];
 			if (rec) {
 				// const filepath = rec.filepath;
-				const filename = rec.filename;
+				
 				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 				const pageNumber = pageObj ? pageObj.pageNumber : 1;
 				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
@@ -89,15 +91,28 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				}
 			}
 		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]);
+	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]);
 
 	useEffect(() => {
+		const {dataIdx}  = iframePreviewLink;
+		const rec = data[dataIdx];
+			if (rec) {		
+				setFilename(rec.filename);
+				setFileUrl(rec.download_url_s);
+			}
+	}, [filename, data, iframePreviewLink]);
+
+	useEffect(() => {
+		
 		if (!collapseKeys) {
 			let initialCollapseKeys = {};
 			_.each(data, (d, k) => {
 				initialCollapseKeys[k] = false;
+
 			})
 			setCollapseKeys(initialCollapseKeys);
+			
+			
 		}
 	}, [data, collapseKeys]);
 
@@ -140,23 +155,27 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	 		dataIdx: key
 	 	});
 	}
-
+	
 	function handlePdfOnLoadStart () {
+		
 		if (!iframeLoading && !pdfLoaded){
 			const { dataIdx } = iframePreviewLink;
 			const rec = data[dataIdx];
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
-					setPdfLoaded(true);
+						handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
+						setPdfLoaded(true);
+					
 				}
 			} catch(err) {
 				console.log(err);
 				console.log('Doc Explorer: failed to load pdf')
 			}
 		}
+		
 	}
+
 	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
 	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) || [];
 	const previewDataReflist = (data.length > 0 && data[iframePreviewLink.dataIdx] && getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) || [];
@@ -184,8 +203,8 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 }
 
 	return (
-		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
-			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+		<div className="row" style={{ height: 'calc(100% - 62px)', marginTop: '10px' }}>
+			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
 				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{
 						totalCount ?
@@ -219,8 +238,9 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				{!loading && _.map(data, (item, key) => {
 					const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
 					const displayTitle = item.title === "NA" ? `${item.doc_type} ${item.doc_num}` : `${item.doc_type} ${item.doc_num} - ${item.title}` ;
-					// let contextHtml = item.context;
-					// contextHtml = contextHtml.replace(/<em>/g, '<span class="highlight-search-demo">').replace(/<\/em>/g, '</span>') + '...';
+					
+					
+
 					if (item.type === 'document'){
 						return <div key={key}>
 						<div className="searchdemo-modal-result-header" onClick={(e) => {
@@ -265,9 +285,9 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 					}
 				})}
 			</div>
-			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
-				<div style={{ display: 'flex', width: '100%', height: '94%', flexDirection: 'column' }}>
-					<div className="searchdemo-vertical-bar-toggle" style={leftBarExtraStyles} onClick={() => handleLeftPanelToggle()}>
+			<div className={`col-xs-${iframePanelSize}`} style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}>
+				<div style={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column' }}>
+					<div className="searchdemo-vertical-bar-toggle" style={{...leftBarExtraStyles, bottom:'0px'}} onClick={() => handleLeftPanelToggle()}>
 						<i
 							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
@@ -278,12 +298,23 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
 						/>
 					</div>
-					{!iframeLoading && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}
-					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: '100%' }}>
-						<iframe className="aref" id={'docPdfViewer'} onLoad={handlePdfOnLoadStart} ref={measuredRef} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} title="pdf" width="100%" height="100%%"></iframe>
+					{!iframeLoading && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}				
+					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: "100%" }}>
+						<div style={{height: '100%'}}>
+							{filename && filename.endsWith('pdf') &&
+	
+								<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} width="100%" height="100%%"></iframe>
+							}
+							
+							{filename && filename.endsWith('html') &&
+	
+								<iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}}></iframe>
+							}
+						</div>
 					</div>
+
 					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
-					<div className="searchdemo-vertical-bar-toggle" style={rightBarExtraStyles} onClick={() => handleRightPanelToggle()}>
+					<div className="searchdemo-vertical-bar-toggle" style={{...rightBarExtraStyles, bottom:'0px'}} onClick={() => handleRightPanelToggle()}>
 						<i
 							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
@@ -297,7 +328,7 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 				</div>
 
 			</div>
-            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '94%', overflow: 'scroll' }}>
+            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
                 <SimpleTable tableClass={'magellan-table'}
                     zoom={0.8}
                     headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
@@ -321,3 +352,4 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 		</div>
 	);
 }
+

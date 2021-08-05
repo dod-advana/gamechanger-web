@@ -82,6 +82,7 @@ const GameChangerSearchBar = (props) => {
 	const { context  } = props;
 	const {state, dispatch} = context;
 	const isEDA = state.cloneData.clone_name === 'eda';
+	const isGlobalSearch = state.cloneData.clone_name === 'globalSearch';
 	const isGamechanger = state.cloneData.clone_name === 'gamechanger';
 	const classes = useStyles();
 	const useDebounce = (value, delay) => {
@@ -101,7 +102,6 @@ const GameChangerSearchBar = (props) => {
 
 	const [userSearchHistory, setUserSearchHistory] = useState([]);
 	const [autocorrect, setAutocorrect] = useState([]);
-	const [presearchFile, setPresearchFile] = useState([]);
 	const [presearchTitle, setPresearchTitle] = useState([]);
 	const [presearchTopic, setPresearchTopic] = useState([]);
 	const [presearchOrg, setPresearchOrg] = useState([]);
@@ -142,7 +142,6 @@ const GameChangerSearchBar = (props) => {
 				const index = state.cloneData?.clone_data?.esCluster ?? '';
 				const { data } = await gameChangerAPI.getTextSuggestion({ index, searchText: value });
 				setAutocorrect(data?.autocorrect?.map(item => ({ text: item })) ?? []);
-				setPresearchFile(data?.presearchFile?.map(item => ({ text: item })) ?? [])
 				setPresearchTitle(data?.presearchTitle?.map(item => ({ text: item })) ?? []);
 				setPresearchTopic(data?.presearchTopic?.map(item => ({ text: item })) ?? []);
 				setPresearchOrg(data?.presearchOrg?.map(item => ({ text: item })) ?? []);
@@ -152,10 +151,10 @@ const GameChangerSearchBar = (props) => {
 			}
 		}
 		
-		if (state.cloneData?.clone_name !== 'globalSearch') {
+		if (!isGlobalSearch) {
 			debouncedFetchSearchSuggestions(debouncedSearchTerm);
 		}
-	}, [state.cloneData, debouncedSearchTerm ]); // run when debounce value changes;
+	}, [state.cloneData, debouncedSearchTerm, isGlobalSearch]); // run when debounce value changes;
 
 	useEffect(() => {
     function onKeyDown(e) {
@@ -275,7 +274,6 @@ const GameChangerSearchBar = (props) => {
 	const clearLiveSuggestions = () => {
 		setAutocorrect([]);
 		setPredictions([]);
-		setPresearchFile([]);
 		setPresearchOrg([]);
 		setPresearchTopic([]);
 		setPresearchTitle([]);
@@ -320,21 +318,6 @@ const GameChangerSearchBar = (props) => {
 					rows: rows,
 					handleRowPressed: handleRowPressed,
 					rowType: 'autocorrect'
-				});
-			}
-			if (text.length > 0 && presearchFile.length > 0) {
-				const rows = [];
-				presearchFile.forEach(o => {
-					if(textArray.findIndex(item => item === o.text.toLowerCase()) === -1){ // if current item is not in textArray
-						rows.push(o);
-						textArray.push(o.text.toLowerCase());
-					}
-				});
-				data.push({
-					IconComponent: Search,
-					rows: rows,
-					handleRowPressed: handleRowPressed,
-					rowType: 'presearchFile'
 				});
 			}
 			if (text.length > 0 && presearchTitle.length > 0) {
@@ -447,7 +430,6 @@ const GameChangerSearchBar = (props) => {
 		debouncedSearchTerm,
 		userSearchHistory,
 		autocorrect,
-		presearchFile,
 		presearchTitle,
 		presearchTopic,
 		presearchOrg,
@@ -476,7 +458,7 @@ const GameChangerSearchBar = (props) => {
 					id="gcSearchInput"
 				/>
 
-				{!isEDA &&
+				{(!isEDA && !isGlobalSearch) &&
 					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement='top' arrow>
 						<button
 							type="button"
@@ -511,16 +493,20 @@ const GameChangerSearchBar = (props) => {
 				<i className="fa fa-search" />
 			</SearchButton>
 
-			<GCButton
-			onClick={()=>{
-				getUserData(dispatch);
-				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-				clearDashboardNotification('total', state, dispatch);
-			}}
-			style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
-			>
-				<ConstrainedIcon src={UserIcon} />
-			</GCButton>
+			{!isGlobalSearch ?
+				<GCButton
+					onClick={()=>{
+						getUserData(dispatch);
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+						clearDashboardNotification('total', state, dispatch);
+					}}
+					style={{height: 50, width: 60, minWidth:'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor:'#131E43', border:'#131E43'}}
+				>
+					<ConstrainedIcon src={UserIcon} />
+				</GCButton>
+				:
+				<div style={{ width: 60, margin: '0 0 0 4%' }} />
+			}
 
 			<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
 				open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
