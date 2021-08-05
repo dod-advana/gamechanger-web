@@ -40,7 +40,7 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 }
 
-const DefaultSearchHandler = {
+const SimpleSearchHandler = {
 	async handleSearch(state, dispatch) {
 		setState(dispatch, {runSearch: false});
 		
@@ -448,4 +448,4 @@ const DefaultSearchHandler = {
 	},
 };
 
-export default DefaultSearchHandler;
+export default SimpleSearchHandler;
