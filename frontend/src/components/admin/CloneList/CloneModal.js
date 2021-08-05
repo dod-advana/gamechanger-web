@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import _ from "underscore";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import CloseIcon from "@material-ui/icons/Close";
 
 import GCButton from "../common/GCButton";
 import {styles} from './GCAdminStyles';
@@ -9,7 +10,7 @@ import {styles} from './GCAdminStyles';
  * 
  * @class CloneModal
  */
-export default (props) => {
+export default ({showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
     const [editCloneID, setEditCloneID] = useState(-99);
 	const [editCloneData, setEditCloneData] = useState({});
     const closeCloneModal = () => {
