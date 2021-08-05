@@ -2,7 +2,6 @@ import React from 'react';
 import { Tooltip} from "@material-ui/core";
 import {ConstrainedIcon} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
-import _ from "underscore";
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';

@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import ReactTable from "react-table";
-import _ from "underscore";
 import {Snackbar} from "@material-ui/core";
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCAccordion from "../../common/GCAccordion";

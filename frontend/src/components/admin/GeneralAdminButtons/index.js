@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Paper from 'material-ui/Paper';
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import {Link } from "@material-ui/core";
+
+import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';
 import {styles} from '../util/GCAdminStyles';
 import UOTAlert from '../../common/GCAlert';

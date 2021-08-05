@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from 'react';
-import _ from "underscore";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
