@@ -14,7 +14,7 @@ import {
 	getTrackingNameForFactory
 } from '../../gamechangerUtils';
 import styled from 'styled-components';
-import {FormControl, Input, InputLabel} from '@material-ui/core';
+import {FormControl, Input, InputLabel, Popover} from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
@@ -22,6 +22,9 @@ import GCTooltip from '../common/GCToolTip';
 import {SvgIcon} from 'material-ui';
 import {trackEvent} from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
+import CloseIcon from '@material-ui/icons/Close';
+import GCButton from '../common/GCButton';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const NODE_ALPHA = 1;
 const HIDDEN_NODE_ALPHA = 0.08;
@@ -68,6 +71,28 @@ const styles = {
 		cursor: 'pointer'
 	},
 }
+
+const useStyles = makeStyles({
+	root: {
+		zIndex: '1000 !important'
+	},
+});
+
+const CloseButton = styled.div`
+	padding: 6px;
+	background-color: white;
+	border-radius: 5px;
+	color: #8091A5 !important;
+	border: 1px solid #B0B9BE;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: .4;
+	position: absolute;
+	right: 15px;
+	top: 15px;
+`;
 
 const StyledMenu = styled.nav`
   display: flex;
@@ -179,6 +204,19 @@ export const StyledLegendClickable = styled.div`
 	}
 `;
 
+const StyledNodeGroupNode = styled.div`
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	transition: opacity 0.3s ease-in-out;
+	border-radius: 6px;
+	
+	&:hover {
+		background: rgba(222, 235, 255, 0.5);
+		opacity: 1;
+	}
+`;
+
 const EdgeLegendItem = (props) => {
 	
 	const {
@@ -260,11 +298,15 @@ export default function GraphNodeCluster2D(props) {
 		handleSetCommunityView = null,
 		cloneData,
 		zoom = 1,
+		nodeGroupMenuOpenProp = undefined,
 		nodeGroupMenuTargetProp = undefined,
-		nodeGroupMenuLabelProp = '',
+		nodeGroupMenuLabelProp = undefined,
+		closeGroupNodeMenu = undefined
 	} = props;
 	
 	const graphRef = useRef();
+	
+	const classes = useStyles();
 	
 	const [shouldRunSimulation, setShouldRunSimulation] = React.useState(true);
 	const [highlightNodes, setHighlightNodes] = React.useState(new Set());
@@ -289,8 +331,8 @@ export default function GraphNodeCluster2D(props) {
 	
 	const [legendData, setLegendData] = React.useState({});
 	const [shouldCenter, setShouldCenter] = React.useState(true)
-	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(nodeGroupMenuTargetProp)
-	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState(nodeGroupMenuLabelProp)
+	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(null)
+	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('')
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false)
 	
 	const [dagMode, setDagMode] = React.useState(false);
@@ -303,20 +345,6 @@ export default function GraphNodeCluster2D(props) {
 		setDegreeConnected({ 0: [], 1: [], 2: [] });
 		setEdgeLabels({});
 	}, []);
-	
-	useEffect(() => {
-		if (nodeGroupMenuTargetProp !== nodeGroupMenuTarget || nodeGroupMenuLabelProp !== nodeGroupMenuLabel) {
-			if (nodeGroupMenuTargetProp === null || nodeGroupMenuLabelProp === '') {
-				setNodeGroupMenuOpen(false);
-				setNodeGroupMenuTarget(null);
-				setNodeGroupMenuLabel('');
-			} else {
-				setNodeGroupMenuOpen(true);
-				setNodeGroupMenuTarget(nodeGroupMenuTargetProp);
-				setNodeGroupMenuLabel(nodeGroupMenuLabelProp);
-			}
-		}
-	}, [nodeGroupMenuTargetProp, nodeGroupMenuLabelProp, nodeGroupMenuOpen, nodeGroupMenuTarget, nodeGroupMenuLabel])
 	
 	useEffect(() => {
 		const legendData = {};
@@ -623,7 +651,68 @@ export default function GraphNodeCluster2D(props) {
 	}
 	
 	const renderNodeGroupMenu = () => {
-		
+		const nodesInGroup = graphData.nodes.filter(node => {return node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel})
+		console.log(nodesInGroup)
+		return (
+			<Popover
+				onClose={() => handleCloseGroupNodeMenu()}
+				id={'graph-legend-node-group'}
+				open={nodeGroupMenuOpenProp || nodeGroupMenuOpen} anchorEl={nodeGroupMenuTargetProp || nodeGroupMenuTarget}
+				anchorOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'left',
+				}}
+				classes ={{
+					root: classes.root
+				}}
+			>
+				<div style={{padding: '0px 15px 10px'}}>
+					<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+						<CloseButton onClick={() => handleCloseGroupNodeMenu()}>
+							<CloseIcon fontSize="small"/>
+						</CloseButton>
+					</div>
+					<div style={{width: 250, margin: 5}}>
+						<div style={{margin: '16px 15px 0'}}>
+							<span style={{fontWeight: 'bold'}}>Nodes in Group</span>
+							<div style={{marginTop: 2, marginRight: 10, maxHeight: 400}}>
+								{nodesInGroup.map(node => {
+									return (
+										<GCTooltip title={node.display_title_s} arrow style={{zIndex: 99999}}>
+											<StyledNodeGroupNode
+												onClick={() => {
+												
+												}}
+												onMouseEnter={() => {
+													const ref = graphRefProp ? graphRefProp : graphRef;
+													ref.current.centerAt(node.x, node.y, 500);
+													handleNodeHover(node);
+												}}
+												onMouseLeave={() => {
+													handleNodeHover(null);
+												}}
+											>
+												{`${node.doc_type} ${node.doc_num}`}
+											</StyledNodeGroupNode>
+										</GCTooltip>
+									)
+								})}
+							</div>
+						</div>
+					</div>
+				</div>
+			</Popover>
+		)
+	}
+	
+	const handleCloseGroupNodeMenu = closeGroupNodeMenu ? closeGroupNodeMenu : () => {
+		setNodeGroupMenuOpen(false);
+		setNodeGroupMenuTarget(null);
+		setNodeGroupMenuLabel('');
 	}
 	
 	/**
@@ -1166,6 +1255,6 @@ export default function GraphNodeCluster2D(props) {
 			}
 		</div>
 	)
-};
+}
 
 export const MemoizedNodeCluster2D = React.memo(GraphNodeCluster2D);

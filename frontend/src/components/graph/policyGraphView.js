@@ -346,6 +346,10 @@ export default function PolicyGraphView(props) {
 	const [nodeRelSize, setNodeRelSize] = React.useState(5);
 	const [communityView, setCommunityView] = React.useState(false);
 	
+	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('');
+	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(null);
+	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
+	
 	useEffect(() => {
 		if (!graphData || graphData.nodes?.length <= 0) return;
 		setContextOpen(false);
@@ -1189,7 +1193,7 @@ export default function PolicyGraphView(props) {
 						<GCTooltip key={key} title={`${docOrgNumbers[key]} node${docOrgNumbers[key] > 1 ? 's' : ''} associated`} arrow enterDelay={30}>
 							<StyledLegendClickable
 								key={legendData[key].name}
-								onClick={() => handleLegendNodeClick(key)}
+								onClick={(event) => handleLegendNodeClick(event.target, key)}
 								typeSelected={orgTypeSelected}
 								type={key}
 							>
@@ -1211,9 +1215,25 @@ export default function PolicyGraphView(props) {
 		);
 	}
 	
-	const handleLegendNodeClick = (legendKey) => {
+	const handleLegendNodeClick = (target, legendKey) => {
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphLegendClicked', legendKey, legendKey !== orgTypeSelected);
 		setOrgTypeSelected(legendKey === orgTypeSelected ? null : legendKey);
+		if (nodeGroupMenuOpen){
+    		setNodeGroupMenuOpen(false);
+    		setNodeGroupMenuTarget(null);
+    		setNodeGroupMenuLabel('');
+		} else {
+    		setNodeGroupMenuOpen(true);
+    		setNodeGroupMenuTarget(target);
+    		setNodeGroupMenuLabel(legendKey);
+		}
+	}
+	
+	const closeGroupNodeMenu = () => {
+		setNodeGroupMenuOpen(false);
+		setNodeGroupMenuTarget(null);
+		setNodeGroupMenuLabel('');
+		setOrgTypeSelected(null);
 	}
 	
 	/**
@@ -1408,7 +1428,9 @@ export default function PolicyGraphView(props) {
 					resetGraph={() => resetGraph()} runSimulationProp={runSimulation} runningSearch={runningSearch}
 					nodeRelativeSizeProp={nodeRelSize} graphWidth={width} graphHeight={height} nodeHoverIDProp={nodeHoverID}
 					shouldCenterProp={shouldCenter} handleSetCommunityView={handleSetCommunityView} showCommunities={communityView}
-				    showBasic={showBasic} hierarchyView={hierarchyView} onZoom={handleOnZoom} zoom={zoom}
+				    showBasic={showBasic} hierarchyView={hierarchyView} onZoom={handleOnZoom} zoom={zoom} 
+					closeGroupNodeMenu={closeGroupNodeMenu} nodeGroupMenuOpenProp={nodeGroupMenuOpen}
+					nodeGroupMenuTargetProp={nodeGroupMenuTarget} nodeGroupMenuLabelProp={nodeGroupMenuLabel} setNodeHoverIDProp={setNodeHoverID}
 				/>
 			}
 			{showGraphCard && <div style={styles.graphCard}>
