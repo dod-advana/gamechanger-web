@@ -15,7 +15,7 @@ const gameChangerAPI = new GameChangerAPI();
  * @class GeneralAdminButtons
  */
 export default () => {
-	// State variables
+	// State variables for the buttons
     const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
@@ -408,8 +408,8 @@ export default () => {
 					/> : <i></i>
 				}
 			</div>
-			<TrendingBlackListModal />
-			<EditESIndexModal  />
+			<TrendingBlackListModal showTrendingBlacklistModal={showTrendingBlacklistModal} setShowTrendingBlacklistModal={setShowTrendingBlacklistModal} />
+			<EditESIndexModal showEditESIndexModal={showEditESIndexModal} setShowEditESIndexModal={setShowEditESIndexModal} />
 		</>
     )
 }

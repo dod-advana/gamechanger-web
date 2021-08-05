@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import _ from "underscore";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import CloseIcon from "@material-ui/icons/Close";
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 import GCButton from "../common/GCButton";
 import {styles} from './GCAdminStyles';
@@ -10,11 +11,9 @@ import {styles} from './GCAdminStyles';
  * 
  * @class CloneModal
  */
-export default ({showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
-    const [editCloneID, setEditCloneID] = useState(-99);
+export default ({storeCloneData, cloneToEdit, showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
 	const [editCloneData, setEditCloneData] = useState({});
     const closeCloneModal = () => {
-		setEditCloneID(-99);
 		setEditCloneData({});
 		setShowCreateEditCloneModal(false);
 	}
@@ -23,7 +22,13 @@ export default ({showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
     };
 
     
-
+	useEffect(() => {
+		if (showCreateEditCloneModal && cloneToEdit) {
+			setEditCloneData(cloneToEdit);
+		} else {
+			setEditCloneData({});
+		}
+	}, [setShowCreateEditCloneModal])
     return(
         <Dialog
                 open={showCreateEditCloneModal}
@@ -37,7 +42,7 @@ export default ({showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
             >
                 <DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneID === -99 ? 'Create Clone' : 'Edit Clone'}</Typography>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneData.id &&  editCloneData.id>0 ? 'Create Clone' : 'Edit Clone'}</Typography>
 					</div>
 					<IconButton aria-label="close" style={{ 
 						position: 'absolute',
