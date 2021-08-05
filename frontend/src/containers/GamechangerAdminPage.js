@@ -57,7 +57,8 @@ const DEFAULT_MODULE = {
 	navigation_module: 'default/defaultNavigationHandler',
 	search_module: 'simple/simpleSearchHandler',
 	title_bar_module: 'default/defaultTitleBarHandler',
-	s3_bucket: 'advana-raw-zone/bronze'
+	s3_bucket: 'advana-raw-zone/bronze',
+	config: {esIndex: ''}
 }
 
 const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'config'];
@@ -1209,15 +1210,14 @@ const GamechangerAdminPage = props => {
 		const handleChange = (event, key) => {
 			const tmpData = {...editCloneData};
 			const cloneErrors = {...editCloneDataErrors};
-			tmpData[key] = event.target.value
-			cloneErrors[key] = false;
 			
-			if (key === 'clone_name') {
-				tmpData['config'] = {esIndex: event.target.value};
-				tmpData['url'] = event.target.value;
-				cloneErrors['config'] = false;
-				cloneErrors['url'] = false;
+			if (key === 'config') {
+				tmpData[key] = JSON.parse(event.target.value);
+			} else {
+				tmpData[key] = event.target.value
 			}
+			
+			cloneErrors[key] = false;
 			
 			setEditCloneDataErrors(cloneErrors);
 			setEditCloneData(tmpData);
@@ -1264,9 +1264,9 @@ const GamechangerAdminPage = props => {
 						<TextField
 							label={getCloneModalTextDisplayName(field)}
 							id="margin-dense"
-							defaultValue={editCloneData ? JSON.stringify(editCloneData[field.key]) : ''}
-							value={editCloneData && editCloneData[field.key] ? JSON.stringify(editCloneData[field.key]) : '' }
-							onChange={event => {editCloneData[field.key] = event.target.value}}
+							defaultValue={editCloneData ? JSON.stringify(editCloneData[field.key]) : JSON.stringify(defaultModuleGivenKey(field.key))}
+							value={editCloneData && editCloneData[field.key] ? JSON.stringify(editCloneData[field.key]) : JSON.stringify(defaultModuleGivenKey(field.key)) }
+							onChange={event => handleChange(event, field.key)}
 							className={classes.textField}
 							helperText={field.display_name}
 							margin="dense"
