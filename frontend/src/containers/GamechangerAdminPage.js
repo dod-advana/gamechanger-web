@@ -54,7 +54,7 @@ const GamechangerAdminPage = props => {
 			case PAGES.general:
 				return <GeneralAdminButtons />;
 			case PAGES.cloneList:
-				return (<CloneList />);
+				return (<CloneList refreshClones={refreshClones} />);
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
 			case PAGES.mlDashboard:

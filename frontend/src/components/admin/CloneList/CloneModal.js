@@ -42,7 +42,7 @@ export default ({storeCloneData, cloneToEdit, showCreateEditCloneModal, setShowC
             >
                 <DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneData.id &&  editCloneData.id>0 ? 'Create Clone' : 'Edit Clone'}</Typography>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneData.id &&  editCloneData.id>0 ? 'Edit Clone' : 'Create Clone'}</Typography>
 					</div>
 					<IconButton aria-label="close" style={{ 
 						position: 'absolute',

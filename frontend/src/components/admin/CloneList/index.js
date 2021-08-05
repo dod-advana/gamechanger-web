@@ -15,7 +15,7 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class CloneList
  */
-export default () => {
+export default ({refreshClones}) => {
     // Component Properties
     const [gcCloneTableData, setGCCloneTableData] = useState([]);
     const [cloneTableMetaData, setCloneTableMetaData] = useState({stringFields: [], booleanFields: [], jsonFields: []});
@@ -34,6 +34,34 @@ export default () => {
 		}
 	
         setShowCreateEditCloneModal(true);
+	}
+    const storeCloneData = (editCloneData = null) => {
+		
+		if (!editCloneData) {
+			editCloneData = cloneToEdit;
+		}
+		
+		const cloneDataToStore = {...editCloneData};
+		
+		delete cloneDataToStore.id;
+		delete cloneDataToStore.createdAt;
+		delete cloneDataToStore.updatedAt;
+		
+			cloneTableMetaData.jsonFields.forEach(field => {
+				if (typeof cloneDataToStore[field.key] === 'string') {
+					cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
+				}
+			})
+		
+		gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
+			if (data.status === 200) {
+				setCloneTableMetaData({});
+				setShowCreateEditCloneModal(false);
+				getCloneData();
+				refreshClones();
+			}
+		});
+
 	}
     const getCloneData = async () => {
         const tableData = [];
@@ -188,6 +216,7 @@ export default () => {
                 />
             </div>
             <CloneModal 
+                storeCloneData = {storeCloneData}
                 cloneToEdit = {cloneToEdit}
                 showCreateEditCloneModal={showCreateEditCloneModal}
                 setShowCreateEditCloneModal={setShowCreateEditCloneModal}
