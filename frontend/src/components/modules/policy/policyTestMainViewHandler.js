@@ -25,6 +25,8 @@ import {
 } from "../../../gamechangerUtils";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
+import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
+
 
 const _ = require('lodash');
 
@@ -197,7 +199,7 @@ const PolicyMainViewHandler = {
 				if(buf.status === "fulfilled"){
 					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
 				} else {
-					pubs[idx].imgSrc = ' '
+					pubs[idx].imgSrc = DefaultSeal;
 				}
 			})
 			
@@ -227,7 +229,7 @@ const PolicyMainViewHandler = {
 					}
 				}
 				else {
-					crawlerSources[idx].imgSrc = ' '
+					crawlerSources[idx].imgSrc = DefaultSeal;
 				}
 			});
 			setState(dispatch, {crawlerSources});
