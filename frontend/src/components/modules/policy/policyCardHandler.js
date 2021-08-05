@@ -16,6 +16,7 @@ import {Popover, TextField} from "@material-ui/core";
 import {KeyboardArrowRight} from "@material-ui/icons";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {crawlerMappingFunc} from "../../../gamechangerUtils";
+import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 
 const styles = {
@@ -96,8 +97,8 @@ const StyledFrontCardHeader = styled.div`
 	font-family: Montserrat;
 	height: ${({listView}) => listView ? 'fit-content': '59px'};
 	padding: ${({listView}) => listView ? '0px': '5px'};
-	margin-left: ${({listView}) => listView ? '10px': '0px'};
-	margin-right: ${({listView}) => listView ? '10px': '0px'};
+	margin-left: ${({listView}) => listView ? '5px': '0px'};
+	margin-right: ${({listView}) => listView ? '5px': '0px'};
 	
 	.title-text-selected-favorite-div {
 		max-height: ${({listView}) => listView ? '': '50px'};
@@ -127,7 +128,6 @@ const StyledFrontCardHeader = styled.div`
 			font-family: "Noto Sans";
 			font-weight: 400;
 			font-size: ${CARD_FONT_SIZE}px;
-			margin-top: ${({listView}) => listView ? '2px': '0px'};
 		}
 	}
 	
@@ -180,6 +180,31 @@ const StyledFrontCardSubHeader = styled.div`
 			width: 25px;
     		margin: 0px 10px 0px 0px;
 		}
+	}
+
+	.list-sub-header-one {
+		color: ${({typeTextColor}) => typeTextColor ? typeTextColor : '#ffffff'};
+		background-color: ${({docTypeColor}) => docTypeColor ? docTypeColor : '#000000'};
+		width: 150px;
+		padding: 8px;
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		margin-top: 8px;
+		
+		img {
+			width: 16px;
+    		margin: 0px 10px 0px 0px;
+		}
+	}
+	
+	.list-sub-header-two {
+		width: 150px;
+		color: white;
+		padding: 2px 8px 8px;
+		background-color: ${({docOrgColor}) => docOrgColor ? docOrgColor : '#000000'};
+		font-size: 14px;
+		margin-top: 8px;
 	}
 `;
 
@@ -251,7 +276,7 @@ const StyledListViewFrontCardContent = styled.div`
 		
 		> .expanded-metadata {
 			border: 1px solid rgb(189, 189, 189);
-			border-left: 0px;
+			border-left: 1px solid darkgray;
 			min-height: 126px;
 			width: 100%;
 			
@@ -259,7 +284,6 @@ const StyledListViewFrontCardContent = styled.div`
 				font-size: ${CARD_FONT_SIZE}px;
 				line-height: 20px;
 				
-				background: #eceef1;
 				margin-bottom: 0;
 				height: 165px;
 				border-left: 0;
@@ -283,6 +307,7 @@ const StyledListViewFrontCardContent = styled.div`
 	.metadata {
 		display: flex;
 		height: 100%;
+		width: 100%;
 		flex-direction: column;
 		border-radius: 5px;
 		overflow: auto;
@@ -479,6 +504,12 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 	
 	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
 	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
+	const cardType = item.type;
+	const iconSrc = getTypeIcon(cardType);
+	const typeTextColor = getTypeTextColor(cardType);
+	
+	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
+
 	let publicationDate;
 	if(item.publication_date_dt !== undefined && item.publication_date_dt !== ''){
 		const currentDate = new Date(item.publication_date_dt);
@@ -507,17 +538,29 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						}
 					</div>
 				</GCTooltip>
-				<div className={'selected-favorite'}>
-					<div style={{display: "flex"}}>
-						{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-						{checkboxComponent(item.filename, item.display_title_s, idx)}
-						{favoriteComponent()}
+				<div style={{ display: 'flex' }}>
+					{docListView &&
+						<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={docTypeColor} docOrgColor={docOrgColor}>
+							<div className={'list-sub-header-one'}>
+								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo"/>}
+								{displayType}
+							</div>
+							<div className={'list-sub-header-two'}>
+								{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
+							</div>
+						</StyledFrontCardSubHeader>
+					}
+					<div className={'selected-favorite'}>
+						<div style={{display: "flex"}}>
+							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+							{checkboxComponent(item.filename, item.display_title_s, idx)}
+							{favoriteComponent()}
+						</div>
 					</div>
 				</div>
 			</div>
 			{docListView &&
 				<div className={'list-view-sub-header'}>
-					<p> {displayType} | {displayOrg} </p>
 					<p style={{ fontWeight: 400 }}>{`Published on: ${publicationDate ?? 'Unknown'}`}</p>
 				</div>
 			}
@@ -655,8 +698,6 @@ const PolicyCardHandler = {
 				 item,
 				 state,
 				 backBody,
-				 hitsExpanded,
-				 setHitsExpanded,
 				 hoveredHit,
 				 setHoveredHit,
 				 metadataExpanded,
@@ -687,26 +728,12 @@ const PolicyCardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						{item.pageHits.length > 0 &&
-							<button type="button" className={'list-view-button'}
-									onClick={() => {
-										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages');
-										setHitsExpanded(!hitsExpanded);
-									}}
-							>
-								<GCTooltip
-									title={'Date GAMECHANGER last verified this document against its originating source'}
-									placement='top' arrow>
-									<span className="buttonText">Page Hits</span>
-								</GCTooltip>
-								<i className={hitsExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-							</button>
-						}
-						{hitsExpanded && item.pageHits.length > 0 &&
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits).map((page, key) => {
-										return (
-											<div className={'page-hit'} key={key} style={{
+							<GCAccordion header={'PAGE HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>
+										{_.chain(item.pageHits).map((page, key) => {
+											return (
+												<div className={'page-hit'} key={key} style={{
 													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
 												}}
 												onMouseEnter={() => setHoveredHit(key) }
@@ -714,37 +741,29 @@ const PolicyCardHandler = {
 													e.preventDefault();
 													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
 												}}
-											>
-												<span>
-													{page.title && <span >{page.title}</span>}
-													{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
-												</span>
-												<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
-											</div>
-										);
-									}).value()}
+												>
+													<span>
+														{page.title && <span >{page.title}</span>}
+														{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
+													</span>
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
+									</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
 								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
+							</GCAccordion>
 						}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Document Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			} else if (state.listView && intelligentSearch) {
@@ -1088,7 +1107,6 @@ const PolicyCardHandler = {
 		getCardHeader: (props) => {
 			const {item, state, favoriteComponent} = props;
 			const displayTitle = item.name;
-			const cardType = 'Organization';
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={state.listView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
@@ -1114,11 +1132,6 @@ const PolicyCardHandler = {
 							</div>
 						</div>
 					</div>
-					{state.listView &&
-						<div className={'list-view-sub-header'}>
-							<p> {cardType} </p>
-						</div>
-					}
 				</StyledFrontCardHeader>
 			);
 		},
@@ -1147,9 +1160,7 @@ const PolicyCardHandler = {
 			const {
 				 item,
 				 state,
-				 backBody,
-				 metadataExpanded,
-				 setMetadataExpanded,
+				 backBody
 			} = props;
 			
 			if (state.listView) {
@@ -1166,22 +1177,13 @@ const PolicyCardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						{item.description && <p>{item.description}</p>}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Document Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			}else {
@@ -1347,11 +1349,6 @@ const PolicyCardHandler = {
 						{/*	</div>*/}
 						{/*</div>*/}
 					</div>
-					{state.listView &&
-						<div className={'list-view-sub-header'}>
-							<p> {displayTitle} </p>
-						</div>
-					}
 				</StyledFrontCardHeader>
 			);
 		},
@@ -1380,31 +1377,20 @@ const PolicyCardHandler = {
 			const {
 				 item,
 				 state,
-				 backBody,
-				 metadataExpanded,
-				 setMetadataExpanded,
+				 backBody
 			} = props;
 
 			if(state.listView){
 				return (
 					<StyledListViewFrontCardContent>
 						{item.information && <p>{item.information}</p>}
-						<button type="button" className={'list-view-button'}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ListViewInteraction', !metadataExpanded ? 'Expand metadata' : 'Collapse metadata');
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Topics Metadata</span>
-							<i className = {metadataExpanded ? "fa fa-chevron-up" : "fa fa-chevron-down"} aria-hidden="true"/>
-						</button>
-						{metadataExpanded &&
+						<GCAccordion header={'DOCUMENT METADATA'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							<div className={'metadata'}>
 								<div className={'inner-scroll-container'}>
 									{backBody}
 								</div>
 							</div>
-						}
+						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
 			}else {
