@@ -14,7 +14,7 @@ import {
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import defaultSearchHandler from "../default/defaultSearchHandler";
+import simpleSearchHandler from "../simple/simpleSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -295,7 +295,7 @@ const HermesSearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		const {searchText, resultsPage} = defaultSearchHandler.parseSearchURL(defaultState, url);
+		const {searchText, resultsPage} = simpleSearchHandler.parseSearchURL(defaultState, url);
 		return {searchText, resultsPage};
 	},
 
