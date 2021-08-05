@@ -1,25 +1,27 @@
-import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-import {ForceGraph2D} from "react-force-graph";
-import {backgroundWhite, gcOrange} from "../../components/common/gc-colors";
-import React, {useEffect, useRef} from "react";
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import {ForceGraph2D} from 'react-force-graph';
+import {backgroundWhite, gcOrange} from '../../components/common/gc-colors';
+import React, {useEffect, useRef} from 'react';
 import {
 	calcLinkControlPoints, draw2DArrows, EDGE_PATTERNS,
 	getLines,
 	getNodeColors,
 	getNodeOutlineColors, getTextColorBasedOnBackground, shuffleArray
-} from "../../graphUtils";
+} from '../../graphUtils';
 import {
 	convertHexToRgbA,
 	getLinkColor,
 	getTrackingNameForFactory
-} from "../../gamechangerUtils";
-import styled from "styled-components";
-import {FormControl, Input, InputLabel} from "@material-ui/core";
-import RefreshIcon from "@material-ui/icons/Refresh";
-import GCTooltip from "../common/GCToolTip";
-import {SvgIcon} from "material-ui";
-import {trackEvent} from "../telemetry/Matomo";
-import UOTToggleSwitch from "../common/GCToggleSwitch";
+} from '../../gamechangerUtils';
+import styled from 'styled-components';
+import {FormControl, Input, InputLabel} from '@material-ui/core';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import ZoomInIcon from '@material-ui/icons/ZoomIn';
+import ZoomOutIcon from '@material-ui/icons/ZoomOut';
+import GCTooltip from '../common/GCToolTip';
+import {SvgIcon} from 'material-ui';
+import {trackEvent} from '../telemetry/Matomo';
+import UOTToggleSwitch from '../common/GCToggleSwitch';
 
 const NODE_ALPHA = 1;
 const HIDDEN_NODE_ALPHA = 0.08;
@@ -124,6 +126,7 @@ const StyledBurger = styled.button`
   cursor: pointer;
   padding: 0;
   z-index: 99;
+  margin-top: 1px;
 
   &:focus {
     outline: none;
@@ -255,7 +258,8 @@ export default function GraphNodeCluster2D(props) {
 		showSettingsMenu = true,
 		showCommunities = false,
 		handleSetCommunityView = null,
-		cloneData
+		cloneData,
+		zoom = 1
 	} = props;
 	
 	const graphRef = useRef();
@@ -275,6 +279,7 @@ export default function GraphNodeCluster2D(props) {
 	const [linkDistance, setLinkDistance] = React.useState(20);
 	const [linkIterations, setLinkIterations] = React.useState(4);
 	const [nodeRelativeSize, setNodeRelativeSize] = React.useState(1);
+	const [zoomFactor, setZoomFactor] = React.useState(0.5);
 	const [nodeLabelColors, setNodeLabelColors] = React.useState({});
 	const [nodeLabelSelected, setNodeLabelSelected] = React.useState(null);
 	const [edgeLabelPatterns, setEdgeLabelPatterns] = React.useState({});
@@ -435,6 +440,17 @@ export default function GraphNodeCluster2D(props) {
 		if (event.k > zoomLimit) {
 			const ref = graphRefProp ? graphRefProp : graphRef;
 			ref.current.zoom(zoomLimit);
+		} else {
+		}
+	}
+	
+	const zoomInOut = (zoomIn) => {
+		const ref = graphRefProp ? graphRefProp : graphRef;
+		const newZoom = zoom + ((zoomIn ? 1 : -1) * zoomFactor);
+		if (newZoom > zoomLimit) {
+			ref.current.zoom(zoomLimit);
+		} else {
+			ref.current.zoom(newZoom);
 		}
 	}
 	
@@ -509,7 +525,7 @@ export default function GraphNodeCluster2D(props) {
 							return (
 								<div style={styles.legendRow} key={`${edgeLabelPatterns[label].label}-legend-item`}>
 									<EdgeLegendItem edgePattern={edgeLabelPatterns[label].pattern} height={10}
-													width={50}/>
+										width={50}/>
 									<div style={{marginLeft: '1em'}}>{edgeLabelPatterns[label].label}</div>
 								</div>
 							);
@@ -906,13 +922,27 @@ export default function GraphNodeCluster2D(props) {
 								rightLabel={'On'}
 								customColor={gcOrange}
 								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name),'GraphSettingsMenu', 'valueUpdated', 'DAGMode');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name),'GraphSettingsMenu', 'DAGMode', !dagMode ? 1 : 0);
 									setDagMode(!dagMode);
 									setShouldRunSimulation(true);
 								}}
 								leftLabelStyle={{ marginBottom: 0 }}
 								rightLabelStyle={{ marginBottom: 0 }}
 							/>
+						</div>
+					</form>
+				</div>
+				<div>
+					<i>Zoom Settings</i>
+					<form noValidate autoComplete="off">
+						<div className={'settings-item'}>
+							<FormControl className={'form-item-width'}>
+								<InputLabel htmlFor="zoom-settings">Zoom Factor</InputLabel>
+								<Input id="zoom-settings" value={zoomFactor} onChange={(event) => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'zoomFactor', Number(event.target.value));
+									setZoomFactor(Number(event.target.value));
+								}} />
+							</FormControl>
 						</div>
 					</form>
 				</div>
@@ -929,7 +959,7 @@ export default function GraphNodeCluster2D(props) {
 									rightLabel={'On'}
 									customColor={gcOrange}
 									onClick={() => {
-										trackEvent('GraphSettingsMenu', 'valueUpdated', 'showCommunities');
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'showCommunities', !showCommunities ? 1: 0);
 										handleSetCommunityView(!showCommunities)
 										setShouldRunSimulation(true);
 									}}
@@ -942,7 +972,7 @@ export default function GraphNodeCluster2D(props) {
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="node-size">Node Size</InputLabel>
 								<Input id="node-size" value={nodeRelativeSize} onChange={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'valueUpdated', 'NodeSize');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'NodeSize', Number(event.target.value));
 									handleUpdateNodeSize(Number(event.target.value))
 									setShouldRunSimulation(true);
 								}} />
@@ -957,7 +987,7 @@ export default function GraphNodeCluster2D(props) {
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="edge-thickness">Edge Thickness</InputLabel>
 								<Input id="edge-thickness" value={edgeThickness} onChange={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'valueUpdated', 'EdgeThickness');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'EdgeThickness', Number(event.target.value));
 									setEdgeThickness(Number(event.target.value));
 									setShouldRunSimulation(true);
 								}} />
@@ -972,7 +1002,7 @@ export default function GraphNodeCluster2D(props) {
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="charge-strength">Charge Strength</InputLabel>
 								<Input id="charge-strength" value={chargeStrength * -1} onChange={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'valueUpdated', 'ChargeStrength');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'ChargeStrength', Number(event.target.value));
 									setChargeStrength(Number(event.target.value) * -1);
 									setShouldRunSimulation(true);
 								}} />
@@ -982,7 +1012,7 @@ export default function GraphNodeCluster2D(props) {
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="link-distance">Link Distance</InputLabel>
 								<Input id="link-distance" value={linkDistance} onChange={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'valueUpdated', 'LinkDistance');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'LinkDistance', Number(event.target.value));
 									setLinkDistance(Number(event.target.value));
 									setShouldRunSimulation(true);
 								}} />
@@ -992,7 +1022,7 @@ export default function GraphNodeCluster2D(props) {
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="link-iterations">Link Iterations</InputLabel>
 								<Input id="link-iterations" value={linkIterations} onChange={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'valueUpdated', 'LinkIterations');
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphSettingsMenu', 'LinkIterations', Number(event.target.value));
 									setLinkIterations(Number(event.target.value));
 									setShouldRunSimulation(true);
 								}} />
@@ -1052,9 +1082,25 @@ export default function GraphNodeCluster2D(props) {
 					justifyContent: 'flex-end',
 					margin: '5px 0px 5px -10px'
 				}}>
+					<GCTooltip title="Zoom In" arrow>
+						<StyledRefresh onClick={() => {
+							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ZoomIn');
+							zoomInOut(true);
+						}}>
+							<ZoomInIcon fontSize="inherit" style={{fontSize: 26}}/>
+						</StyledRefresh>
+					</GCTooltip>
+					<GCTooltip title="Zoom Out" arrow>
+						<StyledRefresh onClick={() => {
+							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ZoomOut');
+							zoomInOut(false);
+						}}>
+							<ZoomOutIcon fontSize="inherit" style={{fontSize: 26}}/>
+						</StyledRefresh>
+					</GCTooltip>
 					<GCTooltip title="Recenter graph" arrow>
 						<StyledRefresh onClick={() => {
-							trackEvent('GraphButton', 'onClick', 'CenterGraph');
+							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'CenterGraph');
 							recenterGraph();
 						}}>
 							<SvgIcon>
@@ -1065,10 +1111,10 @@ export default function GraphNodeCluster2D(props) {
 					</GCTooltip>
 					<GCTooltip title="Reset graph" arrow>
 						<StyledRefresh onClick={() => {
-							trackEvent('GraphButton', 'onClick', 'ResetGraph');
+							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ResetGraph');
 							handleResetGraph();
 						}}>
-							<RefreshIcon fontSize="large"/>
+							<RefreshIcon fontSize="inherit" style={{fontSize: 26}}/>
 						</StyledRefresh>
 					</GCTooltip>
 					{settingsBurger()}

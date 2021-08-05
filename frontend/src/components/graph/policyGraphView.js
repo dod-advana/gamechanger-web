@@ -1,24 +1,24 @@
-import React, {useEffect, useRef} from "react";
-import {MemoizedNodeCluster2D, StyledLegendClickable} from "./GraphNodeCluster2D";
+import React, {useEffect, useRef} from 'react';
+import {MemoizedNodeCluster2D, StyledLegendClickable} from './GraphNodeCluster2D';
 import {
 	generateRandomColors, getLines,
 	getNodeOutlineColors,
 	getTextColorBasedOnBackground
-} from "../../graphUtils";
+} from '../../graphUtils';
 import {
 	convertHexToRgbA,
 	getDocTypeStyles, getLinkColor,
 	getTrackingNameForFactory,
 	typeColorMap
-} from "../../gamechangerUtils";
-import GCTooltip from "../common/GCToolTip";
-import {trackEvent} from "../telemetry/Matomo";
-import Config from "../../config/config";
-import styled from "styled-components";
-import GameChangerAPI from "../api/gameChanger-service-api";
+} from '../../gamechangerUtils';
+import GCTooltip from '../common/GCToolTip';
+import {trackEvent} from '../telemetry/Matomo';
+import Config from '../../config/config';
+import styled from 'styled-components';
+import GameChangerAPI from '../api/gameChanger-service-api';
 
-import {Card} from "../cards/GCCard";
-import {backgroundWhite} from "../common/gc-colors";
+import {Card} from '../cards/GCCard';
+import {backgroundWhite} from '../common/gc-colors';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -230,42 +230,42 @@ const filterGraphData = (nodes, edges) => {
 	const edgeToNodeCountMap = {};
 	
 	_.forEach(nodes, (node) => {
-			filteredGraph.nodes.push(node);
-			idToNodeMap[node.id] = node;
-			edgeToNodeCountMap[node.id] = 0;
+		filteredGraph.nodes.push(node);
+		idToNodeMap[node.id] = node;
+		edgeToNodeCountMap[node.id] = 0;
 			
-			const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
+		const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
 			
-			switch (node.label) {
-				case 'Entity':
-					if (docOrgNumbers.hasOwnProperty('Entity')) {
-						docOrgNumbers['Entity'] += 1;
-					} else {
-						docOrgNumbers['Entity'] = 1;
-					}
-					break;
-				case 'Topic':
-					if (docOrgNumbers.hasOwnProperty('Topic')) {
-						docOrgNumbers['Topic'] += 1;
-					} else {
-						docOrgNumbers['Topic'] = 1;
-					}
-					break;
-				case 'UKN_Document':
-					if (docOrgNumbers.hasOwnProperty('UKN_Document')) {
-						docOrgNumbers['UKN_Document'] += 1;
-					} else {
-						docOrgNumbers['UKN_Document'] = 1;
-					}
-					break;
-				default:
-					if (docOrgNumbers.hasOwnProperty(displayOrg)) {
-						docOrgNumbers[displayOrg] += 1;
-					} else {
-						docOrgNumbers[displayOrg] = 1;
-					}
-					break;
-			}
+		switch (node.label) {
+			case 'Entity':
+				if (docOrgNumbers.hasOwnProperty('Entity')) {
+					docOrgNumbers['Entity'] += 1;
+				} else {
+					docOrgNumbers['Entity'] = 1;
+				}
+				break;
+			case 'Topic':
+				if (docOrgNumbers.hasOwnProperty('Topic')) {
+					docOrgNumbers['Topic'] += 1;
+				} else {
+					docOrgNumbers['Topic'] = 1;
+				}
+				break;
+			case 'UKN_Document':
+				if (docOrgNumbers.hasOwnProperty('UKN_Document')) {
+					docOrgNumbers['UKN_Document'] += 1;
+				} else {
+					docOrgNumbers['UKN_Document'] = 1;
+				}
+				break;
+			default:
+				if (docOrgNumbers.hasOwnProperty(displayOrg)) {
+					docOrgNumbers[displayOrg] += 1;
+				} else {
+					docOrgNumbers[displayOrg] = 1;
+				}
+				break;
+		}
 	});
 
 	_.forEach(edges, (edge) => {
@@ -313,7 +313,8 @@ export default function PolicyGraphView(props) {
 		searchText = '',
 		showBasic = false,
 		hierarchyView = false,
-		detailsView = false
+		detailsView = false,
+		selectedDocuments = new Map()
 	} = props;
 	
 	const graph2DRef = useRef();
@@ -554,19 +555,19 @@ export default function PolicyGraphView(props) {
 				break;
 		}
 		
-		menuItems.push({ className: "fa fa-book fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
-				handleShowGraphCard(), false, 'showGraphCard'), tooltip: `Display the ${cardText} card`});
+		menuItems.push({ className: 'fa fa-book fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
+			handleShowGraphCard(), false, 'showGraphCard'), tooltip: `Display the ${cardText} card`});
 		
 		if (nodeLabel === 'Publication' && !notInOriginal) {
-			menuItems.push({ className: "fa fa-sitemap  fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
+			menuItems.push({ className: 'fa fa-sitemap  fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
 				showChildDocuments(), true, 'showChildDocuments'), tooltip: 'Display child documents'});
 		}
 		if (nodeLabel === 'Document' && !notInOriginal) {
-			menuItems.push({ className: "fa fa-address-card fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
+			menuItems.push({ className: 'fa fa-address-card fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
 				showEntitiesForNode(), true, 'showEntities'), tooltip: 'Display entity nodes for this document'});
 			if (Config.GAMECHANGER.SHOW_TOPICS) {
 				menuItems.push({
-					className: "fa fa-lightbulb-o fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
+					className: 'fa fa-lightbulb-o fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
 						showTopicsForNode(), true, 'showTopics'), tooltip: 'Display topic nodes for this document'
 				});
 			}
@@ -574,34 +575,34 @@ export default function PolicyGraphView(props) {
 		
 		if (!notInOriginal && nodeLabel === 'Document') {
 			menuItems.push({
-				className: "fa fa-code-fork fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
+				className: 'fa fa-code-fork fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
 					showReferencesForNode(false), true, 'showReference'), tooltip: 'Display reference nodes for this document'
 			});
 		}
 		
 		if (!notInOriginal && nodeLabel === 'UKN_Document') {
 			menuItems.push({
-				className: "fa fa-code-fork fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
+				className: 'fa fa-code-fork fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
 					showReferencesForNode(true), true, 'showReference'), tooltip: 'Display reference nodes for this document'
 			});
 		}
 		
-		menuItems.push({ className: "fa fa-unlock fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
-					lockNodeInPlace(null, false), true, 'lockUnlockNode'), tooltip: 'Unlock the node'});
-		menuItems.push({ className: "fa fa-eye-slash fa-2x", onClick: () => handleContextMenuButtonClicked(() =>
-					hideNode(), true, 'hideNode'), tooltip: 'Dismiss the node from the graph'});
+		menuItems.push({ className: 'fa fa-unlock fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
+			lockNodeInPlace(null, false), true, 'lockUnlockNode'), tooltip: 'Unlock the node'});
+		menuItems.push({ className: 'fa fa-eye-slash fa-2x', onClick: () => handleContextMenuButtonClicked(() =>
+			hideNode(), true, 'hideNode'), tooltip: 'Dismiss the node from the graph'});
 		
 		return (
 			<StyledCircularMenu style={myStyle}>
 				<div className={`circle ${contextOpen ? 'open' : null}`}>
-					<div className={"items"}>
+					<div className={'items'}>
 						{menuItems.map((item, idx) => {
-							const leftBack = (50 - 31*Math.cos(-0.5 * Math.PI - 2*(1/menuItems.length)*idx*Math.PI)).toFixed(4) + "%";
-							const topBack = (50 + 31*Math.sin(-0.5 * Math.PI - 2*(1/menuItems.length)*idx*Math.PI)).toFixed(4) + "%";
+							const leftBack = (50 - 31*Math.cos(-0.5 * Math.PI - 2*(1/menuItems.length)*idx*Math.PI)).toFixed(4) + '%';
+							const topBack = (50 + 31*Math.sin(-0.5 * Math.PI - 2*(1/menuItems.length)*idx*Math.PI)).toFixed(4) + '%';
 							return (
 								<GCTooltip title={item.tooltip} arrow enterDelay={30} key={`tooltip-${idx}`}>
-									<div className={"graph-contextItem"} onClick={item.onClick} style={{left: leftBack, top: topBack}}>
-										<div className={"graph-contextBackground"} style={{transform: `rotate(${idx*(360/menuItems.length)}deg)`}}>
+									<div className={'graph-contextItem'} onClick={item.onClick} style={{left: leftBack, top: topBack}}>
+										<div className={'graph-contextBackground'} style={{transform: `rotate(${idx*(360/menuItems.length)}deg)`}}>
 										</div>
 										<div>
 											<i className={`graph-contextIcon ${item.className}`}/>
@@ -659,8 +660,8 @@ export default function PolicyGraphView(props) {
 		// trackEvent('Graph', 'onZoom', 'zoom', event.k);
 		if (event.k > ZOOM_LIMIT) {
 			graph2DRef.current.zoom(ZOOM_LIMIT);
-		}
-		if (zoom !== event.k) {
+			setZoom(ZOOM_LIMIT);
+		} else {
 			setZoom(event.k);
 		}
 	}
@@ -1183,7 +1184,7 @@ export default function PolicyGraphView(props) {
 	const renderNodeLegendItems = () => {
 		return (
 			<>
-			{ !runningSearch &&
+				{ !runningSearch &&
 				Object.keys(legendData).sort().map(key => {
 					return (
 						<GCTooltip key={key} title={`${docOrgNumbers[key]} node${docOrgNumbers[key] > 1 ? 's' : ''} associated`} arrow enterDelay={30}>
@@ -1206,7 +1207,7 @@ export default function PolicyGraphView(props) {
 						</GCTooltip>
 					)
 				})
-			}
+				}
 			</>
 		);
 	}
@@ -1275,7 +1276,7 @@ export default function PolicyGraphView(props) {
 		ctx.stroke();
 		
 		// Selected/Hovered Outline
-		if (node.id === selectedID || node.id === nodeHoverID) {
+		if (node.id === selectedID || node.id === nodeHoverID || selectedDocuments.includes(node.doc_id)) {
 			ctx.strokeStyle = convertHexToRgbA('#6ac6ff',
 				(orgTypeSelected !== null && orgTypeSelected !== nodeType) ? HIDDEN_NODE_ALPHA : NODE_ALPHA);
 			ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
@@ -1321,6 +1322,11 @@ export default function PolicyGraphView(props) {
 	const createNodeLabel = (node) => {
 		const useNameOnly = ['Entity', 'Topic', 'UKN_Document'];
 		return useNameOnly.includes(node.label) ? node.name : `${node.doc_type} ${node.doc_num}`;
+	}
+	
+	const createNodeTooltip = (node) => {
+		const useNameOnly = ['Entity', 'Topic', 'UKN_Document'];
+		return useNameOnly.includes(node.label) ? node.name : node.display_title_s;
 	}
 	
 	const handleGetLinkColor = (link) => {
@@ -1399,11 +1405,11 @@ export default function PolicyGraphView(props) {
 					onGetLinkColor={handleGetLinkColor} onNodeHover={handleNodeHover} renderNodeLegendItems={renderNodeLegendItems}
 					onNodeClick={handleNodeClick} onBackgroundClick={handleBackgroundClick}
 					runSimulation={shouldRender} zoomLimit={ZOOM_LIMIT} updateNodeSize={updateNodeSize}
-					contextMenuOpen={contextOpen} createNodeLabel={createNodeLabel} reloadGraphProp={reloadGraph}
+					contextMenuOpen={contextOpen} createNodeLabel={createNodeTooltip} reloadGraphProp={reloadGraph}
 					resetGraph={() => resetGraph()} runSimulationProp={runSimulation} runningSearch={runningSearch}
 					nodeRelativeSizeProp={nodeRelSize} graphWidth={width} graphHeight={height} nodeHoverIDProp={nodeHoverID}
 					shouldCenterProp={shouldCenter} handleSetCommunityView={handleSetCommunityView} showCommunities={communityView}
-				    showBasic={showBasic} hierarchyView={hierarchyView} onZoom={handleOnZoom}
+				    showBasic={showBasic} hierarchyView={hierarchyView} onZoom={handleOnZoom} zoom={zoom}
 				/>
 			}
 			{showGraphCard && <div style={styles.graphCard}>

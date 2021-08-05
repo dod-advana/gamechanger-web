@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import {orgFilters, typeFilters} from "../../../gamechangerUtils";
+import {orgFilters, typeFilters} from '../../../gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -86,6 +86,7 @@ const initState = {
 	
 	// Export
 	selectedDocuments: new Map(),
+	selectedDocumentsForGraph: [],
 	docsDrawerOpen: false,
 	isSelectedDocs: false,
 	isDrawerReady: false,
@@ -173,7 +174,7 @@ const initState = {
 		includeRevoked: false
 	},
 
-  // Presearch Filters
+	// Presearch Filters
 	presearchSources: {},
 	presearchTypes: {},
 	seeMoreSources: false,
