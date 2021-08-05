@@ -259,7 +259,9 @@ export default function GraphNodeCluster2D(props) {
 		showCommunities = false,
 		handleSetCommunityView = null,
 		cloneData,
-		zoom = 1
+		zoom = 1,
+		nodeGroupMenuTargetProp = undefined,
+		nodeGroupMenuLabelProp = '',
 	} = props;
 	
 	const graphRef = useRef();
@@ -287,6 +289,9 @@ export default function GraphNodeCluster2D(props) {
 	
 	const [legendData, setLegendData] = React.useState({});
 	const [shouldCenter, setShouldCenter] = React.useState(true)
+	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(nodeGroupMenuTargetProp)
+	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState(nodeGroupMenuLabelProp)
+	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false)
 	
 	const [dagMode, setDagMode] = React.useState(false);
 	
@@ -298,6 +303,20 @@ export default function GraphNodeCluster2D(props) {
 		setDegreeConnected({ 0: [], 1: [], 2: [] });
 		setEdgeLabels({});
 	}, []);
+	
+	useEffect(() => {
+		if (nodeGroupMenuTargetProp !== nodeGroupMenuTarget || nodeGroupMenuLabelProp !== nodeGroupMenuLabel) {
+			if (nodeGroupMenuTargetProp === null || nodeGroupMenuLabelProp === '') {
+				setNodeGroupMenuOpen(false);
+				setNodeGroupMenuTarget(null);
+				setNodeGroupMenuLabel('');
+			} else {
+				setNodeGroupMenuOpen(true);
+				setNodeGroupMenuTarget(nodeGroupMenuTargetProp);
+				setNodeGroupMenuLabel(nodeGroupMenuLabelProp);
+			}
+		}
+	}, [nodeGroupMenuTargetProp, nodeGroupMenuLabelProp, nodeGroupMenuOpen, nodeGroupMenuTarget, nodeGroupMenuLabel])
 	
 	useEffect(() => {
 		const legendData = {};
@@ -494,7 +513,7 @@ export default function GraphNodeCluster2D(props) {
 							<GCTooltip key={key} title={`${legendData[key].count} node${legendData[key].count > 1 ? 's' : ''} associated`} arrow enterDelay={30}>
 								<StyledLegendClickable
 									key={legendData[key].name}
-									onClick={() => handleLegendNodeClick(key)}
+									onClick={(event) => handleLegendNodeClick(key, event.target)}
 									typeSelected={nodeLabelSelected}
 									type={key}
 								>
@@ -589,9 +608,22 @@ export default function GraphNodeCluster2D(props) {
 		);
 	}
 	
-	const handleLegendNodeClick = (label) => {
+	const handleLegendNodeClick = (label, target) => {
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphLegendOnClick', label, label !== nodeLabelSelected)
 		setNodeLabelSelected(label === nodeLabelSelected ? null : label);
+		if (nodeGroupMenuOpen){
+    		setNodeGroupMenuOpen(false);
+    		setNodeGroupMenuTarget(null);
+    		setNodeGroupMenuLabel('');
+		} else {
+    		setNodeGroupMenuOpen(true);
+    		setNodeGroupMenuTarget(target);
+    		setNodeGroupMenuLabel(label);
+		}
+	}
+	
+	const renderNodeGroupMenu = () => {
+		
 	}
 	
 	/**
@@ -1122,6 +1154,7 @@ export default function GraphNodeCluster2D(props) {
 				</div>
 			}
 			{renderContextMenu()}
+			{renderNodeGroupMenu()}
 			{shouldShowLegend && handleRenderLegend()}
 			{runningQuery && <div style={{height: 650}}>
 				<div style={styles.loading}>
