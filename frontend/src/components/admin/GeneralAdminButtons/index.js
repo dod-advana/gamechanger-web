@@ -4,10 +4,10 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import {Link } from "@material-ui/core";
 import { trackEvent } from '../../telemetry/Matomo';
 import {styles} from '../util/GCAdminStyles';
-import UOTAlert from '../../components/common/GCAlert';
+import UOTAlert from '../../common/GCAlert';
 
 import TrendingBlackListModal from './TrendingBlackListModal';
-import EditESIndexModal from './EditESIndexModal';
+import EditEsIndexModal from './EditEsIndexModal';
 
 const gameChangerAPI = new GameChangerAPI();
 /**
@@ -23,7 +23,7 @@ export default () => {
 	const [topicSearch, setTopicSearch] = useState(true);
 
 	// EsIndexModal and TrendingBlacklistModal state variables
-	const [showEditESIndexModal, setShowEditESIndexModal] = useState(false);
+	const [showEditEsIndexModal, setShowEditEsIndexModal] = useState(false);
 	const [showTrendingBlacklistModal, setShowTrendingBlacklistModal] = useState(false);
 
 	// Alert state variables
@@ -45,7 +45,7 @@ export default () => {
 		setShowTrendingBlacklistModal(true);
 	}
 	const openEsIndexModal = () => {
-		setShowEditESIndexModal(true);
+		setShowEditEsIndexModal(true);
 	}
 
     const setCombinedSearchMode = async () => {
@@ -409,7 +409,7 @@ export default () => {
 				}
 			</div>
 			<TrendingBlackListModal showTrendingBlacklistModal={showTrendingBlacklistModal} setShowTrendingBlacklistModal={setShowTrendingBlacklistModal} />
-			<EditESIndexModal showEditESIndexModal={showEditESIndexModal} setShowEditESIndexModal={setShowEditESIndexModal} />
+			<EditEsIndexModal showEditEsIndexModal={showEditEsIndexModal} setShowEditEsIndexModal={setShowEditEsIndexModal} />
 		</>
     )
 }

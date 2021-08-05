@@ -3,17 +3,20 @@ import _ from "underscore";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { Dialog, DialogTitle, DialogContent, Typography } from "@material-ui/core";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography } from "@material-ui/core";
 
-import GCButton from "../common/GCButton";
-import {styles} from '../util/GCAdminStyles';
+import GCButton from "../../common/GCButton";
+import {styles, GCCheckbox, useStyles} from '../util/GCAdminStyles';
 
 /**
  * 
  * @class CloneModal
  */
 export default ({storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
+	// State Variables
 	const [editCloneData, setEditCloneData] = useState({});
+	const classes = useStyles();
+	//Component Methods
     const closeCloneModal = () => {
 		setEditCloneData({});
 		setShowCreateEditCloneModal(false);

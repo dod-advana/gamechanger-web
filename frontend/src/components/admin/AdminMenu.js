@@ -2,19 +2,18 @@ import React from 'react';
 import { Tooltip} from "@material-ui/core";
 import {ConstrainedIcon} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
-import AdminIcon from "../images/icon/AdminIcon.png";
-import CloneIcon from "../images/icon/CloneIcon.png";
-import AuthIcon from "../images/icon/Authority.png";
-import AnalystToolsIcon from '../images/icon/analyticswht.png';
-import ReportIcon from '../images/icon/slideout-menu/reports icon.png';
-
-import DashboardIcon from '../images/icon/slideout-menu/dashboard icon.png';
 import _ from "underscore";
-
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';
-import { HoverNavItem } from '../components/navigation/NavItems'
+
+import AdminIcon from "../../images/icon/AdminIcon.png";
+import CloneIcon from "../../images/icon/CloneIcon.png";
+import AuthIcon from "../../images/icon/Authority.png";
+import AnalystToolsIcon from '../../images/icon/analyticswht.png';
+import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
+import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
+import { HoverNavItem } from '../../components/navigation/NavItems'
 import {toolTheme} from './util/GCAdminStyles';
 /**
  * This file containes two components ClosedAdminMenu and OpenedAdminMenu

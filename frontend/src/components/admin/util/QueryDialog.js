@@ -2,7 +2,7 @@ import React from 'react';
 import UOTDialog from '../../common/GCDialog';
 import GCButton from '../../common/GCButton';
 import { Typography } from '@material-ui/core'
-import '../export/export-results-dialog.css';
+import '../../export/export-results-dialog.css';
 
 //TODO replace orgFilterQuery with orgFilterString when DE has data in for display_org_s in prod
 

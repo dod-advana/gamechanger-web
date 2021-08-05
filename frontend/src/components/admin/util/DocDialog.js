@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Typography } from '@material-ui/core';
+
 import UOTDialog from '../../common/GCDialog';
-import { Typography } from '@material-ui/core'
-import '../export/export-results-dialog.css';
 import GCButton from "../../common/GCButton";
+import '../../export/export-results-dialog.css';
 
 const DocDialog = ({ open, handleClose, doc }) => {
 	return (

@@ -5,14 +5,14 @@ import Checkbox from "@material-ui/core/Checkbox";
 import styled from "styled-components";
 import {PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 
-import GamechangerTextIcon from "../../images/icon/GamechangerText.png";
+import GamechangerTextIcon from "../../../images/icon/GamechangerText.png";
 import {
 	primary,
 	backgroundWhite,
 	backgroundGreyLight,
 	backgroundGreyDark,
 	gcOrange
-} from '../../components/common/gc-colors';
+} from '../../common/gc-colors';
 
 
 const styles = {

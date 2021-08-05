@@ -20,6 +20,10 @@ export default () => {
     const [showCreateEditAdminModal, setShowCreateEditAdminModal] = useState(false);
     // Component Methods
 
+    const openAdminModal = ()=>{
+        setShowCreateEditAdminModal(true)
+    }
+
     const getAdminData = async () => {
         const tableData = [];
     
