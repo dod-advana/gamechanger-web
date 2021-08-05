@@ -271,9 +271,7 @@ const PolicyMainViewHandler = {
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		// get trending from gamechanger, change it back when we move to main.
-		// const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-		const trendingStorage = localStorage.getItem(`trending${'gamechanger'}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
