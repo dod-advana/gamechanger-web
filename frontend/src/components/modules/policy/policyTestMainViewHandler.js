@@ -432,13 +432,14 @@ const PolicyMainViewHandler = {
 						{ (adminMajorPubs[0] && adminMajorPubs[0].imgSrc) ? adminMajorPubs.map((pub) =>
 							<div className="topPublication"
 							>
-								{ pub.imgSrc !== 'error' && 
+								{ pub.imgSrc !== 'error' ? 
 									<img 
 									className="image"
 									src={pub.imgSrc}
 									alt="thumbnail" 
 									title={pub.name}
-								/>
+								/> : 
+									<div className="image">{pub.name}</div>
 								}
 								
 								<div 
