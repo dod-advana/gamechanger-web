@@ -314,7 +314,7 @@ export default function PolicyGraphView(props) {
 		showBasic = false,
 		hierarchyView = false,
 		detailsView = false,
-		selectedDocuments = new Map()
+		selectedDocuments = []
 	} = props;
 	
 	const graph2DRef = useRef();
@@ -1398,7 +1398,7 @@ export default function PolicyGraphView(props) {
 	}
 	
 	return (
-		<div style={{height: 'calc(100vh - 30px)'}}>
+		<div>
 			{show2DView &&
 				<MemoizedNodeCluster2D renderContextMenu={showNodeContextMenu} runningQuery={runningSearch} cloneData={cloneData}
 					graph={filteredGraph} graphRefProp={graph2DRef} createGraphNode={create2dGraphNode}
