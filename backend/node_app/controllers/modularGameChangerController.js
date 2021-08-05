@@ -67,6 +67,7 @@ class ModularGameChangerController {
 					card_module: 'policy/policyCardHandler',
 					main_view_module: 'policy/policyMainViewHandler',
 					graph_module: 'policy/policyGraphHandler',
+					search_bar_module: 'policy/policySearchBarHandler',
 					display_name: 'GAMECHANGER',
 					is_live: true,
 					url: '/',
