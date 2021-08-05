@@ -1364,6 +1364,12 @@ const GamechangerAdminPage = props => {
 			}
 		})
 		
+		Object.keys(DEFAULT_MODULE).forEach(key => {
+			if (!cloneDataToStore[key] || cloneDataToStore[key] === '') {
+				cloneDataToStore[key] = defaultModuleGivenKey(key);
+			}
+		})
+		
 		let error = false;
 		const cloneErrors = {...editCloneDataErrors};
 		CLONE_MUST_BE_FILLED_KEYS.forEach(fieldKey => {
