@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import _ from "underscore";
 import Modal from 'react-modal';
+import {TextField, Typography } from "@material-ui/core";
 import GameChangerAPI from '../api/gameChanger-service-api';
-import GCButton from "../common/GCButton";
-import {styles} from './util/GCAdminStyles';
+import GCButton from "../../common/GCButton";
+import {styles, useStyles} from '../util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -13,6 +14,7 @@ const gameChangerAPI = new GameChangerAPI();
  */
 export default ({showEditESIndexModal, setShowEditESIndexModal}) => {
     const [esIndex, setEsIndex] = useState('');
+	const classes = useStyles();
     /**
      * 
      * @param {*} setDefault 

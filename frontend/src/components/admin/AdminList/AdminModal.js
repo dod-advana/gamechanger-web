@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import _ from "underscore";
 import Modal from 'react-modal';
+import {TextField, Typography } from "@material-ui/core";
 
-import GameChangerAPI from '../api/gameChanger-service-api';
-import GCButton from "../common/GCButton";
-import {styles, useStyles} from './util/GCAdminStyles';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import GCButton from "../../common/GCButton";
+import {styles, useStyles} from '../util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -15,13 +16,15 @@ const gameChangerAPI = new GameChangerAPI();
 export default ({showCreateEditAdminModal, setShowCreateEditAdminModal}) => {
     const [editAdminID, setEditAdminID] = useState(-99);
 	const [editAdminData, setEditAdminData] = useState({});
+    
+
+    const classes = useStyles();
+
     const closeAdminModal = () => {
 		setEditAdminID(-99);
 		setEditAdminData({});
 		setShowCreateEditAdminModal(false);
 	}
-
-    const classes = useStyles();
     /**
      * 
      * @param {*} adminToEdit 
