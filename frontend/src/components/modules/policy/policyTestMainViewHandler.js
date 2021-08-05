@@ -193,7 +193,7 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 
 		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: pubs, folder: 'thumbnails'});
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails');
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
@@ -218,7 +218,7 @@ const PolicyMainViewHandler = {
 				let filename = item.image_link.split('/').pop();
 				return {img_filename: filename}
 			});
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST({filenames: thumbnailList, folder: folder});
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder);
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
