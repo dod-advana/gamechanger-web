@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react';
-import _ from "underscore";
+import React, {useState} from 'react';
 import Modal from 'react-modal';
 import {TextField, Typography } from "@material-ui/core";
 
