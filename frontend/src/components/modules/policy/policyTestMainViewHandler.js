@@ -197,7 +197,7 @@ const PolicyMainViewHandler = {
 				if(buf.status === "fulfilled"){
 					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
 				} else {
-					pubs[idx].imgSrc = ''
+					pubs[idx].imgSrc = ' '
 				}
 			})
 			
@@ -227,7 +227,7 @@ const PolicyMainViewHandler = {
 					}
 				}
 				else {
-					crawlerSources[idx].imgSrc = ''
+					crawlerSources[idx].imgSrc = ' '
 				}
 			});
 			setState(dispatch, {crawlerSources});
@@ -406,12 +406,14 @@ const PolicyMainViewHandler = {
 						title="Sources" 
 						width='300px'
 					>
-						{crawlerSources.map(source => 
+						{crawlerSources[0] && crawlerSources[0].imgSrc ? crawlerSources.map(source => 
 							<SourceContainer>
 								<img src={source.imgSrc}></img>
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
-						)}
+						) : 
+						<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={recentSearches} 
@@ -425,7 +427,7 @@ const PolicyMainViewHandler = {
 						title="Editor's Choice: Top Publications" 
 						width='215px' 
 					>
-						{adminMajorPubs.map((pub) =>
+						{ (adminMajorPubs[0] && adminMajorPubs[0].imgSrc) ? adminMajorPubs.map((pub) =>
 							<div className="topPublication"
 							>
 								<img 
@@ -445,7 +447,8 @@ const PolicyMainViewHandler = {
 									<div className="hover-text">{pub.name}</div>
 								</div>
 							</div>
-						)}
+						) : 
+						<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>}
 					</GameChangerThumbnailRow>
 				</div>
 			</div>
