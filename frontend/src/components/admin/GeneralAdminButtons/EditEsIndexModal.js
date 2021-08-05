@@ -3,7 +3,7 @@ import _ from "underscore";
 import Modal from 'react-modal';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCButton from "../common/GCButton";
-import {styles} from './GCAdminStyles';
+import {styles} from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 

@@ -16,7 +16,7 @@ import {ClosedAdminMenu, OpenedAdminMenu} from '../components/admin/AdminMenu';
 
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import {toolTheme} from '../components/admin/GCAdminStyles';
+import {toolTheme} from '../components/admin/util/GCAdminStyles';
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 

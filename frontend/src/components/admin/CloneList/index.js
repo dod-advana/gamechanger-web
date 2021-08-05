@@ -6,7 +6,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCButton from "../../common/GCButton";
 import UOTToggleSwitch from "../../common/GCToggleSwitch";
 import { trackEvent } from '../../telemetry/Matomo';
-import {styles, TableRow} from '../GCAdminStyles';
+import {styles, TableRow} from '../util/GCAdminStyles';
 import CloneModal from './CloneModal';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -218,6 +218,7 @@ export default ({refreshClones}) => {
             <CloneModal 
                 storeCloneData = {storeCloneData}
                 cloneToEdit = {cloneToEdit}
+                cloneTableMetaData = {cloneTableMetaData}
                 showCreateEditCloneModal={showCreateEditCloneModal}
                 setShowCreateEditCloneModal={setShowCreateEditCloneModal}
             />

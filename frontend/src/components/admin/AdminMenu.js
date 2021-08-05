@@ -15,7 +15,7 @@ import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';
 import { HoverNavItem } from '../components/navigation/NavItems'
-import {toolTheme} from '../components/admin/GCAdminStyles';
+import {toolTheme} from './util/GCAdminStyles';
 /**
  * This file containes two components ClosedAdminMenu and OpenedAdminMenu
  * Both of theses components are the admin page menu on the left and have a list of buttons with icons.

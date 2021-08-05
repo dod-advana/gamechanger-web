@@ -3,7 +3,7 @@ import Paper from 'material-ui/Paper';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import {Link } from "@material-ui/core";
 import { trackEvent } from '../../telemetry/Matomo';
-import {styles} from '../GCAdminStyles';
+import {styles} from '../util/GCAdminStyles';
 import UOTAlert from '../../components/common/GCAlert';
 
 import TrendingBlackListModal from './TrendingBlackListModal';

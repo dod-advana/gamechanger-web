@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCButton from "../common/GCButton";
-import {styles, useStyles} from './GCAdminStyles';
+import {styles, useStyles} from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 

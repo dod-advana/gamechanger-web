@@ -5,7 +5,7 @@ import {Snackbar} from "@material-ui/core";
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCAccordion from "../../common/GCAccordion";
 import GCButton from "../../common/GCButton";
-import {styles, TableRow} from '../GCAdminStyles';
+import {styles, TableRow} from '../util/GCAdminStyles';
 import AddEditorTermDialog from './AddEditorTermDialog';
 
 

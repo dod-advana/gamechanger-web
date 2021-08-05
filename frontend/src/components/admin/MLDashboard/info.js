@@ -3,7 +3,7 @@ import { Tooltip} from '@material-ui/core'
 import ReactTable from 'react-table';
 
 import {TableRow, StatusCircle, BorderDiv} from './util/styledDivs';
-import {styles} from '../GCAdminStyles';
+import {styles} from '../util/GCAdminStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from "../../common/GCButton";
 import "react-table/react-table.css";
