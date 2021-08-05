@@ -96,7 +96,7 @@ const GamechangerAdminPage = props => {
 			unsetTool();
 		};
 
-	}, [unsetTool, setToolState, setPageToView, setGCCloneTableData]);
+	}, [unsetTool, setToolState, setPageToView]);
 
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
