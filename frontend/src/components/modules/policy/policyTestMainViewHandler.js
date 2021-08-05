@@ -199,7 +199,7 @@ const PolicyMainViewHandler = {
 				if(buf.status === "fulfilled"){
 					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
 				} else {
-					pubs[idx].imgSrc = DefaultSeal;
+					pubs[idx].imgSrc = 'error';
 				}
 			})
 			
@@ -432,20 +432,23 @@ const PolicyMainViewHandler = {
 						{ (adminMajorPubs[0] && adminMajorPubs[0].imgSrc) ? adminMajorPubs.map((pub) =>
 							<div className="topPublication"
 							>
-								<img 
+								{ pub.imgSrc !== 'error' && 
+									<img 
 									className="image"
 									src={pub.imgSrc}
 									alt="thumbnail" 
 									title={pub.name}
 								/>
-									<div 
-										className="hover-overlay"
-										onClick={()=>{
-											trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
-											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-											window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
-										}}
-									>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+									}}
+								>
 									<div className="hover-text">{pub.name}</div>
 								</div>
 							</div>
