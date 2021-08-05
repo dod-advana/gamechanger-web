@@ -408,13 +408,14 @@ const PolicyMainViewHandler = {
 						title="Sources" 
 						width='300px'
 					>
-						{crawlerSources[0] && crawlerSources[0].imgSrc ? crawlerSources.map(source => 
+						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
 							<SourceContainer>
 								<img src={source.imgSrc}></img>
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
-						) : 
-						<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						)}
+						{crawlerSources.length > 0 && crawlerSources[0].imgSrc === undefined &&  
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
@@ -429,7 +430,7 @@ const PolicyMainViewHandler = {
 						title="Editor's Choice: Top Publications" 
 						width='215px' 
 					>
-						{ (adminMajorPubs[0] && adminMajorPubs[0].imgSrc) ? adminMajorPubs.map((pub) =>
+						{ (adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc) && adminMajorPubs.map((pub) =>
 							<div className="topPublication"
 							>
 								{ pub.imgSrc !== 'error' ? 
@@ -453,8 +454,10 @@ const PolicyMainViewHandler = {
 									<div className="hover-text">{pub.name}</div>
 								</div>
 							</div>
-						) : 
-						<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>}
+						)}
+						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
 					</GameChangerThumbnailRow>
 				</div>
 			</div>
@@ -595,7 +598,6 @@ const PolicyMainViewHandler = {
 															<>
 																{
 																	getSearchResults(docSearchResults, state, dispatch)
-															
 																}
 																{
 																	docsPagination  && 
