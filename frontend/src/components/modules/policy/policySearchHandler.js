@@ -21,7 +21,7 @@ import {
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import defaultSearchHandler from "../default/defaultSearchHandler";
+import simpleSearchHandler from "../simple/simpleSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -712,7 +712,7 @@ const PolicySearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		return defaultSearchHandler.parseSearchURL(defaultState, url);
+		return simpleSearchHandler.parseSearchURL(defaultState, url);
 	},
 
 

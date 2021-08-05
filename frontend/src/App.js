@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Redirect, Route, HashRouter as Router, Switch } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.css";
-import "react-select/dist/react-select.css";
+import { Redirect, Route, HashRouter as Router, Switch } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'react-select/dist/react-select.css';
 // import Config from './config/config';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
-import { getProvider } from "./components/factories/contextFactory";
+import { getProvider } from './components/factories/contextFactory';
 import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement'; 
 import GamechangerPage from './containers/GameChangerPage';
 import GamechangerAdminPage from './containers/GamechangerAdminPage';
@@ -12,7 +12,7 @@ import GamechangerEsPage from './containers/GamechangerEsPage';
 import GameChangerDetailsPage from './containers/GameChangerDetailsPage';
 import GamechangerPdfViewer from './components/documentViewer/PDFViewer';
 import GamechangerInternalUserTrackingPage from './components/user/InternalUserManagementAutotracker';
-import GameChangerAPI from "./components/api/gameChanger-service-api";
+import GameChangerAPI from './components/api/gameChanger-service-api';
 import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
 import { MuiThemeProvider as V0MuiThemeProvider } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -20,7 +20,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { useMatomo } from '@datapunt/matomo-tracker-react'
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
-import SparkMD5 from "spark-md5";
+import SparkMD5 from 'spark-md5';
 import _ from 'underscore';
 import GCAuth from './components/common/GCAuth';
 import './styles.css';
@@ -28,13 +28,13 @@ import 'font-awesome/css/font-awesome.css';
 import 'flexboxgrid/css/flexboxgrid.css';
 // import ThemeDefault from './components/advana/theme-default';
 import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
-import TutorialOverlayAPI from "@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import Config from './config/config';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
 import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
-import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
 import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
 // import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
@@ -46,7 +46,7 @@ import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoun
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
-import "./index.css";
+import './index.css';
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -69,7 +69,7 @@ const v0Theme = getMuiTheme({});
 const styles = {
 	splashContainerClosed: {
 		padding: 0,
-		height: "100%"
+		height: '100%'
 	},
 	container: {
 		paddingTop: 120,
@@ -100,12 +100,12 @@ const PrivateTrackedRoute = ({ allowFunction, component: Component, render: Rend
 				allowFunction(props) ? (
 					<WrappedComponent {...rest} {...props} />
 				) : (
-						<Redirect
-							to={{
-								pathname: "/unauthorized"
-							}}
-						/>
-					)
+					<Redirect
+						to={{
+							pathname: '/unauthorized'
+						}}
+					/>
+				)
 			}
 		/>
 	)
@@ -140,7 +140,7 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	)
 };
 
-const App = (props) => {
+const App = () => {
 
 	const [gameChangerCloneRoutes, setGameChangerCloneRoutes] = useState([]);
 	const [initialized, setInitialized] = useState(false);
@@ -159,16 +159,22 @@ const App = (props) => {
 					if (isDecoupled) {
 						if (clone.clone_to_gamechanger) {
 							cloneRoutes.push((
-								<PrivateTrackedRoute key={idx} path={`/${clone.url}`}
-								                     render={(props) => <GamechangerProvider><GamechangerPage {...props}
-								                                                                              tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
-								                                                                              history={history}
-								                                                                              isClone={true}
-								                                                                              cloneData={clone}/></GamechangerProvider>}
-								                     pageName={clone.display_name}
-								                     allowFunction={() => {
-									                     return true;
-								                     }}
+								<PrivateTrackedRoute 
+									key={idx} 
+									path={`/${clone.url}`}
+									render={(props) => 
+					                    <GamechangerProvider>
+						                    <GamechangerPage {...props}
+												tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+												history={history}
+												isClone={true}
+												cloneData={clone}
+						                    />
+					                    </GamechangerProvider>}
+				                    pageName={clone.display_name}
+									allowFunction={() => {
+										return true;
+				                    }}
 								/>
 							));
 						}
@@ -176,22 +182,38 @@ const App = (props) => {
 						if (clone.clone_to_advana) {
 							if (clone.permissions_required) {
 								cloneRoutes.push((
-									<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
-									                                                                                                               tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
-									                                                                                                               history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
-									                     allowFunction={() => {
-										                     return Permissions.allowGCClone(clone.clone_name);
-									                     }}
+									<PrivateTrackedRoute 
+										key={idx} 
+										path={`/${clone.url}`} 
+										render={(props) => 
+											<GamechangerProvider>
+												<GamechangerPage {...props}
+													tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+													history={history} 
+													isClone={true} 
+													cloneData={clone} />
+											</GamechangerProvider>} 
+										pageName={clone.display_name}
+										allowFunction={() => {
+											return Permissions.allowGCClone(clone.clone_name);
+										}}
 									/>
 								));
 							} else {
 								cloneRoutes.push((
-									<PrivateTrackedRoute key={idx} path={`/${clone.url}`} render={(props) => <GamechangerProvider><GamechangerPage {...props}
-									                                                                                                               tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
-									                                                                                                               history={history} isClone={true} cloneData={clone} /></GamechangerProvider>} pageName={clone.display_name}
-									                     allowFunction={() => {
-										                     return true;
-									                     }}
+									<PrivateTrackedRoute 
+										key={idx} path={`/${clone.url}`} 
+										render={(props) => 
+											<GamechangerProvider>
+												<GamechangerPage 
+													{...props}
+													tutorialData={tutorialData && tutorialData[name] ? tutorialData[name].newUserTutorial : null}
+													history={history} isClone={true} cloneData={clone} />
+											</GamechangerProvider>} 
+										pageName={clone.display_name}
+										allowFunction={() => {
+											return true;
+										}}
 									/>
 								));
 							}
@@ -241,7 +263,7 @@ const App = (props) => {
 					tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
 				} catch (err) {
 					console.log(err);
-					console.log("Failed to retrieve Tutorial Overlay data");
+					console.log('Failed to retrieve Tutorial Overlay data');
 				}
 			}
 
@@ -261,7 +283,7 @@ const App = (props) => {
 		try {
 			await gameChangerAPI.sendFrontendErrorPOST(error.stack);
 		} catch(err) {
-				console.log({ err });
+			console.log({ err });
 		}
 	}
 
@@ -273,36 +295,36 @@ const App = (props) => {
 						<ClassificationBanner />
 						<ConsentAgreement />
 	
-							<Route exact path='/' children={({ match, location, history }) => (
-								<div style={getStyleType(match, location)}>
-									<SlideOutMenuContextHandler>
-										<>
-											<ErrorBoundary
-												FallbackComponent={ErrorPage}
-												onError={errorHandler}
-											>
-												{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
-												<Switch >
-													{tokenLoaded && gameChangerCloneRoutes.map(route => {
-														return (
-															route
-														)
-													})}
-													<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
-													<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
-													<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
-													<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
-													<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
-													<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
-													<Route path="*" component={NotFoundPage} />
-												</Switch>
-											</ErrorBoundary>
-										</>
-									</SlideOutMenuContextHandler>
-									{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
-									{!isDecoupled && <AdvanaFooter />}
-								</div>
-							)} />
+						<Route exact path='/' children={({ match, location, history }) => (
+							<div style={getStyleType(match, location)}>
+								<SlideOutMenuContextHandler>
+									<>
+										<ErrorBoundary
+											FallbackComponent={ErrorPage}
+											onError={errorHandler}
+										>
+											{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
+											<Switch >
+												{tokenLoaded && gameChangerCloneRoutes.map(route => {
+													return (
+														route
+													)
+												})}
+												<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
+												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
+												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
+												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
+												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
+												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
+												<Route path="*" component={NotFoundPage} />
+											</Switch>
+										</ErrorBoundary>
+									</>
+								</SlideOutMenuContextHandler>
+								{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+								{!isDecoupled && <AdvanaFooter />}
+							</div>
+						)} />
 						
 					</V0MuiThemeProvider>
 				</MuiThemeProvider>

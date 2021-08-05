@@ -22,15 +22,13 @@ export default function PDFViewer({location}) {
 
 	const measuredRef = useCallback(node => {
 		if (node !== null && filename) {
-			const cloneData = {
-				clone_name: cloneIndex
-			}
-			
-			if (filename) {
-				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
-					node.src = url;
-				});
-            }
+			gameChangerAPI.getCloneMeta({cloneName: cloneIndex}).then(data => {
+				if (filename) {
+					gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, data.data).then(url => {
+						node.src = url;
+					});
+	            }
+			});
         }
 	}, [filename, prevSearchText, isClone, cloneIndex, pageNumber]);
    

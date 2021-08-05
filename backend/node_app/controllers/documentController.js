@@ -284,7 +284,8 @@ class DocumentController {
 			
 			Promise.all(promises).then(values => {
 				res.status(200).send(values)
-			})
+			}).catch(e=>console.log(e))
+
 		} catch (err) {
 			this.logger.error(err, 'TJJUFQC', userId)
 			res.status(500).send(err);
