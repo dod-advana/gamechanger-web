@@ -14,9 +14,8 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class AdminList
  */
-export default (props) => {
+export default () => {
     // Component Properties
-    const {openAdminModal, setPageToView} = props;
     const [gcAdminTableData, setGCAdminTableData] = useState([]);
     const [showCreateEditAdminModal, setShowCreateEditAdminModal] = useState(false);
     // Component Methods
@@ -61,7 +60,7 @@ export default (props) => {
                             trackEvent('GAMECHANGER_Admin', "DeleteAdmin", "onClick", row.value);
                             deleteAdminData(row.value).then(() => {
                                 getAdminData().then(() => {
-                                    setPageToView();
+                                    setShowCreateEditAdminModal(false);
                                 });
                             });
                         }}
@@ -92,7 +91,7 @@ export default (props) => {
                     pageSize={10}
                 />
             </div>
-            <AdminModal />
+            <AdminModal showCreateEditAdminModal={showCreateEditAdminModal} setShowCreateEditAdminModal={setShowCreateEditAdminModal} />
         </>
     )
 }

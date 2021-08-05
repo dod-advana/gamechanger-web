@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCButton from "../common/GCButton";
-import {styles} from './GCAdminStyles';
+import {styles, useStyles} from './GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -12,8 +12,7 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class AdminModal
  */
-export default (props) => {
-    const {setPageToView} = props;
+export default ({showCreateEditAdminModal, setShowCreateEditAdminModal}) => {
     const [editAdminID, setEditAdminID] = useState(-99);
 	const [editAdminData, setEditAdminData] = useState({});
     const closeAdminModal = () => {
@@ -21,6 +20,8 @@ export default (props) => {
 		setEditAdminData({});
 		setShowCreateEditAdminModal(false);
 	}
+
+    const classes = useStyles();
     /**
      * 
      * @param {*} adminToEdit 
@@ -44,7 +45,6 @@ export default (props) => {
         gameChangerAPI.storeAdminData(adminDataToStore).then(data => {
             if (data.status === 200) {
                 closeAdminModal();
-                setPageToView();
             }
         });
     }

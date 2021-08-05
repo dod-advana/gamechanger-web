@@ -54,17 +54,13 @@ const GamechangerAdminPage = props => {
 			case PAGES.general:
 				return <GeneralAdminButtons />;
 			case PAGES.cloneList:
-				return (<CloneList 
-							setPageToView={()=>setPageToView(PAGES.cloneList)} 
-						/>);
+				return (<CloneList />);
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
 			case PAGES.mlDashboard:
 				return <MLDashboard />;
 			case PAGES.adminList:
-				return (<AdminList 
-							setPageToView={()=>setPageToView(PAGES.adminList)}
-						/>)
+				return (<AdminList />)
 			case PAGES.notifications:
 				return <NotificationsManagement />;
 			case PAGES.internalUsers:
