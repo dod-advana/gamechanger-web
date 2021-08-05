@@ -7,6 +7,7 @@ import GCButton from "../../common/GCButton";
 import UOTToggleSwitch from "../../common/GCToggleSwitch";
 import { trackEvent } from '../../telemetry/Matomo';
 import {styles, TableRow} from '../GCAdminStyles';
+import CloneModal from './CloneModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -14,15 +15,24 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class CloneList
  */
-export default (props) => {
+export default () => {
     // Component Properties
-    const {setPageToView} = props;
     const [gcCloneTableData, setGCCloneTableData] = useState([]);
     const [cloneTableMetaData, setCloneTableMetaData] = useState({stringFields: [], booleanFields: [], jsonFields: []});
     const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
+    const [cloneToEdit, setCloneToEdit] = useState({});
     // Component Methods
     const openCloneModal = (num=-99) =>{
-		setEditCloneID(num);
+        if (num >= 0) {
+			const filteredClones = _.filter(gcCloneTableData, clone => {
+				return clone.id === num;
+			});
+			const cloneEdit = {...filteredClones[0] };
+			setCloneToEdit(cloneEdit);
+		} else {
+			setCloneToEdit({});
+		}
+	
         setShowCreateEditCloneModal(true);
 	}
     const getCloneData = async () => {
@@ -33,7 +43,7 @@ export default (props) => {
         _.forEach(data.data, result => {
             tableData.push(result);
         });
-        
+        setGCCloneTableData(gcCloneTableData)
         const tableMetaData = await gameChangerAPI.getCloneTableData();
         
         const booleanFields = [];
@@ -64,40 +74,15 @@ export default (props) => {
                 }
             }
         });
+        setCloneTableMetaData(tableMetaData)
     }
     const deleteCloneData = async (id) => {
 		await gameChangerAPI.deleteCloneData(id);
 	}
-    useEffect(() => {
-		if (editCloneID >= 0) {
-			const filteredClones = _.filter(gcCloneTableData, clone => {
-				return clone.id === editCloneID;
-			});
-
-			const cloneToEdit = {...filteredClones[0] };
-
-			setEditCloneData(cloneToEdit);
-		} else {
-			setEditCloneData({});
-		}
-	}, [editCloneID,gcCloneTableData])
     useEffect(()=>{
         getCloneData();
     },[]);
-    useEffect(() => {
-
-		if (editCloneID >= 0) {
-			const filteredClones = _.filter(gcCloneTableData, clone => {
-				return clone.id === editCloneID;
-			});
-
-			const cloneToEdit = {...filteredClones[0] };
-
-			setEditCloneData(cloneToEdit);
-		} else {
-			setEditCloneData({});
-		}
-	}, [editCloneID,gcCloneTableData])
+    
     // The table columns
     const columns = [
         {
@@ -130,11 +115,11 @@ export default (props) => {
                                 return clone.id ===  row.row.id;
                             });
 
-                            const cloneToEdit = {...filteredClones[0]};
+                            const cloneEdit = {...filteredClones[0]};
 
-                             cloneToEdit.is_live = !row.value;
-                             trackEvent('GAMECHANGER_Admin', "ToggleCloneIsLive", cloneToEdit.name, cloneToEdit.is_live ? 1 : 0);
-                             storeCloneData(cloneToEdit);
+                            cloneEdit.is_live = !row.value;
+                             trackEvent('GAMECHANGER_Admin', "ToggleCloneIsLive", cloneEdit.name, cloneEdit.is_live ? 1 : 0);
+                             storeCloneData(cloneEdit);
                         }}
                          customColor={'#E9691D'}
                      />
@@ -170,9 +155,7 @@ export default (props) => {
                             onClick={() => {
                                 trackEvent('GAMECHANGER_Admin', "DeleteClone", "onClick", row.value);
                                 deleteCloneData(row.value).then(() => {
-                                    getCloneData(setGCCloneTableData, setCloneTableMetaData).then(() => {
-                                        setPageToView();
-                                    });
+                                    getCloneData();
                                 });
                             }}
                             style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red'}}
@@ -184,25 +167,31 @@ export default (props) => {
     ];
 
     return (
-        
-        <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Clones</p>
-                <GCButton
-                    onClick={() => {
-                        trackEvent('GAMECHANGER_Admin', "CreateClone", "onClick");
-                        openCloneModal()
-                    }}
-                    style={{minWidth: 'unset'}}
-                >Create Clone</GCButton>
-            </div>
+        <>
+            <div>
+                <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
+                    <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Gamechanger Clones</p>
+                    <GCButton
+                        onClick={() => {
+                            trackEvent('GAMECHANGER_Admin', "CreateClone", "onClick");
+                            openCloneModal()
+                        }}
+                        style={{minWidth: 'unset'}}
+                    >Create Clone</GCButton>
+                </div>
 
-            <ReactTable
-                data={gcCloneTableData}
-                columns={columns}
-                style={{margin: '0 80px 20px 80px', height: 700}}
-                pageSize={10}
+                <ReactTable
+                    data={gcCloneTableData}
+                    columns={columns}
+                    style={{margin: '0 80px 20px 80px', height: 700}}
+                    pageSize={10}
+                />
+            </div>
+            <CloneModal 
+                cloneToEdit = {cloneToEdit}
+                showCreateEditCloneModal={showCreateEditCloneModal}
+                setShowCreateEditCloneModal={setShowCreateEditCloneModal}
             />
-        </div>
+        </>
     )
 }

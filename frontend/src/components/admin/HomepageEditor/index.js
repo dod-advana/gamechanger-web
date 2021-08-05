@@ -18,16 +18,26 @@ const gameChangerAPI = new GameChangerAPI();
 export default () => {
     // State Variables
     const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
-    const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
-
+    
+    // Component methods
+    /**
+     * This updates the table data for the editor table.
+     * Is only used in the child modal
+     * @method handleAddRow
+     * @param {*} key 
+     * @param {*} value 
+     */
     const handleAddRow = (key, value) => {
 		const tmp = {...editorTableData};
 		tmp[key].push({name:value});
 		setEditorTableData(tmp);
 	}
+    /**
+     * 
+     */
     const getHomepageEditorData = async () => {
         const tableData = {};
         const { data } = await gameChangerAPI.getHomepageEditorData();
@@ -38,6 +48,11 @@ export default () => {
     
         setEditorTableData(tableData);
     }
+    /**
+     * 
+     * @param {*} key 
+     * @param {*} index 
+     */
     const handleShiftRowDown = (key, index) => {
 		const curr = editorTableData[key][index];
 		const next = editorTableData[key][index+1];
@@ -46,7 +61,9 @@ export default () => {
 		tmp[key][index+1] = curr;
 		setEditorTableData(tmp);
 	}
-
+    /**
+     * 
+     */
 	const handleShiftRowUp = (key, index) => {
 		const curr = editorTableData[key][index];
 		const prev = editorTableData[key][index-1];
@@ -55,6 +72,10 @@ export default () => {
 		tmp[key][index-1] = curr;
 		setEditorTableData(tmp);
 	}
+    /**
+     * 
+     * @param {*} key 
+     */
     const saveHomepageEditor = async (key) => {
 		try{
 			await gameChangerAPI.setHomepageEditorData({key, tableData:editorTableData[key]});
@@ -66,6 +87,8 @@ export default () => {
     useEffect(()=>{
         getHomepageEditorData();
     },[]);
+
+    // Columns for tables
     const topicColumns = [
         {
             Header: 'Name',
@@ -239,7 +262,7 @@ export default () => {
                     </GCAccordion>
                 </div>
             </div>
-            <AddEditorTermDialog handleAddRow={handleAddRow} />
+            <AddEditorTermDialog showAddEditorTermDialog={showAddEditorTermDialog} setShowAddEditorTermDialog={setShowAddEditorTermDialog} handleAddRow={handleAddRow} />
             <Snackbar
 				style={{marginTop: 20}}
 				anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
