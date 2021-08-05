@@ -67,6 +67,9 @@ module.exports = (sequelize, DataTypes) => {
 			graph_module: {
 				type: DataTypes.STRING
 			},
+			s3_bucket: {
+				type: DataTypes.STRING
+			},
 			config: {
 				type: DataTypes.JSONB
 			},

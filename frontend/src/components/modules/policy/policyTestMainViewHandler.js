@@ -152,7 +152,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
-		const { dispatch } = props;
+		const { dispatch, state } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
@@ -173,7 +173,7 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 
 		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs);
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, state.cloneData);
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf;

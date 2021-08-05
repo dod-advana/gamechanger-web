@@ -274,7 +274,7 @@ export default class GameChangerAPI {
 
 	dataStorageDownloadGET = async (fileName, highlightText, pageNumber, isClone = false, cloneData = {clone_name: 'gamechanger'}) => {
 		return new Promise((resolve, reject) => {
-			const s3Bucket = cloneData?.s3Bucket ?? 'advana-raw-zone';
+			const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 			
 			let filename = encodeURIComponent(`gamechanger${cloneData.clone_name !== 'gamechanger' ? `/projects/${cloneData.clone_name}` : ''}/pdf/${fileName}`)
 
@@ -296,8 +296,8 @@ export default class GameChangerAPI {
 		});
 	}
 
-	thumbnailStorageDownloadPOST = async (filenames) => {
-		const s3Bucket = 'advana-raw-zone';
+	thumbnailStorageDownloadPOST = async (filenames, cloneData) => {
+		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 		const url = endpoints.thumbnailStorageDownloadPOST;
 		return axiosPOST(this.axios, url, {filenames, dest: s3Bucket}, {timeout: 10000})
 	}
