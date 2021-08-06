@@ -535,7 +535,7 @@ export default function PolicyGraphView(props) {
 		
 		const nodeLabel = node ? node.label : '';
 		const notInOriginal = node ? node.notInOriginalSearch : '';
-		
+
 		const menuItems = [];
 		let cardText = '';
 		
@@ -857,9 +857,9 @@ export default function PolicyGraphView(props) {
 	 * Show More Nodes Functions
 	 */
 	
-	const showEntitiesForNode = () => {
+	const showEntitiesForNode = (parentNode) => {
 		
-		const node = graph.nodes.filter(node => {
+		const node = parentNode ? parentNode : graph.nodes.filter(node => {
 			return node.id === selectedID;
 		})[0];
 		
@@ -930,9 +930,9 @@ export default function PolicyGraphView(props) {
 		});
 	}
 	
-	const showReferencesForNode = async (isUKN = false) => {
+	const showReferencesForNode = async (isUKN = false, parentNode) => {
 		
-		const node = graph.nodes.filter(node => {
+		const node = parentNode ? parentNode : graph.nodes.filter(node => {
 			return node.id === selectedID;
 		})[0];
 		
@@ -1000,9 +1000,9 @@ export default function PolicyGraphView(props) {
 		node.showingReferences = true;
 	}
 	
-	const showTopicsForNode = () => {
+	const showTopicsForNode = (parentNode) => {
 		
-		const node = graph.nodes.filter(node => {
+		const node = parentNode ? parentNode : graph.nodes.filter(node => {
 			return node.id === selectedID;
 		})[0];
 		
@@ -1335,20 +1335,26 @@ export default function PolicyGraphView(props) {
 	}
 	
 	const resetGraph = () => {
-		
-		// Remove Remove visible child documents and unlock any locked nodes
+		// Remove visible child documents and unlock any locked nodes
 		graph.nodes.forEach(node => {
 			if (node.label === 'Publication') {
 				node.showingChildren = false;
+			}
+			if (node.showingTopics) {
+				showTopicsForNode(node);
+			}
+			if (node.showingEntities) {
+				showEntitiesForNode(node);
+			}
+			if (node.showingReferences) {
+				showReferencesForNode(node);
 			}
 			node.fx = null;
 			node.fy = null;
 			node.fz = null;
 		})
 		
-		setShouldRender(true);
-		setReloadGraph(true);
-		setRunSimulation(!runSimulation);
+		reloadAndRunSimulation();
 	}
 	
 	/**
