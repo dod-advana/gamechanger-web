@@ -447,6 +447,8 @@ export default function PolicyGraphView(props) {
 		elem.style.cursor = node ? 'pointer' : null;
 		setNodeHoverID(node ? node.id : -1);
 		
+		console.log(node)
+		
 		if (node) {
 			highlightSelectedNodes(node, filteredGraph.edges);
 		} else {
@@ -513,6 +515,7 @@ export default function PolicyGraphView(props) {
 		// Zoom and center node
 		graph2DRef.current.centerAt(node.x, node.y, 500);
 		graph2DRef.current.zoom(ZOOM_LIMIT, 500);
+		setZoom(ZOOM_LIMIT);
 		
 		sleep(500).then(() => {
 			const {x, y} = graph2DRef.current.graph2ScreenCoords(node.x, node.y);
@@ -1283,7 +1286,7 @@ export default function PolicyGraphView(props) {
 			const scalingParam = Math.max(filteredGraph.nodes.length, 150);
 			nodeSize =  nodeRelSize + (combinedTypes.includes(node.label) ? 1 : Math.max(((node.pageRank * node.edgePercent) * (scalingParam / zoom)), 1));
 		}
-		node.nodeSize = nodeSize;
+		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
 		ctx.fillStyle = nodeColor;
 		ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI, false);

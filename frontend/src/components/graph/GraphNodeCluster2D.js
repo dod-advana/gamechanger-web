@@ -23,7 +23,6 @@ import {SvgIcon} from 'material-ui';
 import {trackEvent} from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';
-import GCButton from '../common/GCButton';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const NODE_ALPHA = 1;
