@@ -591,7 +591,7 @@ export const EDASummaryView = (props) => {
                             </FormControl>
                         </div>
                         <div style={{display: 'flex'}}>
-                            <Typography style={{ ...styles.filterTitle, margin: '0 15px 0 0'}}> Contract Issue Agency: </Typography>
+                            <Typography style={{ ...styles.filterTitle, margin: '0 15px 0 0', display: 'flex', alignItems: 'center'}}> Contract Issue Agency: </Typography>
                             <div style={{ display: 'inline-block', margin: '0 0 0 15px' }}>
                                 <Autocomplete
                                     options={['Dept of Army', 'Dept of Navy', 'Dept of Air Force', 'DARPA', 'DLA']}

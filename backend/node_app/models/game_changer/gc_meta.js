@@ -67,6 +67,9 @@ module.exports = (sequelize, DataTypes) => {
 			graph_module: {
 				type: DataTypes.STRING
 			},
+			search_bar_module: {
+				type: DataTypes.STRING
+			},
 			s3_bucket: {
 				type: DataTypes.STRING
 			},
