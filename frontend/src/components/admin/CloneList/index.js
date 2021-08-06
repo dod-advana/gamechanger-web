@@ -109,6 +109,7 @@ export default ({refreshClones}) => {
 	}
     useEffect(()=>{
         getCloneData();
+        // eslint-disable-next-line
     },[]);
     
     // The table columns

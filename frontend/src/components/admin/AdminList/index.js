@@ -42,7 +42,8 @@ export default () => {
 	}
 
     useEffect(()=>{
-        getAdminData()
+        getAdminData();
+        // eslint-disable-next-line
     },[])
     // The table columns
     const columns = [

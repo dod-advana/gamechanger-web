@@ -28,7 +28,7 @@ export default () => {
 	const [showTrendingBlacklistModal, setShowTrendingBlacklistModal] = useState(false);
 
 	// Alert state variables
-	const [isAlertActive, setAlertActive] = useState(false);
+	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
 	const [alertType, setAlertType] = useState('');
 	const [alertMessage, setAlertMessage] = useState('');
@@ -400,13 +400,14 @@ export default () => {
 			</div>
 			<div>
 				{
-					isAlertActive ? <UOTAlert
+					alertActive ? (<UOTAlert
 						title={alertTitle}
 						type={alertType}
+						elementId="Admin-Button"
 						message={alertMessage}
 						onHide={() => setAlertActive(false)}
 						containerStyles={styles.alert}
-					/> : <i></i>
+					/>) : <></>
 				}
 			</div>
 			<TrendingBlackListModal showTrendingBlacklistModal={showTrendingBlacklistModal} setShowTrendingBlacklistModal={setShowTrendingBlacklistModal} />

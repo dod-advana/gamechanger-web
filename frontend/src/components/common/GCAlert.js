@@ -74,34 +74,37 @@ export default class UoTAlert extends React.Component {
 	}
 
 	render() {
+		const self = this;
 		const { message, title, onHide, elementId, top, containerStyles } = this.props;
 		const { isOpen } = this.state;
-		if (!isOpen) return <i></i>
+		if (!isOpen){
+			return <i></i>
+		}
 		const type = this.props.type? this.props.type:DEFAULT_ALERT_TYPE;
 		const typeStyles = alertStyles[type].styles;
-		const allRootStyles = Object.assign({}, styles.alert, typeStyles, { top }, containerStyles);
+		const allRootStyles = {...styles.alert, ...typeStyles, ...{ top }, ...containerStyles};
 		const icon = alertStyles[type].icon;
-		return <div style={allRootStyles} className='UoTAlert'>
+		return (
+			<div style={allRootStyles} className='UoTAlert' >
 
-			<div id={elementId? elementId :'alert-message'} style={styles.message}>
-				<div style={styles.iconWrapper}>{icon}</div>
-				<span style={styles.title}>{title}</span>
-				{message}
+				<div id={elementId? elementId :'alert-message'} style={styles.message} >
+					<div style={styles.iconWrapper} ></div>
+					<span style={styles.title }>{title}</span>
+					{message}
+				</div>
+				<div>
+					<a href='/' style={styles.iconWrapper} onClick={(e) => {
+						e.preventDefault();
+						self.setState({ isOpen: false })
+						if (onHide) onHide();
+					}} >
+						<div
+							style={{fontSize:"26",color:{primaryGreyDark}}}
+						/>
+					</a>
+				</div>
 			</div>
-			<div>
-				<a href='/' style={styles.iconWrapper} onClick={(e) => {
-					e.preventDefault();
-					this.setState({ isOpen: false })
-					if (onHide) onHide();
-				}}>
-					<Ionicon
-						icon="ion-close"
-						fontSize="26px"
-						color={primaryGreyDark}
-					/>
-				</a>
-			</div>
-		</div>
+		)
 	}
 }
 

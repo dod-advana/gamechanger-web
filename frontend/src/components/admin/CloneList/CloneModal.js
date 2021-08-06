@@ -31,6 +31,7 @@ export default ({storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdit
 		} else {
 			setEditCloneData({});
 		}
+		// eslint-disable-next-line
 	}, [setShowCreateEditCloneModal])
     return(
         <Dialog

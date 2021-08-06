@@ -85,6 +85,7 @@ export default () => {
 	}
     useEffect(()=>{
         getHomepageEditorData();
+        // eslint-disable-next-line
     },[]);
 
     // Columns for tables
