@@ -25,86 +25,6 @@ import DateFnsUtils from '@date-io/date-fns';
 import {trackEvent} from "../../telemetry/Matomo";
 import {getTrackingNameForFactory} from "../../../gamechangerUtils";
 
-const handleSelectAllCategories = (state, dispatch) => {
-	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificCategoriesSelected = false;
-	newSearchSettings.allCategoriesSelected = true;
-	Object.keys(newSelectedCategories).forEach(category => newSelectedCategories[category] = true);
-	setState(dispatch, { selectedCategories: newSelectedCategories, searchSettings: newSearchSettings, metricsCounted: false });
-}
-
-const handleSelectSpecificCategories = (state, dispatch) =>{
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.specificCategoriesSelected = true;
-	newSearchSettings.allCategoriesSelected = false;
-	setState(dispatch, { searchSettings: newSearchSettings, metricsCounted: false });
-}
-
-const handleCategoriesFilterChange = (event, state, dispatch) => {
-	const newSelectedCategories = _.cloneDeep(state.selectedCategories);
-	let categoryName = event.target.name;
-	newSelectedCategories[categoryName] = event.target.checked;
-	setState(dispatch, { selectedCategories: newSelectedCategories, metricsCounted: false });
-}
-
-const renderCategories = (state, dispatch, classes) => {
-	return (
-		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			<FormGroup row style={{ marginBottom: '10px' }}>
-				<FormControlLabel
-					name='All categories'
-					value='All categories'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={() => handleSelectAllCategories(state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={state.searchSettings.allCategoriesSelected}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name='All categories'
-						style={styles.filterBox}
-					/>}
-					label='All categories'
-					labelPlacement="end"
-					style={styles.titleText}
-				/>
-				<FormControlLabel
-					name='Specific category(s)'
-					value='Specific category(s)'
-					classes={{ label: classes.titleText }}
-					control={<Checkbox
-						classes={{ root: classes.filterBox }}
-						onClick={() => handleSelectSpecificCategories(state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={state.searchSettings.specificCategoriesSelected}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name='Specific category(s)'
-						style={styles.filterBox}
-					/>}
-					label='Specific category(s)'
-					labelPlacement="end"
-					style={styles.titleText}
-				/>
-			</FormGroup>
-			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-				{state.searchSettings.specificCategoriesSelected && Object.keys(state.selectedCategories).map(category => {
-					return (
-						<FormControlLabel
-							key={`${category}`}
-							value={`${category}`}
-							classes={{ label: classes.checkboxPill }}
-							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${category}`} checked={state.selectedCategories[category]} onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)} />}
-							label={`${category}`}
-							labelPlacement="end"
-						/>
-					)
-				})}
-			</FormGroup>
-		</FormControl>
-	)
-}
-
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.specificOrgsSelected = true;
@@ -920,7 +840,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 				
 				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'500'}>
+					<GCAccordion expanded={state.searchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderTypes(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
@@ -981,14 +901,6 @@ const PolicySearchMatrixHandler = {
 
 		return (
 			<>
-				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>CATEGORY</strong>
-					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
-					<div>
-						{renderCategories(state, dispatch, classes)}
-					</div>
-				</div>
-
 				<div style={styles.filterDiv}>
 					<strong style={styles.boldText}>SOURCE</strong>
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
