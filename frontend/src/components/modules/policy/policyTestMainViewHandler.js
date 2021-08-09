@@ -19,9 +19,7 @@ import GetQAResults from '../default/qaResults';
 import GameChangerThumbnailRow from "../../mainView/ThumbnailRow";
 import { TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "../../mainView/HomePageStyledComponents";
 import {
-	getTrackingNameForFactory,
-	RESULTS_PER_PAGE, StyledCenterContainer,
-	crawlerMappingFunc
+	getTrackingNameForFactory, RESULTS_PER_PAGE, StyledCenterContainer,
 } from "../../../gamechangerUtils";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
@@ -408,7 +406,7 @@ const PolicyMainViewHandler = {
 					>
 						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
 							<SourceContainer>
-								<img src={source.imgSrc}></img>
+								<img src={source.imgSrc} alt={'crawler seal'}></img>
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
