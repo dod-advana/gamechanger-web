@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
-import styled from 'styled-components';
 import { Select, InputLabel, FormControl, MenuItem, Typography, TextField } from '@material-ui/core'
 import GameChangerAPI from "../api/gameChanger-service-api";
 import LoadingBar from '../common/LoadingBar';
 import { backgroundGreyDark } from '../../components/common/gc-colors';
-import CloseIcon from '@material-ui/icons/Close';
 import './export-results-dialog.css';
 import moment from 'moment';
 import {trackEvent} from "../telemetry/Matomo";
@@ -96,22 +94,6 @@ const styles = {
 	}
 }
 
-const CloseButton = styled.div`
-    padding: 6px;
-    background-color: white;
-    border-radius: 5px;
-    color: #8091A5 !important;
-    border: 1px solid #B0B9BE;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: .4;
-    position: absolute;
-    right: -20px;
-    top: -10px;
-`;
-
 export const downloadFile = async (data, format, cloneData) => {
 	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', 'onDownloadFile', format);
 	const filename = "GAMECHANGER-Results-" + moment().format("YYYY-MM-DD_HH-mm-ss");
@@ -176,13 +158,15 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 		
 		<UOTDialog
 			open={open}
-			title={<div><Typography variant="h3" display="inline">Export Results</Typography><CloseButton onClick={handleClose}>
-			<CloseIcon fontSize="large" />
-		</CloseButton></div>}
+			title={<div><Typography variant="h3" display="inline">Export Results</Typography></div>}
 			onRequestClose={handleClose}
 			width="500px"
 			primaryLabel=''
 			primaryAction={() => { }}
+			contentStyle={{padding: 0}}
+			titleStyle={{padding: 0}}
+			mainContainerStyle={{padding: 0, margin: 0}}
+			handleClose={handleClose}
 		> 
 			<h2>&nbsp;Export is currently limited to 10000 results</h2>
 
@@ -211,20 +195,21 @@ const ExportResultsDialog = ({ open, handleClose, searchObject, selectedDocument
 			
 			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
 				<div style={styles.leftButtonGroup}>
-					<FormControl variant="outlined" style={{ width: '115px' }}>
+					<FormControl variant="outlined" style={{ width: '100%' }}>
 						<InputLabel className={classes.labelFont}>File Format</InputLabel>
-						<Select label="File Format" style={{ height: '45px', fontSize: '16px' }} value={selectedFormat} onChange={handleChange}>
+						<Select label="File Format" style={{ fontSize: '16px' }} value={selectedFormat} onChange={handleChange}>
 							{!isEda && <MenuItem style={styles.menuItem} value='pdf' key='pdf'>PDF</MenuItem>}
 							<MenuItem style={styles.menuItem} value='json' key='json'>JSON</MenuItem>
 							<MenuItem style={styles.menuItem} value='csv' key='csv'>CSV</MenuItem>
 						</Select>
 					</FormControl>
 				</div>
-
+			</div>
+			<div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '3% 0 0 0' }}>
 				<div style={styles.rightButtonGroup}>
 					<GCButton
 						onClick={handleClose}
-						buttonColor={'#8091A5'}
+						isSecondaryBtn={true}
 					>
 						Close
 					</GCButton>
