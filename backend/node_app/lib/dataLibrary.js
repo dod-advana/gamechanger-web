@@ -287,7 +287,7 @@ class DataLibrary {
 	}
 
 	getFileThumbnail(data, userId){
-		let { dest, folder, filename } = data;
+		let { dest, folder, filename, clone_name } = data;
 		let filetype = filename.split('.').pop();
 		if (filetype === '.png'){
 			filetype = 'image/png'
@@ -296,7 +296,7 @@ class DataLibrary {
 		}
 		const params = {
 			Bucket: dest,
-			Key: `gamechanger/${folder}/${filename}`,
+			Key: `${clone_name}/${folder}/${filename}`,
 			ResponseContentType: filetype
 		};
 
