@@ -35,7 +35,7 @@ const GameChangerThumbnailRow = (props) => {
 		let items = Math.floor(rowWidth/tWidth);
 		setScrollable(links.length > items);
 		setRowWidth( (items * (tWidth + 10)) );
-	},[children])
+	},[children, links.length, width])
 
 	const scroll = (offset) => {
 		rowRef.current.scrollLeft -= offset;
