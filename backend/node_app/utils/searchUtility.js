@@ -829,7 +829,7 @@ class SearchUtility {
 												'paragraphs.par_raw_text_t'
 											],
 											from: 0,
-											size: 5,
+											size: 100,
 											highlight: {
 												fields: {
 													'paragraphs.filename.search': {
@@ -1136,9 +1136,17 @@ class SearchUtility {
 		let docs = docResults.body.hits.hits
 		let filteredResults = this.filterEmptyDocs(docs, filterLength);
 		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
+		//let orgList = [];
+		//let legitCount = 0;
 		try {
-			for (var i = 0; i < docLimit; i++) {
+			for (var i = 0; i < docLimit ; i++) {
 				let resultDoc = filteredResults[i];
+				//let resultOrg = resultDoc._source.display_org_s;
+				//orgList.push(resultOrg);
+				//if (orgList.filter(x => x===resultOrg).length > 2) {
+				//	continue;
+				//} else {
+				//legitCount++;
 				if (resultDoc._score > qaParams.scoreThreshold) { // if doc scores high, retrieve paragraphs
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
