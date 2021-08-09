@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import { setState } from "../../sharedFunctions";
-import GameChangerSearchBar from "./GameChangerSearchBar";
+import ModularSearchBarHandler from "./ModularSearchBarHandler";
 import SearchBanner from "./GCSearchBanner";
 import SearchHandlerFactory from "../factories/searchHandlerFactory";
 import MainViewFactory from "../factories/mainViewFactory";
@@ -20,7 +20,7 @@ const SearchBar = (props) => {
 		if (state.cloneDataSet && !loaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const tmpSearchHandler = searchFactory.createHandler();
-			setSearchHandler(tmpSearchHandler)
+			setSearchHandler(tmpSearchHandler);
 			const mainViewFactory = new MainViewFactory(state.cloneData.main_view_module);
 			const tmpMainViewHandler = mainViewFactory.createHandler();
 			setMainViewHandler(tmpMainViewHandler);
@@ -75,7 +75,7 @@ const SearchBar = (props) => {
 				dispatch={dispatch}
 				loading={state.loading}
 			>
-				<GameChangerSearchBar context={context}/>
+				<ModularSearchBarHandler context={context}/>
 			</SearchBanner>
 		</>
 	);

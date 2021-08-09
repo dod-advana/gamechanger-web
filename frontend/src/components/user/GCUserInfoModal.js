@@ -67,9 +67,6 @@ export default function GCUserInfoModal (props) {
 
     const [emailError, setEmailError] = useState(false);
     const [orgError, setOrgError] = useState(false);
-    const [passedOnInfo, setPassedOnInfo] = useState(true);
-    const [userFeedbackMode, setUserFeedbackMode] = useState(false);
-    
 
     const checkRequired = (field, value) => {
         if (field === 'email') {
@@ -102,28 +99,14 @@ export default function GCUserInfoModal (props) {
             expires:tomorrow.toUTCString()
         }
         localStorage.setItem('userInfoPassed', JSON.stringify(userInfo));
-        setPassedOnInfo(userInfo.passed)
-    }
-    /**
-     * Check the local storage for a userInfoPassed object
-     * if it hasn't expired return true
-     * @method passedOnUserInfo
-     * @returns boolean
-     */
-    const passedOnUserInfo =() => {
-        const infoPassed =  JSON.parse(localStorage.getItem('userInfoPassed'));
-        let didPass = false;
-        if (infoPassed && (new Date(infoPassed.expires) > new Date())){
-            didPass= infoPassed.passed;
-        }
-        setPassedOnInfo(didPass);
+        setState(dispatch, { userInfoModalOpen: false });
     }
 
     const getUserFeedbackMode = async () => {
 		try {
 			const { data } = await gameChangerAPI.getUserFeedbackMode();
 			const value = data.value === 'true';
-			setUserFeedbackMode(value);
+            localStorage.setItem('userFeedbackMode', JSON.stringify(value));
 		} catch(e) {
 			console.error('Error getting user feedback mode', e);
 		}
@@ -147,11 +130,11 @@ export default function GCUserInfoModal (props) {
 	}
     useEffect(() => {
         getUserFeedbackMode();
-		passedOnUserInfo();
 	}, []);
+
     return (
         <Dialog
-            open={false && !passedOnInfo && userFeedbackMode}
+            open={state.userInfoModalOpen}
             maxWidth="xl"
         >
             <DialogTitle style={styles.modalHeader}>
