@@ -75,64 +75,6 @@ class EdaSearchHandler extends SearchHandler {
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			// log query to ES
 			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
-			
-			// EXPANSION TERM CODE
-
-			// const redisDB = this.sep_async_redis;
-			// redisDB.select(redisAsyncClientDB);
-
-			// // try to get search expansion
-			// const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
-			// let expansionDict = {};
-			// try {
-			// 	expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
-			// } catch (e) {
-			// // log error and move on, expansions are not required
-			// 	if (forCacheReload){
-			// 		throw Error('Cannot get expanded search terms in cache reload');
-			// 	}
-			// 	this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
-			// }
-
-			// let lookUpTerm = searchText.replace(/\"/g, '');
-			// let useText = true;
-			// if (termsArray && termsArray.length && termsArray[0]) {
-			// 	useText = false;
-			// 	lookUpTerm = termsArray[0].replace(/\"/g, '');
-			// }
-			// const synonyms = this.thesaurus.lookUp(lookUpTerm);
-			// let text = searchText;
-			// if (!useText && termsArray && termsArray.length && termsArray[0]) {
-			// 	text = termsArray[0];
-			// }
-
-			// // get expanded abbreviations
-			// await this.async_redis.select(abbreviationRedisAsyncClientDB);
-			// let abbreviationExpansions = [];
-			// let i = 0;
-			// for (i = 0; i < termsArray.length; i++) {
-			// 	let term = termsArray[i];
-			// 	let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			// 	let expandedTerm = await this.async_redis.get(upperTerm);
-			// 	let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			// 	let compressedTerm = await this.async_redis.get(lowerTerm);
-			// 	if (expandedTerm) {
-			// 		if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-			// 			abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-			// 		}
-			// 	}
-			// 	if (compressedTerm) {
-			// 		if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-			// 			abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-			// 		}
-			// 	}
-			// }
-
-			// // removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-			// let cleanedAbbreviations = [];
-
-			// expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
-
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
@@ -201,7 +143,6 @@ class EdaSearchHandler extends SearchHandler {
 			let esQuery = '';
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
-	
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
 				if (forStats) {
@@ -327,7 +268,7 @@ class EdaSearchHandler extends SearchHandler {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					const data = hits[0];
-					const metadata = data._source && data._source.extracted_data_eda_n ? data._source.extracted_data_eda_n : {}
+					const metadata = data._source && data._source.extracted_data_eda_n ? this.edaSearchUtility.getExtractedFields(data._source, data) : {}
 					return { ...data._source, ...data.fields, ...metadata };
 				}
 				else { 
@@ -345,6 +286,46 @@ class EdaSearchHandler extends SearchHandler {
 
 	}
 
+	async querySimilarDocs(req, userId) {
+		try {
+			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const permissions = req.permissions ? req.permissions : [];
+			const { esClientName, esIndex } = clientObj;
+			const { body } = req;
+			const { issueOfficeDoDAAC } = body;
+
+
+			let esQuery = '';
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery({...body, edaSearchSettings: { issueOfficeDoDAAC }}, userId);
+			} else {
+				throw 'Unauthorized';
+			}
+
+
+			// use the award ID to get the base award data only
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+
+			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+				const hits = results.body.hits.hits;
+				if (hits && hits.length > 0) {
+					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
+				}
+				else { 
+					return {}
+				}
+			} else {
+				this.logger.error('Error with similar docs Elasticsearch results', 'P1TFZKQ', userId);
+				return [];
+			}
+		} catch(err) {
+			const { message } = err;
+			this.logger.error(message, 'T5VRV7K', userId);
+			throw err;
+		}
+
+	}
+
 	async callFunctionHelper(req, userId) {
 		const {functionName} = req.body;
 
@@ -356,6 +337,8 @@ class EdaSearchHandler extends SearchHandler {
 						return await this.queryContractMods(req, userId);
 					case 'queryBaseAwardContract':
 						return await this.queryBaseAwardContract(req, userId);
+					case 'querySimilarDocs':
+						return await this.querySimilarDocs(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,
