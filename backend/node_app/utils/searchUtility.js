@@ -731,9 +731,9 @@ class SearchUtility {
 				// documents
 				const wildcard = {
 					wildcard: {
-						'paragraphs.filename.search': { 
+						'display_title_s.search': { 
 							value:  element,
-							boost: 15
+							boost: 6
 						}
 					}
 				}
@@ -753,9 +753,9 @@ class SearchUtility {
 				const mm = {
 					multi_match: {
 					query: element,
-					fields: ["summary_30","title", "keyw_5"],
+					fields: ["summary_30", "keyw_5"],
 					type: "phrase",
-					boost: 5
+					boost: 3
 					}
 				}
 				bigramQueries.docShouldQueries.push(mm);
@@ -1030,7 +1030,7 @@ class SearchUtility {
 		}
 	}
 
-	cleanQAResults (searchResults, shortenedResults, context) {
+	cleanQAResults (QA, shortenedResults, context) {
 		// formats QA results
 		try {
 			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
@@ -1042,16 +1042,26 @@ class SearchUtility {
 					return i['text'] !== '';
 				});
 			}
-			let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
-			let cleanedResults = shortenedResults.answers.map(item => item.text);
-			searchResults.qaResults.answers = cleanedResults;
-			searchResults.qaResults.filenames = contextIds;
-			searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
-			searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
+			let matchedResults = [];
+			for (var i = 0; i < shortenedResults.answers.length; i++) {
+				let ix = shortenedResults.answers[i].context;
+				let matchedAnswer = { 
+					answer: shortenedResults.answers[i].text, 
+					null_score_diff: shortenedResults.answers[i].null_score_diff,
+					filename: context[ix].filename,
+					docId: context[ix].docId,
+					resultType: context[ix].resultType,
+					cac_only: context[ix].cac_only,
+					pub_date: context[ix].pubDate,
+					displaySource: "Source: " + context[ix].filename.toUpperCase() + " (" + context[ix].resultType.toUpperCase() + ')'
+					}
+				matchedResults.push(matchedAnswer);
+			};
+			QA.answers = matchedResults;
 		} catch (e) {
 			LOGGER.error(e.message, 'AJEPRUTY', '');
 		};
-		return searchResults;
+		return QA;
 	}
 
 	getInnerHitHighlight (paragraph) {
@@ -1097,7 +1107,7 @@ class SearchUtility {
 				let [docId, parIdx] = sentResults[i].id.split('_');
 				docId = docId + '_0';
 				let resultDoc = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
-				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
+				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
 				let paraHit = resultDoc._source.paragraphs[parIdx];
 				let para = this.cleanParagraph(paraHit.par_raw_text_t);
 				if (para.length > qaParams.maxLength) { // if paragraph is too long, take beginning
@@ -1134,7 +1144,7 @@ class SearchUtility {
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
 							let para = this.cleanParagraph(this.getInnerHitParagraph(paraHits[x]));
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
 								contextPara.text = this.cleanParagraph(this.getInnerHitHighlight(paraHits[x]));
@@ -1145,7 +1155,7 @@ class SearchUtility {
 						}
 					}
 				} else { // if doc doesn't score high, retrieve the intro
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: 0};
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'context search', parIdx: 0};
 					let singleResult = await this.queryOneDocQA(resultDoc._source.id, esClientName, esIndex, userId); // this adds the beginning of the doc
 					let qaSubset = await this.expandParagraphs(singleResult, contextPara.parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
 					let text = this.cleanParagraph(qaSubset.join(' ')); 
