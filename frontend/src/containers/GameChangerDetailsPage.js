@@ -494,6 +494,7 @@ const GameChangerDetailsPage = (props) => {
 										rows={entity.details}
 										height={'auto'}
 										dontScroll={true}
+										firstColWidth={styles.entityColWidth}
 										colWidth={colWidth}
 										disableWrap={true}
 										title={'Entity Statistics'}
@@ -682,9 +683,8 @@ const styles = {
 		maxWidth: '100px',
 		width: '100px',
 		whiteSpace: 'nowrap',
-		overflowWrap: 'anywhere',
-		textOverflow: 'ellipsis',
-		textAlign: 'left'
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	},
 	topicColWidth: {
 		maxWidth: '900px',
