@@ -17,7 +17,7 @@ class FeedbackController {
 		this.getFeedbackData = this.getFeedbackData.bind(this);
 	}
 
-  async sendIntelligentSearchFeedback(req, res) {
+    async sendIntelligentSearchFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
     const { eventName, intelligentSearchTitle, searchText } = req.body;
 		try {
@@ -31,9 +31,18 @@ class FeedbackController {
 
 	async sendQAFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
-    const { eventName, question, answer } = req.body;
+    const { eventName, question, answer, qaContext, params } = req.body;
 		try {
-			const feedback = await this.feedback.create({ event_name: eventName, user_id: userId, value_1: 'question: ' + question, value_2: 'QA answer: ' + answer });
+			const feedback = await this.feedback.create({ 
+				event_name: eventName, 
+				user_id: userId, 
+				value_1: 'question: ' + question, 
+				value_2: 'QA answer: ' + answer.answer,
+				value_3: 'QA filename: ' + answer.filename,
+				value_4: 'cac_only: ' + answer.cac_only,
+				value_5: 'QA context: ' + JSON.stringify(qaContext),
+				value_6: 'QA params: ' + JSON.stringify(params)
+			});
 			res.status(200).send( eventName + ' feedback sent.' );
 		} catch (err) {
 			this.logger.error(err, 'QO32DTK', userId);
