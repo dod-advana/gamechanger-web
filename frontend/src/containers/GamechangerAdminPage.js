@@ -54,13 +54,13 @@ const GamechangerAdminPage = props => {
 			case PAGES.general:
 				return <GeneralAdminButtons />;
 			case PAGES.cloneList:
-				return (<CloneList refreshClones={refreshClones} />);
+				return <CloneList refreshClones={refreshClones} />;
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
 			case PAGES.mlDashboard:
 				return <MLDashboard />;
 			case PAGES.adminList:
-				return (<AdminList />)
+				return <AdminList />;
 			case PAGES.notifications:
 				return <NotificationsManagement />;
 			case PAGES.internalUsers:
@@ -70,9 +70,9 @@ const GamechangerAdminPage = props => {
 			case PAGES.apiKeys:
 				return <APIRequests />
 			case PAGES.homepageEditor:
-				return (<HomepageEditor />)
+				return <HomepageEditor />;
 			default:
-				return <GeneralAdminButtons />
+				return <GeneralAdminButtons />;
 		}
 	}
 	
