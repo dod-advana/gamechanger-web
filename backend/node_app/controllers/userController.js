@@ -261,8 +261,6 @@ class UserController {
 				user.api_key = '';
 			}
 
-			user.submitted_info = true;
-
 			res.send(user);
 
 		} catch (err) {
