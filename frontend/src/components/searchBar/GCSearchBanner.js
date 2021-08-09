@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, IconButton } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import styled from 'styled-components';
 import Modal from 'react-modal';
@@ -110,6 +110,22 @@ const AdvanaLogo = styled.img`
 	width: 40%;
 `;
 
+const CloseButton = styled.div`
+    padding: 6px;
+    background-color: white;
+    border-radius: 5px;
+    color: #8091A5 !important;
+    border: 1px solid #B0B9BE;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: .4;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+`;
+
 const SearchBanner = (props) => {
 	const {
 		style,
@@ -208,9 +224,9 @@ const SearchBanner = (props) => {
 				isOpen={loginModalOpen}
 				onClose={() => setLoginModal(false)}>
 					<LoginModalHeader>
-						<IconButton aria-label="close" onClick={() => setLoginModal(false)} style={{ borderRadius: '0', backgroundColor: '#F5F5F5'}}>
-							<CloseIcon style={{ fontSize: 30 }} />
-						</IconButton>
+						<CloseButton onClick={() => setLoginModal(false)}>
+							<CloseIcon fontSize="large" />
+						</CloseButton>
 					</LoginModalHeader>
 					<LoginModalBody>
 						<LoginModalBodyDiv>
@@ -221,7 +237,7 @@ const SearchBanner = (props) => {
 						</LoginModalBodyDiv>
 						<LoginModalBodyDiv width='85%'>
 							<a href="https://advana.data.mil/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', border: 'none', borderRadius: '5px' }}>
-								<GCButton style={{ flex: 1 }} buttonColor={'#8091A5'}>
+								<GCButton style={{ flex: 1 }} isSecondaryBtn={true}>
 									Login here
 								</GCButton>
 							</a>
