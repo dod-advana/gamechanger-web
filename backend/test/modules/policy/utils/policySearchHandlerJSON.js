@@ -503,9 +503,9 @@ const searchHelperExpected = {
   },
   "qaResults":{
      "question":"",
-     "answers":[
-        
-     ]
+     "answers":[],
+     "qaContext": [],
+     "params": {}
   },
   "entities":[
      
@@ -562,15 +562,11 @@ const createRecObjectExpected = { historyRec:
 
  const enrichSearchResultsExpected = {
    "entities":[],
-   'qaContext': {
-      'context': [],
-      'params': {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4}
-   },
    "qaResults":{
       "answers":[],
-      "docIds":[],
-      "filenames":[],
-      "question":""
+      "question":"",
+      "qaContext": [],
+      "params": {}
    },
    "topics":[
       
