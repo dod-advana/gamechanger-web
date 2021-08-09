@@ -270,7 +270,7 @@ class DocumentController {
 	async getHomepageThumbnail(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			const { filenames, folder, dest } = req.body
+			const { filenames, folder, dest, clone_name } = req.body
 			const promises = []
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			filenames.forEach(({img_filename}) => {
@@ -278,7 +278,7 @@ class DocumentController {
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
-				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder}, userId));
+				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId));
 			});
 			
 			Promise.allSettled(promises).then(values => {
