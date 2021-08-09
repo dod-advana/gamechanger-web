@@ -117,7 +117,17 @@ const DecoupledFooter = (props) => {
 		}
 	}
 
+	const initializeUserMatomoStatus = async () => {
+        try {
+            const { data } = await gameChangerAPI.getUserMatomoStatus();
+            localStorage.setItem('userMatomo', data);
+        } catch(e) {
+            console.error('Error getting matomo status', e);
+        }
+    }
+
 	useEffect (() => {
+        initializeUserMatomoStatus();
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
 		getUserData();
 	}, [])
@@ -282,7 +292,7 @@ const DecoupledFooter = (props) => {
 };
 
 DecoupledFooter.propTypes = {
-	setUserMatomo: PropTypes.bool.isRequired
+	setUserMatomo: PropTypes.func.isRequired
 }
 
 export default DecoupledFooter;

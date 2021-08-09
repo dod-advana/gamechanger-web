@@ -20,7 +20,8 @@ class HandlerFactory {
 					title_bar_module: 'policy/policyTitleBarHandler',
 					navigation_module: 'policy/policyNavigationHandler',
 					card_module: 'policy/policyCardHandler',
-					graph_module: 'policy/policyGraphHandler'
+					graph_module: 'policy/policyGraphHandler',
+					search_bar_module: 'policy/policySearchBarHandler'
 				});
 			}
 			meta.forEach((m) => {
