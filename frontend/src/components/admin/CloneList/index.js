@@ -57,8 +57,8 @@ export default ({refreshClones}) => {
 			if (data.status === 200) {
 				setCloneTableMetaData({});
 				setShowCreateEditCloneModal(false);
+                refreshClones();
 				getCloneData();
-				refreshClones();
 			}
 		});
 
@@ -71,7 +71,7 @@ export default ({refreshClones}) => {
         _.forEach(data.data, result => {
             tableData.push(result);
         });
-        setGCCloneTableData(gcCloneTableData)
+        setGCCloneTableData(tableData);
         const tableMetaData = await gameChangerAPI.getCloneTableData();
         
         const booleanFields = [];
@@ -102,7 +102,7 @@ export default ({refreshClones}) => {
                 }
             }
         });
-        setCloneTableMetaData(tableMetaData)
+        setCloneTableMetaData({stringFields, booleanFields, jsonFields})
     }
     const deleteCloneData = async (id) => {
 		await gameChangerAPI.deleteCloneData(id);

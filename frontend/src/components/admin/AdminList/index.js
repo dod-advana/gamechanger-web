@@ -96,7 +96,7 @@ export default () => {
                     pageSize={10}
                 />
             </div>
-            <AdminModal showCreateEditAdminModal={showCreateEditAdminModal} setShowCreateEditAdminModal={setShowCreateEditAdminModal} />
+            <AdminModal showCreateEditAdminModal={showCreateEditAdminModal} setShowCreateEditAdminModal={setShowCreateEditAdminModal} getAdminData={getAdminData} />
         </>
     )
 }

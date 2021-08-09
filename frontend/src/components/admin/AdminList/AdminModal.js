@@ -12,7 +12,7 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class AdminModal
  */
-export default ({showCreateEditAdminModal, setShowCreateEditAdminModal}) => {
+export default ({showCreateEditAdminModal, setShowCreateEditAdminModal, getAdminData}) => {
     const [editAdminID, setEditAdminID] = useState(-99);
 	const [editAdminData, setEditAdminData] = useState({});
     
@@ -47,6 +47,7 @@ export default ({showCreateEditAdminModal, setShowCreateEditAdminModal}) => {
         gameChangerAPI.storeAdminData(adminDataToStore).then(data => {
             if (data.status === 200) {
                 closeAdminModal();
+				getAdminData();
             }
         });
     }
