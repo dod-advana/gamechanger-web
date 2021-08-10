@@ -19,12 +19,12 @@ import GetQAResults from '../default/qaResults';
 import GameChangerThumbnailRow from "../../mainView/ThumbnailRow";
 import { TrendingSearchContainer, RecentSearchContainer, SourceContainer } from "../../mainView/HomePageStyledComponents";
 import {
-	getTrackingNameForFactory,
-	RESULTS_PER_PAGE, StyledCenterContainer,
-	crawlerMappingFunc
+	getTrackingNameForFactory, RESULTS_PER_PAGE, StyledCenterContainer,
 } from "../../../gamechangerUtils";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
+import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
+
 
 const _ = require('lodash');
 
@@ -68,7 +68,25 @@ const styles = {
 	containerText: {
 		fontSize: 16,
 		fontWeight: 'bold'
-	}
+	},
+	checkboxPill: {
+		textAlign: 'center',
+		borderRadius: '10px',
+		paddingLeft: '10px',
+		paddingRight: '10px',
+		lineHeight: 1.2,
+		fontSize: '12px',
+		marginLeft: '10px',
+		border: '2px solid #bdccde',
+		backgroundColor: 'white',
+		boxSizing: 'border-box',
+		color: 'black',
+		minHeight: '35px',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		cursor: 'pointer'
+	},
 }
 
 const getSearchResults = (searchResultData, state, dispatch) => {
@@ -152,7 +170,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
-		const { dispatch, state } = props;
+		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
@@ -173,10 +191,14 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 
 		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, state.cloneData);
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
-				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf;
+				if(buf.status === "fulfilled"){
+					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				} else {
+					pubs[idx].imgSrc = 'error';
+				}
 			})
 			
 		} catch(e) {
@@ -185,6 +207,34 @@ const PolicyMainViewHandler = {
 		
 		setState(dispatch, {adminMajorPubs: pubs});
 
+		try {
+			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+			crawlerSources = crawlerSources.data;
+			let folder = crawlerSources[0].image_link.split('/');
+			folder = folder[folder.length - 2];
+			const thumbnailList = crawlerSources.map(item => {
+				let filename = item.image_link.split('/').pop();
+				return {img_filename: filename}
+			});
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
+			const buffers = pngs.data
+			buffers.forEach((buf,idx) => {
+				if(buf.status === "fulfilled"){
+					if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+						crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+					}
+				}
+				else {
+					crawlerSources[idx].imgSrc = DefaultSeal;
+				}
+			});
+			setState(dispatch, {crawlerSources});
+		} catch(e) {
+			//Do nothing
+			console.log(e)
+		}
 	},
 	
 	getMainView(props) {
@@ -265,7 +315,6 @@ const PolicyMainViewHandler = {
 				adminTopics[idx].favorite = topic.name.toLowerCase() === fav.topic_name.toLowerCase();
 			})
 		})
-		const cleanSources = crawlerSources.map(crawl => crawlerMappingFunc(crawl))
 
 		return(
 			<div style={{marginTop: '40px'}}>
@@ -293,11 +342,34 @@ const PolicyMainViewHandler = {
 						)}
 					</GameChangerThumbnailRow> */}
 					<GameChangerThumbnailRow
-						links={adminTopics}
-						title={"Topics"}
-						width='300px'
+						links={trendingLinks}
+						title={"Trending Searches"}
+						width={'300px'}
 					>
-						{adminTopics.map(({name, favorite})=>
+						{trendingLinks.map(({search, favorite, count},idx)=>
+							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
+								<div style={{display:'flex', justifyContent:'space-between'}}>
+									<Typography style={styles.containerText}>{`#${idx+1} ${search.length < 20 ? search : search.substring(0,22) + '...'}`}</Typography>
+									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
+										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+										cursor: "pointer",
+										fontSize: 20
+									}} />
+								</div>
+								<Typography style={styles.subtext}>
+									<i className="fa fa-search" style={{width:16, height:15}}/> 
+									{`${count} searches this week`}
+								</Typography>
+							</TrendingSearchContainer>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
+						links={adminTopics}
+						title={"Editor's Choice: Top Topics"}
+						width='100px'
+						style={{marginLeft: '0'}}
+					>
+						{/* {false && adminTopics.map(({name, favorite})=>
 							<TrendingSearchContainer 
 								style={{backgroundColor: '#E6ECF4'}} 
 								onClick={() => {
@@ -314,71 +386,74 @@ const PolicyMainViewHandler = {
 									}} />
 								</div>
 							</TrendingSearchContainer>
-						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={trendingLinks}
-						title={"Trending Searches"}
-						width='300px'
-					>
-						{trendingLinks.map(({search, favorite, count},idx)=>
-							<TrendingSearchContainer onClick={()=>setState(dispatch,{searchText:search, runSearch:true})}>
-								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{`#${idx+1} ${search}`}</Typography>
-									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-										color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
-										cursor: "pointer",
-										fontSize: 20
-									}} />
-								</div>
-								<Typography style={styles.subtext}>
-									<i className="fa fa-search" style={{width:16, height:15}}/> 
-									{`${count} searches this week`}
-								</Typography>
-							</TrendingSearchContainer>
+						)} */}
+						{adminTopics.map(({name, favorite})=>
+							<div 
+								style={styles.checkboxPill} 
+								onClick={() => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
+								}}
+							>
+								{name}
+							</div>
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={cleanSources} 
+						links={crawlerSources} 
 						title="Sources" 
 						width='300px'
 					>
-						{cleanSources.map(source => 
-							<SourceContainer
-								onClick={()=>{
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.toLowerCase()}`);
-								}}
-							>
-								{/* <div style={{width:100, height:100}}/> */}
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 25}}>{source}</Typography>
+						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
+							<SourceContainer>
+								<img src={source.imgSrc} alt={'crawler seal'}></img>
+								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
+						{crawlerSources.length > 0 && crawlerSources[0].imgSrc === undefined &&  
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={recentSearches} 
 						title="Recent Searches" 
-						width='460px'
+						width='300px'
 					>
 						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
 						links={adminMajorPubs} 
-						title="Major Publications" 
-						width='180px' 
+						title="Editor's Choice: Top Publications" 
+						width='215px' 
 					>
-						{adminMajorPubs.map(({name, imgSrc}) =>
-							<img 
-								style={{height:210, border:'1px solid black', marginLeft: 10, cursor:'pointer'}} 
-								src={imgSrc}
-								alt="thumbnail" 
-								title={name}
-								onClick={()=>{
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-									// window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${name.toLowerCase()}`);
-								}}
-							/>
+						{ (adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc) && adminMajorPubs.map((pub) =>
+							<div className="topPublication"
+							>
+								{ pub.imgSrc !== 'error' ? 
+									<img 
+									className="image"
+									src={pub.imgSrc}
+									alt="thumbnail" 
+									title={pub.name}
+								/> : 
+									<div className="image">{pub.name}</div>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+									}}
+								>
+									<div className="hover-text">{pub.name}</div>
+								</div>
+							</div>
 						)}
+						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
 					</GameChangerThumbnailRow>
 				</div>
 			</div>
@@ -519,7 +594,6 @@ const PolicyMainViewHandler = {
 															<>
 																{
 																	getSearchResults(docSearchResults, state, dispatch)
-															
 																}
 																{
 																	docsPagination  && 
