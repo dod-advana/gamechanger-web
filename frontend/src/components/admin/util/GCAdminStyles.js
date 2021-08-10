@@ -190,13 +190,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const GCCheckbox = withStyles({
-  root: {
-    color: '#E9691D',
-    '&$checked': {
-      color:'#E9691D',
-    },
-  },
-  checked: {},
+	root: {
+		color: '#E9691D',
+		'&$checked': {
+			color:'#E9691D',
+		},
+	},
+	checked: {},
 })((props) => <Checkbox color="default" {...props} />);
 
 const TableRow = styled.div`
