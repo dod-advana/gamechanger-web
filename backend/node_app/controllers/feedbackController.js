@@ -19,9 +19,15 @@ class FeedbackController {
 
     async sendIntelligentSearchFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
-    const { eventName, intelligentSearchTitle, searchText } = req.body;
+    const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
-			const feedback = await this.feedback.create({ event_name: eventName, user_id: userId, value_1: 'search_text: ' + searchText, value_2: 'title_returned: ' + intelligentSearchTitle });
+			const feedback = await this.feedback.create({ 
+				event_name: eventName, 
+				user_id: userId, 
+				value_1: 'search_text: ' + searchText,
+				value_2: 'title_returned: ' + intelligentSearchTitle,
+				value_5: 'sentence_results ' + JSON.stringify(sentenceResults)
+			 });
 			res.status(200).send( eventName + ' feedback sent.' );
 		} catch (err) {
 			this.logger.error(err, '9YVI7BH', userId);
