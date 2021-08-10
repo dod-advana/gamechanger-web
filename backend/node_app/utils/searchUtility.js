@@ -1636,11 +1636,13 @@ class SearchUtility {
 	// }
 
 	async getSentResults(searchText, userId) {
+		let sentResults = [];
 		try {
-			return await this.mlApi.getSentenceTransformerResults(searchText, userId);
+			sentResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		} catch (e) {
-			this.logger.error(e, 'PQKLW5XN', user);
-		}
+			this.logger.error(e, 'PQKLW5XN', userId);
+		};
+		return sentResults
 	}
 
 	async intelligentSearchHandler(sentenceResults, userId, req, clientObj){

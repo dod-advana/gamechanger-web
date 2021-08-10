@@ -268,7 +268,7 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		try {
 			let enrichedResults = searchResults;
-			let sentResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
+			let sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
 			//set empty values
 			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
 			enrichedResults.intelligentSearch = {};
@@ -276,13 +276,14 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
+			enrichedResults.sentenceResults = sentenceResults;
 
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
 			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 2};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, sentResults, qaParams, userId);
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
 				enrichedResults.qaResults = QA
 			}
 
@@ -290,7 +291,8 @@ class PolicySearchHandler extends SearchHandler {
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
-				const intelligentSearchResult = await this.intelligentSearch(req, sentResults, clientObj, userId);
+				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
+				console.log("INTELLIGENT SEARCH RESULT ", intelligentSearchResult);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
 
@@ -368,7 +370,7 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, sentResults, qaParams, userId){
+	async qaEnrichment(req, sentenceResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
@@ -396,7 +398,7 @@ class PolicySearchHandler extends SearchHandler {
 				}
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, sentResults, esClientName, esIndex, userId, qaParams);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, sentenceResults, esClientName, esIndex, userId, qaParams);
 				if (testing === true) {
 					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 				}
