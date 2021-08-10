@@ -9,6 +9,7 @@ export const AgencyPublicationContainer = styled.div`
 	margin-left:10px;
 	padding: 10px;
 	cursor: pointer;
+	flex: 0 0 auto; 
 `;
 
 export const TrendingSearchContainer = styled.div`
@@ -20,6 +21,7 @@ export const TrendingSearchContainer = styled.div`
 	margin-left:10px;
 	padding: 20px;
 	cursor: pointer;
+	flex: 0 0 auto; 
 `;
 
 export const SourceContainer = styled.div`
@@ -31,14 +33,16 @@ export const SourceContainer = styled.div`
 	margin-left:10px;
 	padding: 10px;
 	cursor: pointer;
-`;
+  flex: 0 0 auto; 
+	`;
 
 export const RecentSearchContainer = styled.div`
 	height: 200px;
-	width: 460px;
+	width: 300px;
 	border-radius: 6px;
 	background-color: #F4F4F4;
 	margin-left:10px;
 	padding: 10px;
 	cursor: pointer;
+  flex: 0 0 auto; 
 `;
