@@ -78,6 +78,8 @@ class PolicySearchHandler extends SearchHandler {
 				return await this.getSingleDocumentFromESHelper(req, userId);
 			case 'getDocumentsForDetailsPageFromES':
 				return await this.getDocumentsForDetailsPageFromESHelper(req, userId);
+			case 'getDocumentsBySourceFromESHelper':
+				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
@@ -292,7 +294,6 @@ class PolicySearchHandler extends SearchHandler {
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
 				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
-				console.log("INTELLIGENT SEARCH RESULT ", intelligentSearchResult);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
 
@@ -414,7 +415,6 @@ class PolicySearchHandler extends SearchHandler {
 				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			}
 		}
-		console.log(QA);
 		return QA;
 	}
 	
@@ -560,6 +560,34 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'Z9DWH7K', userId);
+			throw msg;
+		}
+	}
+
+	async getDocumentsBySourceFromESHelper(req, userId) {
+		let esQuery = '';
+		try {
+			const permissions = req.permissions ? req.permissions : [];
+			const { searchText, offset = 0, limit = 18, cloneName } = req.body;
+
+			esQuery = this.searchUtility.getSourceQuery(searchText, offset, limit);
+			const clientObj = this.searchUtility.getESClient(cloneName, permissions)
+			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+
+			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
+
+				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
+				// insert crawler dates into search results
+				return {...searchResults, esQuery};
+			} else {
+				this.logger.error('Error with Elasticsearch results', '54TP85I', userId);
+				return { totalCount: 0, docs: [], esQuery };
+			}
+
+		} catch (err) {
+			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			this.logger.error(msg, 'GODULEB', userId);
 			throw msg;
 		}
 	}

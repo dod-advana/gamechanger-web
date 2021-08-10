@@ -21,7 +21,7 @@ import {
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import defaultSearchHandler from "../default/defaultSearchHandler";
+import simpleSearchHandler from "../simple/simpleSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -134,6 +134,7 @@ const PolicySearchHandler = {
 			categoryMetadata: {},
 			qaResults: {question: '', answers: [], qaContext: [], params: {}},
 			intelligentSearchResult: {},
+			sentenceResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
@@ -230,7 +231,7 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, sentenceResults, intelligentSearch } = resp.data;
 
 				displayBackendError(resp, dispatch);
 				const categoryMetadata = 
@@ -447,6 +448,7 @@ const PolicySearchHandler = {
 						topicSearchResults: topics, 
 						qaResults: qaResults,
 						intelligentSearchResult: intelligentSearch,
+						sentenceResults: sentenceResults,
 						searchResultsCount: searchResults.length,
 						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
@@ -481,6 +483,7 @@ const PolicySearchHandler = {
 						categoryMetadata: {},
 						qaResults: {question: '', answers: [], qaContext: [], params: {}},
 						intelligentSearchResult: {},
+						sentenceResults: [],
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
@@ -709,7 +712,7 @@ const PolicySearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		return defaultSearchHandler.parseSearchURL(defaultState, url);
+		return simpleSearchHandler.parseSearchURL(defaultState, url);
 	},
 
 
