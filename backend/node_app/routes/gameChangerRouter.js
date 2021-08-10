@@ -9,7 +9,6 @@ const { MegaMenuController } = require('../controllers/megaMenuController');
 const { UserController } = require('../controllers/userController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
-const { CloneController } = require('../controllers/cloneController');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { AdminController } = require('../controllers/adminController');
 const { NotificationController } = require('../controllers/notificationController');
@@ -30,7 +29,6 @@ const exportHistory = new ExportHistoryController();
 const user = new UserController();
 const favorites = new FavoritesController();
 const cache = new CacheController();
-const clone = new CloneController();
 const dataTracker = new DataTrackerController();
 const admin = new AdminController();
 const notification = new NotificationController();
@@ -55,6 +53,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
+router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);

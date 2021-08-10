@@ -513,6 +513,10 @@ const EdaSearchHandler = {
 
 		window.history.pushState(null, document.title, linkString);
 	},
+
+	getPresearchData(state) {
+		
+	}
 };
 
 export default EdaSearchHandler;
