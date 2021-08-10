@@ -1101,11 +1101,11 @@ class SearchUtility {
 		}
 	}
 
-	async processQASentenceResults (sentResults, context, esClientName, esIndex, userId, qaParams) {
-		console.log("SENT RESULTS: ", sentResults);
-		for (var i = 0; i < sentResults.length; i++) {
+	async processQASentenceResults (sentenceResults, context, esClientName, esIndex, userId, qaParams) {
+		console.log("SENT RESULTS: ", sentenceResults);
+		for (var i = 0; i < sentenceResults.length; i++) {
 			try {
-				let [docId, parIdx] = sentResults[i].id.split('_');
+				let [docId, parIdx] = sentenceResults[i].id.split('_');
 				docId = docId + '_0';
 				let resultDoc = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
 				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
@@ -1119,7 +1119,7 @@ class SearchUtility {
 					let qaSubset = await this.expandParagraphs(resultDoc, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
 					contextPara.text = this.cleanParagraph(qaSubset.join(' ')); 
 				}
-				if (sentResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
+				if (sentenceResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
 					context.unshift(contextPara);
 				} else {
 					context.push(contextPara);
@@ -1180,15 +1180,15 @@ class SearchUtility {
 		}
 	}
 	
-	async getQAContext(docResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
+	async getQAContext(docResults, entity, sentenceResults, esClientName, esIndex, userId, qaParams) {
 		
 		let context = [];
 		try {
 			if (docResults.body) {
 				context = await this.processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams);
 			};
-			if (sentResults && sentResults.length > 0) { // if sentence results, add them to context
-				context = await this.processQASentenceResults(sentResults, context, esClientName, esIndex, userId, qaParams);
+			if (sentenceResults && sentenceResults.length > 0) { // if sentence results, add them to context
+				context = await this.processQASentenceResults(sentenceResults, context, esClientName, esIndex, userId, qaParams);
 			};
 			if (entity) { // if entity, add to context
 				context = this.processQAEntity(entity, context, userId);
@@ -1643,12 +1643,10 @@ class SearchUtility {
 		}
 	}
 
-	async intelligentSearchHandler(searchText, userId, req, clientObj){
+	async intelligentSearchHandler(sentenceResults, userId, req, clientObj){
 		let filename;
 		let result;
-		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-
-		console.log("SENTENCE RESULTS: ", sentenceResults);
+		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
