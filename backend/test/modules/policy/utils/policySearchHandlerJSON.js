@@ -572,7 +572,8 @@ const createRecObjectExpected = { historyRec:
       
    ],
    "totalEntities":0,
-   "totalTopics":0
+   "totalTopics":0,
+   "sentenceResults": []
 }
 
 const elasticSearchDocDataExpected = {
