@@ -40,7 +40,7 @@ class EdaExportHandler extends ExportHandler {
 				offset,
 				...rest
 			} = req.body;
-			
+		
 			const clientObj = {};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			const permissions = req.permissions ? req.permissions : [];
@@ -64,9 +64,15 @@ class EdaExportHandler extends ExportHandler {
 				
 				const esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(req.body, userId);
 				const results = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-
+				
 				if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, [], expansionDict, clientObj.esIndex);
+					const filenames = searchResults.docs.map((a) => a.filename)
+					
+					const tables = ['"pds_parsed"."line_item_details"']
+					const columns = ['filename','prod_or_svc_des', 'buying_currency']
+			
+					const pgResults = await this.dataLibrary.queryPostgres(columns, tables, filenames);
 				} else {
 					this.logger.error('Error with Elasticsearch download results', 'T5GRJ4Lzdf', userId);
 					searchResults = { totalCount: 0, docs: [] };
@@ -116,7 +122,7 @@ class EdaExportHandler extends ExportHandler {
 			res.status(500).send(err);
 		}
 	}
-
+	
 	createCsvStream(data, userId) {
 		try {
 			const stringifier = this.csvStringify({ delimiter: ',' });
