@@ -114,10 +114,10 @@ class DataLibrary {
 
 			const results = await this.database.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
 			 'p.obligated_amount_cin, p.row_id, x.pdf_filename, x.pds_filename FROM pds_parsed.line_item_details p, '+
-			 'pds_parsed_validation.all_outgoing_counts_pdf_pds_xwalk_only_new x WHERE x.pdf_filename IN (:files)'+
+			 'pds_parsed_validation.all_outgoing_counts_pdf_pds_xwalk_only x WHERE x.pdf_filename IN (:files)'+
 			 'AND x.pds_filename = p.filename',
 			 {replacements:{files: filenames}, type: Sequelize.QueryTypes.SELECT, raw: true, logging: console.log})
-			console.log("RESTLS!!!!!!!!!!!!!\n",results)
+			// console.log("RESTLS!!!!!!!!!!!!!\n",results)
 			return results;
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6XT');
