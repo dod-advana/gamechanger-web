@@ -34,20 +34,19 @@ export default ({showEditESIndexModal, setShowEditESIndexModal}) => {
 			console.log(e);
 		}
 	}
+	const getEsIndexFromRedis = async () => {
+		try {
+			const index = await gameChangerAPI.getElasticSearchIndex();
+			setEsIndex(index.data);
+		} catch (err) {
+			console.log(err);
+			console.log('Could not retrieve elasticsearch index from redis');
+		}
+	}
 
     useEffect(() => {
-		const getEsIndexFromRedis = async () => {
-			try {
-				const index = await gameChangerAPI.getElasticSearchIndex();
-				setEsIndex(index.data);
-			} catch (err) {
-				console.log(err);
-				console.log('Could not retrieve elasticsearch index from redis');
-			}
-		}
-		
 		getEsIndexFromRedis();
-	}, [setEsIndex])
+	}, [])
     return(
         <Modal
 			isOpen={showEditESIndexModal}
