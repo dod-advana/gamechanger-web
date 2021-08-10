@@ -45,9 +45,9 @@ class FeedbackController {
 				value_1: 'question: ' + question, 
 				value_2: 'QA answer: ' + answer.answer,
 				value_3: 'QA filename: ' + answer.filename,
-				value_4: 'cac_only: ' + answer.cac_only,
+				value_4: 'QA params: ' + JSON.stringify(params),
 				value_5: 'QA context: ' + JSON.stringify(qaContext),
-				value_6: 'QA params: ' + JSON.stringify(params)
+				value_7: 'cac_only: ' + answer.cac_only,
 			});
 			res.status(200).send( eventName + ' feedback sent.' );
 		} catch (err) {
@@ -74,7 +74,7 @@ class FeedbackController {
 					'value_3',
 					'value_4',
 					'value_5',
-					'value_6'
+					'value_7',
 				]
 			});
 			res.status(200).send({totalCount: results.count, results: results.rows});
