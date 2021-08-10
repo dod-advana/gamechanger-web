@@ -19,7 +19,7 @@ export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDial
 		<Dialog
 			open={showAddEditorTermDialog}
 			scroll={'paper'}
-			maxWidth='300px'
+			maxWidth='sm'
 		>
 			<TextField
 				id="margin-dense"
