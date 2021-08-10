@@ -733,9 +733,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
+	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
 		const url = endpoints.qaSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+		return axiosPOST(this.axios, url, { eventName, question, answer, qaContext, params });
 	}
 
 	getFeedbackData = async () => {
