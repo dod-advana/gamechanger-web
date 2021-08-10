@@ -261,7 +261,6 @@ class EdaSearchHandler extends SearchHandler {
 				throw 'Unauthorized';
 			}
 
-
 			// use the award ID to get the base award data only
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
@@ -292,12 +291,12 @@ class EdaSearchHandler extends SearchHandler {
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
 			const { body } = req;
-			const { issueOfficeDoDAAC } = body;
+			const { issueOfficeDoDAAC, issueOfficeName } = body;
 
 
 			let esQuery = '';
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery({...body, edaSearchSettings: { issueOfficeDoDAAC }}, userId);
+				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery({...body, limit: 5, edaSearchSettings: { issueOfficeDoDAAC, issueOfficeName }}, userId);
 			} else {
 				throw 'Unauthorized';
 			}
@@ -309,7 +308,8 @@ class EdaSearchHandler extends SearchHandler {
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
-					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
+					let data = this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
+					return data;
 				}
 				else { 
 					return {}
@@ -349,10 +349,10 @@ class EdaSearchHandler extends SearchHandler {
 				}
 			}
 		} catch (err) {
-			console.log(e);
-			const { message } = e;
+			console.log(err);
+			const { message } = err;
 			this.logger.error(message, 'V2L9KW5', userId);
-			throw e;
+			throw err;
 		}
 		
 
