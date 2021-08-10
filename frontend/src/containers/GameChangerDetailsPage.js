@@ -8,7 +8,8 @@ import Paper from 'material-ui/Paper/Paper';
 import SimpleTable from "../components/common/SimpleTable";
 import {MemoizedNodeCluster2D} from "../components/graph/GraphNodeCluster2D";
 import {	numberWithCommas, getMetadataForPropertyTable,
-	getReferenceListMetadataPropertyTable, getTrackingNameForFactory} from "../gamechangerUtils";
+	getReferenceListMetadataPropertyTable, getTrackingNameForFactory, 
+	invertedCrawlerMappingFunc} from "../gamechangerUtils";
 import Pagination from "react-js-pagination";
 import {Card} from "../components/cards/GCCard";
 import GCAccordion from "../components/common/GCAccordion";
@@ -16,6 +17,7 @@ import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/Loadin
 import {gcOrange} from "../components/common/gc-colors";
 import _ from "lodash";
 import DocumentDetailsPage from "../components/details/documentDetailsPage";
+import SourceDetailsPage from "../components/details/sourceDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
@@ -240,6 +242,20 @@ const getDocumentData = async (doc_id, cloneName) => {
 	return data;
 }
 
+const getSourceData = async (searchText, cloneName) => {
+	const t0 = new Date().getTime();
+	const { data } = await gameChangerAPI.callSearchFunction({
+		functionName: 'getDocumentsBySourceFromESHelper',
+		cloneName,
+		options: {
+			searchText: invertedCrawlerMappingFunc(searchText)
+		}
+	});
+	const t1 = new Date().getTime();
+	data.timeFound = ((t1 - t0) / 1000).toFixed(2);
+	return data
+}
+
 const addFavoriteTopicToMetadata = (data, cloneName) => {
 		const temp = _.cloneDeep(data);
 		temp.map(metaData => {
@@ -299,6 +315,10 @@ const GameChangerDetailsPage = (props) => {
 	
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
+
+	const [source, setSource] = useState(null);
+	const [showSourceContainer, setShowSourceContainer] = useState(false);
+	const [initialSourceData, setInitialSourceData] = useState({});
 	
 	const [contractAwardID, setContractAwardID] = useState(null);
 	const [showContractContainer, setShowContractContainer] = useState(false);
@@ -314,7 +334,7 @@ const GameChangerDetailsPage = (props) => {
 	
 	useEffect(() => {
 		const cloneName = query.get('cloneName');
-		gameChangerAPI.getCloneMeta({cloneName: query.get('cloneName')}).then(data => {
+		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
 		});
 		
@@ -368,6 +388,15 @@ const GameChangerDetailsPage = (props) => {
 					setContractAwardID(awardID);
 					setShowContractContainer(true);
 				}
+				break;
+			case 'source':
+				setDetailsType('Source');
+				name = query.get('sourceName');
+				setShowSourceContainer(true);
+				getSourceData(name, cloneName).then(data => {
+					setSource(name);
+					setInitialSourceData(data);
+				});
 				break;
 			default:
 				break;
@@ -428,7 +457,6 @@ const GameChangerDetailsPage = (props) => {
 	
 	const renderDocuments = () => {
 		return visibleDocs.map((item, idx) => {
-			
 			return (
 				<Card key={idx}
 					item={item}
@@ -523,7 +551,8 @@ const GameChangerDetailsPage = (props) => {
 		);
 	}
 	
-	const renderTopicContainer =() => {
+	const renderTopicContainer = () => {
+		debugger;
 		return (
 			<div>
 				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Topic Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
@@ -627,6 +656,10 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showTopicContainer &&
 				renderTopicContainer()
+			}
+
+			{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) &&
+				<SourceDetailsPage source={source} cloneData={cloneData} initialSourceData={initialSourceData}/>
 			}
 			
 			{showDocumentContainer &&

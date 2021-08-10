@@ -359,28 +359,6 @@ const PolicySearchHandler = {
 						let sortedOrgs = orgData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
 						});
-
-
-						let typeFilter = searchSettings.typeFilter;
-						let orgFilter = searchSettings.orgFilter;
-						if(!searchSettings.isFilterUpdate){
-							if(sortedOrgs && sortedOrgs.length) {
-								orgFilter = {};
-								sortedOrgs.forEach((o) => {
-									orgFilter[o.name] = !allOrgsSelected;
-								});
-							}
-							
-							if(sortedTypes && sortedTypes.length) {
-								typeFilter = {};
-								sortedTypes.forEach((t) => {
-									typeFilter[t.name] = !allTypesSelected;
-								});
-							}
-						}
-
-						newSearchSettings.orgFilter = orgFilter;
-						newSearchSettings.typeFilter = typeFilter;
 	
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
