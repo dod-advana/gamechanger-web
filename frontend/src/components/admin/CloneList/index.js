@@ -11,6 +11,21 @@ import CloneModal from './CloneModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'config'];
+
+const DEFAULT_MODULE = {
+	clone_name: '',
+	card_module: 'default/defaultCardHandler',
+	display_name: '',
+	export_module: 'simple/simpleExportHandler',
+	graph_module: 'simple/simpleGraphHandler',
+	main_view_module: 'default/defaultMainViewHandler',
+	navigation_module: 'default/defaultNavigationHandler',
+	search_module: 'simple/simpleSearchHandler',
+	title_bar_module: 'default/defaultTitleBarHandler',
+	s3_bucket: 'advana-raw-zone/bronze'
+}
+
 /**
  * 
  * @class CloneList
@@ -21,6 +36,7 @@ export default () => {
     const [cloneTableMetaData, setCloneTableMetaData] = useState({stringFields: [], booleanFields: [], jsonFields: []});
     const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
     const [cloneToEdit, setCloneToEdit] = useState({});
+    const [editCloneDataErrors, setEditCloneDataErrors] = useState({});
     // Component Methods
     const openCloneModal = (num=-99) =>{
         if (num >= 0) {
@@ -34,6 +50,9 @@ export default () => {
 		}
 	
         setShowCreateEditCloneModal(true);
+	}
+    const defaultModuleGivenKey = (key) => {
+		return DEFAULT_MODULE[key] || '';
 	}
     const storeCloneData = (editCloneData = null) => {
 		
@@ -52,15 +71,33 @@ export default () => {
 				cloneDataToStore[field.key] = JSON.parse(cloneDataToStore[field.key]);
 			}
 		})
+		Object.keys(DEFAULT_MODULE).forEach(key => {
+			if (!cloneDataToStore[key] || cloneDataToStore[key] === '') {
+				cloneDataToStore[key] = defaultModuleGivenKey(key);
+			}
+		})
 		
-		gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
-			if (data.status === 200) {
-				setCloneTableMetaData({});
-				setShowCreateEditCloneModal(false);
-				getCloneData();
+		let error = false;
+		const cloneErrors = {...editCloneDataErrors};
+		CLONE_MUST_BE_FILLED_KEYS.forEach(fieldKey => {
+			if ( !cloneDataToStore[fieldKey] || cloneDataToStore[fieldKey] === '') {
+				error = true;
+				cloneErrors[fieldKey] = true;
+			} else {
+				cloneErrors[fieldKey] = false;
 			}
 		});
-
+		setEditCloneDataErrors(cloneErrors);
+		
+		if (!error) {
+			gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
+				if (data.status === 200) {
+					setEditCloneDataErrors({});
+					setShowCreateEditCloneModal(false);
+				    getCloneData();
+				}
+			});
+		}
 	}
     const getCloneData = async () => {
         const tableData = [];
@@ -70,6 +107,7 @@ export default () => {
         _.forEach(data.data, result => {
             tableData.push(result);
         });
+        // Set the main clone table
         setGCCloneTableData(tableData);
         const tableMetaData = await gameChangerAPI.getCloneTableData();
         
@@ -101,6 +139,7 @@ export default () => {
                 }
             }
         });
+        // Set the metadata
         setCloneTableMetaData({stringFields, booleanFields, jsonFields})
     }
     const deleteCloneData = async (id) => {
@@ -218,6 +257,7 @@ export default () => {
             <CloneModal 
                 storeCloneData = {storeCloneData}
                 cloneToEdit = {cloneToEdit}
+                defaultModuleGivenKey={defaultModuleGivenKey}
                 cloneTableMetaData = {cloneTableMetaData}
                 showCreateEditCloneModal={showCreateEditCloneModal}
                 setShowCreateEditCloneModal={setShowCreateEditCloneModal}

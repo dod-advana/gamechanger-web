@@ -7,26 +7,16 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typograph
 import GCButton from "../../common/GCButton";
 import {styles, GCCheckbox, useStyles} from '../util/GCAdminStyles';
 
-const DEFAULT_MODULE = {
-	clone_name: '',
-	card_module: 'default/defaultCardHandler',
-	display_name: '',
-	export_module: 'simple/simpleExportHandler',
-	graph_module: 'simple/simpleGraphHandler',
-	main_view_module: 'default/defaultMainViewHandler',
-	navigation_module: 'default/defaultNavigationHandler',
-	search_module: 'simple/simpleSearchHandler',
-	title_bar_module: 'default/defaultTitleBarHandler',
-	s3_bucket: 'advana-raw-zone/bronze'
-}
+
 /**
  * 
  * @class CloneModal
  */
-export default ({storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEditCloneModal, setShowCreateEditCloneModal}) => {
+export default ({storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEditCloneModal, setShowCreateEditCloneModal, defaultModuleGivenKey}) => {
 	// State Variables
 	const [editCloneData, setEditCloneData] = useState({});
 	const classes = useStyles();
+
 	//Component Methods
     const closeCloneModal = () => {
 		setEditCloneData({});
@@ -46,9 +36,7 @@ export default ({storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdit
 
 		setEditCloneData(tmpData);
 	};
-	const defaultModuleGivenKey = (key) => {
-		return DEFAULT_MODULE[key] || '';
-	}
+	
     
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
