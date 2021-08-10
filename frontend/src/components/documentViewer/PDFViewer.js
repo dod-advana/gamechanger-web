@@ -27,7 +27,8 @@ export default function PDFViewer({location}) {
 			}
 			
 			if (filename) {
-				gameChangerAPI.dataStorageDownloadGET(encode(filename), prevSearchText, pageNumber, isClone, cloneData).then(url => {
+				const encoded = encode(filename);
+				gameChangerAPI.dataStorageDownloadGET(encoded, prevSearchText, pageNumber, isClone, cloneData).then(url => {
 					node.src = url;
 				});
             }
