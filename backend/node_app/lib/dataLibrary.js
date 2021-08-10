@@ -317,12 +317,17 @@ class DataLibrary {
 	}
 
 	getFileThumbnail(data, userId){
-		let { dest, filekey } = data;
-		
+		let { dest, folder, filename, clone_name } = data;
+		let filetype = filename.split('.').pop();
+		if (filetype === '.png'){
+			filetype = 'image/png'
+		} else if(filetype === 'svg'){
+			filetype = 'image/svg+xml'
+		}
 		const params = {
 			Bucket: dest,
-			Key: `gamechanger/thumbnails/${filekey}.png`,
-			ResponseContentType: 'image/png'
+			Key: `${clone_name}/${folder}/${filename}`,
+			ResponseContentType: filetype
 		};
 
 		return new Promise((resolve,reject) => {

@@ -553,9 +553,7 @@ function GCCard (props) {
 										fontSize: 14,
 										margin: '16px 0px 0px 10px'
 									}}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
+									isSecondaryBtn={true}
 								>No
 								</GCButton>
 								<GCButton
@@ -602,6 +600,18 @@ function GCCard (props) {
 							/>
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px'
+									}}
+									isSecondaryBtn={true}
+								>Cancel
+								</GCButton>
+								<GCButton
 									onClick={() => handleSaveFavorite(true)}
 									style={{
 										height: 40,
@@ -611,20 +621,6 @@ function GCCard (props) {
 										margin: '16px 0px 0px 10px'
 									}}
 								>Save
-								</GCButton>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px'
-									}}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
-								>Cancel
 								</GCButton>
 							</div>
 						</div>
