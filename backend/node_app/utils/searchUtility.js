@@ -1102,6 +1102,7 @@ class SearchUtility {
 	}
 
 	async processQASentenceResults (sentResults, context, esClientName, esIndex, userId, qaParams) {
+		console.log("SENT RESULTS: ", sentResults);
 		for (var i = 0; i < sentResults.length; i++) {
 			try {
 				let [docId, parIdx] = sentResults[i].id.split('_');
@@ -1634,15 +1635,26 @@ class SearchUtility {
 	// 	return searchResults;
 	// }
 
+	async getSentResults(searchText, userId) {
+		try {
+			return await this.mlApi.getSentenceTransformerResults(searchText, userId);
+		} catch (e) {
+			this.logger.error(e, 'PQKLW5XN', user);
+		}
+	}
+
 	async intelligentSearchHandler(searchText, userId, req, clientObj){
 		let filename;
 		let result;
 		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+
+		console.log("SENTENCE RESULTS: ", sentenceResults);
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
 			result = sentenceSearchRes.docs[0];
+			console.log("RESULLT: ", result);
 			return result;
 		}
 		return {};
