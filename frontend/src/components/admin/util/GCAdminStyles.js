@@ -160,7 +160,7 @@ const useStyles = makeStyles((theme) => ({
 	textField: {
 		marginLeft: theme.spacing(1),
 		marginRight: theme.spacing(1),
-		width: '25ch',
+		width: '40ch',
 		'& .MuiFormHelperText-root': {
 			fontSize: 12
 		}
@@ -174,8 +174,8 @@ const useStyles = makeStyles((theme) => ({
 		}
 	},
 	dialogLg: {
-		maxWidth: '800px',
-		minWidth: '800px'
+		maxWidth: '1200px',
+		minWidth: '1200px'
 	},
 	closeButton: {
 		position: 'absolute',
