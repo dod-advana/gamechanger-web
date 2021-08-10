@@ -7,7 +7,6 @@ import {
 	FormGroup,
 	FormControlLabel,
 	Checkbox,
-	// TextField
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import {
@@ -20,8 +19,6 @@ import {
 	KeyboardDatePicker
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-// import uuidv4 from "uuid/v4";
-// import Autocomplete from '@material-ui/lab/Autocomplete';
 import {trackEvent} from '../../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../../gamechangerUtils';
 
@@ -601,169 +598,6 @@ const renderStatus = (state, dispatch, classes) => {
 		</div>
 	);
 }
-// // Temporarily removing advanced search filter
-// const setSearchField = (key, value, state, dispatch) => {
-// 	const { searchSettings, documentProperties } = state;
-// 	const {searchFields} = searchSettings;
-	
-// 	const newSearchFields = _.cloneDeep(searchFields);
-
-// 	let filledOut = true;
-
-// 	// if we set a field, and all other fields are not empty, add a new field
-// 	if (value !== null) {
-// 		newSearchFields[key].field = { display_name: value.display_name, name: value.name, searchField: value.searchField };
-
-// 		for (const key in newSearchFields) {
-// 			if (newSearchFields[key].field === null) {
-// 				filledOut = false;
-// 			}
-// 		}
-
-// 		if (filledOut && Object.keys(newSearchFields).length < documentProperties.length) {
-// 			newSearchFields[uuidv4()] = { field: null, input: '' };
-// 		}
-// 	}
-// 	else {
-// 		newSearchFields[key].field = value;
-// 	}
-
-// 	const newCloneSettings = _.cloneDeep(searchSettings);
-// 	newCloneSettings.searchFields = newSearchFields;
-// 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
-// }
-
-// const setSearchFieldInput = (key, value, state, dispatch) => {
-// 	const { searchSettings } = state;
-// 	const {searchFields} = searchSettings;
-
-// 	const newSearchFields = _.cloneDeep(searchFields);
-// 	newSearchFields[key].input = value;
-
-// 	const newCloneSettings = _.cloneDeep(searchSettings);
-// 	newCloneSettings.searchFields = newSearchFields;
-// 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
-// }
-
-// const removeSearchField = (key, state, dispatch) => {
-// 	const { searchSettings, documentProperties } = state;
-// 	const {searchFields} = searchSettings;
-	
-// 	const newSearchFields = _.cloneDeep(searchFields);
-// 	const numValidFields = Object.keys(newSearchFields).filter(key  => newSearchFields[key].field).length;
-	
-// 	if (numValidFields === documentProperties.length) {
-// 		newSearchFields[key] = { field: null, input: '' };
-// 	}
-// 	else {
-// 		delete newSearchFields[key];
-// 	}
-
-// 	const newCloneSettings = _.cloneDeep(searchSettings);
-// 	newCloneSettings.searchFields = newSearchFields;
-// 	setState(dispatch, { searchSettings: newCloneSettings, metricsCounted: false });
-// }
-
-// const renderAdvancedFilters = (state, dispatch, searchbar = false) => {
-// 	const usedPropertyNames = Object.values(state.searchSettings.searchFields).map(field => { return field.field ? field.field.display_name : '' });
-// 	const unusedProperties = state.documentProperties.filter(prop => usedPropertyNames.indexOf(prop.display_name) === -1);
-// 	return (
-// 		<div id="searchFields" style={{ paddingTop: '10px', paddingBottom: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-// 			{Object.keys(state.searchSettings.searchFields).map(key => {
-// 				const searchField = state.searchSettings.searchFields[key];
-// 				if(searchbar){
-// 					return (
-// 						<div key={key} style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
-// 							TESTING
-// 							<div style={{ flexGrow: 1, marginRight: '10px'}}>
-// 								<Autocomplete
-// 									options={unusedProperties}
-// 									getOptionLabel={(option) => option.display_name}
-// 									getOptionSelected={(option, value) => { return option.name === value.name }}
-// 									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
-// 									clearOnEscape
-// 									clearOnBlur
-// 									blurOnSelect
-// 									openOnFocus
-// 									style={{ backgroundColor: 'white', width: '100%'}}
-// 									value={searchField.field}
-// 									default
-// 									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
-// 								/>
-// 								</div>
-// 								<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', flexGrow: 1 }}>
-// 									<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
-// 										<TextField
-// 											disabled={!state.searchSettings.searchFields[key]?.field}
-// 											placeholder="Input"
-// 											variant="outlined"
-// 											value={searchField.input}
-// 											style={{ backgroundColor: 'white', width: '100%'}}
-// 											fullWidth={true}
-// 											onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
-// 											inputProps={{
-// 												style: {
-// 													height: 19,
-// 													width: '100%'
-// 												}
-// 											}}
-// 										/>
-// 									</div>
-// 									{state.searchSettings.searchFields[key].field !== null &&
-// 										<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
-// 									}
-// 							</div>
-// 							</div>
-// 					);
-// 				} else {
-// 					return (
-// 						<div key={key} style={{ marginLeft: '10px', float: 'left' }}>
-// 							<div style = {{ marginRight: '15px' }}>
-// 								<Autocomplete
-// 									options={unusedProperties}
-// 									getOptionLabel={(option) => option.display_name}
-// 									getOptionSelected={(option, value) => { return option.name === value.name }}
-// 									renderInput={(params) => <TextField {...params} label="Choose a field" variant="outlined" />}
-// 									clearOnEscape
-// 									clearOnBlur
-// 									blurOnSelect
-// 									openOnFocus
-// 									style={{ backgroundColor: 'white', width: '100%' }}
-// 									value={searchField.field}
-// 									default
-// 									onChange={(event, value) => setSearchField(key, value, state, dispatch)}
-// 								/>
-// 							</div>
-// 							<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-// 								<div style={{ marginRight: '15px', marginTop: '10px', marginBottom: '10px', clear: 'both' }}>
-// 									<TextField
-// 										disabled={!state.searchSettings.searchFields[key]?.field}
-// 										placeholder="Input"
-// 										variant="outlined"
-// 										value={searchField.input}
-// 										style={{ backgroundColor: 'white', width: '100%' }}
-// 										fullWidth={true}
-// 										onChange={(event) => setSearchFieldInput(key, event.target.value, state, dispatch)}
-// 										inputProps={{
-// 											style: {
-// 												height: 19,
-// 												width: '100%'
-// 											}
-// 										}}
-// 									/>
-// 								</div>
-// 								{state.searchSettings.searchFields[key].field !== null &&
-// 									<i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer' }} onClick={() => removeSearchField(key, state, dispatch)} />
-// 								}
-// 							</div>
-// 						</div>
-// 					);
-// 				}
-				
-// 			})}
-// 		</div>
-// 	);
-// }
 
 const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 	return (
@@ -809,30 +643,6 @@ const PolicySearchMatrixHandler = {
 
 		return (
 			<>
-				{/*{false &&*/}
-				{/*	<div style={styles.subHead}>*/}
-				{/*		<div style={{*/}
-				{/*			...styles.headerColumn,*/}
-				{/*			color: 'black',*/}
-				{/*			backgroundColor: 'white',*/}
-				{/*			marginTop: 0,*/}
-				{/*			marginLeft: -5*/}
-				{/*		}}>*/}
-				{/*			<div><span>{'Sort By:'}</span></div>*/}
-				{/*		</div>*/}
-				{/*	</div>}*/}
-				{/*	{false &&*/}
-				{/*	<select name="category" value={category} style={{marginBottom: 15, borderWidth: '1px', borderRadius: '5px', borderStyle: 'solid', borderColor: '#B0BAC5'}} onChange={event => handleCategoryChange(event.target.value)}>*/}
-				{/*		<option id="0" >Relevance</option>*/}
-				{/*	</select>}*/}
-				{/*	{false &&*/}
-				{/*	<div style={{width: '100%', marginBottom: 10, border: 'none'}}>*/}
-				{/*		<GCAccordion expanded={false} header={'SEARCH TYPES'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>*/}
-				{/*			{ renderSearchTypes() }*/}
-				{/*		</GCAccordion>*/}
-				{/*	</div>*/}
-				{/*}*/}
-				
 				<div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={state.searchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderSources(state, dispatch, classes) }
@@ -856,13 +666,6 @@ const PolicySearchMatrixHandler = {
 						{ renderStatus(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
-				
-				{/* <div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={false} header={'ADVANCED'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderAdvancedFilters(state, dispatch) }
-					</GCAccordion>
-				</div> */}
-
 				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={expansionTermSelected} header={'RELATED TERMS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
@@ -926,13 +729,6 @@ const PolicySearchMatrixHandler = {
 					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
 					{renderStatus(state, dispatch, classes)}
 				</div>
-
-				{/* <div style={styles.filterDiv}>
-					<strong style={styles.boldText}>ADVANCED</strong>
-					<hr style={{marginTop: '5px', marginBottom: '10px'}}/>
-					{renderAdvancedFilters(state, dispatch, true)}
-				</div> */}
-
 				<div style ={{display: 'flex', margin: '10px'}}>
 					<div style={{width: '120px', height: '40px', marginRight: '20px'}}>
 						<GCButton style={{border: 'none', width: '100%', height: '100%', padding: '0px'}} isSecondaryBtn={true} onClick={() => resetAdvancedSettings(dispatch)}>Clear Filters</GCButton>
