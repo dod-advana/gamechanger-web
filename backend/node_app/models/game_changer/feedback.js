@@ -32,10 +32,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.STRING,
 			},
 			value_5: {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 			},
 			value_6: {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 			},
 			value_7: {
 				type: DataTypes.STRING,

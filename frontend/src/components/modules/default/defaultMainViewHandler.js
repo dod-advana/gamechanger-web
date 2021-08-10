@@ -495,7 +495,7 @@ const DefaultMainViewHandler = {
 			if(!state.qaResults) {
 				return null;
 			} 
-			const { question, answers }  = state.qaResults;
+			const { question, answers, qaContext, params }  = state.qaResults;
 			const wikiContainer = {
 				margin: '5px',
 				padding: '20px',
