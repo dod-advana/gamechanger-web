@@ -179,7 +179,7 @@ const GetQAResults = (props) => {
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
 	}
 	const feedbackComponent = (input, type) => {
-		const { answer } = input;
+		const { answer, qaContext, params } = input;
 		const { title } = input;
 		return(
 		<div style={styles.tooltipRow}>
@@ -296,7 +296,7 @@ const GetQAResults = (props) => {
 					>
 					<strong><b style={{fontSize: 14}}>{answers[0].displaySource}</b></strong>
 					</Link>
-					{feedbackComponent({answer: answers[0]}, "QA")}
+					{feedbackComponent({answer: answers[0], qaContext: qaContext, params: params}, "QA")}
 			</div>);
 	} else if( open && Object.keys(intelligentSearchResult).length !== 0){
 		return 	(

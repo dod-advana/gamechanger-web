@@ -37,7 +37,8 @@ class FeedbackController {
 
 	async sendQAFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
-    const { eventName, question, answer, qaContext, params } = req.body;
+    	const { eventName, question, answer, qaContext, params } = req.body;
+		console.log("feedback: ", eventName, question, answer, qaContext, params);
 		try {
 			const feedback = await this.feedback.create({ 
 				event_name: eventName, 
