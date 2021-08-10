@@ -329,7 +329,7 @@ class PolicySearchHandler extends SearchHandler {
 		return searchResults;
 	}
 
-	async intelligentSearch(req, sentResults, clientObj, userId){
+	async intelligentSearch(req, sentenceResults, clientObj, userId){
 		const {
 			searchText,
 			orgFilterString = [],
@@ -353,7 +353,7 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				// get intelligent search result
 				//intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentResults, userId, req, clientObj);
+				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentenceResults, userId, req, clientObj);
 				return intelligentSearchResult;
 			} catch (e) {
 				if (forCacheReload) {

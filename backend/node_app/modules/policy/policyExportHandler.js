@@ -125,7 +125,7 @@ class PolicyExportHandler extends ExportHandler {
 		}
 	}
 
-	async intelligentSearch(req, clientObj, userId){
+	async intelligentSearch(req, sentenceResults, clientObj, userId){
 		const {
 			searchText,
 			orgFilterString = [],
@@ -147,7 +147,7 @@ class PolicyExportHandler extends ExportHandler {
 		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 			try {
 				// get intelligent search result
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentenceResults, userId, req, clientObj);
 				return intelligentSearchResult;
 			} catch (e) {
 				if (forCacheReload) {
