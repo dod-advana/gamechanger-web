@@ -713,9 +713,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText) => {
+	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText, sentenceResults) => {
 		const url = endpoints.intelligentSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText });
+		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText, sentenceResults });
 	}
 
 	populateNewUserId = async () => {

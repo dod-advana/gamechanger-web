@@ -109,6 +109,7 @@ const GetQAResults = (props) => {
 	} = props;
 	const {state, dispatch} = context;
 	const { question, answers, qaContext, params }  = state.qaResults;
+	const sentenceResults = state.sentenceResults;
 	const {intelligentSearchResult} = state;
 	const isFavorite = _.findIndex(state.userData.favorite_documents, (item) => (item.id === intelligentSearchResult.id)) !== -1;
 	const classes = useStyles();
@@ -180,7 +181,7 @@ const GetQAResults = (props) => {
 	}
 	const feedbackComponent = (input, type) => {
 		const { answer, qaContext, params } = input;
-		const { title } = input;
+		const { title, sentenceResults } = input;
 		return(
 		<div style={styles.tooltipRow}>
 			<div>
@@ -424,7 +425,7 @@ const GetQAResults = (props) => {
 					>
 					<strong><b style={{fontSize: 14}}>Open Document</b></strong>
 				</Link>
-				{feedbackComponent({title: intelligentSearchResult.display_title_s}, "intelligentSearch")}
+				{feedbackComponent({title: intelligentSearchResult.display_title_s, sentenceResults: sentenceResults}, "intelligentSearch")}
 			</div>);
 	}
 	return <></>;
