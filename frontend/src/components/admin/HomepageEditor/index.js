@@ -18,7 +18,7 @@ export default () => {
     // State Variables
     const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
-	const [editorAddTerm, setEditorAddTerm] = useState({value:'', section:'topic'});
+	const [section, setSection] = useState('topic');
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
     
     // Component methods
@@ -26,19 +26,18 @@ export default () => {
      * This updates the table data for the editor table.
      * Is only used in the child modal
      * @method handleAddRow
-     * @param {*} key 
      * @param {*} value 
      */
-    const handleAddRow = (key, value) => {
-		const tmp = {...editorTableData};
-		tmp[key].push({name:value});
+    const handleAddRow = (value) => {
+		const tmp = { ...editorTableData };
+		tmp[section].push({name:value});
 		setEditorTableData(tmp);
 	}
     /**
      * 
      */
     const getHomepageEditorData = async () => {
-        const tableData = {};
+        const tableData = {topics:[],major_pubs:[]};
         const { data } = await gameChangerAPI.getHomepageEditorData();
         data.forEach(obj => {
             obj.key = obj.key.replace('homepage_','');
@@ -202,7 +201,7 @@ export default () => {
                                 <GCButton
                                     id={'addTopic'}
                                     onClick={()=>{
-                                        setEditorAddTerm({...editorAddTerm, section:'topics'})
+                                        setSection('topics')
                                         setShowAddEditorTermDialog(true)
                                     }}
                                     style={{ width:200, margin:'10px'}}
@@ -240,7 +239,7 @@ export default () => {
                                 <GCButton
                                     id={'addMajorPub'}
                                     onClick={()=>{
-                                        setEditorAddTerm({...editorAddTerm, section:'major_pubs'})
+                                        setSection('major_pubs')
                                         setShowAddEditorTermDialog(true)
                                     }}
                                     style={{ width:200, margin:'10px'}}

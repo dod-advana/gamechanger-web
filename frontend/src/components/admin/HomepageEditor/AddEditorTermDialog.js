@@ -1,14 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {Dialog, TextField} from "@material-ui/core";
 import GCButton from "../../common/GCButton";
 import {useStyles} from '../util/GCAdminStyles';
 /**
  * 
- * @class AdminList
+ * @class AddEditorTermDialog
  */
-export default ({handleAddRow, editorAddTerm, setEditorAddTerm, setShowAddEditorTermDialog, showAddEditorTermDialog}) => {
+export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDialog}) => {
 	
+	const [editorAddTerm, setEditorAddTerm] = useState('');
 	const classes = useStyles();
+
+	const closeDialog = ()=>{
+		setEditorAddTerm('');
+		setShowAddEditorTermDialog(false);
+	}
 	return (
 		<Dialog
 			open={showAddEditorTermDialog}
@@ -17,7 +23,7 @@ export default ({handleAddRow, editorAddTerm, setEditorAddTerm, setShowAddEditor
 		>
 			<TextField
 				id="margin-dense"
-				onBlur={event => setEditorAddTerm({...editorAddTerm, value:event.target.value})}
+				onBlur={event => setEditorAddTerm(event.target.value)}
 				className={classes.textField}
 				style={{padding:10}}
 				helperText="Term to add..."
@@ -27,9 +33,9 @@ export default ({handleAddRow, editorAddTerm, setEditorAddTerm, setShowAddEditor
 				<GCButton
 					id={'addTermSubmit'}
 					onClick={()=>{
-						setEditorAddTerm({value:'', section:'topic'});
-						handleAddRow(editorAddTerm.section, editorAddTerm.value)
-						setShowAddEditorTermDialog(false);
+						
+						handleAddRow(editorAddTerm);
+						closeDialog();
 					}}
 					style={{margin:'10px'}}
 				>
@@ -38,8 +44,7 @@ export default ({handleAddRow, editorAddTerm, setEditorAddTerm, setShowAddEditor
 				<GCButton
 					id={'addTermCancel'}
 					onClick={()=>{
-						setEditorAddTerm({value:'', section:'topic'});
-						setShowAddEditorTermDialog(false);
+						closeDialog();
 					}}
 					style={{margin:'10px'}}
 				>
