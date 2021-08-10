@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const RESPONSIBILITIES = sequelize.define('feedback',
+	const FEEDBACK = sequelize.define('feedback',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 			},
 			value_6: {
-				type: DataTypes.TEXT,
+				type: DataTypes.STRING,
 			},
 			value_7: {
 				type: DataTypes.STRING,
@@ -47,5 +47,5 @@ module.exports = (sequelize, DataTypes) => {
 			updatedAt: false,
 		}
 	);
-	return RESPONSIBILITIES;
+	return FEEDBACK
 };
