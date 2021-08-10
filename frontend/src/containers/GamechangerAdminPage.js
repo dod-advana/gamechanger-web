@@ -37,7 +37,7 @@ const PAGES = {
  * @class GamechangerAdminPage
  */
 const GamechangerAdminPage = props => {
-	const { refreshClones, jupiter } = props;
+	const { jupiter } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
 	const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -48,13 +48,13 @@ const GamechangerAdminPage = props => {
 	}
 
 	const renderSwitch = (page) => {
-		trackEvent('GAMECHANGER_Admin', "ChangeAdminPage", "onChange", page.toString());
+		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
 
 		switch(page) {
 			case PAGES.general:
 				return <GeneralAdminButtons />;
 			case PAGES.cloneList:
-				return <CloneList refreshClones={refreshClones} />;
+				return <CloneList />;
 			case PAGES.searchPdfMapping:
 				return <SearchPdfMapping />;
 			case PAGES.mlDashboard:

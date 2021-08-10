@@ -1,4 +1,4 @@
-const defaultSearchHandler = require(`../modules/default/defaultSearchHandler`);
+const simpleSearchHandler = require(`../modules/simple/simpleSearchHandler`);
 const policySearchHandler = require(`../modules/policy/policySearchHandler`);
 const globalSearchHandler = require(`../modules/globalSearch/globalSearchHandler`);
 const edaSearchHandler = require(`../modules/eda/edaSearchHandler`);
@@ -22,11 +22,11 @@ class SearchHandlerFactory {
 					this.handler = hermesSearchHandler;
 					break;
 				default:
-					this.handler = defaultSearchHandler;
+					this.handler = simpleSearchHandler;
 					break;
 			}
 		} catch (err) {
-			this.handler = defaultSearchHandler;
+			this.handler = simpleSearchHandler;
 		}
 	}
 
