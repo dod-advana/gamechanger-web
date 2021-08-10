@@ -211,7 +211,7 @@ const GetQAResults = (props) => {
 										gameChangerAPI.sendQAFeedback('qa_thumbs_up', question, answer, qaContext, params);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsUp', `question : ${question}, answer: ${answer}`);
 									} else {
-										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', title, state.searchText, state.sentenceResults);
+										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', title, state.searchText, sentenceResults);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${state.searchText}, title: ${title}`);
 									}
 									
@@ -229,7 +229,7 @@ const GetQAResults = (props) => {
 										gameChangerAPI.sendQAFeedback('qa_thumbs_down', question, answer, qaContext, params);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsDown', `question : ${question}, title: ${answer}`);
 									} else {
-										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', title, state.searchText, state.sentenceResults);
+										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', title, state.searchText, sentenceResults);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${state.searchText}, title: ${title}`);
 									}
 								}
