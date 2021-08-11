@@ -7,7 +7,7 @@ const AWS = require('aws-sdk');
 const neo4jLib = require('neo4j-driver');
 const { ESSearchLib } = require('./ESSearchLib');
 const Sequelize = require('sequelize');
-const databaseFile = require('../models/eda');
+const edaDatabaseFile = require('../models/eda');
 
 const SAMPLING_BYTES = 4096;
 
@@ -21,7 +21,7 @@ class DataLibrary {
 			neo4j = neo4jLib,
 			esSearchLib,
 			s3Opt = {},
-			database = databaseFile
+			edaDatabase = edaDatabaseFile
 		} = opts;
 
 		this.logger = logger;
@@ -31,7 +31,7 @@ class DataLibrary {
 		this.esRequestConfig = this.getESRequestConfig(this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
 		this.esEDARequestConfig = this.getESRequestConfig(this.constants.EDA_ELASTIC_SEARCH_OPTS);
 		this.esSearchLib = esSearchLib;
-		this.database = database;
+		this.edaDatabase = edaDatabase;
 
 		if (!esSearchLib) {
 			try {
@@ -101,23 +101,15 @@ class DataLibrary {
 	
 
 	//*****************************************************************START HERE, PUT IN DATA LIBRARY!!!!!!!!!!! */
-	async queryPostgres(columns, tables, filenames){//, offset, limit, userId) {
+	async queryLineItemPostgres(columns, tables, filenames){//, offset, limit, userId) {
 		try {
 		
-			// const hitQuery = `select `+ columns.toString()+//description, permission, href, link_label, id
-			// 				  ` from ` +tables.toString()+//megamenu_links
-			// 				  ` where filename in (`+filenames.toString()+`)`;
-							  //***PUT IN DATA LIBRARY!!!!!!!!!!! */
-							//   console.log("This DB:  ", hitQuery)
-			// const results = await this.database.eda.query(hitQuery, {type: Sequelize.QueryTypes.SELECT, raw: true});
-			// const results = await this.database.eda.query('SELECT ? FROM pds_parsed.line_item_details WHERE filename in (?)', {replacements: [columns.toString(), filenames.toString()], type: Sequelize.QueryTypes.SELECT, raw: true })
-
-			const results = await this.database.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
+			const results = await this.edaDatabase.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
 			 'p.obligated_amount_cin, p.row_id, x.pdf_filename, x.pds_filename FROM pds_parsed.line_item_details p, '+
 			 'pds_parsed_validation.all_outgoing_counts_pdf_pds_xwalk_only x WHERE x.pdf_filename IN (:files)'+
 			 'AND x.pds_filename = p.filename',
 			 {replacements:{files: filenames}, type: Sequelize.QueryTypes.SELECT, raw: true, logging: console.log})
-			// console.log("RESTLS!!!!!!!!!!!!!\n",results)
+
 			return results;
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6XT');
