@@ -135,7 +135,13 @@ const neo4jCountsColumns = [
 
 const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = [], tabIndex = 'documents', option = 'all' }) => {
 
-	const order = sorted.map(({ id, desc }) => ([id, desc ? 'DESC' : 'ASC']));
+	const order = sorted.map(({ id, desc }) => {
+		if( id === "json_metadata") {
+			return ["json_metadata.crawler_used", desc ? 'DESC' : 'ASC']
+		} else {
+			return [id, desc ? 'DESC' : 'ASC']
+		}
+	});
 	const where = filtered.map(({ id, value }) => ({ [id]: { '$iLike': `%${value}%`} }));
 
 	try {
@@ -361,7 +367,7 @@ const GCDataStatusTracker = (props) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker' , 'PDFOpen');
 			window.open(`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${state.cloneData.clone_name}`);
 		};
-		
+
 		const dataColumns = [
 			
 			{
@@ -407,16 +413,17 @@ const GCDataStatusTracker = (props) => {
 				accessor: 'json_metadata',
 				width: 350,
 				filterable: false,
+				sortable: false,
 				Cell: props => (
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							window.open(JSON.parse(props.original.json_metadata).source_page_url);
+							window.open(props.original.json_metadata.source_page_url);
 								}}
 							style={{ color: '#386F94' }}
 						>
 						<div>
-							<p>{JSON.parse(props.original.json_metadata).crawler_used}</p>
+							<p>{props.original.json_metadata.crawler_used}</p>
 						</div>
 						</Link>
 					</TableRow>
@@ -448,6 +455,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Next update',
 				width: 150,
 				filterable: false,
+				sortable: false,
 				Cell: row => (
 					<TableRow>
 						{moment(Date.parse(nextFriday.toISOString())).format("YYYY-MM-DD")}

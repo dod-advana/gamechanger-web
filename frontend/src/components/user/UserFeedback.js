@@ -23,10 +23,6 @@ Modal.setAppElement('#app')
 const getHeight = () => window.innerHeight;
 
 const buttonStyle = {
-    border: '1px solid #B0B9BE',
-    borderRadius: '6px',
-    color: '#8091A5 !important',
-    fontFamily: "Montserrat",
     margin:'10px'
 }
 const CloseButton = styled.div`
@@ -261,6 +257,7 @@ export default function UserFeedback (props) {
                     id={'feedbackClose'}
                     onClick={closeModal}
                     style={buttonStyle}
+                    isSecondaryBtn={true}
                 >
                     Close
                 </GCButton>
