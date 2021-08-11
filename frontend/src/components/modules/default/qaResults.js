@@ -108,7 +108,8 @@ const GetQAResults = (props) => {
 		context,
 	} = props;
 	const {state, dispatch} = context;
-	const { question, answers, filenames, docIds, resultTypes }  = state.qaResults;
+	const { question, answers, qaContext, params }  = state.qaResults;
+	const sentenceResults = state.sentenceResults;
 	const {intelligentSearchResult} = state;
 	const isFavorite = _.findIndex(state.userData.favorite_documents, (item) => (item.id === intelligentSearchResult.id)) !== -1;
 	const classes = useStyles();
@@ -179,8 +180,8 @@ const GetQAResults = (props) => {
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
 	}
 	const feedbackComponent = (input, type) => {
-		const { answer, filename, docId } = input;
-		const { title } = input;
+		const { answer, qaContext, params } = input;
+		const { title, sentenceResults } = input;
 		return(
 		<div style={styles.tooltipRow}>
 			<div>
@@ -207,10 +208,10 @@ const GetQAResults = (props) => {
 								if(feedback === ''){
 									setFeedback('thumbsUp');
 									if(type === 'QA'){
-										gameChangerAPI.sendQAFeedback('qa_thumbs_up', question, answer, filename, docId);
+										gameChangerAPI.sendQAFeedback('qa_thumbs_up', question, answer, qaContext, params);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsUp', `question : ${question}, answer: ${answer}`);
 									} else {
-										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', title, state.searchText);
+										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', title, state.searchText, sentenceResults);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${state.searchText}, title: ${title}`);
 									}
 									
@@ -225,10 +226,10 @@ const GetQAResults = (props) => {
 								if(feedback === ''){
 									setFeedback('thumbsDown');
 									if(type === 'QA'){
-										gameChangerAPI.sendQAFeedback('qa_thumbs_down', question, answer, filename, docId);
+										gameChangerAPI.sendQAFeedback('qa_thumbs_down', question, answer, qaContext, params);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'QAThumbsDown', `question : ${question}, title: ${answer}`);
 									} else {
-										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', title, state.searchText);
+										gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', title, state.searchText, sentenceResults);
 										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${state.searchText}, title: ${title}`);
 									}
 								}
@@ -288,15 +289,15 @@ const GetQAResults = (props) => {
 						onClick={() => {setOpen(false)}}>
 							<CloseIcon fontSize="large" />
 						</CloseButton>
-					<p style={{marginTop: '10px', marginBottom: '0'}}>{_.truncate(answers[0], {length: 300})}</p>
+					<p style={{marginTop: '10px', marginBottom: '0'}}>{_.truncate(answers[0].answer, {length: 300})}</p>
 					<Link href={"#"} onClick={(event)=> {
       						preventDefault(event);
-      						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=${resultTypes[0]}&${resultTypes[0]}Name=${docIds[0]}`);
+      						window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=${answers[0].resultType}&${answers[0].resultType}Name=${answers[0].docId}`);
    						}}
 					>
-					<strong><b style={{fontSize: 14}}>{filenames[0]}</b></strong>
+					<strong><b style={{fontSize: 14}}>{answers[0].displaySource}</b></strong>
 					</Link>
-					{feedbackComponent({answer: answers[0], filename: filenames[0], docId: docIds[0]}, "QA")}
+					{feedbackComponent({answer: answers[0], qaContext: qaContext, params: params}, "QA")}
 			</div>);
 	} else if( open && Object.keys(intelligentSearchResult).length !== 0){
 		return 	(
@@ -341,9 +342,7 @@ const GetQAResults = (props) => {
 													fontSize: 14,
 													margin: '16px 0px 0px 10px'
 												}}
-												textStyle={{color: '#8091A5'}}
-												buttonColor={'#FFFFFF'}
-												borderColor={'#B0B9BE'}
+												isSecondaryBtn={true}
 											>No
 											</GCButton>
 											<GCButton
@@ -381,6 +380,18 @@ const GetQAResults = (props) => {
 										/>
 										<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 											<GCButton
+												onClick={() => handleCancelFavorite()}
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px'
+												}}
+												isSecondaryBtn={true}
+											>Cancel
+											</GCButton>
+											<GCButton
 												onClick={() => handleSaveFavorite(true)}
 												style={{
 													height: 40,
@@ -390,20 +401,6 @@ const GetQAResults = (props) => {
 													margin: '16px 0px 0px 10px'
 												}}
 											>Save
-											</GCButton>
-											<GCButton
-												onClick={() => handleCancelFavorite()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px'
-												}}
-												textStyle={{color: '#8091A5'}}
-												buttonColor={'#FFFFFF'}
-												borderColor={'#B0B9BE'}
-											>Cancel
 											</GCButton>
 										</div>
 									</div>
@@ -428,7 +425,7 @@ const GetQAResults = (props) => {
 					>
 					<strong><b style={{fontSize: 14}}>Open Document</b></strong>
 				</Link>
-				{feedbackComponent({title: intelligentSearchResult.display_title_s}, "intelligentSearch")}
+				{feedbackComponent({title: intelligentSearchResult.display_title_s, sentenceResults: sentenceResults}, "intelligentSearch")}
 			</div>);
 	}
 	return <></>;

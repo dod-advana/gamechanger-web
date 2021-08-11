@@ -171,9 +171,15 @@ export const getSearchObjectFromString = (searchString = '') => {
 	// DECOUPLED ONLY
 export const checkUserInfo = (state, dispatch) => {
 	const { userData } = state;
-
+	const userMatomoStatus = JSON.parse(localStorage.getItem('userMatomo'));
+	const infoPassed =  JSON.parse(localStorage.getItem('userInfoPassed'));
+	const userFeedbackMode =  JSON.parse(localStorage.getItem('userFeedbackMode'));
+	let didPass = false;
+	if (infoPassed && (new Date(infoPassed.expires) > new Date())){
+		didPass= infoPassed.passed;
+	}
 	try {
-		if (isDecoupled && userData && !userData.submitted_info) {
+		if (isDecoupled && !userData?.submitted_info && userMatomoStatus && !didPass && userFeedbackMode) {
 			// show pop up
 			setState(dispatch, { userInfoModalOpen: true });
 			console.log('Decoupled user needs to fill out form')
