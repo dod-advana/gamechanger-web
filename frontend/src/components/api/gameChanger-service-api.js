@@ -50,6 +50,7 @@ const endpoints = {
 	gcShortenSearchURLPOST: '/api/gameChanger/shortenSearchURL',
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
+	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
@@ -296,10 +297,11 @@ export default class GameChangerAPI {
 		});
 	}
 
-	thumbnailStorageDownloadPOST = async (filenames, cloneData) => {
+	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
+		// const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, dest: s3Bucket}, {timeout: 10000})
+		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 30000})
 	}
 
 	getCloneData = async () => {
@@ -340,6 +342,11 @@ export default class GameChangerAPI {
 	gcCrawlerTrackerData = async (options) => {
 		const url = endpoints.gcCrawlerTrackerData;
 		return axiosPOST(this.axios, url, options);
+	}
+
+	gcCrawlerSealData = async () => {
+		const url = endpoints.gcCrawlerSealData;
+		return axiosPOST(this.axios, url);
 	}
 	
 	getSourceTrackerData = async (options) => {
