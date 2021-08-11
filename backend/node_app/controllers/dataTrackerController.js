@@ -1,5 +1,6 @@
 const DOCUMENT_CORPUS = require('../models').gc_document_corpus_snapshot;
 const CRAWLER_STATUS = require('../models').crawler_status;
+const CRAWLER_INFO = require('../models').crawler_info;
 const VERSIONED_DOCS = require('../models').versioned_docs;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
@@ -12,12 +13,14 @@ class DataTrackerController {
 			logger = LOGGER,
 			documentCorpus = DOCUMENT_CORPUS,
 			crawlerStatus = CRAWLER_STATUS,
+			crawlerInfo = CRAWLER_INFO,
 			versioned_docs = VERSIONED_DOCS,
 		} = opts;
 
 		this.logger = logger;
 		this.documentCorpus = documentCorpus;
 		this.crawlerStatus = crawlerStatus;
+		this.crawlerInfo = crawlerInfo;
 		this.versioned_docs = versioned_docs;
 
 		this.getTrackedData = this.getTrackedData.bind(this);
@@ -25,6 +28,7 @@ class DataTrackerController {
 		this.getTrackedSource = this.getTrackedSource.bind(this);
 		this.crawlerDateHelper = this.crawlerDateHelper.bind(this);
 		this.getCrawlerMetadata = this.getCrawlerMetadata.bind(this);
+		this.getCrawlerSealData = this.getCrawlerSealData.bind(this);
 	}
 
 	async getBrowsingLibrary(req, res) {
@@ -199,6 +203,20 @@ class DataTrackerController {
 		}
 	}
 
+	async getCrawlerSealData(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const crawlerData = await this.crawlerInfo.findAndCountAll({});
+			const crawlerDataCleaned = crawlerData.rows.map((item) => {
+				return item.dataValues;
+			});
+			res.status(200).send(crawlerDataCleaned);
+		} catch (e) {
+			this.logger.error(e.message, 'VMHW663', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving crawler seals' });
+		}
+	}
 	
 }
 
