@@ -720,9 +720,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText) => {
+	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText, sentenceResults) => {
 		const url = endpoints.intelligentSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText });
+		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText, sentenceResults });
 	}
 
 	populateNewUserId = async () => {
@@ -740,9 +740,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
+	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
 		const url = endpoints.qaSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+		return axiosPOST(this.axios, url, { eventName, question, answer, qaContext, params });
 	}
 
 	getFeedbackData = async () => {

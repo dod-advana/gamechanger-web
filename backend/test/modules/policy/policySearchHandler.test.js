@@ -369,6 +369,9 @@ describe('PolicySearchHandler', function () {
 				searchUtility: {
 					intelligentSearchHandler: () => {
 						return Promise.resolve([]);
+					},
+					getSentResults() {
+						return Promise.resolve([]);
 					}
 				},
 				dataTracker: {},
@@ -381,7 +384,7 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.enrichSearchResults(req, {}, 'test', 'test');
-			const expected = {'entities': [], 'intelligentSearch': {}, 'qaContext': {'context': [], 'params': {}}, 'qaResults': {'answers': [], 'docIds': [], 'filenames': [], 'question': ''}, 'topics': [], 'totalEntities': 0, 'totalTopics': 0};
+			const expected = {'entities': [], 'intelligentSearch': {}, 'qaResults': {'answers': [], 'params': {}, 'qaContext': [], 'question': ''}, 'topics': [], 'totalEntities': 0, 'totalTopics': 0, 'sentenceResults': []};
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
@@ -448,7 +451,7 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.qaEnrichment(req, {}, 'test');
-			const expected = {'qaContext': {'context': [], 'params': {}}, 'qaResults': {'answers': [], 'docIds': [], 'filenames': [], 'question': ''}};
+			const expected = {'answers': [], 'params': 'test', 'qaContext': [], 'question': ''};
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
