@@ -3,36 +3,14 @@ import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
 import styled from 'styled-components';
-import { Select, InputLabel, FormControl, MenuItem, Typography, TextField } from '@material-ui/core'
+import { FormControl, Typography, TextField } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingBar from '../common/LoadingBar';
 import { backgroundGreyDark } from '../common/gc-colors';
-import CloseIcon from '@material-ui/icons/Close';
 import '../../components/export/export-results-dialog.css';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 
 const gameChangerAPI = new GameChangerAPI()
-
-const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
-	const byteCharacters = atob(b64Data);
-	const byteArrays = [];
-
-	for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-		const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-		const byteNumbers = new Array(slice.length);
-		for (let i = 0; i < slice.length; i++) {
-			byteNumbers[i] = slice.charCodeAt(i);
-		}
-
-		const byteArray = new Uint8Array(byteNumbers);
-		byteArrays.push(byteArray);
-	}
-
-	const blob = new Blob(byteArrays, { type: contentType });
-	return blob;
-}
 
 const useStyles = makeStyles(() => ({
 	labelFont: {
@@ -76,22 +54,6 @@ const styles = {
 	}
 }
 
-const CloseButton = styled.div`
-    padding: 6px;
-    background-color: white;
-    border-radius: 5px;
-    color: #8091A5 !important;
-    border: 1px solid #B0B9BE;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: .4;
-    position: absolute;
-    right: -20px;
-    top: -10px;
-`;
-
 const EditEntityDialog = ({ open, handleClose }) => {
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
@@ -110,15 +72,16 @@ const EditEntityDialog = ({ open, handleClose }) => {
 			title={
 				<div>
 					<Typography variant="h3" display="inline">Edit Details</Typography>
-					<CloseButton onClick={handleClose}>
-						<CloseIcon fontSize="large" />
-					</CloseButton>
 				</div>
 			}
 			onRequestClose={handleClose}
 			width="500px"
 			primaryLabel=''
 			primaryAction={() => { }}
+			contentStyle={{padding: 0}}
+			titleStyle={{padding: 0}}
+			mainContainerStyle={{padding: 0, margin: 0}}
+			handleClose={handleClose}
 		> 
 			<FormControl style={{ width:'100%', marginTop: 5 }}>
 				<TextField
@@ -136,14 +99,14 @@ const EditEntityDialog = ({ open, handleClose }) => {
 				</div>
 
 				<div style={styles.rightButtonGroup}>
-					<GCButton onClick={handleSave}>
-						Save
-					</GCButton>
 					<GCButton
 						onClick={handleClose}
-						buttonColor={'#8091A5'}
+						isSecondaryBtn={true}
 					>
 						Close
+					</GCButton>
+					<GCButton onClick={handleSave}>
+						Save
 					</GCButton>
 				</div>
 			</div>
