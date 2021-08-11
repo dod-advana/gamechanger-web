@@ -132,9 +132,9 @@ const PolicySearchHandler = {
 			topicSearchResults: [],
 			entitySearchResults: [],
 			categoryMetadata: {},
-			qaResults: {question: '', answers: [], filenames: [], docIds: []},
-			qaContext: {params: {}, context: []},
+			qaResults: {question: '', answers: [], qaContext: [], params: {}},
 			intelligentSearchResult: {},
+			sentenceResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
@@ -231,7 +231,7 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, sentenceResults, intelligentSearch } = resp.data;
 
 				displayBackendError(resp, dispatch);
 				const categoryMetadata = 
@@ -425,8 +425,8 @@ const PolicySearchHandler = {
 						entitySearchResults: entities,
 						topicSearchResults: topics, 
 						qaResults: qaResults,
-						qaContext: qaContext,
 						intelligentSearchResult: intelligentSearch,
+						sentenceResults: sentenceResults,
 						searchResultsCount: searchResults.length,
 						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
@@ -459,9 +459,9 @@ const PolicySearchHandler = {
 						entitySearchResults: [],
 						topicSearchResults: [],
 						categoryMetadata: {},
-						qaResults: {question: '', answers: [], filenames: [], docIds: []},
-						qaContext: {params: {}, context: []},
+						qaResults: {question: '', answers: [], qaContext: [], params: {}},
 						intelligentSearchResult: {},
+						sentenceResults: [],
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
