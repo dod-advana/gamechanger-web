@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import _ from "lodash";
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
 import {Divider, Checkbox} from '@material-ui/core';
 import GCTooltip from "../common/GCToolTip";
@@ -302,8 +303,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function GCCard (props) {
-    const {
-    	id,
+	const {
+		id,
 		idx,
 		state,
 		dispatch,
@@ -312,39 +313,42 @@ function GCCard (props) {
 		closeGraphCard = () => {},
 		collection = [],
 		detailPage = false
-    } = props;
-    
-    const cardType = item.type;
-    
+		} = props;
+	
+	const cardType = item.type;  
 	const selected = state.selectedDocuments.has(item.filename);
-    const isFavorite = item.favorite;
-    const isRevoked = item.is_revoked_b;
-    const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
-    
-    const allowScroll = true;
 
-    const classes = useStyles();
+	let isFavorite = false;
+	switch(cardType){
+		case 'document':
+			const faveDocs = state.userData.favorite_documents;
+			isFavorite = _.find(faveDocs, (doc) => {return doc.id === item.id}) !== undefined;
+			break;
+		case 'topic':
+			const faveTopics = state.userData.favorite_topics;
+			isFavorite = _.find(faveTopics, (topic) => {return topic.topic_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
+			break;
+		default: 
+			break;
+	}
+	const isRevoked = item.is_revoked_b;
+	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
+	const allowScroll = true;
+
+	const classes = useStyles();
 
 	const [toggledMore, setToggledMore] = useState(false);
 	const [metadataExpanded, setMetadataExpanded] = useState(false);
-    const [hitsExpanded, setHitsExpanded] = useState(false);
-    const [hoveredHit, setHoveredHit] = useState(0);
-    // const [favoriteName, setFavoriteName] = useState('');
-	
-    const [favorite, setFavorite] = useState(isFavorite);
-    const [popperIsOpen, setPopperIsOpen] = useState(false);
-    const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-    const [topicFavoritePopperOpen, setTopicFavoritePopperOpen] = useState(false);
-	const [topicFavoritePopperAnchorEl, setTopicFavoritePopperAnchorEl] = useState(null);
-	const [favoriteTopic, setFavoriteTopic] = useState('');
+	const [hitsExpanded, setHitsExpanded] = useState(false);
+	const [hoveredHit, setHoveredHit] = useState(0);
+	const [favorite, setFavorite] = useState(isFavorite);
+	const [popperIsOpen, setPopperIsOpen] = useState(false);
+	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
 	const [favoriteSummary, setFavoriteSummary] = useState('');
-	const [feedback, setFeedback] = useState('');
-    
-    const [cardHandler, setCardHandler] = useState();
+	const [feedback, setFeedback] = useState('');  
+  const [cardHandler, setCardHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
-	
 	const [filename, setFilename] = useState('');
-	
 	const [modalOpen, setModalOpen] = useState(false);
 
 	useEffect(() => {
@@ -352,10 +356,8 @@ function GCCard (props) {
 		if (cardType && !loaded) {
 			const factory = new CardFactory(state.cloneData.card_module);
 			const handler = factory.createHandler();
-			
 			setCardHandler(handler[cardType])
 			setLoaded(true);
-			
 			setFilename(handler[cardType].getFilename(item));
 		}
 	}, [state, loaded, cardType, item]);
@@ -382,50 +384,40 @@ function GCCard (props) {
 		}
 	}
 
-    const handleSaveFavorite = (favorite = false) => {
-		const documentData = {
-			filename: filename,
-			favorite_summary: favoriteSummary,
-			favorite_name: '',
-			is_favorite: favorite
-		};
-
+  const handleSaveFavorite = (favorite = false) => {
+		switch(cardType){
+			case 'document':
+				const documentData = {
+					filename: filename,
+					favorite_summary: favoriteSummary,
+					favorite_name: '',
+					is_favorite: favorite
+				};
+				handleSaveFavoriteDocument(documentData, state, dispatch);
+				break;
+			case 'organization':
+				break;
+			case 'topic':
+				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
+			default:
+				break;
+		}
 		setFavorite(favorite);
 		setPopperAnchorEl(null);
 		setPopperIsOpen(false);
-		// setFavoriteName('');
 		setFavoriteSummary('');
-		handleSaveFavoriteDocument(documentData, state, dispatch);
-	}
-	
-	const handleSaveTopic = (favorite) => {
-		handleSaveFavoriteTopic(favoriteTopic, favoriteSummary, favorite, dispatch)
-		setFavoriteTopic('');
-		setFavoriteSummary('');
-		setTopicFavoritePopperOpen(false)
-		setTopicFavoritePopperAnchorEl(null);
-	}
-	
-	const handleFavoriteTopicClicked = (anchorEL) => {
-		if (!topicFavoritePopperOpen) {
-			setTopicFavoritePopperOpen(true);
-			setTopicFavoritePopperAnchorEl(anchorEL)
-		} else {
-			setTopicFavoritePopperOpen(false)
-			setTopicFavoritePopperAnchorEl(null);
-		}
 	}
 
 	const handleCancelFavorite = () => {
     	setPopperIsOpen(false);
-		setPopperAnchorEl(null);
+			setPopperAnchorEl(null);
 	}
 
 	const favoriteComponent = () => {
 		return (
-			<GCTooltip title={'Favorite a document to track in the User Dashboard'} placement='top' arrow>
+			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
 				<i onClick={(event) => {
-					openFavoritePopper(event.target);
+            openFavoritePopper(event.target);
 				}} className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
 					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
@@ -570,15 +562,6 @@ function GCCard (props) {
 					:
 					<div className={classes.paper}>
 						<div style={{width: 330, margin: 5}}>
-							{/*<TextField*/}
-							{/*	label={'Favorite Name'}*/}
-							{/*	value={favoriteName}*/}
-							{/*	onChange={(event) => {setFavoriteName(event.target.value);}}*/}
-							{/*	className={classes.textField}*/}
-							{/*	margin='none'*/}
-							{/*	size='small'*/}
-							{/*	variant='outlined'*/}
-							{/*/>*/}
 							<TextField
 								label={'Favorite Summary'}
 								value={favoriteSummary}
@@ -653,9 +636,6 @@ function GCCard (props) {
 									backBody: cardHandler.getCardBack({
 										item,
 										state,
-										setFavoriteTopic,
-										setFavorite,
-										handleFavoriteTopicClicked,
 										detailPage
 									}),
 									hitsExpanded,
@@ -714,9 +694,7 @@ function GCCard (props) {
 									item,
 									state,
 									dispatch,
-									setFavoriteTopic,
 									setFavorite,
-									handleFavoriteTopicClicked,
 									detailPage
 								})}
 							</div>
@@ -752,13 +730,9 @@ function GCCard (props) {
 					{/* START CARD EXTRAS */}
 					{loaded && cardHandler.getCardExtras({
 						isFavorite: favorite,
-						topicFavoritePopperOpen,
-						topicFavoritePopperAnchorEl,
 						favoriteSummary,
 						setFavoriteSummary,
 						classes,
-						handleSaveTopic,
-						handleFavoriteTopicClicked,
 						modalOpen,
 						setModalOpen,
 						item
