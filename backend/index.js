@@ -87,6 +87,11 @@ try {
 	console.error('No env variables created')
 }
 
+if (constants.EXPRESS_TRUST_PROXY) {
+	// https://expressjs.com/en/guide/behind-proxies.html
+	app.set("trust proxy", constants.EXPRESS_TRUST_PROXY)
+}
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
