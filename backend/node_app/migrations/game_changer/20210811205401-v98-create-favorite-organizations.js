@@ -13,6 +13,9 @@ module.exports = {
 				type: Sequelize.STRING,
 				allowNull: false
 			},
+			new_user_id: {
+				type: Sequelize.STRING
+			},
 			organization_name: {
 				type: Sequelize.STRING,
 				allowNull: false
