@@ -546,6 +546,9 @@ const GCUserDashboard = (props) => {
 						{ renderTopicFavorites() }
 					</GCAccordion>
 				}
+				<GCAccordion expanded={false} header={'FAVORITE ORGANIZATIONS'} itemCount={topicFavoritesTotalCount}>
+					{ renderOrganizationFavorites() }
+				</GCAccordion>
 				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
 					{ renderDocumentFavorites() }
 				</GCAccordion>
@@ -894,6 +897,48 @@ const GCUserDashboard = (props) => {
 		handleFavoriteTopic(favoriteTopicsSlice[idx]);
 		updateUserData();
 	}
+
+	const renderOrganizationFavorites = () => {
+		return (
+			<div style={{width: '100%', height: '100%'}}>
+				{favoriteTopicsLoading ? (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcOrange} />
+					</div>
+				) : (
+				favoriteTopicsSlice.length > 0 ? (
+				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
+					<div className={"col-xs-12"} style={{ padding: 0 }}>
+						<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+							{_.map(favoriteTopicsSlice, (topic, idx) => {
+								return renderFavoriteTopicCard(topic, idx)
+							})}
+						</div>
+					</div>
+				</div>
+				) : (
+					<StyledPlaceHolder>Favorite an organization to see it listed here</StyledPlaceHolder>
+					)
+				)
+			 }
+
+				{favoriteTopicsSlice.length > 0 &&
+					<div className='gcPagination'>
+						<Pagination
+							activePage={topicFavoritesPage}
+							itemsCountPerPage={RESULTS_PER_PAGE}
+							totalItemsCount={topicFavoritesTotalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTopicFavorites', 'pagination', page);
+								handlePaginationChange(page, 'topicFavorites');
+							}}
+						/>
+					</div>
+				}
+			</div>
+		)
+	};
 	
 	const renderHistory = () => {
 		return (
