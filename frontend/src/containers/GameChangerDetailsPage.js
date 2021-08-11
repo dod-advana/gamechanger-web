@@ -21,6 +21,9 @@ import SourceDetailsPage from "../components/details/sourceDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
+import EditEntityDialog from '../components/admin/EditEntityDialog';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -47,6 +50,8 @@ export const MainContainer = styled.div`
 		font-family: Montserrat !important;
 		font-weight: bold;
 		font-size: 16px;
+		display: flex;
+		justify-content: space-between;
 	}
 	
 	> .details {
@@ -309,6 +314,7 @@ const GameChangerDetailsPage = (props) => {
 	const [detailsType, setDetailsType] = useState('');
 	const [hierarchyView, setHierarchyView] = useState(false);
 	const [loginModalOpen, setLoginModalOpen] = useState(false);
+	const [editEntityVisible, setEditEntityVisible] = useState(false);
 	
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
@@ -472,10 +478,22 @@ const GameChangerDetailsPage = (props) => {
 		setDocResultsPage(page);
 		setVisibleDocs(docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE + 1));
 	}
-	
+
+	const editEntity = () => {
+		if (Permissions.isGameChangerAdmin()) {
+			setEditEntityVisible(true);
+		}
+	}
+
 	const renderEntityContainer = () => {
 		return (
 			<>
+				{editEntityVisible &&
+					<EditEntityDialog
+						open={editEntityVisible}
+						handleClose={() => setEditEntityVisible(false)}
+					/>
+				}
 				{entity &&
 					<MainContainer>
 						<div className={'details'}>
@@ -485,6 +503,15 @@ const GameChangerDetailsPage = (props) => {
 								
 								<div className={'details-header'}>
 									<span>{'ENTITY DETAILS'}</span>
+									{Permissions.isGameChangerAdmin() && (
+										<IconButton
+											aria-label="edit"
+											style={{ padding: 5, color: 'white'}}
+											onClick={editEntity}
+										>
+											<EditIcon />
+										</IconButton>
+									)}
 								</div>
 								
 								<div className={'details-table'}>
