@@ -366,11 +366,9 @@ const PolicySearchHandler = {
 						}
 						
 						if(!searchSettings.isFilterUpdate || (searchSettings.isFilterUpdate && searchSettings.allOrgsSelected)){
-							console.log("one")
 							newSearchSettings.originalOrgFilters = sidebarOrgData;
 						}
 						if(!searchSettings.isFilterUpdate || (searchSettings.isFilterUpdate && searchSettings.allTypesSelected)){
-							console.log("two")
 							newSearchSettings.originalTypeFilters = sidebarTypes;
 						}
 						if(searchSettings.orgUpdate){
