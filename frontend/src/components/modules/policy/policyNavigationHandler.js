@@ -128,6 +128,15 @@ const PolicyNavigationHandler = {
 						<ConstrainedIcon src={AnalystToolsIcon} />
 					</HoverNavItem>
 				</GCTooltip>
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem centered onClick={()=> {
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name),'SidebarInteraction', 'showAboutUs');
+						}} active={ state.pageDisplayed === PAGE_DISPLAYED.aboutUs } toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AnalystToolsIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				<GCTooltip title="Clone Request" placement="right" arrow>
 					<a href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '40px' }}>
 						<HoverNavItem centered onClick={()=> {
@@ -223,6 +232,16 @@ const PolicyNavigationHandler = {
 					>
 						<ConstrainedIcon src={AnalystToolsIcon} />
 						<span style={{ marginLeft: '10px' }}>Analyst Tools</span>
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem onClick={()=> {
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name),'SidebarInteraction', 'showAboutUs');
+						}} active={ state.pageDisplayed === PAGE_DISPLAYED.aboutUs } toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AnalystToolsIcon} />
+						<span style={{ marginLeft: '10px' }}>About Us</span>
 					</HoverNavItem>
 				</GCTooltip>
 				<GCTooltip title="Clone Request" placement="right" arrow>
