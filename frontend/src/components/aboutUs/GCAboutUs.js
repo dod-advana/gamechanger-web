@@ -3,7 +3,7 @@ import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import TabStyles from '../common/TabStyles'
 import { Typography } from "@material-ui/core";
 
-import GCIcon from "../../images/icon/gc-logo.png";
+import GCLogo from "../../images/logos/Gamechanger logo.png";
 import FileIcon from "../../images/icon/GC 312@3x.png";
 import SearchIcon from "../../images/icon/GC 317@3x.png";
 import GraphIcon from "../../images/icon/GC 318@3x.png";
@@ -35,7 +35,7 @@ const GCAboutUs = (props) => {
 					<Typography variant="body" style={{marginTop:'10px'}}><b>Vision: </b>To fundamentally change the way in which the Department navigates its universe of requirements and makes decisions</Typography>
 					<Typography variant="body" syyle={{marginTop:'10px'}}><b>Mission: </b>To create a trusted Department-wide solution for evidence-based, data-driven decision making across the universe of DoD requirements, by:<br/>• Building the Department’s authoritative corpus of requirements and policy to drive search, discovery, understanding, and analytic capabilities <br/>• Operationalizing cutting-edge technologies, algorithms, models, and interfaces to automate and scale the solution <br/>• Fusing best practices from industry, academia, and government to advance innovation and research <br/>• Engaging the open-source community to build generalizable and replicable technology</Typography>
 				</div>
-				<img style={{width:'520px', height:'550px', marginRight:150}} src={GCIcon}></img>
+				<img style={{width:'520px', height:'550px', marginRight:150}} src={GCLogo}></img>
 			</div>,
 			<div style={{backgroundColor:'#ECF1F7'}}>
 				<div style={{margin: '0 350px 0 100px', paddingBottom: '30px'}}>
