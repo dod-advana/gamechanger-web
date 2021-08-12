@@ -270,30 +270,30 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		try {
 			let enrichedResults = searchResults;
+			let sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
 			//set empty values
-			enrichedResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-			enrichedResults.qaContext = {params: {}, context: []};
+			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
 			enrichedResults.intelligentSearch = {};
 			enrichedResults.entities = [];
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
+			enrichedResults.sentenceResults = sentenceResults;
 
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
+			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 2};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, searchResults, qaParams, userId);
-				enrichedResults.qaResults = QA.qaResults;
-				enrichedResults.qaContext = QA.qaContext;
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
+				enrichedResults.qaResults = QA
 			}
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
-			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults, {question: '', answers: [], filenames: [], docIds: []})){ // add intelligent search result if QA empty
-				const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
+			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
+				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
 
@@ -317,13 +317,12 @@ class PolicySearchHandler extends SearchHandler {
 
 			// add results to search report
 			if (testing === true) {
-				let saveResults = {}
+				let saveResults = {};
 				saveResults.regular = searchResults.docs.slice(0, 10);
-				saveResults.context = enrichedResults.qaContext.context;
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
 				saveResults.qaResponses = enrichedResults.qaResults;
-				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
+				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
 			}
 
 			return enrichedResults;
@@ -333,7 +332,7 @@ class PolicySearchHandler extends SearchHandler {
 		return searchResults;
 	}
 
-	async intelligentSearch(req, clientObj, userId){
+	async intelligentSearch(req, sentenceResults, clientObj, userId){
 		const {
 			searchText,
 			orgFilterString = [],
@@ -356,7 +355,8 @@ class PolicySearchHandler extends SearchHandler {
 		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 			try {
 				// get intelligent search result
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				//intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentenceResults, userId, req, clientObj);
 				return intelligentSearchResult;
 			} catch (e) {
 				if (forCacheReload) {
@@ -371,14 +371,12 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, searchResults, qaParams, userId){
+	async qaEnrichment(req, sentenceResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
 
-		let QA = {};
-		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-		QA.qaContext = {params: {}, context: []};
+		let QA = { question: '', answers: [], params: qaParams, qaContext: []};
 		
 		let esClientName = 'gamechanger';
 		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
@@ -392,7 +390,7 @@ class PolicySearchHandler extends SearchHandler {
 				let queryType = 'documents';
 				let entities;
 				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
-				QA.qaResults.question = qaQueries.display;
+				QA.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
 					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
@@ -401,14 +399,14 @@ class PolicySearchHandler extends SearchHandler {
 				}
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, sentenceResults, esClientName, esIndex, userId, qaParams);
 				if (testing === true) {
 					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
 				}
 				if (context.length > 0) { // if context results, query QA model
-					QA.qaContext.context = context;
+					QA.qaContext = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
-					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
+					QA= this.searchUtility.cleanQAResults(QA, shortenedResults, context);
 				}
 				
 			} catch (e) {

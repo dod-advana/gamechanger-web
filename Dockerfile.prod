@@ -9,12 +9,21 @@ USER root
 RUN (type -P "yum" &> /dev/null) && ( \
         yum install -y \
             git \
+            python38 \
+            python38-devel \
+            make \
+            gcc \
+            gcc-c++ \
         && yum clean all \
         && rm -rf /var/cache/yum \
      ) || ((type -P "apt-get" &> /dev/null) && ( \
         apt-get update \
         && apt-get install -y \
             git \
+            python3 \
+            python3-dev \
+            make \
+            gcc-6 \
         && apt-get clean \
         && rm -rf /var/cache/apt/lists \
     )) || ( \
@@ -75,5 +84,8 @@ RUN cd "${APP_FRONTEND_DIR}" \
     && npm run build \
     && mv build "${APP_BACKEND_DIR}"
 
+# http & https
+EXPOSE 8990 8443
 WORKDIR "${APP_BACKEND_DIR}"
-CMD ./startProd.sh
+ENTRYPOINT ["node"]
+CMD ["index.js"]
