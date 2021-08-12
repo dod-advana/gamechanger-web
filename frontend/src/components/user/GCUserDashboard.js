@@ -985,7 +985,6 @@ const GCUserDashboard = (props) => {
 					</GCTooltip>
 				</div>
 			</div>
-
 		return (
 			<FavoriteCard
 				key={`organization-favorite-${idx}`}
@@ -998,7 +997,7 @@ const GCUserDashboard = (props) => {
 				idx={idx}
 				active={organization.active}
 				toggleActive={toggleActive}
-				// isOrganization
+				isOrganization
 				cloneData={cloneData}
 			/>
 		)
