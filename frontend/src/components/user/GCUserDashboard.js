@@ -913,8 +913,29 @@ const GCUserDashboard = (props) => {
 		try {
 			exportHistoryDownloading.add(historyId);
 			setExportHistoryDownloading(new Set(exportHistoryDownloading));
-			const results = await gameChangerAPI.documentSearchDownloadPOST({ ...download_request_body, historyId });
-			downloadFile(results.data, download_request_body.format, cloneData);
+			const exportInput = {
+				cloneName: download_request_body.cloneData.clone_name,
+				format: download_request_body.format,
+				searchText: download_request_body.searchText,
+				options:{
+					limit: download_request_body.limit,
+					index: download_request_body.index,
+					classificationMarking: download_request_body.classificationMarking,
+					cloneData: download_request_body.cloneData,
+					orgFilter: download_request_body.orgFilter,
+					orgFilterString: download_request_body.orgFilterString,
+					typeFilter: download_request_body.typeFilter,
+					typeFilterString: download_request_body.typeFilterString,
+					selectedDocuments: download_request_body.selectedDocuments,
+					tiny_url : download_request_body.tiny_url,
+					searchFields: download_request_body.searchFields,
+					edaSearchSettings: download_request_body.edaSearchSettings,
+					sort: download_request_body.sort,
+					order: download_request_body.order
+				}
+			};
+			const { data } = await gameChangerAPI.modularExport(exportInput);
+			downloadFile(data, download_request_body.format, cloneData);
 		} catch(e) {
 			console.log('regen err', e)
 		} finally {
@@ -1134,20 +1155,18 @@ const GCUserDashboard = (props) => {
 							/>
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
+									onClick={() => handleFavoriteSearchHistoryStarClicked(null, true)}
+									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+									isSecondaryBtn={true}
+								>Cancel
+								</GCButton>
+								<GCButton
 									onClick={() => {
 
 										handleSaveSearch();
 									}}
 									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 								>Save
-								</GCButton>
-								<GCButton
-									onClick={() => handleFavoriteSearchHistoryStarClicked(null, true)}
-									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-									textStyle={{ color: '#8091A5' }}
-									buttonColor={ '#FFFFFF' }
-									borderColor={ '#B0B9BE' }
-								>Cancel
 								</GCButton>
 							</div>
 						</div>
@@ -1184,10 +1203,8 @@ const GCUserDashboard = (props) => {
 										setUnfavoritePopperOpen(false);
 										setSearchHistoryIdx(-1);
 									}}
+									isSecondaryBtn={true}
 									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
 								>No
 								</GCButton>
 								<GCButton

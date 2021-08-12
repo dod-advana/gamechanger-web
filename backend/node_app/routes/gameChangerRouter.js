@@ -9,7 +9,6 @@ const { MegaMenuController } = require('../controllers/megaMenuController');
 const { UserController } = require('../controllers/userController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
-const { CloneController } = require('../controllers/cloneController');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { AdminController } = require('../controllers/adminController');
 const { NotificationController } = require('../controllers/notificationController');
@@ -30,7 +29,6 @@ const exportHistory = new ExportHistoryController();
 const user = new UserController();
 const favorites = new FavoritesController();
 const cache = new CacheController();
-const clone = new CloneController();
 const dataTracker = new DataTrackerController();
 const admin = new AdminController();
 const notification = new NotificationController();
@@ -44,10 +42,6 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 
-router.post('/documentSearch/download', (req, res) => {
-	req.setTimeout(720000);
-	search.documentSearchDownload(req, res);
-});
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
 router.get('/admin/getElasticSearchIndex', search.getElasticSearchIndex);
@@ -59,6 +53,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
+router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);

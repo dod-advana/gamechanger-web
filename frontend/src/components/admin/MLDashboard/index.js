@@ -3,7 +3,7 @@ import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import { Typography } from "@material-ui/core";
 import TabStyles from '../../common/TabStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import styles from '../GCAdminStyles';
+import {styles} from '../util/GCAdminStyles';
 import Info from './info';
 import S3 from './s3';
 import Models from './models';

@@ -425,12 +425,7 @@ function GCCard (props) {
 		return (
 			<GCTooltip title={'Favorite a document to track in the User Dashboard'} placement='top' arrow>
 				<i onClick={(event) => {
-					if (favorite){
-						setFavorite(false);
-						handleSaveFavorite();
-					} else {
-						openFavoritePopper(event.target);
-					}
+					openFavoritePopper(event.target);
 				}} className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
 					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
@@ -475,44 +470,45 @@ function GCCard (props) {
 	}
 	
 	const intelligentFeedbackComponent = () => (
-			<div style={styles.tooltipRow}>
-				<GCTooltip
-					enterDelay={100}
-					title={
-					<div style={{textAlign: 'center'}}>
-						<span>This card was retrieved based on a new machine learning algorithm. {feedback === '' && 'Was this result relevant?'}</span>
-					</div>
-				} placement='right' arrow>
-						<i className={classes.infoCircle + " fa fa-info-circle"} aria-hidden="true"/>
-				</GCTooltip>
-				<Fade in={feedback === ''} timeout={ 1500 }>
-					<div style={{flexGrow: 2, display: 'flex'}}>
-						<i
-							className={classes.feedback + " fa fa-thumbs-up"}
-							style={{color: feedback === 'thumbsUp' ? '#238823' : 'white'}}
-							onClick={() => {
-								if(feedback === ''){
-									setFeedback('thumbsUp');
-									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', cardHandler.getDisplayTitle(item), searchText);
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
-								}
-							}}>
+		<div style={styles.tooltipRow}>
+			<GCTooltip
+				enterDelay={100}
+				title={
+				<div style={{textAlign: 'center'}}>
+					<span>This card was retrieved based on a new machine learning algorithm. {feedback === '' && 'Was this result relevant?'}</span>
+				</div>
+			} placement='right' arrow>
+					<i className={classes.infoCircle + " fa fa-info-circle"} aria-hidden="true"/>
+			</GCTooltip>
+			<Fade in={feedback === ''} timeout={ 1500 }>
+				<div style={{flexGrow: 2, display: 'flex'}}>
+					<i
+						className={classes.feedback + " fa fa-thumbs-up"}
+						style={{color: feedback === 'thumbsUp' ? '#238823' : 'white'}}
+						onClick={() => {
+							if(feedback === ''){
+								setFeedback('thumbsUp');
+								gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', cardHandler.getDisplayTitle(item), searchText);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
+							}
+						}}>
 
-						</i>
-						<i
-							className={classes.feedback + " fa fa-thumbs-down" }
-							style={{color: feedback === 'thumbsDown' ? '#D2222D' : 'white'}}
-							onClick={() => {
-								if(feedback === ''){
-									setFeedback('thumbsDown');
-									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', cardHandler.getDisplayTitle(item), searchText);
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
-								}
-							}}>
-						</i>
-					</div>
-				</Fade>
-			</div>);
+					</i>
+					<i
+						className={classes.feedback + " fa fa-thumbs-down" }
+						style={{color: feedback === 'thumbsDown' ? '#D2222D' : 'white'}}
+						onClick={() => {
+							if(feedback === ''){
+								setFeedback('thumbsDown');
+								gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', cardHandler.getDisplayTitle(item), searchText);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
+							}
+						}}>
+					</i>
+				</div>
+			</Fade>
+		</div>
+	);
 
     return (
     	<StyledCardContainer listView={state.listView} toggledMore={toggledMore} isRevoked={isRevoked}
@@ -535,7 +531,7 @@ function GCCard (props) {
 				{isFavorite ?
 					<div style={{padding: '0px 15px 10px'}}>
 						<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-							<CloseButton onClick={() => handleFavoriteTopicClicked(null)}>
+							<CloseButton onClick={() => handleCancelFavorite()}>
 								<CloseIcon fontSize="small"/>
 							</CloseButton>
 						</div>
@@ -545,7 +541,7 @@ function GCCard (props) {
 							</div>
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
-									onClick={() => handleFavoriteTopicClicked(null)}
+									onClick={() => handleCancelFavorite()}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -553,15 +549,11 @@ function GCCard (props) {
 										fontSize: 14,
 										margin: '16px 0px 0px 10px'
 									}}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
+									isSecondaryBtn={true}
 								>No
 								</GCButton>
 								<GCButton
-									onClick={() => {
-										handleSaveTopic(false);
-									}}
+									onClick={() => handleSaveFavorite(false)}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -602,6 +594,18 @@ function GCCard (props) {
 							/>
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px'
+									}}
+									isSecondaryBtn={true}
+								>Cancel
+								</GCButton>
+								<GCButton
 									onClick={() => handleSaveFavorite(true)}
 									style={{
 										height: 40,
@@ -611,20 +615,6 @@ function GCCard (props) {
 										margin: '16px 0px 0px 10px'
 									}}
 								>Save
-								</GCButton>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px'
-									}}
-									textStyle={{color: '#8091A5'}}
-									buttonColor={'#FFFFFF'}
-									borderColor={'#B0B9BE'}
-								>Cancel
 								</GCButton>
 							</div>
 						</div>

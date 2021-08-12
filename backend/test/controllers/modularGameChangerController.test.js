@@ -37,7 +37,8 @@ describe('ModularGameChangerController', function () {
 					findOne(data) {
 						return Promise.resolve(cloneList[0]);
 					}
-				}
+				},
+				handler_factory: {}
 			};
 			const target = new ModularGameChangerController(opts);
 
@@ -101,7 +102,8 @@ describe('ModularGameChangerController', function () {
 					findAll(data) {
 						return Promise.resolve(cloneList);
 					}
-				}
+				},
+				handler_factory: {}
 			};
 			const target = new ModularGameChangerController(opts);
 
@@ -141,12 +143,16 @@ describe('ModularGameChangerController', function () {
 				handler_factory: {
 					createHandler(handlerType, cloneName) {
 						return {
-							search() {
+							search: async () => {
 								return {msg: 'I am a dummy search. Check out the test for specific modules.', handlerType, cloneName};
+							},
+							getError: () => {
+								return {};
 							}
 						};
 					}
-				}
+				},
+				clone_meta: {}
 			};
 			const target = new ModularGameChangerController(opts);
 
@@ -174,11 +180,8 @@ describe('ModularGameChangerController', function () {
 				}
 			};
 
-			try {
-				await target.search(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
+
+			await target.search(req, res);
 			const expected = {msg: 'I am a dummy search. Check out the test for specific modules.', handlerType: 'search', cloneName: 'gamechanger'};
 			assert.deepStrictEqual(resMsg, expected);
 		});
@@ -196,7 +199,8 @@ describe('ModularGameChangerController', function () {
 							}
 						};
 					}
-				}
+				},
+				clone_meta: {}
 			};
 			const target = new ModularGameChangerController(opts);
 
