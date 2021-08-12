@@ -212,6 +212,7 @@ const GCUserDashboard = (props) => {
 		saveFavoriteSearch,
 		clearDashboardNotification,
 		handleFavoriteTopic,
+		handleFavoriteOrganization,
 		checkUserInfo,
 		cloneData
 	} = props;
@@ -246,6 +247,12 @@ const GCUserDashboard = (props) => {
 	const [topicFavoritesTotalCount, setTopicFavoritesTotalCount] = useState(0);
 	const [favoriteTopics, setFavoriteTopics] = useState([]);
 	const [favoriteTopicsSlice, setFavoriteTopicsSlice] = useState([]);
+
+	const [favoriteOrganizationsLoading, setFavoriteOrganizationsLoading] = useState(false);
+	const [organizationFavoritesPage, setOrganizationFavoritesPage] = useState(1);
+	const [organizationFavoritesTotalCount, setOrganizationFavoritesTotalCount] = useState(0);
+	const [favoriteOrganizations, setFavoriteOrganizations] = useState([]);
+	const [favoriteOrganizationsSlice, setFavoriteOrganizationsSlice] = useState([]);
 
 	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] = useState(null);
 	const [searchHistoryPopperOpen, setSearchHistoryPopperOpen] = useState(false);
@@ -502,6 +509,13 @@ const GCUserDashboard = (props) => {
 			setFavoriteTopicsLoading(false);
 		}
 
+		if (userData.favorite_organizations) {
+			setFavoriteOrganizations(userData.favorite_organizations)
+			setOrganizationFavoritesTotalCount(userData.favorite_organizations ? userData.favorite_organizations.length : 0);
+			setFavoriteOrganizationsSlice(userData.favorite_organizations.slice(0, RESULTS_PER_PAGE));
+			setFavoriteOrganizationsLoading(false);
+		}
+
 	}, [userData]);
 
 	useEffect(() => {
@@ -534,6 +548,10 @@ const GCUserDashboard = (props) => {
 				setTopicFavoritesPage(page);
 				setFavoriteTopicsSlice(favoriteTopics.slice((page - 1 ) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
 				break;
+			case 'organizationFavorites':
+				setOrganizationFavoritesPage(page);
+				setFavoriteOrganizationsSlice(favoriteOrganizations.slice((page - 1 ) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
+				break;
 			default:
 		}
 	}
@@ -546,7 +564,7 @@ const GCUserDashboard = (props) => {
 						{ renderTopicFavorites() }
 					</GCAccordion>
 				}
-				<GCAccordion expanded={false} header={'FAVORITE ORGANIZATIONS'} itemCount={topicFavoritesTotalCount}>
+				<GCAccordion expanded={false} header={'FAVORITE ORGANIZATIONS'} itemCount={organizationFavoritesTotalCount}>
 					{ renderOrganizationFavorites() }
 				</GCAccordion>
 				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
@@ -901,17 +919,17 @@ const GCUserDashboard = (props) => {
 	const renderOrganizationFavorites = () => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
-				{favoriteTopicsLoading ? (
+				{favoriteOrganizationsLoading ? (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
 				) : (
-				favoriteTopicsSlice.length > 0 ? (
+				favoriteOrganizationsSlice.length > 0 ? (
 				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
 					<div className={"col-xs-12"} style={{ padding: 0 }}>
 						<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-							{_.map(favoriteTopicsSlice, (topic, idx) => {
-								return renderFavoriteTopicCard(topic, idx)
+							{_.map(favoriteOrganizationsSlice, (organization, idx) => {
+								return renderFavoriteOrganizationCard(organization, idx)
 							})}
 						</div>
 					</div>
@@ -922,16 +940,16 @@ const GCUserDashboard = (props) => {
 				)
 			 }
 
-				{favoriteTopicsSlice.length > 0 &&
+				{favoriteOrganizationsSlice.length > 0 &&
 					<div className='gcPagination'>
 						<Pagination
-							activePage={topicFavoritesPage}
+							activePage={organizationFavoritesPage}
 							itemsCountPerPage={RESULTS_PER_PAGE}
-							totalItemsCount={topicFavoritesTotalCount}
+							totalItemsCount={organizationFavoritesTotalCount}
 							pageRangeDisplayed={8}
 							onChange={page => {
-								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTopicFavorites', 'pagination', page);
-								handlePaginationChange(page, 'topicFavorites');
+								// trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTopicFavorites', 'pagination', page);
+								handlePaginationChange(page, 'organizationFavorites');
 							}}
 						/>
 					</div>
@@ -939,6 +957,58 @@ const GCUserDashboard = (props) => {
 			</div>
 		)
 	};
+
+	const renderFavoriteOrganizationCard = (organization, idx) => {
+
+		const toggleActive = () => {
+			organization.active = !organization.active
+		}
+
+		const searchDetails = 
+			<div className={'stats-details'}>
+				<div className={'favorited-date'}>{organization.createdAt}</div>
+				<div className={'stats-details-stat-div'}>
+					<GCTooltip title={'Times search has been favorited by others'} placement="top">
+						<div className={'stats-stat'}>
+							<span className={'stats-text'}>{organization.favorited}</span>
+							<Icon className="fa fa-heart-o" />
+						</div>
+					</GCTooltip>
+					<GCTooltip title={"Click to see comments"} placement="top">
+						<div className={'stats-comment'}>
+							<Icon className="fa fa-comment" onClick={() => {
+								toggleActive();
+								setReload(!reload);
+								}}
+							/>
+						</div>
+					</GCTooltip>
+				</div>
+			</div>
+
+		return (
+			<FavoriteCard
+				key={`organization-favorite-${idx}`}
+				cardTitle={organization.organization_name}
+				handleDeleteFavorite={handleDeleteFavoriteOrganization}
+				details={searchDetails}
+				overlayText={organization.organization_summary}
+				reload={reload}
+				setReload={setReload}
+				idx={idx}
+				active={organization.active}
+				toggleActive={toggleActive}
+				// isOrganization
+				cloneData={cloneData}
+			/>
+		)
+	};
+
+	const handleDeleteFavoriteOrganization = async (idx) => {
+		favoriteOrganizationsSlice[idx].favorite = false;
+		handleFavoriteOrganization(favoriteOrganizationsSlice[idx]);
+		updateUserData();
+	}
 	
 	const renderHistory = () => {
 		return (
@@ -1565,6 +1635,7 @@ GCUserDashboard.propTypes = {
 			})
 		})),
 		favorite_topics: PropTypes.arrayOf(PropTypes.object),
+		favorite_organizations: PropTypes.arrayOf(PropTypes.object),
 		notifications: PropTypes.objectOf(PropTypes.number),
 		api_key: PropTypes.string
 	}),
@@ -1574,6 +1645,7 @@ GCUserDashboard.propTypes = {
 	saveFavoriteSearch: PropTypes.func,
 	clearDashboardNotification: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
+	handleFavoriteOrganization: PropTypes.func,
 	checkUserInfo: PropTypes.func,
 	cloneData: PropTypes.shape({
 		clone_name: PropTypes.string
