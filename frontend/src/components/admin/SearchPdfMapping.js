@@ -5,7 +5,7 @@ import XLSX from 'xlsx';
 import GameChangerAPI from '../api//gameChanger-service-api';
 import GCPrimaryButton from "../common/GCButton";
 import { trackEvent } from '../telemetry/Matomo';
-import styles from './GCAdminStyles';
+import {styles} from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
