@@ -115,21 +115,12 @@ const GCAboutUs = (props) => {
 						}} title="userHistory" onClick={() => setTabIndex('about')}>
 						<Typography variant="h6" display="inline" title="cardView">ABOUT GAMECHANGER</Typography>
 					</Tab>
-					<Tab style={{...TabStyles.tabStyle,
-						...(tabIndex === 'faq' ? TabStyles.tabSelectedStyle : {}),
-						borderRadius: `5px 0 0 0`
-						}} title="userHistory" onClick={() => setTabIndex('faq')}>
-						<Typography variant="h6" display="inline" title="cardView">FAQ</Typography>
-					</Tab>
 				</TabList>
 			</div>
 
 			<div style={TabStyles.panelContainer}>
 				<TabPanel>
 					{renderAboutGC()}
-				</TabPanel>
-				<TabPanel>
-					<p>This is the faq page</p> 
 				</TabPanel>
 			</div>
 		</Tabs>
