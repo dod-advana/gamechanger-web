@@ -191,7 +191,8 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 
 		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
+			//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', 'gamechanger');
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
@@ -217,7 +218,9 @@ const PolicyMainViewHandler = {
 				let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
 				return {img_filename: filename}
 			});
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
+			// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, 'gamechanger');
+
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
