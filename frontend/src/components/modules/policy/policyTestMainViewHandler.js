@@ -192,7 +192,7 @@ const PolicyMainViewHandler = {
 
 		try {
 			//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', 'gamechanger');
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'});
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
