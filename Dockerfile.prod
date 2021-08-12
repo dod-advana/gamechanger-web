@@ -85,6 +85,7 @@ RUN cd "${APP_FRONTEND_DIR}" \
     && mv build "${APP_BACKEND_DIR}"
 
 # http & https
+HEALTHCHECK CMD which npm || true
 EXPOSE 8990 8443
 WORKDIR "${APP_BACKEND_DIR}"
 ENTRYPOINT ["node"]
