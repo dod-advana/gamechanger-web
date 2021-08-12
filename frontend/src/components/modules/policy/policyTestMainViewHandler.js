@@ -213,7 +213,8 @@ const PolicyMainViewHandler = {
 			let folder = crawlerSources[0].image_link.split('/');
 			folder = folder[folder.length - 2];
 			const thumbnailList = crawlerSources.map(item => {
-				let filename = item.image_link.split('/').pop();
+				// let filename = item.image_link.split('/').pop();
+				let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
 				return {img_filename: filename}
 			});
 			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
