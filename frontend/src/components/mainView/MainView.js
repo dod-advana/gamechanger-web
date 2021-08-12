@@ -53,14 +53,14 @@ const MainView = (props) => {
 	}, [state, dispatch, pageLoaded])
 
 	useEffect(() => {
-		const favSearchUrls = state.userData.favorite_searches.map(search => {
+		const favSearchUrls = state.userData?.favorite_searches.map(search => {
 			return search.url;
 		});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url);
 		
 		if (state.isFavoriteSearch !== searchFavorite) {
 			setState(dispatch, { isFavoriteSearch: searchFavorite });
