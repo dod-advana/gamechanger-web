@@ -34,8 +34,6 @@ class SimpleExportHandler extends ExportHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 			let searchResults;
-			console.log("ABOUT TO EXPORT SOME STUFFF!!!!!!!!!!!!!!!!!!!")
-
 			try {
 				searchResults = await this.searchUtility.documentSearch(req, {...req.body, expansionDict, operator: 'and'}, clientObj, userId);
 				searchResults.classificationMarking = req.body.classificationMarking;
