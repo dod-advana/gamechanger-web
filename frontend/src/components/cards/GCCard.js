@@ -17,7 +17,9 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CardFactory from "../factories/cardFactory";
 import {
 	handleSaveFavoriteDocument,
-	handleSaveFavoriteTopic, setState
+	handleSaveFavoriteTopic, 
+	handleSaveFavoriteOrganization, 
+	setState
 } from "../../sharedFunctions";
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from "../api/gameChanger-service-api";
@@ -328,6 +330,10 @@ function GCCard (props) {
 			const faveTopics = state.userData.favorite_topics;
 			isFavorite = _.find(faveTopics, (topic) => {return topic.topic_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
 			break;
+		case 'organization':
+			const faveOrganizations = state.userData.favorite_organizations;
+			isFavorite = _.find(faveOrganizations, (organization) => {return organization.organization_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
+			break;
 		default: 
 			break;
 	}
@@ -396,9 +402,11 @@ function GCCard (props) {
 				handleSaveFavoriteDocument(documentData, state, dispatch);
 				break;
 			case 'organization':
+				handleSaveFavoriteOrganization(item.name, favoriteSummary, favorite, dispatch);
 				break;
 			case 'topic':
 				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
+				break;
 			default:
 				break;
 		}
