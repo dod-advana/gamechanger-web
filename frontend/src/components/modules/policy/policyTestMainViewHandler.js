@@ -167,6 +167,60 @@ const renderRecentSearches = (search, state, dispatch) => {
 	)
 }
 
+const handlePubs = async (pubs, state, dispatch) => {
+	try {
+		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
+		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'});
+		const buffers = pngs.data
+		buffers.forEach((buf,idx) => {
+			if(buf.status === "fulfilled"){
+				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+			} else {
+				pubs[idx].imgSrc = 'error';
+			}
+		});
+	} catch(e) {
+		//Do nothing
+		console.log(e);
+	}
+	setState(dispatch, {adminMajorPubs: pubs});
+};
+
+const handleSources = async(state, dispatch) => {
+		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+		crawlerSources = crawlerSources.data;
+	try {
+		// let folder = crawlerSources[0].image_link.split('/');
+		// folder = folder[folder.length - 2];
+		const folder = 'crawler_images'
+		const thumbnailList = crawlerSources.map(item => {
+			// let filename = item.image_link.split('/').pop();
+			let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
+			return {img_filename: filename}
+		});
+		// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
+		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'});
+
+		const buffers = pngs.data;
+		buffers.forEach((buf,idx) => {
+			if(buf.status === "fulfilled"){
+				if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+					crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+				}
+			}
+			else {
+				crawlerSources[idx].imgSrc = DefaultSeal;
+			}
+		});
+	} catch(e) {
+		//Do nothing
+		console.log(e)
+	}
+	setState(dispatch, {crawlerSources});
+}
+
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
@@ -189,56 +243,8 @@ const PolicyMainViewHandler = {
 		}
 		
 		setState(dispatch, {adminTopics:topics});
-
-		try {
-			//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'});
-			const buffers = pngs.data
-			buffers.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-				} else {
-					pubs[idx].imgSrc = 'error';
-				}
-			})
-			
-		} catch(e) {
-			//Do nothing
-		}
-		
-		setState(dispatch, {adminMajorPubs: pubs});
-
-		try {
-			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
-			crawlerSources = crawlerSources.data;
-			let folder = crawlerSources[0].image_link.split('/');
-			folder = folder[folder.length - 2];
-			const thumbnailList = crawlerSources.map(item => {
-				// let filename = item.image_link.split('/').pop();
-				let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
-				return {img_filename: filename}
-			});
-			// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'});
-
-			const buffers = pngs.data
-			buffers.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
-						crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-					}
-				}
-				else {
-					crawlerSources[idx].imgSrc = DefaultSeal;
-				}
-			});
-			setState(dispatch, {crawlerSources});
-		} catch(e) {
-			//Do nothing
-			console.log(e)
-		}
+		handlePubs(pubs, state, dispatch);
+		handleSources(state, dispatch);
 	},
 	
 	getMainView(props) {
