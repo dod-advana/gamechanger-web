@@ -219,7 +219,7 @@ const PolicyMainViewHandler = {
 				return {img_filename: filename}
 			});
 			// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, 'gamechanger');
+			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'});
 
 			const buffers = pngs.data
 			buffers.forEach((buf,idx) => {
