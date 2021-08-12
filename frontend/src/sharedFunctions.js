@@ -113,6 +113,11 @@ export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, di
 	await getUserData(dispatch);
 }
 
+export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
+	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
+	await getUserData(dispatch);
+}
+
 export const createTinyUrl = async (cloneData) => {
 	let url = window.location.hash.toString();
 	url = url.replace("#/", "");
