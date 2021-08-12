@@ -154,12 +154,18 @@ class EdaExportHandler extends ExportHandler {
 	writeCsvData(stringifier, data) {
 
 		if(data && data.docs && data.docs.length > 0){
-			const header = ['Filename', 'Contract Number', 'Page Count', 'Issuing Organization', 'Line Items'];
+			const header = ['Filename', 'Contract Number', 'Page Count', 'Issuing Organization', '', '', 'CLINS', 'Prod or Svc', 'Description', 'Base', 'Type', 'Obligated Amount', 'Obligated Amount CIN', 'Row ID'];
 			stringifier.write(header);
 
 			data.docs.forEach((doc) => {
-				const item = [doc.filename, this.getDisplayTitle(doc), doc.page_count, doc.issuing_organization_eda_ext, doc.line_items];
+				const item = [doc.filename, this.getDisplayTitle(doc), doc.page_count, doc.issuing_organization_eda_ext];
 				stringifier.write(item);
+
+				for (const item of doc.line_items) {
+					const line_item = ['', '', '', '', '', '', '', item.prod_or_svc, item.prod_or_svc_desc, item.li_base, item.li_type, item.obligated_amount, item.obligated_amount_cin, item.row_id];					
+					stringifier.write(line_item);	
+				}
+
 			});
 		}
 	}
