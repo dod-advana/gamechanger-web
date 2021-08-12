@@ -74,7 +74,7 @@ class EdaSearchHandler extends SearchHandler {
 			const operator = 'and';
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			// log query to ES
-			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 			
 			// EXPANSION TERM CODE
 
@@ -176,7 +176,7 @@ class EdaSearchHandler extends SearchHandler {
 				};
 				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
 	
-				this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
+				await this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UA0YDAL');
@@ -353,9 +353,9 @@ class EdaSearchHandler extends SearchHandler {
 			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 				switch (functionName) {
 					case 'queryContractMods':
-						return this.queryContractMods(req, userId);
+						return await this.queryContractMods(req, userId);
 					case 'queryBaseAwardContract':
-						return this.queryBaseAwardContract(req, userId);
+						return await this.queryBaseAwardContract(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,

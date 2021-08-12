@@ -1,5 +1,4 @@
 const asyncRedisLib = require('async-redis');
-const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
 const GC_HISTORY = require('../../models').gc_history;
@@ -11,7 +10,7 @@ class GraphHandler {
 	constructor(opts = {}) {
 		const {
 			redisClientDB = 8,
-			redisDB = redisAsyncClient,
+			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 			gc_history = GC_HISTORY,
 			dataLibrary = new DataLibrary(opts),
 			logger = LOGGER,
@@ -27,7 +26,7 @@ class GraphHandler {
 
 	async search(searchText, options, cloneName, permissions, userId) {
 		// Setup the request
-		console.log(`${userId} is doing a ${cloneName} graph search for ${searchText} with options ${options}`);
+		this.logger.info(`${userId} is doing a ${cloneName} graph search for ${searchText} with options ${options}`);
 		const proxyBody = options;
 		proxyBody.searchText = searchText;
 		proxyBody.cloneName = cloneName;
@@ -37,7 +36,7 @@ class GraphHandler {
 
 	async query(query, code, options, cloneName, permissions, userId) {
 		// Setup the request
-		console.log(`${userId} is doing a ${cloneName} graph query with options ${options}`);
+		this.logger.info(`${userId} is doing a ${cloneName} graph query with options ${options}`);
 		const proxyBody = options;
 		proxyBody.query = query;
 		proxyBody.cloneName = cloneName;
@@ -47,7 +46,7 @@ class GraphHandler {
 
 	async callFunction(functionName, options, cloneName, permissions, userId) {
 		// Setup the request
-		console.log(`${userId} is calling ${functionName} in the ${cloneName} graph module with options ${options}`);
+		this.logger.info(`${userId} is calling ${functionName} in the ${cloneName} graph module with options ${options}`);
 		const proxyBody = options;
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;
@@ -83,7 +82,7 @@ class GraphHandler {
 	async getCachedResults(req, cloneSpecificObject, userId) {
 		try {
 
-			this.redisDB.select(this.redisClientDB);
+			await this.redisDB.select(this.redisClientDB);
 
 			// ## try to get cached results
 			const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
@@ -101,7 +100,7 @@ class GraphHandler {
 	}
 
 	async storeCachedResults(req, graphData, cloneSpecificObject, userId) {
-		this.redisDB.select(this.redisClientDB);
+		await this.redisDB.select(this.redisClientDB);
 
 		// ## try to get cached results
 		const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
@@ -114,7 +113,7 @@ class GraphHandler {
 		}
 	}
 
-	async render2dNodeLocations(nodes, edges, user) {
+	render2dNodeLocations(nodes, edges, user) {
 		try {
 			const renderEdges = JSON.parse(JSON.stringify(edges));
 			const charge = d3Force.forceManyBody();
@@ -151,7 +150,7 @@ class GraphHandler {
 		}
 	}
 
-	async render3dNodeLocations(nodes, edges, user) {
+	render3dNodeLocations(nodes, edges, user) {
 		try {
 			const renderEdges = JSON.parse(JSON.stringify(edges));
 			const simulation = d3Force.forceSimulation(nodes, 3)

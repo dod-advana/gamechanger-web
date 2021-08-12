@@ -8,65 +8,60 @@ const {
 // all test cases used 'shark' as the searchtext. req ripped from a sample network call.
 describe('PolicySearchHandler', function () {
 	describe('#searchHelper', () => {
-		it('should return single document from ES search', async (done) => {
-			try {
-				const req = {body: {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				}};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					dataTracker: {},
-					mlApi: {},
-					searchUtility: {}
-				};
-				const target = new PolicySearchHandler(opts);
+		it('should return single document from ES search', () => {
+			const req = {body: {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			}};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				dataTracker: {},
+				mlApi: {},
+				searchUtility: {
+					isQuestion: () => {
+						return false;
+					}
+				}
+			};
+			const target = new PolicySearchHandler(opts);
 
-				target.createRecObject = () => Promise.resolve({historyRec: [], cloneSpecificObject: [], clientObj: [] });
-				target.gatherExpansionTerms = () => Promise.resolve({expansionTerms: []});
-				target.doSearch = () => Promise.resolve({docs: ['test'], totalCount: 1});
-				target.enrichSearchResults = () => Promise.resolve(enrichSearchResultsExpected);
-				target.storeHistoryRecords = () => Promise.resolve();
+			target.createRecObject = () => Promise.resolve({historyRec: [], cloneSpecificObject: [], clientObj: [] });
+			target.gatherExpansionTerms = () => Promise.resolve({expansionTerms: []});
+			target.doSearch = () => Promise.resolve({docs: ['test'], totalCount: 1});
+			target.enrichSearchResults = () => Promise.resolve(enrichSearchResultsExpected);
+			target.storeHistoryRecords = () => Promise.resolve();
 
-				const actual = await target.searchHelper(req, 'test');
+			target.searchHelper(req, 'test').then(actual => {
 				const expected = enrichSearchResultsExpected;
 				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e){
-				console.log(e);
-			}
+			});
 		});
 	});
-	// describe('#callFunctionHelper', () => {	});
 
 	describe('#createRecObject', () => {
-		it('it should return rec objects for search', async (done) => {
-			done();
-
+		it('it should return rec objects for search', () => {
 			const req = {
 				cloneName: 'gamechanger',
 				searchText: 'shark',
@@ -97,18 +92,17 @@ describe('PolicySearchHandler', function () {
 				},
 				dataLibrary: {
 					putDocument: () => Promise.resolve()
-				}
+				},
+				dataTracker: {},
+				mlApi: {},
+				searchUtility: {}
 			};
 			const target = new PolicySearchHandler(opts);
-			try {
-				const actual = await target.createRecObject(req, 'test');
+			target.createRecObject(req, 'test').then(actual => {
 				actual.historyRec.startTime = null;
-				assert.deepStrictEqual(actual, createRecObjectExpected);
-				done();
-			} catch (e) {
-				console.log(e);
-				done();
-			}
+				const expected = {'clientObj': {'esClientName': 'gamechanger', 'esIndex': 'Test'}, 'cloneSpecificObject': {'includeRevoked': undefined, 'orgFilterString': [], 'searchFields': []}, 'historyRec': {'cachedResult': false, 'clone_name': 'gamechanger', 'endTime': null, 'hadError': false, 'numResults': -1, 'orgFilters': '[]', 'request_body': {'cloneName': 'gamechanger', 'offset': 0, 'options': {'accessDateFilter': [null, null], 'charsPadding': 90, 'includeRevoked': false, 'limit': 6, 'orgFilterString': [], 'publicationDateAllTime': true, 'publicationDateFilter': [null, null], 'searchFields': {'initial': {'field': null, 'input': ''}}, 'searchType': 'Keyword', 'searchVersion': 1, 'showTutorial': false, 'tiny_url': 'gamechanger?tiny=282', 'transformResults': false, 'typeFilterString': [], 'useGCCache': false}, 'searchText': 'shark'}, 'search': '', 'searchText': 'shark', 'searchType': undefined, 'search_version': undefined, 'showTutorial': false, 'startTime': null, 'tiny_url': undefined, 'user_id': 'test'}};
+				assert.deepStrictEqual(actual, expected);
+			});
 		});
 	});
 
@@ -116,215 +110,185 @@ describe('PolicySearchHandler', function () {
 
 	// not tested because it's just a combination of a bunch of sub-functions
 	describe('#gatherExpansionTerms', () => {
-		it('should combine all expansion terms correctly', async (done) => {
-			try {
-				const req = {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					mlApi: {
-						getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
-					},
-					searchUtility: {
-						getEsSearchTerms: () => ['parsedQuery', ['terms', 'array']],
-						combineExpansionTerms: () => ({ shark: [ '"killer whale"', '"whale boat"' ] })
-					}
-				};
-				const target = new PolicySearchHandler(opts);
-				target.mlApiExpansion = () => Promise.resolve({});
-				target.thesaurusExpansion = () => Promise.resolve({synonyms: undefined, text: 'shark'});
-				target.abbreviationCleaner = () => Promise.resolve({synonyms: undefined, text: 'shark'});
+		it('should combine all expansion terms correctly', async () => {
+			const req = {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
+				},
+				searchUtility: {
+					getEsSearchTerms: () => ['parsedQuery', ['terms', 'array']],
+					combineExpansionTerms: () => ({ shark: [ '"killer whale"', '"whale boat"' ] })
+				}
+			};
+			const target = new PolicySearchHandler(opts);
+			target.mlApiExpansion = () => Promise.resolve({});
+			target.thesaurusExpansion = () => {return {synonyms: undefined, text: 'shark'}};
+			target.abbreviationCleaner = () => Promise.resolve({synonyms: undefined, text: 'shark'});
 
-				const actual = await target.gatherExpansionTerms(req, 'test');
-				const expected = { shark: [ '"killer whale"', '"whale boat"' ] };
-				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e) {
-				console.log(e);
-			}
+			const actual = await target.gatherExpansionTerms(req, 'test');
+			const expected = { shark: [ '"killer whale"', '"whale boat"' ] };
+			assert.deepStrictEqual(actual, expected);
 		});
 	});
 
 	describe('#mlApiExpansion', () => {
-		it('it should give expansion', async (done) => {
-			try {
-				const req = {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					mlApi: {
-						getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
-					}
-				};
-				const target = new PolicySearchHandler(opts);
-				const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
-				const actual = await target.mlApiExpansion(termsArray, false, 'test');
-				const expected = { shark: [ '"killer whale"', '"whale boat"' ] };
-				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e) {
-				console.log(e);
-			}
-
+		it('it should give expansion', async () => {
+			const req = {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
+				}
+			};
+			const target = new PolicySearchHandler(opts);
+			const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
+			const actual = await target.mlApiExpansion(termsArray, false, 'test');
+			const expected = { shark: [ '"killer whale"', '"whale boat"' ] };
+			assert.deepStrictEqual(actual, expected);
 		});
 	});
 
 	describe('#thesaurusExpansion', () => {
-		it('should return synonyms and text', async (done) => {
-			try {
-				const req = {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					mlApi: {
-						getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
-					},
-					thesaurus: {
-						lookup: () => {}
-					}
-				};
-				const target = new PolicySearchHandler(opts);
+		it('should return synonyms and text', async () => {
+			const req = {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					getExpandedSearchTerms: (termsArray, userId) => { return Promise.resolve({ shark: [ '"killer whale"', '"whale boat"' ] }); }
+				},
+				thesaurus: {
+					lookup: () => {}
+				}
+			};
+			const target = new PolicySearchHandler(opts);
 
-				const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
-				const actual = await target.thesaurusExpansion(req.searchText, termsArray);
-				const expected = {synonyms: undefined, text: 'shark'};
-				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e) {
-				console.log(e);
-			}
+			const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
+			const actual = target.thesaurusExpansion(req.searchText, termsArray);
+			const expected = {synonyms: undefined, text: 'shark'};
+			assert.deepStrictEqual(actual, expected);
 		});
 	});
 	describe('#abbreviationCleaner', () => {
-		it('should return abbreviations', async (done) => {
-			try {
-				const req = {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {},
-					mlApi: {},
-					dataTracker: {},
-				};
-				const target = new PolicySearchHandler(opts);
-				const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
-				const actual = await target.abbreviationCleaner(termsArray);
-				const expected = []; // maybe need a better test case for abbreviationCleaner; but also unsure because redisAsyncClient
-				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e) {
-				console.log(e);
-			}
-			done();
+		it('should return abbreviations', async () => {
+			const req = {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {},
+				dataTracker: {},
+			};
+			const target = new PolicySearchHandler(opts);
+			const [parsedQuery, termsArray] = target.searchUtility.getEsSearchTerms({searchText: req.searchText});
+			const actual = await target.abbreviationCleaner(termsArray);
+			const expected = []; // maybe need a better test case for abbreviationCleaner; but also unsure because redisAsyncClient
+			assert.deepStrictEqual(actual, expected);
 		});
 	});
 
 	// searchHelper parts
 	describe('#doSearch', () => {
-		it('should do the search and return SearchResults', async (done) => {
+		it('should do the search and return SearchResults', async () => {
 			const req = {body: {
 				cloneName: 'gamechanger',
 				searchText: 'shark',
@@ -368,12 +332,11 @@ describe('PolicySearchHandler', function () {
 			const actual = await target.doSearch(req, {expansionDict: []}, {clientObj: 'client'}, 'test');
 			const expected = {docs: ['test doc'], totalCount: 1};
 			assert.deepStrictEqual(actual, expected);
-			done();
 		});
 	});
 
 	describe('#enrichSearchResults', () => {
-		it('should return enriched SearchResults', async (done) => {
+		it('should return enriched SearchResults', async () => {
 			const req = {body: {
 				cloneName: 'gamechanger',
 				searchText: 'shark',
@@ -403,7 +366,14 @@ describe('PolicySearchHandler', function () {
 				},
 				dataLibrary: {},
 				mlApi: {},
-				searchUtility: {},
+				searchUtility: {
+					intelligentSearchHandler: () => {
+						return Promise.resolve([]);
+					},
+					getSentResults() {
+						return Promise.resolve([]);
+					}
+				},
 				dataTracker: {},
 				async_redis: {},
 				app_settings: {
@@ -413,15 +383,14 @@ describe('PolicySearchHandler', function () {
 				}
 			};
 			const target = new PolicySearchHandler(opts);
-			const actual = await target.enrichSearchResults(req, {}, 'test');
-			const expected = enrichSearchResultsExpected;
+			const actual = await target.enrichSearchResults(req, {}, 'test', 'test');
+			const expected = {'entities': [], 'intelligentSearch': {}, 'qaResults': {'answers': [], 'params': {}, 'qaContext': [], 'question': ''}, 'topics': [], 'totalEntities': 0, 'totalTopics': 0, 'sentenceResults': []};
 			assert.deepStrictEqual(actual, expected);
-			done();
 		});
 	});
 
 	describe('#qaEnrichment', () => {
-		it('should return QA results', async (done) => {
+		it('should return QA results', async () => {
 			const req = {body: {
 				cloneName: 'gamechanger',
 				searchText: 'what is this',
@@ -482,13 +451,12 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.qaEnrichment(req, {}, 'test');
-			const expected = {'qaContext': {'context': [{'name': 'test object'}], 'params': {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entitylimit: 4}}, 'qaResults': {'answers': [], 'docIds': [], 'filenames': [], 'question': 'what is this?'}};
+			const expected = {'answers': [], 'params': 'test', 'qaContext': [], 'question': ''};
 			assert.deepStrictEqual(actual, expected);
-			done();
 		});
 	});
 	describe('#entitySearch', () => {
-		it('should return entity search results', async (done) => {
+		it('should return entity search results', () => {
 			const req = {
 				cloneName: 'gamechanger',
 				searchText: 'shark',
@@ -513,10 +481,8 @@ describe('PolicySearchHandler', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants: {
-					env: {
-						GAME_CHANGER_OPTS: {downloadLimit: 1000},
-						GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-					}
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 				},
 				dataLibrary: {
 					queryElasticSearch: () => { return Promise.resolve({body: {hits: {hits: [{_source: {name: 'test'}}], total: {value: 1}}}}); },
@@ -524,19 +490,19 @@ describe('PolicySearchHandler', function () {
 				},
 				mlApi: {},
 				searchUtility: {
-					getTopicQuery: () => { return Promise.resolve(); },
+					getEntityQuery: () => { return Promise.resolve(); },
 					cleanNeo4jData: () => { return {graph_metadata: 'data'}; }
 				}
 			};
 			const target = new PolicySearchHandler(opts);
-			const actual = await target.topicSearch('shark', 0, 6, 'test');
-			const expected = {topics: [{name: 'test', relatedTopics: 'data', type: 'topic', documentCount: 'data'}], totalTopics: 1};
-			assert.deepStrictEqual(actual, expected);
-			done();
+			target.entitySearch('shark', 0, 6, 'test').then(actual => {
+				const expected = {'entities': [{'name': 'test', 'type': 'organization'}], 'totalEntities': 1};
+				assert.deepStrictEqual(actual, expected);
+			});
 		});
 	});
 	describe('#topicSearch', () => {
-		it('should return topic search results', async (done) => {
+		it('should return topic search results', async () => {
 			const req = {
 				cloneName: 'gamechanger',
 				searchText: 'shark',
@@ -561,10 +527,8 @@ describe('PolicySearchHandler', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants: {
-					env: {
-						GAME_CHANGER_OPTS: {downloadLimit: 1000},
-						GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-					}
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 				},
 				dataLibrary: {
 					queryElasticSearch: () => { return Promise.resolve({body: {hits: {hits: [{_source: {name: 'test'}}], total: {value: 1}}}}); },
@@ -578,92 +542,82 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.topicSearch('shark', 0, 6, 'test');
-			const expected = {topics: [{name: 'test', relatedTopics: 'data', type: 'topic', documentCount: 'data'}], totalTopics: 1};
+			const expected = {'topics': [{'documentCount': 'data', 'name': 'test', 'relatedTopics': 'data', 'type': 'topic'}], 'totalTopics': 1};
 			assert.deepStrictEqual(actual, expected);
-			done();
 		});
 	});
 
 	// ES helper stuff
 	describe('#getSingleDocumentFromESHelper', () => {
-		it('should return single document from ES search', async (done) => {
-			try {
-				const req = {body: {
-					cloneName: 'gamechanger',
-					searchText: 'shark',
-					offset: 0,
-					options: {
-						searchType: 'Keyword',
-						orgFilterString: [],
-						transformResults: false,
-						charsPadding: 90,
-						typeFilterString: [],
-						showTutorial: false,
-						useGCCache: false,
-						tiny_url: 'gamechanger?tiny=282',
-						searchFields: {initial: {field: null, input: ''}},
-						accessDateFilter: [null, null],
-						publicationDateFilter: [null, null],
-						publicationDateAllTime: true,
-						includeRevoked: false,
-						limit: 6,
-						searchVersion: 1}
-				}};
-				const opts = {
-					...constructorOptionsMock,
-					constants: {
-						env: {
-							GAME_CHANGER_OPTS: {downloadLimit: 1000},
-							GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-						}
-					},
-					dataLibrary: {
-						queryElasticSearch: () => Promise.resolve(
-							{
-								body:
-                  {
-                  	hits: {
-                  		name: 'test-obj',
-                  		total: {value: 1}
-                  	},
-                  }
-							})
-					},
-					dataTracker: {
-						crawlerDateHelper: (input, userId) => Promise.resolve(input)
-					},
-					mlApi: {},
-					searchUtility: {
-						getESClient: () => ({esClientName: 'test-client', esIndex: 'test-index'}),
-						cleanUpEsResults: () => ({ totalCount: 1, docs: [{name: 'testdoc'}] })
-					}
-				};
-				const target = new PolicySearchHandler(opts);
-				target.getElasticsearchDocDataFromId = () => ({});
+		it('should return single document from ES search', () => {
+			const req = {body: {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			}};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {
+					queryElasticSearch: () => Promise.resolve(
+						{
+							body:
+              {
+              	hits: {
+              		name: 'test-obj',
+              		total: {value: 1}
+              	},
+              }
+						})
+				},
+				dataTracker: {
+					crawlerDateHelper: (input, userId) => Promise.resolve(input)
+				},
+				mlApi: {},
+				searchUtility: {
+					getESClient: () => ({esClientName: 'test-client', esIndex: 'test-index'}),
+					cleanUpEsResults: () => ({ totalCount: 1, docs: [{name: 'testdoc'}] })
+				}
+			};
+			const target = new PolicySearchHandler(opts);
+			target.getElasticsearchDocDataFromId = () => ({});
 
-				const actual = await target.getSingleDocumentFromESHelper(req, 'test');
+			target.getSingleDocumentFromESHelper(req, 'test').then(actual => {
 				const expected = { totalCount: 1, docs: [{name: 'testdoc'}] };
 				assert.deepStrictEqual(actual, expected);
-				done();
-			} catch (e){
-				console.log(e);
-			}
+			});
 		});
 	});
 	
 	describe('#getElasticsearchDocDataFromId', () => {
 		it('should return the right ES query', () => {
-			try {
-				const opts = {
-					...constructorOptionsMock
-				};
-				const target = new PolicySearchHandler(opts);
-				const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
-				const expected = elasticSearchDocDataExpected;
-				assert.deepStrictEqual(actual, expected);
-			} catch (e) {
-				console.log(e);
-			}
+			const opts = {
+				...constructorOptionsMock,
+				dataLibrary: {}
+			};
+			const target = new PolicySearchHandler(opts);
+			const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
+			const expected = {'_source': {'includes': ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_rs']}, 'query': {'bool': {'must': {'terms': {'id': 'test_ID'}}}}, 'size': 100, 'stored_fields': ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'ref_list', 'id', 'summary_30', 'keyw_5', 'type', 'pagerank_r', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s'], 'track_total_hits': true};
+			assert.deepStrictEqual(actual, expected);
 		});
 	});
 });

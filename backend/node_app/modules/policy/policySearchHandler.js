@@ -1,8 +1,6 @@
 const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
 const constantsFile = require('../../config/constants');
-const asyncRedisLib = require('async-redis');
-const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
 const sparkMD5 = require('spark-md5');
@@ -21,25 +19,23 @@ class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
 		const {
 			dataTracker = new DataTrackerController(opts),
-			logger = LOGGER,
 			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
-			async_redis = redisAsyncClient,
 			app_settings = APP_SETTINGS,
-			constants = constantsFile
+			constants = constantsFile,
+			favorite_search = FAVORITE_SEARCH
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 
 		this.dataTracker = dataTracker;
-		this.logger = logger;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
-		this.async_redis = async_redis;
 		this.app_settings = app_settings;
 		this.constants = constants;
 		this.error = {};
+		this.favorite_Search = favorite_search;
 	}
 
 	async searchHelper(req, userId) {
@@ -59,13 +55,13 @@ class PolicySearchHandler extends SearchHandler {
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
 		if(doubleQuoteCount % 2 === 1){
-			req.body.searchText = searchText.replace(/["]+/g,"");
+			req.body.searchText = searchText.replace(/["]+/g,'');
 		}
 		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		return enrichedResults;
 	}
 
@@ -74,14 +70,16 @@ class PolicySearchHandler extends SearchHandler {
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
 		if(doubleQuoteCount % 2 === 1){
-			req.body.searchText = searchText.replace(/["]+/g,"");
+			req.body.searchText = searchText.replace(/["]+/g,'');
 		}
 		
 		switch (functionName) {
 			case 'getSingleDocumentFromES':
-				return this.getSingleDocumentFromESHelper(req, userId);
+				return await this.getSingleDocumentFromESHelper(req, userId);
 			case 'getDocumentsForDetailsPageFromES':
-				return this.getDocumentsForDetailsPageFromESHelper(req, userId);
+				return await this.getDocumentsForDetailsPageFromESHelper(req, userId);
+			case 'getDocumentsBySourceFromESHelper':
+				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId);
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
@@ -89,11 +87,11 @@ class PolicySearchHandler extends SearchHandler {
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
-				return this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+				return await this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'topicPagination':
-				return this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+				return await this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'getPresearchData':
-				return this.getPresearchData(userId);
+				return await this.getPresearchData(userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policySearchHandler`,
@@ -147,21 +145,19 @@ class PolicySearchHandler extends SearchHandler {
 			historyRec.showTutorial = showTutorial;
 
 			const cloneSpecificObject = { orgFilterString, searchFields: Object.values(searchFields), includeRevoked };
-
-			const redisDB = this.async_redis;
-			redisDB.select(redisAsyncClientDB);
+			
+			await this.redisDB.select(redisAsyncClientDB);
 
 			// log query to ES
-			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 			return {historyRec, cloneSpecificObject, clientObj};
 		} catch (e) {
 			this.logger.error(e.message, 'AC3CP8H');
 		}
 		// if fail, return empty objects
-		return {historyRec, cloneSpecificObject: { orgFilter, searchFields: Object.values(searchFields), includeRevoked }, };
+		return {historyRec, cloneSpecificObject: { orgFilterString, searchFields: Object.values(searchFields), includeRevoked }, };
 	}
-
-
+	
 	async gatherExpansionTerms(body, userId) {
 		const {
 			searchText,
@@ -171,7 +167,7 @@ class PolicySearchHandler extends SearchHandler {
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
-			const {synonyms, text} = await this.thesaurusExpansion(searchText, termsArray);
+			const {synonyms, text} = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
 			return expansionDict;
@@ -196,7 +192,7 @@ class PolicySearchHandler extends SearchHandler {
 		return expansionDict;
 	}
 
-	async thesaurusExpansion(searchText, termsArray){
+	thesaurusExpansion(searchText, termsArray){
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
 		if (termsArray && termsArray.length && termsArray[0]) {
@@ -213,15 +209,15 @@ class PolicySearchHandler extends SearchHandler {
 
 	async abbreviationCleaner(termsArray){
 		// get expanded abbreviations
-		await this.async_redis.select(abbreviationRedisAsyncClientDB);
+		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
 		let i = 0;
 		for (i = 0; i < termsArray.length; i++) {
 			let term = termsArray[i];
 			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.async_redis.get(upperTerm);
+			let expandedTerm = await this.redisDB.get(upperTerm);
 			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.async_redis.get(lowerTerm);
+			let compressedTerm = await this.redisDB.get(lowerTerm);
 			if (expandedTerm) {
 				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
@@ -254,7 +250,7 @@ class PolicySearchHandler extends SearchHandler {
 	async doSearch(req, expansionDict, clientObj, userId) {
 		try {
 			// caching db
-			await this.async_redis.select(redisAsyncClientDB);
+			await this.redisDB.select(redisAsyncClientDB);
 
 			let searchResults;
 			const operator = 'and';
@@ -274,30 +270,30 @@ class PolicySearchHandler extends SearchHandler {
 		} = req.body;
 		try {
 			let enrichedResults = searchResults;
+			let sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
 			//set empty values
-			enrichedResults.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-			enrichedResults.qaContext = {params: {}, context: []};
+			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
 			enrichedResults.intelligentSearch = {};
 			enrichedResults.entities = [];
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
+			enrichedResults.sentenceResults = sentenceResults;
 
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			let qaParams = {maxLength: 3000, maxDocContext: 3, maxParaContext: 3, minLength: 350, scoreThreshold: 100, entityLimit: 4};
+			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 2};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, searchResults, qaParams, userId);
-				enrichedResults.qaResults = QA.qaResults;
-				enrichedResults.qaContext = QA.qaContext;
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
+				enrichedResults.qaResults = QA
 			}
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
-			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults, {question: '', answers: [], filenames: [], docIds: []})){ // add intelligent search result if QA empty
-				const intelligentSearchResult = await this.intelligentSearch(req, clientObj, userId);
+			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
+				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
 
@@ -311,7 +307,7 @@ class PolicySearchHandler extends SearchHandler {
 			}
 
 			//add topics
-			let topicSearchOn = await APP_SETTINGS.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
+			let topicSearchOn = await this.app_settings.findOrCreate({where: { key: 'topic_search'}, defaults: {value: 'true'} });
 			topicSearchOn = topicSearchOn.length > 0 ? topicSearchOn[0].dataValues.value === 'true' : false;
 			if (topicSearchOn) { // make a topicSearch switch
 				const topics = await this.topicSearch(searchText, offset, 6, userId);
@@ -321,14 +317,13 @@ class PolicySearchHandler extends SearchHandler {
 
 			// add results to search report
 			if (testing === true) {
-				let saveResults = {}
+				let saveResults = {};
 				saveResults.regular = searchResults.docs.slice(0, 10);
-				saveResults.context = enrichedResults.qaContext.context;
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
 				saveResults.qaResponses = enrichedResults.qaResults;
-				this.searchUtility.addSearchReport(searchText, enrichedResults.qaContext.params, saveResults, userId);
-			};
+				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
+			}
 
 			return enrichedResults;
 		} catch (e) {
@@ -337,7 +332,7 @@ class PolicySearchHandler extends SearchHandler {
 		return searchResults;
 	}
 
-	async intelligentSearch(req, clientObj, userId){
+	async intelligentSearch(req, sentenceResults, clientObj, userId){
 		const {
 			searchText,
 			orgFilterString = [],
@@ -360,7 +355,8 @@ class PolicySearchHandler extends SearchHandler {
 		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 			try {
 				// get intelligent search result
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				//intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
+				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentenceResults, userId, req, clientObj);
 				return intelligentSearchResult;
 			} catch (e) {
 				if (forCacheReload) {
@@ -375,14 +371,12 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, searchResults, qaParams, userId){
+	async qaEnrichment(req, sentenceResults, qaParams, userId){
 		const {
 			searchText,
 		} = req.body;
 
-		let QA = {};
-		QA.qaResults = {question: '', answers: [], filenames: [], docIds: []};
-		QA.qaContext = {params: {}, context: []};
+		let QA = { question: '', answers: [], params: qaParams, qaContext: []};
 		
 		let esClientName = 'gamechanger';
 		let esIndex = this.constants.GAME_CHANGER_OPTS.index;
@@ -396,7 +390,7 @@ class PolicySearchHandler extends SearchHandler {
 				let queryType = 'documents';
 				let entities;
 				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
-				QA.qaResults.question = qaQueries.display;
+				QA.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
 					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
@@ -405,22 +399,22 @@ class PolicySearchHandler extends SearchHandler {
 				}
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, searchResults.sentResults, esClientName, esIndex, userId, qaParams);
+				let context = await this.searchUtility.getQAContext(docQAResults, entities.QAResults, sentenceResults, esClientName, esIndex, userId, qaParams);
 				if (testing === true) {
 					this.searchUtility.addSearchReport(qaSearchText, qaParams, {results: context}, userId);
-				};
+				}
 				if (context.length > 0) { // if context results, query QA model
-					QA.qaContext.context = context;
+					QA.qaContext = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
-					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
-				};
+					QA= this.searchUtility.cleanQAResults(QA, shortenedResults, context);
+				}
 				
 			} catch (e) {
 				this.error.category = 'ML API'
 				this.error.code = 'KBBIOYCJ';
 				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
-			};
-		};
+			}
+		}
 		return QA;
 	}
 	
@@ -464,7 +458,7 @@ class PolicySearchHandler extends SearchHandler {
 					const hashed_user = sparkMD5.hash(userId);
 
 					// check if this search is a favorite
-					const favoriteSearch = await FAVORITE_SEARCH.findOne({
+					const favoriteSearch = await this.favorite_Search.findOne({
 						where: {
 							user_id: hashed_user,
 							tiny_url: tiny_url
@@ -483,7 +477,7 @@ class PolicySearchHandler extends SearchHandler {
 						}
 
 						// update the favorite search info
-						FAVORITE_SEARCH.update({
+						await this.favorite_Search.update({
 							run_by_cache: true,
 							updated_results: updated,
 							document_count: count
@@ -566,6 +560,34 @@ class PolicySearchHandler extends SearchHandler {
 		} catch (err) {
 			const msg = (err && err.message) ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'Z9DWH7K', userId);
+			throw msg;
+		}
+	}
+
+	async getDocumentsBySourceFromESHelper(req, userId) {
+		let esQuery = '';
+		try {
+			const permissions = req.permissions ? req.permissions : [];
+			const { searchText, offset = 0, limit = 18, cloneName } = req.body;
+
+			esQuery = this.searchUtility.getSourceQuery(searchText, offset, limit);
+			const clientObj = this.searchUtility.getESClient(cloneName, permissions)
+			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+
+			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
+
+				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
+				// insert crawler dates into search results
+				return {...searchResults, esQuery};
+			} else {
+				this.logger.error('Error with Elasticsearch results', '54TP85I', userId);
+				return { totalCount: 0, docs: [], esQuery };
+			}
+
+		} catch (err) {
+			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			this.logger.error(msg, 'GODULEB', userId);
 			throw msg;
 		}
 	}
@@ -741,7 +763,7 @@ class PolicySearchHandler extends SearchHandler {
 				};
 				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
 
-				this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
+				await this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UA0YDAL');

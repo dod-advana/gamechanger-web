@@ -1,22 +1,53 @@
 const assert = require('assert');
+const {constructorOptionsMock} = require("../resources/testUtility");
 const { AppStatsController } = require('../../node_app/controllers/appStatsController');
 const { reqMock, resMock } = require('../resources/testUtility');
 
 describe('AppStatsController', function () {
 
 	describe('#getAppStats', () => {
-
-		it('should get application stats', async (done) => {
-
-			let constants = {
+		
+		const opts = {
+			...constructorOptionsMock,
+			constants: {
 				MATOMO_DB_CONFIG: {
 					host: 'fakeHost',
 					user: 'fakeUser',
 					password: 'fakePassword',
 					database: 'fakeDatabase'
 				}
-			};
+			},
+			
+		};
+
+		it('should get application stats', async (done) => {
+
 			let mysqlParams = null;
+			const mySqlConnection = {
+				connect: () => {
+					connectCalled = true;
+				},
+				end: () => {
+					endCalled = true;
+				},
+				query: (query, params, callback) => {
+					queries.push(query);
+					let response = expectedResponses[counter];
+					counter++;
+					callback(null, response, []);
+				}
+			};
+			const tmpOpts = {
+				...opts,
+				mysql_lib: {
+					createConnection: (params) => {
+						mysqlParams = params;
+						return mySqlConnection;
+					}
+				}
+			};
+			
+			
 			let connectCalled = false;
 			let endCalled = false;
 			let queries = [];
@@ -34,27 +65,7 @@ describe('AppStatsController', function () {
 					}
 				]
 			];
-			const mySqlConnection = {
-				connect: () => {
-					connectCalled = true;
-				},
-				end: () => {
-					endCalled = true;
-				},
-				query: (query, callback) => {
-					queries.push(query);
-					let response = expectedResponses[counter];
-					counter++;
-					callback(null, response, []);
-				}
-			};
-			const mysql_lib = {
-				createConnection: (params) => {
-					mysqlParams = params;
-					return mySqlConnection;
-				}
-			};
-			const opts = {mysql_lib, constants};
+			
 			const req = {body: {isClone: false, cloneData: {clone_name: 'gamechanger'}, internalUsers: [], daysAgo: 7}};
 			let passedCode = null;
 			let sentData = null;
@@ -71,7 +82,7 @@ describe('AppStatsController', function () {
 
 			const expectedData = {daysBack: 7, data: {avgSearchesPerSession: 13, blacklist: [], cloneData: {clone_name: 'gamechanger'}, excluding: [], topSearches: {topN: 10, data: [{search: 'fakeSearch1', count: 32}, {search: 'fakeSearch2', count: 16}]}}};
 
-			const target = new AppStatsController(opts);
+			const target = new AppStatsController(tmpOpts);
 			await target.getAppStats(req, res);
 			assert.equal(passedCode, 200);
 			assert.deepEqual(sentData, expectedData);
@@ -114,7 +125,7 @@ describe('AppStatsController', function () {
 				end: () => {
 					endCalled = true;
 				},
-				query: (query, callback) => {
+				query: (query, params, callback) => {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
@@ -185,7 +196,7 @@ describe('AppStatsController', function () {
 				end: () => {
 					endCalled = true;
 				},
-				query: (query, callback) => {
+				query: (query, params, callback) => {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;
@@ -257,7 +268,7 @@ describe('AppStatsController', function () {
 				end: () => {
 					endCalled = true;
 				},
-				query: (query, callback) => {
+				query: (query, params, callback) => {
 					queries.push(query);
 					let response = expectedResponses[counter];
 					counter++;

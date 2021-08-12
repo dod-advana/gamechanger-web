@@ -21,7 +21,11 @@ const useStyles = makeStyles({
 		paddingTop: '16px',
 		marginRight: '10px',
 		'& .MuiInputBase-root':{
-			height: '50px'
+			height: '50px',
+			fontSize: 20
+		},
+		'& .MuiFormLabel-root': {
+			fontSize: 20
 		},
 		'&:hover .MuiInput-underline:before':{
 			borderBottom: `3px solid ${gcOrange}`

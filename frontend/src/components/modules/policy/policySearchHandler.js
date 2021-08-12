@@ -21,7 +21,7 @@ import {
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
-import defaultSearchHandler from "../default/defaultSearchHandler";
+import simpleSearchHandler from "../simple/simpleSearchHandler";
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -132,9 +132,9 @@ const PolicySearchHandler = {
 			topicSearchResults: [],
 			entitySearchResults: [],
 			categoryMetadata: {},
-			qaResults: {question: '', answers: [], filenames: [], docIds: []},
-			qaContext: {params: {}, context: []},
+			qaResults: {question: '', answers: [], qaContext: [], params: {}},
 			intelligentSearchResult: {},
+			sentenceResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			entityCount: 0,
@@ -231,7 +231,7 @@ const PolicySearchHandler = {
 			let getUserDataFlag = true;
 	
 			if (_.isObject(resp.data)) {
-				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, qaContext, intelligentSearch } = resp.data;
+				let { doc_types, doc_orgs, docs, entities, topics, totalCount, totalEntities, totalTopics, expansionDict, isCached, timeSinceCache, query, qaResults, sentenceResults, intelligentSearch } = resp.data;
 
 				displayBackendError(resp, dispatch);
 				const categoryMetadata = 
@@ -359,28 +359,6 @@ const PolicySearchHandler = {
 						let sortedOrgs = orgData.sort(function(a, b) {
 						return (a.value < b.value) ? 1 : ((b.value < a.value) ? -1 : 0)
 						});
-
-
-						let typeFilter = searchSettings.typeFilter;
-						let orgFilter = searchSettings.orgFilter;
-						if(!searchSettings.isFilterUpdate){
-							if(sortedOrgs && sortedOrgs.length) {
-								orgFilter = {};
-								sortedOrgs.forEach((o) => {
-									orgFilter[o.name] = !allOrgsSelected;
-								});
-							}
-							
-							if(sortedTypes && sortedTypes.length) {
-								typeFilter = {};
-								sortedTypes.forEach((t) => {
-									typeFilter[t.name] = !allTypesSelected;
-								});
-							}
-						}
-
-						newSearchSettings.orgFilter = orgFilter;
-						newSearchSettings.typeFilter = typeFilter;
 	
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
@@ -447,8 +425,8 @@ const PolicySearchHandler = {
 						entitySearchResults: entities,
 						topicSearchResults: topics, 
 						qaResults: qaResults,
-						qaContext: qaContext,
 						intelligentSearchResult: intelligentSearch,
+						sentenceResults: sentenceResults,
 						searchResultsCount: searchResults.length,
 						categoryMetadata: categoryMetadata,
 						autocompleteItems: [],
@@ -481,9 +459,9 @@ const PolicySearchHandler = {
 						entitySearchResults: [],
 						topicSearchResults: [],
 						categoryMetadata: {},
-						qaResults: {question: '', answers: [], filenames: [], docIds: []},
-						qaContext: {params: {}, context: []},
+						qaResults: {question: '', answers: [], qaContext: [], params: {}},
 						intelligentSearchResult: {},
+						sentenceResults: [],
 						searchResultsCount: 0,
 						runningSearch: false,
 						prevSearchText: searchText,
@@ -712,7 +690,7 @@ const PolicySearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		return defaultSearchHandler.parseSearchURL(defaultState, url);
+		return simpleSearchHandler.parseSearchURL(defaultState, url);
 	},
 
 

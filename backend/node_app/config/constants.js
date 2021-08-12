@@ -57,8 +57,6 @@ module.exports = Object.freeze({
 		impalaTable: 'policy_analytics.gc_history',
 		protocol: 'http',
 		downloadLimit: 5000,
-		s3Dest: 'advana-raw-zone',
-		s3Path: '/gamechanger/json',
 		index: 'gamechanger',
 		emailAddress: process.env.EMAIL_ADDRESS,
 		cacheReloadUserId: 'gc-auto-cache-reload',
