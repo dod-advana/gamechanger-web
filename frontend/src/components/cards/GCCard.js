@@ -352,7 +352,7 @@ function GCCard (props) {
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
 	const [favoriteSummary, setFavoriteSummary] = useState('');
 	const [feedback, setFeedback] = useState('');  
-  const [cardHandler, setCardHandler] = useState();
+  	const [cardHandler, setCardHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 	const [filename, setFilename] = useState('');
 	const [modalOpen, setModalOpen] = useState(false);
