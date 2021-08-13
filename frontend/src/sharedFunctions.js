@@ -92,8 +92,9 @@ export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	document.clone_index = cloneData?.clone_data?.project_name;
 
 	await gameChangerAPI.favoriteDocument(document);
-
-	await getUserData(dispatch);
+	if(typeof dispatch !== 'undefined'){
+		await getUserData(dispatch);
+	}
 
 	const favFilenames = state.userData.favorite_documents.map(doc => {
 		return doc.filename;
@@ -105,7 +106,9 @@ export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 		result.favorite = favFilenames.includes(result.filename);
 		resultData.push(result);
 	});
-	setState(dispatch, {rawSearchResults: resultData});
+	if(typeof dispatch !== 'undefined'){
+		setState(dispatch, {rawSearchResults: resultData});
+	}
 }
 
 export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, dispatch) => {
