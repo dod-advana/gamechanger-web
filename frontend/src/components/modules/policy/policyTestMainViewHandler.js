@@ -204,7 +204,7 @@ const handleSources = async(state, dispatch) => {
 		const buffers = pngs.data;
 		buffers.forEach((buf,idx) => {
 			if(buf.status === "fulfilled"){
-				if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+				if(crawlerSources[idx].image_link.split('.').pop() === 'png' || true){
 					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
 				} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
 					crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
