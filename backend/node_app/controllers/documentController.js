@@ -272,16 +272,33 @@ class DocumentController {
 		try {
 			const { filenames, folder, dest, clone_name } = req.body
 			const promises = []
+			const promiseTimeout = function(ms, promise){
+				// Create a promise that rejects in <ms> milliseconds
+				let timeout = new Promise((resolve, reject) => {
+					let id = setTimeout(() => {
+						clearTimeout(id);
+						reject('Timed out in '+ ms + 'ms.')
+					}, ms)
+				})
+				// Returns a race between our timeout and the passed in promise
+				return Promise.race([
+					promise,
+					timeout
+				])
+			}
+
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			filenames.forEach(({img_filename}) => {
 				const filename = img_filename;
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
-				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId));
+				let promise = this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId);
+				promises.push(promiseTimeout(20000, promise));
 			});
 			
 			Promise.allSettled(promises).then(values => {
+				console.log(values);
 				res.status(200).send(values)
 			}).catch(e=>console.log(e))
 
