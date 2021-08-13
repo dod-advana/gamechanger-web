@@ -297,7 +297,7 @@ class DataLibrary {
 		const params = {
 			Bucket: dest,
 			Key: `${clone_name}/${folder}/${filename}`,
-			ResponseContentType: filetype
+			ResponseContentType: 'image/png'
 		};
 
 		return new Promise((resolve,reject) => {
