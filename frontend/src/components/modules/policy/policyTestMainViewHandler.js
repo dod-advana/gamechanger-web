@@ -169,9 +169,11 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 const handlePubs = async (pubs, state, dispatch) => {
 	try {
+		const firstSet = 5;
+		// FIRST PASS: update state for first 5 results
 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'});
-		const buffers = pngs.data
+		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs.slice(0,firstSet), 'thumbnails', {clone_name: 'gamechanger'});
+		const buffers = pngs.data;
 		buffers.forEach((buf,idx) => {
 			if(buf.status === "fulfilled"){
 				pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
@@ -179,17 +181,33 @@ const handlePubs = async (pubs, state, dispatch) => {
 				pubs[idx].imgSrc = 'error';
 			}
 		});
+		setState(dispatch, {adminMajorPubs: pubs});
+
+		// SECOND PASS: get the rest
+		const pngs2 = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs.slice(firstSet), 'thumbnails', {clone_name: 'gamechanger'});
+		const buffers2 = pngs2.data;
+		buffers2.forEach((buf,idx) => {
+			if(buf.status === "fulfilled"){
+				pubs[firstSet + idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+			} else {
+				pubs[firstSet + idx].imgSrc = 'error';
+			}
+		});
+		setState(dispatch, {adminMajorPubs: pubs});
 	} catch(e) {
 		//Do nothing
 		console.log(e);
+		setState(dispatch, {adminMajorPubs: pubs});
 	}
-	setState(dispatch, {adminMajorPubs: pubs});
 };
 
 const handleSources = async(state, dispatch) => {
 		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 		crawlerSources = crawlerSources.data;
 	try {
+		// first Pass
+		const firstSet = 5;
+
 		// let folder = crawlerSources[0].image_link.split('/');
 		// folder = folder[folder.length - 2];
 		const folder = 'crawler_images'
@@ -199,26 +217,47 @@ const handleSources = async(state, dispatch) => {
 			return {img_filename: filename}
 		});
 		// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
-		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'});
-
+		const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList.slice(0, firstSet), folder, {clone_name: 'gamechanger'});
 		const buffers = pngs.data;
 		buffers.forEach((buf,idx) => {
 			if(buf.status === "fulfilled"){
-				if(crawlerSources[idx].image_link.split('.').pop() === 'png' || true){
-					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-				} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-					crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-				}
+				crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				// if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+				// 	crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				// } else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+				// 	crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+				// }
 			}
 			else {
 				crawlerSources[idx].imgSrc = DefaultSeal;
 			}
 		});
+		setState(dispatch, {crawlerSources});
+
+		// second pass
+		const pngs2 = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList.slice(firstSet), folder, {clone_name: 'gamechanger'});
+		const buffers2 = pngs2.data;
+		buffers2.forEach((buf,idx) => {
+			if(buf.status === "fulfilled"){
+				crawlerSources[firstSet + idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				// if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+				// 	crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				// } else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+				// 	crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+				// }
+			}
+			else {
+				crawlerSources[firstSet + idx].imgSrc = DefaultSeal;
+			}
+		});
+		setState(dispatch, {crawlerSources});
+
 	} catch(e) {
 		//Do nothing
-		console.log(e)
+		console.log(e);
+		setState(dispatch, {crawlerSources});
+
 	}
-	setState(dispatch, {crawlerSources});
 }
 
 const PolicyMainViewHandler = {
