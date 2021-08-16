@@ -65,12 +65,14 @@ const GCAboutUs = (props) => {
 
 	const categoryOrder = ['General','Clones','Search','Graph View','Data','Analyst Tools','Collaboration'];
 	const arrLength = categoryOrder.length;
+	let ignoreNextScrollEvent = false;
 
 	if(categoryRefs.current.length !== arrLength){
 		categoryRefs.current = Array(arrLength).fill().map((_, i) => categoryRefs.current[i] || createRef());
 	}
+	
 	const onScroll = useCallback((e) => {
-		if(categoryRefs.current[1].current!==null){
+		if(categoryRefs.current[1].current!==null && !ignoreNextScrollEvent){
 			const currentScroll = e.target.documentElement.scrollTop;
 			let index = 0;
 			let closestNegative = categoryOrder.map(cat=>cat.toLowerCase()).indexOf(selectedCategory);
@@ -207,8 +209,9 @@ const GCAboutUs = (props) => {
 								id={category} 
 								selected={selectedCategory} 
 								onClick={()=>{
-									setSelectedCategory(category)
-									categoryRefs.current[i].current.scrollIntoView({behavior: 'smooth'});
+									ignoreNextScrollEvent = true;
+									categoryRefs.current[i].current.scrollIntoView();
+									setSelectedCategory(category);
 								}}
 							>
 								{cat}
