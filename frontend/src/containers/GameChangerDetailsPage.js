@@ -671,7 +671,7 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
-									 graphData={graph}
+									 graphData={graph} userData={userData} rawSearchResults={docResults}
 				/>
 			}
 
