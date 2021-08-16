@@ -26,6 +26,7 @@ import ReactTable from "react-table";
 import TextField from "@material-ui/core/TextField";
 import Config from '../../config/config.js';
 import GCAccordion from "../common/GCAccordion";
+import moment from 'moment';
 
 const _ = require('lodash');
 
@@ -629,13 +630,15 @@ const GCUserDashboard = (props) => {
 			search.active = !search.active
 		}
 
+		const createdDate = moment(Date.parse(search.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+
 		const searchDetails = 
 		<>
 			<GCTooltip title={search.search_text} placement="top">
 				<div className={'search-text'}>Search Text: {search.search_text.length > 55 ? search.search_text.slice(0,40)+'...' : search.search_text}</div>
 			</GCTooltip>
 			<div className={'stats-details'}>
-				<div className={'favorited-date'}>{search.createdAt}</div>
+				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
 					<GCTooltip title={'Number of documents found in search'} placement="top">
 						<div className={'stats-stat'}>
@@ -752,6 +755,8 @@ const GCUserDashboard = (props) => {
 			document.active = !document.active
 		}
 
+		const createdDate = moment(Date.parse(document.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+
 		const documentDetails = 
 			<>
 				<div className={'buttons-div'}>
@@ -781,7 +786,7 @@ const GCUserDashboard = (props) => {
 					</GCButton>
 				</div>
 				<div className={'stats-details'}>
-					<div className={'favorited-date'}>{document.createdAt}</div>
+					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
 						<GCTooltip title={'The number of times this document has been favorited by others'} placement="top">
 							<div className={'stats-stat'}>
@@ -870,9 +875,11 @@ const GCUserDashboard = (props) => {
 			topic.active = !topic.active
 		}
 
+		const createdDate = moment(Date.parse(topic.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+
 		const searchDetails = 
 			<div className={'stats-details'}>
-				<div className={'favorited-date'}>{topic.createdAt}</div>
+				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
 					<GCTooltip title={'The number of times this topic has been favorited by others'} placement="top">
 						<div className={'stats-stat'}>
@@ -963,9 +970,11 @@ const GCUserDashboard = (props) => {
 			organization.active = !organization.active
 		}
 
+		const createdDate = moment(Date.parse(organization.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+
 		const searchDetails = 
 			<div className={'stats-details'}>
-				<div className={'favorited-date'}>{organization.createdAt}</div>
+				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
 					<GCTooltip title={'The number of times this organization has been favorited by others'} placement="top">
 						<div className={'stats-stat'}>
