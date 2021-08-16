@@ -783,7 +783,7 @@ const GCUserDashboard = (props) => {
 				<div className={'stats-details'}>
 					<div className={'favorited-date'}>{document.createdAt}</div>
 					<div className={'stats-details-stat-div'}>
-						<GCTooltip title={'Times document has been favorited by others'} placement="top">
+						<GCTooltip title={'The number of times this document has been favorited by others'} placement="top">
 							<div className={'stats-stat'}>
 								<span className={'stats-text'}>{document.favorited}</span>
 								<Icon className="fa fa-heart-o" />
@@ -874,7 +874,7 @@ const GCUserDashboard = (props) => {
 			<div className={'stats-details'}>
 				<div className={'favorited-date'}>{topic.createdAt}</div>
 				<div className={'stats-details-stat-div'}>
-					<GCTooltip title={'Times search has been favorited by others'} placement="top">
+					<GCTooltip title={'The number of times this topic has been favorited by others'} placement="top">
 						<div className={'stats-stat'}>
 							<span className={'stats-text'}>{topic.favorited}</span>
 							<Icon className="fa fa-heart-o" />
@@ -959,7 +959,6 @@ const GCUserDashboard = (props) => {
 	};
 
 	const renderFavoriteOrganizationCard = (organization, idx) => {
-
 		const toggleActive = () => {
 			organization.active = !organization.active
 		}
@@ -968,7 +967,7 @@ const GCUserDashboard = (props) => {
 			<div className={'stats-details'}>
 				<div className={'favorited-date'}>{organization.createdAt}</div>
 				<div className={'stats-details-stat-div'}>
-					<GCTooltip title={'Times search has been favorited by others'} placement="top">
+					<GCTooltip title={'The number of times this organization has been favorited by others'} placement="top">
 						<div className={'stats-stat'}>
 							<span className={'stats-text'}>{organization.favorited}</span>
 							<Icon className="fa fa-heart-o" />
