@@ -102,7 +102,7 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
-	getFAQ: 'api/gamechanger/getFAQ',
+	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){

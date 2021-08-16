@@ -161,6 +161,6 @@ router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFee
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
-router.get('/getFAQ', aboutGc.getFAQ);
+router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 module.exports = router;

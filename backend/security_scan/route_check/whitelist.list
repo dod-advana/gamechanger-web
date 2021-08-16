@@ -68,3 +68,4 @@
 .* /api/gamechanger/modular/querySuggester .*
 .* /api/gamechanger/modular/docFetcher .*
 .* /api/gamechanger/sendFrontendError .*
+.* /api/gamechanger/aboutGC/getFAQ .*
