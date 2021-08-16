@@ -169,10 +169,9 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 const handlePubs = async (pubs, state, dispatch) => {
 	try {
-		const firstSet = 5;
 		// FIRST PASS: update state for first 5 results
 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-		gameChangerAPI.thumbnailStorageDownloadPOST(pubs.slice(0, firstSet), 'thumbnails', {clone_name: 'gamechanger'})
+		gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
 		.then( (pngs) => {
 			const buffers = pngs.data;
 			buffers.forEach((buf,idx) => {
@@ -184,22 +183,6 @@ const handlePubs = async (pubs, state, dispatch) => {
 			});
 		setState(dispatch, {adminMajorPubs: pubs});
 		});
-		
-
-		// SECOND PASS: get the rest
-		gameChangerAPI.thumbnailStorageDownloadPOST(pubs.slice(firstSet), 'thumbnails', {clone_name: 'gamechanger'})
-		.then( (pngs2) => {
-			const buffers2 = pngs2.data;
-			buffers2.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					pubs[firstSet + idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-				} else {
-					pubs[firstSet + idx].imgSrc = 'error';
-				}
-			});
-			setState(dispatch, {adminMajorPubs: pubs});
-		});
-		
 	} catch(e) {
 		//Do nothing
 		console.log(e);
@@ -211,29 +194,25 @@ const handleSources = async(state, dispatch) => {
 		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 		crawlerSources = crawlerSources.data;
 	try {
-		// first Pass
-		const firstSet = 5;
-
-		// let folder = crawlerSources[0].image_link.split('/');
-		// folder = folder[folder.length - 2];
-		const folder = 'crawler_images'
+		let folder = crawlerSources[0].image_link.split('/');
+		folder = folder[folder.length - 2];
 		const thumbnailList = crawlerSources.map(item => {
-			// let filename = item.image_link.split('/').pop();
-			let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
+			let filename = item.image_link.split('/').pop();
+			// let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
 			return {img_filename: filename}
 		});
 		// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
-		gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList.slice(0, firstSet), folder, {clone_name: 'gamechanger'})
+		gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'})
 		.then( (pngs) => {
 			const buffers = pngs.data;
 			buffers.forEach((buf,idx) => {
 				if(buf.status === "fulfilled"){
 					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					// if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
-					// 	crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					// } else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-					// 	crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-					// }
+					if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+						crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+					}
 				}
 				else {
 					crawlerSources[idx].imgSrc = DefaultSeal;
@@ -241,29 +220,6 @@ const handleSources = async(state, dispatch) => {
 			});
 			setState(dispatch, {crawlerSources});
 		});
-		
-
-		// second pass
-		gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList.slice(firstSet), folder, {clone_name: 'gamechanger'})
-		.then( (pngs2) => {
-			const buffers2 = pngs2.data;
-			buffers2.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					crawlerSources[firstSet + idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					// if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
-					// 	crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					// } else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-					// 	crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-					// }
-				}
-				else {
-					crawlerSources[firstSet + idx].imgSrc = DefaultSeal;
-				}
-			});
-			setState(dispatch, {crawlerSources});
-		});
-
-
 	} catch(e) {
 		//Do nothing
 		console.log(e);

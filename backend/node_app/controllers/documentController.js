@@ -289,13 +289,13 @@ class DocumentController {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
 				let promise = this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId);
-				promises.push(promiseTimeout(59000, promise));
+				promises.push(promise);
 			});
 			
-			Promise.allSettled(promises).then(values => {
-				res.status(200).send(values)
-			}).catch(e=>console.log(e))
-
+			let allPromises = Promise.allSettled(promises);
+			promiseTimeout(30000, allPromises)
+			.then((results) => { res.status(200).send(results);})
+			.catch((err) => { res.status(500).send(err);});
 		} catch (err) {
 			this.logger.error(err, 'TJJUFQC', userId)
 			res.status(500).send(err);
