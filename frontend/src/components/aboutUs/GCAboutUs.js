@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, createRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback, createRef} from 'react';
 import styled from 'styled-components';
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import anchorme from 'anchorme';
@@ -69,6 +69,23 @@ const GCAboutUs = (props) => {
 	if(categoryRefs.current.length !== arrLength){
 		categoryRefs.current = Array(arrLength).fill().map((_, i) => categoryRefs.current[i] || createRef());
 	}
+	const onScroll = useCallback((e) => {
+		if(categoryRefs.current[1].current!==null){
+			const currentScroll = e.target.documentElement.scrollTop;
+			let index = 0;
+			let closestNegative = categoryOrder.map(cat=>cat.toLowerCase()).indexOf(selectedCategory);
+			while (index<categoryOrder.length){
+				const diff = categoryRefs.current[index].current.offsetTop - 30 - currentScroll; // 30 for the height of each dummy div
+				if (diff < 50){
+					closestNegative = index;
+				}
+				index += 1;
+			}
+			
+			setSelectedCategory(categoryOrder[closestNegative].toLowerCase());
+			
+		}
+	},[categoryOrder, selectedCategory]);
 	
 	useEffect(() => {
 		const fetchData = async () => {
@@ -89,6 +106,11 @@ const GCAboutUs = (props) => {
 		
 		fetchData();
 	},[]);
+
+	useEffect(() => {
+		window.addEventListener('scroll', onScroll);
+		return () => window.removeEventListener("scroll", onScroll);
+	},[selectedCategory, onScroll]);
 	
 	const renderAboutGC = () => {
 
@@ -172,9 +194,9 @@ const GCAboutUs = (props) => {
 
 	const renderFAQ = () => {
 		return ([
-			<div style={{margin: '0 0 30px 100px', width:'40vw'}}>
+			<div style={{margin: '0 0 30px 100px'}}>
 				<Typography variant="h2">Your Questions Answered<br/></Typography>
-				<Typography variant="body">Browse our answers to some of your most frequently asked questions (FAQs) GAMECHANGER. We’ve organized our responses around our guiding principles.<br/><br/>We want to make sure we’re answering all your questions, so if you can’t find what you’re looking for, let us know. Submit a new question or concern, and we’ll do our best to address it.<br/><br/>We’ll continuously update this page with new insights and information. So check back often.</Typography>
+				<Typography variant="body">Browse our answers to some of your most frequently asked questions. We’ll continually update this page with new insights and information, so check back often.</Typography>
 			</div>,
 			<div style={{margin: '30px 0 30px 100px', display: 'flex'}}>
 				<StyledCategories>
@@ -198,7 +220,7 @@ const GCAboutUs = (props) => {
 					{categoryOrder.map( (cat,i) => {
 						const category = cat.toLowerCase();
 						return (
-							<div style={{marginBottom: 100}}>
+							<div style={{marginBottom: 30}}>
 								<div id="spacer" ref={categoryRefs.current[i]} style={{height:30}}/>
 								<Typography variant="h5" style={{marginBottom: 15}}>{cat}</Typography>
 								{FAQdata[category] ? FAQdata[category].map(obj => 
