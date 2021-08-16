@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import GameChangerAPI from '../../components/api/gameChanger-service-api';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 import { TextField, Typography } from "@material-ui/core";
 
 
