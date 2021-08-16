@@ -274,17 +274,12 @@ class DocumentController {
 			const promises = []
 			const promiseTimeout = function(ms, promise){
 				// Create a promise that rejects in <ms> milliseconds
-				let timeout = new Promise((resolve, reject) => {
-					let id = setTimeout(() => {
-						clearTimeout(id);
-						reject('Timed out in '+ ms + 'ms.')
-					}, ms)
-				})
+				let timer;
 				// Returns a race between our timeout and the passed in promise
 				return Promise.race([
 					promise,
-					timeout
-				])
+					new Promise((_r, rej) => timer = setTimeout(rej, ms, 'Timed out in ' + ms + 'ms.'))
+				]).finally(() => clearTimeout(timer));
 			}
 
 			userId = req.get('SSL_CLIENT_S_DN_CN');
