@@ -293,7 +293,7 @@ class DocumentController {
 			});
 			
 			let allPromises = Promise.allSettled(promises);
-			promiseTimeout(30000, allPromises)
+			promiseTimeout(60000, allPromises)
 			.then((results) => { res.status(200).send(results);})
 			.catch((err) => { res.status(500).send(err);});
 		} catch (err) {

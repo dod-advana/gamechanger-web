@@ -169,7 +169,6 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 const handlePubs = async (pubs, state, dispatch) => {
 	try {
-		// FIRST PASS: update state for first 5 results
 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
 		gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
 		.then( (pngs) => {
