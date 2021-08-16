@@ -7,25 +7,25 @@ import CheveronLeftIcon from '@material-ui/icons/ChevronLeft';
 
 
 const ThumbnailRow = styled.div`
-	padding-left: 0;
 	font-family: Noto Sans;
 	display: flex;
 	flex-direction: row;
 	margin-bottom: 20px;
+	width: 90vw;
+	overflow: hidden;
+	scroll-behavior: smooth;
 `;
 
 const GameChangerThumbnailRow = (props) => {
 	const {
 		title = 'Thumbnail Row',
 		width = '225px',
-		// onLinkClick = _.noop,
-		children = []
+		children = [],
+		links
 	} = props;
 
-	const [itemsPerPage, setItemsPerPage] = useState(5)
-	const [maxPage, setMaxPage] = useState(0)
-	const [page, setPage] = useState(0)
-	const [currItems, setCurrItems] = useState(children.slice(0,5))
+	const [rowWidth, setRowWidth] = useState(0)
+	const [scrollable, setScrollable] = useState(false)
 	const rowRef = useRef(null);
 
 	// Calculate the max items per page using row width
@@ -33,40 +33,35 @@ const GameChangerThumbnailRow = (props) => {
 		const rowWidth = rowRef.current.offsetWidth;
 		const tWidth = parseInt(width)
 		let items = Math.floor(rowWidth/tWidth);
-		const thumbnailMargin = (items-1)*10;
-		if( rowWidth < (items*tWidth)+thumbnailMargin ){
-			items -= 1;
-		}
-		setMaxPage(Math.ceil(children.length/items)-1);
-		setCurrItems(children.slice(0,items));
-		setItemsPerPage(items);
+		setScrollable(links.length > items);
+		setRowWidth( (items * (tWidth + 10)) );
+	},[children, links.length, width])
 
-	},[children, width, setCurrItems, setMaxPage, setItemsPerPage])
-
-	// Handle Pagination
-	useEffect(() => {
-		const start = page*itemsPerPage;
-		setCurrItems(children.slice(start, start+itemsPerPage));
-	},[children, page, itemsPerPage, setCurrItems])
+	const scroll = (offset) => {
+		rowRef.current.scrollLeft -= offset;
+	}
 	
 	return (
 		<div>
-			<div style={{display:'flex', justifyContent:'space-between'}}>
+			<div style={{display:'flex', justifyContent:'space-between', flexWrap: 'nowrap', overflow: 'auto'}}>
 				<Typography variant="h3" style={{fontSize: 12, fontWeight: 800 }}>{title}</Typography>
-				<div>
-					{ maxPage > 0 && 
-					[<IconButton style={{padding:7}} onClick={()=>setPage(page-1)} disabled={page===0}>
-						<CheveronLeftIcon/>
-					</IconButton>,
-					<IconButton style={{padding:7}} onClick={()=>setPage(page+1)} disabled={page===maxPage}>
-						<CheveronRightIcon/>
-					</IconButton>]
-				}
-				</div>
 			</div>
-			<ThumbnailRow ref={rowRef} style={{marginLeft:-10}}>  
-			{currItems}
-			</ThumbnailRow>
+			<div style={{display: 'flex', alignItems: 'center'}}>
+				{ scrollable && 
+					<IconButton onClick={()=>scroll(rowWidth)}>
+						<CheveronLeftIcon/>
+					</IconButton>
+				}
+				<ThumbnailRow ref={rowRef} style={scrollable ? {marginTop: '10px', marginRight: '3px', marginLeft: '3px'} : {marginLeft: '40px', marginTop: '10px', marginBottom: '10px'}}>  
+					{children}
+				</ThumbnailRow>
+				{ scrollable && 
+					<IconButton onClick={()=>scroll( rowWidth * -1)}>
+						<CheveronRightIcon/>
+					</IconButton>
+				}
+			</div>
+
 		</div>
 	);
 }
