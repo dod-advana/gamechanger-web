@@ -298,7 +298,6 @@ class DocumentController {
 			});
 			
 			Promise.allSettled(promises).then(values => {
-				console.log(values);
 				res.status(200).send(values)
 			}).catch(e=>console.log(e))
 
