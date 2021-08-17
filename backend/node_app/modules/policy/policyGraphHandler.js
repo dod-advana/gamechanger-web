@@ -327,14 +327,14 @@ class PolicyGraphHandler extends GraphHandler {
 			const topicDocumentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
-				RETURN t2.name as topic_name, count(d) as doc_count
+				RETURN t2.name as topic_name, count(distinct d) as doc_count
 				ORDER BY doc_count DESC LIMIT 5;`, {name: topicName}, isTest, userId
 			);
 			
 			const documentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
-				RETURN count(d) as doc_count`, {name: topicName}, isTest, userId
+				RETURN count(distinct d) as doc_count`, {name: topicName}, isTest, userId
 			);
 			
 			const results = await Promise.all([topicDocumentCount, documentCount]);
@@ -359,7 +359,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [topicData] = await this.getGraphData(
 				'MATCH (t:Topic) WHERE t.name = $name ' +
 				'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
-				'RETURN t as topic, count(d) as documentCountsForTopic;', {name: topicName}, isTest, userId
+				'RETURN t as topic, count(distinct d) as documentCountsForTopic;', {name: topicName}, isTest, userId
 			);
 			
 			data.topicData = topicData;
@@ -367,7 +367,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
 			'WHERE t.name = $name ' +
-			'RETURN pt;', {name: topicName}, isTest, userId
+			'RETURN distinct pt LIMIT 1000;', {name: topicName}, isTest, userId
 			);
 			
 			data.graph = graphData
@@ -395,7 +395,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
 				'WHERE c.name = $name ' +
-				'RETURN pc;', {name: entityName}, isTest, userId
+				'RETURN distinct pc limit 1000;', {name: entityName}, isTest, userId
 			);
 			
 			data.graph = graphData
@@ -418,33 +418,33 @@ class PolicyGraphHandler extends GraphHandler {
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
 					'WHERE d2.is_revoked_b = false ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
 					'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
 					'WHERE NOT d = d2 ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				)
 			]);
 			
