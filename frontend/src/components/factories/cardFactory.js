@@ -3,6 +3,7 @@ const hermesCardHandler = require('../modules/hermes/hermesCardHandler');
 const globalSearchCardHandler = require('../modules/globalSearch/globalSearchCardHandler');
 const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
+const budgetSearchCardHandler = require('../modules/budgetSearch/budgetSearchCardHandler');
 
 class CardFactory {
 
@@ -21,6 +22,8 @@ class CardFactory {
 				case 'eda/edaCardHandler':
 					this.handler = edaCardHandler;
 					break;
+				case 'budgetSearch/budgetSearchCardHandler':
+					this.handler = budgetSearchCardHandler;
 				default:
 					this.handler = defaultCardHandler;
 					break;
