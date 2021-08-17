@@ -24,8 +24,8 @@ import ExportResultsDialog from "../../export/ExportResultsDialog";
 import {gcOrange} from "../../common/gc-colors";
 import {DidYouMean} from "../../searchBar/SearchBarStyledComponents";
 import ResultView from "../../mainView/ResultView";
-import QueryDialog from "../../admin/QueryDialog";
-import DocDialog from "../../admin/DocDialog";
+import QueryDialog from "../../admin/util/QueryDialog";
+import DocDialog from "../../admin/util/DocDialog";
 import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 import MagellanTrendingLinkList from "../../common/MagellanTrendingLinkList";
 import GameChangerAPI from "../../api/gameChanger-service-api";
@@ -189,10 +189,12 @@ const DefaultMainViewHandler = {
 		}
 		
 		try {
-			gameChangerAPI.gcCrawlerTrackerData().then(({data}) => {
-				const names = data.docs.map(d=>d.crawler_name)
-				setState(dispatch, {crawlerSources: names});
-			});
+			// gameChangerAPI.gcCrawlerTrackerData().then(({data}) => {
+			// 	const names = data.docs.map(d=>d.crawler_name)
+			// 	setState(dispatch, {crawlerSources: names});
+			// });
+			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+			setState(dispatch, {crawlerSources: crawlerSources.data});
 		} catch(e) {
 			// Do nothing
 		}

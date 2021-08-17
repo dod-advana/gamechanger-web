@@ -1,11 +1,19 @@
+import React from 'react';
+import { typography } from 'material-ui/styles';
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+import Checkbox from "@material-ui/core/Checkbox";
+import styled from "styled-components";
+import {PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
+
+import GamechangerTextIcon from "../../../images/icon/GamechangerText.png";
 import {
 	primary,
 	backgroundWhite,
 	backgroundGreyLight,
 	backgroundGreyDark,
 	gcOrange
-} from '../../components/common/gc-colors';
-import { typography } from 'material-ui/styles';
+} from '../../common/gc-colors';
+
 
 const styles = {
 	sectionHeader: {
@@ -130,5 +138,70 @@ const styles = {
 	},
     backgroundGreyLight:backgroundGreyLight
 }
+const toolTheme = {
+	menuBackgroundColor: '#171A23',
+	logoBackgroundColor: '#000000',
+	openCloseButtonBackgroundColor: '#000000',
+	allAppsBackgroundColor: '#171A23',
+	openCloseIconColor: '#FFFFFF',
+	sectionSeparatorColor: '#323E4A',
+	fontColor: '#FFFFFF',
+	hoverColor: '#E9691D',
+	toolLogo: (<PageLink href="#/gamechanger"><img src={GamechangerTextIcon} href='#/gamechanger' alt="tool logo" /></PageLink>),
+	toolIconHref: '#/gamechanger'
+};
 
-export default styles;
+const useStyles = makeStyles((theme) => ({
+	root: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		margin: '0 20px'
+	},
+	textField: {
+		marginLeft: theme.spacing(1),
+		marginRight: theme.spacing(1),
+		width: '40ch',
+		'& .MuiFormHelperText-root': {
+			fontSize: 12
+		}
+	},
+	textFieldWide: {
+		marginLeft: theme.spacing(1),
+		marginRight: theme.spacing(1),
+		minWidth: '50ch',
+		'& .MuiFormHelperText-root': {
+			fontSize: 12
+		}
+	},
+	dialogLg: {
+		maxWidth: '1200px',
+		minWidth: '1200px'
+	},
+	closeButton: {
+		position: 'absolute',
+		right: '0px',
+		top: '0px',
+		height: 60,
+		width: 60,
+		color: 'black',
+		backgroundColor: styles.backgroundGreyLight,
+		borderRadius: 0
+    },
+}));
+
+const GCCheckbox = withStyles({
+	root: {
+		color: '#E9691D',
+		'&$checked': {
+			color:'#E9691D',
+		},
+	},
+	checked: {},
+})((props) => <Checkbox color="default" {...props} />);
+
+const TableRow = styled.div`
+	text-align: left;
+	height: 35px;
+`
+
+export {styles, TableRow, GCCheckbox, useStyles, toolTheme};
