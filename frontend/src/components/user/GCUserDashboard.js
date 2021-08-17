@@ -259,6 +259,8 @@ const GCUserDashboard = (props) => {
 	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({searchType: '',
 		orgFilterText: '', exportType: '', isExport: false});
 
+	const [documentGroups, setDocumentGroups] = useState([]);
+
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
 
@@ -1309,6 +1311,66 @@ const GCUserDashboard = (props) => {
 		updateUserData();
 	}
 
+	const renderGroups = () => {
+		return (
+			<div>
+				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={exportHistory.length}>
+					{ renderDocumentGroups() }
+				</GCAccordion>
+			</div>
+		);
+	} 
+
+	const renderDocumentGroups = () => {
+		return (
+			<div style={{width: '100%', height: '100%'}}>
+				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
+					<div className={"col-xs-12"} style={{ padding: 0 }}>
+					<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
+							<GCButton
+								onClick={()=>{}}
+								style={{}}
+								isSecondaryBtn={true}
+							>
+								Delete a Group
+							</GCButton>
+							<GCButton
+								onClick={()=>{}}
+								style={{}}
+							>
+								Create a New Group
+							</GCButton>
+						</div>
+				{documentGroups.length > 0 ? (
+					<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+						{_.map(documentGroups, (document, idx) => {
+							return renderFavoriteDocumentCard(document, idx)
+						})}
+					</div>
+				) : (
+					<StyledPlaceHolder>Make a group to see it listed here</StyledPlaceHolder>
+				)}
+					</div>
+				</div>
+
+				{/* {favoriteDocumentsSlice.length > 0 &&
+					<div className='gcPagination'>
+						<Pagination
+							activePage={documentFavoritesPage}
+							itemsCountPerPage={RESULTS_PER_PAGE}
+							totalItemsCount={documentFavoritesTotalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardDocumentFavorites', 'pagination', page);
+								handlePaginationChange(page, 'documentsFavorites');
+							}}
+						/>
+					</div>
+				} */}
+			</div>
+		);
+	}
+
 	return (
 		<div style={styles.tabContainer}>
 			<Tabs onSelect={(tabIndex, lastIndex, event) => handleTabClicked(tabIndex, lastIndex, event)}>
@@ -1328,6 +1390,12 @@ const GCUserDashboard = (props) => {
 							borderRadius: ` 0 5px 0 0`
 							}} title="userHistory">
 							<Typography variant="h6" display="inline" title="cardView">HISTORY</Typography>
+						</Tab>
+						<Tab style={{...styles.tabStyle,
+							...(tabIndex=== 2 ? styles.tabSelectedStyle : {}),
+							borderRadius: ` 0 5px 0 0`
+							}} title="userGroups">
+							<Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>
 						</Tab>
 					</TabList>
 
@@ -1392,6 +1460,9 @@ const GCUserDashboard = (props) => {
 					</TabPanel>
 					<TabPanel>
 						{ renderHistory() }
+					</TabPanel>
+					<TabPanel>
+						{ renderGroups() }
 					</TabPanel>
 				</div>
 
