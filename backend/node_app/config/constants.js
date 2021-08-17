@@ -1,12 +1,24 @@
 var path = require('path');
 const dataCatalogConfig = require('./datacatalog');
+const fs = require('fs');
 
 module.exports = Object.freeze({
 	VERSION: '#DYNAMIC_VERSION',
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
 	TLS_CERT: process.env.TLS_CERT ? process.env.TLS_CERT.replace(/\\n/g, '\n') : '',
-	TLS_CERT_CA: process.env.TLS_CERT_CA ? process.env.TLS_CERT_CA.replace(/\\n/g, '\n') : '',
+	TLS_CERT_CA: process.env.TLS_CERT_CA_FILEPATH ? 
+		fs.readFileSync(process.env.TLS_CERT_CA_FILEPATH, 'ascii') : 
+		process.env.TLS_CERT_CA ? 
+			process.env.TLS_CERT_CA.replace(/\\n/g, '\n') : 
+			'',
 	TLS_KEY: process.env.TLS_KEY ? process.env.TLS_KEY.replace(/\\n/g, '\n') : '',
+	EXPRESS_TRUST_PROXY: function () {
+		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : ''
+		if (['true','false'].includes(str_var.toLowerCase())) {
+			return str_var.toLowerCase() === 'true'
+		}
+		return str_var
+	}(),
 	POSTGRES_CONFIG: {
 		databases: {
 			game_changer: {
