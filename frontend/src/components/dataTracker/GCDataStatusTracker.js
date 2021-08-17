@@ -418,12 +418,12 @@ const GCDataStatusTracker = (props) => {
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							window.open(JSON.parse(props.original.json_metadata).source_page_url);
+							window.open(props.original.json_metadata.source_page_url);
 								}}
 							style={{ color: '#386F94' }}
 						>
 						<div>
-							<p>{JSON.parse(props.original.json_metadata).crawler_used}</p>
+							<p>{props.original.json_metadata.crawler_used}</p>
 						</div>
 						</Link>
 					</TableRow>

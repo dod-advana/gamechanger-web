@@ -776,6 +776,7 @@ export const decodeTinyUrl = (url) => {
 }
 
 export const encode = (filename) => {
+
 	const encodings = {
 		'+': '%2B',
 		'!': '%21',

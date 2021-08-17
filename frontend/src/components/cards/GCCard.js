@@ -1,25 +1,25 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
 import {Divider, Checkbox} from '@material-ui/core';
-import GCTooltip from "../common/GCToolTip";
+import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
-import {trackEvent} from "../telemetry/Matomo";
-import {makeStyles} from "@material-ui/core/styles";
-import GCButton from "../common/GCButton";
-import Popover from "@material-ui/core/Popover";
-import TextField from "@material-ui/core/TextField";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CardFactory from "../factories/cardFactory";
+import {trackEvent} from '../telemetry/Matomo';
+import {makeStyles} from '@material-ui/core/styles';
+import GCButton from '../common/GCButton';
+import Popover from '@material-ui/core/Popover';
+import TextField from '@material-ui/core/TextField';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CardFactory from '../factories/cardFactory';
 import {
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic, setState
-} from "../../sharedFunctions";
+} from '../../sharedFunctions';
 import Fade from '@material-ui/core/Fade';
-import GameChangerAPI from "../api/gameChanger-service-api";
+import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
 
 const CARD_HEIGHT = 412;
@@ -183,21 +183,21 @@ const styles = {
 		marginBottom: 5,
 		fontFamily: 'Noto Sans',
 		textAlign: 'left',
-        backgroundColor: 'transparent',
+		backgroundColor: 'transparent',
 		borderRadius: '5px',
 		display: 'flex',
 	},
 	innerContainer: {
 		display: 'flex',
 		height: '100%',
-        flexDirection: 'column',
+		flexDirection: 'column',
 		borderRadius: '5px',
 		overflow: 'auto'
 	},
-    icon: {
-        width: '25px',
-        margin: '0 10px 0 0'
-    },
+	icon: {
+		width: '25px',
+		margin: '0 10px 0 0'
+	},
 	tab: {
 		display: 'flex',
 		flex: 1,
@@ -302,7 +302,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function GCCard (props) {
-    const {
+	const {
     	id,
 		idx,
 		state,
@@ -312,35 +312,35 @@ function GCCard (props) {
 		closeGraphCard = () => {},
 		collection = [],
 		detailPage = false
-    } = props;
+	} = props;
     
-    const cardType = item.type;
+	const cardType = item.type;
     
 	const selected = state.selectedDocuments.has(item.filename);
-    const isFavorite = item.favorite;
-    const isRevoked = item.is_revoked_b;
-    const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
+	const isFavorite = item.favorite;
+	const isRevoked = item.is_revoked_b;
+	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
     
-    const allowScroll = true;
+	const allowScroll = true;
 
-    const classes = useStyles();
+	const classes = useStyles();
 
 	const [toggledMore, setToggledMore] = useState(false);
 	const [metadataExpanded, setMetadataExpanded] = useState(false);
-    const [hitsExpanded, setHitsExpanded] = useState(false);
-    const [hoveredHit, setHoveredHit] = useState(0);
-    // const [favoriteName, setFavoriteName] = useState('');
+	const [hitsExpanded, setHitsExpanded] = useState(false);
+	const [hoveredHit, setHoveredHit] = useState(0);
+	// const [favoriteName, setFavoriteName] = useState('');
 	
-    const [favorite, setFavorite] = useState(isFavorite);
-    const [popperIsOpen, setPopperIsOpen] = useState(false);
-    const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-    const [topicFavoritePopperOpen, setTopicFavoritePopperOpen] = useState(false);
+	const [favorite, setFavorite] = useState(isFavorite);
+	const [popperIsOpen, setPopperIsOpen] = useState(false);
+	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
+	const [topicFavoritePopperOpen, setTopicFavoritePopperOpen] = useState(false);
 	const [topicFavoritePopperAnchorEl, setTopicFavoritePopperAnchorEl] = useState(null);
 	const [favoriteTopic, setFavoriteTopic] = useState('');
 	const [favoriteSummary, setFavoriteSummary] = useState('');
 	const [feedback, setFeedback] = useState('');
     
-    const [cardHandler, setCardHandler] = useState();
+	const [cardHandler, setCardHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 	
 	const [filename, setFilename] = useState('');
@@ -368,11 +368,11 @@ function GCCard (props) {
 		}
 	}, [state.listView]);
     
-  let searchText = state.searchText;
+	let searchText = state.searchText;
 
-	const tutorialComponent = "Search Result Card";
+	const tutorialComponent = 'Search Result Card';
 	
-    const openFavoritePopper = (target) => {
+	const openFavoritePopper = (target) => {
     	if (popperIsOpen){
     		setPopperIsOpen(false);
     		setPopperAnchorEl(null);
@@ -382,7 +382,7 @@ function GCCard (props) {
 		}
 	}
 
-    const handleSaveFavorite = (favorite = false) => {
+	const handleSaveFavorite = (favorite = false) => {
 		const documentData = {
 			filename: filename,
 			favorite_summary: favoriteSummary,
@@ -425,16 +425,11 @@ function GCCard (props) {
 		return (
 			<GCTooltip title={'Favorite a document to track in the User Dashboard'} placement='top' arrow>
 				<i onClick={(event) => {
-					if (favorite){
-						setFavorite(false);
-						handleSaveFavorite();
-					} else {
-						openFavoritePopper(event.target);
-					}
-				}} className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+					openFavoritePopper(event.target);
+				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
+					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
-					cursor: "pointer",
+					cursor: 'pointer',
 					fontSize: 26,
 					alignSelf: 'center'
 				}}/>
@@ -442,79 +437,83 @@ function GCCard (props) {
 		);
 	}
 
-	const checkboxComponent = (key, value, index) => {
+	const checkboxComponent = (key, value, id) => {
 		return (
 			<GCTooltip title={'Select a document for export'} placement='top' arrow>
 				<Checkbox
 					style={styles.checkbox}
-					onChange={() => handleCheckbox(key, value)}
+					onChange={() => handleCheckbox(key, value, id)}
 					color="primary"
 					icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
-					checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: "#386F94" }} />}
+					checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
 					checked={selected}
-					className={`tutorial-step-${state.componentStepNumbers["Search Result Checkbox"]}`}
+					className={`tutorial-step-${state.componentStepNumbers['Search Result Checkbox']}`}
 					id={'gcSearchResultCheckbox'}
 				/>
 			</GCTooltip>
 		)
 	}
 	
-	const handleCheckbox = (key, value) => {
-		const { selectedDocuments } = state;
+	const handleCheckbox = (key, value, id) => {
+		const { selectedDocuments, selectedDocumentsForGraph = [] } = state;
+		let newDocArray = [...selectedDocumentsForGraph];
 
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), "CardCheckboxUnchecked", key, 0);
+			newDocArray = newDocArray.filter(item => item !== id)
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
 		}
 		else {
 			selectedDocuments.set(key, value);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), "CardCheckboxChecked", key, 1);
+			newDocArray.push(id);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
 		}
 
-		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
+		setState(dispatch, { selectedDocuments: new Map(selectedDocuments), selectedDocumentsForGraph: newDocArray });
 	}
 	
 	const intelligentFeedbackComponent = () => (
-			<div style={styles.tooltipRow}>
-				<GCTooltip
-					enterDelay={100}
-					title={
+		<div style={styles.tooltipRow}>
+			<GCTooltip
+				enterDelay={100}
+				title={
 					<div style={{textAlign: 'center'}}>
 						<span>This card was retrieved based on a new machine learning algorithm. {feedback === '' && 'Was this result relevant?'}</span>
 					</div>
 				} placement='right' arrow>
-						<i className={classes.infoCircle + " fa fa-info-circle"} aria-hidden="true"/>
-				</GCTooltip>
-				<Fade in={feedback === ''} timeout={ 1500 }>
-					<div style={{flexGrow: 2, display: 'flex'}}>
-						<i
-							className={classes.feedback + " fa fa-thumbs-up"}
-							style={{color: feedback === 'thumbsUp' ? '#238823' : 'white'}}
-							onClick={() => {
-								if(feedback === ''){
-									setFeedback('thumbsUp');
-									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', cardHandler.getDisplayTitle(item), searchText);
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
-								}
-							}}>
+				<i className={classes.infoCircle + ' fa fa-info-circle'} aria-hidden="true"/>
+			</GCTooltip>
+			<Fade in={feedback === ''} timeout={ 1500 }>
+				<div style={{flexGrow: 2, display: 'flex'}}>
+					<i
+						className={classes.feedback + ' fa fa-thumbs-up'}
+						style={{color: feedback === 'thumbsUp' ? '#238823' : 'white'}}
+						onClick={() => {
+							if(feedback === ''){
+								setFeedback('thumbsUp');
+								gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_up', cardHandler.getDisplayTitle(item), searchText);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsUp', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
+							}
+						}}>
 
-						</i>
-						<i
-							className={classes.feedback + " fa fa-thumbs-down" }
-							style={{color: feedback === 'thumbsDown' ? '#D2222D' : 'white'}}
-							onClick={() => {
-								if(feedback === ''){
-									setFeedback('thumbsDown');
-									gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', cardHandler.getDisplayTitle(item), searchText);
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
-								}
-							}}>
-						</i>
-					</div>
-				</Fade>
-			</div>);
+					</i>
+					<i
+						className={classes.feedback + ' fa fa-thumbs-down' }
+						style={{color: feedback === 'thumbsDown' ? '#D2222D' : 'white'}}
+						onClick={() => {
+							if(feedback === ''){
+								setFeedback('thumbsDown');
+								gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_thumbs_down', cardHandler.getDisplayTitle(item), searchText);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'IntelligentSearchThumbsDown', `search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`);
+							}
+						}}>
+					</i>
+				</div>
+			</Fade>
+		</div>
+	);
 
-    return (
+	return (
     	<StyledCardContainer listView={state.listView} toggledMore={toggledMore} isRevoked={isRevoked}
 			selected={selected} allowScroll={allowScroll} showSideFilters={state.showSideFilters}
 		 	ntelligentSearch={intelligentSearch} graphView={graphView}
@@ -535,7 +534,7 @@ function GCCard (props) {
 				{isFavorite ?
 					<div style={{padding: '0px 15px 10px'}}>
 						<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-							<CloseButton onClick={() => handleFavoriteTopicClicked(null)}>
+							<CloseButton onClick={() => handleCancelFavorite()}>
 								<CloseIcon fontSize="small"/>
 							</CloseButton>
 						</div>
@@ -545,7 +544,7 @@ function GCCard (props) {
 							</div>
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
-									onClick={() => handleFavoriteTopicClicked(null)}
+									onClick={() => handleCancelFavorite()}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -557,9 +556,7 @@ function GCCard (props) {
 								>No
 								</GCButton>
 								<GCButton
-									onClick={() => {
-										handleSaveTopic(false);
-									}}
+									onClick={() => handleSaveFavorite(false)}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -633,7 +630,7 @@ function GCCard (props) {
 				<div className={'styled-card-inner'}
 					ref={(node) => {
 						if (node && IS_EDGE) {
-							node.style.setProperty("transform-style", "flat", "important");
+							node.style.setProperty('transform-style', 'flat', 'important');
 						}
 					  }}
 				>
@@ -778,7 +775,7 @@ function GCCard (props) {
 			</div >
 			
 		</StyledCardContainer>
-    );
+	);
 	
 }
 

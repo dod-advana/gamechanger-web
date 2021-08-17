@@ -51,21 +51,22 @@ const MainView = (props) => {
 			setState(dispatch, {viewNames});
 		}
 		
-		if (state.userData.favorite_searches?.length > 0) {
-			const favSearchUrls = state.userData.favorite_searches.map(search => {
-				return search.url;
-			});
-			
-			let url = window.location.hash.toString();
-			url = url.replace("#/", "");
-	
-			const searchFavorite = favSearchUrls.includes(url);
-			
-			if (state.isFavoriteSearch !== searchFavorite) {
-				setState(dispatch, { isFavoriteSearch: searchFavorite });
-			}
-		}
 	}, [state, dispatch, pageLoaded])
+
+	useEffect(() => {
+		const favSearchUrls = state.userData.favorite_searches.map(search => {
+			return search.url;
+		});
+		
+		let url = window.location.hash.toString();
+		url = url.replace("#/", "");
+
+		const searchFavorite = favSearchUrls.includes(url);
+		
+		if (state.isFavoriteSearch !== searchFavorite) {
+			setState(dispatch, { isFavoriteSearch: searchFavorite });
+		}
+	},[state.isFavoriteSearch, state.userData, dispatch, pageLoaded])
 
 	useEffect(() => {
 		if (state.cloneData.clone_name === 'gamechanger'){
