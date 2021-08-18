@@ -223,7 +223,6 @@ const handleSources = async(state, dispatch) => {
 		//Do nothing
 		console.log(e);
 		setState(dispatch, {crawlerSources});
-
 	}
 }
 
