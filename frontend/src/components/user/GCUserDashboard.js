@@ -25,6 +25,7 @@ import FavoriteCard from "../cards/GCFavoriteCard";
 import ReactTable from "react-table";
 import TextField from "@material-ui/core/TextField";
 import Config from '../../config/config.js';
+import Modal from 'react-modal';
 import GCAccordion from "../common/GCAccordion";
 
 const _ = require('lodash');
@@ -160,6 +161,47 @@ const useStyles = makeStyles((theme) => ({
 			}
 		},
 	},
+	modalTextField: {
+		marginTop: '14px',
+		paddingBottom: '8px',
+		height: 'auto',
+		width: '100%',
+		'& .MuiFormHelperText-root': {
+			fontSize: 14,
+			marginLeft: 'unset'
+		},
+		'& .MuiInputBase-root': {
+			'& .MuiInputBase-input': {
+				height: '24px',
+				fontSize: '14px'
+			}
+		},
+		'& .MuiOutlinedInput-root': {
+			'&.Mui-disabled fieldset': {
+				borderColor: props => props.error ? 'red' : 'inherit',
+			}
+		},
+	},
+	modalTextArea: {
+		marginTop: '14px',
+		paddingBottom: '8px',
+		height: 'auto',
+		width: '100%',
+		'& .MuiFormHelperText-root': {
+			fontSize: 14,
+			marginLeft: 'unset'
+		},
+		'& .MuiInputBase-root': {
+			'& .MuiInputBase-input': {
+				fontSize: '14px'
+			}
+		},
+		'& .MuiOutlinedInput-root': {
+			'&.Mui-disabled fieldset': {
+				borderColor: props => props.error ? 'red' : 'inherit',
+			}
+		},
+	},
 	icon: {
 		borderRadius: 4,
 		color: '#DFE6EE',
@@ -198,6 +240,18 @@ const useStyles = makeStyles((theme) => ({
 			backgroundColor: '#ebf1f5',
 		},
 	},
+	newGroupModal: {
+		position: 'absolute',
+		top: '35%',
+		left: '50%',
+		transform: 'translate(-50%, -50%)',
+		backgroundColor: 'white',
+		zIndex: 9999,
+		border: '1px solid #CCD8E5', 
+		boxShadow: '0px 12px 14px #00000080', 
+		borderRadius: '6px',
+		padding: 15
+	  }
 }));
 
 const RESULTS_PER_PAGE = 12;
@@ -260,6 +314,7 @@ const GCUserDashboard = (props) => {
 		orgFilterText: '', exportType: '', isExport: false});
 
 	const [documentGroups, setDocumentGroups] = useState([]);
+	const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -1335,11 +1390,61 @@ const GCUserDashboard = (props) => {
 								Delete a Group
 							</GCButton>
 							<GCButton
-								onClick={()=>{}}
+								onClick={() => setShowNewGroupModal(true)}
 								style={{}}
 							>
 								Create a New Group
 							</GCButton>
+							<Modal 
+								isOpen={showNewGroupModal}
+								onRequestClose={() => setShowNewGroupModal(false)}
+								className={classes.newGroupModal}
+								overlayClassName="new-group-modal-overlay"
+								id="new-group-modal"
+								closeTimeoutMS={300}
+								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
+								<div>
+									<CloseButton onClick={() => setShowNewGroupModal(false)}>
+										<CloseIcon fontSize="large" />
+									</CloseButton>
+									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Create a New Group</Typography>
+									<div style={{ width: 490 }}>
+										<TextField
+											label={'Name of the Group'}
+											// value={favoriteName}
+											// onChange={(event) => { setFavoriteName(event.target.value); }}
+											className={classes.modalTextField}
+											margin='none'
+											size='small'
+											variant='outlined'
+										/>
+										<TextField
+											label={'Description'}
+											// value={favoriteSummary}
+											// onChange={(event) => { setFavoriteSummary(event.target.value) }}
+											className={classes.modalTextArea}
+											margin='none'
+											size='small'
+											variant='outlined'
+											multiline={true}
+											rows={4}
+										/>
+										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+											<GCButton
+												onClick={() => setShowNewGroupModal(false)}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												isSecondaryBtn
+											>Close
+											</GCButton>
+											<GCButton
+												// onClick={() => handleSaveSearch(true)}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											>Generate
+											</GCButton>
+										</div>
+									</div>
+								</div>
+							</Modal> 
 						</div>
 				{documentGroups.length > 0 ? (
 					<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
