@@ -132,7 +132,7 @@ const MainView = (props) => {
 	
 	const getUserDashboard = () => {
 		return (
-			<GCUserDashboard userData={state.userData} updateUserData={() => getUserData(dispatch)}
+			<GCUserDashboard state={state} dispatch={dispatch} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
 				saveFavoriteSearch={(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count) =>

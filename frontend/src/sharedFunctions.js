@@ -113,6 +113,15 @@ export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, di
 	await getUserData(dispatch);
 }
 
+export const handleGenerateGroup = async ( group, state, dispatch ) => {
+	const { cloneData } = state;
+	const clone_index = cloneData?.clone_data?.project_name;
+	const {group_type, group_name, group_description, create, group_id} = group;
+
+	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_id});
+	await getUserData(dispatch);
+}
+
 export const createTinyUrl = async (cloneData) => {
 	let url = window.location.hash.toString();
 	url = url.replace("#/", "");

@@ -27,6 +27,7 @@ import TextField from "@material-ui/core/TextField";
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
 import GCAccordion from "../common/GCAccordion";
+import { handleGenerateGroup } from "../../sharedFunctions";
 
 const _ = require('lodash');
 
@@ -267,7 +268,9 @@ const GCUserDashboard = (props) => {
 		clearDashboardNotification,
 		handleFavoriteTopic,
 		checkUserInfo,
-		cloneData
+		cloneData,
+		state,
+		dispatch
 	} = props;
 
 	const [tabIndex, setTabIndex] = useState(0);
@@ -307,6 +310,9 @@ const GCUserDashboard = (props) => {
 	const [searchHistoryFavoriteData, setSearchHistoryFavoriteData] = useState({ favoriteName: '',
 		favoriteSummary: '', favorite: false, tinyUrl: '', searchText: '', count: 0 });
 	const [searchHistoryIdx, setSearchHistoryIdx] = useState(-1);
+
+	const [groupName, setGroupName] = useState("");
+	const [groupDescription, setGroupDescription] = useState("");
 
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
@@ -1376,6 +1382,19 @@ const GCUserDashboard = (props) => {
 		);
 	} 
 
+	const handleSaveGroup = (groupType) => {
+		const group = {
+			group_type: groupType, 
+			group_name: groupName, 
+			group_description: groupDescription,
+			create: true
+		}
+		setGroupDescription("");
+		setGroupName("");
+		setShowNewGroupModal(false);
+		handleGenerateGroup(group, state, dispatch);
+	}
+
 	const renderDocumentGroups = () => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
@@ -1411,8 +1430,8 @@ const GCUserDashboard = (props) => {
 									<div style={{ width: 490 }}>
 										<TextField
 											label={'Name of the Group'}
-											// value={favoriteName}
-											// onChange={(event) => { setFavoriteName(event.target.value); }}
+											value={groupName}
+											onChange={(event) => { setGroupName(event.target.value); }}
 											className={classes.modalTextField}
 											margin='none'
 											size='small'
@@ -1420,8 +1439,8 @@ const GCUserDashboard = (props) => {
 										/>
 										<TextField
 											label={'Description'}
-											// value={favoriteSummary}
-											// onChange={(event) => { setFavoriteSummary(event.target.value) }}
+											value={groupDescription}
+											onChange={(event) => { setGroupDescription(event.target.value) }}
 											className={classes.modalTextArea}
 											margin='none'
 											size='small'
@@ -1437,7 +1456,7 @@ const GCUserDashboard = (props) => {
 											>Close
 											</GCButton>
 											<GCButton
-												// onClick={() => handleSaveSearch(true)}
+												onClick={() => handleSaveGroup('document')}
 												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 											>Generate
 											</GCButton>

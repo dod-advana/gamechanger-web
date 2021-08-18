@@ -1,6 +1,7 @@
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_GROUP = require('../models').favorite_groups;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
@@ -18,6 +19,7 @@ class FavoritesController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteGroup = FAVORITE_GROUP,
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
@@ -30,6 +32,7 @@ class FavoritesController {
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteGroup = favoriteGroup;
 		this.sparkMD5 = sparkMD5;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
@@ -40,6 +43,7 @@ class FavoritesController {
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
+		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
@@ -166,6 +170,46 @@ class FavoritesController {
 			}
 		} catch (err) {
 			this.logger.error(err, 'QNFUWTT', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async favoriteGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const hashed_user = this.sparkMD5.hash(getTenDigitUserId(userId));
+			const { group_type, group_name, group_description, is_clone, create, clone_index, group_id = '' } = req.body;
+
+			if (create) {
+				const [group] = await this.favoriteGroup.findOrCreate(
+					{
+						where: { user_id: hashed_user, group_name: group_name },
+						defaults: {
+							user_id: hashed_user,
+							group_type: group_type,
+							group_name: group_name,
+							group_description: group_description,
+							is_clone: is_clone,
+							clone_index: clone_index
+						}
+					}
+				);
+				res.status(200).send(group);
+			} else {
+				const deleted = this.favoriteGroup.destroy({
+					where: {
+						id: group_id,
+						filename: filename
+					}
+				});
+				res.status(200).send(deleted);
+			}
+		} catch (err) {
+			this.logger.error(err, '2EA9CTR', userId);
+			console.log(err);
 			res.status(500).send(err);
 			return err;
 		}
