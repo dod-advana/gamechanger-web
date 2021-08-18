@@ -394,7 +394,6 @@ class PolicySearchHandler extends SearchHandler {
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
 					entities = await this.searchUtility.getQAEntities(entities, qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
-					console.log(entities);
 				} catch (e) {
 					this.logger.error(e.message, 'FLPQX67M');
 				}
