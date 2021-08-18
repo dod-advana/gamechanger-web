@@ -128,7 +128,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 									<FormControlLabel
 										key={`${org}`}
 										value={`${originalOrgFilters[org]}`}
-										classes={{ label: classes.checkboxPill }}
+										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
 										label={`${org}`}
 										labelPlacement="end"
@@ -191,7 +191,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 									disabled={!betterOrgData[org] && !state.searchSettings.orgFilter[org]}
 									key={`${org} (${betterOrgData[org]})`}
 									value={`${org} (${betterOrgData[org]})`}
-									classes={{ label: classes.checkboxPill }}
+									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.searchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
 									label={`${org} (${betterOrgData[org]})`}
 									labelPlacement="end"
@@ -307,7 +307,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 									<FormControlLabel
 										key={`${type}`}
 										value={`${type}`}
-										classes={{ label: classes.checkboxPill }}
+										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
 										label={`${type}`}
 										labelPlacement="end"
@@ -371,7 +371,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 										disabled={!betterTypeData[type] && !state.searchSettings.typeFilter[type]}
 										key={`${type} (${betterTypeData[type]})`}
 										value={`${type} (${betterTypeData[type]})`}
-										classes={{ label: classes.checkboxPill }}
+										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type} (${betterTypeData[type]})`} checked={state.searchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)} />}
 										label={`${type} (${betterTypeData[type]})`}
 										labelPlacement="end"
@@ -609,7 +609,7 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 						<FormControlLabel
 							key={term}
 							value={term}
-							classes={{ label: classes.checkboxPill }}
+							classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={term} checked={checked} onClick={() => handleAddSearchTerm(phrase,source,idx)} />}
 							label={term}
 							labelPlacement="end"
