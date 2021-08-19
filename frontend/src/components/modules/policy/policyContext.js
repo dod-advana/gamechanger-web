@@ -189,7 +189,7 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References', 'Popular']
 	},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
