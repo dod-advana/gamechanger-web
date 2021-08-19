@@ -3,6 +3,7 @@ const GC_USER = require('../models').gc_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_GROUP= require('../models').favorite_groups;
 const GC_HISTORY = require('../models').gc_history;
 const EXPORT_HISTORY = require('../models').export_history;
 const LOGGER = require('../lib/logger');
@@ -28,6 +29,7 @@ class UserController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteGroup = FAVORITE_GROUP,
 			gcHistory = GC_HISTORY,
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
@@ -49,6 +51,7 @@ class UserController {
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteGroup = favoriteGroup;
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
@@ -108,6 +111,13 @@ class UserController {
 					where: {user_id: user.user_id},
 					raw: true
 				});
+
+				const favorite_groups = await this.favoriteGroup.findAll({
+					where: {user_id: user.user_id},
+					raw: true
+				})
+				user.favorite_groups = favorite_groups;
+
 				const search_history = await this.gcHistory.findAll({
 					where: {
 						user_id: user.user_id,
