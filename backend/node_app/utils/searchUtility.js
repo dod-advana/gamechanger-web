@@ -496,6 +496,9 @@ class SearchUtility {
 				case 'Alphabetical':
 					query.sort = [ {"display_title_s": {"order" : order}} ]
 					break;
+				case 'Popular':
+					query.sort = [ {"pop_score": {"order" : order}} ]
+					break;
 				case 'References':
 					query.sort = [{"_script": {
 						"type": "number",
@@ -2148,6 +2151,9 @@ class SearchUtility {
 		}
 
 		return edge;
+	}
+	getPopularDocsQuery(){
+
 	}
 
 	getNeo4jType(v, isTest) {
