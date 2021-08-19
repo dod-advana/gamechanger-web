@@ -180,7 +180,7 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(getTenDigitUserId(userId));
+			const hashed_user = getTenDigitUserId(userId) ? this.sparkMD5.hash(getTenDigitUserId(userId)) : this.sparkMD5.hash(userId);
 			const { group_type, group_name, group_description, is_clone, create, clone_index, group_id = '' } = req.body;
 
 			if (create) {

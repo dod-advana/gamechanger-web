@@ -118,7 +118,7 @@ export const handleGenerateGroup = async ( group, state, dispatch ) => {
 	const clone_index = cloneData?.clone_data?.project_name;
 	const {group_type, group_name, group_description, create, group_id} = group;
 
-	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_id});
+	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_id, is_clone: true});
 	await getUserData(dispatch);
 }
 
