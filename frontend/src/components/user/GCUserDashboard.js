@@ -1492,9 +1492,10 @@ const GCUserDashboard = (props) => {
 						</div>
 				{documentGroups.length > 0 ? (
 					<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-						{_.map(documentGroups, (document, idx) => {
+						{_.map(documentGroups, (group, idx) => {
 							return (
 								<GCGroupCard
+									group={group}
 									state={state}
 									idx={idx}
 									dispatch={dispatch}

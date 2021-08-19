@@ -17,7 +17,7 @@ import { checkUserInfo, setState } from '../../sharedFunctions';
 
 
 
-const StyledFavoriteDocumentCard = styled.div`
+const StyledFavoriteGroupCard = styled.div`
     width: 420px;
 	height: 535px;
     background-color: #FFFFFF
@@ -25,6 +25,7 @@ const StyledFavoriteDocumentCard = styled.div`
     border-radius: 6px;
 	margin: 10px;
 	position: relative;
+    padding: 15px;
 
     > .main-info {
 
@@ -231,25 +232,43 @@ const StyledFavoriteDocumentCard = styled.div`
     }
 `;
 
-const CloseButton = styled.div`
-	padding: 6px;
-	background-color: white;
-	border-radius: 5px;
-	color: #8091A5 !important;
-	border: 1px solid #B0B9BE;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex: .4;
-	position: absolute;
-	right: 15px;
-	top: 15px;
-`;
+const styles = {
+    exportButton : {
+        position: 'absolute',
+        right: 15,
+        top: 15,
+        margin: '-16px 0px 0px -10px'
+    },
+    groupName: {
+        color: '#000000',
+        fontFamily: "Noto Sans",
+        fontSize: 18,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        lineHeight: 1,
+        maxHeight: 50,
+		height: 35,
+		display: 'flex'
+    },
+    details: {
+        marginTop: -5,
+        display: 'flex',
+        placeContent: 'space-between'
+    },
+    itemCount: {
+        marginBottom: 8,
+        marginLeft: 15,
+        textAlign: 'start',
+        fontSize: 12,
+        fontFamily: 'Montserrat',
+        color: '#3F4A56'
+    }
+}
 
 const GroupCard = (props) => {
 	
 	const {
+        group,
 		idx,
         state,
         dispatch
@@ -266,24 +285,34 @@ const GroupCard = (props) => {
 	}
 
 	return (
-		<StyledFavoriteDocumentCard key={idx}>
-            <SelectedDocsDrawer
-					selectedDocuments={state.selectedDocuments}
-					docsDrawerOpen={state.docsDrawerOpen}
-					setDrawer={(open) => setState(dispatch, {docsDrawerOpen: open})}
-					clearSelections={() => setState(dispatch, {selectedDocuments: new Map()})}
-					openExport={() => setState(dispatch, {exportDialogVisible: true})}
-					removeSelection={(doc) => removeSelectedDocument(doc)}
-					componentStepNumbers={state.componentStepNumbers}
-					isDrawerReady={state.isDrawerReady}
-					setDrawerReady={(ready) => setState(dispatch, {isDrawerReady: ready})}
-					setShowTutorial={(showTutorial) => setState(dispatch, {showTutorial: showTutorial})}
-					setStepIndex={(stepIndex) => setState(dispatch, {stepIndex: stepIndex})}
-					showTutorial={state.showTutorial}
-					rawSearchResults={[{}]}
-					checkUserInfo={() => {checkUserInfo(state, dispatch)}}
-				/>
-		</StyledFavoriteDocumentCard>
+		<StyledFavoriteGroupCard key={idx}>
+            <div style={styles.exportButton}>
+                <SelectedDocsDrawer
+                    selectedDocuments={state.selectedDocuments}
+                    docsDrawerOpen={state.docsDrawerOpen}
+                    setDrawer={(open) => setState(dispatch, {docsDrawerOpen: open})}
+                    clearSelections={() => setState(dispatch, {selectedDocuments: new Map()})}
+                    openExport={() => setState(dispatch, {exportDialogVisible: true})}
+                    removeSelection={(doc) => removeSelectedDocument(doc)}
+                    componentStepNumbers={state.componentStepNumbers}
+                    isDrawerReady={state.isDrawerReady}
+                    setDrawerReady={(ready) => setState(dispatch, {isDrawerReady: ready})}
+                    setShowTutorial={(showTutorial) => setState(dispatch, {showTutorial: showTutorial})}
+                    setStepIndex={(stepIndex) => setState(dispatch, {stepIndex: stepIndex})}
+                    showTutorial={state.showTutorial}
+                    rawSearchResults={[{}]}
+                    checkUserInfo={() => {checkUserInfo(state, dispatch)}}
+                />
+            </div>
+            <div style={styles.groupName}>
+                {group.group_name}
+            </div>
+            <div style={styles.details}>
+                <div>
+                    {`${0} items`}
+                </div>
+            </div>
+		</StyledFavoriteGroupCard>
 	)
 }
 
