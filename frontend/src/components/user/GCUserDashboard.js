@@ -15,19 +15,20 @@ import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/Loadin
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Icon from "@material-ui/core/Icon";
 import GCButton from "../common/GCButton";
-import { downloadFile } from '../export/ExportResultsDialog';
+import ExportResultsDialog, { downloadFile } from '../export/ExportResultsDialog';
 import Popover from "@material-ui/core/Popover";
 import Popper from "@material-ui/core/Popper";
 import Link from "@material-ui/core/Link";
 import Badge from "@material-ui/core/Badge";
-import {decodeTinyUrl, getTrackingNameForFactory} from "../../gamechangerUtils";
+import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from "../../gamechangerUtils";
 import FavoriteCard from "../cards/GCFavoriteCard";
 import ReactTable from "react-table";
 import TextField from "@material-ui/core/TextField";
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
 import GCAccordion from "../common/GCAccordion";
-import { handleGenerateGroup } from "../../sharedFunctions";
+import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from "../../sharedFunctions";
+import GCGroupCard from '../../components/cards/GCGroupCard';
 
 const _ = require('lodash');
 
@@ -563,6 +564,10 @@ const GCUserDashboard = (props) => {
 			setTopicFavoritesTotalCount(userData.favorite_topics ? userData.favorite_topics.length : 0);
 			setFavoriteTopicsSlice(userData.favorite_topics.slice(0, RESULTS_PER_PAGE));
 			setFavoriteTopicsLoading(false);
+		}
+
+		if(userData.favorite_groups) {
+			setDocumentGroups(userData.favorite_groups);
 		}
 
 	}, [userData]);
@@ -1464,11 +1469,36 @@ const GCUserDashboard = (props) => {
 									</div>
 								</div>
 							</Modal> 
+							<ExportResultsDialog
+								open={state.exportDialogVisible}
+								handleClose={() => setState(dispatch, { exportDialogVisible: false })}
+								searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : "")}
+								setCurrentTime={setCurrentTime}
+								selectedDocuments={state.selectedDocuments}
+								isSelectedDocs={state.selectedDocuments?.size ? true : false}
+								orgFilterString={getOrgToOrgQuery(state.searchSettings.allOrgsSelected, state.searchSettings.orgFilter)}
+								typeFilterString={getTypeQuery(state.searchSettings.allTypesSelected, state.searchSettings.typeFilter)}
+								orgFilter={state.searchSettings.orgFilter}
+								typeFilter={state.searchSettings.typeFilter}
+								getUserData={() => getUserData(dispatch)}
+								isClone = {true}
+								cloneData = {state.cloneData}
+								searchType={state.searchSettings.searchType}
+								searchFields={state.searchSettings.searchFields}
+								edaSearchSettings={state.edaSearchSettings}
+								sort={state.currentSort}
+								order={state.currentOrder}
+							/>
 						</div>
 				{documentGroups.length > 0 ? (
 					<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
 						{_.map(documentGroups, (document, idx) => {
-							return renderFavoriteDocumentCard(document, idx)
+							return (
+								<GCGroupCard
+									state={state}
+									idx={idx}
+									dispatch={dispatch}
+								/>)
 						})}
 					</div>
 				) : (
