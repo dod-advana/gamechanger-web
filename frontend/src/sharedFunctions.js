@@ -199,3 +199,18 @@ export const checkUserInfo = (state, dispatch) => {
 	}
 	return false;
 }
+
+export const setCurrentTime = (dispatch) => {
+	// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+	let currentTime = new Date();
+	let currentMonth = currentTime.getMonth() + 1 < 10 ? `0${currentTime.getMonth() + 1}` : currentTime.getMonth() + 1;
+	let currentDay = currentTime.getDate() < 10 ? `0${currentTime.getDate()}` : currentTime.getDate();
+
+	// currentTime = `${months[currentTime.getMonth() - 1]} ${currentTime.getDate()}, ${currentTime.getHours()}:${currentTime.getMinutes()}`;
+	currentTime = `${currentTime.getFullYear()}-${currentMonth}-${currentDay}-${currentTime.getHours()}-${currentTime.getSeconds()}-${currentTime.getMilliseconds()}`;
+	
+	setState(dispatch, { currentTime: currentTime });
+
+	return currentTime;
+}
