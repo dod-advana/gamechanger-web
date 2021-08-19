@@ -4,7 +4,6 @@ const { constructorOptionsMock } = require('../resources/testUtility');
 const { expect } = require('chai');
 const qaESReturn = require('../resources/mockResponses/qaESReturn');
 const qaEntitiesReturn = require('../resources/mockResponses/qaEntitiesReturn');
-const qaAliasesReturn = require('../resources/mockResponses/qaAliasesReturn');
 
 const fake_ref_list = ['Title 50', 'Title 3', 'Title 8', 'Title 31', 'Title 18', 'Title 28', 'Title28', 'Title 10', 'Title 2', 'Title 12', 'Title 15', 'Title 30'];
 const RAW_ES_BODY_SEARCH_RESPONSE = {
