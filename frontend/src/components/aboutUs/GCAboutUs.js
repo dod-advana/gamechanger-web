@@ -227,7 +227,7 @@ const GCAboutUs = (props) => {
 								<div id="spacer" ref={categoryRefs.current[i]} style={{height:30}}/>
 								<Typography variant="h5" style={{marginBottom: 15}}>{cat}</Typography>
 								{FAQdata[category] ? FAQdata[category].map(obj => 
-									<GCAccordion expanded={false} header={obj.question} contentAlign='left' onClick={()=>setSelectedCategory(category)}>
+									<GCAccordion expanded={false} header={obj.question} contentAlign='left'>
 										<div dangerouslySetInnerHTML={{__html: sanitizeHtml(obj.answer)}}/>
 									</GCAccordion>
 									) :
