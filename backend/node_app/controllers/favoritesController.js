@@ -2,6 +2,7 @@ const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
 const FAVORITE_GROUP = require('../models').favorite_groups;
+const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
@@ -20,6 +21,7 @@ class FavoritesController {
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
 			favoriteGroup = FAVORITE_GROUP,
+			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
@@ -33,6 +35,7 @@ class FavoritesController {
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
 		this.favoriteGroup = favoriteGroup;
+		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
 		this.sparkMD5 = sparkMD5;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
@@ -44,6 +47,7 @@ class FavoritesController {
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
 		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
+		this.addToavoriteGroupPOST = this.addTofavoriteGroupPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
@@ -209,7 +213,23 @@ class FavoritesController {
 			}
 		} catch (err) {
 			this.logger.error(err, '2EA9CTR', userId);
-			console.log(err);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async addTofavoriteGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { groupId, documentId } = req.body;
+
+			const [favorite] = await this.favoriteDocumentsGroup.findOrCreate({
+				where: { favorite_group_id: groupId, favorite_document_id: documentId }
+			})
+			res.status(200).send(favorite);
+		} catch (err) {
+			this.logger.error(err, '1YT9HQB', userId);
 			res.status(500).send(err);
 			return err;
 		}

@@ -111,6 +111,7 @@ router.post('/favorites/search', favorites.favoriteSearchPOST);
 router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
 router.post('/favorites/group', favorites.favoriteGroupPOST);
+router.post('/favorites/addToGroup', favorites.addTofavoriteGroupPOST);
 router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);

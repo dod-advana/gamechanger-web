@@ -761,15 +761,23 @@ const GCUserDashboard = (props) => {
 					</div>
 				) : (
 					favoriteDocumentsSlice.length > 0 ? (
-					<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
-						<div className={"col-xs-12"} style={{ padding: 0 }}>
-							<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-								{_.map(favoriteDocumentsSlice, (document, idx) => {
-									return renderFavoriteDocumentCard(document, idx)
-								})}
+					<>
+						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
+							<GCButton
+								onClick={() => {}}
+							>Add To Group
+							</GCButton>
+						</div>
+						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
+							<div className={"col-xs-12"} style={{ padding: 0 }}>
+								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+									{_.map(favoriteDocumentsSlice, (document, idx) => {
+										return renderFavoriteDocumentCard(document, idx)
+									})}
+								</div>
 							</div>
 						</div>
-					</div>
+					</>
 					) : (
 						<StyledPlaceHolder>Favorite a document to see it listed here</StyledPlaceHolder>
 					)
@@ -1380,7 +1388,7 @@ const GCUserDashboard = (props) => {
 	const renderGroups = () => {
 		return (
 			<div>
-				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={exportHistory.length}>
+				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
 					{ renderDocumentGroups() }
 				</GCAccordion>
 			</div>
