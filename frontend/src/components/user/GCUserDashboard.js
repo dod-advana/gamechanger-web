@@ -6,7 +6,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import GameChangerAPI from '../api//gameChanger-service-api';
 import { trackEvent } from "../telemetry/Matomo";
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
-import { Typography } from "@material-ui/core";
+import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@material-ui/core";
 import GCTooltip from "../common/GCToolTip"
 import { backgroundGreyDark, backgroundWhite } from "../../components/common/gc-colors";
 import { gcOrange } from "../../components/common/gc-colors";
@@ -29,6 +29,8 @@ import Modal from 'react-modal';
 import GCAccordion from "../common/GCAccordion";
 import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from "../../sharedFunctions";
 import GCGroupCard from '../../components/cards/GCGroupCard';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
 const _ = require('lodash');
 
@@ -253,7 +255,23 @@ const useStyles = makeStyles((theme) => ({
 		boxShadow: '0px 12px 14px #00000080', 
 		borderRadius: '6px',
 		padding: 15
-	  }
+	},
+	addToGroupModal: {
+		position: 'absolute',
+		top: '35%',
+		left: '50%',
+		transform: 'translate(-50%, -50%)',
+		backgroundColor: 'white',
+		zIndex: 1000,
+		border: '1px solid #CCD8E5', 
+		boxShadow: '0px 12px 14px #00000080', 
+		borderRadius: '6px',
+		padding: 15,
+	},
+	label: {
+		fontSize: 14,
+		maxWidth: 350
+	}
 }));
 
 const RESULTS_PER_PAGE = 12;
@@ -322,6 +340,9 @@ const GCUserDashboard = (props) => {
 
 	const [documentGroups, setDocumentGroups] = useState([]);
 	const [showNewGroupModal, setShowNewGroupModal] = useState(false);
+	const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
+	const [selectedGroup, setSelectedGroup] = useState('');
+	const [documentsToGroup, setDocumentsToGroup] = useState([]);
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -331,6 +352,10 @@ const GCUserDashboard = (props) => {
 	const classes = useStyles();
 
 	const preventDefault = (event) => event.preventDefault();
+
+	const handleChange = ({ target: { value } }) => {
+		setSelectedGroup(value)
+	}
 
 	const searchHistoryColumns = [
 		{
@@ -751,6 +776,17 @@ const GCUserDashboard = (props) => {
 		updateUserData();
 	}
 
+	const handleCheckbox = (value) => {
+		const newDocumentsToGroup = [...documentsToGroup];
+		const index = newDocumentsToGroup.indexOf(value);
+		if(index > -1){
+			newDocumentsToGroup.splice(index, 1);
+		} else {
+			newDocumentsToGroup.push(value);
+		}
+		setDocumentsToGroup(newDocumentsToGroup);
+	}
+
 	const renderDocumentFavorites = () => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
@@ -764,10 +800,62 @@ const GCUserDashboard = (props) => {
 					<>
 						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
 							<GCButton
-								onClick={() => {}}
+								onClick={() => {setShowAddToGroupModal(true)}}
 							>Add To Group
 							</GCButton>
 						</div>
+						<Modal 
+								isOpen={showAddToGroupModal}
+								onRequestClose={() => setShowAddToGroupModal(false)}
+								className={classes.addToGroupModal}
+								overlayClassName="new-group-modal-overlay"
+								id="new-group-modal"
+								closeTimeoutMS={300}
+								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
+								<div>
+									<CloseButton onClick={() => setShowAddToGroupModal(false)}>
+										<CloseIcon fontSize="large" />
+									</CloseButton>
+									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
+									<div style={{ width: 800 }}>
+										{_.map(favoriteDocuments, (doc) => {
+											return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
+												<FormControlLabel
+													control={<Checkbox
+														onChange={() => handleCheckbox(doc.id)}
+														color="primary"
+														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
+														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
+														key={doc.id}
+													/>}
+													label={<Typography variant="h6" noWrap className={classes.label}>{doc.title}</Typography>}
+												/>
+											</GCTooltip>
+										})}
+										<FormControl variant="outlined" style={{ width: '100%' }}>
+											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
+											<Select label="File Format" style={{ fontSize: '16px' }} value={selectedGroup} onChange={handleChange}>
+											{_.map(documentGroups, (group) => {
+												return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
+											})}
+											</Select>
+										</FormControl>
+										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+											<GCButton
+												onClick={() => setShowAddToGroupModal(false)}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												isSecondaryBtn
+											>Close
+											</GCButton>
+											<GCButton
+												onClick={() => console.log("documents to group: ",documentsToGroup)}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											>Save
+											</GCButton>
+										</div>
+									</div>
+								</div>
+							</Modal> 
 						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
 							<div className={"col-xs-12"} style={{ padding: 0 }}>
 								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
@@ -1635,6 +1723,9 @@ const GCUserDashboard = (props) => {
 }
 
 const styles = {
+	menuItem: {
+		fontSize: 16
+	},
 	tabsList: {
 		borderBottom: `2px solid ${gcOrange}`,
 		padding: 0,
