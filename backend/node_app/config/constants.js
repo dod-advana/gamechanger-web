@@ -104,7 +104,9 @@ module.exports = Object.freeze({
 		// index: 'eda'
 		requestTimeout: 60000
 	},
-
+	BUDGETSEARCH_ELASTIC_SEARCH_OPTS: {
+		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX
+	},
 	S3_REGION: process.env.S3_REGION ? process.env.S3_REGION : undefined,
 	GRAPH_DB_CONFIG: {
 		url: process.env.NEO4J_URL,
