@@ -7,7 +7,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 // import { primary } from "../experimental/uot-colors";
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
-import { grey800 } from '@material-ui/core/styles/colors';
+import { grey800 } from '@material-ui/core/colors/grey';
 import {
 	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,

@@ -1,5 +1,5 @@
 import React from 'react';
-import FlatButton from '@material-ui/core/FlatButton';
+import Button from '@material-ui/core/Button';
 import { backgroundWhite, primary } from './gc-colors';
 
 const UOTSecondaryButton = (props) => {
@@ -32,7 +32,7 @@ const UOTSecondaryButton = (props) => {
 
 
 	return (
-		<FlatButton
+		<Button
 			style={styles.secondaryButtonStyle}
 			labelStyle={styles.secondaryLabelStyle}
 			{...remaining}
