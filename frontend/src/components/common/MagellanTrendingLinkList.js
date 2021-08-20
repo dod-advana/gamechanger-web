@@ -1,6 +1,6 @@
 import React from "react";
 import _ from 'underscore';
-import {grey300} from 'material-ui/styles/colors';
+import {grey300} from '@material-ui/core/styles/colors';
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 

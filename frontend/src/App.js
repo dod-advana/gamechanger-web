@@ -14,9 +14,7 @@ import GamechangerPdfViewer from './components/documentViewer/PDFViewer';
 import GamechangerInternalUserTrackingPage from './components/user/InternalUserManagementAutotracker';
 import GameChangerAPI from './components/api/gameChanger-service-api';
 import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
-import { MuiThemeProvider as V0MuiThemeProvider } from 'material-ui';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider, createMuiTheme  } from '@material-ui/core/styles';
 import { useMatomo } from '@datapunt/matomo-tracker-react'
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
@@ -64,7 +62,7 @@ const history = createBrowserHistory();
 const tutorialOverlayAPI = new TutorialOverlayAPI();
 const gameChangerAPI = new GameChangerAPI();
 
-const v0Theme = getMuiTheme({});
+const v0Theme = createMuiTheme({});
 
 const styles = {
 	splashContainerClosed: {
@@ -292,7 +290,7 @@ const App = () => {
 		<Router>
 			<MatomoProvider value={instance}>
 				<MuiThemeProvider theme={ThemeDefault}>
-					<V0MuiThemeProvider muiTheme={v0Theme}>
+					<MuiThemeProvider muiTheme={v0Theme}>
 						<ClassificationBanner />
 						<ConsentAgreement />
 	
@@ -327,7 +325,7 @@ const App = () => {
 							</div>
 						)} />
 						
-					</V0MuiThemeProvider>
+					</MuiThemeProvider>
 				</MuiThemeProvider>
 			</MatomoProvider>
 		</Router>

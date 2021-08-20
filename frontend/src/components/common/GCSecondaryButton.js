@@ -1,5 +1,5 @@
 import React from 'react';
-import FlatButton from 'material-ui/FlatButton';
+import FlatButton from '@material-ui/core/FlatButton';
 import { backgroundWhite, primary } from './gc-colors';
 
 const UOTSecondaryButton = (props) => {
