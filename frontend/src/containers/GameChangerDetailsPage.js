@@ -4,7 +4,7 @@ import {trackEvent, trackPageView} from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import {gcColors} from './GameChangerPage';
 import styled from 'styled-components';
-import Paper from '@material-ui/core/paper/Paper';
+import Paper from '@material-ui/core/Paper';
 import SimpleTable from '../components/common/SimpleTable';
 import {MemoizedNodeCluster2D} from '../components/graph/GraphNodeCluster2D';
 import {	numberWithCommas, getMetadataForPropertyTable,

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import Paper from '@material-ui/core/paper/Paper';
+import Paper from '@material-ui/core/Paper';
 import SimpleTable from '../common/SimpleTable';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcColors} from '../../containers/GameChangerPage';
