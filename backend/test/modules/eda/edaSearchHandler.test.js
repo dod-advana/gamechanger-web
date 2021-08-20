@@ -48,7 +48,8 @@ describe('EDASearchHandler', function () {
 							historyIndex: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				};
 
 				const target = new EDASearchHandler(opts);
@@ -89,7 +90,8 @@ describe('EDASearchHandler', function () {
 							index: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const req = {
@@ -136,7 +138,8 @@ describe('EDASearchHandler', function () {
 							index: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const req = {
@@ -178,7 +181,8 @@ describe('EDASearchHandler', function () {
 							index: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const req = {
@@ -230,7 +234,8 @@ describe('EDASearchHandler', function () {
 							index: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const req = {
@@ -289,7 +294,8 @@ describe('EDASearchHandler', function () {
 							index: 'test index'
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const target = new EDASearchHandler(opts);
@@ -336,7 +342,8 @@ describe('EDASearchHandler', function () {
 						
 						}
 					},
-					esSearchLib: {}
+					esSearchLib: {},
+					redisDB: 'redis://localhost'
 				}
 
 				const target = new EDASearchHandler(opts);
@@ -366,7 +373,8 @@ describe('EDASearchHandler', function () {
 						return Promise.resolve(mockResults);
 					}
 				},
-				esSearchLib: {}
+				esSearchLib: {},
+				redisDB: 'redis://localhost'
 			}
 
 			const req = {
