@@ -31,8 +31,6 @@ class DataLibrary {
 
 		if (!esSearchLib) {
 			try {
-				console.log(this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS)
-				console.log(this.constants.EDA_ELASTIC_SEARCH_OPTS)
 				const gamechangerConfig = this.getESClientConfig(this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
 				const edaConfig = this.getESClientConfig(this.constants.EDA_ELASTIC_SEARCH_OPTS);
 
