@@ -1,6 +1,6 @@
 import React from 'react';
-import FlatButton from 'material-ui/FlatButton';
-import { grey400 } from 'material-ui/styles/colors';
+import FlatButton from '@material-ui/core/FlatButton';
+import { grey400 } from '@material-ui/core/styles/colors';
 import { backgroundWhite, primary } from './gc-colors';
 import { trackEvent } from '../telemetry/Matomo'
 import _ from 'underscore';

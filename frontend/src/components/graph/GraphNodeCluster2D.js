@@ -19,7 +19,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 import GCTooltip from '../common/GCToolTip';
-import {SvgIcon} from 'material-ui';
+import {SvgIcon} from '@material-ui/core';
 import {trackEvent} from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';

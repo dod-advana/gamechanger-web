@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Paper from 'material-ui/Paper';
-import {Link } from '@material-ui/core';
+import {Link, Paper } from '@material-ui/core';
 
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';

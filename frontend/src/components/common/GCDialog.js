@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Dialog from 'material-ui/Dialog';
+import Dialog from '@material-ui/core/Dialog';
 import UOTPrimaryButton from './GCPrimaryButton';
 import UOTSecondaryButton from './GCSecondaryButton';
 import styled from 'styled-components';
