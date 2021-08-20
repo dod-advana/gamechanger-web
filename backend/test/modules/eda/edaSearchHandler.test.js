@@ -47,7 +47,8 @@ describe('EDASearchHandler', function () {
 						GAME_CHANGER_OPTS: {
 							historyIndex: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				};
 
 				const target = new EDASearchHandler(opts);
@@ -87,7 +88,8 @@ describe('EDASearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {
 							index: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const req = {
@@ -133,7 +135,8 @@ describe('EDASearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {
 							index: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const req = {
@@ -174,7 +177,8 @@ describe('EDASearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {
 							index: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const req = {
@@ -225,7 +229,8 @@ describe('EDASearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {
 							index: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const req = {
@@ -283,7 +288,8 @@ describe('EDASearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {
 							index: 'test index'
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const target = new EDASearchHandler(opts);
@@ -329,7 +335,8 @@ describe('EDASearchHandler', function () {
 						GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 						
 						}
-					}
+					},
+					esSearchLib: {}
 				}
 
 				const target = new EDASearchHandler(opts);
@@ -358,7 +365,8 @@ describe('EDASearchHandler', function () {
 					queryElasticSearch() {
 						return Promise.resolve(mockResults);
 					}
-				}
+				},
+				esSearchLib: {}
 			}
 
 			const req = {
