@@ -50,7 +50,6 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		} = req.body;
 
 		try {
-			const permissions = req.permissions ? req.permissions : [];
 			historyRec.search = searchText;
 			historyRec.searchText = searchText;
 			historyRec.tiny_url = tiny_url;
@@ -60,7 +59,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			historyRec.showTutorial = showTutorial;
 
 			const operator = 'and';
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
+			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
 			// log query to ES
 			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
 
@@ -74,7 +73,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 					historyRec.numResults = totalCount;
 					await this.storeRecordOfSearchInPg(historyRec, userId);
 				} catch (e) {
-					this.logger.error(e.message, 'ZMVI2TO', userId);
+					this.logger.error(e.message, '8W3Z513', userId);
 				}
 			}
 
@@ -83,7 +82,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		} catch (err) {
 			if (!forCacheReload){
 				const { message } = err;
-				this.logger.error(message, '3VOOUHO', userId);
+				this.logger.error(message, 'WHMU1G2', userId);
 				historyRec.endTime = new Date().toISOString();
 				historyRec.hadError = true;
 				await this.storeRecordOfSearchInPg(historyRec, showTutorial);
@@ -109,7 +108,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 				await this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
 			}
 		} catch (e) {
-			this.logger.error(e.message, 'UA0YDAL');
+			this.logger.error(e.message, 'KVRECAF');
 		}
 	}
 
@@ -145,14 +144,39 @@ class BudgetSearchSearchHandler extends SearchHandler {
 					return this.searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}
 			} else {
-				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
+				this.logger.error('Error with Elasticsearch results', '9XZVSXW', userId);
 				return { totalCount: 0, docs: [] };
 			}
 		} catch (e) {
 			console.log(e);
 			const { message } = e;
-			this.logger.error(message, 'YNR8ZIT', userId);
+			this.logger.error(message, 'IDD6Y19', userId);
 			throw e;
+		}
+	}
+
+	async getMainPageData(req, userId) {
+		try {
+			const esClientName = 'gamechanger';
+			const esIndex = this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index;
+
+			const esQuery = this.budgetSearchSearchUtility.getMainPageQuery();
+
+			console.log(JSON.stringify(esQuery));
+
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			
+			// console.log(JSON.stringify(results))
+			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+				return this.budgetSearchSearchUtility.cleanUpEsResults(results);
+			}
+			else {
+				this.logger.error('Error with BudgetSearch Elasticsearch results', '0556DZM', userId);
+				return { };
+			}
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'WHMU1G2', userId);
 		}
 	}
 
@@ -161,10 +185,12 @@ class BudgetSearchSearchHandler extends SearchHandler {
 
 		try {
             switch (functionName) {
+				case 'getMainPageData': 
+					return await this.getMainPageData(req, userId);
                 default:
                     this.logger.error(
                         `There is no function called ${functionName} defined in the budgetSearchSearchHandler`,
-                        'W8A5BE0',
+                        '71739D8',
                         userId
                     );
                     return {};
@@ -172,7 +198,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		} catch (err) {
 			console.log(e);
 			const { message } = e;
-			this.logger.error(message, 'V2L9KW5', userId);
+			this.logger.error(message, 'D03Z7K6', userId);
 			throw e;
 		}
 		

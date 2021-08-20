@@ -1,6 +1,10 @@
 import React from "react";
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
+import styled from 'styled-components';
 
+import GCPrimaryButton from "../../common/GCButton";
+
+import { FormControlLabel, Checkbox } from "@material-ui/core";
 import Pagination from "react-js-pagination";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {
@@ -12,6 +16,12 @@ import {setState} from "../../../sharedFunctions";
 import {Card} from "../../cards/GCCard";
 import ViewHeader from "../../mainView/ViewHeader";
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
+import GameChangerAPI from "../../api/gameChanger-service-api";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import ReactTable from "react-table";
+import './budgetsearch.css';
+
+const gameChangerAPI = new GameChangerAPI();
 
 
 const _ = require('lodash');
@@ -47,16 +57,366 @@ const styles = {
 	rightContainerSummary: {
 		marginLeft: '17.5%',
 		width: '79.7%'
-	}
+	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		marginLeft: '5px',
+		marginRight: '5px'
+	},
+	titleText: {
+		fontSize: 22,
+		fontWeight: 500,
+		color: '#131E43',
+	},
+	tableColumn: {
+        textAlign: 'left',
+        margin: '4px 0'
+    }
 }
+
+const StyledContainer = styled.div`
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+`;
+
+const StyledFilterBar = styled.div`
+	width: 100%;
+	display: flex;
+	height: 60px;
+	background-color: #EFF2F6;
+	padding: 0 2em;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+const StyledMainContainer = styled.div`
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 0 2em;
+
+`;
+
+const StyledMainTopBar = styled.div`
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	align-items: center;
+`;
+
+const StyledMainBottomContainer = styled.div`
+	width: 100%;
+	height: 100%;
+
+`;
+
 
 const BudgetSearchMainViewHandler = {
 	async handlePageLoad(props) {
+		const { 
+			state, dispatch
+		} = props;
 		await defaultMainViewHandler.handlePageLoad(props);
+		const mainData = await gameChangerAPI.callSearchFunction({
+			functionName: 'getMainPageData',
+			cloneName: state.cloneData.clone_name,
+			options: {}
+		});
+		setState(dispatch, { mainPageData: mainData.data })
+		console.log(mainData);
 	},
 	
 	getMainView(props) {
-		return defaultMainViewHandler.getMainView(props);
+		const {
+			state,
+			dispatch
+		} = props;
+
+		const {
+			loading,
+			mainPageData
+		} = state;
+
+		const renderFilterBar = () => {
+			const filterOptions = [];
+			for (let i = 0; i < 9; i++) {
+				filterOptions.push(		
+				<FormControlLabel
+					name={'Lorem ipsum dolor'}
+					value={''}
+					style={{}}
+					control={<Checkbox
+						style={styles.filterBox}
+						onClick={() => {}}
+						icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+						checked={false}
+						checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+						name={''}
+					/>}
+					label={<span style={{ fontSize: 13, marginLeft: 5, fontWeight: 600 }}>Lorem Ipsum</span>}
+					labelPlacement="end"                        
+				/>
+				)
+			}
+			return (
+			<>
+				<div>
+					{filterOptions}
+				</div>
+				<div style={{ margin: '0 15px 0 0'}}>
+					<GCPrimaryButton
+						style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					>
+						Clear Filters
+					</GCPrimaryButton>
+					<GCPrimaryButton
+						style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+					>
+						Review Filters
+					</GCPrimaryButton>
+				</div>
+			</>);
+		}
+
+		const getMainPageColumns = () => {
+			const mainPageColumns = [
+				{
+					Header: () => <p style={styles.tableColumn}>PER</p>,
+					filterable: false,
+					accessor: 'per',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'per'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
+					filterable: false,
+					accessor: 'projectTitle',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'projectTitle'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
+					filterable: false,
+					accessor: 'projectNum',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'projectNum'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>SERVICE</p>,
+					filterable: false,
+					accessor: 'service',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'service'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>KEY HITS</p>,
+					filterable: false,
+					accessor: 'keyHits',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'keyHits'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>COST CONTRIB</p>,
+					filterable: false,
+					accessor: 'costContributer',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'costContributer'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>AI LABEL</p>,
+					filterable: false,
+					accessor: 'aiLabel',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'aiLabel'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
+					filterable: false,
+					accessor: 'reviewStatus',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
+					aggregate: (vals, rows) => {
+						return rows.length;
+					},
+					Aggregated: (row, item) => {
+						return <span>{row.value}</span>
+					},
+					id: 'reviewStatus'
+				},
+			];
+
+			return mainPageColumns;
+		}
+
+		const renderMainContainer = () => {
+			return (
+			<>
+				<StyledMainTopBar>
+					<div style={styles.titleText}>
+						Filtered Results
+					</div>
+					<div className='gcPagination'>
+						<Pagination
+							activePage={1}
+							itemsCountPerPage={10}
+							totalItemsCount={mainPageData.totalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+								// setState(dispatch, { resultsPage: page, runSearch: true });
+								scrollToContentTop();
+							}}
+						/>					
+					</div>
+				</StyledMainTopBar>
+				<StyledMainBottomContainer>
+					<ReactTable
+						data={mainPageData ? mainPageData.docs : []}
+						className={'striped'}
+						noDataText={"No rows found"}
+						loading={loading}
+						columns={getMainPageColumns()}
+						// pivotBy={searchResults ? edaSearchSettings.aggregations: []}
+						editable={false}
+						filterable={false}
+						minRows={1}
+						multiSort={false}
+						showPageSizeOptions={false}
+						showPagination={false}
+						getTbodyProps={(state, rowInfo, column) => {
+							return {
+								style: {
+									overflow: 'auto'
+								}
+							};
+						}}
+						getTdProps={(state, rowInfo, column) => ({
+							style: {
+								whiteSpace: 'unset'
+							},
+						})}
+						getTheadTrProps={(state, rowInfo, column) => {
+							return { style: styles.tableHeaderRow };
+						}}
+						getTheadThProps={(state, rowInfo, column) => {
+							return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
+						}}
+						style={{
+							height: "calc(100vh - 300px)",
+							borderTopRightRadius: 5,
+							borderTopLeftRadius: 5,
+							marginBottom: 10
+						}}
+						getTableProps={(state, rowInfo, column) => {
+							return { style: { 
+								borderTopRightRadius: 5,
+								borderTopLeftRadius: 5
+							}}
+						}}
+					/>
+				</StyledMainBottomContainer>
+			</>
+			)
+		}
+
+		return (
+			<StyledContainer className={"cool-class"}>
+				<StyledFilterBar>
+					{renderFilterBar()}
+				</StyledFilterBar>
+				<StyledMainContainer>
+					{renderMainContainer()}
+				</StyledMainContainer>
+			</StyledContainer>
+		)
 	},
 	
 	renderHideTabs(props) {
@@ -118,7 +478,6 @@ const BudgetSearchMainViewHandler = {
 		// 			</StyledCenterContainer>
 		// 	}
 		// );
-		
 		return viewPanels;
 	},
 
@@ -202,6 +561,7 @@ const BudgetSearchMainViewHandler = {
 								setState(dispatch, { resultsPage: page, runSearch: true });
 								scrollToContentTop();
 							}}
+							style={{backgroundColor: 'blue'}}
 						/>
 					</div>
 				}

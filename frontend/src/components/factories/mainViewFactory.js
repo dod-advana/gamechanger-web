@@ -26,6 +26,7 @@ class MainViewFactory {
 					break;
 				case 'budgetSearch/budgetSearchMainViewHandler':
 					this.handler = budgetSearchMainViewHandler;
+					break;
 				default:
 					this.handler = defaultMainViewHandler;
 					break;

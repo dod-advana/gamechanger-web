@@ -17,6 +17,8 @@ class BudgetSearchSearchUtility {
 
 		this.getElasticsearchQuery = this.getElasticsearchQuery.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
+		this.getMainPageQuery = this.getMainPageQuery.bind(this);
+		this.transformEsFields = this.transformEsFields.bind(this);
 	}
 
 	getElasticsearchQuery(
@@ -298,7 +300,7 @@ class BudgetSearchSearchUtility {
 			}
 			return query;
 		} catch (err) {
-			this.logger.error(err, '2OQQD7D', user);
+			this.logger.error(err, '4PAFB56', user);
 		}
 	}
 
@@ -310,57 +312,36 @@ class BudgetSearchSearchUtility {
 				docs: [],
 			};
 	
-			let docTypes = [];
-			let docOrgs = [];
-	
-			const { body = {} } = raw;
-			const { aggregations = {} } = body;
-			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
-			const type_buckets = doc_type_aggs.buckets ? doc_type_aggs.buckets : [];
-			const org_buckets = doc_org_aggs.buckets ? doc_org_aggs.buckets : [];
-	
-			type_buckets.forEach((agg) => {
-				docTypes.push(agg);
-			});
-	
-			org_buckets.forEach((agg) => {
-				docOrgs.push(agg);
-			});
-	
-			results.doc_types = docTypes;
-			results.doc_orgs = docOrgs;
-	
 			raw.body.hits.hits.forEach((r) => {
-				let result = this.searchUtility.transformEsFields(r.fields);
+				let result = this.transformEsFields(r._source);
+
 				const { _source = {}, fields = {} } = r;
 				const { topics_rs = {} } = _source;
 				result.topics_rs = Object.keys(topics_rs);
-	
-				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
-					result.pageHits = [];
-					const pageSet = new Set();
+				
+				result.pageHits = [];
+				const pageSet = new Set();
 
-					if (r.inner_hits) {
-						r.inner_hits.pages.hits.hits.forEach((phit) => {
-							const pageIndex = phit._nested.offset;
-							// const snippet =  phit.fields["pages.p_raw_text"][0];
-							let pageNumber = pageIndex + 1;
-							// one hit per page max
-							if (!pageSet.has(pageNumber)) {
-								const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-								if (usePageZero) {
-									if (pageSet.has(0)) {
-										return;
-									} else {
-										pageNumber = 0;
-										pageSet.add(0);
-									}
+				if (r.inner_hits) {
+					r.inner_hits.pages.hits.hits.forEach((phit) => {
+						const pageIndex = phit._nested.offset;
+						// const snippet =  phit.fields["pages.p_raw_text"][0];
+						let pageNumber = pageIndex + 1;
+						// one hit per page max
+						if (!pageSet.has(pageNumber)) {
+							const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+							if (usePageZero) {
+								if (pageSet.has(0)) {
+									return;
+								} else {
+									pageNumber = 0;
+									pageSet.add(0);
 								}
-								pageSet.add(pageNumber);
-								result.pageHits.push({snippet, pageNumber });
 							}
-						});
-					}
+							pageSet.add(pageNumber);
+							result.pageHits.push({snippet, pageNumber });
+						}
+					});
 
 					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
 					if(r.highlight){
@@ -372,6 +353,14 @@ class BudgetSearchSearchUtility {
 						}
 					}
 					result.pageHitCount = pageSet.size;
+
+					try {
+						result = this.parseFields(result);
+					}
+					catch(err) {
+						console.log(err);
+						console.log('Error parsing BudgetSearch fields')
+					}
 					
 					result.esIndex = index;
 	
@@ -392,8 +381,48 @@ class BudgetSearchSearchUtility {
 			return results;
 		} catch (err) {
 			console.log(err);
-			this.logger.error(err.message, 'GL7EDI3', user);
+			this.logger.error(err.message, 'DVHAAHW', user);
 		}
+	}
+
+	getMainPageQuery() {
+		return {
+			query: {
+				match_all: {}
+			}
+		}
+	}
+
+	transformEsFields(raw) {
+		let result = {};
+		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
+		const budgetSearchArrayFields = ['meta_o', 'record_o']
+		for (let key in raw) {
+			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
+				if (arrayFields.includes(key) || budgetSearchArrayFields.includes(key)) {
+					result[key] = raw[key];
+				} else if (Array.isArray(raw[key])) {
+					result[key] = raw[key][0];
+				} else {
+					result[key] = raw[key];
+				}
+			} else {
+				result[key] = null;
+			}
+		}
+		return result;
+	}
+
+	parseFields(result) {
+		const {
+			meta_o,
+			record_o
+		} = result;
+
+		const hasRecord = record_o;
+		const hasMeta = meta_o;
+
+		
 	}
 
 }

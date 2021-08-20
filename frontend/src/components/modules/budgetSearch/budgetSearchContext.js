@@ -1,6 +1,9 @@
 import React, { useReducer } from 'react';
 
 const initState = {
+    mainPageData: {},
+
+    
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
