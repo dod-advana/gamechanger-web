@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import GameChangerAPI from "../api/gameChanger-service-api";
-import Paper from "material-ui/Paper/Paper";
-import SimpleTable from "../common/SimpleTable";
-import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-import {gcColors} from "../../containers/GameChangerPage";
-import GCAccordion from "../common/GCAccordion";
+import GameChangerAPI from '../api/gameChanger-service-api';
+import Paper from 'material-ui/Paper/Paper';
+import SimpleTable from '../common/SimpleTable';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import {gcColors} from '../../containers/GameChangerPage';
+import GCAccordion from '../common/GCAccordion';
 import GCButton from '../common/GCButton';
 import GCErrorSnackbar from '../common/GCErrorSnackbar';
-import {MainContainer} from "../../containers/GameChangerDetailsPage";
-import {MemoizedPolicyGraphView} from "../graph/policyGraphView";
-import {trackEvent} from "../telemetry/Matomo";
-import Pagination from "react-js-pagination";
-import {getTrackingNameForFactory, numberWithCommas} from "../../gamechangerUtils";
-import {Card} from "../cards/GCCard";
+import {MainContainer} from '../../containers/GameChangerDetailsPage';
+import {MemoizedPolicyGraphView} from '../graph/policyGraphView';
+import {trackEvent} from '../telemetry/Matomo';
+import Pagination from 'react-js-pagination';
+import {getTrackingNameForFactory, numberWithCommas} from '../../gamechangerUtils';
+import {Card} from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 
@@ -224,7 +224,7 @@ const DocumentDetailsPage = (props) => {
 				<div style={{display: 'flex', justifyContent: 'space-between'}}>
 					<div
 						style={styles.resultsCount}>{runningQuery ? 'Searching for documents...' : documentObj.docCount > 0 ?
-						`${numberWithCommas(documentObj.docCount)} results found in ${documentObj.timeFound} seconds` : ''}</div>
+							`${numberWithCommas(documentObj.docCount)} results found in ${documentObj.timeFound} seconds` : ''}</div>
 					<div style={{marginTop: '-14px', display: 'flex'}} className={'gcPagination'}>
 						{(!runningQuery && documentObj.docCount > 0) &&
 							<Pagination
@@ -240,7 +240,7 @@ const DocumentDetailsPage = (props) => {
 						}
 					</div>
 				</div>
-				<div className="row" style={{marginLeft: 0, marginRight: 0}}>
+				<div className="row" style={{marginLeft: -45, marginRight: -15, width: 'unset'}}>
 					{runningQuery ?
 						<div style={{margin: '0 auto'}}>
 							<LoadingIndicator customColor={gcColors.buttonColor2}/>
@@ -362,8 +362,8 @@ const DocumentDetailsPage = (props) => {
 				open={!!backendError.code}
 				message={
 					Permissions.isGameChangerAdmin() ?
-					`An error occurred with ${backendError.category}. Error code ${backendError.code}` :
-					`An error has occurred in the application, but we are working to fix it!`
+						`An error occurred with ${backendError.category}. Error code ${backendError.code}` :
+						`An error has occurred in the application, but we are working to fix it!`
 				}
 				onClose={() => setBackendError({})}
 			/>
