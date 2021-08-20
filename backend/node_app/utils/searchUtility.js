@@ -731,9 +731,9 @@ class SearchUtility {
 				// documents
 				const wildcard = {
 					wildcard: {
-						'paragraphs.filename.search': { 
+						'display_title_s.search': { 
 							value:  element,
-							boost: 15
+							boost: 6
 						}
 					}
 				}
@@ -753,9 +753,9 @@ class SearchUtility {
 				const mm = {
 					multi_match: {
 					query: element,
-					fields: ["summary_30","title", "keyw_5"],
+					fields: ["summary_30", "keyw_5"],
 					type: "phrase",
-					boost: 5
+					boost: 3
 					}
 				}
 				bigramQueries.docShouldQueries.push(mm);
@@ -829,7 +829,7 @@ class SearchUtility {
 												'paragraphs.par_raw_text_t'
 											],
 											from: 0,
-											size: 5,
+											size: 100,
 											highlight: {
 												fields: {
 													'paragraphs.filename.search': {
@@ -1030,7 +1030,7 @@ class SearchUtility {
 		}
 	}
 
-	cleanQAResults (searchResults, shortenedResults, context) {
+	cleanQAResults (QA, shortenedResults, context) {
 		// formats QA results
 		try {
 			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
@@ -1042,16 +1042,26 @@ class SearchUtility {
 					return i['text'] !== '';
 				});
 			}
-			let contextIds = shortenedResults.answers.map(item => 'Source: ' + context[item.context].filename.toUpperCase() + ' (' + context[item.context].resultType.toUpperCase() + ')');
-			let cleanedResults = shortenedResults.answers.map(item => item.text);
-			searchResults.qaResults.answers = cleanedResults;
-			searchResults.qaResults.filenames = contextIds;
-			searchResults.qaResults.docIds = shortenedResults.answers.map(item => context[item.context].docId);
-			searchResults.qaResults.resultTypes = shortenedResults.answers.map(item => context[item.context].resultType);
+			let matchedResults = [];
+			for (var i = 0; i < shortenedResults.answers.length; i++) {
+				let ix = shortenedResults.answers[i].context;
+				let matchedAnswer = { 
+					answer: shortenedResults.answers[i].text, 
+					null_score_diff: shortenedResults.answers[i].null_score_diff,
+					filename: context[ix].filename,
+					docId: context[ix].docId,
+					resultType: context[ix].resultType,
+					cac_only: context[ix].cac_only,
+					pub_date: context[ix].pubDate,
+					displaySource: "Source: " + context[ix].filename.toUpperCase() + " (" + context[ix].resultType.toUpperCase() + ')'
+					}
+				matchedResults.push(matchedAnswer);
+			};
+			QA.answers = matchedResults;
 		} catch (e) {
 			LOGGER.error(e.message, 'AJEPRUTY', '');
 		};
-		return searchResults;
+		return QA;
 	}
 
 	getInnerHitHighlight (paragraph) {
@@ -1091,13 +1101,13 @@ class SearchUtility {
 		}
 	}
 
-	async processQASentenceResults (sentResults, context, esClientName, esIndex, userId, qaParams) {
-		for (var i = 0; i < sentResults.length; i++) {
+	async processQASentenceResults (sentenceResults, context, esClientName, esIndex, userId, qaParams) {
+		for (var i = 0; i < sentenceResults.length; i++) {
 			try {
-				let [docId, parIdx] = sentResults[i].id.split('_');
+				let [docId, parIdx] = sentenceResults[i].id.split('_');
 				docId = docId + '_0';
 				let resultDoc = await this.queryOneDocQA(docId, esClientName, esIndex, userId); // this adds the beginning of the doc
-				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
+				let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'intelligent search', parIdx: parIdx};
 				let paraHit = resultDoc._source.paragraphs[parIdx];
 				let para = this.cleanParagraph(paraHit.par_raw_text_t);
 				if (para.length > qaParams.maxLength) { // if paragraph is too long, take beginning
@@ -1108,7 +1118,7 @@ class SearchUtility {
 					let qaSubset = await this.expandParagraphs(resultDoc, parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
 					contextPara.text = this.cleanParagraph(qaSubset.join(' ')); 
 				}
-				if (sentResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
+				if (sentenceResults[i].score >= 0.95) { // if sentence result scores hidh, push to top of context
 					context.unshift(contextPara);
 				} else {
 					context.push(contextPara);
@@ -1126,15 +1136,23 @@ class SearchUtility {
 		let docs = docResults.body.hits.hits
 		let filteredResults = this.filterEmptyDocs(docs, filterLength);
 		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
+		//let orgList = [];
+		//let legitCount = 0;
 		try {
-			for (var i = 0; i < docLimit; i++) {
+			for (var i = 0; i < docLimit ; i++) {
 				let resultDoc = filteredResults[i];
+				//let resultOrg = resultDoc._source.display_org_s;
+				//orgList.push(resultOrg);
+				//if (orgList.filter(x => x===resultOrg).length > 2) {
+				//	continue;
+				//} else {
+				//legitCount++;
 				if (resultDoc._score > qaParams.scoreThreshold) { // if doc scores high, retrieve paragraphs
 					let paraHits = resultDoc.inner_hits.paragraphs.hits.hits;
 					let paraLimits = Math.min(qaParams.maxParaContext, paraHits.length);
 					for (var x = 0; x < paraLimits; x++) { // for each doc, add the paragraph hits
 						if (paraHits[x]) {
-							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
+							let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'context search', parIdx: paraHits[x]._nested.offset};
 							let para = this.cleanParagraph(this.getInnerHitParagraph(paraHits[x]));
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
 								contextPara.text = this.cleanParagraph(this.getInnerHitHighlight(paraHits[x]));
@@ -1145,7 +1163,7 @@ class SearchUtility {
 						}
 					}
 				} else { // if doc doesn't score high, retrieve the intro
-					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, resultType: 'document', source: 'context search', parIdx: 0};
+					let contextPara = {filename: resultDoc._source.display_title_s, docId: resultDoc._source.id, docScore: resultDoc._score, docTypeDisplay: resultDoc._source.display_doc_type_s, pubDate: resultDoc._source.publication_date_dt, pageCount: resultDoc._source.page_count, docType: resultDoc._source.doc_type, org: resultDoc._source.display_org_s, cac_only: resultDoc._source.cac_login_required_b, resultType: 'document', source: 'context search', parIdx: 0};
 					let singleResult = await this.queryOneDocQA(resultDoc._source.id, esClientName, esIndex, userId); // this adds the beginning of the doc
 					let qaSubset = await this.expandParagraphs(singleResult, contextPara.parIdx, qaParams.minLength); // get only text around the hit paragraph up to the max length
 					let text = this.cleanParagraph(qaSubset.join(' ')); 
@@ -1161,15 +1179,15 @@ class SearchUtility {
 		}
 	}
 	
-	async getQAContext(docResults, entity, sentResults, esClientName, esIndex, userId, qaParams) {
+	async getQAContext(docResults, entity, sentenceResults, esClientName, esIndex, userId, qaParams) {
 		
 		let context = [];
 		try {
 			if (docResults.body) {
 				context = await this.processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams);
 			};
-			if (sentResults && sentResults.length > 0) { // if sentence results, add them to context
-				context = await this.processQASentenceResults(sentResults, context, esClientName, esIndex, userId, qaParams);
+			if (sentenceResults && sentenceResults.length > 0) { // if sentence results, add them to context
+				context = await this.processQASentenceResults(sentenceResults, context, esClientName, esIndex, userId, qaParams);
 			};
 			if (entity) { // if entity, add to context
 				context = this.processQAEntity(entity, context, userId);
@@ -1616,10 +1634,20 @@ class SearchUtility {
 	// 	return searchResults;
 	// }
 
-	async intelligentSearchHandler(searchText, userId, req, clientObj){
+	async getSentResults(searchText, userId) {
+		let sentResults = [];
+		try {
+			sentResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+		} catch (e) {
+			this.logger.error(e, 'PQKLW5XN', userId);
+		};
+		return sentResults
+	}
+
+	async intelligentSearchHandler(sentenceResults, userId, req, clientObj){
 		let filename;
 		let result;
-		let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
+		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
