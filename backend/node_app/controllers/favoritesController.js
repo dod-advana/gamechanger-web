@@ -272,12 +272,12 @@ class FavoritesController {
 			})
 
 			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
-				returning: true
+				returning: true,
+				ignoreDuplicates: true
 			})
 			res.status(200).send(favorites);
 		} catch (err) {
 			this.logger.error(err, '1YT9HQB', userId);
-			console.log("err: ", err)
 			res.status(500).send(err);
 			return err;
 		}
