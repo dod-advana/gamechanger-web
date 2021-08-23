@@ -86,6 +86,8 @@ export default function UserFeedback (props) {
     
     const closeModal = () => {
 		setState(dispatch, { showFeedbackModal: false });
+        setUserEmail('');
+        setEmailError(false);
 	}
 
     function handleTypeChange(event) {
