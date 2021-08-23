@@ -157,18 +157,18 @@ class BudgetSearchSearchHandler extends SearchHandler {
 
 	async getMainPageData(req, userId) {
 		try {
+			const {
+				resultsPage
+			} = req.body;
 			const esClientName = 'gamechanger';
 			const esIndex = this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index;
 
-			const esQuery = this.budgetSearchSearchUtility.getMainPageQuery();
-
-			console.log(JSON.stringify(esQuery));
+			const esQuery = this.budgetSearchSearchUtility.getMainPageQuery(resultsPage);
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			
-			// console.log(JSON.stringify(results))
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-				return this.budgetSearchSearchUtility.cleanUpEsResults(results);
+				return this.budgetSearchSearchUtility.cleanUpEsResults(results, userId, esIndex);
 			}
 			else {
 				this.logger.error('Error with BudgetSearch Elasticsearch results', '0556DZM', userId);

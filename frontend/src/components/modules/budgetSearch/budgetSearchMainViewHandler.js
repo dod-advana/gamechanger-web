@@ -1,20 +1,15 @@
 import React from "react";
-import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import styled from 'styled-components';
 
 import GCPrimaryButton from "../../common/GCButton";
 
 import { FormControlLabel, Checkbox } from "@material-ui/core";
 import Pagination from "react-js-pagination";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import {
-	getTrackingNameForFactory,
-	RESULTS_PER_PAGE, scrollToContentTop, StyledCenterContainer
+	getTrackingNameForFactory, scrollToContentTop
 } from "../../../gamechangerUtils";
 import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
-import {Card} from "../../cards/GCCard";
-import ViewHeader from "../../mainView/ViewHeader";
 import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
@@ -64,8 +59,7 @@ const styles = {
 		padding: '2px',
 		border: '2px solid #bdccde',
 		pointerEvents: 'none',
-		marginLeft: '5px',
-		marginRight: '5px'
+		margin: '2px 5px 0px'
 	},
 	titleText: {
 		fontSize: 22,
@@ -127,9 +121,11 @@ const BudgetSearchMainViewHandler = {
 		const mainData = await gameChangerAPI.callSearchFunction({
 			functionName: 'getMainPageData',
 			cloneName: state.cloneData.clone_name,
-			options: {}
+			options: {
+				resultsPage: state.resultsPage
+			}
 		});
-		setState(dispatch, { mainPageData: mainData.data })
+		setState(dispatch, { mainPageData: mainData.data });
 		console.log(mainData);
 	},
 	
@@ -141,30 +137,35 @@ const BudgetSearchMainViewHandler = {
 
 		const {
 			loading,
-			mainPageData
+			mainPageData,
+			resultsPage
 		} = state;
 
 		const renderFilterBar = () => {
 			const filterOptions = [];
-			for (let i = 0; i < 9; i++) {
+			const checkboxOptions = ['RDocs Historical', 'PDocs (JSON) Historical', 'RDocs FY21', 'PDocs FY21', 'RDocs FY22', 'PDocs FY22'];
+			
+			for (const checkbox of checkboxOptions) {
 				filterOptions.push(		
-				<FormControlLabel
-					name={'Lorem ipsum dolor'}
-					value={''}
-					style={{}}
-					control={<Checkbox
-						style={styles.filterBox}
-						onClick={() => {}}
-						icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-						checked={false}
-						checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
-						name={''}
-					/>}
-					label={<span style={{ fontSize: 13, marginLeft: 5, fontWeight: 600 }}>Lorem Ipsum</span>}
-					labelPlacement="end"                        
-				/>
-				)
+					<FormControlLabel
+						name={checkbox}
+						value={''}
+						style={{ margin: '0 10px 0'}}
+						control={<Checkbox
+							style={styles.filterBox}
+							onClick={() => {}}
+							icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+							checked={false}  // TODO
+							checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+							name={''}
+						/>}
+						label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{checkbox}</span>}
+						labelPlacement="end"                        
+					/>
+				);
 			}
+
+			
 			return (
 			<>
 				<div>
@@ -190,7 +191,7 @@ const BudgetSearchMainViewHandler = {
 				{
 					Header: () => <p style={styles.tableColumn}>PER</p>,
 					filterable: false,
-					accessor: 'per',
+					accessor: 'ProgramElementNumber_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
@@ -208,7 +209,7 @@ const BudgetSearchMainViewHandler = {
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
 					filterable: false,
-					accessor: 'projectTitle',
+					accessor: 'ProjectTitle_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
@@ -226,7 +227,7 @@ const BudgetSearchMainViewHandler = {
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
 					filterable: false,
-					accessor: 'projectNum',
+					accessor: 'ProjectNumber_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
@@ -244,7 +245,7 @@ const BudgetSearchMainViewHandler = {
 				{
 					Header: () => <p style={styles.tableColumn}>SERVICE</p>,
 					filterable: false,
-					accessor: 'service',
+					accessor: 'ServiceAgencyName_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
@@ -339,19 +340,19 @@ const BudgetSearchMainViewHandler = {
 		const renderMainContainer = () => {
 			return (
 			<>
-				<StyledMainTopBar>
+				<StyledMainTopBar id="game-changer-content-top">
 					<div style={styles.titleText}>
 						Filtered Results
 					</div>
 					<div className='gcPagination'>
 						<Pagination
-							activePage={1}
+							activePage={resultsPage}
 							itemsCountPerPage={10}
 							totalItemsCount={mainPageData.totalCount}
 							pageRangeDisplayed={8}
 							onChange={page => {
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-								// setState(dispatch, { resultsPage: page, runSearch: true });
+								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
 								scrollToContentTop();
 							}}
 						/>					
@@ -402,6 +403,20 @@ const BudgetSearchMainViewHandler = {
 							}}
 						}}
 					/>
+					<div className='gcPagination' style={{ textAlign: 'center'}}>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={10}
+							totalItemsCount={mainPageData.totalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								console.log(page);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
+								scrollToContentTop();
+							}}
+						/>					
+					</div>
 				</StyledMainBottomContainer>
 			</>
 			)
@@ -482,97 +497,16 @@ const BudgetSearchMainViewHandler = {
 	},
 
 	getCardViewPanel(props) {
-		const {
-			context
-		} = props;
+		// const {
+		// 	context
+		// } = props;
 		
-		const {state, dispatch} = context;
-
-		const {
-			rawSearchResults,
-			loading,
-			count,
-			iframePreviewLink,
-			resultsPage,
-			componentStepNumbers,
-			hideTabs,
-			resultsText
-		} = state;
-		
-		let sideScroll = {
-			height: '72vh'
-		}
-		if (!iframePreviewLink) sideScroll = {};
-		
-		const getSearchResults = (searchResultData) => {
-
-			return _.map(searchResultData, (item, idx) => {
-				return (
-					<Card key={item.doc_num}
-						item={item}
-						idx={idx}
-						state={state}
-						dispatch={dispatch}
-					/>
-				);
-			});
-		}
-
-		const searchResults = rawSearchResults;
+		// const {state, dispatch} = context;
 		
 		return (
-			<div key={'cardView'} style={{marginTop: hideTabs ? 40 : 'auto'}}>
-				<div id="game-changer-content-top"/>
-				{!loading &&
-					<StyledCenterContainer showSideFilters={true}>
-						<div className={'left-container'}>
-							<div className={'side-bar-container'}>
-                                <GameChangerSearchMatrix 
-                                    context={context}
-                                />
-							</div>
-						</div>
-						<div className={'right-container'}>
-							{!hideTabs && 
-								<ViewHeader resultsText={resultsText} {...props}/>
-							}
-						
-							<div className={`tutorial-step-${componentStepNumbers["Search Results Section"]} card-container`}>
-								<div className={"col-xs-12"} style={{...sideScroll, padding: 0}}>
-									<div className="row" style={{marginLeft: 0, marginRight: 0}}>
-										{!loading &&
-											getSearchResults(searchResults)
-										}
-									</div>
-								</div>
-							</div>
-						</div>
-					</StyledCenterContainer>
-				}
-				{!iframePreviewLink && 
-					<div style={styles.paginationWrapper} className={'gcPagination'}>
-						<Pagination
-							activePage={resultsPage}
-							itemsCountPerPage={RESULTS_PER_PAGE}
-							totalItemsCount={count}
-							pageRangeDisplayed={8}
-							onChange={page => {
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-								setState(dispatch, { resultsPage: page, runSearch: true });
-								scrollToContentTop();
-							}}
-							style={{backgroundColor: 'blue'}}
-						/>
-					</div>
-				}
-
-				{Permissions.isGameChangerAdmin() && !loading &&
-					<div style={styles.cachedResultIcon}>
-						<i style={{...styles.image, cursor: 'pointer'}} className="fa fa-rocket" onClick={() => setState(dispatch, { showEsQueryDialog: true })}/>
-					</div>
-				}
+			<div>
 			</div>
-		)
+		);
 	}
 };
 
