@@ -7,7 +7,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 // import { primary } from "../experimental/uot-colors";
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
-import { grey800 } from '@material-ui/core/colors/grey';
+import grey from '@material-ui/core/colors/grey';
 import {
 	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,
@@ -19,7 +19,7 @@ import { trackEvent } from "../../telemetry/Matomo";
 import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI()
-
+const grey800 = grey[800];
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;

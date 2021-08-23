@@ -1,9 +1,11 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { grey400 } from '@material-ui/core/colors/grey';
+import grey from '@material-ui/core/colors/grey';
 import { backgroundWhite, primary } from './gc-colors';
 import { trackEvent } from '../telemetry/Matomo'
 import _ from 'underscore';
+
+const grey400 = grey[400];
 
 const UOTPrimaryButton = (props) => {
 
