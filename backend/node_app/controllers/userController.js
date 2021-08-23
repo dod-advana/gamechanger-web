@@ -192,6 +192,7 @@ class UserController {
 					favorite_documents.forEach(doc => {
 						const docData = returnDocsTemp.find(data => data.filename === doc.filename);
 						if (docData) {
+							doc.favorite_id = doc.id;
 							doc.title = `${docData.doc_type} ${docData.doc_num} ${docData.title}`;
 							doc.doc_type = docData.doc_type;
 							doc.doc_num = docData.doc_num;

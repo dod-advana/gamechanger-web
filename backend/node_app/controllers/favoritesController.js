@@ -50,7 +50,7 @@ class FavoritesController {
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
 		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
-		this.addToFavoriteGroupPOST = this.addTofavoriteGroupPOST.bind(this);
+		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
@@ -262,18 +262,22 @@ class FavoritesController {
 		}
 	}
 
-	async addTofavoriteGroupPOST(req, res) {
+	async addToFavoriteGroupPOST(req, res) {
 		let userId = 'Unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { groupId, documentId } = req.body;
-
-			const [favorite] = await this.favoriteDocumentsGroup.findOrCreate({
-				where: { favorite_group_id: groupId, favorite_document_id: documentId }
+			const { groupId, documentIds } = req.body;
+			const docObjects = documentIds.map(docId => {
+				return {favorite_group_id: groupId, favorite_document_id: docId}
 			})
-			res.status(200).send(favorite);
+
+			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
+				returning: true
+			})
+			res.status(200).send(favorites);
 		} catch (err) {
 			this.logger.error(err, '1YT9HQB', userId);
+			console.log("err: ", err)
 			res.status(500).send(err);
 			return err;
 		}
