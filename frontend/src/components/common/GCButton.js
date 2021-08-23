@@ -1,8 +1,9 @@
 import React from 'react';
 import { gcOrange } from "./gc-colors"
 import UOTPrimaryButton from './GCPrimaryButton';
-import {grey400} from '@material-ui/core/colors/grey';
+import grey from '@material-ui/core/colors/grey';
 
+const grey400 = grey[400];
 const GCButton = (props) => {
     const {
         style,
