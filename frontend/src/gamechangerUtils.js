@@ -787,7 +787,7 @@ export const encode = (filename) => {
 		//'(': '%28',
 		//')': '%29',
 		'*': '%2A',
-		',': '%2C',
+		//',': '%2C',
 		':': '%3A',
 		';': '%3B',
 		'=': '%3D',
@@ -797,7 +797,7 @@ export const encode = (filename) => {
 	};
 
 	return filename.replace(
-		/([+!"#$&'*+,:;=?@])/img,
+		/([+!"#$&'*+:;=?@])/img,
 		match => encodings[match]
 	);
 }
