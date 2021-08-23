@@ -1826,10 +1826,10 @@ class SearchUtility {
 				this.logger.error(err, 'PTF390A', '');
 			}
 	}	
-	async getPopularDocs(esClientName, userId) {
+	async getPopularDocs(esIndex="gamechanger", userId) {
 		try {
 			let popDocsQuery = this.getPopularDocsQuery();
-			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", "gamechanger_test_popular", popDocsQuery, userId);
+			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
 			let popDocs = [];
 			if (esResults) {
 				esResults.body.hits.hits.forEach((r) => {
@@ -1840,7 +1840,6 @@ class SearchUtility {
 					popDocs.push(doc);
 				});
 			};
-			console.log(popDocs);
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
