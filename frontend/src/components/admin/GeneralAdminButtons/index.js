@@ -268,7 +268,7 @@ export default () => {
 				<p style={styles.sectionHeader}>General Actions</p>
 				<div className='row' style={{paddingLeft: '80px'}}>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={() => {
 								openEsIndexModal();
 								trackEvent('GAMECHANGER_Admin', 'AdminPageChangeEsIndex', 'onClick');
@@ -279,7 +279,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={createSearchCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-search fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Search Cache</span></h2>
@@ -287,7 +287,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={clearSearchCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-trash fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Search Cache</span></h2>
@@ -295,7 +295,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={createAbbreviationsCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-search fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Abbreviations Cache</span></h2>
@@ -303,7 +303,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={clearAbbreviationsCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-trash fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Abbreviations Cache</span></h2>
@@ -311,7 +311,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={createGraphDataCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-code-fork fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Create Graph Cache</span></h2>
@@ -319,7 +319,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={clearGraphDataCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-trash fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Clear Graph Cache</span></h2>
@@ -327,7 +327,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={openTrendingBlacklistModal} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-line-chart fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Edit Trending Blacklist</span></h2>
@@ -335,7 +335,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={populateNewUserId} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-users fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Populate New User ID Column</span></h2>
@@ -343,7 +343,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2} circle>
+						<Paper style={styles.paper} zDepth={2} >
 							<Link to='#' onClick={reloadHandlerMap} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-map fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Reload Handler Map</span></h2>
@@ -351,7 +351,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={combinedSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+						<Paper style={combinedSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} >
 							<Link to='#' onClick={setCombinedSearchMode} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-btc fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Combined Search</span></h2>
@@ -359,7 +359,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={intelligentAnswers?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+						<Paper style={intelligentAnswers?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} >
 							<Link to='#' onClick={setIntelligentAnswersMode} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-question fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Intelligent Answers</span></h2>
@@ -367,7 +367,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={entitySearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+						<Paper style={entitySearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} >
 							<Link to='#' onClick={setEntitySearchMode} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-id-badge fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Entity Search</span></h2>
@@ -375,7 +375,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={topicSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+						<Paper style={topicSearch?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} >
 							<Link to='#' onClick={setTopicSearchMode} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-id-badge fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle Topic Search</span></h2>
@@ -383,7 +383,7 @@ export default () => {
 						</Paper>
 					</div>
 					<div style={styles.feature}>
-						<Paper style={userFeedback?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} circle>
+						<Paper style={userFeedback?styles.paper:{...styles.paper, backgroundColor:'rgb(181 52 82)'}} zDepth={2} >
 							<Link to='#' onClick={toggleUserFeedback} style={{ textDecoration: 'none' }}>
 							<i style={styles.image} className='fa fa-id-card-o fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Toggle User Feedback</span></h2>
