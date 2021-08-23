@@ -188,9 +188,6 @@ const PolicyMainViewHandler = {
 
 				}
 			});
-			console.log(pubs)
-			console.log(pop_pubs)	
-
 		} catch(e){
 			// Do nothing
 		}
