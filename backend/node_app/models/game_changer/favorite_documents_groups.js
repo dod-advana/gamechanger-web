@@ -2,17 +2,15 @@
 module.exports = (sequelize, DataTypes) => {
     const FAVORITE_DOCUMENTS_GROUP = sequelize.define("favorite_documents_groups", 
     {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         favorite_group_id: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: false,
+            primaryKey: true
         },
         favorite_document_id: {
-            type: DataTypes.TEXT
+            type: DataTypes.TEXT,
+            allowNull: false,
+            primaryKey: true
         },
     }, 
     {

@@ -4,18 +4,15 @@ module.exports = {
 	up: async (queryInterface, Sequelize) => {
 		return queryInterface.createTable('favorite_documents_groups',
 		{
-			id: {
-                type: Sequelize.INTEGER,
-                autoIncrement: true,
-                primaryKey: true,
-                allowNull: false
-            },
             favorite_group_id: {
                 type: Sequelize.TEXT,
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },
             favorite_document_id: {
-                type: Sequelize.TEXT
+                type: Sequelize.TEXT,
+                allowNull: false,
+                primaryKey: true
             },
 			createdAt: Sequelize.DATE,
 			updatedAt: Sequelize.DATE,

@@ -349,7 +349,7 @@ const GCUserDashboard = (props) => {
 	const [documentGroups, setDocumentGroups] = useState([]);
 	const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 	const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
-	const [selectedGroup, setSelectedGroup] = useState('');
+	const [selectedGroup, setSelectedGroup] = useState({});
 	const [documentsToGroup, setDocumentsToGroup] = useState([]);
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
@@ -361,8 +361,9 @@ const GCUserDashboard = (props) => {
 
 	const preventDefault = (event) => event.preventDefault();
 
-	const handleChange = ({ target: { value } }) => {
-		setSelectedGroup(value)
+	const handleChange = ({ target }) => {
+		const groupId = documentGroups.find(group => group.group_name === target.value).id;
+		setSelectedGroup({id: groupId, name: target.value});
 	}
 
 	const searchHistoryColumns = [
@@ -601,6 +602,7 @@ const GCUserDashboard = (props) => {
 
 		if(userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
+			setSelectedGroup({id: userData.favorite_groups[0].id, name: userData.favorite_groups[0].group_name})
 		}
 		if (userData.favorite_organizations) {
 			setFavoriteOrganizations(userData.favorite_organizations)
@@ -810,6 +812,10 @@ const GCUserDashboard = (props) => {
 		setDocumentsToGroup(newDocumentsToGroup);
 	}
 
+	const handleAddToFavorites = () => {
+		gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup})
+	}
+
 	const renderDocumentFavorites = () => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
@@ -845,7 +851,7 @@ const GCUserDashboard = (props) => {
 											return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
 												<FormControlLabel
 													control={<Checkbox
-														onChange={() => handleCheckbox(doc.id)}
+														onChange={() => handleCheckbox(doc.favorite_id)}
 														color="primary"
 														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
 														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
@@ -857,7 +863,7 @@ const GCUserDashboard = (props) => {
 										})}
 										<FormControl variant="outlined" style={{ width: '100%' }}>
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
-											<Select label="File Format" style={{ fontSize: '16px' }} value={selectedGroup} onChange={handleChange}>
+											<Select label="File Format" style={{ fontSize: '16px' }} value={selectedGroup.name} onChange={handleChange}>
 											{_.map(documentGroups, (group) => {
 												return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
 											})}
@@ -871,7 +877,7 @@ const GCUserDashboard = (props) => {
 											>Close
 											</GCButton>
 											<GCButton
-												onClick={() => console.log("documents to group: ",documentsToGroup)}
+												onClick={() => handleAddToFavorites()}
 												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 											>Save
 											</GCButton>
