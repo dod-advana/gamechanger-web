@@ -9,20 +9,22 @@ import SimpleTable from '../components/common/SimpleTable';
 import {MemoizedNodeCluster2D} from '../components/graph/GraphNodeCluster2D';
 import {	numberWithCommas, getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable, getTrackingNameForFactory, 
-	invertedCrawlerMappingFunc} from '../gamechangerUtils';
-import Pagination from 'react-js-pagination';
-import {Card} from '../components/cards/GCCard';
-import GCAccordion from '../components/common/GCAccordion';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import {gcOrange} from '../components/common/gc-colors';
-import _ from 'lodash';
-import DocumentDetailsPage from '../components/details/documentDetailsPage';
-import SourceDetailsPage from '../components/details/sourceDetailsPage';
-import {MemoizedPolicyGraphView} from '../components/graph/policyGraphView';
-import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
-import EDAContractDetailsPage from '../components/modules/eda/edaContractDetailsPage';
+	invertedCrawlerMappingFunc} from "../gamechangerUtils";
+import Pagination from "react-js-pagination";
+import {Card} from "../components/cards/GCCard";
+import GCAccordion from "../components/common/GCAccordion";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
+import {gcOrange} from "../components/common/gc-colors";
+import _ from "lodash";
+import DocumentDetailsPage from "../components/details/documentDetailsPage";
+import SourceDetailsPage from "../components/details/sourceDetailsPage";
+import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
 
 const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 const RESULTS_PER_PAGE = 18;
 
@@ -295,6 +297,7 @@ const GameChangerDetailsPage = (props) => {
 	} = props;
 	
 	const [cloneData, setCloneData] = useState({});
+	const [userData, setUserData] = useState({});
 	const [entity, setEntity] = useState(null)
 	const [query, setQuery] = useState(null)
 	const [runningQuery, setRunningQuery] = useState(false);
@@ -333,6 +336,10 @@ const GameChangerDetailsPage = (props) => {
 	}, [])
 	
 	useEffect(() => {
+		gcUserManagementAPI.getUserData().then(data => {
+			setUserData(data.data);
+		});
+
 		const cloneName = query.get('cloneName');
 		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
@@ -461,8 +468,8 @@ const GameChangerDetailsPage = (props) => {
 				<Card key={idx}
 					item={item}
 					idx={idx}
-					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
-					//dispatch={dispatch}
+					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, userData, rawSearchResults: docResults}}
+					dispatch={() => {}}
 				/>
 			);
 		});
@@ -664,7 +671,7 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
-									 graphData={graph}
+									 graphData={graph} userData={userData} rawSearchResults={docResults}
 				/>
 			}
 
