@@ -6,7 +6,7 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {Typography} from "@material-ui/core";
-import {setState} from "../../../sharedFunctions";
+import {setState, handleSaveFavoriteTopic} from "../../../sharedFunctions";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
@@ -310,11 +310,14 @@ const PolicyMainViewHandler = {
 			});
 		});
 
+		const favTopicNames = favorite_topics.map(item => item.topic_name.toLowerCase());
 		adminTopics.forEach((topic,idx)=> {
-			favorite_topics.forEach(fav => {
-				adminTopics[idx].favorite = topic.name.toLowerCase() === fav.topic_name.toLowerCase();
-			})
-		})
+			if( _.find(favTopicNames, (item)=> {return item === topic.name.toLowerCase()} )){
+				adminTopics[idx].favorite = true;
+			} else {
+				adminTopics[idx].favorite = false;
+			}
+		});
 
 		return(
 			<div style={{marginTop: '40px'}}>
@@ -369,33 +372,28 @@ const PolicyMainViewHandler = {
 						width='100px'
 						style={{marginLeft: '0'}}
 					>
-						{/* {false && adminTopics.map(({name, favorite})=>
-							<TrendingSearchContainer 
-								style={{backgroundColor: '#E6ECF4'}} 
-								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
-								}}
-							>
-								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{name}</Typography>
-									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-										color: favorite ? "#E9691D" : 'rgb(224,224,224)',
-										cursor: "pointer",
-										fontSize: 20
-									}} />
-								</div>
-							</TrendingSearchContainer>
-						)} */}
-						{adminTopics.map(({name, favorite})=>
+						{adminTopics.map((item, idx)=>
 							<div 
 								style={styles.checkboxPill} 
 								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${item.name.toLowerCase()}`);
 								}}
 							>
-								{name}
+								{item.name}
+								<i className={item.favorite ? "fa fa-star" : "fa fa-star-o"} 
+										style={{
+										color: item.favorite ? "#E9691D" : 'rgb(224,224,224)',
+										marginLeft: 10,
+										cursor: "pointer",
+										fontSize: 20
+										}}
+										onClick={(event)=> { 
+											event.stopPropagation(); 
+											handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch); 
+											}
+										}
+									/>
 							</div>
 						)}
 					</GameChangerThumbnailRow>
