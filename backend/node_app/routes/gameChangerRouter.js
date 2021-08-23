@@ -110,6 +110,7 @@ router.post('/favorites/document', favorites.favoriteDocumentPOST);
 router.post('/favorites/search', favorites.favoriteSearchPOST);
 router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
+router.post('/favorites/organization', favorites.favoriteOrganizationPOST);
 router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);

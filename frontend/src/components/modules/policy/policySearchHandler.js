@@ -365,10 +365,13 @@ const PolicySearchHandler = {
 							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
 						
-						if(!searchSettings.isFilterUpdate){
-							newSearchSettings.originalTypeFilters = sidebarTypes;
+						if(!searchSettings.isFilterUpdate || (searchSettings.isFilterUpdate && searchSettings.allOrgsSelected)){
 							newSearchSettings.originalOrgFilters = sidebarOrgData;
-						}else if(searchSettings.orgUpdate){
+						}
+						if(!searchSettings.isFilterUpdate || (searchSettings.isFilterUpdate && searchSettings.allTypesSelected)){
+							newSearchSettings.originalTypeFilters = sidebarTypes;
+						}
+						if(searchSettings.orgUpdate){
 
 							const typeFilterObject = {};
 							newSearchSettings.originalTypeFilters.forEach(type => typeFilterObject[type[0]] = 0);
