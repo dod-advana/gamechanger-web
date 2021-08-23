@@ -304,79 +304,29 @@ class BudgetSearchSearchUtility {
 		}
 	}
 
-	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
+	cleanUpEsResults(raw, user, index) {
 		try {
 			let results = {
-				query,
-				totalCount: (selectedDocuments && selectedDocuments.length > 0) ? selectedDocuments.length : raw.body.hits.total.value,
+				totalCount: raw.body.hits.total.value,
 				docs: [],
 			};
 	
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r._source);
-
-				const { _source = {}, fields = {} } = r;
-				const { topics_rs = {} } = _source;
-				result.topics_rs = Object.keys(topics_rs);
-				
-				result.pageHits = [];
-				const pageSet = new Set();
-
-				if (r.inner_hits) {
-					r.inner_hits.pages.hits.hits.forEach((phit) => {
-						const pageIndex = phit._nested.offset;
-						// const snippet =  phit.fields["pages.p_raw_text"][0];
-						let pageNumber = pageIndex + 1;
-						// one hit per page max
-						if (!pageSet.has(pageNumber)) {
-							const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-							if (usePageZero) {
-								if (pageSet.has(0)) {
-									return;
-								} else {
-									pageNumber = 0;
-									pageSet.add(0);
-								}
-							}
-							pageSet.add(pageNumber);
-							result.pageHits.push({snippet, pageNumber });
-						}
-					});
-
-					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-					if(r.highlight){
-						if(r.highlight['title.search']){
-							result.pageHits.push({title: 'Title', snippet: r.highlight['title.search'][0]});
-						}						
-						if(r.highlight.keyw_5){
-							result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-						}
-					}
-					result.pageHitCount = pageSet.size;
-
-					try {
-						result = this.parseFields(result);
-					}
-					catch(err) {
-						console.log(err);
-						console.log('Error parsing BudgetSearch fields')
-					}
-					
-					result.esIndex = index;
-	
-					if (Array.isArray(result['keyw_5'])){
-						result['keyw_5'] = result['keyw_5'].join(', ');
-					} else {
-						result['keyw_5'] = '';
-					}
-					if (!result.ref_list) {
-						result.ref_list = [];
-					}
-					results.docs.push(result);
+				let projects = [];
+				try {
+					projects = this.flattenProjectData(result, index);
 				}
+				catch(err) {
+					console.log(err);
+					console.log('Error parsing BudgetSearch fields')
+				}
+
+				if (projects && projects.length > 0) {
+					results.docs = results.docs.concat(projects);
+				}
+				
 			});
-			results.searchTerms = searchTerms;
-			results.expansionDict = expansionDict;
 
 			return results;
 		} catch (err) {
@@ -385,8 +335,9 @@ class BudgetSearchSearchUtility {
 		}
 	}
 
-	getMainPageQuery() {
+	getMainPageQuery(resultsPage) {
 		return {
+			from: resultsPage * 10,
 			query: {
 				match_all: {}
 			}
@@ -413,16 +364,40 @@ class BudgetSearchSearchUtility {
 		return result;
 	}
 
-	parseFields(result) {
+	flattenProjectData(result, index) {
 		const {
 			meta_o,
 			record_o
 		} = result;
 
-		const hasRecord = record_o;
-		const hasMeta = meta_o;
+		const projects = [];
 
-		
+		if (record_o && record_o.ProjectList_o) {
+
+			const projectList = record_o.ProjectList_o.Project_n;
+
+			for (const project of projectList) {
+
+				project.esIndex = index;
+
+				for (const key in record_o) {
+					if (key !== 'ProjectList_o') {
+						project[key] = record_o[key];
+					}
+				}
+
+				for (const key in meta_o) {
+					project[key] = meta_o[key];
+				}
+
+				projects.push(project)
+
+			}
+
+		}
+
+		return projects;
+
 	}
 
 }

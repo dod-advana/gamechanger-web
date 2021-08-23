@@ -38,8 +38,21 @@ const BudgetSearchSearchHandler = {
 			userData,
 			searchSettings,
 			tabName,
-			cloneData
+			cloneData,
+			runGetData
 		} = state;
+
+		if (runGetData) {
+			const mainData = await gameChangerAPI.callSearchFunction({
+				functionName: 'getMainPageData',
+				cloneName: state.cloneData.clone_name,
+				options: {
+					resultsPage
+				}
+			});
+			setState(dispatch, { mainPageData: mainData.data, runGetData: false });
+			return;
+		}
 		
 		
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {

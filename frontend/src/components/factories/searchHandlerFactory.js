@@ -24,6 +24,7 @@ class SearchHandlerFactory {
 					break;
 				case 'budgetSearch/budgetSearchSearchHandler':
 					this.handler = budgetSearchSearchHandler;
+					break;
 				default:
 					this.handler = simpleSearchHandler;
 					break;
