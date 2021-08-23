@@ -1826,7 +1826,7 @@ class SearchUtility {
 				this.logger.error(err, 'PTF390A', '');
 			}
 	}	
-	async getPopularDocs(esIndex="gamechanger", userId) {
+	async getPopularDocs(esIndex="gamechanger_test_popular", userId) {
 		try {
 			let popDocsQuery = this.getPopularDocsQuery();
 			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);

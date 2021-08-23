@@ -27,7 +27,6 @@ class AdminController {
 		this.deleteGCAdminData = this.deleteGCAdminData.bind(this);
 		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
 		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
-		this.getHomePagePopularDocs = this.getHomePagePopularDocs.bind(this);
 
 	}
 
@@ -91,20 +90,6 @@ class AdminController {
 			res.status(500).send(err);
 		}
 	}
-	async getHomePagePopularDocs(req, res){
-		try {
-			let results = {};
-			results.pop_docs= await this.searchUtility.getPopularDocs();
-			console.log(results)
-			res.status(200).send(results);
-
-		}
-		catch (err) {
-			this.logger.error(err, '1RB00O3', userId);
-			res.status(500).send(err);
-		}
-
-	}
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
 
@@ -122,7 +107,6 @@ class AdminController {
 			docs.key = "popular_docs"
 			docs.value =  await this.searchUtility.getPopularDocs()
 			results.push(docs)
-			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
