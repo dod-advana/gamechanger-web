@@ -1,6 +1,5 @@
 import React from 'react';
 import { makeStyles, withStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
 import styled from "styled-components";
 import {PageLink} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
@@ -54,23 +53,26 @@ const styles = {
 	},
 	paper: {
 		backgroundColor: primary,
+		borderRadius:'50%',
 		height: 150,
 		width: 150,
 		paddingTop: 25,
 		marginRight: 30,
 		marginBottom: 30,
-		cursor: 'pointer'
+		cursor: 'pointer',
+		boxShadow:' rgb(0 0 0 / 16%) 0px 3px 10px, rgb(0 0 0 / 23%) 0px 3px 10px'
 	},
 	featureName: {
-		color: Typography.textFullWhite,
+		color: 'white',
 		fontSize: 16,
 		textAlign: 'center',
+		fontFamily: 'Roboto, sans-serif',
 		textTransform: 'uppercase',
 		fontWeight: 900,
 		margin: '5px 5px 0 5px'
 	},
 	featureNameLink: {
-		color: Typography.textFullWhite
+		color: 'white'
 	},
 	applicationsRow: {
 		marginTop: 40,
