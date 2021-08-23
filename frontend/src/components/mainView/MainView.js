@@ -14,6 +14,7 @@ import {
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
+	handleSaveFavoriteOrganization,
 	setState
 } from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
@@ -54,14 +55,14 @@ const MainView = (props) => {
 	}, [state, dispatch, pageLoaded])
 
 	useEffect(() => {
-		const favSearchUrls = state.userData.favorite_searches.map(search => {
+		const favSearchUrls = state.userData?.favorite_searches.map(search => {
 			return search.url;
 		});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url);
 		
 		if (state.isFavoriteSearch !== searchFavorite) {
 			setState(dispatch, { isFavoriteSearch: searchFavorite });
@@ -140,6 +141,8 @@ const MainView = (props) => {
 					handleSaveFavoriteSearchHistory(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count)}
 				handleFavoriteTopic={({topic_name, topic_summary, favorite}) =>
 					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)}
+				handleFavoriteOrganization={({organization_name, organization_summary, favorite}) =>
+					handleSaveFavoriteOrganization(organization_name, organization_summary, favorite, dispatch)}
 				clearDashboardNotification={(type) => clearDashboardNotification(type, state, dispatch)}
 				cloneData={state.cloneData} checkUserInfo={() => { return checkUserInfo(state, dispatch)}}
 			/>
