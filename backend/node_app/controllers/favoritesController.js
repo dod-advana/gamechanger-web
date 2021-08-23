@@ -3,6 +3,7 @@ const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
 const FAVORITE_GROUP = require('../models').favorite_groups;
 const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
+const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
@@ -22,6 +23,7 @@ class FavoritesController {
 			favoriteTopic = FAVORITE_TOPIC,
 			favoriteGroup = FAVORITE_GROUP,
 			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
+			favoriteOrganization = FAVORITE_ORGANIZATION,
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
@@ -36,6 +38,7 @@ class FavoritesController {
 		this.favoriteTopic = favoriteTopic;
 		this.favoriteGroup = favoriteGroup;
 		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
+		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
@@ -47,7 +50,8 @@ class FavoritesController {
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
 		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
-		this.addToavoriteGroupPOST = this.addTofavoriteGroupPOST.bind(this);
+		this.addToFavoriteGroupPOST = this.addTofavoriteGroupPOST.bind(this);
+		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
@@ -168,6 +172,46 @@ class FavoritesController {
 					where: {
 						user_id: hashed_user,
 						topic_name: topic
+					}
+				});
+				res.status(200).send(deleted);
+			}
+		} catch (err) {
+			this.logger.error(err, 'QNFUWTT', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async favoriteOrganizationPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const hashed_user = this.sparkMD5.hash(userId);
+			const new_id = getTenDigitUserId(userId)
+			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
+			const { organization, organizationSummary, is_favorite } = req.body;
+
+			if (is_favorite) {
+				const [favorite] = await this.favoriteOrganization.findOrCreate(
+					{
+						where: { user_id: hashed_user, organization_name: organization },
+						defaults: {
+							user_id: hashed_user,
+							new_user_id: new_hashed_user,
+							organization_name: organization,
+							organization_summary: organizationSummary,
+							is_clone: false
+						}
+					}
+				);
+				res.status(200).send(favorite);
+			} else {
+				const deleted = this.favoriteOrganization.destroy({
+					where: {
+						user_id: hashed_user,
+						organization_name: organization
 					}
 				});
 				res.status(200).send(deleted);

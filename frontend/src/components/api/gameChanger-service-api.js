@@ -64,6 +64,7 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
+	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
 	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
 	trainModel: '/api/gamechanger/admin/trainModel',
@@ -483,6 +484,11 @@ export default class GameChangerAPI {
 	
 	favoriteTopic = async (data) => {
 		const url = endpoints.favoriteTopicPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	favoriteOrganization = async (data) => {
+		const url = endpoints.favoriteOrganizationPOST;
 		return axiosPOST(this.axios, url, data);
 	}
 
