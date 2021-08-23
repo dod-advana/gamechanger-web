@@ -1475,9 +1475,9 @@ const PolicyCardHandler = {
 					<>
 						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
 							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${item.name}DetailsPage`);
+								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${item.name.toLowerCase()}DetailsPage`);
 								e.preventDefault();
-								window.open(`#/gamechanger-details?type=topic&topicName=${item.name}&cloneName=${cloneName}`);
+								window.open(`#/gamechanger-details?type=topic&topicName=${item.name.toLowerCase()}&cloneName=${cloneName}`);
 							}}
 						>
 							Open
