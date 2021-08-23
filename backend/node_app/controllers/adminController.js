@@ -2,7 +2,7 @@ const GC_ADMINS = require('../models').admin;
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
-
+const SearchUtility = require('../utils/searchUtility');
 class AdminController {
 
 	constructor(opts = {}) {
@@ -11,12 +11,15 @@ class AdminController {
 			gcAdmins = GC_ADMINS,
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
+			searchUtility = new SearchUtility(opts),
+
 		} = opts;
 
 		this.logger = logger;
 		this.gcAdmins = gcAdmins;
 		this.sparkMD5 = sparkMD5;
 		this.appSettings = appSettings;
+		this.searchUtility = searchUtility;
 
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
@@ -24,6 +27,8 @@ class AdminController {
 		this.deleteGCAdminData = this.deleteGCAdminData.bind(this);
 		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
 		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
+		this.getHomePagePopularDocs = this.getHomePagePopularDocs.bind(this);
+
 	}
 
 	async getGCAdminData(req, res) {
@@ -86,13 +91,26 @@ class AdminController {
 			res.status(500).send(err);
 		}
 	}
+	async getHomePagePopularDocs(req, res){
+		try {
+			let results = {};
+			results.pop_docs= await this.searchUtility.getPopularDocs();
+			console.log(results)
+			res.status(200).send(results);
 
+		}
+		catch (err) {
+			this.logger.error(err, '1RB00O3', userId);
+			res.status(500).send(err);
+		}
+
+	}
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const results = await this.appSettings.findAll({
+			let results = await this.appSettings.findAll({
 				where: {
 					key: [
 						'homepage_topics',
@@ -100,6 +118,11 @@ class AdminController {
 					]
 				}
 			});
+			let docs = {}
+			docs.key = "popular_docs"
+			docs.value =  await this.searchUtility.getPopularDocs()
+			results.push(docs)
+			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
