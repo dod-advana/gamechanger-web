@@ -24,6 +24,7 @@ import {
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
 import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
+import GamechangerUserManagementAPI from "../../api/GamechangerUserManagement";
 
 
 const _ = require('lodash');
@@ -174,6 +175,7 @@ const PolicyMainViewHandler = {
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
+		let pop_pubs = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
 			data.forEach(obj => {
@@ -181,8 +183,13 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
+				} else if (obj.key == 'popular_docs'){
+					pop_pubs = obj.value;
+
 				}
 			});
+			console.log(pubs)
+			console.log(pop_pubs)	
 
 		} catch(e){
 			// Do nothing
@@ -206,6 +213,22 @@ const PolicyMainViewHandler = {
 		}
 		
 		setState(dispatch, {adminMajorPubs: pubs});
+
+		try {
+			const pop_pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pop_pubs, 'thumbnails', state.cloneData);
+			const pop_buffers = pop_pngs.data
+			pop_buffers.forEach((buf,idx) => {
+				if(buf.status === "fulfilled"){
+					pop_pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				} else {
+					pop_pubs[idx].imgSrc = 'error';
+				}
+			})
+			
+		} catch(e) {
+			//Do nothing
+		}
+		setState(dispatch, {searchMajorPubs: pop_pubs});
 
 		try {
 			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
@@ -258,6 +281,7 @@ const PolicyMainViewHandler = {
 		const {
 			adminTopics,
 			adminMajorPubs,
+			searchMajorPubs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -452,6 +476,40 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={searchMajorPubs} 
+						title="Popular Publications" 
+						width='215px' 
+					>
+						{ (searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc) && searchMajorPubs.map((pub) =>
+							<div className="topPublication"
+							>
+								{ pub.imgSrc !== 'error' ? 
+									<img 
+									className="image"
+									src={pub.imgSrc}
+									alt="thumbnail" 
+									title={pub.name}
+								/> : 
+									<div className="image">{pub.name}</div>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+									}}
+								>
+									<div className="hover-text">{pub.name}</div>
+								</div>
+							</div>
+						)}
+						{ searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && 
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>

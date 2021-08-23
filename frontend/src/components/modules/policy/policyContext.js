@@ -54,6 +54,7 @@ const initState = {
 	crawlerSources: [],
 	adminTopics: [],
 	adminMajorPubs: [],
+	searchMajorPubs: [],
 	trendingLinks: [],
 	
 	// Tutorial
