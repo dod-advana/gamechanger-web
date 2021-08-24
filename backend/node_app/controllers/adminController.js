@@ -3,6 +3,7 @@ const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');
+const constantsFile = require('../config/constants');
 class AdminController {
 
 	constructor(opts = {}) {
@@ -12,6 +13,7 @@ class AdminController {
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
+			constants = constantsFile,
 
 		} = opts;
 
@@ -20,6 +22,8 @@ class AdminController {
 		this.sparkMD5 = sparkMD5;
 		this.appSettings = appSettings;
 		this.searchUtility = searchUtility;
+		this.constants = constants;
+
 
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
@@ -104,9 +108,10 @@ class AdminController {
 				}
 			});
 			let docs = {}
-			docs.key = "popular_docs"
-			docs.value =  await this.searchUtility.getPopularDocs()
-			results.push(docs)
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			docs.key = "popular_docs";
+			docs.value =  await this.searchUtility.getPopularDocs("", esIndex);
+			results.push(docs);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);

@@ -24,7 +24,6 @@ import {
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
 import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
-import GamechangerUserManagementAPI from "../../api/GamechangerUserManagement";
 
 
 const _ = require('lodash');
@@ -183,9 +182,8 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
-				} else if (obj.key == 'popular_docs'){
+				} else if (obj.key === 'popular_docs'){
 					pop_pubs = obj.value;
-
 				}
 			});
 		} catch(e){
