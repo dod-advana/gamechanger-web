@@ -108,9 +108,16 @@ class AdminController {
 				}
 			});
 			let docs = {}
-			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			//let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			let esIndex = "gamechanger_test_popular";
 			docs.key = "popular_docs";
-			docs.value =  await this.searchUtility.getPopularDocs("", esIndex);
+			try {
+				docs.value =  await this.searchUtility.getPopularDocs("", esIndex);
+			} catch (err) {
+				this.logger.error(err, 'FL1LLDU', userId);
+				res.status(500).send(err);
+				docs.value = []
+			}
 			results.push(docs);
 			res.status(200).send(results);
 		} catch (err) {
