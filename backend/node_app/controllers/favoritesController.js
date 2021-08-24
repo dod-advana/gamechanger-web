@@ -266,9 +266,11 @@ class FavoritesController {
 		let userId = 'Unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const hashed_user = getTenDigitUserId(userId) ? this.sparkMD5.hash(getTenDigitUserId(userId)) : this.sparkMD5.hash(userId);
+
 			const { groupId, documentIds } = req.body;
 			const docObjects = documentIds.map(docId => {
-				return {favorite_group_id: groupId, favorite_document_id: docId}
+				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId}
 			})
 
 			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
