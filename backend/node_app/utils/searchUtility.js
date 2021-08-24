@@ -1826,11 +1826,13 @@ class SearchUtility {
 				this.logger.error(err, 'PTF390A', '');
 			}
 	}	
-	async getPopularDocs(esIndex="gamechanger_test_popular", userId) {
+	async getPopularDocs(userId, esIndex) {
+		let popDocs = [];
+
 		try {
 			let popDocsQuery = this.getPopularDocsQuery();
 			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
-			let popDocs = [];
+			console.log(esResults)
 			if (esResults) {
 				esResults.body.hits.hits.forEach((r) => {
 					let doc = {}
@@ -1843,6 +1845,7 @@ class SearchUtility {
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
+			return popDocs
 		}
 	}
 	getSourceQuery(searchText, offset, limit) {
