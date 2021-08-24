@@ -271,7 +271,8 @@ const GroupCard = (props) => {
         group,
 		idx,
         state,
-        dispatch
+        dispatch,
+		count
 	} = props;
 
     const removeSelectedDocument = (key) => {
@@ -309,7 +310,7 @@ const GroupCard = (props) => {
             </div>
             <div style={styles.details}>
                 <div>
-                    {`${0} items`}
+                    {`${count} items`}
                 </div>
             </div>
 		</StyledFavoriteGroupCard>

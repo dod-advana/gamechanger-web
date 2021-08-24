@@ -1722,6 +1722,7 @@ const GCUserDashboard = (props) => {
 									state={state}
 									idx={idx}
 									dispatch={dispatch}
+									count={group.favorites.length}
 								/>)
 						})}
 					</div>
