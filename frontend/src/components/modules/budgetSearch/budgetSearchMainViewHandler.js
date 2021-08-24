@@ -111,6 +111,25 @@ const StyledMainBottomContainer = styled.div`
 
 `;
 
+const setBudgetSearchSetting = (field, value, state, dispatch) => {
+	const budgetSearchSettings = _.cloneDeep(state.budgetSearchSettings)
+	switch (field) {
+		case 'dataSources':
+            const dataSourceIndex = budgetSearchSettings.dataSources.indexOf(value);
+            if (dataSourceIndex !== -1) {
+                budgetSearchSettings.dataSources.splice(dataSourceIndex, 1);
+            }
+            else {
+                budgetSearchSettings.dataSources.push(value);
+            }                
+            break;	
+		default:
+			break;
+	}
+
+	setState(dispatch, { budgetSearchSettings });
+}
+
 
 const BudgetSearchMainViewHandler = {
 	async handlePageLoad(props) {
@@ -138,28 +157,29 @@ const BudgetSearchMainViewHandler = {
 		const {
 			loading,
 			mainPageData,
-			resultsPage
+			resultsPage,
+			budgetSearchSettings
 		} = state;
 
 		const renderFilterBar = () => {
 			const filterOptions = [];
-			const checkboxOptions = ['RDocs Historical', 'PDocs (JSON) Historical', 'RDocs FY21', 'PDocs FY21', 'RDocs FY22', 'PDocs FY22'];
+			const dataSources = ['RDocs Historical', 'PDocs (JSON) Historical', 'RDocs FY21', 'PDocs FY21', 'RDocs FY22', 'PDocs FY22'];
 			
-			for (const checkbox of checkboxOptions) {
+			for (const dataSource of dataSources) {
 				filterOptions.push(		
 					<FormControlLabel
-						name={checkbox}
-						value={''}
-						style={{ margin: '0 10px 0'}}
+						name={dataSource}
+						value={dataSource}
+						style={{ margin: '0 20px 0 0'}}
 						control={<Checkbox
 							style={styles.filterBox}
-							onClick={() => {}}
+							onClick={() => setBudgetSearchSetting('dataSources', dataSource, state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-							checked={false}  // TODO
+							checked={budgetSearchSettings && budgetSearchSettings.dataSources && budgetSearchSettings.dataSources.indexOf(dataSource) !== -1}
 							checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
-							name={''}
+							name={dataSource}
 						/>}
-						label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{checkbox}</span>}
+						label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{dataSource}</span>}
 						labelPlacement="end"                        
 					/>
 				);
@@ -342,7 +362,7 @@ const BudgetSearchMainViewHandler = {
 			<>
 				<StyledMainTopBar id="game-changer-content-top">
 					<div style={styles.titleText}>
-						Filtered Results
+						Filtered Results {mainPageData ? `(${mainPageData.totalCount})` : ''}
 					</div>
 					<div className='gcPagination'>
 						<Pagination

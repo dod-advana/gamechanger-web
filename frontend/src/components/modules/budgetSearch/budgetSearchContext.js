@@ -3,6 +3,9 @@ import React, { useReducer } from 'react';
 const initState = {
     mainPageData: {},
     runGetData: false,
+    budgetSearchSettings: {
+        dataSources: []
+    },
     
     resultsPage: 1,
     showSideFilters: true,
