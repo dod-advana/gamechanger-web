@@ -14,6 +14,8 @@ import { trackEvent } from "../telemetry/Matomo";
 import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
 import { checkUserInfo, setState } from '../../sharedFunctions';
+import FavoriteCard from "../cards/GCFavoriteCard";
+
 
 
 
@@ -246,8 +248,8 @@ const styles = {
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         lineHeight: 1,
-        maxHeight: 50,
-		height: 35,
+        maxHeight: 60,
+		height: 60,
 		display: 'flex'
     },
     details: {
@@ -308,14 +310,39 @@ const GroupCard = (props) => {
             <div style={styles.groupName}>
                 {group.group_name}
             </div>
-			<div>
-				{favorites.map(fav => {
+			<div style={{position: 'relative'}}>
+				{favorites.map((fav, index) => {
 					const doc = state.userData.favorite_documents.find(fav_doc => {
 						console.log("fav.favorite_document_id: ", fav.favorite_document_id)
 						console.log("fav_doc.favorite_id: ", fav_doc.favorite_id)
 						return fav.favorite_document_id === `${fav_doc.favorite_id}`;
 					})
-					return doc?.filename;
+					const favCardStyles = {
+						main: `margin: 0px;
+						background: #F5F5F5 0% 0% no-repeat padding-box; 
+						box-shadow: 0px -3px 6px #00000029; 
+						position: absolute; 
+						top: ${index * 60}px; 
+						left: 0px;`
+					}
+					return <FavoriteCard
+					key={`${doc.favorite_id}`}
+					cardTitle={doc.title}
+					isDocument={true}
+					documentObject={doc}
+					handleDeleteFavorite={()=>{}}
+					// summary={doc.summary}
+					summary={group.group_name}
+					// details={documentDetails}
+					overlayText={doc.favorite_summary}
+					reload={true}
+					setReload={()=>{}}
+					idx={doc.favorite_id}
+					active={doc.active}
+					toggleActive={()=>{}}
+					cloneData={state.cloneData}
+					styles={favCardStyles}
+				/>
 				})}
 			</div>
             <div style={styles.details}>
