@@ -1832,7 +1832,6 @@ class SearchUtility {
 		try {
 			let popDocsQuery = this.getPopularDocsQuery();
 			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
-			console.log(esResults)
 			if (esResults) {
 				esResults.body.hits.hits.forEach((r) => {
 					let doc = {}
