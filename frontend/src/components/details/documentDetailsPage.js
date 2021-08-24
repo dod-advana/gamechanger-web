@@ -46,7 +46,9 @@ const DocumentDetailsPage = (props) => {
 	
 	const {
 		document,
-		cloneData
+		cloneData,
+		userData,
+		rawSearchResults
 	} = props;
 	
 	const [runningQuery, setRunningQuery] = useState(false);
@@ -210,7 +212,7 @@ const DocumentDetailsPage = (props) => {
 					<Card key={idx}
 						item={item}
 						idx={idx}
-						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false}}
+						state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false,  userData, rawSearchResults}}
 						dispatch={() => {}}
 					/>
 				);
