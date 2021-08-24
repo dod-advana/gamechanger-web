@@ -23,6 +23,7 @@ const StyledFavoriteDocumentCard = styled.div`
 	margin: 10px;
 	position: relative;
 	border: ${({ updated }) => updated ? '1px solid #069FD9' : 'none'}
+	${({styless}) => styless?.main}
 
     > .main-info {
 
@@ -264,7 +265,8 @@ const FavoriteCard = (props) => {
 		updated,
 		isTopic,
 		isOrganization,
-		cloneData
+		cloneData,
+		styles
 	} = props;
 
 	const [popoverOpen, setPopoverOpen] = useState(false);
@@ -292,7 +294,7 @@ const FavoriteCard = (props) => {
 	}
 
 	return (
-		<StyledFavoriteDocumentCard key={idx} updated={updated}>
+		<StyledFavoriteDocumentCard key={idx} updated={updated} styless={styles}>
 			<div className={'main-info'}>
 				<div className={'top-buttons'}>
 					<GCTooltip title={cardTitle} placement="top">
