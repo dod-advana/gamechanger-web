@@ -272,7 +272,7 @@ const GroupCard = (props) => {
 		idx,
         state,
         dispatch,
-		count
+		favorites
 	} = props;
 
     const removeSelectedDocument = (key) => {
@@ -308,9 +308,19 @@ const GroupCard = (props) => {
             <div style={styles.groupName}>
                 {group.group_name}
             </div>
+			<div>
+				{favorites.map(fav => {
+					const doc = state.userData.favorite_documents.find(fav_doc => {
+						console.log("fav.favorite_document_id: ", fav.favorite_document_id)
+						console.log("fav_doc.favorite_id: ", fav_doc.favorite_id)
+						return fav.favorite_document_id === `${fav_doc.favorite_id}`;
+					})
+					return doc?.filename;
+				})}
+			</div>
             <div style={styles.details}>
                 <div>
-                    {`${count} items`}
+                    {`${favorites.length} items`}
                 </div>
             </div>
 		</StyledFavoriteGroupCard>

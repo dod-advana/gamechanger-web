@@ -812,8 +812,10 @@ const GCUserDashboard = (props) => {
 		setDocumentsToGroup(newDocumentsToGroup);
 	}
 
-	const handleAddToFavorites = () => {
-		gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup})
+	const handleAddToFavorites = async () => {
+		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup})
+		updateUserData();
+		setShowAddToGroupModal(false);
 	}
 
 	const renderDocumentFavorites = () => {
@@ -1722,7 +1724,7 @@ const GCUserDashboard = (props) => {
 									state={state}
 									idx={idx}
 									dispatch={dispatch}
-									count={group.favorites.length}
+									favorites={group.favorites}
 								/>)
 						})}
 					</div>
