@@ -599,6 +599,39 @@ describe('SearchUtility', function () {
 
 	});
 
+	describe('#getPopularQuery()', function () {
+
+		it('should get popular documents query', () => {
+			let target = new SearchUtility(opts);
+			let actual = target.getPopularDocsQuery();
+			const expected = {
+				"_source": [
+					"title",
+					"filename",
+					"pop_score"
+				],
+				"from": 0,
+				"size": 10,
+				"query": {
+					"range": {
+						"pop_score": {
+							"gte": 10
+						}
+					}
+				},
+				"sort": [
+					{
+						"pop_score": {
+							"order": "desc"
+						}
+					}
+				]
+			 };			 
+			assert.deepStrictEqual(actual, expected);
+		});
+
+	});
+
 	describe('#getElasticsearchQuery', () => {
 		it('should return an es query given parsedQuery and defaults', () => {
 			const tmpOpts = {
