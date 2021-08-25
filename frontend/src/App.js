@@ -230,6 +230,24 @@ const App = () => {
 		}
 	}
 
+	const getBudgetSearchProfileRoute = () => {
+		const BudgetSearchProvider = getProvider('budgetSearch');
+
+		return (
+			<PrivateTrackedRoute 
+				path={`/budgetsearch-profile`}
+				render={(props) => 
+					<BudgetSearchProvider>
+						<BudgetSearchProfilePage {...props} />
+					</BudgetSearchProvider>}
+				pageName={'BudgetSearchProfilePage'}
+				allowFunction={() => {
+					return true;
+				}}
+			/>
+		)
+	}
+
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
 		return includePaths.includes(location.pathname);
@@ -315,7 +333,7 @@ const App = () => {
 												<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
 												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
 												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
-												<Route exact path="/budgetsearch-profile" component={BudgetSearchProfilePage} location={location} />
+												{getBudgetSearchProfileRoute()}
 												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
 												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
 												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />

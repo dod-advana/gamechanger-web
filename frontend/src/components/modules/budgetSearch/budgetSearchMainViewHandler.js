@@ -6,7 +6,7 @@ import GCPrimaryButton from "../../common/GCButton";
 import { FormControlLabel, Checkbox } from "@material-ui/core";
 import Pagination from "react-js-pagination";
 import {
-	getTrackingNameForFactory, scrollToContentTop
+	getTrackingNameForFactory, scrollToContentTop, getQueryVariable
 } from "../../../gamechangerUtils";
 import {trackEvent} from "../../telemetry/Matomo";
 import {setState} from "../../../sharedFunctions";
@@ -139,18 +139,23 @@ const BudgetSearchMainViewHandler = {
 		const { 
 			state, dispatch
 		} = props;
-		await defaultMainViewHandler.handlePageLoad(props);
 
-		setState(dispatch, { loading: true });
-		const mainData = await gameChangerAPI.callSearchFunction({
-			functionName: 'getMainPageData',
-			cloneName: state.cloneData.clone_name,
-			options: {
-				resultsPage: state.resultsPage
-			}
-		});
-		setState(dispatch, { mainPageData: mainData.data, loading: false });
-		console.log(mainData);
+		await defaultMainViewHandler.handlePageLoad(props);
+		const url = window.location.href;
+		const searchText = getQueryVariable('q', url);
+		if (!searchText) {
+			setState(dispatch, { loading: true, cloneData: state.cloneData });
+			const mainData = await gameChangerAPI.callSearchFunction({
+				functionName: 'getMainPageData',
+				cloneName: state.cloneData.clone_name,
+				options: {
+					resultsPage: state.resultsPage
+				}
+			});
+			setState(dispatch, { mainPageData: mainData.data, loading: false });
+			console.log(mainData);
+		}		
+
 	},
 	
 	getMainView(props) {
@@ -367,88 +372,84 @@ const BudgetSearchMainViewHandler = {
 		const renderMainContainer = () => {
 			return (
 			<>
-				{/* {loading ? 
-					<LoadingIndicator/>
-					:
-					<> */}
-						<StyledMainTopBar id="game-changer-content-top">
-							<div style={styles.titleText}>
-								Filtered Results {mainPageData && mainPageData.totalCount ? `(${mainPageData.totalCount})` : ''}
-							</div>
-							<div className='gcPagination'>
-								<Pagination
-									activePage={resultsPage}
-									itemsCountPerPage={10}
-									totalItemsCount={mainPageData.totalCount}
-									pageRangeDisplayed={8}
-									onChange={page => {
-										trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-										setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
-										scrollToContentTop();
-									}}
-								/>					
-							</div>
-						</StyledMainTopBar>
-						<StyledMainBottomContainer>
-						<ReactTable
-							data={mainPageData ? mainPageData.docs : []}
-							className={'striped'}
-							noDataText={"No rows found"}
-							loading={loading}
-							columns={getMainPageColumns()}
-							// pivotBy={searchResults ? edaSearchSettings.aggregations: []}
-							editable={false}
-							filterable={false}
-							minRows={1}
-							multiSort={false}
-							showPageSizeOptions={false}
-							showPagination={false}
-							getTbodyProps={(state, rowInfo, column) => {
-								return {
-									style: {
-										overflow: 'auto'
-									}
-								};
+				<StyledMainTopBar id="game-changer-content-top">
+					<div style={styles.titleText}>
+						Filtered Results {mainPageData && mainPageData.totalCount ? `(${mainPageData.totalCount})` : ''}
+					</div>
+					<div className='gcPagination'>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={10}
+							totalItemsCount={mainPageData.totalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
+								scrollToContentTop();
 							}}
-							getTdProps={(state, rowInfo, column) => ({
+						/>					
+					</div>
+				</StyledMainTopBar>
+				<StyledMainBottomContainer>
+					<ReactTable
+						data={mainPageData ? mainPageData.docs : []}
+						className={'striped'}
+						noDataText={"No rows found"}
+						loading={loading}
+						columns={getMainPageColumns()}
+						// pivotBy={searchResults ? edaSearchSettings.aggregations: []}
+						editable={false}
+						filterable={false}
+						minRows={1}
+						multiSort={false}
+						showPageSizeOptions={false}
+						showPagination={false}
+						getTbodyProps={(state, rowInfo, column) => {
+							return {
 								style: {
-									whiteSpace: 'unset'
-								},
-							})}
-							getTheadTrProps={(state, rowInfo, column) => {
-								return { style: styles.tableHeaderRow };
-							}}
-							getTheadThProps={(state, rowInfo, column) => {
-								return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
-							}}
-							style={{
-								height: "calc(100vh - 300px)",
+									overflow: 'auto'
+								}
+							};
+						}}
+						getTdProps={(state, rowInfo, column) => ({
+							style: {
+								whiteSpace: 'unset'
+							},
+						})}
+						getTheadTrProps={(state, rowInfo, column) => {
+							return { style: styles.tableHeaderRow };
+						}}
+						getTheadThProps={(state, rowInfo, column) => {
+							return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
+						}}
+						style={{
+							height: "calc(100vh - 300px)",
+							borderTopRightRadius: 5,
+							borderTopLeftRadius: 5,
+							marginBottom: 10
+						}}
+						getTableProps={(state, rowInfo, column) => {
+							return { style: { 
 								borderTopRightRadius: 5,
-								borderTopLeftRadius: 5,
-								marginBottom: 10
+								borderTopLeftRadius: 5
 							}}
-							getTableProps={(state, rowInfo, column) => {
-								return { style: { 
-									borderTopRightRadius: 5,
-									borderTopLeftRadius: 5
-								}}
+						}}
+					/>
+					<div className='gcPagination' style={{ textAlign: 'center'}}>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={10}
+							totalItemsCount={mainPageData.totalCount}
+							pageRangeDisplayed={8}
+							onChange={page => {
+								console.log(page);
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
+								scrollToContentTop();
 							}}
-						/>
-						<div className='gcPagination' style={{ textAlign: 'center'}}>
-							<Pagination
-								activePage={resultsPage}
-								itemsCountPerPage={10}
-								totalItemsCount={mainPageData.totalCount}
-								pageRangeDisplayed={8}
-								onChange={page => {
-									console.log(page);
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-									setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
-									scrollToContentTop();
-								}}
-							/>					
-						</div>
-					</StyledMainBottomContainer>
+						/>					
+					</div>
+				</StyledMainBottomContainer>
 					{/* </>
 				} */}
 			</>

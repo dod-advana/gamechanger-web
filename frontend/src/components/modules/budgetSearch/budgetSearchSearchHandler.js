@@ -3,15 +3,13 @@ import _ from "lodash";
 import {
 	getQueryVariable,
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
-	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE,
+	RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE,
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
-	checkUserInfo,
 	createTinyUrl,
 	getSearchObjectFromString,
 	getUserData,
-	isDecoupled,
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
@@ -35,7 +33,6 @@ const BudgetSearchSearchHandler = {
 			resultsPage,
 			listView,
 			showTutorial,
-			userData,
 			searchSettings,
 			tabName,
 			cloneData,
@@ -55,13 +52,6 @@ const BudgetSearchSearchHandler = {
 			return;
 		}
 		
-		
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
-		
 		this.setSearchURL(state);
 		
 		let url = window.location.hash.toString();
@@ -69,12 +59,7 @@ const BudgetSearchSearchHandler = {
 				
 		setState(dispatch, {
 			runningSearch: true,
-			expansionDict: {},
-			isDataTracker: false,
-			isCachedResult: false,
-			pageDisplayed: PAGE_DISPLAYED.main,
-			didYouMean: '',
-			trending: ''
+
 		});
 		
 		const trimmed = searchText.trim();
@@ -92,30 +77,16 @@ const BudgetSearchSearchHandler = {
 		
 		const t0 = new Date().getTime();
 	
-		let searchResults = [];
 		let foundEntity = false;
 	
 		
 		setState(dispatch, {
 			loading: true,
-			metricsLoading: true,
 			noResultsMessage: null,
-			autocompleteItems: [],
-			rawSearchResults: [],
-			docSearchResults: [],
-			searchResultsCount: 0,
 			count: 0,
-			resultsDownloadURL: '',
 			timeFound: 0.0,
 			iframePreviewLink: null,
-			graph: { nodes: [], edges: [] },
 			runningSearch: true,
-			showFullGraph: false,
-			docTypeData: {},
-			runningEntitySearch: true,
-			runningTopicSearch: true,
-			hideTabs: true,
-			statsLoading: true
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
@@ -125,10 +96,6 @@ const BudgetSearchSearchHandler = {
 		const tiny_url = await createTinyUrl(cloneData);
 		
 		try {
-			
-			if (cloneData.show_graph && tabName === 'graphView') {
-				setState(dispatch, {runGraphSearch: true});
-			}
 			
 			const combinedSearch = 'false';
 	
@@ -150,32 +117,15 @@ const BudgetSearchSearchHandler = {
 		
 				if (_.isObject(resp.data)) {
 
-					console.log(resp.data);
-
-					let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
+					let { docs, totalCount } = resp.data;
 		
 					if (docs && Array.isArray(docs)) {
-		
-						// intelligent search failed, show keyword results with warning alert
-						if (resp.data.transformFailed) {
-							setState(dispatch, {transformFailed: true});
-						}
-		
-						searchResults = searchResults.concat(docs);
-						
-						let hasExpansionTerms = false;
-						
-						if (expansionDict) {
-							Object.keys(expansionDict).forEach(key => {
-								if (expansionDict[key].length > 0) hasExpansionTerms = true;
-							})
-						}
-						
+								
 						if (!offset) {
 							trackSearch(
 								searchText,
-								`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-								totalCount + (foundEntity ? 1 : 0),
+								`${getTrackingNameForFactory(cloneData.clone_name)}`,
+								totalCount,
 								false
 							);
 						}
@@ -184,26 +134,15 @@ const BudgetSearchSearchHandler = {
 							timeFound: ((t1 - t0) / 1000).toFixed(2),
 							prevSearchText: searchText,
 							loading: false,
-							count: totalCount + (foundEntity ? 1 : 0),
-							rawSearchResults: searchResults,
-							docSearchResults: docs,
-							searchResultsCount: searchResults.length,
-							autocompleteItems: [],
-							expansionDict,
-							isCachedResult: isCached,
-							timeSinceCache,
-							hasExpansionTerms,
-							metricsLoading: false,
-							metricsCounted: true,
 							loadingTinyUrl: false,
-							hideTabs: false,
-							query: resp.data.query
+							query: resp.data.query,
+							mainPageData: resp.data
 						});
 					} else {
 						if (!offset) {
 							trackSearch(
 								searchText,
-								`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
+								`${getTrackingNameForFactory(cloneData.clone_name)}`,
 								0,
 								false
 							);
@@ -212,26 +151,19 @@ const BudgetSearchSearchHandler = {
 						setState(dispatch, {
 							loading: false,
 							count: 0,
-							rawSearchResults: [],
-							docSearchResults: [],
-							searchResultsCount: 0,
 							runningSearch: false,
 							prevSearchText: searchText,
-							isCachedResult: false,
 							loadingTinyUrl: false,
-							hasExpansionTerms: false
+							mainPageData: {}
 						});
 					}
 				} else {
 					setState(dispatch, {
 						prevSearchText: null,
 						loading: false,
-						searchResultsCount: 0,
 						noResultsMessage: NO_RESULTS_MESSAGE,
-						autocompleteItems: [],
 						runningSearch: false,
 						loadingTinyUrl: false,
-						hasExpansionTerms: false
 					});
 				}
 		
@@ -253,7 +185,6 @@ const BudgetSearchSearchHandler = {
 				unauthorizedError: true,
 				loading: false,
 				autocompleteItems: [],
-				searchResultsCount: 0,
 				runningSearch: false,
 				loadingTinyUrl: false,
 				hasExpansionTerms: false
