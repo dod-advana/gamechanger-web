@@ -7,12 +7,14 @@ import {trackEvent} from "../telemetry/Matomo";
 import GCDataStatusTracker from "../dataTracker/GCDataStatusTracker";
 import GCResponsibilityTracker from "../analystTools/GCResponsibilityTracker";
 import GCUserDashboard from "../user/GCUserDashboard";
+import GCAboutUs from "../aboutUs/GCAboutUs";
 import {
 	checkUserInfo,
 	clearDashboardNotification,
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
+	handleSaveFavoriteOrganization,
 	setState
 } from "../../sharedFunctions";
 import GameChangerAPI from "../api/gameChanger-service-api";
@@ -53,14 +55,14 @@ const MainView = (props) => {
 	}, [state, dispatch, pageLoaded])
 
 	useEffect(() => {
-		const favSearchUrls = state.userData.favorite_searches.map(search => {
+		const favSearchUrls = state.userData?.favorite_searches.map(search => {
 			return search.url;
 		});
 		
 		let url = window.location.hash.toString();
 		url = url.replace("#/", "");
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url);
 		
 		if (state.isFavoriteSearch !== searchFavorite) {
 			setState(dispatch, { isFavoriteSearch: searchFavorite });
@@ -139,10 +141,18 @@ const MainView = (props) => {
 					handleSaveFavoriteSearchHistory(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count)}
 				handleFavoriteTopic={({topic_name, topic_summary, favorite}) =>
 					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)}
+				handleFavoriteOrganization={({organization_name, organization_summary, favorite}) =>
+					handleSaveFavoriteOrganization(organization_name, organization_summary, favorite, dispatch)}
 				clearDashboardNotification={(type) => clearDashboardNotification(type, state, dispatch)}
 				cloneData={state.cloneData} checkUserInfo={() => { return checkUserInfo(state, dispatch)}}
 			/>
 		);
+	}
+
+	const getAboutUs = () => {
+		return (
+			<GCAboutUs state={state} />
+		)
 	}
 	
 	const handleDeleteFavoriteSearch = async (search) => {
@@ -168,9 +178,9 @@ const MainView = (props) => {
 		return (
 			<div>
 				<div style={{backgroundColor: 'rgba(223, 230, 238, 0.5)', marginBottom: 10}}>
-					<div style={{borderTop: '1px solid #B0BAC5', width: '91.2%', marginLeft: 'auto', marginRight: 'auto'}}/>
+					{state.pageDisplayed !== 'aboutUs' && <div style={{borderTop: '1px solid #B0BAC5', width: '91.2%', marginLeft: 'auto', marginRight: 'auto'}}/>}
 					<React.Fragment>
-						<Button
+						{state.pageDisplayed !== 'aboutUs' && <Button
 							style={{marginLeft: '10px', marginTop: '8px', fontFamily: 'Montserrat',
 								color: '#313541', position: 'absolute' }}
 							startIcon={<ArrowBackIcon/>}
@@ -195,7 +205,7 @@ const MainView = (props) => {
 							}}
 						>
 							<></>
-						</Button>
+						</Button>}
 						<div>
 							<p style={{fontSize: '26px', marginLeft: '80px', fontFamily: 'Montserrat', fontWeight: 'bold', marginTop: '10px',
 								color: '#313541'}}>
@@ -205,7 +215,9 @@ const MainView = (props) => {
 							</p>
 						</div>
 						
-						<div style={{backgroundColor: state.pageDisplayed === PAGE_DISPLAYED.dataTracker || state.pageDisplayed === PAGE_DISPLAYED.analystTools ? '#ffffff' : '#DFE6EE'}}>
+						<div style={{backgroundColor: state.pageDisplayed === PAGE_DISPLAYED.dataTracker || 
+														state.pageDisplayed === PAGE_DISPLAYED.analystTools || 
+														state.pageDisplayed === PAGE_DISPLAYED.aboutUs ? '#ffffff' : '#DFE6EE'}}>
 							{getInnerChildren()}
 						</div>
 					</React.Fragment>
@@ -240,6 +252,8 @@ const MainView = (props) => {
 			return  getNonMainPageOuterContainer(getDataTracker);
 		case PAGE_DISPLAYED.userDashboard:
 			return  getNonMainPageOuterContainer(getUserDashboard);
+		case PAGE_DISPLAYED.aboutUs:
+			return getNonMainPageOuterContainer(getAboutUs);
 		case PAGE_DISPLAYED.main:
 		default:
 			if (mainViewHandler) {

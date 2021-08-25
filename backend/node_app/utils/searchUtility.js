@@ -1011,9 +1011,8 @@ class SearchUtility {
 		};
 	}
 
-	async getQAEntities (qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
+	async getQAEntities (entities, qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
 		try {
-			let entities = {};
 			if (qaQueries.alias._source) {
 				entities.QAResults = qaQueries.alias;
 			} else {
@@ -1021,7 +1020,7 @@ class SearchUtility {
 				let qaEntityQuery = this.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				entities.allResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 			};
-			if (entities.allResults) {
+			if (entities.allResults.body && entities.allResults.body.hits.total.value > 0) {
 				entities.QAResults = entities.allResults.body.hits.hits[0]
 			};
 			return entities;
@@ -1189,7 +1188,7 @@ class SearchUtility {
 			if (sentenceResults && sentenceResults.length > 0) { // if sentence results, add them to context
 				context = await this.processQASentenceResults(sentenceResults, context, esClientName, esIndex, userId, qaParams);
 			};
-			if (entity) { // if entity, add to context
+			if (entity._source) { // if entity, add to context
 				context = this.processQAEntity(entity, context, userId);
 			};
 			return context;

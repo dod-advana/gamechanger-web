@@ -5,11 +5,11 @@ import {
 	getTypeQuery,
 	numberWithCommas,
 	SEARCH_TYPES
-} from "../../gamechangerUtils";
-import {getSearchObjectFromString, setState} from "../../sharedFunctions";
-import GameChangerAPI from "../api/gameChanger-service-api";
-import {MemoizedPolicyGraphView} from "./policyGraphView";
-import ViewHeader from "../mainView/ViewHeader";
+} from '../../gamechangerUtils';
+import {getSearchObjectFromString, setState} from '../../sharedFunctions';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import {MemoizedPolicyGraphView} from './policyGraphView';
+import ViewHeader from '../mainView/ViewHeader';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -18,7 +18,7 @@ const getGraphData = async (setRunningSearch, setGraphResultsFound, graphResults
 	setRunningSearch(true);
 	
 	const {
-		searchText = "",
+		searchText = '',
 		esIndex,
 		searchSettings,
 		cloneData
@@ -129,7 +129,7 @@ const DefaultGraphView = (props) => {
 							 notificationCountProp={state.notifications.length} setDocumentsFound={setDocumentsFound}
 							 setTimeFound={setTimeFound} cloneData={state.cloneData} expansionTerms={state.hasExpansionTerms}
 							 setNumOfEdges={setNumOfEdges} dispatch={dispatch} showSideFilters={state.showSideFilters}
-							 searchText={state.searchText}
+							 searchText={state.searchText} selectedDocuments={state.selectedDocumentsForGraph}
 			/>
 		</div>
 	);

@@ -31,17 +31,6 @@ const styles = {
 	}
 }
 
-// const CustomTooltip = ({ active, payload, label }) => {
-//     console.log(payload);
-//     console.log(label);
-//       return (
-//         <div className="custom-tooltip">
-//           <p className="label">{`${label} : ${payload}`}</p>
-//           <p className="desc"></p>
-//         </div>
-//       );
-// }
-
 const EDAContractDetailsPage = (props) => {
 
     const {
@@ -64,11 +53,17 @@ const EDAContractDetailsPage = (props) => {
     const [modLoading, setModLoading] = useState(false);
     const [timeFound, setTimeFound] = useState(null);
 
+    // similar docs data 
+    const [similarDocsData, setSimilarDocsData] = useState(null);
+    const [similarDocsLoading, setSimilarDocsLoading] = useState(false);
+    const [timeFoundSimilar, setTimeFoundSimilar] = useState(null);
+
     useEffect(() => {
         if (!awardID || !cloneData || !cloneData.clone_name) return;
         
-        async function getContractAwardData() {
+        async function getContractAwardAndSimilarDocsData() {
             setAwardLoading(true);
+            setSimilarDocsLoading(true);
             const contractAward = await gameChangerAPI.callSearchFunction({
                 functionName: 'queryBaseAwardContract',
                 cloneName: cloneData.clone_name,
@@ -77,7 +72,27 @@ const EDAContractDetailsPage = (props) => {
                 }
             });
             setAwardLoading(false);
-            setContractAwardData(contractAward.data);
+            await setContractAwardData(contractAward.data);
+
+            const t0 = new Date().getTime();
+
+            if (contractAward.data.contract_issue_dodaac_eda_ext) {
+                const similarDocs = await gameChangerAPI.callSearchFunction({
+                    functionName: 'querySimilarDocs',
+                    cloneName: cloneData.clone_name,
+                    options: {
+                        issueOfficeDoDAAC: contractAward.data.contract_issue_dodaac_eda_ext,
+                        issueOfficeName: contractAward.data.contract_issue_name_eda_ext
+                    }
+                });
+                setSimilarDocsData(similarDocs.data);
+            }
+
+
+            const t1 = new Date().getTime();
+
+            setTimeFoundSimilar(((t1 - t0) / 1000).toFixed(2));
+            setSimilarDocsLoading(false);
         }
 
         async function getContractModData() {
@@ -94,11 +109,11 @@ const EDAContractDetailsPage = (props) => {
             const t1 = new Date().getTime();
             setModLoading(false);
             setTimeFound(((t1 - t0) / 1000).toFixed(2));
-            const contractModData = contractMods?.data?.docs;
+            const contractModData = contractMods?.data;
 
             if (contractModData) {
                 // for the contract modifications section
-                contractModData.sort((first, second) => {
+                contractModData.docs.sort((first, second) => {
 
                     if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {
                         return -1;
@@ -122,7 +137,7 @@ const EDAContractDetailsPage = (props) => {
 
                 setContractModData(contractModData);
 
-                let barGraphData = contractModData.map(doc => {
+                let barGraphData = contractModData.docs.map(doc => {
                     const modData = {
                          "Mod Number": doc.modification_eda_ext,
                          "Obligated Amount": doc.obligated_amounts_eda_ext ? Math.ceil(doc.obligated_amounts_eda_ext * 100) / 100 : "",
@@ -136,7 +151,7 @@ const EDAContractDetailsPage = (props) => {
     
                 let currentAmount = 0;
                 // data points on the timeline view section
-                let timelineData = contractModData.map(doc => {
+                let timelineData = contractModData.docs.map(doc => {
                     let date = doc.signature_date_eda_ext;
                     if (!date) {
                         if (doc.effective_date_eda_ext) {
@@ -172,7 +187,7 @@ const EDAContractDetailsPage = (props) => {
         }
 
         try {
-            getContractAwardData();
+            getContractAwardAndSimilarDocsData();
             getContractModData();
         } catch(err) {
             console.log(err);
@@ -242,7 +257,7 @@ const EDAContractDetailsPage = (props) => {
     }
 
     const renderContractMods = () => {
-        return contractModData.map((item, idx) => {
+        return contractModData.docs.map((item, idx) => {
             return (
                 <Card key={idx}
                     item={item}
@@ -253,6 +268,20 @@ const EDAContractDetailsPage = (props) => {
                 />
             )
         })
+    }
+
+    const renderSimilarDocs = () => {
+        return similarDocsData.docs.map((item, idx) => {
+            return (
+                <Card key={idx}
+                    item={item}
+                    idx={idx}
+                    state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false}}
+                    dispatch={() => {}}
+                    detailPage={true}
+                />
+            )
+        });
     }
 
     return (
@@ -286,27 +315,43 @@ const EDAContractDetailsPage = (props) => {
             </div>
             <div className={'graph-top-docs'}>
                 <div className={'section'}>
-                    <GCAccordion expanded={false} header={'CONTRACT AMOUNT OVER TIME'} backgroundColor={'rgb(238, 241, 242'}>
+                    <GCAccordion expanded={false} header={'CONTRACT AMOUNT OVER TIME'} backgroundColor={'rgb(238, 241, 242)'}>
                         {timelineViewData && timelineViewData.length > 0 ? renderTimeline() : modLoading ? "Searching for data..." : "Data Not Available"}
                     </GCAccordion>
                 </div>
                 <div className={'section'}>
-                    <GCAccordion expanded={true} header={'CONTRACT MOD AMOUNTS'} backgroundColor={'rgb(238, 241, 242'}>
+                    <GCAccordion expanded={true} header={'CONTRACT MOD AMOUNTS'} backgroundColor={'rgb(238, 241, 242)'}>
                         {barGraphData && barGraphData.length > 0 ? renderBarGraph() : modLoading ? "Searching for data..." : "Data Not Available"}
                     </GCAccordion>
                 </div>
                 <div className={'section'}>
-                    <GCAccordion expanded={true} header={'CONTRACT MODIFICATIONS'} itemCount={contractModData ? contractModData.length : 0} backgroundColor={'rgb(238,241,242)'}>
+                    <GCAccordion expanded={false} header={'SIMILAR DOCUMENTS'} backgroundColor={'rgb(238, 241, 242)'}>
+                        <div style={{ width: '100%'}}>
+                            <div className="row" style={{margin: 'auto 0'}}>
+                                <div style={styles.resultsCount}>
+                                    {similarDocsLoading ? 'Searching for documents...' :
+                                    !similarDocsLoading && similarDocsData && similarDocsData.docs && similarDocsData.docs.length ? `${numberWithCommas(similarDocsData.totalCount)} results found in ${timeFoundSimilar} seconds` : ""}
+                                </div>
+                                {similarDocsData && similarDocsData.docs && similarDocsData.docs.length && !similarDocsLoading ?
+                                    renderSimilarDocs() : ""
+                                }
+                                {!similarDocsLoading && (!similarDocsData || !similarDocsData.docs || similarDocsData.docs.length === 0) && <div style={{fontSize: 22, fontWeight: 'bold', color: '#131E43'}}>No Documents Found</div>}
+                            </div>
+                        </div>                    
+                    </GCAccordion>
+                </div>
+                <div className={'section'}>
+                    <GCAccordion expanded={true} header={'CONTRACT MODIFICATIONS'} itemCount={contractModData && contractModData.docs ? contractModData.docs.length : 0} backgroundColor={'rgb(238,241,242)'}>
                         <div style={{ width: '100%'}}>
                             <div className="row" style={{margin: 'auto 0'}}>
                                 <div style={styles.resultsCount}>
                                     {modLoading ? 'Searching for documents...' :
-                                    !modLoading && contractModData && contractModData.length ? `${numberWithCommas(contractModData.length)} results found in ${timeFound} seconds` : ""}
+                                    !modLoading && contractModData && contractModData.docs && contractModData.docs.length ? `${numberWithCommas(contractModData.totalCount)} results found in ${timeFound} seconds` : ""}
                                 </div>
-                                {contractModData && contractModData.length && !modLoading ?
+                                {contractModData && contractModData.docs && contractModData.docs.length && !modLoading ?
                                     renderContractMods() : ""
                                 }
-                                {!modLoading && (!contractModData || contractModData.length === 0) && <div style={{fontSize: 22, fontWeight: 'bold', color: '#131E43'}}>No Documents Found</div>}
+                                {!modLoading && (!contractModData || !contractModData.docs || contractModData.docs.length === 0) && <div style={{fontSize: 22, fontWeight: 'bold', color: '#131E43'}}>No Documents Found</div>}
                             </div>
                         </div>
 
