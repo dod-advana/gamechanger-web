@@ -313,8 +313,6 @@ const GroupCard = (props) => {
 			<div style={{position: 'relative'}}>
 				{favorites.map((fav, index) => {
 					const doc = state.userData.favorite_documents.find(fav_doc => {
-						console.log("fav.favorite_document_id: ", fav.favorite_document_id)
-						console.log("fav_doc.favorite_id: ", fav_doc.favorite_id)
 						return fav.favorite_document_id === `${fav_doc.favorite_id}`;
 					})
 					const favCardStyles = {
@@ -331,8 +329,7 @@ const GroupCard = (props) => {
 					isDocument={true}
 					documentObject={doc}
 					handleDeleteFavorite={()=>{}}
-					// summary={doc.summary}
-					summary={group.group_name}
+					summary={doc.summary}
 					// details={documentDetails}
 					overlayText={doc.favorite_summary}
 					reload={true}

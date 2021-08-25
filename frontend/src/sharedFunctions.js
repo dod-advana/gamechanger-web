@@ -115,9 +115,9 @@ export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, di
 export const handleGenerateGroup = async ( group, state, dispatch ) => {
 	const { cloneData } = state;
 	const clone_index = cloneData?.clone_data?.project_name;
-	const {group_type, group_name, group_description, create, group_id} = group;
+	const {group_type, group_name, group_description, create, group_ids} = group;
 
-	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_id, is_clone: true});
+	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true});
 	await getUserData(dispatch);
 }
 

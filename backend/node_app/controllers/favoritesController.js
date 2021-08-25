@@ -229,7 +229,7 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const hashed_user = getTenDigitUserId(userId) ? this.sparkMD5.hash(getTenDigitUserId(userId)) : this.sparkMD5.hash(userId);
-			const { group_type, group_name, group_description, is_clone, create, clone_index, group_id = '' } = req.body;
+			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids} = req.body;
 
 			if (create) {
 				const [group] = await this.favoriteGroup.findOrCreate(
@@ -247,13 +247,17 @@ class FavoritesController {
 				);
 				res.status(200).send(group);
 			} else {
-				const deleted = this.favoriteGroup.destroy({
+				const deletedGroup = await this.favoriteGroup.destroy({
 					where: {
-						id: group_id,
-						filename: filename
+						id: group_ids,
 					}
 				});
-				res.status(200).send(deleted);
+				const deletedFavs = await this.favoriteDocumentsGroup.destroy({
+					where: {
+						favorite_group_id: group_ids
+					}
+				})
+				res.status(200).send({deletedGroup, deletedFavs});
 			}
 		} catch (err) {
 			this.logger.error(err, '2EA9CTR', userId);

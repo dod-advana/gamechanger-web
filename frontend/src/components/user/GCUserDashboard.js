@@ -351,6 +351,8 @@ const GCUserDashboard = (props) => {
 	const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
 	const [selectedGroup, setSelectedGroup] = useState({});
 	const [documentsToGroup, setDocumentsToGroup] = useState([]);
+	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
+	const [groupsToDelete, setGroupsToDelete] = useState([]);
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -801,7 +803,7 @@ const GCUserDashboard = (props) => {
 		updateUserData();
 	}
 
-	const handleCheckbox = (value) => {
+	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
 		const index = newDocumentsToGroup.indexOf(value);
 		if(index > -1){
@@ -810,6 +812,17 @@ const GCUserDashboard = (props) => {
 			newDocumentsToGroup.push(value);
 		}
 		setDocumentsToGroup(newDocumentsToGroup);
+	}
+
+	const handleDeleteGroupCheckbox = (value) => {
+		const newGroupsToDelete = [...groupsToDelete];
+		const index = newGroupsToDelete.indexOf(`${value}`);
+		if(index > -1){
+			newGroupsToDelete.splice(index, 1);
+		} else {
+			newGroupsToDelete.push(`${value}`);
+		}
+		setGroupsToDelete(newGroupsToDelete);
 	}
 
 	const handleAddToFavorites = async () => {
@@ -853,7 +866,7 @@ const GCUserDashboard = (props) => {
 											return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
 												<FormControlLabel
 													control={<Checkbox
-														onChange={() => handleCheckbox(doc.favorite_id)}
+														onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
 														color="primary"
 														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
 														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
@@ -1625,6 +1638,20 @@ const GCUserDashboard = (props) => {
 		handleGenerateGroup(group, state, dispatch);
 	}
 
+	const handleDeleteGroup = () => {
+		const group = {
+			group_ids: groupsToDelete,
+			create: false
+		}
+		handleGenerateGroup(group, state, dispatch)
+		handleCloseDeleteGroupModal();
+	}
+
+	const handleCloseDeleteGroupModal = () => {
+		setShowDeleteGroupModal(false);
+		setGroupsToDelete([])
+	}
+
 	const renderDocumentGroups = () => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
@@ -1632,7 +1659,7 @@ const GCUserDashboard = (props) => {
 					<div className={"col-xs-12"} style={{ padding: 0 }}>
 					<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
 							<GCButton
-								onClick={()=>{}}
+								onClick={() => setShowDeleteGroupModal(true)}
 								style={{}}
 								isSecondaryBtn={true}
 							>
@@ -1694,6 +1721,48 @@ const GCUserDashboard = (props) => {
 									</div>
 								</div>
 							</Modal> 
+							<Modal 
+								isOpen={showDeleteGroupModal}
+								onRequestClose={() => handleCloseDeleteGroupModal()}
+								className={classes.newGroupModal}
+								overlayClassName="new-group-modal-overlay"
+								id="new-group-modal"
+								closeTimeoutMS={300}
+								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
+								<div>
+									<CloseButton onClick={() => handleCloseDeleteGroupModal()}>
+										<CloseIcon fontSize="large" />
+									</CloseButton>
+									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Delete Groups</Typography>
+									<div style={{ width: 490 }}>
+										{_.map(documentGroups, (group) => {
+											return <FormControlLabel
+													control={<Checkbox
+														onChange={() => handleDeleteGroupCheckbox(group.id)}
+														color="primary"
+														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
+														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
+														key={group.id}
+													/>}
+													label={<Typography variant="h6" noWrap className={classes.label}>{group.group_name}</Typography>}
+												/>
+										})}
+										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+											<GCButton
+												onClick={() => handleCloseDeleteGroupModal()}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												isSecondaryBtn
+											>Cancel
+											</GCButton>
+											<GCButton
+												onClick={() => handleDeleteGroup()}
+												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											>Delete
+											</GCButton>
+										</div>
+									</div>
+								</div>
+							</Modal>
 							<ExportResultsDialog
 								open={state.exportDialogVisible}
 								handleClose={() => setState(dispatch, { exportDialogVisible: false })}
