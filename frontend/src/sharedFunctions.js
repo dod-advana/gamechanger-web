@@ -126,6 +126,11 @@ export const handleSaveFavoriteOrganization = async (organization, organizationS
 	await getUserData(dispatch);
 }
 
+export const handleRemoveFavoriteFromGroup = async (groupId, documentId, dispatch) => {
+	await gameChangerAPI.deleteFavoriteFromGroupPOST({groupId, documentId});
+	await getUserData(dispatch);
+}
+
 export const createTinyUrl = async (cloneData) => {
 	let url = window.location.hash.toString();
 	url = url.replace("#/", "");

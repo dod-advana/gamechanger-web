@@ -13,7 +13,7 @@ import GCButton from "../common/GCButton";
 import { trackEvent } from "../telemetry/Matomo";
 import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
-import { checkUserInfo, setState } from '../../sharedFunctions';
+import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../sharedFunctions';
 import FavoriteCard from "../cards/GCFavoriteCard";
 
 
@@ -353,6 +353,10 @@ const GroupCard = (props) => {
 					toggleActive={()=>{}}
 					cloneData={state.cloneData}
 					styles={favCardStyles}
+					isGroupFavorite
+					handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
+					dispatch={dispatch}
+					groupId={group.id}
 				/>
 				})}
 			</div>

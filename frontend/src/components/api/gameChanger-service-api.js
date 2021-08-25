@@ -54,6 +54,7 @@ const endpoints = {
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	favoriteGroupPOST: '/api/gameChanger/favorites/group',
 	addTofavoriteGroupPOST: '/api/gameChanger/favorites/addToGroup',
+	deleteFavoriteFromGroupPOST: '/api/gameChanger/favorites/removeFromGroup',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
@@ -469,6 +470,11 @@ export default class GameChangerAPI {
 
 	addTofavoriteGroupPOST = async (data) => {
 		const url = endpoints.addTofavoriteGroupPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	deleteFavoriteFromGroupPOST = async (data) => {
+		const url = endpoints.deleteFavoriteFromGroupPOST;
 		return axiosPOST(this.axios, url, data);
 	}
 
