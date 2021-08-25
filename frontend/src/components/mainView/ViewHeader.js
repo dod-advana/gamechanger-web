@@ -71,7 +71,7 @@ const ViewHeader = (props) => {
 
 	const {state, dispatch} = context;
 	const {originalOrgFilters, orgFilter} = state.searchSettings;
-	
+	const {originalTypeFilters, typeFilter} = state.searchSettings;
 	const {
 		activeCategoryTab,
 		cloneData,
@@ -102,6 +102,11 @@ const ViewHeader = (props) => {
         for(let i=0; i<originalOrgFilters.length; i++) {
             betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
         }
+    const betterTypeData = {};
+        for(let i=0; i<originalTypeFilters.length; i++) {
+            betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
+        }
+
 
 	useEffect(()=> {
 		let tempCount;
@@ -213,7 +218,8 @@ const ViewHeader = (props) => {
 					</span>
 				</button>
         </div>
-		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+		
+        <FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
 							console.log(org);
@@ -241,6 +247,27 @@ const ViewHeader = (props) => {
 							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
 					}
 	        </FormControl>
+       		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+                <FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+                {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+                    if(state.searchSettings.typeFilter[type]){
+                        return (
+                            <FormControlLabel
+                                key={`${type}`}
+                                value={`${type}`}
+                                classes={{ label: classes.checkboxPill }}
+                                control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]}/>}
+                                label={`${type}`}
+                                labelPlacement="end"
+                            />
+                        )
+                    } else {
+                        return null;
+                    }
+                })}
+            </FormGroup>
+        </FormControl>
+
         </div>
 
             <div className={'view-buttons-container'}>
