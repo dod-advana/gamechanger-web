@@ -6,7 +6,30 @@ const initState = {
     budgetSearchSettings: {
         dataSources: []
     },
-    
+    cloneData: {
+        clone_name: 'budgetSearch',
+		search_module: 'budgetSearch/budgetSearchSearchHandler',
+		export_module: 'simple/simpleExportHandler',
+		title_bar_module: 'budgetSearch/budgetSearchTitleBarHandler',
+		navigation_module: 'default/defaultNavigationHandler',
+		card_module: 'budgetSearch/budgetSearchCardHandler',
+		main_view_module: 'budgetSearch/budgetSearchMainViewHandler',
+		search_bar_module: 'budgetSearch/budgetSearchSearchBarHandler',
+		display_name: 'AI Inventory Portfolio Tool',
+		is_live: true,
+		url: 'budgetsearch',
+		permissions_required: false,
+		clone_to_advana: true,
+		clone_to_gamechanger: true,
+		clone_to_jupiter: false,
+		clone_to_sipr: false,
+		show_tutorial: false,
+		show_graph: false,
+		show_crowd_source: false,
+		show_feedback: false,
+		config: {esIndex: 'gc_budgetsearch'}
+    },
+
     loading: false,
     resultsPage: 1,
     showSideFilters: true,

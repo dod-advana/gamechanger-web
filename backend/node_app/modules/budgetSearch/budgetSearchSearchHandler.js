@@ -115,10 +115,8 @@ class BudgetSearchSearchHandler extends SearchHandler {
 	async documentSearch(req, body, clientObj, userId) {
 		try {
 			const {
-				getIdList,
 				selectedDocuments,
 				expansionDict = {},
-				forGraphCache = false,
 			} = body;
 			body.searchText += " OR AI-Enabled OR AI-Enabling OR Core-AI";
 
@@ -133,16 +131,9 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-	
-				if (getIdList) {
-					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
-				}
-	
-				if (forGraphCache){
-					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
-				} else {
-					return this.searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
-				}
+
+				return this.budgetSearchSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+				
 			} else {
 				this.logger.error('Error with Elasticsearch results', '9XZVSXW', userId);
 				return { totalCount: 0, docs: [] };
