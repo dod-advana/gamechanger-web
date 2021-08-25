@@ -241,17 +241,26 @@ const styles = {
         top: 15,
         margin: '-16px 0px 0px -10px'
     },
-    groupName: {
+    titleSection: {
         color: '#000000',
         fontFamily: "Noto Sans",
-        fontSize: 18,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        lineHeight: 1,
+        lineHeight: 1.5,
         maxHeight: 60,
 		height: 60,
-		display: 'flex'
+		display: 'flex',
+		flexDirection: 'column',
+		textAlign: 'left'
     },
+	groupName: {
+		overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        fontSize: 18,
+	},
+	groupDescription: {
+		overflow: 'hidden',
+        textOverflow: 'ellipsis',
+		fontSize: 14
+	},
     details: {
         marginTop: -5,
         display: 'flex',
@@ -307,8 +316,13 @@ const GroupCard = (props) => {
                     checkUserInfo={() => {checkUserInfo(state, dispatch)}}
                 />
             </div>
-            <div style={styles.groupName}>
-                {group.group_name}
+            <div style={styles.titleSection}>
+				<div style={styles.groupName}>
+					{group.group_name}
+				</div>
+                <div style={styles.groupDescription}>
+					{group.group_description}
+				</div>
             </div>
 			<div style={{position: 'relative'}}>
 				{favorites.map((fav, index) => {
