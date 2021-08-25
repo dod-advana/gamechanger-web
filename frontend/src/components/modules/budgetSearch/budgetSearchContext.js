@@ -7,12 +7,10 @@ const initState = {
         dataSources: []
     },
     
+    loading: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
-    statsLoading: false,
-    summaryCardView: false, 
-    summaryCardData: [],
     resultsText: '',
     resetSettingsSwitch: false,
     categorySorting: {

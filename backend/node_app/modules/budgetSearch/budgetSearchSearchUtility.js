@@ -24,24 +24,11 @@ class BudgetSearchSearchUtility {
 	getElasticsearchQuery(
 		{ 
 			searchText, 
-			searchTerms, 
 			parsedQuery, 
-			orgFilterString = '', 
-			typeFilterString = '',
-			index, 
 			offset = 0, 
 			limit = 20, 
-			format = 'json', 
-			getIdList = false, 
-			expandTerms = false, 
-			isClone = false, 
-			cloneData = {}, 
 			charsPadding = 90, 
 			operator = 'and', 
-			searchFields = {}, 
-			accessDateFilter = [], 
-			publicationDateFilter = [], 
-			publicationDateAllTime = true, 
 			storedFields = [
 				'filename',
 				'title',
@@ -68,10 +55,6 @@ class BudgetSearchSearchUtility {
 			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
-			includeRevoked = false,
-			sort = 'Relevance', 
-			order = 'desc',
-			includeHighlights = true,
 			docIds = {}
 		 }, 
 		 user) {
@@ -79,19 +62,10 @@ class BudgetSearchSearchUtility {
 		try {
 			// add additional search fields to the query
 			const mustQueries = [];
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
-					const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
-					// wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
 
-					mustQueries.push(wildcard);
-				}
-			}
 			storedFields = [...storedFields, ...extStoredFields];
-			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
-			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
-			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
+			const default_field = 'paragraphs.par_raw_text_t.gc_english';
+			const analyzer = 'gc_english';
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
@@ -212,26 +186,6 @@ class BudgetSearchSearchUtility {
 				}
 			};
 
-			switch(sort){
-				case 'Relevance':
-					query.sort = [ {"_score": {"order" : order}} ]
-					break;
-				case 'Publishing Date':
-					query.sort = [ {"publication_date_dt": {"order" : order}} ]
-					break;
-				case 'Alphabetical':
-					query.sort = [ {"display_title_s": {"order" : order}} ]
-					break;
-				case 'References':
-					query.sort = [{"_script": {
-						"type": "number",
-						"script": "doc.ref_list.size()",
-						"order": order
-					}}]
-				default: 
-					break;
-			} 
-
 			if (extSearchFields.length > 0){
 				const extQuery = {
 					multi_match: {
@@ -244,60 +198,20 @@ class BudgetSearchSearchUtility {
 				query.query.bool.should = query.query.bool.should.concat(extQuery);
 			}
 
-			if (this.constants.GAME_CHANGER_OPTS.allow_daterange && !publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]){
-				if (!publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]) {
-					query.query.bool.must.push({
-						range: {
-							publication_date_dt: {
-								gte: publicationDateFilter[0].split('.')[0],
-								lte: publicationDateFilter[1].split('.')[0]
-							}
-						}
-					});
-				}
-			}
-
-			if (!includeRevoked && !isClone) { // if includeRevoked, get return cancelled docs
-				query.query.bool.filter.push({
-					term: {
-						is_revoked_b: 'false'
-					}
-				});
-			}
-
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 
 			}
 
-			if ((!isClone) && (orgFilterString.length > 0)) {
-				query.query.bool.filter.push(
-					{
-						terms: {
-							display_org_s: orgFilterString
-						}
-					}
-				);
-			}
-			if ((!isClone) && (typeFilterString.length > 0)) {
-				query.query.bool.filter.push(
-					{
-						terms: {
-							display_doc_type_s: typeFilterString
-						}
-					}
-				);
-			}
-			if (includeHighlights == false) {
-				delete query.query.bool.should[0].nested.inner_hits;
-				delete query.highlight;
-			}
+
 			if (Object.keys(docIds).length !== 0){
 				query.query.bool.must.push(
 					{terms: {id: docIds}}
 					)
 
 			}
+
+			console.log(JSON.stringify(query));
 			return query;
 		} catch (err) {
 			this.logger.error(err, '4PAFB56', user);
@@ -313,18 +227,16 @@ class BudgetSearchSearchUtility {
 	
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r._source);
-				let projects = [];
+
 				try {
-					projects = this.flattenProjectData(result, index);
+					result = this.getProjectData(result, index);
 				}
 				catch(err) {
 					console.log(err);
 					console.log('Error parsing BudgetSearch fields')
 				}
 
-				if (projects && projects.length > 0) {
-					results.docs = results.docs.concat(projects);
-				}
+				results.docs.push(result);
 				
 			});
 
@@ -347,7 +259,7 @@ class BudgetSearchSearchUtility {
 	transformEsFields(raw) {
 		let result = {};
 		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
-		const budgetSearchArrayFields = ['meta_o', 'record_o']
+		const budgetSearchArrayFields = ['meta_n', 'record_n']
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
 				if (arrayFields.includes(key) || budgetSearchArrayFields.includes(key)) {
@@ -364,39 +276,38 @@ class BudgetSearchSearchUtility {
 		return result;
 	}
 
-	flattenProjectData(result, index) {
+	getProjectData(result, index) {
 		const {
-			meta_o,
-			record_o
+			meta_n,
+			record_n,
+			project_n
 		} = result;
 
-		const projects = [];
+		const project = {};
+		project.esIndex = index;
 
-		if (record_o && record_o.ProjectList_o) {
+		console.log(result);
 
-			const projectList = record_o.ProjectList_o.Project_n;
-
-			for (const project of projectList) {
-
-				project.esIndex = index;
-
-				for (const key in record_o) {
-					if (key !== 'ProjectList_o') {
-						project[key] = record_o[key];
-					}
-				}
-
-				for (const key in meta_o) {
-					project[key] = meta_o[key];
-				}
-
-				projects.push(project)
-
+		if (project_n) {
+			for (const key in project_n) {
+				project[key] = project_n[key];
 			}
-
 		}
 
-		return projects;
+		if (record_n) {
+			for (const key in record_n) {
+				project[key] = record_n[key];
+			}
+		}
+
+		if (meta_n) {
+			for (const key in meta_n) {
+				project[key] = meta_n[key];
+			}
+		}
+
+		console.log(project);
+		return project;
 
 	}
 
