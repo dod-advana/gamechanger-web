@@ -40,7 +40,8 @@ export const PAGE_DISPLAYED = {
 	main: 'main',
 	userDashboard: 'userDashboard',
 	dataTracker: 'dataTracker',
-	analystTools: 'analystTools'
+	analystTools: 'analystTools',
+	aboutUs: 'aboutUs'
 }
 
 export const SEARCH_TYPES = {
