@@ -1,22 +1,23 @@
 import React from "react";
 import {Typography} from "@material-ui/core";
+import JAICLogo from "../../../images/logos/JAIC_wht.png";
 
 const BudgetSearchTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
 			onTitleClick,
-			componentStepNumbers,
 			cloneData
 		} = props;
 		return (
-			<div className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+			<div style={{ display: 'flex', alignItems: 'center'}}
 				 onClick={onTitleClick}>
-				<Typography variant="h1" style={styles.wording} display="inline">
+				<img src={JAICLogo} style={styles.title} alt='JAIC' id={'titleButton'} />
+				<Typography variant="h3" style={styles.wording} display="inline">
 					{cloneData.display_name}
 				</Typography>
-				<Typography variant="h6" style={styles.wording} display="inline">
+				{/* <Typography variant="h6" style={styles.wording} display="inline">
 					Powered by GAMECHANGER
-				</Typography>
+				</Typography> */}
 			</div>
 		);
 	},
@@ -44,7 +45,7 @@ const styles = {
 	wording: {
 		color: 'white',
 		marginRight: 15,
-        fontWeight: 400
+        fontWeight: 700
 	},
 	titleBar: {
 		padding: '0 1em',
@@ -54,5 +55,10 @@ const styles = {
 		flex: 1,
 		minHeight: 80,
 		width: '100%'
+	},
+	title: {
+		margin: '0 5px',
+		cursor: 'pointer',
+		width: '100px',
 	},
 };

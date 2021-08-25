@@ -43,6 +43,7 @@ const BudgetSearchSearchHandler = {
 		} = state;
 
 		if (runGetData) {
+			setState(dispatch, {loading: true})
 			const mainData = await gameChangerAPI.callSearchFunction({
 				functionName: 'getMainPageData',
 				cloneName: state.cloneData.clone_name,
@@ -50,7 +51,7 @@ const BudgetSearchSearchHandler = {
 					resultsPage
 				}
 			});
-			setState(dispatch, { mainPageData: mainData.data, runGetData: false });
+			setState(dispatch, { mainPageData: mainData.data, runGetData: false, loading: false });
 			return;
 		}
 		
@@ -96,7 +97,6 @@ const BudgetSearchSearchHandler = {
 	
 		
 		setState(dispatch, {
-			selectedDocuments: new Map(),
 			loading: true,
 			metricsLoading: true,
 			noResultsMessage: null,
@@ -149,6 +149,8 @@ const BudgetSearchSearchHandler = {
 				let getUserDataFlag = true;
 		
 				if (_.isObject(resp.data)) {
+
+					console.log(resp.data);
 
 					let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
 		

@@ -47,6 +47,7 @@ import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErr
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
+import BudgetSearchProfilePage from './containers/BudgetSearchProfilePage';
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -314,6 +315,7 @@ const App = () => {
 												<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
 												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
 												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
+												<Route exact path="/budgetsearch-profile" component={BudgetSearchProfilePage} location={location} />
 												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
 												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
 												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
