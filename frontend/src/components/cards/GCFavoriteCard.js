@@ -266,7 +266,10 @@ const FavoriteCard = (props) => {
 		isTopic,
 		isOrganization,
 		cloneData,
-		styles
+		styles,
+		handleRemoveFavoriteFromGroup,
+		dispatch,
+		groupId
 	} = props;
 
 	const [popoverOpen, setPopoverOpen] = useState(false);
@@ -327,7 +330,7 @@ const FavoriteCard = (props) => {
 						>
 							<i className={"fa fa-star"} />
 						</GCButton>
-						<Popover id={idx} onClose={handleStarClicked}
+						{!props.isGroupFavorite ? <Popover id={idx} onClose={handleStarClicked}
 							open={popoverOpen && popoverIdx === idx} anchorEl={popoverAnchorEl}
 							anchorOrigin={{
 								vertical: 'bottom',
@@ -363,7 +366,47 @@ const FavoriteCard = (props) => {
 									</div>
 								</div>
 							</div>
-						</Popover>
+						</Popover> :
+						<Popover id={idx} onClose={handleStarClicked}
+						open={popoverOpen && popoverIdx === idx} anchorEl={popoverAnchorEl}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'right',
+						}}
+						transformOrigin={{
+							vertical: 'top',
+							horizontal: 'right',
+						}}
+					>
+						<div style={{ padding: '0px 15px 10px' }}>
+							<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+								<CloseButton onClick={handleStarClicked}>
+									<CloseIcon fontSize="small" />
+								</CloseButton>
+							</div>
+							<div style={{width: 350, margin: 5}}>
+								<div style={{ margin: '65px 15px 0'}}>Are you sure you want to remove this favorite from the group?</div>
+								<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+									<GCButton
+										onClick={handleStarClicked}
+										style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+										isSecondaryBtn={true}
+									>No
+									</GCButton>
+									<GCButton
+										onClick={() => {
+											setPopoverIdx(-1);
+											setPopoverOpen(false);
+											setPopoverAnchorEl(null);
+											handleRemoveFavoriteFromGroup(`${groupId}`, `${documentObject.favorite_id}`, dispatch);
+										}}
+										style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 10px 0px', marginRight: 10 }}
+									>Yes
+									</GCButton>
+								</div>
+							</div>
+						</div>
+					</Popover>}
 					</div>
 				</div>
 				<div className={'summary-details'}>

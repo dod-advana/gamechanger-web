@@ -51,6 +51,7 @@ class FavoritesController {
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
 		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
 		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
+		this.deleteFavoriteFromGroupPOST =this.deleteFavoriteFromGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
@@ -284,6 +285,27 @@ class FavoritesController {
 			res.status(200).send(favorites);
 		} catch (err) {
 			this.logger.error(err, '1YT9HQB', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async deleteFavoriteFromGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { groupId, documentId } = req.body;
+
+			const removed = await this.favoriteDocumentsGroup.destroy({
+				where: {
+					favorite_group_id: groupId,
+					favorite_document_id: documentId
+				}
+			})
+			res.status(200).send({removed});
+		} catch (err) {
+			this.logger.error(err, '2XR1QAD', userId);
+			console.log(err);
 			res.status(500).send(err);
 			return err;
 		}
