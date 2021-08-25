@@ -1,12 +1,12 @@
 import React, {useState, useEffect, useRef} from 'react';
-import SearchBanner from "../components/searchBar/GCSearchBanner";
-import {trackEvent, trackPageView} from "../components/telemetry/Matomo";
-import GameChangerAPI from "../components/api/gameChanger-service-api";
-import {gcColors} from "./GameChangerPage";
-import styled from "styled-components";
+import SearchBanner from '../components/searchBar/GCSearchBanner';
+import {trackEvent, trackPageView} from '../components/telemetry/Matomo';
+import GameChangerAPI from '../components/api/gameChanger-service-api';
+import {gcColors} from './GameChangerPage';
+import styled from 'styled-components';
 import Paper from 'material-ui/Paper/Paper';
-import SimpleTable from "../components/common/SimpleTable";
-import {MemoizedNodeCluster2D} from "../components/graph/GraphNodeCluster2D";
+import SimpleTable from '../components/common/SimpleTable';
+import {MemoizedNodeCluster2D} from '../components/graph/GraphNodeCluster2D';
 import {	numberWithCommas, getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable, getTrackingNameForFactory, 
 	invertedCrawlerMappingFunc} from "../gamechangerUtils";
@@ -21,8 +21,10 @@ import SourceDetailsPage from "../components/details/sourceDetailsPage";
 import {MemoizedPolicyGraphView} from "../components/graph/policyGraphView";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import EDAContractDetailsPage from "../components/modules/eda/edaContractDetailsPage";
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
 
 const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 const RESULTS_PER_PAGE = 18;
 
@@ -214,7 +216,7 @@ const getDocumentData = async (doc_id, cloneName) => {
 	const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list, true);
 	
 	const labelText = data.document.isRevoked ? 'Cancel Date' : 'Verification Date';
-	let dateText = "Unknown";
+	let dateText = 'Unknown';
 	if(data.document.current_as_of !== undefined && data.document.current_as_of !== ''){
 		const currentDate = new Date(data.document.current_as_of);
 		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
@@ -257,14 +259,14 @@ const getSourceData = async (searchText, cloneName) => {
 }
 
 const addFavoriteTopicToMetadata = (data, cloneName) => {
-		const temp = _.cloneDeep(data);
-		temp.map(metaData => {
-			if(metaData.Key === 'Topics') {
-				metaData.Key = <div>
+	const temp = _.cloneDeep(data);
+	temp.map(metaData => {
+		if(metaData.Key === 'Topics') {
+			metaData.Key = <div>
 					Topics<br/><b style={{color:'red'}}>(Beta)</b>
-					</div>
-				const topics = metaData.Value;
-				metaData.Value =
+			</div>
+			const topics = metaData.Value;
+			metaData.Value =
 				<div>
 					{topics.map((topic,index) => {
 						topic = topic.trim()
@@ -278,15 +280,15 @@ const addFavoriteTopicToMetadata = (data, cloneName) => {
 							>
 								{topic}
 							</FavoriteTopic>
-							)
-						})
+						)
+					})
 					}
 				</div>
-			}
-			return metaData
-		})
-		return temp
-	}
+		}
+		return metaData
+	})
+	return temp
+}
 	
 const GameChangerDetailsPage = (props) => {
 	
@@ -295,6 +297,7 @@ const GameChangerDetailsPage = (props) => {
 	} = props;
 	
 	const [cloneData, setCloneData] = useState({});
+	const [userData, setUserData] = useState({});
 	const [entity, setEntity] = useState(null)
 	const [query, setQuery] = useState(null)
 	const [runningQuery, setRunningQuery] = useState(false);
@@ -329,10 +332,14 @@ const GameChangerDetailsPage = (props) => {
 	useQuery(location, setQuery, query);
 	
 	useEffect(() => {
-		trackPageView("GameChanger Details Page", false);
+		trackPageView('GameChanger Details Page', false);
 	}, [])
 	
 	useEffect(() => {
+		gcUserManagementAPI.getUserData().then(data => {
+			setUserData(data.data);
+		});
+
 		const cloneName = query.get('cloneName');
 		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
@@ -461,8 +468,8 @@ const GameChangerDetailsPage = (props) => {
 				<Card key={idx}
 					item={item}
 					idx={idx}
-					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
-					//dispatch={dispatch}
+					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, userData, rawSearchResults: docResults}}
+					dispatch={() => {}}
 				/>
 			);
 		});
@@ -518,27 +525,27 @@ const GameChangerDetailsPage = (props) => {
 										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 											<div style={styles.resultsCount}>{gettingDocuments ? 'Searching for documents...' :
 												`${numberWithCommas(docCount)} results found in ${timeFound} seconds`}</div>
-												<div style={{ marginTop: '-14px', display: 'flex' }} className={'gcPagination'}>
-													<Pagination
-														activePage={docResultsPage}
-														itemsCountPerPage={20}
-														totalItemsCount={docCount}
-														pageRangeDisplayed={8}
-														onChange={page => {
-															trackEvent('GAMECHANGER_DETAILS', 'DetailsPaginationChanged', 'page', page);
-															handleChangeDocsPage(page);
-														}}
-														className='gcPagination'
-													/>
-												</div>
+											<div style={{ marginTop: '-14px', display: 'flex' }} className={'gcPagination'}>
+												<Pagination
+													activePage={docResultsPage}
+													itemsCountPerPage={20}
+													totalItemsCount={docCount}
+													pageRangeDisplayed={8}
+													onChange={page => {
+														trackEvent('GAMECHANGER_DETAILS', 'DetailsPaginationChanged', 'page', page);
+														handleChangeDocsPage(page);
+													}}
+													className='gcPagination'
+												/>
 											</div>
-											<div className="row" style={{ marginLeft: 0, marginRight: -15 }}>
-												{gettingDocuments ?
+										</div>
+										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+											{gettingDocuments ?
 												<div style={{ margin: '0 auto' }}>
 													<LoadingIndicator customColor={gcOrange} />
 												</div> :
-													renderDocuments()}
-											</div>
+												renderDocuments()}
+										</div>
 									</div>
 								</GCAccordion>
 							</div>
@@ -552,7 +559,6 @@ const GameChangerDetailsPage = (props) => {
 	}
 	
 	const renderTopicContainer = () => {
-		debugger;
 		return (
 			<div>
 				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Topic Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
@@ -601,7 +607,7 @@ const GameChangerDetailsPage = (props) => {
 										<div style={{display: 'flex', justifyContent: 'space-between'}}>
 											<div
 												style={styles.resultsCount}>{gettingDocuments ? 'Searching for documents...' :
-												`${numberWithCommas(docCount)} results found in ${timeFound} seconds`}</div>
+													`${numberWithCommas(docCount)} results found in ${timeFound} seconds`}</div>
 											<div style={{marginTop: '-14px', display: 'flex'}} className={'gcPagination'}>
 												<Pagination
 													activePage={docResultsPage}
@@ -616,7 +622,7 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{marginLeft: 0, marginRight: -15}}>
+										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
 											{gettingDocuments ?
 												<div style={{margin: '0 auto'}}>
 													<LoadingIndicator customColor={gcColors.buttonColor2}/>
@@ -664,7 +670,7 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
-									 graphData={graph}
+									 graphData={graph} userData={userData} rawSearchResults={docResults}
 				/>
 			}
 

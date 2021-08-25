@@ -22,8 +22,8 @@ class EDASearchUtility {
 
 	getElasticsearchPagesQuery(
 		{
-			searchText,
-			parsedQuery,
+			searchText = "",
+			parsedQuery = "",
 			offset = 0,
 			limit = 20,
 			charsPadding = 90,
