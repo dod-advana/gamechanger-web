@@ -828,7 +828,12 @@ const GCUserDashboard = (props) => {
 	const handleAddToFavorites = async () => {
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup})
 		updateUserData();
+		handleCloseAddGroupModal();
+	}
+
+	const handleCloseAddGroupModal = () => {
 		setShowAddToGroupModal(false);
+		setDocumentsToGroup([]);
 	}
 
 	const renderDocumentFavorites = () => {
@@ -850,14 +855,14 @@ const GCUserDashboard = (props) => {
 						</div>
 						<Modal 
 								isOpen={showAddToGroupModal}
-								onRequestClose={() => setShowAddToGroupModal(false)}
+								onRequestClose={() => handleCloseAddGroupModal()}
 								className={classes.addToGroupModal}
 								overlayClassName="new-group-modal-overlay"
 								id="new-group-modal"
 								closeTimeoutMS={300}
 								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
 								<div>
-									<CloseButton onClick={() => setShowAddToGroupModal(false)}>
+									<CloseButton onClick={() => handleCloseAddGroupModal()}>
 										<CloseIcon fontSize="large" />
 									</CloseButton>
 									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
@@ -886,7 +891,7 @@ const GCUserDashboard = (props) => {
 										</FormControl>
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
-												onClick={() => setShowAddToGroupModal(false)}
+												onClick={() => handleCloseAddGroupModal()}
 												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 												isSecondaryBtn
 											>Close
@@ -1649,7 +1654,13 @@ const GCUserDashboard = (props) => {
 
 	const handleCloseDeleteGroupModal = () => {
 		setShowDeleteGroupModal(false);
-		setGroupsToDelete([])
+		setGroupsToDelete([]);
+	}
+
+	const handleCloseNewGroupModal = () => {
+		setShowNewGroupModal(false);
+		setGroupName('');
+		setGroupDescription('');
 	}
 
 	const renderDocumentGroups = () => {
@@ -1673,14 +1684,14 @@ const GCUserDashboard = (props) => {
 							</GCButton>
 							<Modal 
 								isOpen={showNewGroupModal}
-								onRequestClose={() => setShowNewGroupModal(false)}
+								onRequestClose={() => handleCloseNewGroupModal()}
 								className={classes.newGroupModal}
 								overlayClassName="new-group-modal-overlay"
 								id="new-group-modal"
 								closeTimeoutMS={300}
 								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
 								<div>
-									<CloseButton onClick={() => setShowNewGroupModal(false)}>
+									<CloseButton onClick={() => handleCloseNewGroupModal()}>
 										<CloseIcon fontSize="large" />
 									</CloseButton>
 									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Create a New Group</Typography>
@@ -1707,7 +1718,7 @@ const GCUserDashboard = (props) => {
 										/>
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
-												onClick={() => setShowNewGroupModal(false)}
+												onClick={() => handleCloseNewGroupModal()}
 												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
 												isSecondaryBtn
 											>Close
