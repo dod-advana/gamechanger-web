@@ -2,10 +2,22 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
 import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
+import _ from 'lodash';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import {
+	ThemeProvider,
+} from '@material-ui/core/styles';
+
 import GCButton from "../common/GCButton";
 import GCTooltip from "../common/GCToolTip";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
-import { FormControl, InputLabel, MenuItem,  Select, } from '@material-ui/core';
+import { 
+    FormControl,
+    FormGroup,
+    FormControlLabel,
+    Checkbox,
+    InputLabel,
+    MenuItem,  Select, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { gcOrange } from "../common/gc-colors";
@@ -15,6 +27,10 @@ const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
+const resetAdvancedSettings = (dispatch) => {
+	dispatch({type: 'RESET_SEARCH_SETTINGS'});
+}
+
 
 const useStyles = makeStyles({
 	root: {
@@ -54,6 +70,7 @@ const ViewHeader = (props) => {
 	const {context, resultsText, mainStyles={}} = props;
 
 	const {state, dispatch} = context;
+	const {originalOrgFilters, orgFilter} = state.searchSettings;
 	
 	const {
 		activeCategoryTab,
@@ -81,7 +98,11 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-    
+    const betterOrgData = {};
+        for(let i=0; i<originalOrgFilters.length; i++) {
+            betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
+        }
+
 	useEffect(()=> {
 		let tempCount;
 		switch(activeCategoryTab){
@@ -155,7 +176,7 @@ const ViewHeader = (props) => {
     return (
 
         <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
-		{state.cloneData.clone_name === "gamechanger" ?
+        {state.cloneData.clone_name === "gamechanger" ?
 			<>
 			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
 				<div className={'sidebar-section-title'}>
@@ -172,6 +193,56 @@ const ViewHeader = (props) => {
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
 			</div>
 		}
+        <div className={'sidebar-section-title'}>
+
+        <div className='view-buttons-container' style={{height:'60px', display: 'flex'}}>
+            <button
+					type="button"
+					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
+					onClick={() => {
+						resetAdvancedSettings(dispatch);
+						setState(dispatch, { runSearch: true, runGraphSearch: true });
+					}}
+				>
+					<span style={{
+						fontFamily: 'Montserrat',
+						fontWeight: 600,
+						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
+					}}>
+						Clear Filters
+					</span>
+				</button>
+        </div>
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+						{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
+							console.log(org);
+//                            if(index < 10 || state.seeMoreSources){
+                            if (state.searchSettings.orgFilter[org]){
+                                
+                                return (
+                                    <FormControlLabel
+                                        key={`${org}`}
+                                        value={`${originalOrgFilters[org]}`}
+                                        classes={{ label: classes.checkboxPill }}
+                                        control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} />}
+                                        label={`${org}`}
+                                        labelPlacement="end"
+                                    />
+                                )
+                            }
+                            else {
+								return null;
+							}
+						})}
+					</FormGroup>
+					{state.searchSettings.specificOrgsSelected &&
+							// eslint-disable-next-line
+							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
+					}
+	        </FormControl>
+        </div>
+
             <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
