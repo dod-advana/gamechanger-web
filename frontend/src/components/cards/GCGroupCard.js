@@ -273,7 +273,11 @@ const styles = {
         fontSize: 12,
         fontFamily: 'Montserrat',
         color: '#3F4A56'
-    }
+    },
+	groupDetails: {
+		position: 'absolute',
+		bottom: 0
+	}
 }
 
 const GroupCard = (props) => {
@@ -361,7 +365,7 @@ const GroupCard = (props) => {
 				})}
 			</div>
             <div style={styles.details}>
-                <div>
+                <div style={styles.groupDetails}>
                     {`${favorites.length} items`}
                 </div>
             </div>
