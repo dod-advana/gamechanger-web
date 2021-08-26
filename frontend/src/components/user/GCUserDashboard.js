@@ -272,6 +272,14 @@ const useStyles = makeStyles((theme) => ({
 	label: {
 		fontSize: 14,
 		maxWidth: 350
+	},
+	labelFont: {
+		backgroundColor: 'white',
+		padding: '0px 10px'
+	},
+	groupSelect: {
+		fontSize: '16px', 
+		"&:focus": {backgroundColor: 'white'} 
 	}
 }));
 
@@ -867,6 +875,7 @@ const GCUserDashboard = (props) => {
 									</CloseButton>
 									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
 									<div style={{ width: 800 }}>
+										<div style={{overflow: 'scroll', maxHeight: 300}}>
 										{_.map(favoriteDocuments, (doc) => {
 											return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
 												<FormControlLabel
@@ -881,9 +890,10 @@ const GCUserDashboard = (props) => {
 												/>
 											</GCTooltip>
 										})}
+										</div>
 										<FormControl variant="outlined" style={{ width: '100%' }}>
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
-											<Select label="File Format" style={{ fontSize: '16px' }} value={selectedGroup.name} onChange={handleChange}>
+											<Select classes={{root: classes.groupSelect}} value={selectedGroup.name} onChange={handleChange}>
 											{_.map(documentGroups, (group) => {
 												return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
 											})}
@@ -1623,7 +1633,7 @@ const GCUserDashboard = (props) => {
 	const renderGroups = () => {
 		return (
 			<div>
-				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
+				<GCAccordion expanded={true} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
 					{ renderDocumentGroups() }
 				</GCAccordion>
 			</div>
@@ -1668,7 +1678,7 @@ const GCUserDashboard = (props) => {
 			<div style={{width: '100%', height: '100%'}}>
 				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
 					<div className={"col-xs-12"} style={{ padding: 0 }}>
-					<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
+					<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: 0, marginLeft: 40,width:'95%' }}>
 							<GCButton
 								onClick={() => setShowDeleteGroupModal(true)}
 								style={{}}
