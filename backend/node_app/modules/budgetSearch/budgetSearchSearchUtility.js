@@ -25,7 +25,6 @@ class BudgetSearchSearchUtility {
 		{ 
 			searchText, 
 			offset = 0, 
-			limit = 20, 
 		 }, 
 		 user) {
 
@@ -36,7 +35,6 @@ class BudgetSearchSearchUtility {
 					includes: ['meta_n', 'record_n', 'project_n', 'doc_type_s']
 				},
 				from: offset,
-				size: limit,
 				track_total_hits: true,
 				query: {
 					bool: {
@@ -186,7 +184,6 @@ class BudgetSearchSearchUtility {
 			}
 		}
 
-		console.log(project);
 		return project;
 
 	}
