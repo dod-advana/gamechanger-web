@@ -500,33 +500,6 @@ const BudgetSearchMainViewHandler = {
 		} = state;
 
 		const viewPanels = [];
-
-        //DOC EXPLORER
-		// viewPanels.push(
-		// 	{
-		// 		panelName: 'Explorer',
-		// 		panel:
-		// 			<StyledCenterContainer showSideFilters={false}>
-		// 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-		// 					<ViewHeader {...props} mainStyles={{margin:'20px 0 0 0'}} resultsText=' '/>
-		// 					<EDADocumentExplorer handleSearch={() => setState(dispatch, {runSearch: true})}
-		// 						data={docSearchResults}
-		// 						searchText={searchText}
-		// 						prevSearchText={prevSearchText}
-		// 						totalCount={count}
-		// 						loading={loading}
-		// 						resultsPage={resultsPage}
-		// 						resultsPerPage={RESULTS_PER_PAGE}
-		// 						onPaginationClick={(page) => {
-		// 							setState(dispatch, { resultsPage: page, runSearch: true });
-		// 						}}
-		// 						isClone={true}
-		// 						cloneData={cloneData}
-		// 					/>
-		// 				</div>
-		// 			</StyledCenterContainer>
-		// 	}
-		// );
 		return viewPanels;
 	},
 
