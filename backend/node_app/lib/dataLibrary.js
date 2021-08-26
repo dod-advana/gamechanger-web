@@ -5,6 +5,7 @@ const https = require('https');
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const neo4jLib = require('neo4j-driver');
+const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 
 const SAMPLING_BYTES = 4096;
@@ -19,8 +20,12 @@ class DataLibrary {
 			neo4j = neo4jLib,
 			esSearchLib,
 			s3Opt = {},
+			redisClientDB = 8,
+			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 		} = opts;
 
+		this.redisClientDB = redisClientDB;
+		this.redisDB = redisDB;
 		this.logger = logger;
 		this.constants = constants;
 		this.axios = axios;
@@ -286,32 +291,44 @@ class DataLibrary {
 		}
 	}
 
-	getFileThumbnail(data, userId){
+	async getFileThumbnail(data, userId){
 		let { dest, folder, filename, clone_name } = data;
+		const key = `${clone_name}/${folder}/${filename}`;
 		let filetype = filename.split('.').pop();
 		if (filetype === '.png'){
 			filetype = 'image/png'
 		} else if(filetype === 'svg'){
 			filetype = 'image/svg+xml'
 		}
+
 		const params = {
 			Bucket: dest,
-			Key: `${clone_name}/${folder}/${filename}`,
+			Key: key,
 			ResponseContentType: 'image/png'
 		};
 
-		return new Promise((resolve,reject) => {
-			this.awsS3Client.getObject(params, (err, data) => {
-				if(err) {
-					reject(err, err.stack);
-				} else {
-					try {
-						resolve(data.Body.toString('base64'));
-					} catch (e) {
-						reject(e)
+		return new Promise(async (resolve,reject) => {
+
+			await this.redisDB.select(this.redisClientDB);
+			const cachedResults = await this.redisDB.get(key);
+			if (cachedResults) {
+				resolve(cachedResults);
+			} else {
+				this.awsS3Client.getObject(params, async (err, data) => {
+					if(err) {
+						reject(err, err.stack);
+					} else {
+						try {
+							const result = data.Body.toString('base64')
+							await this.redisDB.set(key, result);
+							resolve(result);
+						} catch (e) {
+							reject(e)
+						}
 					}
-				}
-			})
+				})
+			}
+
 		});
 	}
 
@@ -331,7 +348,7 @@ class DataLibrary {
 		}
 	}
 
-	async close(driver, session) {
+ async close(driver, session) {
 		await session.close();
 		await driver.close();
 	}
