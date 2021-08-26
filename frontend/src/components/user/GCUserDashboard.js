@@ -855,7 +855,7 @@ const GCUserDashboard = (props) => {
 				) : (
 					favoriteDocumentsSlice.length > 0 ? (
 					<>
-						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'20px', marginRight:'2em',width:'95%' }}>
+						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'40px', paddingRight: 0,width:'95%' }}>
 							<GCButton
 								onClick={() => {setShowAddToGroupModal(true)}}
 							>Add To Group

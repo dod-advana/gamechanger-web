@@ -178,6 +178,7 @@ class UserController {
 					const esQuery = {
 						_source: false,
 						stored_fields: [ 'filename', 'title', 'id', 'summary_30', 'doc_type', 'doc_num'],
+						size: favorite_documents.length,
 						query: {
 							terms: { filename: filenames }
 						}
