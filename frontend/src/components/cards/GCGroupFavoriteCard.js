@@ -45,6 +45,17 @@ const StyledFavoriteDocumentCard = styled.div`
 			display: flex;
 			place-content: space-between;
 			
+			> .back-button {
+				position: absolute;
+				top: 20px;
+				left: 10px;
+				color: #386F94;
+				font-family: "Noto Sans";
+				&:hover {
+					cursor: pointer;
+				}
+			}
+
 			> .summary-title {
 				color: #000000;
 				font-family: "Noto Sans";
@@ -53,8 +64,8 @@ const StyledFavoriteDocumentCard = styled.div`
 				width: 326px;
 				height: 38px;
 				text-overflow: ellipsis;
-				cursor: pointer;
 				line-height: 1;
+				${({active}) => active ? 'margin-top: 40px;' : ''}
 				
 				> .summary-title-link {
 					text-decoration: none;
@@ -65,16 +76,14 @@ const StyledFavoriteDocumentCard = styled.div`
 					width: 326px;
 					height: 38px;
 					text-overflow: ellipsis;
-					cursor: pointer;
 					line-height: 1;
 				}
 			}    			
     		
     		> .check-div {
-				width: 20px;
-				height: 20px;
-				margin-right: 28px;
-    			margin-top: -6px;
+				position: absolute;
+				top: 10px;
+				right: 10px;
     		}
     	}
     	
@@ -114,31 +123,19 @@ const StyledFavoriteDocumentCard = styled.div`
 			font-family: Montserrat;
 			color: #8091A5;
 		}
-		
-		> .buttons-div {
-			height: 30px;
-			margin-left: 10px;
-			margin-top: -24px;
-			margin-bottom: 5px;
-			
-			> button {
-				padding: 0 10px !important;
-				height: 20px  !important;
-				min-width: 60px  !important; 
-				margin: 0 5px  !important; 
-				border-radius: 17px  !important;
-				line-height: unset  !important; 
-				
-				> div {
-					margin-top: -5px;
-				}
-			}
-		}
     	
     	> .stats-details {
     		margin-top: -5px;
 			display: flex;
 			place-content: space-between;
+
+			> .buttons-div {
+				height: 40px;
+				
+				> a {
+					margin-right: 5px;
+				}
+			}
 
 			> .favorited-date {
 				margin-bottom: 8px;
@@ -153,8 +150,7 @@ const StyledFavoriteDocumentCard = styled.div`
     			display: flex;
     			
     			> .stats-comment {
-					margin-left: -12px;
-					margin-right: 15px;
+					margin-right: 10px;
 	
 					> .fa {
 						color: #8091A5;
@@ -291,7 +287,7 @@ const GroupFavoriteCard = (props) => {
 		<StyledFavoriteDocumentCard key={idx} groupStyles={styles} active={active} onClick={() => {if(!active) setActive(true)}} style={active ? {height: 500, top: 0} : {}}>
 			<div className={'main-info'}>
 				<div className={'top-buttons'}>
-					{active && <div onClick={() => setActive(false)}>{'< Back'}</div>}
+					{active && <div className={'back-button'} onClick={() => setActive(false)}>{'< Back'}</div>}
 					<GCTooltip title={cardTitle} placement="top">
 						<div className={'summary-title'}>
 							<div className={'summary-title-link'}>{cardTitle}</div>
@@ -353,27 +349,6 @@ const GroupFavoriteCard = (props) => {
 					<div className={'summary-summary'}>{summary}</div>
 				</div>
 				{active && <>
-					<div className={'buttons-div'}>
-						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE: 14}} href={'#'}
-							onClick={(e) => {
-								e.preventDefault();
-								// clickFn(doc.filename, state.cloneData.clone_name, doc.search_text, 0, item.download_url_s);
-							}}
-						>
-							Open
-						</CardButton>
-						<CardButton
-							style={{...styles.footerButtonBack, CARD_FONT_SIZE:14}}
-							href={'#'}
-							onClick={(e) => {
-								// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
-								// window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${item.id}`);
-								e.preventDefault();
-							}}
-						>
-							Details
-						</CardButton>
-					</div>
 					<div className={'stats-details'}>
 						<div className={'favorited-date'}>{createdDate}</div>
 						<div className={'stats-details-stat-div'}>
@@ -383,6 +358,27 @@ const GroupFavoriteCard = (props) => {
 									/>
 								</div>
 							</GCTooltip>
+						</div>
+						<div className={'buttons-div'}>
+							<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE: 14}} href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									// clickFn(doc.filename, state.cloneData.clone_name, doc.search_text, 0, item.download_url_s);
+								}}
+							>
+								Open
+							</CardButton>
+							<CardButton
+								style={{...styles.footerButtonBack, CARD_FONT_SIZE:14}}
+								href={'#'}
+								onClick={(e) => {
+									// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
+									// window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${item.id}`);
+									e.preventDefault();
+								}}
+							>
+								Details
+							</CardButton>
 						</div>
 					</div>
 				</>}
