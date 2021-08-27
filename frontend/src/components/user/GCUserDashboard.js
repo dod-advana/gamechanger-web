@@ -361,6 +361,7 @@ const GCUserDashboard = (props) => {
 	const [documentsToGroup, setDocumentsToGroup] = useState([]);
 	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
 	const [groupsToDelete, setGroupsToDelete] = useState([]);
+	const [tooManyInGroupError, setTooManyInGroupError] = useState(false);
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -834,7 +835,13 @@ const GCUserDashboard = (props) => {
 	}
 
 	const handleAddToFavorites = async () => {
-		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup})
+		const selectedGroupInfo = userData.favorite_groups.find(group => group.id === selectedGroup.id);
+		let totalInGroup = documentsToGroup.length;
+		selectedGroupInfo.favorites.forEach(fav => {
+			if(!documentsToGroup.includes(Number(fav.favorite_document_id))) totalInGroup++;
+		})
+		if(totalInGroup > 5) return setTooManyInGroupError(true);
+		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
 		updateUserData();
 		handleCloseAddGroupModal();
 	}
@@ -900,6 +907,7 @@ const GCUserDashboard = (props) => {
 											</Select>
 										</FormControl>
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+											{tooManyInGroupError && <div>Groups can't contain more than 5 items</div>}
 											<GCButton
 												onClick={() => handleCloseAddGroupModal()}
 												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
