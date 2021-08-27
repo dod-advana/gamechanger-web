@@ -14,14 +14,14 @@ import { trackEvent } from "../telemetry/Matomo";
 import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
 import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../sharedFunctions';
-import FavoriteCard from "../cards/GCFavoriteCard";
+import GroupFavoriteCard from "../cards/GCGroupFavoriteCard";
 
 
 
 
 const StyledFavoriteGroupCard = styled.div`
     width: 420px;
-	height: 535px;
+	height: 600px;
     background-color: #FFFFFF
     border: 1px solid #CFCFCF;
     border-radius: 6px;
@@ -280,6 +280,13 @@ const styles = {
 	}
 }
 
+const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
+};
+
 const GroupCard = (props) => {
 	
 	const {
@@ -334,33 +341,28 @@ const GroupCard = (props) => {
 						return fav.favorite_document_id === `${fav_doc.favorite_id}`;
 					})
 					const favCardStyles = {
-						main: `margin: 0px;
-						background: #F5F5F5 0% 0% no-repeat padding-box; 
-						box-shadow: 0px -3px 6px #00000029; 
-						position: absolute; 
-						top: ${index * 60}px; 
-						left: 0px;`
+						main: `top: ${index * 60}px; 
+						&:hover {
+							background-color: #ECF1F7;
+							top: ${index * 60 - 20}px;
+							cursor: pointer;
+						}`
 					}
-					return <FavoriteCard
+
+					return <GroupFavoriteCard
 					key={`${doc.favorite_id}`}
 					cardTitle={doc.title}
 					isDocument={true}
 					documentObject={doc}
 					handleDeleteFavorite={()=>{}}
 					summary={doc.summary}
-					// details={documentDetails}
 					overlayText={doc.favorite_summary}
-					reload={true}
-					setReload={()=>{}}
 					idx={doc.favorite_id}
-					active={doc.active}
-					toggleActive={()=>{}}
 					cloneData={state.cloneData}
 					styles={favCardStyles}
-					isGroupFavorite
 					handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
 					dispatch={dispatch}
-					groupId={group.id}
+					group={group}
 				/>
 				})}
 			</div>

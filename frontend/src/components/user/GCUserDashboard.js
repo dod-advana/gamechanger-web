@@ -246,7 +246,7 @@ const useStyles = makeStyles((theme) => ({
 		},
 	},
 	newGroupModal: {
-		position: 'absolute',
+		position: 'fixed',
 		top: '35%',
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
@@ -258,7 +258,7 @@ const useStyles = makeStyles((theme) => ({
 		padding: 15
 	},
 	addToGroupModal: {
-		position: 'absolute',
+		position: 'fixed',
 		top: '35%',
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
