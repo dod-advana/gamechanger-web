@@ -6,6 +6,7 @@ import GCAccordion from "../components/common/GCAccordion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from 'recharts';
 import { TextField, Typography } from '@material-ui/core';
 import SimpleTable from "../components/common/SimpleTable";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const StyledNavBar = styled.div`
 	width: 100%;
@@ -65,7 +66,8 @@ const StyledRightContainer = styled.div`
 `;
 
 const StyledAccordionDiv = styled.div`
-    padding: ${({ padding }) => padding ?? '0'}
+    padding: ${({ padding }) => padding ?? '0'};
+    width: 100%;
 `;
 
 const StyledAIText = styled.div`
@@ -90,7 +92,7 @@ const StyledReviewRightContainer = styled.div`
     padding: 20px;
 `;
 
-const StyledAccomplishments = styled.div`
+const StyledTableContainer = styled.div`
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -187,6 +189,149 @@ const sampleAccomplishmentData = [
     }
 ];
 
+const sampleVendorData = [
+    {
+        Key: 'Consolidated Award',
+        Value: '00000000'
+    },
+    {
+        Key: 'Parent Award',
+        Value: '00000000'
+    },
+    {
+        Key: 'PIIN',
+        Value: '00000000'
+    },
+    {
+        Key: 'Award Description',
+        Value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+    },
+    {
+        Key: 'Fiscal Year',
+        Value: '2020'
+    },
+    {
+        Key: 'Budget Activity',
+        Value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+    },
+    {
+        Key: 'Reimbursable',
+        Value: 'Nan'
+    },
+    {
+        Key: 'Product or Service Code Description',
+        Value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+    },
+];
+
+const jaicReviewData = [
+    {
+        Key: 'Reviewers',
+        Value: <Autocomplete
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    style={{ width: 300 }}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+    },
+    {
+        Key: 'Core AI Analysis',
+        Value: <Autocomplete
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    style={{ width: 300, backgroundColor: 'white' }}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+    },
+    {
+        Key: 'Service/DoD Component Reviewer',
+        Value: <Autocomplete
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    style={{ width: 300, backgroundColor: 'white' }}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+    },
+    {
+        Key: 'Review Status',
+        Value: <Autocomplete
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    style={{ width: 300, backgroundColor: 'white' }}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+    },
+    {
+        Key: 'Planned Transition Partner',
+        Value: <Autocomplete
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    style={{ width: 300, backgroundColor: 'white' }}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+    },
+    {
+        Key: 'Current Mission Partners (Academia, Industry, or Other)',
+        Value: 
+        <> 
+            <Autocomplete
+                options={[]}
+                getOptionLabel={(option) => option.title}
+                style={{ width: 300, backgroundColor: 'white' }}
+                renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+            />
+            <TextField
+                placeholder="Reviewer Notes"
+                variant="outlined"
+                defaultValue={''}
+                style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
+                onBlur={() => {}}
+                inputProps={{
+                    style: {
+                        width: '100%'
+                    }
+                }}
+                rows={10}
+                multiline
+            />
+        </>
+    }
+];
+
+const serviceReviewData = [
+    {
+        Key: <div style={{ width: "100%", height: "100%", padding: "10px"}}><strong>AI Labeling</strong></div>,
+        Value: 
+        <div style={{ padding: '0 15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0' }}>
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>Do you agree with the JAIC's labeling of "Not AI" for this effort?</Typography>
+                <Autocomplete
+                    size="small"
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0' }}>
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>If you don't agree, how would you label this effort? </Typography>
+                <Autocomplete
+                    size="small"
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+            </div>
+        </div>
+    }
+];
+
+const boldKeys = (data) => {
+    return data.map(pair => {
+        pair.Key = <strong>{pair.Key}</strong>;
+        return pair
+    });
+}
+
 const renderAICategory = () => {
 
     return (
@@ -264,17 +409,71 @@ const renderOtherProjects = () => {
     )
 }
 
+const renderMissionPartners = () => {
+    return (
+        <StyledAccordionDiv>
+
+        </StyledAccordionDiv>
+    )
+}
+
+const renderVendors = () => {
+    return (
+        <StyledTableContainer>
+            <SimpleTable tableClass={'magellan-table'}
+                zoom={1}
+                rows={boldKeys(sampleVendorData)}
+                height={'auto'}
+                dontScroll={true}
+                disableWrap={true}
+                title={'Vendor Name: Lorem Ipsum'}
+                headerExtraStyle={{
+                    backgroundColor: '#313541',
+                    color: 'white'
+                }}
+                hideSubheader={true}
+            />
+            <SimpleTable tableClass={'magellan-table'}
+                zoom={1}
+                rows={boldKeys(sampleVendorData)}
+                height={'auto'}
+                dontScroll={true}
+                disableWrap={true}
+                title={'Vendor Name: Lorem Ipsum'}
+                headerExtraStyle={{
+                    backgroundColor: '#313541',
+                    color: 'white'
+                }}
+                hideSubheader={true}
+            />
+        </StyledTableContainer>
+    )
+}
+
 const renderAccomplishments = () => {
     return (
-        <StyledAccomplishments>
+        <StyledTableContainer>
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={sampleAccomplishmentData}
+                rows={boldKeys(sampleAccomplishmentData)}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
                 title={'Accomplishment Name/Title'}
-                hideHeader={true}
+                headerExtraStyle={{
+                    backgroundColor: '#1C2D64',
+                    color: 'white'
+                }}
+                hideSubheader={true}
+            />
+            <SimpleTable tableClass={'magellan-table'}
+                zoom={1}
+                rows={boldKeys(sampleAccomplishmentData)}
+                height={'auto'}
+                dontScroll={true}
+                disableWrap={true}
+                title={'Accomplishment Name/Title'}
+                hideSubheader={true}
                 headerExtraStyle={{
                     backgroundColor: '#1C2D64',
                     color: 'white'
@@ -282,44 +481,77 @@ const renderAccomplishments = () => {
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={sampleAccomplishmentData}
+                rows={boldKeys(sampleAccomplishmentData)}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
                 title={'Accomplishment Name/Title'}
-                hideHeader={true}
                 headerExtraStyle={{
                     backgroundColor: '#1C2D64',
                     color: 'white'
                 }}
+                hideSubheader={true}
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={sampleAccomplishmentData}
+                rows={boldKeys(sampleAccomplishmentData)}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
                 title={'Accomplishment Name/Title'}
-                hideHeader={true}
                 headerExtraStyle={{
                     backgroundColor: '#1C2D64',
                     color: 'white'
                 }}
+                hideSubheader={true}
             />
+        </StyledTableContainer>
+    );
+}
+
+const renderJAICReview = () => {
+    return (
+        <StyledTableContainer>
+            <div style={{ margin: '0 0 15px 0'}}>
+                <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
+            </div>
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={sampleAccomplishmentData}
+                rows={boldKeys(jaicReviewData)}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
-                title={'Accomplishment Name/Title'}
-                hideHeader={true}
+                title={''}
                 headerExtraStyle={{
-                    backgroundColor: '#1C2D64',
+                    backgroundColor: '#313541',
                     color: 'white'
                 }}
+                hideHeader={true}
             />
-        </StyledAccomplishments>
+        </StyledTableContainer>
+    );
+}
+
+const renderServiceReviewer = () => {
+    return (
+        <StyledTableContainer>
+        <div style={{ margin: '0 0 15px 0'}}>
+            <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
+        </div>
+        <SimpleTable tableClass={'magellan-table'}
+            zoom={1}
+            rows={boldKeys(serviceReviewData)}
+            height={'auto'}
+            dontScroll={true}
+            disableWrap={true}
+            title={''}
+            headerExtraStyle={{
+                backgroundColor: '#313541',
+                color: 'white'
+            }}
+            hideHeader={true}
+        />
+    </StyledTableContainer>
     );
 }
 
@@ -410,6 +642,7 @@ const BudgetSearchProfilePage = (props) => {
                         backgroundColor: '#313541',
                         color: 'white'
                     }}
+                    hideSubheader={true}
                 />
                 </StyledRightContainer>
             </StyledContainer>
@@ -420,9 +653,28 @@ const BudgetSearchProfilePage = (props) => {
                             {renderAccomplishments()}
                         </GCAccordion>
                     </StyledAccordionContainer>
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={true} header={'CONTRACTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                            {renderVendors()}
+                        </GCAccordion>
+                    </StyledAccordionContainer>
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={true} header={'JAIC REVIEW'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                            {renderJAICReview()}
+                        </GCAccordion>                    
+                    </StyledAccordionContainer>
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={true} header={'SERVICE REVIEWER'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                            {renderServiceReviewer()}
+                        </GCAccordion>                    
+                    </StyledAccordionContainer>
                 </StyledReviewLeftContainer>
                 <StyledReviewRightContainer>
-
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={true} header={'MISSION PARTNERS'} headerBackground={'#1C2D64'} headerTextColor={'white'} headerTextWeight={'normal'}>
+                            {renderMissionPartners()}
+                        </GCAccordion>                    
+                    </StyledAccordionContainer>
                 </StyledReviewRightContainer>
             </StyledReviewContainer>
         </div>

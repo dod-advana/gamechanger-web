@@ -46,7 +46,8 @@ export default class SimpleTable extends React.Component {
 		showEditIcon: false,
 		disableWrap: false,
 		stickyHeader: false,
-		useParser: false
+		useParser: false,
+		hideSubheader: false
 	}
 
 	state = {
@@ -54,7 +55,7 @@ export default class SimpleTable extends React.Component {
 	}
 
 	getHeader = (cols, colMap) => {
-		const { hideHeader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
+		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
 
 		if (hideHeader) return <thead></thead>
 		return <thead>
@@ -64,7 +65,7 @@ export default class SimpleTable extends React.Component {
 					<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}></th>
 				</tr>
 			}
-			<tr>
+			{!hideSubheader && <tr>
 				{
 					colMap && _.map(colMap, (col, idx) => {
 						if (idx === 0) {
@@ -81,7 +82,7 @@ export default class SimpleTable extends React.Component {
 						return <th style={{ ...(this.props.stickyHeader && stickyHeader), ...colWidth, ...headerExtraStyle }} key={idx}>{col}</th>
 					}
 				})}
-			</tr>
+			</tr>}
 		</thead>
 	}
 
