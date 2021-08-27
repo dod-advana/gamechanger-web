@@ -277,6 +277,21 @@ class FavoritesController {
 			const docObjects = documentIds.map(docId => {
 				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId}
 			})
+			
+			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
+				where:{
+					favorite_group_id: `${groupId}`
+				}
+			})
+			let totalInGroup = documentIds.length + existingFavorites.length;
+			existingFavorites.forEach(fav => {
+				if(documentIds.includes(Number(fav.dataValues.favorite_document_id))){
+					totalInGroup--;
+				}
+			})
+			if(totalInGroup > 5){
+				return res.status(400);
+			}
 
 			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
 				returning: true,
