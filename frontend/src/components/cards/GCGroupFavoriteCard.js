@@ -30,7 +30,8 @@ const StyledFavoriteDocumentCard = styled.div`
 	: `top: 0px;
 	background: #ECF1F7;
 	height: 500px;
-	z-index: 100;`}
+	z-index: 100;
+	transition: top 1s, height 1s;`}
 
     > .main-info {
 
@@ -51,9 +52,11 @@ const StyledFavoriteDocumentCard = styled.div`
 				left: 10px;
 				color: #386F94;
 				font-family: "Noto Sans";
+				${({active}) => active ? 'opacity: 1; visibility: visible;' : 'opacity: 0; visibility: hidden'}
 				&:hover {
 					cursor: pointer;
 				}
+				transition: opacity 1s;
 			}
 
 			> .summary-title {
@@ -65,7 +68,7 @@ const StyledFavoriteDocumentCard = styled.div`
 				height: 38px;
 				text-overflow: ellipsis;
 				line-height: 1;
-				${({active}) => active ? 'margin-top: 40px;' : ''}
+				transition: margin-top .5s;
 				
 				> .summary-title-link {
 					text-decoration: none;
@@ -78,7 +81,12 @@ const StyledFavoriteDocumentCard = styled.div`
 					text-overflow: ellipsis;
 					line-height: 1;
 				}
-			}    			
+			} 
+			
+			> .summary-title-active {
+				margin-top: 40px;
+				transition: margin-top 1s;
+			}
     		
     		> .check-div {
 				position: absolute;
@@ -122,6 +130,18 @@ const StyledFavoriteDocumentCard = styled.div`
 			font-size: 12px;
 			font-family: Montserrat;
 			color: #8091A5;
+		}
+
+		> .stats-details-active {
+			visibility: visible;
+			opacity: 1;
+			transition: opacity 1s;
+		}
+
+		> .stats-details-inactive {
+			visibility: hidden;
+			opacity: 0;
+			transition: opacity .5s, visibility .5s;
 		}
     	
     	> .stats-details {
@@ -287,9 +307,9 @@ const GroupFavoriteCard = (props) => {
 		<StyledFavoriteDocumentCard key={idx} groupStyles={styles} active={active} onClick={() => {if(!active) setActive(true)}} style={active ? {height: 500, top: 0} : {}}>
 			<div className={'main-info'}>
 				<div className={'top-buttons'}>
-					{active && <div className={'back-button'} onClick={() => setActive(false)}>{'< Back'}</div>}
+					<div className={'back-button'} onClick={() => setActive(false)}>{'< Back'}</div>
 					<GCTooltip title={cardTitle} placement="top">
-						<div className={'summary-title'}>
+						<div className={active ? 'summary-title summary-title-active' : 'summary-title'}>
 							<div className={'summary-title-link'}>{cardTitle}</div>
 						</div>
 					</GCTooltip>
@@ -348,8 +368,7 @@ const GroupFavoriteCard = (props) => {
 				<div className={'summary-details'}>
 					<div className={'summary-summary'}>{summary}</div>
 				</div>
-				{active && <>
-					<div className={'stats-details'}>
+					<div className={active ? 'stats-details stats-details-active' : 'stats-details stats-details-inactive'}>
 						<div className={'favorited-date'}>{createdDate}</div>
 						<div className={'stats-details-stat-div'}>
 							<GCTooltip title={`Click to see ${group.type} comments`} placement="top">
@@ -381,8 +400,7 @@ const GroupFavoriteCard = (props) => {
 							</CardButton>
 						</div>
 					</div>
-				</>}
-			</div>
+				</div>
 			<div className={'overlay-details'} hidden={!showComments}>
 				<div className={'overlay-buttons'}>
 					<Button className={'title-bar-close'}
