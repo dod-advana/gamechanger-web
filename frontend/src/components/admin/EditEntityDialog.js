@@ -54,19 +54,23 @@ const styles = {
 	}
 }
 
-const EditEntityDialog = ({ open, handleClose, url }) => {
+const EditEntityDialog = ({ open, handleClose, url, orgName }) => {
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
 	const [sealURL, setSealURL] = useState(url);
 	const classes = useStyles();
-	console.log({sealURL});
 
 	const handleChange = ({ target: { value } }) => {
 	};
 
-	const handleSave = () => {
-
-	};
+	async function handleSave() {
+		try {
+			await gameChangerAPI.saveOrgImageOverrideURL({ name: orgName, imageURL: sealURL });
+			handleClose();
+		} catch(err) {
+			console.log({ err });
+		}		
+	}
 
 	return (		
 		<UOTDialog

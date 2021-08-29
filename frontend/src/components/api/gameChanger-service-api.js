@@ -104,6 +104,7 @@ const endpoints = {
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
+	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 
 	exportHistoryDELETE: function(id){
 		if (!id) {
@@ -778,5 +779,12 @@ export default class GameChangerAPI {
 	getOrgImageOverrideURLs = async (names) => {
 		const url = endpoints.getOrgImageOverrideURLs;
 		return axiosPOST(this.axios, url, names);
+	}
+
+	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
+		console.log({name});
+		console.log({imageURL});
+		const url = endpoints.saveOrgImageOverrideURL;
+		return axiosPOST(this.axios, url, { name, imageURL });
 	}
 }
