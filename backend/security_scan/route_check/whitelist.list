@@ -70,3 +70,4 @@
 .* /api/gamechanger/sendFrontendError .*
 .*/api/gamechanger/getCrawlerSeals .*
 .*/api/gamechanger/getOrgImageOverrideURLs .*
+.*/api/gamechanger/saveOrgImageOverrideURL .*

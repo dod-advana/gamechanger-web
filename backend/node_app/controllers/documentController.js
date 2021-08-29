@@ -39,6 +39,7 @@ class DocumentController {
 		this.getDocumentProperties = this.getDocumentProperties.bind(this);
 		this.cleanUpEsResultsForAssist = this.cleanUpEsResultsForAssist.bind(this);
 		this.getOrgImageOverrideURLs = this.getOrgImageOverrideURLs.bind(this);
+		this.saveOrgImageOverrideURL = this.saveOrgImageOverrideURL.bind(this);
 	}
 
 	async getDocumentsToAnnotate(req, res) {
@@ -337,8 +338,7 @@ class DocumentController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const orgNames = req.body;
-			this.logger.info(`getOrgImageOverrideURLs req.body: ${JSON.stringify(req.body)}`);
-
+			const orgDataCleaned = {};
 			const orgData = await this.organizationURLs.findAll(orgNames ? {
 				where: {
 					org_name: {
@@ -346,14 +346,43 @@ class DocumentController {
 					}
 				}
 			} : {});
-			const orgDataCleaned = {};
+
 			orgData.forEach((item) => {
 				orgDataCleaned[item.org_name] = item.image_url;
 			});
-			this.logger.info(`orgDataCleaned: ${JSON.stringify(orgDataCleaned)}`);
+			
 			res.status(200).send(orgDataCleaned);
 		} catch (err) {
 			this.logger.error(err, 'TJJU7QC', userId)
+			res.status(500).send(err);
+		}
+	}
+
+	async saveOrgImageOverrideURL(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const { name, imageURL } = req.body;
+
+			const existingOrg = await this.organizationURLs.findOne({
+				where: {
+					org_name: name
+				}
+			});
+
+			if (existingOrg) {
+				existingOrg.update({ image_url: imageURL });
+			} else {
+				await this.organizationURLs.create({
+					org_name: name,
+					image_url: imageURL
+				});
+			}
+
+			res.status(200).send({});
+		} catch (err) {
+			this.logger.error(err, 'TJDU7QC', userId)
 			res.status(500).send(err);
 		}
 	}

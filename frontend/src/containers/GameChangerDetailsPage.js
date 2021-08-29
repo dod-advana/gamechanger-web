@@ -341,7 +341,6 @@ const GameChangerDetailsPage = (props) => {
 		
 		const orgName = 'United States Navy';
 		gameChangerAPI.getOrgImageOverrideURLs([orgName]).then(({data}) => {
-			console.log(data ? data[orgName] : null);
 			setSealURLOverride(data ? data[orgName] : null);
 		});
 	}, [])
@@ -501,6 +500,7 @@ const GameChangerDetailsPage = (props) => {
 						open={editEntityVisible}
 						handleClose={() => setEditEntityVisible(false)}
 						url={sealURLOverride}
+						orgName={entity?.name}
 					/>
 				}
 				{entity &&
