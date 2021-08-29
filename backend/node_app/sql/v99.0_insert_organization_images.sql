@@ -1,1 +1,2 @@
 INSERT INTO organization_urls(org_name, image_url) VALUES ('United States Navy', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Emblem_of_the_United_States_Navy.svg/1000px-Emblem_of_the_United_States_Navy.svg.png');
+INSERT INTO organization_urls(org_name, image_url) VALUES ('United States Army', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Mark_of_the_United_States_Army.svg/1000px-Mark_of_the_United_States_Army.svg.png');

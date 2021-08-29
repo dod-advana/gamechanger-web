@@ -54,10 +54,12 @@ const styles = {
 	}
 }
 
-const EditEntityDialog = ({ open, handleClose }) => {
+const EditEntityDialog = ({ open, handleClose, url }) => {
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
+	const [sealURL, setSealURL] = useState(url);
 	const classes = useStyles();
+	console.log({sealURL});
 
 	const handleChange = ({ target: { value } }) => {
 	};
@@ -90,6 +92,8 @@ const EditEntityDialog = ({ open, handleClose }) => {
 					InputLabelProps={{ className: classes.labelFont }}
 					InputProps={{ className: classes.labelFont }}
 					FormHelperTextProps={{ className: classes.helperText }}
+					value={sealURL}
+					onChange={(event) => setSealURL(event.target.value)}
 				/>
 			</FormControl>
 			

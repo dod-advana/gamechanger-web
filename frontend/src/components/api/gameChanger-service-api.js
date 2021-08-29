@@ -103,7 +103,7 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
-
+	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
 
 	exportHistoryDELETE: function(id){
 		if (!id) {
@@ -773,5 +773,10 @@ export default class GameChangerAPI {
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
+	}
+
+	getOrgImageOverrideURLs = async (names) => {
+		const url = endpoints.getOrgImageOverrideURLs;
+		return axiosPOST(this.axios, url, names);
 	}
 }

@@ -69,3 +69,4 @@
 .* /api/gamechanger/modular/docFetcher .*
 .* /api/gamechanger/sendFrontendError .*
 .*/api/gamechanger/getCrawlerSeals .*
+.*/api/gamechanger/getOrgImageOverrideURLs .*

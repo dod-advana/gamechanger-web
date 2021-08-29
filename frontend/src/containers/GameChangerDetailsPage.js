@@ -330,12 +330,20 @@ const GameChangerDetailsPage = (props) => {
 	const [showContractContainer, setShowContractContainer] = useState(false);
 	const [edaPermissions, setEDAPermissions] = useState(false);
 
+	const [sealURLOverride, setSealURLOverride] = useState(null);
+
 	const graphRef = useRef();
 	
 	useQuery(location, setQuery, query);
 	
 	useEffect(() => {
 		trackPageView('GameChanger Details Page', false);
+		
+		const orgName = 'United States Navy';
+		gameChangerAPI.getOrgImageOverrideURLs([orgName]).then(({data}) => {
+			console.log(data ? data[orgName] : null);
+			setSealURLOverride(data ? data[orgName] : null);
+		});
 	}, [])
 	
 	useEffect(() => {
@@ -492,6 +500,7 @@ const GameChangerDetailsPage = (props) => {
 					<EditEntityDialog
 						open={editEntityVisible}
 						handleClose={() => setEditEntityVisible(false)}
+						url={sealURLOverride}
 					/>
 				}
 				{entity &&
