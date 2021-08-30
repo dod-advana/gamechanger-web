@@ -362,6 +362,7 @@ const GCUserDashboard = (props) => {
 	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
 	const [groupsToDelete, setGroupsToDelete] = useState([]);
 	const [addToGroupError, setAddToGroupError] = useState("");
+	const [createGroupError, setCreateGroupError] = useState("");
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -613,9 +614,9 @@ const GCUserDashboard = (props) => {
 
 		if(userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			// setSelectedGroup({id: userData.favorite_groups[0].id, name: userData.favorite_groups[0].group_name})
 			setSelectedGroup({id: null, name: ""})
 		}
+
 		if (userData.favorite_organizations) {
 			setFavoriteOrganizations(userData.favorite_organizations)
 			setOrganizationFavoritesTotalCount(userData.favorite_organizations ? userData.favorite_organizations.length : 0);
@@ -909,7 +910,7 @@ const GCUserDashboard = (props) => {
 											</Select>
 										</FormControl>
 										<div style={{ display: 'flex' }}>
-											{addToGroupError && <div style={{color: '#f44336'}}>{addToGroupError}</div>}
+											{addToGroupError && <div style={styles.modalError}>{addToGroupError}</div>}
 											<div style={{ marginLeft: 'auto' }}>
 												<GCButton
 													onClick={() => handleCloseAddGroupModal()}
@@ -1659,10 +1660,11 @@ const GCUserDashboard = (props) => {
 			group_description: groupDescription,
 			create: true
 		}
-		setGroupDescription("");
-		setGroupName("");
-		setShowNewGroupModal(false);
+		if(documentGroups.filter(group => group.group_name === groupName).length > 0){
+			return setCreateGroupError("A group with that name already exists");
+		}
 		handleGenerateGroup(group, state, dispatch);
+		handleCloseNewGroupModal();
 	}
 
 	const handleDeleteGroup = () => {
@@ -1683,6 +1685,7 @@ const GCUserDashboard = (props) => {
 		setShowNewGroupModal(false);
 		setGroupName('');
 		setGroupDescription('');
+		setCreateGroupError('');
 	}
 
 	const renderDocumentGroups = () => {
@@ -1721,7 +1724,12 @@ const GCUserDashboard = (props) => {
 										<TextField
 											label={'Name of the Group'}
 											value={groupName}
-											onChange={(event) => { setGroupName(event.target.value); }}
+											onChange={(event) => { 
+												setGroupName(event.target.value); 
+												setCreateGroupError("");
+											}}
+											error={createGroupError}
+											helperText = {createGroupError}
 											className={classes.modalTextField}
 											margin='none'
 											size='small'
@@ -2058,6 +2066,9 @@ const styles = {
 		overlaySearchDetails: {
 			marginBottom: '10px'
 		}
+	},
+	modalError: {
+		color: '#f44336'
 	}
 }
 
