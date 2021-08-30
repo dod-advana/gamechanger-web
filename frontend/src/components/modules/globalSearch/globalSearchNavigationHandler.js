@@ -10,7 +10,7 @@ import {
 } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
 import {setState} from "../../../sharedFunctions";
-import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
+import AppTutorialsIcon from "../../../images/icon/AppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
