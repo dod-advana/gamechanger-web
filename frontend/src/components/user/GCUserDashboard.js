@@ -613,7 +613,8 @@ const GCUserDashboard = (props) => {
 
 		if(userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			setSelectedGroup({id: userData.favorite_groups[0].id, name: userData.favorite_groups[0].group_name})
+			// setSelectedGroup({id: userData.favorite_groups[0].id, name: userData.favorite_groups[0].group_name})
+			setSelectedGroup({id: null, name: ""})
 		}
 		if (userData.favorite_organizations) {
 			setFavoriteOrganizations(userData.favorite_organizations)
