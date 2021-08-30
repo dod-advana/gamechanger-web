@@ -24,8 +24,10 @@ import EDAContractDetailsPage from '../components/modules/eda/edaContractDetails
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import EditEntityDialog from '../components/admin/EditEntityDialog';
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
 
 const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 const RESULTS_PER_PAGE = 18;
 
@@ -300,6 +302,7 @@ const GameChangerDetailsPage = (props) => {
 	} = props;
 	
 	const [cloneData, setCloneData] = useState({});
+	const [userData, setUserData] = useState({});
 	const [entity, setEntity] = useState(null)
 	const [query, setQuery] = useState(null)
 	const [runningQuery, setRunningQuery] = useState(false);
@@ -346,6 +349,10 @@ const GameChangerDetailsPage = (props) => {
 	}, [])
 	
 	useEffect(() => {
+		gcUserManagementAPI.getUserData().then(data => {
+			setUserData(data.data);
+		});
+
 		const cloneName = query.get('cloneName');
 		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
@@ -474,8 +481,8 @@ const GameChangerDetailsPage = (props) => {
 				<Card key={idx}
 					item={item}
 					idx={idx}
-					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
-					//dispatch={dispatch}
+					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, userData, rawSearchResults: docResults}}
+					dispatch={() => {}}
 				/>
 			);
 		});
@@ -589,7 +596,6 @@ const GameChangerDetailsPage = (props) => {
 	}
 	
 	const renderTopicContainer = () => {
-		debugger;
 		return (
 			<div>
 				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Topic Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
@@ -701,7 +707,7 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
-									 graphData={graph}
+									 graphData={graph} userData={userData} rawSearchResults={docResults}
 				/>
 			}
 

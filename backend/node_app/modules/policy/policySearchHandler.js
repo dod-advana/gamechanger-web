@@ -282,7 +282,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 2};
+			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn){
 				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
@@ -355,7 +355,6 @@ class PolicySearchHandler extends SearchHandler {
 		if (sort === 'Relevance' && order === 'desc' && noFilters && noSourceSpecified && noPubDateSpecified && noTypeSpecified && combinedSearch && !verbatimSearch){
 			try {
 				// get intelligent search result
-				//intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(searchText, userId, req, clientObj);
 				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(sentenceResults, userId, req, clientObj);
 				return intelligentSearchResult;
 			} catch (e) {
@@ -388,14 +387,14 @@ class PolicySearchHandler extends SearchHandler {
 		if (intelligentQuestions && req.body.questionFlag){
 			try {
 				let queryType = 'documents';
-				let entities;
+				let entities = {QAResults: {}, allResults: {}};
 				let qaQueries = await this.searchUtility.formatQAquery(searchText, qaParams.entityLimit, esClientName, entitiesIndex, userId);
 				QA.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
-					entities = await this.searchUtility.getQAEntities(qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
+					entities = await this.searchUtility.getQAEntities(entities, qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId);
 				} catch (e) {
-					this.logger.error(e.message, 'FLPQX67M')
+					this.logger.error(e.message, 'FLPQX67M');
 				}
 				let qaDocQuery = this.searchUtility.phraseQAQuery(bigramQueries, queryType, qaParams.entityLimit, qaParams.maxLength, userId);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
