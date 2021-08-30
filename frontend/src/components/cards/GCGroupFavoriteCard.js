@@ -381,7 +381,7 @@ const GroupFavoriteCard = (props) => {
 					<div className={active ? 'stats-details stats-details-active' : 'stats-details stats-details-inactive'}>
 						<div className={'favorited-date'}>{createdDate}</div>
 						<div className={'stats-details-stat-div'}>
-							<GCTooltip title={`Click to see ${group.type} comments`} placement="top">
+							<GCTooltip title={`Click to see ${group.group_type} comments`} placement="top">
 								<div className={'stats-comment'}>
 									<Icon className="fa fa-comment" onClick={() => setShowComments(!showComments)}
 									/>
