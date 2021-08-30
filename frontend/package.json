@@ -18,7 +18,7 @@
 		"@material-ui/pickers": "3.2.10",
 		"axios": "^0.21.1",
 		"bezier-js": "4.0.3",
-		"bootstrap": "^5.1.0",
+		"bootstrap": "^3.4.1",
 		"browserslist": "^4.16.7",
 		"color": "^3.2.1",
 		"crypto-js": "^4.1.1",
