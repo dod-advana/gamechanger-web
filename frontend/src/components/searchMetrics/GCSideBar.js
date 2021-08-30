@@ -126,6 +126,7 @@ export default function SideBar(props) {
 	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
 	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
 	const [orgSources, setOrgSources] = useState([]);
+	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
 
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
@@ -142,17 +143,11 @@ export default function SideBar(props) {
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
 
-	const handleImgSrcError = (event, name, fallbackSources) => {
-		console.log({name});
-		if (fallbackSources.admin) {
-			// fallback to entity
-			event.target.src = fallbackSources.entity;
-		}
-		else if (fallbackSources.entity) {
-			// fallback to default
-			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
-		}
-	}
+	useEffect(() => {
+		gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({data}) => {
+			setOrgOverrideImageURLs(data);
+		});
+	}, [topEntities]);
 
 	useEffect(() => {
 		try {
@@ -185,24 +180,37 @@ export default function SideBar(props) {
 					});
 				});
 
-				setOrgSources(data);
+				setOrgSources(orgSources);
 			});
 		} catch (e) {
 			// Do nothing
 		}
-	}, []);
+	}, [state.cloneData]);
+
+	const handleImgSrcError = (event, name, fallbackSources) => {
+		console.log({name});
+		if (fallbackSources.admin) {
+			// fallback to entity
+			console.log('falling back to entity');
+			event.target.src = fallbackSources.entity;
+		}
+		else if (fallbackSources.entity) {
+			// fallback to default
+			console.log('falling back to default');
+			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+		}
+	}
 
 	const renderTopEntities = () => {
-		console.log({orgSources});
 		console.log({topEntities});
+		console.log({orgOverrideImageURLs});
 		return (
-			
 			<StyledTopEntities>
 				{topEntities.map(entity => {
-					console.log({entity});
 					let fallbackSources = {
-						admin: 'https://upload.wikimedia.org/wikipedia/admin.png',
-						entity: 'https://upload.wikimedia.org/wikipedia/entity.png'
+						s3: undefined, // use values from orgSources
+						admin: orgOverrideImageURLs[entity.name],
+						entity: entity.image
 					};
 					return (
 						<GCTooltip key={entity.name} title={entity.name} arrow enterDelay={30} leaveDelay={10} >
@@ -212,7 +220,7 @@ export default function SideBar(props) {
 							}}>
 								<img
 									alt={`${entity.name} Img`}
-									src={undefined || 'https://upload.wikimedia.org/wikipedia/admin.png' || 'https://upload.wikimedia.org/wikipedia/entity.png'}
+									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
 									onError={(event) => {
 										handleImgSrcError(event, entity.name, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
@@ -223,8 +231,7 @@ export default function SideBar(props) {
 						</GCTooltip>
 					);
 				})}
-			</StyledTopEntities>
-			
+			</StyledTopEntities>			
 		);
 	};
 
