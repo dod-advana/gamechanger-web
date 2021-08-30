@@ -128,7 +128,9 @@ class UserController {
 						where: {favorite_group_id: `${group.id}`},
 						raw: true
 					})
-					favorite_groups[index].favorites = res;
+					const favoriteList = [];
+					res.forEach(fav => favoriteList.push(fav.favorite_document_id))
+					favorite_groups[index].favorites = favoriteList;
 				})
 				user.favorite_groups = favorite_groups;
 				

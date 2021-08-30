@@ -375,6 +375,7 @@ const GCUserDashboard = (props) => {
 
 	const handleChange = ({ target }) => {
 		const groupId = documentGroups.find(group => group.group_name === target.value).id;
+		setDocumentsToGroup([]);
 		setSelectedGroup({id: groupId, name: target.value});
 	}
 
@@ -839,8 +840,8 @@ const GCUserDashboard = (props) => {
 	const handleAddToFavorites = async () => {
 		const selectedGroupInfo = userData.favorite_groups.find(group => group.id === selectedGroup.id);
 		let totalInGroup = documentsToGroup.length;
-		selectedGroupInfo.favorites.forEach(fav => {
-			if(!documentsToGroup.includes(Number(fav.favorite_document_id))) totalInGroup++;
+		selectedGroupInfo.favorites.forEach(favId => {
+			if(!documentsToGroup.includes(Number(favId))) totalInGroup++;
 		})
 		if(totalInGroup > 5) return setAddToGroupError("Groups can only contain up to 5 items");
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
@@ -852,6 +853,32 @@ const GCUserDashboard = (props) => {
 		setAddToGroupError("");
 		setShowAddToGroupModal(false);
 		setDocumentsToGroup([]);
+	}
+
+	const renderDocumentsToAdd = () => {
+		let groupFavorites;
+		if(selectedGroup.name) groupFavorites = userData.favorite_groups.find(group => group.group_name === selectedGroup.name).favorites;
+		return <div style={{overflow: 'scroll', maxHeight: 300}}>
+			{_.map(favoriteDocuments, (doc) => {
+				if(selectedGroup.name){
+					if(groupFavorites.includes(`${doc.favorite_id}`)) {
+						return <></>;
+					}
+				}
+				return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
+					<FormControlLabel
+						control={<Checkbox
+							onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
+							color="primary"
+							icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
+							checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
+							key={doc.id}
+						/>}
+						label={<Typography variant="h6" noWrap className={classes.label}>{doc.title}</Typography>}
+					/>
+				</GCTooltip>
+			})}
+		</div>
 	}
 
 	const renderDocumentFavorites = () => {
@@ -885,22 +912,7 @@ const GCUserDashboard = (props) => {
 									</CloseButton>
 									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
 									<div style={{ width: 800 }}>
-										<div style={{overflow: 'scroll', maxHeight: 300}}>
-										{_.map(favoriteDocuments, (doc) => {
-											return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
-												<FormControlLabel
-													control={<Checkbox
-														onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
-														color="primary"
-														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
-														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
-														key={doc.id}
-													/>}
-													label={<Typography variant="h6" noWrap className={classes.label}>{doc.title}</Typography>}
-												/>
-											</GCTooltip>
-										})}
-										</div>
+										{selectedGroup.name && renderDocumentsToAdd()}
 										<FormControl variant="outlined" style={{ width: '100%' }}>
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
 											<Select classes={{root: classes.groupSelect}} value={selectedGroup.name} onChange={handleChange}>
