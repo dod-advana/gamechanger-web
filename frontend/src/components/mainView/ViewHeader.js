@@ -19,9 +19,9 @@ import {
     InputLabel,
     MenuItem,  Select, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-
+import styled from 'styled-components';
 import { gcOrange } from "../common/gc-colors";
-
+import CloseIcon from '@material-ui/icons/Close';
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -63,6 +63,7 @@ const useStyles = makeStyles({
 		paddingTop: '16px'
 	}
 })
+
 
 const ViewHeader = (props) => {
 
@@ -196,14 +197,38 @@ const ViewHeader = (props) => {
 		:
 			<div className={'sidebar-section-title'}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-			</div>
-		}
-        <div className={'sidebar-section-title'}>
-
-        <div className='view-buttons-container' style={{height:'60px', display: 'flex'}}>
-            <button
+           </div>
+        }
+    {state.searchSettings.isFilterUpdate &&
+                <button
+                        type="button"
+                        style={{ border: 'none', backgroundColor: 'none', padding: '0 15px', display: 'flex', height: 40, alignItems: 'left', borderRadius: 5 }}
+                        onClick={() => {
+                            resetAdvancedSettings(dispatch);
+                            setState(dispatch, { runSearch: true, runGraphSearch: true });
+                        }}
+                    >
+                        <span style={{
+                            fontFamily: 'Montserrat',
+                            fontWeight: 150,
+                            width: '100%', marginTop: '5px', marginBottom: '10px'
+                        }}>
+                            Clear Filters
+                        </span>
+                    </button>
+            }
+            
+<div>
+        </div>
+        <div>
+        {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+                    if(state.searchSettings.typeFilter[type]){
+                        return (
+             <button
 					type="button"
-					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
+                            variant="contained"
+                            startIcon=<CloseIcon />
+					style={{ margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
 						setState(dispatch, { runSearch: true, runGraphSearch: true });
@@ -211,66 +236,44 @@ const ViewHeader = (props) => {
 				>
 					<span style={{
 						fontFamily: 'Montserrat',
-						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
+						fontWeight: 400,
+						width: '100%', marginTop: '5px', marginBottom: '10px'
 					}}>
-						Clear Filters
+                            {type}
 					</span>
 				</button>
-        </div>
-		
-        <FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
-							console.log(org);
-//                            if(index < 10 || state.seeMoreSources){
-                            if (state.searchSettings.orgFilter[org]){
-                                
-                                return (
-                                    <FormControlLabel
-                                        key={`${org}`}
-                                        value={`${originalOrgFilters[org]}`}
-                                        classes={{ label: classes.checkboxPill }}
-                                        control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.searchSettings.orgFilter[org]} />}
-                                        label={`${org}`}
-                                        labelPlacement="end"
-                                    />
-                                )
-                            }
-                            else {
-								return null;
-							}
-						})}
-					</FormGroup>
-					{state.searchSettings.specificOrgsSelected &&
-							// eslint-disable-next-line
-							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
-					}
-	        </FormControl>
-       		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-                <FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-                {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
-                    if(state.searchSettings.typeFilter[type]){
+    )} else {
+                        return null;
+                    }
+    })}
+	{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
+                    if(state.searchSettings.orgFilter[org]){
                         return (
-                            <FormControlLabel
-                                key={`${type}`}
-                                value={`${type}`}
-                                classes={{ label: classes.checkboxPill }}
-                                control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.searchSettings.typeFilter[type]}/>}
-                                label={`${type}`}
-                                labelPlacement="end"
-                            />
+                 
+             <button
+					type="button"
+					style={{margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
+					onClick={() => {
+						resetAdvancedSettings(dispatch);
+						setState(dispatch, { runSearch: true, runGraphSearch: true });
+					}}
+				>
+					<span style={{
+						fontFamily: 'Montserrat',
+						fontWeight: 400,
+						width: '100%', marginTop: '5px', marginBottom: '10px'
+					}}>
+                            {org}
+					</span>
+				</button>
                         )
                     } else {
                         return null;
                     }
-                })}
-            </FormGroup>
-        </FormControl>
-
-        </div>
-
-            <div className={'view-buttons-container'}>
+    })}
+       </div>
+    
+        <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>
