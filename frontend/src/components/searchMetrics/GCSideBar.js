@@ -141,11 +141,28 @@ export default function SideBar(props) {
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
 
+	const handleImgSrcError = (event, name, fallbackSources) => {
+		console.log({name});
+		if (fallbackSources.admin) {
+			// fallback to entity
+			event.target.src = fallbackSources.entity;
+		}
+		else if (fallbackSources.entity) {
+			// fallback to default
+			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+		}
+	}
+
 	const renderTopEntities = () => {
 		return (
 			
 			<StyledTopEntities>
 				{topEntities.map(entity => {
+					console.log({entity});
+					let fallbackSources = {
+						admin: 'https://upload.wikimedia.org/wikipedia/admin.png',
+						entity: 'https://upload.wikimedia.org/wikipedia/entity.png'
+					};
 					return (
 						<GCTooltip key={entity.name} title={entity.name} arrow enterDelay={30} leaveDelay={10} >
 							<div className={'entity-div'} onClick={() => {
@@ -154,7 +171,11 @@ export default function SideBar(props) {
 							}}>
 								<img
 									alt={`${entity.name} Img`}
-									src={entity.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png'}
+									src={undefined || 'https://upload.wikimedia.org/wikipedia/admin.png' || 'https://upload.wikimedia.org/wikipedia/entity.png'}
+									onError={(event) => {
+										handleImgSrcError(event, entity.name, fallbackSources);
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
+									}}
 								/>
 								<span>{entity.aliase}</span>
 							</div>
