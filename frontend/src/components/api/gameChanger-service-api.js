@@ -1,4 +1,4 @@
-import axiosLib from "axios";
+import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import {axiosGET, axiosDELETE, axiosPOST} from '../../gamechangerUtils';
@@ -51,6 +51,7 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
+	gcOrgSealData: '/api/gameChanger/getOrgSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
@@ -347,6 +348,11 @@ export default class GameChangerAPI {
 
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
+		return axiosPOST(this.axios, url);
+	}
+
+	gcOrgSealData = async () => {
+		const url = endpoints.gcOrgSealData;
 		return axiosPOST(this.axios, url);
 	}
 	

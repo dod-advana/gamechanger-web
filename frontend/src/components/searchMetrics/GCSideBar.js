@@ -9,6 +9,8 @@ import {getTrackingNameForFactory, orgColorMap} from "../../gamechangerUtils";
 import GCTooltip from "../common/GCToolTip";
 import GCAccordion from "../common/GCAccordion";
 import ReactTable from 'react-table';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import DefaultSeal from '../mainView/seals/GC Default Seal.png';
 
 const gcColors = {
 	buttonColor1: '#131E43',
@@ -110,8 +112,8 @@ export const StyledTopTopics = styled.div`
 	}
 `;
 
+const gameChangerAPI = new GameChangerAPI();
 export default function SideBar(props) {
-	
 	const {
 		cloneData = {},
 		context
@@ -123,8 +125,7 @@ export default function SideBar(props) {
 	const [topTopics, setTopTopics] = useState([]);
 	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
 	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
-	
-	
+	const [orgSources, setOrgSources] = useState([]);
 
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
@@ -153,7 +154,47 @@ export default function SideBar(props) {
 		}
 	}
 
+	useEffect(() => {
+		try {
+			gameChangerAPI.gcOrgSealData().then(({data}) => {
+				console.log({data});
+				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
+				console.log({orgSources});
+				let folder = orgSources[0].image_link.split('/');
+				folder = folder[folder.length - 2];
+				console.log({folder});
+				const thumbnailList = orgSources.map(item => {
+					let filename = item.image_link.split('/').pop();
+					return {img_filename: filename}
+				});
+				console.log({thumbnailList});
+				gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
+					console.log({data});
+					const buffers = data;
+					buffers.forEach((buf,idx) => {
+						if (buf.status === 'fulfilled') {
+							if (orgSources[idx].image_link.split('.').pop() === 'png'){
+								orgSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+							} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
+								orgSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+							}
+						}
+						else {
+							orgSources[idx].imgSrc = DefaultSeal;
+						}
+					});
+				});
+
+				setOrgSources(data);
+			});
+		} catch (e) {
+			// Do nothing
+		}
+	}, []);
+
 	const renderTopEntities = () => {
+		console.log({orgSources});
+		console.log({topEntities});
 		return (
 			
 			<StyledTopEntities>

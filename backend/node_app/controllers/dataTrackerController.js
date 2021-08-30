@@ -1,6 +1,7 @@
 const DOCUMENT_CORPUS = require('../models').gc_document_corpus_snapshot;
 const CRAWLER_STATUS = require('../models').crawler_status;
 const CRAWLER_INFO = require('../models').crawler_info;
+const ORGANIZATION_INFO = require('../models').organization_info;
 const VERSIONED_DOCS = require('../models').versioned_docs;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
@@ -14,6 +15,7 @@ class DataTrackerController {
 			documentCorpus = DOCUMENT_CORPUS,
 			crawlerStatus = CRAWLER_STATUS,
 			crawlerInfo = CRAWLER_INFO,
+			organizationInfo = ORGANIZATION_INFO,
 			versioned_docs = VERSIONED_DOCS,
 		} = opts;
 
@@ -21,6 +23,7 @@ class DataTrackerController {
 		this.documentCorpus = documentCorpus;
 		this.crawlerStatus = crawlerStatus;
 		this.crawlerInfo = crawlerInfo;
+		this.organizationInfo = organizationInfo;
 		this.versioned_docs = versioned_docs;
 
 		this.getTrackedData = this.getTrackedData.bind(this);
@@ -29,6 +32,7 @@ class DataTrackerController {
 		this.crawlerDateHelper = this.crawlerDateHelper.bind(this);
 		this.getCrawlerMetadata = this.getCrawlerMetadata.bind(this);
 		this.getCrawlerSealData = this.getCrawlerSealData.bind(this);
+		this.getOrgSealData = this.getOrgSealData.bind(this);
 	}
 
 	async getBrowsingLibrary(req, res) {
@@ -218,6 +222,20 @@ class DataTrackerController {
 		}
 	}
 	
+	async getOrgSealData(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const orgData = await this.organizationInfo.findAndCountAll({});
+			const orgDataCleaned = orgData.rows.map((item) => {
+				return item.dataValues;
+			});
+			res.status(200).send(orgDataCleaned);
+		} catch (e) {
+			this.logger.error(e.message, 'VMHW263', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving organization seals' });
+		}
+	}
 }
 
 module.exports.DataTrackerController = DataTrackerController;
