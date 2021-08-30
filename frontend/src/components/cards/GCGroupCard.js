@@ -124,9 +124,9 @@ const GroupCard = (props) => {
 				</div>
             </div>
 			<div style={{position: 'relative'}}>
-				{favorites.map((fav, index) => {
-					const doc = state.userData.favorite_documents.find(fav_doc => {
-						return fav.favorite_document_id === `${fav_doc.favorite_id}`;
+				{favorites.map((favId, index) => {
+					const doc = state.userData.favorite_documents.find(doc => {
+						return favId === `${doc.favorite_id}`;
 					})
 					const favCardStyles = {
 						main: `top: ${index * 60}px; 
