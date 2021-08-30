@@ -4,9 +4,12 @@ import SearchBar from "../components/searchBar/SearchBar";
 import {getContext} from "../components/factories/contextFactory";
 import GCAccordion from "../components/common/GCAccordion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from 'recharts';
-import { TextField, Typography } from '@material-ui/core';
+import { TextField, Typography, Checkbox, FormControlLabel } from '@material-ui/core';
 import SimpleTable from "../components/common/SimpleTable";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import GCPrimaryButton from "../components/common/GCButton";
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 const StyledNavBar = styled.div`
 	width: 100%;
@@ -104,6 +107,49 @@ const StyledAccordionContainer = styled.div`
     width: 100%;
     margin: 0 0 15px 0;
 `;
+
+const StyledTableKeyContainer = styled.div`
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+`;
+
+const StyledTableValueContainer = styled.div`
+    padding: 15px;
+`;
+
+const StyledCheckboxContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+`;
+
+const StyledInlineContainer = styled.div`
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    justify-content: ${({justifyContent}) => justifyContent ?? 'space-between' }
+`;
+
+const StyledFooterDiv = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+`;
+
+const StyledAccordionHeader = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+`;
+
+const firstColWidth = {
+    maxWidth: 100,
+	whiteSpace: 'nowrap',
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+}
 
 const samplePieData = [
     {
@@ -228,6 +274,7 @@ const jaicReviewData = [
     {
         Key: 'Reviewers',
         Value: <Autocomplete
+                    size="small"
                     options={[]}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300 }}
@@ -237,6 +284,7 @@ const jaicReviewData = [
     {
         Key: 'Core AI Analysis',
         Value: <Autocomplete
+                    size="small"
                     options={[]}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300, backgroundColor: 'white' }}
@@ -246,6 +294,7 @@ const jaicReviewData = [
     {
         Key: 'Service/DoD Component Reviewer',
         Value: <Autocomplete
+                    size="small"
                     options={[]}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300, backgroundColor: 'white' }}
@@ -255,6 +304,7 @@ const jaicReviewData = [
     {
         Key: 'Review Status',
         Value: <Autocomplete
+                    size="small"
                     options={[]}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300, backgroundColor: 'white' }}
@@ -264,6 +314,7 @@ const jaicReviewData = [
     {
         Key: 'Planned Transition Partner',
         Value: <Autocomplete
+                    size="small"
                     options={[]}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300, backgroundColor: 'white' }}
@@ -275,6 +326,7 @@ const jaicReviewData = [
         Value: 
         <> 
             <Autocomplete
+                size="small"
                 options={[]}
                 getOptionLabel={(option) => option.title}
                 style={{ width: 300, backgroundColor: 'white' }}
@@ -298,12 +350,45 @@ const jaicReviewData = [
     }
 ];
 
+const renderMissionPartnerCheckboxes = () => {
+    const missionPartners = ['Alion Science and Technology Corporation', 'Austal USA LLC', 'General Dynamics Corporation', 'Innovative Professional Solutions Inc.', 'Johns Hopkins University', 'Raytheon Company', 'Saic Gemini Inc.', 'Technical Systems Integration Inc.', 'Textron Inc.'];
+    const checkboxes = [];
+    for (const name of missionPartners) {
+        checkboxes.push(
+            <FormControlLabel
+                name={name}
+                value={name}
+                style={{ margin: '0 20px 0 0'}}
+                control={<Checkbox
+                    style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '5px',
+                        padding: '2px',
+                        border: '2px solid #bdccde',
+                        pointerEvents: 'none',
+                        margin: '2px 5px 0px'
+                    }}
+                    onClick={() => {}}
+                    icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
+                    checked={true}
+                    checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
+                    name={name}
+                />}
+                label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{name}</span>}
+                labelPlacement="end"                        
+            />
+        );
+    }
+
+    return checkboxes;
+}
+
 const serviceReviewData = [
     {
-        Key: <div style={{ width: "100%", height: "100%", padding: "10px"}}><strong>AI Labeling</strong></div>,
+        Key: <StyledTableKeyContainer><strong>AI Labeling</strong></StyledTableKeyContainer>,
         Value: 
-        <div style={{ padding: '0 15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0' }}>
+        <StyledTableValueContainer>
+            <StyledInlineContainer>
                 <Typography variant="subtitle1" style={{ fontSize: 16 }}>Do you agree with the JAIC's labeling of "Not AI" for this effort?</Typography>
                 <Autocomplete
                     size="small"
@@ -311,8 +396,8 @@ const serviceReviewData = [
                     getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0' }}>
+            </StyledInlineContainer>
+            <StyledInlineContainer>
                 <Typography variant="subtitle1" style={{ fontSize: 16 }}>If you don't agree, how would you label this effort? </Typography>
                 <Autocomplete
                     size="small"
@@ -320,8 +405,117 @@ const serviceReviewData = [
                     getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
+            </StyledInlineContainer>
+        </StyledTableValueContainer>
+    },
+    {
+        Key: <StyledTableKeyContainer><strong>Transition Partners</strong></StyledTableKeyContainer>,
+        Value: 
+        <StyledTableValueContainer>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0' }}>
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>Is the transition partner known for this effort?</Typography>
+                <Autocomplete
+                    style={{ backgroundColor: 'white' }}
+                    size="small"
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
             </div>
-        </div>
+        </StyledTableValueContainer>
+    },
+    {
+        Key: <StyledTableKeyContainer>
+                <strong>Academic/Industry Mission Partners</strong>
+                <Typography variant="subtitle1" style={{ fontSize: 14 }}>Please uncheck any academic or industry mission partners not applicable for this effort</Typography>
+             </StyledTableKeyContainer>,
+        Value: 
+        <StyledTableValueContainer>
+            <Typography variant="subtitle1" style={{ fontSize: 16 }}>Based on our analysis of contract data, here are the identified academic and industry mission partners.</Typography>
+            <StyledCheckboxContainer>
+                {renderMissionPartnerCheckboxes()}
+            </StyledCheckboxContainer>
+            <Typography variant="subtitle1" style={{ fontSize: 16 }}>Are there any mission partners not listed above (please list using commas):</Typography>
+            <TextField
+                placeholder=""
+                variant="outlined"
+                defaultValue={''}
+                style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
+                onBlur={() => {}}
+                inputProps={{
+                    style: {
+                        width: '100%'
+                    }
+                }}
+            />
+        </StyledTableValueContainer>
+    },
+    {
+        Key: 
+        <StyledTableKeyContainer>
+            <strong>AI Point of Contact (POC) for Effort</strong>
+            <Typography variant="subtitle1" style={{ fontSize: 14 }}>If available, please share the appropriate AI POC for this effort.</Typography>
+        </StyledTableKeyContainer>,
+        Value:
+        <StyledTableValueContainer>
+            <StyledInlineContainer justifyContent={'left'}>
+                <Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>POC Title</Typography>
+                <TextField
+                    placeholder="Title"
+                    variant="outlined"
+                    defaultValue={''}
+                    style={{ backgroundColor: 'white', width: '40%' }}
+                    onBlur={() => {}}
+                    size="small"
+                />
+            </StyledInlineContainer>
+            <StyledInlineContainer justifyContent={'left'}>
+                <Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>POC Name</Typography>
+                <TextField
+                    placeholder="Name"
+                    variant="outlined"
+                    defaultValue={''}
+                    style={{ backgroundColor: 'white', width: '40%'  }}
+                    onBlur={() => {}}
+                    size="small"
+                />
+            </StyledInlineContainer>
+            <StyledInlineContainer justifyContent={'left'}>
+                <Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>POC Email</Typography>
+                <TextField
+                    placeholder="Email"
+                    variant="outlined"
+                    defaultValue={''}
+                    style={{ backgroundColor: 'white', width: '40%'  }}
+                    onBlur={() => {}}
+                    size="small"
+                />
+            </StyledInlineContainer>
+        </StyledTableValueContainer>
+    },
+    {
+        Key: 
+        <StyledTableKeyContainer>
+            <strong>Reviewer Notes</strong>
+        </StyledTableKeyContainer>,
+        Value: 
+        <StyledTableValueContainer>
+        <TextField
+            placeholder="Reviewer Notes"
+            variant="outlined"
+            defaultValue={''}
+            style={{ backgroundColor: 'white', width: '100%' }}
+            onBlur={() => {}}
+            inputProps={{
+                style: {
+                    width: '100%'
+                }
+            }}
+            rows={6}
+            multiline
+        />
+        </StyledTableValueContainer>
+
     }
 ];
 
@@ -432,6 +626,7 @@ const renderVendors = () => {
                     color: 'white'
                 }}
                 hideSubheader={true}
+                firstColWidth={firstColWidth}
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
@@ -445,6 +640,7 @@ const renderVendors = () => {
                     color: 'white'
                 }}
                 hideSubheader={true}
+                firstColWidth={firstColWidth}
             />
         </StyledTableContainer>
     )
@@ -465,6 +661,7 @@ const renderAccomplishments = () => {
                     color: 'white'
                 }}
                 hideSubheader={true}
+                firstColWidth={firstColWidth}
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
@@ -478,6 +675,7 @@ const renderAccomplishments = () => {
                     backgroundColor: '#1C2D64',
                     color: 'white'
                 }}
+                firstColWidth={firstColWidth}
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
@@ -491,6 +689,7 @@ const renderAccomplishments = () => {
                     color: 'white'
                 }}
                 hideSubheader={true}
+                firstColWidth={firstColWidth}
             />
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
@@ -504,6 +703,7 @@ const renderAccomplishments = () => {
                     color: 'white'
                 }}
                 hideSubheader={true}
+                firstColWidth={firstColWidth}
             />
         </StyledTableContainer>
     );
@@ -527,14 +727,27 @@ const renderJAICReview = () => {
                     color: 'white'
                 }}
                 hideHeader={true}
+                firstColWidth={firstColWidth}
             />
+            <StyledFooterDiv>
+                <GCPrimaryButton
+                    style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+                >
+                    Submit and Go to Home
+                </GCPrimaryButton>
+                <GCPrimaryButton
+                    style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+                >
+                    Submit
+                </GCPrimaryButton>
+            </StyledFooterDiv>
         </StyledTableContainer>
     );
 }
 
 const renderServiceReviewer = () => {
     return (
-        <StyledTableContainer>
+    <StyledTableContainer>
         <div style={{ margin: '0 0 15px 0'}}>
             <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
         </div>
@@ -550,9 +763,64 @@ const renderServiceReviewer = () => {
                 color: 'white'
             }}
             hideHeader={true}
+            firstColWidth={firstColWidth}
         />
+        <StyledFooterDiv>
+            <GCPrimaryButton
+                style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+            >
+                Save (Partial Review)
+            </GCPrimaryButton>
+            <GCPrimaryButton
+                style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+            >
+                Submit and Go to Home (Finished Review)
+            </GCPrimaryButton>
+            <GCPrimaryButton
+                style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+            >
+                Submit
+            </GCPrimaryButton>
+        </StyledFooterDiv>
     </StyledTableContainer>
     );
+}
+
+const renderPOCReviewer = () => {
+    return (
+        <StyledAccordionDiv>
+
+        </StyledAccordionDiv>
+    );
+}
+
+const renderSecondaryReviewer = () => {
+    return (
+        <div style={{ padding: '0 15px 20px', width: '100%'}}>
+            <StyledInlineContainer>
+                <Typography variant="subtitle1" style={{ fontSize: 16, fontWeight: 500 }}>Do you agree with the Service / DoD Component's review for this effort</Typography>
+                <Autocomplete
+                    size="small"
+                    options={[]}
+                    getOptionLabel={(option) => option.title}
+                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                />
+                <Typography variant="subtitle1" style={{ color: '#F9B32D', fontSize: '18px', textAlign: 'right', fontWeight: 500 }}>Needs Review</Typography>
+            </StyledInlineContainer>
+            <StyledFooterDiv>
+                <GCPrimaryButton
+                    style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+                >
+                    Submit and Go to Home
+                </GCPrimaryButton>
+                <GCPrimaryButton
+                    style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+                >
+                    Submit
+                </GCPrimaryButton>
+            </StyledFooterDiv>
+        </div>
+    )
 }
 
 const BudgetSearchProfilePage = (props) => {
@@ -592,22 +860,22 @@ const BudgetSearchProfilePage = (props) => {
             <StyledContainer>
                 <StyledLeftContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'AI Category'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'AI Category'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderAICategory()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={false} header={'Classifier'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'} style={{ width: '100%' }}>
+                        <GCAccordion contentPadding={0} expanded={false} header={'Classifier'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'} style={{ width: '100%' }}>
                             {renderClassifier()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'User Summary on AI'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'User Summary on AI'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderUserSummaryInput()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'Other Projects'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'Other Projects'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderOtherProjects()}
                         </GCAccordion>
                     </StyledAccordionContainer>
@@ -643,35 +911,66 @@ const BudgetSearchProfilePage = (props) => {
                         color: 'white'
                     }}
                     hideSubheader={true}
+                    firstColWidth={firstColWidth}
                 />
                 </StyledRightContainer>
             </StyledContainer>
             <StyledReviewContainer>
                 <StyledReviewLeftContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'ACCOMPLISHMENTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'ACCOMPLISHMENTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderAccomplishments()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'CONTRACTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'CONTRACTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderVendors()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'JAIC REVIEW'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
+                            <StyledAccordionHeader headerWidth='100%'>
+                                <strong>JAIC REVIEW</strong>
+                                <FiberManualRecordIcon style={{ color: 'green' }} />
+                            </StyledAccordionHeader>
+                        } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderJAICReview()}
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'SERVICE REVIEWER'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
+                            <StyledAccordionHeader>
+                                <strong>SERVICE REVIEWER</strong>
+                                <FiberManualRecordIcon style={{ color: 'green' }} />
+                            </StyledAccordionHeader>
+                        } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderServiceReviewer()}
                         </GCAccordion>                    
+                    </StyledAccordionContainer>
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={false} headerWidth='100%' header={
+                            <StyledAccordionHeader>
+                                <strong>POC REVIEWER</strong>
+                                <FiberManualRecordIcon style={{ color: 'green' }} />
+                            </StyledAccordionHeader>
+                        } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+                            {renderPOCReviewer()}
+                        </GCAccordion>
+                    </StyledAccordionContainer>
+                    <StyledAccordionContainer>
+                        <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
+                            <StyledAccordionHeader>
+                                <strong>SECONDARY REVIEWER SECTION</strong>
+                                <FiberManualRecordIcon style={{ color: '#F9B32D' }} />
+                            </StyledAccordionHeader>
+                        } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+                            {renderSecondaryReviewer()}
+                        </GCAccordion>
                     </StyledAccordionContainer>
                 </StyledReviewLeftContainer>
                 <StyledReviewRightContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'MISSION PARTNERS'} headerBackground={'#1C2D64'} headerTextColor={'white'} headerTextWeight={'normal'}>
+                        <GCAccordion contentPadding={0} expanded={true} header={'MISSION PARTNERS'} headerBackground={'#1C2D64'} headerTextColor={'white'} headerTextWeight={'600'}>
                             {renderMissionPartners()}
                         </GCAccordion>                    
                     </StyledAccordionContainer>
