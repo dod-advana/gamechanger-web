@@ -361,7 +361,7 @@ const GCUserDashboard = (props) => {
 	const [documentsToGroup, setDocumentsToGroup] = useState([]);
 	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
 	const [groupsToDelete, setGroupsToDelete] = useState([]);
-	const [tooManyInGroupError, setTooManyInGroupError] = useState(false);
+	const [addToGroupError, setAddToGroupError] = useState("");
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -840,13 +840,14 @@ const GCUserDashboard = (props) => {
 		selectedGroupInfo.favorites.forEach(fav => {
 			if(!documentsToGroup.includes(Number(fav.favorite_document_id))) totalInGroup++;
 		})
-		if(totalInGroup > 5) return setTooManyInGroupError(true);
+		if(totalInGroup > 5) return setAddToGroupError("Groups can only contain up to 5 items");
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
 		updateUserData();
 		handleCloseAddGroupModal();
 	}
 
 	const handleCloseAddGroupModal = () => {
+		setAddToGroupError("");
 		setShowAddToGroupModal(false);
 		setDocumentsToGroup([]);
 	}
@@ -906,19 +907,21 @@ const GCUserDashboard = (props) => {
 											})}
 											</Select>
 										</FormControl>
-										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-											{tooManyInGroupError && <div>Groups can't contain more than 5 items</div>}
-											<GCButton
-												onClick={() => handleCloseAddGroupModal()}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-												isSecondaryBtn
-											>Close
-											</GCButton>
-											<GCButton
-												onClick={() => handleAddToFavorites()}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-											>Save
-											</GCButton>
+										<div style={{ display: 'flex' }}>
+											{addToGroupError && <div style={{color: '#f44336'}}>{addToGroupError}</div>}
+											<div style={{ marginLeft: 'auto' }}>
+												<GCButton
+													onClick={() => handleCloseAddGroupModal()}
+													style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+													isSecondaryBtn
+												>Close
+												</GCButton>
+												<GCButton
+													onClick={() => handleAddToFavorites()}
+													style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												>Save
+												</GCButton>
+											</div>
 										</div>
 									</div>
 								</div>
