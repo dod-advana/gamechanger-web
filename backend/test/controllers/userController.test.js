@@ -392,6 +392,15 @@ describe('UserController', function () {
 				clone_index: 'Test'
 			}];
 
+			const favorite_organizations = [{
+				id: 1,
+				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				organization_name: 'Test',
+				organization_summary: 'Test',
+				is_clone: false,
+				clone_index: 'Test'
+			}];
+
 			const search_hisotry = [{
 				id: 1,
 				user_id: '27d1ca9e10b731476b7641eae2710ac0',
@@ -534,6 +543,31 @@ describe('UserController', function () {
 						}
 					}
 				},
+				favoriteOrganization: {
+					sequelize: {
+						fn(data) {},
+						col(data) {}
+					},
+					findAll(data) {
+						if (data.hasOwnProperty('attributes')) {
+							let count = 0;
+							favorite_organizations.forEach(org => {
+								if (data.where.organization_name === org.organization_name) {
+									count += 1;
+								}
+							});
+							return Promise.resolve([{favorited_count: count}]);
+						} else {
+							returnFavoriteOrganizations = [];
+							favorite_organizations.forEach(org => {
+								if (data.where.user_id === org.user_id) {
+									returnFavoriteOrganizations.push(org);
+								}
+							});
+							return Promise.resolve(returnFavoriteOrganizations);
+						}
+					}
+				},
 				gcHistory: {
 					findAll(data) {
 						returnGCHistory = [];
@@ -586,7 +620,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': {'favorites': 0, 'history': 0, 'total': 0}, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': {'favorites': 0, 'history': 0, 'total': 0}, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(resMsg, expected);
 
 		});
