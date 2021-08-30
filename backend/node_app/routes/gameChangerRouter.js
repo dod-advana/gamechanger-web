@@ -11,6 +11,7 @@ const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { AdminController } = require('../controllers/adminController');
+const { ReviewController } = require('../controllers/reviewController');
 const { NotificationController } = require('../controllers/notificationController');
 const { TransformerController } = require('../controllers/transformerController');
 const { TutorialOverlayController } = require('../controllers/tutorialOverlaysController');
@@ -43,6 +44,8 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
+
+const review = new ReviewController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -158,6 +161,8 @@ router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);
+
+router.get('/review/getReview', review.getProjReview);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
