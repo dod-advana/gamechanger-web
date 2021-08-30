@@ -350,22 +350,24 @@ const GroupCard = (props) => {
 							tansition: top 1s;
 						}`
 					}
-
-					return <GroupFavoriteCard
-					key={`${doc.favorite_id}`}
-					cardTitle={doc.title}
-					isDocument={true}
-					documentObject={doc}
-					handleDeleteFavorite={()=>{}}
-					summary={doc.summary}
-					overlayText={doc.favorite_summary}
-					idx={doc.favorite_id}
-					cloneData={state.cloneData}
-					styles={favCardStyles}
-					handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
-					dispatch={dispatch}
-					group={group}
-				/>
+					if(doc){
+						return <GroupFavoriteCard
+							key={`${doc.favorite_id}`}
+							cardTitle={doc.title}
+							isDocument={true}
+							documentObject={doc}
+							handleDeleteFavorite={()=>{}}
+							summary={doc.summary}
+							overlayText={doc.favorite_summary}
+							idx={doc.favorite_id}
+							cloneData={state.cloneData}
+							styles={favCardStyles}
+							handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
+							dispatch={dispatch}
+							group={group}
+						/>
+					} else {return}
+					
 				})}
 			</div>
             <div style={styles.details}>

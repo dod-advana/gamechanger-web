@@ -66,7 +66,7 @@ class FavoritesController {
 			const hashed_user = this.sparkMD5.hash(userId);
 			const new_id = getTenDigitUserId(userId)
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
-			const { filename, favorite_name, favorite_summary, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
+			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteDocument.findOrCreate(
@@ -92,6 +92,11 @@ class FavoritesController {
 						filename: filename
 					}
 				});
+				this.favoriteDocumentsGroup.destroy({
+					where: {
+						favorite_document_id: `${favorite_id}`
+					}
+				})
 				res.status(200).send(deleted);
 			}
 		} catch (err) {
