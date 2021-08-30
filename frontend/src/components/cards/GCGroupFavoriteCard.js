@@ -10,7 +10,7 @@ import moment from 'moment';
 
 // Local Imports
 import {trackEvent} from '../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, encode } from '../../gamechangerUtils';
 import GCTooltip from "../common/GCToolTip"
 import GCButton from "../common/GCButton";
 import {CardButton} from '../common/CardButton';
@@ -286,6 +286,8 @@ const GroupFavoriteCard = (props) => {
 		cloneData
 	} = props;
 
+	const createdDate = moment(Date.parse(documentObject.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [popoverAnchorEl, setPopoverAnchorEl] = useState(null);
 	const [popoverIdx, setPopoverIdx] = useState(-1);
@@ -303,9 +305,14 @@ const GroupFavoriteCard = (props) => {
 			setPopoverIdx(-1);
 		}
 	}
-	
-	const createdDate = moment(Date.parse(documentObject.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
 
+	const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
+	};
+	
 	return (
 		<StyledFavoriteDocumentCard key={idx} groupStyles={styles} active={active} onClick={() => {if(!active) setActive(true)}} style={active ? {height: 500, top: 0} : {}}>
 			<div className={'main-info'}>
@@ -385,7 +392,7 @@ const GroupFavoriteCard = (props) => {
 							<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE: 14}} href={'#'}
 								onClick={(e) => {
 									e.preventDefault();
-									// clickFn(doc.filename, state.cloneData.clone_name, doc.search_text, 0, item.download_url_s);
+									clickFn(documentObject.filename, cloneData.clone_name, documentObject.search_text, 0);
 								}}
 							>
 								Open
