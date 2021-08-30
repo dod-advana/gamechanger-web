@@ -54,7 +54,7 @@ const styles = {
 	}
 }
 
-const EditEntityDialog = ({ open, handleClose, url, orgName }) => {
+const EditEntityDialog = ({ open, handleClose, url, orgName, setSealURLOverride }) => {
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
 	const [sealURL, setSealURL] = useState(url);
@@ -66,6 +66,7 @@ const EditEntityDialog = ({ open, handleClose, url, orgName }) => {
 	async function handleSave() {
 		try {
 			await gameChangerAPI.saveOrgImageOverrideURL({ name: orgName, imageURL: sealURL });
+			setSealURLOverride(sealURL);
 			handleClose();
 		} catch(err) {
 			console.log({ err });
