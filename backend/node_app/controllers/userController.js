@@ -3,6 +3,7 @@ const GC_USER = require('../models').gc_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const EXPORT_HISTORY = require('../models').export_history;
 const LOGGER = require('../lib/logger');
@@ -28,6 +29,7 @@ class UserController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteOrganization = FAVORITE_ORGANIZATION,
 			gcHistory = GC_HISTORY,
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
@@ -49,6 +51,7 @@ class UserController {
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteOrganization = favoriteOrganization;
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
@@ -108,6 +111,12 @@ class UserController {
 					where: {user_id: user.user_id},
 					raw: true
 				});
+
+				const favorite_organizations = await this.favoriteOrganization.findAll({
+					where: {user_id: user.user_id},
+					raw: true
+				});
+
 				const search_history = await this.gcHistory.findAll({
 					where: {
 						user_id: user.user_id,
@@ -222,6 +231,20 @@ class UserController {
 					user.favorite_topics = favorite_topics;
 				} else {
 					user.favorite_topics = [];
+				}
+
+				if (favorite_organizations) {
+					for (const org of favorite_organizations) {
+						const countData = await this.favoriteOrganization.findAll({
+							attributes: [[this.favoriteOrganization.sequelize.fn('COUNT', this.favoriteOrganization.sequelize.col('id')), 'favorited_count']],
+							where: {organization_name: org.organization_name},
+							raw: true
+						});
+						org.favorited = countData[0].favorited_count;
+					}
+					user.favorite_organizations = favorite_organizations;
+				} else {
+					user.favorite_organizations = [];
 				}
 
 				if (search_history) {
