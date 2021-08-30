@@ -9,6 +9,8 @@ import Icon from "@material-ui/core/Icon";
 import moment from 'moment';
 
 // Local Imports
+import {trackEvent} from '../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../gamechangerUtils';
 import GCTooltip from "../common/GCToolTip"
 import GCButton from "../common/GCButton";
 import {CardButton} from '../common/CardButton';
@@ -281,6 +283,7 @@ const GroupFavoriteCard = (props) => {
 		handleRemoveFavoriteFromGroup,
 		dispatch,
 		group,
+		cloneData
 	} = props;
 
 	const [popoverOpen, setPopoverOpen] = useState(false);
@@ -391,8 +394,8 @@ const GroupFavoriteCard = (props) => {
 								style={{...styles.footerButtonBack, CARD_FONT_SIZE:14}}
 								href={'#'}
 								onClick={(e) => {
-									// trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
-									// window.open(`#/gamechanger-details?cloneName=${state.cloneData.clone_name}&type=document&documentName=${item.id}`);
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${documentObject.id}`);
 									e.preventDefault();
 								}}
 							>
@@ -423,7 +426,6 @@ GroupFavoriteCard.propTypes = {
 	idx: PropTypes.number.isRequired,
 	tiny_url: PropTypes.string,
 	overlayText: PropTypes.string,
-	isDocument: PropTypes.bool,
 	documentObject: PropTypes.objectOf(PropTypes.string),
 	isTopic: PropTypes.bool,
 	isOrganization: PropTypes.bool,
