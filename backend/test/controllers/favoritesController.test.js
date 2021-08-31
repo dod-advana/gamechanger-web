@@ -298,6 +298,64 @@ describe('FavoritesController', function () {
 		});
 	});
 
+	describe('#favoriteOrganizationPOST', () => {
+		it('should create a favorite organization', (done) => {
+			const apiResMock = [{}, true];
+			const expectedReturn = {};
+			const statusMock = 200;
+			const constants = {
+				env: {
+					GAME_CHANGER_OPTS: {
+						version: 'version'
+					}
+				}
+			};
+
+			const favoriteOrganization = {
+				findOrCreate() {
+					return Promise.resolve(apiResMock);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				favoriteOrganization
+			};
+			const target = new FavoritesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					is_favorite: true,
+					organization: 'United States Navy'
+				}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				target.favoriteOrganizationPOST(req, res).then(() => {
+					assert.equal(resCode, statusMock);
+					assert.deepEqual(resMsg, expectedReturn);
+					done();
+				});
+			} catch (e) {
+				assert.fail(e);
+			}
+		});
+	});
+
 	describe('#favoriteDocumentPOST', () => {
 		it('should create a favorite document', (done) => {
 			const apiResMock = [{}, true];

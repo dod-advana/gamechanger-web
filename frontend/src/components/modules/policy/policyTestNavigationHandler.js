@@ -14,7 +14,7 @@ import {
 } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
 import { setState } from "../../../sharedFunctions";
-import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
+import AppTutorialsIcon from "../../../images/icon/AppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import CrowdSourcingAppIcon from "../../../images/icon/NewCrowdSourcingIcon.png";
 import DataStatusTrackerIcon from "../../../images/icon/NewDataStatusTrackerIcon.png";
