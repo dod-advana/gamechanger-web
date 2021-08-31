@@ -679,6 +679,19 @@ const getDisplayTitle = (item) => {
 	return item.display_title_s ? item.display_title_s : item.title;
 };
 
+const handleImgSrcError = (event, fallbackSources) => {
+	if (fallbackSources.admin) {
+		// fallback to entity
+		console.log('falling back to entity');
+		event.target.src = fallbackSources.entity;
+	}
+	else if (fallbackSources.entity) {
+		// fallback to default
+		console.log('falling back to default');
+		event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+	}
+};
+
 const PolicyCardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
@@ -1103,6 +1116,7 @@ const PolicyCardHandler = {
 		getDisplayTitle: (item) => {
 			return item.name;
 		},
+
 		getCardHeader: (props) => {
 			const {item, state, favoriteComponent} = props;
 			const displayTitle = item.name;
@@ -1161,6 +1175,7 @@ const PolicyCardHandler = {
 				 state,
 				 backBody
 			} = props;
+			console.log({item});
 			
 			if (state.listView) {
 				if (item.description?.length > 300) {
@@ -1185,13 +1200,25 @@ const PolicyCardHandler = {
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
-			}else {
+			} else {
+				let fallbackSources = {
+					s3: undefined,
+					admin: item.sealURLOverride,
+					entity: item.image
+				};
+				
 				return (
 					<StyledEntityTopicFrontCardContent listView={state.listView}>
-						{!state.listView && item.image && <img
-							alt="Office Img"
-							src={item.image}
-						/>}
+						{!state.listView && item.image && 
+							<img
+								alt="Office Img"
+								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+								onError={(event) => {
+									handleImgSrcError(event, fallbackSources);
+									if (fallbackSources.admin) fallbackSources.admin = undefined;
+								}}
+							/>
+						}
 						<p>{item.description}</p>
 					</StyledEntityTopicFrontCardContent>
 				);
