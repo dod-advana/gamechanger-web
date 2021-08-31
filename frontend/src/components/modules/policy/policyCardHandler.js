@@ -1367,7 +1367,7 @@ const PolicyCardHandler = {
 							</div>
 						</GCTooltip>
 						<div className={'selected-favorite'}>
-							<div style={{display: "flex"}}>
+							<div style={{display: 'flex'}}>
 								{/* {state.listView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
 								{checkboxComponent(item.filename, `${type} ${num}`, idx)} */}
 								{favoriteComponent()}
