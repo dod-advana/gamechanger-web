@@ -31,7 +31,7 @@ const styles = {
     },
     titleSection: {
         color: '#000000',
-        fontFamily: "Noto Sans",
+        fontFamily: "Montserrat",
         lineHeight: 1.5,
         maxHeight: 60,
 		height: 60,
@@ -65,6 +65,13 @@ const styles = {
 	groupDetails: {
 		position: 'absolute',
 		bottom: 0
+	},
+	placeHolder: {
+		fontFamily: 'Montserrat',
+		fontSize: 20,
+		fontWeight: 300,
+		textAlign: 'center',
+		marginTop: 50
 	}
 }
 
@@ -123,10 +130,11 @@ const GroupCard = (props) => {
 					{group.group_description}
 				</div>
             </div>
+			{favorites.length > 0 ? 
 			<div style={{position: 'relative'}}>
 				{favorites.map((favId, index) => {
 					const doc = state.userData.favorite_documents.find(doc => {
-						return favId === `${doc.favorite_id}`;
+						return favId === doc.favorite_id;
 					})
 					const favCardStyles = {
 						main: `top: ${index * 60}px; 
@@ -155,7 +163,10 @@ const GroupCard = (props) => {
 					} else {return <></>}
 					
 				})}
-			</div>
+			</div> 
+			:
+			<div style={styles.placeHolder}>Go to the favorites tab to add up to five {group.group_type}s to the group.</div>
+			}
             <div style={styles.details}>
                 <div style={styles.groupDetails}>
                     {`${favorites.length} items`}

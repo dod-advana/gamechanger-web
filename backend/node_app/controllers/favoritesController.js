@@ -94,7 +94,7 @@ class FavoritesController {
 				});
 				this.favoriteDocumentsGroup.destroy({
 					where: {
-						favorite_document_id: `${favorite_id}`
+						favorite_document_id: favorite_id
 					}
 				})
 				res.status(200).send(deleted);
@@ -285,12 +285,12 @@ class FavoritesController {
 			
 			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
 				where:{
-					favorite_group_id: `${groupId}`
+					favorite_group_id: groupId
 				}
 			})
 			let totalInGroup = documentIds.length + existingFavorites.length;
 			existingFavorites.forEach(fav => {
-				if(documentIds.includes(Number(fav.dataValues.favorite_document_id))){
+				if(documentIds.includes(fav.dataValues.favorite_document_id)){
 					totalInGroup--;
 				}
 			})

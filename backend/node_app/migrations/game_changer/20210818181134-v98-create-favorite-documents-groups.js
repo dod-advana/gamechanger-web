@@ -5,12 +5,12 @@ module.exports = {
 		return queryInterface.createTable('favorite_documents_groups',
 		{
             favorite_group_id: {
-                type: Sequelize.TEXT,
+                type: Sequelize.INTEGER,
                 allowNull: false,
                 primaryKey: true
             },
             favorite_document_id: {
-                type: Sequelize.TEXT,
+                type: Sequelize.INTEGER,
                 allowNull: false,
                 primaryKey: true
             },

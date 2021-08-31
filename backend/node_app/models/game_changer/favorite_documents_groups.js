@@ -3,12 +3,12 @@ module.exports = (sequelize, DataTypes) => {
     const FAVORITE_DOCUMENTS_GROUP = sequelize.define("favorite_documents_groups", 
     {
         favorite_group_id: {
-            type: DataTypes.TEXT,
+            type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true
         },
         favorite_document_id: {
-            type: DataTypes.TEXT,
+            type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true
         },
