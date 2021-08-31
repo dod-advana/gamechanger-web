@@ -11,6 +11,7 @@ import GCAccordion from "../common/GCAccordion";
 import ReactTable from 'react-table';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import DefaultSeal from '../mainView/seals/GC Default Seal.png';
+import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const gcColors = {
 	buttonColor1: '#131E43',
@@ -196,7 +197,7 @@ export default function SideBar(props) {
 		else if (fallbackSources.entity) {
 			// fallback to default
 			console.log('falling back to default');
-			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+			event.target.src = dodSeal;
 		}
 	}
 

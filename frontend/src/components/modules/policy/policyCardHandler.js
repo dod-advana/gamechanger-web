@@ -18,6 +18,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import {crawlerMappingFunc} from '../../../gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
+import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const styles = {
 	footerButtonBack: {
@@ -688,7 +689,7 @@ const handleImgSrcError = (event, fallbackSources) => {
 	else if (fallbackSources.entity) {
 		// fallback to default
 		console.log('falling back to default');
-		event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+		event.target.src = dodSeal;
 	}
 };
 
