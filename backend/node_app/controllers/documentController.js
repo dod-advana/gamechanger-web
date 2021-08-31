@@ -337,7 +337,7 @@ class DocumentController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const orgNames = req.body;
+			const orgNames = req.query.names;
 			const orgDataCleaned = {};
 			const orgData = await this.organizationURLs.findAll(orgNames ? {
 				where: {
