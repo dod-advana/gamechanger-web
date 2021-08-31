@@ -187,8 +187,7 @@ export default function SideBar(props) {
 		}
 	}, [state.cloneData]);
 
-	const handleImgSrcError = (event, name, fallbackSources) => {
-		console.log({name});
+	const handleImgSrcError = (event, fallbackSources) => {
 		if (fallbackSources.admin) {
 			// fallback to entity
 			console.log('falling back to entity');
@@ -222,7 +221,7 @@ export default function SideBar(props) {
 									alt={`${entity.name} Img`}
 									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
 									onError={(event) => {
-										handleImgSrcError(event, entity.name, fallbackSources);
+										handleImgSrcError(event, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
 									}}
 								/>
