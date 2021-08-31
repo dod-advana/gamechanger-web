@@ -25,6 +25,7 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import EditEntityDialog from '../components/admin/EditEntityDialog';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
+import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -506,7 +507,7 @@ const GameChangerDetailsPage = (props) => {
 		else if (fallbackSources.entity) {
 			// fallback to default
 			console.log('falling back to default');
-			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+			event.target.src = dodSeal;
 		}
 	}
 
