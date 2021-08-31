@@ -603,7 +603,7 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
 											{gettingDocuments ?
 												<div style={{ margin: '0 auto' }}>
 													<LoadingIndicator customColor={gcOrange} />
@@ -686,7 +686,7 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
 											{gettingDocuments ?
 												<div style={{margin: '0 auto'}}>
 													<LoadingIndicator customColor={gcColors.buttonColor2}/>
