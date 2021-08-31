@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 // Local Imports
-import { trackEvent } from "../telemetry/Matomo";
-import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
 import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../sharedFunctions';
 import GroupFavoriteCard from "../cards/GCGroupFavoriteCard";
@@ -75,13 +73,6 @@ const styles = {
 	}
 }
 
-const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
-};
-
 const GroupCard = (props) => {
 	
 	const {
@@ -91,6 +82,17 @@ const GroupCard = (props) => {
         dispatch,
 		favorites
 	} = props;
+
+	const favFilenames = new Map();
+	const searchTextlist = [];
+	favorites.forEach((favId) => {
+		const doc = state.userData.favorite_documents.find(doc => {
+			return favId === doc.favorite_id;
+		})
+		favFilenames.set(doc.filename,doc.filename);
+		if(!searchTextlist.includes(doc.search_text)) searchTextlist.push(doc.search_text)
+	})
+	const combinedSearchText = searchTextlist.join(' OR ');
 
     const removeSelectedDocument = (key) => {
 		const { selectedDocuments } = state;
@@ -110,7 +112,9 @@ const GroupCard = (props) => {
                     docsDrawerOpen={state.docsDrawerOpen}
                     setDrawer={(open) => setState(dispatch, {docsDrawerOpen: open})}
                     clearSelections={() => setState(dispatch, {selectedDocuments: new Map()})}
-                    openExport={() => setState(dispatch, {exportDialogVisible: true})}
+                    openExport={() => {
+						setState(dispatch, {selectedDocuments: favFilenames, exportDialogVisible: true, prevSearchText: combinedSearchText});
+					}}
                     removeSelection={(doc) => removeSelectedDocument(doc)}
                     componentStepNumbers={state.componentStepNumbers}
                     isDrawerReady={state.isDrawerReady}
@@ -177,7 +181,11 @@ const GroupCard = (props) => {
 }
 
 GroupCard.propTypes = {
-	
-}
+	group: PropTypes.object,
+	idx: PropTypes.number,
+	state: PropTypes.object,
+	dispatch: PropTypes.func,
+	favorites: PropTypes.arrayOf(PropTypes.number),
+} 
 
 export default GroupCard;
