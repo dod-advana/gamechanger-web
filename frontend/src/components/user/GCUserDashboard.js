@@ -374,6 +374,7 @@ const GCUserDashboard = (props) => {
 	const preventDefault = (event) => event.preventDefault();
 
 	const handleChange = ({ target }) => {
+		setAddToGroupError("");
 		const groupId = documentGroups.find(group => group.group_name === target.value).id;
 		setDocumentsToGroup([]);
 		setSelectedGroup({id: groupId, name: target.value});
@@ -828,20 +829,21 @@ const GCUserDashboard = (props) => {
 
 	const handleDeleteGroupCheckbox = (value) => {
 		const newGroupsToDelete = [...groupsToDelete];
-		const index = newGroupsToDelete.indexOf(`${value}`);
+		const index = newGroupsToDelete.indexOf(value);
 		if(index > -1){
 			newGroupsToDelete.splice(index, 1);
 		} else {
-			newGroupsToDelete.push(`${value}`);
+			newGroupsToDelete.push(value);
 		}
 		setGroupsToDelete(newGroupsToDelete);
 	}
 
 	const handleAddToFavorites = async () => {
+		if(!selectedGroup.name) return setAddToGroupError("Please select a group");
 		const selectedGroupInfo = userData.favorite_groups.find(group => group.id === selectedGroup.id);
 		let totalInGroup = documentsToGroup.length;
 		selectedGroupInfo.favorites.forEach(favId => {
-			if(!documentsToGroup.includes(Number(favId))) totalInGroup++;
+			if(!documentsToGroup.includes(favId)) totalInGroup++;
 		})
 		if(totalInGroup > 5) return setAddToGroupError("Groups can only contain up to 5 items");
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
@@ -857,11 +859,11 @@ const GCUserDashboard = (props) => {
 
 	const renderDocumentsToAdd = () => {
 		let groupFavorites;
-		if(selectedGroup.name) groupFavorites = userData.favorite_groups.find(group => group.group_name === selectedGroup.name).favorites;
+		if(selectedGroup.name) groupFavorites = userData.favorite_groups.find(group => group.group_name === selectedGroup.name)?.favorites;
 		return <div style={{overflow: 'scroll', maxHeight: 300}}>
 			{_.map(favoriteDocuments, (doc) => {
 				if(selectedGroup.name){
-					if(groupFavorites.includes(`${doc.favorite_id}`)) {
+					if(groupFavorites.includes(doc.favorite_id)) {
 						return <></>;
 					}
 				}
@@ -893,10 +895,10 @@ const GCUserDashboard = (props) => {
 					favoriteDocumentsSlice.length > 0 ? (
 					<>
 						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'40px', paddingRight: 0,width:'95%' }}>
-							<GCButton
+							{userData.favorite_groups.length > 0 && <GCButton
 								onClick={() => {setShowAddToGroupModal(true)}}
 							>Add To Group
-							</GCButton>
+							</GCButton>}
 						</div>
 						<Modal 
 								isOpen={showAddToGroupModal}

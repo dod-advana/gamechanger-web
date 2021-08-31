@@ -125,7 +125,7 @@ class UserController {
 				favorite_groups.forEach(async (group, index) => {
 					const res = await this.favoriteDocumentsGroup.findAll({
 						attributes: ['favorite_document_id'],
-						where: {favorite_group_id: `${group.id}`},
+						where: {favorite_group_id: group.id},
 						raw: true
 					})
 					const favoriteList = [];

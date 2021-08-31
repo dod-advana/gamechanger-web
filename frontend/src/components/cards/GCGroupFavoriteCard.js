@@ -364,7 +364,7 @@ const GroupFavoriteCard = (props) => {
 											setPopoverIdx(-1);
 											setPopoverOpen(false);
 											setPopoverAnchorEl(null);
-											handleRemoveFavoriteFromGroup(`${group.id}`, `${documentObject.favorite_id}`, dispatch);
+											handleRemoveFavoriteFromGroup(group.id, documentObject.favorite_id, dispatch);
 										}}
 										style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 10px 0px', marginRight: 10 }}
 									>Yes
