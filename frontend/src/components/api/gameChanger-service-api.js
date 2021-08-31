@@ -792,16 +792,14 @@ export default class GameChangerAPI {
 
 	getOrgImageOverrideURLs = async (names) => {
 		const url = endpoints.getOrgImageOverrideURLs;
-		return axiosPOST(this.axios, url, names);
+		return axiosGET(this.axios, url, { params: { names }});
 	}
 
 	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
-		console.log({name});
-		console.log({imageURL});
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
 	}
-	
+
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;
 		return axiosGET(this.axios, url);

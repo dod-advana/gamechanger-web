@@ -71,7 +71,7 @@ router.post('/thumbnailDownload', document.getHomepageThumbnail);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);
 router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotations);
 router.get('/getThumbnail', document.getThumbnail);
-router.post('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
+router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
 router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
