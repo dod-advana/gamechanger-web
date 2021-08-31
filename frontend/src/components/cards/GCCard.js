@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import _ from "lodash";
+import _ from 'lodash';
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
 import {Divider, Checkbox} from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
@@ -20,7 +20,7 @@ import {
 	handleSaveFavoriteTopic, 
 	handleSaveFavoriteOrganization, 
 	setState
-} from "../../sharedFunctions";
+} from '../../sharedFunctions';
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
@@ -432,8 +432,8 @@ function GCCard (props) {
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
 				<i onClick={(event) => {
             openFavoritePopper(event.target);
-				}} className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
+					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
 					cursor: 'pointer',
 					fontSize: 26,
