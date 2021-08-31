@@ -1837,7 +1837,8 @@ class SearchUtility {
 					let doc = {}
 					doc.doc_filename = r['_source'].filename;
 					doc.name = r['_source'].title;
-					doc.img_filename = doc.doc_filename.slice(0,-4) + ".png"
+					const path = require('path');
+					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
 					popDocs.push(doc);
 				});
 			};
