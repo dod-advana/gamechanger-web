@@ -58,6 +58,11 @@ class HandlerFactory {
 				moduleName = 'graphModule';
 				break;
 		}
+
+		console.log(this.cloneMetaMap);
+		console.log(cloneName);
+		console.log(moduleName);
+		console.log(handlerMap)
 		if (handlerMap && moduleName &&
 			this.cloneMetaMap[cloneName] &&
 			this.cloneMetaMap[cloneName][moduleName] &&
