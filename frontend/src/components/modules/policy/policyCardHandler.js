@@ -683,12 +683,10 @@ const getDisplayTitle = (item) => {
 const handleImgSrcError = (event, fallbackSources) => {
 	if (fallbackSources.admin) {
 		// fallback to entity
-		console.log('falling back to entity');
 		event.target.src = fallbackSources.entity;
 	}
 	else if (fallbackSources.entity) {
 		// fallback to default
-		console.log('falling back to default');
 		event.target.src = dodSeal;
 	}
 };
@@ -1176,7 +1174,6 @@ const PolicyCardHandler = {
 				 state,
 				 backBody
 			} = props;
-			console.log({item});
 			
 			if (state.listView) {
 				if (item.description?.length > 300) {
