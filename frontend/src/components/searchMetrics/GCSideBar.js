@@ -126,7 +126,8 @@ export default function SideBar(props) {
 	const [topTopics, setTopTopics] = useState([]);
 	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
 	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
-	const [orgSources, setOrgSources] = useState([]);
+	// eslint-disable-next-line no-unused-vars
+	const [orgSources, setOrgSources] = useState([]); // Will use when s3 performance fixed
 	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
 
 	useEffect(() => {

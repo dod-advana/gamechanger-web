@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
-import styled from 'styled-components';
 import { FormControl, Typography, TextField } from '@material-ui/core'
 import GameChangerAPI from '../api/gameChanger-service-api';
-import LoadingBar from '../common/LoadingBar';
 import { backgroundGreyDark } from '../common/gc-colors';
 import '../../components/export/export-results-dialog.css';
 import { makeStyles } from '@material-ui/core/styles';
@@ -55,13 +53,8 @@ const styles = {
 }
 
 const EditEntityDialog = ({ open, handleClose, url, orgName, setSealURLOverride }) => {
-	const [loading, setLoading] = useState(false);
-	const [errorMsg, setErrorMsg] = useState('');
 	const [sealURL, setSealURL] = useState(url);
 	const classes = useStyles();
-
-	const handleChange = ({ target: { value } }) => {
-	};
 
 	async function handleSave() {
 		try {
@@ -119,14 +112,6 @@ const EditEntityDialog = ({ open, handleClose, url, orgName, setSealURLOverride 
 					</GCButton>
 				</div>
 			</div>
-			{
-				errorMsg ?
-					(
-						<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>{errorMsg}</div>
-					) : (
-						<LoadingBar color='primary' loading={loading} />
-					)
-			}
 		</UOTDialog>
 	)
 };
@@ -134,25 +119,9 @@ const EditEntityDialog = ({ open, handleClose, url, orgName, setSealURLOverride 
 EditEntityDialog.propTypes = {
 	open: PropTypes.bool.isRequired,
 	handleClose: PropTypes.func.isRequired, 
-	searchObject: PropTypes.shape({
-		search: PropTypes.string
-	}),
-	selectedDocuments: PropTypes.instanceOf(Map), 
-	isSelectedDocs: PropTypes.bool, 
-	orgFilter: PropTypes.objectOf(PropTypes.bool), 
-	orgFilterString: PropTypes.array, 
-	typeFilter: PropTypes.objectOf(PropTypes.bool), 
-	typeFilterString: PropTypes.array, 
-	isClone: PropTypes.bool, 
-	cloneData: PropTypes.shape({
-		clone_name: PropTypes.string
-	}), 
-	getUserData: PropTypes.func, 
-	searchType: PropTypes.string, 
-	searchFields: PropTypes.object, 
-	edaSearchSettings: PropTypes.object, 
-	sort: PropTypes.string, 
-	order: PropTypes.string
+	url: PropTypes.string,
+	orgName: PropTypes.string,
+	setSealURLOverride: PropTypes.func
 }
 
 export default EditEntityDialog
