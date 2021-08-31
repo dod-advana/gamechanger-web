@@ -62,6 +62,7 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
+	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
 	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
 	trainModel: '/api/gamechanger/admin/trainModel',
@@ -103,6 +104,7 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
+	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
@@ -475,6 +477,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
+	favoriteOrganization = async (data) => {
+		const url = endpoints.favoriteOrganizationPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
 	trendingSearches = async(data) => {
 		const url = endpoints.trendingSearchesPOST;
 		return axiosPOST(this.axios, url, data);
@@ -774,5 +781,10 @@ export default class GameChangerAPI {
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
+	}
+
+	getFAQ = async () => {
+		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
 	}
 }
