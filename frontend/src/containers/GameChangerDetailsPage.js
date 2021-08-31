@@ -177,7 +177,7 @@ const getEntityData = async (name, cloneName) => {
 }
 
 const getTopicData = async (name, cloneName) => {
-	const data = {topic: {}, graph: {nodes: [], edges: []}};
+	const data = {topic: {}, graph: {nodes: [], edges: []}, isNeo4j: true};
 	
 	const resp = await gameChangerAPI.callGraphFunction({
 		functionName: 'getTopicDataDetailsPage',
@@ -194,6 +194,9 @@ const getTopicData = async (name, cloneName) => {
 		data.topic = tmpTopic;
 	
 		data.graph = resp.data.graph;
+	} else {
+		data.topic = {name, details:[]};
+		data.isNeo4j = false;
 	}
 	
 	return data;
@@ -304,7 +307,7 @@ const GameChangerDetailsPage = (props) => {
 	const [graph, setGraph] = useState({nodes: [], edges: [], labels: []});
 	const [docCount, setDocCount] = useState(0);
 	const [timeFound, setTimeFound] = useState('0.0');
-	const [docResultsPage, setDocResultsPage] = useState(0);
+	const [docResultsPage, setDocResultsPage] = useState(1);
 	const [docResults, setDocResults] = useState([]);
 	const [visibleDocs, setVisibleDocs] = useState([]);
 	const [gettingDocuments, setGettingDocuments] = useState(true);
@@ -315,6 +318,7 @@ const GameChangerDetailsPage = (props) => {
 	
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
+	const [fromNeo4j, setFromNeo4j] = useState(true);
 	
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
@@ -373,6 +377,7 @@ const GameChangerDetailsPage = (props) => {
 					setShowTopicContainer(true);
 					setTopic(data.topic);
 					setGraph(data.graph);
+					setFromNeo4j(data.isNeo4j)
 					setRunningQuery(false);
 				})
 				break;
@@ -461,6 +466,26 @@ const GameChangerDetailsPage = (props) => {
 		});
 
 	}, [topic, graph, cloneData]);
+
+	useEffect(() => {
+		if(!topic || !cloneData || fromNeo4j) return;
+		const t0 = new Date().getTime();
+		setGettingDocuments(true);
+		gameChangerAPI.modularSearch({
+				cloneName: cloneData.clone_name,
+				searchText: topic.name,
+				offset: docResultsPage-1,
+				options: {},
+				limit: 18,
+			}).then(resp => {
+				const t1 = new Date().getTime();
+				setTimeFound(((t1-t0) / 1000).toFixed(2));
+				setDocCount(resp.data.totalCount)
+				setVisibleDocs(resp.data.docs)
+				setGettingDocuments(false);
+			})
+		
+	}, [fromNeo4j, docResultsPage, topic, cloneData])
 	
 	const renderDocuments = () => {
 		return visibleDocs.map((item, idx) => {
@@ -590,7 +615,7 @@ const GameChangerDetailsPage = (props) => {
 						<div className={'graph-top-docs'}>
 							
 							<div className={'section'}>
-								<GCAccordion expanded={true} header={'GRAPH VIEW'} backgroundColor={'rgb(238,241,242)'}>
+								<GCAccordion expanded={fromNeo4j} header={'GRAPH VIEW'} backgroundColor={'rgb(238,241,242)'}>
 									<MemoizedPolicyGraphView width={1420} height={670} graphData={graph} runningSearchProp={runningQuery}
 										 notificationCountProp={0} setDocumentsFound={() => {}} setTimeFound={() => {}}
 										 cloneData={cloneData} expansionTerms={false} setNumOfEdges={() => {}}
