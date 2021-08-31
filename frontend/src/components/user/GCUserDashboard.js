@@ -1820,11 +1820,11 @@ const GCUserDashboard = (props) => {
 							</Modal>
 							<ExportResultsDialog
 								open={state.exportDialogVisible}
-								handleClose={() => setState(dispatch, { exportDialogVisible: false })}
+								handleClose={() => setState(dispatch, { exportDialogVisible: false, selectedDocuments: new Map(), prevSearchText: "" })}
 								searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : "")}
 								setCurrentTime={setCurrentTime}
 								selectedDocuments={state.selectedDocuments}
-								isSelectedDocs={state.selectedDocuments?.size ? true : false}
+								isSelectedDocs={true}
 								orgFilterString={getOrgToOrgQuery(state.searchSettings.allOrgsSelected, state.searchSettings.orgFilter)}
 								typeFilterString={getTypeQuery(state.searchSettings.allTypesSelected, state.searchSettings.typeFilter)}
 								orgFilter={state.searchSettings.orgFilter}
@@ -1849,6 +1849,7 @@ const GCUserDashboard = (props) => {
 									idx={idx}
 									dispatch={dispatch}
 									favorites={group.favorites}
+									key={group.id}
 								/>)
 						})}
 					</div>

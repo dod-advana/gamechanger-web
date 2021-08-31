@@ -183,26 +183,6 @@ const StyledFavoriteDocumentCard = styled.div`
 						margin-left: 10px;
 					}
 				}
-    			
-    			> .stats-stat {
-					margin-right: 10px;
-	
-					> .stats-text {
-						color: #8091A5;
-						font-family: "Noto Sans";
-						font-size: 14px;
-						font-weight: 500;
-						margin-right: 5px;
-					}
-	
-					> .fa {
-						color: #8091A5;
-						height: 20px;
-						width: 20px;
-						margin-bottom: -8px;
-						padding-left: 2px;
-					}
-				}
     		}
 			
     	}
@@ -428,12 +408,15 @@ const GroupFavoriteCard = (props) => {
 }
 
 GroupFavoriteCard.propTypes = {
+	styles: PropTypes.object,
+	handleRemoveFavoriteFromGroup: PropTypes.func,
+	dispatch: PropTypes.func,
+	group: PropTypes.object,
 	cardTitle: PropTypes.string.isRequired,
 	summary: PropTypes.string.isRequired,
 	idx: PropTypes.number.isRequired,
-	tiny_url: PropTypes.string,
 	overlayText: PropTypes.string,
-	documentObject: PropTypes.objectOf(PropTypes.string),
+	documentObject: PropTypes.object,
 	isTopic: PropTypes.bool,
 	isOrganization: PropTypes.bool,
 	cloneData: PropTypes.shape({
