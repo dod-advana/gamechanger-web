@@ -497,7 +497,27 @@ const GameChangerDetailsPage = (props) => {
 		}
 	}
 
+	const handleImgSrcError = (event, fallbackSources) => {
+		if (fallbackSources.admin) {
+			// fallback to entity
+			console.log('falling back to entity');
+			event.target.src = fallbackSources.entity;
+		}
+		else if (fallbackSources.entity) {
+			// fallback to default
+			console.log('falling back to default');
+			event.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png';
+		}
+	}
+
 	const renderEntityContainer = () => {
+		let fallbackSources = {};
+		if (entity) {
+			fallbackSources.s3 = undefined;
+			fallbackSources.admin = sealURLOverride;
+			fallbackSources.entity = entity.image;
+		}
+
 		return (
 			<>
 				{editEntityVisible &&
@@ -514,7 +534,15 @@ const GameChangerDetailsPage = (props) => {
 						<div className={'details'}>
 							<Paper>
 								<div className={'name'}>{entity.name}</div>
-								<img className={'img'} alt={`${entity.name} Img`} src={entity.image} />
+								<img
+									className={'img'}
+									alt={`${entity.name} Img`}
+									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									onError={(event) => {
+										handleImgSrcError(event, fallbackSources);
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
+									}}
+								/>
 								
 								<div className={'details-header'}>
 									<span>{'ENTITY DETAILS'}</span>
