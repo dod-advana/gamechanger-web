@@ -365,7 +365,6 @@ function GCCard (props) {
 			setCardHandler(handler[cardType])
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
-			console.log({cardType});
 			if (cardType === 'organization') {
 				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({data}) => {
 					item.sealURLOverride = data[item.name];
