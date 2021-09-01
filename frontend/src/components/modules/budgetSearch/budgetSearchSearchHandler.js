@@ -54,8 +54,8 @@ const BudgetSearchSearchHandler = {
 		
 		this.setSearchURL(state);
 		
-		let url = window.location.hash.toString();
-		url = url.replace("#/", "");
+		// let url = window.location.hash.toString();
+		// url = url.replace("#/", "");
 				
 		setState(dispatch, {
 			runningSearch: true,
@@ -75,10 +75,7 @@ const BudgetSearchSearchHandler = {
 			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 		
-		const t0 = new Date().getTime();
-	
-		let foundEntity = false;
-	
+		const t0 = new Date().getTime();	
 		
 		setState(dispatch, {
 			loading: true,

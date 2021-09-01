@@ -1,7 +1,7 @@
 import React from "react";
 import {trackEvent} from "../../telemetry/Matomo";
 import {
-	CARD_FONT_SIZE, encode,
+	CARD_FONT_SIZE,
 	getTrackingNameForFactory, getTypeIcon, getTypeTextColor
 } from "../../../gamechangerUtils";
 // import {
@@ -17,7 +17,7 @@ import {primary} from "../../../components/common/gc-colors";
 import {CardButton} from "../../common/CardButton";
 import GCTooltip from "../../common/GCToolTip";
 // import SimpleTable from "../../common/SimpleTable";
-import {KeyboardArrowRight, Star} from "@material-ui/icons";
+import {KeyboardArrowRight} from "@material-ui/icons";
 import styled from "styled-components";
 import _ from "lodash";
 // import {setState} from "../../../sharedFunctions";
