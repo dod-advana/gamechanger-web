@@ -414,6 +414,127 @@ describe('FavoritesController', function () {
 		});
 	});
 
+	describe('#favoriteGroupPOST', () => {
+		it('should create a new group for favorites', (done) => {
+			const apiResMock = [{}, true];
+			const expectedReturn = {};
+			const statusMock = 200;
+			const constants = {
+				env: {
+					GAME_CHANGER_OPTS: {
+						version: 'version'
+					}
+				}
+			};
+
+			const favoriteGroup = {
+				findOrCreate() {
+					return Promise.resolve(apiResMock);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				favoriteGroup
+			};
+			const target = new FavoritesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					group_type: "document", 
+					group_name: "Test", 
+					group_description: "Test",
+					create: true
+				}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				target.favoriteGroupPOST(req, res).then(() => {
+					assert.equal(resCode, statusMock);
+					assert.deepEqual(resMsg, expectedReturn);
+					done();
+				});
+			} catch (e) {
+				assert.fail(e);
+			}
+		});
+	});
+
+	describe('#addToFavoriteGroupPOST', () => {
+		it('should add a favorite to a group', (done) => {
+			const apiResMock = [{}];
+			const expectedReturn = {};
+			const statusMock = 200;
+			const constants = {
+				env: {
+					GAME_CHANGER_OPTS: {
+						version: 'version'
+					}
+				}
+			};
+
+			const favoriteDocumentsGroup = {
+				findAll() {
+					return Promise.resolve([]);
+				},
+				bulkCreate() {
+					return Promise.resolve(apiResMock);
+				}
+			}
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				favoriteDocumentsGroup,
+			};
+			const target = new FavoritesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					groupId: 1, 
+					documentIds: [1]
+				}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				target.addToFavoriteGroupPOST(req, res).then(() => {
+					assert.equal(resCode, statusMock);
+					assert.deepEqual(resMsg, expectedReturn);
+					done();
+				});
+			} catch (e) {
+				assert.fail(e);
+			}
+		});
+	});
+
 	describe('#clearFavoriteSearchUpdate', () => {
 		it('should clear a favorite search update flag', (done) => {
 			const expectedReturn = [
