@@ -219,9 +219,24 @@ const BudgetSearchMainViewHandler = {
 		}
 
 		const getMainPageColumns = () => {
+			const displayNames = {
+				'rdte': 'RDT&E'
+			};
 			const mainPageColumns = [
 				{
-					Header: () => <p style={styles.tableColumn}>PER</p>,
+					Header: () => <p style={styles.tableColumn}>Budget Type/Appropriation</p>,
+					filterable: false,
+					accessor: 'doc_type_s',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{displayNames[row.value]}</p>
+						</div>
+					),
+					id: 'budgetType'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>PE #</p>,
 					filterable: false,
 					accessor: 'ProgramElementNumber_s',
 					width: 150,
@@ -230,34 +245,10 @@ const BudgetSearchMainViewHandler = {
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'per'
+					id: 'programElementNum'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
-					filterable: false,
-					accessor: 'ProjectTitle_s',
-					width: 150,
-					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
-							<p>{row.value}</p>
-						</div>
-					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'projectTitle'
-				},
-				{
-					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
+					Header: () => <p style={styles.tableColumn}>PROJECT #/BLI #</p>,
 					filterable: false,
 					accessor: 'ProjectNumber_s',
 					width: 150,
@@ -266,70 +257,46 @@ const BudgetSearchMainViewHandler = {
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
 					id: 'projectNum'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>SERVICE</p>,
+					Header: () => <p style={styles.tableColumn}>Project/BLI Title</p>,
 					filterable: false,
-					accessor: 'ServiceAgencyName_s',
+					accessor: 'ProjectTitle_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'service'
+					id: 'projectTitle'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>KEY HITS</p>,
+					Header: () => <p style={styles.tableColumn}>Service/Agency</p>,
 					filterable: false,
-					accessor: 'keyHits',
+					accessor: 'service_agency_name_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'keyHits'
+					id: 'serviceAgency'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>COST CONTRIB</p>,
+					Header: () => <p style={styles.tableColumn}>Reviewer Name</p>,
 					filterable: false,
-					accessor: 'costContributer',
+					accessor: 'reviewer_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'costContributer'
+					id: 'reviewerName'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>AI LABEL</p>,
+					Header: () => <p style={styles.tableColumn}>Key Words</p>,
 					filterable: false,
 					accessor: 'aiLabel',
 					width: 150,
@@ -338,30 +305,30 @@ const BudgetSearchMainViewHandler = {
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
-					id: 'aiLabel'
+					id: 'keywords'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
+					Header: () => <p style={styles.tableColumn}>AI Label(s)</p>,
 					filterable: false,
-					accessor: 'reviewStatus',
+					accessor: 'core_ai_label_s',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'left' }}>
 							<p>{row.value}</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
-						return rows.length;
-					},
-					Aggregated: (row, item) => {
-						return <span>{row.value}</span>
-					},
+					id: 'aiLabels'
+				},
+				{
+					Header: () => <p style={styles.tableColumn}>Review Status</p>,
+					filterable: false,
+					accessor: 'reviewer_s',
+					width: 150,
+					Cell: row => (
+						<div style={{ textAlign: 'left' }}>
+							<p>{row.value}</p>
+						</div>
+					),
 					id: 'reviewStatus'
 				},
 			];
@@ -433,6 +400,21 @@ const BudgetSearchMainViewHandler = {
 								borderTopRightRadius: 5,
 								borderTopLeftRadius: 5
 							}}
+						}}
+						getTrProps={(state, rowInfo, column) => {
+							return { 
+								style: { cursor: 'pointer'},
+								onClick: () => {
+									const row = rowInfo.row;
+									const {
+										projectTitle,
+										programElementNum,
+										projectNum,
+										serviceAgency
+									} = row;
+									window.open(`#/budgetsearch-profile?title=${projectTitle}&peNum=${programElementNum}&projectNum=${projectNum}&serviceAgency=${serviceAgency}`);
+								}
+							}
 						}}
 					/>
 					<div className='gcPagination' style={{ textAlign: 'center'}}>

@@ -46,7 +46,8 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			offset,
 			showTutorial = false,
 			tiny_url,
-			forCacheReload = false
+			forCacheReload = false,
+			budgetSearchSettings = {}
 		} = req.body;
 
 		try {
@@ -57,6 +58,8 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			historyRec.search_version = searchVersion;
 			historyRec.request_body = req.body;
 			historyRec.showTutorial = showTutorial;
+
+			console.log(budgetSearchSettings);
 
 			const operator = 'and';
 			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}

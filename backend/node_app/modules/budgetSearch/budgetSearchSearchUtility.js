@@ -32,7 +32,7 @@ class BudgetSearchSearchUtility {
 
 			let query = {
 				_source: {
-					includes: ['meta_n', 'record_n', 'project_n', 'doc_type_s']
+					includes: ['doc_type_s', 'meta_n', 'record_n', 'project_n']
 				},
 				from: offset,
 				track_total_hits: true,
@@ -107,7 +107,6 @@ class BudgetSearchSearchUtility {
 	
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r._source);
-
 				try {
 					result = this.getProjectData(result, index);
 				}
@@ -138,11 +137,10 @@ class BudgetSearchSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
 		const budgetSearchArrayFields = ['meta_n', 'record_n', 'project_n']
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
-				if (arrayFields.includes(key) || budgetSearchArrayFields.includes(key)) {
+				if (budgetSearchArrayFields.includes(key)) {
 					result[key] = raw[key];
 				} else if (Array.isArray(raw[key])) {
 					result[key] = raw[key][0];
@@ -160,11 +158,13 @@ class BudgetSearchSearchUtility {
 		const {
 			meta_n,
 			record_n,
-			project_n
+			project_n,
+			doc_type_s
 		} = result;
 
 		const project = {};
 		project.esIndex = index;
+		project.doc_type_s = doc_type_s;
 
 		if (project_n) {
 			for (const key in project_n) {

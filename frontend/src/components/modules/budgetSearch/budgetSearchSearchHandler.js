@@ -36,7 +36,8 @@ const BudgetSearchSearchHandler = {
 			searchSettings,
 			tabName,
 			cloneData,
-			runGetData
+			runGetData,
+			budgetSearchSettings
 		} = state;
 
 		if (runGetData) {
@@ -59,7 +60,6 @@ const BudgetSearchSearchHandler = {
 				
 		setState(dispatch, {
 			runningSearch: true,
-
 		});
 		
 		const trimmed = searchText.trim();
@@ -105,7 +105,8 @@ const BudgetSearchSearchHandler = {
 					charsPadding,
 					showTutorial,
 					tiny_url,
-					combinedSearch
+					combinedSearch,
+					budgetSearchSettings
 				},
 			}).then(resp => {
 				const t1 = new Date().getTime();
