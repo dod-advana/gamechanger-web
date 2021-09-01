@@ -535,6 +535,63 @@ describe('FavoritesController', function () {
 		});
 	});
 
+	describe('#deleteFavoriteFromGroupPOST', () => {
+		it('should delete a favorite from a group', (done) => {
+			const expectedReturn = {"removed": 1};
+			const statusMock = 200;
+			const constants = {
+				env: {
+					GAME_CHANGER_OPTS: {
+						version: 'version'
+					}
+				}
+			};
+
+			const favoriteDocumentsGroup = {
+				destroy() {
+					return Promise.resolve(1);
+				}
+			}
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				favoriteDocumentsGroup,
+			};
+			const target = new FavoritesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					groupId: 1, 
+					documentId: 1
+				}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				target.deleteFavoriteFromGroupPOST(req, res).then(() => {
+					assert.equal(resCode, statusMock);
+					assert.deepEqual(resMsg, expectedReturn);
+					done();
+				});
+			} catch (e) {
+				assert.fail(e);
+			}
+		});
+	});
+
 	describe('#clearFavoriteSearchUpdate', () => {
 		it('should clear a favorite search update flag', (done) => {
 			const expectedReturn = [
