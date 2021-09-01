@@ -22,6 +22,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { gcOrange } from "../common/gc-colors";
 import CloseIcon from '@material-ui/icons/Close';
+import {trackEvent} from '../telemetry/Matomo';
+import {getTrackingNameForFactory} from '../../gamechangerUtils';
+
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -29,6 +32,20 @@ const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_SEARCH_SETTINGS'});
+}
+//const handleTypeFilterChangeLocal
+
+const handleOrganizationFilterChange = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+	newSearchSettings.orgFilter = {
+		...newSearchSettings.orgFilter,
+		[orgName]: event.target.checked
+	};
+	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings.orgUpdate = true;
+	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
 
@@ -253,10 +270,8 @@ const ViewHeader = (props) => {
              <button
 					type="button"
 					style={{margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runSearch: true, runGraphSearch: true });
-					}}
+					onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)}
+                    
 				>
 					<span style={{
 						fontFamily: 'Montserrat',
