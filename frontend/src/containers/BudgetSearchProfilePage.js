@@ -4,12 +4,13 @@ import SearchBar from "../components/searchBar/SearchBar";
 import {getContext} from "../components/factories/contextFactory";
 import GCAccordion from "../components/common/GCAccordion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from 'recharts';
-import { TextField, Typography, Checkbox, FormControlLabel } from '@material-ui/core';
+import { TextField, Typography, Checkbox, FormControlLabel, Slider, Input } from '@material-ui/core';
 import SimpleTable from "../components/common/SimpleTable";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import GCPrimaryButton from "../components/common/GCButton";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import './budgetsearch.css';
 
 const StyledNavBar = styled.div`
 	width: 100%;
@@ -500,24 +501,154 @@ const serviceReviewData = [
         </StyledTableKeyContainer>,
         Value: 
         <StyledTableValueContainer>
-        <TextField
-            placeholder="Reviewer Notes"
-            variant="outlined"
-            defaultValue={''}
-            style={{ backgroundColor: 'white', width: '100%' }}
-            onBlur={() => {}}
-            inputProps={{
-                style: {
-                    width: '100%'
-                }
-            }}
-            rows={6}
-            multiline
-        />
+            <TextField
+                placeholder="Reviewer Notes"
+                variant="outlined"
+                defaultValue={''}
+                style={{ backgroundColor: 'white', width: '100%' }}
+                onBlur={() => {}}
+                inputProps={{
+                    style: {
+                        width: '100%'
+                    }
+                }}
+                rows={6}
+                multiline
+            />
         </StyledTableValueContainer>
 
     }
 ];
+
+const marks =[
+    {
+        value: 50,
+        label: '50'
+    },
+    {
+        value: 100,
+        label: '100'
+    }
+]
+
+const pocReviewerData = [
+    {
+        Key:
+        <StyledTableKeyContainer>
+            <strong>Type of AI</strong>
+        </StyledTableKeyContainer>,
+        Value:
+        <StyledTableValueContainer>
+            <TextField
+                placeholder="Specify type of AI"
+                variant="outlined"
+                defaultValue={''}
+                style={{ backgroundColor: 'white', width: '100%' }}
+                onBlur={() => {}}
+                inputProps={{
+                    style: {
+                        width: '100%'
+                    }
+                }}
+                rows={6}
+                multiline
+            />
+        </StyledTableValueContainer>
+    },
+    {
+        Key:
+        <StyledTableKeyContainer>
+            <strong>AI Functionality</strong>
+        </StyledTableKeyContainer>,
+        Value:
+        <StyledTableValueContainer>
+            <TextField
+                placeholder="Functionality of AI System"
+                variant="outlined"
+                defaultValue={''}
+                style={{ backgroundColor: 'white', width: '100%' }}
+                onBlur={() => {}}
+                rows={6}
+                multiline
+            />
+        </StyledTableValueContainer>
+    },
+    {
+        Key:
+        <StyledTableKeyContainer>
+            <strong>AI Distribution Estimate (%)</strong>
+        </StyledTableKeyContainer>,
+        Value:
+        <StyledTableValueContainer>
+            <StyledInlineContainer>
+                <Typography variant="subtitle1" style={{ fontSize: 16, width: 140 }}>AI-Enabled</Typography>
+                <Slider
+                    // value={}
+                    // onChange={}
+                    valueLabelDisplay="auto"
+                    step={1}
+                    defaultValue={0}
+                    min={0}
+                    max={100}
+                    // ValueLabelComponent={}
+                    style={{ fontSize: 14, margin: '0 30px' }}
+                    marks={marks}
+                />
+                <Input
+                    // value={}
+                    margin="dense"
+                    style={{ width: 50}}
+                    // onChange={}
+                />
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>%</Typography>
+            </StyledInlineContainer>
+            <StyledInlineContainer>
+                <Typography variant="subtitle1" style={{ fontSize: 16, width: 140 }}>AI-Enabling</Typography>
+                <Slider
+                    // value={}
+                    // onChange={}
+                    valueLabelDisplay="auto"
+                    step={1}
+                    defaultValue={0}
+                    min={0}
+                    max={100}
+                    // ValueLabelComponent={}
+                    style={{ fontSize: 14, margin: '0 30px' }}
+                    marks={marks}
+                />
+                <Input
+                    // value={}
+                    margin="dense"
+                    style={{ width: 50}}
+                    // onChange={}
+                />
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>%</Typography>
+            </StyledInlineContainer>
+            <StyledInlineContainer>
+                <Typography variant="subtitle1" style={{ fontSize: 16, width: 140 }}>Core-AI</Typography>
+                <Slider
+                    // value={}
+                    // onChange={}
+                    valueLabelDisplay="auto"
+                    step={1}
+                    defaultValue={0}
+                    min={0}
+                    max={100}
+                    // ValueLabelComponent={}
+                    style={{ fontSize: 14, margin: '0 30px' }}
+                    marks={marks}
+                />
+                <Input
+                    // value={}
+                    margin="dense"
+                    style={{ width: 50}}
+                    // onChange={}
+                />
+                <Typography variant="subtitle1" style={{ fontSize: 16 }}>%</Typography>
+            </StyledInlineContainer>
+        </StyledTableValueContainer>
+    }
+]
 
 const boldKeys = (data) => {
     return data.map(pair => {
@@ -562,27 +693,6 @@ const renderAICategory = () => {
                 </p>
             </StyledAIText>
 
-        </StyledAccordionDiv>
-    );
-}
-
-const renderUserSummaryInput = () => {
-    return (
-        <StyledAccordionDiv padding="15px">
-            <TextField
-                placeholder="AI Summary from User"
-                variant="outlined"
-                defaultValue={''}
-                style={{ backgroundColor: 'white', width: '100%' }}
-                onBlur={() => {}}
-                inputProps={{
-                    style: {
-                        width: '100%'
-                    }
-                }}
-                rows={10}
-                multiline
-            />
         </StyledAccordionDiv>
     );
 }
@@ -788,39 +898,23 @@ const renderServiceReviewer = () => {
 
 const renderPOCReviewer = () => {
     return (
-        <StyledAccordionDiv>
-
-        </StyledAccordionDiv>
+        <StyledTableContainer>
+            <SimpleTable tableClass={'magellan-table'}
+                zoom={1}
+                rows={boldKeys(pocReviewerData)}
+                height={'auto'}
+                dontScroll={true}
+                disableWrap={true}
+                title={''}
+                headerExtraStyle={{
+                    backgroundColor: '#313541',
+                    color: 'white'
+                }}
+                hideHeader={true}
+                firstColWidth={firstColWidth}
+            />
+        </StyledTableContainer>
     );
-}
-
-const renderSecondaryReviewer = () => {
-    return (
-        <div style={{ padding: '0 15px 20px', width: '100%'}}>
-            <StyledInlineContainer>
-                <Typography variant="subtitle1" style={{ fontSize: 16, fontWeight: 500 }}>Do you agree with the Service / DoD Component's review for this effort</Typography>
-                <Autocomplete
-                    size="small"
-                    options={[]}
-                    getOptionLabel={(option) => option.title}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-                <Typography variant="subtitle1" style={{ color: '#F9B32D', fontSize: '18px', textAlign: 'right', fontWeight: 500 }}>Needs Review</Typography>
-            </StyledInlineContainer>
-            <StyledFooterDiv>
-                <GCPrimaryButton
-                    style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-                >
-                    Submit and Go to Home
-                </GCPrimaryButton>
-                <GCPrimaryButton
-                    style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
-                >
-                    Submit
-                </GCPrimaryButton>
-            </StyledFooterDiv>
-        </div>
-    )
 }
 
 const BudgetSearchProfilePage = (props) => {
@@ -867,11 +961,6 @@ const BudgetSearchProfilePage = (props) => {
                     <StyledAccordionContainer>
                         <GCAccordion contentPadding={0} expanded={false} header={'Classifier'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'} style={{ width: '100%' }}>
                             {renderClassifier()}
-                        </GCAccordion>
-                    </StyledAccordionContainer>
-                    <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} header={'User Summary on AI'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                            {renderUserSummaryInput()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
@@ -948,23 +1037,13 @@ const BudgetSearchProfilePage = (props) => {
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={false} headerWidth='100%' header={
+                        <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
                             <StyledAccordionHeader>
                                 <strong>POC REVIEWER</strong>
                                 <FiberManualRecordIcon style={{ color: 'green' }} />
                             </StyledAccordionHeader>
                         } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderPOCReviewer()}
-                        </GCAccordion>
-                    </StyledAccordionContainer>
-                    <StyledAccordionContainer>
-                        <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
-                            <StyledAccordionHeader>
-                                <strong>SECONDARY REVIEWER SECTION</strong>
-                                <FiberManualRecordIcon style={{ color: '#F9B32D' }} />
-                            </StyledAccordionHeader>
-                        } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                            {renderSecondaryReviewer()}
                         </GCAccordion>
                     </StyledAccordionContainer>
                 </StyledReviewLeftContainer>

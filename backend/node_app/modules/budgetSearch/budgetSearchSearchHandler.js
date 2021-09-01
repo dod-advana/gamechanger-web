@@ -59,8 +59,6 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			historyRec.request_body = req.body;
 			historyRec.showTutorial = showTutorial;
 
-			console.log(budgetSearchSettings);
-
 			const operator = 'and';
 			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
 			// log query to ES

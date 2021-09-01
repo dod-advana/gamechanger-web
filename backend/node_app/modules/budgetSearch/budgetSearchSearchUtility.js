@@ -25,6 +25,7 @@ class BudgetSearchSearchUtility {
 		{ 
 			searchText, 
 			offset = 0, 
+			budgetSearchSettings = {}
 		 }, 
 		 user) {
 

@@ -67,7 +67,7 @@ const styles = {
 		color: '#131E43',
 	},
 	tableColumn: {
-        textAlign: 'left',
+        textAlign: 'center',
         margin: '4px 0'
     }
 }
@@ -224,108 +224,98 @@ const BudgetSearchMainViewHandler = {
 			};
 			const mainPageColumns = [
 				{
-					Header: () => <p style={styles.tableColumn}>Budget Type/Appropriation</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>BUDGET TYPE</p>,
 					accessor: 'doc_type_s',
 					width: 150,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{displayNames[row.value]}</p>
 						</div>
 					),
 					id: 'budgetType'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>PE #</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>PROGRAM ELEMENT #</p>,
 					accessor: 'ProgramElementNumber_s',
-					width: 150,
+					width: 200,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'programElementNum'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>PROJECT #/BLI #</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
 					accessor: 'ProjectNumber_s',
 					width: 150,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'projectNum'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>Project/BLI Title</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
 					accessor: 'ProjectTitle_s',
-					width: 150,
+					width: 250,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'projectTitle'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>Service/Agency</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>SERVICE / AGENCY</p>,
 					accessor: 'service_agency_name_s',
-					width: 150,
+					width: 250,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'serviceAgency'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>Reviewer Name</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>REVIEWER NAME</p>,
 					accessor: 'reviewer_s',
 					width: 150,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'reviewerName'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>Key Words</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>KEY WORDS</p>,
 					accessor: 'aiLabel',
-					width: 150,
+					width: 200,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'keywords'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>AI Label(s)</p>,
-					filterable: false,
+					Header: () => <p style={styles.tableColumn}>AI LABEL(S)</p>,
 					accessor: 'core_ai_label_s',
 					width: 150,
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
 					id: 'aiLabels'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>Review Status</p>,
-					filterable: false,
-					accessor: 'reviewer_s',
-					width: 150,
+					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
+					accessor: 'jaic_review_stat_s',
 					Cell: row => (
-						<div style={{ textAlign: 'left' }}>
+						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
 						</div>
 					),
@@ -359,6 +349,7 @@ const BudgetSearchMainViewHandler = {
 				</StyledMainTopBar>
 				<StyledMainBottomContainer>
 					<ReactTable
+						filterable
 						data={mainPageData ? mainPageData.docs : []}
 						className={'striped'}
 						noDataText={"No rows found"}
@@ -366,7 +357,6 @@ const BudgetSearchMainViewHandler = {
 						columns={getMainPageColumns()}
 						// pivotBy={searchResults ? edaSearchSettings.aggregations: []}
 						editable={false}
-						filterable={false}
 						minRows={1}
 						multiSort={false}
 						showPageSizeOptions={false}

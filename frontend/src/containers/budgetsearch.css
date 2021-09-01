@@ -1,0 +1,11 @@
+.PrivateValueLabel-label-21 {
+    font-size: 12px;
+}
+
+.MuiSlider-root {
+    color: #1C2D64 !important;
+}
+
+.MuiInput-underline:after {
+    border-bottom: 2px solid #1C2D64 !important;
+}
