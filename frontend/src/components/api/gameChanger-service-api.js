@@ -104,11 +104,9 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
-<<<<<<< Updated upstream
 	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
-=======
 	projReviewGET: '/api/gameChanger/review/getReview',
->>>>>>> Stashed changes
+
 
 
 	exportHistoryDELETE: function(id){
@@ -791,9 +789,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 	
-	getProjReview = async (error) => {
+	getProjReview = async (btype, bLi, peNum) => {
 		const url = endpoints.projReviewGET;
-		return axiosGET(this.axios, url, error);
+		return axiosGET(this.axios, url, { params: { btype: btype, bli: bLi , penum: peNum}});
 
 	}
 }

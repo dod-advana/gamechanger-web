@@ -11,18 +11,6 @@ let jbook_sequelize = new Sequelize(
 );
 Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value); };
 
-// Add models from eda folder
-fs
-	.readdirSync(__dirname)
-	.filter(file =>
-		(file.indexOf('.') !== 0) &&
-        (file !== basename) &&
-        (file.slice(-3) === '.js'))
-	.forEach(file => {
-		const model = require(path.join(__dirname, file))(jbook_sequelize, DataTypes);
-		db[model.name] = model;
-	});
-
 // db.all_outgoing_counts_pdf_pds_xwalk_only.hasMany(db.line_item_details, {foreignKey: 'pds_filename'});
 // db.line_item_details.belongsTo(db.all_outgoing_counts_pdf_pds_xwalk_only, {foreignKey: 'filename'});
 

@@ -162,12 +162,12 @@ router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);
 
-router.get('/review/getReview', review.getProjReview);
-
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
+
+router.get('/review/getReview', review.getProjReview);
 
 module.exports = router;
