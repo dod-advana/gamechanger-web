@@ -99,7 +99,7 @@ class AdminController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			let results = await this.appSettings.findAll({
+			const results = await this.appSettings.findAll({
 				where: {
 					key: [
 						'homepage_topics',
@@ -108,11 +108,10 @@ class AdminController {
 				}
 			});
 			let docs = {}
-			//let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-			let esIndex = "gamechanger_test_popular";
+			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			docs.key = "popular_docs";
 			try {
-				docs.value =  await this.searchUtility.getPopularDocs("", esIndex);
+				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
 			} catch (err) {
 				this.logger.error(err, 'FL1LLDU', userId);
 				res.status(500).send(err);
