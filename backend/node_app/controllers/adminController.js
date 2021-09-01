@@ -96,6 +96,7 @@ class AdminController {
 	}
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
+		let esIndex = "gamechanger";
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -108,7 +109,7 @@ class AdminController {
 				}
 			});
 			let docs = {}
-			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			console.log(esIndex)
 			docs.key = "popular_docs";
 			try {
 				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
