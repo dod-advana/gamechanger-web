@@ -1285,7 +1285,8 @@ export default function PolicyGraphView(props) {
 		let nodeSize = nodeRelSize;
 		if (!detailsView){
 			const scalingParam = Math.max(filteredGraph.nodes.length, 150);
-			nodeSize =  nodeRelSize + (combinedTypes.includes(node.label) ? 1 : Math.max(((node.pageRank * node.edgePercent) * (scalingParam / zoom)), 1));
+			const edgePercent = node.edgePercent ? node.edgePercent : 0;
+			nodeSize =  nodeRelSize + (combinedTypes.includes(node.label) ? 1 : Math.max(((node.pageRank * edgePercent) * (scalingParam / zoom)), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
