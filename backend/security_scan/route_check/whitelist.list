@@ -69,4 +69,5 @@
 .* /api/gamechanger/modular/querySuggester .*
 .* /api/gamechanger/modular/docFetcher .*
 .* /api/gamechanger/sendFrontendError .*
-.*/api/gamechanger/getCrawlerSeals .*
+.* /api/gamechanger/aboutGC/getFAQ .*
+.* /api/gamechanger/getCrawlerSeals .*
