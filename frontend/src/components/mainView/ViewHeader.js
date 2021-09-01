@@ -203,22 +203,29 @@ const ViewHeader = (props) => {
 			<>
 			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
 				<div className={'sidebar-section-title'}>
+                <p style={{fontSize: '18px'}}>
 					{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-				</div>
+				</p>
+                </div>
 			:
 				<div className={'sidebar-section-title'}>
+                <p style={{fontSize: '18px'}}>
 					{'Loading results ...'}
+                </p>
 				</div>
 			}
 			</>
 		:
 			<div className={'sidebar-section-title'}>
+            <p style={{fontSize: '18px'}}>
 				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-           </div>
+            </p>
+            </div>
         }
     {state.searchSettings.isFilterUpdate &&
-                <button
-                        type="button"
+                <Button
+        variant="contained"
+        startIcon=<CloseIcon />
                         style={{ border: 'none', backgroundColor: 'none', padding: '0 15px', display: 'flex', height: 40, alignItems: 'left', borderRadius: 5 }}
                         onClick={() => {
                             resetAdvancedSettings(dispatch);
@@ -232,28 +239,23 @@ const ViewHeader = (props) => {
                         }}>
                             Clear Filters
                         </span>
-                    </button>
+                    </Button>
             }
             
-        <div>
         {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
-                    if(state.searchSettings.typeFilter[type]){
+            
+                if(state.searchSettings.typeFilter[type]){
                         return (
              <Button
-                            startIcon=<CloseIcon />
-					style={{ margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
-					onClick={() => {
+                            variant="contained"
+					style={{borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
+					            startIcon=<CloseIcon />
+                            onClick={() => {
 						resetAdvancedSettings(dispatch);
 						setState(dispatch, { runSearch: true, runGraphSearch: true });
 					}}
 				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 400,
-						width: '100%', marginTop: '5px', marginBottom: '10px'
-					}}>
-                            {type}
-					</span>
+		                            {type}
 				</Button>
     )} else {
                         return null;
@@ -262,10 +264,10 @@ const ViewHeader = (props) => {
 	{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
                     if(state.searchSettings.orgFilter[org]){
                         return (
-                 
-             <button
-					type="button"
-					style={{margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
+                            <Button
+                            variant="contained"
+                            startIcon=<CloseIcon />
+					style={{borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
 					onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)}
                     
 				>
@@ -276,13 +278,12 @@ const ViewHeader = (props) => {
 					}}>
                             {org}
 					</span>
-				</button>
+				</Button>
                         )
                     } else {
                         return null;
                     }
     })}
-       </div>
     
         <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
