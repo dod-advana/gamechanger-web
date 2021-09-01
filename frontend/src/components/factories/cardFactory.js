@@ -24,6 +24,7 @@ class CardFactory {
 					break;
 				case 'budgetSearch/budgetSearchCardHandler':
 					this.handler = budgetSearchCardHandler;
+					break;
 				default:
 					this.handler = defaultCardHandler;
 					break;

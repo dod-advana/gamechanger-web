@@ -483,21 +483,21 @@ const BudgetSearchMainViewHandler = {
 	},
 	
 	getExtraViewPanels(props) {
-		const {
-			context
-		} = props;
+		// const {
+		// 	context
+		// } = props;
 
-		const {state, dispatch} = context;
+		// const {state, dispatch} = context;
 
-		const {
-			docSearchResults,
-			loading,
-			cloneData,
-			resultsPage,
-			searchText,
-			prevSearchText,
-			count,
-		} = state;
+		// const {
+		// 	docSearchResults,
+		// 	loading,
+		// 	cloneData,
+		// 	resultsPage,
+		// 	searchText,
+		// 	prevSearchText,
+		// 	count,
+		// } = state;
 
 		const viewPanels = [];
 		return viewPanels;
