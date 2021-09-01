@@ -61,6 +61,7 @@
 	},
 	"devDependencies": {
 		"decompress-tar": "^4.0.0",
+		"decompress-tarbz2": "^4.0.0",
 		"decompress-targz": "^4.0.0",
 		"eslint": "^6.6.0",
 		"eslint-plugin-import": "^2.23.4",
