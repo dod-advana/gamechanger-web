@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
 import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
 import _ from 'lodash';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import {Button} from "@material-ui/core";
 import {
 	ThemeProvider,
 } from '@material-ui/core/styles';
@@ -235,15 +235,11 @@ const ViewHeader = (props) => {
                     </button>
             }
             
-<div>
-        </div>
         <div>
         {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
                     if(state.searchSettings.typeFilter[type]){
                         return (
-             <button
-					type="button"
-                            variant="contained"
+             <Button
                             startIcon=<CloseIcon />
 					style={{ margin: '4px', borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
 					onClick={() => {
@@ -258,7 +254,7 @@ const ViewHeader = (props) => {
 					}}>
                             {type}
 					</span>
-				</button>
+				</Button>
     )} else {
                         return null;
                     }
