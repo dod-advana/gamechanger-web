@@ -198,31 +198,32 @@ const ViewHeader = (props) => {
 
     return (
 
+   //     <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
+   //     {state.cloneData.clone_name === "gamechanger" ?
+   // 		<>
+   // 		{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
+   // 			<div className={'sidebar-section-title'}>
+   //             <p style={{fontSize: '18px'}}>
+   // 				{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
+   // 			</p>
+   //             </div>
+   // 		:
+   // 			<div className={'sidebar-section-title'}>
+   //             <p style={{fontSize: '18px'}}>
+   // 				{'Loading results ...'}
+   //             </p>
+   // 			</div>
+   // 		}
+   // 		</>
+   // 	:
+   // 		<div className={'sidebar-section-title'}>
+   //         <p style={{fontSize: '18px'}}>
+   // 			{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
+   //         </p>
+   //         </div>
+   //     }
         <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
-        {state.cloneData.clone_name === "gamechanger" ?
-			<>
-			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
-				<div className={'sidebar-section-title'}>
-                <p style={{fontSize: '18px'}}>
-					{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-				</p>
-                </div>
-			:
-				<div className={'sidebar-section-title'}>
-                <p style={{fontSize: '18px'}}>
-					{'Loading results ...'}
-                </p>
-				</div>
-			}
-			</>
-		:
-			<div className={'sidebar-section-title'}>
-            <p style={{fontSize: '18px'}}>
-				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-            </p>
-            </div>
-        }
-    {state.searchSettings.isFilterUpdate &&
+        {state.searchSettings.isFilterUpdate && 
                 <Button
         variant="contained"
         startIcon=<CloseIcon />
@@ -241,50 +242,49 @@ const ViewHeader = (props) => {
                         </span>
                     </Button>
             }
-            
-        {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
-            
-                if(state.searchSettings.typeFilter[type]){
-                        return (
-             <Button
-                            variant="contained"
-					style={{borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
-					            startIcon=<CloseIcon />
-                            onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runSearch: true, runGraphSearch: true });
-					}}
-				>
-		                            {type}
-				</Button>
-    )} else {
-                        return null;
-                    }
-    })}
+            <div className={'view-filters-container'}>
 	{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
                     if(state.searchSettings.orgFilter[org]){
                         return (
-                            <Button
-                            variant="contained"
-                            startIcon=<CloseIcon />
-					style={{borderStyle: 'groove', borderColor:'#35364F', backgroundColor: '#F2F6FB', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', borderRadius: 100 }}
-					onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)}
+                     <Button
+                    variant="contained"
+
+					style={{borderStyle: 'groove', color:'gcOrange',  backgroundColor: 'none', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', display: 'flex'}}
+					startIcon=<CloseIcon />
+					onClick={(event) => {
+                        handleOrganizationFilterChange(event, state, dispatch);
+                    }}
                     
-				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 400,
-						width: '100%', marginTop: '5px', marginBottom: '10px'
-					}}>
+				    >
                             {org}
-					</span>
 				</Button>
-                        )
-                    } else {
+                    )} else {
                         return null;
                     }
     })}
-    
+        </div>
+     <div className={'view-filters-container'}> 
+        {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+            if(state.searchSettings.typeFilter[type]){
+                return (
+                    <Button
+                    variant="contained"
+					style={{borderStyle: 'groove', backgroundColor: 'none', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', display: 'flex'}}
+					startIcon=<CloseIcon />
+                    onClick={() => {
+					resetAdvancedSettings(dispatch);
+					setState(dispatch, { runSearch: true, runGraphSearch: true });
+					}}
+				    >
+		                {type}
+				    </Button>
+                    )} else {
+                        return null;
+                    }
+        }
+        )}
+        </div>
+
         <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
