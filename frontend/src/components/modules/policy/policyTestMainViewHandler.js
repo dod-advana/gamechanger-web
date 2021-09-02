@@ -273,6 +273,7 @@ const PolicyMainViewHandler = {
 		const {
 			adminTopics,
 			adminMajorPubs,
+			searchMajorPubs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -465,6 +466,40 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={searchMajorPubs} 
+						title="Popular Publications" 
+						width='215px' 
+					>
+						{ (searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc) && searchMajorPubs.map((pub) =>
+							<div className="topPublication"
+							>
+								{ pub.imgSrc !== 'error' ? 
+									<img 
+									className="image"
+									src={pub.imgSrc}
+									alt="thumbnail" 
+									title={pub.name}
+								/> : 
+									<div className="image">{pub.name}</div>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+									}}
+								>
+									<div className="hover-text">{pub.name}</div>
+								</div>
+							</div>
+						)}
+						{ searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && 
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>

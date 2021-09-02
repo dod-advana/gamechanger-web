@@ -29,6 +29,7 @@ const HIDDEN_NODE_ALPHA = 0.08;
 const NODE_ALPHA = 1;
 const LINK_ALPHA = 0.5;
 const NO_RESULTS_MESSAGE = 'No results found! Please try refining your search.';
+const DETAILS_NO_RESULTS_MESSAGE = 'There are no nodes for this topic. Please check back later.' 
 
 const StyledCircularMenu = styled.nav`
 	width: 250px;
@@ -1284,7 +1285,8 @@ export default function PolicyGraphView(props) {
 		let nodeSize = nodeRelSize;
 		if (!detailsView){
 			const scalingParam = Math.max(filteredGraph.nodes.length, 150);
-			nodeSize =  nodeRelSize + (combinedTypes.includes(node.label) ? 1 : Math.max(((node.pageRank * node.edgePercent) * (scalingParam / zoom)), 1));
+			const edgePercent = node.edgePercent ? node.edgePercent : 0;
+			nodeSize =  nodeRelSize + (combinedTypes.includes(node.label) ? 1 : Math.max(((node.pageRank * edgePercent) * (scalingParam / zoom)), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
@@ -1440,7 +1442,7 @@ export default function PolicyGraphView(props) {
 			</div>}
 			{(graphData.nodes.length === 0 && !runningSearch) && (
 				<div style={styles.centeredContent}>
-					<div style={styles.noResultsMessage}>{NO_RESULTS_MESSAGE}</div>
+					<div style={styles.noResultsMessage}>{detailsView ? DETAILS_NO_RESULTS_MESSAGE : NO_RESULTS_MESSAGE}</div>
 				</div>
 			)}
 		</div>
