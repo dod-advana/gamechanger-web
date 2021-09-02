@@ -109,7 +109,6 @@ class AdminController {
 				}
 			});
 			let docs = {}
-			console.log(esIndex)
 			docs.key = "popular_docs";
 			try {
 				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
