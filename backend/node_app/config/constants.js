@@ -40,6 +40,15 @@ module.exports = Object.freeze({
 				dialect: 'postgres',
 				logging: false
 			},
+			jbook: {
+				username: process.env.POSTGRES_USER_EDA,
+				password: process.env.POSTGRES_PASSWORD_EDA,
+				database: 'jbook',
+				host: process.env.POSTGRES_HOST_EDA,
+				port: 5432,
+				dialect: 'postgres',
+				logging: false
+			},
 			uot: {
 				username: process.env.POSTGRES_USER_UOT,
 				password: process.env.POSTGRES_PASSWORD_UOT,
