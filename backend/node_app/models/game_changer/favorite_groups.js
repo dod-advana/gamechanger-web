@@ -39,12 +39,5 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	);
 
-	// FAVORITE_GROUP.associate = (models) => {
-	// 	FAVORITE_GROUP.belongsToMany(models.FAVORITE_DOCUMENT, {
-	// 		through: models.FAVORITE_DOCUMENTS_GROUP,
-	// 		foreignKey: "favorite_group_id",
-	// 	});
-	// };
-
 	return FAVORITE_GROUP;
 };
