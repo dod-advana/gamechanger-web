@@ -105,7 +105,8 @@ const endpoints = {
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
-	projReviewGET: '/api/gameChanger/review/getReview',
+	jbookReviewGET: '/api/gameChanger/review/getJbookReview',
+	storeJbookReviewPOST: '/api/gameChanger/review/storeJbookReview',
 
 
 
@@ -789,9 +790,15 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 	
-	getProjReview = async (btype, bLi, peNum) => {
+	getJbookReview = async (btype, bLi, peNum) => {
 		const url = endpoints.projReviewGET;
 		return axiosGET(this.axios, url, { params: { btype: btype, bli: bLi , penum: peNum}});
+
+	}
+	
+	storeJbookReview = async (reviewData) => {
+		const url = endpoints.projReviewGET;
+		return axiosGET(this.axios, url, { reviewData});
 
 	}
 }

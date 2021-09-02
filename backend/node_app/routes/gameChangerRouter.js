@@ -168,6 +168,7 @@ router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
-router.get('/review/getReview', review.getProjReview);
+router.get('/review/getJbookReview', review.getJbookReview);
+router.post('/review/storeJbookReview', review.storeJbookReview);
 
 module.exports = router;
