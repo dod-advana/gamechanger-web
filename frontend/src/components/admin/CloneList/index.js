@@ -11,7 +11,7 @@ import CloneModal from './CloneModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
-const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'elasticsearch_index'];
+const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name'];
 
 
 const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
