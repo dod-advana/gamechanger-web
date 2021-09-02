@@ -913,7 +913,7 @@ const GCUserDashboard = (props) => {
 										<CloseIcon fontSize="large" />
 									</CloseButton>
 									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
-									<div style={{ width: 800 }}>
+									<div style={{ width: 815 }}>
 										{selectedGroup.name && renderDocumentsToAdd()}
 										<FormControl variant="outlined" style={{ width: '100%' }}>
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
