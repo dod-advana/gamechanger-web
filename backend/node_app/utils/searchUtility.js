@@ -50,6 +50,7 @@ class SearchUtility {
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
+
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -495,6 +496,9 @@ class SearchUtility {
 					break;
 				case 'Alphabetical':
 					query.sort = [ {"display_title_s": {"order" : order}} ]
+					break;
+				case 'Popular':
+					query.sort = [ {"pop_score.keyword": {"order" : order}} ]
 					break;
 				case 'References':
 					query.sort = [{"_script": {
@@ -1795,6 +1799,54 @@ class SearchUtility {
 				}
 	}
 
+	getPopularDocsQuery(offset = 0, limit = 10) {
+		try {
+			let query = {
+				_source: ["title", "filename", "pop_score"],
+				from: offset,
+				size: limit,
+				query: {
+					range: {
+						'pop_score.keyword': {
+							gte: 10
+						}
+					}
+				},
+				sort: [
+					{
+						'pop_score.keyword': {
+							order: "desc"
+						}
+					}
+				]
+			};
+			return query;
+			} catch (err) {
+				this.logger.error(err, 'PTF390A', '');
+			}
+	}	
+	async getPopularDocs(userId, esIndex) {
+		let popDocs = [];
+
+		try {
+			let popDocsQuery = this.getPopularDocsQuery();
+			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
+			if (esResults) {
+				esResults.body.hits.hits.forEach((r) => {
+					let doc = {}
+					doc.doc_filename = r['_source'].filename;
+					doc.name = r['_source'].title;
+					const path = require('path');
+					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
+					popDocs.push(doc);
+				});
+			};
+			return popDocs;
+		} catch (e) {
+			this.logger.error(e.message, 'I9XQQA1F');
+			return popDocs
+		}
+	}
 	getSourceQuery(searchText, offset, limit) {
 		try {
 			let query = {

@@ -48,7 +48,17 @@ module.exports = Object.freeze({
 				port: 5432,
 				dialect: 'postgres',
 				logging: false
+			},
+			eda: {
+				username: process.env.POSTGRES_USER_EDA,
+				password: process.env.POSTGRES_PASSWORD_EDA,
+				database: 'eda',
+				host: process.env.POSTGRES_HOST_EDA,
+				port: 5432,
+				dialect: 'postgres',
+				logging: false
 			}
+			
 		}
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
