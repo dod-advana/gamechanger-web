@@ -2,11 +2,14 @@ const LOGGER = require('../lib/logger');
 const constantsFile = require('../config/constants');
 const axiosLib = require('axios');
 const https = require('https');
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const neo4jLib = require('neo4j-driver');
 const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
+const {Op} = require('sequelize');
+const edaDatabaseFile = require('../models/eda');
+const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
+const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
 
 const SAMPLING_BYTES = 4096;
 
@@ -22,6 +25,9 @@ class DataLibrary {
 			s3Opt = {},
 			redisClientDB = 8,
 			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
+			edaDatabase = edaDatabaseFile,
+			lineItemDetails = LINE_ITEM_DETAILS,
+			allOutgoingCounts = ALL_OUTGOING_COUNTS
 		} = opts;
 
 		this.redisClientDB = redisClientDB;
@@ -33,6 +39,9 @@ class DataLibrary {
 		this.esRequestConfig = this.getESRequestConfig(this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
 		this.esEDARequestConfig = this.getESRequestConfig(this.constants.EDA_ELASTIC_SEARCH_OPTS);
 		this.esSearchLib = esSearchLib;
+		this.edaDatabase = edaDatabase;
+		this.lineItemDetails = lineItemDetails;
+		this.allOutgoingCounts = allOutgoingCounts;
 
 		if (!esSearchLib) {
 			try {
@@ -82,7 +91,6 @@ class DataLibrary {
 		this.getFilePDF = this.getFilePDF.bind(this);
 		this.queryGraph = this.queryGraph.bind(this);
 		this.putDocument = this.putDocument.bind(this);
-
 	}
 
 	// async queryElasticSearch(esQuery, esIndex, userId, options, isClone = false, cloneData = {}, multiSearch = false) {
@@ -99,6 +107,44 @@ class DataLibrary {
 	// 		throw msg;
 	// 	}
 	// }
+	
+
+	async queryLineItemPostgres(columns, tables, filenames){
+		try {
+			// original raw query
+			// const results = await this.edaDatabase.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
+			//  'p.obligated_amount_cin, p.row_id, x.pdf_filename, x.pds_filename FROM pds_parsed.line_item_details p, '+
+			//  'pds_parsed_validation.all_outgoing_counts_pdf_pds_xwalk_only x WHERE x.pdf_filename IN (:files)'+
+			//  'AND x.pds_filename = p.filename',
+			//  {replacements:{files: filenames}, type: Sequelize.QueryTypes.SELECT, raw: true, logging: console.log})
+
+			let results = await this.lineItemDetails.findAll({
+				include: [{
+					model: this.allOutgoingCounts,
+					attributes: ['pdf_filename', 'pds_filename'],
+					where: {
+						pdf_filename: { 
+							[Op.in]: filenames
+						},
+					},
+				}],
+				attributes: ['filename', 'prod_or_svc', 'prod_or_svc_desc', 'li_base', 'li_type', 'obligated_amount', 'obligated_amount_cin', 'row_id'],
+			});
+
+			results = results.map(result => {
+				result = result.dataValues;
+				let data = result.all_outgoing_counts_pdf_pds_xwalk_only ? result.all_outgoing_counts_pdf_pds_xwalk_only.dataValues : {}; 
+				result.pdf_filename = data.pdf_filename;
+				result.pds_filename = data.pds_filename;
+				return result;
+			});
+
+			return results;
+		} catch (err) {
+			this.logger.error(err, 'MJ2D6XT');
+			return { results: [], totalCount: 0, count: 0 };
+		}
+	};
 
 	async queryElasticSearch(clientName, index, queryBody, user) {
 		try {
