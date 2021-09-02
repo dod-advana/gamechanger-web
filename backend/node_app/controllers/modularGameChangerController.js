@@ -80,7 +80,13 @@ class ModularGameChangerController {
 					show_graph: true,
 					show_crowd_source: true,
 					show_feedback: true,
-					config: {esIndex: 'gamechanger'}
+					data_source_name: '',
+					source_agency_name: '',
+					metadata_creation_group: '',
+					source_s3_bucket: '',
+					source_s3_prefix: '',
+					elasticsearch_index: 'gamechanger',
+					needs_ingest: false,
 				});
 			}
 			c.forEach(clone => {
