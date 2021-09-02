@@ -860,7 +860,7 @@ const GCUserDashboard = (props) => {
 	const renderDocumentsToAdd = () => {
 		let groupFavorites;
 		if(selectedGroup.name) groupFavorites = userData.favorite_groups.find(group => group.group_name === selectedGroup.name)?.favorites;
-		return <div style={{overflow: 'scroll', maxHeight: 300}}>
+		return <div style={{overflow: 'scroll', maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)'}}>
 			{_.map(favoriteDocuments, (doc) => {
 				if(selectedGroup.name){
 					if(groupFavorites.includes(doc.favorite_id)) {
