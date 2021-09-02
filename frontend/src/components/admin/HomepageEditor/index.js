@@ -30,7 +30,7 @@ export default () => {
      */
     const handleAddRow = (value) => {
 		const tmp = { ...editorTableData };
-		tmp[section].push({name:value});
+		tmp[section].push(value);
 		setEditorTableData(tmp);
 	}
     /**
@@ -41,7 +41,7 @@ export default () => {
         const { data } = await gameChangerAPI.getHomepageEditorData();
         data.forEach(obj => {
             obj.key = obj.key.replace('homepage_','');
-            tableData[obj.key] = JSON.parse(obj.value)
+            tableData[obj.key] = obj.key === 'popular_docs' ? obj.key : JSON.parse(obj.value)
         });
     
         setEditorTableData(tableData);
@@ -261,7 +261,7 @@ export default () => {
                     </GCAccordion>
                 </div>
             </div>
-            <AddEditorTermDialog showAddEditorTermDialog={showAddEditorTermDialog} setShowAddEditorTermDialog={setShowAddEditorTermDialog} handleAddRow={handleAddRow} />
+            <AddEditorTermDialog showAddEditorTermDialog={showAddEditorTermDialog} setShowAddEditorTermDialog={setShowAddEditorTermDialog} handleAddRow={handleAddRow} section={section}/>
             <Snackbar
 				style={{marginTop: 20}}
 				anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
