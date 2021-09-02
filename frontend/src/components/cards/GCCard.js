@@ -324,17 +324,17 @@ function GCCard (props) {
 	let favorite_id = null;
 	switch(cardType){
 		case 'document':
-			const faveDocs = state.userData.favorite_documents;
+			const faveDocs = state.userData ? state.userData.favorite_documents : [];
 			const favDocInfo = _.find(faveDocs, (doc) => {return doc.id === item.id});
-			isFavorite = favDocInfo !== undefined;
 			favorite_id = favDocInfo?.favorite_id;
+			isFavorite = _.find(faveDocs, (doc) => {return doc.id === item.id}) !== undefined;
 			break;
 		case 'topic':
-			const faveTopics = state.userData.favorite_topics;
+			const faveTopics = state.userData ? state.userData.favorite_topics : [];
 			isFavorite = _.find(faveTopics, (topic) => {return topic.topic_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
 			break;
 		case 'organization':
-			const faveOrganizations = state.userData.favorite_organizations;
+			const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
 			isFavorite = _.find(faveOrganizations, (organization) => {return organization.organization_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
 			break;
 		default: 
