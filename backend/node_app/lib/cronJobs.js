@@ -27,6 +27,10 @@ class CronJobs {
 
 	init(){
 		this.cacheController.setStartupSearchHistoryCacheKeys();
+
+		cron.schedule('*/10 * * * * *', async () => {
+			await this.favoritesController.checkLeastRecentFavoritedSearch();
+		});
 	}
 
 	getReloadJob() {

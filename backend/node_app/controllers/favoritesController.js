@@ -12,6 +12,8 @@ const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility')
 const constantsFile = require('../config/constants');
+const Sequelize = require('sequelize');
+const { HandlerFactory } = require('../factories/handlerFactory');
 
 class FavoritesController {
 
@@ -29,7 +31,8 @@ class FavoritesController {
 			gcHistory = GC_HISTORY,
 			search = new SearchController(opts),
 			searchUtility = new SearchUtility(opts),
-			constants = constantsFile
+			constants = constantsFile,
+			handler_factory = new HandlerFactory(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -45,6 +48,7 @@ class FavoritesController {
 		this.search = search;
 		this.searchUtility = searchUtility;
 		this.constants = constants;
+		this.handler_factory = handler_factory;
 
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
@@ -55,6 +59,7 @@ class FavoritesController {
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
+		this.checkLeastRecentFavoritedSearch = this.checkLeastRecentFavoritedSearch.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
 	}
 
@@ -428,6 +433,66 @@ class FavoritesController {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'M4ZSJKR', userId);
+		}
+	}
+	
+	async checkLeastRecentFavoritedSearch() {
+		try {
+			const favorite = await this.favoriteSearch.findOne({
+				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+			});
+			if (!favorite) {
+				this.logger.info('no favorite searches to check');
+				return;
+			}
+
+			// update timestamp first so we don't get stuck on a specific search in the case
+			// that it fails -- also reduces (but doesn't eliminate) race conditions of multiple
+			// app instances checking the same search (although the race condition is benign
+			// as far as correctness; we could lock the row to eliminate but not sure we want to)
+			favorite.last_checked = Sequelize.fn('NOW');
+			await favorite.save();
+
+			// every favorited search has a tiny_url generated for it so look for the
+			// search body the last time it was run in the search history;
+			// this is a kludge because the backend has no functionality to directly
+			// convert a tiny url to a search
+			const history = await this.gcHistory.findOne({
+				where: {
+					user_id: favorite.user_id,
+					tiny_url: favorite.tiny_url
+				},
+				order: [['run_at', 'DESC']]
+			});
+
+			if (!history || !history.request_body) {
+				this.logger.console.error('no request body data to make the search', 'B32AUDE');
+				return;
+			}
+			
+			// largely copypasta-ed from modularGameChangerController.js
+			// so will need to be updated if ^ changes (we can't directly use the original code as-is);
+			// unfortunately the recorded `request_body` in the history isn't the actual original search body,
+			// so we attempt to transform it back into the original format (not sure how brittle this is)
+			const { cloneName, searchText, offset = 0, limit = 1 /*, options */} = history.request_body;
+			const options = history.request_body;
+			const userId = favorite.user_id;
+			const permissions = ['Webapp Super Admin']; // XXX: ??? is this ok -- do we need to pull the actual user permissions?
+			const handler = this.handler_factory.createHandler('search', cloneName);
+			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
+			const error = handler.getError();
+			if (error.code) {
+				this.logger.console.error('favorites search error', 'YN3USY3');
+				return;
+			}
+			if (results.totalCount != favorite.document_count) {
+				favorite.updated_results = true;
+				favorite.document_count = results.totalCount;
+				await favorite.save();
+			}
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message || err, 'D8HNW90');
 		}
 	}
 
