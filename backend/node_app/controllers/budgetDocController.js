@@ -2,6 +2,7 @@ const PDOC = require('../models').pdoc;
 const RDOC = require('../models').rdoc;
 
 const LOGGER = require('../lib/logger');
+const { Op } = require('sequelize');
 
 class BudgetDocController {
 
@@ -16,32 +17,110 @@ class BudgetDocController {
 		this.pdocs = pdoc;
         this.rdocs = rdoc;
     
-        this.getBudgetDocs = this.getBudgetDocs.bind(this);
+        this.budgetDocSearch = this.budgetDocSearch.bind(this);
+        this.getDocQuery = this.getDocQuery.bind(this);
 	}
 
+    getDocQuery({offset, searchText, budgetSearchSettings}) {
+        const baseQuery = {
+            limit: 10,
+            offset, 
+        }
+
+        // const {
+        //     dataSources
+        // } = budgetSearchSettings;
+
+        let pdocQuery = baseQuery;
+        let rdocQuery = baseQuery;
+
+        // if (dataSources && dataSources.length > 0) {
+
+        // }
+
+        if (searchText && searchText !== '') {
+            pdocQuery = {
+                ...baseQuery,
+                where: {
+                    [Op.or]: [
+                        {
+                            Program_Description: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Budget_Activity_Title: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Budget_Line_Item_Title: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Budget_Justification: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        }
+                    ]
+                }
+            }
+
+            rdocQuery = {
+                ...baseQuery,
+                where: {
+                    [Op.or]: [
+                        {
+                            Budget_Activity_Title: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Program_Element_Title: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Program_Element_Notes: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            PE_Mission_Description_and_Budget_Justification: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        },
+                        {
+                            Project_Mission_Description: {
+                                [Op.iLike]: `%${searchText}%`
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+
+        return {pdocQuery, rdocQuery}
+    }
+
     // retrieve all docs from both tables rdoc/pdoc
-	async getBudgetDocs(req, res) {
+	async budgetDocSearch(req, res) {
 		let userId = 'webapp_unknown';
-        const {offset} = req.query;
+        // const {offset, searchText, budgetSearchSettings} = req.body;
 		try {
 
             userId = req.get('SSL_CLIENT_S_DN_CN');
 
-            // let docs = [];
-			let pdocuments = await this.pdocs.findAndCountAll({
-                limit: 10,
-                offset
-            });
+            const {pdocQuery, rdocQuery} = this.getDocQuery(req.body);
+
+			let pdocuments = await this.pdocs.findAndCountAll(pdocQuery);
 
             pdocuments.rows.map(data => {
                 data.dataValues.type = 'Procurement';
             });
 
-            let rdocuments = await this.rdocs.findAndCountAll(
-                {
-                    limit: 10,
-                    offset
-            });
+            let rdocuments = await this.rdocs.findAndCountAll(rdocQuery);
 
             rdocuments.rows.map(data => {
                 data.dataValues.type = 'RDT&E';
@@ -57,7 +136,6 @@ class BudgetDocController {
 			res.status(500).send(err);
 		}
 	}
-
 	
 }
 

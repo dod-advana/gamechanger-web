@@ -3,13 +3,14 @@ import _ from "lodash";
 import {
 	getQueryVariable,
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
-	RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE,
+	RECENT_SEARCH_LIMIT,
+	RESULTS_PER_PAGE
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
-	createTinyUrl,
+	// createTinyUrl,
 	getSearchObjectFromString,
-	getUserData,
+	// getUserData,
 	setState,
 } from "../../../sharedFunctions";
 import GameChangerAPI from "../../api/gameChanger-service-api";
@@ -31,8 +32,6 @@ const BudgetSearchSearchHandler = {
 		const {
 			searchText = "",
 			resultsPage,
-			listView,
-			showTutorial,
 			searchSettings,
 			tabName,
 			cloneData,
@@ -51,7 +50,6 @@ const BudgetSearchSearchHandler = {
 		const trimmed = searchText.trim();
 		if (_.isEmpty(trimmed)) return;
 		
-		const searchObject = getSearchObjectFromString(searchText);
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 	
@@ -73,31 +71,14 @@ const BudgetSearchSearchHandler = {
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
-	
-		const charsPadding = listView ? 750 : 90;
-	
-		const tiny_url = await createTinyUrl(cloneData);
-		
+				
 		try {
-			
-			const combinedSearch = 'false';
-	
+				
 			// regular search
-			gameChangerAPI.modularSearch({
-				cloneName: cloneData.clone_name,
-				searchText: searchObject.search,
-				offset,
-				options: {
-					charsPadding,
-					showTutorial,
-					tiny_url,
-					combinedSearch,
-					budgetSearchSettings
-				},
-			}).then(resp => {
+			gameChangerAPI.budgetDocSearch(offset, searchText).then(resp => {
 				const t1 = new Date().getTime();
 			
-				let getUserDataFlag = true;
+				// let getUserDataFlag = true;
 		
 				if (_.isObject(resp.data)) {
 
@@ -153,9 +134,9 @@ const BudgetSearchSearchHandler = {
 		
 				this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
 		
-				if (getUserDataFlag) {
-					getUserData(dispatch);
-				}
+				// if (getUserDataFlag) {
+				// 	getUserData(dispatch);
+				// }
 			}).catch(err => {
 				console.log(err);
 				throw err;

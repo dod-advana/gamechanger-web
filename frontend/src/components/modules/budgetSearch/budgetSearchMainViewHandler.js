@@ -112,25 +112,26 @@ const StyledMainBottomContainer = styled.div`
 `;
 
 const setBudgetSearchSetting = (field, value, state, dispatch) => {
-	const budgetSearchSettings = _.cloneDeep(state.budgetSearchSettings)
+	const budgetSearchSettings = _.cloneDeep(state.budgetSearchSettings);
+	let dataSources = _.cloneDeep(state.dataSources);
 	switch (field) {
 		case 'dataSources':
-            const dataSourceIndex = budgetSearchSettings.dataSources.indexOf(value);
+            const dataSourceIndex = dataSources.indexOf(value);
             if (dataSourceIndex !== -1) {
-                budgetSearchSettings.dataSources.splice(dataSourceIndex, 1);
+                dataSources.splice(dataSourceIndex, 1);
             }
             else {
-                budgetSearchSettings.dataSources.push(value);
+                dataSources.push(value);
             }                
             break;	
 		case 'clearDataSources':
-			budgetSearchSettings.dataSources = [];
+			dataSources = [];
 			break;
 		default:
 			break;
 	}
 
-	setState(dispatch, { budgetSearchSettings });
+	setState(dispatch, { budgetSearchSettings, dataSources });
 }
 
 
@@ -145,7 +146,7 @@ const BudgetSearchMainViewHandler = {
 		const searchText = getQueryVariable('q', url);
 		if (!searchText) {
 			setState(dispatch, { loading: true, cloneData: state.cloneData });
-			const mainData = await gameChangerAPI.getBudgetDocs();
+			const mainData = await gameChangerAPI.budgetDocSearch();
 			setState(dispatch, { mainPageData: mainData.data, loading: false });
 			console.log(mainData);
 		}		
@@ -162,14 +163,14 @@ const BudgetSearchMainViewHandler = {
 			loading,
 			mainPageData,
 			resultsPage,
-			budgetSearchSettings
+			dataSources
 		} = state;
 
 		const renderCheckboxes = () => {
 			const filterOptions = [];
-			const dataSources = ['RDocs Historical', 'PDocs (JSON) Historical', 'RDocs FY21', 'PDocs FY21', 'RDocs FY22', 'PDocs FY22'];
+			const sourcesList = ['RDocs FY21', 'PDocs FY21', 'RDocs FY22', 'PDocs FY22'];
 			
-			for (const dataSource of dataSources) {
+			for (const dataSource of sourcesList) {
 				filterOptions.push(		
 					<FormControlLabel
 						name={dataSource}
@@ -179,7 +180,7 @@ const BudgetSearchMainViewHandler = {
 							style={styles.filterBox}
 							onClick={() => setBudgetSearchSetting('dataSources', dataSource, state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{visibility:'hidden'}}/>}
-							checked={budgetSearchSettings && budgetSearchSettings.dataSources && budgetSearchSettings.dataSources.indexOf(dataSource) !== -1}
+							checked={ dataSources && dataSources.indexOf(dataSource) !== -1}
 							checkedIcon={<i style={{color:'#E9691D'}} className="fa fa-check"/>}
 							name={dataSource}
 						/>}

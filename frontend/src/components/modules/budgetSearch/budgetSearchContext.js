@@ -3,8 +3,9 @@ import React, { useReducer } from 'react';
 const initState = {
     mainPageData: {},
     budgetSearchSettings: {
-        dataSources: []
+
     },
+	dataSources: [],
     cloneData: {
         clone_name: 'budgetSearch',
 		search_module: 'budgetSearch/budgetSearchSearchHandler',

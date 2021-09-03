@@ -172,6 +172,6 @@ router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 router.get('/review/getJbookReview', review.getJbookReview);
 router.post('/review/storeJbookReview', review.storeJbookReview);
 
-router.get('/budget/getBudgetDocs', budgetDocs.getBudgetDocs);
+router.post('/budget/budgetDocSearch', budgetDocs.budgetDocSearch);
 
 module.exports = router;
