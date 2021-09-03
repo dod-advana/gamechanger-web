@@ -36,22 +36,8 @@ const BudgetSearchSearchHandler = {
 			searchSettings,
 			tabName,
 			cloneData,
-			runGetData,
 			budgetSearchSettings
 		} = state;
-
-		if (runGetData) {
-			setState(dispatch, {loading: true})
-			const mainData = await gameChangerAPI.callSearchFunction({
-				functionName: 'getMainPageData',
-				cloneName: state.cloneData.clone_name,
-				options: {
-					resultsPage
-				}
-			});
-			setState(dispatch, { mainPageData: mainData.data, runGetData: false, loading: false });
-			return;
-		}
 		
 		this.setSearchURL(state);
 		

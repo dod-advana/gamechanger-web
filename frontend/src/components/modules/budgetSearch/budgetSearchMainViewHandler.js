@@ -145,13 +145,7 @@ const BudgetSearchMainViewHandler = {
 		const searchText = getQueryVariable('q', url);
 		if (!searchText) {
 			setState(dispatch, { loading: true, cloneData: state.cloneData });
-			const mainData = await gameChangerAPI.callSearchFunction({
-				functionName: 'getMainPageData',
-				cloneName: state.cloneData.clone_name,
-				options: {
-					resultsPage: state.resultsPage
-				}
-			});
+			const mainData = await gameChangerAPI.getBudgetDocs();
 			setState(dispatch, { mainPageData: mainData.data, loading: false });
 			console.log(mainData);
 		}		
@@ -219,24 +213,22 @@ const BudgetSearchMainViewHandler = {
 		}
 
 		const getMainPageColumns = () => {
-			const displayNames = {
-				'rdte': 'RDT&E'
-			};
+
 			const mainPageColumns = [
 				{
 					Header: () => <p style={styles.tableColumn}>BUDGET TYPE</p>,
-					accessor: 'doc_type_s',
+					accessor: 'type',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
-							<p>{displayNames[row.value]}</p>
+							<p>{row.value}</p>
 						</div>
 					),
 					id: 'budgetType'
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROGRAM ELEMENT #</p>,
-					accessor: 'ProgramElementNumber_s',
+					accessor: 'Program_Element',
 					width: 200,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -247,7 +239,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
-					accessor: 'ProjectNumber_s',
+					accessor: row => row.Project ? row.Project : row.Budget_Line_Item,
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -258,7 +250,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
-					accessor: 'ProjectTitle_s',
+					accessor: row => row.Project_Title ? row.Project_Title : row.Budget_Line_Item_Title, // or Budget_Activity_Title?
 					width: 250,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -269,7 +261,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>SERVICE / AGENCY</p>,
-					accessor: 'service_agency_name_s',
+					accessor: row => row.Service__Agency ? row.Service__Agency : row.Service__Agency_Name,
 					width: 250,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -280,7 +272,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>REVIEWER NAME</p>,
-					accessor: 'reviewer_s',
+					accessor: 'reviewer',
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -291,18 +283,18 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>KEY WORDS</p>,
-					accessor: 'aiLabel',
+					accessor: 'keywords',
 					width: 200,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
-							<p>{row.value}</p>
+							<p>-</p>
 						</div>
 					),
 					id: 'keywords'
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>AI LABEL(S)</p>,
-					accessor: 'core_ai_label_s',
+					accessor: row => row.core_ai_label ? row.core_ai_label : row.dj_core_ai_label,
 					width: 150,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -313,7 +305,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
-					accessor: 'jaic_review_stat_s',
+					accessor: 'reviewer',
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
@@ -341,7 +333,7 @@ const BudgetSearchMainViewHandler = {
 							pageRangeDisplayed={8}
 							onChange={page => {
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
+								setState(dispatch, { resultsPage: page, runSearch: true });
 								scrollToContentTop();
 							}}
 						/>					
@@ -416,7 +408,7 @@ const BudgetSearchMainViewHandler = {
 							onChange={page => {
 								console.log(page);
 								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
-								setState(dispatch, { resultsPage: page, runGetData: true, runSearch: true });
+								setState(dispatch, { resultsPage: page, runSearch: true });
 								scrollToContentTop();
 							}}
 						/>					

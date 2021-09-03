@@ -23,6 +23,7 @@ const { TrendingSearchesController } = require('../controllers/trendingSearchesC
 const { AppSettingsController } = require('../controllers/appSettingsController');
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
+const { BudgetDocController } = require('../controllers/budgetDocController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -44,8 +45,8 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
-
 const review = new ReviewController();
+const budgetDocs = new BudgetDocController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -170,5 +171,7 @@ router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.get('/review/getJbookReview', review.getJbookReview);
 router.post('/review/storeJbookReview', review.storeJbookReview);
+
+router.get('/budget/getBudgetDocs', budgetDocs.getBudgetDocs);
 
 module.exports = router;
