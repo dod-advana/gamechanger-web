@@ -168,7 +168,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		if (!req.headers['x-api-key']) {
 			res.sendStatus(403);
 		} else {
-			const key = await ApiKey.findAll({ where: { apiKey: req.headers['x-api-key'] }, raw: true });
+			const [key] = await ApiKey.findAll({ where: { apiKey: req.headers['x-api-key'] }, raw: true });
 			if (key && key.active) {
 				req.headers['ssl_client_s_dn_cn'] = key.username;
 				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
