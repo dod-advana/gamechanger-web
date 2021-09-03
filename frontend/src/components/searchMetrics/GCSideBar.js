@@ -154,19 +154,14 @@ export default function SideBar(props) {
 	useEffect(() => {
 		try {
 			gameChangerAPI.gcOrgSealData().then(({data}) => {
-				console.log({data});
 				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
-				console.log({orgSources});
 				let folder = orgSources[0].image_link.split('/');
 				folder = folder[folder.length - 2];
-				console.log({folder});
 				const thumbnailList = orgSources.map(item => {
 					let filename = item.image_link.split('/').pop();
 					return {img_filename: filename}
 				});
-				console.log({thumbnailList});
 				gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
-					console.log({data});
 					const buffers = data;
 					buffers.forEach((buf,idx) => {
 						if (buf.status === 'fulfilled') {
@@ -192,19 +187,15 @@ export default function SideBar(props) {
 	const handleImgSrcError = (event, fallbackSources) => {
 		if (fallbackSources.admin) {
 			// fallback to entity
-			console.log('falling back to entity');
 			event.target.src = fallbackSources.entity;
 		}
 		else if (fallbackSources.entity) {
 			// fallback to default
-			console.log('falling back to default');
 			event.target.src = dodSeal;
 		}
 	}
 
 	const renderTopEntities = () => {
-		console.log({topEntities});
-		console.log({orgOverrideImageURLs});
 		return (
 			<StyledTopEntities>
 				{topEntities.map(entity => {
