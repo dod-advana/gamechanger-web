@@ -51,6 +51,7 @@ const initState = {
 	crawlerSources: [],
 	adminTopics: [],
 	adminMajorPubs: [],
+	searchMajorPubs: [],
 	trendingLinks: [],
 	
 	// Tutorial
@@ -86,7 +87,7 @@ const initState = {
 	},	
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References', 'Popular']
 	},
 
 	// Documents
