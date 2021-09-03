@@ -132,7 +132,7 @@ class BudgetDocController {
             });
 
 		} catch (err) {
-			this.logger.error(err, '9BN7UGJ', userId);
+			this.logger.error(err, 'N49863Q', userId);
 			res.status(500).send(err);
 		}
 	}

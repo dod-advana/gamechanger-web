@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import styled from 'styled-components';
 import SearchBar from "../components/searchBar/SearchBar";
 import {getContext} from "../components/factories/contextFactory";
@@ -10,7 +10,15 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import GCPrimaryButton from "../components/common/GCButton";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import {
+	getQueryVariable
+} from "../gamechangerUtils";
+import GameChangerAPI from "../components/api/gameChanger-service-api";
 import './budgetsearch.css';
+import { setState } from '../sharedFunctions';
+
+const gameChangerAPI = new GameChangerAPI();
+
 
 const StyledNavBar = styled.div`
 	width: 100%;
@@ -921,6 +929,9 @@ const BudgetSearchProfilePage = (props) => {
 
     const [currentNav, setCurrentNav] = useState('The Basics');
 	const context = useContext(getContext('budgetSearch'));
+    const accomplishments = useState([]);
+    console.log(context);
+    const { state, dispatch } = context;
 
     const renderNavButtons = () => {
         const buttonNames = ['The Basics', 'Accomplishment', 'Contracts', 'JAIC Reviewer Section', 'Service / DoD Component Reviewer Section', 'POC Reviewer Section', 'Secondary Reviewer Section'];
@@ -941,6 +952,29 @@ const BudgetSearchProfilePage = (props) => {
         return navButtons;
     }
 
+    useEffect(() => {
+        try {
+            const url = window.location.href;
+            const peNum = getQueryVariable('peNum', url);
+            const projectNum = getQueryVariable('projectNum');
+    
+            const getAccomplishments = async () => {
+                setState(dispatch, { profileLoading: true });
+                const accomps = await gameChangerAPI.getAccomplishments(peNum, projectNum);
+                console.log(accomps);
+                setState(dispatch, { profileLoading: false, accomplishments: accomps });
+            }
+
+            getAccomplishments();
+
+        } catch(err) {
+            console.log(err);
+            console.log('Error retrieving budget profile page data');
+            setState(dispatch, { profileLoading: false });
+        }
+
+
+    }, [])
 
 
     return (
