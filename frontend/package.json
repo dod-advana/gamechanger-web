@@ -16,6 +16,7 @@
 		"@material-ui/icons": "4.9.1",
 		"@material-ui/lab": "4.0.0-alpha.55",
 		"@material-ui/pickers": "3.2.10",
+		"anchorme": "^2.1.2",
 		"axios": "^0.21.1",
 		"bezier-js": "4.0.3",
 		"bootstrap": "^3.4.1",
