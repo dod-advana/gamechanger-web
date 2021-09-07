@@ -4,6 +4,7 @@ const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
 const LOGGER = require('../lib/logger');
+const { poll } = require('../utils/pollUtility');
 
 class CronJobs {
 	constructor(opts = {}){
@@ -28,9 +29,9 @@ class CronJobs {
 	init(){
 		this.cacheController.setStartupSearchHistoryCacheKeys();
 
-		cron.schedule('*/10 * * * * *', async () => {
+		poll(async () => {
 			await this.favoritesController.checkLeastRecentFavoritedSearch();
-		});
+		}, 10000);
 	}
 
 	getReloadJob() {
