@@ -10,7 +10,7 @@ const fs = require('fs');
  */
 const getCert = (certEnvVar, certFileEnvVar) => {
 	if (process.env[certEnvVar]) {
-		process.env[certEnvVar].replace(/\\n/g, '\n')
+		return process.env[certEnvVar].replace(/\\n/g, '\n')
 	} else if (process.env[certFileEnvVar]) {
 		return fs.readFileSync(process.env[certFileEnvVar], 'ascii');
 	} else {
