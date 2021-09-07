@@ -423,8 +423,8 @@ const PolicyMainViewHandler = {
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
-						{crawlerSources.length === 0 &&  
-							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						{crawlerSources.length >= 0 &&  
+							<div className='col-xs-12' style={{height: '140px'}} ><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '140px', textAlign: 'center'}}/></div>
 						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
@@ -465,7 +465,7 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 						{ adminMajorPubs.length === 0 && 
-							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center', paddingTop: '75px', paddingBottom: '75px'}}/></div>
 						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
@@ -499,7 +499,7 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 						{ searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && 
-							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center'}}/></div>
 						}
 					</GameChangerThumbnailRow>
 				</div>
