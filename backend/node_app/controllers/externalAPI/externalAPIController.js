@@ -1,6 +1,8 @@
 const LOGGER = require('../../lib/logger');
 const ApiKey = require('../../models').api_key;
 const ApiKeyRequests = require('../../models').api_key_request;
+const ApiKeyRequestClones = require('../../models').api_key_request_clone;
+const CloneMeta = require('../../models').clone_meta;
 const EmailUtility = require('../../utils/emailUtility');
 const constantsFile = require('../../config/constants');
 const hat = require('hat');
@@ -85,6 +87,8 @@ class ExternalAPIController {
 			constants = constantsFile,
 			apiKeys = ApiKey,
 			apiKeyRequests = ApiKeyRequests,
+			apiKeyRequestClones = ApiKeyRequestClones,
+			cloneMeta = CloneMeta,
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
@@ -96,6 +100,8 @@ class ExternalAPIController {
 		this.logger = logger;
 		this.apiKeys = apiKeys;
 		this.apiKeyRequests = apiKeyRequests;
+		this.apiKeyRequestClones = apiKeyRequestClones;
+		this.cloneMeta = cloneMeta;
 		this.emailUtility = emailUtility;
 
 		this.getAPIKeyRequests = this.getAPIKeyRequests.bind(this);
@@ -111,8 +117,13 @@ class ExternalAPIController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const requests = await this.apiKeyRequests.findAll({ raw: true });
-
+			const requests = await this.apiKeyRequests.findAll({ 
+				raw: true,
+				include: [{
+					model: this.cloneMeta,
+				}],
+			});
+			console.log("requests: ", requests);
 			const pending = []; const approved = [];
 
 			for (const request of requests) {
@@ -210,7 +221,8 @@ class ExternalAPIController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {name, email, reason} = req.body;
+			const {name, email, reason, clones} = req.body;
+			console.log("clones: ", clones);
 
 			if (name && email && reason) {
 				try {
@@ -221,8 +233,21 @@ class ExternalAPIController {
 						reason
 					});
 
-					if (request) res.sendStatus(200);
-					else res.sendStatus(400);
+					const joinObjects = clones.map(cloneId => {
+						return {
+							apiKeyRequestId: request.dataValues.id,
+							cloneId
+						}
+					})
+					console.log("join objects: ", joinObjects)
+					try{
+						const joins = await this.apiKeyRequestClones.bulkCreate(joinObjects, {
+							returning: true,
+							ignoreDuplicates: true
+						})
+						if (joins) res.sendStatus(200);
+						else res.sendStatus(400);
+					} catch(er){console.log(er)};
 				} catch (err) {
 					res.status(400).send({status: 'request already exists'});
 				}

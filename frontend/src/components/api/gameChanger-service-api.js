@@ -661,9 +661,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { id, approve });
 	}
 	
-	createAPIKeyRequest = async (name, email, reason) => {
+	createAPIKeyRequest = async (name, email, reason, clones) => {
 		const url = endpoints.createAPIKeyRequestPOST;
-		return axiosPOST(this.axios, url, { name, email, reason });
+		return axiosPOST(this.axios, url, { name, email, reason, clones });
 	}
 
 	updateUserAPIRequestLimit = async() => {

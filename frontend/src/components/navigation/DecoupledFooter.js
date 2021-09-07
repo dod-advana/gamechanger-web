@@ -8,8 +8,12 @@ import {
 	DialogContent,
 	DialogTitle,
 	Modal, TextField,
-	Typography
+	Typography,
+	FormGroup,
+	FormControlLabel,
+	Checkbox
 } from '@material-ui/core';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GameChangerAPI from "../api/gameChanger-service-api";
 import GamechangerUserManagementAPI from "../api/GamechangerUserManagement";
 // import {trackPageView} from "../../../utilities/telemetry/Matomo";
@@ -42,6 +46,19 @@ const useStyles = makeStyles((theme) => ({
 	dialogLg: {
 		maxWidth: '800px',
 		minWidth: '800px'
+	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		marginLeft: '5px',
+		marginRight: '5px'
+	},
+	titleText: {
+		fontWeight: 900,
+        marginBottom: 5
 	}
 }));
 
@@ -105,6 +122,7 @@ const DecoupledFooter = (props) => {
 	const [useMatomo, setUseMatomo] = useState(false);
 	const [requestAPIKeyData, setRequestAPIKeyData] = useState({});
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
+	const [cloneMeta,  setCloneMeta] = useState([]);
 
 	const getUserData = async () => {
 		try {
@@ -126,16 +144,27 @@ const DecoupledFooter = (props) => {
         }
     }
 
+	const getCloneData = async () => {
+		try {
+			const { data } = await gameChangerAPI.getCloneData();
+			setCloneMeta(data);
+		} catch(err) {
+			console.error('Error getting clone meta data: ', err);
+		}
+		
+	}
+
 	useEffect (() => {
         initializeUserMatomoStatus();
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
 		getUserData();
+		getCloneData();
 	}, [])
 	
 	useEffect (() => {
-		setRequestAPIKeyData({name: '', email: '', reason: ''});
+		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
 	}, [showRequestAPIKeyModal])
-	
+
 	const setUserMatomoStatus = (status) => {
 		
 		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then((data) => {
@@ -145,6 +174,18 @@ const DecoupledFooter = (props) => {
 			console.log(err);
 		});
 	}
+
+	const handleCloneChange = (cloneId) => {
+		const newRequestAPIKeyData = {...requestAPIKeyData};
+		if(!newRequestAPIKeyData.clones) newRequestAPIKeyData.clones =[];
+		const index = newRequestAPIKeyData.clones.indexOf(cloneId);
+		if(index > -1){
+			newRequestAPIKeyData.clones.splice(index, 1);
+		}else{
+			newRequestAPIKeyData.clones.push(cloneId);
+		}
+        setRequestAPIKeyData(newRequestAPIKeyData);
+    }
 	
 	const renderAPIKeyRequestForm = () => {
 		return (
@@ -183,13 +224,36 @@ const DecoupledFooter = (props) => {
 						margin="dense"
 						variant="outlined"
 					/>
+					<Typography variant="h3" style={{ width: '100%', fontSize:'24px' }}>Select clones to access</Typography>
+					<FormGroup style={{margin: '0px 10px', width: '100%', flexDirection: 'row'}}>
+						{cloneMeta.map((clone) => {
+							return  (
+								<FormControlLabel
+									key={clone.id}
+									name={clone.clone_name}
+									value={clone}
+									control={<Checkbox
+										onClick={() => handleCloneChange(clone.id)}
+										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+										checked={requestAPIKeyData?.clones.includes(clone.id)}
+										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+										name={clone.clone_name}
+										className={classes.filterBox}
+									/>}
+									label={clone.clone_name}
+									labelPlacement="end"
+									className={classes.titleText}
+								/>
+							)
+						})}
+                    </FormGroup>
 				</div>
 			 </>
 		);
 	}
 	
 	const sendAPIKeyRequest = () => {
-		gameChangerAPI.createAPIKeyRequest(requestAPIKeyData.name, requestAPIKeyData.email, requestAPIKeyData.reason).then(resp => {
+		gameChangerAPI.createAPIKeyRequest(requestAPIKeyData.name, requestAPIKeyData.email, requestAPIKeyData.reason, requestAPIKeyData.clones).then(resp => {
 			gameChangerAPI.updateUserAPIRequestLimit().then(()=>setAPIRequestLimit(apiRequestLimit-1))
 			setShowRequestAPIKeyModal(false);
 		}).catch(e => {
