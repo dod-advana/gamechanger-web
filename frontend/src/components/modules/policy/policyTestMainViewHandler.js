@@ -421,7 +421,7 @@ const PolicyMainViewHandler = {
 						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
 							<SourceContainer>
 								<img src={source.imgSrc} alt={'crawler seal'}></img>
-								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.data_source_s}</Typography>
+								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
 						{crawlerSources.length > 0 && crawlerSources[0].imgSrc === undefined &&  
