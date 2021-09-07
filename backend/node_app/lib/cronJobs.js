@@ -29,9 +29,15 @@ class CronJobs {
 	init(){
 		this.cacheController.setStartupSearchHistoryCacheKeys();
 
-		poll(async () => {
-			await this.favoritesController.checkLeastRecentFavoritedSearch();
-		}, 10000);
+		const favoriteSearchPollInterval = this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval;
+		if (favoriteSearchPollInterval >= 0) {
+			this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
+			poll(async () => {
+				await this.favoritesController.checkLeastRecentFavoritedSearch();
+			}, favoriteSearchPollInterval);
+		} else {
+			this.logger.info('Polling for favorite search updates disabled.');
+		}
 	}
 
 	getReloadJob() {

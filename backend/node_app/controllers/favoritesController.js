@@ -396,7 +396,7 @@ class FavoritesController {
 										});
 									}
 								} else {
-									this.logger.log('no request body data to make the search');
+									this.logger.info('no request body data to make the search');
 								}
 
 
