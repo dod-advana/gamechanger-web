@@ -423,7 +423,7 @@ const PolicyMainViewHandler = {
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
-						{crawlerSources.length > 0 && crawlerSources[0].imgSrc === undefined &&  
+						{crawlerSources.length === 0 &&  
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>
@@ -464,7 +464,7 @@ const PolicyMainViewHandler = {
 								</div>
 							</div>
 						)}
-						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+						{ adminMajorPubs.length === 0 && 
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>
