@@ -103,6 +103,13 @@ export default () => {
                 <TableRow>{row.value}</TableRow>
             )
         },
+        // {
+        //     Header: 'Clones',
+        //     accessor: 'clones',
+        //     Cell: row => (
+        //         <TableRow>{row.value}</TableRow>
+        //     )
+        // },
         {
             Header: ' ',
             accessor: 'id',
