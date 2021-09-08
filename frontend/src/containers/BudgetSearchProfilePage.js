@@ -178,60 +178,94 @@ const samplePieData = [
     }
 ];
 
-const sampleMetadata = [
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Project',
-        Value: '000000',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    },
-    {
-        Key: 'Program POC',
-        Value: 'First Name, Last Name, Position, Agency',
-    }
-];
+const getMetadataTableData = (projectData) => {
+    
+    const metadata = [
+        {
+            Key: 'Presumed POC',
+            Value: 'N/A',
+        },
+        {
+            Key: 'Project',
+            Value: projectData.Project ,
+        },
+        {
+            Key: 'Service Agency Name',
+            Value: projectData.Service__Agency_Name ?? projectData.Service__Agency,
+        },
+        {
+            Key: 'Source Tags',
+            Value: projectData.source_tag,
+        },
+        {
+            Key: 'Budget Years',
+            Value: projectData.Budget_Year,
+        },
+        {
+            Key: 'Prior Year Amount',
+            Value: projectData.Prior_Year_Amount ?? projectData.Prior_Year_Amt,
+        },
+        {
+            Key: 'Current Year Amount',
+            Value: projectData.Current_Year_Amount ?? projectData.Current_Year_Amt,
+        },
+        {
+            Key: 'Fiscal Year',
+            Value: 'N/A',
+        },
+        {
+            Key: 'To Complete',
+            Value: projectData.To_Complete,
+        },
+        {
+            Key: 'Total Cost',
+            Value: projectData.Total_Cost ?? projectData.Total,
+        },
+        {
+            Key: 'Budget Year',
+            Value: projectData.Budget_Year,
+        },
+        {
+            Key: 'Budget Cycle',
+            Value: projectData.Budget_Cycle,
+        },
+        {
+            Key: 'Appropriation',
+            Value: projectData.Appropriation,
+        },
+        {
+            Key: 'Appropriation Title',
+            Value: projectData.Appropriation_Title,
+        },
+        {
+            Key: 'Budget Activity',
+            Value: projectData.Budget_Activity,
+        },
+        {
+            Key: 'Budget Activity Title',
+            Value: projectData.Budget_Activity_Title,
+        },
+        {
+            Key: 'Submission Date',
+            Value: 'N/A',
+        },
+        {
+            Key: 'Program Element',
+            Value: projectData.Program_Element,
+        },
+        {
+            Key: 'Category',
+            Value: projectData.core_ai_label,
+        },
+        {
+            Key: 'Keywords',
+            Value: 'N/A',
+        },
+    ];
+
+    return metadata;
+}
+
 
 const sampleAccomplishmentData = [
     {
@@ -929,12 +963,11 @@ const BudgetSearchProfilePage = (props) => {
 
     const [currentNav, setCurrentNav] = useState('The Basics');
 	const context = useContext(getContext('budgetSearch'));
-    const accomplishments = useState([]);
-    console.log(context);
+    const [projectData, setProjectData] = useState({});
     const { state, dispatch } = context;
 
     const renderNavButtons = () => {
-        const buttonNames = ['The Basics', 'Accomplishment', 'Contracts', 'JAIC Reviewer Section', 'Service / DoD Component Reviewer Section', 'POC Reviewer Section', 'Secondary Reviewer Section'];
+        const buttonNames = ['The Basics', 'Accomplishment', 'Contracts', 'JAIC Reviewer Section', 'Service / DoD Component Reviewer Section', 'POC Reviewer Section'];
         const navButtons = [];
         buttonNames.forEach((name, index) => {
             navButtons.push(
@@ -942,7 +975,14 @@ const BudgetSearchProfilePage = (props) => {
                     first={index === 0} 
                     last={index === navButtons.length - 1} 
                     selected={currentNav === name}
-                    onClick={() => setCurrentNav(name)}
+                    onClick={() => {
+                        setCurrentNav(name);
+                        const element = document.getElementById(name);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+                        }
+                    }
+                    }
                 >   
                     {name}
                 </StyledNavButton>
@@ -957,15 +997,18 @@ const BudgetSearchProfilePage = (props) => {
             const url = window.location.href;
             const peNum = getQueryVariable('peNum', url);
             const projectNum = getQueryVariable('projectNum');
+            const budgetType = getQueryVariable('type');
     
-            const getAccomplishments = async () => {
+            const getProjectData = async () => {
                 setState(dispatch, { profileLoading: true });
-                const accomps = await gameChangerAPI.getAccomplishments(peNum, projectNum);
-                console.log(accomps);
-                setState(dispatch, { profileLoading: false, accomplishments: accomps });
+                const projectData = await gameChangerAPI.getProjectData(peNum, projectNum, budgetType);
+                const dropdownData = await gameChangerAPI.getBudgetDropdownData()
+                console.log(projectData);
+                console.log(dropdownData);
+                setProjectData(projectData.data);
+                setState(dispatch, { profileLoading: false });
             }
-
-            getAccomplishments();
+            getProjectData();
 
         } catch(err) {
             console.log(err);
@@ -980,7 +1023,7 @@ const BudgetSearchProfilePage = (props) => {
     return (
         <div>
             <SearchBar context={context}/>
-            <StyledNavBar>
+            <StyledNavBar id="The Basics">
                 <StyledNavContainer>
                     {renderNavButtons()}
                 </StyledNavContainer>
@@ -1004,31 +1047,27 @@ const BudgetSearchProfilePage = (props) => {
                     </StyledAccordionContainer>
                 </StyledLeftContainer>
                 <StyledMainContainer>
-                    <Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>187 0904759A Major T&E Investment</Typography>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px' }}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
+                    <Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>{projectData.Project_Title ?? projectData.Budget_Line_Item_Title}</Typography>
+                    <Typography variant="h3" style={{ fontWeight: 'bold', width: '100%' }}>
+                        Project Description
                     </Typography>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px' }}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
-                    </Typography>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px' }}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
-                    </Typography>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px' }}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
-                    </Typography>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px' }}>
+                    <div style={{ height: '600px', overflow: 'auto'}}>
+                        <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
+                            {projectData.Project_Mission_Description ?? projectData.Program_Description}
+                        </Typography>
+                    </div>
+                    <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
                     </Typography>
                 </StyledMainContainer>
                 <StyledRightContainer>
                 <SimpleTable tableClass={'magellan-table'}
                     zoom={1}
-                    rows={sampleMetadata}
+                    rows={projectData ? getMetadataTableData(projectData) : []}
                     height={'auto'}
                     dontScroll={true}
                     disableWrap={true}
-                    title={'Metadata'}
+                    title={'Metadata - Project Budget Information'}
                     headerExtraStyle={{
                         backgroundColor: '#313541',
                         color: 'white'
@@ -1040,17 +1079,17 @@ const BudgetSearchProfilePage = (props) => {
             </StyledContainer>
             <StyledReviewContainer>
                 <StyledReviewLeftContainer>
-                    <StyledAccordionContainer>
+                    <StyledAccordionContainer id={"Accomplishment"}>
                         <GCAccordion contentPadding={0} expanded={true} header={'ACCOMPLISHMENTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderAccomplishments()}
                         </GCAccordion>
                     </StyledAccordionContainer>
-                    <StyledAccordionContainer>
+                    <StyledAccordionContainer id={"Contracts"}>
                         <GCAccordion contentPadding={0} expanded={true} header={'CONTRACTS (#)'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
                             {renderVendors()}
                         </GCAccordion>
                     </StyledAccordionContainer>
-                    <StyledAccordionContainer>
+                    <StyledAccordionContainer id={"JAIC Reviewer Section"}>
                         <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
                             <StyledAccordionHeader headerWidth='100%'>
                                 <strong>JAIC REVIEW</strong>
@@ -1060,7 +1099,7 @@ const BudgetSearchProfilePage = (props) => {
                             {renderJAICReview()}
                         </GCAccordion>                    
                     </StyledAccordionContainer>
-                    <StyledAccordionContainer>
+                    <StyledAccordionContainer id={"Service / DoD Component Reviewer Section"}>
                         <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
                             <StyledAccordionHeader>
                                 <strong>SERVICE REVIEWER</strong>
@@ -1070,7 +1109,7 @@ const BudgetSearchProfilePage = (props) => {
                             {renderServiceReviewer()}
                         </GCAccordion>                    
                     </StyledAccordionContainer>
-                    <StyledAccordionContainer>
+                    <StyledAccordionContainer id={"POC Reviewer Section"}>
                         <GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
                             <StyledAccordionHeader>
                                 <strong>POC REVIEWER</strong>

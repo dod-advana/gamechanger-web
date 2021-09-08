@@ -313,7 +313,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
-					accessor: 'reviewer',
+					accessor: 'jaic_review_stat',
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
@@ -400,9 +400,10 @@ const BudgetSearchMainViewHandler = {
 										projectTitle,
 										programElementNum,
 										projectNum,
-										serviceAgency
+										serviceAgency,
+										budgetType
 									} = row;
-									window.open(`#/budgetsearch-profile?title=${projectTitle}&peNum=${programElementNum}&projectNum=${projectNum}&serviceAgency=${serviceAgency}`);
+									window.open(`#/budgetsearch-profile?title=${projectTitle}&peNum=${programElementNum}&projectNum=${projectNum}&serviceAgency=${serviceAgency}&type=${budgetType}`);
 								}
 							}
 						}}

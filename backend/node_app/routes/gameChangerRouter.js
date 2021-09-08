@@ -24,7 +24,6 @@ const { AppSettingsController } = require('../controllers/appSettingsController'
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
 const { BudgetDocController } = require('../controllers/budgetDocController');
-const { AccomplishmentsController } = require('../controllers/accomplishmentsController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -48,7 +47,6 @@ const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
 const review = new ReviewController();
 const budgetDocs = new BudgetDocController();
-const accomplishments = new AccomplishmentsController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -176,6 +174,7 @@ router.post('/review/storeJbookReview', review.storeJbookReview);
 
 router.post('/budget/budgetDocSearch', budgetDocs.budgetDocSearch);
 
-router.get('/budget/getAccomplishments', accomplishments.getAccomplishments);
+router.get('/budget/getProjectData', budgetDocs.getProjectData);
+router.get('/budget/getBudgetDropdownData', budgetDocs.getBudgetDropdownData);
 
 module.exports = router;
