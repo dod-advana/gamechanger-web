@@ -209,7 +209,7 @@ class DataLibrary {
 		return reqConfig;
 	}
 
-	getESClientConfig ({ user, password, ca, protocol, host, port, index }) {
+	getESClientConfig ({ user, password, ca, protocol, host, port, index, requestTimeout }) {
 		let config = {
 			node: {}
 		};
@@ -233,6 +233,7 @@ class DataLibrary {
 			};
 		};
 		config.node.url = new URL(`${protocol}://${host}:${port}`);
+		config.requestTimeout = requestTimeout;
 
 		return config;
 	}
