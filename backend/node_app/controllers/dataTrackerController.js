@@ -226,11 +226,8 @@ class DataTrackerController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const orgData = await this.organizationInfo.findAndCountAll({});
-			const orgDataCleaned = orgData.rows.map((item) => {
-				return item.dataValues;
-			});
-			res.status(200).send(orgDataCleaned);
+			const orgData = await this.organizationInfo.findAll();
+			res.status(200).send(orgData);
 		} catch (e) {
 			this.logger.error(e.message, 'VMHW263', userId);
 			res.status(500).send({ error: e.message, message: 'Error retrieving organization seals' });
