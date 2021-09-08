@@ -295,7 +295,7 @@ export default function SearchMatrix(props) {
 		const exclude = new Set([...keys, ...quotedKeys]);
 		let topFive = new Set();
 
-		while(topFive.size < 7){
+		while(topFive.size < 10){
 			if(expandedTerms.length === 0){
 				break;
 			}

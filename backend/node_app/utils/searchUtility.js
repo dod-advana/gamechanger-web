@@ -50,6 +50,7 @@ class SearchUtility {
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
+		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 
 	}
 
@@ -60,7 +61,7 @@ class SearchUtility {
 		return `${cloneName}_${hashed}`;
 	}
 
-	combineExpansionTerms(expansionDict, synonyms, key, abbreviationExpansions, userId) {
+	combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbreviationExpansions, userId) {
 		try {
 			let result = {};
 			let toReturn;
@@ -126,9 +127,16 @@ class SearchUtility {
 					nextIsAbb = true;
 				}
 			}
+
 			toReturn = result;
 			let cleaned = this.cleanExpansions(key, toReturn);
+			if (relatedSearches.length > 0) {
+				relatedSearches.forEach((term) => {
+					cleaned[key].push({phrase: term, source: 'related'})
+				})
+			}
 			// this.logger.info('cleaned: ' + cleaned);
+			
 			return cleaned;
 		} catch (err) {
 			const { message } = err;
@@ -1328,7 +1336,52 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+	async getRelatedSearches(searchText, esClientName, userId) {
+		// need to caps all search text for ID and Title since it's stored like that in ES
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
+		let relatedSearches = []
 
+		const query = 
+			{
+				size: 1,
+				query: {
+					query_string: {
+						query: `*${searchText}*`,
+						fuzziness: 5
+					}
+				},
+				aggs: {
+					related: {
+						terms: {
+							field: 'search_query',
+							min_doc_count: 5
+						},
+						aggs: {
+							user: { terms: {field: 'user_id', size: 2}}
+						}
+					}
+				}
+			}
+		try {
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			let aggs = results.body.aggregations.related.buckets
+			if (aggs.length > 0) {
+				aggs.forEach(term => {
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					if (word !== searchText && term.user.buckets.length > 1){
+						word = word.replace(/\s{2,}/g," ");
+						if (!relatedSearches.includes(word)){
+							relatedSearches.push(word);
+						}
+					}
+				 });
+			}
+		} catch (err) {
+			this.logger.error(err.message, 'ALS01AZ', user);
+		}
+
+		return relatedSearches
+	}
 
 	cleanUpIdEsResultsForGraphCache(raw, user) {
 		try {

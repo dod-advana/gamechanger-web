@@ -162,6 +162,7 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 			forCacheReload = false,
+			cloneName,
 		} = body;
 		try {
 			// try to get search expansion
@@ -169,7 +170,10 @@ class PolicySearchHandler extends SearchHandler {
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			const {synonyms, text} = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, cloneName, userId)
+			console.log(relatedSearches)
+			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, text, cleanedAbbreviations, userId);
+			console.log(expansionDict)
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
