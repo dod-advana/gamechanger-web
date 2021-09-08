@@ -258,6 +258,18 @@ export default function SideBar(props) {
 											}
 									</GCAccordion>
 								</div>
+								<div style={{width: '100%', marginBottom: 10}}>
+									<GCAccordion expanded={false} header={'TOPICS'} headerTextWeight={'normal'}>
+											{runningTopicSearch ?
+												<div style={{margin: '0 auto'}}>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
+												</div> :
+												<>
+													{renderTopTopics()}
+												</>
+											}
+									</GCAccordion>
+								</div>
 								{false && <div style={{width: '100%', marginBottom: 10}}>
 									<GCAccordion expanded={false} header={'LEGEND'} headerTextWeight={'normal'}>
 										<>
