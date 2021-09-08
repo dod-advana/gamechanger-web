@@ -283,6 +283,13 @@ const handleSources = async(state, dispatch) => {
 	}
 }
 
+const truncateString = (text) => {
+	if (text.length > 50) {
+		return text.substring(0, 50) + '...'
+	}
+	return text;
+}
+
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
@@ -522,7 +529,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{pub.name.trunc(50)}</div>
+									<div className="hover-text">{truncateString(pub.name)}</div>
 								</div>
 							</div>
 						)}
@@ -556,7 +563,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{pub.name.trunc(50)}</div>
+									<div className="hover-text">{truncateString(pub.name)}</div>
 								</div>
 							</div>
 						)}
