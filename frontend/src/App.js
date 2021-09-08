@@ -248,7 +248,9 @@ const App = () => {
 
 	useEffect(() => {
 		const initialize = async () => {
-
+			if(window.location.hash !== '' || window.location.hash !== '#/') {
+				localStorage.setItem('userInitialUrl', window.location.href)
+			}
 			if (isDecoupled) {
 				GCAuth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
 			} else {
@@ -273,6 +275,11 @@ const App = () => {
 		if (!initialized) {
 			setInitialized(true);
 			initialize();
+			const initialUrl = localStorage.getItem('userInitialUrl')
+			if(initialUrl && initialUrl !== window.location.href) {
+				window.location.href = initialUrl;
+			}
+			localStorage.removeItem('userInitialUrl');
 		}
 	}, [initialized]);
 
