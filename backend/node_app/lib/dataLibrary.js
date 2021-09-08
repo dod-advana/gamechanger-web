@@ -354,7 +354,7 @@ class DataLibrary {
 		};
 
 		return new Promise(async (resolve,reject) => {
-			if(filename = 'none'){
+			if(filename === 'none'){
 				reject(filename);
 			}
 			await this.redisDB.select(this.redisClientDB);

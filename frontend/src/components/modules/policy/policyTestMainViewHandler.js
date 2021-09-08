@@ -167,6 +167,29 @@ const renderRecentSearches = (search, state, dispatch) => {
 	)
 }
 
+
+const handlePopPubs = async(pop_pubs, state, dispatch) => {
+	try {
+		for(let i = 0; i < pop_pubs.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([pop_pubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
+				const buffers = pngs.data;
+				buffers.forEach((buf,idx) => {
+					if(buf.status === "fulfilled"){
+						pop_pubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else {
+						pop_pubs[i].imgSrc = 'error';
+					}
+				});
+				setState(dispatch, {searchMajorPubs: pop_pubs});
+			});
+		}
+	} catch(e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, {searchMajorPubs: pop_pubs});
+	}
+}
+
 const handlePubs = async (pubs, state, dispatch) => {
 	try {
 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
@@ -267,6 +290,7 @@ const PolicyMainViewHandler = {
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
+		let pop_pubs = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
 			data.forEach(obj => {
@@ -274,6 +298,8 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
+				} else if (obj.key === 'popular_docs'){
+					pop_pubs = obj.value;
 				}
 			});
 
@@ -284,6 +310,7 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 		handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
+		handlePopPubs(pop_pubs, state, dispatch);
 	},
 	
 	getMainView(props) {
