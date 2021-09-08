@@ -477,7 +477,7 @@ class FavoritesController {
 			const { cloneName, searchText, offset = 0, limit = 1 /*, options */} = history.request_body;
 			const options = history.request_body;
 			const userId = favorite.user_id;
-			const permissions = ['Webapp Super Admin']; // XXX: ??? is this ok -- do we need to pull the actual user permissions?
+			const permissions = ['Webapp Super Admin', 'Tier 3 Support']; // XXX: ??? is this ok -- do we need to pull the actual user permissions?
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
 			const error = handler.getError();
