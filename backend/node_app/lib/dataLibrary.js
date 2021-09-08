@@ -354,7 +354,9 @@ class DataLibrary {
 		};
 
 		return new Promise(async (resolve,reject) => {
-
+			if(filename = 'none'){
+				reject(filename);
+			}
 			await this.redisDB.select(this.redisClientDB);
 			const cachedResults = await this.redisDB.get(key);
 			if (cachedResults) {
