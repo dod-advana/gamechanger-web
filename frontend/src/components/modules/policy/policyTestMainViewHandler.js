@@ -170,18 +170,32 @@ const renderRecentSearches = (search, state, dispatch) => {
 const handlePubs = async (pubs, state, dispatch) => {
 	try {
 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-		gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
-		.then( (pngs) => {
-			const buffers = pngs.data;
-			buffers.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-				} else {
-					pubs[idx].imgSrc = 'error';
-				}
+		for(let i = 0; i < pubs.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([pubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
+				const buffers = pngs.data;
+				buffers.forEach((buf,idx) => {
+					if(buf.status === "fulfilled"){
+						pubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else {
+						pubs[i].imgSrc = 'error';
+					}
+				});
+			setState(dispatch, {adminMajorPubs: pubs});
 			});
-		setState(dispatch, {adminMajorPubs: pubs});
-		});
+
+		}
+		// gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
+		// .then( (pngs) => {
+		// 	const buffers = pngs.data;
+		// 	buffers.forEach((buf,idx) => {
+		// 		if(buf.status === "fulfilled"){
+		// 			pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+		// 		} else {
+		// 			pubs[idx].imgSrc = 'error';
+		// 		}
+		// 	});
+		// setState(dispatch, {adminMajorPubs: pubs});
+		// });
 	} catch(e) {
 		//Do nothing
 		console.log(e);
@@ -200,24 +214,45 @@ const handleSources = async(state, dispatch) => {
 			return {img_filename: filename}
 		});
 		// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
-		gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'})
-		.then( (pngs) => {
-			const buffers = pngs.data;
-			buffers.forEach((buf,idx) => {
-				if(buf.status === "fulfilled"){
-					crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
-						crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-					} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+
+		for(let i = 0; i < thumbnailList.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, {clone_name: 'gamechanger'}).then( (pngs) => {
+				const buffers = pngs.data;
+				buffers.forEach((buf,idx) => {
+					if(buf.status === "fulfilled"){
+						crawlerSources[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+						if(crawlerSources[i].image_link.split('.').pop() === 'png'){
+							crawlerSources[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+						} else if(crawlerSources[i].image_link.split('.').pop() === 'svg') {
+							crawlerSources[i].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+						}
 					}
-				}
-				else {
-					crawlerSources[idx].imgSrc = DefaultSeal;
-				}
+					else {
+						crawlerSources[i].imgSrc = DefaultSeal;
+					}
+				});
+				setState(dispatch, {crawlerSources});
 			});
-			setState(dispatch, {crawlerSources});
-		});
+		}
+
+		// gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'})
+		// .then( (pngs) => {
+		// 	const buffers = pngs.data;
+		// 	buffers.forEach((buf,idx) => {
+		// 		if(buf.status === "fulfilled"){
+		// 			crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+		// 			if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
+		// 				crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+		// 			} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
+		// 				crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+		// 			}
+		// 		}
+		// 		else {
+		// 			crawlerSources[idx].imgSrc = DefaultSeal;
+		// 		}
+		// 	});
+		// 	setState(dispatch, {crawlerSources});
+		// });
 	} catch(e) {
 		//Do nothing
 		console.log(e);
@@ -423,7 +458,7 @@ const PolicyMainViewHandler = {
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
 						)}
-						{crawlerSources.length >= 0 &&  
+						{ crawlerSources.length === 0 &&  
 							<div className='col-xs-12' style={{height: '140px'}} ><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '140px', textAlign: 'center'}}/></div>
 						}
 					</GameChangerThumbnailRow>
@@ -498,7 +533,7 @@ const PolicyMainViewHandler = {
 								</div>
 							</div>
 						)}
-						{ searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && 
+						{ searchMajorPubs.length === 0 && 
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center'}}/></div>
 						}
 					</GameChangerThumbnailRow>
