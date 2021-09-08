@@ -283,6 +283,14 @@ const handleSources = async(state, dispatch) => {
 	}
 }
 
+const titleFormatting = (title) => {
+	if(title.length <= 60){
+		return title;
+	} else {
+		return title.substring(0, 60) + '...'
+	}
+}
+
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
@@ -522,7 +530,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{pub.name}</div>
+									<div className="hover-text">{titleFormatting(pub.name)}</div>
 								</div>
 							</div>
 						)}
@@ -556,7 +564,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{pub.name}</div>
+									<div className="hover-text">{titleFormatting(pub.name)}</div>
 								</div>
 							</div>
 						)}
