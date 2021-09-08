@@ -40,7 +40,7 @@ class EdaExportHandler extends ExportHandler {
 				offset,
 				...rest
 			} = req.body;
-			
+		
 			const clientObj = {};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			const permissions = req.permissions ? req.permissions : [];
@@ -64,9 +64,21 @@ class EdaExportHandler extends ExportHandler {
 				
 				const esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(req.body, userId);
 				const results = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-
+				
 				if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, [], expansionDict, clientObj.esIndex);
+					const filenames = searchResults.docs.map((a) => a.filename)
+					
+					const tables = ['"pds_parsed"."line_item_details"']
+					const columns = ['filename','prod_or_svc_des', 'buying_currency']
+			
+					const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
+
+					for (const result of searchResults.docs) {
+						if (result.filename) {
+							result.line_items = pgResults.filter(lineItem => lineItem.pdf_filename === result.filename);
+						}
+					}
 				} else {
 					this.logger.error('Error with Elasticsearch download results', 'T5GRJ4Lzdf', userId);
 					searchResults = { totalCount: 0, docs: [] };
@@ -87,6 +99,8 @@ class EdaExportHandler extends ExportHandler {
 				// 		searchTerms
 				// 	}, userId);
 				// }
+
+
 
 				if (format === 'pdf') {
 					const sendDataCallback = (buffer) => {
@@ -116,7 +130,7 @@ class EdaExportHandler extends ExportHandler {
 			res.status(500).send(err);
 		}
 	}
-
+	
 	createCsvStream(data, userId) {
 		try {
 			const stringifier = this.csvStringify({ delimiter: ',' });
@@ -140,12 +154,18 @@ class EdaExportHandler extends ExportHandler {
 	writeCsvData(stringifier, data) {
 
 		if(data && data.docs && data.docs.length > 0){
-			const header = ['Filename', 'Contract Number', 'Page Count', 'Issuing Organization'];
+			const header = ['Filename', 'Contract Number', 'Page Count', 'Issuing Organization', '', '', 'CLINS', 'Prod or Svc', 'Description', 'Base', 'Type', 'Obligated Amount', 'Obligated Amount CIN', 'Row ID'];
 			stringifier.write(header);
 
 			data.docs.forEach((doc) => {
 				const item = [doc.filename, this.getDisplayTitle(doc), doc.page_count, doc.issuing_organization_eda_ext];
 				stringifier.write(item);
+
+				for (const item of doc.line_items) {
+					const line_item = ['', '', '', '', '', '', '', item.prod_or_svc, item.prod_or_svc_desc, item.li_base, item.li_type, item.obligated_amount, item.obligated_amount_cin, item.row_id];					
+					stringifier.write(line_item);	
+				}
+
 			});
 		}
 	}

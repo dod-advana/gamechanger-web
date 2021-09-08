@@ -73,8 +73,26 @@ module.exports = (sequelize, DataTypes) => {
 			s3_bucket: {
 				type: DataTypes.STRING
 			},
-			config: {
-				type: DataTypes.JSONB
+			data_source_name: {
+				type: DataTypes.STRING
+			},
+			source_agency_name: {
+				type: DataTypes.STRING
+			},
+			metadata_creation_group: {
+				type: DataTypes.STRING
+			},
+			source_s3_bucket: {
+				type: DataTypes.STRING
+			},
+			source_s3_prefix: {
+				type: DataTypes.STRING
+			},
+			elasticsearch_index: {
+				type: DataTypes.STRING
+			},
+			needs_ingest: {
+				type: DataTypes.BOOLEAN
 			},
 			createdAt: {
 				type: DataTypes.DATE

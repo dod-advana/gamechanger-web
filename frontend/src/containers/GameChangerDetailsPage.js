@@ -443,7 +443,7 @@ const GameChangerDetailsPage = (props) => {
 			setDocResultsPage(1);
 			setDocResults(resp.data.docs);
 			setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
-			if(resp.data.docs.length > 0) {
+			if(resp.data.docs.length > 0 || resp.data.totalCount === 0) {
 				setTimeFound(((t1 - t0) / 1000).toFixed(2));
 				setGettingDocuments(false);
 			}
