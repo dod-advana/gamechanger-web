@@ -283,6 +283,17 @@ const handleSources = async(state, dispatch) => {
 	}
 }
 
+const formatString = (text) => {
+	let titleCase = text.split(' ').map(function(val){ 
+		if(val.charAt(0) === '(' && val.charAt(val.length - 1) === ')'){
+			return val;
+		} else {
+			return val.charAt(0).toUpperCase() + val.substr(1).toLowerCase();
+		}
+  }).join(' ');
+	return _.truncate(titleCase, {length: 60, separator: /,?\.* +/ });
+}
+
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 
@@ -522,7 +533,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{_.truncate(pub.name, {length: 60, separator: /,?\.* +/ })}</div>
+									<div className="hover-text">{formatString(pub.name)}</div>
 								</div>
 							</div>
 						)}
@@ -556,7 +567,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{_.truncate(pub.name, {length: 60, separator: /,?\.* +/ })}</div>
+									<div className="hover-text">{formatString(pub.name)}</div>
 								</div>
 							</div>
 						)}
