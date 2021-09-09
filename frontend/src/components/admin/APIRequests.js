@@ -89,6 +89,14 @@ export default () => {
             )
         },
         {
+            Header: 'Clones',
+            // accessor: 'email',
+            width: 200,
+            Cell: row => (
+                <TableRow>{''}</TableRow>
+            )
+        },
+        {
             Header: 'Keys',
             accessor: 'keys',
             Cell: row => 
@@ -119,6 +127,22 @@ export default () => {
         {
             Header: 'Name',
             accessor: 'name',
+            width: 200,
+            Cell: row => (
+                <TableRow>{row.value}</TableRow>
+            )
+        },
+        {
+            Header: 'Username',
+            accessor: 'username',
+            width: 200,
+            Cell: row => (
+                <TableRow>{row.value}</TableRow>
+            )
+        },
+        {
+            Header: 'Email',
+            accessor: 'email',
             width: 200,
             Cell: row => (
                 <TableRow>{row.value}</TableRow>
