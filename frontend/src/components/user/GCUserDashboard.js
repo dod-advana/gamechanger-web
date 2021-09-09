@@ -40,7 +40,7 @@ const gameChangerAPI = new GameChangerAPI();
 const StyledBadge = withStyles((theme) => ({
 	badge: {
 		backgroundColor: '#AD0000',
-		right: '-11px',
+		right: '-11px !important',
 		top: 0,
 		color: 'white',
 		fontSize: 12,
