@@ -65,6 +65,30 @@ export default () => {
             )
         },
         {
+            Header: 'Username',
+            accessor: 'username',
+            width: 200,
+            Cell: row => (
+                <TableRow>{row.value}</TableRow>
+            )
+        },
+        {
+            Header: 'Email',
+            accessor: 'email',
+            width: 200,
+            Cell: row => (
+                <TableRow>{row.value}</TableRow>
+            )
+        },
+        {
+            Header: 'Decscription',
+            // accessor: 'email',
+            width: 200,
+            Cell: row => (
+                <TableRow>{''}</TableRow>
+            )
+        },
+        {
             Header: 'Keys',
             accessor: 'keys',
             Cell: row => 
