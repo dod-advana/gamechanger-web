@@ -118,12 +118,14 @@ class ExternalAPIController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const requests = await this.apiKeyRequests.findAll({ 
-				raw: true,
+				raw: false,
 				include: [{
 					model: this.cloneMeta,
+					attributes: ['id', 'clone_name'],
+					through: {attributes: []}
 				}],
 			});
-			console.log("requests: ", requests);
+			
 			const pending = []; const approved = [];
 
 			for (const request of requests) {

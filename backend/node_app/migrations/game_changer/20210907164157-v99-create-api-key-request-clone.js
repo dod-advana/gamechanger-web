@@ -11,22 +11,10 @@ module.exports = {
 			apiKeyRequestId: {
 				allowNull: false,
 				type: Sequelize.INTEGER,
-                references: {
-                    model: 'api_key_requests',
-                    key: 'id'
-                  },
-                  onUpdate: 'cascade',
-                  onDelete: 'cascade'
 			},
 			cloneId: {
 				allowNull: false,
 				type: Sequelize.INTEGER,
-                references: {
-                    model: 'clone_meta',
-                    key: 'id'
-                  },
-                  onUpdate: 'cascade',
-                  onDelete: 'cascade'
 			},
 			createdAt: Sequelize.DATE,
 			updatedAt: Sequelize.DATE
