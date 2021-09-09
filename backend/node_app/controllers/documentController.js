@@ -272,16 +272,6 @@ class DocumentController {
 		try {
 			const { filenames, folder, dest, clone_name } = req.body
 			const promises = []
-			const promiseTimeout = function(ms, promise){
-				// Create a promise that rejects in <ms> milliseconds
-				let timer;
-				// Returns a race between our timeout and the passed in promise
-				return Promise.race([
-					promise,
-					new Promise((_r, rej) => timer = setTimeout(rej, ms, 'Timed out in ' + ms + 'ms.'))
-				]).finally(() => clearTimeout(timer));
-			}
-
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			filenames.forEach(({img_filename}) => {
 				const filename = img_filename;
@@ -292,10 +282,8 @@ class DocumentController {
 				promises.push(promise);
 			});
 			
-			let allPromises = Promise.allSettled(promises);
-			allPromises
-			.then((results) => { res.status(200).send(results);})
-			.catch((err) => { res.status(500).send(err);});
+			let allPromises = await Promise.allSettled(promises);
+			res.status(200).send(allPromises);			
 		} catch (err) {
 			this.logger.error(err, 'TJJUFQC', userId)
 			res.status(500).send(err);

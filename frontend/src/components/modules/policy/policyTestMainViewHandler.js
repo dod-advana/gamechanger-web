@@ -508,40 +508,6 @@ const PolicyMainViewHandler = {
 						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow 
-						links={adminMajorPubs} 
-						title="Editor's Choice: Top Publications" 
-						width='215px' 
-					>
-						{ (adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc) && adminMajorPubs.map((pub) =>
-							<div className="topPublication"
-							>
-								{ pub.imgSrc !== 'error' ? 
-									<img 
-									className="image"
-									src={pub.imgSrc}
-									alt="thumbnail" 
-									title={pub.name}
-								/> : 
-									<div className="image">{pub.name}</div>
-								}
-								
-								<div 
-									className="hover-overlay"
-									onClick={()=>{
-										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
-										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
-									}}
-								>
-									<div className="hover-text">{formatString(pub.name)}</div>
-								</div>
-							</div>
-						)}
-						{ adminMajorPubs.length === 0 && 
-							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center', paddingTop: '75px', paddingBottom: '75px'}}/></div>
-						}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow 
 						links={searchMajorPubs} 
 						title="Popular Publications" 
 						width='215px' 
