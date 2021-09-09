@@ -107,5 +107,14 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: false
 		}
 	);
+
+	CLONE_META.associate = (models) => {
+		console.log("models: ", models)
+		CLONE_META.belongsToMany(models.api_key_request, { 
+			through: 'api_key_request_clone', 
+			foreignKey: 'cloneId'
+		})
+	}
+	
 	return CLONE_META;
 };
