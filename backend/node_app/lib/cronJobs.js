@@ -1,4 +1,6 @@
 const cron = require('node-cron');
+const redis = require('redis');
+const Redlock = require('redlock');
 const { CacheController } = require('../controllers/cacheController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
@@ -14,7 +16,14 @@ class CronJobs {
 			favoritesController = new FavoritesController(),
 			userController = new UserController(),
 			logger = LOGGER,
+			redisClient,
 		} = opts;
+
+		if (!redisClient){
+			this.redisClient = redis.createClient(process.env.REDIS_URL || 'redis://localhost');
+		}
+		
+		this.redlock = new Redlock([this.redisClient]);
 
 		this.constants = constants;
 		this.cacheController = cacheController;
@@ -33,7 +42,21 @@ class CronJobs {
 		if (favoriteSearchPollInterval >= 0) {
 			this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
 			poll(async () => {
-				await this.favoritesController.checkLeastRecentFavoritedSearch();
+				let lock;
+				try {
+					const resource = 'locks:checkLeastRecentFavoritedSearch';
+					const ttl = 60000; // timeout lock after 60s
+					lock = await this.redlock.lock(resource, ttl);
+					await this.favoritesController.checkLeastRecentFavoritedSearch();
+				} catch (err) {
+					this.logger.error(err, 'M8HFXEH');
+				} finally {
+					if (lock) {
+						try {
+							await lock.unlock();
+						} catch (err) { /* swallow */ }
+					}
+				}
 			}, favoriteSearchPollInterval);
 		} else {
 			this.logger.info('Polling for favorite search updates disabled.');
