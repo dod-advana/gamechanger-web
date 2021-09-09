@@ -23,7 +23,10 @@ class CronJobs {
 			this.redisClient = redis.createClient(process.env.REDIS_URL || 'redis://localhost');
 		}
 		
-		this.redlock = new Redlock([this.redisClient]);
+		this.redlock = new Redlock([this.redisClient], {
+			// we're polling so no reason to retry
+			retryCount: 1,
+		});
 
 		this.constants = constants;
 		this.cacheController = cacheController;
@@ -45,19 +48,23 @@ class CronJobs {
 				let lock;
 				try {
 					const resource = 'locks:checkLeastRecentFavoritedSearch';
-					const ttl = 60000; // timeout lock after 60s
+					const ttl = Math.max(favoriteSearchPollInterval, 60000); // timeout lock after at least 60s
 					lock = await this.redlock.lock(resource, ttl);
 					await this.favoritesController.checkLeastRecentFavoritedSearch();
 				} catch (err) {
-					this.logger.error(err, 'M8HFXEH');
+					// XXX: this error is expected when the lock hasn't expired -- can we differentiate?
+					this.logger.error(err, 'M8HFXEH', 'this probably is not an issue');
 				} finally {
 					if (lock) {
 						try {
-							await lock.unlock();
-						} catch (err) { /* swallow */ }
+							// reduce the lock timeout to the poll interval
+							await lock.extend(favoriteSearchPollInterval);
+						} catch (err) {
+							this.logger.error(err, 'N7FGETF');
+						}
 					}
 				}
-			}, favoriteSearchPollInterval);
+			}, 1000); // we check every second if we can process the next item
 		} else {
 			this.logger.info('Polling for favorite search updates disabled.');
 		}
