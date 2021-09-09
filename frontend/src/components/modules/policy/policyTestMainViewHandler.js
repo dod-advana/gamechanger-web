@@ -522,7 +522,7 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{_.truncate(pub.name, {length: 30, separator: /,?\.* +/ })}</div>
+									<div className="hover-text">{_.truncate(pub.name, {length: 60, separator: /,?\.* +/ })}</div>
 								</div>
 							</div>
 						)}
@@ -556,12 +556,12 @@ const PolicyMainViewHandler = {
 										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
 									}}
 								>
-									<div className="hover-text">{_.truncate(pub.name, {length: 30, separator: /,?\.* +/ })}</div>
+									<div className="hover-text">{_.truncate(pub.name, {length: 60, separator: /,?\.* +/ })}</div>
 								</div>
 							</div>
 						)}
 						{ searchMajorPubs.length === 0 && 
-							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center'}}/></div>
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center', paddingTop: '75px', paddingBottom: '75px'}}/></div>
 						}
 					</GameChangerThumbnailRow>
 				</div>
