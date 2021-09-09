@@ -18,6 +18,8 @@ import GameChangerAPI from "../components/api/gameChanger-service-api";
 
 import './budgetsearch.css';
 import { setState } from '../sharedFunctions';
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
+
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -315,92 +317,6 @@ const sampleVendorData = [
     },
 ];
 
-const getJaicReviewData = (state) =>{
-
-    const {reviewers, categories, serviceReviewers, reviewStatus} = state;
-    const jaicReviewData = [
-        {
-            Key: 'Reviewers',
-            Value: <Autocomplete
-                        size="small"
-                        options={reviewers}
-                        getOptionLabel={(option) => option}
-                        style={{ width: 300 }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Core AI Analysis',
-            Value: <Autocomplete
-                        size="small"
-                        options={categories}
-                        getOptionLabel={(option) => option}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Service/DoD Component Reviewer',
-            Value: <Autocomplete
-                        size="small"
-                        options={serviceReviewers}
-                        getOptionLabel={(option) => option}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Review Status',
-            Value: <Autocomplete
-                        size="small"
-                        options={reviewStatus}
-                        getOptionLabel={(option) => option}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Planned Transition Partner',
-            Value: <Autocomplete
-                        size="small"
-                        freeSolo={true}
-                        options={[]}
-                        getOptionLabel={(option) => option.title}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Current Mission Partners (Academia, Industry, or Other)',
-            Value: 
-            <> 
-                <Autocomplete
-                    size="small"
-                    options={[]}
-                    freeSolo={true}
-                    getOptionLabel={(option) => option.title}
-                    style={{ width: 300, backgroundColor: 'white' }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-                <TextField
-                    placeholder="Reviewer Notes"
-                    variant="outlined"
-                    defaultValue={''}
-                    style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
-                    onBlur={() => {}}
-                    inputProps={{
-                        style: {
-                            width: '100%'
-                        }
-                    }}
-                    rows={10}
-                    multiline
-                />
-            </>
-        }
-    ];
-    return (jaicReviewData);
-}
 
 const renderMissionPartnerCheckboxes = () => {
     const missionPartners = ['Alion Science and Technology Corporation', 'Austal USA LLC', 'General Dynamics Corporation', 'Innovative Professional Solutions Inc.', 'Johns Hopkins University', 'Raytheon Company', 'Saic Gemini Inc.', 'Technical Systems Integration Inc.', 'Textron Inc.'];
@@ -444,7 +360,7 @@ const serviceReviewData = [
                 <Typography variant="subtitle1" style={{ fontSize: 16 }}>Do you agree with the JAIC's labeling of "Not AI" for this effort?</Typography>
                 <Autocomplete
                     size="small"
-                    options={[]}
+                    options={['Yes', 'No']}
                     getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
@@ -469,7 +385,7 @@ const serviceReviewData = [
                 <Autocomplete
                     style={{ backgroundColor: 'white' }}
                     size="small"
-                    options={[]}
+                    options={['Yes', 'No']}
                     getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
@@ -708,10 +624,11 @@ const boldKeys = (data) => {
     });
 }
 
-const renderAICategory = () => {
+const renderAICategory = (projectData) => {
 
     return (
         <StyledAccordionDiv>
+            {projectData && projectData.accomplishments ?
             <ResponsiveContainer width="100%" height={300}>
                 <PieChart width={300} height={300}>
                     <Pie
@@ -737,6 +654,9 @@ const renderAICategory = () => {
                     <Tooltip />
                 </PieChart>
             </ResponsiveContainer>
+            :
+            <Typography variant="h2" style={{ width: '100%', margin: '15px 0', fontWeight: 'bold' }}>{projectData.core_ai_label}</Typography>
+            }
             <hr style={{margin: '10px auto', width: '85%'}}/>
             <StyledAIText>
                 <p align="left">
@@ -870,46 +790,6 @@ const renderAccomplishments = () => {
     );
 }
 
-
-
-const renderJAICReview = (state) => {
-
-
-    return (
-        <StyledTableContainer>
-            <div style={{ margin: '0 0 15px 0'}}>
-                <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
-            </div>
-            <SimpleTable tableClass={'magellan-table'}
-                zoom={1}
-                rows={boldKeys(getJaicReviewData(state))}
-                height={'auto'}
-                dontScroll={true}
-                disableWrap={true}
-                title={''}
-                headerExtraStyle={{
-                    backgroundColor: '#313541',
-                    color: 'white'
-                }}
-                hideHeader={true}
-                firstColWidth={firstColWidth}
-            />
-            <StyledFooterDiv>
-                <GCPrimaryButton
-                    style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-                >
-                    Submit and Go to Home
-                </GCPrimaryButton>
-                <GCPrimaryButton
-                    style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
-                >
-                    Submit
-                </GCPrimaryButton>
-            </StyledFooterDiv>
-        </StyledTableContainer>
-    );
-}
-
 const renderServiceReviewer = () => {
     return (
     <StyledTableContainer>
@@ -977,6 +857,8 @@ const BudgetSearchProfilePage = (props) => {
     const [currentNav, setCurrentNav] = useState('The Basics');
 	const context = useContext(getContext('budgetSearch'));
     const [projectData, setProjectData] = useState({});
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [dropdownData, setDropdownData] = useState({});
     const { state, dispatch } = context;
 
     const renderNavButtons = () => {
@@ -1013,20 +895,21 @@ const BudgetSearchProfilePage = (props) => {
             const budgetType = getQueryVariable('type');
     
             const getProjectData = async () => {
-                setState(dispatch, { profileLoading: true });
+                setProfileLoading(true);
                 const projectData = await gameChangerAPI.getProjectData(peNum, projectNum, budgetType);
                 const dropdownData = await gameChangerAPI.getBudgetDropdownData()
                 console.log(projectData);
                 console.log(dropdownData);
                 setProjectData(projectData.data);
-                setState(dispatch, { profileLoading: false });
+                setDropdownData(dropdownData.data);
+                setProfileLoading(false);
             }
             getProjectData();
 
         } catch(err) {
             console.log(err);
             console.log('Error retrieving budget profile page data');
-            setState(dispatch, { profileLoading: false });
+            setProfileLoading(false);
         }
 
 
@@ -1045,7 +928,7 @@ const BudgetSearchProfilePage = (props) => {
                 <StyledLeftContainer>
                     <StyledAccordionContainer>
                         <GCAccordion contentPadding={0} expanded={true} header={'AI Category'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                            {renderAICategory()}
+                            {renderAICategory(projectData)}
                         </GCAccordion>
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
@@ -1060,18 +943,23 @@ const BudgetSearchProfilePage = (props) => {
                     </StyledAccordionContainer>
                 </StyledLeftContainer>
                 <StyledMainContainer>
-                    <Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>{projectData.Project_Title ?? projectData.Budget_Line_Item_Title}</Typography>
-                    <Typography variant="h3" style={{ fontWeight: 'bold', width: '100%' }}>
-                        Project Description
-                    </Typography>
-                    <div style={{ height: '600px', overflow: 'auto'}}>
-                        <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
-                            {projectData.Project_Mission_Description ?? projectData.Program_Description}
+                    {profileLoading ? <LoadingIndicator customColor={'#1C2D64'} />
+                    :
+                    <>
+                        <Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>{projectData.Project_Title ?? projectData.Budget_Line_Item_Title}</Typography>
+                        <Typography variant="h3" style={{ fontWeight: 'bold', width: '100%' }}>
+                            {(projectData.Project_Mission_Description || projectData.Program_Description) ?? projectData.Project_Mission_Description ? 'Project Description' : 'Program Description'}
                         </Typography>
-                    </div>
-                    <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
-                    </Typography>
+                        <div style={{ height: '600px', overflow: 'auto'}}>
+                            <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
+                                {projectData.Project_Mission_Description ?? projectData.Program_Description}
+                            </Typography>
+                        </div>
+                        <Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
+                        </Typography>
+                    </>
+                    }
                 </StyledMainContainer>
                 <StyledRightContainer>
                 <SimpleTable tableClass={'magellan-table'}
@@ -1080,7 +968,7 @@ const BudgetSearchProfilePage = (props) => {
                     height={'auto'}
                     dontScroll={true}
                     disableWrap={true}
-                    title={'Metadata - Project Budget Information'}
+                    title={'Metadata'}
                     headerExtraStyle={{
                         backgroundColor: '#313541',
                         color: 'white'
