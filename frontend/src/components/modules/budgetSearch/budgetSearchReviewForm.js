@@ -151,7 +151,7 @@ const BudgetSearchReviewForm = (props) =>{
 							options={categories}
 							getOptionLabel={(option) => option}
 							style={{ width: 300, backgroundColor: 'white' }}
-							onChange={(event, value)=>{this.setState({rev_core_ai_label: value})}}
+							onChange={(event, value)=>{setRev_core_ai_label(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						/>
 			},
@@ -169,10 +169,11 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Review Status',
 				Value: <Autocomplete
 							size="small"
+							freeSolo={true}
 							options={reviewStatus}
 							getOptionLabel={(option) => option}
 							style={{ width: 300, backgroundColor: 'white' }}
-							onChange={(event, value)=>{this.setState({rev_review_stat: value})}}
+							onChange={(event, value)=>{setRev_review_stat(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						/>
 			},
@@ -184,7 +185,7 @@ const BudgetSearchReviewForm = (props) =>{
 							options={[]}
 							getOptionLabel={(option) => option.title}
 							style={{ width: 300, backgroundColor: 'white' }}
-							onChange={(event, value)=>{this.setState({rev_ptp: value})}}
+							onChange={(event, value)=>{setRev_ptp(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						/>
 			},
@@ -198,7 +199,7 @@ const BudgetSearchReviewForm = (props) =>{
 						freeSolo={true}
 						getOptionLabel={(option) => option.title}
 						style={{ width: 300, backgroundColor: 'white' }}
-						onChange={(event, value)=>{this.setState({rev_mp_add: [...this.state.rev_mp_add,value]})}}
+						onChange={(event, value)=>{setRev_mp_add(value)}}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					/>
 					<TextField
@@ -244,17 +245,17 @@ const BudgetSearchReviewForm = (props) =>{
 			review_notes: review_notes,
 			budget_year: budget_year
 		}
-		gameChangerAPI.storeJbookReview(reviewData);
+		gameChangerAPI.storeBudgetReview(reviewData);
 	}
 
     return (
         <StyledTableContainer>
             <div style={{ margin: '0 0 15px 0'}}>
-                <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
+                <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>{rev_review_stat}</Typography>
             </div>
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={boldKeys(getJaicReviewData(context.state))}
+                rows={boldKeys(getJaicReviewData())}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
@@ -269,7 +270,7 @@ const BudgetSearchReviewForm = (props) =>{
             <StyledFooterDiv>
                 <GCPrimaryButton 
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-					onClick={this.submitStay}
+					onClick={submitStay}
                 >
                     Submit and Go to Home
                 </GCPrimaryButton>
