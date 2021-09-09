@@ -26,5 +26,13 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: true
 		}
 	);
+
+	API_KEY.associate = (models) => {
+		API_KEY.belongsToMany(models.clone_meta, { 
+			through: 'api_key_clone', 
+			foreignKey: 'apiKeyId'
+		})
+	}
+
 	return API_KEY;
 };
