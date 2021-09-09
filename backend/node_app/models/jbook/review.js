@@ -59,6 +59,9 @@ module.exports = (sequelize, DataTypes) => {
             },
             review_notes: {
                 type: DataTypes.TEXT
+            },
+            budget_year: {
+                type: DataTypes.TEXT
             }
 		},{
             freezeTableName: true,

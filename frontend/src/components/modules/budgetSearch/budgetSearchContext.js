@@ -4,7 +4,28 @@ const initState = {
     mainPageData: {},
     budgetSearchSettings: {
 
-    },
+	},
+	// reviewData: {
+	// 	rev_agree_label: "",
+	// 	rev_core_ai_label: "",
+	// 	rev_trans_known: "",
+	// 	rev_trans_type: "",
+	// 	rev_ptp:"",
+	// 	rev_mp_list: "",
+	// 	rev_mp_add: "",
+	// 	rev_review_stat: "",
+	// 	secrev_agree_label: "",
+	// 	secrev_notes: "",
+	// 	secrev_review_stat: "",
+	// 	poc_title: "",
+	// 	poc_name: "",
+	// 	poc_email: "",
+	// 	review_notes: ""
+	// },
+	reviewers:[],
+	categories: ['Core AI', 'AI-Enabled', 'AI-Enabling', 'Not AI'],
+	serviceReviewers: ['Army','Navy', 'Marines','Air Force', 'Coast Guard', 'Space Force'],
+	reviewStatus: ['Needs Review', 'Partial Review', "Finished Review"],
 	dataSources: [],
     cloneData: {
         clone_name: 'budgetSearch',

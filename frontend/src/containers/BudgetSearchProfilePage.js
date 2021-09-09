@@ -10,10 +10,12 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import GCPrimaryButton from "../components/common/GCButton";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import BudgetSearchReviewForm from "../components/modules/budgetSearch/budgetSearchReviewForm";
 import {
 	getQueryVariable
 } from "../gamechangerUtils";
 import GameChangerAPI from "../components/api/gameChanger-service-api";
+
 import './budgetsearch.css';
 import { setState } from '../sharedFunctions';
 import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
@@ -788,122 +790,6 @@ const renderAccomplishments = () => {
     );
 }
 
-const renderJAICReview = (dropdownData) => {
-    const jaicReviewData = [
-        {
-            Key: 'Reviewers',
-            Value: <Autocomplete
-                        size="small"
-                        options={dropdownData && dropdownData.reviewers ? dropdownData.reviewers : []}
-                        getOptionLabel={(option) => option.reviewer}
-                        style={{ width: 300 }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Core AI Analysis',
-            Value: <Autocomplete
-                        size="small"
-                        options={dropdownData && dropdownData.coreAILabel ? dropdownData.coreAILabel : []}
-                        getOptionLabel={(option) => option.core_ai_label}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Service/DoD Component Reviewer',
-            Value: <Autocomplete
-                        size="small"
-                        options={dropdownData && dropdownData.serviceReviewer ? dropdownData.serviceReviewer : []}
-                        getOptionLabel={(option) => option.service_review}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Review Status',
-            Value: <Autocomplete
-                        size="small"
-                        options={dropdownData && dropdownData.reviewStat ? dropdownData.reviewStat : []}
-                        getOptionLabel={(option) => option.jaic_review_stat}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Planned Transition Partner',
-            Value: <Autocomplete
-                        size="small"
-                        options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
-                        getOptionLabel={(option) => option.planned_trans_part}
-                        style={{ width: 300, backgroundColor: 'white' }}
-                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                    />
-        },
-        {
-            Key: 'Current Mission Partners (Academia, Industry, or Other)',
-            Value: 
-            <> 
-                <Autocomplete
-                    size="small"
-                    options={dropdownData && dropdownData.missionPartners ? dropdownData.missionPartners : []}
-                    getOptionLabel={(option) => option.current_msn_part}
-                    style={{ width: 300, backgroundColor: 'white' }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-                <TextField
-                    placeholder="Reviewer Notes"
-                    variant="outlined"
-                    defaultValue={''}
-                    style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
-                    onBlur={() => {}}
-                    inputProps={{
-                        style: {
-                            width: '100%'
-                        }
-                    }}
-                    rows={10}
-                    multiline
-                />
-            </>
-        }
-    ];
-
-    return (
-        <StyledTableContainer>
-            <div style={{ margin: '0 0 15px 0'}}>
-                <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
-            </div>
-            <SimpleTable tableClass={'magellan-table'}
-                zoom={1}
-                rows={boldKeys(jaicReviewData)}
-                height={'auto'}
-                dontScroll={true}
-                disableWrap={true}
-                title={''}
-                headerExtraStyle={{
-                    backgroundColor: '#313541',
-                    color: 'white'
-                }}
-                hideHeader={true}
-                firstColWidth={firstColWidth}
-            />
-            <StyledFooterDiv>
-                <GCPrimaryButton
-                    style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-                >
-                    Submit and Go to Home
-                </GCPrimaryButton>
-                <GCPrimaryButton
-                    style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
-                >
-                    Submit
-                </GCPrimaryButton>
-            </StyledFooterDiv>
-        </StyledTableContainer>
-    );
-}
-
 const renderServiceReviewer = () => {
     return (
     <StyledTableContainer>
@@ -1028,7 +914,7 @@ const BudgetSearchProfilePage = (props) => {
 
 
     }, [])
-
+    // {renderJAICReview(context.state)}
 
     return (
         <div>
@@ -1111,7 +997,7 @@ const BudgetSearchProfilePage = (props) => {
                                 <FiberManualRecordIcon style={{ color: 'green' }} />
                             </StyledAccordionHeader>
                         } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                            {renderJAICReview(dropdownData)}
+                          <BudgetSearchReviewForm budget_type={"rdoc"} program_element={"130423HAHAHA"} budget_line_item={"TestHappy"} budget_year={"2021"}></BudgetSearchReviewForm>
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer id={"Service / DoD Component Reviewer Section"}>

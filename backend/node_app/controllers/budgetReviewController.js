@@ -3,7 +3,7 @@ const REVIEW = require('../models').review;
 const LOGGER = require('../lib/logger');
 // const sparkMD5Lib = require('spark-md5');
 
-class ReviewController {
+class BudgetReviewController {
 
 	constructor(opts = {}) {
 		const {
@@ -20,12 +20,12 @@ class ReviewController {
 		// this.sparkMD5 = sparkMD5;
 
 
-		this.getJbookReview = this.getJbookReview.bind(this);
-		this.storeJbookReview = this.storeJbookReview.bind(this);
+		this.getBudgetReview = this.getBudgetReview.bind(this);
+		this.storeBudgetReview = this.storeBudgetReview.bind(this);
 		
 	}
 
-	async getJbookReview(req, res) {
+	async getBudgetReview(req, res) {
 		let userId = 'webapp_unknown';
 		const {btype, penum, bli} = req.query;
 		try {
@@ -52,7 +52,7 @@ class ReviewController {
 		}
 	}
 
-	async storeJbookReview(req, res) {
+	async storeBudgetReview(req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			// const { reviewData, btype,penum, bli } = req.body;
@@ -82,7 +82,8 @@ class ReviewController {
 						poc_title: reviewData.poc_title,
 						poc_name: reviewData.poc_name,
 						poc_email: reviewData.poc_email,
-						review_notes: reviewData.review_notes
+						review_notes: reviewData.review_notes,
+						budget_year: reviewData.budget_year
 					}
 					
 					
@@ -109,4 +110,4 @@ class ReviewController {
 	
 }
 
-module.exports.ReviewController = ReviewController;
+module.exports.BudgetReviewController = BudgetReviewController;
