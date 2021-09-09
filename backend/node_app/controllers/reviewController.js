@@ -82,7 +82,8 @@ class ReviewController {
 						poc_title: reviewData.poc_title,
 						poc_name: reviewData.poc_name,
 						poc_email: reviewData.poc_email,
-						review_notes: reviewData.review_notes
+						review_notes: reviewData.review_notes,
+						budget_year: reviewData.budget_year
 					}
 					
 					

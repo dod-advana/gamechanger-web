@@ -10,6 +10,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import GCPrimaryButton from "../components/common/GCButton";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import BudgetSearchReviewForm from "../components/modules/budgetSearch/budgetSearchReviewForm";
+
 import './budgetsearch.css';
 
 const StyledNavBar = styled.div`
@@ -271,85 +273,92 @@ const sampleVendorData = [
     },
 ];
 
-const jaicReviewData = [
-    {
-        Key: 'Reviewers',
-        Value: <Autocomplete
+const getJaicReviewData = (state) =>{
+
+    const {reviewers, categories, serviceReviewers, reviewStatus} = state;
+    const jaicReviewData = [
+        {
+            Key: 'Reviewers',
+            Value: <Autocomplete
+                        size="small"
+                        options={reviewers}
+                        getOptionLabel={(option) => option}
+                        style={{ width: 300 }}
+                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                    />
+        },
+        {
+            Key: 'Core AI Analysis',
+            Value: <Autocomplete
+                        size="small"
+                        options={categories}
+                        getOptionLabel={(option) => option}
+                        style={{ width: 300, backgroundColor: 'white' }}
+                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                    />
+        },
+        {
+            Key: 'Service/DoD Component Reviewer',
+            Value: <Autocomplete
+                        size="small"
+                        options={serviceReviewers}
+                        getOptionLabel={(option) => option}
+                        style={{ width: 300, backgroundColor: 'white' }}
+                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                    />
+        },
+        {
+            Key: 'Review Status',
+            Value: <Autocomplete
+                        size="small"
+                        options={reviewStatus}
+                        getOptionLabel={(option) => option}
+                        style={{ width: 300, backgroundColor: 'white' }}
+                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                    />
+        },
+        {
+            Key: 'Planned Transition Partner',
+            Value: <Autocomplete
+                        size="small"
+                        freeSolo={true}
+                        options={[]}
+                        getOptionLabel={(option) => option.title}
+                        style={{ width: 300, backgroundColor: 'white' }}
+                        renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                    />
+        },
+        {
+            Key: 'Current Mission Partners (Academia, Industry, or Other)',
+            Value: 
+            <> 
+                <Autocomplete
                     size="small"
                     options={[]}
-                    getOptionLabel={(option) => option.title}
-                    style={{ width: 300 }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-    },
-    {
-        Key: 'Core AI Analysis',
-        Value: <Autocomplete
-                    size="small"
-                    options={[]}
+                    freeSolo={true}
                     getOptionLabel={(option) => option.title}
                     style={{ width: 300, backgroundColor: 'white' }}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
-    },
-    {
-        Key: 'Service/DoD Component Reviewer',
-        Value: <Autocomplete
-                    size="small"
-                    options={[]}
-                    getOptionLabel={(option) => option.title}
-                    style={{ width: 300, backgroundColor: 'white' }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+                <TextField
+                    placeholder="Reviewer Notes"
+                    variant="outlined"
+                    defaultValue={''}
+                    style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
+                    onBlur={() => {}}
+                    inputProps={{
+                        style: {
+                            width: '100%'
+                        }
+                    }}
+                    rows={10}
+                    multiline
                 />
-    },
-    {
-        Key: 'Review Status',
-        Value: <Autocomplete
-                    size="small"
-                    options={[]}
-                    getOptionLabel={(option) => option.title}
-                    style={{ width: 300, backgroundColor: 'white' }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-    },
-    {
-        Key: 'Planned Transition Partner',
-        Value: <Autocomplete
-                    size="small"
-                    options={[]}
-                    getOptionLabel={(option) => option.title}
-                    style={{ width: 300, backgroundColor: 'white' }}
-                    renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-                />
-    },
-    {
-        Key: 'Current Mission Partners (Academia, Industry, or Other)',
-        Value: 
-        <> 
-            <Autocomplete
-                size="small"
-                options={[]}
-                getOptionLabel={(option) => option.title}
-                style={{ width: 300, backgroundColor: 'white' }}
-                renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-            />
-            <TextField
-                placeholder="Reviewer Notes"
-                variant="outlined"
-                defaultValue={''}
-                style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
-                onBlur={() => {}}
-                inputProps={{
-                    style: {
-                        width: '100%'
-                    }
-                }}
-                rows={10}
-                multiline
-            />
-        </>
-    }
-];
+            </>
+        }
+    ];
+    return (jaicReviewData);
+}
 
 const renderMissionPartnerCheckboxes = () => {
     const missionPartners = ['Alion Science and Technology Corporation', 'Austal USA LLC', 'General Dynamics Corporation', 'Innovative Professional Solutions Inc.', 'Johns Hopkins University', 'Raytheon Company', 'Saic Gemini Inc.', 'Technical Systems Integration Inc.', 'Textron Inc.'];
@@ -819,7 +828,11 @@ const renderAccomplishments = () => {
     );
 }
 
-const renderJAICReview = () => {
+
+
+const renderJAICReview = (state) => {
+
+
     return (
         <StyledTableContainer>
             <div style={{ margin: '0 0 15px 0'}}>
@@ -827,7 +840,7 @@ const renderJAICReview = () => {
             </div>
             <SimpleTable tableClass={'magellan-table'}
                 zoom={1}
-                rows={boldKeys(jaicReviewData)}
+                rows={boldKeys(getJaicReviewData(state))}
                 height={'auto'}
                 dontScroll={true}
                 disableWrap={true}
@@ -1023,7 +1036,7 @@ const BudgetSearchProfilePage = (props) => {
                                 <FiberManualRecordIcon style={{ color: 'green' }} />
                             </StyledAccordionHeader>
                         } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                            {renderJAICReview()}
+                            {renderJAICReview(context.state)}
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer>
