@@ -174,4 +174,7 @@ router.post('/review/storeJbookReview', review.storeJbookReview);
 
 router.post('/budget/budgetDocSearch', budgetDocs.budgetDocSearch);
 
+router.get('/budget/getProjectData', budgetDocs.getProjectData);
+router.get('/budget/getBudgetDropdownData', budgetDocs.getBudgetDropdownData);
+
 module.exports = router;

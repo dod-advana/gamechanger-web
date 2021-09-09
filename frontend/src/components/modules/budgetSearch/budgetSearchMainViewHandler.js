@@ -145,10 +145,17 @@ const BudgetSearchMainViewHandler = {
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url);
 		if (!searchText) {
-			setState(dispatch, { loading: true, cloneData: state.cloneData });
-			const mainData = await gameChangerAPI.budgetDocSearch();
-			setState(dispatch, { mainPageData: mainData.data, loading: false });
-			console.log(mainData);
+			try {
+				setState(dispatch, { loading: true, cloneData: state.cloneData });
+				const mainData = await gameChangerAPI.budgetDocSearch();
+				setState(dispatch, { mainPageData: mainData.data, loading: false });
+				console.log(mainData);
+			}
+			catch(err) {
+				console.log(err);
+				console.log('Error loading budget search main page');
+				setState(dispatch, { loading: false });
+			}
 		}		
 
 	},
@@ -306,7 +313,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>REVIEW STATUS</p>,
-					accessor: 'reviewer',
+					accessor: 'jaic_review_stat',
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
 							<p>{row.value}</p>
@@ -393,9 +400,10 @@ const BudgetSearchMainViewHandler = {
 										projectTitle,
 										programElementNum,
 										projectNum,
-										serviceAgency
+										serviceAgency,
+										budgetType
 									} = row;
-									window.open(`#/budgetsearch-profile?title=${projectTitle}&peNum=${programElementNum}&projectNum=${projectNum}&serviceAgency=${serviceAgency}`);
+									window.open(`#/budgetsearch-profile?title=${projectTitle}&peNum=${programElementNum}&projectNum=${projectNum}&serviceAgency=${serviceAgency}&type=${budgetType}`);
 								}
 							}
 						}}

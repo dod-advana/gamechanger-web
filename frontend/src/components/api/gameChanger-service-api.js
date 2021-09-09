@@ -108,7 +108,8 @@ const endpoints = {
 	jbookReviewGET: '/api/gameChanger/review/getJbookReview',
 	storeJbookReviewPOST: '/api/gameChanger/review/storeJbookReview',
 	budgetDocSearch: '/api/gameChanger/budget/budgetDocSearch',
-
+	getProjectData: '/api/gameChanger/budget/getProjectData',
+	getBudgetDropdownData: '/api/gameChanger/budget/getBudgetDropdownData',
 
 	exportHistoryDELETE: function(id){
 		if (!id) {
@@ -806,5 +807,15 @@ export default class GameChangerAPI {
 	budgetDocSearch = async (offset=0, searchText='', budgetSearchSettings = {}) => {
 		const url = endpoints.budgetDocSearch;
 		return axiosPOST(this.axios, url, { offset, searchText, budgetSearchSettings });
+	}
+
+	getProjectData = async (peNum, projNum, type) => {
+		const url = endpoints.getProjectData;
+		return axiosGET(this.axios, url, { params: { peNum, projNum, type } });
+	}
+
+	getBudgetDropdownData = async () => {
+		const url = endpoints.getBudgetDropdownData;
+		return axiosGET(this.axios, url);
 	}
 }

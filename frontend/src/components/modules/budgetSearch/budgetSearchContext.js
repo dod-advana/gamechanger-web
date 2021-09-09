@@ -52,6 +52,7 @@ const initState = {
     },
 
     loading: false,
+	profileLoading: false,
     resultsPage: 1,
     showSideFilters: true,
     issuingOrgs: {},
