@@ -46,7 +46,16 @@ module.exports = {
 							port: 5432,
 							dialect: 'postgres',
 							logging: false
-					}
+					},
+					jbook: {
+						username: secrets["postgres_user_jbook"],
+						password: secrets["postgres_password_jbook"],
+						database: 'jbook',
+						host: secrets["postgres_host_jbook"],
+						port: 5432,
+						dialect: 'postgres',
+						logging: false
+					},
 			}
 	},
 	game_changer: {
@@ -66,5 +75,14 @@ module.exports = {
 			port: 5432,
 			dialect: 'postgres',
 			logging: false
-	}
+	},
+	jbook: {
+		username: secrets.postgres_user_jbook,
+		password: secrets.postgres_password_jbook,
+		database: 'jbook',
+		host: secrets.postgres_host_jbook,
+		port: 5432,
+		dialect: 'postgres',
+		logging: false
+	},
 };

@@ -112,28 +112,45 @@ class BudgetDocController {
     // retrieve all docs from both tables rdoc/pdoc
 	async budgetDocSearch(req, res) {
 		let userId = 'webapp_unknown';
-        // const {offset, searchText, budgetSearchSettings} = req.body;
+        const {offset, searchText, budgetSearchSettings} = req.body;
 		try {
 
             userId = req.get('SSL_CLIENT_S_DN_CN');
+            let limit = 10;
 
-            const {pdocQuery, rdocQuery} = this.getDocQuery(req.body);
+            let pQuery = `SELECT COUNT(*) OVER (), * FROM pdoc where _search @@ to_tsquery('english', :searchText) LIMIT :limit OFFSET :offset;`
+            let rQuery = `SELECT COUNT(*) OVER (), * FROM rdoc where _search @@ to_tsquery('english', :searchText) LIMIT :limit OFFSET :offset;`
+            let totalCount = 0;
 
-			let pdocuments = await this.pdocs.findAndCountAll(pdocQuery);
+            if (!searchText || searchText === '') {
+                pQuery = `SELECT COUNT(*) OVER (), * FROM pdoc LIMIT :limit`;
+                rQuery = `SELECT COUNT(*) OVER (), * FROM rdoc LIMIT :limit`;
+            }
+            const presults = await this.pdocs.sequelize.query(pQuery, { replacements: { searchText, offset, limit }});
 
-            pdocuments.rows.map(data => {
-                data.dataValues.type = 'Procurement';
-            });
+            const pdocuments = presults && presults[0] ? presults[0] : [];
+            if (pdocuments.length && pdocuments.length > 0) {
+                pdocuments.map(data => {
+                    data.type = 'Procurement';
+                });
+                totalCount += parseInt(pdocuments[0].count);
+            }
 
-            let rdocuments = await this.rdocs.findAndCountAll(rdocQuery);
+            const rresults = await this.rdocs.sequelize.query(rQuery, { replacements: { searchText, offset, limit }});
 
-            rdocuments.rows.map(data => {
-                data.dataValues.type = 'RDT&E';
-            });
+            const rdocuments = rresults && rresults[0] ? rresults[0] : [];
+
+            if (rdocuments.length && rdocuments.length > 0) {
+                rdocuments.map(data => {
+                    data.type = 'RDT&E';
+                });
+                totalCount += parseInt(rdocuments[0].count);
+            }
+
 
             res.status(200).send({
-                totalCount: pdocuments.count + rdocuments.count,
-                docs: rdocuments.rows.concat(pdocuments.rows)
+                totalCount,
+                docs: rdocuments.concat(pdocuments)
             });
 
 		} catch (err) {
