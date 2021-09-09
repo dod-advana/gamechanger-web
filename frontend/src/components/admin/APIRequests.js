@@ -23,8 +23,12 @@ export default () => {
      * @method getApiKeyRequestData
      */
     const getApiKeyRequestData = async () => {
-        const resp = await gameChangerAPI.getAPIKeyRequestData();
-        setGCAPIRequestData(resp.data || {approved: [], pending: []});
+        const { data } = await gameChangerAPI.getAPIKeyRequestData();
+        data.pending.forEach((pending, idx) => {
+            const cloneString = pending.clone_meta.map(meta => meta.clone_name).join(", ");
+            data.pending[idx].cloneString = cloneString;
+        })
+        setGCAPIRequestData(data || {approved: [], pending: []});
     }
     /**
      * Attemps to revoke a key based on the id
@@ -103,13 +107,13 @@ export default () => {
                 <TableRow>{row.value}</TableRow>
             )
         },
-        // {
-        //     Header: 'Clones',
-        //     accessor: 'clones',
-        //     Cell: row => (
-        //         <TableRow>{row.value}</TableRow>
-        //     )
-        // },
+        {
+            Header: 'Clones',
+            accessor: 'cloneString',
+            Cell: row => (
+                <TableRow>{row.value}</TableRow>
+            )
+        },
         {
             Header: ' ',
             accessor: 'id',
