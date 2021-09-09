@@ -228,7 +228,9 @@ const handlePubs = async (pubs, state, dispatch) => {
 
 const handleSources = async(state, dispatch) => {
 		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
-		crawlerSources = crawlerSources.data;
+		crawlerSources = crawlerSources.data.map((item) => ({	...item, imgSrc: DefaultSeal}));
+		setState(dispatch, {crawlerSources});
+
 	try {
 		let folder = 'crawler_images'
 		const thumbnailList = crawlerSources.map(item => {
