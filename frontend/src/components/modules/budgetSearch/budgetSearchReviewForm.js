@@ -40,76 +40,15 @@ const boldKeys = (data) => {
 }
 
 
-
-
-// const renderServiceReviewer = () => {
-//     return (
-//     <StyledTableContainer>
-//         <div style={{ margin: '0 0 15px 0'}}>
-//             <Typography variant="subtitle1" style={{ color: 'green', fontSize: '18px', textAlign: 'right' }}>Finished Review</Typography>
-//         </div>
-//         <SimpleTable tableClass={'magellan-table'}
-//             zoom={1}
-//             rows={boldKeys(serviceReviewData)}
-//             height={'auto'}
-//             dontScroll={true}
-//             disableWrap={true}
-//             title={''}
-//             headerExtraStyle={{
-//                 backgroundColor: '#313541',
-//                 color: 'white'
-//             }}
-//             hideHeader={true}
-//             firstColWidth={firstColWidth}
-//         />
-//         <StyledFooterDiv>
-//             <GCPrimaryButton
-//                 style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-//             >
-//                 Save (Partial Review)
-//             </GCPrimaryButton>
-//             <GCPrimaryButton
-//                 style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-//             >
-//                 Submit and Go to Home (Finished Review)
-//             </GCPrimaryButton>
-//             <GCPrimaryButton
-//                 style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
-//             >
-//                 Submit
-//             </GCPrimaryButton>
-//         </StyledFooterDiv>
-//     </StyledTableContainer>
-//     );
-// }
-
-// const renderPOCReviewer = () => {
-//     return (
-//         <StyledTableContainer>
-//             <SimpleTable tableClass={'magellan-table'}
-//                 zoom={1}
-//                 rows={boldKeys(pocReviewerData)}
-//                 height={'auto'}
-//                 dontScroll={true}
-//                 disableWrap={true}
-//                 title={''}
-//                 headerExtraStyle={{
-//                     backgroundColor: '#313541',
-//                     color: 'white'
-//                 }}
-//                 hideHeader={true}
-//                 firstColWidth={firstColWidth}
-//             />
-//         </StyledTableContainer>
-//     );
-// }
-
 const BudgetSearchReviewForm = (props) =>{
 
-	const { budget_type,
-		program_element,
+	const { 
+		budgetType,
+		peNum,
 		budget_line_item,
-		budget_year} = props;
+		budget_year,
+		dropdownData
+	} = props;
 	const context = useContext(getContext('budgetSearch'));
 
 	const [rev_core_ai_label, setRev_core_ai_label] = useState(null);
@@ -138,8 +77,8 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Reviewers',
 				Value: <Autocomplete
 							size="small"
-							options={reviewers}
-							getOptionLabel={(option) => option}
+							options={dropdownData && dropdownData.reviewers ? dropdownData.reviewers : []}
+							getOptionLabel={(option) => option.reviewer}
 							style={{ width: 300 }}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						/>
@@ -148,8 +87,8 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Core AI Analysis',
 				Value: <Autocomplete
 							size="small"
-							options={categories}
-							getOptionLabel={(option) => option}
+							options={dropdownData && dropdownData.coreAILabel ? dropdownData.coreAILabel : []}
+							getOptionLabel={(option) => option.core_ai_label}
 							style={{ width: 300, backgroundColor: 'white' }}
 							onChange={(event, value)=>{setRev_core_ai_label(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
@@ -159,8 +98,8 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Service/DoD Component Reviewer',
 				Value: <Autocomplete
 							size="small"
-							options={serviceReviewers}
-							getOptionLabel={(option) => option}
+							options={dropdownData && dropdownData.serviceReviewer ? dropdownData.serviceReviewer : []}
+							getOptionLabel={(option) => option.service_review}
 							style={{ width: 300, backgroundColor: 'white' }}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						/>
@@ -170,8 +109,8 @@ const BudgetSearchReviewForm = (props) =>{
 				Value: <Autocomplete
 							size="small"
 							freeSolo={true}
-							options={reviewStatus}
-							getOptionLabel={(option) => option}
+							options={dropdownData && dropdownData.reviewStat ? dropdownData.reviewStat : []}
+							getOptionLabel={(option) => option.jaic_review_stat}
 							style={{ width: 300, backgroundColor: 'white' }}
 							onChange={(event, value)=>{setRev_review_stat(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
@@ -182,8 +121,8 @@ const BudgetSearchReviewForm = (props) =>{
 				Value: <Autocomplete
 							size="small"
 							freeSolo={true}
-							options={[]}
-							getOptionLabel={(option) => option.title}
+							options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+							getOptionLabel={(option) => option.planned_trans_part}
 							style={{ width: 300, backgroundColor: 'white' }}
 							onChange={(event, value)=>{setRev_ptp(value)}}
 							renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
@@ -195,9 +134,9 @@ const BudgetSearchReviewForm = (props) =>{
 				<> 
 					<Autocomplete
 						size="small"
-						options={[]}
+						options={dropdownData && dropdownData.missionPartners ? dropdownData.missionPartners : []}
 						freeSolo={true}
-						getOptionLabel={(option) => option.title}
+						getOptionLabel={(option) => option.current_msn_part}
 						style={{ width: 300, backgroundColor: 'white' }}
 						onChange={(event, value)=>{setRev_mp_add(value)}}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
@@ -225,8 +164,8 @@ const BudgetSearchReviewForm = (props) =>{
 
 	const submitStay = () =>{
 		const reviewData = {
-			budget_type: budget_type,
-			program_element: program_element,
+			budget_type: budgetType,
+			program_element: peNum,
 			budget_line_item: budget_line_item,
 			rev_agree_label: rev_agree_label,
 			rev_core_ai_label: rev_core_ai_label,

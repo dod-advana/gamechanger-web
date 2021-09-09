@@ -361,7 +361,7 @@ const serviceReviewData = [
                 <Autocomplete
                     size="small"
                     options={['Yes', 'No']}
-                    getOptionLabel={(option) => option.title}
+                    // getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
             </StyledInlineContainer>
@@ -386,7 +386,7 @@ const serviceReviewData = [
                     style={{ backgroundColor: 'white' }}
                     size="small"
                     options={['Yes', 'No']}
-                    getOptionLabel={(option) => option.title}
+                    // getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
                 />
             </div>
@@ -859,6 +859,11 @@ const BudgetSearchProfilePage = (props) => {
     const [projectData, setProjectData] = useState({});
     const [profileLoading, setProfileLoading] = useState(false);
     const [dropdownData, setDropdownData] = useState({});
+
+    const [budgetType, setBudgetType] = useState('');
+    const [peNum, setPENum] = useState('');
+    const [projectNum, setProjectNum] = useState('');
+
     const { state, dispatch } = context;
 
     const renderNavButtons = () => {
@@ -896,10 +901,14 @@ const BudgetSearchProfilePage = (props) => {
     
             const getProjectData = async () => {
                 setProfileLoading(true);
+
                 const projectData = await gameChangerAPI.getProjectData(peNum, projectNum, budgetType);
                 const dropdownData = await gameChangerAPI.getBudgetDropdownData()
                 console.log(projectData);
                 console.log(dropdownData);
+                setPENum(peNum);
+                setProjectNum(projectNum);
+                setBudgetType(budgetType);
                 setProjectData(projectData.data);
                 setDropdownData(dropdownData.data);
                 setProfileLoading(false);
@@ -997,7 +1006,7 @@ const BudgetSearchProfilePage = (props) => {
                                 <FiberManualRecordIcon style={{ color: 'green' }} />
                             </StyledAccordionHeader>
                         } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                          <BudgetSearchReviewForm budget_type={"rdoc"} program_element={"130423HAHAHA"} budget_line_item={"TestHappy"} budget_year={"2021"}></BudgetSearchReviewForm>
+                          <BudgetSearchReviewForm dropdownData={dropdownData} budgetType={budgetType} peNum={peNum} budget_line_item={"TestHappy"} budget_year={"2021"}></BudgetSearchReviewForm>
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer id={"Service / DoD Component Reviewer Section"}>
