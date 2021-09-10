@@ -194,41 +194,41 @@ const handlePopPubs = async(pop_pubs, pop_pubs_inactive, state, dispatch) => {
 	}
 }
 
-const handlePubs = async (pubs, state, dispatch) => {
-	try {
-		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
-		for(let i = 0; i < pubs.length; i++){
-			gameChangerAPI.thumbnailStorageDownloadPOST([pubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
-				const buffers = pngs.data;
-				buffers.forEach((buf,idx) => {
-					if(buf.status === "fulfilled"){
-						pubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
-					} else {
-						pubs[i].imgSrc = 'error';
-					}
-				});
-			setState(dispatch, {adminMajorPubs: pubs});
-			});
+// const handlePubs = async (pubs, state, dispatch) => {
+// 	try {
+// 		//const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', state.cloneData);
+// 		for(let i = 0; i < pubs.length; i++){
+// 			gameChangerAPI.thumbnailStorageDownloadPOST([pubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
+// 				const buffers = pngs.data;
+// 				buffers.forEach((buf,idx) => {
+// 					if(buf.status === "fulfilled"){
+// 						pubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+// 					} else {
+// 						pubs[i].imgSrc = 'error';
+// 					}
+// 				});
+// 			setState(dispatch, {adminMajorPubs: pubs});
+// 			});
 
-		}
-		// gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
-		// .then( (pngs) => {
-		// 	const buffers = pngs.data;
-		// 	buffers.forEach((buf,idx) => {
-		// 		if(buf.status === "fulfilled"){
-		// 			pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-		// 		} else {
-		// 			pubs[idx].imgSrc = 'error';
-		// 		}
-		// 	});
-		// setState(dispatch, {adminMajorPubs: pubs});
-		// });
-	} catch(e) {
-		//Do nothing
-		console.log(e);
-		setState(dispatch, {adminMajorPubs: pubs});
-	}
-};
+// 		}
+// 		// gameChangerAPI.thumbnailStorageDownloadPOST(pubs, 'thumbnails', {clone_name: 'gamechanger'})
+// 		// .then( (pngs) => {
+// 		// 	const buffers = pngs.data;
+// 		// 	buffers.forEach((buf,idx) => {
+// 		// 		if(buf.status === "fulfilled"){
+// 		// 			pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+// 		// 		} else {
+// 		// 			pubs[idx].imgSrc = 'error';
+// 		// 		}
+// 		// 	});
+// 		// setState(dispatch, {adminMajorPubs: pubs});
+// 		// });
+// 	} catch(e) {
+// 		//Do nothing
+// 		console.log(e);
+// 		setState(dispatch, {adminMajorPubs: pubs});
+// 	}
+// };
 
 const handleSources = async(state, dispatch) => {
 		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
@@ -239,10 +239,8 @@ const handleSources = async(state, dispatch) => {
 		let folder = 'crawler_images'
 		const thumbnailList = crawlerSources.map(item => {
 			let filename = item.image_link.split('/').pop();
-			// let filename = 's3://advana-raw-zone/gamechanger/crawler_images/army_reserves_low.png'.split('/').pop();
 			return {img_filename: filename}
 		});
-		// const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData);
 
 		for(let i = 0; i < thumbnailList.length; i++){
 			gameChangerAPI.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, {clone_name: 'gamechanger'}).then( (pngs) => {
@@ -263,25 +261,6 @@ const handleSources = async(state, dispatch) => {
 				setState(dispatch, {crawlerSources});
 			});
 		}
-
-		// gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, {clone_name: 'gamechanger'})
-		// .then( (pngs) => {
-		// 	const buffers = pngs.data;
-		// 	buffers.forEach((buf,idx) => {
-		// 		if(buf.status === "fulfilled"){
-		// 			crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-		// 			if(crawlerSources[idx].image_link.split('.').pop() === 'png'){
-		// 				crawlerSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-		// 			} else if(crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-		// 				crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-		// 			}
-		// 		}
-		// 		else {
-		// 			crawlerSources[idx].imgSrc = DefaultSeal;
-		// 		}
-		// 	});
-		// 	setState(dispatch, {crawlerSources});
-		// });
 	} catch(e) {
 		//Do nothing
 		console.log(e);
@@ -306,7 +285,7 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
-		let pubs = [];
+		// let pubs = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		try {
@@ -314,9 +293,11 @@ const PolicyMainViewHandler = {
 			data.forEach(obj => {
 				if(obj.key === 'homepage_topics'){
 					topics = JSON.parse(obj.value);
-				} else if(obj.key === 'homepage_major_pubs') {
-					pubs = JSON.parse(obj.value);
-				} else if(obj.key === 'homepage_popular_docs_inactive') {
+				} 
+				// else if(obj.key === 'homepage_major_pubs') {
+				// 	pubs = JSON.parse(obj.value);
+				// } 
+				else if(obj.key === 'homepage_popular_docs_inactive') {
 					pop_pubs_inactive = JSON.parse(obj.value);
 				} else if (obj.key === 'popular_docs'){
 					pop_pubs = obj.value;
@@ -328,7 +309,7 @@ const PolicyMainViewHandler = {
 		}
 		
 		setState(dispatch, {adminTopics:topics});
-		handlePubs(pubs, state, dispatch);
+		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
 	},
@@ -353,7 +334,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch, searchHandler } = props;
 		const {
 			adminTopics,
-			adminMajorPubs,
 			searchMajorPubs,
 			cloneData,
 			crawlerSources,
