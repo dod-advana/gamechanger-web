@@ -147,6 +147,8 @@ const App = () => {
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
 
+	const initialUrl = localStorage.getItem('userInitialUrl')
+	if(!initialUrl) localStorage.setItem('userInitialUrl', window.location.href)
 	const getGamechangerClones = async (tutorialData) => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
@@ -248,9 +250,6 @@ const App = () => {
 
 	useEffect(() => {
 		const initialize = async () => {
-			if(window.location.hash !== '' || window.location.hash !== '#/') {
-				localStorage.setItem('userInitialUrl', window.location.href)
-			}
 			if (isDecoupled) {
 				GCAuth.refreshUserToken(() => setTokenLoaded(true), () => setTokenLoaded(true));
 			} else {
