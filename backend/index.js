@@ -174,12 +174,12 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 				raw: false,
 				include: [{
 					model: CloneMeta,
-					attributes: ['id'],
+					attributes: ['clone_name'],
 					through: {attributes: []}
 				}],
 			});
-			// console.log(key.clone_meta)
-			if (key && key.active) {
+			const cloneAccess = key.clone_meta.map(clone => clone.clone_name)
+			if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 				req.headers['ssl_client_s_dn_cn'] = key.username;
 				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
 				next();
