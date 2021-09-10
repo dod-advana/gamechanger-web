@@ -133,8 +133,18 @@ class ExternalAPIController {
 
 			for (const request of requests) {
 				if (request.approved) {
-					const key = await this.apiKeys.findOne({ raw: true, where: { username: request.username }});
+					const key = await this.apiKeys.findOne({ 
+						raw: false, 
+						where: { username: request.username },
+						include: [{
+							model: this.cloneMeta,
+							attributes: ['id', 'clone_name'],
+							through: {attributes: []}
+						}],
+					});
+					console.log("KEY!!: ", key)
 					request.dataValues.key = key.apiKey;
+					request.dataValues.keyClones = key.clone_meta;
 					delete request.username;
 					approved.push(request);
 				} else if (!request.approved && !request.rejected) {
