@@ -1,4 +1,5 @@
 import React from "react";
+import moment from 'moment';
 import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import GameChangerSideBar from "../../searchMetrics/GCSideBar";
 import DefaultGraphView from "../../graph/defaultGraphView";
@@ -162,31 +163,34 @@ const renderRecentSearches = (search, state, dispatch) => {
 			<Typography style={styles.subtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
 			<Typography style={styles.subtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
 			<Typography style={styles.subtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
-			<Typography style={styles.subtext}>Search Time: {run_at}</Typography>
+			<Typography style={styles.subtext}>Search Time: {moment(Date.parse(run_at)).utc().format("YYYY-MM-DD HH:mm UTC")}</Typography>
 		</RecentSearchContainer>
 	)
 }
 
 
-const handlePopPubs = async(pop_pubs, state, dispatch) => {
+const handlePopPubs = async(pop_pubs, pop_pubs_inactive, state, dispatch) => {
+	const filteredPubs = _.filter(pop_pubs, (item) => {
+		return !_.includes(pop_pubs_inactive, item.id);
+	});
 	try {
-		for(let i = 0; i < pop_pubs.length; i++){
-			gameChangerAPI.thumbnailStorageDownloadPOST([pop_pubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
+		for(let i = 0; i < filteredPubs.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
 				const buffers = pngs.data;
 				buffers.forEach((buf,idx) => {
 					if(buf.status === "fulfilled"){
-						pop_pubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+						filteredPubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
 					} else {
-						pop_pubs[i].imgSrc = 'error';
+						filteredPubs[i].imgSrc = 'error';
 					}
 				});
-				setState(dispatch, {searchMajorPubs: pop_pubs});
+				setState(dispatch, {searchMajorPubs: filteredPubs});
 			});
 		}
 	} catch(e) {
 		//Do nothing
 		console.log(e);
-		setState(dispatch, {searchMajorPubs: pop_pubs});
+		setState(dispatch, {searchMajorPubs: filteredPubs});
 	}
 }
 
@@ -304,6 +308,7 @@ const PolicyMainViewHandler = {
 		let topics = [];
 		let pubs = [];
 		let pop_pubs = [];
+		let pop_pubs_inactive = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
 			data.forEach(obj => {
@@ -311,6 +316,8 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
+				} else if(obj.key === 'homepage_popular_docs_inactive') {
+					pop_pubs_inactive = JSON.parse(obj.value);
 				} else if (obj.key === 'popular_docs'){
 					pop_pubs = obj.value;
 				}
@@ -323,7 +330,7 @@ const PolicyMainViewHandler = {
 		setState(dispatch, {adminTopics:topics});
 		handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
-		handlePopPubs(pop_pubs, state, dispatch);
+		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
 	},
 	
 	getMainView(props) {
@@ -532,7 +539,7 @@ const PolicyMainViewHandler = {
 									onClick={()=>{
 										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
 										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`);
 									}}
 								>
 									<div className="hover-text">{formatString(pub.name)}</div>
