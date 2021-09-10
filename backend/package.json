@@ -11,10 +11,10 @@
     "awsDocker": "npm start",
     "jest-coverage": "jest --coverage",
     "sonarscan": "sonar-scanner",
-	"gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
-	"gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
-	"orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
-	"orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
+    "gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
+    "gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
+    "orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
+    "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
   },
   "author": "",
   "license": "ISC",
@@ -55,6 +55,7 @@
     "sonarqube-scanner": "^2.5.0",
     "spark-md5": "^3.0.1",
     "ssh-key-decrypt": "latest",
+    "static-eval": "^2.0.5",
     "swagger-jsdoc": "^6.0.1",
     "swagger-ui-express": "^4.1.6",
     "underscore": "^1.13.1",
