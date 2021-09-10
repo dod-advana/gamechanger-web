@@ -29,9 +29,13 @@ export default () => {
      */
     const getApiKeyRequestData = async () => {
         const { data } = await gameChangerAPI.getAPIKeyRequestData();
-        data.pending.forEach((pending, idx) => {
-            const cloneString = pending.clone_meta.map(meta => meta.clone_name).join(", ");
+        data.pending.forEach((request, idx) => {
+            const cloneString = request.clone_meta.map(meta => meta.clone_name).join(", ");
             data.pending[idx].cloneString = cloneString;
+        })
+        data.approved.forEach((request, idx) => {
+            const cloneString = request.keyClones.map(clone => clone.clone_name).join(", ");
+            data.approved[idx].cloneString = cloneString;
         })
         setGCAPIRequestData(data || {approved: [], pending: []});
     }
@@ -100,10 +104,10 @@ export default () => {
         },
         {
             Header: 'Clones',
-            // accessor: 'email',
+            accessor: 'cloneString',
             width: 200,
             Cell: row => (
-                <TableRow>{''}</TableRow>
+                <TableRow>{row.value}</TableRow>
             )
         },
         {
@@ -260,8 +264,7 @@ export default () => {
             </div>
         </Popover>
     }
-
-    console.log("approved list: ", gcAPIRequestData.approved)
+console.log(gcAPIRequestData.approved)
     return (
         <div style={{height: '100%'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
