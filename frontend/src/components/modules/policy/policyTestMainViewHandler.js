@@ -24,8 +24,8 @@ import {
 } from "../../../gamechangerUtils";
 import GameChangerAPI from "../../api/gameChanger-service-api";
 import '../../mainView/main-view.css'
-import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
-
+import DefaultSeal from '../../mainView/img/GC Default Seal.png';
+import DefaultPub from '../../mainView/img/default_cov.png';
 
 const _ = require('lodash');
 
@@ -170,10 +170,13 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 
 const handlePopPubs = async(pop_pubs, pop_pubs_inactive, state, dispatch) => {
-	const filteredPubs = _.filter(pop_pubs, (item) => {
+	let filteredPubs = _.filter(pop_pubs, (item) => {
 		return !_.includes(pop_pubs_inactive, item.id);
 	});
 	try {
+		filteredPubs = filteredPubs.map(item => ({	...item, imgSrc: DefaultPub}));
+		setState(dispatch, {searchMajorPubs: filteredPubs});
+
 		for(let i = 0; i < filteredPubs.length; i++){
 			gameChangerAPI.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
 				const buffers = pngs.data;
@@ -181,7 +184,7 @@ const handlePopPubs = async(pop_pubs, pop_pubs_inactive, state, dispatch) => {
 					if(buf.status === "fulfilled"){
 						filteredPubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
 					} else {
-						filteredPubs[i].imgSrc = 'error';
+						filteredPubs[i].imgSrc = DefaultPub;
 					}
 				});
 				setState(dispatch, {searchMajorPubs: filteredPubs});
