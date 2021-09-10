@@ -275,12 +275,12 @@ const App = () => {
 		if (!initialized) {
 			setInitialized(true);
 			initialize();
-			const initialUrl = localStorage.getItem('userInitialUrl')
-			if(initialUrl && initialUrl !== window.location.href) {
-				window.location.href = initialUrl;
-			}
-			localStorage.removeItem('userInitialUrl');
 		}
+		const initialUrl = localStorage.getItem('userInitialUrl')
+		if(initialUrl && initialUrl !== window.location.href) {
+			window.location.href = initialUrl;
+		}
+		localStorage.removeItem('userInitialUrl');
 	}, [initialized]);
 
 	if (!initialized || !tokenLoaded) {
