@@ -133,8 +133,8 @@ class ExternalAPIController {
 
 			for (const request of requests) {
 				if (request.approved) {
-					const keys = await this.apiKeys.findAll({ raw: true, where: { username: request.username }});
-					request.dataValues.keys = keys.map(key => { return key.apiKey; });
+					const key = await this.apiKeys.findOne({ raw: true, where: { username: request.username }});
+					request.dataValues.key = key.apiKey;
 					delete request.username;
 					approved.push(request);
 				} else if (!request.approved && !request.rejected) {

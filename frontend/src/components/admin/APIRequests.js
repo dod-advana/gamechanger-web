@@ -1,5 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import ReactTable from "react-table";
+import Popover from '@material-ui/core/Popover';
+import CloseIcon from '@material-ui/icons/Close';
+import styled from 'styled-components';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCAccordion from "../common/GCAccordion";
@@ -17,6 +20,8 @@ export default () => {
     // State Variables
     const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
+    const [popperIsOpen, setPopperIsOpen] = useState(false);
+	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
     // Comonent Methods
     /**
      * Grabs all the data from the backend to populate the table
@@ -43,10 +48,15 @@ export default () => {
 	/**
      * Either approves or rejects a key request with an id and boolean
      * @method approveRejectAPIKeyRequestData
-     * @param {*} id 
+     * @param {Object} request - API key request containing it's ID and the associated username
+     * @param {*} request.id
+     * @param {string} request.username
      * @param {boolean} approve 
      */
-	const approveRejectAPIKeyRequestData = async (id, approve) => {
+	const approveRejectAPIKeyRequestData = async ({ id, username }, approve) => {
+        if(gcAPIRequestData.approved.find(request => request.username === username)){ 
+            return setPopperIsOpen(true);
+        }
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
 			getApiKeyRequestData();
 		});
@@ -97,11 +107,11 @@ export default () => {
             )
         },
         {
-            Header: 'Keys',
-            accessor: 'keys',
+            Header: 'Key',
+            accessor: 'key',
             Cell: row => 
                 { return (gcAPIKeyVision ? 
-                    <TableRow>{row.value.join(", ")}</TableRow> :
+                    <TableRow>{row.value}</TableRow> :
                     <TableRow>******************************************</TableRow> )
                 }
         },
@@ -164,12 +174,14 @@ export default () => {
         },
         {
             Header: ' ',
-            accessor: 'id',
+            id: 'Approve',
+            accessor:  request => {return {id: request.id, username: request.username}},
             width: 230,
             Cell: row => (
                 <TableRow>
                     <GCButton
-                        onClick={() => {
+                        onClick={(event) => {
+                            setPopperAnchorEl(event.target);
                             trackEvent('GAMECHANGER_Admin', "AdminPage", "ApproveAPIKeyRequest", row.value);
                             approveRejectAPIKeyRequestData(row.value, true);
                         }}
@@ -187,11 +199,76 @@ export default () => {
         }
     ]
 
+    const CloseButton = styled.div`
+        padding: 6px;
+        background-color: white;
+        border-radius: 5px;
+        color: #8091A5 !important;
+        border: 1px solid #B0B9BE;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: .4;
+        position: absolute;
+        right: 15px;
+        top: 15px;
+    `;
+
+    const handleClosePopOver = () => {
+    	setPopperIsOpen(false);
+		setPopperAnchorEl(null);
+	}
+
+    const renderPopOver = () => {
+        return<Popover
+            onClose={() => handleClosePopOver()}
+            open={popperIsOpen} anchorEl={popperAnchorEl}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+            }}
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+        >
+            <div style={{padding: '0px 15px 10px'}}>
+                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                    <CloseButton onClick={() => handleClosePopOver()}>
+                        <CloseIcon fontSize="small"/>
+                    </CloseButton>
+                </div>
+                <div style={{width: 350, margin: 5}}>
+                    <div style={{margin: '65px 15px 0'}}>User already has an API key. Either reject the request or revoke the user's current API key.
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <GCButton
+                            onClick={() => handleClosePopOver()}
+                            style={{
+                                height: 40,
+                                minWidth: 40,
+                                padding: '2px 8px 0px',
+                                fontSize: 14,
+                                margin: '16px 0px 0px 10px'
+                            }}
+                            isSecondaryBtn={true}
+                        >Close
+                        </GCButton>
+                    </div>
+                </div>
+            </div>
+        </Popover>
+    }
+
+    console.log("approved list: ", gcAPIRequestData.approved)
     return (
         <div style={{height: '100%'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
                 <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>API Key Requests</p>
             </div>
+
+            {renderPopOver()}
             
             <div style={{margin: '10px 80px'}}>
                 <GCAccordion expanded={false} header={'APPROVED API KEYS'}>
