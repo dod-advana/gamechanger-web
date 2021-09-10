@@ -6,7 +6,6 @@ const policyTitleBarHandler = require(`../modules/policy/policyTitleBarHandler`)
 const globalSearchTitleBarHandler = require(`../modules/globalSearch/globalSearchTitleBarHandler`);
 
 class TitleBarFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {

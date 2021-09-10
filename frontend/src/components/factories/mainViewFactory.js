@@ -3,17 +3,16 @@ const edaMainViewHandler = require(`../modules/eda/edaMainViewHandler`);
 const policyMainViewHandler = require(`../modules/policy/policyMainViewHandler`);
 const globalSearchMainViewHandler = require(`../modules/globalSearch/globalSearchMainViewHandler`);
 
-const policyTestMainViewHandler = require(`../modules/policy/policyTestMainViewHandler`)
+const policyTestMainViewHandler = require(`../modules/policy/policyTestMainViewHandler`);
 
 class MainViewFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
 				case 'policy/policyMainViewHandler':
 					this.handler = policyMainViewHandler;
 					break;
-				// TODO Remove this once the homepage is used for main GC page. 
+				// TODO Remove this once the homepage is used for main GC page.
 				case 'policy/policyTestMainViewHandler':
 					this.handler = policyTestMainViewHandler;
 					break;

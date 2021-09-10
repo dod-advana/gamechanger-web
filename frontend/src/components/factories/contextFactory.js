@@ -1,7 +1,13 @@
-import { DefaultContext, DefaultProvider } from "../modules/default/defaultContext";
-import { PolicyContext, PolicyProvider } from "../modules/policy/policyContext";
-import { GlobalSearchContext, GlobalSearchProvider} from "../modules/globalSearch/globalSearchContext";
-import { EDAContext, EDAProvider } from "../modules/eda/edaContext";
+import {
+	DefaultContext,
+	DefaultProvider,
+} from '../modules/default/defaultContext';
+import { PolicyContext, PolicyProvider } from '../modules/policy/policyContext';
+import {
+	GlobalSearchContext,
+	GlobalSearchProvider,
+} from '../modules/globalSearch/globalSearchContext';
+import { EDAContext, EDAProvider } from '../modules/eda/edaContext';
 
 const getContext = (cloneName) => {
 	switch (cloneName) {
@@ -31,4 +37,4 @@ const getProvider = (cloneName) => {
 	}
 };
 
-export {getContext, getProvider};
+export { getContext, getProvider };

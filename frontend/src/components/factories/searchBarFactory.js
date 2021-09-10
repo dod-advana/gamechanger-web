@@ -4,7 +4,6 @@ const policySearchBarHandler = require(`../modules/policy/policySearchBarHandler
 const globalSearchSearchBarHandler = require(`../modules/globalSearch/globalSearchSearchBarHandler`);
 
 class SearchBarFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
