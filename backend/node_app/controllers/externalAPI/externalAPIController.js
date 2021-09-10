@@ -111,6 +111,7 @@ class ExternalAPIController {
 		this.approveRejectAPIKeyRequest = this.approveRejectAPIKeyRequest.bind(this);
 		this.revokeAPIKeyRequest = this.revokeAPIKeyRequest.bind(this);
 		this.createAPIKeyRequest = this.createAPIKeyRequest.bind(this);
+		this.updateAPIKeyDescription = this.updateAPIKeyDescription.bind(this);
 		this.getAPIKey = this.getAPIKey.bind(this);
 		this.sendApprovalEmail = this.sendApprovalEmail.bind(this);
 	}
@@ -135,16 +136,20 @@ class ExternalAPIController {
 				if (request.approved) {
 					const key = await this.apiKeys.findOne({ 
 						raw: false, 
-						where: { username: request.username },
+						where: { 
+							username: request.username,
+							active: true
+						 },
 						include: [{
 							model: this.cloneMeta,
 							attributes: ['id', 'clone_name'],
 							through: {attributes: []}
 						}],
 					});
-					console.log("KEY!!: ", key)
+					console.log("KEY!!: ", key);
 					request.dataValues.key = key.apiKey;
 					request.dataValues.keyClones = key.clone_meta;
+					request.dataValues.description = key.description;
 					delete request.username;
 					approved.push(request);
 				} else if (!request.approved && !request.rejected) {
@@ -185,7 +190,8 @@ class ExternalAPIController {
 						const key = await this.apiKeys.create({
 							username: request.dataValues.username,
 							apiKey,
-							active: true
+							active: true,
+							description: request.reason
 						});
 						const joinObjects = request.dataValues.clone_meta.map(clone => {
 							return {
@@ -290,6 +296,18 @@ class ExternalAPIController {
 		} catch (err) {
 			this.logger.error(err, 'GUJ8UVG', userId);
 			res.status(500).send(err);
+		}
+	}
+
+	async updateAPIKeyDescription(req, res) {
+		let userId = 'webapp_unknown';
+		try{
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { description, key } = req.body;
+			await this.apiKeys.update({ description }, { where: { apiKey: key } });
+			res.status(200).send({status: 'updated'});
+		} catch(err) {
+			this.logger.error(err, "MJID22P", userId)
 		}
 	}
 
