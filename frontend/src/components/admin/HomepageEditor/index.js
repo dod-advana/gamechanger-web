@@ -50,7 +50,6 @@ export default () => {
                 tableData.popular_docs_inactive = JSON.parse(obj.value);
             }
         });    
-        console.log(data)
         setEditorTableData(tableData);
     }
     /**
@@ -160,7 +159,6 @@ export default () => {
                         onClick={() => {
                             const index = _.findIndex(editorTableData.popular_docs_inactive, (item) => item === row.value);
                             editorTableData.popular_docs_inactive.splice(index, 1);
-                            console.log(editorTableData.popular_docs_inactive);
                             setEditorTableData({...editorTableData,popular_docs_inactive:editorTableData.popular_docs_inactive})
                         }}
                         disabled={_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) === undefined}
@@ -169,7 +167,6 @@ export default () => {
                     <GCButton
                         onClick={() => {
                             editorTableData.popular_docs_inactive.push(row.value)
-                            console.log(editorTableData.popular_docs_inactive);
                             setEditorTableData({...editorTableData,popular_docs_inactive:editorTableData.popular_docs_inactive})
                         }}
                         disabled={_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) !== undefined}
