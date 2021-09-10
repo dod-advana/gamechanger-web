@@ -349,7 +349,9 @@ const PolicyMainViewHandler = {
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		// const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${'gamechanger'}Searches`) || '[]';
+
 
 		if(prevSearchText) {
 			if(!resetSettingsSwitch) {
@@ -412,18 +414,6 @@ const PolicyMainViewHandler = {
 					</div>
 				)}
 				<div style={{ margin: '0 70px 0 70px'}}>
-					{/* <GameChangerThumbnailRow
-						links={agencyPublications}
-						title={"Agency Publications"}
-						width='450px'
-					>
-						{agencyPublications.map(pub => 
-							<AgencyPublicationContainer>
-								<div style={{width:180, height:100}}/>
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
-							</AgencyPublicationContainer>
-						)}
-					</GameChangerThumbnailRow> */}
 					<GameChangerThumbnailRow
 						links={trendingLinks}
 						title={"Trending Searches"}
@@ -483,7 +473,12 @@ const PolicyMainViewHandler = {
 						width='300px'
 					>
 						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
-							<SourceContainer>
+							<SourceContainer
+								onClick={ () => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'SourceOpened', source.display_source_s)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.display_source_s.toLowerCase()}`);
+								}}
+							>
 								<img src={source.imgSrc} alt={'crawler seal'}></img>
 								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
 							</SourceContainer>
