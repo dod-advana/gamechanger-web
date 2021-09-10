@@ -1,4 +1,3 @@
-
 import styled from 'styled-components';
 import { CloseRounded } from '@material-ui/icons';
 
@@ -11,10 +10,10 @@ export const DropdownWrapper = styled.ul`
 	top: 100%;
 	width: 100%;
 	z-index: 1000;
-	box-shadow: 0 6px 8px 3px rgba(0,0,0,0.5);
+	box-shadow: 0 6px 8px 3px rgba(0, 0, 0, 0.5);
 	font-size: 22px;
 	padding: 3px 0;
-	font-family: "Montserrat";
+	font-family: 'Montserrat';
 `;
 
 export const AdvDropdownWrapper = styled.div`
@@ -24,12 +23,11 @@ export const AdvDropdownWrapper = styled.div`
 	top: 100%;
 	width: 100%;
 	z-index: 1000;
-	box-shadow: 0 6px 8px 3px rgba(0,0,0,0.5);
+	box-shadow: 0 6px 8px 3px rgba(0, 0, 0, 0.5);
 	font-size: 22px;
 	padding: 10px;
-	font-family: "Montserrat";
+	font-family: 'Montserrat';
 `;
-
 
 export const SearchBarInput = styled.input`
 	flex: 1;
@@ -38,7 +36,7 @@ export const SearchBarInput = styled.input`
 	padding-left: 36px;
 	border: ${inputBorder};
 	border-right: none;
-	font-family: "Montserrat";
+	font-family: 'Montserrat';
 	outline: none;
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
@@ -61,17 +59,19 @@ export const Row = styled.li`
 	justify-content: space-between;
 	list-style-type: none;
 
-	&:hover,:focus,:focus-within {
+	&:hover,
+	:focus,
+	:focus-within {
 		outline: none;
 		background-color: gainsboro;
-	};
+	}
 	&.cursor {
 		outline: none;
 		background-color: gainsboro;
 	}
 	&.bold {
-    font-weight: bold;
-  }
+		font-weight: bold;
+	}
 `;
 
 export const IconTextWrapper = styled.div`
@@ -85,7 +85,7 @@ export const DeleteButton = styled(CloseRounded)`
 
 	&:hover {
 		background-color: gray;
-	};
+	}
 `;
 
 export const Beta = styled.div`
@@ -93,12 +93,12 @@ export const Beta = styled.div`
 	justify-content: center;
 	color: red;
 	font-size: 12px;
-	font-family: "Noto Sans";
+	font-family: 'Noto Sans';
 `;
 
 export const SearchButton = styled.button`
 	font-size: 24px;
-	background-color: #131E43;
+	background-color: #131e43;
 	color: white;
 	padding: 4px 18px;
 	border: none;
@@ -112,8 +112,8 @@ export const SearchButton = styled.button`
 
 export const AdvancedSearchButton = styled.button`
 	font-size: 1em;
-	background-color: rgb(182,197,216);
-	color: #131E43;
+	background-color: rgb(182, 197, 216);
+	color: #131e43;
 	padding: 4px 18px;
 	border: none;
 	width: 150px;
@@ -132,8 +132,8 @@ export const DidYouMean = styled.span`
 
 export const SuggestionText = styled.div`
 	color: black;
-	`;
+`;
 export const SubText = styled.div`
 	color: grey;
-	font-size: .75em;
-	`
+	font-size: 0.75em;
+`;

@@ -5,7 +5,6 @@ const edaSearchHandler = require(`../modules/eda/edaSearchHandler`);
 const hermesSearchHandler = require(`../modules/hermes/hermesSearchHandler`);
 
 class SearchHandlerFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {

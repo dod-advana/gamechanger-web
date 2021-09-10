@@ -5,7 +5,6 @@ const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
 
 class CardFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
