@@ -22,6 +22,7 @@ export default () => {
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
     const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
+    const [keyDescriptions, setKeyDescriptions] = useState({});
     // Comonent Methods
     /**
      * Grabs all the data from the backend to populate the table
@@ -39,6 +40,14 @@ export default () => {
         })
         setGCAPIRequestData(data || {approved: [], pending: []});
     }
+
+    useEffect(()=>{
+        if(!Object.keys(keyDescriptions).length){
+            const descriptions = {};
+            gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
+            setKeyDescriptions(descriptions);
+        }
+    }, [gcAPIRequestData, keyDescriptions])
     /**
      * Attemps to revoke a key based on the id
      * @method revokeAPIKeyRequestData
@@ -68,6 +77,12 @@ export default () => {
     useEffect(()=>{
         getApiKeyRequestData()
     },[]);
+
+    const handleChange = (key, event) => {
+        const newDescriptions = {...keyDescriptions};
+        newDescriptions[key] = event.target.value;
+        setKeyDescriptions(newDescriptions);
+    }
     // Columns 
     const approvedColumns = [
         {
@@ -96,10 +111,12 @@ export default () => {
         },
         {
             Header: 'Decscription',
-            // accessor: 'email',
+            accessor:  'key',
             width: 200,
             Cell: row => (
-                <TableRow>{''}</TableRow>
+                <TableRow>
+                    {Object.keys(keyDescriptions).length && <input value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
+                </TableRow>
             )
         },
         {
@@ -118,6 +135,22 @@ export default () => {
                     <TableRow>{row.value}</TableRow> :
                     <TableRow>******************************************</TableRow> )
                 }
+        },
+        {
+            Header: ' ',
+            accessor: 'key',
+            width: 120,
+            Cell: row => (
+                <TableRow>
+                    <GCButton
+                        onClick={() => {
+                            // trackEvent('GAMECHANGER_Admin', "AdminPage", "DeleteAPIKey", row.value);
+                            gameChangerAPI.updateAPIKeyDescription(keyDescriptions[row.value], row.value);
+                        }}
+                        style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
+                    >Update</GCButton>
+                </TableRow>
+            )
         },
         {
             Header: ' ',
@@ -264,7 +297,7 @@ export default () => {
             </div>
         </Popover>
     }
-console.log(gcAPIRequestData.approved)
+     
     return (
         <div style={{height: '100%'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>

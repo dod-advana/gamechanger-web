@@ -140,6 +140,7 @@ router.post('/textSuggestion', textSuggest.getTextSuggestion);
 
 router.get('/admin/getAPIKeyRequests', apiController.getAPIKeyRequests);
 router.post('/admin/approveRejectAPIKeyRequest', apiController.approveRejectAPIKeyRequest);
+router.post('/admin/updateAPIKeyDescription', apiController.updateAPIKeyDescription);
 router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
