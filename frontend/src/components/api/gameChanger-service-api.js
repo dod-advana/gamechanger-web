@@ -85,6 +85,7 @@ const endpoints = {
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
 	callGraphFunctionPOST: '/api/gameChanger/modular/callGraphFunction',
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
+	callDataFunctionPOST: '/api/gameChanger/modular/callDataFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
@@ -105,11 +106,6 @@ const endpoints = {
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
-	budgetReviewGET: '/api/gameChanger/budget/getBudgetReview',
-	storeBudgetReviewPOST: '/api/gameChanger/budget/storeBudgetReview',
-	budgetDocSearch: '/api/gameChanger/budget/budgetDocSearch',
-	getProjectData: '/api/gameChanger/budget/getProjectData',
-	getBudgetDropdownData: '/api/gameChanger/budget/getBudgetDropdownData',
 
 	exportHistoryDELETE: function(id){
 		if (!id) {
@@ -752,6 +748,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
+	callDataFunction = async(body) => {
+		const url = endpoints.callDataFunctionPOST;
+		return axiosPOST(this.axios, url, body);
+	}
+
 	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
 		const url = endpoints.qaSearchFeedback;
 		return axiosPOST(this.axios, url, { eventName, question, answer, qaContext, params });
@@ -792,30 +793,4 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 	
-	getBudgetReview = async (btype, bLi, peNum) => {
-		const url = endpoints.BudgetReviewGET;
-		return axiosGET(this.axios, url, { params: { btype: btype, bli: bLi , penum: peNum}});
-
-	}
-	
-	storeBudgetReview = async (reviewData) => {
-		const url = endpoints.storeBudgetReviewPOST;
-		return axiosPOST(this.axios, url, { reviewData});
-
-	}
-
-	budgetDocSearch = async (offset=0, searchText='', budgetSearchSettings = {}) => {
-		const url = endpoints.budgetDocSearch;
-		return axiosPOST(this.axios, url, { offset, searchText, budgetSearchSettings });
-	}
-
-	getProjectData = async (peNum, projNum, type) => {
-		const url = endpoints.getProjectData;
-		return axiosGET(this.axios, url, { params: { peNum, projNum, type } });
-	}
-
-	getBudgetDropdownData = async () => {
-		const url = endpoints.getBudgetDropdownData;
-		return axiosGET(this.axios, url);
-	}
 }

@@ -7,6 +7,11 @@ const BudgetSearchSearchUtility = require('./budgetSearchSearchUtility');
 
 const SearchHandler = require('../base/searchHandler');
 
+const PDOC = require('../../models').pdoc;
+const RDOC = require('../../models').rdoc;
+const ACCOMP = require('../../models').accomp;
+
+
 class BudgetSearchSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
 		const {
@@ -15,13 +20,21 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			mlApi = new MLApiClient(opts),
 			searchUtility = new SearchUtility(opts),
 			budgetSearchSearchUtility = new BudgetSearchSearchUtility(opts),
+			pdoc = PDOC,
+			rdoc = RDOC,
+			accomp = ACCOMP
 		} = opts;
+
 		super({ ...opts}); 
 		this.dataLibrary = dataLibrary;
 		this.constants = constants;
 		this.mlApi = mlApi;
 		this.searchUtility = searchUtility;
 		this.budgetSearchSearchUtility = budgetSearchSearchUtility;
+
+		this.pdocs = pdoc;
+		this.rdocs = rdoc;
+		this.accomp = accomp;
 	}
 
 	async searchHelper(req, userId) {
@@ -46,7 +59,6 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			offset,
 			showTutorial = false,
 			tiny_url,
-			forCacheReload = false,
 			budgetSearchSettings = {}
 		} = req.body;
 
@@ -59,40 +71,42 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			historyRec.request_body = req.body;
 			historyRec.showTutorial = showTutorial;
 
-			const operator = 'and';
-			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
-			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
-
 			let searchResults;
-			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
-			// try storing results record
-			if (!forCacheReload) {
-				try {
-					const { totalCount } = searchResults;
-					historyRec.endTime = new Date().toISOString();
-					historyRec.numResults = totalCount;
-					await this.storeRecordOfSearchInPg(historyRec, userId);
-				} catch (e) {
-					this.logger.error(e.message, '8W3Z513', userId);
-				}
+
+			try {
+				// log query to ES
+				this.storeEsRecord('gamechanger', offset, cloneName, userId, searchText);
+			} catch (e) {
+				console.log(e);
+			}
+
+			// search postgres
+			searchResults = await this.documentSearch(req, userId);
+
+			// store record in history
+			try {
+				const { totalCount } = searchResults;
+				historyRec.endTime = new Date().toISOString();
+				historyRec.numResults = totalCount;
+				await this.storeRecordOfSearchInPg(historyRec, userId);
+			} catch (e) {
+				this.logger.error(e.message, 'ZMVI2TO', userId);
 			}
 
 			return searchResults;
 
 		} catch (err) {
-			if (!forCacheReload){
-				const { message } = err;
-				this.logger.error(message, 'WHMU1G2', userId);
-				historyRec.endTime = new Date().toISOString();
-				historyRec.hadError = true;
-				await this.storeRecordOfSearchInPg(historyRec, showTutorial);
-			}
+			const { message } = err;
+			this.logger.error(message, 'WHMU1G2', userId);
+			historyRec.endTime = new Date().toISOString();
+			historyRec.hadError = true;
+			await this.storeRecordOfSearchInPg(historyRec, showTutorial);
+			
 			throw err;
 		}
 	}
 
-	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
+	async storeEsRecord(clientName, offset, clone_name, userId, searchText){
 		try {
 			// log search query to elasticsearch
 			if (offset === 0){
@@ -102,43 +116,60 @@ class BudgetSearchSearchHandler extends SearchHandler {
 					search_query: searchText,
 					run_time: new Date().getTime(),
 					clone_name: clone_log
-	
 				};
-				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
 	
-				await this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
+				await this.dataLibrary.putDocument(clientName, 'none', searchLog);
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'KVRECAF');
 		}
 	}
 
-	async documentSearch(req, body, clientObj, userId) {
+	async documentSearch(req, userId) {
+
 		try {
 			const {
-				selectedDocuments,
-				expansionDict = {},
-			} = body;
-			body.searchText += " OR AI-Enabled OR AI-Enabling OR Core-AI";
+				offset, 
+				searchText, 
+				budgetSearchSettings
+			} = req.body;
 
-			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
-			body.searchTerms = searchTerms;
-			body.parsedQuery = parsedQuery;
-	
-			const { esClientName, esIndex } = clientObj;
+            let limit = 9;
 
-			const esQuery = this.budgetSearchSearchUtility.getElasticsearchQuery(body, userId)
-	
-			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+            let pQuery = `SELECT COUNT(*) OVER (), * FROM pdoc where _search @@ to_tsquery('english', :searchText) LIMIT :limit OFFSET :offset;`
+            let rQuery = `SELECT COUNT(*) OVER (), * FROM rdoc where _search @@ to_tsquery('english', :searchText) LIMIT :limit OFFSET :offset;`
+            let totalCount = 0;
 
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+            if (!searchText || searchText === '') {
+                pQuery = `SELECT COUNT(*) OVER (), * FROM pdoc LIMIT :limit`;
+                rQuery = `SELECT COUNT(*) OVER (), * FROM rdoc LIMIT :limit`;
+            }
 
-				return this.budgetSearchSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
-				
-			} else {
-				this.logger.error('Error with Elasticsearch results', '9XZVSXW', userId);
-				return { totalCount: 0, docs: [] };
-			}
+            const presults = await this.pdocs.sequelize.query(pQuery, { replacements: { searchText, offset, limit }});
+
+            const pdocuments = presults && presults[0] ? presults[0] : [];
+            if (pdocuments.length && pdocuments.length > 0) {
+                pdocuments.map(data => {
+                    data.type = 'Procurement';
+                });
+                totalCount += parseInt(pdocuments[0].count);
+            }
+
+            const rresults = await this.rdocs.sequelize.query(rQuery, { replacements: { searchText, offset, limit }});
+
+            const rdocuments = rresults && rresults[0] ? rresults[0] : [];
+
+            if (rdocuments.length && rdocuments.length > 0) {
+                rdocuments.map(data => {
+                    data.type = 'RDT&E';
+                });
+                totalCount += parseInt(rdocuments[0].count);
+            }
+
+			return {
+                totalCount,
+                docs: rdocuments.concat(pdocuments)
+            }
 		} catch (e) {
 			console.log(e);
 			const { message } = e;
@@ -147,38 +178,11 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getMainPageData(req, userId) {
-		try {
-			const {
-				resultsPage
-			} = req.body;
-			const esClientName = 'gamechanger';
-			const esIndex = this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index;
-
-			const esQuery = this.budgetSearchSearchUtility.getMainPageQuery(resultsPage);
-
-			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-				return this.budgetSearchSearchUtility.cleanUpEsResults(results, userId, esIndex);
-			}
-			else {
-				this.logger.error('Error with BudgetSearch Elasticsearch results', '0556DZM', userId);
-				return { };
-			}
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'WHMU1G2', userId);
-		}
-	}
-
 	async callFunctionHelper(req, userId) {
 		const {functionName} = req.body;
 
 		try {
             switch (functionName) {
-				case 'getMainPageData': 
-					return await this.getMainPageData(req, userId);
                 default:
                     this.logger.error(
                         `There is no function called ${functionName} defined in the budgetSearchSearchHandler`,

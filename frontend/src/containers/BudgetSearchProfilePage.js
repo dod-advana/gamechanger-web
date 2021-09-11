@@ -865,6 +865,7 @@ const BudgetSearchProfilePage = (props) => {
     const [projectNum, setProjectNum] = useState('');
 
     const { state, dispatch } = context;
+    const { cloneData } = state;
 
     const renderNavButtons = () => {
         const buttonNames = ['The Basics', 'Accomplishment', 'Contracts', 'JAIC Reviewer Section', 'Service / DoD Component Reviewer Section', 'POC Reviewer Section'];
@@ -897,18 +898,31 @@ const BudgetSearchProfilePage = (props) => {
             const url = window.location.href;
             const peNum = getQueryVariable('peNum', url);
             const projectNum = getQueryVariable('projectNum');
-            const budgetType = getQueryVariable('type');
+            const type = getQueryVariable('type');
     
             const getProjectData = async () => {
                 setProfileLoading(true);
 
-                const projectData = await gameChangerAPI.getProjectData(peNum, projectNum, budgetType);
-                const dropdownData = await gameChangerAPI.getBudgetDropdownData()
+                const projectData = await gameChangerAPI.callDataFunction({
+                    functionName: 'getProjectData',
+                    cloneName: cloneData.clone_name,
+                    options: {
+                        peNum,
+                        projectNum,
+                        type
+                    }
+                });
+                const dropdownData = await gameChangerAPI.callDataFunction({
+                    functionName: 'getBudgetDropdownData',
+                    cloneName: cloneData.clone_name,
+                    options: {}
+                });  
+                
                 console.log(projectData);
-                console.log(dropdownData);
+                // console.log(dropdownData);
                 setPENum(peNum);
                 setProjectNum(projectNum);
-                setBudgetType(budgetType);
+                setBudgetType(type);
                 setProjectData(projectData.data);
                 setDropdownData(dropdownData.data);
                 setProfileLoading(false);
@@ -1006,7 +1020,7 @@ const BudgetSearchProfilePage = (props) => {
                                 <FiberManualRecordIcon style={{ color: 'green' }} />
                             </StyledAccordionHeader>
                         } headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-                          <BudgetSearchReviewForm dropdownData={dropdownData} budgetType={budgetType} peNum={peNum} budget_line_item={"TestHappy"} budget_year={"2021"}></BudgetSearchReviewForm>
+                          <BudgetSearchReviewForm cloneData={state.cloneData} dropdownData={dropdownData} budgetType={budgetType} peNum={peNum} budget_line_item={"TestHappy"} budget_year={"2021"}></BudgetSearchReviewForm>
                         </GCAccordion>                    
                     </StyledAccordionContainer>
                     <StyledAccordionContainer id={"Service / DoD Component Reviewer Section"}>

@@ -47,7 +47,8 @@ const BudgetSearchReviewForm = (props) =>{
 		peNum,
 		budget_line_item,
 		budget_year,
-		dropdownData
+		dropdownData,
+		cloneData
 	} = props;
 	const context = useContext(getContext('budgetSearch'));
 
@@ -108,7 +109,6 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Review Status',
 				Value: <Autocomplete
 							size="small"
-							freeSolo={true}
 							options={dropdownData && dropdownData.reviewStat ? dropdownData.reviewStat : []}
 							getOptionLabel={(option) => option.jaic_review_stat}
 							style={{ width: 300, backgroundColor: 'white' }}
@@ -120,7 +120,6 @@ const BudgetSearchReviewForm = (props) =>{
 				Key: 'Planned Transition Partner',
 				Value: <Autocomplete
 							size="small"
-							freeSolo={true}
 							options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
 							getOptionLabel={(option) => option.planned_trans_part}
 							style={{ width: 300, backgroundColor: 'white' }}
@@ -135,7 +134,6 @@ const BudgetSearchReviewForm = (props) =>{
 					<Autocomplete
 						size="small"
 						options={dropdownData && dropdownData.missionPartners ? dropdownData.missionPartners : []}
-						freeSolo={true}
 						getOptionLabel={(option) => option.current_msn_part}
 						style={{ width: 300, backgroundColor: 'white' }}
 						onChange={(event, value)=>{setRev_mp_add(value)}}
@@ -184,7 +182,13 @@ const BudgetSearchReviewForm = (props) =>{
 			review_notes: review_notes,
 			budget_year: budget_year
 		}
-		gameChangerAPI.storeBudgetReview(reviewData);
+		gameChangerAPI.callDataFunction({
+			functionName: 'storeBudgetReview',
+			cloneName: cloneData.clone_name,
+			options: {
+				reviewData
+			}
+		}); 
 	}
 
     return (

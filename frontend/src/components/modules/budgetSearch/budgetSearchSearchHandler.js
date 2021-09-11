@@ -8,8 +8,8 @@ import {
 } from "../../../gamechangerUtils";
 import {trackSearch} from "../../telemetry/Matomo";
 import {
-	// createTinyUrl,
-	getSearchObjectFromString,
+	createTinyUrl,
+	// getSearchObjectFromString,
 	// getUserData,
 	setState,
 } from "../../../sharedFunctions";
@@ -35,7 +35,7 @@ const BudgetSearchSearchHandler = {
 			searchSettings,
 			tabName,
 			cloneData,
-			budgetSearchSettings
+			budgetSearchSettings,
 		} = state;
 		
 		this.setSearchURL(state);
@@ -47,8 +47,6 @@ const BudgetSearchSearchHandler = {
 			runningSearch: true,
 		});
 		
-		const trimmed = searchText.trim();
-		if (_.isEmpty(trimmed)) return;
 		
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
@@ -71,14 +69,24 @@ const BudgetSearchSearchHandler = {
 		});
 		
 		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
-				
+		const tiny_url = await createTinyUrl(cloneData);
+
 		try {
-				
 			// regular search
-			gameChangerAPI.budgetDocSearch(offset, searchText).then(resp => {
+			gameChangerAPI.modularSearch({
+				cloneName: cloneData.clone_name,
+				searchText,
+				offset,
+				options: {
+					budgetSearchSettings,
+					tiny_url
+				}
+			}).then(resp => {
 				const t1 = new Date().getTime();
 			
 				// let getUserDataFlag = true;
+
+				console.log(resp);
 		
 				if (_.isObject(resp.data)) {
 
@@ -181,8 +189,6 @@ const BudgetSearchSearchHandler = {
 				parsed.offset = offset;
 			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
 		}
-
-		parsed.edaSearchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.edaSearchSettings));
 
 		return parsed;
 	},

@@ -145,19 +145,8 @@ const BudgetSearchMainViewHandler = {
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url);
 		if (!searchText) {
-			try {
-				setState(dispatch, { loading: true, cloneData: state.cloneData });
-				const mainData = await gameChangerAPI.budgetDocSearch();
-				setState(dispatch, { mainPageData: mainData.data, loading: false });
-				console.log(mainData);
-			}
-			catch(err) {
-				console.log(err);
-				console.log('Error loading budget search main page');
-				setState(dispatch, { loading: false });
-			}
+			setState(dispatch, { loading: true, runSearch: true });
 		}		
-
 	},
 	
 	getMainView(props) {

@@ -11,7 +11,6 @@ const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { AdminController } = require('../controllers/adminController');
-const { BudgetReviewController } = require('../controllers/budgetReviewController');
 const { NotificationController } = require('../controllers/notificationController');
 const { TransformerController } = require('../controllers/transformerController');
 const { TutorialOverlayController } = require('../controllers/tutorialOverlaysController');
@@ -23,7 +22,6 @@ const { TrendingSearchesController } = require('../controllers/trendingSearchesC
 const { AppSettingsController } = require('../controllers/appSettingsController');
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
-const { BudgetDocController } = require('../controllers/budgetDocController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -45,8 +43,6 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
-const budgetReview = new BudgetReviewController();
-const budgetDocs = new BudgetDocController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -168,13 +164,5 @@ router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
-
-router.get('/budget/getBudgetReview', budgetReview.getBudgetReview);
-router.post('/budget/storeBudgetReview', budgetReview.storeBudgetReview);
-
-router.post('/budget/budgetDocSearch', budgetDocs.budgetDocSearch);
-
-router.get('/budget/getProjectData', budgetDocs.getProjectData);
-router.get('/budget/getBudgetDropdownData', budgetDocs.getBudgetDropdownData);
 
 module.exports = router;

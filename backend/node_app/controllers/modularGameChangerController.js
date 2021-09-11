@@ -26,6 +26,7 @@ class ModularGameChangerController {
 		this.graphSearch = this.graphSearch.bind(this);
 		this.graphQuery = this.graphQuery.bind(this);
 		this.callGraphFunction = this.callGraphFunction.bind(this);
+		this.callDataFunction = this.callDataFunction.bind(this);
 	}
 
 	async getCloneTableStructure(req, res) {
@@ -68,6 +69,7 @@ class ModularGameChangerController {
 					main_view_module: 'policy/policyMainViewHandler',
 					graph_module: 'policy/policyGraphHandler',
 					search_bar_module: 'policy/policySearchBarHandler',
+					data_module: 'simple/SimpleDataHandler',
 					display_name: 'GAMECHANGER',
 					is_live: true,
 					url: '/',
@@ -233,6 +235,18 @@ class ModularGameChangerController {
 		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, 'LSZ82AY', userId);
+		}
+	}
+
+	async callDataFunction(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const {cloneName, functionName, options} = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('data', cloneName);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId);
+			res.status(200).send(results);
+		} catch (error) {
+			res.status(500).send(error, 'N1AF564', userId);
 		}
 	}
 
