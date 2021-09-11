@@ -472,25 +472,21 @@ const GameChangerDetailsPage = (props) => {
 		let searchText = `"${entity.name}"`;
 		aliases.forEach((alias) => {
 			searchText += ` or ${alias}`;
-		});
-
+		})
+		
 		const t0 = new Date().getTime();
-		gameChangerAPI
-			.getDocumentsForEntity(cloneData.clone_name, {
-				entityName: entity.name,
-				searchText,
-			})
-			.then((resp) => {
-				const t1 = new Date().getTime();
-				setDocCount(resp.data.totalCount);
-				setDocResultsPage(1);
-				setDocResults(resp.data.docs);
-				setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
-				if (resp.data.docs.length > 0) {
-					setTimeFound(((t1 - t0) / 1000).toFixed(2));
-					setGettingDocuments(false);
-				}
-			});
+		gameChangerAPI.getDocumentsForEntity(cloneData.clone_name, {entityName: entity.name, searchText}).then(resp => {
+			
+			const t1 = new Date().getTime();
+			setDocCount(resp.data.totalCount)
+			setDocResultsPage(1);
+			setDocResults(resp.data.docs);
+			setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
+			if(resp.data.docs.length > 0 || resp.data.totalCount === 0) {
+				setTimeFound(((t1 - t0) / 1000).toFixed(2));
+				setGettingDocuments(false);
+			}
+		});
 	}, [entity, cloneData]);
 
 	useEffect(() => {

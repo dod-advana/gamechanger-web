@@ -166,13 +166,10 @@ export const draw2DArrows = (
 	ctx.fill();
 };
 
-export const getNodeColors = (node, alpha, nodeLabelColors = {}) => {
-	console.log(node);
-
-	if (
-		nodeLabelColors[node?.label] &&
-		nodeLabelColors[node?.label].color === ''
-	) {
+export const  getNodeColors = (node, alpha, nodeLabelColors = {}) => {
+	
+	if (nodeLabelColors[node?.label] && nodeLabelColors[node?.label].color === '') {
+		
 		shuffleArray(NODE_COLORS);
 
 		Object.keys(nodeLabelColors).forEach((label, idx) => {
