@@ -148,15 +148,18 @@
 					"skipComments": true
 				}
 			],
-			"import/no-anonymous-default-export": ["error", {
-				"allowArray": false,
-				"allowArrowFunction": true,
-				"allowAnonymousClass": false,
-				"allowAnonymousFunction": true,
-				"allowCallExpression": true,
-				"allowLiteral": false,
-				"allowObject": true
-			  }]
+			"import/no-anonymous-default-export": [
+				"error",
+				{
+					"allowArray": false,
+					"allowArrowFunction": true,
+					"allowAnonymousClass": false,
+					"allowAnonymousFunction": true,
+					"allowCallExpression": true,
+					"allowLiteral": false,
+					"allowObject": true
+				}
+			]
 		},
 		"env": {
 			"es6": true
