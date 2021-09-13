@@ -38,16 +38,16 @@ const resetAdvancedSettings = (dispatch) => {
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-    let orgName = state.searchSettings.orgFilter;
-	newSearchSettings.orgFilter = {
+    let orgName = event.target.innerHTML;
+    newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
-		[orgName]: event.currentTarget.name
+		[orgName]: false 
 	};
 	
     newSearchSettings.isFilterUpdate = true;
 	newSearchSettings.orgUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.currentTarget.ariaPressed ? 1 : 0);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
 }
 
 
@@ -220,31 +220,6 @@ const ViewHeader = (props) => {
 	}
 
     return (
-
-   //     <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
-   //     {state.cloneData.clone_name === "gamechanger" ?
-   // 		<>
-   // 		{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
-   // 			<div className={'sidebar-section-title'}>
-   //             <p style={{fontSize: '18px'}}>
-   // 				{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-   // 			</p>
-   //             </div>
-   // 		:
-   // 			<div className={'sidebar-section-title'}>
-   //             <p style={{fontSize: '18px'}}>
-   // 				{'Loading results ...'}
-   //             </p>
-   // 			</div>
-   // 		}
-   // 		</>
-   // 	:
-   // 		<div className={'sidebar-section-title'}>
-   //         <p style={{fontSize: '18px'}}>
-   // 			{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-   //         </p>
-   //         </div>
-   //     }
         <div className={'results-count-view-buttons-container'}> 
         {state.searchSettings.isFilterUpdate && 
                 <filterButton
@@ -264,6 +239,7 @@ const ViewHeader = (props) => {
                             backgroundColor="white"
                             display="inline-flex"
                     name={org}
+
 					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40, ariaPressed: 'true'}}
 					startIcon=<CloseIcon />
 					onClick={(event) => {
