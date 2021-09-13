@@ -34,7 +34,18 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_SEARCH_SETTINGS'});
 }
-//const handleTypeFilterChangeLocal
+const handleTypeFilterChange = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    let typeName = event.target.innerHTML;
+    newSearchSettings.typeFilter = {
+		...newSearchSettings.typeFilter,
+		[typeName]: false 
+	};
+    newSearchSettings.isFilterUpdate = true;
+    newSearchSettings.typeUpdate = true;
+	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'typeFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
+}
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
@@ -269,16 +280,14 @@ const ViewHeader = (props) => {
             if(state.searchSettings.typeFilter[type]){
                 return (
                     <Button
-                    variant="contained"
-                            backgroundColor="white"
-                            display="inline-flex"
-
-					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
-					startIcon=<CloseIcon />
+                        variant="contained"
+                        backgroundColor="white"
+                        display="inline-flex"
+					    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
+					    startIcon=<CloseIcon />
 					onClick={(event) => {
-                        handleOrganizationFilterChange(event, state, dispatch);
+                        handleTypeFilterChange(event, state, dispatch);
                     }}
-                    
 				    >
                          <span style={{
                             fontFamily: 'Montserrat',
