@@ -275,15 +275,22 @@ describe('ExternalAPIController', function () {
 					throw new Error('Duplicate found');
 				} else {
 					apiKeyRequest.push(data);
-					return Promise.resolve(data);
+					return Promise.resolve({dataValues: data});
 				}
 			}
 		};
 
+		const apiKeyRequestClones = {
+			bulkCreate: async (data) => {
+				return Promise.resolve([{id:0, apiKeyRequestId:0, cloneId: 1}]);
+			}
+		}
+
 		const opts = {
 			...constructorOptionsMock,
 			apiKeys,
-			apiKeyRequests
+			apiKeyRequests,
+			apiKeyRequestClones
 		};
 
 		const target = new ExternalAPIController(opts);
@@ -309,7 +316,8 @@ describe('ExternalAPIController', function () {
 			body: {
 				name: 'Test',
 				email: 'Test',
-				reason: 'Test'
+				reason: 'Test',
+				clones: [1]
 			},
 			get(key) {
 				return this.headers[key];
