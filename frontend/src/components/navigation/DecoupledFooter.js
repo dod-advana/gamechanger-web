@@ -123,6 +123,7 @@ const DecoupledFooter = (props) => {
 	const [requestAPIKeyData, setRequestAPIKeyData] = useState({});
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
 	const [cloneMeta,  setCloneMeta] = useState([]);
+	const [apiRequestError, setApiRequestError] = useState('');
 
 	const getUserData = async () => {
 		try {
@@ -176,6 +177,7 @@ const DecoupledFooter = (props) => {
 	}
 
 	const handleCloneChange = (cloneId) => {
+		setApiRequestError('');
 		const newRequestAPIKeyData = {...requestAPIKeyData};
 		if(!newRequestAPIKeyData.clones) newRequestAPIKeyData.clones =[];
 		const index = newRequestAPIKeyData.clones.indexOf(cloneId);
@@ -247,15 +249,18 @@ const DecoupledFooter = (props) => {
 							)
 						})}
                     </FormGroup>
+					{apiRequestError && <div style={{color: '#f44336'}}>{apiRequestError}</div>}
 				</div>
 			 </>
 		);
 	}
 	
 	const sendAPIKeyRequest = () => {
+		if(!requestAPIKeyData.clones.length) return setApiRequestError('Select at least one clone');
 		gameChangerAPI.createAPIKeyRequest(requestAPIKeyData.name, requestAPIKeyData.email, requestAPIKeyData.reason, requestAPIKeyData.clones).then(resp => {
 			gameChangerAPI.updateUserAPIRequestLimit().then(()=>setAPIRequestLimit(apiRequestLimit-1))
 			setShowRequestAPIKeyModal(false);
+			setApiRequestError('');
 		}).catch(e => {
 			console.log(e);
 		});
