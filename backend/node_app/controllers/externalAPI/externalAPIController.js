@@ -146,7 +146,6 @@ class ExternalAPIController {
 							through: {attributes: []}
 						}],
 					});
-					console.log("KEY!!: ", key);
 					request.dataValues.key = key.apiKey;
 					request.dataValues.keyClones = key.clone_meta;
 					request.dataValues.description = key.description;
