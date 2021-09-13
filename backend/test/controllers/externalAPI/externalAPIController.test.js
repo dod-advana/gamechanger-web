@@ -7,15 +7,15 @@ describe('ExternalAPIController', function () {
 	describe('#getAPIKeyRequests()', () => {
 
 		const apiKeyList = [
-			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true'}
+			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true', description: 'test'}
 		];
 		const apiKeys = {
-			findAll: async (data) => {
+			findOne: async (data) => {
 				const returnKeys = [];
 				apiKeyList.forEach(key => {
 					if (key.username === data.where.username) returnKeys.push(key);
 				});
-				return Promise.resolve(returnKeys);
+				return Promise.resolve(returnKeys[0]);
 			}
 		};
 
