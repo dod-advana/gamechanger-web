@@ -95,12 +95,19 @@ describe('ExternalAPIController', function () {
 			{id: 2, username: 'bad', name: 'Test Test', email: 'bad@test.com', reason: 'For testing', approved: false, rejected: true},
 			{id: 3, username: 'john', name: 'Test Test', email: 'john@test.com', reason: 'For testing', approved: false, rejected: false}
 		];
+
+		const apiKeyRequestCloneAssociation = [
+			{apiKeyRequestId: 0, cloneId: 5, clone_name: 'gamechanger'}
+		];
+
 		const apiKeyRequests = {
 			findOne: async (data) => {
 				let returnRequest = {};
 				apiKeyRequestList.forEach(request => {
-					if (request.id === data.where.id) returnRequest = request;
+					if (request.id === data.where.id) returnRequest.dataValues = request;
 				});
+				const clone_meta = apiKeyRequestCloneAssociation.filter(clone => clone.apiKeyRequestId === returnRequest.id);
+				returnRequest.dataValues.clone_meta = clone_meta.map(clone => { return {id: clone.cloneId, clone_name: clone.clone_name } })
 				return Promise.resolve(returnRequest);
 			},
 			update: async (data, where) => {
@@ -113,11 +120,17 @@ describe('ExternalAPIController', function () {
 				return Promise.resolve();
 			}
 		};
+		const apiKeyClones = {
+			bulkCreate: async (data) => {
+				return Promise.resolve([{id:0, apiKeyId:0, cloneId: 0}]);
+			}
+		}
 
 		const opts = {
 			...constructorOptionsMock,
 			apiKeys,
-			apiKeyRequests
+			apiKeyRequests,
+			apiKeyClones
 		};
 
 		const target = new ExternalAPIController(opts);
