@@ -18,10 +18,11 @@ import {
     Checkbox,
     InputLabel,
     MenuItem,  Select, } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { gcOrange } from "../common/gc-colors";
 import CloseIcon from '@material-ui/icons/Close';
+import {blue, black, white, grey, orange} from '@material-ui/core/colors/blue';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../gamechangerUtils';
 
@@ -37,15 +38,16 @@ const resetAdvancedSettings = (dispatch) => {
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
+    let orgName = state.searchSettings.orgFilter;
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
-		[orgName]: event.target.checked
+		[orgName]: event.currentTarget.name
 	};
-	newSearchSettings.isFilterUpdate = true;
+	
+    newSearchSettings.isFilterUpdate = true;
 	newSearchSettings.orgUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.currentTarget.ariaPressed ? 1 : 0);
 }
 
 
@@ -81,6 +83,27 @@ const useStyles = makeStyles({
 	}
 })
 
+const filterButton = withStyles({
+    root: {
+        variant: 'contained',
+        startIcon: <CloseIcon/>,
+        borderColor: blue,
+        backgroundColor: '#0063cc',
+    borderColor: '#0063cc',
+    fontFamily: 'Montserrat',
+    '&:hover': {
+      backgroundColor: '#0069d9',
+      borderColor: '#0062cc',
+    },
+    '&:active': {
+      backgroundColor: '#0062cc',
+      borderColor: '#005cbf',
+    },
+    '&:focus': {
+      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
+    },
+  },
+})(Button);
 
 const ViewHeader = (props) => {
 
@@ -222,25 +245,15 @@ const ViewHeader = (props) => {
    //         </p>
    //         </div>
    //     }
-        <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
+        <div className={'results-count-view-buttons-container'}> 
         {state.searchSettings.isFilterUpdate && 
-                <Button
-        variant="contained"
-        startIcon=<CloseIcon />
-                        style={{ border: 'none', backgroundColor: 'none', padding: '0 15px', display: 'flex', height: 40, alignItems: 'left', borderRadius: 5 }}
-                        onClick={() => {
-                            resetAdvancedSettings(dispatch);
-                            setState(dispatch, { runSearch: true, runGraphSearch: true });
-                        }}
+                <filterButton
+            variant='contained'
+            color='primary'
+            startIcon=<CloseIcon />
                     >
-                        <span style={{
-                            fontFamily: 'Montserrat',
-                            fontWeight: 150,
-                            width: '100%', marginTop: '5px', marginBottom: '10px'
-                        }}>
-                            Clear Filters
-                        </span>
-                    </Button>
+                           Clear Filters
+                    </filterButton>
             }
             <div className={'view-filters-container'}>
 	{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
@@ -248,15 +261,27 @@ const ViewHeader = (props) => {
                         return (
                      <Button
                     variant="contained"
-
-					style={{borderStyle: 'groove', color:'gcOrange',  backgroundColor: 'none', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', display: 'flex'}}
+                            backgroundColor="white"
+                            display="inline-flex"
+                    name={org}
+					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40, ariaPressed: 'true'}}
 					startIcon=<CloseIcon />
 					onClick={(event) => {
                         handleOrganizationFilterChange(event, state, dispatch);
                     }}
                     
 				    >
+                         <span 
+                            role="button"
+                            style={{
+                            fontFamily: 'Montserrat',
+                            fontWeight: 300,
+                            color: 'black',
+                            width: '100%', marginTop: '5px', marginBottom: '5px'
+                         }}>
                             {org}
+                            </span>
+
 				</Button>
                     )} else {
                         return null;
@@ -269,15 +294,26 @@ const ViewHeader = (props) => {
                 return (
                     <Button
                     variant="contained"
-					style={{borderStyle: 'groove', backgroundColor: 'none', padding: '0 15px', display: 'inline', height: 40, alignItems: 'left', display: 'flex'}}
+                            backgroundColor="white"
+                            display="inline-flex"
+
+					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
 					startIcon=<CloseIcon />
-                    onClick={() => {
-					resetAdvancedSettings(dispatch);
-					setState(dispatch, { runSearch: true, runGraphSearch: true });
-					}}
+					onClick={(event) => {
+                        handleOrganizationFilterChange(event, state, dispatch);
+                    }}
+                    
 				    >
-		                {type}
-				    </Button>
+                         <span style={{
+                            fontFamily: 'Montserrat',
+                            fontWeight: 300,
+                            color: 'black',
+                            width: '100%', marginTop: '5px', marginBottom: '5px'
+                         }}>
+                            {type}
+                            </span>
+
+				</Button>
                     )} else {
                         return null;
                     }
