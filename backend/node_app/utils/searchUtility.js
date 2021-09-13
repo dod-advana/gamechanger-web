@@ -2036,7 +2036,7 @@ class SearchUtility {
 					node.topicScore = recObj.topicScore;
 					addNode(node);
 				} else if (recObj.hasOwnProperty('doc_id')) {
-					docIds.push({doc_id: recObj.doc_id, mentions: recObj.mentions.low});
+					docIds.push({doc_id: recObj.doc_id, mentions: recObj.mentions?.low});
 				} else if (recObj.hasOwnProperty('primary_key')) {
 					graphMetaData.push({
 						label: recObj.label,
