@@ -383,6 +383,59 @@ describe('ExternalAPIController', function () {
 		})
 	})
 
+	describe('#updateAPIKeyDescription()', () => {
+		const apiKeyList = [
+			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true', description: 'testing'}
+		];
+
+		const apiKeys = {
+			update: async (data, where) => {
+				apiKeyList.forEach(key => {
+					if (key.apiKey === where.where.apiKey) {
+						key.description = data.description;
+					}
+				});
+				return Promise.resolve([1]);
+			}
+		};
+		const opts = {
+			...constructorOptionsMock,
+			apiKeys
+		};
+
+		const target = new ExternalAPIController(opts);
+
+		let resCode;
+		let resData;
+		const res = {
+			...resMock,
+			send: (data) => {
+				resData = data;
+				return data;
+			}
+		};
+
+		const req = {
+			headers: {
+				SSL_CLIENT_S_DN_CN: 'john'
+			},
+			body: {
+				key: 'aklfjdkh',
+				description: 'new description'
+			},
+			get(key) {
+				return this.headers[key];
+			}
+		};
+
+		it("should update the description of an API key", async (done) => {
+			target.updateAPIKeyDescription(req, res).then(() => {
+				assert.deepStrictEqual(resData, { status: [1] });
+				done();
+			});
+		})
+	})
+
 	describe('sendApprovalEmail()', () => {
 
 		const target = new ExternalAPIController(constructorOptionsMock);

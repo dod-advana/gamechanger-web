@@ -301,8 +301,10 @@ class ExternalAPIController {
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { description, key } = req.body;
-			await this.apiKeys.update({ description }, { where: { apiKey: key } });
-			res.status(200).send({status: 'updated'});
+			const update = await this.apiKeys.update({ description }, { where: { apiKey: key } });
+			if (update) {
+				res.status(200).send({status: update})
+			} else { res.status(400) }
 		} catch(err) {
 			this.logger.error(err, "MJID22P", userId)
 		}
