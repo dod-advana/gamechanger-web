@@ -9,13 +9,17 @@ describe('ExternalAPIController', function () {
 		const apiKeyList = [
 			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true', description: 'test'}
 		];
+
+		const apiKeyCloneAssociation = [
+			{apiKeyId: 0, cloneId: 5, clone_name: 'gamechanger'}
+		];
+
 		const apiKeys = {
 			findOne: async (data) => {
-				const returnKeys = [];
-				apiKeyList.forEach(key => {
-					if (key.username === data.where.username) returnKeys.push(key);
-				});
-				return Promise.resolve(returnKeys[0]);
+				const returnKey = apiKeyList.find(key => key.username === data.where.username);
+				const clone_meta = apiKeyCloneAssociation.filter(clone => clone.apiKeyId === returnKey.id);
+				returnKey.clone_meta = clone_meta.map(clone => { return {id: clone.cloneId, clone_name: clone.clone_name } })
+				return Promise.resolve(returnKey);
 			}
 		};
 
@@ -26,7 +30,8 @@ describe('ExternalAPIController', function () {
 		];
 		const apiKeyRequests = {
 			findAll: async (data) => {
-				return Promise.resolve(apiKeyRequestList);
+				const response = apiKeyRequestList.map(request => { return { ...request, dataValues: request} })
+				return Promise.resolve(response);
 			}
 		};
 
@@ -59,10 +64,10 @@ describe('ExternalAPIController', function () {
 		it('should return all api requests that are not rejected', (done) => {
 			const expected = {
 				approved: [
-					{approved: true, email: 'test@test.com', id: 0, keys: ['aklfjdkh'], name: 'Test Test', reason: 'For testing', rejected: false},
+					{approved: true, description:'test', email: 'test@test.com', id: 0, key: 'aklfjdkh', keyClones: [{clone_name: 'gamechanger', id: 5}], name: 'Test Test', reason: 'For testing', rejected: false, username: 'test'},
 				],
 				pending: [
-					{approved: false, email: 'john@test.com', id: 1, name: 'Test Test', reason: 'For testing', rejected: false}
+					{approved: false, email: 'john@test.com', id: 1, name: 'Test Test', reason: 'For testing', rejected: false, username: 'john'}
 				]
 			};
 
