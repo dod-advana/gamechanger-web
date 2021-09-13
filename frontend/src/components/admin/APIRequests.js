@@ -115,7 +115,8 @@ export default () => {
             width: 200,
             Cell: row => (
                 <TableRow>
-                    {Object.keys(keyDescriptions).length && <input value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
+                    {Object.keys(keyDescriptions).length && 
+                    <input style={{width: '100%'}} value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
                 </TableRow>
             )
         },
@@ -318,7 +319,7 @@ export default () => {
                                 return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
                             }}
                             getTheadThProps={() => {
-                                return { style: { fontSize: 15, fontWeight: 'bold' } };
+                                return { style: { fontSize: 15, fontWeight: 'bold', borderBottom: 'rgba(0,0,0,0.05) 1px solid' } };
                             }}
                         />
                         {gcAPIRequestData.approved.length>0 && <GCButton
@@ -340,7 +341,7 @@ export default () => {
                             return { style: { height: 'fit-content', textAlign: 'left', fontWeight: 'bold' } };
                         }}
                         getTheadThProps={() => {
-                            return { style: { fontSize: 15, fontWeight: 'bold' } };
+                            return { style: { fontSize: 15, fontWeight: 'bold', borderBottom: 'rgba(0,0,0,0.05) 1px solid' } };
                         }}
                     />
                 </GCAccordion>
