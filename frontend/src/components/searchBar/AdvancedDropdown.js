@@ -165,7 +165,7 @@ const AdvancedDropdown = (props) => {
 			setMatrixHandler(handler);
 			setLoaded(true);
 		}
-	}, [state, loaded]);
+	}, [state, loaded, dispatch]);
 
 	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm

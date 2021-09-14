@@ -1,5 +1,4 @@
 const {HandlerFactory} = require('../factories/handlerFactory');
-const handlerFactory = new HandlerFactory();
 const CLONE_META = require('../models').clone_meta;
 const LOGGER = require('../lib/logger');
 
@@ -8,7 +7,7 @@ class ModularGameChangerController {
 		const {
 			logger = LOGGER,
 			clone_meta = CLONE_META,
-			handler_factory = handlerFactory,
+			handler_factory = new HandlerFactory(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -68,6 +67,7 @@ class ModularGameChangerController {
 					card_module: 'policy/policyCardHandler',
 					main_view_module: 'policy/policyMainViewHandler',
 					graph_module: 'policy/policyGraphHandler',
+					search_bar_module: 'policy/policySearchBarHandler',
 					display_name: 'GAMECHANGER',
 					is_live: true,
 					url: '/',
@@ -80,11 +80,17 @@ class ModularGameChangerController {
 					show_graph: true,
 					show_crowd_source: true,
 					show_feedback: true,
-					config: {esIndex: 'gamechanger'}
+					data_source_name: '',
+					source_agency_name: '',
+					metadata_creation_group: '',
+					source_s3_bucket: '',
+					source_s3_prefix: '',
+					elasticsearch_index: 'gamechanger',
+					needs_ingest: false,
 				});
 			}
 			c.forEach(clone => {
-				clone.can_edit = clone.clone_name !== 'gamechanger';
+				clone.can_edit = true;
 			});
 			res.status(200).send(c);
 		}).catch((e) => {

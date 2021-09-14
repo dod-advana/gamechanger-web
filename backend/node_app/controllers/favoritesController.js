@@ -1,12 +1,15 @@
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
 const { getTenDigitUserId } = require('../utils/userUtility')
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
+const SearchUtility = require('../utils/searchUtility')
+const constantsFile = require('../config/constants');
 
 class FavoritesController {
 
@@ -16,24 +19,31 @@ class FavoritesController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteOrganization = FAVORITE_ORGANIZATION,
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
-			search = new SearchController(opts)
+			search = new SearchController(opts),
+			searchUtility = new SearchUtility(opts),
+			constants = constantsFile
 		} = opts;
 
 		this.logger = logger;
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
 		this.search = search;
+		this.searchUtility = searchUtility;
+		this.constants = constants;
 
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
+		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
@@ -165,6 +175,46 @@ class FavoritesController {
 		}
 	}
 
+	async favoriteOrganizationPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const hashed_user = this.sparkMD5.hash(userId);
+			const new_id = getTenDigitUserId(userId)
+			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
+			const { organization, organizationSummary, is_favorite } = req.body;
+
+			if (is_favorite) {
+				const [favorite] = await this.favoriteOrganization.findOrCreate(
+					{
+						where: { user_id: hashed_user, organization_name: organization },
+						defaults: {
+							user_id: hashed_user,
+							new_user_id: new_hashed_user,
+							organization_name: organization,
+							organization_summary: organizationSummary,
+							is_clone: false
+						}
+					}
+				);
+				res.status(200).send(favorite);
+			} else {
+				const deleted = this.favoriteOrganization.destroy({
+					where: {
+						user_id: hashed_user,
+						organization_name: organization
+					}
+				});
+				res.status(200).send(deleted);
+			}
+		} catch (err) {
+			this.logger.error(err, 'QNFUWTT', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
 	async checkFavoritedSearches(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
@@ -208,12 +258,12 @@ class FavoritesController {
 								});
 
 								if (history.request_body) {
-									const searchResults = await this.search.documentSearchHelper({body:history.request_body}, userId);
+									const searchResults = await this.searchUtility.documentSearch(null, {body:history.request_body}, {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index}, userId);
 									if (searchResults.totalCount > search.document_count) {
 
 										numNotifications += 1;
 
-										this.favoriteSearch.update({
+										await this.favoriteSearch.update({
 											updated_results: true,
 											run_by_cache: false,
 											document_count: searchResults.totalCount
@@ -225,7 +275,7 @@ class FavoritesController {
 										});
 									}
 								} else {
-									console.log('no request body data to make the search');
+									this.logger.log('no request body data to make the search');
 								}
 
 
@@ -234,7 +284,7 @@ class FavoritesController {
 								this.logger.error(err);
 							}
 						} else {
-							this.favoriteSearch.update({ run_by_cache: false },
+							await this.favoriteSearch.update({ run_by_cache: false },
 								{
 									where: {
 										id: search.id

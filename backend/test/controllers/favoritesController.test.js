@@ -65,6 +65,10 @@ describe('FavoritesController', function () {
 
 			const opts = {
 				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
 				gcUser,
 				favoriteSearch
 			};
@@ -133,10 +137,7 @@ describe('FavoritesController', function () {
 			const searchResultsMock = {
 				totalCount: 10
 			};
-
-			target.documentSearchHelper = () => {
-				return searchResultsMock;
-			};
+			
 
 			let resData;
 			const res = {
@@ -200,18 +201,20 @@ describe('FavoritesController', function () {
 				totalCount: 20
 			};
 
-			const search = {
-				documentSearchHelper: async () => {
-					return Promise.resolve(searchResultsMock);
-				}
-			};
-
 			const opts = {
 				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
 				gcUser,
 				favoriteSearch,
 				gcHistory,
-				search
+				searchUtility: {
+					documentSearch: async () => {
+						return searchResultsMock;
+					}
+				}
 			};
 
 			const target = new FavoritesController(opts);
@@ -285,6 +288,64 @@ describe('FavoritesController', function () {
 
 			try {
 				target.favoriteTopicPOST(req, res).then(() => {
+					assert.equal(resCode, statusMock);
+					assert.deepEqual(resMsg, expectedReturn);
+					done();
+				});
+			} catch (e) {
+				assert.fail(e);
+			}
+		});
+	});
+
+	describe('#favoriteOrganizationPOST', () => {
+		it('should create a favorite organization', (done) => {
+			const apiResMock = [{}, true];
+			const expectedReturn = {};
+			const statusMock = 200;
+			const constants = {
+				env: {
+					GAME_CHANGER_OPTS: {
+						version: 'version'
+					}
+				}
+			};
+
+			const favoriteOrganization = {
+				findOrCreate() {
+					return Promise.resolve(apiResMock);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				favoriteOrganization
+			};
+			const target = new FavoritesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					is_favorite: true,
+					organization: 'United States Navy'
+				}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				target.favoriteOrganizationPOST(req, res).then(() => {
 					assert.equal(resCode, statusMock);
 					assert.deepEqual(resMsg, expectedReturn);
 					done();

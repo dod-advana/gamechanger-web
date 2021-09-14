@@ -6,7 +6,7 @@ import SearchTabBar from "./SearchTabBar";
 const GlobalSearchTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
-			onTitleClick,
+			// onTitleClick,
 			componentStepNumbers,
 			cloneData
 		} = props;
@@ -14,7 +14,7 @@ const GlobalSearchTitleBarHandler = {
 			<img
 				src={AdvanaLightTheme}
 				style={styles.title}
-				onClick={onTitleClick}
+				onClick={() => window.location.href = 'https://advana.data.mil/'}
 				alt='globalsearch'
 				id={'titleButton'}
 				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}` : null}
@@ -28,8 +28,8 @@ const GlobalSearchTitleBarHandler = {
 			activeCategoryTab,
 			setActiveCategoryTab,
 			categoryMetadata,
-			cloneData,
-			dispatch
+			// cloneData,
+			// dispatch
 		} = props;
 		
 		return (
@@ -41,8 +41,7 @@ const GlobalSearchTitleBarHandler = {
 						setActiveTab: setActiveCategoryTab,
 						resultMetaData: categoryMetadata,
 						returnHome: () => {
-							window.location.href = `/#/${cloneData.clone_name}`
-							dispatch({type: 'RESET_STATE'});
+							window.location.href = 'https://advana.data.mil/';
 						}
 					}}
 				>

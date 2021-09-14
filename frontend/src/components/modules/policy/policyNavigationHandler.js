@@ -14,7 +14,7 @@ import {
 } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
 import { setState } from "../../../sharedFunctions";
-import AppTutorialsIcon from "../../../images/icon/NewAppTutorialsIcon.png";
+import AppTutorialsIcon from "../../../images/icon/AppTutorialsIcon.png";
 import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
 import CrowdSourcingAppIcon from "../../../images/icon/NewCrowdSourcingIcon.png";
 import DataStatusTrackerIcon from "../../../images/icon/NewDataStatusTrackerIcon.png";
@@ -24,6 +24,7 @@ import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissio
 import AdminIcon from "../../../images/icon/NewAdminIcon.png";
 import GamechangerTextIcon from "../../../images/icon/GamechangerText.png";
 import ResourcesIcon from "../../../images/icon/slideout-menu/resources icon.png";
+import AboutUsIcon from "../../../images/icon/AboutUsIcon.png";
 import {getNotifications} from "../../notifications/Notifications";
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
@@ -139,6 +140,15 @@ const PolicyNavigationHandler = {
 						</HoverNavItem>
 					</a>
 				</GCTooltip>
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem centered onClick={()=> {
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name),'SidebarInteraction', 'showAboutUs');
+						}} active={ state.pageDisplayed === PAGE_DISPLAYED.aboutUs } toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AboutUsIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink href="#/gamechanger-admin" centered style={{ width: '100%' }}>
@@ -235,6 +245,16 @@ const PolicyNavigationHandler = {
 							<span style={{ marginLeft: '10px' }}>Clone Request</span>
 						</HoverNavItem>
 					</a>
+				</GCTooltip>
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem onClick={()=> {
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(getTrackingNameForFactory(state.cloneData.clone_name),'SidebarInteraction', 'showAboutUs');
+						}} active={ state.pageDisplayed === PAGE_DISPLAYED.aboutUs } toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AboutUsIcon} />
+						<span style={{ marginLeft: '10px' }}>About Us</span>
+					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>

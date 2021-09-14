@@ -5,8 +5,7 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
 import { Typography } from "@material-ui/core";
-import { backgroundGreyDark, backgroundWhite} from "../../components/common/gc-colors";
-import { gcOrange} from "../../components/common/gc-colors";
+import TabStyles from '../common/TabStyles'
 import moment from 'moment'
 import Link from "@material-ui/core/Link";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -17,7 +16,6 @@ import {MemoizedNodeCluster2D}  from "../graph/GraphNodeCluster2D";
 import {getTrackingNameForFactory} from "../../gamechangerUtils";
 import {trackEvent} from "../telemetry/Matomo";
 import {crawlerMappingFunc} from "../../gamechangerUtils";
-import {generateRandomColors} from "../../graphUtils";
 
 const TableRow = styled.div`
 	text-align: left;
@@ -137,7 +135,13 @@ const neo4jCountsColumns = [
 
 const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = [], tabIndex = 'documents', option = 'all' }) => {
 
-	const order = sorted.map(({ id, desc }) => ([id, desc ? 'DESC' : 'ASC']));
+	const order = sorted.map(({ id, desc }) => {
+		if( id === "json_metadata") {
+			return ["json_metadata.crawler_used", desc ? 'DESC' : 'ASC']
+		} else {
+			return [id, desc ? 'DESC' : 'ASC']
+		}
+	});
 	const where = filtered.map(({ id, value }) => ({ [id]: { '$iLike': `%${value}%`} }));
 
 	try {
@@ -363,7 +367,7 @@ const GCDataStatusTracker = (props) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker' , 'PDFOpen');
 			window.open(`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${state.cloneData.clone_name}`);
 		};
-		
+
 		const dataColumns = [
 			
 			{
@@ -409,16 +413,17 @@ const GCDataStatusTracker = (props) => {
 				accessor: 'json_metadata',
 				width: 350,
 				filterable: false,
+				sortable: false,
 				Cell: props => (
 					<TableRow>
 						<Link href={"#"} onClick={(event)=> {
 							preventDefault(event);
-							window.open(JSON.parse(props.original.json_metadata).source_page_url);
+							window.open(props.original.json_metadata.source_page_url);
 								}}
 							style={{ color: '#386F94' }}
 						>
 						<div>
-							<p>{JSON.parse(props.original.json_metadata).crawler_used}</p>
+							<p>{props.original.json_metadata.crawler_used}</p>
 						</div>
 						</Link>
 					</TableRow>
@@ -450,6 +455,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Next update',
 				width: 150,
 				filterable: false,
+				sortable: false,
 				Cell: row => (
 					<TableRow>
 						{moment(Date.parse(nextFriday.toISOString())).format("YYYY-MM-DD")}
@@ -735,42 +741,42 @@ const GCDataStatusTracker = (props) => {
 	}
 	
 	return (
-		<div style={styles.tabContainer}>
+		<div style={TabStyles.tabContainer}>
 			<Tabs>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'documents' ? styles.tabSelectedStyle : {}),
+				<div style={TabStyles.tabButtonContainer}>
+					<TabList style={TabStyles.tabsList}>
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `5px 0 0 0`
 							}} title="userHistory" onClick={() => handleTabClicked('documents')}>
 							<Typography variant="h6" display="inline" title="cardView">DOCUMENTS</Typography>
 						</Tab>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex === 'crawler' ? styles.tabSelectedStyle : {}),
+						<Tab style={{...TabStyles.tabStyle,
+							...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: '0 0 0 0'}}
 							title="crawlerTable" onClick={() => handleTabClicked('crawler')}>
 							<Typography variant="h6" display="inline">PROGRESS</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'version' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 0 0 0`
 						}} title="versionDocs" onClick={() => handleTabClicked('version')}>
 							<Typography variant="h6" display="inline" title="cardView">UPDATES</Typography>
 						</Tab>
 						<Tab style={{
-							...styles.tabStyle,
-							...(tabIndex === 'neo4j' ? styles.tabSelectedStyle : {}),
+							...TabStyles.tabStyle,
+							...(tabIndex === 'neo4j' ? TabStyles.tabSelectedStyle : {}),
 							borderRadius: `0 5px 0 0`
 						}} title="neo4jDataTracker" onClick={() => handleTabClicked('neo4j')}>
 							<Typography variant="h6" display="inline" title="cardView">KNOWLEDGE GRAPH</Typography>
 						</Tab>
 					</TabList>
 
-					<div style={styles.spacer}  />
+					<div style={TabStyles.spacer}  />
 				</div>
 
-				<div style={styles.panelContainer}>
+				<div style={TabStyles.panelContainer}>
 					<TabPanel>
 						{renderDataTable()}
 					</TabPanel>
@@ -787,63 +793,6 @@ const GCDataStatusTracker = (props) => {
 			</Tabs>
 		</div>
 	);
-}
-
-const styles = {
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px'
-	},
-	tabStyle: {
-		width: '140px',
-		border: '1px solid',
-		borderColor: backgroundGreyDark,
-		borderBottom: 'none !important',
-		borderRadius: `6px 6px 0px 0px`,
-		position: ' relative',
-		listStyle: 'none',
-		padding: '2px 12px',
-		cursor: 'pointer',
-		textAlign: 'center',
-		backgroundColor: backgroundWhite,
-		marginRight: '2px',
-		marginLeft: '2px',
-		height: 45,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	tabSelectedStyle: {
-		border: '1px solid transparent',
-		backgroundColor: gcOrange,
-		borderColor: 'none',
-		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
-	},
-	panelContainer: {
-		alignItems: 'center',
-		marginTop: 10,
-		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20
-	}
-	
-
 }
 
 GCDataStatusTracker.propTypes = {

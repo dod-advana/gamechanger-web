@@ -95,7 +95,7 @@ const StyledFrontCardHeader = styled.div`
 	font-family: Montserrat;
 	height: ${({listView}) => listView ? 'fit-content': '59px'};
 	padding: ${({listView}) => listView ? '0px': '5px'};
-	margin-left: ${({listView}) => listView ? '10px': '0px'};
+	margin-left: ${({listView}) => listView ? '4px': '0px'};
 	margin-right: ${({listView}) => listView ? '10px': '0px'};
 	
 	.title-text-selected-favorite-div {
@@ -164,37 +164,35 @@ const StyledFrontCardHeader = styled.div`
 
 const StyledFrontCardContent = styled.div`
 	font-family: "Noto Sans";
-    overflow: auto;
-    font-size: ${CARD_FONT_SIZE}px;
-    
-    .image-container {
-    	text-align: center;
-    	margin-top: 5px;
-    }
-    
-    img {
-    	height: 175px;
-    	width: 300px;
-    	margin-right: auto;
-    	margin-left: auto;
-    	margin-bottom: 10px;
-    	background-image: url(${QLIKICON});
-    	background-repeat: no-repeat;
-    	background-position: center;
-    }
-   
-    .body-container {
-    	display: flex;
-    	height: 100%;
-    	
-    	.body-text {
-    		min-width: 100px;
-    		height: 100%;
-    		border: 1px solid rgb(189, 189, 189);
-    		border-top: 0px;
-    		font-size: ${CARD_FONT_SIZE}px;
-    	}
-    }
+	overflow: auto;
+	font-size: ${CARD_FONT_SIZE}px;
+	
+	.image-container {
+		text-align: center;
+		margin-top: 5px;
+	}
+	
+	img {
+		height: 175px;
+		width: 300px;
+		margin-right: auto;
+		margin-left: auto;
+		margin-bottom: 10px;
+		background-image: url(${QLIKICON});
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	
+	.body-container {
+		display: flex;
+		height: 100%;
+		
+		.body-text {
+			min-width: 100px;
+			height: 100%;
+			font-size: ${CARD_FONT_SIZE}px;
+		}
+	}
 `;
 
 const clickFn = (cloneName, href, type) => {

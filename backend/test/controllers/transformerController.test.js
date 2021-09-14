@@ -83,48 +83,6 @@ describe('DocumentController', function () {
 		});
 	});
 
-	describe('#setTransformerModel', () => {
-		it('should set a fake transformer', async (done) => {
-
-			const opts = {
-				...constructorOptionsMock,
-				mlApi: {
-					setTransformerModel(model_name) {
-						return Promise.resolve(model_name);
-					}
-				}
-			};
-
-			const req = {
-				...reqMock,
-				body: {
-					model_name: 'Test'
-				}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			const target = new TransformerController(opts);
-
-			await target.setTransformerModel(req, res);
-
-			assert.strictEqual(resMsg, 'Test');
-			done();
-
-		});
-	});
 	describe('#getS3List', () => {
 		it('should get a fake list of models in s3', async (done) => {
 
