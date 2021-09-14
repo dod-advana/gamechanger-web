@@ -146,10 +146,12 @@ class ExternalAPIController {
 							through: {attributes: []}
 						}],
 					});
-					request.dataValues.key = key.apiKey;
-					request.dataValues.keyClones = key.clone_meta;
-					request.dataValues.description = key.description;
-					approved.push(request.dataValues);
+					if(key){
+						request.dataValues.key = key.apiKey;
+						request.dataValues.keyClones = key.clone_meta;
+						request.dataValues.description = key.description;
+						approved.push(request.dataValues);
+					}
 				} else if (!request.approved && !request.rejected) {
 					pending.push(request.dataValues);
 				}
