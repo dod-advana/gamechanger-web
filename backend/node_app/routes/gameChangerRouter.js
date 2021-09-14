@@ -21,6 +21,7 @@ const { AppStatsController } = require('../controllers/appStatsController');
 const { TrendingSearchesController } = require('../controllers/trendingSearchesController');
 const { AppSettingsController } = require('../controllers/appSettingsController');
 const { FeedbackController } = require('../controllers/feedbackController');
+const { AboutGcController } = require('../controllers/aboutGcController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -41,6 +42,7 @@ const responsibility = new ResponsibilityController();
 const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
+const aboutGc = new AboutGcController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -54,6 +56,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
 router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
+router.post('/getOrgSeals', dataTracker.getOrgSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
@@ -68,6 +71,8 @@ router.post('/thumbnailDownload', document.getHomepageThumbnail);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);
 router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotations);
 router.get('/getThumbnail', document.getThumbnail);
+router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
+router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
@@ -110,6 +115,7 @@ router.post('/favorites/document', favorites.favoriteDocumentPOST);
 router.post('/favorites/search', favorites.favoriteSearchPOST);
 router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
+router.post('/favorites/organization', favorites.favoriteOrganizationPOST);
 router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
@@ -160,5 +166,6 @@ router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFee
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
+router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 module.exports = router;

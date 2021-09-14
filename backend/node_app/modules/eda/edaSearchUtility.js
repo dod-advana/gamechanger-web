@@ -22,8 +22,8 @@ class EDASearchUtility {
 
 	getElasticsearchPagesQuery(
 		{
-			searchText,
-			parsedQuery,
+			searchText = "",
+			parsedQuery = "",
 			offset = 0,
 			limit = 20,
 			charsPadding = 90,
@@ -713,7 +713,7 @@ class EDASearchUtility {
 			return results;
 		} catch (err) {
 			console.log(err);
-			this.logger.error(err.message, 'GL7EDI3', user);
+			this.logger.error(err.message, 'FKJ37ZU', user);
 		}
 	}
 

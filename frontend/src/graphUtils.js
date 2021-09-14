@@ -120,8 +120,6 @@ export const draw2DArrows = (link, ctx, globalScale, arrowLength, arrowRelativeP
 
 export const  getNodeColors = (node, alpha, nodeLabelColors = {}) => {
 	
-	console.log(node)
-
 	if (nodeLabelColors[node?.label] && nodeLabelColors[node?.label].color === '') {
 		
 		shuffleArray(NODE_COLORS);
