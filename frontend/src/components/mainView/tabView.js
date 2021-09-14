@@ -169,9 +169,7 @@ const TabView = (props) => {
 						id={'gcShareSearch'}
 						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
 						style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}
-						disabled={
-							!state.rawSearchResults || state.rawSearchResults.length <= 0
-						}
+						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>
 						Share <i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCButton>

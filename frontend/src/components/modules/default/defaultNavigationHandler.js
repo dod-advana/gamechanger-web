@@ -119,36 +119,32 @@ const DefaultNavigationHandler = {
 				)}
 				{state.cloneData?.show_tutorial &&
 					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
-						<HoverNavItem
-							centered
-							onClick={() => {
-								setState(dispatch, {
-									showTutorial: true,
-									clickedTutorial: true,
-								});
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'SidebarInteraction',
-									'ShowTutorial'
-								);
-							}}
-							toolTheme={toolTheme}
-						>
-							<StyledBadgeSmall
-								color="secondary"
-								badgeContent=" "
-								invisible={!state.newUser || state.clickedTutorial}
+						<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+							<HoverNavItem
+								centered
+								onClick={() => {
+									setState(dispatch, {
+										showTutorial: true,
+										clickedTutorial: true,
+									});
+									trackEvent(
+										getTrackingNameForFactory(state.cloneData.clone_name),
+										'SidebarInteraction',
+										'ShowTutorial'
+									);
+								}}
+								toolTheme={toolTheme}
 							>
-								<ConstrainedIcon src={AppTutorialsIcon} />
-							</StyledBadgeSmall>
-						</HoverNavItem>
-					</GCTooltip>
-				)}
+								<StyledBadgeSmall
+									color="secondary"
+									badgeContent=" "
+									invisible={!state.newUser || state.clickedTutorial}
+								>
+									<ConstrainedIcon src={AppTutorialsIcon} />
+								</StyledBadgeSmall>
+							</HoverNavItem>
+						</GCTooltip>
+					)}
 				<GCTooltip title="User Feedback" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -272,11 +268,7 @@ const DefaultNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href="#/gamechanger-admin"
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href="#/gamechanger-admin" centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>
@@ -315,36 +307,32 @@ const DefaultNavigationHandler = {
 				</NavItem>
 				{state.cloneData?.show_tutorial &&
 					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
-						<HoverNavItem
-							onClick={() => {
-								setState(dispatch, {
-									showTutorial: true,
-									clickedTutorial: true,
-								});
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'SidebarInteraction',
-									'ShowTutorial'
-								);
-							}}
-							toolTheme={toolTheme}
-						>
-							<StyledBadgeSmall
-								color="secondary"
-								badgeContent=" "
-								invisible={!state.newUser || state.clickedTutorial}
+						<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+							<HoverNavItem
+								onClick={() => {
+									setState(dispatch, {
+										showTutorial: true,
+										clickedTutorial: true,
+									});
+									trackEvent(
+										getTrackingNameForFactory(state.cloneData.clone_name),
+										'SidebarInteraction',
+										'ShowTutorial'
+									);
+								}}
+								toolTheme={toolTheme}
 							>
-								<ConstrainedIcon src={AppTutorialsIcon} />
-							</StyledBadgeSmall>
-							<span style={{ marginLeft: '10px' }}>Guided Tutorial</span>
-						</HoverNavItem>
-					</GCTooltip>
-				)}
+								<StyledBadgeSmall
+									color="secondary"
+									badgeContent=" "
+									invisible={!state.newUser || state.clickedTutorial}
+								>
+									<ConstrainedIcon src={AppTutorialsIcon} />
+								</StyledBadgeSmall>
+								<span style={{ marginLeft: '10px' }}>Guided Tutorial</span>
+							</HoverNavItem>
+						</GCTooltip>
+					)}
 				<GCTooltip title="Tell us what you think!" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {

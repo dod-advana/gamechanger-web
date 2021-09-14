@@ -6,25 +6,29 @@ import { gcColors } from './GameChangerPage';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import SimpleTable from '../components/common/SimpleTable';
-import {MemoizedNodeCluster2D} from '../components/graph/GraphNodeCluster2D';
-import {	numberWithCommas, getMetadataForPropertyTable,
-	getReferenceListMetadataPropertyTable, getTrackingNameForFactory, 
-	invertedCrawlerMappingFunc} from '../gamechangerUtils';
+import { MemoizedNodeCluster2D } from '../components/graph/GraphNodeCluster2D';
+import {
+	numberWithCommas,
+	getMetadataForPropertyTable,
+	getReferenceListMetadataPropertyTable,
+	getTrackingNameForFactory,
+	invertedCrawlerMappingFunc,
+} from '../gamechangerUtils';
 import Pagination from 'react-js-pagination';
-import {Card} from '../components/cards/GCCard';
+import { Card } from '../components/cards/GCCard';
 import GCAccordion from '../components/common/GCAccordion';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import {gcOrange} from '../components/common/gc-colors';
+import { gcOrange } from '../components/common/gc-colors';
 import _ from 'lodash';
 import DocumentDetailsPage from '../components/details/documentDetailsPage';
 import SourceDetailsPage from '../components/details/sourceDetailsPage';
-import {MemoizedPolicyGraphView} from '../components/graph/policyGraphView';
+import { MemoizedPolicyGraphView } from '../components/graph/policyGraphView';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import EDAContractDetailsPage from '../components/modules/eda/edaContractDetailsPage';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import EditEntityDialog from '../components/admin/EditEntityDialog';
-import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -326,11 +330,7 @@ const addFavoriteTopicToMetadata = (data, cloneName) => {
 							<FavoriteTopic
 								key={index}
 								onClick={(event) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'TopicOpened',
-										topic
-									);
+									trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
 									window.open(
 										`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
 									);
@@ -369,7 +369,7 @@ const GameChangerDetailsPage = (props) => {
 	const [hierarchyView, setHierarchyView] = useState(false);
 	const [loginModalOpen, setLoginModalOpen] = useState(false);
 	const [editEntityVisible, setEditEntityVisible] = useState(false);
-	
+
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
 	const [fromNeo4j, setFromNeo4j] = useState(true);
@@ -412,7 +412,7 @@ const GameChangerDetailsPage = (props) => {
 			case 'entity':
 				setDetailsType('Organization');
 				name = query.get('entityName');
-				gameChangerAPI.getOrgImageOverrideURLs([name]).then(({data}) => {
+				gameChangerAPI.getOrgImageOverrideURLs([name]).then(({ data }) => {
 					setSealURLOverride(data ? data[name] : null);
 				});
 				setRunningQuery(true);
@@ -480,21 +480,25 @@ const GameChangerDetailsPage = (props) => {
 		let searchText = `"${entity.name}"`;
 		aliases.forEach((alias) => {
 			searchText += ` or ${alias}`;
-		})
-		
-		const t0 = new Date().getTime();
-		gameChangerAPI.getDocumentsForEntity(cloneData.clone_name, {entityName: entity.name, searchText}).then(resp => {
-			
-			const t1 = new Date().getTime();
-			setDocCount(resp.data.totalCount)
-			setDocResultsPage(1);
-			setDocResults(resp.data.docs);
-			setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
-			if(resp.data.docs.length > 0 || resp.data.totalCount === 0) {
-				setTimeFound(((t1 - t0) / 1000).toFixed(2));
-				setGettingDocuments(false);
-			}
 		});
+
+		const t0 = new Date().getTime();
+		gameChangerAPI
+			.getDocumentsForEntity(cloneData.clone_name, {
+				entityName: entity.name,
+				searchText,
+			})
+			.then((resp) => {
+				const t1 = new Date().getTime();
+				setDocCount(resp.data.totalCount);
+				setDocResultsPage(1);
+				setDocResults(resp.data.docs);
+				setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
+				if (resp.data.docs.length > 0 || resp.data.totalCount === 0) {
+					setTimeFound(((t1 - t0) / 1000).toFixed(2));
+					setGettingDocuments(false);
+				}
+			});
 	}, [entity, cloneData]);
 
 	useEffect(() => {
@@ -568,25 +572,26 @@ const GameChangerDetailsPage = (props) => {
 
 	const handleChangeDocsPage = (page) => {
 		setDocResultsPage(page);
-		setVisibleDocs(docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE + 1));
-	}
+		setVisibleDocs(
+			docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE + 1)
+		);
+	};
 
 	const editEntity = () => {
 		if (Permissions.isGameChangerAdmin()) {
 			setEditEntityVisible(true);
 		}
-	}
+	};
 
 	const handleImgSrcError = (event, fallbackSources) => {
 		if (fallbackSources.admin) {
 			// fallback to entity
 			event.target.src = fallbackSources.entity;
-		}
-		else if (fallbackSources.entity) {
+		} else if (fallbackSources.entity) {
 			// fallback to default
 			event.target.src = dodSeal;
 		}
-	}
+	};
 
 	const renderEntityContainer = () => {
 		let fallbackSources = {};
@@ -598,7 +603,7 @@ const GameChangerDetailsPage = (props) => {
 
 		return (
 			<>
-				{editEntityVisible &&
+				{editEntityVisible && (
 					<EditEntityDialog
 						open={editEntityVisible}
 						handleClose={() => setEditEntityVisible(false)}
@@ -606,8 +611,8 @@ const GameChangerDetailsPage = (props) => {
 						orgName={entity?.name}
 						setSealURLOverride={setSealURLOverride}
 					/>
-				}
-				{entity &&
+				)}
+				{entity && (
 					<MainContainer>
 						<div className={'details'}>
 							<Paper>
@@ -615,19 +620,21 @@ const GameChangerDetailsPage = (props) => {
 								<img
 									className={'img'}
 									alt={`${entity.name} Img`}
-									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									src={
+										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity
+									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
 									}}
 								/>
-								
+
 								<div className={'details-header'}>
 									<span>{'ENTITY DETAILS'}</span>
 									{Permissions.isGameChangerAdmin() && (
 										<IconButton
 											aria-label="edit"
-											style={{ padding: 5, color: 'white'}}
+											style={{ padding: 5, color: 'white' }}
 											onClick={editEntity}
 										>
 											<EditIcon />
@@ -681,10 +688,7 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div
-										className={'related-documents'}
-										style={{ width: '100%' }}
-									>
+									<div className={'related-documents'} style={{ width: '100%' }}>
 										<div
 											style={{
 												display: 'flex',
@@ -695,7 +699,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-														docCount
+															docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -720,8 +724,15 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
-											{gettingDocuments ?
+										<div
+											className="row"
+											style={{
+												paddingLeft: 0,
+												marginRight: -15,
+												width: 'unset',
+											}}
+										>
+											{gettingDocuments ? (
 												<div style={{ margin: '0 auto' }}>
 													<LoadingIndicator customColor={gcOrange} />
 												</div>
@@ -743,10 +754,10 @@ const GameChangerDetailsPage = (props) => {
 		return (
 			<div>
 				<p style={{ margin: '10px 4%', fontSize: 18 }}>
-					Welcome to our new (Beta version) Topic Details page! As you look
-					around, you may note some technical issues below; please bear with us
-					while we continue making improvements here and check back often for a
-					more stable version.
+					Welcome to our new (Beta version) Topic Details page! As you look around,
+					you may note some technical issues below; please bear with us while we
+					continue making improvements here and check back often for a more stable
+					version.
 				</p>
 				{topic && (
 					<MainContainer>
@@ -811,10 +822,7 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div
-										className={'related-documents'}
-										style={{ width: '100%' }}
-									>
+									<div className={'related-documents'} style={{ width: '100%' }}>
 										<div
 											style={{
 												display: 'flex',
@@ -825,7 +833,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-														docCount
+															docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -850,12 +858,21 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
-											{gettingDocuments ?
-												<div style={{margin: '0 auto'}}>
-													<LoadingIndicator customColor={gcColors.buttonColor2}/>
-												</div> :
-												renderDocuments()}
+										<div
+											className="row"
+											style={{
+												paddingLeft: 0,
+												marginRight: -15,
+												width: 'unset',
+											}}
+										>
+											{gettingDocuments ? (
+												<div style={{ margin: '0 auto' }}>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
+												</div>
+											) : (
+												renderDocuments()
+											)}
 										</div>
 									</div>
 								</GCAccordion>
@@ -888,12 +905,12 @@ const GameChangerDetailsPage = (props) => {
 			{showSourceContainer &&
 				!_.isEmpty(cloneData) &&
 				!_.isEmpty(initialSourceData) && (
-				<SourceDetailsPage
-					source={source}
-					cloneData={cloneData}
-					initialSourceData={initialSourceData}
-				/>
-			)}
+					<SourceDetailsPage
+						source={source}
+						cloneData={cloneData}
+						initialSourceData={initialSourceData}
+					/>
+				)}
 
 			{showDocumentContainer && (
 				<DocumentDetailsPage
@@ -907,10 +924,7 @@ const GameChangerDetailsPage = (props) => {
 			)}
 
 			{showContractContainer && edaPermissions && (
-				<EDAContractDetailsPage
-					awardID={contractAwardID}
-					cloneData={cloneData}
-				/>
+				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
 			)}
 		</div>
 	);
@@ -922,7 +936,7 @@ const styles = {
 		width: '100px',
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
-		textOverflow: 'ellipsis'
+		textOverflow: 'ellipsis',
 	},
 	topicColWidth: {
 		maxWidth: '900px',

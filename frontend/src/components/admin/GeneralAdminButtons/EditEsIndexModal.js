@@ -22,9 +22,7 @@ export default ({ showEditESIndexModal, setShowEditESIndexModal }) => {
 	const changeEsIndex = async (setDefault) => {
 		try {
 			if (setDefault) {
-				await gameChangerAPI
-					.setElasticSearchIndex('')
-					.then(() => setEsIndex(''));
+				await gameChangerAPI.setElasticSearchIndex('').then(() => setEsIndex(''));
 			} else {
 				await gameChangerAPI.setElasticSearchIndex(editEsIndex).then(() => {
 					setEsIndex(editEsIndex);

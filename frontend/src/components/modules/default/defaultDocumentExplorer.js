@@ -114,8 +114,7 @@ export default function DocumentExplorer({
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
 					if (
 						filename &&
-						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
+						JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)
 					) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
@@ -234,12 +233,7 @@ export default function DocumentExplorer({
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad(
-						'docPdfViewer',
-						'viewerContainer',
-						fileName,
-						'PDF Viewer'
-					);
+					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
 					setPdfLoaded(true);
 				}
 			} catch (err) {
@@ -312,9 +306,7 @@ export default function DocumentExplorer({
 					overflow: 'scroll',
 				}}
 			>
-				<div
-					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
-				>
+				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{totalCount ? (
 						<div>
 							{numberWithCommas(totalCount)} results found.
@@ -327,10 +319,7 @@ export default function DocumentExplorer({
 					)}
 				</div>
 
-				<div
-					style={styles.docExplorerPag}
-					className="gcPagination docExplorerPag"
-				>
+				<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
 					<Pagination
 						activePage={resultsPage}
 						itemsCountPerPage={resultsPerPage}
@@ -356,9 +345,7 @@ export default function DocumentExplorer({
 				)}
 				{!loading &&
 					_.map(data, (item, key) => {
-						const collapsed = collapseKeys
-							? collapseKeys[key.toString()]
-							: true;
+						const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
 						const displayTitle =
 							item.title === 'NA'
 								? `${item.doc_type} ${item.doc_num}`
@@ -385,10 +372,7 @@ export default function DocumentExplorer({
 										<span className="gc-document-explorer-result-header-text">
 											{displayTitle}
 										</span>
-										<span
-											style={{ width: 30, marginLeft: 'auto' }}
-											className="badge"
-										>
+										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
 											{item.pageHitCount}
 										</span>
 									</div>
@@ -405,8 +389,7 @@ export default function DocumentExplorer({
 															];
 														if (pageObj) {
 															isHighlighted =
-																data[iframePreviewLink.dataIdx].filename ===
-																	item.filename &&
+																data[iframePreviewLink.dataIdx].filename === item.filename &&
 																pageKey === iframePreviewLink.pageHitIdx;
 														}
 													}
@@ -414,13 +397,9 @@ export default function DocumentExplorer({
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 
 													if (isHighlighted)
-														blockquoteClass +=
-															' searchdemo-blockquote-sm-active';
+														blockquoteClass += ' searchdemo-blockquote-sm-active';
 													return (
-														<div
-															key={key + pageKey}
-															style={{ position: 'relative' }}
-														>
+														<div key={key + pageKey} style={{ position: 'relative' }}>
 															<a
 																href="#noref"
 																className="searchdemo-quote-link"
@@ -523,8 +502,7 @@ export default function DocumentExplorer({
 									onLoad={handlePdfOnLoadStart}
 									style={{
 										borderStyle: 'none',
-										display:
-											data.length > 0 && !iframeLoading ? 'initial' : 'none',
+										display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
 									}}
 									width="100%"
 									height="100%%"

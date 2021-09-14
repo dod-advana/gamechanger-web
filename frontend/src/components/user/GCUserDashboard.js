@@ -241,8 +241,7 @@ const GCUserDashboard = (props) => {
 	const [searchHistory, setSearchHistory] = useState([]);
 	const [searchHistoryLoading, setSearchHistoryLoading] = useState(true);
 
-	const [favoriteDocumentsLoading, setFavoriteDocumentsLoading] =
-		useState(true);
+	const [favoriteDocumentsLoading, setFavoriteDocumentsLoading] = useState(true);
 	const [documentFavoritesPage, setDocumentFavoritesPage] = useState(1);
 	const [documentFavoritesTotalCount, setDocumentFavoritesTotalCount] =
 		useState(0);
@@ -368,10 +367,7 @@ const GCUserDashboard = (props) => {
 			filterable: false,
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip
-					title={'Click to see setting for this search'}
-					placement="top"
-				>
+				<GCTooltip title={'Click to see setting for this search'} placement="top">
 					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
 						<i
 							className="fa fa-cogs"
@@ -481,10 +477,7 @@ const GCUserDashboard = (props) => {
 			filterable: false,
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip
-					title={'Click to see setting for this export'}
-					placement="top"
-				>
+				<GCTooltip title={'Click to see setting for this export'} placement="top">
 					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
 						<i
 							className="fa fa-cogs"
@@ -601,18 +594,14 @@ const GCUserDashboard = (props) => {
 			setTopicFavoritesTotalCount(
 				userData.favorite_topics ? userData.favorite_topics.length : 0
 			);
-			setFavoriteTopicsSlice(
-				userData.favorite_topics.slice(0, RESULTS_PER_PAGE)
-			);
+			setFavoriteTopicsSlice(userData.favorite_topics.slice(0, RESULTS_PER_PAGE));
 			setFavoriteTopicsLoading(false);
 		}
 
 		if (userData.favorite_organizations) {
 			setFavoriteOrganizations(userData.favorite_organizations);
 			setOrganizationFavoritesTotalCount(
-				userData.favorite_organizations
-					? userData.favorite_organizations.length
-					: 0
+				userData.favorite_organizations ? userData.favorite_organizations.length : 0
 			);
 			setFavoriteOrganizationsSlice(
 				userData.favorite_organizations.slice(0, RESULTS_PER_PAGE)
@@ -788,10 +777,7 @@ const GCUserDashboard = (props) => {
 				<div className={'stats-details'}>
 					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
-						<GCTooltip
-							title={'Number of documents found in search'}
-							placement="top"
-						>
+						<GCTooltip title={'Number of documents found in search'} placement="top">
 							<div className={'stats-stat'}>
 								<span className={'stats-text'}>{search.document_count}</span>
 								<Icon className="fa fa-file-pdf-o" />
@@ -833,8 +819,7 @@ const GCUserDashboard = (props) => {
 					{search.orgFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Search Filters:</span>{' '}
-					{searchFields}
+					<span style={{ fontWeight: 'bold' }}>Search Filters:</span> {searchFields}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Publication Date:</span>{' '}
@@ -972,9 +957,7 @@ const GCUserDashboard = (props) => {
 					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
 						<GCTooltip
-							title={
-								'The number of times this document has been favorited by others'
-							}
+							title={'The number of times this document has been favorited by others'}
 							placement="top"
 						>
 							<div className={'stats-stat'}>
@@ -1078,9 +1061,7 @@ const GCUserDashboard = (props) => {
 				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
 					<GCTooltip
-						title={
-							'The number of times this topic has been favorited by others'
-						}
+						title={'The number of times this topic has been favorited by others'}
 						placement="top"
 					>
 						<div className={'stats-stat'}>
@@ -1336,9 +1317,7 @@ const GCUserDashboard = (props) => {
 							}}
 						/>
 					) : (
-						<StyledPlaceHolder>
-							Make a search to see the History
-						</StyledPlaceHolder>
+						<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
 					)}
 				</div>
 
@@ -1454,9 +1433,7 @@ const GCUserDashboard = (props) => {
 							}}
 						/>
 					) : (
-						<StyledPlaceHolder>
-							Make a search to see the History
-						</StyledPlaceHolder>
+						<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
 					)}
 				</div>
 
@@ -1493,8 +1470,7 @@ const GCUserDashboard = (props) => {
 								label={'Favorite Summary'}
 								value={searchHistoryFavoriteData.favoriteSummary}
 								onChange={(event) => {
-									searchHistoryFavoriteData.favoriteSummary =
-										event.target.value;
+									searchHistoryFavoriteData.favoriteSummary = event.target.value;
 									setReload(!reload);
 								}}
 								className={classes.textArea}
@@ -1506,9 +1482,7 @@ const GCUserDashboard = (props) => {
 							/>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 								<GCButton
-									onClick={() =>
-										handleFavoriteSearchHistoryStarClicked(null, true)
-									}
+									onClick={() => handleFavoriteSearchHistoryStarClicked(null, true)}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -1636,9 +1610,7 @@ const GCUserDashboard = (props) => {
 						</div>
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
-								<span style={{ fontWeight: 'bold' }}>
-									Organization Filters:
-								</span>{' '}
+								<span style={{ fontWeight: 'bold' }}>Organization Filters:</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>
 							{searchHistorySettingsData.isExport && (

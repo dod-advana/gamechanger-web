@@ -73,10 +73,10 @@ const SourceDetailsPage = (props) => {
 	return (
 		<div>
 			<p style={{ margin: '10px 4%', fontSize: 18 }}>
-				Welcome to our new (Beta version) Source Details page! As you look
-				around, you may note some technical issues below; please bear with us
-				while we continue making improvements here and check back often for a
-				more stable version.
+				Welcome to our new (Beta version) Source Details page! As you look around,
+				you may note some technical issues below; please bear with us while we
+				continue making improvements here and check back often for a more stable
+				version.
 			</p>
 			<MainContainer>
 				<div className={'details'}>
@@ -131,16 +131,12 @@ const SourceDetailsPage = (props) => {
 							backgroundColor={'rgb(238,241,242)'}
 						>
 							<div style={{ width: '100%' }}>
-								<div
-									style={{ display: 'flex', justifyContent: 'space-between' }}
-								>
+								<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 									<div style={styles.resultsCount}>
 										{initialSourceData.totalCount > 0
 											? `${numberWithCommas(
-												initialSourceData.totalCount
-											  )} results found in ${
-												initialSourceData.timeFound
-											  } seconds`
+													initialSourceData.totalCount
+											  )} results found in ${initialSourceData.timeFound} seconds`
 											: ''}
 									</div>
 									<div

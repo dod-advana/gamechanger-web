@@ -276,19 +276,20 @@ const App = () => {
 		const BudgetSearchProvider = getProvider('budgetSearch');
 
 		return (
-			<PrivateTrackedRoute 
+			<PrivateTrackedRoute
 				path={`/budgetsearch-profile`}
-				render={(props) => 
+				render={(props) => (
 					<BudgetSearchProvider>
 						<BudgetSearchProfilePage {...props} />
-					</BudgetSearchProvider>}
+					</BudgetSearchProvider>
+				)}
 				pageName={'BudgetSearchProfilePage'}
 				allowFunction={() => {
 					return true;
 				}}
 			/>
-		)
-	}
+		);
+	};
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = [
@@ -367,39 +368,75 @@ const App = () => {
 					<MuiThemeProvider muiTheme={theme}>
 						<ClassificationBanner />
 						<ConsentAgreement />
-	
-						<Route exact path='/' children={({ match, location, history }) => (
-							<div style={getStyleType(match, location)}>
-								<SlideOutMenuContextHandler>
-									<>
-										<ErrorBoundary
-											FallbackComponent={ErrorPage}
-											onError={errorHandler}
-										>
-											{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
-											<Switch >
-												{tokenLoaded && gameChangerCloneRoutes.map(route => {
-													return (
-														route
-													)
-												})}
-												<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
-												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
-												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
-												{getBudgetSearchProfileRoute()}
-												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
-												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
-												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
-												<Route path="*" component={NotFoundPage} />
-											</Switch>
-										</ErrorBoundary>
-									</>
-								</SlideOutMenuContextHandler>
-								{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
-								{!isDecoupled && <AdvanaFooter />}
-							</div>
-						)} />
-						
+
+						<Route
+							exact
+							path="/"
+							children={({ match, location, history }) => (
+								<div style={getStyleType(match, location)}>
+									<SlideOutMenuContextHandler>
+										<>
+											<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
+												{!isShowNothingButComponent(location) && (
+													<SlideOutMenu
+														match={match}
+														location={location}
+														history={history}
+													/>
+												)}
+												<Switch>
+													{tokenLoaded &&
+														gameChangerCloneRoutes.map((route) => {
+															return route;
+														})}
+													<Route
+														exact
+														path="/"
+														render={() => <Redirect to="/gamechanger" />}
+													/>
+													<Route
+														exact
+														path="/gamechanger/internalUsers/track/me"
+														component={GamechangerInternalUserTrackingPage}
+													/>
+													<Route
+														exact
+														path="/gamechanger-details"
+														component={GameChangerDetailsPage}
+														location={location}
+													/>
+													{getBudgetSearchProfileRoute()}
+													<PrivateTrackedRoute
+														path="/gamechanger-admin"
+														pageName={'GamechangerAdminPage'}
+														component={GamechangerAdminPage}
+														allowFunction={() => {
+															return Permissions.isGameChangerAdmin();
+														}}
+													/>
+													<PrivateTrackedRoute
+														path="/gamechanger-es"
+														pageName={'GamechangerEsPage'}
+														component={GamechangerEsPage}
+														allowFunction={() => {
+															return true;
+														}}
+													/>
+													<TrackedPDFView
+														path="/pdfviewer/gamechanger"
+														component={GamechangerPdfViewer}
+														location={location}
+													/>
+													<Route path="*" component={NotFoundPage} />
+												</Switch>
+											</ErrorBoundary>
+										</>
+									</SlideOutMenuContextHandler>
+									{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+									{!isDecoupled && <AdvanaFooter />}
+								</div>
+							)}
+						/>
 					</MuiThemeProvider>
 				</MuiThemeProvider>
 			</MatomoProvider>

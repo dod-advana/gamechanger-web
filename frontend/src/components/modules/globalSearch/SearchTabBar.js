@@ -54,8 +54,7 @@ const SearchTabBar = (props) => {
 
 					let style = styles.tab;
 
-					if (activeTab === searchType)
-						style = { ...style, ...styles.activeTab };
+					if (activeTab === searchType) style = { ...style, ...styles.activeTab };
 
 					return (
 						<Typography

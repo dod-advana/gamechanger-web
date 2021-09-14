@@ -392,12 +392,10 @@ const GlobalSearchHandler = {
 
 		if (resp.data) {
 			setState(dispatch, {
-				dataSourcesSearchResults: resp.data.dataSources.results.map(
-					(result) => {
-						result.type = 'dataSource';
-						return result;
-					}
-				),
+				dataSourcesSearchResults: resp.data.dataSources.results.map((result) => {
+					result.type = 'dataSource';
+					return result;
+				}),
 				dataSourcesLoading: false,
 				dataSourcesPagination: false,
 			});
@@ -478,16 +476,15 @@ const GlobalSearchHandler = {
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(
-				_.pickBy(state.selectedCategories, (value) => !!value)
-			  ).join('_')
+			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join(
+					'_'
+			  )
 			: undefined;
 
 		const params = new URLSearchParams();
 		if (searchText) params.append('keyword', searchText);
 		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (categoriesText !== undefined)
-			params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

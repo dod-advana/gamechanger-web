@@ -93,8 +93,7 @@ const endpoints = {
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getOtherEntityFilterList:
 		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData:
-		'/api/gameChanger/responsibilities/storeReport',
+	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	approveRejectAPIKeyRequestPOST:
 		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
@@ -295,8 +294,7 @@ export default class GameChangerAPI {
 		);
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
-		if (highlightText)
-			append += `#search=${this.splitSearchText(highlightText)}`;
+		if (highlightText) append += `#search=${this.splitSearchText(highlightText)}`;
 		if (pageNumber)
 			append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
 		if (fileName)
@@ -350,10 +348,7 @@ export default class GameChangerAPI {
 				})
 				.catch((e) => {
 					console.error(e);
-					console.error(
-						'ERROR GC-service-api storageDownloadBlobGET',
-						e.message
-					);
+					console.error('ERROR GC-service-api storageDownloadBlobGET', e.message);
 					reject(e.message);
 				});
 		});
@@ -415,13 +410,13 @@ export default class GameChangerAPI {
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
 		return axiosPOST(this.axios, url);
-	}
+	};
 
 	gcOrgSealData = async () => {
 		const url = endpoints.gcOrgSealData;
 		return axiosPOST(this.axios, url);
-	}
-	
+	};
+
 	getSourceTrackerData = async (options) => {
 		const url = endpoints.gcSourceTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
@@ -882,13 +877,13 @@ export default class GameChangerAPI {
 
 	getOrgImageOverrideURLs = async (names) => {
 		const url = endpoints.getOrgImageOverrideURLs;
-		return axiosGET(this.axios, url, { params: { names }});
-	}
+		return axiosGET(this.axios, url, { params: { names } });
+	};
 
 	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
-	}
+	};
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;

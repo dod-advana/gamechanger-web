@@ -59,12 +59,7 @@ export default function PDFViewer({ location }) {
 				id={'pdfViewer'}
 				ref={measuredRef}
 				onLoad={() =>
-					handlePdfOnLoad(
-						'pdfViewer',
-						'viewerContainer',
-						filename,
-						'PDF Viewer'
-					)
+					handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')
 				}
 				style={{ width: '100%', height: '100%' }}
 			/>

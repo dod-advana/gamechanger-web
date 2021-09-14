@@ -314,9 +314,7 @@ const DefaultMainViewHandler = {
 					>
 						Did you mean{' '}
 						<DidYouMean
-							onClick={() =>
-								handleDidYouMeanClicked(didYouMean, state, dispatch)
-							}
+							onClick={() => handleDidYouMeanClicked(didYouMean, state, dispatch)}
 						>
 							{didYouMean}
 						</DidYouMean>
@@ -396,9 +394,7 @@ const DefaultMainViewHandler = {
 				{exportDialogVisible && (
 					<ExportResultsDialog
 						open={exportDialogVisible}
-						handleClose={() =>
-							setState(dispatch, { exportDialogVisible: false })
-						}
+						handleClose={() => setState(dispatch, { exportDialogVisible: false })}
 						searchObject={getSearchObjectFromString(prevSearchText)}
 						setCurrentTime={setCurrentTime}
 						selectedDocuments={selectedDocuments}
@@ -592,13 +588,7 @@ const DefaultMainViewHandler = {
 		const getSearchResults = (searchResultData) => {
 			return _.map(searchResultData, (item, idx) => {
 				return (
-					<Card
-						key={idx}
-						item={item}
-						idx={idx}
-						state={state}
-						dispatch={dispatch}
-					/>
+					<Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />
 				);
 			});
 		};
@@ -641,19 +631,14 @@ const DefaultMainViewHandler = {
 								{showSideFilters && (
 									<div className={'left-container'}>
 										<div className={'side-bar-container'}>
-											<div
-												className={'filters-container sidebar-section-title'}
-											>
+											<div className={'filters-container sidebar-section-title'}>
 												FILTERS
 											</div>
 											<GameChangerSearchMatrix context={context} />
 											{sidebarDocTypes.length > 0 && sidebarOrgs.length > 0 && (
 												<>
 													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar
-														context={context}
-														cloneData={cloneData}
-													/>
+													<GameChangerSideBar context={context} cloneData={cloneData} />
 												</>
 											)}
 										</div>
@@ -664,20 +649,11 @@ const DefaultMainViewHandler = {
 									<div
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 									>
-										<div
-											className={'col-xs-12'}
-											style={{ ...sideScroll, padding: 0 }}
-										>
-											<div
-												className="row"
-												style={{ marginLeft: 0, marginRight: 0 }}
-											>
+										<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+											<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
 												{!loading && getQAResults()}
 											</div>
-											<div
-												className="row"
-												style={{ marginLeft: 0, marginRight: 0 }}
-											>
+											<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
 												{!loading && getSearchResults(rawSearchResults)}
 											</div>
 										</div>
@@ -717,9 +693,7 @@ const DefaultMainViewHandler = {
 								<i
 									style={{ ...styles.image, cursor: 'pointer' }}
 									className="fa fa-rocket"
-									onClick={() =>
-										setState(dispatch, { showEsQueryDialog: true })
-									}
+									onClick={() => setState(dispatch, { showEsQueryDialog: true })}
 								/>
 							</div>
 						)}

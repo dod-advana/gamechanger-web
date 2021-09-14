@@ -45,9 +45,7 @@ const PolicySearchBarHandler = {
 			setPresearchTopic(
 				data?.presearchTopic?.map((item) => ({ text: item })) ?? []
 			);
-			setPresearchOrg(
-				data?.presearchOrg?.map((item) => ({ text: item })) ?? []
-			);
+			setPresearchOrg(data?.presearchOrg?.map((item) => ({ text: item })) ?? []);
 			setPredictions(data?.predictions?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
 			console.log('Policy debouncedFetchSearchSuggestions err', e);
@@ -133,20 +131,13 @@ const PolicySearchBarHandler = {
 								padding: '0 15px',
 							}}
 							onClick={(event) =>
-								handleFavoriteSearchClicked(
-									event.target,
-									state.isFavoriteSearch
-								)
+								handleFavoriteSearchClicked(event.target, state.isFavoriteSearch)
 							}
 						>
 							<i
-								className={
-									state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'
-								}
+								className={state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
-									color: state.isFavoriteSearch
-										? '#E9691D'
-										: 'rgb(224, 224, 224)',
+									color: state.isFavoriteSearch ? '#E9691D' : 'rgb(224, 224, 224)',
 									cursor: 'pointer',
 									fontSize: 26,
 								}}

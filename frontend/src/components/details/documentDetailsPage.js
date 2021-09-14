@@ -118,12 +118,8 @@ const DocumentDetailsPage = (props) => {
 		}
 		graphData.edges.forEach((edge) => {
 			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-				const target = nodeIdMap[edge.target]
-					? nodeIdMap[edge.target].doc_id
-					: '';
-				const source = nodeIdMap[edge.source]
-					? nodeIdMap[edge.source].doc_id
-					: '';
+				const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
+				const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
 				if (source === document.id && edge.label === 'SIMILAR_TO') {
 					if (!docsMap.similar_to.includes(target)) {
 						docsMap.similar_to.push(target);
@@ -284,10 +280,10 @@ const DocumentDetailsPage = (props) => {
 						{runningQuery
 							? 'Searching for documents...'
 							: documentObj.docCount > 0
-								? `${numberWithCommas(documentObj.docCount)} results found in ${
+							? `${numberWithCommas(documentObj.docCount)} results found in ${
 									documentObj.timeFound
 							  } seconds`
-								: ''}
+							: ''}
 					</div>
 					<div
 						style={{ marginTop: '-14px', display: 'flex' }}
@@ -333,17 +329,15 @@ const DocumentDetailsPage = (props) => {
 	return (
 		<div>
 			<p style={{ margin: '10px 4%', fontSize: 18 }}>
-				Welcome to our new (Beta version) Document Details page! As you look
-				around, you may note some technical issues below; please bear with us
-				while we continue making improvements here and check back often for a
-				more stable version.
+				Welcome to our new (Beta version) Document Details page! As you look around,
+				you may note some technical issues below; please bear with us while we
+				continue making improvements here and check back often for a more stable
+				version.
 			</p>
 			<MainContainer>
 				<div className={'details'}>
 					<Paper>
-						<div className={'name'}>
-							{document?.display_title_s || 'Loading...'}
-						</div>
+						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
 
 						<div>
 							<GCButton

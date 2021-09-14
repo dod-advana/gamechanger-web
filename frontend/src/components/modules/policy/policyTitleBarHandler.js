@@ -38,9 +38,7 @@ const PolicyTitleBarHandler = {
 
 		return (
 			<>
-				{rawSearchResults?.length !== 0 &&
-					!loading &&
-					pageDisplayed === 'main' && (
+				{rawSearchResults?.length !== 0 && !loading && pageDisplayed === 'main' && (
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,

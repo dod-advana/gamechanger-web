@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import _ from 'lodash';
-import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
-import {Divider, Checkbox} from '@material-ui/core';
+import {
+	CARD_FONT_SIZE,
+	getTrackingNameForFactory,
+} from '../../gamechangerUtils';
+import { Divider, Checkbox } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
@@ -17,9 +20,9 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CardFactory from '../factories/cardFactory';
 import {
 	handleSaveFavoriteDocument,
-	handleSaveFavoriteTopic, 
-	handleSaveFavoriteOrganization, 
-	setState
+	handleSaveFavoriteTopic,
+	handleSaveFavoriteOrganization,
+	setState,
 } from '../../sharedFunctions';
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -61,20 +64,20 @@ const StyledCardContainer = styled.div`
 			border-radius: 5px;
 			display: flex;
 			border: ${({ listView, isRevoked, selected }) =>
-		listView
-			? 'none'
-			: selected
-				? '2px solid #386F94'
-				: isRevoked
+				listView
+					? 'none'
+					: selected
+					? '2px solid #386F94'
+					: isRevoked
 					? '2px solid #e50000'
 					: '2px solid rgb(224, 224, 224)'};
 			box-shadow: ${({ listView, selected }) =>
-		listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+				listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
 
 			transition: ${({ listView }) =>
-		listView
-			? 'transform .5s !important;'
-			: 'box-shadow .2s, transform .5s !important'};
+				listView
+					? 'transform .5s !important;'
+					: 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
 			transform-style: preserve-3d !important;
 			position: relative;
@@ -99,11 +102,11 @@ const StyledCardContainer = styled.div`
 					border-radius: 5px;
 					overflow: auto;
 					background-color: ${({ listView, intelligentSearch }) =>
-		listView
-			? intelligentSearch
-				? '#9BB1C8'
-				: 'white'
-			: 'rgb(238,241,242)'};
+						listView
+							? intelligentSearch
+								? '#9BB1C8'
+								: 'white'
+							: 'rgb(238,241,242)'};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -149,7 +152,7 @@ const StyledCardContainer = styled.div`
 					border-radius: 5px;
 					overflow: auto;
 					background-color: ${({ listView }) =>
-		listView ? 'white' : 'rgb(238,241,242)'};
+						listView ? 'white' : 'rgb(238,241,242)'};
 
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
@@ -359,8 +362,7 @@ function GCCard(props) {
 			isFavorite =
 				_.find(faveOrganizations, (organization) => {
 					return (
-						organization.organization_name.toLowerCase() ===
-						item.name.toLowerCase()
+						organization.organization_name.toLowerCase() === item.name.toLowerCase()
 					);
 				}) !== undefined;
 			break;
@@ -397,7 +399,7 @@ function GCCard(props) {
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
 			if (cardType === 'organization') {
-				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({data}) => {
+				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({ data }) => {
 					item.sealURLOverride = data[item.name];
 				});
 			}
@@ -464,16 +466,24 @@ function GCCard(props) {
 
 	const favoriteComponent = () => {
 		return (
-			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
-				<i onClick={(event) => {
-            openFavoritePopper(event.target);
-				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
-					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-					marginLeft: 'auto',
-					cursor: 'pointer',
-					fontSize: 26,
-					alignSelf: 'center'
-				}}/>
+			<GCTooltip
+				title={`Favorite this ${cardType} to track in the User Dashboard`}
+				placement="top"
+				arrow
+			>
+				<i
+					onClick={(event) => {
+						openFavoritePopper(event.target);
+					}}
+					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
+					style={{
+						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
+						marginLeft: 'auto',
+						cursor: 'pointer',
+						fontSize: 26,
+						alignSelf: 'center',
+					}}
+				/>
 			</GCTooltip>
 		);
 	};
@@ -569,9 +579,7 @@ function GCCard(props) {
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'CardInteraction',
 									'IntelligentSearchThumbsUp',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`
 								);
 							}
 						}}
@@ -591,9 +599,7 @@ function GCCard(props) {
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'CardInteraction',
 									'IntelligentSearchThumbsDown',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`
 								);
 							}
 						}}
@@ -746,8 +752,7 @@ function GCCard(props) {
 							{/* END CARD HEADER */}
 
 							{/* START CARD SUBHEADER */}
-							{loaded &&
-								cardHandler.getCardSubHeader({ item, state, toggledMore })}
+							{loaded && cardHandler.getCardSubHeader({ item, state, toggledMore })}
 							{/* END CARD SUBHEADER */}
 
 							{/* START CARD CONTENT */}

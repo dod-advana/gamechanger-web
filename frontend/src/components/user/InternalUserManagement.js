@@ -148,9 +148,7 @@ export default () => {
 						<ListItem key={id}>
 							<div>{id}</div>
 							<div>{username}</div>
-							<DeleteButton onClick={() => handleDelete(id)}>
-								Delete
-							</DeleteButton>
+							<DeleteButton onClick={() => handleDelete(id)}>Delete</DeleteButton>
 						</ListItem>
 					);
 				})}

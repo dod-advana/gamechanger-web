@@ -211,7 +211,7 @@ const StyledFrontCardHeader = styled.div`
 		margin-bottom: 0px;
 		margin-top: 0px;
 		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+			intelligentSearch ? '#9BB1C8' : 'white'};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -246,10 +246,9 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
 		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -266,14 +265,13 @@ const StyledFrontCardSubHeader = styled.div`
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+			docOrgColor ? docOrgColor : '#000000'};
 	}
 
 	.sub-header-full {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
 		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+			docTypeColor ? docTypeColor : '#000000'};
 		padding: 8px;
 		display: flex;
 		align-items: center;
@@ -397,12 +395,12 @@ const getCardHeaderHandler = ({
 						onClick={
 							docListView
 								? () =>
-									clickFn(
-										item.filename,
-										state.cloneData.clone_name,
-										state.searchText,
-										0
-									)
+										clickFn(
+											item.filename,
+											state.cloneData.clone_name,
+											state.searchText,
+											0
+										)
 								: () => {}
 						}
 					>
@@ -463,9 +461,7 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 						{displayType}
 					</div>
 					<div className={'sub-header-two'}>
-						{item.display_org_s
-							? item.display_org_s
-							: getTypeDisplay(displayOrg)}
+						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
 					</div>
 				</StyledFrontCardSubHeader>
 			)}
@@ -478,11 +474,7 @@ const getDisplayTitle = (item) => {
 };
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'PDFOpen'
-	);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
@@ -613,9 +605,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Page Hits</span>
 							<i
-								className={
-									hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -646,17 +636,12 @@ const DefaultCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
+														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color:
-																hoveredHit === key
-																	? 'white'
-																	: 'rgb(189, 189, 189)',
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -687,9 +672,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={
-									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -729,17 +712,12 @@ const DefaultCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0
-														? 'ID'
-														: `Page ${page.pageNumber}`}
+													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -769,9 +747,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={
-									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -820,17 +796,12 @@ const DefaultCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0
-														? 'ID'
-														: `Page ${page.pageNumber}`}
+													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -922,9 +893,7 @@ const DefaultCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip
-							title={'Check back soon for a new document details page.'}
-						>
+						<GCTooltip title={'Check back soon for a new document details page.'}>
 							<CardButton
 								disabled={true}
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
@@ -1035,9 +1004,9 @@ const DefaultCardHandler = {
 								onClick={
 									state.listView
 										? () =>
-											window.open(
-												`#/gamechanger-details?type=entity&entityName=${item.name}&cloneName=${state.cloneData.clone_name}`
-											)
+												window.open(
+													`#/gamechanger-details?type=entity&entityName=${item.name}&cloneName=${state.cloneData.clone_name}`
+												)
 										: () => {}
 								}
 							>

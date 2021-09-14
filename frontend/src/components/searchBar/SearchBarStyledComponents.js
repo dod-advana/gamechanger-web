@@ -98,7 +98,7 @@ export const Beta = styled.div`
 
 export const SearchButton = styled.button`
 	font-size: 24px;
-	background-color: ${({backgroundColor}) => backgroundColor ?? '#131E43'};
+	background-color: ${({ backgroundColor }) => backgroundColor ?? '#131E43'};
 	color: white;
 	padding: 4px 18px;
 	border: none;

@@ -107,10 +107,7 @@ export default (props) => {
 	 */
 	const checkFlag = (flag) => {
 		let flagged = false;
-		if (
-			props.processes.process_status &&
-			props.processes.process_status.flags
-		) {
+		if (props.processes.process_status && props.processes.process_status.flags) {
 			const flags = props.processes.process_status.flags;
 			for (const key in flags) {
 				if (key.includes(flag) && flags[key]) {
