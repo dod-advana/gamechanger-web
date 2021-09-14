@@ -2,16 +2,28 @@ var path = require('path');
 const dataCatalogConfig = require('./datacatalog');
 const fs = require('fs');
 
+/**
+ * Get cert/key provided env vars
+ * @param {string} certEnvVar env var containing entire cert/key
+ * @param {string} certFileEnvVar env var containing path to cert/key
+ * @returns {string} cert/key contents
+ */
+const getCert = (certEnvVar, certFileEnvVar) => {
+	if (process.env[certEnvVar]) {
+		return process.env[certEnvVar].replace(/\\n/g, '\n')
+	} else if (process.env[certFileEnvVar]) {
+		return fs.readFileSync(process.env[certFileEnvVar], 'ascii');
+	} else {
+		return '';
+	}
+};
+
 module.exports = Object.freeze({
 	VERSION: '#DYNAMIC_VERSION',
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
-	TLS_CERT: process.env.TLS_CERT ? process.env.TLS_CERT.replace(/\\n/g, '\n') : '',
-	TLS_CERT_CA: process.env.TLS_CERT_CA_FILEPATH ? 
-		fs.readFileSync(process.env.TLS_CERT_CA_FILEPATH, 'ascii') : 
-		process.env.TLS_CERT_CA ? 
-			process.env.TLS_CERT_CA.replace(/\\n/g, '\n') : 
-			'',
-	TLS_KEY: process.env.TLS_KEY ? process.env.TLS_KEY.replace(/\\n/g, '\n') : '',
+	TLS_CERT: getCert('TLS_CERT', 'TLS_CERT_FILEPATH'),
+	TLS_CERT_CA: getCert('TLS_CERT_CA', 'TLS_CERT_CA_FILEPATH'),
+	TLS_KEY: getCert('TLS_KEY', 'TLS_KEY_FILEPATH'),
 	EXPRESS_TRUST_PROXY: function () {
 		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : ''
 		if (['true','false'].includes(str_var.toLowerCase())) {
@@ -114,7 +126,9 @@ module.exports = Object.freeze({
 		// index: 'eda'
 		requestTimeout: 60000
 	},
-
+	BUDGETSEARCH_ELASTIC_SEARCH_OPTS: {
+		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX
+	},
 	S3_REGION: process.env.S3_REGION ? process.env.S3_REGION : undefined,
 	GRAPH_DB_CONFIG: {
 		url: process.env.NEO4J_URL,

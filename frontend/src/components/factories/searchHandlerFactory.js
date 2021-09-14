@@ -3,6 +3,7 @@ const policySearchHandler = require(`../modules/policy/policySearchHandler`);
 const globalSearchHandler = require(`../modules/globalSearch/globalSearchHandler`);
 const edaSearchHandler = require(`../modules/eda/edaSearchHandler`);
 const hermesSearchHandler = require(`../modules/hermes/hermesSearchHandler`);
+const budgetSearchSearchHandler = require(`../modules/budgetSearch/budgetSearchSearchHandler`);
 
 class SearchHandlerFactory {
 
@@ -20,6 +21,9 @@ class SearchHandlerFactory {
 					break;
 				case 'hermes/hermesSearchHandler':
 					this.handler = hermesSearchHandler;
+					break;
+				case 'budgetSearch/budgetSearchSearchHandler':
+					this.handler = budgetSearchSearchHandler;
 					break;
 				default:
 					this.handler = simpleSearchHandler;
