@@ -154,9 +154,8 @@ export default function SideBar(props) {
 	useEffect(() => {
 		try {
 			gameChangerAPI.gcOrgSealData().then(({data}) => {
-				let orgSources = []
-				if(data.length > 0){
-					orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
+				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
+				if(orgSources.length > 0){
 					let folder = orgSources[0].image_link.split('/');
 					folder = folder[folder.length - 2];
 					const thumbnailList = orgSources.map(item => {
