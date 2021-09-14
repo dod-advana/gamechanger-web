@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import {withStyles} from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import {gcBlue} from "../../components/common/gc-colors";
@@ -96,11 +97,13 @@ const GCAccordion = (props) => {
 		headerBackground,
 		headerTextColor,
 		headerTextWeight,
+		headerWidth,
 		contentPadding,
 		contentAlign,
 		contentHeight,
 		notBordered,
-		onChange
+		onChange,
+		onClick = _.noop
 	} = props;
 	
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -121,10 +124,10 @@ const GCAccordion = (props) => {
 	const borderString = notBordered ? '0px' : '1px solid rgba(0, 0, 0, .125)';
 	
 	return (
-		<StyledAccordion style={{border: borderString}} expanded={isExpanded} onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)}>
+		<StyledAccordion style={{border: borderString}} expanded={isExpanded} onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)} onClick={onClick}>
 			<StyledAccordionSummary style= {{ backgroundColor: headerBackground }} aria-controls="accordion-content" id="accordion-header"
 							  expandIcon={isExpanded ? <CollapseIcon style={{ color: headerTextColor }}/> : <ExpandIcon style={{ color: headerTextColor }} />}>
-				<PanelHeader style = {{ color: headerTextColor, fontWeight: headerTextWeight }}>{header}</PanelHeader>
+				<PanelHeader style = {{ color: headerTextColor, fontWeight: headerTextWeight, width: headerWidth }}>{header}</PanelHeader>
 				{itemCount >= 0 &&
 				<Typography 
 					style={{color:'white', marginTop:'3px', marginLeft:'6px', fontSize:'14px', fontWeight:'900'}}>

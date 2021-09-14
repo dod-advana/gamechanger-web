@@ -6,7 +6,7 @@ import defaultMainViewHandler from "../default/defaultMainViewHandler";
 import ViewHeader from "../../mainView/ViewHeader";
 import {trackEvent} from "../../telemetry/Matomo";
 import {Typography} from "@material-ui/core";
-import {setState} from "../../../sharedFunctions";
+import {setState, handleSaveFavoriteTopic} from "../../../sharedFunctions";
 import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
 import SearchSection from "../globalSearch/SearchSection";
 import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
@@ -174,6 +174,7 @@ const PolicyMainViewHandler = {
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
 		let pubs = [];
+		let pop_pubs = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
 			data.forEach(obj => {
@@ -181,9 +182,10 @@ const PolicyMainViewHandler = {
 					topics = JSON.parse(obj.value);
 				} else if(obj.key === 'homepage_major_pubs') {
 					pubs = JSON.parse(obj.value);
+				} else if (obj.key === 'popular_docs'){
+					pop_pubs = obj.value;
 				}
 			});
-
 		} catch(e){
 			// Do nothing
 		}
@@ -206,6 +208,22 @@ const PolicyMainViewHandler = {
 		}
 		
 		setState(dispatch, {adminMajorPubs: pubs});
+
+		try {
+			const pop_pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(pop_pubs, 'thumbnails', state.cloneData);
+			const pop_buffers = pop_pngs.data
+			pop_buffers.forEach((buf,idx) => {
+				if(buf.status === "fulfilled"){
+					pop_pubs[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+				} else {
+					pop_pubs[idx].imgSrc = 'error';
+				}
+			})
+			
+		} catch(e) {
+			//Do nothing
+		}
+		setState(dispatch, {searchMajorPubs: pop_pubs});
 
 		try {
 			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
@@ -258,6 +276,7 @@ const PolicyMainViewHandler = {
 		const {
 			adminTopics,
 			adminMajorPubs,
+			searchMajorPubs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -310,11 +329,14 @@ const PolicyMainViewHandler = {
 			});
 		});
 
+		const favTopicNames = favorite_topics.map(item => item.topic_name.toLowerCase());
 		adminTopics.forEach((topic,idx)=> {
-			favorite_topics.forEach(fav => {
-				adminTopics[idx].favorite = topic.name.toLowerCase() === fav.topic_name.toLowerCase();
-			})
-		})
+			if( _.find(favTopicNames, (item)=> {return item === topic.name.toLowerCase()} )){
+				adminTopics[idx].favorite = true;
+			} else {
+				adminTopics[idx].favorite = false;
+			}
+		});
 
 		return(
 			<div style={{marginTop: '40px'}}>
@@ -369,33 +391,28 @@ const PolicyMainViewHandler = {
 						width='100px'
 						style={{marginLeft: '0'}}
 					>
-						{/* {false && adminTopics.map(({name, favorite})=>
-							<TrendingSearchContainer 
-								style={{backgroundColor: '#E6ECF4'}} 
-								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
-								}}
-							>
-								<div style={{display:'flex', justifyContent:'space-between'}}>
-									<Typography style={styles.containerText}>{name}</Typography>
-									<i className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-										color: favorite ? "#E9691D" : 'rgb(224,224,224)',
-										cursor: "pointer",
-										fontSize: 20
-									}} />
-								</div>
-							</TrendingSearchContainer>
-						)} */}
-						{adminTopics.map(({name, favorite})=>
+						{adminTopics.map((item, idx)=>
 							<div 
 								style={styles.checkboxPill} 
 								onClick={() => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', name)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${name.toLowerCase()}`);
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${item.name.toLowerCase()}`);
 								}}
 							>
-								{name}
+								{item.name}
+								<i className={item.favorite ? "fa fa-star" : "fa fa-star-o"} 
+										style={{
+										color: item.favorite ? "#E9691D" : 'rgb(224,224,224)',
+										marginLeft: 10,
+										cursor: "pointer",
+										fontSize: 20
+										}}
+										onClick={(event)=> { 
+											event.stopPropagation(); 
+											handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch); 
+											}
+										}
+									/>
 							</div>
 						)}
 					</GameChangerThumbnailRow>
@@ -452,6 +469,40 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 						{ adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
+						}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow 
+						links={searchMajorPubs} 
+						title="Popular Publications" 
+						width='215px' 
+					>
+						{ (searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc) && searchMajorPubs.map((pub) =>
+							<div className="topPublication"
+							>
+								{ pub.imgSrc !== 'error' ? 
+									<img 
+									className="image"
+									src={pub.imgSrc}
+									alt="thumbnail" 
+									title={pub.name}
+								/> : 
+									<div className="image">{pub.name}</div>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`);
+									}}
+								>
+									<div className="hover-text">{pub.name}</div>
+								</div>
+							</div>
+						)}
+						{ searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && 
 							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} /></div>
 						}
 					</GameChangerThumbnailRow>

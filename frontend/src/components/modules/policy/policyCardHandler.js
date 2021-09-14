@@ -18,6 +18,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import {crawlerMappingFunc} from '../../../gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
+import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const styles = {
 	footerButtonBack: {
@@ -679,6 +680,17 @@ const getDisplayTitle = (item) => {
 	return item.display_title_s ? item.display_title_s : item.title;
 };
 
+const handleImgSrcError = (event, fallbackSources) => {
+	if (fallbackSources.admin) {
+		// fallback to entity
+		event.target.src = fallbackSources.entity;
+	}
+	else if (fallbackSources.entity) {
+		// fallback to default
+		event.target.src = dodSeal;
+	}
+};
+
 const PolicyCardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
@@ -1103,6 +1115,7 @@ const PolicyCardHandler = {
 		getDisplayTitle: (item) => {
 			return item.name;
 		},
+
 		getCardHeader: (props) => {
 			const {item, state, favoriteComponent} = props;
 			const displayTitle = item.name;
@@ -1185,13 +1198,25 @@ const PolicyCardHandler = {
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
 				);
-			}else {
+			} else {
+				let fallbackSources = {
+					s3: undefined,
+					admin: item.sealURLOverride,
+					entity: item.image
+				};
+				
 				return (
 					<StyledEntityTopicFrontCardContent listView={state.listView}>
-						{!state.listView && item.image && <img
-							alt="Office Img"
-							src={item.image}
-						/>}
+						{!state.listView && item.image && 
+							<img
+								alt="Office Img"
+								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+								onError={(event) => {
+									handleImgSrcError(event, fallbackSources);
+									if (fallbackSources.admin) fallbackSources.admin = undefined;
+								}}
+							/>
+						}
 						<p>{item.description}</p>
 					</StyledEntityTopicFrontCardContent>
 				);
@@ -1320,9 +1345,8 @@ const PolicyCardHandler = {
 			return item.name;
 		},
 		getCardHeader: (props) => {
-			const {item, state} = props;
+			const {item, state, favoriteComponent} = props;
 			const displayTitle = item.name;
-
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={state.listView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
@@ -1340,13 +1364,13 @@ const PolicyCardHandler = {
 								}
 							</div>
 						</GCTooltip>
-						{/*<div className={'selected-favorite'}>*/}
-						{/*	<div style={{display: "flex"}}>*/}
-						{/*		{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}*/}
-						{/*		{checkboxComponent(item.filename, `${type} ${num}`, item.id)}*/}
-						{/*		{favoriteComponent()}*/}
-						{/*	</div>*/}
-						{/*</div>*/}
+						<div className={'selected-favorite'}>
+							<div style={{display: 'flex'}}>
+								{/* {state.listView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+								{checkboxComponent(item.filename, `${type} ${num}`, idx)} */}
+								{favoriteComponent()}
+							</div>
+						</div>
 					</div>
 				</StyledFrontCardHeader>
 			);
@@ -1462,7 +1486,7 @@ const PolicyCardHandler = {
 		getFooter: (props) => {
 
 			const {
-				name,
+				item,
 				cloneName,
 				graphView,
 				closeGraphCard,
@@ -1475,9 +1499,9 @@ const PolicyCardHandler = {
 					<>
 						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
 							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${name}DetailsPage`);
+								trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Open', `${item.name.toLowerCase()}DetailsPage`);
 								e.preventDefault();
-								window.open(`#/gamechanger-details?type=topic&topicName=${name}&cloneName=${cloneName}`);
+								window.open(`#/gamechanger-details?type=topic&topicName=${item.name.toLowerCase()}&cloneName=${cloneName}`);
 							}}
 						>
 							Open

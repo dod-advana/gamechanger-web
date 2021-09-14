@@ -21,8 +21,14 @@ import SourceDetailsPage from '../components/details/sourceDetailsPage';
 import {MemoizedPolicyGraphView} from '../components/graph/policyGraphView';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import EDAContractDetailsPage from '../components/modules/eda/edaContractDetailsPage';
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
+import EditEntityDialog from '../components/admin/EditEntityDialog';
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement'
+import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 const RESULTS_PER_PAGE = 18;
 
@@ -47,6 +53,8 @@ export const MainContainer = styled.div`
 		font-family: Montserrat !important;
 		font-weight: bold;
 		font-size: 16px;
+		display: flex;
+		justify-content: space-between;
 	}
 	
 	> .details {
@@ -175,7 +183,7 @@ const getEntityData = async (name, cloneName) => {
 }
 
 const getTopicData = async (name, cloneName) => {
-	const data = {topic: {}, graph: {nodes: [], edges: []}};
+	const data = {topic: {}, graph: {nodes: [], edges: []}, isNeo4j: true};
 	
 	const resp = await gameChangerAPI.callGraphFunction({
 		functionName: 'getTopicDataDetailsPage',
@@ -192,6 +200,9 @@ const getTopicData = async (name, cloneName) => {
 		data.topic = tmpTopic;
 	
 		data.graph = resp.data.graph;
+	} else {
+		data.topic = {name, details:[]};
+		data.isNeo4j = false;
 	}
 	
 	return data;
@@ -295,13 +306,14 @@ const GameChangerDetailsPage = (props) => {
 	} = props;
 	
 	const [cloneData, setCloneData] = useState({});
+	const [userData, setUserData] = useState({});
 	const [entity, setEntity] = useState(null)
 	const [query, setQuery] = useState(null)
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graph, setGraph] = useState({nodes: [], edges: [], labels: []});
 	const [docCount, setDocCount] = useState(0);
 	const [timeFound, setTimeFound] = useState('0.0');
-	const [docResultsPage, setDocResultsPage] = useState(0);
+	const [docResultsPage, setDocResultsPage] = useState(1);
 	const [docResults, setDocResults] = useState([]);
 	const [visibleDocs, setVisibleDocs] = useState([]);
 	const [gettingDocuments, setGettingDocuments] = useState(true);
@@ -309,9 +321,11 @@ const GameChangerDetailsPage = (props) => {
 	const [detailsType, setDetailsType] = useState('');
 	const [hierarchyView, setHierarchyView] = useState(false);
 	const [loginModalOpen, setLoginModalOpen] = useState(false);
+	const [editEntityVisible, setEditEntityVisible] = useState(false);
 	
 	const [topic, setTopic] = useState(null);
 	const [showTopicContainer, setShowTopicContainer] = useState(false);
+	const [fromNeo4j, setFromNeo4j] = useState(true);
 	
 	const [document, setDocument] = useState(null);
 	const [showDocumentContainer, setShowDocumentContainer] = useState(false);
@@ -324,6 +338,8 @@ const GameChangerDetailsPage = (props) => {
 	const [showContractContainer, setShowContractContainer] = useState(false);
 	const [edaPermissions, setEDAPermissions] = useState(false);
 
+	const [sealURLOverride, setSealURLOverride] = useState(null);
+
 	const graphRef = useRef();
 	
 	useQuery(location, setQuery, query);
@@ -333,6 +349,10 @@ const GameChangerDetailsPage = (props) => {
 	}, [])
 	
 	useEffect(() => {
+		gcUserManagementAPI.getUserData().then(data => {
+			setUserData(data.data);
+		});
+
 		const cloneName = query.get('cloneName');
 		gameChangerAPI.getCloneMeta({cloneName}).then(data => {
 			setCloneData(data.data);
@@ -345,6 +365,9 @@ const GameChangerDetailsPage = (props) => {
 			case 'entity':
 				setDetailsType('Organization');
 				name = query.get('entityName');
+				gameChangerAPI.getOrgImageOverrideURLs([name]).then(({data}) => {
+					setSealURLOverride(data ? data[name] : null);
+				});
 				setRunningQuery(true);
 				setGettingDocuments(true);
 				getEntityData(name, cloneName).then(data => {
@@ -366,6 +389,7 @@ const GameChangerDetailsPage = (props) => {
 					setShowTopicContainer(true);
 					setTopic(data.topic);
 					setGraph(data.graph);
+					setFromNeo4j(data.isNeo4j)
 					setRunningQuery(false);
 				})
 				break;
@@ -419,7 +443,7 @@ const GameChangerDetailsPage = (props) => {
 			setDocResultsPage(1);
 			setDocResults(resp.data.docs);
 			setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
-			if(resp.data.docs.length > 0) {
+			if(resp.data.docs.length > 0 || resp.data.totalCount === 0) {
 				setTimeFound(((t1 - t0) / 1000).toFixed(2));
 				setGettingDocuments(false);
 			}
@@ -454,6 +478,26 @@ const GameChangerDetailsPage = (props) => {
 		});
 
 	}, [topic, graph, cloneData]);
+
+	useEffect(() => {
+		if(!topic || !cloneData || fromNeo4j) return;
+		const t0 = new Date().getTime();
+		setGettingDocuments(true);
+		gameChangerAPI.modularSearch({
+				cloneName: cloneData.clone_name,
+				searchText: topic.name,
+				offset: docResultsPage-1,
+				options: {},
+				limit: 18,
+			}).then(resp => {
+				const t1 = new Date().getTime();
+				setTimeFound(((t1-t0) / 1000).toFixed(2));
+				setDocCount(resp.data.totalCount)
+				setVisibleDocs(resp.data.docs)
+				setGettingDocuments(false);
+			})
+		
+	}, [fromNeo4j, docResultsPage, topic, cloneData])
 	
 	const renderDocuments = () => {
 		return visibleDocs.map((item, idx) => {
@@ -461,8 +505,8 @@ const GameChangerDetailsPage = (props) => {
 				<Card key={idx}
 					item={item}
 					idx={idx}
-					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}}}
-					//dispatch={dispatch}
+					state={{cloneData, selectedDocuments: new Map(), componentStepNumbers: {}, userData, rawSearchResults: docResults}}
+					dispatch={() => {}}
 				/>
 			);
 		});
@@ -472,19 +516,69 @@ const GameChangerDetailsPage = (props) => {
 		setDocResultsPage(page);
 		setVisibleDocs(docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE + 1));
 	}
-	
+
+	const editEntity = () => {
+		if (Permissions.isGameChangerAdmin()) {
+			setEditEntityVisible(true);
+		}
+	}
+
+	const handleImgSrcError = (event, fallbackSources) => {
+		if (fallbackSources.admin) {
+			// fallback to entity
+			event.target.src = fallbackSources.entity;
+		}
+		else if (fallbackSources.entity) {
+			// fallback to default
+			event.target.src = dodSeal;
+		}
+	}
+
 	const renderEntityContainer = () => {
+		let fallbackSources = {};
+		if (entity) {
+			fallbackSources.s3 = undefined;
+			fallbackSources.admin = sealURLOverride;
+			fallbackSources.entity = entity.image;
+		}
+
 		return (
 			<>
+				{editEntityVisible &&
+					<EditEntityDialog
+						open={editEntityVisible}
+						handleClose={() => setEditEntityVisible(false)}
+						url={sealURLOverride}
+						orgName={entity?.name}
+						setSealURLOverride={setSealURLOverride}
+					/>
+				}
 				{entity &&
 					<MainContainer>
 						<div className={'details'}>
 							<Paper>
 								<div className={'name'}>{entity.name}</div>
-								<img className={'img'} alt={`${entity.name} Img`} src={entity.image} />
+								<img
+									className={'img'}
+									alt={`${entity.name} Img`}
+									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									onError={(event) => {
+										handleImgSrcError(event, fallbackSources);
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
+									}}
+								/>
 								
 								<div className={'details-header'}>
 									<span>{'ENTITY DETAILS'}</span>
+									{Permissions.isGameChangerAdmin() && (
+										<IconButton
+											aria-label="edit"
+											style={{ padding: 5, color: 'white'}}
+											onClick={editEntity}
+										>
+											<EditIcon />
+										</IconButton>
+									)}
 								</div>
 								
 								<div className={'details-table'}>
@@ -494,6 +588,7 @@ const GameChangerDetailsPage = (props) => {
 										rows={entity.details}
 										height={'auto'}
 										dontScroll={true}
+										firstColWidth={styles.entityColWidth}
 										colWidth={colWidth}
 										disableWrap={true}
 										title={'Entity Statistics'}
@@ -532,7 +627,7 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
 											{gettingDocuments ?
 												<div style={{ margin: '0 auto' }}>
 													<LoadingIndicator customColor={gcOrange} />
@@ -552,7 +647,6 @@ const GameChangerDetailsPage = (props) => {
 	}
 	
 	const renderTopicContainer = () => {
-		debugger;
 		return (
 			<div>
 				<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new (Beta version) Topic Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
@@ -584,7 +678,7 @@ const GameChangerDetailsPage = (props) => {
 						<div className={'graph-top-docs'}>
 							
 							<div className={'section'}>
-								<GCAccordion expanded={true} header={'GRAPH VIEW'} backgroundColor={'rgb(238,241,242)'}>
+								<GCAccordion expanded={fromNeo4j} header={'GRAPH VIEW'} backgroundColor={'rgb(238,241,242)'}>
 									<MemoizedPolicyGraphView width={1420} height={670} graphData={graph} runningSearchProp={runningQuery}
 										 notificationCountProp={0} setDocumentsFound={() => {}} setTimeFound={() => {}}
 										 cloneData={cloneData} expansionTerms={false} setNumOfEdges={() => {}}
@@ -616,7 +710,7 @@ const GameChangerDetailsPage = (props) => {
 												/>
 											</div>
 										</div>
-										<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+										<div className="row" style={{ paddingLeft: 0, marginRight: -15, width: 'unset' }}>
 											{gettingDocuments ?
 												<div style={{margin: '0 auto'}}>
 													<LoadingIndicator customColor={gcColors.buttonColor2}/>
@@ -664,7 +758,7 @@ const GameChangerDetailsPage = (props) => {
 			
 			{showDocumentContainer &&
 				<DocumentDetailsPage document={document} cloneData={cloneData} runningQuery={runningQuery}
-									 graphData={graph}
+									 graphData={graph} userData={userData} rawSearchResults={docResults}
 				/>
 			}
 
@@ -682,9 +776,8 @@ const styles = {
 		maxWidth: '100px',
 		width: '100px',
 		whiteSpace: 'nowrap',
-		overflowWrap: 'anywhere',
-		textOverflow: 'ellipsis',
-		textAlign: 'left'
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	},
 	topicColWidth: {
 		maxWidth: '900px',

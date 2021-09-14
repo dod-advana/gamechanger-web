@@ -1,4 +1,4 @@
-import axiosLib from "axios";
+import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import {axiosGET, axiosDELETE, axiosPOST} from '../../gamechangerUtils';
@@ -51,6 +51,7 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
+	gcOrgSealData: '/api/gameChanger/getOrgSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
@@ -62,6 +63,7 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
+	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
 	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
 	trainModel: '/api/gamechanger/admin/trainModel',
@@ -103,6 +105,9 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
+	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
+	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
+	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
@@ -301,7 +306,8 @@ export default class GameChangerAPI {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 		// const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 30000})
+		const cloneName = "gamechanger"
+		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneName, dest: s3Bucket}, {timeout: 0})
 	}
 
 	getCloneData = async () => {
@@ -346,6 +352,11 @@ export default class GameChangerAPI {
 
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
+		return axiosPOST(this.axios, url);
+	}
+
+	gcOrgSealData = async () => {
+		const url = endpoints.gcOrgSealData;
 		return axiosPOST(this.axios, url);
 	}
 	
@@ -471,6 +482,11 @@ export default class GameChangerAPI {
 	
 	favoriteTopic = async (data) => {
 		const url = endpoints.favoriteTopicPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	favoriteOrganization = async (data) => {
+		const url = endpoints.favoriteOrganizationPOST;
 		return axiosPOST(this.axios, url, data);
 	}
 
@@ -773,5 +789,20 @@ export default class GameChangerAPI {
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
+	}
+
+	getOrgImageOverrideURLs = async (names) => {
+		const url = endpoints.getOrgImageOverrideURLs;
+		return axiosGET(this.axios, url, { params: { names }});
+	}
+
+	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
+		const url = endpoints.saveOrgImageOverrideURL;
+		return axiosPOST(this.axios, url, { name, imageURL });
+	}
+
+	getFAQ = async () => {
+		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
 	}
 }

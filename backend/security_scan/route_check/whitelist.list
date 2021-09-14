@@ -28,6 +28,7 @@
 .* /api/gamechanger/favorites/search .*
 .* /api/gamechanger/favorites/checkSearches .*
 .* /api/gamechanger/favorites/topic .*
+.* /api/gamechanger/favorites/organization .*
 .* /api/gamechanger/clearFavoriteSearchUpdate .*
 .* /api/gamechanger/trending/trendingSearches .*
 .* /api/gamechanger/trending/getTrendingBlacklist .*
@@ -69,3 +70,7 @@
 .* /api/gamechanger/modular/docFetcher .*
 .* /api/gamechanger/sendFrontendError .*
 .*/api/gamechanger/getCrawlerSeals .*
+.*/api/gamechanger/getOrgSeals .*
+.*/api/gamechanger/getOrgImageOverrideURLs .*
+.*/api/gamechanger/saveOrgImageOverrideURL .*
+.* /api/gamechanger/aboutGC/getFAQ .*

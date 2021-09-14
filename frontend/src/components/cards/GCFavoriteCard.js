@@ -263,6 +263,7 @@ const FavoriteCard = (props) => {
 		documentObject,
 		updated,
 		isTopic,
+		isOrganization,
 		cloneData
 	} = props;
 
@@ -300,9 +301,12 @@ const FavoriteCard = (props) => {
 							window.open(`/#/pdfviewer/gamechanger?filename=${encode(documentObject.filename)}&prevSearchText=${documentObject.search_text}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`);
 						} : isTopic ? () => {
 							trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
-							window.open(`#/gamechanger/details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`);
+							window.open(`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`);
+						} : isOrganization ? () => {
+							// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
+							window.open(`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`);
 						} : null}>
-							{isDocument || isTopic ? cardTitle 
+							{isDocument || isTopic || isOrganization ? cardTitle 
 							:
 							<>
 								<Link className={'summary-title-link'} href={`#/${tiny_url}`} target={'_blank'}>{cardTitle}</Link>
@@ -398,6 +402,7 @@ FavoriteCard.propTypes = {
 	documentObject: PropTypes.objectOf(PropTypes.string),
 	updated: PropTypes.bool,
 	isTopic: PropTypes.bool,
+	isOrganization: PropTypes.bool,
 	cloneData: PropTypes.shape({
 		clone_name: PropTypes.string
 	})
