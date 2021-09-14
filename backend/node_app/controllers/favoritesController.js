@@ -481,12 +481,20 @@ class FavoritesController {
 
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
+
+			// we will ignore recoverable errors even though they may alter the search results
+			// and use the assumption that degradations in search services will only result in
+			// fewer search results so that below only *more* search results should trigger a
+			// search result update
+			/*
 			const error = handler.getError();
 			if (error.code) {
 				this.logger.error('favorites search error', 'YN3USY3');
 				return;
 			}
-			if (results.totalCount != favorite.document_count) {
+			*/
+
+			if (results.totalCount > favorite.document_count) {
 				favorite.updated_results = true;
 				favorite.document_count = results.totalCount;
 				await favorite.save();
