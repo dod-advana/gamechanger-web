@@ -155,28 +155,29 @@ export default function SideBar(props) {
 		try {
 			gameChangerAPI.gcOrgSealData().then(({data}) => {
 				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
-				let folder = orgSources[0].image_link.split('/');
-				folder = folder[folder.length - 2];
-				const thumbnailList = orgSources.map(item => {
-					let filename = item.image_link.split('/').pop();
-					return {img_filename: filename}
-				});
-				gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
-					const buffers = data;
-					buffers.forEach((buf,idx) => {
-						if (buf.status === 'fulfilled') {
-							if (orgSources[idx].image_link.split('.').pop() === 'png'){
-								orgSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-							} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
-								orgSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
-							}
-						}
-						else {
-							orgSources[idx].imgSrc = DefaultSeal;
-						}
+				if(orgSources.length > 0){
+					let folder = orgSources[0].image_link.split('/');
+					folder = folder[folder.length - 2];
+					const thumbnailList = orgSources.map(item => {
+						let filename = item.image_link.split('/').pop();
+						return {img_filename: filename}
 					});
-				});
-
+					gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
+						const buffers = data;
+						buffers.forEach((buf,idx) => {
+							if (buf.status === 'fulfilled') {
+								if (orgSources[idx].image_link.split('.').pop() === 'png'){
+									orgSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+								} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
+									orgSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+								}
+							}
+							else {
+								orgSources[idx].imgSrc = DefaultSeal;
+							}
+						});
+					});
+				}
 				setOrgSources(orgSources);
 			});
 		} catch (e) {
