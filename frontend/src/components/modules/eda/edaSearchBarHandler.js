@@ -8,16 +8,9 @@ import {
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
-import { PAGE_DISPLAYED } from '../../../gamechangerUtils';
-import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
-import UserIcon from '../../../images/icon/UserIcon.png';
+import UserButton from '../../searchBar/UserButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
-import {
-	setState,
-	getUserData,
-	clearDashboardNotification,
-} from '../../../sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
@@ -56,7 +49,6 @@ const EDASearchBarHandler = {
 		const {
 			context,
 			state,
-			dispatch,
 			classes,
 			searchFavoritePopperAnchorEl,
 			advancedSearchOpen,
@@ -148,24 +140,7 @@ const EDASearchBarHandler = {
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<GCButton
-					onClick={() => {
-						getUserData(dispatch);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-						clearDashboardNotification('total', state, dispatch);
-					}}
-					style={{
-						height: 50,
-						width: 60,
-						minWidth: 'none',
-						padding: '0 18px',
-						margin: '0 0 0 4%',
-						backgroundColor: '#131E43',
-						border: '#131E43',
-					}}
-				>
-					<ConstrainedIcon src={UserIcon} />
-				</GCButton>
+				<UserButton context={context}></UserButton>
 
 				<Popover
 					onClose={() => {
