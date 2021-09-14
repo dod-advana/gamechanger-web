@@ -863,7 +863,7 @@ const GCUserDashboard = (props) => {
 		return <div style={{overflow: 'scroll', maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)'}}>
 			{_.map(favoriteDocuments, (doc) => {
 				if(selectedGroup.name){
-					if(groupFavorites.includes(doc.favorite_id)) {
+					if(groupFavorites?.includes(doc.favorite_id)) {
 						return <></>;
 					}
 				}
