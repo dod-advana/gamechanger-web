@@ -15,7 +15,6 @@ const DetailsTitleBar = {
 				<Typography variant="h1" style={styles.wording} display="inline">
 					Details
 				</Typography>
-				<b style={{color: 'red', fontSize: 14, alignSelf: 'flex-end'}}>(Beta)</b>
 			</div>
 		);
 	},

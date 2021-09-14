@@ -6,7 +6,7 @@ import GCAccordion from "../../common/GCAccordion";
 import GCButton from "../../common/GCButton";
 import {styles, TableRow} from '../util/GCAdminStyles';
 import AddEditorTermDialog from './AddEditorTermDialog';
-
+import _ from 'lodash';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -16,7 +16,7 @@ const gameChangerAPI = new GameChangerAPI();
  */
 export default () => {
     // State Variables
-    const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[]});
+    const [editorTableData, setEditorTableData] = useState({topics:[],major_pubs:[], popular_docs:[]});
 	const [showAddEditorTermDialog, setShowAddEditorTermDialog] = useState(false);
 	const [section, setSection] = useState('topic');
 	const [showSavedSnackbar, setShowSavedSnackbar] = useState(false);
@@ -30,20 +30,26 @@ export default () => {
      */
     const handleAddRow = (value) => {
 		const tmp = { ...editorTableData };
-		tmp[section].push({name:value});
+		tmp[section].push(value);
 		setEditorTableData(tmp);
 	}
     /**
      * 
      */
     const getHomepageEditorData = async () => {
-        const tableData = {topics:[],major_pubs:[]};
+        const tableData = {topics:[],major_pubs:[], popular_docs:[], popular_docs_inactive: []};
         const { data } = await gameChangerAPI.getHomepageEditorData();
         data.forEach(obj => {
-            obj.key = obj.key.replace('homepage_','');
-            tableData[obj.key] = JSON.parse(obj.value)
-        });
-    
+            if(obj.key === 'homepage_topics'){
+                tableData.topics = JSON.parse(obj.value);
+            } else if(obj.key === 'homepage_major_pubs') {
+                tableData.major_pubs = JSON.parse(obj.value);
+            } else if (obj.key === 'popular_docs'){
+                tableData.popular_docs = obj.value;
+            } else if (obj.key === 'homepage_popular_docs_inactive'){
+                tableData.popular_docs_inactive = JSON.parse(obj.value);
+            }
+        });    
         setEditorTableData(tableData);
     }
     /**
@@ -127,18 +133,18 @@ export default () => {
         }
     ]
     
-    const majorPubColumns = [
+    const popPubColumns = [
         {
             Header: 'Name',
             accessor: 'name',
-            width: 200,
+            width: 300,
             Cell: row => (
                 <TableRow>{row.value}</TableRow>
             )
         },
         {
-            Header: 'Reason',
-            accessor: 'reason',
+            Header: 'ID',
+            accessor: 'id',
             Cell: row => (
                 <TableRow>{row.value}</TableRow>
             )
@@ -146,30 +152,26 @@ export default () => {
         {
             Header: ' ',
             accessor: 'id',
-            width: 230,
+            width: 400,
             Cell: row => (
                 <TableRow>
                     <GCButton
                         onClick={() => {
-                            handleShiftRowUp('major_pubs', row.index)
+                            const index = _.findIndex(editorTableData.popular_docs_inactive, (item) => item === row.value);
+                            editorTableData.popular_docs_inactive.splice(index, 1);
+                            setEditorTableData({...editorTableData,popular_docs_inactive:editorTableData.popular_docs_inactive})
                         }}
-                        disabled={row.index===0}
+                        disabled={_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) === undefined}
                         style={{minWidth: 'unset', backgroundColor: 'green', borderColor: 'green', height: 35}}
-                    >Up</GCButton>
+                    >Enable</GCButton>
                     <GCButton
                         onClick={() => {
-                            handleShiftRowDown('major_pubs', row.index)
+                            editorTableData.popular_docs_inactive.push(row.value)
+                            setEditorTableData({...editorTableData,popular_docs_inactive:editorTableData.popular_docs_inactive})
                         }}
-                        disabled={row.index===editorTableData['major_pubs'].length-1}
+                        disabled={_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) !== undefined}
                         style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-                    >Down</GCButton>
-                    <GCButton
-                        onClick={() => {
-                            editorTableData['major_pubs'].splice(row.index,1)
-                            setEditorTableData({...editorTableData,major_pubs:editorTableData['major_pubs']})
-                        }}
-                        style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red', height: 35}}
-                    >Remove</GCButton>
+                    >Disable</GCButton>
                 </TableRow>
             )
         }
@@ -221,11 +223,11 @@ export default () => {
                             </div>
                         </div>
                     </GCAccordion>
-                    <GCAccordion expanded={true} header={'Major Publications'}>
+                    <GCAccordion expanded={true} header={'Popular Publications'}>
                         <div style={{display:"flex", flexDirection: 'column', width: "100%"}}>
                             <ReactTable
-                                data={editorTableData.major_pubs}
-                                columns={majorPubColumns}
+                                data={editorTableData.popular_docs}
+                                columns={popPubColumns}
                                 pageSize={10}
                                 style={{width: '100%'}}
                                 getTheadTrProps={() => {
@@ -237,19 +239,9 @@ export default () => {
                             />
                             <div style={{display:'flex'}}>
                                 <GCButton
-                                    id={'addMajorPub'}
-                                    onClick={()=>{
-                                        setSection('major_pubs')
-                                        setShowAddEditorTermDialog(true)
-                                    }}
-                                    style={{ width:200, margin:'10px'}}
-                                >
-                                    Add Term
-                                </GCButton>
-                                <GCButton
                                     id={'saveMajorPub'}
                                     onClick={()=>{
-                                        saveHomepageEditor('major_pubs');
+                                        saveHomepageEditor('popular_docs_inactive');
                                         setShowSavedSnackbar(true);
                                     }}
                                     style={{ width:200, margin:'10px'}}
@@ -261,7 +253,7 @@ export default () => {
                     </GCAccordion>
                 </div>
             </div>
-            <AddEditorTermDialog showAddEditorTermDialog={showAddEditorTermDialog} setShowAddEditorTermDialog={setShowAddEditorTermDialog} handleAddRow={handleAddRow} />
+            <AddEditorTermDialog showAddEditorTermDialog={showAddEditorTermDialog} setShowAddEditorTermDialog={setShowAddEditorTermDialog} handleAddRow={handleAddRow} section={section}/>
             <Snackbar
 				style={{marginTop: 20}}
 				anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
