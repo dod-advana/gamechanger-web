@@ -1016,4 +1016,55 @@ describe('DocumentController', function () {
 		});
 	});
 
+	describe('#getOrgImageOverrideURLs', () => {
+		it('should get image override URLs', async (done) => {			
+			const constants = {
+				GAME_CHANGER_OPTS: {
+					index: 'version'
+				}
+			};
+
+			const organizationURLs = {
+				findAll() {
+					return Promise.resolve(
+						[{
+							'id': 1,
+							'org_name': 'Test Organization',
+							'image_url': 'testURL'
+						}]
+					);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				organizationURLs
+			};
+
+			const target = new DocumentController(opts);
+
+			const req = {
+				...reqMock,
+				body: {},
+				query: {}
+			};
+
+			let resData;
+			const res = {
+				...resMock,
+				send: (data) => {
+					resData = data;
+					return data;
+				}
+			};
+
+			await target.getOrgImageOverrideURLs(req, res);
+
+			const expected = {'Test Organization': 'testURL'};
+			assert.deepStrictEqual(resData, expected);
+
+			done();
+		});
+	});
 });
