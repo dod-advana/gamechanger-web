@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import _ from 'lodash';
-import {
-	CARD_FONT_SIZE,
-	getTrackingNameForFactory,
-} from '../../gamechangerUtils';
-import { Divider, Checkbox } from '@material-ui/core';
+import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
+import {Divider, Checkbox} from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
@@ -20,9 +17,9 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CardFactory from '../factories/cardFactory';
 import {
 	handleSaveFavoriteDocument,
-	handleSaveFavoriteTopic,
-	handleSaveFavoriteOrganization,
-	setState,
+	handleSaveFavoriteTopic, 
+	handleSaveFavoriteOrganization, 
+	setState
 } from '../../sharedFunctions';
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -399,6 +396,11 @@ function GCCard(props) {
 			setCardHandler(handler[cardType]);
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
+			if (cardType === 'organization') {
+				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({data}) => {
+					item.sealURLOverride = data[item.name];
+				});
+			}
 		}
 	}, [state, loaded, cardType, item]);
 
@@ -462,24 +464,16 @@ function GCCard(props) {
 
 	const favoriteComponent = () => {
 		return (
-			<GCTooltip
-				title={`Favorite this ${cardType} to track in the User Dashboard`}
-				placement="top"
-				arrow
-			>
-				<i
-					onClick={(event) => {
-						openFavoritePopper(event.target);
-					}}
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						marginLeft: 'auto',
-						cursor: 'pointer',
-						fontSize: 26,
-						alignSelf: 'center',
-					}}
-				/>
+			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
+				<i onClick={(event) => {
+            openFavoritePopper(event.target);
+				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
+					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
+					marginLeft: 'auto',
+					cursor: 'pointer',
+					fontSize: 26,
+					alignSelf: 'center'
+				}}/>
 			</GCTooltip>
 		);
 	};
