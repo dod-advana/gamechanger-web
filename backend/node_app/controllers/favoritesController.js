@@ -466,7 +466,7 @@ class FavoritesController {
 			});
 
 			if (!history || !history.request_body) {
-				this.logger.console.error('no request body data to make the search', 'B32AUDE');
+				this.logger.error('no request body data to make the search', 'B32AUDE');
 				return;
 			}
 			
@@ -482,7 +482,7 @@ class FavoritesController {
 			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
 			const error = handler.getError();
 			if (error.code) {
-				this.logger.console.error('favorites search error', 'YN3USY3');
+				this.logger.error('favorites search error', 'YN3USY3');
 				return;
 			}
 			if (results.totalCount != favorite.document_count) {
