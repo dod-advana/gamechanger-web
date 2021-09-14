@@ -447,9 +447,7 @@ class FavoritesController {
 			}
 
 			// update timestamp first so we don't get stuck on a specific search in the case
-			// that it fails -- also reduces (but doesn't eliminate) race conditions of multiple
-			// app instances checking the same search (although the race condition is benign
-			// as far as correctness; we could lock the row to eliminate but not sure we want to)
+			// that the search fails
 			favorite.last_checked = Sequelize.fn('NOW');
 			await favorite.save();
 
@@ -476,8 +474,11 @@ class FavoritesController {
 			// so we attempt to transform it back into the original format (not sure how brittle this is)
 			const { cloneName, searchText, offset = 0, limit = 1 /*, options */} = history.request_body;
 			const options = history.request_body;
-			const userId = favorite.user_id;
-			const permissions = ['Webapp Super Admin', 'Tier 3 Support']; // XXX: ??? is this ok -- do we need to pull the actual user permissions?
+
+			// run the search as a non-user
+			const userId = '';
+			const permissions = ['Webapp Super Admin', 'Tier 3 Support'];
+
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
 			const error = handler.getError();
