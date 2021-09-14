@@ -84,28 +84,6 @@ const useStyles = makeStyles({
 	}
 })
 
-//const filterButton = withStyles({
-//    root: {
-//        variant: 'contained',
-//        startIcon: <CloseIcon/>,
-//        borderColor: blue,
-//        backgroundColor: '#0063cc',
-//    borderColor: '#0063cc',
-//    fontFamily: 'Montserrat',
-//    '&:hover': {
-//      backgroundColor: '#0069d9',
-//      borderColor: '#0062cc',
-//    },
-//    '&:active': {
-//      backgroundColor: '#0062cc',
-//      borderColor: '#005cbf',
-//    },
-//    '&:focus': {
-//      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
-//    },
-//  },
-//})(Button);
-
 const ViewHeader = (props) => {
 
 	const classes = useStyles();
