@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import {orgFilters, typeFilters} from "../../../gamechangerUtils";
+import {orgFilters, typeFilters} from '../../../gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -11,6 +11,7 @@ const initState = {
 		navigation_module: 'policy/policyNavigationHandler',
 		card_module: 'policy/policyCardHandler',
 		main_view_module: 'policy/policyMainViewHandler',
+		search_bar_module: 'policy/policySearchBarHandler',
 		display_name: 'GAMECHANGER',
 		is_live: true,
 		url: 'gamechanger',
@@ -53,6 +54,7 @@ const initState = {
 	crawlerSources: [],
 	adminTopics: [],
 	adminMajorPubs: [],
+	searchMajorPubs: [],
 	trendingLinks: [],
 	
 	// Tutorial
@@ -88,6 +90,7 @@ const initState = {
 	
 	// Export
 	selectedDocuments: new Map(),
+	selectedDocumentsForGraph: [],
 	docsDrawerOpen: false,
 	isSelectedDocs: false,
 	isDrawerReady: false,
@@ -175,7 +178,7 @@ const initState = {
 		includeRevoked: false
 	},
 
-  // Presearch Filters
+	// Presearch Filters
 	presearchSources: {},
 	presearchTypes: {},
 	seeMoreSources: false,
@@ -189,7 +192,7 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References', 'Popular']
 	},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',

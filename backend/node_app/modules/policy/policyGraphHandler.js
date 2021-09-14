@@ -38,7 +38,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const cloneSpecificObject = { orgFilter, searchFields: Object.values(searchFields), includeRevoked };
 
 			if (!forCacheReload && useGCCache) {
-				return this.getCachedResults(req, cloneSpecificObject, userId);
+				return await this.getCachedResults(req, cloneSpecificObject, userId);
 			}
 
 			// get results
@@ -46,7 +46,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const gT0 = new Date().getTime();
 			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
-			const [parsedQuery, parsedTerms] = await this.searchUtility.getEsSearchTerms(req.body);
+			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
 			req.body.limit = 10000;
@@ -152,31 +152,31 @@ class PolicyGraphHandler extends GraphHandler {
 
 		switch (functionName) {
 			case 'getDataForSearch':
-				return this.getDataForSearchHelper(req, userId);
+				return await this.getDataForSearchHelper(req, userId);
 			case 'getDocumentsForEntity':
-				return this.getDocumentsForEntityHelper(req, userId);
+				return await this.getDocumentsForEntityHelper(req, userId);
 			case 'getDocumentsForTopic':
-				return this.getDocumentsForTopicHelper(req, userId);
+				return await this.getDocumentsForTopicHelper(req, userId);
 			case 'getSingleDocument':
-				return this.getSingleDocumentHelper(req, userId);
+				return await this.getSingleDocumentHelper(req, userId);
 			case 'getDocumentDetailsPageDataFull':
-				return this.getDocumentDetailsPageDataFullHelper(req, userId);
+				return await this.getDocumentDetailsPageDataFullHelper(req, userId);
 			case 'getEntityDataDetailsPage':
-				return this.getEntityDataDetailsPageHelper(req, userId);
+				return await this.getEntityDataDetailsPageHelper(req, userId);
 			case 'getTopicDataDetailsPage':
-				return this.getTopicDataDetailsPageHelper(req, userId);
+				return await this.getTopicDataDetailsPageHelper(req, userId);
 			case 'getTopicDataPolicyGraph':
-				return this.getTopicDataPolicyGraphHelper(req, userId);
+				return await this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
-				return this.getReferencesPolicyGraphHelper(req, userId);
+				return await this.getReferencesPolicyGraphHelper(req, userId);
 			case 'getEntitiesForNode':
-				return this.getEntitiesForNodeHelper(req, userId);
+				return await this.getEntitiesForNodeHelper(req, userId);
 			case 'getTopicsForNode':
-				return this.getTopicsForNodeHelper(req, userId);
+				return await this.getTopicsForNodeHelper(req, userId);
 			case 'getGraphSchema':
-				return this.getGraphSchemaHelper(req, userId);
+				return await this.getGraphSchemaHelper(req, userId);
 			case 'getTopicCardData':
-				return this.getTopicCardDataHelper(req, userId);
+				return await this.getTopicCardDataHelper(req, userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policyGraphHandler`,
@@ -327,14 +327,14 @@ class PolicyGraphHandler extends GraphHandler {
 			const topicDocumentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
-				RETURN t2.name as topic_name, count(d) as doc_count
+				RETURN t2.name as topic_name, count(distinct d) as doc_count
 				ORDER BY doc_count DESC LIMIT 5;`, {name: topicName}, isTest, userId
 			);
 			
 			const documentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
-				RETURN count(d) as doc_count`, {name: topicName}, isTest, userId
+				RETURN count(distinct d) as doc_count`, {name: topicName}, isTest, userId
 			);
 			
 			const results = await Promise.all([topicDocumentCount, documentCount]);
@@ -359,7 +359,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [topicData] = await this.getGraphData(
 				'MATCH (t:Topic) WHERE t.name = $name ' +
 				'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
-				'RETURN t as topic, count(d) as documentCountsForTopic;', {name: topicName}, isTest, userId
+				'RETURN t as topic, count(distinct d) as documentCountsForTopic;', {name: topicName}, isTest, userId
 			);
 			
 			data.topicData = topicData;
@@ -367,7 +367,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
 			'WHERE t.name = $name ' +
-			'RETURN pt;', {name: topicName}, isTest, userId
+			'RETURN distinct pt LIMIT 1000;', {name: topicName}, isTest, userId
 			);
 			
 			data.graph = graphData
@@ -395,7 +395,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
 				'WHERE c.name = $name ' +
-				'RETURN pc;', {name: entityName}, isTest, userId
+				'RETURN distinct pc limit 1000;', {name: entityName}, isTest, userId
 			);
 			
 			data.graph = graphData
@@ -418,33 +418,33 @@ class PolicyGraphHandler extends GraphHandler {
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
 					'WHERE d2.is_revoked_b = false ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
 					'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
 					'WHERE NOT d = d2 ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
 					'WHERE d.doc_id = $doc_id ' +
 					'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
-					'RETURN pt;', {doc_id}, isTest, userId
+					'RETURN distinct pt;', {doc_id}, isTest, userId
 				)
 			]);
 			
@@ -531,7 +531,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const gT0 = new Date().getTime();
 			searchBody.questionFlag = this.searchUtility.isQuestion(searchText)
-			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(searchBody);
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
 			
@@ -610,6 +610,13 @@ class PolicyGraphHandler extends GraphHandler {
 					RETURN d.doc_id as doc_id, m.count as mentions
 					ORDER BY mentions DESC LIMIT 100;`, {entityName: entityName}, isTest, userId
 			);
+
+			if (doc_ids[0].doc_id === null) {
+				return {
+					totalCount: 0,
+					docs: []
+				};
+			}
 
 			const docIds = doc_ids.map(docId => {
 				return docId.doc_id;

@@ -1,16 +1,16 @@
-import _ from "underscore";
+import _ from 'underscore';
 import DocumentIcon from './images/icon/Document.png';
 import OrganizationIcon from './images/icon/Organization.png';
-import {trackEvent} from "./components/telemetry/Matomo";
+import {trackEvent} from './components/telemetry/Matomo';
 // import util from "./components/advana/api/util";
 import Config from './config/config.js';
-import {getTextColorBasedOnBackground} from "./graphUtils";
-import {useEffect} from "react";
-import styled from "styled-components";
+import {getTextColorBasedOnBackground} from './graphUtils';
+import {useEffect} from 'react';
+import styled from 'styled-components';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import {setState} from './sharedFunctions';
-const CryptoJS = require("crypto-js");
+const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const Color = require('color');
 
@@ -23,24 +23,25 @@ export const CARD_FONT_SIZE = 14;
 export const NO_RESULTS_MESSAGE = 'No results found! Please try refining your search.';
 
 export const orgAlias = {
-	OSD: "Office of the Secretary of Defense",
-	JS: "Joint Staff",
-	IC: "Intelligence Community",
-	POTUS: "Office of the President of the United States",
-	LEG: "Congress",
-	FED: "Federal Agencies",
-	Army: "Army",
-	Navy: "Navy",
-	"Air Force": "Air Force",
-	"Marine Corps": "Marine Corps",
-	"Space Force": "Space Force"
+	OSD: 'Office of the Secretary of Defense',
+	JS: 'Joint Staff',
+	IC: 'Intelligence Community',
+	POTUS: 'Office of the President of the United States',
+	LEG: 'Congress',
+	FED: 'Federal Agencies',
+	Army: 'Army',
+	Navy: 'Navy',
+	'Air Force': 'Air Force',
+	'Marine Corps': 'Marine Corps',
+	'Space Force': 'Space Force'
 };
 
 export const PAGE_DISPLAYED = {
 	main: 'main',
 	userDashboard: 'userDashboard',
 	dataTracker: 'dataTracker',
-	analystTools: 'analystTools'
+	analystTools: 'analystTools',
+	aboutUs: 'aboutUs'
 }
 
 export const SEARCH_TYPES = {
@@ -94,12 +95,12 @@ export const exportToCsv = (filename, data, isJson=false) => {
 	if (navigator.msSaveBlob) { // IE 10+
 		navigator.msSaveBlob(blob, filename);
 	} else {
-		var link = document.createElement("a");
+		var link = document.createElement('a');
 		if (link.download !== undefined) { // feature detection
 			// Browsers that support HTML5 download attribute
 			var url = URL.createObjectURL(blob);
-			link.setAttribute("href", url);
-			link.setAttribute("download", filename);
+			link.setAttribute('href', url);
+			link.setAttribute('download', filename);
 			link.style.visibility = 'hidden';
 			document.body.appendChild(link);
 			link.click();
@@ -188,7 +189,7 @@ export const StyledCenterContainer = styled.div`
 `;
 
 export const scrollToContentTop = () => {
-	document.getElementById("game-changer-content-top").scrollIntoView({ behavior: 'smooth', block: "center", inline: "nearest" })
+	document.getElementById('game-changer-content-top').scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
 }
 
 export const capitalizeFirst = (text) => {
@@ -221,7 +222,7 @@ export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
 		ref_list = ref_list[0].split(', ');
 	}
 	const trimmed = _.chain(ref_list).map(x => x.trim()).chunk(4).value();
-	return _.map(trimmed, x => ({ References: x[0], " ": x[1] || '', "  ": x[2], "   ": x[3], }));
+	return _.map(trimmed, x => ({ References: x[0], ' ': x[1] || '', '  ': x[2], '   ': x[3], }));
 }
 
 export const getMetadataForPropertyTable = (item) => {
@@ -257,9 +258,9 @@ export const getMetadataForPropertyTable = (item) => {
 
 export function commaThousands(value) {
 	if (_.isNull(value) || _.isUndefined(value))
-		return "";
+		return '';
 
-	return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 export const getCurrentView = (view, list) => {
@@ -275,41 +276,49 @@ export const getCurrentView = (view, list) => {
 //https://stackoverflow.com/a/2901298
 export function numberWithCommas(x) {
 	if (!x) return x;
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 const crawlerMapping = {
-	"dod_issuances":"WHS DoD Directives Division",
-	"army_pubs":"Army Publishing Directorate", 
-	"jcs_pubs":"Joint Chiefs of Staff Library",
-	"jcs_manual_uploads":"Joint Chiefs of Staff",
-	"dod_manual_uploads":"Dept. of Defense",
-	"army_manual_uploads":"US Army",
-	"ic_policies":"Director of National Intelligence",
-	"us_code":"Office of the Law Revision Counsel",
-	"ex_orders":"Federal Register",
-	"opm_pubs":"OMB Publication",
-	"air_force_pubs":"Dept. of the Air Force E-Publishing",
-	"marine_pubs":"Marine Corps Publications Electronic Library",
-	"secnav_pubs":"Dept. of the Navy Issuances",
-	"navy_reserves":"U.S. Navy Reserve Publications",
-	"navy_med_pubs":"Navy Medicine Directives",
-	"Bupers_Crawler":"Bureau of Naval Personnel Instructions",
-	"milpersman_crawler":"Navy Personnel Command Instructions",
-	"nato_stanag":"NATO Publications",
-	"fmr_pubs":"DoD Financial Management Regulation",
-	"legislation_pubs":"Congressional Legislation",
-	"Army_Reserve":"U.S. Army Reserve Publications",
-	"Memo":"OSD Executive Executive Secretary",
-	"dha_pubs":"Military Health System",
-	"jumbo_FAR":"Federal Acquisition Regulation",
-	"jumbo_DFAR":"Defense Federal Acquisition Regulation",
-	"National_Guard": "National Guard Bureau Publications Library",
-	"Coast_Guard": "US Coast Guard Directives",
-    "dfar_subpart_regs": "Defense Federal Acquisition Regulation",
-    "far_subpart_regs": "Federal Acquisition Regulation",
-	"Chief_National_Guard_Bureau_Instructions": "National Guard Bureau Instructions"
+	'dod_issuances':'WHS DoD Directives Division',
+	'army_pubs':'Army Publishing Directorate', 
+	'jcs_pubs':'Joint Chiefs of Staff Library',
+	'jcs_manual_uploads':'Joint Chiefs of Staff',
+	'dod_manual_uploads':'Dept. of Defense',
+	'army_manual_uploads':'US Army',
+	'ic_policies':'Director of National Intelligence',
+	'us_code':'Office of the Law Revision Counsel',
+	'ex_orders':'Federal Register',
+	'opm_pubs':'OMB Publication',
+	'air_force_pubs':'Dept. of the Air Force E-Publishing',
+	'marine_pubs':'Marine Corps Publications Electronic Library',
+	'secnav_pubs':'Dept. of the Navy Issuances',
+	'navy_reserves':'U.S. Navy Reserve Publications',
+	'navy_med_pubs':'Navy Medicine Directives',
+	'Bupers_Crawler':'Bureau of Naval Personnel Instructions',
+	'milpersman_crawler':'Navy Personnel Command Instructions',
+	'nato_stanag':'NATO Publications',
+	'fmr_pubs':'DoD Financial Management Regulation',
+	'legislation_pubs':'Congressional Legislation',
+	'Army_Reserve':'U.S. Army Reserve Publications',
+	'Memo':'OSD Executive Executive Secretary',
+	'dha_pubs':'Military Health System',
+	'jumbo_FAR':'Federal Acquisition Regulation',
+	'jumbo_DFAR':'Defense Federal Acquisition Regulation',
+	'National_Guard': 'National Guard Bureau Publications Library',
+	'Coast_Guard': 'US Coast Guard Directives',
+	'dfar_subpart_regs': 'Defense Federal Acquisition Regulation',
+	'far_subpart_regs': 'Federal Acquisition Regulation',
+	'Chief_National_Guard_Bureau_Instructions': 'National Guard Bureau Instructions'
 } 
+
+export const invertedCrawlerMappingFunc = (item) => {
+	const inverted = {}
+	Object.keys(crawlerMapping).forEach(key => {
+	  inverted[crawlerMapping[key].toLowerCase()] = key;
+	});
+	return inverted[item];
+}
 
 export const crawlerMappingFunc = (item) => {
 	return crawlerMapping[item]? crawlerMapping[item] : item
@@ -334,7 +343,7 @@ export const orgColorMap = {
 	'Space Force': '#000000', // black
 	'NATO': '#003bd1', // blue
 	'Financial Mgmt. Reg': '#636363',
-	"Legislation": '#ffbf00'
+	'Legislation': '#ffbf00'
 	// FED:
 };
 
@@ -577,35 +586,35 @@ export const getLinkColor = (link, alpha) => {
 export const shadeColor = (col, amt) => {
 	let usePound = false;
 
-    if (col[0] === "#") {
-        col = col.slice(1);
-        usePound = true;
-    }
+	if (col[0] === '#') {
+		col = col.slice(1);
+		usePound = true;
+	}
 
-    let R = parseInt(col.substring(0,2),16);
-    let G = parseInt(col.substring(2,4),16);
-    let B = parseInt(col.substring(4,6),16);
+	let R = parseInt(col.substring(0,2),16);
+	let G = parseInt(col.substring(2,4),16);
+	let B = parseInt(col.substring(4,6),16);
 
-    // to make the colour less bright than the input
-    // change the following three "+" symbols to "-"
-    R = R + amt;
-    G = G + amt;
-    B = B + amt;
+	// to make the colour less bright than the input
+	// change the following three "+" symbols to "-"
+	R = R + amt;
+	G = G + amt;
+	B = B + amt;
 
-    if (R > 255) R = 255;
-    else if (R < 0) R = 0;
+	if (R > 255) R = 255;
+	else if (R < 0) R = 0;
 
-    if (G > 255) G = 255;
-    else if (G < 0) G = 0;
+	if (G > 255) G = 255;
+	else if (G < 0) G = 0;
 
-    if (B > 255) B = 255;
-    else if (B < 0) B = 0;
+	if (B > 255) B = 255;
+	else if (B < 0) B = 0;
 
-    const RR = ((R.toString(16).length===1)?"0"+R.toString(16):R.toString(16));
-    const GG = ((G.toString(16).length===1)?"0"+G.toString(16):G.toString(16));
-    const BB = ((B.toString(16).length===1)?"0"+B.toString(16):B.toString(16));
+	const RR = ((R.toString(16).length===1)?'0'+R.toString(16):R.toString(16));
+	const GG = ((G.toString(16).length===1)?'0'+G.toString(16):G.toString(16));
+	const BB = ((B.toString(16).length===1)?'0'+B.toString(16):B.toString(16));
 
-    return (usePound?"#":"") + RR + GG + BB;
+	return (usePound?'#':'') + RR + GG + BB;
 }
 
 export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
@@ -700,7 +709,7 @@ export const decodeTinyUrl = (url) => {
 	returnData.searchType = getQueryVariable('searchType', url);
 	returnData.offset = getQueryVariable('offset', url);
 	returnData.tabName = getQueryVariable('tabName', url);
-	returnData.isRevoked = getQueryVariable('revoked', url) === "true";
+	returnData.isRevoked = getQueryVariable('revoked', url) === 'true';
 
 	const orgURL = getQueryVariable('orgFilter', url);
 	const pubDateURL = getQueryVariable('pubDate', url);
@@ -735,15 +744,15 @@ export const decodeTinyUrl = (url) => {
 
 	returnData.resultsPage = Math.floor(returnData.offset / RESULTS_PER_PAGE) + 1;
 	returnData.useSemanticSearch = returnData.searchType === SEARCH_TYPES.semantic;
-	returnData.pubDate = "";
+	returnData.pubDate = '';
 	returnData.searchFields = [];
 
-	if (!pubDateURL || pubDateURL.indexOf("_") === -1) {
-		returnData.pubDate = "All";
+	if (!pubDateURL || pubDateURL.indexOf('_') === -1) {
+		returnData.pubDate = 'All';
 	}
 	else {
 		try {
-			const dates = pubDateURL.split("_");
+			const dates = pubDateURL.split('_');
 			const start = new Date(parseInt(dates[0]));
 			const end = new Date(parseInt(dates[1]));
 	
@@ -754,9 +763,9 @@ export const decodeTinyUrl = (url) => {
 	}
 
 	if (searchFieldsURL && searchFieldsURL.length > 0) {
-		const searchFieldPairs = searchFieldsURL.split("_");
+		const searchFieldPairs = searchFieldsURL.split('_');
 		for (const pair of searchFieldPairs) {
-			const keyValue = pair.split("-");
+			const keyValue = pair.split('-');
 			if (keyValue && keyValue.length === 2) {
 				returnData.searchFields.push(`${keyValue[0]}: "${keyValue[1]}"`)
 			}
@@ -767,29 +776,31 @@ export const decodeTinyUrl = (url) => {
 }
 
 export const encode = (filename) => {
-    const encodings = {
-        '+': "%2B",
-        '!': "%21",
-        '"': "%22",
-        '#': "%23",
-        '$': "%24",
-        '&': "%26",
-        '\'': "%27",
-        '(': "%28",
-        ')': "%29",
-        '*': "%2A",
-        ',': "%2C",
-        ':': "%3A",
-        ';': "%3B",
-        '=': "%3D",
-        '?': "%3F",
-        '@': "%40",
-    };
 
-    return filename.replace(
-        /([+!"#$&'()*+,:;=?@])/img,
-        match => encodings[match]
-    );
+	const encodings = {
+		'+': '%2B',
+		'!': '%21',
+		'"': '%22',
+		'#': '%23',
+		'$': '%24',
+		'&': '%26',
+		'\'': '%27',
+		//'(': '%28',
+		//')': '%29',
+		'*': '%2A',
+		//',': '%2C',
+		':': '%3A',
+		';': '%3B',
+		'=': '%3D',
+		'?': '%3F',
+		'@': '%40',
+		//' ': '%20'
+	};
+
+	return filename.replace(
+		/([+!"#$&'*+:;=?@])/img,
+		match => encodings[match]
+	);
 }
 
 export const exactMatch = (phrase, word, split) => {

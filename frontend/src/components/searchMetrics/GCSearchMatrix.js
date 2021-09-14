@@ -90,6 +90,14 @@ const useStyles = makeStyles({
 		border: '0px',
 		cursor: 'default'
 	},
+	rootLabel: {
+		cursor: 'pointer',
+		display: 'inline-flex',
+		alignItems: 'center',
+		marginRight: '26px',
+		marginBottom: '15px',
+		verticalAlign: 'middle'
+	},
 	filterBox: {
 		backgroundColor: '#ffffff',
 		borderRadius: '5px',
@@ -147,8 +155,6 @@ const useStyles = makeStyles({
 		borderRadius: '10px',
 		lineHeight: 1.2,
 		fontSize: '12px',
-		marginBottom: '15px',
-		marginRight: '10px',
 		border: '2px solid #bdccde',
 		backgroundColor: 'white',
 		boxSizing: 'border-box',
@@ -314,7 +320,7 @@ export default function SearchMatrix(props) {
 	}, [state, comparableExpansion]);
 
 	useEffect(() => {
-		if(state.searchSettings.isFilterUpdate & state.searchSettings.expansionTermAdded){
+		if(state.searchSettings.isFilterUpdate && state.searchSettings.expansionTermAdded){
 			let newSearchText = state.searchText.trim()
 			expansionTerms.forEach(({phrase, source, checked}) => {
 				if(checked && !exactMatch(newSearchText, phrase, " OR ")) {

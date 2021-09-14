@@ -1,4 +1,5 @@
 import React from 'react';
+import { gcOrange } from "./gc-colors"
 import UOTPrimaryButton from './GCPrimaryButton';
 import {grey400} from 'material-ui/styles/colors';
 
@@ -10,10 +11,12 @@ const GCButton = (props) => {
         disabled = false,
         buttonColor,
         borderColor,
+        isSecondaryBtn,
         ...remaining
     } = props;
 
-    let primaryColor = '#E9691D';
+    let primaryColor = isSecondaryBtn ? '#E0E0E0' : gcOrange;
+    let fontColor  = isSecondaryBtn ? 'rgb(0, 0, 0, 1)' : 'rgb(255, 255, 255, 1)';
     
 
     if (buttonColor) {
@@ -37,7 +40,7 @@ const GCButton = (props) => {
                 padding: '0 15px',
                 cursor: !disabled ? 'pointer' : 'not-allowed',
                 fontSize: 16,
-                color: !disabled ? 'rgb(255, 255, 255, 1)' : 'rgb(255, 255, 255, .6)',
+                color: !disabled ? fontColor : 'rgb(255, 255, 255, .6)',
                 ...style
             }}
             {...remaining}

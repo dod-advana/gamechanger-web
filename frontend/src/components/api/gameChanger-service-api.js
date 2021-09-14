@@ -10,7 +10,6 @@ const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
 	modularSearch: '/api/gameChanger/modular/search',
 	modularExport: '/api/gameChanger/modular/export',
-	gameChangerDocumentSearchDownloadPOST: '/api/gameChanger/documentSearch/download',
 	gameChangerSemanticSearchDownloadPOST: '/api/gameChanger/semanticSearch/download',
 	gameChangerGraphSearchPOST: '/api/gameChanger/modular/graphSearch',
 	graphQueryPOST: '/api/gameChanger/modular/graphQuery',
@@ -51,6 +50,7 @@ const endpoints = {
 	gcShortenSearchURLPOST: '/api/gameChanger/shortenSearchURL',
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
+	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
@@ -62,6 +62,7 @@ const endpoints = {
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
+	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
 	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
 	trainModel: '/api/gamechanger/admin/trainModel',
@@ -70,7 +71,8 @@ const endpoints = {
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
-	setTransformerModel: '/api/gameChanger/admin/setTransformerModel',
+	getProcessStatus:'/api/gameChanger/admin/getProcessStatus',
+	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
@@ -105,6 +107,7 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
+	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
@@ -176,14 +179,6 @@ export default class GameChangerAPI {
 
 	modularExport = async (data) => {
 		const url = endpoints.modularExport;
-		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
-
-		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
-		return axiosPOST(this.axios, url, data, options);
-	}
-
-	documentSearchDownloadPOST = async (data) => {
-		const url = endpoints.gameChangerDocumentSearchDownloadPOST;
 		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
 
 		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
@@ -285,7 +280,7 @@ export default class GameChangerAPI {
 
 	dataStorageDownloadGET = async (fileName, highlightText, pageNumber, isClone = false, cloneData = {clone_name: 'gamechanger'}) => {
 		return new Promise((resolve, reject) => {
-			const s3Bucket = cloneData?.s3Bucket ?? 'advana-raw-zone';
+			const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
 			
 			let filename = encodeURIComponent(`gamechanger${cloneData.clone_name !== 'gamechanger' ? `/projects/${cloneData.clone_name}` : ''}/pdf/${fileName}`)
 
@@ -307,10 +302,12 @@ export default class GameChangerAPI {
 		});
 	}
 
-	thumbnailStorageDownloadPOST = async (filenames) => {
-		const s3Bucket = 'advana-raw-zone';
+	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
+		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
+		// const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, dest: s3Bucket}, {timeout: 10000})
+		const cloneName = "gamechanger"
+		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneName, dest: s3Bucket}, {timeout: 0})
 	}
 
 	getCloneData = async () => {
@@ -351,6 +348,11 @@ export default class GameChangerAPI {
 	gcCrawlerTrackerData = async (options) => {
 		const url = endpoints.gcCrawlerTrackerData;
 		return axiosPOST(this.axios, url, options);
+	}
+
+	gcCrawlerSealData = async () => {
+		const url = endpoints.gcCrawlerSealData;
+		return axiosPOST(this.axios, url);
 	}
 	
 	getSourceTrackerData = async (options) => {
@@ -493,6 +495,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	}
 
+	favoriteOrganization = async (data) => {
+		const url = endpoints.favoriteOrganizationPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
 	trendingSearches = async(data) => {
 		const url = endpoints.trendingSearchesPOST;
 		return axiosPOST(this.axios, url, data);
@@ -512,7 +519,7 @@ export default class GameChangerAPI {
 		const url = endpoints.deleteTrendingBlacklist;
 		return axiosPOST(this.axios, url, data);
 	}
-
+	// Starting ML endpoints
 	reloadModels = async (data) => {
 		const url = endpoints.reloadModels;
 		return axiosPOST(this.axios, url, data);
@@ -538,6 +545,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
+	getProcessStatus = async () => {
+		const url = endpoints.getProcessStatus;
+		return axiosGET(this.axios, url);
+	}
+
 	getS3List = async () => {
 		const url = endpoints.getS3List;
 		return axiosGET(this.axios, url);
@@ -553,11 +565,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	setTransformerModel = async (modelName) => {
-		const url = endpoints.setTransformerModel;
-		return axiosPOST(this.axios, url, { model_name: modelName });
+	getFilesInCorpus = async () => {
+		const url = endpoints.getFilesInCorpus;
+		return axiosGET(this.axios, url);
 	}
-
+	// End ML endpoints
 	getUserSettings = async () => {
 		const url = endpoints.getUserSettings;
 		return axiosGET(this.axios, url);
@@ -734,9 +746,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	}
 
-	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText) => {
+	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText, sentenceResults) => {
 		const url = endpoints.intelligentSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText });
+		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText, sentenceResults });
 	}
 
 	populateNewUserId = async () => {
@@ -754,9 +766,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	}
 
-	sendQAFeedback = async (eventName, question, answer, filename, docId) => {
+	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
 		const url = endpoints.qaSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, question, answer, filename, docId });
+		return axiosPOST(this.axios, url, { eventName, question, answer, qaContext, params });
 	}
 
 	getFeedbackData = async () => {
@@ -787,5 +799,10 @@ export default class GameChangerAPI {
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
+	}
+
+	getFAQ = async () => {
+		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
 	}
 }

@@ -4,12 +4,13 @@ const { Thesaurus } = require('../../node_app/lib/thesaurus');
 describe('Thesaurus', function () {
 
 	describe('#waitForLoad', () => {
-		it('should indicate when it is done loading the thesaurus into memory', async (done) => {
+		it('should indicate when it is done loading the thesaurus into memory', (done) => {
 			const target = new Thesaurus();
 			assert.equal(target.isLoaded(), false);
-			await target.waitForLoad();
-			assert.equal(target.isLoaded(), true);
-			done();
+			target.waitForLoad().then(() => {
+				assert.equal(target.isLoaded(), true);
+				done();
+			});
 		});
 	});
 

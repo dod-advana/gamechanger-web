@@ -4,19 +4,23 @@
   "description": "gamechanger backend",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest",
+    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
     "prestart": "npm install",
     "start": "node index.js",
     "awsDocker": "npm start",
     "jest-coverage": "jest --coverage",
-    "sonarscan": "sonar-scanner"
+    "sonarscan": "sonar-scanner",
+	"gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
+	"gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
+	"orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
+	"orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@dod-advana/advana-api-auth": "0.0.9",
-    "@elastic/elasticsearch": "^7.11.0",
+    "@elastic/elasticsearch": "7.13.0",
     "async": "^2.6.0",
     "async-redis": "^1.1.7",
     "aws-sdk": "^2.848.0",
@@ -62,7 +66,8 @@
       "text",
       "cobertura",
       "lcov"
-    ]
+    ],
+    "testTimeout": 10000
   },
   "eslintConfig": {
     "rules": {

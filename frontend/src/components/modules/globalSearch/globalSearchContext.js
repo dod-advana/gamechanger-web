@@ -9,6 +9,7 @@ const initState = {
 		title_bar_module: 'globalSearch/globalSearchTitleBarHandler',
 		navigation_module: 'globalSearch/globalSearchNavigationHandler',
 		card_module: 'globalSearch/globalSearchCardHandler',
+		search_bar_module: 'globalSearch/globalSearchSearchBarHandler',
 		display_name: 'Global Search',
 		is_live: true,
 		url: 'searchtest',

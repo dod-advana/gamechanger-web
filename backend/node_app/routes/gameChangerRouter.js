@@ -9,7 +9,6 @@ const { MegaMenuController } = require('../controllers/megaMenuController');
 const { UserController } = require('../controllers/userController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { CacheController } = require('../controllers/cacheController');
-const { CloneController } = require('../controllers/cloneController');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { AdminController } = require('../controllers/adminController');
 const { NotificationController } = require('../controllers/notificationController');
@@ -22,6 +21,7 @@ const { AppStatsController } = require('../controllers/appStatsController');
 const { TrendingSearchesController } = require('../controllers/trendingSearchesController');
 const { AppSettingsController } = require('../controllers/appSettingsController');
 const { FeedbackController } = require('../controllers/feedbackController');
+const { AboutGcController } = require('../controllers/aboutGcController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -30,7 +30,6 @@ const exportHistory = new ExportHistoryController();
 const user = new UserController();
 const favorites = new FavoritesController();
 const cache = new CacheController();
-const clone = new CloneController();
 const dataTracker = new DataTrackerController();
 const admin = new AdminController();
 const notification = new NotificationController();
@@ -43,11 +42,8 @@ const responsibility = new ResponsibilityController();
 const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
+const aboutGc = new AboutGcController();
 
-router.post('/documentSearch/download', (req, res) => {
-	req.setTimeout(720000);
-	search.documentSearchDownload(req, res);
-});
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
 router.get('/admin/getElasticSearchIndex', search.getElasticSearchIndex);
@@ -59,6 +55,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
+router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
@@ -81,15 +78,16 @@ router.post('/responsibilities/updateResponsibility', responsibility.updateRespo
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
-router.post('/admin/reloadModels', transformer.reloadModels);
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);
 router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
-router.post('/admin/setTransformerModel', transformer.setTransformerModel);
+router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
+router.get('/admin/getProcessStatus', transformer.getProcessStatus);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
+router.post('/admin/reloadModels', transformer.reloadModels);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
@@ -117,6 +115,7 @@ router.post('/favorites/document', favorites.favoriteDocumentPOST);
 router.post('/favorites/search', favorites.favoriteSearchPOST);
 router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
+router.post('/favorites/organization', favorites.favoriteOrganizationPOST);
 router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
 router.post('/trending/trendingSearches', trending.trendingSearchesPOST);
@@ -167,5 +166,6 @@ router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFee
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 
+router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 module.exports = router;

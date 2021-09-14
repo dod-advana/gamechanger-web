@@ -53,10 +53,8 @@ describe('GraphHandler', function () {
 	const opts = {
 		...constructorOptionsMock,
 		constants: {
-			env: {
-				GAME_CHANGER_OPTS: {downloadLimit: 1000},
-				GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-			}
+			GAME_CHANGER_OPTS: {downloadLimit: 1000},
+			GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 		},
 		dataLibrary: {},
 		redisDB: {
@@ -246,10 +244,8 @@ describe('GraphHandler', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants: {
-					env: {
-						GAME_CHANGER_OPTS: {downloadLimit: 1000},
-						GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
-					}
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 				},
 				dataLibrary: {
 					queryGraph() {

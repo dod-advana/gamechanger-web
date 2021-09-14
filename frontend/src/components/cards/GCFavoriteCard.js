@@ -12,7 +12,7 @@ import Chip from "@material-ui/core/Chip";
 import GCTooltip from "../common/GCToolTip"
 import GCButton from "../common/GCButton";
 import { trackEvent } from "../telemetry/Matomo";
-import {getTrackingNameForFactory} from "../../gamechangerUtils";
+import {encode, getTrackingNameForFactory} from "../../gamechangerUtils";
 
 
 const StyledFavoriteDocumentCard = styled.div`
@@ -263,6 +263,7 @@ const FavoriteCard = (props) => {
 		documentObject,
 		updated,
 		isTopic,
+		isOrganization,
 		cloneData
 	} = props;
 
@@ -297,12 +298,15 @@ const FavoriteCard = (props) => {
 					<GCTooltip title={cardTitle} placement="top">
 						<div className={'summary-title'} onClick={isDocument ? () =>{
 							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardFavoritesInteraction', 'PDFOpen', documentObject.filename);
-							window.open(`/#/pdfviewer/gamechanger?filename=${documentObject.filename}&prevSearchText=${documentObject.search_text}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`);
+							window.open(`/#/pdfviewer/gamechanger?filename=${encode(documentObject.filename)}&prevSearchText=${documentObject.search_text}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`);
 						} : isTopic ? () => {
 							trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
-							window.open(`#/gamechanger/details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`);
+							window.open(`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`);
+						} : isOrganization ? () => {
+							// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
+							window.open(`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`);
 						} : null}>
-							{isDocument || isTopic ? cardTitle 
+							{isDocument || isTopic || isOrganization ? cardTitle 
 							:
 							<>
 								<Link className={'summary-title-link'} href={`#/${tiny_url}`} target={'_blank'}>{cardTitle}</Link>
@@ -344,6 +348,7 @@ const FavoriteCard = (props) => {
 										<GCButton
 											onClick={handleStarClicked}
 											style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											isSecondaryBtn={true}
 										>No
 										</GCButton>
 										<GCButton
@@ -397,6 +402,7 @@ FavoriteCard.propTypes = {
 	documentObject: PropTypes.objectOf(PropTypes.string),
 	updated: PropTypes.bool,
 	isTopic: PropTypes.bool,
+	isOrganization: PropTypes.bool,
 	cloneData: PropTypes.shape({
 		clone_name: PropTypes.string
 	})

@@ -269,6 +269,7 @@ class GlobalSearchHandler extends SearchHandler {
 			// fields to search
 			this.field('name');
 			this.field('description');
+			this.field('stream', { extractor: ({ stream: { name } }) => name });
 	
 			// data to search
 			allApps.forEach(function (app) { this.add(app); }, this);

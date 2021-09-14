@@ -23,10 +23,6 @@ Modal.setAppElement('#app')
 const getHeight = () => window.innerHeight;
 
 const buttonStyle = {
-    border: '1px solid #B0B9BE',
-    borderRadius: '6px',
-    color: '#8091A5 !important',
-    fontFamily: "Montserrat",
     margin:'10px'
 }
 const CloseButton = styled.div`
@@ -58,6 +54,7 @@ export default function UserFeedback (props) {
     const [errorFlag, setErrorFlag] = useState(false);
     const [loading, setLoading] = useState(false);
     const [screenShot, setScreenShot] = useState('');
+    const [emailTextFocus, setEmailTextFocus] = useState(false);
 
     // windowHeight - (all the other components that contribute to height except textfield)
     const textFieldHeight = windowHeight-(55+72.75+40+64+37+300);
@@ -89,6 +86,8 @@ export default function UserFeedback (props) {
     
     const closeModal = () => {
 		setState(dispatch, { showFeedbackModal: false });
+        setUserEmail('');
+        setEmailError(false);
 	}
 
     function handleTypeChange(event) {
@@ -235,13 +234,15 @@ export default function UserFeedback (props) {
                         </Select>
                     </FormControl>
                     <TextField
+                        onFocus={() => setEmailTextFocus(true)}
+                        onBlur={() => setEmailTextFocus(false)}
                         variant="outlined"
                         error={emailError}
                         style={{margin:'0 0 0 20px', width:"700px"}}
                         placeholder="Entering your email address will help us respond directly to you!"
                         value={userEmail}
                         onChange={e=>handleEmailChange(e.target.value)}
-                        helperText = {emailError ? "Enter Valid Email Format!" : ""}
+                        helperText = {emailError && !emailTextFocus ? "Please enter a valid email address." : ""}
                     />
                 </div>
 
@@ -261,6 +262,7 @@ export default function UserFeedback (props) {
                     id={'feedbackClose'}
                     onClick={closeModal}
                     style={buttonStyle}
+                    isSecondaryBtn={true}
                 >
                     Close
                 </GCButton>

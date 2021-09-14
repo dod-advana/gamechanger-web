@@ -87,6 +87,11 @@ try {
 	console.error('No env variables created')
 }
 
+if (constants.EXPRESS_TRUST_PROXY) {
+	// https://expressjs.com/en/guide/behind-proxies.html
+	app.set("trust proxy", constants.EXPRESS_TRUST_PROXY)
+}
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
@@ -284,7 +289,6 @@ http.createServer(app).listen(port);
 
 // shoutout to the user
 logger.boot(`
-====> App version: ${constants.VERSION}
 ====> Is decoupled? ${constants.GAME_CHANGER_OPTS.isDecoupled}
 ====> http port: ${port}
 ====> https port: ${securePort}
@@ -293,8 +297,10 @@ logger.boot(`
 ====> Using Kerberos: ${process.env.APP_USE_KERBEROS === 'true' ? 'yes' : 'no'}
 ====> Using Docker: ${process.env.DOCKER === 'true' ? 'yes' : 'no'}
 ====> Redis url: ${process.env.REDIS_URL || 'redis://localhost'}
-====> Postgres host: ${constants.POSTGRES_CONFIG.host}
-====> Postgres port: ${constants.POSTGRES_CONFIG.port}
+====> game_changer postgres host: ${process.env.POSTGRES_HOST_GAME_CHANGER}
+====> gc-orchestration postgres host: ${process.env.POSTGRES_HOST_GC_ORCHESTRATION}
+====> uot postgres host: ${process.env.POSTGRES_HOST_UOT}
+====> module postgres host: ${process.env.PG_HOST}
 `);
 
 if(process.env.PRINT_ROUTES === 'true') {
@@ -306,15 +312,19 @@ if(process.env.PRINT_ROUTES === 'true') {
 	routers['/api'] = require('./node_app/routes/advanaRouter');
 	routers['/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
 
-	console.log('BEGIN ROUTES');
+	let output = 'Route\n';
 	for(let base in routers) {
 		routers[base].stack.forEach(function(r){
-		if (r.route && r.route.path && !r.route.path.includes('*')){
-			console.log(`${base}${r.route.path}`.replace(/\/\//g, '/'));
-		}
+			if (r.route && r.route.path && !r.route.path.includes('*')){
+				output += `${base}${r.route.path}\n`.replace(/\/\//g, '/');
+			}
 		});
 	}
-	console.log('END ROUTES');
+	fs.writeFile(__dirname + '/security_scan/route_check/routes.csv', output, (err) => {
+		if(err) {
+			console.error(err);
+		}
+	});
 }
 
 setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick'); }, 10000);

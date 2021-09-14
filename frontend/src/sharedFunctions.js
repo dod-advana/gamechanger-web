@@ -92,7 +92,6 @@ export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	document.clone_index = cloneData?.clone_data?.project_name;
 
 	await gameChangerAPI.favoriteDocument(document);
-
 	await getUserData(dispatch);
 
 	const favFilenames = state.userData.favorite_documents.map(doc => {
@@ -110,6 +109,11 @@ export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 
 export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, dispatch) => {
 	await gameChangerAPI.favoriteTopic({topic, topicSummary, is_favorite: favorited});
+	await getUserData(dispatch);
+}
+
+export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
+	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
 	await getUserData(dispatch);
 }
 
@@ -171,9 +175,15 @@ export const getSearchObjectFromString = (searchString = '') => {
 	// DECOUPLED ONLY
 export const checkUserInfo = (state, dispatch) => {
 	const { userData } = state;
-
+	const userMatomoStatus = JSON.parse(localStorage.getItem('userMatomo'));
+	const infoPassed =  JSON.parse(localStorage.getItem('userInfoPassed'));
+	const userFeedbackMode =  JSON.parse(localStorage.getItem('userFeedbackMode'));
+	let didPass = false;
+	if (infoPassed && (new Date(infoPassed.expires) > new Date())){
+		didPass= infoPassed.passed;
+	}
 	try {
-		if (isDecoupled && userData && !userData.submitted_info) {
+		if (isDecoupled && !userData?.submitted_info && userMatomoStatus && !didPass && userFeedbackMode) {
 			// show pop up
 			setState(dispatch, { userInfoModalOpen: true });
 			console.log('Decoupled user needs to fill out form')
