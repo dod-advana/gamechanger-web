@@ -306,11 +306,10 @@ export default class GameChangerAPI {
 	}
 
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
-		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
-		// const s3Bucket = 'advana-raw-zone';
+		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
+		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		const cloneName = "gamechanger"
-		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneName, dest: s3Bucket}, {timeout: 0})
+		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 0})
 	}
 
 	getCloneData = async () => {
