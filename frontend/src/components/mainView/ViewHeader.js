@@ -1,28 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
-import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
+import { getCurrentView } from "../..//gamechangerUtils";
 import _ from 'lodash';
 import {Button} from "@material-ui/core";
-import {
-	ThemeProvider,
-} from '@material-ui/core/styles';
 
 import GCButton from "../common/GCButton";
 import GCTooltip from "../common/GCToolTip";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
 import { 
     FormControl,
-    FormGroup,
-    FormControlLabel,
-    Checkbox,
     InputLabel,
     MenuItem,  Select, } from '@material-ui/core';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
-import styled from 'styled-components';
+import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from "../common/gc-colors";
 import CloseIcon from '@material-ui/icons/Close';
-import {blue, black, white, grey, orange} from '@material-ui/core/colors/blue';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../gamechangerUtils';
 
@@ -31,9 +23,7 @@ const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
-const resetAdvancedSettings = (dispatch) => {
-	dispatch({type: 'RESET_SEARCH_SETTINGS'});
-}
+
 const handleTypeFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
     let typeName = event.target.innerHTML;
@@ -94,27 +84,27 @@ const useStyles = makeStyles({
 	}
 })
 
-const filterButton = withStyles({
-    root: {
-        variant: 'contained',
-        startIcon: <CloseIcon/>,
-        borderColor: blue,
-        backgroundColor: '#0063cc',
-    borderColor: '#0063cc',
-    fontFamily: 'Montserrat',
-    '&:hover': {
-      backgroundColor: '#0069d9',
-      borderColor: '#0062cc',
-    },
-    '&:active': {
-      backgroundColor: '#0062cc',
-      borderColor: '#005cbf',
-    },
-    '&:focus': {
-      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
-    },
-  },
-})(Button);
+//const filterButton = withStyles({
+//    root: {
+//        variant: 'contained',
+//        startIcon: <CloseIcon/>,
+//        borderColor: blue,
+//        backgroundColor: '#0063cc',
+//    borderColor: '#0063cc',
+//    fontFamily: 'Montserrat',
+//    '&:hover': {
+//      backgroundColor: '#0069d9',
+//      borderColor: '#0062cc',
+//    },
+//    '&:active': {
+//      backgroundColor: '#0062cc',
+//      borderColor: '#005cbf',
+//    },
+//    '&:focus': {
+//      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
+//    },
+//  },
+//})(Button);
 
 const ViewHeader = (props) => {
 
@@ -232,16 +222,11 @@ const ViewHeader = (props) => {
 
     return (
         <div className={'results-count-view-buttons-container'}> 
-        {state.searchSettings.isFilterUpdate && 
-                <filterButton
-            variant='contained'
-            color='primary'
-            startIcon=<CloseIcon />
-                    >
-                    </filterButton>
-            }
+        {state.cloneData.clone_name === "gamechanger" ?
+            <>
             <div className={'view-filters-container'}>
-	{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
+            {state.searchSettings.specificOrgsSelected 
+        && Object.keys(orgFilter).map((org, index) => {
                     if(state.searchSettings.orgFilter[org]){
                         return (
                      <Button
@@ -249,16 +234,14 @@ const ViewHeader = (props) => {
                             backgroundColor="white"
                             display="inline-flex"
                     name={org}
-
-					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40, ariaPressed: 'true'}}
-					startIcon=<CloseIcon />
+					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color:'orange', height: 40, ariaPressed: 'true'}}
+					endIcon=<CloseIcon />
 					onClick={(event) => {
                         handleOrganizationFilterChange(event, state, dispatch);
                     }}
                     
 				    >
                          <span 
-                            role="button"
                             style={{
                             fontFamily: 'Montserrat',
                             fontWeight: 300,
@@ -273,9 +256,9 @@ const ViewHeader = (props) => {
                         return null;
                     }
     })}
-        </div>
-     <div className={'view-filters-container'}> 
-        {state.searchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+
+        {state.searchSettings.specificTypesSelected 
+            && Object.keys(typeFilter).map((type, index) => {
             if(state.searchSettings.typeFilter[type]){
                 return (
                     <Button
@@ -283,7 +266,7 @@ const ViewHeader = (props) => {
                         backgroundColor="white"
                         display="inline-flex"
 					    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
-					    startIcon=<CloseIcon />
+					    endIcon=<CloseIcon />
 					onClick={(event) => {
                         handleTypeFilterChange(event, state, dispatch);
                     }}
@@ -304,7 +287,8 @@ const ViewHeader = (props) => {
         }
         )}
         </div>
-
+        </> : <> </>
+        } 
         <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
