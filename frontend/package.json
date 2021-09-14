@@ -87,7 +87,7 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"pretty": "prettier --use-tabs --single-quote --write \"./**/*.{js,jsx,json}\""
+		"pretty": "prettier --use-tabs --tab-width 1 --single-quote --write \"./**/*.{js,jsx,json}\""
 	},
 	"jest": {
 		"moduleNameMapper": {
@@ -124,10 +124,7 @@
 			"max-len": 0,
 			"indent": [
 				"error",
-				"tab",
-				{
-					"SwitchCase": 1
-				}
+				"tab"
 			],
 			"space-before-function-paren": 0,
 			"radix": 0,

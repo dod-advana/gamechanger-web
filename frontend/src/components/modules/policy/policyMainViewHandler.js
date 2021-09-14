@@ -105,14 +105,10 @@ const PolicyMainViewHandler = {
 											FILTERS
 										</div>
 										<GameChangerSearchMatrix context={context} />
-										{state.sidebarDocTypes.length > 0 &&
-											state.sidebarOrgs.length > 0 && (
+										{state.sidebarDocTypes.length > 0 && state.sidebarOrgs.length > 0 && (
 											<>
 												<div className={'sidebar-section-title'}>RELATED</div>
-												<GameChangerSideBar
-													context={context}
-													cloneData={state.cloneData}
-												/>
+												<GameChangerSideBar context={context} cloneData={state.cloneData} />
 											</>
 										)}
 									</div>
@@ -187,10 +183,7 @@ const PolicyMainViewHandler = {
 											{sidebarDocTypes.length > 0 && sidebarOrgs.length > 0 && (
 												<>
 													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar
-														context={context}
-														cloneData={cloneData}
-													/>
+													<GameChangerSideBar context={context} cloneData={cloneData} />
 												</>
 											)}
 										</div>
@@ -202,10 +195,7 @@ const PolicyMainViewHandler = {
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 										style={{ padding: 0 }}
 									>
-										<div
-											className={'col-xs-12'}
-											style={{ ...sideScroll, padding: 0 }}
-										>
+										<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 											<div
 												className="row"
 												style={{ marginLeft: 0, marginRight: 0, padding: 0 }}
@@ -216,182 +206,157 @@ const PolicyMainViewHandler = {
 												(activeCategoryTab === 'Documents' ||
 													activeCategoryTab === 'all') &&
 												selectedCategories['Documents'] && (
-												<div
-													className={'col-xs-12'}
-													style={{
-														marginTop: 10,
-														marginLeft: 0,
-														marginRight: 0,
-													}}
-												>
-													{!searchSettings.isFilterUpdate ? (
-														<SearchSection
-															section={'Documents'}
-															color={'#131E43'}
-															icon={DocumentIcon}
-														>
-															{activeCategoryTab === 'all' ? (
-																<>
-																	{!docsLoading && !docsPagination ? (
-																		getSearchResults(
-																			docSearchResults,
-																			state,
-																			dispatch
-																		)
-																	) : (
-																		<div className="col-xs-12">
-																			<LoadingIndicator
-																				customColor={gcOrange}
-																			/>
-																		</div>
-																	)}
-																	<div className="gcPagination col-xs-12 text-center">
-																		<Pagination
-																			activePage={resultsPage}
-																			itemsCountPerPage={RESULTS_PER_PAGE}
-																			totalItemsCount={count}
-																			pageRangeDisplayed={8}
-																			onChange={async (page) => {
-																				trackEvent(
-																					getTrackingNameForFactory(
-																						state.cloneData.clone_name
-																					),
-																					'PaginationChanged',
-																					'page',
-																					page
-																				);
-																				setState(dispatch, {
-																					docsLoading: true,
-																					resultsPage: page,
-																					docsPagination: true,
-																				});
-																			}}
-																		/>
-																	</div>
-																</>
-															) : (
-																<>
-																	{getSearchResults(
-																		docSearchResults,
-																		state,
-																		dispatch
-																	)}
-																	{docsPagination && (
-																		<div className="col-xs-12">
-																			<LoadingIndicator
-																				customColor={gcOrange}
-																				containerStyle={{
-																					margin: '-100px auto',
+													<div
+														className={'col-xs-12'}
+														style={{
+															marginTop: 10,
+															marginLeft: 0,
+															marginRight: 0,
+														}}
+													>
+														{!searchSettings.isFilterUpdate ? (
+															<SearchSection
+																section={'Documents'}
+																color={'#131E43'}
+																icon={DocumentIcon}
+															>
+																{activeCategoryTab === 'all' ? (
+																	<>
+																		{!docsLoading && !docsPagination ? (
+																			getSearchResults(docSearchResults, state, dispatch)
+																		) : (
+																			<div className="col-xs-12">
+																				<LoadingIndicator customColor={gcOrange} />
+																			</div>
+																		)}
+																		<div className="gcPagination col-xs-12 text-center">
+																			<Pagination
+																				activePage={resultsPage}
+																				itemsCountPerPage={RESULTS_PER_PAGE}
+																				totalItemsCount={count}
+																				pageRangeDisplayed={8}
+																				onChange={async (page) => {
+																					trackEvent(
+																						getTrackingNameForFactory(state.cloneData.clone_name),
+																						'PaginationChanged',
+																						'page',
+																						page
+																					);
+																					setState(dispatch, {
+																						docsLoading: true,
+																						resultsPage: page,
+																						docsPagination: true,
+																					});
 																				}}
 																			/>
 																		</div>
-																	)}
-																</>
-															)}
-														</SearchSection>
-													) : (
-														<div className="col-xs-12">
-															<LoadingIndicator customColor={gcOrange} />
-														</div>
-													)}
-												</div>
-											)}
+																	</>
+																) : (
+																	<>
+																		{getSearchResults(docSearchResults, state, dispatch)}
+																		{docsPagination && (
+																			<div className="col-xs-12">
+																				<LoadingIndicator
+																					customColor={gcOrange}
+																					containerStyle={{
+																						margin: '-100px auto',
+																					}}
+																				/>
+																			</div>
+																		)}
+																	</>
+																)}
+															</SearchSection>
+														) : (
+															<div className="col-xs-12">
+																<LoadingIndicator customColor={gcOrange} />
+															</div>
+														)}
+													</div>
+												)}
 
 											{entitySearchResults &&
 												entitySearchResults.length > 0 &&
 												(activeCategoryTab === 'Organizations' ||
 													activeCategoryTab === 'all') &&
 												selectedCategories['Organizations'] && (
-												<div
-													className={'col-xs-12'}
-													style={{
-														marginTop: 10,
-														marginLeft: 0,
-														marginRight: 0,
-													}}
-												>
-													<SearchSection
-														section={'Organizations'}
-														color={'#376f94'}
-														icon={OrganizationIcon}
+													<div
+														className={'col-xs-12'}
+														style={{
+															marginTop: 10,
+															marginLeft: 0,
+															marginRight: 0,
+														}}
 													>
-														{getSearchResults(
-															entitySearchResults,
-															state,
-															dispatch
-														)}
-														<div className="gcPagination col-xs-12 text-center">
-															<Pagination
-																activePage={entityPage}
-																itemsCountPerPage={RESULTS_PER_PAGE}
-																totalItemsCount={entityCount}
-																pageRangeDisplayed={8}
-																onChange={async (page) => {
-																	trackEvent(
-																		getTrackingNameForFactory(
-																			state.cloneData.clone_name
-																		),
-																		'PaginationChanged',
-																		'page',
-																		page
-																	);
-																	setState(dispatch, {
-																		entitiesLoading: true,
-																		entityPage: page,
-																		entityPagination: true,
-																	});
-																}}
-															/>
-														</div>
-													</SearchSection>
-												</div>
-											)}
+														<SearchSection
+															section={'Organizations'}
+															color={'#376f94'}
+															icon={OrganizationIcon}
+														>
+															{getSearchResults(entitySearchResults, state, dispatch)}
+															<div className="gcPagination col-xs-12 text-center">
+																<Pagination
+																	activePage={entityPage}
+																	itemsCountPerPage={RESULTS_PER_PAGE}
+																	totalItemsCount={entityCount}
+																	pageRangeDisplayed={8}
+																	onChange={async (page) => {
+																		trackEvent(
+																			getTrackingNameForFactory(state.cloneData.clone_name),
+																			'PaginationChanged',
+																			'page',
+																			page
+																		);
+																		setState(dispatch, {
+																			entitiesLoading: true,
+																			entityPage: page,
+																			entityPagination: true,
+																		});
+																	}}
+																/>
+															</div>
+														</SearchSection>
+													</div>
+												)}
 
 											{topicSearchResults &&
 												topicSearchResults.length > 0 &&
-												(activeCategoryTab === 'Topics' ||
-													activeCategoryTab === 'all') &&
+												(activeCategoryTab === 'Topics' || activeCategoryTab === 'all') &&
 												selectedCategories['Topics'] && (
-												<div
-													className={'col-xs-12'}
-													style={{
-														marginTop: 10,
-														marginLeft: 0,
-														marginRight: 0,
-													}}
-												>
-													<SearchSection
-														section={'Topics'}
-														color={'#4da593'}
-														icon={ApplicationsIcon}
+													<div
+														className={'col-xs-12'}
+														style={{
+															marginTop: 10,
+															marginLeft: 0,
+															marginRight: 0,
+														}}
 													>
-														{getSearchResults(
-															topicSearchResults,
-															state,
-															dispatch
-														)}
-														<div className="gcPagination col-xs-12 text-center">
-															<Pagination
-																activePage={topicPage}
-																itemsCountPerPage={RESULTS_PER_PAGE}
-																totalItemsCount={topicCount}
-																pageRangeDisplayed={8}
-																onChange={async (page) => {
-																	trackEvent(
-																		getTrackingNameForFactory(
-																			state.cloneData.clone_name
-																		),
-																		'PaginationChanged',
-																		'page',
-																		page
-																	);
-																	// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
-																}}
-															/>
-														</div>
-													</SearchSection>
-												</div>
-											)}
+														<SearchSection
+															section={'Topics'}
+															color={'#4da593'}
+															icon={ApplicationsIcon}
+														>
+															{getSearchResults(topicSearchResults, state, dispatch)}
+															<div className="gcPagination col-xs-12 text-center">
+																<Pagination
+																	activePage={topicPage}
+																	itemsCountPerPage={RESULTS_PER_PAGE}
+																	totalItemsCount={topicCount}
+																	pageRangeDisplayed={8}
+																	onChange={async (page) => {
+																		trackEvent(
+																			getTrackingNameForFactory(state.cloneData.clone_name),
+																			'PaginationChanged',
+																			'page',
+																			page
+																		);
+																		// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
+																	}}
+																/>
+															</div>
+														</SearchSection>
+													</div>
+												)}
 										</div>
 									</div>
 								</div>
@@ -400,10 +365,7 @@ const PolicyMainViewHandler = {
 						{isCachedResult && (
 							<div style={styles.cachedResultIcon}>
 								<GCTooltip title={cacheTip} placement="right" arrow>
-									<i
-										style={{ cursor: 'pointer' }}
-										className="fa fa-bolt fa-2x"
-									/>
+									<i style={{ cursor: 'pointer' }} className="fa fa-bolt fa-2x" />
 								</GCTooltip>
 							</div>
 						)}
@@ -412,9 +374,7 @@ const PolicyMainViewHandler = {
 								<i
 									style={{ cursor: 'pointer' }}
 									className="fa fa-rocket"
-									onClick={() =>
-										setState(dispatch, { showEsQueryDialog: true })
-									}
+									onClick={() => setState(dispatch, { showEsQueryDialog: true })}
 								/>
 							</div>
 						)}

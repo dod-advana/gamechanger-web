@@ -154,9 +154,9 @@ export default function GCUserInfoModal(props) {
 				<CloseIcon fontSize="large" />
 			</CloseButton>
 			<p style={styles.disclaimer}>
-				The GAMECHANGER Team is collecting user data to support our research as
-				we continue improving the application. Your responses will not be shared
-				or used for any purposes outside of the GAMECHANGER development team.
+				The GAMECHANGER Team is collecting user data to support our research as we
+				continue improving the application. Your responses will not be shared or
+				used for any purposes outside of the GAMECHANGER development team.
 			</p>
 			<DialogContent style={styles.modalBody}>
 				<div style={{ ...styles.inputDiv, height: 60 }}>
@@ -196,8 +196,8 @@ export default function GCUserInfoModal(props) {
 				</div>
 				<div style={styles.inputDiv}>
 					<Typography variant="h6" style={{ margin: '0 0 5px 0' }}>
-						(Optional) What data sets or capabilities is GAMECHANGER lacking
-						that would be valuable for your role or office?
+						(Optional) What data sets or capabilities is GAMECHANGER lacking that
+						would be valuable for your role or office?
 					</Typography>
 					<TextField
 						multiline
@@ -209,8 +209,8 @@ export default function GCUserInfoModal(props) {
 				</div>
 				<div style={styles.inputDiv}>
 					<Typography variant="h6" style={{ margin: '0 0 5px 0' }}>
-						(Optional) Can you share any examples of how GAMECHANGER has
-						impacted your job?
+						(Optional) Can you share any examples of how GAMECHANGER has impacted your
+						job?
 					</Typography>
 					<TextField
 						multiline

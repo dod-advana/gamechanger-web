@@ -164,14 +164,14 @@ export const GeneralUserAnnotationCard = ({
 				}}
 			>
 				<p style={{ margin: 0 }}>
-					Help the community! Answer a simple yes or no if the highlighted words
-					are tagged correctly.
+					Help the community! Answer a simple yes or no if the highlighted words are
+					tagged correctly.
 				</p>
 				<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600 }}>
 					<li>Click "Yes" if the word(s) is/are tagged correctly.</li>
 					<li>
-						Click "No" if the word(s) is/are not tagged correctly. Then select
-						why using the drop down menu that appears.
+						Click "No" if the word(s) is/are not tagged correctly. Then select why
+						using the drop down menu that appears.
 					</li>
 					<li>Click "Not Sure" if unsure.</li>
 					<li>Submit Assist to save the assist and show another.</li>
@@ -199,9 +199,7 @@ export const GeneralUserAnnotationCard = ({
 					</FormControl>
 					<div style={{ width: '100%' }}></div>
 				</div>
-				<div
-					style={{ display: 'flex', marginTop: '10px', marginLeft: '-10px' }}
-				>
+				<div style={{ display: 'flex', marginTop: '10px', marginLeft: '-10px' }}>
 					<GCButton
 						id={'correctBtn'}
 						onClick={() => annotationCorrect()}
@@ -264,11 +262,7 @@ export const GeneralUserAnnotationCard = ({
 								className={classes.selectEmpty}
 								inputProps={{ 'aria-label': 'Without label' }}
 							>
-								<MenuItem
-									value=""
-									disabled
-									classes={{ root: { fontSize: '16px' } }}
-								>
+								<MenuItem value="" disabled classes={{ root: { fontSize: '16px' } }}>
 									Select...
 								</MenuItem>
 								<MenuItem value={1} classes={{ root: { fontSize: '16px' } }}>

@@ -178,7 +178,7 @@ const SimpleSearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					combinedSearch,
-					esIndex: cloneData.elasticsearch_index
+					esIndex: cloneData.elasticsearch_index,
 				},
 			});
 
@@ -406,10 +406,7 @@ const SimpleSearchHandler = {
 			}
 		}
 
-		if (
-			!isNullish(accessDateURL) &&
-			accessDateURL !== 'ALL' /* legacy value */
-		) {
+		if (!isNullish(accessDateURL) && accessDateURL !== 'ALL' /* legacy value */) {
 			const parsedDates = accessDateURL
 				.split('_')
 				.map((dateStr) => new Date(parseInt(dateStr)));
@@ -489,17 +486,15 @@ const SimpleSearchHandler = {
 				: undefined;
 
 		const publicationDateText =
-			publicationDateFilter &&
-			publicationDateFilter[0] &&
-			publicationDateFilter[1]
+			publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]
 				? publicationDateFilter.map((date) => date.getTime()).join('_')
 				: undefined;
 		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(
-				_.pickBy(state.selectedCategories, (value) => !!value)
-			  ).join('_')
+			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join(
+					'_'
+			  )
 			: undefined;
 
 		const params = new URLSearchParams();
@@ -509,8 +504,7 @@ const SimpleSearchHandler = {
 		if (accessDateText) params.append('accessDate', accessDateText);
 		if (pubDateText) params.append('pubDate', pubDateText);
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
-		if (categoriesText !== undefined)
-			params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

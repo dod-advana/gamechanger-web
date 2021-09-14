@@ -133,10 +133,8 @@ const DefaultGraphView = (props) => {
 	const resultsText = runningSearch
 		? 'Running search...'
 		: noSearches
-			? 'Make a search to see the graph network'
-			: `${numberWithCommas(
-				documentsFound
-		  )} document nodes and ${numberWithCommas(
+		? 'Make a search to see the graph network'
+		: `${numberWithCommas(documentsFound)} document nodes and ${numberWithCommas(
 				numOfEdges
 		  )} edges returned in ${timeFound} seconds`;
 

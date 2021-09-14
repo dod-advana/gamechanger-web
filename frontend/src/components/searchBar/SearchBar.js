@@ -110,9 +110,7 @@ SearchBar.propTypes = {
 			expansionDict: PropTypes.object,
 			selectedCategories: PropTypes.objectOf(PropTypes.bool),
 			activeCategoryTab: PropTypes.string,
-			categoryMetadata: PropTypes.objectOf(
-				PropTypes.objectOf(PropTypes.number)
-			),
+			categoryMetadata: PropTypes.objectOf(PropTypes.objectOf(PropTypes.number)),
 			isFavoriteSearch: PropTypes.bool,
 		}),
 		dispatch: PropTypes.func,

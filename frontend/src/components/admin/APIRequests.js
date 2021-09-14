@@ -80,12 +80,7 @@ export default () => {
 				<TableRow>
 					<GCButton
 						onClick={() => {
-							trackEvent(
-								'GAMECHANGER_Admin',
-								'AdminPage',
-								'DeleteAPIKey',
-								row.value
-							);
+							trackEvent('GAMECHANGER_Admin', 'AdminPage', 'DeleteAPIKey', row.value);
 							revokeAPIKeyRequestData(row.value);
 						}}
 						style={{
@@ -179,9 +174,7 @@ export default () => {
 
 			<div style={{ margin: '10px 80px' }}>
 				<GCAccordion expanded={false} header={'APPROVED API KEYS'}>
-					<div
-						style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
-					>
+					<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 						<ReactTable
 							data={gcAPIRequestData.approved}
 							columns={approvedColumns}

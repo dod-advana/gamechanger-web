@@ -199,11 +199,7 @@ const SearchBanner = (props) => {
 										: null
 								}
 							/>
-							<Typography
-								variant="h2"
-								style={styles.adminWording}
-								display="inline"
-							>
+							<Typography variant="h2" style={styles.adminWording} display="inline">
 								Data Tracker
 							</Typography>
 						</div>
@@ -220,10 +216,7 @@ const SearchBanner = (props) => {
 									<TitleText>ADVANA</TitleText>
 								</PillButton>
 							) : (
-								<AdvanaMegaMenuPill
-									margin="0 0 0 5px"
-									defaultHeader="Applications"
-								/>
+								<AdvanaMegaMenuPill margin="0 0 0 5px" defaultHeader="Applications" />
 							)}
 						</>
 					)}

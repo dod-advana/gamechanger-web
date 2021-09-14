@@ -117,9 +117,7 @@ const ModularSearchBarHandler = (props) => {
 	const [searchBarHandler, setSearchBarHandler] = useState();
 
 	useEffect(() => {
-		const queryText = context.state.searchText
-			? context.state.searchText
-			: null;
+		const queryText = context.state.searchText ? context.state.searchText : null;
 		if (queryText) {
 			setSearchText(queryText);
 		}
@@ -129,8 +127,7 @@ const ModularSearchBarHandler = (props) => {
 		// initial loading of user search history
 		if (!loaded) {
 			const userSearchHistory = JSON.parse(
-				localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) ||
-					'[]'
+				localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) || '[]'
 			);
 			const historyWithIds = userSearchHistory.map((item, index) => ({
 				id: String(index),
@@ -318,9 +315,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && autocorrect.length > 0) {
 				const rows = [];
 				autocorrect.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -336,9 +331,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchTitle.length > 0) {
 				const rows = [];
 				presearchTitle.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -354,9 +347,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && predictions.length > 0) {
 				const rows = [];
 				predictions.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -372,9 +363,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchTopic.length > 0) {
 				const rows = [];
 				presearchTopic.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -390,9 +379,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchOrg.length > 0) {
 				const rows = [];
 				presearchOrg.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());

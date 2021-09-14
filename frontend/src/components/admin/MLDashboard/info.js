@@ -30,10 +30,7 @@ const apiColumns = [
 		width: 100,
 		Cell: (row) => (
 			<TableRow>
-				<div
-					style={{ borderRadius: '8px' }}
-					className={row.value.toLowerCase()}
-				>
+				<div style={{ borderRadius: '8px' }} className={row.value.toLowerCase()}>
 					{row.value}
 				</div>
 			</TableRow>
@@ -90,16 +87,11 @@ export default (props) => {
 					: ''
 			);
 			setCurrentQa(
-				current.data.qa_model
-					? current.data.qa_model.replace(/^.*[\\/]/, '')
-					: ''
+				current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : ''
 			);
 			props.updateLogs('Successfully queried current transformer', 0);
 		} catch (e) {
-			props.updateLogs(
-				'Error querying current transformer: ' + e.toString(),
-				2
-			);
+			props.updateLogs('Error querying current transformer: ' + e.toString(), 2);
 			throw e;
 		}
 	};
@@ -197,9 +189,7 @@ export default (props) => {
 					>
 						<div style={{ display: 'inline-block' }}>Current State:</div>
 						<Tooltip
-							title={
-								'Connection ' + status[getConnectionStatus()].toUpperCase()
-							}
+							title={'Connection ' + status[getConnectionStatus()].toUpperCase()}
 							placement="right"
 							arrow
 						>
@@ -208,10 +198,7 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div
-								style={{ width: '35%', boxSizing: 'border-box' }}
-								className="half"
-							>
+							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
 								Application: <br />
 								Version: <br />
 								Connection Status: <br />

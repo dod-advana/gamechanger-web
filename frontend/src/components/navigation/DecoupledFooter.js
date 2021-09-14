@@ -2,17 +2,13 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
-import {
-	Button,
-	Modal, TextField,
-	Typography
-} from '@material-ui/core';
+import { Button, Modal, TextField, Typography } from '@material-ui/core';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
 // import {trackPageView} from "../../../utilities/telemetry/Matomo";
-import CloseIcon from "@material-ui/icons/Close";
-import GCButton from "../common/GCButton";
-import {makeStyles} from "@material-ui/core/styles";
+import CloseIcon from '@material-ui/icons/Close';
+import GCButton from '../common/GCButton';
+import { makeStyles } from '@material-ui/core/styles';
 import RequestAPIKeyDialog from '../../components/api/RequestAPIKeyDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -148,9 +144,7 @@ const DecoupledFooter = (props) => {
 	const renderAPIKeyRequestForm = () => {
 		return (
 			<>
-				<div
-					style={{ margin: '0 20px', display: 'flex', flexDirection: 'column' }}
-				>
+				<div style={{ margin: '0 20px', display: 'flex', flexDirection: 'column' }}>
 					{apiRequestLimit === 0 && (
 						<Typography display="inline" style={{ color: 'red' }}>
 							You have reached you're request limit for this month
@@ -160,9 +154,7 @@ const DecoupledFooter = (props) => {
 						label="Name"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.name ? requestAPIKeyData.name : null
-						}
+						defaultValue={requestAPIKeyData.name ? requestAPIKeyData.name : null}
 						onChange={(event) => {
 							requestAPIKeyData.name = event.target.value;
 						}}
@@ -174,9 +166,7 @@ const DecoupledFooter = (props) => {
 						label="Email"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.email ? requestAPIKeyData.email : null
-						}
+						defaultValue={requestAPIKeyData.email ? requestAPIKeyData.email : null}
 						onChange={(event) => {
 							requestAPIKeyData.email = event.target.value;
 						}}
@@ -188,9 +178,7 @@ const DecoupledFooter = (props) => {
 						label="Reason"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.reason ? requestAPIKeyData.reason : null
-						}
+						defaultValue={requestAPIKeyData.reason ? requestAPIKeyData.reason : null}
 						onChange={(event) => {
 							requestAPIKeyData.reason = event.target.value;
 						}}
@@ -226,15 +214,19 @@ const DecoupledFooter = (props) => {
 	return (
 		<FooterContainer>
 			<LinkContainer>
-				<LinkButton key='disclaimer' onClick={() => setTrackingModalOpen(true)}>App-wide Tracking Agreement</LinkButton>
-				<LinkButton key='apiKeyRequest' onClick={() => window.location = '#/gamechanger/APIKey'}>Request API Key</LinkButton>
+				<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
+					App-wide Tracking Agreement
+				</LinkButton>
+				<LinkButton
+					key="apiKeyRequest"
+					onClick={() => (window.location = '#/gamechanger/APIKey')}
+				>
+					Request API Key
+				</LinkButton>
 			</LinkContainer>
 			<Spacer />
 
-			<Modal
-				open={trackingModalOpen}
-				onClose={() => setTrackingModalOpen(false)}
-			>
+			<Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)}>
 				<div
 					style={{
 						width: '50%',
@@ -250,20 +242,19 @@ const DecoupledFooter = (props) => {
 					</CloseButton>
 					<div style={{ paddingTop: 50 }}>
 						<p>
-							Advana employs a web measurement and customization technology
-							(WMCT), on this site to remember your online interactions, to
-							conduct measurement and analysis of usage, or to customize your
-							experience. This WMCT activity is categorized as a Tier 2 WMCT:
-							i.e., multi-session tracking without collection of personally
-							identifiable information (PII), and is enabled by default. Advana
-							does not use the information associated with the WMCT to track
-							individual user activity on the Internet outside of Advana
-							websites, nor does it share the data obtained through such
-							technologies, without your explicit consent, with other
-							departments or agencies. Advana keeps a database of information
-							obtained from the use of this WMCT in an encrypted RDS instance,
-							but no personal data is maintained. Opting out of this WMCT does
-							not effect a user's access to information on this website.
+							Advana employs a web measurement and customization technology (WMCT), on
+							this site to remember your online interactions, to conduct measurement
+							and analysis of usage, or to customize your experience. This WMCT
+							activity is categorized as a Tier 2 WMCT: i.e., multi-session tracking
+							without collection of personally identifiable information (PII), and is
+							enabled by default. Advana does not use the information associated with
+							the WMCT to track individual user activity on the Internet outside of
+							Advana websites, nor does it share the data obtained through such
+							technologies, without your explicit consent, with other departments or
+							agencies. Advana keeps a database of information obtained from the use of
+							this WMCT in an encrypted RDS instance, but no personal data is
+							maintained. Opting out of this WMCT does not effect a user's access to
+							information on this website.
 						</p>
 					</div>
 					<div
@@ -303,7 +294,7 @@ const DecoupledFooter = (props) => {
 					path="/gamechanger/APIKey"
 					children={
 						<RequestAPIKeyDialog
-							handleClose={() => window.location = '#/gamechanger'}
+							handleClose={() => (window.location = '#/gamechanger')}
 							handleSave={sendAPIKeyRequest}
 							apiRequestLimit={apiRequestLimit}
 							renderContent={renderAPIKeyRequestForm}

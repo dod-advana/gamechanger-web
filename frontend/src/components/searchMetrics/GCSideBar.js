@@ -115,17 +115,18 @@ export const StyledTopTopics = styled.div`
 
 const gameChangerAPI = new GameChangerAPI();
 export default function SideBar(props) {
-	const {
-		cloneData = {},
-		context
-	} = props;
-	
-	const {state} = context;
-	
+	const { cloneData = {}, context } = props;
+
+	const { state } = context;
+
 	const [topEntities, setTopEntities] = useState([]);
 	const [topTopics, setTopTopics] = useState([]);
-	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
-	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
+	const [runningTopicSearch, setRunningTopicSearch] = useState(
+		state.runningTopicSearch
+	);
+	const [runningEntitySearch, setRunningEntitySearch] = useState(
+		state.runningEntitySearch
+	);
 	// eslint-disable-next-line no-unused-vars
 	const [orgSources, setOrgSources] = useState([]); // Will use when s3 performance fixed
 	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
@@ -146,36 +147,39 @@ export default function SideBar(props) {
 	}, [state]);
 
 	useEffect(() => {
-		gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({data}) => {
-			setOrgOverrideImageURLs(data);
-		});
+		gameChangerAPI
+			.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name))
+			.then(({ data }) => {
+				setOrgOverrideImageURLs(data);
+			});
 	}, [topEntities]);
 
 	useEffect(() => {
 		try {
-			gameChangerAPI.gcOrgSealData().then(({data}) => {
+			gameChangerAPI.gcOrgSealData().then(({ data }) => {
 				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
 				let folder = orgSources[0].image_link.split('/');
 				folder = folder[folder.length - 2];
-				const thumbnailList = orgSources.map(item => {
+				const thumbnailList = orgSources.map((item) => {
 					let filename = item.image_link.split('/').pop();
-					return {img_filename: filename}
+					return { img_filename: filename };
 				});
-				gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
-					const buffers = data;
-					buffers.forEach((buf,idx) => {
-						if (buf.status === 'fulfilled') {
-							if (orgSources[idx].image_link.split('.').pop() === 'png'){
-								orgSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
-							} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
-								orgSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+				gameChangerAPI
+					.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData)
+					.then(({ data }) => {
+						const buffers = data;
+						buffers.forEach((buf, idx) => {
+							if (buf.status === 'fulfilled') {
+								if (orgSources[idx].image_link.split('.').pop() === 'png') {
+									orgSources[idx].imgSrc = 'data:image/png;base64,' + buf.value;
+								} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
+									orgSources[idx].imgSrc = 'data:image/svg+xml;base64,' + buf.value;
+								}
+							} else {
+								orgSources[idx].imgSrc = DefaultSeal;
 							}
-						}
-						else {
-							orgSources[idx].imgSrc = DefaultSeal;
-						}
+						});
 					});
-				});
 
 				setOrgSources(orgSources);
 			});
@@ -188,21 +192,20 @@ export default function SideBar(props) {
 		if (fallbackSources.admin) {
 			// fallback to entity
 			event.target.src = fallbackSources.entity;
-		}
-		else if (fallbackSources.entity) {
+		} else if (fallbackSources.entity) {
 			// fallback to default
 			event.target.src = dodSeal;
 		}
-	}
+	};
 
 	const renderTopEntities = () => {
 		return (
 			<StyledTopEntities>
-				{topEntities.map(entity => {
+				{topEntities.map((entity) => {
 					let fallbackSources = {
 						s3: undefined, // use values from orgSources
 						admin: orgOverrideImageURLs[entity.name],
-						entity: entity.image
+						entity: entity.image,
 					};
 					return (
 						<GCTooltip
@@ -227,7 +230,9 @@ export default function SideBar(props) {
 							>
 								<img
 									alt={`${entity.name} Img`}
-									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									src={
+										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity
+									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
@@ -238,7 +243,7 @@ export default function SideBar(props) {
 						</GCTooltip>
 					);
 				})}
-			</StyledTopEntities>			
+			</StyledTopEntities>
 		);
 	};
 
@@ -326,9 +331,7 @@ export default function SideBar(props) {
 										>
 											{runningEntitySearch ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator
-														customColor={gcColors.buttonColor2}
-													/>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
 												</div>
 											) : (
 												<>{renderTopEntities()}</>
@@ -343,9 +346,7 @@ export default function SideBar(props) {
 										>
 											{runningTopicSearch ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator
-														customColor={gcColors.buttonColor2}
-													/>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
 												</div>
 											) : (
 												<>{renderTopTopics()}</>

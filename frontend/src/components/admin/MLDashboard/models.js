@@ -91,16 +91,11 @@ export default (props) => {
 					: ''
 			);
 			setCurrentQa(
-				current.data.qa_model
-					? current.data.qa_model.replace(/^.*[\\/]/, '')
-					: ''
+				current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : ''
 			);
 			props.updateLogs('Successfully queried current transformer', 0);
 		} catch (e) {
-			props.updateLogs(
-				'Error querying current transformer: ' + e.toString(),
-				2
-			);
+			props.updateLogs('Error querying current transformer: ' + e.toString(), 2);
 			throw e;
 		}
 	};
@@ -205,10 +200,7 @@ export default (props) => {
 	 */
 	const checkFlag = (flag) => {
 		let flagged = false;
-		if (
-			props.processes.process_status &&
-			props.processes.process_status.flags
-		) {
+		if (props.processes.process_status && props.processes.process_status.flags) {
 			const flags = props.processes.process_status.flags;
 			for (const key in flags) {
 				if (key.includes(flag) && flags[key]) {
@@ -259,10 +251,7 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div
-								style={{ width: '35%', boxSizing: 'border-box' }}
-								className="half"
-							>
+							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
 								Corpus:
 								<br />
 								<div style={{ paddingLeft: '15px' }}>Files in corpus:</div>
@@ -447,15 +436,10 @@ export default (props) => {
 							>
 								GPU:
 							</div>
-							<Checkbox
-								checked={gpu}
-								onChange={(e) => setgpu(e.target.checked)}
-							/>
+							<Checkbox checked={gpu} onChange={(e) => setgpu(e.target.checked)} />
 						</div>
 						<div>
-							<div style={{ width: '120px', display: 'inline-block' }}>
-								Version:
-							</div>
+							<div style={{ width: '120px', display: 'inline-block' }}>Version:</div>
 							<Input
 								value={version}
 								onChange={(e) => setVersion(e.target.value)}

@@ -39,13 +39,7 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 				rowData.reduce(
 					(
 						acc,
-						{
-							rows,
-							IconComponent,
-							handleRowPressed,
-							handleDeletePressed,
-							rowType,
-						},
+						{ rows, IconComponent, handleRowPressed, handleDeletePressed, rowType },
 						i
 					) => {
 						const withDelete = handleDeletePressed instanceof Function;

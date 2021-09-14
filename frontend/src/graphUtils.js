@@ -114,9 +114,9 @@ export const draw2DArrows = (
 	const getCoordsAlongLine = bzLine
 		? (t) => bzLine.get(t) // get position along bezier line
 		: (t) => ({
-			// straight line: interpolate linearly
-			x: start.x + (end.x - start.x) * t || 0,
-			y: start.y + (end.y - start.y) * t || 0,
+				// straight line: interpolate linearly
+				x: start.x + (end.x - start.x) * t || 0,
+				y: start.y + (end.y - start.y) * t || 0,
 		  });
 
 	const lineLen = bzLine
@@ -166,10 +166,11 @@ export const draw2DArrows = (
 	ctx.fill();
 };
 
-export const  getNodeColors = (node, alpha, nodeLabelColors = {}) => {
-	
-	if (nodeLabelColors[node?.label] && nodeLabelColors[node?.label].color === '') {
-		
+export const getNodeColors = (node, alpha, nodeLabelColors = {}) => {
+	if (
+		nodeLabelColors[node?.label] &&
+		nodeLabelColors[node?.label].color === ''
+	) {
 		shuffleArray(NODE_COLORS);
 
 		Object.keys(nodeLabelColors).forEach((label, idx) => {
@@ -359,9 +360,7 @@ export function generateRandomColors(number) {
 			) {
 				//if there's a problem with range or luminosity
 				//set the biggest difference for these colors to be whatever is most significant
-				differences.push(
-					Math.min(differenceRange + lumDifference, sumDifference)
-				);
+				differences.push(Math.min(differenceRange + lumDifference, sumDifference));
 			}
 			differences.push(sumDifference); //otherwise output the raw difference in RGB values
 		}

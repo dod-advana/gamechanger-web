@@ -443,13 +443,9 @@ export default function SearchMatrix(props) {
 							<Checkbox
 								classes={{ root: classes.filterBox }}
 								onClick={() => handleSelectAllCategories(state, dispatch)}
-								icon={
-									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
-								}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.searchSettings.allCategoriesSelected}
-								checkedIcon={
-									<i style={{ color: '#E9691D' }} className="fa fa-check" />
-								}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="All categories"
 								style={styles.filterBox}
 							/>
@@ -468,13 +464,9 @@ export default function SearchMatrix(props) {
 							<Checkbox
 								classes={{ root: classes.filterBox }}
 								onClick={() => handleSelectSpecificCategories(state, dispatch)}
-								icon={
-									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
-								}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.searchSettings.specificCategoriesSelected}
-								checkedIcon={
-									<i style={{ color: '#E9691D' }} className="fa fa-check" />
-								}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="Specific category(s)"
 								style={styles.filterBox}
 							/>

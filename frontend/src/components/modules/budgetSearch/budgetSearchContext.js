@@ -1,13 +1,13 @@
 import React, { useReducer } from 'react';
 
 const initState = {
-    mainPageData: {},
-    runGetData: false,
-    budgetSearchSettings: {
-        dataSources: []
-    },
-    cloneData: {
-        clone_name: 'budgetSearch',
+	mainPageData: {},
+	runGetData: false,
+	budgetSearchSettings: {
+		dataSources: [],
+	},
+	cloneData: {
+		clone_name: 'budgetSearch',
 		search_module: 'budgetSearch/budgetSearchSearchHandler',
 		export_module: 'simple/simpleExportHandler',
 		title_bar_module: 'budgetSearch/budgetSearchTitleBarHandler',
@@ -27,51 +27,49 @@ const initState = {
 		show_graph: false,
 		show_crowd_source: false,
 		show_feedback: false,
-		config: {esIndex: 'gc_budgetsearch'}
-    },
-
-    loading: false,
-    resultsPage: 1,
-    showSideFilters: true,
-    issuingOrgs: {},
-    resultsText: '',
-    resetSettingsSwitch: false,
-    categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+		config: { esIndex: 'gc_budgetsearch' },
 	},
-    
-    //
-    notifications: [],
-    alerts: {},
-    userInfo: {},
-    searchSettings: {
-        allCategoriesSelected: true,
-		specificCategoriesSelected: false,
-    },
-    rawSearchResults: [],
-    userData: {
-        favorite_searches: [],
-        favorite_documents: [],
-    },
-    notificationIds: [],
-    componentStepNumbers: [],
-    selectedDocuments: [],
-    totalObligatedAmount: 0,
-    sidebarDocTypes: [],
 
-}
+	loading: false,
+	resultsPage: 1,
+	showSideFilters: true,
+	issuingOrgs: {},
+	resultsText: '',
+	resetSettingsSwitch: false,
+	categorySorting: {
+		Documents: ['Relevance', 'Publishing Date', 'Alphabetical', 'References'],
+	},
+
+	//
+	notifications: [],
+	alerts: {},
+	userInfo: {},
+	searchSettings: {
+		allCategoriesSelected: true,
+		specificCategoriesSelected: false,
+	},
+	rawSearchResults: [],
+	userData: {
+		favorite_searches: [],
+		favorite_documents: [],
+	},
+	notificationIds: [],
+	componentStepNumbers: [],
+	selectedDocuments: [],
+	totalObligatedAmount: 0,
+	sidebarDocTypes: [],
+};
 
 const init = (initialState) => {
-    return initialState;
-}
+	return initialState;
+};
 
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
-		...action.payload
-	}
-}
-
+		...action.payload,
+	};
+};
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -81,11 +79,11 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
-        // case 'RESET_SEARCH_SETTINGS':
-        //     return {
-        //         ...state,
-        //         searchSettings: initState.searchSettings
-        //     };
+		// case 'RESET_SEARCH_SETTINGS':
+		//     return {
+		//         ...state,
+		//         searchSettings: initState.searchSettings
+		//     };
 		default:
 			return state;
 	}
@@ -95,9 +93,9 @@ const BudgetSearchContext = React.createContext(initState);
 
 const BudgetSearchProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
-	
+
 	return (
-		<BudgetSearchContext.Provider value={{state, dispatch}}>
+		<BudgetSearchContext.Provider value={{ state, dispatch }}>
 			{props.children}
 		</BudgetSearchContext.Provider>
 	);

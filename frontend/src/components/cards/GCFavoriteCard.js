@@ -296,37 +296,37 @@ const FavoriteCard = (props) => {
 							onClick={
 								isDocument
 									? () => {
-										trackEvent(
-											getTrackingNameForFactory(cloneData.clone_name),
-											'UserDashboardFavoritesInteraction',
-											'PDFOpen',
-											documentObject.filename
-										);
-										window.open(
-											`/#/pdfviewer/gamechanger?filename=${encode(
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'UserDashboardFavoritesInteraction',
+												'PDFOpen',
 												documentObject.filename
-											)}&prevSearchText=${
-												documentObject.search_text
-											}&pageNumber=${1}&isClone=${true}&cloneIndex=${
-												cloneData.clone_name
-											}`
-										);
+											);
+											window.open(
+												`/#/pdfviewer/gamechanger?filename=${encode(
+													documentObject.filename
+												)}&prevSearchText=${
+													documentObject.search_text
+												}&pageNumber=${1}&isClone=${true}&cloneIndex=${
+													cloneData.clone_name
+												}`
+											);
 									  }
 									: isTopic
-										? () => {
+									? () => {
 											trackEvent('GAMECHANGER', 'TopicOpened', cardTitle);
 											window.open(
 												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`
 											);
 									  }
-										: isOrganization
-											? () => {
+									: isOrganization
+									? () => {
 											// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
-												window.open(
-													`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
-												);
+											window.open(
+												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
+											);
 									  }
-											: null
+									: null
 							}
 						>
 							{isDocument || isTopic || isOrganization ? (
@@ -394,8 +394,8 @@ const FavoriteCard = (props) => {
 								</div>
 								<div style={{ width: 350, margin: 5 }}>
 									<div style={{ margin: '65px 15px 0' }}>
-										Are you sure you want to delete this favorite? You will lose
-										any comments made.
+										Are you sure you want to delete this favorite? You will lose any
+										comments made.
 									</div>
 									<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 										<GCButton

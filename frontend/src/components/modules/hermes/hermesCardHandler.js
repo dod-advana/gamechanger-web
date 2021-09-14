@@ -154,7 +154,7 @@ const StyledFrontCardHeader = styled.div`
 		margin-bottom: 0px;
 		margin-top: 0px;
 		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+			intelligentSearch ? '#9BB1C8' : 'white'};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -166,10 +166,9 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
 		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -186,7 +185,7 @@ const StyledFrontCardSubHeader = styled.div`
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+			docOrgColor ? docOrgColor : '#000000'};
 	}
 `;
 
@@ -452,9 +451,7 @@ const HermesCardHandler = {
 				<div style={styles.bodyContainer}>
 					{frontItems}
 					{item && item.highlight && (
-						<div
-							style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}
-						>
+						<div style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}>
 							<div
 								style={{
 									minWidth: 100,

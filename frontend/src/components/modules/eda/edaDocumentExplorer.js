@@ -119,8 +119,7 @@ export default function EDADocumentExplorer({
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
 					if (
 						filename &&
-						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
+						JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)
 					) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
@@ -229,12 +228,7 @@ export default function EDADocumentExplorer({
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad(
-						'docPdfViewer',
-						'viewerContainer',
-						fileName,
-						'PDF Viewer'
-					);
+					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
 					setPdfLoaded(true);
 				}
 			} catch (err) {
@@ -321,9 +315,7 @@ export default function EDADocumentExplorer({
 					overflow: 'scroll',
 				}}
 			>
-				<div
-					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
-				>
+				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{totalCount ? (
 						<div>
 							{numberWithCommas(totalCount)} results found.
@@ -336,10 +328,7 @@ export default function EDADocumentExplorer({
 					)}
 				</div>
 
-				<div
-					style={styles.docExplorerPag}
-					className="gcPagination docExplorerPag"
-				>
+				<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
 					<Pagination
 						activePage={resultsPage}
 						itemsCountPerPage={resultsPerPage}
@@ -365,9 +354,7 @@ export default function EDADocumentExplorer({
 				)}
 				{!loading &&
 					_.map(data, (item, key) => {
-						const collapsed = collapseKeys
-							? collapseKeys[key.toString()]
-							: true;
+						const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
 						const displayTitle = getDisplayTitle(item);
 
 						if (item.type === 'document') {
@@ -391,10 +378,7 @@ export default function EDADocumentExplorer({
 										<span className="gc-document-explorer-result-header-text">
 											{displayTitle}
 										</span>
-										<span
-											style={{ width: 30, marginLeft: 'auto' }}
-											className="badge"
-										>
+										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
 											{item.pageHitCount}
 										</span>
 									</div>
@@ -411,8 +395,7 @@ export default function EDADocumentExplorer({
 															];
 														if (pageObj) {
 															isHighlighted =
-																data[iframePreviewLink.dataIdx].filename ===
-																	item.filename &&
+																data[iframePreviewLink.dataIdx].filename === item.filename &&
 																pageKey === iframePreviewLink.pageHitIdx;
 														}
 													}
@@ -420,13 +403,9 @@ export default function EDADocumentExplorer({
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 
 													if (isHighlighted)
-														blockquoteClass +=
-															' searchdemo-blockquote-sm-active';
+														blockquoteClass += ' searchdemo-blockquote-sm-active';
 													return (
-														<div
-															key={key + pageKey}
-															style={{ position: 'relative' }}
-														>
+														<div key={key + pageKey} style={{ position: 'relative' }}>
 															<a
 																href="#noref"
 																className="searchdemo-quote-link"

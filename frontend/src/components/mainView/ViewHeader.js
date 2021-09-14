@@ -192,9 +192,7 @@ const ViewHeader = (props) => {
 							)} results found in ${timeFound} seconds`}
 						</div>
 					) : (
-						<div className={'sidebar-section-title'}>
-							{'Loading results ...'}
-						</div>
+						<div className={'sidebar-section-title'}>{'Loading results ...'}</div>
 					)}
 				</>
 			) : (
@@ -202,114 +200,100 @@ const ViewHeader = (props) => {
 					{resultsText
 						? resultsText
 						: `${numberWithCommas(
-							displayCount
+								displayCount
 						  )} results found in ${timeFound} seconds`}
 				</div>
 			)}
 			<div className={'view-buttons-container'}>
 				{categorySorting !== undefined &&
 					categorySorting[activeCategoryTab] !== undefined && (
-					<>
-						<FormControl variant="outlined" classes={{ root: classes.root }}>
-							<InputLabel
-								classes={{ root: classes.formlabel }}
-								id="view-name-select"
-							>
+						<>
+							<FormControl variant="outlined" classes={{ root: classes.root }}>
+								<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 									Sort
-							</InputLabel>
-							<Select
-								labelId="view-name"
-								label="Sort"
-								id="view-name-select"
-								value={currentSort}
-								onChange={handleChangeSort}
-								classes={{
-									root: classes.selectRoot,
-									icon: classes.selectIcon,
-								}}
-								autoWidth
-							>
-								{categorySorting[activeCategoryTab].map((sort) => {
-									return (
-										<MenuItem key={`${sort}-key`} value={sort}>
-											{sort}
-										</MenuItem>
-									);
-								})}
-							</Select>
-						</FormControl>
-						{currentSort !== 'Alphabetical' ? (
-							<div
-								style={{ width: '40px', marginRight: '6px', display: 'flex' }}
-							>
-								<i
-									className="fa fa-sort-amount-desc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color:
-												currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+								</InputLabel>
+								<Select
+									labelId="view-name"
+									label="Sort"
+									id="view-name-select"
+									value={currentSort}
+									onChange={handleChangeSort}
+									classes={{
+										root: classes.selectRoot,
+										icon: classes.selectIcon,
 									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								></i>
-								<i
-									className="fa fa-sort-amount-asc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color:
-												currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								></i>
-							</div>
-						) : (
-							<div
-								style={{ width: '40px', marginRight: '6px', display: 'flex' }}
-							>
-								<i
-									className="fa fa-sort-alpha-asc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color:
-												currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								></i>
-								<i
-									className="fa fa-sort-alpha-desc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color:
-												currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								></i>
-							</div>
-						)}
-					</>
-				)}
+									autoWidth
+								>
+									{categorySorting[activeCategoryTab].map((sort) => {
+										return (
+											<MenuItem key={`${sort}-key`} value={sort}>
+												{sort}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</FormControl>
+							{currentSort !== 'Alphabetical' ? (
+								<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+									<i
+										className="fa fa-sort-amount-desc"
+										style={{
+											marginTop: '80%',
+											marginRight: '5px',
+											cursor: 'pointer',
+											color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+										}}
+										aria-hidden="true"
+										onClick={() => {
+											handleChangeOrder('desc');
+										}}
+									></i>
+									<i
+										className="fa fa-sort-amount-asc"
+										style={{
+											marginTop: '80%',
+											cursor: 'pointer',
+											color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+										}}
+										aria-hidden="true"
+										onClick={() => {
+											handleChangeOrder('asc');
+										}}
+									></i>
+								</div>
+							) : (
+								<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+									<i
+										className="fa fa-sort-alpha-asc"
+										style={{
+											marginTop: '80%',
+											marginRight: '5px',
+											cursor: 'pointer',
+											color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+										}}
+										aria-hidden="true"
+										onClick={() => {
+											handleChangeOrder('asc');
+										}}
+									></i>
+									<i
+										className="fa fa-sort-alpha-desc"
+										style={{
+											marginTop: '80%',
+											cursor: 'pointer',
+											color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+										}}
+										aria-hidden="true"
+										onClick={() => {
+											handleChangeOrder('desc');
+										}}
+									></i>
+								</div>
+							)}
+						</>
+					)}
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
-					<InputLabel
-						classes={{ root: classes.formlabel }}
-						id="view-name-select"
-					>
+					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 						View
 					</InputLabel>
 					<Select
@@ -365,9 +349,7 @@ const ViewHeader = (props) => {
 						margin: '16px 0px 0px 10px',
 						minWidth: 50,
 					}}
-					disabled={
-						!state.rawSearchResults || state.rawSearchResults.length <= 0
-					}
+					disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 				>
 					<GCTooltip title="Share" placement="bottom" arrow>
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />

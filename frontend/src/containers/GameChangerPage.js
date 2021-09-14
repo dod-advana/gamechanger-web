@@ -68,9 +68,7 @@ const GameChangerPage = (props) => {
 					{cloneData.show_tutorial && <Tutorial context={context} />}
 
 					{/* Search Banner */}
-					{state.cloneDataSet && (
-						<SearchBar context={context} jupiter={jupiter} />
-					)}
+					{state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} />}
 
 					<GCUserInfoModal context={context} />
 
