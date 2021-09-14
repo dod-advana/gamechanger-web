@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import LoadingIndicator from 'advana-platform-ui/dist/loading/LoadingIndicator.js';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { RespExplAnnotationCard } from './RespExplAnnotationCard'
 import styled from 'styled-components';
 import GameChangerAPI from "../api/gameChanger-service-api";
