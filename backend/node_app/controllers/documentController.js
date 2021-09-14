@@ -1,12 +1,14 @@
 const constantsFile = require('../config/constants');
 const LOGGER = require('../lib/logger');
 const GC_ASSISTS = require('../models').gc_assists;
+const ORGANIZATION_URLS = require('../models').organization_urls;
 const { DataLibrary } = require('../lib/dataLibrary');
 const sparkMD5Lib = require('spark-md5');
 const fs = require('fs');
 const axios = require('axios');
 const https = require('https');
 const url = require('url');
+const { Op } = require('sequelize');
 const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
@@ -14,6 +16,7 @@ class DocumentController {
 		const {
 			constants = constantsFile,
 			gcCrowdAssist = GC_ASSISTS,
+			organizationURLs = ORGANIZATION_URLS,
 			logger = LOGGER,
 			dataApi = new DataLibrary(opts),
 			sparkMD5 = sparkMD5Lib
@@ -21,6 +24,7 @@ class DocumentController {
 
 		this.constants = constants;
 		this.gcCrowdAssist = gcCrowdAssist;
+		this.organizationURLs = organizationURLs;
 		this.logger = logger;
 		this.dataApi = dataApi;
 		this.sparkMD5 = sparkMD5;
@@ -34,7 +38,8 @@ class DocumentController {
 		this.cleanDocumentForCrowdAssist = this.cleanDocumentForCrowdAssist.bind(this);
 		this.getDocumentProperties = this.getDocumentProperties.bind(this);
 		this.cleanUpEsResultsForAssist = this.cleanUpEsResultsForAssist.bind(this);
-
+		this.getOrgImageOverrideURLs = this.getOrgImageOverrideURLs.bind(this);
+		this.saveOrgImageOverrideURL = this.saveOrgImageOverrideURL.bind(this);
 	}
 
 	async getDocumentsToAnnotate(req, res) {
@@ -323,6 +328,61 @@ class DocumentController {
 		} catch (err) {
 			this.logger.error(err, '8AV00WC', userId);
 			res.status(500).send(`Error getting document properties: ${err.message}`);
+		}
+	}
+
+	async getOrgImageOverrideURLs(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const orgNames = req.query.names;
+			const orgDataCleaned = {};
+			const orgData = await this.organizationURLs.findAll(orgNames ? {
+				where: {
+					org_name: {
+						[Op.or]: orgNames
+					}
+				}
+			} : {});
+
+			orgData.forEach((item) => {
+				orgDataCleaned[item.org_name] = item.image_url;
+			});
+			
+			res.status(200).send(orgDataCleaned);
+		} catch (err) {
+			this.logger.error(err, 'TJJU7QC', userId)
+			res.status(500).send(err);
+		}
+	}
+
+	async saveOrgImageOverrideURL(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const { name, imageURL } = req.body;
+
+			const existingOrg = await this.organizationURLs.findOne({
+				where: {
+					org_name: name
+				}
+			});
+
+			if (existingOrg) {
+				existingOrg.update({ image_url: imageURL });
+			} else {
+				await this.organizationURLs.create({
+					org_name: name,
+					image_url: imageURL
+				});
+			}
+
+			res.status(200).send({});
+		} catch (err) {
+			this.logger.error(err, 'TJDU7QC', userId)
+			res.status(500).send(err);
 		}
 	}
 }
