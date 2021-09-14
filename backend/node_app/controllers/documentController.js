@@ -283,13 +283,12 @@ class DocumentController {
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
-				promises.push(this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId));
+				let promise = this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId);
+				promises.push(promise);
 			});
 			
-			Promise.allSettled(promises).then(values => {
-				res.status(200).send(values)
-			}).catch(e=>console.log(e))
-
+			let allPromises = await Promise.allSettled(promises);
+			res.status(200).send(allPromises);			
 		} catch (err) {
 			this.logger.error(err, 'TJJUFQC', userId)
 			res.status(500).send(err);

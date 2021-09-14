@@ -604,7 +604,7 @@ describe('SearchUtility', function () {
 		it('should get popular documents query', () => {
 			let target = new SearchUtility(opts);
 			let actual = target.getPopularDocsQuery();
-			const expected = {"_source": ["title", "filename", "pop_score"], "from": 0, "query": {"range": {"pop_score.keyword": {"gte": 10}}}, "size": 10, "sort": [{"pop_score.keyword": {"order": "desc"}}]}	 
+			const expected = {"_source": ["title", "filename", "pop_score", "id"], "from": 0, "query": {"range": {"pop_score.keyword": {"gte": 10}}}, "size": 10, "sort": [{"pop_score.keyword": {"order": "desc"}}]}	 
 			assert.deepStrictEqual(actual, expected);
 		});
 

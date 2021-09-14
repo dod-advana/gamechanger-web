@@ -193,8 +193,8 @@ const DefaultMainViewHandler = {
 			// 	const names = data.docs.map(d=>d.crawler_name)
 			// 	setState(dispatch, {crawlerSources: names});
 			// });
-			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
-			setState(dispatch, {crawlerSources: crawlerSources.data});
+			// let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+			// setState(dispatch, {crawlerSources: crawlerSources.data});
 		} catch(e) {
 			// Do nothing
 		}
