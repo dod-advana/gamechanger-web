@@ -53,6 +53,7 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
+	gcOrgSealData: '/api/gameChanger/getOrgSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
@@ -110,6 +111,8 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
+	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
+	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
 
 	exportHistoryDELETE: function (id) {
@@ -412,8 +415,13 @@ export default class GameChangerAPI {
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
 		return axiosPOST(this.axios, url);
-	};
+	}
 
+	gcOrgSealData = async () => {
+		const url = endpoints.gcOrgSealData;
+		return axiosPOST(this.axios, url);
+	}
+	
 	getSourceTrackerData = async (options) => {
 		const url = endpoints.gcSourceTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
@@ -871,6 +879,16 @@ export default class GameChangerAPI {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
 	};
+
+	getOrgImageOverrideURLs = async (names) => {
+		const url = endpoints.getOrgImageOverrideURLs;
+		return axiosGET(this.axios, url, { params: { names }});
+	}
+
+	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
+		const url = endpoints.saveOrgImageOverrideURL;
+		return axiosPOST(this.axios, url, { name, imageURL });
+	}
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;

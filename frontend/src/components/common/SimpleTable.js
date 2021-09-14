@@ -47,92 +47,44 @@ export default class SimpleTable extends React.Component {
 		disableWrap: false,
 		stickyHeader: false,
 		useParser: false,
-	};
+		hideSubheader: false
+	}
 
 	state = {
 		selectedRow: null,
 	};
 
 	getHeader = (cols, colMap) => {
-		const { hideHeader, headerExtraStyle, colWidth, firstColWidth, title } =
-			this.props;
+		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
 
-		if (hideHeader) return <thead></thead>;
-		return (
-			<thead>
-				{title && (
-					<tr>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
-							{title}
-						</th>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}></th>
-					</tr>
-				)}
-				<tr>
-					{colMap &&
-						_.map(colMap, (col, idx) => {
-							if (idx === 0) {
-								return (
-									<th
-										style={{
-											...(this.props.stickyHeader && stickyHeader),
-											...firstColWidth,
-											...headerExtraStyle,
-										}}
-										key={idx}
-									>
-										{col.label || col.col}
-									</th>
-								);
-							} else {
-								return (
-									<th
-										style={{
-											...(this.props.stickyHeader && stickyHeader),
-											...colWidth,
-											...headerExtraStyle,
-										}}
-										key={idx}
-									>
-										{col.label || col.col}
-									</th>
-								);
-							}
-						})}
-					{!colMap &&
-						_.map(cols, (col, idx) => {
-							if (idx === 0) {
-								return (
-									<th
-										style={{
-											...(this.props.stickyHeader && stickyHeader),
-											...firstColWidth,
-											...headerExtraStyle,
-										}}
-										key={idx}
-									>
-										{col}
-									</th>
-								);
-							} else {
-								return (
-									<th
-										style={{
-											...(this.props.stickyHeader && stickyHeader),
-											...colWidth,
-											...headerExtraStyle,
-										}}
-										key={idx}
-									>
-										{col}
-									</th>
-								);
-							}
-						})}
+		if (hideHeader) return <thead></thead>
+		return <thead>
+			{
+				title && <tr>
+					<th style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>{title}</th>
+					<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}></th>
 				</tr>
-			</thead>
-		);
-	};
+			}
+			{!hideSubheader && <tr>
+				{
+					colMap && _.map(colMap, (col, idx) => {
+						if (idx === 0) {
+							return <th style={{ ...(this.props.stickyHeader && stickyHeader), ...firstColWidth, ...headerExtraStyle }} key={idx}>{col.label || col.col}</th>
+						} else {
+							return <th style={{ ...(this.props.stickyHeader && stickyHeader), ...colWidth, ...headerExtraStyle }} key={idx}>{col.label || col.col}</th>
+						}
+					})
+				}
+				{!colMap && _.map(cols, (col, idx) => {
+					if (idx === 0) {
+						return <th style={{ ...(this.props.stickyHeader && stickyHeader), ...firstColWidth, ...headerExtraStyle }} key={idx}>{col}</th>
+					} else {
+						return <th style={{ ...(this.props.stickyHeader && stickyHeader), ...colWidth, ...headerExtraStyle }} key={idx}>{col}</th>
+					}
+				})}
+			</tr>}
+		</thead>
+	}
 
 	getBody = (rows, cols, colMap, onRowClick) => {
 		const rowItems = [];

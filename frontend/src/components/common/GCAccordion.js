@@ -96,6 +96,7 @@ const GCAccordion = (props) => {
 		headerBackground,
 		headerTextColor,
 		headerTextWeight,
+		headerWidth,
 		contentPadding,
 		contentAlign,
 		contentHeight,
@@ -120,39 +121,13 @@ const GCAccordion = (props) => {
 	const borderString = notBordered ? '0px' : '1px solid rgba(0, 0, 0, .125)';
 
 	return (
-		<StyledAccordion
-			style={{ border: borderString }}
-			expanded={isExpanded}
-			onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)}
-			onClick={onClick}
-		>
-			<StyledAccordionSummary
-				style={{ backgroundColor: headerBackground }}
-				aria-controls="accordion-content"
-				id="accordion-header"
-				expandIcon={
-					isExpanded ? (
-						<CollapseIcon style={{ color: headerTextColor }} />
-					) : (
-						<ExpandIcon style={{ color: headerTextColor }} />
-					)
-				}
-			>
-				<PanelHeader
-					style={{ color: headerTextColor, fontWeight: headerTextWeight }}
-				>
-					{header}
-				</PanelHeader>
+		<StyledAccordion style={{border: borderString}} expanded={isExpanded} onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)} onClick={onClick}>
+			<StyledAccordionSummary style= {{ backgroundColor: headerBackground }} aria-controls="accordion-content" id="accordion-header"
+							  expandIcon={isExpanded ? <CollapseIcon style={{ color: headerTextColor }}/> : <ExpandIcon style={{ color: headerTextColor }} />}>
+				<PanelHeader style = {{ color: headerTextColor, fontWeight: headerTextWeight, width: headerWidth }}>{header}</PanelHeader>
 				{itemCount >= 0 && (
-					<Typography
-						style={{
-							color: 'white',
-							marginTop: '3px',
-							marginLeft: '6px',
-							fontSize: '14px',
-							fontWeight: '900',
-						}}
-					>
+				<Typography 
+					style={{color:'white', marginTop:'3px', marginLeft:'6px', fontSize:'14px', fontWeight:'900'}}>
 						({itemCount})
 					</Typography>
 				)}

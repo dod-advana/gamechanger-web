@@ -50,6 +50,7 @@ import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErr
 import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
+import BudgetSearchProfilePage from './containers/BudgetSearchProfilePage';
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -69,7 +70,7 @@ const history = createBrowserHistory();
 const tutorialOverlayAPI = new TutorialOverlayAPI();
 const gameChangerAPI = new GameChangerAPI();
 
-const v0Theme = createMuiTheme({});
+const theme = createMuiTheme({});
 
 const styles = {
 	splashContainerClosed: {
@@ -271,6 +272,24 @@ const App = () => {
 		}
 	};
 
+	const getBudgetSearchProfileRoute = () => {
+		const BudgetSearchProvider = getProvider('budgetSearch');
+
+		return (
+			<PrivateTrackedRoute 
+				path={`/budgetsearch-profile`}
+				render={(props) => 
+					<BudgetSearchProvider>
+						<BudgetSearchProfilePage {...props} />
+					</BudgetSearchProvider>}
+				pageName={'BudgetSearchProfilePage'}
+				allowFunction={() => {
+					return true;
+				}}
+			/>
+		)
+	}
+
 	const isShowNothingButComponent = (location) => {
 		const includePaths = [
 			'/pdfviewer/gamechanger',
@@ -345,82 +364,42 @@ const App = () => {
 		<Router>
 			<MatomoProvider value={instance}>
 				<MuiThemeProvider theme={ThemeDefault}>
-					<MuiThemeProvider muiTheme={v0Theme}>
+					<MuiThemeProvider muiTheme={theme}>
 						<ClassificationBanner />
 						<ConsentAgreement />
-
-						<Route
-							exact
-							path="/"
-							children={({ match, location, history }) => (
-								<div style={getStyleType(match, location)}>
-									<SlideOutMenuContextHandler>
-										<>
-											<ErrorBoundary
-												FallbackComponent={ErrorPage}
-												onError={errorHandler}
-											>
-												{!isShowNothingButComponent(location) && (
-													<SlideOutMenu
-														match={match}
-														location={location}
-														history={history}
-													/>
-												)}
-												<Switch>
-													{tokenLoaded &&
-														gameChangerCloneRoutes.map((route) => {
-															return route;
-														})}
-													<Route
-														exact
-														path="/"
-														render={() => <Redirect to="/gamechanger" />}
-													/>
-													<Route
-														exact
-														path="/gamechanger/internalUsers/track/me"
-														component={GamechangerInternalUserTrackingPage}
-													/>
-													<Route
-														exact
-														path="/gamechanger-details"
-														component={GameChangerDetailsPage}
-														location={location}
-													/>
-													<PrivateTrackedRoute
-														path="/gamechanger-admin"
-														pageName={'GamechangerAdminPage'}
-														component={GamechangerAdminPage}
-														allowFunction={() => {
-															return Permissions.isGameChangerAdmin();
-														}}
-													/>
-													<PrivateTrackedRoute
-														path="/gamechanger-es"
-														pageName={'GamechangerEsPage'}
-														component={GamechangerEsPage}
-														allowFunction={() => {
-															return true;
-														}}
-													/>
-													<TrackedPDFView
-														path="/pdfviewer/gamechanger"
-														component={GamechangerPdfViewer}
-														location={location}
-													/>
-													<Route path="*" component={NotFoundPage} />
-												</Switch>
-											</ErrorBoundary>
-										</>
-									</SlideOutMenuContextHandler>
-									{isDecoupled && (
-										<DecoupledFooter setUserMatomo={setUserMatomo} />
-									)}
-									{!isDecoupled && <AdvanaFooter />}
-								</div>
-							)}
-						/>
+	
+						<Route exact path='/' children={({ match, location, history }) => (
+							<div style={getStyleType(match, location)}>
+								<SlideOutMenuContextHandler>
+									<>
+										<ErrorBoundary
+											FallbackComponent={ErrorPage}
+											onError={errorHandler}
+										>
+											{!isShowNothingButComponent(location) && <SlideOutMenu match={match} location={location} history={history} />}
+											<Switch >
+												{tokenLoaded && gameChangerCloneRoutes.map(route => {
+													return (
+														route
+													)
+												})}
+												<Route exact path="/" render={() => (<Redirect to="/gamechanger" />)} />
+												<Route exact path="/gamechanger/internalUsers/track/me" component={GamechangerInternalUserTrackingPage} />
+												<Route exact path="/gamechanger-details" component={GameChangerDetailsPage} location={location} />
+												{getBudgetSearchProfileRoute()}
+												<PrivateTrackedRoute path="/gamechanger-admin" pageName={'GamechangerAdminPage'} component={GamechangerAdminPage} allowFunction={() => { return Permissions.isGameChangerAdmin(); }} />
+												<PrivateTrackedRoute path="/gamechanger-es" pageName={'GamechangerEsPage'} component={GamechangerEsPage} allowFunction={() => { return true; }} />
+												<TrackedPDFView path="/pdfviewer/gamechanger" component={GamechangerPdfViewer} location={location} />
+												<Route path="*" component={NotFoundPage} />
+											</Switch>
+										</ErrorBoundary>
+									</>
+								</SlideOutMenuContextHandler>
+								{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+								{!isDecoupled && <AdvanaFooter />}
+							</div>
+						)} />
+						
 					</MuiThemeProvider>
 				</MuiThemeProvider>
 			</MatomoProvider>

@@ -9,6 +9,9 @@ import { getTrackingNameForFactory, orgColorMap } from '../../gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import DefaultSeal from '../mainView/seals/GC Default Seal.png';
+import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
 
 const gcColors = {
 	buttonColor1: '#131E43',
@@ -110,19 +113,22 @@ export const StyledTopTopics = styled.div`
 	}
 `;
 
+const gameChangerAPI = new GameChangerAPI();
 export default function SideBar(props) {
-	const { cloneData = {}, context } = props;
-
-	const { state } = context;
-
+	const {
+		cloneData = {},
+		context
+	} = props;
+	
+	const {state} = context;
+	
 	const [topEntities, setTopEntities] = useState([]);
 	const [topTopics, setTopTopics] = useState([]);
-	const [runningTopicSearch, setRunningTopicSearch] = useState(
-		state.runningTopicSearch
-	);
-	const [runningEntitySearch, setRunningEntitySearch] = useState(
-		state.runningEntitySearch
-	);
+	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
+	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
+	// eslint-disable-next-line no-unused-vars
+	const [orgSources, setOrgSources] = useState([]); // Will use when s3 performance fixed
+	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
 
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
@@ -139,10 +145,65 @@ export default function SideBar(props) {
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
 
+	useEffect(() => {
+		gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({data}) => {
+			setOrgOverrideImageURLs(data);
+		});
+	}, [topEntities]);
+
+	useEffect(() => {
+		try {
+			gameChangerAPI.gcOrgSealData().then(({data}) => {
+				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
+				let folder = orgSources[0].image_link.split('/');
+				folder = folder[folder.length - 2];
+				const thumbnailList = orgSources.map(item => {
+					let filename = item.image_link.split('/').pop();
+					return {img_filename: filename}
+				});
+				gameChangerAPI.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData).then(({data}) => {
+					const buffers = data;
+					buffers.forEach((buf,idx) => {
+						if (buf.status === 'fulfilled') {
+							if (orgSources[idx].image_link.split('.').pop() === 'png'){
+								orgSources[idx].imgSrc = 'data:image/png;base64,'+ buf.value;
+							} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
+								orgSources[idx].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+							}
+						}
+						else {
+							orgSources[idx].imgSrc = DefaultSeal;
+						}
+					});
+				});
+
+				setOrgSources(orgSources);
+			});
+		} catch (e) {
+			// Do nothing
+		}
+	}, [state.cloneData]);
+
+	const handleImgSrcError = (event, fallbackSources) => {
+		if (fallbackSources.admin) {
+			// fallback to entity
+			event.target.src = fallbackSources.entity;
+		}
+		else if (fallbackSources.entity) {
+			// fallback to default
+			event.target.src = dodSeal;
+		}
+	}
+
 	const renderTopEntities = () => {
 		return (
 			<StyledTopEntities>
-				{topEntities.map((entity) => {
+				{topEntities.map(entity => {
+					let fallbackSources = {
+						s3: undefined, // use values from orgSources
+						admin: orgOverrideImageURLs[entity.name],
+						entity: entity.image
+					};
 					return (
 						<GCTooltip
 							key={entity.name}
@@ -166,17 +227,18 @@ export default function SideBar(props) {
 							>
 								<img
 									alt={`${entity.name} Img`}
-									src={
-										entity.image ||
-										'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/United_States_Department_of_Defense_Seal.svg/1200px-United_States_Department_of_Defense_Seal.svg.png'
-									}
+									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									onError={(event) => {
+										handleImgSrcError(event, fallbackSources);
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
+									}}
 								/>
 								<span>{entity.aliase}</span>
 							</div>
 						</GCTooltip>
 					);
 				})}
-			</StyledTopEntities>
+			</StyledTopEntities>			
 		);
 	};
 
