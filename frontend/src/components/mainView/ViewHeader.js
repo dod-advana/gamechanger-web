@@ -238,7 +238,6 @@ const ViewHeader = (props) => {
             color='primary'
             startIcon=<CloseIcon />
                     >
-                           Clear Filters
                     </filterButton>
             }
             <div className={'view-filters-container'}>
@@ -246,7 +245,7 @@ const ViewHeader = (props) => {
                     if(state.searchSettings.orgFilter[org]){
                         return (
                      <Button
-                    variant="contained"
+                    variant="outlined"
                             backgroundColor="white"
                             display="inline-flex"
                     name={org}
@@ -280,7 +279,7 @@ const ViewHeader = (props) => {
             if(state.searchSettings.typeFilter[type]){
                 return (
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         backgroundColor="white"
                         display="inline-flex"
 					    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
