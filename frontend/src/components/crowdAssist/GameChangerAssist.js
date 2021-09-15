@@ -402,7 +402,8 @@ class GameChangerAssist extends Component {
 				paragraphEntities[currentParagraphIndex].length
 			} entities left in this paragraph`,
 			progressValue:
-				((newEntityIndex + 1) / paragraphEntities[currentParagraphIndex].length) *
+				((newEntityIndex + 1) /
+					paragraphEntities[currentParagraphIndex].length) *
 				100,
 			canMoveForward: newCanMoveForward,
 		});
@@ -471,8 +472,11 @@ class GameChangerAssist extends Component {
 	};
 
 	handleGeneralAnswers = (correct, incorrectReason, unknown = false) => {
-		const { paragraphEntityAnswers, currentEntityIndex, currentParagraphIndex } =
-			this.state;
+		const {
+			paragraphEntityAnswers,
+			currentEntityIndex,
+			currentParagraphIndex,
+		} = this.state;
 		//gameChangerAPI.saveDocumentAnnotations(dataToSave);
 
 		paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex] = {
@@ -642,12 +646,15 @@ class GameChangerAssist extends Component {
 						}
 						entityAnswer={
 							paragraphEntityAnswers[currentParagraphIndex]
-								? paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex]
+								? paragraphEntityAnswers[currentParagraphIndex][
+										currentEntityIndex
+								  ]
 								: { correct: true, incorrectReason: '0' }
 						}
 						tag={
 							paragraphEntities[currentParagraphIndex]
-								? paragraphEntities[currentParagraphIndex][currentEntityIndex]?.tag
+								? paragraphEntities[currentParagraphIndex][currentEntityIndex]
+										?.tag
 								: 'PERSON'
 						}
 						tags={tagsList}
@@ -692,7 +699,11 @@ class GameChangerAssist extends Component {
 			>
 				<DialogTitle>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+						<Typography
+							variant="h3"
+							display="inline"
+							style={{ fontWeight: 700 }}
+						>
 							Your Assists this Week:{' '}
 							<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
 						</Typography>

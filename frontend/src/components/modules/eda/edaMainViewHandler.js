@@ -245,8 +245,14 @@ const EdaMainViewHandler = {
 							<div
 								className={`tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 							>
-								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+								<div
+									className={'col-xs-12'}
+									style={{ ...sideScroll, padding: 0 }}
+								>
+									<div
+										className="row"
+										style={{ marginLeft: 0, marginRight: 0 }}
+									>
 										{!loading && getSearchResults(searchResults)}
 									</div>
 								</div>

@@ -208,15 +208,15 @@ const GetQAResults = (props) => {
 							<div style={{ textAlign: 'center' }}>
 								{type === 'QA' ? (
 									<span>
-										This answer was retrieved based on beta artificial intelligent
-										answering. <br />
-										User discretion is encouraged while we continue maturing this
-										capability.
+										This answer was retrieved based on beta artificial
+										intelligent answering. <br />
+										User discretion is encouraged while we continue maturing
+										this capability.
 									</span>
 								) : (
 									<span>
-										This card was retrieved based on a new machine learning algorithm.{' '}
-										{feedback === '' && 'Was this result relevant?'}
+										This card was retrieved based on a new machine learning
+										algorithm. {feedback === '' && 'Was this result relevant?'}
 									</span>
 								)}
 							</div>
@@ -451,10 +451,12 @@ const GetQAResults = (props) => {
 									</div>
 									<div style={{ width: 350, margin: 5 }}>
 										<div style={{ margin: '65px 15px 0' }}>
-											Are you sure you want to delete this favorite? You will lose any
-											comments made.
+											Are you sure you want to delete this favorite? You will
+											lose any comments made.
 										</div>
-										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+										<div
+											style={{ display: 'flex', justifyContent: 'flex-end' }}
+										>
 											<GCButton
 												onClick={() => handleCancelFavorite()}
 												style={{
@@ -509,7 +511,9 @@ const GetQAResults = (props) => {
 											multiline={true}
 											rows={8}
 										/>
-										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+										<div
+											style={{ display: 'flex', justifyContent: 'flex-end' }}
+										>
 											<GCButton
 												onClick={() => handleCancelFavorite()}
 												style={{

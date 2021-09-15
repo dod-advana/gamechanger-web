@@ -282,7 +282,11 @@ const GCResponsibilityTracker = (props) => {
 							href={'#'}
 							onClick={(event) => {
 								preventDefault(event);
-								fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
+								fileClicked(
+									row.row._original.filename,
+									row.row.responsibilityText,
+									1
+								);
 							}}
 							style={{ color: '#386F94' }}
 						>
@@ -334,7 +338,9 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentsReferenced',
 				style: { whiteSpace: 'unset' },
 				width: 200,
-				Cell: (row) => <TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>,
+				Cell: (row) => (
+					<TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>
+				),
 			},
 			{
 				Header: 'Select',
@@ -357,7 +363,9 @@ const GCResponsibilityTracker = (props) => {
 								/>
 							}
 							checkedIcon={
-								<CheckBoxIcon style={{ width: 25, height: 25, fill: gcOrange }} />
+								<CheckBoxIcon
+									style={{ width: 25, height: 25, fill: gcOrange }}
+								/>
 							}
 							checked={row.row.selected}
 						/>
@@ -689,8 +697,8 @@ const GCResponsibilityTracker = (props) => {
 			<div style={styles.disclaimerContainer}>
 				Data in the table below does not currently reflect all documents in
 				GAMECHANGER. As we continue to process data for this capability, please
-				check back later or reach us by email if your document/s of interest are not
-				yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
+				check back later or reach us by email if your document/s of interest are
+				not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
 			</div>
 
 			<div style={styles.tabContainer}>
@@ -713,11 +721,18 @@ const GCResponsibilityTracker = (props) => {
 						</TabList>
 						{selectRows ? (
 							<div>
-								<GCPrimaryButton buttonColor={'#131E43'} onClick={handleCancelSelect}>
+								<GCPrimaryButton
+									buttonColor={'#131E43'}
+									onClick={handleCancelSelect}
+								>
 									Cancel <Icon className="fa fa-times" style={styles.buttons} />
 								</GCPrimaryButton>
 								<GCPrimaryButton onClick={exportCSV}>
-									Export <Icon className="fa fa-external-link" style={styles.buttons} />
+									Export{' '}
+									<Icon
+										className="fa fa-external-link"
+										style={styles.buttons}
+									/>
 								</GCPrimaryButton>
 								<GCPrimaryButton
 									buttonColor={'red'}
@@ -755,7 +770,11 @@ const GCResponsibilityTracker = (props) => {
 			>
 				<DialogTitle>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+						<Typography
+							variant="h3"
+							display="inline"
+							style={{ fontWeight: 700 }}
+						>
 							Report Issues with Data
 						</Typography>
 					</div>

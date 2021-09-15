@@ -178,15 +178,24 @@ const BudgetSearchMainViewHandler = {
 							<Checkbox
 								style={styles.filterBox}
 								onClick={() =>
-									setBudgetSearchSetting('dataSources', dataSource, state, dispatch)
+									setBudgetSearchSetting(
+										'dataSources',
+										dataSource,
+										state,
+										dispatch
+									)
 								}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={
 									budgetSearchSettings &&
 									budgetSearchSettings.dataSources &&
 									budgetSearchSettings.dataSources.indexOf(dataSource) !== -1
 								}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name={dataSource}
 							/>
 						}

@@ -277,9 +277,8 @@ const PolicySearchHandler = {
 					// if entity, add wiki description
 					entities.forEach(async (obj, i) => {
 						if (obj && obj.type === 'organization') {
-							const descriptionAPI = await gameChangerAPI.getDescriptionFromWikipedia(
-								obj.name
-							);
+							const descriptionAPI =
+								await gameChangerAPI.getDescriptionFromWikipedia(obj.name);
 							let description = descriptionAPI.query;
 							if (description.pages) {
 								entities[i].description =
@@ -446,9 +445,9 @@ const PolicySearchHandler = {
 								orgFilterObject[org[0]] = org[1];
 							});
 
-							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map(
-								(obj) => [obj, orgFilterObject[obj]]
-							);
+							newSearchSettings.originalOrgFilters = Object.keys(
+								orgFilterObject
+							).map((obj) => [obj, orgFilterObject[obj]]);
 							newSearchSettings.originalOrgFilters.sort((a, b) => b[1] - a[1]);
 						}
 
@@ -476,7 +475,9 @@ const PolicySearchHandler = {
 					setState(dispatch, {
 						searchSettings: newSearchSettings,
 						activeCategoryTab:
-							entities.length === 0 && topics.length === 0 ? 'Documents' : 'all',
+							entities.length === 0 && topics.length === 0
+								? 'Documents'
+								: 'all',
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
 						loading: false,
@@ -799,9 +800,9 @@ const PolicySearchHandler = {
 				: undefined;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join(
-					'_'
-			  )
+			? Object.keys(
+					_.pickBy(state.selectedCategories, (value) => !!value)
+			  ).join('_')
 			: undefined;
 
 		const params = new URLSearchParams();
@@ -814,7 +815,8 @@ const PolicySearchHandler = {
 		if (accessDateText) params.append('accessDate', accessDateText);
 		if (pubDateText) params.append('pubDate', pubDateText);
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
-		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined)
+			params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

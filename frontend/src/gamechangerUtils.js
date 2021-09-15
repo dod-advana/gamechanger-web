@@ -319,7 +319,8 @@ const crawlerMapping = {
 	Coast_Guard: 'US Coast Guard Directives',
 	dfar_subpart_regs: 'Defense Federal Acquisition Regulation',
 	far_subpart_regs: 'Federal Acquisition Regulation',
-	Chief_National_Guard_Bureau_Instructions: 'National Guard Bureau Instructions',
+	Chief_National_Guard_Bureau_Instructions:
+		'National Guard Bureau Instructions',
 };
 
 export const invertedCrawlerMappingFunc = (item) => {
@@ -636,9 +637,12 @@ export const shadeColor = (col, amt) => {
 	if (B > 255) B = 255;
 	else if (B < 0) B = 0;
 
-	const RR = R.toString(16).length === 1 ? '0' + R.toString(16) : R.toString(16);
-	const GG = G.toString(16).length === 1 ? '0' + G.toString(16) : G.toString(16);
-	const BB = B.toString(16).length === 1 ? '0' + B.toString(16) : B.toString(16);
+	const RR =
+		R.toString(16).length === 1 ? '0' + R.toString(16) : R.toString(16);
+	const GG =
+		G.toString(16).length === 1 ? '0' + G.toString(16) : G.toString(16);
+	const BB =
+		B.toString(16).length === 1 ? '0' + B.toString(16) : B.toString(16);
 
 	return (usePound ? '#' : '') + RR + GG + BB;
 };
@@ -668,7 +672,9 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
 
 					distance =
 						distance /
-						(element.getBoundingClientRect().height - element.scrollHeight + 62);
+						(element.getBoundingClientRect().height -
+							element.scrollHeight +
+							62);
 
 					handleOnScroll(distance, filename, category);
 
@@ -777,7 +783,8 @@ export const decodeTinyUrl = (url) => {
 	}
 
 	returnData.resultsPage = Math.floor(returnData.offset / RESULTS_PER_PAGE) + 1;
-	returnData.useSemanticSearch = returnData.searchType === SEARCH_TYPES.semantic;
+	returnData.useSemanticSearch =
+		returnData.searchType === SEARCH_TYPES.semantic;
 	returnData.pubDate = '';
 	returnData.searchFields = [];
 
@@ -789,7 +796,10 @@ export const decodeTinyUrl = (url) => {
 			const start = new Date(parseInt(dates[0]));
 			const end = new Date(parseInt(dates[1]));
 
-			returnData.pubDate = `${formatDate(start, '/')} - ${formatDate(end, '/')}`;
+			returnData.pubDate = `${formatDate(start, '/')} - ${formatDate(
+				end,
+				'/'
+			)}`;
 		} catch (err) {
 			console.log(err);
 		}

@@ -287,11 +287,16 @@ const GlobalSearchMainViewHandler = {
 				<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 					{applications &&
 						applications.length > 0 &&
-						(activeCategoryTab === 'Applications' || activeCategoryTab === 'all') &&
+						(activeCategoryTab === 'Applications' ||
+							activeCategoryTab === 'all') &&
 						selectedCategories['Applications'] && (
 							<div
 								className={'col-xs-12'}
-								style={state.listView ? styles.listViewContainer : styles.containerDiv}
+								style={
+									state.listView
+										? styles.listViewContainer
+										: styles.containerDiv
+								}
 							>
 								<SearchSection
 									section={'Applications'}
@@ -332,11 +337,16 @@ const GlobalSearchMainViewHandler = {
 
 					{dashboards &&
 						dashboards.length > 0 &&
-						(activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') &&
+						(activeCategoryTab === 'Dashboards' ||
+							activeCategoryTab === 'all') &&
 						selectedCategories['Dashboards'] && (
 							<div
 								className={'col-xs-12'}
-								style={state.listView ? styles.listViewContainer : styles.containerDiv}
+								style={
+									state.listView
+										? styles.listViewContainer
+										: styles.containerDiv
+								}
 							>
 								<SearchSection
 									section={'Dashboards'}
@@ -377,11 +387,16 @@ const GlobalSearchMainViewHandler = {
 
 					{dataSources &&
 						dataSources.length > 0 &&
-						(activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') &&
+						(activeCategoryTab === 'DataSources' ||
+							activeCategoryTab === 'all') &&
 						selectedCategories['DataSources'] && (
 							<div
 								className={'col-xs-12'}
-								style={state.listView ? styles.listViewContainer : styles.containerDiv}
+								style={
+									state.listView
+										? styles.listViewContainer
+										: styles.containerDiv
+								}
 							>
 								<SearchSection
 									section={'Data Sources'}
@@ -422,11 +437,16 @@ const GlobalSearchMainViewHandler = {
 
 					{databases &&
 						databases.length > 0 &&
-						(activeCategoryTab === 'Databases' || activeCategoryTab === 'all') &&
+						(activeCategoryTab === 'Databases' ||
+							activeCategoryTab === 'all') &&
 						selectedCategories['Databases'] && (
 							<div
 								className={'col-xs-12'}
-								style={state.listView ? styles.listViewContainer : styles.containerDiv}
+								style={
+									state.listView
+										? styles.listViewContainer
+										: styles.containerDiv
+								}
 							>
 								<SearchSection
 									section={'Databases'}

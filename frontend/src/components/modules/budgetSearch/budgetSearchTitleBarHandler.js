@@ -10,7 +10,12 @@ const BudgetSearchTitleBarHandler = {
 				style={{ display: 'flex', alignItems: 'center' }}
 				onClick={onTitleClick}
 			>
-				<img src={JAICLogo} style={styles.title} alt="JAIC" id={'titleButton'} />
+				<img
+					src={JAICLogo}
+					style={styles.title}
+					alt="JAIC"
+					id={'titleButton'}
+				/>
 				<Typography variant="h3" style={styles.wording} display="inline">
 					{cloneData.display_name}
 				</Typography>

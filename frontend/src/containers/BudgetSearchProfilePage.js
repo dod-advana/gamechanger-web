@@ -422,7 +422,9 @@ const renderMissionPartnerCheckboxes = () => {
 						onClick={() => {}}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 						checked={true}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						checkedIcon={
+							<i style={{ color: '#E9691D' }} className="fa fa-check" />
+						}
 						name={name}
 					/>
 				}
@@ -514,22 +516,23 @@ const serviceReviewData = [
 			<StyledTableKeyContainer>
 				<strong>Academic/Industry Mission Partners</strong>
 				<Typography variant="subtitle1" style={{ fontSize: 14 }}>
-					Please uncheck any academic or industry mission partners not applicable for
-					this effort
+					Please uncheck any academic or industry mission partners not
+					applicable for this effort
 				</Typography>
 			</StyledTableKeyContainer>
 		),
 		Value: (
 			<StyledTableValueContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Based on our analysis of contract data, here are the identified academic
-					and industry mission partners.
+					Based on our analysis of contract data, here are the identified
+					academic and industry mission partners.
 				</Typography>
 				<StyledCheckboxContainer>
 					{renderMissionPartnerCheckboxes()}
 				</StyledCheckboxContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Are there any mission partners not listed above (please list using commas):
+					Are there any mission partners not listed above (please list using
+					commas):
 				</Typography>
 				<TextField
 					placeholder=""
@@ -675,11 +678,11 @@ const renderAICategory = () => {
 			<hr style={{ margin: '10px auto', width: '85%' }} />
 			<StyledAIText>
 				<p align="left">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra blandit
-					est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam in elit
-					hendrerit, vitae iaculis est tristique. Sed condimentum enim at enim
-					venenatis, non suscipit urna lobortis. Sed quis risus vulputate, porta orci
-					eget, cursus sem. Mauris non sodales nunc.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
+					blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate
+					quam in elit hendrerit, vitae iaculis est tristique. Sed condimentum
+					enim at enim venenatis, non suscipit urna lobortis. Sed quis risus
+					vulputate, porta orci eget, cursus sem. Mauris non sodales nunc.
 				</p>
 			</StyledAIText>
 		</StyledAccordionDiv>
@@ -945,7 +948,10 @@ const renderSecondaryReviewer = () => {
 	return (
 		<div style={{ padding: '0 15px 20px', width: '100%' }}>
 			<StyledInlineContainer>
-				<Typography variant="subtitle1" style={{ fontSize: 16, fontWeight: 500 }}>
+				<Typography
+					variant="subtitle1"
+					style={{ fontSize: 16, fontWeight: 500 }}
+				>
 					Do you agree with the Service / DoD Component's review for this effort
 				</Typography>
 				<Autocomplete
@@ -1092,38 +1098,43 @@ const BudgetSearchProfilePage = (props) => {
 					</Typography>
 					<Typography variant="subtitle1" style={{ fontSize: '16px' }}>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
-						blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam
-						in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at
-						enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate,
-						porta orci eget, cursus sem. Mauris non sodales nunc.
+						blandit est, hendrerit luctus tortor sollicitudin ut. Donec
+						vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed
+						condimentum enim at enim venenatis, non suscipit urna lobortis. Sed
+						quis risus vulputate, porta orci eget, cursus sem. Mauris non
+						sodales nunc.
 					</Typography>
 					<Typography variant="subtitle1" style={{ fontSize: '16px' }}>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
-						blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam
-						in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at
-						enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate,
-						porta orci eget, cursus sem. Mauris non sodales nunc.
+						blandit est, hendrerit luctus tortor sollicitudin ut. Donec
+						vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed
+						condimentum enim at enim venenatis, non suscipit urna lobortis. Sed
+						quis risus vulputate, porta orci eget, cursus sem. Mauris non
+						sodales nunc.
 					</Typography>
 					<Typography variant="subtitle1" style={{ fontSize: '16px' }}>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
-						blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam
-						in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at
-						enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate,
-						porta orci eget, cursus sem. Mauris non sodales nunc.
+						blandit est, hendrerit luctus tortor sollicitudin ut. Donec
+						vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed
+						condimentum enim at enim venenatis, non suscipit urna lobortis. Sed
+						quis risus vulputate, porta orci eget, cursus sem. Mauris non
+						sodales nunc.
 					</Typography>
 					<Typography variant="subtitle1" style={{ fontSize: '16px' }}>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
-						blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam
-						in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at
-						enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate,
-						porta orci eget, cursus sem. Mauris non sodales nunc.
+						blandit est, hendrerit luctus tortor sollicitudin ut. Donec
+						vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed
+						condimentum enim at enim venenatis, non suscipit urna lobortis. Sed
+						quis risus vulputate, porta orci eget, cursus sem. Mauris non
+						sodales nunc.
 					</Typography>
 					<Typography variant="subtitle1" style={{ fontSize: '16px' }}>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut viverra
-						blandit est, hendrerit luctus tortor sollicitudin ut. Donec vulputate quam
-						in elit hendrerit, vitae iaculis est tristique. Sed condimentum enim at
-						enim venenatis, non suscipit urna lobortis. Sed quis risus vulputate,
-						porta orci eget, cursus sem. Mauris non sodales nunc.
+						blandit est, hendrerit luctus tortor sollicitudin ut. Donec
+						vulputate quam in elit hendrerit, vitae iaculis est tristique. Sed
+						condimentum enim at enim venenatis, non suscipit urna lobortis. Sed
+						quis risus vulputate, porta orci eget, cursus sem. Mauris non
+						sodales nunc.
 					</Typography>
 				</StyledMainContainer>
 				<StyledRightContainer>

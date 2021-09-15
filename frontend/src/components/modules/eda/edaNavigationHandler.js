@@ -50,7 +50,10 @@ const getToolTheme = (cloneData) => {
 		hoverColor: '#E9691D',
 		toolLogo: (
 			<div>
-				<Typography variant="h1" style={{ ...styles.wording, margin: '5px 0 0 0' }}>
+				<Typography
+					variant="h1"
+					style={{ ...styles.wording, margin: '5px 0 0 0' }}
+				>
 					<img
 						src={GamechangerContractSearchIcon}
 						alt="tool logo"
@@ -117,7 +120,11 @@ const EdaNavigationHandler = {
 				)}
 				{state.cloneData?.show_tutorial &&
 					Object.keys(state.componentStepNumbers).length > 0 && (
-						<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+						<GCTooltip
+							title="How-to, features, and tips"
+							placement="right"
+							arrow
+						>
 							<HoverNavItem
 								centered
 								onClick={() => {
@@ -244,7 +251,11 @@ const EdaNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin" centered style={{ width: '100%' }}>
+						<PageLink
+							href="#/gamechanger-admin"
+							centered
+							style={{ width: '100%' }}
+						>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>
@@ -283,7 +294,11 @@ const EdaNavigationHandler = {
 				</NavItem>
 				{state.cloneData?.show_tutorial &&
 					Object.keys(state.componentStepNumbers).length > 0 && (
-						<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+						<GCTooltip
+							title="How-to, features, and tips"
+							placement="right"
+							arrow
+						>
 							<HoverNavItem
 								onClick={() => {
 									setState(dispatch, {

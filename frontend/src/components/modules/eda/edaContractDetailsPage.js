@@ -114,7 +114,10 @@ const EDAContractDetailsPage = (props) => {
 			if (contractModData) {
 				// for the contract modifications section
 				contractModData.docs.sort((first, second) => {
-					if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {
+					if (
+						first.modification_eda_ext &&
+						first.modification_eda_ext === 'Award'
+					) {
 						return -1;
 					}
 					if (
@@ -148,7 +151,9 @@ const EDAContractDetailsPage = (props) => {
 
 					return modData;
 				});
-				barGraphData = barGraphData.filter((doc) => doc['Obligated Amount'] !== '');
+				barGraphData = barGraphData.filter(
+					(doc) => doc['Obligated Amount'] !== ''
+				);
 				setBarGraphData(barGraphData);
 
 				let currentAmount = 0;
@@ -169,7 +174,9 @@ const EDAContractDetailsPage = (props) => {
 
 					const modData = {
 						'Mod Number': doc.modification_eda_ext ?? '',
-						'Obligated Amount': amount ? Math.ceil(currentAmount * 100) / 100 : '',
+						'Obligated Amount': amount
+							? Math.ceil(currentAmount * 100) / 100
+							: '',
 						Date: date,
 					};
 					return modData;
@@ -200,7 +207,9 @@ const EDAContractDetailsPage = (props) => {
 	const renderBarGraph = () => {
 		return (
 			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-				<p style={{ width: '100%' }}>Contract Obligated Amount per Contract Mod</p>
+				<p style={{ width: '100%' }}>
+					Contract Obligated Amount per Contract Mod
+				</p>
 				<div style={{ width: '100%', height: 500 }}>
 					<ResponsiveContainer width="100%" height="100%">
 						<BarChart
@@ -219,7 +228,11 @@ const EDAContractDetailsPage = (props) => {
 							<YAxis />
 							<Tooltip />
 							<Legend />
-							<Bar dataKey="Obligated Amount" fill="rgb(0, 131, 143)" barSize={30} />
+							<Bar
+								dataKey="Obligated Amount"
+								fill="rgb(0, 131, 143)"
+								barSize={30}
+							/>
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
@@ -419,7 +432,9 @@ const EDAContractDetailsPage = (props) => {
 						expanded={true}
 						header={'CONTRACT MODIFICATIONS'}
 						itemCount={
-							contractModData && contractModData.docs ? contractModData.docs.length : 0
+							contractModData && contractModData.docs
+								? contractModData.docs.length
+								: 0
 						}
 						backgroundColor={'rgb(238,241,242)'}
 					>

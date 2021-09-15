@@ -144,7 +144,9 @@ export const SelectedDocsDrawer = (props) => {
 					margin: '16px 0px 0px 10px',
 					height: 50,
 				}}
-				disabled={!rawSearchResults || rawSearchResults.length <= 0 ? true : false}
+				disabled={
+					!rawSearchResults || rawSearchResults.length <= 0 ? true : false
+				}
 			>
 				<GCToolTip title="Export" placement="bottom" arrow>
 					<img
@@ -152,7 +154,8 @@ export const SelectedDocsDrawer = (props) => {
 						style={{
 							margin: '0 0 3px 5px',
 							width: 15,
-							opacity: !rawSearchResults || rawSearchResults.length <= 0 ? 0.6 : 1,
+							opacity:
+								!rawSearchResults || rawSearchResults.length <= 0 ? 0.6 : 1,
 						}}
 						alt="export"
 					/>

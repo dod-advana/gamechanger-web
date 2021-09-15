@@ -154,9 +154,19 @@ export default () => {
 					return (
 						<ListItem key={id}>
 							<div>{id}</div>
-							<Notification level={level} message={message} key={level + message} />
-							<Switch name={id} checked={active[id]} onChange={handleActiveChanged} />
-							<DeleteButton onClick={() => handleDelete(id)}>Delete</DeleteButton>
+							<Notification
+								level={level}
+								message={message}
+								key={level + message}
+							/>
+							<Switch
+								name={id}
+								checked={active[id]}
+								onChange={handleActiveChanged}
+							/>
+							<DeleteButton onClick={() => handleDelete(id)}>
+								Delete
+							</DeleteButton>
 						</ListItem>
 					);
 				})}
@@ -203,7 +213,10 @@ export default () => {
 					</LabelStack>
 					<LabelStack>
 						<label style={{ marginRight: '4px' }}>Active</label>
-						<Switch checked={createActive} onChange={handleCreateActiveChanged} />
+						<Switch
+							checked={createActive}
+							onChange={handleCreateActiveChanged}
+						/>
 					</LabelStack>
 				</CreateWrapper>
 				<button

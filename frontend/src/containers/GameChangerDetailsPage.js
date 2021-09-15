@@ -330,7 +330,11 @@ const addFavoriteTopicToMetadata = (data, cloneName) => {
 							<FavoriteTopic
 								key={index}
 								onClick={(event) => {
-									trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'TopicOpened',
+										topic
+									);
 									window.open(
 										`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
 									);
@@ -573,7 +577,10 @@ const GameChangerDetailsPage = (props) => {
 	const handleChangeDocsPage = (page) => {
 		setDocResultsPage(page);
 		setVisibleDocs(
-			docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE + 1)
+			docResults.slice(
+				(page - 1) * RESULTS_PER_PAGE,
+				page * RESULTS_PER_PAGE + 1
+			)
 		);
 	};
 
@@ -621,11 +628,14 @@ const GameChangerDetailsPage = (props) => {
 									className={'img'}
 									alt={`${entity.name} Img`}
 									src={
-										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity
+										fallbackSources.s3 ||
+										fallbackSources.admin ||
+										fallbackSources.entity
 									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
-										if (fallbackSources.admin) fallbackSources.admin = undefined;
+										if (fallbackSources.admin)
+											fallbackSources.admin = undefined;
 									}}
 								/>
 
@@ -688,7 +698,10 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div className={'related-documents'} style={{ width: '100%' }}>
+									<div
+										className={'related-documents'}
+										style={{ width: '100%' }}
+									>
 										<div
 											style={{
 												display: 'flex',
@@ -754,10 +767,10 @@ const GameChangerDetailsPage = (props) => {
 		return (
 			<div>
 				<p style={{ margin: '10px 4%', fontSize: 18 }}>
-					Welcome to our new (Beta version) Topic Details page! As you look around,
-					you may note some technical issues below; please bear with us while we
-					continue making improvements here and check back often for a more stable
-					version.
+					Welcome to our new (Beta version) Topic Details page! As you look
+					around, you may note some technical issues below; please bear with us
+					while we continue making improvements here and check back often for a
+					more stable version.
 				</p>
 				{topic && (
 					<MainContainer>
@@ -822,7 +835,10 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div className={'related-documents'} style={{ width: '100%' }}>
+									<div
+										className={'related-documents'}
+										style={{ width: '100%' }}
+									>
 										<div
 											style={{
 												display: 'flex',
@@ -868,7 +884,9 @@ const GameChangerDetailsPage = (props) => {
 										>
 											{gettingDocuments ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator customColor={gcColors.buttonColor2} />
+													<LoadingIndicator
+														customColor={gcColors.buttonColor2}
+													/>
 												</div>
 											) : (
 												renderDocuments()
@@ -924,7 +942,10 @@ const GameChangerDetailsPage = (props) => {
 			)}
 
 			{showContractContainer && edaPermissions && (
-				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
+				<EDAContractDetailsPage
+					awardID={contractAwardID}
+					cloneData={cloneData}
+				/>
 			)}
 		</div>
 	);

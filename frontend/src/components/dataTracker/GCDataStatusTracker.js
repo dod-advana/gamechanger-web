@@ -374,11 +374,17 @@ const GCDataStatusTracker = (props) => {
 			);
 		} else if (days > 14) {
 			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: orange[500] }} />
+				<FiberManualRecordIcon
+					fontSize="large"
+					style={{ color: orange[500] }}
+				/>
 			);
 		} else if (days > 7) {
 			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: yellow[500] }} />
+				<FiberManualRecordIcon
+					fontSize="large"
+					style={{ color: yellow[500] }}
+				/>
 			);
 		} else {
 			return (
@@ -464,7 +470,9 @@ const GCDataStatusTracker = (props) => {
 				filterable: false,
 				width: 150,
 				Cell: (row) => (
-					<TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>
+					<TableRow>
+						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
+					</TableRow>
 				),
 			},
 			{
@@ -473,7 +481,9 @@ const GCDataStatusTracker = (props) => {
 				filterable: false,
 				width: 150,
 				Cell: (row) => (
-					<TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>
+					<TableRow>
+						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
+					</TableRow>
 				),
 			},
 			{
@@ -542,9 +552,15 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
-							<FiberManualRecordIcon fontSize="large" style={{ color: green[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: green[500] }}
+							/>
 						) : (
-							<FiberManualRecordIcon fontSize="large" style={{ color: red[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: red[500] }}
+							/>
 						)}
 					</CenterRow>
 				),
@@ -555,9 +571,15 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
-							<FiberManualRecordIcon fontSize="large" style={{ color: green[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: green[500] }}
+							/>
 						) : (
-							<FiberManualRecordIcon fontSize="large" style={{ color: red[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: red[500] }}
+							/>
 						)}
 					</CenterRow>
 				),
@@ -568,9 +590,15 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
-							<FiberManualRecordIcon fontSize="large" style={{ color: green[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: green[500] }}
+							/>
 						) : (
-							<FiberManualRecordIcon fontSize="large" style={{ color: red[500] }} />
+							<FiberManualRecordIcon
+								fontSize="large"
+								style={{ color: red[500] }}
+							/>
 						)}
 					</CenterRow>
 				),
@@ -581,7 +609,9 @@ const GCDataStatusTracker = (props) => {
 				width: 150,
 				Cell: (row) => {
 					return (
-						<TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>
+						<TableRow>
+							{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
+						</TableRow>
 					);
 				},
 			},
@@ -629,7 +659,9 @@ const GCDataStatusTracker = (props) => {
 				width: 200,
 				Cell: (row) => {
 					return (
-						<TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>
+						<TableRow>
+							{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
+						</TableRow>
 					);
 				},
 			},
@@ -724,14 +756,15 @@ const GCDataStatusTracker = (props) => {
 			<StyledNeo4jTable>
 				<div className={'details-paragraph'}>
 					<Typography variant="body2">
-						The following tables and chart describe the schema in the Knowledge Graph.
-						The table on the left lists the Nodes and Relationships by "Label" along
-						with the property names and the types of those properties.
+						The following tables and chart describe the schema in the Knowledge
+						Graph. The table on the left lists the Nodes and Relationships by
+						"Label" along with the property names and the types of those
+						properties.
 					</Typography>
 					<Typography variant="body2">
-						The table in the bottom right lists the different Nodes and Relationships
-						and the counts. The chart graphically describes the schema of the
-						Knowledge Graph.
+						The table in the bottom right lists the different Nodes and
+						Relationships and the counts. The chart graphically describes the
+						schema of the Knowledge Graph.
 					</Typography>
 				</div>
 				<div className={'columns'}>

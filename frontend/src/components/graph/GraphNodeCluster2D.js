@@ -577,7 +577,9 @@ export default function GraphNodeCluster2D(props) {
 										>
 											<StyledLegendClickable
 												key={legendData[key].name}
-												onClick={(event) => handleLegendNodeClick(key, event.target)}
+												onClick={(event) =>
+													handleLegendNodeClick(key, event.target)
+												}
 												typeSelected={nodeLabelSelected}
 												type={key}
 											>
@@ -718,7 +720,9 @@ export default function GraphNodeCluster2D(props) {
 
 	const renderNodeGroupMenu = () => {
 		const nodesInGroup = graphData.nodes.filter((node) => {
-			return node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel;
+			return (
+				node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel
+			);
 		});
 		return (
 			<Popover
@@ -845,7 +849,12 @@ export default function GraphNodeCluster2D(props) {
 								nodeHexColor,
 								connectedLevel
 						  )
-						: getNodeOutlineColors(node, nodeAlpha, nodeHexColor, connectedLevel);
+						: getNodeOutlineColors(
+								node,
+								nodeAlpha,
+								nodeHexColor,
+								connectedLevel
+						  );
 
 				ctx.beginPath();
 
@@ -990,11 +999,9 @@ export default function GraphNodeCluster2D(props) {
 					ctx.lineTo(end.x, end.y);
 				} else {
 					// Use quadratic curves for regular lines and bezier for loops
-					ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](
-						...controlPoints,
-						end.x,
-						end.y
-					);
+					ctx[
+						controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'
+					](...controlPoints, end.x, end.y);
 				}
 				ctx.stroke();
 
@@ -1345,7 +1352,9 @@ export default function GraphNodeCluster2D(props) {
 					<form noValidate autoComplete="off">
 						<div className={'settings-item'}>
 							<FormControl className={'form-item-width'}>
-								<InputLabel htmlFor="charge-strength">Charge Strength</InputLabel>
+								<InputLabel htmlFor="charge-strength">
+									Charge Strength
+								</InputLabel>
 								<Input
 									id="charge-strength"
 									value={chargeStrength * -1}
@@ -1383,7 +1392,9 @@ export default function GraphNodeCluster2D(props) {
 						</div>
 						<div className={'settings-item'}>
 							<FormControl className={'form-item-width'}>
-								<InputLabel htmlFor="link-iterations">Link Iterations</InputLabel>
+								<InputLabel htmlFor="link-iterations">
+									Link Iterations
+								</InputLabel>
 								<Input
 									id="link-iterations"
 									value={linkIterations}
@@ -1411,7 +1422,9 @@ export default function GraphNodeCluster2D(props) {
 	 */
 
 	const renderNodeViewer = () => {
-		const forceGraphRef = graphRefProp ? graphRefProp.current : graphRef.current;
+		const forceGraphRef = graphRefProp
+			? graphRefProp.current
+			: graphRef.current;
 		if (forceGraphRef) {
 			// forceGraphRef.d3Force('charge').strength(chargeStrength);
 			// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);

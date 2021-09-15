@@ -39,7 +39,10 @@ var FontInspector = (function FontInspectorClosure() {
 		}
 	}
 	function textLayerClick(e) {
-		if (!e.target.dataset.fontName || e.target.tagName.toUpperCase() !== 'SPAN') {
+		if (
+			!e.target.dataset.fontName ||
+			e.target.tagName.toUpperCase() !== 'SPAN'
+		) {
 			return;
 		}
 		var fontName = e.target.dataset.fontName;

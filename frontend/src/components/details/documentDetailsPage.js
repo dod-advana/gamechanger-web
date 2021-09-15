@@ -118,8 +118,12 @@ const DocumentDetailsPage = (props) => {
 		}
 		graphData.edges.forEach((edge) => {
 			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-				const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
-				const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
+				const target = nodeIdMap[edge.target]
+					? nodeIdMap[edge.target].doc_id
+					: '';
+				const source = nodeIdMap[edge.source]
+					? nodeIdMap[edge.source].doc_id
+					: '';
 				if (source === document.id && edge.label === 'SIMILAR_TO') {
 					if (!docsMap.similar_to.includes(target)) {
 						docsMap.similar_to.push(target);
@@ -328,11 +332,17 @@ const DocumentDetailsPage = (props) => {
 
 	return (
 		<div>
-			<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new Document Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
+			<p style={{ margin: '10px 4%', fontSize: 18 }}>
+				Welcome to our new Document Details page! As you look around, you may
+				note some technical issues below; please bear with us while we continue
+				making improvements here and check back often for a more stable version.
+			</p>
 			<MainContainer>
 				<div className={'details'}>
 					<Paper>
-						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
+						<div className={'name'}>
+							{document?.display_title_s || 'Loading...'}
+						</div>
 
 						<div>
 							<GCButton
@@ -409,11 +419,27 @@ const DocumentDetailsPage = (props) => {
 				</div>
 				<div className={'graph-top-docs'}>
 					<div className={'section'}>
-						<GCAccordion expanded={true} header={'GRAPH VIEW (BETA)'} backgroundColor={'rgb(238,241,242)'}>
-							<MemoizedPolicyGraphView width={1420} height={670} graphData={graphData} runningSearchProp={runningQuery}
-								 notificationCountProp={0} setDocumentsFound={() => {}} setTimeFound={() => {}}
-								 cloneData={cloneData} expansionTerms={false} setNumOfEdges={() => {}}
-								 dispatch={{}} showSideFilters={false} showBasic={false} searchText={''} detailsView={true}
+						<GCAccordion
+							expanded={true}
+							header={'GRAPH VIEW (BETA)'}
+							backgroundColor={'rgb(238,241,242)'}
+						>
+							<MemoizedPolicyGraphView
+								width={1420}
+								height={670}
+								graphData={graphData}
+								runningSearchProp={runningQuery}
+								notificationCountProp={0}
+								setDocumentsFound={() => {}}
+								setTimeFound={() => {}}
+								cloneData={cloneData}
+								expansionTerms={false}
+								setNumOfEdges={() => {}}
+								dispatch={{}}
+								showSideFilters={false}
+								showBasic={false}
+								searchText={''}
+								detailsView={true}
 							/>
 						</GCAccordion>
 					</div>

@@ -87,7 +87,9 @@ export default () => {
 			>
 				{'Edit Trending Blacklist'}
 			</Typography>
-			<div style={{ display: 'flex', flexDirection: 'row', marginBottom: '10px' }}>
+			<div
+				style={{ display: 'flex', flexDirection: 'row', marginBottom: '10px' }}
+			>
 				<TextField
 					label="Blacklist Query"
 					id="margin-dense"

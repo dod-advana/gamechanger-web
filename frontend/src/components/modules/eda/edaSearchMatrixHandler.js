@@ -305,7 +305,9 @@ const renderMajcoms = (state, dispatch, org) => {
 							state.edaSearchSettings.majcoms &&
 							state.edaSearchSettings.majcoms[org].indexOf(searchQuery) !== -1
 						}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						checkedIcon={
+							<i style={{ color: '#E9691D' }} className="fa fa-check" />
+						}
 						name={subOrg}
 					/>
 				}
@@ -315,7 +317,9 @@ const renderMajcoms = (state, dispatch, org) => {
 		);
 	}
 
-	return <FormGroup style={{ margin: '0 0 0 28px' }}>{orgCheckboxes}</FormGroup>;
+	return (
+		<FormGroup style={{ margin: '0 0 0 28px' }}>{orgCheckboxes}</FormGroup>
+	);
 };
 
 const renderOrganizationFilters = (state, dispatch) => {
@@ -328,10 +332,16 @@ const renderOrganizationFilters = (state, dispatch) => {
 						value="All organizations"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('allOrgs', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('allOrgs', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={state.edaSearchSettings.allOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="All organizations"
 								style={styles.filterBox}
 							/>
@@ -345,10 +355,16 @@ const renderOrganizationFilters = (state, dispatch) => {
 						value="Specific organization(s)"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('specOrgs', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('specOrgs', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={!state.edaSearchSettings.allOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="Specific organization(s)"
 								style={styles.filterBox}
 							/>
@@ -369,13 +385,24 @@ const renderOrganizationFilters = (state, dispatch) => {
 								<Checkbox
 									style={styles.filterBox}
 									onClick={() =>
-										setEDASearchSetting('organizations', 'air force', state, dispatch)
+										setEDASearchSetting(
+											'organizations',
+											'air force',
+											state,
+											dispatch
+										)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.organizations &&
-										state.edaSearchSettings.organizations.indexOf('air force') !== -1
+										state.edaSearchSettings.organizations.indexOf(
+											'air force'
+										) !== -1
 									}
 									checkedIcon={
 										<i style={{ color: '#E9691D' }} className="fa fa-check" />
@@ -387,7 +414,8 @@ const renderOrganizationFilters = (state, dispatch) => {
 							labelPlacement="end"
 						/>
 						{state.edaSearchSettings.organizations &&
-							state.edaSearchSettings.organizations.indexOf('air force') !== -1 &&
+							state.edaSearchSettings.organizations.indexOf('air force') !==
+								-1 &&
 							renderMajcoms(state, dispatch, 'air force')}
 						<FormControlLabel
 							name="Army"
@@ -397,9 +425,18 @@ const renderOrganizationFilters = (state, dispatch) => {
 								<Checkbox
 									style={styles.filterBox}
 									onClick={() =>
-										setEDASearchSetting('organizations', 'army', state, dispatch)
+										setEDASearchSetting(
+											'organizations',
+											'army',
+											state,
+											dispatch
+										)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.organizations &&
@@ -425,13 +462,23 @@ const renderOrganizationFilters = (state, dispatch) => {
 								<Checkbox
 									style={styles.filterBox}
 									onClick={() =>
-										setEDASearchSetting('organizations', 'defense', state, dispatch)
+										setEDASearchSetting(
+											'organizations',
+											'defense',
+											state,
+											dispatch
+										)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.organizations &&
-										state.edaSearchSettings.organizations.indexOf('defense') !== -1
+										state.edaSearchSettings.organizations.indexOf('defense') !==
+											-1
 									}
 									checkedIcon={
 										<i style={{ color: '#E9691D' }} className="fa fa-check" />
@@ -453,9 +500,18 @@ const renderOrganizationFilters = (state, dispatch) => {
 								<Checkbox
 									style={styles.filterBox}
 									onClick={() =>
-										setEDASearchSetting('organizations', 'navy', state, dispatch)
+										setEDASearchSetting(
+											'organizations',
+											'navy',
+											state,
+											dispatch
+										)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.organizations &&
@@ -515,7 +571,12 @@ const renderIssueOfficeNameFilter = (state, dispatch) => {
 			style={{ backgroundColor: 'white', width: '100%' }}
 			fullWidth={true}
 			onBlur={(event) =>
-				setEDASearchSetting('issueOfficeName', event.target.value, state, dispatch)
+				setEDASearchSetting(
+					'issueOfficeName',
+					event.target.value,
+					state,
+					dispatch
+				)
 			}
 			inputProps={{
 				style: {
@@ -552,7 +613,9 @@ const renderFiscalYearFilter = (state, dispatch) => {
 							state.edaSearchSettings.fiscalYears &&
 							state.edaSearchSettings.fiscalYears.indexOf(i.toString()) !== -1
 						}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+						checkedIcon={
+							<i style={{ color: '#E9691D' }} className="fa fa-check" />
+						}
 						name={i.toString()}
 					/>
 				}
@@ -571,10 +634,16 @@ const renderFiscalYearFilter = (state, dispatch) => {
 						value="All years"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('allYears', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('allYears', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={state.edaSearchSettings.allYearsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="All years"
 								style={styles.filterBox}
 							/>
@@ -588,10 +657,16 @@ const renderFiscalYearFilter = (state, dispatch) => {
 						value="Specific fiscal year(s)"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('specYears', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('specYears', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={!state.edaSearchSettings.allYearsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="Specific fiscal year(s)"
 								style={styles.filterBox}
 							/>
@@ -620,10 +695,16 @@ const renderContractDataFilter = (state, dispatch) => {
 						value="All data sources"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('allData', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('allData', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={state.edaSearchSettings.allDataSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="All data sources"
 								style={styles.filterBox}
 							/>
@@ -637,10 +718,16 @@ const renderContractDataFilter = (state, dispatch) => {
 						value="Specific data source(s)"
 						control={
 							<Checkbox
-								onClick={() => setEDASearchSetting('specData', '', state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								onClick={() =>
+									setEDASearchSetting('specData', '', state, dispatch)
+								}
+								icon={
+									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
+								}
 								checked={!state.edaSearchSettings.allDataSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								checkedIcon={
+									<i style={{ color: '#E9691D' }} className="fa fa-check" />
+								}
 								name="Specific data source(s)"
 								style={styles.filterBox}
 							/>
@@ -663,7 +750,11 @@ const renderContractDataFilter = (state, dispatch) => {
 									onClick={() =>
 										setEDASearchSetting('contractData', 'pds', state, dispatch)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.contractData &&
@@ -688,7 +779,11 @@ const renderContractDataFilter = (state, dispatch) => {
 									onClick={() =>
 										setEDASearchSetting('contractData', 'syn', state, dispatch)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.contractData &&
@@ -713,7 +808,11 @@ const renderContractDataFilter = (state, dispatch) => {
 									onClick={() =>
 										setEDASearchSetting('contractData', 'none', state, dispatch)
 									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
 									checked={
 										state.edaSearchSettings &&
 										state.edaSearchSettings.contractData &&
@@ -806,9 +905,16 @@ const renderModificationFilter = (state, dispatch) => {
 							<Radio
 								style={styles.radio}
 								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
-								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+								checkedIcon={
+									<FiberManualRecordIcon style={styles.radioChecked} />
+								}
 								onClick={() =>
-									setEDASearchSetting('contractsOrMods', 'both', state, dispatch)
+									setEDASearchSetting(
+										'contractsOrMods',
+										'both',
+										state,
+										dispatch
+									)
 								}
 								checked={
 									state.edaSearchSettings &&
@@ -827,9 +933,16 @@ const renderModificationFilter = (state, dispatch) => {
 							<Radio
 								style={styles.radio}
 								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
-								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+								checkedIcon={
+									<FiberManualRecordIcon style={styles.radioChecked} />
+								}
 								onClick={() =>
-									setEDASearchSetting('contractsOrMods', 'contracts', state, dispatch)
+									setEDASearchSetting(
+										'contractsOrMods',
+										'contracts',
+										state,
+										dispatch
+									)
 								}
 								checked={
 									state.edaSearchSettings &&
@@ -848,9 +961,16 @@ const renderModificationFilter = (state, dispatch) => {
 							<Radio
 								style={styles.radio}
 								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
-								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+								checkedIcon={
+									<FiberManualRecordIcon style={styles.radioChecked} />
+								}
 								onClick={() =>
-									setEDASearchSetting('contractsOrMods', 'mods', state, dispatch)
+									setEDASearchSetting(
+										'contractsOrMods',
+										'mods',
+										state,
+										dispatch
+									)
 								}
 								checked={
 									state.edaSearchSettings &&

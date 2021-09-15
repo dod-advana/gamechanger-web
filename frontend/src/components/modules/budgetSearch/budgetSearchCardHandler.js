@@ -114,7 +114,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
@@ -348,7 +349,10 @@ const BudgetSearchCardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					docListView={docListView}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
@@ -461,7 +465,9 @@ const BudgetSearchCardHandler = {
 							>
 								<span className="buttonText">Page Hits</span>
 								<i
-									className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+									className={
+										hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+									}
 									aria-hidden="true"
 								/>
 							</button>
@@ -488,12 +494,17 @@ const BudgetSearchCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -563,12 +574,17 @@ const BudgetSearchCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.pageNumber === 0
+														? 'ID'
+														: `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -598,7 +614,9 @@ const BudgetSearchCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -655,12 +673,17 @@ const BudgetSearchCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -750,7 +773,9 @@ const BudgetSearchCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip title={'Click here to view the contract award details page'}>
+						<GCTooltip
+							title={'Click here to view the contract award details page'}
+						>
 							<CardButton
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}

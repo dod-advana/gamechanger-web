@@ -198,7 +198,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
@@ -413,7 +414,11 @@ const StyledFrontCardContent = styled.div`
 `;
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen'
+	);
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
@@ -448,12 +453,17 @@ const EdaCardHandler = {
 			const isBaseAward = item.mod_identifier_eda_ext === 'base_award';
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					docListView={docListView}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.filename, 0) : () => {}}
+								onClick={
+									docListView ? () => clickFn(item.filename, 0) : () => {}
+								}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -553,7 +563,10 @@ const EdaCardHandler = {
 			) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
-				} else if (item.metadata_type_eda_ext === 'syn' && item.award_id_eda_ext) {
+				} else if (
+					item.metadata_type_eda_ext === 'syn' &&
+					item.award_id_eda_ext
+				) {
 					tooltipText = 'Pulled from Synopsis data';
 				}
 			}
@@ -576,7 +589,9 @@ const EdaCardHandler = {
 							>
 								<span className="buttonText">Page Hits</span>
 								<i
-									className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+									className={
+										hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+									}
 									aria-hidden="true"
 								/>
 							</button>
@@ -603,12 +618,17 @@ const EdaCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -625,7 +645,12 @@ const EdaCardHandler = {
 								</div>
 							</div>
 						)}
-						<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
+						<GCTooltip
+							title={tooltipText}
+							arrow
+							placement="top"
+							enterDelay={400}
+						>
 							<div>
 								<button
 									type="button"
@@ -634,7 +659,9 @@ const EdaCardHandler = {
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'ListViewInteraction',
-											!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+											!metadataExpanded
+												? 'Expand metadata'
+												: 'Collapse metadata'
 										);
 										setMetadataExpanded(!metadataExpanded);
 									}}
@@ -642,7 +669,9 @@ const EdaCardHandler = {
 									<span className="buttonText">Document Metadata</span>
 									<i
 										className={
-											metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+											metadataExpanded
+												? 'fa fa-chevron-up'
+												: 'fa fa-chevron-down'
 										}
 										aria-hidden="true"
 									/>
@@ -680,12 +709,17 @@ const EdaCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.pageNumber === 0
+														? 'ID'
+														: `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -715,7 +749,9 @@ const EdaCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -772,12 +808,17 @@ const EdaCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -908,7 +949,10 @@ const EdaCardHandler = {
 										)}
 										<ListItemText
 											style={{
-												margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
+												margin:
+													item.modification_eda_ext !== modNumber
+														? '0 0 0 54px'
+														: '',
 												display: 'flex',
 												justifyContent: 'space-between',
 											}}
@@ -932,7 +976,9 @@ const EdaCardHandler = {
 					placement="top"
 					enterDelay={400}
 				>
-					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+					<div
+						style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+					>
 						{item.award_id_eda_ext &&
 							item.award_id_eda_ext !== 'empty' &&
 							!detailPage && (
@@ -949,14 +995,19 @@ const EdaCardHandler = {
 									<List style={{ width: '100%', padding: '0' }}>
 										<ListItem>
 											<ListItemIcon>
-												<img src={AwardIcon} style={{ width: 15 }} alt="award" />
+												<img
+													src={AwardIcon}
+													style={{ width: 15 }}
+													alt="award"
+												/>
 											</ListItemIcon>
 											<ListItemText primary={item.award_id_eda_ext} />
 										</ListItem>
 										<Divider light={true} />
 										{renderContractMods()}
 										{state.contractAwards &&
-											state.contractAwards[item.award_id_eda_ext] === 'loading' && (
+											state.contractAwards[item.award_id_eda_ext] ===
+												'loading' && (
 												<LoadingIndicator customColor={gcOrange} />
 											)}
 									</List>
@@ -967,7 +1018,11 @@ const EdaCardHandler = {
 							tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, fields, item)}
+							rows={getEDAMetadataForPropertyTable(
+								EDA_FIELD_JSON_MAP,
+								fields,
+								item
+							)}
 							height={'auto'}
 							dontScroll={true}
 							colWidth={colWidth}
@@ -1029,7 +1084,9 @@ const EdaCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip title={'Click here to view the contract award details page'}>
+						<GCTooltip
+							title={'Click here to view the contract award details page'}
+						>
 							<CardButton
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}

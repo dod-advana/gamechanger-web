@@ -246,7 +246,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
@@ -269,7 +270,8 @@ const StyledFrontCardSubHeader = styled.div`
 	}
 
 	.sub-header-full {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		padding: 8px;
@@ -461,7 +463,9 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 						{displayType}
 					</div>
 					<div className={'sub-header-two'}>
-						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
+						{item.display_org_s
+							? item.display_org_s
+							: getTypeDisplay(displayOrg)}
 					</div>
 				</StyledFrontCardSubHeader>
 			)}
@@ -474,7 +478,11 @@ const getDisplayTitle = (item) => {
 };
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen'
+	);
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
@@ -605,7 +613,9 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Page Hits</span>
 							<i
-								className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -636,12 +646,17 @@ const DefaultCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -672,7 +687,9 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -712,12 +729,17 @@ const DefaultCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.pageNumber === 0
+														? 'ID'
+														: `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -747,7 +769,9 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -796,12 +820,17 @@ const DefaultCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.pageNumber === 0
+														? 'ID'
+														: `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -893,7 +922,9 @@ const DefaultCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip title={'Check back soon for a new document details page.'}>
+						<GCTooltip
+							title={'Check back soon for a new document details page.'}
+						>
 							<CardButton
 								disabled={true}
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}

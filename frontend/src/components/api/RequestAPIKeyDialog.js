@@ -73,7 +73,9 @@ const RequestAPIKeyDialog = ({
 				</CloseButton>
 			</DialogTitle>
 
-			<DialogContent style={{ height: '100%' }}>{renderContent()}</DialogContent>
+			<DialogContent style={{ height: '100%' }}>
+				{renderContent()}
+			</DialogContent>
 
 			<DialogActions>
 				<div
