@@ -61,7 +61,12 @@ export default () => {
 				<TableRow>
 					<GCButton
 						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', 'DeleteAdmin', 'onClick', row.value);
+							trackEvent(
+								'GAMECHANGER_Admin',
+								'DeleteAdmin',
+								'onClick',
+								row.value
+							);
 							deleteAdminData(row.value).then(() => {
 								getAdminData().then(() => {
 									setShowCreateEditAdminModal(false);

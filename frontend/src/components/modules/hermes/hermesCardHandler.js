@@ -166,7 +166,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
@@ -451,7 +452,9 @@ const HermesCardHandler = {
 				<div style={styles.bodyContainer}>
 					{frontItems}
 					{item && item.highlight && (
-						<div style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}>
+						<div
+							style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}
+						>
 							<div
 								style={{
 									minWidth: 100,

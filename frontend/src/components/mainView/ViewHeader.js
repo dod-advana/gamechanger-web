@@ -192,7 +192,9 @@ const ViewHeader = (props) => {
 							)} results found in ${timeFound} seconds`}
 						</div>
 					) : (
-						<div className={'sidebar-section-title'}>{'Loading results ...'}</div>
+						<div className={'sidebar-section-title'}>
+							{'Loading results ...'}
+						</div>
 					)}
 				</>
 			) : (
@@ -209,7 +211,10 @@ const ViewHeader = (props) => {
 					categorySorting[activeCategoryTab] !== undefined && (
 						<>
 							<FormControl variant="outlined" classes={{ root: classes.root }}>
-								<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
+								<InputLabel
+									classes={{ root: classes.formlabel }}
+									id="view-name-select"
+								>
 									Sort
 								</InputLabel>
 								<Select
@@ -234,14 +239,17 @@ const ViewHeader = (props) => {
 								</Select>
 							</FormControl>
 							{currentSort !== 'Alphabetical' ? (
-								<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+								<div
+									style={{ width: '40px', marginRight: '6px', display: 'flex' }}
+								>
 									<i
 										className="fa fa-sort-amount-desc"
 										style={{
 											marginTop: '80%',
 											marginRight: '5px',
 											cursor: 'pointer',
-											color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+											color:
+												currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
 										}}
 										aria-hidden="true"
 										onClick={() => {
@@ -253,7 +261,8 @@ const ViewHeader = (props) => {
 										style={{
 											marginTop: '80%',
 											cursor: 'pointer',
-											color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+											color:
+												currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
 										}}
 										aria-hidden="true"
 										onClick={() => {
@@ -262,14 +271,17 @@ const ViewHeader = (props) => {
 									></i>
 								</div>
 							) : (
-								<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+								<div
+									style={{ width: '40px', marginRight: '6px', display: 'flex' }}
+								>
 									<i
 										className="fa fa-sort-alpha-asc"
 										style={{
 											marginTop: '80%',
 											marginRight: '5px',
 											cursor: 'pointer',
-											color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+											color:
+												currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
 										}}
 										aria-hidden="true"
 										onClick={() => {
@@ -281,7 +293,8 @@ const ViewHeader = (props) => {
 										style={{
 											marginTop: '80%',
 											cursor: 'pointer',
-											color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+											color:
+												currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
 										}}
 										aria-hidden="true"
 										onClick={() => {
@@ -293,7 +306,10 @@ const ViewHeader = (props) => {
 						</>
 					)}
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
-					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
+					<InputLabel
+						classes={{ root: classes.formlabel }}
+						id="view-name-select"
+					>
 						View
 					</InputLabel>
 					<Select
@@ -349,7 +365,9 @@ const ViewHeader = (props) => {
 						margin: '16px 0px 0px 10px',
 						minWidth: 50,
 					}}
-					disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
+					disabled={
+						!state.rawSearchResults || state.rawSearchResults.length <= 0
+					}
 				>
 					<GCTooltip title="Share" placement="bottom" arrow>
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />

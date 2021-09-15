@@ -203,7 +203,11 @@ export default () => {
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert('Reloading Handler Map', 'error', 'Failed updating handler map');
+			createAlert(
+				'Reloading Handler Map',
+				'error',
+				'Failed updating handler map'
+			);
 		}
 	};
 	const toggleUserFeedback = async () => {
@@ -295,13 +299,19 @@ export default () => {
 								to="#"
 								onClick={() => {
 									openEsIndexModal();
-									trackEvent('GAMECHANGER_Admin', 'AdminPageChangeEsIndex', 'onClick');
+									trackEvent(
+										'GAMECHANGER_Admin',
+										'AdminPageChangeEsIndex',
+										'onClick'
+									);
 								}}
 								style={{ textDecoration: 'none' }}
 							>
 								<i style={styles.image} className="fa fa fa-plug fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Change ElasticSearch Index</span>
+									<span style={styles.featureNameLink}>
+										Change ElasticSearch Index
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -315,7 +325,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-search fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Create Search Cache</span>
+									<span style={styles.featureNameLink}>
+										Create Search Cache
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -343,7 +355,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-search fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Create Abbreviations Cache</span>
+									<span style={styles.featureNameLink}>
+										Create Abbreviations Cache
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -357,7 +371,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-trash fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Clear Abbreviations Cache</span>
+									<span style={styles.featureNameLink}>
+										Clear Abbreviations Cache
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -399,7 +415,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-line-chart fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Edit Trending Blacklist</span>
+									<span style={styles.featureNameLink}>
+										Edit Trending Blacklist
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -413,7 +431,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-users fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Populate New User ID Column</span>
+									<span style={styles.featureNameLink}>
+										Populate New User ID Column
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -448,7 +468,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-btc fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle Combined Search</span>
+									<span style={styles.featureNameLink}>
+										Toggle Combined Search
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -469,7 +491,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-question fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle Intelligent Answers</span>
+									<span style={styles.featureNameLink}>
+										Toggle Intelligent Answers
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -490,7 +514,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle Entity Search</span>
+									<span style={styles.featureNameLink}>
+										Toggle Entity Search
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -511,7 +537,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle Topic Search</span>
+									<span style={styles.featureNameLink}>
+										Toggle Topic Search
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -532,7 +560,9 @@ export default () => {
 							>
 								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle User Feedback</span>
+									<span style={styles.featureNameLink}>
+										Toggle User Feedback
+									</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -540,7 +570,9 @@ export default () => {
 				</div>
 
 				{/* <p style={styles.sectionFooter}>Currently {useMatomo ? 'sending': 'not sending'} data to Matomo</p> */}
-				<p style={styles.sectionFooter}>Currently not using cache for searches</p>
+				<p style={styles.sectionFooter}>
+					Currently not using cache for searches
+				</p>
 				<p style={styles.sectionFooter}>
 					Currently using{' '}
 					{combinedSearch ? 'combined search mode' : 'keyword searching only'}

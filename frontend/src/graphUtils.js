@@ -360,7 +360,9 @@ export function generateRandomColors(number) {
 			) {
 				//if there's a problem with range or luminosity
 				//set the biggest difference for these colors to be whatever is most significant
-				differences.push(Math.min(differenceRange + lumDifference, sumDifference));
+				differences.push(
+					Math.min(differenceRange + lumDifference, sumDifference)
+				);
 			}
 			differences.push(sumDifference); //otherwise output the raw difference in RGB values
 		}

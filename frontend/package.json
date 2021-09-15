@@ -87,7 +87,7 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"pretty": "prettier --use-tabs --tab-width 1 --single-quote --write \"./**/*.{js,jsx,json}\""
+		"pretty": "prettier --use-tabs --single-quote --write \"./**/*.{js,jsx,json}\""
 	},
 	"jest": {
 		"moduleNameMapper": {

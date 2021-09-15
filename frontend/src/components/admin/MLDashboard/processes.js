@@ -137,7 +137,9 @@ const Process = (props) => {
 							marginTop: '10px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Processes In Progress:</div>
+						<div style={{ display: 'inline-block' }}>
+							Processes In Progress:
+						</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">

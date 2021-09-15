@@ -331,7 +331,9 @@ const ExportResultsDialog = ({
 				</div>
 			</div>
 			{errorMsg ? (
-				<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>
+				<div
+					style={{ color: 'red', display: 'flex', justifyContent: 'center' }}
+				>
 					{errorMsg}
 				</div>
 			) : (

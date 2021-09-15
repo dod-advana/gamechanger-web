@@ -44,7 +44,9 @@ const EDASearchBarHandler = {
 			setPresearchTopic(
 				data?.presearchTopic?.map((item) => ({ text: item })) ?? []
 			);
-			setPresearchOrg(data?.presearchOrg?.map((item) => ({ text: item })) ?? []);
+			setPresearchOrg(
+				data?.presearchOrg?.map((item) => ({ text: item })) ?? []
+			);
 			setPredictions(data?.predictions?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
 			console.log('EDA debouncedFetchSearchSuggestions err', e);

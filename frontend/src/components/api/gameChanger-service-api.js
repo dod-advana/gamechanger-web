@@ -93,7 +93,8 @@ const endpoints = {
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getOtherEntityFilterList:
 		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	storeResponsibilityReportData:
+		'/api/gameChanger/responsibilities/storeReport',
 	approveRejectAPIKeyRequestPOST:
 		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
@@ -294,7 +295,8 @@ export default class GameChangerAPI {
 		);
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
-		if (highlightText) append += `#search=${this.splitSearchText(highlightText)}`;
+		if (highlightText)
+			append += `#search=${this.splitSearchText(highlightText)}`;
 		if (pageNumber)
 			append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
 		if (fileName)
@@ -348,7 +350,10 @@ export default class GameChangerAPI {
 				})
 				.catch((e) => {
 					console.error(e);
-					console.error('ERROR GC-service-api storageDownloadBlobGET', e.message);
+					console.error(
+						'ERROR GC-service-api storageDownloadBlobGET',
+						e.message
+					);
 					reject(e.message);
 				});
 		});
@@ -358,8 +363,13 @@ export default class GameChangerAPI {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 0})
-	}
+		return axiosPOST(
+			this.axios,
+			url,
+			{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
+			{ timeout: 0 }
+		);
+	};
 
 	getCloneData = async () => {
 		const url = endpoints.gcCloneDataGET;

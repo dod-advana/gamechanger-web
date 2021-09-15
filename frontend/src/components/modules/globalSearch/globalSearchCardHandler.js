@@ -259,7 +259,10 @@ const GlobalSearchCardHandler = {
 			} else permission = true;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={!permission}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					restricted={!permission}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
@@ -368,13 +371,20 @@ const GlobalSearchCardHandler = {
 			let { name, id, restricted, type } = item;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={restricted}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					restricted={restricted}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
 							onClick={() =>
-								clickFn(state.cloneData.clone_name, getUrl(id, restricted), type)
+								clickFn(
+									state.cloneData.clone_name,
+									getUrl(id, restricted),
+									type
+								)
 							}
 						>
 							<div className={'text'}>{name}</div>
@@ -447,7 +457,8 @@ const GlobalSearchCardHandler = {
 						{new moment(modifiedDate).format('MM-DD-YYYY').toString()}
 					</Typography>
 					<Typography variant="body2">
-						Published date: {new moment(publishTime).format('MM-DD-YYYY').toString()}
+						Published date:{' '}
+						{new moment(publishTime).format('MM-DD-YYYY').toString()}
 					</Typography>
 					<Typography variant="body2">
 						Lead Developer: {parseOwnerName(owner?.name)}
@@ -457,7 +468,8 @@ const GlobalSearchCardHandler = {
 		},
 
 		getFooter: (props) => {
-			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
+			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } =
+				props;
 
 			let { restricted, betaAvailable, id } = item;
 
@@ -558,7 +570,9 @@ const GlobalSearchCardHandler = {
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
+							onClick={() =>
+								clickFn(state.cloneData.clone_name, url, item.type)
+							}
 						>
 							<div className={'text'}>{name}</div>
 							{docListView && (
@@ -661,7 +675,9 @@ const GlobalSearchCardHandler = {
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
+							onClick={() =>
+								clickFn(state.cloneData.clone_name, url, item.type)
+							}
 						>
 							<div className={'text'}>{name}</div>
 							{docListView && (

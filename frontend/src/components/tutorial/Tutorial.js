@@ -33,7 +33,9 @@ const Tutorial = (props) => {
 
 	useMountEffect(() => {
 		if (
-			!sessionStorage.getItem(`${state.cloneData.clone_name}-userVersionChecked`)
+			!sessionStorage.getItem(
+				`${state.cloneData.clone_name}-userVersionChecked`
+			)
 		) {
 			initTutorial(dispatch, state.cloneData.clone_name);
 		}

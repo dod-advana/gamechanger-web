@@ -376,7 +376,10 @@ const App = () => {
 								<div style={getStyleType(match, location)}>
 									<SlideOutMenuContextHandler>
 										<>
-											<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
+											<ErrorBoundary
+												FallbackComponent={ErrorPage}
+												onError={errorHandler}
+											>
 												{!isShowNothingButComponent(location) && (
 													<SlideOutMenu
 														match={match}
@@ -432,7 +435,9 @@ const App = () => {
 											</ErrorBoundary>
 										</>
 									</SlideOutMenuContextHandler>
-									{isDecoupled && <DecoupledFooter setUserMatomo={setUserMatomo} />}
+									{isDecoupled && (
+										<DecoupledFooter setUserMatomo={setUserMatomo} />
+									)}
 									{!isDecoupled && <AdvanaFooter />}
 								</div>
 							)}

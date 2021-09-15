@@ -191,7 +191,10 @@ export default class SimpleTable extends React.Component {
 				_.each(cols, (c, cIdx) => {
 					let value = r[c];
 					const editIcon = this.props.showEditIcon && cIdx === 0 && (
-						<i style={{ marginRight: 10, color: 'blue' }} className="fa fa-pencil" />
+						<i
+							style={{ marginRight: 10, color: 'blue' }}
+							className="fa fa-pencil"
+						/>
 					);
 					if (!value || _.isBoolean(value)) value = '';
 					rowCells.push(

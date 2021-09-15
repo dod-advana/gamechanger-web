@@ -394,8 +394,8 @@ const FavoriteCard = (props) => {
 								</div>
 								<div style={{ width: 350, margin: 5 }}>
 									<div style={{ margin: '65px 15px 0' }}>
-										Are you sure you want to delete this favorite? You will lose any
-										comments made.
+										Are you sure you want to delete this favorite? You will lose
+										any comments made.
 									</div>
 									<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 										<GCButton

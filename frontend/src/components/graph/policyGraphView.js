@@ -298,8 +298,10 @@ const filterGraphData = (nodes, edges) => {
 				edgeToNodeCountMap[source] += 1;
 				edgeToNodeCountMap[target] += 1;
 
-				idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
-				idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
+				idToNodeMap[source].edgePercent =
+					edgeToNodeCountMap[source] / edgeCount;
+				idToNodeMap[target].edgePercent =
+					edgeToNodeCountMap[target] / edgeCount;
 
 				if (!filteredGraph.relationships.includes(edge.label)) {
 					filteredGraph.relationships.push(edge.label);
@@ -459,7 +461,8 @@ export default function PolicyGraphView(props) {
 						break;
 					default:
 						const docData = getDocTypeStyles(displayType, displayOrg);
-						node.color = docData.docOrgColor !== '' ? docData.docOrgColor : '#964B00';
+						node.color =
+							docData.docOrgColor !== '' ? docData.docOrgColor : '#964B00';
 						if (!tmpLegendData[docData.docOrg]) {
 							tmpLegendData[docData.docOrg] = {
 								color: docData.docOrgColor,
@@ -733,13 +736,19 @@ export default function PolicyGraphView(props) {
 								(
 									50 -
 									31 *
-										Math.cos(-0.5 * Math.PI - 2 * (1 / menuItems.length) * idx * Math.PI)
+										Math.cos(
+											-0.5 * Math.PI -
+												2 * (1 / menuItems.length) * idx * Math.PI
+										)
 								).toFixed(4) + '%';
 							const topBack =
 								(
 									50 +
 									31 *
-										Math.sin(-0.5 * Math.PI - 2 * (1 / menuItems.length) * idx * Math.PI)
+										Math.sin(
+											-0.5 * Math.PI -
+												2 * (1 / menuItems.length) * idx * Math.PI
+										)
 								).toFixed(4) + '%';
 							return (
 								<GCTooltip
@@ -756,7 +765,9 @@ export default function PolicyGraphView(props) {
 										<div
 											className={'graph-contextBackground'}
 											style={{
-												transform: `rotate(${idx * (360 / menuItems.length)}deg)`,
+												transform: `rotate(${
+													idx * (360 / menuItems.length)
+												}deg)`,
 											}}
 										></div>
 										<div>
@@ -772,7 +783,11 @@ export default function PolicyGraphView(props) {
 		);
 	};
 
-	const handleContextMenuButtonClicked = (funcToRun, removeSelectedID, name) => {
+	const handleContextMenuButtonClicked = (
+		funcToRun,
+		removeSelectedID,
+		name
+	) => {
 		trackEvent(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'GraphContextMenuClicked',
@@ -870,7 +885,9 @@ export default function PolicyGraphView(props) {
 					...cardItem,
 					id: node.doc_id,
 					title:
-						node.label === 'Publication' ? `${node.name}` : `${node.display_title_s}`,
+						node.label === 'Publication'
+							? `${node.name}`
+							: `${node.display_title_s}`,
 					type: cardType,
 					doc_ids: [],
 					label: node.label,
@@ -997,17 +1014,20 @@ export default function PolicyGraphView(props) {
 	};
 
 	const getEntityCardData = () => {
-		gameChangerAPI.getDescriptionFromWikipedia(selectedItem.name).then((resp) => {
-			const desc = resp.query?.pages[Object.keys(resp.query.pages)[0]]?.extract;
-			if (selectedItem) {
-				selectedItem.description = desc;
-				selectedItem.done = true;
-			}
-			setGraphCardData({
-				description: desc,
-				done: true,
+		gameChangerAPI
+			.getDescriptionFromWikipedia(selectedItem.name)
+			.then((resp) => {
+				const desc =
+					resp.query?.pages[Object.keys(resp.query.pages)[0]]?.extract;
+				if (selectedItem) {
+					selectedItem.description = desc;
+					selectedItem.done = true;
+				}
+				setGraphCardData({
+					description: desc,
+					done: true,
+				});
 			});
-		});
 	};
 
 	const getTopicCardData = async () => {
@@ -1371,7 +1391,9 @@ export default function PolicyGraphView(props) {
 								>
 									<StyledLegendClickable
 										key={legendData[key].name}
-										onClick={(event) => handleLegendNodeClick(event.target, key)}
+										onClick={(event) =>
+											handleLegendNodeClick(event.target, key)
+										}
 										typeSelected={orgTypeSelected}
 										type={key}
 									>
@@ -1465,7 +1487,12 @@ export default function PolicyGraphView(props) {
 				: convertHexToRgbA(node.color, NODE_ALPHA);
 		const outlineColor =
 			orgTypeSelected !== null && orgTypeSelected !== nodeType
-				? getNodeOutlineColors(node, HIDDEN_NODE_ALPHA, node.color, connectedLevel)
+				? getNodeOutlineColors(
+						node,
+						HIDDEN_NODE_ALPHA,
+						node.color,
+						connectedLevel
+				  )
 				: getNodeOutlineColors(node, NODE_ALPHA, node.color, connectedLevel);
 
 		ctx.beginPath();
@@ -1693,7 +1720,9 @@ export default function PolicyGraphView(props) {
 					setNodeHoverIDProp={setNodeHoverID}
 				/>
 			)}
-			{showGraphCard && <div style={styles.graphCard}>{displayGraphCard()}</div>}
+			{showGraphCard && (
+				<div style={styles.graphCard}>{displayGraphCard()}</div>
+			)}
 			{graphData.nodes.length === 0 && !runningSearch && (
 				<div style={styles.centeredContent}>
 					<div style={styles.noResultsMessage}>

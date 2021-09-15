@@ -203,7 +203,11 @@ const PolicyNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin" centered style={{ width: '100%' }}>
+						<PageLink
+							href="#/gamechanger-admin"
+							centered
+							style={{ width: '100%' }}
+						>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>

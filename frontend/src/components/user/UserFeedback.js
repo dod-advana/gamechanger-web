@@ -301,7 +301,9 @@ export default function UserFeedback(props) {
 							<MenuItem value="Request training or related materials">
 								Request training or related materials
 							</MenuItem>
-							<MenuItem value="Submit a suggestion">Submit a suggestion</MenuItem>
+							<MenuItem value="Submit a suggestion">
+								Submit a suggestion
+							</MenuItem>
 							<MenuItem value="Other (please provide description below)">
 								Other (please provide description below)
 							</MenuItem>

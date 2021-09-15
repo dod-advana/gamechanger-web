@@ -202,7 +202,12 @@ export default () => {
 					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
+								trackEvent(
+									'GAMECHANGER_Admin',
+									'EditClone',
+									'onClick',
+									row.value
+								);
 								openCloneModal(row.value);
 							}}
 							style={{ minWidth: 'unset' }}
@@ -222,7 +227,12 @@ export default () => {
 					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
+								trackEvent(
+									'GAMECHANGER_Admin',
+									'DeleteClone',
+									'onClick',
+									row.value
+								);
 								deleteCloneData(row.value).then(() => {
 									getCloneData(setGCCloneTableData, setCloneTableMetaData);
 								});

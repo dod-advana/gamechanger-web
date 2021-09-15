@@ -362,7 +362,8 @@ function GCCard(props) {
 			isFavorite =
 				_.find(faveOrganizations, (organization) => {
 					return (
-						organization.organization_name.toLowerCase() === item.name.toLowerCase()
+						organization.organization_name.toLowerCase() ===
+						item.name.toLowerCase()
 					);
 				}) !== undefined;
 			break;
@@ -579,7 +580,9 @@ function GCCard(props) {
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'CardInteraction',
 									'IntelligentSearchThumbsUp',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`
+									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
+										item
+									)}`
 								);
 							}
 						}}
@@ -599,7 +602,9 @@ function GCCard(props) {
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'CardInteraction',
 									'IntelligentSearchThumbsDown',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(item)}`
+									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
+										item
+									)}`
 								);
 							}
 						}}
@@ -752,7 +757,8 @@ function GCCard(props) {
 							{/* END CARD HEADER */}
 
 							{/* START CARD SUBHEADER */}
-							{loaded && cardHandler.getCardSubHeader({ item, state, toggledMore })}
+							{loaded &&
+								cardHandler.getCardSubHeader({ item, state, toggledMore })}
 							{/* END CARD SUBHEADER */}
 
 							{/* START CARD CONTENT */}

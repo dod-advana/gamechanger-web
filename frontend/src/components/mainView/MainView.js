@@ -79,7 +79,11 @@ const MainView = (props) => {
 	useEffect(() => {
 		if (state.cloneData.clone_name === 'gamechanger') {
 			if (state.docsPagination && searchHandler) {
-				searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+				searchHandler.handleDocPagination(
+					state,
+					dispatch,
+					state.replaceResults
+				);
 			}
 			if (state.entityPagination && searchHandler) {
 				searchHandler.handleEntityPagination(state, dispatch);
@@ -294,7 +298,8 @@ const MainView = (props) => {
 									'Data Status Tracker'}
 								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && (
 									<span>
-										Analyst Tools <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
+										Analyst Tools{' '}
+										<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
 									</span>
 								)}
 								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && (

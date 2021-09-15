@@ -157,7 +157,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
@@ -180,7 +181,8 @@ const StyledFrontCardSubHeader = styled.div`
 	}
 
 	.sub-header-full {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		padding: 8px;
@@ -194,7 +196,8 @@ const StyledFrontCardSubHeader = styled.div`
 	}
 
 	.list-sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		color: ${({ typeTextColor }) =>
+			typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
 			docTypeColor ? docTypeColor : '#000000'};
 		width: 150px;
@@ -461,7 +464,11 @@ const clickFn = (
 	pageNumber = 0,
 	sourceUrl
 ) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen'
+	);
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
@@ -640,7 +647,9 @@ const getCardHeaderHandler = ({
 								{displayType}
 							</div>
 							<div className={'list-sub-header-two'}>
-								{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
+								{item.display_org_s
+									? item.display_org_s
+									: getTypeDisplay(displayOrg)}
 							</div>
 						</StyledFrontCardSubHeader>
 					)}
@@ -691,7 +700,9 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 						{displayType}
 					</div>
 					<div className={'sub-header-two'}>
-						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
+						{item.display_org_s
+							? item.display_org_s
+							: getTypeDisplay(displayOrg)}
 					</div>
 				</StyledFrontCardSubHeader>
 			)}
@@ -729,8 +740,8 @@ const getCardExtrasHandler = (props) => {
 				<div className={classes.paper}>
 					<div style={{ width: 330, margin: 5 }}>
 						<div>
-							Are you sure you wish to delete this favorite? You will lose any comments
-							made.
+							Are you sure you wish to delete this favorite? You will lose any
+							comments made.
 						</div>
 						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 							<GCButton
@@ -917,14 +928,19 @@ const PolicyCardHandler = {
 															{page.title && <span>{page.title}</span>}
 															{page.pageNumber && (
 																<span>
-																	{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+																	{page.pageNumber === 0
+																		? 'ID'
+																		: `Page ${page.pageNumber}`}
 																</span>
 															)}
 														</span>
 														<i
 															className="fa fa-chevron-right"
 															style={{
-																color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+																color:
+																	hoveredHit === key
+																		? 'white'
+																		: 'rgb(189, 189, 189)',
 															}}
 														/>
 													</div>
@@ -983,12 +999,17 @@ const PolicyCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.pageNumber === 0
+														? 'ID'
+														: `Page ${page.pageNumber}`}
 												</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -1018,7 +1039,9 @@ const PolicyCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
+								className={
+									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
+								}
 								aria-hidden="true"
 							/>
 						</button>
@@ -1091,13 +1114,18 @@ const PolicyCardHandler = {
 												{page.title && <span>{page.title}</span>}
 												{page.pageNumber && (
 													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
 													</span>
 												)}
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -1128,7 +1156,8 @@ const PolicyCardHandler = {
 		}) => {
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item;
-			const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list);
+			const previewDataReflist =
+				getReferenceListMetadataPropertyTable(ref_list);
 
 			const labelText = item.isRevoked ? 'Cancel Date' : 'Verification Date';
 			let dateText = 'Unknown';
@@ -1189,9 +1218,16 @@ const PolicyCardHandler = {
 			}
 
 			let file_orgin_item;
-			if (item.source_page_url_s !== undefined && item.source_page_url_s !== '') {
+			if (
+				item.source_page_url_s !== undefined &&
+				item.source_page_url_s !== ''
+			) {
 				file_orgin_item = (
-					<a href={item.source_page_url_s} target="_blank" rel="noopener noreferrer">
+					<a
+						href={item.source_page_url_s}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						{' '}
 						Go to Source{' '}
 					</a>
@@ -1203,7 +1239,11 @@ const PolicyCardHandler = {
 			let source_file_item;
 			if (item.download_url_s !== undefined && item.download_url_s !== '') {
 				source_file_item = (
-					<a href={item.download_url_s} target="_blank" rel="noopener noreferrer">
+					<a
+						href={item.download_url_s}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						{' '}
 						Open from Source
 					</a>
@@ -1277,7 +1317,13 @@ const PolicyCardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+								clickFn(
+									filename,
+									cloneName,
+									searchText,
+									0,
+									item.download_url_s
+								);
 							}}
 						>
 							Open
@@ -1547,7 +1593,9 @@ const PolicyCardHandler = {
 							<img
 								alt="Office Img"
 								src={
-									fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity
+									fallbackSources.s3 ||
+									fallbackSources.admin ||
+									fallbackSources.entity
 								}
 								onError={(event) => {
 									handleImgSrcError(event, fallbackSources);
@@ -1581,7 +1629,8 @@ const PolicyCardHandler = {
 					) {
 						if (key === 'website') {
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: <a href={item[key]}>{item[key]}</a>,
 							});
 						} else if (key === 'aliases') {
@@ -1594,12 +1643,14 @@ const PolicyCardHandler = {
 								finalString = item[key];
 							}
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: finalString,
 							});
 						} else if (key === 'parent_agency') {
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: (
 									<a
 										href="/#/gamechanger-details"
@@ -1624,7 +1675,8 @@ const PolicyCardHandler = {
 							});
 						} else {
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: item[key],
 							});
 						}
@@ -1850,7 +1902,8 @@ const PolicyCardHandler = {
 								finalString = item[key];
 							}
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: finalString,
 							});
 						} else if (key === 'documentCount') {
@@ -1872,7 +1925,8 @@ const PolicyCardHandler = {
 							});
 						} else {
 							tableData.push({
-								Key: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+								Key:
+									key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
 								Value: item[key],
 							});
 						}

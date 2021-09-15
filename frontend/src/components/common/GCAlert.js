@@ -93,7 +93,10 @@ export default class UoTAlert extends React.Component {
 		const icon = alertStyles[type].icon;
 		return (
 			<div style={allRootStyles} className="UoTAlert">
-				<div id={elementId ? elementId : 'alert-message'} style={styles.message}>
+				<div
+					id={elementId ? elementId : 'alert-message'}
+					style={styles.message}
+				>
 					<div style={styles.iconWrapper}>{icon}</div>
 					<span style={styles.title}>{title}</span>
 					{message}

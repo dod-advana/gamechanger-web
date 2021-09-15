@@ -141,8 +141,8 @@ export const PowerUserAnnotationCard = ({
 				}}
 			>
 				<p style={{ margin: 0 }}>
-					Help the community! Highlight text you're familiar with, and tag it with a
-					corresponding opinion.
+					Help the community! Highlight text you're familiar with, and tag it
+					with a corresponding opinion.
 				</p>
 				<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600 }}>
 					<li>Select one option</li>
@@ -181,7 +181,11 @@ export const PowerUserAnnotationCard = ({
 						{options}
 					</RadioGroup>
 				</FormControl>
-				<Typography variant="h5" display="outline" style={{ margin: '15px 0 0 0' }}>
+				<Typography
+					variant="h5"
+					display="outline"
+					style={{ margin: '15px 0 0 0' }}
+				>
 					Highlight text for: {tag}
 				</Typography>
 			</div>
