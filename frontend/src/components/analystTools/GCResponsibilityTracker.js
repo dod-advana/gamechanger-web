@@ -629,7 +629,7 @@ const GCResponsibilityTracker = (props) => {
 									Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 								</GCPrimaryButton>
 								<GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
-									Report <Icon className="fa fa-bug" style={styles.buttons}/>
+									Update <Icon className="fa fa-bug" style={styles.buttons}/>
 								</GCPrimaryButton>
 								<div style={styles.spacer}/>
 							</div>
