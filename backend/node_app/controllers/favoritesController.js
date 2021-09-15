@@ -14,6 +14,7 @@ const SearchUtility = require('../utils/searchUtility')
 const constantsFile = require('../config/constants');
 const Sequelize = require('sequelize');
 const { HandlerFactory } = require('../factories/handlerFactory');
+const db = require('../models');
 
 class FavoritesController {
 
@@ -27,6 +28,7 @@ class FavoritesController {
 			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
 			favoriteOrganization = FAVORITE_ORGANIZATION,
 			sparkMD5 = sparkMD5Lib,
+			sequelize = db['game_changer'],
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
 			search = new SearchController(opts),
@@ -43,6 +45,7 @@ class FavoritesController {
 		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
 		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
+		this.sequelize = sequelize;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
 		this.search = search;
@@ -497,7 +500,18 @@ class FavoritesController {
 			if (results.totalCount > favorite.document_count) {
 				favorite.updated_results = true;
 				favorite.document_count = results.totalCount;
-				await favorite.save();
+				await this.sequelize.transaction(async (t) => {
+					await favorite.save({ transaction: t });
+					const user = await this.gcUser.findOne({ 
+						where: { user_id: favorite.user_id },
+						transaction: t,
+					});
+					const notifications = Object.assign({ favorites: 0, history: 0, total: 0 }, user.notifications);
+					notifications.favorites += 1;
+					notifications.total += 1;
+					user.notifications = notifications;
+					await user.save({ transaction: t });
+				});
 			}
 		} catch (err) {
 			const { message } = err;
