@@ -328,12 +328,7 @@ const DocumentDetailsPage = (props) => {
 
 	return (
 		<div>
-			<p style={{ margin: '10px 4%', fontSize: 18 }}>
-				Welcome to our new (Beta version) Document Details page! As you look around,
-				you may note some technical issues below; please bear with us while we
-				continue making improvements here and check back often for a more stable
-				version.
-			</p>
+			<p  style={{margin: '10px 4%', fontSize: 18}}>Welcome to our new Document Details page! As you look around, you may note some technical issues below; please bear with us while we continue making improvements here and check back often for a more stable version.</p>
 			<MainContainer>
 				<div className={'details'}>
 					<Paper>
@@ -414,27 +409,11 @@ const DocumentDetailsPage = (props) => {
 				</div>
 				<div className={'graph-top-docs'}>
 					<div className={'section'}>
-						<GCAccordion
-							expanded={true}
-							header={'GRAPH VIEW'}
-							backgroundColor={'rgb(238,241,242)'}
-						>
-							<MemoizedPolicyGraphView
-								width={1420}
-								height={670}
-								graphData={graphData}
-								runningSearchProp={runningQuery}
-								notificationCountProp={0}
-								setDocumentsFound={() => {}}
-								setTimeFound={() => {}}
-								cloneData={cloneData}
-								expansionTerms={false}
-								setNumOfEdges={() => {}}
-								dispatch={{}}
-								showSideFilters={false}
-								showBasic={false}
-								searchText={''}
-								detailsView={true}
+						<GCAccordion expanded={true} header={'GRAPH VIEW (BETA)'} backgroundColor={'rgb(238,241,242)'}>
+							<MemoizedPolicyGraphView width={1420} height={670} graphData={graphData} runningSearchProp={runningQuery}
+								 notificationCountProp={0} setDocumentsFound={() => {}} setTimeFound={() => {}}
+								 cloneData={cloneData} expansionTerms={false} setNumOfEdges={() => {}}
+								 dispatch={{}} showSideFilters={false} showBasic={false} searchText={''} detailsView={true}
 							/>
 						</GCAccordion>
 					</div>

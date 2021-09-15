@@ -1,35 +1,30 @@
-import React from 'react';
-import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
-import GameChangerSideBar from '../../searchMetrics/GCSideBar';
-import DefaultGraphView from '../../graph/defaultGraphView';
-import defaultMainViewHandler from '../default/defaultMainViewHandler';
-import ViewHeader from '../../mainView/ViewHeader';
-import { trackEvent } from '../../telemetry/Matomo';
-import { Typography } from '@material-ui/core';
-import { setState, handleSaveFavoriteTopic } from '../../../sharedFunctions';
-import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
-import SearchSection from '../globalSearch/SearchSection';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { gcOrange } from '../../common/gc-colors';
-import { Card } from '../../cards/GCCard';
-import { DidYouMean } from '../../searchBar/SearchBarStyledComponents';
-import Pagination from 'react-js-pagination';
-import GCTooltip from '../../common/GCToolTip';
+import React from "react";
+import moment from 'moment';
+import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
+import GameChangerSideBar from "../../searchMetrics/GCSideBar";
+import DefaultGraphView from "../../graph/defaultGraphView";
+import defaultMainViewHandler from "../default/defaultMainViewHandler";
+import ViewHeader from "../../mainView/ViewHeader";
+import {trackEvent} from "../../telemetry/Matomo";
+import {Typography} from "@material-ui/core";
+import {setState, handleSaveFavoriteTopic} from "../../../sharedFunctions";
+import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import SearchSection from "../globalSearch/SearchSection";
+import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
+import {gcOrange} from "../../common/gc-colors";
+import {Card} from "../../cards/GCCard";
+import {DidYouMean} from "../../searchBar/SearchBarStyledComponents";
+import Pagination from "react-js-pagination";
+import GCTooltip from "../../common/GCToolTip";
 import GetQAResults from '../default/qaResults';
 import GameChangerThumbnailRow from '../../mainView/ThumbnailRow';
 import {
-	TrendingSearchContainer,
-	RecentSearchContainer,
-	SourceContainer,
-} from '../../mainView/HomePageStyledComponents';
-import {
-	getTrackingNameForFactory,
-	RESULTS_PER_PAGE,
-	StyledCenterContainer,
-} from '../../../gamechangerUtils';
-import GameChangerAPI from '../../api/gameChanger-service-api';
-import '../../mainView/main-view.css';
-import DefaultSeal from '../../mainView/seals/GC Default Seal.png';
+	getTrackingNameForFactory, RESULTS_PER_PAGE, StyledCenterContainer,
+} from "../../../gamechangerUtils";
+import GameChangerAPI from "../../api/gameChanger-service-api";
+import '../../mainView/main-view.css'
+import DefaultSeal from '../../mainView/img/GC Default Seal.png';
+import DefaultPub from '../../mainView/img/default_cov.png';
 
 const _ = require('lodash');
 
@@ -168,120 +163,125 @@ const renderRecentSearches = (search, state, dispatch) => {
 					}}
 				/>
 			</div>
-			<Typography style={styles.subtext}>
-				Organization Filter:
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
-			</Typography>
-			<Typography style={styles.subtext}>
-				Type Filter:
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
-			</Typography>
-			<Typography style={styles.subtext}>
-				Publication Date:
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
-			</Typography>
-			<Typography style={styles.subtext}>
-				Include Canceled: {includeRevoked ? 'Yes' : 'No'}
-			</Typography>
-			<Typography style={styles.subtext}>Search Time: {run_at}</Typography>
+			<Typography style={styles.subtext}>Organization Filter:{orgFilterString.length===0? 'All' : orgFilterString.join(', ')}</Typography>
+			<Typography style={styles.subtext}>Type Filter:{typeFilterString.length===0? 'All' : typeFilterString.join(', ')}</Typography>
+			<Typography style={styles.subtext}>Publication Date:{publicationDateAllTime? 'All': publicationDateFilter.join(' - ')}</Typography>
+			<Typography style={styles.subtext}>Include Canceled: {includeRevoked ? 'Yes': 'No'}</Typography>
+			<Typography style={styles.subtext}>Search Time: {moment(Date.parse(run_at)).utc().format("YYYY-MM-DD HH:mm UTC")}</Typography>
 		</RecentSearchContainer>
 	);
 };
+
+
+const handlePopPubs = async(pop_pubs, pop_pubs_inactive, state, dispatch) => {
+	let filteredPubs = _.filter(pop_pubs, (item) => {
+		return !_.includes(pop_pubs_inactive, item.id);
+	});
+	try {
+		filteredPubs = filteredPubs.map(item => ({	...item, imgSrc: DefaultPub}));
+		setState(dispatch, {searchMajorPubs: filteredPubs});
+
+		for(let i = 0; i < filteredPubs.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', {clone_name: 'gamechanger'}).then((pngs) => {
+				const buffers = pngs.data;
+				buffers.forEach((buf,idx) => {
+					if(buf.status === "fulfilled"){
+						filteredPubs[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+					} else {
+						filteredPubs[i].imgSrc = DefaultPub;
+					}
+				});
+				setState(dispatch, {searchMajorPubs: filteredPubs});
+			});
+		}
+	} catch(e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, {searchMajorPubs: filteredPubs});
+	}
+}
+
+const handleSources = async(state, dispatch) => {
+		let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
+		crawlerSources = crawlerSources.data.map((item) => ({	...item, imgSrc: DefaultSeal}));
+		setState(dispatch, {crawlerSources});
+
+	try {
+		let folder = 'crawler_images'
+		const thumbnailList = crawlerSources.map(item => {
+			let filename = item.image_link.split('/').pop();
+			return {img_filename: filename}
+		});
+
+		for(let i = 0; i < thumbnailList.length; i++){
+			gameChangerAPI.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, {clone_name: 'gamechanger'}).then( (pngs) => {
+				const buffers = pngs.data;
+				buffers.forEach((buf,idx) => {
+					if(buf.status === "fulfilled"){
+						crawlerSources[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+						if(crawlerSources[i].image_link.split('.').pop() === 'png'){
+							crawlerSources[i].imgSrc = 'data:image/png;base64,'+ buf.value;
+						} else if(crawlerSources[i].image_link.split('.').pop() === 'svg') {
+							crawlerSources[i].imgSrc = 'data:image/svg+xml;base64,'+ buf.value;
+						}
+					}
+					else {
+						crawlerSources[i].imgSrc = DefaultSeal;
+					}
+				});
+				setState(dispatch, {crawlerSources});
+			});
+		}
+	} catch(e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, {crawlerSources});
+	}
+}
+
+const formatString = (text) => {
+	let titleCase = text.split(' ').map(function(val){ 
+		if(val.charAt(0) === '(' && val.charAt(val.length - 1) === ')'){
+			return val;
+		} else {
+			return val.charAt(0).toUpperCase() + val.substr(1).toLowerCase();
+		}
+  }).join(' ');
+	return _.truncate(titleCase, {length: 60, separator: /,?\.* +/ });
+}
 
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
-		let pubs = [];
+		// let pubs = [];
 		let pop_pubs = [];
+		let pop_pubs_inactive = [];
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData();
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
-				} else if (obj.key === 'homepage_major_pubs') {
-					pubs = JSON.parse(obj.value);
-				} else if (obj.key === 'popular_docs') {
+				} 
+				// else if(obj.key === 'homepage_major_pubs') {
+				// 	pubs = JSON.parse(obj.value);
+				// } 
+				else if(obj.key === 'homepage_popular_docs_inactive') {
+					pop_pubs_inactive = JSON.parse(obj.value);
+				} else if (obj.key === 'popular_docs'){
 					pop_pubs = obj.value;
 				}
 			});
-		} catch (e) {
+
+		} catch(e){
 			// Do nothing
 		}
-
-		setState(dispatch, { adminTopics: topics });
-
-		try {
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(
-				pubs,
-				'thumbnails',
-				state.cloneData
-			);
-			const buffers = pngs.data;
-			buffers.forEach((buf, idx) => {
-				if (buf.status === 'fulfilled') {
-					pubs[idx].imgSrc = 'data:image/png;base64,' + buf.value;
-				} else {
-					pubs[idx].imgSrc = 'error';
-				}
-			});
-		} catch (e) {
-			//Do nothing
-		}
-
-		setState(dispatch, { adminMajorPubs: pubs });
-
-		try {
-			const pop_pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(
-				pop_pubs,
-				'thumbnails',
-				state.cloneData
-			);
-			const pop_buffers = pop_pngs.data;
-			pop_buffers.forEach((buf, idx) => {
-				if (buf.status === 'fulfilled') {
-					pop_pubs[idx].imgSrc = 'data:image/png;base64,' + buf.value;
-				} else {
-					pop_pubs[idx].imgSrc = 'error';
-				}
-			});
-		} catch (e) {
-			//Do nothing
-		}
-		setState(dispatch, { searchMajorPubs: pop_pubs });
-
-		try {
-			let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
-			crawlerSources = crawlerSources.data;
-			let folder = crawlerSources[0].image_link.split('/');
-			folder = folder[folder.length - 2];
-			const thumbnailList = crawlerSources.map((item) => {
-				let filename = item.image_link.split('/').pop();
-				return { img_filename: filename };
-			});
-			const pngs = await gameChangerAPI.thumbnailStorageDownloadPOST(
-				thumbnailList,
-				folder,
-				state.cloneData
-			);
-			const buffers = pngs.data;
-			buffers.forEach((buf, idx) => {
-				if (buf.status === 'fulfilled') {
-					if (crawlerSources[idx].image_link.split('.').pop() === 'png') {
-						crawlerSources[idx].imgSrc = 'data:image/png;base64,' + buf.value;
-					} else if (crawlerSources[idx].image_link.split('.').pop() === 'svg') {
-						crawlerSources[idx].imgSrc = 'data:image/svg+xml;base64,' + buf.value;
-					}
-				} else {
-					crawlerSources[idx].imgSrc = DefaultSeal;
-				}
-			});
-			setState(dispatch, { crawlerSources });
-		} catch (e) {
-			//Do nothing
-			console.log(e);
-		}
+		
+		setState(dispatch, {adminTopics:topics});
+		// handlePubs(pubs, state, dispatch);
+		handleSources(state, dispatch);
+		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
 	},
 
 	getMainView(props) {
@@ -306,7 +306,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch, searchHandler } = props;
 		const {
 			adminTopics,
-			adminMajorPubs,
 			searchMajorPubs,
 			cloneData,
 			crawlerSources,
@@ -319,18 +318,15 @@ const PolicyMainViewHandler = {
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage =
-			localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		// const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${'gamechanger'}Searches`) || '[]';
 
-		if (prevSearchText) {
-			if (!resetSettingsSwitch) {
-				dispatch({ type: 'RESET_SEARCH_SETTINGS' });
-				setState(dispatch, {
-					resetSettingsSwitch: true,
-					showSnackbar: true,
-					snackBarMsg: 'Search settings reset',
-				});
-				if (searchHandler) searchHandler.setSearchURL(state);
+
+		if(prevSearchText) {
+			if(!resetSettingsSwitch) {
+				dispatch({type: 'RESET_SEARCH_SETTINGS'});
+				setState(dispatch, {resetSettingsSwitch: true, showSnackbar: true, snackBarMsg: 'Search settings reset'});
+				if (searchHandler) searchHandler.setSearchURL(state)
 			}
 		}
 
@@ -410,19 +406,7 @@ const PolicyMainViewHandler = {
 						?
 					</div>
 				)}
-				<div style={{ margin: '0 70px 0 70px' }}>
-					{/* <GameChangerThumbnailRow
-						links={agencyPublications}
-						title={"Agency Publications"}
-						width='450px'
-					>
-						{agencyPublications.map(pub => 
-							<AgencyPublicationContainer>
-								<div style={{width:180, height:100}}/>
-								<Typography style={{...styles.containerText, color:'#313541', marginLeft: 20, marginTop: 35}}>{pub}</Typography>
-							</AgencyPublicationContainer>
-						)}
-					</GameChangerThumbnailRow> */}
+				<div style={{ margin: '0 70px 0 70px'}}>
 					<GameChangerThumbnailRow
 						links={trendingLinks}
 						title={'Trending Searches'}
@@ -503,28 +487,20 @@ const PolicyMainViewHandler = {
 						title="Sources"
 						width="300px"
 					>
-						{crawlerSources.length > 0 &&
-							crawlerSources[0].imgSrc &&
-							crawlerSources.map((source) => (
-								<SourceContainer>
-									<img src={source.imgSrc} alt={'crawler seal'}></img>
-									<Typography
-										style={{
-											...styles.containerText,
-											color: '#313541',
-											alignSelf: 'center',
-											marginLeft: '20px',
-										}}
-									>
-										{source.display_source_s}
-									</Typography>
-								</SourceContainer>
-							))}
-						{crawlerSources.length > 0 && crawlerSources[0].imgSrc === undefined && (
-							<div className="col-xs-12">
-								<LoadingIndicator customColor={gcOrange} />
-							</div>
+						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
+							<SourceContainer
+								onClick={ () => {
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'SourceOpened', source.display_source_s)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.display_source_s.toLowerCase()}`);
+								}}
+							>
+								<img src={source.imgSrc} alt={'crawler seal'}></img>
+								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
+							</SourceContainer>
 						)}
+						{ crawlerSources.length === 0 &&  
+							<div className='col-xs-12' style={{height: '140px'}} ><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '140px', textAlign: 'center'}}/></div>
+						}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={recentSearches}
@@ -535,93 +511,44 @@ const PolicyMainViewHandler = {
 							renderRecentSearches(search, state, dispatch)
 						)}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={adminMajorPubs}
-						title="Editor's Choice: Top Publications"
-						width="215px"
+					<GameChangerThumbnailRow 
+						links={searchMajorPubs} 
+						title="Popular Publications" 
+						width='215px' 
 					>
-						{adminMajorPubs.length > 0 &&
-							adminMajorPubs[0].imgSrc &&
-							adminMajorPubs.map((pub) => (
-								<div className="topPublication">
-									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
-									) : (
-										<div className="image">{pub.name}</div>
-									)}
-
-									<div
-										className="hover-overlay"
-										onClick={() => {
-											trackEvent(
-												getTrackingNameForFactory(cloneData.clone_name),
-												'PublicationOpened',
-												pub.name
-											);
-											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-											window.open(
-												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`
-											);
-										}}
-									>
-										<div className="hover-text">{pub.name}</div>
-									</div>
+						{ (searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc) && searchMajorPubs.map((pub) =>
+							<div className="topPublication"
+							>
+								{ pub.imgSrc !== 'error' ? 
+									<img 
+									className="image"
+									src={pub.imgSrc}
+									alt="thumbnail" 
+									title={pub.name}
+								/> : 
+									<div className="image">{pub.name}</div>
+								}
+								
+								<div 
+									className="hover-overlay"
+									onClick={()=>{
+										trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'PublicationOpened', pub.name)
+										// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+										window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`);
+									}}
+								>
+									<div className="hover-text">{formatString(pub.name)}</div>
 								</div>
-							))}
-						{adminMajorPubs.length > 0 && adminMajorPubs[0].imgSrc === undefined && (
-							<div className="col-xs-12">
-								<LoadingIndicator customColor={gcOrange} />
 							</div>
 						)}
-					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={searchMajorPubs}
-						title="Popular Publications"
-						width="215px"
-					>
-						{searchMajorPubs.length > 0 &&
-							searchMajorPubs[0].imgSrc &&
-							searchMajorPubs.map((pub) => (
-								<div className="topPublication">
-									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
-									) : (
-										<div className="image">{pub.name}</div>
-									)}
-
-									<div
-										className="hover-overlay"
-										onClick={() => {
-											trackEvent(
-												getTrackingNameForFactory(cloneData.clone_name),
-												'PublicationOpened',
-												pub.name
-											);
-											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-											window.open(
-												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.doc_filename}`
-											);
-										}}
-									>
-										<div className="hover-text">{pub.name}</div>
-									</div>
-								</div>
-							))}
 						{searchMajorPubs.length > 0 && searchMajorPubs[0].imgSrc === undefined && (
 							<div className="col-xs-12">
 								<LoadingIndicator customColor={gcOrange} />
 							</div>
 						)}
+						{ searchMajorPubs.length === 0 && 
+							<div className='col-xs-12'><LoadingIndicator customColor={gcOrange} inline={true} containerStyle={{height: '300px', textAlign: 'center', paddingTop: '75px', paddingBottom: '75px'}}/></div>
+						}
 					</GameChangerThumbnailRow>
 				</div>
 			</div>

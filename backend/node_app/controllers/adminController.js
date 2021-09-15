@@ -104,7 +104,8 @@ class AdminController {
 				where: {
 					key: [
 						'homepage_topics',
-						'homepage_major_pubs'
+						'homepage_major_pubs',
+						'homepage_popular_docs_inactive'
 					]
 				}
 			});

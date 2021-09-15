@@ -1067,4 +1067,63 @@ describe('DocumentController', function () {
 			done();
 		});
 	});
+	describe('#getHomepageThumbnail', () => {
+		it('should get array of thumbnails', async (done) => {
+			const dataApi = {
+				getFileThumbnail: (data, userId) => {
+					let { dest, folder, filename, clone_name } = data;
+					const key = `${clone_name}/${folder}/${filename}`;
+					return new Promise(async (resolve, reject) => { resolve(key)});
+				}
+			};
+			
+			const opts = {
+				...constructorOptionsMock,
+				dataApi,
+				constants: {
+					GAME_CHANGER_OPTS: {
+						index: 'version'
+					}
+				}
+			};
+
+			const target = new DocumentController(opts);
+
+			const req	= {
+				headers: {
+					SSL_CLIENT_S_DN_CN: 'john'
+				},
+				body: {
+					filenames: [{img_filename: 'test1'}, {img_filename: 'test2'}],
+					folder: 'test',
+					dest: 'gamechanger',
+					clone_name: 'gamechanger'
+				},
+				get(key) {
+					return this.headers[key];
+				}
+			};
+	
+			let resData;
+			const res = {
+				...resMock,
+				status(msg){
+					return this;
+				},
+				send: (data) => {
+					resData = data;
+					return data;
+				}
+			};
+			const apiResMock = [
+				{ status: 'fulfilled', value: 'gamechanger/test/test1' },
+				{ status: 'fulfilled', value: 'gamechanger/test/test2' }
+			];
+
+			target.getHomepageThumbnail(req, res).then( () => {
+				assert.deepEqual(resData, apiResMock);
+				done();
+			});
+		});
+	});
 });
