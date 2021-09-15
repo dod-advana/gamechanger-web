@@ -23,6 +23,11 @@ import {
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
 } from '../../../gamechangerUtils';
+import {
+	TrendingSearchContainer,
+	RecentSearchContainer,
+	SourceContainer,
+} from '../../mainView/HomePageStyledComponents';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import '../../mainView/main-view.css';
 import DefaultSeal from '../../mainView/img/GC Default Seal.png';
