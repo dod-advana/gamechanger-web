@@ -116,9 +116,8 @@ const DecoupledFooter = (props) => {
 	
 	const { setUserMatomo } = props;
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-	const [showRequestAPIKeyModal, setShowRequestAPIKeyModal] = useState(false);
 	const [useMatomo, setUseMatomo] = useState(false);
-	const [requestAPIKeyData, setRequestAPIKeyData] = useState({});
+	const [requestAPIKeyData, setRequestAPIKeyData] = useState({name: '', email: '', reason: '', clones: []});
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
 	const [cloneMeta,  setCloneMeta] = useState([]);
 	const [apiRequestError, setApiRequestError] = useState('');
@@ -159,10 +158,6 @@ const DecoupledFooter = (props) => {
 		getUserData();
 		getCloneData();
 	}, [])
-	
-	useEffect (() => {
-		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
-	}, [showRequestAPIKeyModal])
 
 	const setUserMatomoStatus = (status) => {
 		
@@ -172,6 +167,11 @@ const DecoupledFooter = (props) => {
 		}, (err) => {
 			console.log(err);
 		});
+	}
+
+	const handleClose = () => {
+		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
+		window.location = '#/gamechanger';
 	}
 
 	const handleCloneChange = (cloneId) => {
@@ -257,8 +257,8 @@ const DecoupledFooter = (props) => {
 		if(!requestAPIKeyData.clones.length) return setApiRequestError('Select at least one clone');
 		gameChangerAPI.createAPIKeyRequest(requestAPIKeyData.name, requestAPIKeyData.email, requestAPIKeyData.reason, requestAPIKeyData.clones).then(resp => {
 			gameChangerAPI.updateUserAPIRequestLimit().then(()=>setAPIRequestLimit(apiRequestLimit-1))
-			setShowRequestAPIKeyModal(false);
 			setApiRequestError('');
+			handleClose();
 		}).catch(e => {
 			console.log(e);
 		});
@@ -315,7 +315,7 @@ const DecoupledFooter = (props) => {
 					path="/gamechanger/APIKey"
 					children={
 						<RequestAPIKeyDialog
-							handleClose={() => window.location = '#/gamechanger'}
+							handleClose={handleClose}
 							handleSave={sendAPIKeyRequest}
 							apiRequestLimit={apiRequestLimit}
 							renderContent={renderAPIKeyRequestForm}
