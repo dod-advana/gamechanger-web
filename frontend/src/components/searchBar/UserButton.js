@@ -6,7 +6,7 @@ import { ConstrainedIcon } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
 import UserIcon from "../../images/icon/UserIcon.png";
 import GCButton from "../common/GCButton";
 import { PAGE_DISPLAYED } from "../../gamechangerUtils";
-import { setState, getUserData, clearDashboardNotification } from '../../sharedFunctions';
+import { setState, clearDashboardNotification } from '../../sharedFunctions';
 
 const StyledBadge = withStyles((theme) => ({
 	badge: {
@@ -30,7 +30,6 @@ const UserButton = (props) => {
 			<GCButton
 				onClick={() => {
 					clearDashboardNotification('total', state, dispatch);
-					getUserData(dispatch);
 					setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				}}
 				style={{ height: 50, width: 60, minWidth: 'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor: '#131E43', border: '#131E43' }}
