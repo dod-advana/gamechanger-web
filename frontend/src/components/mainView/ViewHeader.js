@@ -26,7 +26,7 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const handleTypeFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-    let typeName = event.target.innerHTML;
+    let typeName = event.currentTarget.value;
     newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
 		[typeName]: false 
@@ -39,7 +39,7 @@ const handleTypeFilterChange = (event, state, dispatch) => {
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-    let orgName = event.target.innerHTML;
+    let orgName = event.currentTarget.value;
     newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: false 
@@ -209,9 +209,10 @@ const ViewHeader = (props) => {
                         return (
                      <Button
                     variant="outlined"
-                            backgroundColor="white"
-                            display="inline-flex"
+                    backgroundColor="white"
+                    display="inline-flex"
                     name={org}
+                    value = {org}
 					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color:'orange', height: 40, ariaPressed: 'true'}}
 					endIcon=<CloseIcon />
 					onClick={(event) => {
@@ -219,17 +220,17 @@ const ViewHeader = (props) => {
                     }}
                     
 				    >
-                         <span 
-                            style={{
-                            fontFamily: 'Montserrat',
-                            fontWeight: 300,
-                            color: 'black',
-                            width: '100%', marginTop: '5px', marginBottom: '5px'
-                         }}>
-                            {org}
-                            </span>
+                     <span 
+                        style={{
+                        fontFamily: 'Montserrat',
+                        fontWeight: 300,
+                        color: 'black',
+                        width: '100%', marginTop: '5px', marginBottom: '5px'
+                     }}>
+                        {org}
+                        </span>
 
-				</Button>
+                    </Button>
                     )} else {
                         return null;
                     }
@@ -240,11 +241,12 @@ const ViewHeader = (props) => {
             if(state.searchSettings.typeFilter[type]){
                 return (
                     <Button
-                        variant="outlined"
-                        backgroundColor="white"
-                        display="inline-flex"
-					    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
-					    endIcon=<CloseIcon />
+                    variant="outlined"
+                    backgroundColor="white"
+                    display="inline-flex"
+                    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
+                    endIcon=<CloseIcon />
+                    value={type}
 					onClick={(event) => {
                         handleTypeFilterChange(event, state, dispatch);
                     }}
@@ -256,14 +258,13 @@ const ViewHeader = (props) => {
                             width: '100%', marginTop: '5px', marginBottom: '5px'
                          }}>
                             {type}
-                            </span>
+                        </span>
 
-				</Button>
-                    )} else {
-                        return null;
+                    </Button>
+                        )} else {
+                            return null;
                     }
-        }
-        )}
+        })}
         </div>
         </> : <> </>
         } 
