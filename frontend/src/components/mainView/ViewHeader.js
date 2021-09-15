@@ -87,7 +87,7 @@ const useStyles = makeStyles({
 const ViewHeader = (props) => {
 
 	const classes = useStyles();
-	const {context, resultsText, mainStyles={}} = props;
+	const {context ={}} = props;
 
 	const {state, dispatch} = context;
 	const {originalOrgFilters, orgFilter} = state.searchSettings;
@@ -102,7 +102,6 @@ const ViewHeader = (props) => {
 		listView,
 		selectedCategories,
 		topicCount,
-		timeFound,
 		viewNames,
 		categorySorting,
 		currentSort,
@@ -110,7 +109,8 @@ const ViewHeader = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [displayCount, setDisplayCount] = useState(activeCategoryTab === 'all'?count+entityCount+topicCount: count)
+	// eslint-disable-next-line
+    const [displayCount, setDisplayCount] = useState(activeCategoryTab === 'all'?count+entityCount+topicCount: count)
 
 	useEffect(()=> {
 		if(IS_EDGE){
