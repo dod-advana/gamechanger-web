@@ -1802,7 +1802,7 @@ class SearchUtility {
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
-				_source: ["title", "filename", "pop_score"],
+				_source: ["title", "filename", "pop_score", "id"],
 				from: offset,
 				size: limit,
 				query: {
@@ -1838,6 +1838,7 @@ class SearchUtility {
 					doc.name = r['_source'].title;
 					const path = require('path');
 					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
+					doc.id =r['_source'].id;
 					popDocs.push(doc);
 				});
 			};

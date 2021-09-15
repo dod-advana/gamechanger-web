@@ -235,4 +235,58 @@ describe('DataTrackerController', function () {
 
 		});
 	});
+
+	describe('#getOrgSealData', () => {
+		it('should get organization seal data', async (done) => {			
+			const constants = {
+				GAME_CHANGER_OPTS: {
+					index: 'version'
+				}
+			};
+
+			const organizationInfo = {
+				findAll() {
+					return Promise.resolve(
+						[{
+							'org_name': 'Organization Test',
+							'org_acronym': 'TEST',
+							'image_link': 'testURL'
+						}]
+					);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				constants,
+				organizationInfo
+			};
+
+			const target = new DataTrackerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resData;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(data) {
+					resData = data;
+					return data;
+				}
+			};
+
+			await target.getOrgSealData(req, res);
+
+			const expected = [{'org_name': 'Organization Test', 'org_acronym': 'TEST', 'image_link': 'testURL'}];
+			assert.deepStrictEqual(resData, expected);
+
+			done();
+		});
+	});
 });
