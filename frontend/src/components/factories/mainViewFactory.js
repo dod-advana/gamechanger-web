@@ -13,7 +13,7 @@ class MainViewFactory {
 				case 'policy/policyMainViewHandler':
 					this.handler = policyMainViewHandler;
 					break;
-				// TODO Remove this once the homepage is used for main GC page.
+					// TODO Remove this once the homepage is used for main GC page.
 				case 'policy/policyTestMainViewHandler':
 					this.handler = policyTestMainViewHandler;
 					break;

@@ -87,36 +87,36 @@ const GlobalSearchNavigationHandler = {
 				)}
 				{state.cloneData?.show_tutorial &&
 					Object.keys(state.componentStepNumbers).length > 0 && (
-						<GCTooltip
-							title="How-to, features, and tips"
-							placement="right"
-							arrow
+					<GCTooltip
+						title="How-to, features, and tips"
+						placement="right"
+						arrow
+					>
+						<HoverNavItem
+							centered
+							onClick={() => {
+								setState(dispatch, {
+									showTutorial: true,
+									clickedTutorial: true,
+								});
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'SidebarInteraction',
+									'ShowTutorial'
+								);
+							}}
+							toolTheme={toolTheme}
 						>
-							<HoverNavItem
-								centered
-								onClick={() => {
-									setState(dispatch, {
-										showTutorial: true,
-										clickedTutorial: true,
-									});
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										'SidebarInteraction',
-										'ShowTutorial'
-									);
-								}}
-								toolTheme={toolTheme}
+							<StyledBadgeSmall
+								color="secondary"
+								badgeContent=" "
+								invisible={!state.newUser || state.clickedTutorial}
 							>
-								<StyledBadgeSmall
-									color="secondary"
-									badgeContent=" "
-									invisible={!state.newUser || state.clickedTutorial}
-								>
-									<ConstrainedIcon src={AppTutorialsIcon} />
-								</StyledBadgeSmall>
-							</HoverNavItem>
-						</GCTooltip>
-					)}
+								<ConstrainedIcon src={AppTutorialsIcon} />
+							</StyledBadgeSmall>
+						</HoverNavItem>
+					</GCTooltip>
+				)}
 				<GCTooltip title="User Feedback" placement="right" arrow>
 					<HoverNavItem
 						centered

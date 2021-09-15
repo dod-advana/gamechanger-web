@@ -64,20 +64,20 @@ const StyledCardContainer = styled.div`
 			border-radius: 5px;
 			display: flex;
 			border: ${({ listView, isRevoked, selected }) =>
-				listView
-					? 'none'
-					: selected
-					? '2px solid #386F94'
-					: isRevoked
+		listView
+			? 'none'
+			: selected
+				? '2px solid #386F94'
+				: isRevoked
 					? '2px solid #e50000'
 					: '2px solid rgb(224, 224, 224)'};
 			box-shadow: ${({ listView, selected }) =>
-				listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+		listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
 
 			transition: ${({ listView }) =>
-				listView
-					? 'transform .5s !important;'
-					: 'box-shadow .2s, transform .5s !important'};
+		listView
+			? 'transform .5s !important;'
+			: 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
 			transform-style: preserve-3d !important;
 			position: relative;
@@ -102,11 +102,11 @@ const StyledCardContainer = styled.div`
 					border-radius: 5px;
 					overflow: auto;
 					background-color: ${({ listView, intelligentSearch }) =>
-						listView
-							? intelligentSearch
-								? '#9BB1C8'
-								: 'white'
-							: 'rgb(238,241,242)'};
+		listView
+			? intelligentSearch
+				? '#9BB1C8'
+				: 'white'
+			: 'rgb(238,241,242)'};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -152,7 +152,7 @@ const StyledCardContainer = styled.div`
 					border-radius: 5px;
 					overflow: auto;
 					background-color: ${({ listView }) =>
-						listView ? 'white' : 'rgb(238,241,242)'};
+		listView ? 'white' : 'rgb(238,241,242)'};
 
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);

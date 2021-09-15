@@ -712,7 +712,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-															docCount
+														docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -849,7 +849,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-															docCount
+														docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -923,12 +923,12 @@ const GameChangerDetailsPage = (props) => {
 			{showSourceContainer &&
 				!_.isEmpty(cloneData) &&
 				!_.isEmpty(initialSourceData) && (
-					<SourceDetailsPage
-						source={source}
-						cloneData={cloneData}
-						initialSourceData={initialSourceData}
-					/>
-				)}
+				<SourceDetailsPage
+					source={source}
+					cloneData={cloneData}
+					initialSourceData={initialSourceData}
+				/>
+			)}
 
 			{showDocumentContainer && (
 				<DocumentDetailsPage

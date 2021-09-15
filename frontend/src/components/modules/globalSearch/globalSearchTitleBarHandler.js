@@ -20,7 +20,7 @@ const GlobalSearchTitleBarHandler = {
 				className={
 					componentStepNumbers
 						? `tutorial-step-${
-								componentStepNumbers[`${cloneData.display_name} Title`]
+							componentStepNumbers[`${cloneData.display_name} Title`]
 						  }`
 						: null
 				}

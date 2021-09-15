@@ -801,7 +801,7 @@ const PolicySearchHandler = {
 
 		const categoriesText = state.selectedCategories
 			? Object.keys(
-					_.pickBy(state.selectedCategories, (value) => !!value)
+				_.pickBy(state.selectedCategories, (value) => !!value)
 			  ).join('_')
 			: undefined;
 

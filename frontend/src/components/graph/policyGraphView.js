@@ -1478,8 +1478,8 @@ export default function PolicyGraphView(props) {
 		const nodeType = communityView
 			? String(node.community)
 			: combinedTypes.includes(node.label)
-			? node.label
-			: node.orgType;
+				? node.label
+				: node.orgType;
 
 		const nodeColor =
 			orgTypeSelected !== null && orgTypeSelected !== nodeType
@@ -1488,10 +1488,10 @@ export default function PolicyGraphView(props) {
 		const outlineColor =
 			orgTypeSelected !== null && orgTypeSelected !== nodeType
 				? getNodeOutlineColors(
-						node,
-						HIDDEN_NODE_ALPHA,
-						node.color,
-						connectedLevel
+					node,
+					HIDDEN_NODE_ALPHA,
+					node.color,
+					connectedLevel
 				  )
 				: getNodeOutlineColors(node, NODE_ALPHA, node.color, connectedLevel);
 
