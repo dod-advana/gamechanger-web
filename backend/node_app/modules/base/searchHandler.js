@@ -141,7 +141,6 @@ class SearchHandler {
 				search_version
 			};
 
-			console.log("this the obj we lookin for: ", obj)
 			this.gc_history.create(obj);
 
 		} catch (err) {

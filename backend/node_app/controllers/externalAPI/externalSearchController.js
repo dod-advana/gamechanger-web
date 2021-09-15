@@ -99,35 +99,3 @@ class ExternalSearchController {
 }
 
 module.exports.ExternalSearchController = ExternalSearchController;
-
-
-// orgFilterString: [],
-// 		transformResults: false,
-// 		charsPadding: 90,
-// typeFilterString: [],
-// 		showTutorial: false,
-// 		useGCCache: null,
-// tiny_url: 'gamechanger?tiny=24',
-// 		searchFields: { initial: [Object] },
-// 		accessDateFilter: [ null, null ],
-// 		publicationDateFilter: [ null, null ],
-// 		publicationDateAllTime: true,
-// 		includeRevoked: false,
-// 		searchVersion: 1,
-// searchText: 'pineapple',
-// offset: 0,
-// limit: 18,
-// cloneName: 'gamechanger',
-// questionFlag: false
-
-// 		searchType: 'keyword',
-// 		orgFilter: {},
-// 		typeFilter: {},
-// orgFilterString: [],
-// typeFilterString: [],
-// tiny_url: 'gamechanger?tiny=4',
-// searchText: 'testing',
-// offset: 0,
-// limit: 2,
-// cloneName: 'gamechanger',
-// questionFlag: false
