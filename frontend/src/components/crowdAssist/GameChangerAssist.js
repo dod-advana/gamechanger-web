@@ -647,14 +647,14 @@ class GameChangerAssist extends Component {
 						entityAnswer={
 							paragraphEntityAnswers[currentParagraphIndex]
 								? paragraphEntityAnswers[currentParagraphIndex][
-										currentEntityIndex
+									currentEntityIndex
 								  ]
 								: { correct: true, incorrectReason: '0' }
 						}
 						tag={
 							paragraphEntities[currentParagraphIndex]
 								? paragraphEntities[currentParagraphIndex][currentEntityIndex]
-										?.tag
+									?.tag
 								: 'PERSON'
 						}
 						tags={tagsList}

@@ -508,9 +508,9 @@ const EdaSearchHandler = {
 		const majcomFilter =
 			organizations && majcoms
 				? _.pickBy(
-						majcoms,
-						(value, key) =>
-							value && value.length > 0 && organizations.indexOf(key) !== -1
+					majcoms,
+					(value, key) =>
+						value && value.length > 0 && organizations.indexOf(key) !== -1
 				  )
 				: undefined;
 		if (

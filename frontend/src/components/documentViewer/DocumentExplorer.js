@@ -252,9 +252,9 @@ const DocumentExplorer = ({
 			data[iframePreviewLink.dataIdx] &&
 			(isEDA && cloneData && cloneData.clone_data
 				? getEDAMetadataForPropertyTable(
-						EDA_FIELD_JSON_MAP,
-						EDA_FIELDS,
-						data[iframePreviewLink.dataIdx]
+					EDA_FIELD_JSON_MAP,
+					EDA_FIELDS,
+					data[iframePreviewLink.dataIdx]
 				  )
 				: getMetadataForPropertyTable(data[iframePreviewLink.dataIdx]))) ||
 		[];

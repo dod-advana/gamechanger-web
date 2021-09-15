@@ -79,11 +79,11 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
-		// case 'RESET_SEARCH_SETTINGS':
-		//     return {
-		//         ...state,
-		//         searchSettings: initState.searchSettings
-		//     };
+			// case 'RESET_SEARCH_SETTINGS':
+			//     return {
+			//         ...state,
+			//         searchSettings: initState.searchSettings
+			//     };
 		default:
 			return state;
 	}

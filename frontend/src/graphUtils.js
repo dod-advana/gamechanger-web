@@ -114,9 +114,9 @@ export const draw2DArrows = (
 	const getCoordsAlongLine = bzLine
 		? (t) => bzLine.get(t) // get position along bezier line
 		: (t) => ({
-				// straight line: interpolate linearly
-				x: start.x + (end.x - start.x) * t || 0,
-				y: start.y + (end.y - start.y) * t || 0,
+			// straight line: interpolate linearly
+			x: start.x + (end.x - start.x) * t || 0,
+			y: start.y + (end.y - start.y) * t || 0,
 		  });
 
 	const lineLen = bzLine

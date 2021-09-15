@@ -145,7 +145,7 @@ const StyledFrontCardHeader = styled.div`
 		margin-bottom: 0px;
 		margin-top: 0px;
 		background-color: ${({ intelligentSearch }) =>
-			intelligentSearch ? '#9BB1C8' : 'white'};
+		intelligentSearch ? '#9BB1C8' : 'white'};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -158,9 +158,9 @@ const StyledFrontCardSubHeader = styled.div`
 
 	.sub-header-one {
 		color: ${({ typeTextColor }) =>
-			typeTextColor ? typeTextColor : '#ffffff'};
+		typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
-			docTypeColor ? docTypeColor : '#000000'};
+		docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -177,14 +177,14 @@ const StyledFrontCardSubHeader = styled.div`
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) =>
-			docOrgColor ? docOrgColor : '#000000'};
+		docOrgColor ? docOrgColor : '#000000'};
 	}
 
 	.sub-header-full {
 		color: ${({ typeTextColor }) =>
-			typeTextColor ? typeTextColor : '#ffffff'};
+		typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
-			docTypeColor ? docTypeColor : '#000000'};
+		docTypeColor ? docTypeColor : '#000000'};
 		padding: 8px;
 		display: flex;
 		align-items: center;
@@ -197,9 +197,9 @@ const StyledFrontCardSubHeader = styled.div`
 
 	.list-sub-header-one {
 		color: ${({ typeTextColor }) =>
-			typeTextColor ? typeTextColor : '#ffffff'};
+		typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
-			docTypeColor ? docTypeColor : '#000000'};
+		docTypeColor ? docTypeColor : '#000000'};
 		width: 150px;
 		padding: 8px;
 		display: flex;
@@ -218,7 +218,7 @@ const StyledFrontCardSubHeader = styled.div`
 		color: white;
 		padding: 2px 8px 8px;
 		background-color: ${({ docOrgColor }) =>
-			docOrgColor ? docOrgColor : '#000000'};
+		docOrgColor ? docOrgColor : '#000000'};
 		font-size: 14px;
 		margin-top: 8px;
 	}
@@ -616,12 +616,12 @@ const getCardHeaderHandler = ({
 						onClick={
 							docListView
 								? () =>
-										clickFn(
-											item.filename,
-											state.cloneData.clone_name,
-											state.searchText,
-											0
-										)
+									clickFn(
+										item.filename,
+										state.cloneData.clone_name,
+										state.searchText,
+										0
+									)
 								: () => {}
 						}
 					>
@@ -1802,9 +1802,9 @@ const PolicyCardHandler = {
 								onClick={
 									state.listView
 										? () =>
-												window.open(
-													`#/gamechanger-details?type=topic&topicName=${item.name}&cloneName=${state.cloneData.clone_name}`
-												)
+											window.open(
+												`#/gamechanger-details?type=topic&topicName=${item.name}&cloneName=${state.cloneData.clone_name}`
+											)
 										: () => {}
 								}
 							>

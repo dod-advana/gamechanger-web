@@ -137,9 +137,9 @@ const SourceDetailsPage = (props) => {
 									<div style={styles.resultsCount}>
 										{initialSourceData.totalCount > 0
 											? `${numberWithCommas(
-													initialSourceData.totalCount
+												initialSourceData.totalCount
 											  )} results found in ${
-													initialSourceData.timeFound
+												initialSourceData.timeFound
 											  } seconds`
 											: ''}
 									</div>

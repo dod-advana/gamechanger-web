@@ -366,8 +366,8 @@ const EDAContractDetailsPage = (props) => {
 						{timelineViewData && timelineViewData.length > 0
 							? renderTimeline()
 							: modLoading
-							? 'Searching for data...'
-							: 'Data Not Available'}
+								? 'Searching for data...'
+								: 'Data Not Available'}
 					</GCAccordion>
 				</div>
 				<div className={'section'}>
@@ -379,8 +379,8 @@ const EDAContractDetailsPage = (props) => {
 						{barGraphData && barGraphData.length > 0
 							? renderBarGraph()
 							: modLoading
-							? 'Searching for data...'
-							: 'Data Not Available'}
+								? 'Searching for data...'
+								: 'Data Not Available'}
 					</GCAccordion>
 				</div>
 				<div className={'section'}>
@@ -398,10 +398,10 @@ const EDAContractDetailsPage = (props) => {
 										  similarDocsData &&
 										  similarDocsData.docs &&
 										  similarDocsData.docs.length
-										? `${numberWithCommas(
+											? `${numberWithCommas(
 												similarDocsData.totalCount
 										  )} results found in ${timeFoundSimilar} seconds`
-										: ''}
+											: ''}
 								</div>
 								{similarDocsData &&
 								similarDocsData.docs &&
@@ -413,16 +413,16 @@ const EDAContractDetailsPage = (props) => {
 									(!similarDocsData ||
 										!similarDocsData.docs ||
 										similarDocsData.docs.length === 0) && (
-										<div
-											style={{
-												fontSize: 22,
-												fontWeight: 'bold',
-												color: '#131E43',
-											}}
-										>
+									<div
+										style={{
+											fontSize: 22,
+											fontWeight: 'bold',
+											color: '#131E43',
+										}}
+									>
 											No Documents Found
-										</div>
-									)}
+									</div>
+								)}
 							</div>
 						</div>
 					</GCAccordion>
@@ -447,10 +447,10 @@ const EDAContractDetailsPage = (props) => {
 										  contractModData &&
 										  contractModData.docs &&
 										  contractModData.docs.length
-										? `${numberWithCommas(
+											? `${numberWithCommas(
 												contractModData.totalCount
 										  )} results found in ${timeFound} seconds`
-										: ''}
+											: ''}
 								</div>
 								{contractModData &&
 								contractModData.docs &&
@@ -462,16 +462,16 @@ const EDAContractDetailsPage = (props) => {
 									(!contractModData ||
 										!contractModData.docs ||
 										contractModData.docs.length === 0) && (
-										<div
-											style={{
-												fontSize: 22,
-												fontWeight: 'bold',
-												color: '#131E43',
-											}}
-										>
+									<div
+										style={{
+											fontSize: 22,
+											fontWeight: 'bold',
+											color: '#131E43',
+										}}
+									>
 											No Documents Found
-										</div>
-									)}
+									</div>
+								)}
 							</div>
 						</div>
 					</GCAccordion>

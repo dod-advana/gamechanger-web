@@ -478,7 +478,7 @@ const PolicyMainViewHandler = {
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={adminTopics}
-						title={"Editor's Choice: Top Topics"}
+						title={'Editor\'s Choice: Top Topics'}
 						width="100px"
 						style={{ marginLeft: '0' }}
 					>
@@ -663,14 +663,14 @@ const PolicyMainViewHandler = {
 										<GameChangerSearchMatrix context={context} />
 										{state.sidebarDocTypes.length > 0 &&
 											state.sidebarOrgs.length > 0 && (
-												<>
-													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar
-														context={context}
-														cloneData={state.cloneData}
-													/>
-												</>
-											)}
+											<>
+												<div className={'sidebar-section-title'}>RELATED</div>
+												<GameChangerSideBar
+													context={context}
+													cloneData={state.cloneData}
+												/>
+											</>
+										)}
 									</div>
 								</div>
 							)}
@@ -772,182 +772,182 @@ const PolicyMainViewHandler = {
 												(activeCategoryTab === 'Documents' ||
 													activeCategoryTab === 'all') &&
 												selectedCategories['Documents'] && (
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
-													>
-														{!searchSettings.isFilterUpdate ? (
-															<SearchSection
-																section={'Documents'}
-																color={'#131E43'}
-																icon={DocumentIcon}
-															>
-																{activeCategoryTab === 'all' ? (
-																	<>
-																		{!docsLoading && !docsPagination ? (
-																			getSearchResults(
-																				docSearchResults,
-																				state,
-																				dispatch
-																			)
-																		) : (
-																			<div className="col-xs-12">
-																				<LoadingIndicator
-																					customColor={gcOrange}
-																				/>
-																			</div>
-																		)}
-																		<div className="gcPagination col-xs-12 text-center">
-																			<Pagination
-																				activePage={resultsPage}
-																				itemsCountPerPage={RESULTS_PER_PAGE}
-																				totalItemsCount={count}
-																				pageRangeDisplayed={8}
-																				onChange={async (page) => {
-																					trackEvent(
-																						getTrackingNameForFactory(
-																							cloneData.clone_name
-																						),
-																						'PaginationChanged',
-																						'page',
-																						page
-																					);
-																					setState(dispatch, {
-																						docsLoading: true,
-																						resultsPage: page,
-																						docsPagination: true,
-																					});
-																				}}
-																			/>
-																		</div>
-																	</>
-																) : (
-																	<>
-																		{getSearchResults(
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+													}}
+												>
+													{!searchSettings.isFilterUpdate ? (
+														<SearchSection
+															section={'Documents'}
+															color={'#131E43'}
+															icon={DocumentIcon}
+														>
+															{activeCategoryTab === 'all' ? (
+																<>
+																	{!docsLoading && !docsPagination ? (
+																		getSearchResults(
 																			docSearchResults,
 																			state,
 																			dispatch
-																		)}
-																		{docsPagination && (
-																			<div className="col-xs-12">
-																				<LoadingIndicator
-																					customColor={gcOrange}
-																					containerStyle={{
-																						margin: '-100px auto',
-																					}}
-																				/>
-																			</div>
-																		)}
-																	</>
-																)}
-															</SearchSection>
-														) : (
-															<div className="col-xs-12">
-																<LoadingIndicator customColor={gcOrange} />
-															</div>
-														)}
-													</div>
-												)}
+																		)
+																	) : (
+																		<div className="col-xs-12">
+																			<LoadingIndicator
+																				customColor={gcOrange}
+																			/>
+																		</div>
+																	)}
+																	<div className="gcPagination col-xs-12 text-center">
+																		<Pagination
+																			activePage={resultsPage}
+																			itemsCountPerPage={RESULTS_PER_PAGE}
+																			totalItemsCount={count}
+																			pageRangeDisplayed={8}
+																			onChange={async (page) => {
+																				trackEvent(
+																					getTrackingNameForFactory(
+																						cloneData.clone_name
+																					),
+																					'PaginationChanged',
+																					'page',
+																					page
+																				);
+																				setState(dispatch, {
+																					docsLoading: true,
+																					resultsPage: page,
+																					docsPagination: true,
+																				});
+																			}}
+																		/>
+																	</div>
+																</>
+															) : (
+																<>
+																	{getSearchResults(
+																		docSearchResults,
+																		state,
+																		dispatch
+																	)}
+																	{docsPagination && (
+																		<div className="col-xs-12">
+																			<LoadingIndicator
+																				customColor={gcOrange}
+																				containerStyle={{
+																					margin: '-100px auto',
+																				}}
+																			/>
+																		</div>
+																	)}
+																</>
+															)}
+														</SearchSection>
+													) : (
+														<div className="col-xs-12">
+															<LoadingIndicator customColor={gcOrange} />
+														</div>
+													)}
+												</div>
+											)}
 
 											{entitySearchResults &&
 												entitySearchResults.length > 0 &&
 												(activeCategoryTab === 'Organizations' ||
 													activeCategoryTab === 'all') &&
 												selectedCategories['Organizations'] && (
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+													}}
+												>
+													<SearchSection
+														section={'Organizations'}
+														color={'#376f94'}
+														icon={OrganizationIcon}
 													>
-														<SearchSection
-															section={'Organizations'}
-															color={'#376f94'}
-															icon={OrganizationIcon}
-														>
-															{getSearchResults(
-																entitySearchResults,
-																state,
-																dispatch
-															)}
-															<div className="gcPagination col-xs-12 text-center">
-																<Pagination
-																	activePage={entityPage}
-																	itemsCountPerPage={RESULTS_PER_PAGE}
-																	totalItemsCount={entityCount}
-																	pageRangeDisplayed={8}
-																	onChange={async (page) => {
-																		trackEvent(
-																			getTrackingNameForFactory(
-																				cloneData.clone_name
-																			),
-																			'PaginationChanged',
-																			'page',
-																			page
-																		);
-																		setState(dispatch, {
-																			entitiesLoading: true,
-																			entityPage: page,
-																			entityPagination: true,
-																		});
-																	}}
-																/>
-															</div>
-														</SearchSection>
-													</div>
-												)}
+														{getSearchResults(
+															entitySearchResults,
+															state,
+															dispatch
+														)}
+														<div className="gcPagination col-xs-12 text-center">
+															<Pagination
+																activePage={entityPage}
+																itemsCountPerPage={RESULTS_PER_PAGE}
+																totalItemsCount={entityCount}
+																pageRangeDisplayed={8}
+																onChange={async (page) => {
+																	trackEvent(
+																		getTrackingNameForFactory(
+																			cloneData.clone_name
+																		),
+																		'PaginationChanged',
+																		'page',
+																		page
+																	);
+																	setState(dispatch, {
+																		entitiesLoading: true,
+																		entityPage: page,
+																		entityPagination: true,
+																	});
+																}}
+															/>
+														</div>
+													</SearchSection>
+												</div>
+											)}
 
 											{topicSearchResults &&
 												topicSearchResults.length > 0 &&
 												(activeCategoryTab === 'Topics' ||
 													activeCategoryTab === 'all') &&
 												selectedCategories['Topics'] && (
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+													}}
+												>
+													<SearchSection
+														section={'Topics'}
+														color={'#4da593'}
+														icon={ApplicationsIcon}
 													>
-														<SearchSection
-															section={'Topics'}
-															color={'#4da593'}
-															icon={ApplicationsIcon}
-														>
-															{getSearchResults(
-																topicSearchResults,
-																state,
-																dispatch
-															)}
-															<div className="gcPagination col-xs-12 text-center">
-																<Pagination
-																	activePage={topicPage}
-																	itemsCountPerPage={RESULTS_PER_PAGE}
-																	totalItemsCount={topicCount}
-																	pageRangeDisplayed={8}
-																	onChange={async (page) => {
-																		trackEvent(
-																			getTrackingNameForFactory(
-																				cloneData.clone_name
-																			),
-																			'PaginationChanged',
-																			'page',
-																			page
-																		);
-																		// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
-																	}}
-																/>
-															</div>
-														</SearchSection>
-													</div>
-												)}
+														{getSearchResults(
+															topicSearchResults,
+															state,
+															dispatch
+														)}
+														<div className="gcPagination col-xs-12 text-center">
+															<Pagination
+																activePage={topicPage}
+																itemsCountPerPage={RESULTS_PER_PAGE}
+																totalItemsCount={topicCount}
+																pageRangeDisplayed={8}
+																onChange={async (page) => {
+																	trackEvent(
+																		getTrackingNameForFactory(
+																			cloneData.clone_name
+																		),
+																		'PaginationChanged',
+																		'page',
+																		page
+																	);
+																	// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
+																}}
+															/>
+														</div>
+													</SearchSection>
+												</div>
+											)}
 										</div>
 									</div>
 								</div>

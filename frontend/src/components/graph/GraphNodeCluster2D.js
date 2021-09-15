@@ -422,15 +422,15 @@ export default function GraphNodeCluster2D(props) {
 	const handleNodeHover = onNodeHover
 		? onNodeHover
 		: (node) => {
-				const elem = document.getElementById('graph2dContainer');
-				elem.style.cursor = node ? 'pointer' : null;
-				setNodeHoverID(node ? node.id : -1);
+			const elem = document.getElementById('graph2dContainer');
+			elem.style.cursor = node ? 'pointer' : null;
+			setNodeHoverID(node ? node.id : -1);
 
-				if (node && shouldHighlightNodes) {
-					highlightSelectedNodes(node, graph.edges);
-				} else {
-					highlightNodes.clear();
-				}
+			if (node && shouldHighlightNodes) {
+				highlightSelectedNodes(node, graph.edges);
+			} else {
+				highlightNodes.clear();
+			}
 		  };
 
 	const highlightSelectedNodes = (node, edges) => {
@@ -474,46 +474,46 @@ export default function GraphNodeCluster2D(props) {
 	const handleNodeClick = onNodeClick
 		? onNodeClick
 		: async (node, event) => {
-				trackEvent(
-					getTrackingNameForFactory(cloneData.clone_name),
-					'GraphNode',
-					'onClick',
-					node.name
-				);
-				if (selectedNodeID !== node.id) {
-					setSelectedNodeID(node.id);
-				} else {
-					setSelectedNodeID(null);
-				}
+			trackEvent(
+				getTrackingNameForFactory(cloneData.clone_name),
+				'GraphNode',
+				'onClick',
+				node.name
+			);
+			if (selectedNodeID !== node.id) {
+				setSelectedNodeID(node.id);
+			} else {
+				setSelectedNodeID(null);
+			}
 		  };
 
 	const handleNodeDrag = onNodeDrag
 		? onNodeDrag
 		: (node, translate) => {
-				setShouldRunSimulation(true);
+			setShouldRunSimulation(true);
 		  };
 
 	const handleNodeDragEnd = onNodeDragEnd
 		? onNodeDragEnd
 		: (node, translate) => {
-				setShouldRunSimulation(false);
+			setShouldRunSimulation(false);
 		  };
 
 	const handleBackgroundClick = onBackgroundClick
 		? onBackgroundClick
 		: (event) => {
-				setSelectedNodeID(-1);
+			setSelectedNodeID(-1);
 		  };
 
 	const handleOnZoom = onZoom
 		? onZoom
 		: (event) => {
-				// trackEvent('Graph', 'onZoom', 'zoom', event.k);
-				if (event.k > zoomLimit) {
-					const ref = graphRefProp ? graphRefProp : graphRef;
-					ref.current.zoom(zoomLimit);
-				} else {
-				}
+			// trackEvent('Graph', 'onZoom', 'zoom', event.k);
+			if (event.k > zoomLimit) {
+				const ref = graphRefProp ? graphRefProp : graphRef;
+				ref.current.zoom(zoomLimit);
+			} else {
+			}
 		  };
 
 	const zoomInOut = (zoomIn) => {
@@ -529,12 +529,12 @@ export default function GraphNodeCluster2D(props) {
 	const handleResetGraph = resetGraph
 		? resetGraph
 		: () => {
-				graph.nodes.forEach((node) => {
-					node.hidden = false;
-				});
+			graph.nodes.forEach((node) => {
+				node.hidden = false;
+			});
 
-				setReloadGraph(!reloadGraph);
-				setShouldRunSimulation(true);
+			setReloadGraph(!reloadGraph);
+			setShouldRunSimulation(true);
 		  };
 
 	const recenterGraph = () => {
@@ -560,9 +560,9 @@ export default function GraphNodeCluster2D(props) {
 	const handleRenderNodeLegendItems = renderNodeLegendItems
 		? renderNodeLegendItems
 		: () => {
-				return (
-					<>
-						{!runningQuery &&
+			return (
+				<>
+					{!runningQuery &&
 							Object.keys(legendData)
 								.sort()
 								.map((key) => {
@@ -599,16 +599,16 @@ export default function GraphNodeCluster2D(props) {
 										</GCTooltip>
 									);
 								})}
-					</>
-				);
+				</>
+			);
 		  };
 
 	const handleRenderEdgeLegendItems = renderEdgeLegendItems
 		? renderEdgeLegendItems
 		: () => {
-				return (
-					<>
-						{!runningQuery &&
+			return (
+				<>
+					{!runningQuery &&
 							Object.keys(edgeLabelPatterns).map((label) => {
 								if (edgeLabels[label] > 0) {
 									return (
@@ -628,8 +628,8 @@ export default function GraphNodeCluster2D(props) {
 									);
 								} else return <></>;
 							})}
-					</>
-				);
+				</>
+			);
 		  };
 
 	const handleRenderLegend = () => {
@@ -803,9 +803,9 @@ export default function GraphNodeCluster2D(props) {
 	const handleCloseGroupNodeMenu = closeGroupNodeMenu
 		? closeGroupNodeMenu
 		: () => {
-				setNodeGroupMenuOpen(false);
-				setNodeGroupMenuTarget(null);
-				setNodeGroupMenuLabel('');
+			setNodeGroupMenuOpen(false);
+			setNodeGroupMenuTarget(null);
+			setNodeGroupMenuLabel('');
 		  };
 
 	/**
@@ -815,87 +815,87 @@ export default function GraphNodeCluster2D(props) {
 	const handleCreateNodeLabel = createNodeLabel
 		? createNodeLabel
 		: (node) => {
-				return node.name;
+			return node.name;
 		  };
 
 	const handleCreateGraphNode = createGraphNode
 		? createGraphNode
 		: (node, ctx, globalScale) => {
-				let outlineThickness = 3;
-				let connectedLevel = -1;
+			let outlineThickness = 3;
+			let connectedLevel = -1;
 
-				if (highlightNodes.size > 0 && highlightNodes.has(node)) {
-					if (degreeConnected[0].includes(node)) {
-						connectedLevel = 0;
-					} else if (degreeConnected[1].includes(node)) {
-						connectedLevel = 1;
-					}
-					outlineThickness += 2;
+			if (highlightNodes.size > 0 && highlightNodes.has(node)) {
+				if (degreeConnected[0].includes(node)) {
+					connectedLevel = 0;
+				} else if (degreeConnected[1].includes(node)) {
+					connectedLevel = 1;
 				}
+				outlineThickness += 2;
+			}
 
-				if (selectedNodeID === node.id) {
-					outlineThickness += 2;
-				}
+			if (selectedNodeID === node.id) {
+				outlineThickness += 2;
+			}
 
-				const { nodeColor, nodeHexColor, nodeTextColor } =
+			const { nodeColor, nodeHexColor, nodeTextColor } =
 					nodeLabelSelected !== null && nodeLabelSelected !== node.label
 						? getNodeColors(node, hiddenNodeAlpha, nodeLabelColors)
 						: getNodeColors(node, nodeAlpha, nodeLabelColors);
-				const outlineColor =
+			const outlineColor =
 					nodeLabelSelected !== null && nodeLabelSelected !== node.label
 						? getNodeOutlineColors(
-								node,
-								hiddenNodeAlpha,
-								nodeHexColor,
-								connectedLevel
+							node,
+							hiddenNodeAlpha,
+							nodeHexColor,
+							connectedLevel
 						  )
 						: getNodeOutlineColors(
-								node,
-								nodeAlpha,
-								nodeHexColor,
-								connectedLevel
+							node,
+							nodeAlpha,
+							nodeHexColor,
+							connectedLevel
 						  );
 
-				ctx.beginPath();
+			ctx.beginPath();
 
-				ctx.fillStyle = nodeColor;
+			ctx.fillStyle = nodeColor;
+			ctx.arc(
+				node.x,
+				node.y,
+				node.value * nodeRelativeSize,
+				0,
+				2 * Math.PI,
+				false
+			);
+			ctx.fill();
+			ctx.strokeStyle = outlineColor;
+			ctx.lineWidth = outlineThickness / globalScale;
+			ctx.arc(
+				node.x,
+				node.y,
+				node.value * nodeRelativeSize,
+				0,
+				2 * Math.PI,
+				false
+			);
+			ctx.stroke();
+
+			// Selected/Hovered Outline
+			if (node.id === selectedNodeID || node.id === nodeHoverID) {
+				ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
+				ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
 				ctx.arc(
 					node.x,
 					node.y,
-					node.value * nodeRelativeSize,
-					0,
-					2 * Math.PI,
-					false
-				);
-				ctx.fill();
-				ctx.strokeStyle = outlineColor;
-				ctx.lineWidth = outlineThickness / globalScale;
-				ctx.arc(
-					node.x,
-					node.y,
-					node.value * nodeRelativeSize,
+					node.value * nodeRelativeSize + 0.2,
 					0,
 					2 * Math.PI,
 					false
 				);
 				ctx.stroke();
+			}
 
-				// Selected/Hovered Outline
-				if (node.id === selectedNodeID || node.id === nodeHoverID) {
-					ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
-					ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
-					ctx.arc(
-						node.x,
-						node.y,
-						node.value * nodeRelativeSize + 0.2,
-						0,
-						2 * Math.PI,
-						false
-					);
-					ctx.stroke();
-				}
-
-				handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
+			handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
 		  };
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
@@ -962,65 +962,65 @@ export default function GraphNodeCluster2D(props) {
 	const handleCreateGraphLink = createGraphLink
 		? createGraphLink
 		: (link, ctx, globalScale) => {
-				if (!showBasic) {
-					calcLinkControlPoints(link);
-				}
+			if (!showBasic) {
+				calcLinkControlPoints(link);
+			}
 
-				const start = link.source;
-				const end = link.target;
-				let lineWidth = edgeThickness;
+			const start = link.source;
+			const end = link.target;
+			let lineWidth = edgeThickness;
 
-				if (
-					highlightNodes.size > 0 &&
+			if (
+				highlightNodes.size > 0 &&
 					(highlightNodes.has(start) || highlightNodes.has(end))
-				) {
-					lineWidth += 1;
-				}
+			) {
+				lineWidth += 1;
+			}
 
-				const color = handleGetLinkColor(link);
+			const color = handleGetLinkColor(link);
 
-				ctx.strokeStyle = color;
+			ctx.strokeStyle = color;
 
-				// ignore unbound links
-				if (typeof start !== 'object' || typeof end !== 'object') return;
+			// ignore unbound links
+			if (typeof start !== 'object' || typeof end !== 'object') return;
 
-				ctx.save();
+			ctx.save();
 
-				// Draw link
-				ctx.beginPath();
-				ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
-				ctx.lineWidth = lineWidth / globalScale;
-				ctx.moveTo(start.x, start.y);
+			// Draw link
+			ctx.beginPath();
+			ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
+			ctx.lineWidth = lineWidth / globalScale;
+			ctx.moveTo(start.x, start.y);
 
-				const controlPoints = link.__controlPoints;
+			const controlPoints = link.__controlPoints;
 
-				if (!controlPoints) {
-					// Straight line
-					ctx.lineTo(end.x, end.y);
-				} else {
-					// Use quadratic curves for regular lines and bezier for loops
-					ctx[
-						controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'
-					](...controlPoints, end.x, end.y);
-				}
-				ctx.stroke();
+			if (!controlPoints) {
+				// Straight line
+				ctx.lineTo(end.x, end.y);
+			} else {
+				// Use quadratic curves for regular lines and bezier for loops
+				ctx[
+					controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'
+				](...controlPoints, end.x, end.y);
+			}
+			ctx.stroke();
 
-				// Draw Arrow
-				draw2DArrows(
-					link,
-					ctx,
-					globalScale,
-					arrowLength,
-					arrowRelativePosition,
-					color,
-					nodeRelativeSize
-				);
+			// Draw Arrow
+			draw2DArrows(
+				link,
+				ctx,
+				globalScale,
+				arrowLength,
+				arrowRelativePosition,
+				color,
+				nodeRelativeSize
+			);
 
-				if (displayLinkLabel) {
-					handleCreateGraphLinkText(link, ctx, globalScale);
-				}
+			if (displayLinkLabel) {
+				handleCreateGraphLinkText(link, ctx, globalScale);
+			}
 
-				ctx.restore();
+			ctx.restore();
 		  };
 
 	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
@@ -1091,69 +1091,69 @@ export default function GraphNodeCluster2D(props) {
 	const handleGetLinkColor = onGetLinkColor
 		? onGetLinkColor
 		: (link) => {
-				return getLinkColor(link, linkAlpha);
+			return getLinkColor(link, linkAlpha);
 		  };
 
 	const handleSimulationStop = onSimulationStop
 		? onSimulationStop
 		: () => {
-				setShouldRunSimulation(false);
+			setShouldRunSimulation(false);
 
-				if (!graphRendered1stTime) {
-					recenterGraph();
-					setGraphRendered1stTime(true);
+			if (!graphRendered1stTime) {
+				recenterGraph();
+				setGraphRendered1stTime(true);
+			}
+
+			if (!shouldCenter) setShouldCenter(true);
+
+			const nodes = {};
+			let centralNode = null;
+
+			graph.nodes.forEach((node) => {
+				node.fx = null;
+				node.fy = null;
+				node.fz = null;
+			});
+
+			let count = 0;
+			graph.edges.forEach((edge) => {
+				const end = edge.target;
+				const start = edge.source;
+
+				if (nodes.hasOwnProperty(end.id)) {
+					nodes[end.id] += 1;
+				} else {
+					nodes[end.id] = 1;
 				}
 
-				if (!shouldCenter) setShouldCenter(true);
-
-				const nodes = {};
-				let centralNode = null;
-
-				graph.nodes.forEach((node) => {
-					node.fx = null;
-					node.fy = null;
-					node.fz = null;
-				});
-
-				let count = 0;
-				graph.edges.forEach((edge) => {
-					const end = edge.target;
-					const start = edge.source;
-
-					if (nodes.hasOwnProperty(end.id)) {
-						nodes[end.id] += 1;
-					} else {
-						nodes[end.id] = 1;
-					}
-
-					if (nodes.hasOwnProperty(start.id)) {
-						nodes[start.id] += 1;
-					} else {
-						nodes[start.id] = 1;
-					}
-
-					if (nodes[end.id] > count) {
-						count = nodes[end.id];
-						centralNode = end;
-					} else if (nodes[start.id] > count) {
-						count = nodes[start.id];
-						centralNode = start;
-					} else if (!centralNode) {
-						centralNode = end;
-					}
-				});
-
-				if (centralNode) {
-					centralNode.fx = centralNode?.x;
-					centralNode.fy = centralNode?.y;
-					centralNode.fz = centralNode?.z;
+				if (nodes.hasOwnProperty(start.id)) {
+					nodes[start.id] += 1;
+				} else {
+					nodes[start.id] = 1;
 				}
+
+				if (nodes[end.id] > count) {
+					count = nodes[end.id];
+					centralNode = end;
+				} else if (nodes[start.id] > count) {
+					count = nodes[start.id];
+					centralNode = start;
+				} else if (!centralNode) {
+					centralNode = end;
+				}
+			});
+
+			if (centralNode) {
+				centralNode.fx = centralNode?.x;
+				centralNode.fy = centralNode?.y;
+				centralNode.fz = centralNode?.z;
+			}
 		  };
 
 	const handleUpdateNodeSize = updateNodeSize
 		? updateNodeSize
 		: (size) => {
-				setNodeRelativeSize(size);
+			setNodeRelativeSize(size);
 		  };
 
 	const getNodesWithNEdges = (numEdges) => {

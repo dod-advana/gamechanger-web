@@ -284,10 +284,10 @@ const DocumentDetailsPage = (props) => {
 						{runningQuery
 							? 'Searching for documents...'
 							: documentObj.docCount > 0
-							? `${numberWithCommas(documentObj.docCount)} results found in ${
+								? `${numberWithCommas(documentObj.docCount)} results found in ${
 									documentObj.timeFound
 							  } seconds`
-							: ''}
+								: ''}
 					</div>
 					<div
 						style={{ marginTop: '-14px', display: 'flex' }}

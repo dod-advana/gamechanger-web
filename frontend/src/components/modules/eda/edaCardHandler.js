@@ -186,7 +186,7 @@ const StyledFrontCardHeader = styled.div`
 		margin-bottom: 0px;
 		margin-top: 0px;
 		background-color: ${({ intelligentSearch }) =>
-			intelligentSearch ? '#9BB1C8' : 'white'};
+		intelligentSearch ? '#9BB1C8' : 'white'};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -199,9 +199,9 @@ const StyledFrontCardSubHeader = styled.div`
 
 	.sub-header-one {
 		color: ${({ typeTextColor }) =>
-			typeTextColor ? typeTextColor : '#ffffff'};
+		typeTextColor ? typeTextColor : '#ffffff'};
 		background-color: ${({ docTypeColor }) =>
-			docTypeColor ? docTypeColor : '#000000'};
+		docTypeColor ? docTypeColor : '#000000'};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -218,7 +218,7 @@ const StyledFrontCardSubHeader = styled.div`
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) =>
-			docOrgColor ? docOrgColor : '#000000'};
+		docOrgColor ? docOrgColor : '#000000'};
 	}
 `;
 
@@ -926,8 +926,8 @@ const EdaCardHandler = {
 							let date = signatureDate
 								? signatureDate
 								: effectiveDate
-								? effectiveDate
-								: null;
+									? effectiveDate
+									: null;
 							let dateText = '';
 							if (signatureDate) {
 								date = signatureDate;
@@ -982,37 +982,37 @@ const EdaCardHandler = {
 						{item.award_id_eda_ext &&
 							item.award_id_eda_ext !== 'empty' &&
 							!detailPage && (
-								<GCAccordion
-									onChange={loadContractAward}
-									contentPadding={0}
-									expanded={false}
-									header={'Show Contract Modifications'}
-									headerBackground={'rgb(238,241,242)'}
-									headerTextColor={'black'}
-									headerTextWeight={'normal'}
-									style={{ marginBottom: '0px !important' }}
-								>
-									<List style={{ width: '100%', padding: '0' }}>
-										<ListItem>
-											<ListItemIcon>
-												<img
-													src={AwardIcon}
-													style={{ width: 15 }}
-													alt="award"
-												/>
-											</ListItemIcon>
-											<ListItemText primary={item.award_id_eda_ext} />
-										</ListItem>
-										<Divider light={true} />
-										{renderContractMods()}
-										{state.contractAwards &&
+							<GCAccordion
+								onChange={loadContractAward}
+								contentPadding={0}
+								expanded={false}
+								header={'Show Contract Modifications'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+								style={{ marginBottom: '0px !important' }}
+							>
+								<List style={{ width: '100%', padding: '0' }}>
+									<ListItem>
+										<ListItemIcon>
+											<img
+												src={AwardIcon}
+												style={{ width: 15 }}
+												alt="award"
+											/>
+										</ListItemIcon>
+										<ListItemText primary={item.award_id_eda_ext} />
+									</ListItem>
+									<Divider light={true} />
+									{renderContractMods()}
+									{state.contractAwards &&
 											state.contractAwards[item.award_id_eda_ext] ===
 												'loading' && (
-												<LoadingIndicator customColor={gcOrange} />
-											)}
-									</List>
-								</GCAccordion>
-							)}
+										<LoadingIndicator customColor={gcOrange} />
+									)}
+								</List>
+							</GCAccordion>
+						)}
 
 						<SimpleTable
 							tableClass={'magellan-table'}
