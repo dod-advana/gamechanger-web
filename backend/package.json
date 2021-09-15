@@ -11,10 +11,10 @@
     "awsDocker": "npm start",
     "jest-coverage": "jest --coverage",
     "sonarscan": "sonar-scanner",
-	"gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
-	"gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
-	"orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
-	"orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
+    "gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
+    "gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
+    "orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
+    "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
   },
   "author": "",
   "license": "ISC",
