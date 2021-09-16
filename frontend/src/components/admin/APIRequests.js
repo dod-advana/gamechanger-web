@@ -67,7 +67,7 @@ export default () => {
      * @param {boolean} approve 
      */
 	const approveRejectAPIKeyRequestData = async ({ id, username }, approve) => {
-        if(gcAPIRequestData.approved.find(request => request.username === username)){ 
+        if(gcAPIRequestData.approved.find(request => request.username === username && approve)){ 
             return setPopperIsOpen(true);
         }
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
