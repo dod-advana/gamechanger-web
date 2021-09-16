@@ -72,9 +72,38 @@ class SearchUtility {
 			let nextIsSyn = false;
 			let nextIsAbb = true;
 			let timesSinceLastAdd = 0;
-			result = {};
+			let expandedWords = expansionDict['qexp']
+			let similarWords = expansionDict['wordsim']
+			console.log("expansion list")
+			console.log(expansionDict)
+			console.log("synonyms list")
+			console.log(synonyms)
+			console.log("related list")
+			console.log(relatedSearches)
+			console.log("abbrev list")
+			console.log(abbreviationExpansions)
+			console.log("key:", key)
 			result[key] = [];
-			while (result[key].length < 6 && timesSinceLastAdd < 18) {
+			console.log("result:", result)
+
+			let wordsList = [];
+			for (var word in similarWords){
+				wordsList = wordsList.concat(similarWords[word])
+			}
+			for (var word in expandedWords){
+				wordsList = wordsList.concat(expandedWords[word])
+			}
+			console.log("combined query exp")
+			console.log(wordsList)
+
+			if (relatedSearches && relatedSearches.length > 0) {
+				console.log("related")
+				relatedSearches.forEach((term) => {
+					result[key].push({phrase: term, source: 'related'})
+				})
+			}
+			console.log(result[key])
+			while (result[key].length < 12 && timesSinceLastAdd < 18) {
 				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
 					let syn = synonyms[nextSynIndex];
 					let found = false;
@@ -99,18 +128,18 @@ class SearchUtility {
 						result[key].push({phrase: abb, source: 'abbreviations'});
 					}
 					nextAbbIndex++;
-				} else if (!nextIsAbb && !nextIsSyn && expansionDict && expansionDict[key] && expansionDict[key][nextMlIndex]) {
-					let phrase = expansionDict[key][nextMlIndex];
-					let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
-					if (cleanedPhrase && cleanedPhrase !== '') {
+				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
+					let phrase = wordsList[nextMlIndex];
+					//let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
+					if (phrase && phrase !== '') {
 						let found = false;
 						result[key].forEach((r) => {
-							if (r.phrase === cleanedPhrase) {
+							if (r.phrase === phrase) {
 								found = true;
 							}
 						});
 						if (!found) {
-							result[key].push({phrase: cleanedPhrase, source: 'ML-QE'});
+							result[key].push({phrase: phrase, source: 'ML-QE'});
 						}
 					}
 					nextMlIndex++;
@@ -130,11 +159,7 @@ class SearchUtility {
 
 			toReturn = result;
 			let cleaned = this.cleanExpansions(key, toReturn);
-			if (relatedSearches.length > 0) {
-				relatedSearches.forEach((term) => {
-					cleaned[key].push({phrase: term, source: 'related'})
-				})
-			}
+
 			// this.logger.info('cleaned: ' + cleaned);
 			
 			return cleaned;
@@ -148,25 +173,38 @@ class SearchUtility {
 		let cleaned = {};
 		cleaned[key] = [];
 		if (toReturn && toReturn[key] && toReturn[key].length) {
-			let phrases = [];
-			toReturn[key].forEach((x) => {
-				phrases.push(x.phrase);
-			});
+			// let phrases = [];
+			// toReturn[key].forEach((x) => {
+			// 	phrases.push(x.phrase);
+			// });
 
-			phrases = phrases.sort();
-			let ordered = [];
-			phrases.forEach((phr) => {
-				toReturn[key].forEach((y) => {
-					if (y.phrase === phr) {
-						y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
-						if (y.phrase && y.phrase !== '' && y.phrase !== key) {
+			// phrases = phrases.sort();
+			// let ordered = [];
+			// phrases.forEach((phr) => {
+			// 	toReturn[key].forEach((y) => {
+			// 		if (y.phrase === phr) {
+			// 			//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
+			// 			y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
+
+			// 			if (y.phrase && y.phrase !== '' && y.phrase !== key) {
+			// 				ordered.push(y);
+			// 			}
+			// 		}
+			// 	});
+			// });
+			var ordered =[];
+			var currList = [];
+			console.log(toReturn[key])
+			toReturn[key].forEach((y) => {
+					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
+					y.phrase = y.phrase.replace(/^"(.*)"$/, '$1').trim();
+					console.log(y.phrase)
+					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
-						}
+							currList.push(y.phrase.toLowerCase())
 					}
 				});
-			});
-
-			cleaned[key] = ordered;
+			cleaned[key] = ordered
 		}
 
 		return cleaned;
@@ -1336,17 +1374,23 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
-	async getRelatedSearches(searchText, esClientName, userId) {
+	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let relatedSearches = []
-
+		let similarWords = expansionDict['wordsim']
+		let simWordList = Object.keys(expansionDict['wordsim'])
+		for (var key in similarWords) {
+			simWordList = simWordList.concat(similarWords[key])
+		}
+		let similarWordsQuery = simWordList.join("* OR *")
+		console.log(similarWordsQuery)
 		const query = 
 			{
 				size: 1,
 				query: {
 					query_string: {
-						query: `*${searchText}*`,
+						query: `*${similarWordsQuery}*`,
 						fuzziness: 5
 					}
 				},
@@ -1364,14 +1408,16 @@ class SearchUtility {
 			}
 		try {
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
-			let aggs = results.body.aggregations.related.buckets
+			let aggs = results.body.aggregations.related.buckets;
+			let maxCount = 0;
 			if (aggs.length > 0) {
 				aggs.forEach(term => {
 					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
 					if (word !== searchText && term.user.buckets.length > 1){
 						word = word.replace(/\s{2,}/g," ");
-						if (!relatedSearches.includes(word)){
+						if (!relatedSearches.includes(word) && maxCount < maxSearches){
 							relatedSearches.push(word);
+							maxCount += 1;
 						}
 					}
 				 });
@@ -1762,7 +1808,6 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	

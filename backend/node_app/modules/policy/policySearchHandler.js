@@ -168,12 +168,10 @@ class PolicySearchHandler extends SearchHandler {
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
-			const {synonyms, text} = this.thesaurusExpansion(searchText, termsArray);
+			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
-			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, cloneName, userId)
-			console.log(relatedSearches)
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, text, cleanedAbbreviations, userId);
-			console.log(expansionDict)
+			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId)
+			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, termsArray[0], cleanedAbbreviations, userId);
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
@@ -199,16 +197,23 @@ class PolicySearchHandler extends SearchHandler {
 	thesaurusExpansion(searchText, termsArray){
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
+		let synList = []
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			lookUpTerm = termsArray[0].replace(/\"/g, '');
+			for(var term in termsArray){
+				lookUpTerm = termsArray[term].replace(/\"/g, '');
+				const synonyms = thesaurus.lookUp(lookUpTerm);
+				if (synonyms && synonyms.length > 1){
+					synList = synList.concat(synonyms.slice(0,2))
+				}
+			}
 		}
-		const synonyms = thesaurus.lookUp(lookUpTerm);
+		//const synonyms = thesaurus.lookUp(lookUpTerm);
 		let text = searchText;
 		if (!useText && termsArray && termsArray.length && termsArray[0]) {
 			text = termsArray[0];
 		}
-		return {synonyms, text};
+		return [synList, text];
 	}
 
 	async abbreviationCleaner(termsArray){

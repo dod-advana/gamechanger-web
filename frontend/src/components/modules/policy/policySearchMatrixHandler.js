@@ -612,6 +612,7 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 							classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={term} checked={checked} onClick={() => handleAddSearchTerm(phrase,source,idx)} />}
 							label={term}
+							LineBreakMode="TailTruncation"
 							labelPlacement="end"
 						/>
 					)
@@ -636,7 +637,7 @@ const PolicySearchMatrixHandler = {
 			handleAddSearchTerm
 		} = props;
 		
-		let expansionTermSelected = false;
+		let expansionTermSelected = true;
 		expansionTerms.forEach(term => {
 			if(term.checked === true) expansionTermSelected = true;
 		})
@@ -666,11 +667,11 @@ const PolicySearchMatrixHandler = {
 						{ renderStatus(state, dispatch, classes) }
 					</GCAccordion>
 				</div>
-				{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
+				{/* {expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
 					<GCAccordion expanded={expansionTermSelected} header={'RELATED SEARCHES'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 					</GCAccordion>
-				</div>}
+				</div>} */}
 
 				<button
 					type="button"
