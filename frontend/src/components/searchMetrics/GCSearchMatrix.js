@@ -330,7 +330,7 @@ export default function SearchMatrix(props) {
 				else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
 					newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
 				}
-
+				newSearchText = phrase
 			})
 			const newSearchSettings = _.cloneDeep(state.searchSettings);
 			newSearchSettings.expansionTermAdded = false;
