@@ -4,8 +4,11 @@ const LOGGER = require('../lib/logger');
 async function poll(promiseFn, ms) {
 	ms = Math.max(0, ms);
 	while (true) {
+		const start = new Date().getTime();
 		await promiseFn();
-		await new Promise(resolve => setTimeout(resolve, ms));
+		const end = new Date().getTime();
+		const timeout = Math.max(0, ms - (end - start));
+		await new Promise(resolve => setTimeout(resolve, timeout));
 	}
 }
 
@@ -15,6 +18,7 @@ async function distributedPoll(lockName, promiseFn, ms, lockCheckMs = 1000) {
 	const ttl = Math.max(Math.ceil(ms), 60000); // timeout lock after at least 60s
 	const redisLock = new RedisLock(lockName, {ttl});
 	poll(async () => {
+		const start = new Date().getTime();
 		let locked = false;
 		try {
 			await redisLock.lock();
@@ -27,9 +31,15 @@ async function distributedPoll(lockName, promiseFn, ms, lockCheckMs = 1000) {
 			}
 		} finally {
 			if (locked) {
+				const end = new Date().getTime();
+				const timeout = Math.max(0, ms - (end - start));
 				try {
-					// reduce the lock timeout to the poll interval
-					await redisLock.extend(ms);
+					if (timeout > 0) {
+						// reduce the lock timeout to the remaining poll interval
+						await redisLock.extend(timeout);
+					} else {
+						await redisLock.unlock();
+					}
 				} catch (err) {
 					LOGGER.error(err, 'N7FGETF');
 				}
