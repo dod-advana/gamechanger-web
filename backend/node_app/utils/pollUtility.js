@@ -15,14 +15,30 @@ async function poll(promiseFn, ms) {
 // this version of polling uses a lock in Redis to ensure that only
 // one instance of the application runs the function at any given time
 async function distributedPoll(lockName, promiseFn, ms, lockCheckMs = 1000) {
-	const ttl = Math.max(Math.ceil(ms), 60000); // timeout lock after at least 60s
+	const ttl = Math.ceil(ms);
 	const redisLock = new RedisLock(lockName, {ttl});
+	const autorefreshTimeout = Math.ceil(ttl / 2);
+	let refreshTimer;
 	poll(async () => {
 		const start = new Date().getTime();
 		let locked = false;
 		try {
 			await redisLock.lock();
 			locked = true;
+
+			// setup autorefresh of the lock while the function runs
+			const autorefresh = async () => {
+				if (locked) {
+					try {
+						await redisLock.extend(ttl);
+					} catch (err) { /* swallow */ }
+					refreshTimer = setTimeout(autorefresh, autorefreshTimeout);
+					refreshTimer.unref && refreshTimer.unref();
+				}
+			};
+			refreshTimer = setTimeout(autorefresh, autorefreshTimeout);
+			refreshTimer.unref && refreshTimer.unref();
+
 			await promiseFn();
 		} catch (err) {
 			// we expect the resource to sometimes already be locked
@@ -31,9 +47,11 @@ async function distributedPoll(lockName, promiseFn, ms, lockCheckMs = 1000) {
 			}
 		} finally {
 			if (locked) {
+				locked = false;
 				const end = new Date().getTime();
 				const timeout = Math.max(0, ms - (end - start));
 				try {
+					clearTimeout(refreshTimer);
 					if (timeout > 0) {
 						// reduce the lock timeout to the remaining poll interval
 						await redisLock.extend(timeout);
