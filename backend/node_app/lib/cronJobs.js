@@ -4,11 +4,10 @@ const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
 const LOGGER = require('../lib/logger');
-const { poll } = require('../utils/pollUtility');
-const { RedisLock, ResourceLockedError } = require('../utils/redisLock');
+const { distributedPoll } = require('../utils/pollUtility');
 
 class CronJobs {
-	constructor(opts = {}){
+	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
 			cacheController = new CacheController(),
@@ -27,37 +26,15 @@ class CronJobs {
 		this.init();
 	}
 
-	init(){
+	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
 
-		const resource = 'locks:checkLeastRecentFavoritedSearch';
 		const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
-		const ttl = Math.max(favoriteSearchPollInterval, 60000); // timeout lock after at least 60s
-		const redisLock = new RedisLock(resource, {ttl});
 		if (favoriteSearchPollInterval >= 0) {
 			this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
-			poll(async () => {
-				let locked = false;
-				try {
-					await redisLock.lock();
-					locked = true;
-					await this.favoritesController.checkLeastRecentFavoritedSearch();
-				} catch (err) {
-					// we expect the resource to sometimes already be locked
-					if (!(err instanceof ResourceLockedError)) {
-						this.logger.error(err, 'M8HFXEH');
-					}
-				} finally {
-					if (locked) {
-						try {
-							// reduce the lock timeout to the poll interval
-							await redisLock.extend(favoriteSearchPollInterval);
-						} catch (err) {
-							this.logger.error(err, 'N7FGETF');
-						}
-					}
-				}
-			}, 1000); // we check every second if we can process the next item
+			distributedPoll('locks:checkLeastRecentFavoritedSearch',
+				this.favoritesController.checkLeastRecentFavoritedSearch,
+				favoriteSearchPollInterval);
 		} else {
 			this.logger.info('Polling for favorite search updates disabled.');
 		}
@@ -87,7 +64,7 @@ class CronJobs {
 				// } catch (e) {
 				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, 'ZFH252A', userId);
 				// }
-				
+
 				// try {
 				// 	await this.cacheController.clearGraphDataCacheHelper(userId, true);
 				// 	await this.cacheController.createGraphDataCacheHelper(userId);
