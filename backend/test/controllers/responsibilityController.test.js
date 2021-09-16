@@ -193,4 +193,175 @@ describe('ResponsibilityController', function () {
 
 		});
 	});
+
+	describe('#queryOneDocES', () => {
+		const opts = {
+			...constructorOptionsMock,
+		};
+
+		it('should', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.queryOneDocES(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {};
+			assert.deepStrictEqual({}, expected);
+			assert.strictEqual(resCode, 200);
+
+		});
+	});
+
+	describe('#getParagraphNum', () => {
+		const opts = {
+			...constructorOptionsMock,
+		};
+
+		it('should', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getParagraphNum(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {};
+			assert.deepStrictEqual({}, expected);
+			assert.strictEqual(resCode, 200);
+
+		});
+	});
+
+	describe('#cleanUpEsResults', () => {
+		const opts = {
+			...constructorOptionsMock,
+		};
+
+		it('should', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.cleanUpEsResults(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {};
+			assert.deepStrictEqual({}, expected);
+			assert.strictEqual(resCode, 200);
+
+		});
+	});
+
+	describe('#rejectResponsibility', () => {
+		const opts = {
+			...constructorOptionsMock,
+		};
+
+		it('should', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.rejectResponsibility(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {};
+			assert.deepStrictEqual({}, expected);
+			assert.strictEqual(resCode, 200);
+
+		});
+	});
+
+	describe('#updateResponsibility', () => {
+		const opts = {
+			...constructorOptionsMock,
+		};
+
+		it('should', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.updateResponsibility(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {};
+			assert.deepStrictEqual({}, expected);
+			assert.strictEqual(resCode, 200);
+
+		});
+	});
+
 });
