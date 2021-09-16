@@ -66,7 +66,6 @@
 		"eslint": "^7.11.0",
 		"eslint-plugin-import": "^2.23.4",
 		"eslint-plugin-react": "^7.24.0",
-		"prettier": "^2.4.0",
 		"react-scripts": "^4.0.3",
 		"sass": "^1.38.0",
 		"sass-loader": "^12.1.0",
@@ -87,7 +86,6 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"pretty": "prettier --use-tabs --single-quote --write \"./**/*.{js,jsx,json}\"",
 		"eslint": "eslint --fix --debug -c package.json ./src/"
 	},
 	"jest": {
