@@ -107,7 +107,7 @@ const endpoints = {
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
-	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
+	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
