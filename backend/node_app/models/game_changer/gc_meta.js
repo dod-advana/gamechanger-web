@@ -22,16 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 			permissions_required: {
 				type: DataTypes.BOOLEAN
 			},
-			clone_to_advana: {
-				type: DataTypes.BOOLEAN
-			},
-			clone_to_gamechanger: {
-				type: DataTypes.BOOLEAN
-			},
 			clone_to_sipr: {
-				type: DataTypes.BOOLEAN
-			},
-			clone_to_jupiter: {
 				type: DataTypes.BOOLEAN
 			},
 			show_tutorial: {
@@ -93,6 +84,9 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			needs_ingest: {
 				type: DataTypes.BOOLEAN
+			},
+			available_at: {
+				type: DataTypes.STRING
 			},
 			createdAt: {
 				type: DataTypes.DATE

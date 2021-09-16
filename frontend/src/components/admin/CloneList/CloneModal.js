@@ -65,6 +65,9 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
+			if(cloneToEdit.available_at !== null){
+				cloneToEdit.available_at = JSON.parse(cloneToEdit.available_at).join(', ');
+			}
 			setEditCloneData(cloneToEdit);
 		} else {
 			setEditCloneData({ ...DEFAULT_VALUES });

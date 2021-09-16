@@ -97,6 +97,11 @@ export default () => {
 		delete cloneDataToStore.createdAt;
 		delete cloneDataToStore.updatedAt;
 
+		if(cloneDataToStore.available_at !== undefined){
+			const dataArray = cloneDataToStore.available_at.split(',').map(item => item.trim());
+			cloneDataToStore.available_at = JSON.stringify(dataArray);
+		}
+
 		let error = false;
 		const cloneErrors = { ...editCloneDataErrors };
 		CLONE_MUST_BE_FILLED_KEYS.forEach(fieldKey => {
