@@ -347,7 +347,8 @@ class SearchUtility {
 			sort = 'Relevance', 
 			order = 'desc',
 			includeHighlights = true,
-			docIds = {}
+			docIds = {},
+			selectedDocuments
 		 }, 
 		 user) {
 
@@ -539,6 +540,14 @@ class SearchUtility {
 				query.query.bool.filter.push({
 					term: {
 						is_revoked_b: 'false'
+					}
+				});
+			}
+
+			if (selectedDocuments?.length > 0 && !isClone) { // filter selected documents
+				query.query.bool.filter.push({
+					terms: {
+						filename: selectedDocuments
 					}
 				});
 			}
