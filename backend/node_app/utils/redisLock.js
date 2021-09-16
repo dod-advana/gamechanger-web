@@ -55,7 +55,8 @@ class RedisLock {
 		if redis.call("get", KEYS[1]) == ARGV[1] then
 			return redis.call("del", KEYS[1])
 		else
-			return 0
+			-- consider unlocked as a different lock owns this key
+			return 1
 		end`;
 		const res = await this.redisClient.eval(deleteScript, 1, this.key, this.id);
 		if (res !== 1) {
