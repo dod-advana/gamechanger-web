@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
-import { getCurrentView } from "../..//gamechangerUtils";
+import { checkUserInfo, createCopyTinyUrl, setState } from '../../sharedFunctions';
+import { getCurrentView } from '../..//gamechangerUtils';
 import _ from 'lodash';
-import {Button} from "@material-ui/core";
+import {Button} from '@material-ui/core';
 
-import GCButton from "../common/GCButton";
-import GCTooltip from "../common/GCToolTip";
-import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
+import GCButton from '../common/GCButton';
+import GCTooltip from '../common/GCToolTip';
+import {SelectedDocsDrawer} from '../searchBar/GCSelectedDocsDrawer';
 import { 
-    FormControl,
-    InputLabel,
-    MenuItem,  Select, } from '@material-ui/core';
+	FormControl,
+	InputLabel,
+	MenuItem,  Select, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from "../common/gc-colors";
+import { gcOrange } from '../common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../gamechangerUtils';
@@ -26,26 +26,26 @@ const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const handleTypeFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-    let typeName = event.currentTarget.value;
-    newSearchSettings.typeFilter = {
+	let typeName = event.currentTarget.value;
+	newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
 		[typeName]: false 
 	};
-    newSearchSettings.isFilterUpdate = true;
-    newSearchSettings.typeUpdate = true;
+	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings.typeUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'typeFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-    let orgName = event.currentTarget.value;
-    newSearchSettings.orgFilter = {
+	let orgName = event.currentTarget.value;
+	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: false 
 	};
 	
-    newSearchSettings.isFilterUpdate = true;
+	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings.orgUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
@@ -118,14 +118,14 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-    const betterOrgData = {};
-        for(let i=0; i<originalOrgFilters.length; i++) {
-            betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
-        }
-    const betterTypeData = {};
-        for(let i=0; i<originalTypeFilters.length; i++) {
-            betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
-        }
+	const betterOrgData = {};
+	for(let i=0; i<originalOrgFilters.length; i++) {
+		betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
+	}
+	const betterTypeData = {};
+	for(let i=0; i<originalTypeFilters.length; i++) {
+		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
+	}
 
 
 	useEffect(()=> {
@@ -182,92 +182,92 @@ const ViewHeader = (props) => {
 	const handleChangeView = (event) => {
 		const {target: { value }} = event;
 		switch(value) {
-			case "List":
+			case 'List':
 				setState(dispatch, {currentViewName: 'Card', listView: true});
 				break;
-			case "Grid":
+			case 'Grid':
 				setState(dispatch, {currentViewName: 'Card', listView: false});
 				break;
-			case "Graph":
+			case 'Graph':
 				setState(dispatch, {currentViewName: value, runGraphSearch: true});
 				break;
-			case "Explorer":
+			case 'Explorer':
 			default:
 				setState(dispatch, {currentViewName: value});
 		}
 		setDropdownValue(value)
 	}
 
-    return (
-        <div className={'results-count-view-buttons-container'}> 
-        {state.cloneData.clone_name === "gamechanger" ?
-            <>
+	return (
+		<div className={'results-count-view-buttons-container'}> 
+			{state.cloneData.clone_name === 'gamechanger' ?
+				<>
             	<div className={'view-filters-container'}>
             		{state.searchSettings.specificOrgsSelected && Object.keys(orgFilter).map((org, index) => {
-                    if(state.searchSettings.orgFilter[org]){
-                        return (
+							if(state.searchSettings.orgFilter[org]){
+								return (
                      		<Button
-								variant="outlined"
-								backgroundColor="white"
-								display="inline-flex"
-								name={org}
-								value = {org}
-								style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color:'orange', height: 40, ariaPressed: 'true'}}
-								endIcon={<CloseIcon />}
-								onClick={(event) => {
-									handleOrganizationFilterChange(event, state, dispatch);
-								}}
+										variant="outlined"
+										backgroundColor="white"
+										display="inline-flex"
+										name={org}
+										value = {org}
+										style={{marginRight:'10px', padding: '10px 15px',backgroundColor:'white', color:'orange', height: 40, ariaPressed: 'true'}}
+										endIcon={<CloseIcon />}
+										onClick={(event) => {
+											handleOrganizationFilterChange(event, state, dispatch);
+										}}
 								
-								>
-							<span 
-								style={{
-								fontFamily: 'Montserrat',
-								fontWeight: 300,
-								color: 'black',
-								width: '100%', marginTop: '5px', marginBottom: '5px'
-							}}>
-								{org}
-								</span>
+									>
+										<span 
+											style={{
+												fontFamily: 'Montserrat',
+												fontWeight: 300,
+												color: 'black',
+												width: '100%', marginTop: '5px', marginBottom: '5px'
+											}}>
+											{org}
+										</span>
 
-							</Button>
-							)} else {
+									</Button>
+								)} else {
 								return null;
 							}
-			})}
+						})}
 
-        {state.searchSettings.specificTypesSelected 
+						{state.searchSettings.specificTypesSelected 
             && Object.keys(typeFilter).map((type, index) => {
-            if(state.searchSettings.typeFilter[type]){
-                return (
-                    <Button
-                    variant="outlined"
-                    backgroundColor="white"
-                    display="inline-flex"
-                    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
-                    endIcon={<CloseIcon />}
-                    value={type}
-					onClick={(event) => {
-                        handleTypeFilterChange(event, state, dispatch);
-                    }}
+            	if(state.searchSettings.typeFilter[type]){
+            		return (
+            			<Button
+            				variant="outlined"
+            				backgroundColor="white"
+            				display="inline-flex"
+            				style={{marginRight:'10px', padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
+            				endIcon={<CloseIcon />}
+            				value={type}
+            				onClick={(event) => {
+            					handleTypeFilterChange(event, state, dispatch);
+            				}}
 				    >
-                         <span style={{
-                            fontFamily: 'Montserrat',
-                            fontWeight: 300,
-                            color: 'black',
-                            width: '100%', marginTop: '5px', marginBottom: '5px'
-                         }}>
-                            {type}
-                        </span>
+            				<span style={{
+            					fontFamily: 'Montserrat',
+            					fontWeight: 300,
+            					color: 'black',
+            					width: '100%', marginTop: '5px', marginBottom: '5px'
+            				}}>
+            					{type}
+            				</span>
 
-                    </Button>
-                        )} else {
-                            return null;
-                    }
-        })}
-        </div>
-        </> : <> </>
-        } 
-        <div className={'view-buttons-container'}>
+            			</Button>
+            		)} else {
+            		return null;
+            	}
+            })}
+					</div>
+				</> : <> </>
+			} 
+			<div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>
@@ -316,12 +316,12 @@ const ViewHeader = (props) => {
 								></i>
 							</div>)
 						}
-				</>
+					</>
 				}
 				<FormControl variant="outlined" classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
-						className={`tutorial-step-${componentStepNumbers["Change View"]}`}
+						className={`tutorial-step-${componentStepNumbers['Change View']}`}
 						labelId="view-name"
 						label="View"
 						id="view-name-select"
@@ -330,16 +330,16 @@ const ViewHeader = (props) => {
 						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
 						autoWidth
 					>
-					{viewNames.map(view => {
-						if(view.name === "Card"){
-							return([
-								<MenuItem key={`Card-List`}value={'List'}>List View</MenuItem>,
-								<MenuItem key={`Card-Grid`}value={'Grid'}>Grid View</MenuItem>
-							])
-						} else {
-							return <MenuItem key={`${view.name}-key`}value={view.name}>{view.title}</MenuItem>
-						}
-					})}
+						{viewNames.map(view => {
+							if(view.name === 'Card'){
+								return([
+									<MenuItem key={`Card-List`}value={'List'}>List View</MenuItem>,
+									<MenuItem key={`Card-Grid`}value={'Grid'}>Grid View</MenuItem>
+								])
+							} else {
+								return <MenuItem key={`${view.name}-key`}value={view.name}>{view.title}</MenuItem>
+							}
+						})}
 					</Select>
 				</FormControl>
 				{cloneData?.clone_name === 'eda' &&
@@ -350,12 +350,12 @@ const ViewHeader = (props) => {
 					</a>
 				}
 				<GCButton
-						className={`tutorial-step-${state.componentStepNumbers["Share Search"]}`}
-						id={"gcShareSearch"}
-						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
-						style={{height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50}}
-						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
-					>
+					className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
+					id={'gcShareSearch'}
+					onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
+					style={{height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50}}
+					disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
+				>
 					<GCTooltip title='Share' placement="bottom" arrow>
 						<i className="fa fa-share" style={{margin: '0 0 0 5px'}}/>
 					</GCTooltip>
@@ -379,7 +379,7 @@ const ViewHeader = (props) => {
 				/>
 			</div>
 		</div>
-        )
+	)
 
 }
 
