@@ -123,7 +123,6 @@ const PolicySearchHandler = {
         setState(dispatch, {
 			selectedDocuments: new Map(),
 			loading: searchSettings.isFilterUpdate ? false: true,
-            replaceResults: true,
             metricsLoading: false,
 			noResultsMessage: null,
 			autocompleteItems: [],
