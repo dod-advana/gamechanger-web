@@ -18,9 +18,7 @@ describe('ModularGameChangerController', function () {
 				is_live: true,
 				url: 'gamechanger',
 				permissions_required: false,
-				clone_to_advana: true,
-				clone_to_gamchanger: true,
-				clone_to_jupiter: true,
+				available_at: JSON.stringify([['localhost']]),
 				clone_to_sipr: false,
 				show_tutorial: true,
 				show_graph: true,
@@ -86,9 +84,7 @@ describe('ModularGameChangerController', function () {
 				is_live: true,
 				url: 'gamechanger',
 				permissions_required: false,
-				clone_to_advana: true,
-				clone_to_gamchanger: true,
-				clone_to_jupiter: true,
+				available_at: JSON.stringify([['localhost']]),
 				clone_to_sipr: false,
 				show_tutorial: true,
 				show_graph: true,
@@ -134,6 +130,72 @@ describe('ModularGameChangerController', function () {
 			}
 			assert.deepStrictEqual(resMsg, cloneList);
 		});
+	});
+
+	describe('#storeCloneMeta', () => {
+		it('should take in clonedata, and update the db', async () => {
+			const cloneList = [{
+				id: 1,
+				clone_name: 'gamechanger',
+				search_module: 'policy/policySearchHandler',
+				export_module: 'simple/simpleExportHandler',
+				title_bar_module: 'policy/policyTitleBarHandler',
+				navigation_module: 'policy/policyNavigationHandler',
+				card_module: 'policy/policyCardHandler',
+				display_name: 'GAMECHANGER',
+				is_live: true,
+				url: 'gamechanger',
+				permissions_required: false,
+				available_at: JSON.stringify([['localhost']]),
+				clone_to_sipr: false,
+				show_tutorial: true,
+				show_graph: true,
+				show_crowd_source: true,
+				show_feedback: true,
+				config: {esIndex: 'gamechanger'},
+				save: () => {}
+			}];
+			const opts = {
+				...constructorOptionsMock,
+				clone_meta: {
+					findOrCreate(data) {
+						return Promise.resolve([cloneList[0], false]);
+					},
+				},
+				handler_factory: {
+					reloadCloneMeta: () => {}
+				}
+			};
+			const target = new ModularGameChangerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					cloneData: {"cloneData":{"clone_name":"gamechanger","display_name":"GAMECHANGER","is_live":true,"url":"gamechanger","permissions_required":true,"clone_to_sipr":false,"show_tutorial":false,"show_graph":true,"show_crowd_source":true,"show_feedback":true,"search_module":"policy/policySearchHandler","export_module":"policy/policyExportHandler","title_bar_module":"policy/policyTitleBarHandler","navigation_module":"policy/policyNavigationHandler","card_module":"policy/policyCardHandler","main_view_module":"policy/policyMainViewHandler","graph_module":"policy/policyGraphHandler","search_bar_module":null,"s3_bucket":null,"data_source_name":null,"source_agency_name":null,"metadata_creation_group":null,"source_s3_bucket":null,"source_s3_prefix":null,"elasticsearch_index":null,"needs_ingest":false,"available_at":"[\"localhost\"]","can_edit":true}}
+				}
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.storeCloneMeta(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.deepStrictEqual(resMsg, {created: false, updated: true});
+		})
 	});
 
 	describe('#search', () => {
