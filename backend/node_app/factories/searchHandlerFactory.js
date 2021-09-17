@@ -20,7 +20,6 @@ class SearchHandlerFactory {
 	}
 
 	createSearchHandler(cloneName) {
-		console.log(cloneName);
 		if(this.cloneMetaMap[cloneName] &&
 		this.cloneMetaMap[cloneName].searchModule &&
 		this.searchHandlerMap[this.cloneMetaMap[cloneName].searchModule]) {
