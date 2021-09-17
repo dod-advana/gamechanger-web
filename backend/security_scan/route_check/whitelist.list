@@ -74,3 +74,6 @@
 .*/api/gamechanger/getOrgImageOverrideURLs .*
 .*/api/gamechanger/saveOrgImageOverrideURL .*
 .* /api/gamechanger/aboutGC/getFAQ .*
+.*/api/gamechanger/getElasticSearchIndex .*
+.*/api/gamechanger/getHomepageEditorData .*
+
