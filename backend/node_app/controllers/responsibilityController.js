@@ -419,12 +419,13 @@ class ResponsibilityController {
 					const emailBody = `<h2>Responsibility Issue Report from ${userId}</h2>
 						<p>Responsibility Row in Postgres: ${id}</p>
 						<p>${issue_description}</p>`;
-					this.emailUtility.sendEmail(emailBody, 'Responsibility Issue Report', this.constants.GAME_CHANGER_OPTS.emailAddress, null, null, userId).then(resp => {
-						resp.status(200).send(report);
-					}).catch(error => {
+					try{
+						await this.emailUtility.sendEmail(emailBody, 'Responsibility Issue Report', this.constants.GAME_CHANGER_OPTS.emailAddress, null, null, userId);
+						res.status(200).send(report);
+					}catch(error){
 						this.logger.error(JSON.stringify(error), 'YXBG3G4', userId);
 						res.status(200).send(report);
-					});
+					};
 				} else {
 					res.status(200).send(report);
 				}

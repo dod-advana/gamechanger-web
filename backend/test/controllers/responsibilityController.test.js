@@ -138,7 +138,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {}
+				body: {where:['id','otherOrganizationPersonnel']}
 			};
 
 			let resCode;
@@ -167,17 +167,66 @@ describe('ResponsibilityController', function () {
 	});
 
 	describe('#storeResponsibilityReports', () => {
-		let responsibility_reports = [];
+		let responsibility_reports = [{id: 2, responsibility_id: 2, reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', issue_description:'test'}];
 		const opts = {
 			...constructorOptionsMock,
 			responsibility_reports: {
 				findOrCreate(data) {
-					const report = {id: 1, ...data.defaults};
-					responsibility_reports.push(report);
-					return Promise.resolve([report]);
+					const reportFound = responsibility_reports.find(report => (report.responsibility_id === data.where.responsibility_id && report.reporter_hashed_username === data.where.reporter_hashed_username));
+					if(reportFound){
+						return Promise.resolve([reportFound, false]);
+					} else{
+						const report = {id: 1, ...data.defaults};
+						responsibility_reports.push(report);
+						return Promise.resolve([report, true]);
+					}
+				}
+			},
+			constants: {
+				GAME_CHANGER_OPTS: {
+					emailAddress: 'test@test.com'
+				}
+			},
+			emailUtility: {
+				sendEmail: async (html, subject, recipientEmails, userEmail, attachments = null, userId) => {
+					return Promise.resolve();
 				}
 			}
 		};
+
+		it('should find the existing report', async () => {
+			const target = new ResponsibilityController(opts);
+
+			const req = {
+				...reqMock,
+				body: {id: 2, issue_description: 'test'}
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.storeResponsibilityReports(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = [{id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2}];
+			const expectedReport = {id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2};
+			assert.deepStrictEqual(responsibility_reports, expected);
+			assert.deepStrictEqual(resMsg, expectedReport);
+			assert.strictEqual(resCode, 200);
+		});
 
 		it('should create a report successfully', async () => {
 			const target = new ResponsibilityController(opts);
@@ -206,12 +255,11 @@ describe('ResponsibilityController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = [{id: 1, issue_description: 'Test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 1}];
+			const expected = [{id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2}, {id: 1, issue_description: 'Test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 1}];
 			const expectedReport = {id: 1, issue_description: 'Test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 1};
 			assert.deepStrictEqual(responsibility_reports, expected);
 			assert.deepStrictEqual(resMsg, expectedReport);
 			assert.strictEqual(resCode, 200);
-
 		});
 
 		it('should return 400 since a var is missing', async () => {
