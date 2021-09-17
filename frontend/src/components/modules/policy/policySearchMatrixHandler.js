@@ -612,7 +612,6 @@ const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 							classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 							control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={term} checked={checked} onClick={() => handleAddSearchTerm(phrase,source,idx)} />}
 							label={term}
-							LineBreakMode="TailTruncation"
 							labelPlacement="end"
 						/>
 					)
