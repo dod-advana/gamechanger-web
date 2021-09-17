@@ -360,6 +360,7 @@ export default function SearchMatrix(props) {
 		const temp = _.cloneDeep(expansionTerms)
 		temp[idx].checked = !temp[idx].checked
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		console.log(newSearchSettings)
 		newSearchSettings.expansionTermAdded = true;
 		newSearchSettings.isFilterUpdate = true;
 		setState(dispatch, { searchSettings: newSearchSettings });

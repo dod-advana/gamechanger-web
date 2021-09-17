@@ -325,6 +325,7 @@ export default function SideBar(props) {
 			}
 		}
 		let topFiveArr = Array.from(topFive)
+		console.log(topFiveArr)
 		topFiveArr = topFiveArr.map(term => {
 			return {...term, checked:exactMatch(state.searchText, term.phrase, " OR ")}
 		})
@@ -346,6 +347,26 @@ export default function SideBar(props) {
 		setRunningTopicSearch(state.runningTopicSearch);
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
+
+	useEffect(() => {
+		if(state.searchSettings.expansionTermAdded){
+			let newSearchText = state.searchText.trim()
+			expansionTerms.forEach(({phrase, source, checked}) => {
+				if(checked && !exactMatch(newSearchText, phrase, " OR ")) {
+					trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'QueryExpansion', 'SearchTermAdded', `${phrase}_${source}`);
+					//newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
+					newSearchText = phrase
+				} 
+				else if(!checked && exactMatch(newSearchText,`${phrase}`, " OR ")) {
+					newSearchText = newSearchText.replace(` OR ${phrase}`, "").trim()
+				}
+			})
+
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.expansionTermAdded = false;
+			setState(dispatch, { searchText: newSearchText, runSearch: true, searchSettings: newSearchSettings });
+		}
+	}, [state, expansionTerms, dispatch])
 
 	const renderTopEntities = () => {
 		return (
@@ -384,7 +405,6 @@ export default function SideBar(props) {
 								classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 								control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={term} checked={checked} onClick={() => handleAddSearchTerm(phrase,source,idx)} />}
 								label={term}
-								LineBreakMode="TailTruncation"
 								labelPlacement="end"
 							/>
 						)
@@ -472,7 +492,7 @@ export default function SideBar(props) {
 						<div style={styles.innerContainer}>
 						{expansionTerms.length>0 && <div style={{width: '100%', marginBottom: 10}}>
 						<GCAccordion expanded={expansionTermSelected} header={'SEARCHES'} headerTextWeight={'normal'}>
-						{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
+							{ renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes) }
 						</GCAccordion>
 						</div>}
 							{(topEntities.length > 0) && <>
