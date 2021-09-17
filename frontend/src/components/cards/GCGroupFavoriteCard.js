@@ -2,17 +2,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import Button from "@material-ui/core/Button";
+import Button from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
-import Popover from "@material-ui/core/Popover";
-import Icon from "@material-ui/core/Icon";
+import Popover from '@material-ui/core/Popover';
+import Icon from '@material-ui/core/Icon';
 import moment from 'moment';
 
 // Local Imports
 import {trackEvent} from '../telemetry/Matomo';
 import { getTrackingNameForFactory, encode } from '../../gamechangerUtils';
-import GCTooltip from "../common/GCToolTip"
-import GCButton from "../common/GCButton";
+import GCTooltip from '../common/GCToolTip'
+import GCButton from '../common/GCButton';
 import {CardButton} from '../common/CardButton';
 
 const StyledFavoriteDocumentCard = styled.div`
@@ -29,7 +29,7 @@ const StyledFavoriteDocumentCard = styled.div`
 	position: absolute; 
 	border: none;
 	${({groupStyles, active}) => !active ? groupStyles?.main 
-	: `top: 0px;
+		: `top: 0px;
 	background: #ECF1F7;
 	height: 500px;
 	z-index: 100;
@@ -266,7 +266,7 @@ const GroupFavoriteCard = (props) => {
 		cloneData
 	} = props;
 
-	const createdDate = moment(Date.parse(documentObject.createdAt)).utc().format("YYYY-MM-DD HH:mm UTC");
+	const createdDate = moment(Date.parse(documentObject.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [popoverAnchorEl, setPopoverAnchorEl] = useState(null);
@@ -309,88 +309,88 @@ const GroupFavoriteCard = (props) => {
 							style={{ height: 37, minWidth: 30, fontSize: 24, margin: 0, border: 'unset', padding: '0 6px' }}
 							buttonColor={'#FFFFFF'}
 							borderColor={'#B0B9BE'}
-							textStyle={{color: "#E9691D"}}
+							textStyle={{color: '#E9691D'}}
 						>
-							<i className={"fa fa-star"} />
+							<i className={'fa fa-star'} />
 						</GCButton>
 						<Popover id={idx} onClose={handleStarClicked}
-						open={popoverOpen && popoverIdx === idx} anchorEl={popoverAnchorEl}
-						anchorOrigin={{
-							vertical: 'bottom',
-							horizontal: 'right',
-						}}
-						transformOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-					>
-						<div style={{ padding: '0px 15px 10px' }}>
-							<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-								<CloseButton onClick={handleStarClicked}>
-									<CloseIcon fontSize="small" />
-								</CloseButton>
-							</div>
-							<div style={{width: 350, margin: 5}}>
-								<div style={{ margin: '65px 15px 0'}}>Are you sure you want to remove this favorite from the group?</div>
-								<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-									<GCButton
-										onClick={handleStarClicked}
-										style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-										isSecondaryBtn={true}
-									>No
-									</GCButton>
-									<GCButton
-										onClick={() => {
-											setPopoverIdx(-1);
-											setPopoverOpen(false);
-											setPopoverAnchorEl(null);
-											handleRemoveFavoriteFromGroup(group.id, documentObject.favorite_id, dispatch);
-										}}
-										style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 10px 0px', marginRight: 10 }}
-									>Yes
-									</GCButton>
+							open={popoverOpen && popoverIdx === idx} anchorEl={popoverAnchorEl}
+							anchorOrigin={{
+								vertical: 'bottom',
+								horizontal: 'right',
+							}}
+							transformOrigin={{
+								vertical: 'top',
+								horizontal: 'right',
+							}}
+						>
+							<div style={{ padding: '0px 15px 10px' }}>
+								<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+									<CloseButton onClick={handleStarClicked}>
+										<CloseIcon fontSize="small" />
+									</CloseButton>
+								</div>
+								<div style={{width: 350, margin: 5}}>
+									<div style={{ margin: '65px 15px 0'}}>Are you sure you want to remove this favorite from the group?</div>
+									<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+										<GCButton
+											onClick={handleStarClicked}
+											style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+											isSecondaryBtn={true}
+										>No
+										</GCButton>
+										<GCButton
+											onClick={() => {
+												setPopoverIdx(-1);
+												setPopoverOpen(false);
+												setPopoverAnchorEl(null);
+												handleRemoveFavoriteFromGroup(group.id, documentObject.favorite_id, dispatch);
+											}}
+											style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 10px 0px', marginRight: 10 }}
+										>Yes
+										</GCButton>
+									</div>
 								</div>
 							</div>
-						</div>
-					</Popover>
+						</Popover>
 					</div>
 				</div>
 				<div className={'summary-details'}>
 					<div className={'summary-summary'}>{summary}</div>
 				</div>
-					<div className={active ? 'stats-details stats-details-active' : 'stats-details stats-details-inactive'}>
-						<div className={'favorited-date'}>{createdDate}</div>
-						<div className={'stats-details-stat-div'}>
-							<GCTooltip title={`Click to see ${group.group_type} comments`} placement="top">
-								<div className={'stats-comment'}>
-									<Icon className="fa fa-comment" onClick={() => setShowComments(!showComments)}
-									/>
-								</div>
-							</GCTooltip>
-						</div>
-						<div className={'buttons-div'}>
-							<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE: 14}} href={'#'}
-								onClick={(e) => {
-									e.preventDefault();
-									clickFn(documentObject.filename, cloneData.clone_name, documentObject.search_text, 0);
-								}}
-							>
+				<div className={active ? 'stats-details stats-details-active' : 'stats-details stats-details-inactive'}>
+					<div className={'favorited-date'}>{createdDate}</div>
+					<div className={'stats-details-stat-div'}>
+						<GCTooltip title={`Click to see ${group.group_type} comments`} placement="top">
+							<div className={'stats-comment'}>
+								<Icon className="fa fa-comment" onClick={() => setShowComments(!showComments)}
+								/>
+							</div>
+						</GCTooltip>
+					</div>
+					<div className={'buttons-div'}>
+						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE: 14}} href={'#'}
+							onClick={(e) => {
+								e.preventDefault();
+								clickFn(documentObject.filename, cloneData.clone_name, documentObject.search_text, 0);
+							}}
+						>
 								Open
-							</CardButton>
-							<CardButton
-								style={{...styles.footerButtonBack, CARD_FONT_SIZE:14}}
-								href={'#'}
-								onClick={(e) => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${documentObject.id}`);
-									e.preventDefault();
-								}}
-							>
+						</CardButton>
+						<CardButton
+							style={{...styles.footerButtonBack, CARD_FONT_SIZE:14}}
+							href={'#'}
+							onClick={(e) => {
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'CardInteraction', 'showDocumentDetails');
+								window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${documentObject.id}`);
+								e.preventDefault();
+							}}
+						>
 								Details
-							</CardButton>
-						</div>
+						</CardButton>
 					</div>
 				</div>
+			</div>
 			<div className={'overlay-details'} hidden={!showComments}>
 				<div className={'overlay-buttons'}>
 					<Button className={'title-bar-close'}
