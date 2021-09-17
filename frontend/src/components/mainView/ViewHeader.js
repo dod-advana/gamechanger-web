@@ -1,20 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { checkUserInfo, createCopyTinyUrl, setState } from "../../sharedFunctions";
-import { numberWithCommas, getCurrentView } from "../..//gamechangerUtils";
+import { getCurrentView } from "../..//gamechangerUtils";
+import _ from 'lodash';
+import {Button} from "@material-ui/core";
+
 import GCButton from "../common/GCButton";
 import GCTooltip from "../common/GCToolTip";
 import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
-import { FormControl, InputLabel, MenuItem,  Select, } from '@material-ui/core';
+import { 
+    FormControl,
+    InputLabel,
+    MenuItem,  Select, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-
 import { gcOrange } from "../common/gc-colors";
+import CloseIcon from '@material-ui/icons/Close';
+import {trackEvent} from '../telemetry/Matomo';
+import {getTrackingNameForFactory} from '../../gamechangerUtils';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
+
+const handleTypeFilterChange = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    let typeName = event.currentTarget.value;
+    newSearchSettings.typeFilter = {
+		...newSearchSettings.typeFilter,
+		[typeName]: false 
+	};
+    newSearchSettings.isFilterUpdate = true;
+    newSearchSettings.typeUpdate = true;
+	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'typeFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
+}
+
+const handleOrganizationFilterChange = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+    let orgName = event.currentTarget.value;
+    newSearchSettings.orgFilter = {
+		...newSearchSettings.orgFilter,
+		[orgName]: false 
+	};
+	
+    newSearchSettings.isFilterUpdate = true;
+	newSearchSettings.orgUpdate = true;
+	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
+}
+
 
 const useStyles = makeStyles({
 	root: {
@@ -51,10 +87,11 @@ const useStyles = makeStyles({
 const ViewHeader = (props) => {
 
 	const classes = useStyles();
-	const {context, resultsText, mainStyles={}} = props;
+	const {context ={}} = props;
 
 	const {state, dispatch} = context;
-	
+	const {originalOrgFilters, orgFilter} = state.searchSettings;
+	const {originalTypeFilters, typeFilter} = state.searchSettings;
 	const {
 		activeCategoryTab,
 		cloneData,
@@ -65,7 +102,6 @@ const ViewHeader = (props) => {
 		listView,
 		selectedCategories,
 		topicCount,
-		timeFound,
 		viewNames,
 		categorySorting,
 		currentSort,
@@ -73,7 +109,8 @@ const ViewHeader = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [displayCount, setDisplayCount] = useState(activeCategoryTab === 'all'?count+entityCount+topicCount: count)
+	// eslint-disable-next-line
+    const [displayCount, setDisplayCount] = useState(activeCategoryTab === 'all'?count+entityCount+topicCount: count)
 
 	useEffect(()=> {
 		if(IS_EDGE){
@@ -81,7 +118,7 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-    
+
 	useEffect(()=> {
 		let tempCount;
 		switch(activeCategoryTab){
@@ -153,26 +190,76 @@ const ViewHeader = (props) => {
 	}
 
     return (
+        <div className={'results-count-view-buttons-container'}> 
+        {state.cloneData.clone_name === "gamechanger" ?
+            <>
+            <div className={'view-filters-container'}>
+            {state.searchSettings.specificOrgsSelected 
+        && Object.keys(orgFilter).map((org, index) => {
+                    if(state.searchSettings.orgFilter[org]){
+                        return (
+                     <Button
+                    variant="outlined"
+                    backgroundColor="white"
+                    display="inline-flex"
+                    name={org}
+                    value = {org}
+					style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color:'orange', height: 40, ariaPressed: 'true'}}
+					endIcon=<CloseIcon />
+					onClick={(event) => {
+                        handleOrganizationFilterChange(event, state, dispatch);
+                    }}
+                    
+				    >
+                     <span 
+                        style={{
+                        fontFamily: 'Montserrat',
+                        fontWeight: 300,
+                        color: 'black',
+                        width: '100%', marginTop: '5px', marginBottom: '5px'
+                     }}>
+                        {org}
+                        </span>
 
-        <div className={'results-count-view-buttons-container'} style={{...mainStyles}}> 
-		{state.cloneData.clone_name === "gamechanger" ?
-			<>
-			{ !state.searchSettings.isFilterUpdate && displayCount > 0 ? 
-				<div className={'sidebar-section-title'}>
-					{`${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-				</div>
-			:
-				<div className={'sidebar-section-title'}>
-					{'Loading results ...'}
-				</div>
-			}
-			</>
-		:
-			<div className={'sidebar-section-title'}>
-				{resultsText ? resultsText : `${numberWithCommas(displayCount)} results found in ${timeFound} seconds`}
-			</div>
-		}
-            <div className={'view-buttons-container'}>
+                    </Button>
+                    )} else {
+                        return null;
+                    }
+    })}
+
+        {state.searchSettings.specificTypesSelected 
+            && Object.keys(typeFilter).map((type, index) => {
+            if(state.searchSettings.typeFilter[type]){
+                return (
+                    <Button
+                    variant="outlined"
+                    backgroundColor="white"
+                    display="inline-flex"
+                    style={{marginRight:"10px", padding: '10px 15px',backgroundColor:'white', color: 'orange', height: 40}}
+                    endIcon=<CloseIcon />
+                    value={type}
+					onClick={(event) => {
+                        handleTypeFilterChange(event, state, dispatch);
+                    }}
+				    >
+                         <span style={{
+                            fontFamily: 'Montserrat',
+                            fontWeight: 300,
+                            color: 'black',
+                            width: '100%', marginTop: '5px', marginBottom: '5px'
+                         }}>
+                            {type}
+                        </span>
+
+                    </Button>
+                        )} else {
+                            return null;
+                    }
+        })}
+        </div>
+        </> : <> </>
+        } 
+        <div className={'view-buttons-container'}>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>
