@@ -138,7 +138,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {where:['id','otherOrganizationPersonnel']}
+				body: { where: [{id: "id", value:"test"}, {id: "otherOrganizationPersonnel", value: "test"}, {id: "otherOrganizationPersonnel", value: [null]}, {id: "test", value: "test"}] }
 			};
 
 			let resCode;
