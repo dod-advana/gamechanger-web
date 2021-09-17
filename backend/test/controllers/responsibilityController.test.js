@@ -375,11 +375,28 @@ describe('ResponsibilityController', function () {
 	});
 
 	describe('#updateResponsibility', () => {
+
+		const responsibilitiesList = [{
+			id: 0, filename: 'test', documentTitle: 'test', organizationPersonnel: 'test', responsibilityText: 'test', otherOrganizationPersonnel: 'test', documentsReferenced: {}, status: 'active'
+		}]
+		const responsibilities = {
+			update: async (data, where) => {
+				let updates = 0;
+				const responsibilityToUpdate = responsibilitiesList.find(responsibility => responsibility.id === where.where.id);
+				responsibilityToUpdate.status = 'revised';
+				responsibilityToUpdate.organizationPersonnel = data.annotatedEntity;
+				responsibilityToUpdate.responsibilityText = data.annotatedResponsibilityText;
+				if(responsibilityToUpdate.status === 'revised') updates++;
+				return Promise.resolve([updates]);
+			}
+		}
+
 		const opts = {
 			...constructorOptionsMock,
+			responsibilities
 		};
 
-		it('should', async () => {
+		it('should update a resposibility and return a 200 status code', async () => {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
@@ -396,14 +413,20 @@ describe('ResponsibilityController', function () {
 				}
 			};
 
+			const req = {
+				...reqMock,
+				body: { 
+					id: 0, 
+					annotatedEntity: "updated entity", 
+					annotatedResponsibilityText: "updated text"},
+			};
+
 			try {
 				await target.updateResponsibility(req, res);
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {};
-			assert.deepStrictEqual({}, expected);
-			// assert.strictEqual(resCode, 200);
+			assert.strictEqual(resCode, 200);
 
 		});
 	});
