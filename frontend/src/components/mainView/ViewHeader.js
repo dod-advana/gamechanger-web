@@ -90,8 +90,7 @@ const ViewHeader = (props) => {
 	const {context ={}} = props;
 
 	const {state, dispatch} = context;
-	const {originalOrgFilters, orgFilter} = state.searchSettings;
-	const {originalTypeFilters, typeFilter} = state.searchSettings;
+	const {typeFilter, orgFilter} = state.searchSettings;
 	const {
 		activeCategoryTab,
 		cloneData,
