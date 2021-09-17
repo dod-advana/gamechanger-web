@@ -163,7 +163,7 @@ const App = () => {
 						} else {
 							clone.available_at = JSON.parse(clone.available_at);
 						}
-						if (_.find(clone.available_at, (item) => item === url) !== undefined){
+						if (_.find(clone.available_at, (item) => item === url || item === 'all') !== undefined){
 							cloneRoutes.push((
 								<PrivateTrackedRoute 
 									key={idx} 
@@ -192,7 +192,7 @@ const App = () => {
 						} else {
 							clone.available_at = JSON.parse(clone.available_at);
 						}
-						if(_.find(clone.available_at, (item) => item === url) !== undefined){
+						if(_.find(clone.available_at, (item) => item === url || item === 'all') !== undefined){
 							if (clone.permissions_required) {
 								cloneRoutes.push((
 									<PrivateTrackedRoute 
