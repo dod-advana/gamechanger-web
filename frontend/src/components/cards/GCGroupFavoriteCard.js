@@ -16,10 +16,10 @@ import GCButton from '../common/GCButton';
 import {CardButton} from '../common/CardButton';
 
 const StyledFavoriteDocumentCard = styled.div`
-    width: 387px;
+	width: 387px;
 	height: 250px;
-    background-color: #F4F4F4;
-    border-radius: 6px;
+   background-color: #F4F4F4;
+   border-radius: 6px;
 	margin: 10px;
 	position: relative;
 	left: 0px;
@@ -53,7 +53,7 @@ const StyledFavoriteDocumentCard = styled.div`
 				top: 20px;
 				left: 10px;
 				color: #386F94;
-				font-family: "Noto Sans";
+				font-family: 'Noto Sans';
 				${({active}) => active ? 'opacity: 1; visibility: visible;' : 'opacity: 0; visibility: hidden'}
 				&:hover {
 					cursor: pointer;
@@ -63,7 +63,7 @@ const StyledFavoriteDocumentCard = styled.div`
 
 			> .summary-title {
 				color: #000000;
-				font-family: "Noto Sans";
+				font-family: 'Noto Sans';
 				font-size: 18px;
 				overflow: hidden;
 				width: 326px;
@@ -75,7 +75,7 @@ const StyledFavoriteDocumentCard = styled.div`
 				> .summary-title-link {
 					text-decoration: none;
     				color: #000000;
-					font-family: "Noto Sans";
+					font-family: 'Noto Sans';
 					font-size: 18px;
 					overflow: hidden;
 					width: 326px;
@@ -298,7 +298,7 @@ const GroupFavoriteCard = (props) => {
 			<div className={'main-info'}>
 				<div className={'top-buttons'}>
 					<div className={'back-button'} onClick={() => setActive(false)}>{'< Back'}</div>
-					<GCTooltip title={cardTitle} placement="top">
+					<GCTooltip title={cardTitle} placement='top'>
 						<div className={active ? 'summary-title summary-title-active' : 'summary-title'}>
 							<div className={'summary-title-link'}>{cardTitle}</div>
 						</div>
@@ -327,7 +327,7 @@ const GroupFavoriteCard = (props) => {
 							<div style={{ padding: '0px 15px 10px' }}>
 								<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
 									<CloseButton onClick={handleStarClicked}>
-										<CloseIcon fontSize="small" />
+										<CloseIcon fontSize='small' />
 									</CloseButton>
 								</div>
 								<div style={{width: 350, margin: 5}}>
@@ -361,9 +361,9 @@ const GroupFavoriteCard = (props) => {
 				<div className={active ? 'stats-details stats-details-active' : 'stats-details stats-details-inactive'}>
 					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
-						<GCTooltip title={`Click to see ${group.group_type} comments`} placement="top">
+						<GCTooltip title={`Click to see ${group.group_type} comments`} placement='top'>
 							<div className={'stats-comment'}>
-								<Icon className="fa fa-comment" onClick={() => setShowComments(!showComments)}
+								<Icon className='fa fa-comment' onClick={() => setShowComments(!showComments)}
 								/>
 							</div>
 						</GCTooltip>

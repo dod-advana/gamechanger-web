@@ -142,13 +142,13 @@ const GroupCard = (props) => {
 						})
 						const favCardStyles = {
 							main: `top: ${index * 60}px; 
-						transition: top .5s, height .5s;
-						&:hover {
-							background-color: #ECF1F7;
-							top: ${index * 60 - 20}px;
-							cursor: pointer;
-							tansition: top 1s;
-						}`
+								transition: top .5s, height .5s;
+								&:hover {
+									background-color: #ECF1F7;
+									top: ${index * 60 - 20}px;
+									cursor: pointer;
+									tansition: top 1s;
+								}`
 						}
 						if(doc){
 							return <GroupFavoriteCard
