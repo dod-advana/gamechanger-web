@@ -624,13 +624,17 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
+			
+			const hashed_user = this.sparkMD5.hash(userId);
+			
 			let ids = await this.gcHistory.findAll({
 				attributes: [
 					[Sequelize.fn('MAX', Sequelize.col('id')), 'id']
 				],
 				where: {
 					clone_name,
-					had_error: 'f'
+					had_error: 'f',
+					user_id: hashed_user
 				},
 				group: ['search'],
 				order: [[Sequelize.col('id'), 'DESC']],
