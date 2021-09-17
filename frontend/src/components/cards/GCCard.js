@@ -321,9 +321,12 @@ function GCCard (props) {
 	const selected = state.selectedDocuments.has(item.filename);
 
 	let isFavorite = false;
+	let favorite_id = null;
 	switch(cardType){
 		case 'document':
 			const faveDocs = state.userData ? state.userData.favorite_documents : [];
+			const favDocInfo = _.find(faveDocs, (doc) => {return doc.id === item.id});
+			favorite_id = favDocInfo?.favorite_id;
 			isFavorite = _.find(faveDocs, (doc) => {return doc.id === item.id}) !== undefined;
 			break;
 		case 'topic':
@@ -401,6 +404,7 @@ function GCCard (props) {
 				const documentData = {
 					filename: filename,
 					favorite_summary: favoriteSummary,
+					favorite_id: favorite_id,
 					favorite_name: '',
 					is_favorite: favorite
 				};
