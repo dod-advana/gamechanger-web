@@ -278,12 +278,7 @@ describe('ResponsibilityController', function () {
 				meta: {}
 			};
 
-			let paragraphNum;
-			try {
-				paragraphNum = await target.getParagraphNum(raw, user);
-			} catch (e) {
-				assert.fail(e);
-			}
+			const paragraphNum = await target.getParagraphNum(raw, user);
 			const expected = 65;
 			assert.strictEqual(paragraphNum, expected);
 		});
@@ -294,31 +289,35 @@ describe('ResponsibilityController', function () {
 			...constructorOptionsMock,
 		};
 
-		it('should', async () => {
+		it('should return cleaned results', async () => {
 			const target = new ResponsibilityController(opts);
 
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
+			const user = 'john';
+			const raw = {
+				body: {
+					took: 2,
+					timed_out: false,
+					_shards: { total: 3, successful: 3, skipped: 0, failed: 0 },
+					hits: { 
+						total: { value: 1, relation: 'eq' }, 
+						max_score: 10.008718, 
+						hits: [{
+							_source: {test: 'pass'}
+						}] 
+					}
 				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
+				statusCode: 200,
+				headers: {},
+				meta: {}
+			}
+
+			const expected = {
+				totalCount: 1,
+				docs: [{test: 'pass'}]
 			};
 
-			try {
-				await target.cleanUpEsResults(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			const expected = {};
-			assert.deepStrictEqual({}, expected);
-			// assert.strictEqual(resCode, 200);
+			const results = await target.cleanUpEsResults(raw, user);
+			assert.deepStrictEqual(results, expected);
 
 		});
 	});
