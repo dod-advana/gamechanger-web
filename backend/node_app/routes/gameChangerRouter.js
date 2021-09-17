@@ -46,7 +46,7 @@ const aboutGc = new AboutGcController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
-router.get('/admin/getElasticSearchIndex', search.getElasticSearchIndex);
+router.get('/getElasticSearchIndex', search.getElasticSearchIndex);
 router.post('/admin/setElasticSearchIndex', search.setElasticSearchIndex);
 router.post('/admin/queryEs', search.queryEs);
 
@@ -62,7 +62,7 @@ router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
-router.get('/admin/getHomepageEditorData', admin.getHomepageEditorData);
+router.get('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
