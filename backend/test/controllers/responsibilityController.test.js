@@ -2,6 +2,60 @@ const assert = require('assert');
 const { ResponsibilityController } = require('../../node_app/controllers/responsibilityController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
+const esRawResults= {
+	body: {
+		took: 4, timed_out: false, _shards: {},
+		hits: { 
+			total: { value: 1, relation: 'eq' }, 
+			max_score: 50.01322, 
+			hits: [{
+				_index: 'gamechanger_sans_abbreviations',
+				_type: '_doc',
+				_id: 'test',
+				_score: 29.58102,
+				_source: {
+					id: 'test',
+					doc_num: 'test',
+					paragraphs: [{
+						type: 'paragraph',
+						filename: 'test',
+						par_inc_count: 99,
+						id: 'test',
+						par_count_i: 9,
+						page_num_i: 6,
+						par_raw_text_t: 'test',
+						entities: {}
+					}]
+				},
+				fields: {},
+				inner_hits: { 
+					paragraphs: {
+						hits: { 
+							total: [Object], 
+							max_score: 194.13794, 
+							hits: [{
+								_index: 'gamechanger_sans_abbreviations',
+								_type: '_doc',
+								_id: 'test',
+								_nested: {},
+								_score: 194.13794,
+								fields: {
+								'paragraphs.par_inc_count': [ 65 ],
+								'paragraphs.filename': [ 'test.pdf' ],
+								'paragraphs.par_raw_text_t': ['test']
+								}
+							}] 
+						}
+					}
+				}
+			}] 
+		}
+	},
+	statusCode: 200,
+	headers: {},
+	meta: {}
+};
+
 describe('ResponsibilityController', function () {
 	describe('#getOtherEntResponsibilityFilterList', () => {
 		let responsibilities =  [
@@ -195,11 +249,25 @@ describe('ResponsibilityController', function () {
 	});
 
 	describe('#queryOneDocES', () => {
+		const dataApi = {
+			queryElasticSearch: async (esClientName, esIndex, esQuery, userId) => {
+				return Promise.resolve(esRawResults);
+			}
+		}
+
+		const constants = {
+			GAME_CHANGER_OPTS: {
+				index: 'gamechanger'
+			}
+		}
+
 		const opts = {
 			...constructorOptionsMock,
+			dataApi,
+			constants
 		};
 
-		it('should', async () => {
+		it('should get back a list of paragraphs for a document and the paragraph number for the string', async () => {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
@@ -216,14 +284,37 @@ describe('ResponsibilityController', function () {
 				}
 			};
 
+			const req = {
+				...reqMock,
+				permissions: 'Gamechanger Admin',
+				body: { 
+					cloneData: { clone_name: 'gamechanger' }, 
+					filename: "test", 
+					text: "test" 
+				},
+			};
+
 			try {
 				await target.queryOneDocES(req, res);
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {};
-			assert.deepStrictEqual({}, expected);
-			// assert.strictEqual(resCode, 200);
+			const expected = {
+				doc_id: "test",
+				doc_num: "test",
+				par_num: 65,
+				paragraphs: [{
+					type: 'paragraph',
+					filename: 'test',
+					par_inc_count: 99,
+					id: 'test',
+					par_count_i: 9,
+					page_num_i: 6,
+					par_raw_text_t: 'test',
+					entities: {},
+				}],
+			};
+			assert.deepStrictEqual(resMsg, expected);
 
 		});
 	});
@@ -237,46 +328,7 @@ describe('ResponsibilityController', function () {
 			const target = new ResponsibilityController(opts);
 
 			const user = 'john';
-			const raw= {
-				body: {
-					took: 4, timed_out: false, _shards: {},
-					hits: { 
-						total: {}, 
-						max_score: 50.01322, 
-						hits: [{
-							_index: 'gamechanger_sans_abbreviations',
-							_type: '_doc',
-							_id: 'test',
-							_score: 29.58102,
-							_source: {},
-							fields: {},
-							inner_hits: { 
-								paragraphs: {
-									hits: { 
-										total: [Object], 
-										max_score: 194.13794, 
-										hits: [{
-											_index: 'gamechanger_sans_abbreviations',
-											_type: '_doc',
-											_id: 'test',
-											_nested: {},
-											_score: 194.13794,
-											fields: {
-											'paragraphs.par_inc_count': [ 65 ],
-											'paragraphs.filename': [ 'test.pdf' ],
-											'paragraphs.par_raw_text_t': ['test']
-											}
-										}] 
-									}
-								}
-							}
-						}] 
-					}
-				},
-				statusCode: 200,
-				headers: {},
-				meta: {}
-			};
+			const raw= esRawResults;
 
 			const paragraphNum = await target.getParagraphNum(raw, user);
 			const expected = 65;
@@ -293,27 +345,24 @@ describe('ResponsibilityController', function () {
 			const target = new ResponsibilityController(opts);
 
 			const user = 'john';
-			const raw = {
-				body: {
-					took: 2,
-					timed_out: false,
-					_shards: { total: 3, successful: 3, skipped: 0, failed: 0 },
-					hits: { 
-						total: { value: 1, relation: 'eq' }, 
-						max_score: 10.008718, 
-						hits: [{
-							_source: {test: 'pass'}
-						}] 
-					}
-				},
-				statusCode: 200,
-				headers: {},
-				meta: {}
-			}
+			const raw = esRawResults;
 
 			const expected = {
 				totalCount: 1,
-				docs: [{test: 'pass'}]
+				docs: [{
+					id: 'test',
+					doc_num: 'test',
+					paragraphs: [{
+						type: 'paragraph',
+						filename: 'test',
+						par_inc_count: 99,
+						id: 'test',
+						par_count_i: 9,
+						page_num_i: 6,
+						par_raw_text_t: 'test',
+						entities: {}
+					}]
+				}]
 			};
 
 			const results = await target.cleanUpEsResults(raw, user);
