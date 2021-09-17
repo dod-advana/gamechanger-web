@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 // Local Imports
-import {SelectedDocsDrawer} from "../searchBar/GCSelectedDocsDrawer";
+import {SelectedDocsDrawer} from '../searchBar/GCSelectedDocsDrawer';
 import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../sharedFunctions';
-import GroupFavoriteCard from "../cards/GCGroupFavoriteCard";
+import GroupFavoriteCard from '../cards/GCGroupFavoriteCard';
 
 
 const StyledFavoriteGroupCard = styled.div`
@@ -21,45 +21,45 @@ const StyledFavoriteGroupCard = styled.div`
 `;
 
 const styles = {
-    exportButton : {
-        position: 'absolute',
-        right: 15,
-        top: 15,
-        margin: '-16px 0px 0px -10px'
-    },
-    titleSection: {
-        color: '#000000',
-        fontFamily: "Montserrat",
-        lineHeight: 1.5,
-        maxHeight: 60,
+	exportButton : {
+		position: 'absolute',
+		right: 15,
+		top: 15,
+		margin: '-16px 0px 0px -10px'
+	},
+	titleSection: {
+		color: '#000000',
+		fontFamily: 'Montserrat',
+		lineHeight: 1.5,
+		maxHeight: 60,
 		height: 60,
 		display: 'flex',
 		flexDirection: 'column',
 		textAlign: 'left'
-    },
+	},
 	groupName: {
 		overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        fontSize: 18,
+		textOverflow: 'ellipsis',
+		fontSize: 18,
 	},
 	groupDescription: {
 		overflow: 'hidden',
-        textOverflow: 'ellipsis',
+		textOverflow: 'ellipsis',
 		fontSize: 14
 	},
-    details: {
-        marginTop: -5,
-        display: 'flex',
-        placeContent: 'space-between'
-    },
-    itemCount: {
-        marginBottom: 8,
-        marginLeft: 15,
-        textAlign: 'start',
-        fontSize: 12,
-        fontFamily: 'Montserrat',
-        color: '#3F4A56'
-    },
+	details: {
+		marginTop: -5,
+		display: 'flex',
+		placeContent: 'space-between'
+	},
+	itemCount: {
+		marginBottom: 8,
+		marginLeft: 15,
+		textAlign: 'start',
+		fontSize: 12,
+		fontFamily: 'Montserrat',
+		color: '#3F4A56'
+	},
 	groupDetails: {
 		position: 'absolute',
 		bottom: 0
@@ -76,10 +76,10 @@ const styles = {
 const GroupCard = (props) => {
 	
 	const {
-        group,
+		group,
 		idx,
-        state,
-        dispatch,
+		state,
+		dispatch,
 		favorites
 	} = props;
 
@@ -94,7 +94,7 @@ const GroupCard = (props) => {
 	})
 	const combinedSearchText = searchTextlist.join(' OR ');
 
-    const removeSelectedDocument = (key) => {
+	const removeSelectedDocument = (key) => {
 		const { selectedDocuments } = state;
 
 		if (selectedDocuments.has(key)) {
@@ -106,42 +106,42 @@ const GroupCard = (props) => {
 
 	return (
 		<StyledFavoriteGroupCard key={idx}>
-            <div style={styles.exportButton}>
-                <SelectedDocsDrawer
-                    selectedDocuments={state.selectedDocuments}
-                    docsDrawerOpen={state.docsDrawerOpen}
-                    setDrawer={(open) => setState(dispatch, {docsDrawerOpen: open})}
-                    clearSelections={() => setState(dispatch, {selectedDocuments: new Map()})}
-                    openExport={() => {
+			<div style={styles.exportButton}>
+				<SelectedDocsDrawer
+					selectedDocuments={state.selectedDocuments}
+					docsDrawerOpen={state.docsDrawerOpen}
+					setDrawer={(open) => setState(dispatch, {docsDrawerOpen: open})}
+					clearSelections={() => setState(dispatch, {selectedDocuments: new Map()})}
+					openExport={() => {
 						setState(dispatch, {selectedDocuments: favFilenames, exportDialogVisible: true, prevSearchText: combinedSearchText});
 					}}
-                    removeSelection={(doc) => removeSelectedDocument(doc)}
-                    componentStepNumbers={state.componentStepNumbers}
-                    isDrawerReady={state.isDrawerReady}
-                    setDrawerReady={(ready) => setState(dispatch, {isDrawerReady: ready})}
-                    setShowTutorial={(showTutorial) => setState(dispatch, {showTutorial: showTutorial})}
-                    setStepIndex={(stepIndex) => setState(dispatch, {stepIndex: stepIndex})}
-                    showTutorial={state.showTutorial}
-                    rawSearchResults={[{}]}
-                    checkUserInfo={() => {checkUserInfo(state, dispatch)}}
-                />
-            </div>
-            <div style={styles.titleSection}>
+					removeSelection={(doc) => removeSelectedDocument(doc)}
+					componentStepNumbers={state.componentStepNumbers}
+					isDrawerReady={state.isDrawerReady}
+					setDrawerReady={(ready) => setState(dispatch, {isDrawerReady: ready})}
+					setShowTutorial={(showTutorial) => setState(dispatch, {showTutorial: showTutorial})}
+					setStepIndex={(stepIndex) => setState(dispatch, {stepIndex: stepIndex})}
+					showTutorial={state.showTutorial}
+					rawSearchResults={[{}]}
+					checkUserInfo={() => {checkUserInfo(state, dispatch)}}
+				/>
+			</div>
+			<div style={styles.titleSection}>
 				<div style={styles.groupName}>
 					{group.group_name}
 				</div>
-                <div style={styles.groupDescription}>
+				<div style={styles.groupDescription}>
 					{group.group_description}
 				</div>
-            </div>
+			</div>
 			{favorites.length > 0 ? 
-			<div style={{position: 'relative'}}>
-				{favorites.map((favId, index) => {
-					const doc = state.userData.favorite_documents.find(doc => {
-						return favId === doc.favorite_id;
-					})
-					const favCardStyles = {
-						main: `top: ${index * 60}px; 
+				<div style={{position: 'relative'}}>
+					{favorites.map((favId, index) => {
+						const doc = state.userData.favorite_documents.find(doc => {
+							return favId === doc.favorite_id;
+						})
+						const favCardStyles = {
+							main: `top: ${index * 60}px; 
 						transition: top .5s, height .5s;
 						&:hover {
 							background-color: #ECF1F7;
@@ -149,33 +149,33 @@ const GroupCard = (props) => {
 							cursor: pointer;
 							tansition: top 1s;
 						}`
-					}
-					if(doc){
-						return <GroupFavoriteCard
-							key={`${doc.favorite_id}`}
-							cardTitle={doc.title}
-							documentObject={doc}
-							summary={doc.summary}
-							overlayText={doc.favorite_summary}
-							idx={doc.favorite_id}
-							cloneData={state.cloneData}
-							styles={favCardStyles}
-							handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
-							dispatch={dispatch}
-							group={group}
-						/>
-					} else {return <></>}
+						}
+						if(doc){
+							return <GroupFavoriteCard
+								key={`${doc.favorite_id}`}
+								cardTitle={doc.title}
+								documentObject={doc}
+								summary={doc.summary}
+								overlayText={doc.favorite_summary}
+								idx={doc.favorite_id}
+								cloneData={state.cloneData}
+								styles={favCardStyles}
+								handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
+								dispatch={dispatch}
+								group={group}
+							/>
+						} else {return <></>}
 					
-				})}
-			</div> 
-			:
-			<div style={styles.placeHolder}>Go to the favorites tab to add up to five {group.group_type}s to the group.</div>
+					})}
+				</div> 
+				:
+				<div style={styles.placeHolder}>Go to the favorites tab to add up to five {group.group_type}s to the group.</div>
 			}
-            <div style={styles.details}>
-                <div style={styles.groupDetails}>
-                    {`${favorites.length} items`}
-                </div>
-            </div>
+			<div style={styles.details}>
+				<div style={styles.groupDetails}>
+					{`${favorites.length} items`}
+				</div>
+			</div>
 		</StyledFavoriteGroupCard>
 	)
 }

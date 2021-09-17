@@ -4,30 +4,30 @@ import styled from 'styled-components';
 import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import GameChangerAPI from '../api//gameChanger-service-api';
-import { trackEvent } from "../telemetry/Matomo";
-import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
-import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@material-ui/core";
-import GCTooltip from "../common/GCToolTip"
-import { backgroundGreyDark, backgroundWhite } from "../../components/common/gc-colors";
-import { gcOrange } from "../../components/common/gc-colors";
-import Pagination from "react-js-pagination";
-import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import Icon from "@material-ui/core/Icon";
-import GCButton from "../common/GCButton";
+import { trackEvent } from '../telemetry/Matomo';
+import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
+import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@material-ui/core';
+import GCTooltip from '../common/GCToolTip'
+import { backgroundGreyDark, backgroundWhite } from '../../components/common/gc-colors';
+import { gcOrange } from '../../components/common/gc-colors';
+import Pagination from 'react-js-pagination';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Icon from '@material-ui/core/Icon';
+import GCButton from '../common/GCButton';
 import ExportResultsDialog, { downloadFile } from '../export/ExportResultsDialog';
-import Popover from "@material-ui/core/Popover";
-import Popper from "@material-ui/core/Popper";
-import Link from "@material-ui/core/Link";
-import Badge from "@material-ui/core/Badge";
-import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from "../../gamechangerUtils";
-import FavoriteCard from "../cards/GCFavoriteCard";
-import ReactTable from "react-table";
-import TextField from "@material-ui/core/TextField";
+import Popover from '@material-ui/core/Popover';
+import Popper from '@material-ui/core/Popper';
+import Link from '@material-ui/core/Link';
+import Badge from '@material-ui/core/Badge';
+import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../gamechangerUtils';
+import FavoriteCard from '../cards/GCFavoriteCard';
+import ReactTable from 'react-table';
+import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
-import GCAccordion from "../common/GCAccordion";
-import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from "../../sharedFunctions";
+import GCAccordion from '../common/GCAccordion';
+import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from '../../sharedFunctions';
 import GCGroupCard from '../../components/cards/GCGroupCard';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -282,7 +282,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	groupSelect: {
 		fontSize: '16px', 
-		"&:focus": {backgroundColor: 'white'} 
+		'&:focus': {backgroundColor: 'white'} 
 	}
 }));
 
@@ -363,8 +363,8 @@ const GCUserDashboard = (props) => {
 	});
 	const [searchHistoryIdx, setSearchHistoryIdx] = useState(-1);
 
-	const [groupName, setGroupName] = useState("");
-	const [groupDescription, setGroupDescription] = useState("");
+	const [groupName, setGroupName] = useState('');
+	const [groupDescription, setGroupDescription] = useState('');
 
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
@@ -378,8 +378,8 @@ const GCUserDashboard = (props) => {
 	const [documentsToGroup, setDocumentsToGroup] = useState([]);
 	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
 	const [groupsToDelete, setGroupsToDelete] = useState([]);
-	const [addToGroupError, setAddToGroupError] = useState("");
-	const [createGroupError, setCreateGroupError] = useState("");
+	const [addToGroupError, setAddToGroupError] = useState('');
+	const [createGroupError, setCreateGroupError] = useState('');
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -391,7 +391,7 @@ const GCUserDashboard = (props) => {
 	const preventDefault = (event) => event.preventDefault();
 
 	const handleChange = ({ target }) => {
-		setAddToGroupError("");
+		setAddToGroupError('');
 		const groupId = documentGroups.find(group => group.group_name === target.value).id;
 		setDocumentsToGroup([]);
 		setSelectedGroup({id: groupId, name: target.value});
@@ -699,7 +699,7 @@ const GCUserDashboard = (props) => {
 
 		if(userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			setSelectedGroup({id: null, name: ""})
+			setSelectedGroup({id: null, name: ''})
 		}
 
 		if (userData.favorite_organizations) {
@@ -991,20 +991,20 @@ const GCUserDashboard = (props) => {
 	}
 
 	const handleAddToFavorites = async () => {
-		if(!selectedGroup.name) return setAddToGroupError("Please select a group");
+		if(!selectedGroup.name) return setAddToGroupError('Please select a group');
 		const selectedGroupInfo = userData.favorite_groups.find(group => group.id === selectedGroup.id);
 		let totalInGroup = documentsToGroup.length;
 		selectedGroupInfo.favorites.forEach(favId => {
 			if(!documentsToGroup.includes(favId)) totalInGroup++;
 		})
-		if(totalInGroup > 5) return setAddToGroupError("Groups can only contain up to 5 items");
+		if(totalInGroup > 5) return setAddToGroupError('Groups can only contain up to 5 items');
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
 		updateUserData();
 		handleCloseAddGroupModal();
 	}
 
 	const handleCloseAddGroupModal = () => {
-		setAddToGroupError("");
+		setAddToGroupError('');
 		setShowAddToGroupModal(false);
 		setDocumentsToGroup([]);
 	}
@@ -1044,14 +1044,14 @@ const GCUserDashboard = (props) => {
 					</div>
 				) : (
 					favoriteDocumentsSlice.length > 0 ? (
-					<>
-						<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'40px', paddingRight: 0,width:'95%' }}>
-							{userData.favorite_groups.length > 0 && <GCButton
-								onClick={() => {setShowAddToGroupModal(true)}}
-							>Add To Group
-							</GCButton>}
-						</div>
-						<Modal 
+						<>
+							<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'40px', paddingRight: 0,width:'95%' }}>
+								{userData.favorite_groups.length > 0 && <GCButton
+									onClick={() => {setShowAddToGroupModal(true)}}
+								>Add To Group
+								</GCButton>}
+							</div>
+							<Modal 
 								isOpen={showAddToGroupModal}
 								onRequestClose={() => handleCloseAddGroupModal()}
 								className={classes.addToGroupModal}
@@ -1069,9 +1069,9 @@ const GCUserDashboard = (props) => {
 										<FormControl variant="outlined" style={{ width: '100%' }}>
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
 											<Select classes={{root: classes.groupSelect}} value={selectedGroup.name} onChange={handleChange}>
-											{_.map(documentGroups, (group) => {
-												return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
-											})}
+												{_.map(documentGroups, (group) => {
+													return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
+												})}
 											</Select>
 										</FormControl>
 										<div style={{ display: 'flex' }}>
@@ -1093,16 +1093,16 @@ const GCUserDashboard = (props) => {
 									</div>
 								</div>
 							</Modal> 
-						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
-							<div className={"col-xs-12"} style={{ padding: 0 }}>
-								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-									{_.map(favoriteDocumentsSlice, (document, idx) => {
-										return renderFavoriteDocumentCard(document, idx)
-									})}
+							<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
+								<div className={'col-xs-12'} style={{ padding: 0 }}>
+									<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+										{_.map(favoriteDocumentsSlice, (document, idx) => {
+											return renderFavoriteDocumentCard(document, idx)
+										})}
+									</div>
 								</div>
 							</div>
-						</div>
-					</>
+						</>
 					) : (
 						<StyledPlaceHolder>Favorite a document to see it listed here</StyledPlaceHolder>
 					)
@@ -1962,7 +1962,7 @@ const GCUserDashboard = (props) => {
 			create: true
 		}
 		if(documentGroups.filter(group => group.group_name === groupName).length > 0){
-			return setCreateGroupError("A group with that name already exists");
+			return setCreateGroupError('A group with that name already exists');
 		}
 		handleGenerateGroup(group, state, dispatch);
 		handleCloseNewGroupModal();
@@ -1993,8 +1993,8 @@ const GCUserDashboard = (props) => {
 		return (
 			<div style={{width: '100%', height: '100%'}}>
 				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
-					<div className={"col-xs-12"} style={{ padding: 0 }}>
-					<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: 0, marginLeft: 40,width:'95%' }}>
+					<div className={'col-xs-12'} style={{ padding: 0 }}>
+						<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: 0, marginLeft: 40,width:'95%' }}>
 							<GCButton
 								onClick={() => setShowDeleteGroupModal(true)}
 								style={{}}
@@ -2027,7 +2027,7 @@ const GCUserDashboard = (props) => {
 											value={groupName}
 											onChange={(event) => { 
 												setGroupName(event.target.value); 
-												setCreateGroupError("");
+												setCreateGroupError('');
 											}}
 											error={createGroupError}
 											helperText = {createGroupError}
@@ -2079,15 +2079,15 @@ const GCUserDashboard = (props) => {
 									<div style={{ width: 490 }}>
 										{_.map(documentGroups, (group) => {
 											return <FormControlLabel
-													control={<Checkbox
-														onChange={() => handleDeleteGroupCheckbox(group.id)}
-														color="primary"
-														icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
-														checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
-														key={group.id}
-													/>}
-													label={<Typography variant="h6" noWrap className={classes.label}>{group.group_name}</Typography>}
-												/>
+												control={<Checkbox
+													onChange={() => handleDeleteGroupCheckbox(group.id)}
+													color="primary"
+													icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
+													checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
+													key={group.id}
+												/>}
+												label={<Typography variant="h6" noWrap className={classes.label}>{group.group_name}</Typography>}
+											/>
 										})}
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
@@ -2107,8 +2107,8 @@ const GCUserDashboard = (props) => {
 							</Modal>
 							<ExportResultsDialog
 								open={state.exportDialogVisible}
-								handleClose={() => setState(dispatch, { exportDialogVisible: false, selectedDocuments: new Map(), prevSearchText: "" })}
-								searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : "")}
+								handleClose={() => setState(dispatch, { exportDialogVisible: false, selectedDocuments: new Map(), prevSearchText: '' })}
+								searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : '')}
 								setCurrentTime={setCurrentTime}
 								selectedDocuments={state.selectedDocuments}
 								isSelectedDocs={true}
@@ -2126,23 +2126,23 @@ const GCUserDashboard = (props) => {
 								order={state.currentOrder}
 							/>
 						</div>
-				{documentGroups.length > 0 ? (
-					<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-						{_.map(documentGroups, (group, idx) => {
-							return (
-								<GCGroupCard
-									group={group}
-									state={state}
-									idx={idx}
-									dispatch={dispatch}
-									favorites={group.favorites}
-									key={group.id}
-								/>)
-						})}
-					</div>
-				) : (
-					<StyledPlaceHolder>Make a group to see it listed here</StyledPlaceHolder>
-				)}
+						{documentGroups.length > 0 ? (
+							<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+								{_.map(documentGroups, (group, idx) => {
+									return (
+										<GCGroupCard
+											group={group}
+											state={state}
+											idx={idx}
+											dispatch={dispatch}
+											favorites={group.favorites}
+											key={group.id}
+										/>)
+								})}
+							</div>
+						) : (
+							<StyledPlaceHolder>Make a group to see it listed here</StyledPlaceHolder>
+						)}
 					</div>
 				</div>
 
@@ -2207,7 +2207,7 @@ const GCUserDashboard = (props) => {
 						<Tab style={{...styles.tabStyle,
 							...(tabIndex=== 2 ? styles.tabSelectedStyle : {}),
 							borderRadius: ` 0 5px 0 0`
-							}} title="userGroups">
+						}} title="userGroups">
 							<Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>
 						</Tab>
 					</TabList>
