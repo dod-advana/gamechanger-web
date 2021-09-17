@@ -46,7 +46,7 @@ const aboutGc = new AboutGcController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
-router.get('/admin/getElasticSearchIndex', search.getElasticSearchIndex);
+router.get('/getElasticSearchIndex', search.getElasticSearchIndex);
 router.post('/admin/setElasticSearchIndex', search.setElasticSearchIndex);
 router.post('/admin/queryEs', search.queryEs);
 
@@ -56,12 +56,13 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
 router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
+router.post('/getOrgSeals', dataTracker.getOrgSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
-router.get('/admin/getHomepageEditorData', admin.getHomepageEditorData);
+router.get('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
@@ -70,6 +71,8 @@ router.post('/thumbnailDownload', document.getHomepageThumbnail);
 router.post('/assist/getDocumentsToAnnotate', document.getDocumentsToAnnotate);
 router.post('/assist/saveDocumentAnnotationsPOST', document.saveDocumentAnnotations);
 router.get('/getThumbnail', document.getThumbnail);
+router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
+router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);

@@ -1,0 +1,21 @@
+.gcPagination > .pagination > .active > a {
+    background-color: #1C2D64 !important;
+    border-color: #1C2D64 !important;
+    color: white !important;
+    padding: 11px 19px;
+}
+
+.gcPagination > .pagination > li > a {
+    color: black !important;
+    padding: 11px 19px;
+}
+
+.gcPagination > .pagination > .active > a:hover {
+    background-color: #1C2D64 !important;
+    border-color: #1C2D64 !important;
+}
+
+.gcPagination > .pagination > .active > a:focus {
+    background-color: #1C2D64 !important;
+    border-color: #1C2D64 !important;
+}

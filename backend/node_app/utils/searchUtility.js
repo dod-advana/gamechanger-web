@@ -347,7 +347,8 @@ class SearchUtility {
 			sort = 'Relevance', 
 			order = 'desc',
 			includeHighlights = true,
-			docIds = {}
+			docIds = {},
+			selectedDocuments
 		 }, 
 		 user) {
 
@@ -539,6 +540,14 @@ class SearchUtility {
 				query.query.bool.filter.push({
 					term: {
 						is_revoked_b: 'false'
+					}
+				});
+			}
+
+			if (selectedDocuments?.length > 0 && !isClone) { // filter selected documents
+				query.query.bool.filter.push({
+					terms: {
+						filename: selectedDocuments
 					}
 				});
 			}
@@ -1802,7 +1811,7 @@ class SearchUtility {
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
-				_source: ["title", "filename", "pop_score"],
+				_source: ["title", "filename", "pop_score", "id"],
 				from: offset,
 				size: limit,
 				query: {
@@ -1838,6 +1847,7 @@ class SearchUtility {
 					doc.name = r['_source'].title;
 					const path = require('path');
 					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
+					doc.id =r['_source'].id;
 					popDocs.push(doc);
 				});
 			};

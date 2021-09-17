@@ -4,6 +4,7 @@ const axiosLib = require('axios');
 const https = require('https');
 const AWS = require('aws-sdk');
 const neo4jLib = require('neo4j-driver');
+const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const {Op} = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
@@ -22,11 +23,15 @@ class DataLibrary {
 			neo4j = neo4jLib,
 			esSearchLib,
 			s3Opt = {},
+			redisClientDB = 8,
+			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 			edaDatabase = edaDatabaseFile,
 			lineItemDetails = LINE_ITEM_DETAILS,
 			allOutgoingCounts = ALL_OUTGOING_COUNTS
 		} = opts;
 
+		this.redisClientDB = redisClientDB;
+		this.redisDB = redisDB;
 		this.logger = logger;
 		this.constants = constants;
 		this.axios = axios;
@@ -209,7 +214,7 @@ class DataLibrary {
 		return reqConfig;
 	}
 
-	getESClientConfig ({ user, password, ca, protocol, host, port, index }) {
+	getESClientConfig ({ user, password, ca, protocol, host, port, index, requestTimeout }) {
 		let config = {
 			node: {}
 		};
@@ -233,6 +238,7 @@ class DataLibrary {
 			};
 		};
 		config.node.url = new URL(`${protocol}://${host}:${port}`);
+		config.requestTimeout = requestTimeout;
 
 		return config;
 	}
@@ -332,32 +338,46 @@ class DataLibrary {
 		}
 	}
 
-	getFileThumbnail(data, userId){
+	async getFileThumbnail(data, userId){
 		let { dest, folder, filename, clone_name } = data;
+		const key = `${clone_name}/${folder}/${filename}`;
 		let filetype = filename.split('.').pop();
 		if (filetype === '.png'){
 			filetype = 'image/png'
 		} else if(filetype === 'svg'){
 			filetype = 'image/svg+xml'
 		}
+
 		const params = {
 			Bucket: dest,
-			Key: `${clone_name}/${folder}/${filename}`,
-			ResponseContentType: filetype
+			Key: key,
+			ResponseContentType: 'image/png'
 		};
 
-		return new Promise((resolve,reject) => {
-			this.awsS3Client.getObject(params, (err, data) => {
-				if(err) {
-					reject(err, err.stack);
-				} else {
-					try {
-						resolve(data.Body.toString('base64'));
-					} catch (e) {
-						reject(e)
+		return new Promise(async (resolve,reject) => {
+			if(filename === 'none'){
+				reject(filename);
+			}
+			await this.redisDB.select(this.redisClientDB);
+			const cachedResults = await this.redisDB.get(key);
+			if (cachedResults) {
+				resolve(cachedResults);
+			} else {
+				this.awsS3Client.getObject(params, async (err, data) => {
+					if(err) {
+						reject(err, err.stack);
+					} else {
+						try {
+							const result = data.Body.toString('base64')
+							await this.redisDB.set(key, result);
+							resolve(result);
+						} catch (e) {
+							reject(e)
+						}
 					}
-				}
-			})
+				})
+			}
+
 		});
 	}
 
@@ -377,7 +397,7 @@ class DataLibrary {
 		}
 	}
 
-	async close(driver, session) {
+ async close(driver, session) {
 		await session.close();
 		await driver.close();
 	}
