@@ -118,15 +118,6 @@ const ViewHeader = (props) => {
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
 	},[dispatch])
-    const betterOrgData = {};
-        for(let i=0; i<originalOrgFilters.length; i++) {
-            betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
-        }
-    const betterTypeData = {};
-        for(let i=0; i<originalTypeFilters.length; i++) {
-            betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
-        }
-
 
 	useEffect(()=> {
 		let tempCount;
