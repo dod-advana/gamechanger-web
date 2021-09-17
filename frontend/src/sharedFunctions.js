@@ -139,21 +139,26 @@ export const handleSaveFavoriteTopic = async (
 		is_favorite: favorited,
 	});
 	await getUserData(dispatch);
-};
+}
 
-export const handleSaveFavoriteOrganization = async (
-	organization,
-	organizationSummary,
-	favorited,
-	dispatch
-) => {
-	await gameChangerAPI.favoriteOrganization({
-		organization,
-		organizationSummary,
-		is_favorite: favorited,
-	});
+export const handleGenerateGroup = async ( group, state, dispatch ) => {
+	const { cloneData } = state;
+	const clone_index = cloneData?.clone_data?.project_name;
+	const {group_type, group_name, group_description, create, group_ids} = group;
+
+	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true});
+	await getUserData(dispatch);
+}
+
+export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
+	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
 	await getUserData(dispatch);
 };
+
+export const handleRemoveFavoriteFromGroup = async (groupId, documentId, dispatch) => {
+	await gameChangerAPI.deleteFavoriteFromGroupPOST({groupId, documentId});
+	await getUserData(dispatch);
+}
 
 export const createTinyUrl = async (cloneData) => {
 	let url = window.location.hash.toString();
@@ -234,4 +239,19 @@ export const checkUserInfo = (state, dispatch) => {
 		console.log(err);
 	}
 	return false;
-};
+}
+
+export const setCurrentTime = (dispatch) => {
+	// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+	let currentTime = new Date();
+	let currentMonth = currentTime.getMonth() + 1 < 10 ? `0${currentTime.getMonth() + 1}` : currentTime.getMonth() + 1;
+	let currentDay = currentTime.getDate() < 10 ? `0${currentTime.getDate()}` : currentTime.getDate();
+
+	// currentTime = `${months[currentTime.getMonth() - 1]} ${currentTime.getDate()}, ${currentTime.getHours()}:${currentTime.getMinutes()}`;
+	currentTime = `${currentTime.getFullYear()}-${currentMonth}-${currentDay}-${currentTime.getHours()}-${currentTime.getSeconds()}-${currentTime.getMilliseconds()}`;
+	
+	setState(dispatch, { currentTime: currentTime });
+
+	return currentTime;
+}

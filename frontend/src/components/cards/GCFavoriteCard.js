@@ -468,7 +468,7 @@ FavoriteCard.propTypes = {
 	active: PropTypes.bool,
 	toggleActive: PropTypes.func,
 	isDocument: PropTypes.bool,
-	documentObject: PropTypes.objectOf(PropTypes.string),
+	documentObject: PropTypes.object,
 	updated: PropTypes.bool,
 	isTopic: PropTypes.bool,
 	isOrganization: PropTypes.bool,

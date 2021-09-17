@@ -115,6 +115,9 @@ router.post('/favorites/document', favorites.favoriteDocumentPOST);
 router.post('/favorites/search', favorites.favoriteSearchPOST);
 router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
+router.post('/favorites/group', favorites.favoriteGroupPOST);
+router.post('/favorites/addToGroup', favorites.addToFavoriteGroupPOST);
+router.post('/favorites/removeFromGroup', favorites.deleteFavoriteFromGroupPOST);
 router.post('/favorites/organization', favorites.favoriteOrganizationPOST);
 router.post('/clearFavoriteSearchUpdate', favorites.clearFavoriteSearchUpdate);
 
