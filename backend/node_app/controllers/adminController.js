@@ -2,7 +2,8 @@ const GC_ADMINS = require('../models').admin;
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
-
+const SearchUtility = require('../utils/searchUtility');
+const constantsFile = require('../config/constants');
 class AdminController {
 
 	constructor(opts = {}) {
@@ -11,12 +12,18 @@ class AdminController {
 			gcAdmins = GC_ADMINS,
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
+			searchUtility = new SearchUtility(opts),
+			constants = constantsFile,
+
 		} = opts;
 
 		this.logger = logger;
 		this.gcAdmins = gcAdmins;
 		this.sparkMD5 = sparkMD5;
 		this.appSettings = appSettings;
+		this.searchUtility = searchUtility;
+		this.constants = constants;
+
 
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
@@ -24,6 +31,7 @@ class AdminController {
 		this.deleteGCAdminData = this.deleteGCAdminData.bind(this);
 		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
 		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
+
 	}
 
 	async getGCAdminData(req, res) {
@@ -86,9 +94,9 @@ class AdminController {
 			res.status(500).send(err);
 		}
 	}
-
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
+		let esIndex = "gamechanger";
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -96,10 +104,21 @@ class AdminController {
 				where: {
 					key: [
 						'homepage_topics',
-						'homepage_major_pubs'
+						'homepage_major_pubs',
+						'homepage_popular_docs_inactive'
 					]
 				}
 			});
+			let docs = {}
+			docs.key = "popular_docs";
+			try {
+				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
+			} catch (err) {
+				this.logger.error(err, 'FL1LLDU', userId);
+				res.status(500).send(err);
+				docs.value = []
+			}
+			results.push(docs);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);

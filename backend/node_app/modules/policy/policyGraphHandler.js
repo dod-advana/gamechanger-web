@@ -611,6 +611,13 @@ class PolicyGraphHandler extends GraphHandler {
 					ORDER BY mentions DESC LIMIT 100;`, {entityName: entityName}, isTest, userId
 			);
 
+			if (doc_ids[0].doc_id === null) {
+				return {
+					totalCount: 0,
+					docs: []
+				};
+			}
+
 			const docIds = doc_ids.map(docId => {
 				return docId.doc_id;
 			});

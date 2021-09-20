@@ -2,6 +2,7 @@ const defaultSearchBarHandler = require(`../modules/default/defaultSearchBarHand
 const edaSearchBarHandler = require(`../modules/eda/edaSearchBarHandler`);
 const policySearchBarHandler = require(`../modules/policy/policySearchBarHandler`);
 const globalSearchSearchBarHandler = require(`../modules/globalSearch/globalSearchSearchBarHandler`);
+const budgetSearchSearchBarHandler = require(`../modules/budgetSearch/budgetSearchSearchBarHandler`);
 
 class SearchBarFactory {
 
@@ -16,6 +17,9 @@ class SearchBarFactory {
 					break;
 				case 'globalSearch/globalSearchSearchBarHandler':
 					this.handler = globalSearchSearchBarHandler;
+					break;
+				case 'budgetSearch/budgetSearchSearchBarHandler':
+					this.handler = budgetSearchSearchBarHandler;
 					break;
 				default:
 					this.handler = defaultSearchBarHandler;
