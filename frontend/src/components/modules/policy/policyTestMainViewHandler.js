@@ -439,12 +439,12 @@ const PolicyMainViewHandler = {
 						{crawlerSources.length > 0 && crawlerSources[0].imgSrc && crawlerSources.map(source => 
 							<SourceContainer
 								onClick={ () => {
-									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'SourceOpened', source.display_source_s)
-									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.display_source_s.toLowerCase()}`);
+									trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'SourceOpened', source.data_source_s)
+									window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=source&sourceName=${source.data_source_s.toLowerCase()}`);
 								}}
 							>
 								<img src={source.imgSrc} alt={'crawler seal'}></img>
-								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.display_source_s}</Typography>
+								<Typography style={{...styles.containerText, color:'#313541', alignSelf: 'center', marginLeft: '20px'}}>{source.data_source_s}</Typography>
 							</SourceContainer>
 						)}
 						{ crawlerSources.length === 0 &&  
