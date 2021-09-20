@@ -50,6 +50,7 @@ class SearchUtility {
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
+
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -346,7 +347,8 @@ class SearchUtility {
 			sort = 'Relevance', 
 			order = 'desc',
 			includeHighlights = true,
-			docIds = {}
+			docIds = {},
+			selectedDocuments
 		 }, 
 		 user) {
 
@@ -496,6 +498,9 @@ class SearchUtility {
 				case 'Alphabetical':
 					query.sort = [ {"display_title_s": {"order" : order}} ]
 					break;
+				case 'Popular':
+					query.sort = [ {"pop_score.keyword": {"order" : order}} ]
+					break;
 				case 'References':
 					query.sort = [{"_script": {
 						"type": "number",
@@ -535,6 +540,14 @@ class SearchUtility {
 				query.query.bool.filter.push({
 					term: {
 						is_revoked_b: 'false'
+					}
+				});
+			}
+
+			if (selectedDocuments?.length > 0 && !isClone) { // filter selected documents
+				query.query.bool.filter.push({
+					terms: {
+						filename: selectedDocuments
 					}
 				});
 			}
@@ -1795,6 +1808,55 @@ class SearchUtility {
 				}
 	}
 
+	getPopularDocsQuery(offset = 0, limit = 10) {
+		try {
+			let query = {
+				_source: ["title", "filename", "pop_score", "id"],
+				from: offset,
+				size: limit,
+				query: {
+					range: {
+						'pop_score.keyword': {
+							gte: 10
+						}
+					}
+				},
+				sort: [
+					{
+						'pop_score.keyword': {
+							order: "desc"
+						}
+					}
+				]
+			};
+			return query;
+			} catch (err) {
+				this.logger.error(err, 'PTF390A', '');
+			}
+	}	
+	async getPopularDocs(userId, esIndex) {
+		let popDocs = [];
+
+		try {
+			let popDocsQuery = this.getPopularDocsQuery();
+			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
+			if (esResults) {
+				esResults.body.hits.hits.forEach((r) => {
+					let doc = {}
+					doc.doc_filename = r['_source'].filename;
+					doc.name = r['_source'].title;
+					const path = require('path');
+					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
+					doc.id =r['_source'].id;
+					popDocs.push(doc);
+				});
+			};
+			return popDocs;
+		} catch (e) {
+			this.logger.error(e.message, 'I9XQQA1F');
+			return popDocs
+		}
+	}
 	getSourceQuery(searchText, offset, limit) {
 		try {
 			let query = {
@@ -1984,7 +2046,7 @@ class SearchUtility {
 					node.topicScore = recObj.topicScore;
 					addNode(node);
 				} else if (recObj.hasOwnProperty('doc_id')) {
-					docIds.push({doc_id: recObj.doc_id, mentions: recObj.mentions.low});
+					docIds.push({doc_id: recObj.doc_id, mentions: recObj.mentions?.low});
 				} else if (recObj.hasOwnProperty('primary_key')) {
 					graphMetaData.push({
 						label: recObj.label,

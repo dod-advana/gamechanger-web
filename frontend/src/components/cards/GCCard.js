@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import _ from "lodash";
+import _ from 'lodash';
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
 import {Divider, Checkbox} from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
@@ -20,7 +20,7 @@ import {
 	handleSaveFavoriteTopic, 
 	handleSaveFavoriteOrganization, 
 	setState
-} from "../../sharedFunctions";
+} from '../../sharedFunctions';
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
@@ -321,17 +321,20 @@ function GCCard (props) {
 	const selected = state.selectedDocuments.has(item.filename);
 
 	let isFavorite = false;
+	let favorite_id = null;
 	switch(cardType){
 		case 'document':
-			const faveDocs = state.userData.favorite_documents;
+			const faveDocs = state.userData ? state.userData.favorite_documents : [];
+			const favDocInfo = _.find(faveDocs, (doc) => {return doc.id === item.id});
+			favorite_id = favDocInfo?.favorite_id;
 			isFavorite = _.find(faveDocs, (doc) => {return doc.id === item.id}) !== undefined;
 			break;
 		case 'topic':
-			const faveTopics = state.userData.favorite_topics;
+			const faveTopics = state.userData ? state.userData.favorite_topics : [];
 			isFavorite = _.find(faveTopics, (topic) => {return topic.topic_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
 			break;
 		case 'organization':
-			const faveOrganizations = state.userData.favorite_organizations;
+			const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
 			isFavorite = _.find(faveOrganizations, (organization) => {return organization.organization_name.toLowerCase() === item.name.toLowerCase()}) !== undefined;
 			break;
 		default: 
@@ -365,6 +368,11 @@ function GCCard (props) {
 			setCardHandler(handler[cardType])
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
+			if (cardType === 'organization') {
+				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({data}) => {
+					item.sealURLOverride = data[item.name];
+				});
+			}
 		}
 	}, [state, loaded, cardType, item]);
 
@@ -396,6 +404,7 @@ function GCCard (props) {
 				const documentData = {
 					filename: filename,
 					favorite_summary: favoriteSummary,
+					favorite_id: favorite_id,
 					favorite_name: '',
 					is_favorite: favorite
 				};
@@ -426,8 +435,8 @@ function GCCard (props) {
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
 				<i onClick={(event) => {
             openFavoritePopper(event.target);
-				}} className={favorite ? "fa fa-star" : "fa fa-star-o"} style={{
-					color: favorite ? "#E9691D" : 'rgb(224, 224, 224)',
+				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
+					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
 					cursor: 'pointer',
 					fontSize: 26,

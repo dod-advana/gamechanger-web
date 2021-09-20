@@ -1,4 +1,4 @@
-import axiosLib from "axios";
+import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import {axiosGET, axiosDELETE, axiosPOST} from '../../gamechangerUtils';
@@ -30,11 +30,11 @@ const endpoints = {
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
 	gcAdminDataDeletePOST: '/api/gameChanger/admin/deleteAdminData',
-	getHomepageEditorData: '/api/gameChanger/admin/getHomepageEditorData',
+	getHomepageEditorData: '/api/gameChanger/getHomepageEditorData',
 	setHomepageEditorData: '/api/gameChanger/admin/setHomepageEditorData',
 	getGCCacheStatus: '/api/gameChanger/admin/getGCCacheStatus',
 	toggleGCCacheStatus: '/api/gameChanger/admin/toggleGCCacheStatus',
-	getElasticSearchIndex: '/api/gameChanger/admin/getElasticSearchIndex',
+	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
 	notificationsGET: '/api/gameChanger/getNotifications',
@@ -51,7 +51,11 @@ const endpoints = {
 	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
 	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
 	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
+	gcOrgSealData: '/api/gameChanger/getOrgSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
+	favoriteGroupPOST: '/api/gameChanger/favorites/group',
+	addTofavoriteGroupPOST: '/api/gameChanger/favorites/addToGroup',
+	deleteFavoriteFromGroupPOST: '/api/gameChanger/favorites/removeFromGroup',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
@@ -104,7 +108,9 @@ const endpoints = {
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
 	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
-	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
+	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
+	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
+	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
@@ -300,10 +306,10 @@ export default class GameChangerAPI {
 	}
 
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
-		const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
-		// const s3Bucket = 'advana-raw-zone';
+		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
+		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 30000})
+		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 0})
 	}
 
 	getCloneData = async () => {
@@ -348,6 +354,11 @@ export default class GameChangerAPI {
 
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
+		return axiosPOST(this.axios, url);
+	}
+
+	gcOrgSealData = async () => {
+		const url = endpoints.gcOrgSealData;
 		return axiosPOST(this.axios, url);
 	}
 	
@@ -458,6 +469,21 @@ export default class GameChangerAPI {
 
 	favoriteDocument = async (data) => {
 		const url = endpoints.favoriteDocumentPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	favoriteGroup = async (data) => {
+		const url = endpoints.favoriteGroupPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	addTofavoriteGroupPOST = async (data) => {
+		const url = endpoints.addTofavoriteGroupPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	deleteFavoriteFromGroupPOST = async (data) => {
+		const url = endpoints.deleteFavoriteFromGroupPOST;
 		return axiosPOST(this.axios, url, data);
 	}
 
@@ -780,6 +806,16 @@ export default class GameChangerAPI {
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
+	}
+
+	getOrgImageOverrideURLs = async (names) => {
+		const url = endpoints.getOrgImageOverrideURLs;
+		return axiosGET(this.axios, url, { params: { names }});
+	}
+
+	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
+		const url = endpoints.saveOrgImageOverrideURL;
+		return axiosPOST(this.axios, url, { name, imageURL });
 	}
 
 	getFAQ = async () => {

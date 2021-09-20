@@ -6,9 +6,9 @@ import {useStyles} from '../util/GCAdminStyles';
  * 
  * @class AddEditorTermDialog
  */
-export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDialog}) => {
+export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDialog, section}) => {
 	
-	const [editorAddTerm, setEditorAddTerm] = useState('');
+	const [editorAddTerm, setEditorAddTerm] = useState({});
 	const classes = useStyles();
 
 	const closeDialog = ()=>{
@@ -23,12 +23,30 @@ export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDial
 		>
 			<TextField
 				id="margin-dense"
-				onBlur={event => setEditorAddTerm(event.target.value)}
+				onBlur={event => setEditorAddTerm({...editorAddTerm, name: event.target.value})}
 				className={classes.textField}
 				style={{padding:10}}
 				helperText="Term to add..."
 				margin="dense"
 			/>
+			{section === 'major_pubs' && <>
+				<TextField
+					id="margin-dense"
+					onBlur={event => setEditorAddTerm({...editorAddTerm, img_filename: event.target.value})}
+					className={classes.textField}
+					style={{padding:10}}
+					helperText="image filename (in s3)"
+					margin="dense"
+				/>
+				<TextField
+					id="margin-dense"
+					onBlur={event => setEditorAddTerm({...editorAddTerm, doc_filename: event.target.value})}
+					className={classes.textField}
+					style={{padding:10}}
+					helperText="document filename (+ file extension)"
+					margin="dense"
+				/>
+			</>}
 			<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding:10}}>
 				<GCButton
 					id={'addTermSubmit'}
@@ -54,3 +72,4 @@ export default ({handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDial
 		</Dialog>
 	)
 }
+

@@ -166,7 +166,7 @@ const SimpleSearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					combinedSearch,
-					esIndex: cloneData.config.esIndex
+					esIndex: cloneData.elasticsearch_index
 				},
 			});
 			

@@ -401,6 +401,22 @@ describe('UserController', function () {
 				clone_index: 'Test'
 			}];
 
+			const favorite_groups = [{
+				id: 1,
+				user_id: "27d1ca9e10b731476b7641eae2710ac0",
+				group_type: "document",
+				group_name: "Test",
+				group_description: "Test",
+				is_clone: true,
+				clone_index: "Test",
+			}]
+
+			const favorite_documents_groups = [{
+				user_id: "27d1ca9e10b731476b7641eae2710ac0",
+				favorite_group_id: 1,
+				favorite_document_id: 1,
+			}]
+
 			const search_hisotry = [{
 				id: 1,
 				user_id: '27d1ca9e10b731476b7641eae2710ac0',
@@ -568,6 +584,36 @@ describe('UserController', function () {
 						}
 					}
 				},
+				favoriteGroup: {
+					sequelize: {
+						fn(data) {},
+						col(data) {}
+					},
+					findAll(data) {
+						returnFavoriteGroups = [];
+						favorite_groups.forEach(group => {
+							if (data.where.user_id === group.user_id) {
+								returnFavoriteGroups.push(group);
+							}
+						});
+						return Promise.resolve(returnFavoriteGroups);
+					}
+				},
+				favoriteDocumentsGroup: {
+					sequelize: {
+						fn(data) {},
+						col(data) {}
+					},
+					findAll(data) {
+						returnFavoriteDocumentsGroup = [];
+						favorite_documents_groups.forEach(docGroup => {
+							if (data.where.favorite_group_id === docGroup.favorite_group_id) {
+								returnFavoriteDocumentsGroup.push(docGroup);
+							}
+						});
+						return Promise.resolve(returnFavoriteDocumentsGroup);
+					}
+				},
 				gcHistory: {
 					findAll(data) {
 						returnGCHistory = [];
@@ -620,7 +666,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': {'favorites': 0, 'history': 0, 'total': 0}, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', "favorite_id": 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}],"favorite_groups": [{"clone_index": "Test", "favorites": [1], "group_description": "Test", "group_name": "Test", "group_type": "document", "id": 1, "is_clone": true, "user_id": "27d1ca9e10b731476b7641eae2710ac0"}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': {'favorites': 0, 'history': 0, 'total': 0}, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(resMsg, expected);
 
 		});
