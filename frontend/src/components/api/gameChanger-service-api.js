@@ -30,11 +30,11 @@ const endpoints = {
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
 	gcAdminDataDeletePOST: '/api/gameChanger/admin/deleteAdminData',
-	getHomepageEditorData: '/api/gameChanger/admin/getHomepageEditorData',
+	getHomepageEditorData: '/api/gameChanger/getHomepageEditorData',
 	setHomepageEditorData: '/api/gameChanger/admin/setHomepageEditorData',
 	getGCCacheStatus: '/api/gameChanger/admin/getGCCacheStatus',
 	toggleGCCacheStatus: '/api/gameChanger/admin/toggleGCCacheStatus',
-	getElasticSearchIndex: '/api/gameChanger/admin/getElasticSearchIndex',
+	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
 	notificationsGET: '/api/gameChanger/getNotifications',
@@ -53,6 +53,9 @@ const endpoints = {
 	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
 	gcOrgSealData: '/api/gameChanger/getOrgSeals',
 	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
+	favoriteGroupPOST: '/api/gameChanger/favorites/group',
+	addTofavoriteGroupPOST: '/api/gameChanger/favorites/addToGroup',
+	deleteFavoriteFromGroupPOST: '/api/gameChanger/favorites/removeFromGroup',
 	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
 	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
@@ -110,7 +113,7 @@ const endpoints = {
 	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
 	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
-	getFAQ: 'api/gamechanger/aboutGC/getFAQ',
+	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 
 
 	exportHistoryDELETE: function(id){
@@ -484,6 +487,21 @@ export default class GameChangerAPI {
 
 	favoriteDocument = async (data) => {
 		const url = endpoints.favoriteDocumentPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	favoriteGroup = async (data) => {
+		const url = endpoints.favoriteGroupPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	addTofavoriteGroupPOST = async (data) => {
+		const url = endpoints.addTofavoriteGroupPOST;
+		return axiosPOST(this.axios, url, data);
+	}
+
+	deleteFavoriteFromGroupPOST = async (data) => {
+		const url = endpoints.deleteFavoriteFromGroupPOST;
 		return axiosPOST(this.axios, url, data);
 	}
 
