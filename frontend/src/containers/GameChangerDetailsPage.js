@@ -453,7 +453,7 @@ const GameChangerDetailsPage = (props) => {
 	useEffect(() => {
 
 		if (!topic || !cloneData || graph.nodes.length <= 0) return;
-		let searchText = `"${topic.name}"`;
+		let searchText = `${topic.name}`;
 		
 		const docIds = [];
 		
