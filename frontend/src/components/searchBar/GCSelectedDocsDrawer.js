@@ -22,6 +22,7 @@ const DrawerTable = styled(Table)`
     border: 1px solid ${backgroundGreyDark};
     margin: 0 16px;
     width: 93% !important;
+    table-layout:fixed;
 `;
 
 const DrawerTableRow = styled(TableRow)`
@@ -37,6 +38,7 @@ const ButtonRow = styled.div`
 const DrawerTableCell = styled(TableCell)`
     display: flex !important;
     justify-content: space-between !important;
+    max-width: 100% !important;
 `;
 
 export const SelectedDocsDrawer = (props) => {
@@ -82,7 +84,7 @@ export const SelectedDocsDrawer = (props) => {
                             width: '100%',
                             justifyContent: 'space-between'
                         }}>
-                            <span style={{ fontSize: 16 }}>{value}</span>
+                            <span style={{ fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
                             <i className="fa fa-times-circle fa-fw" style={{ cursor: 'pointer', height: 17 }} onClick={()=>handleRemoveSelection(key)} />
                         </div>
                     </DrawerTableCell>
