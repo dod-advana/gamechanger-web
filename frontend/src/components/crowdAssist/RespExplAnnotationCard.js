@@ -74,7 +74,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 							Highlight words, sentences, or parts of text that apply.
 						</li>
 						<li style={{ textAlign: "justify" }}>
-							Submit Assist to tag text with for review.
+							Submit to tag the text with for review.
 						</li>
 					</ol>
 				</GCAccordion>
