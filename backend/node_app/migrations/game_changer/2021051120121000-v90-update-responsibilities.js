@@ -15,11 +15,7 @@ module.exports = {
         queryInterface.addColumn(tablename, 'organizationPersonnel', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'responsibilityText', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'otherOrganizationPersonnel', Sequelize.TEXT),
-        queryInterface.addColumn(tablename, 'documentsReferenced', Sequelize.ARRAY(Sequelize.TEXT)),
-        queryInterface.addColumn(tablename, 'status', {
-          type : Sequelize.TEXT,
-          defaultValue : 'active'
-        }),
+        queryInterface.addColumn(tablename, 'documentsReferenced', Sequelize.ARRAY(Sequelize.TEXT))
 			]);
 		});
   },
@@ -32,7 +28,6 @@ module.exports = {
         queryInterface.removeColumn(tablename, 'otherOrganizationPersonnel'),
         queryInterface.removeColumn(tablename, 'responsibilityText'),
         queryInterface.removeColumn(tablename, 'documentsReferenced'),
-        queryInterface.removeColumn(tablename, 'status', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'primaryEntity', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'responsibilityLevel1', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'responsibilityLevel2', Sequelize.TEXT),
