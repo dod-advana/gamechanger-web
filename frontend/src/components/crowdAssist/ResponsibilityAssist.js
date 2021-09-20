@@ -142,9 +142,9 @@ class ResponsibilityAssist extends Component {
 		const pageNumber = data.paragraphs[data.par_num]?.page_num_i + 1;
 		const searchText = this.props.context.state.responsibilityText;
 
-		const tagsList = [ "Entity", "Verb", "Responsibility"];
+		const tagsList = [ "Entity",/* "Verb", */"Responsibility"];
 		const tagmap = {"Entity": highlightColors[3],
-						"Verb": highlightColors[1],
+						// "Verb": highlightColors[1],
 						"Responsibility": highlightColors[4]};
 
 		this.setState({
