@@ -140,7 +140,7 @@ class ResponsibilityAssist extends Component {
 		const id = this.props.context.state.id;
 		const filename = data.paragraphs[data.par_num]?.filename;
 		const pageNumber = data.paragraphs[data.par_num]?.page_num_i + 1;
-		const searchText = this.props.context.state.responsibilityText;
+		const searchText = `"${this.props.context.state.responsibilityText}"`;
 
 		const tagsList = [ "Entity",/* "Verb", */"Responsibility"];
 		const tagmap = {"Entity": highlightColors[3],
@@ -314,13 +314,13 @@ class ResponsibilityAssist extends Component {
 		});
 	}
 
-	handleOpen = () => { // TODO,  Need to test on server with PDFs
+	handleOpen = () => {
 		const { filename, pageNumber, searchText} = this.state;
 		const cloneName = this.props.context.state.cloneData.clone_name;
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker' , 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'filename', filename);
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
+		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 	}
 
 	renderAnnotationCard = () => {
