@@ -38,18 +38,18 @@ class PolicySearchHandler extends SearchHandler {
 		this.favorite_Search = favorite_search;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const {
 			offset,
 			useGCCache,
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, storeHistory);
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');
-		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 		// }
 
 		// cleaning incomplete double quote issue
@@ -61,7 +61,9 @@ class PolicySearchHandler extends SearchHandler {
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		if (storeHistory) {
+			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		}
 		return enrichedResults;
 	}
 
@@ -102,7 +104,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	// searchHelper function breakouts
-	async createRecObject(body, userId){
+	async createRecObject(body, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -149,7 +151,9 @@ class PolicySearchHandler extends SearchHandler {
 			await this.redisDB.select(redisAsyncClientDB);
 
 			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 			return {historyRec, cloneSpecificObject, clientObj};
 		} catch (e) {
 			this.logger.error(e.message, 'AC3CP8H');

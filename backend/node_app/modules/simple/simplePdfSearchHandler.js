@@ -24,16 +24,16 @@ const abbreviationRedisAsyncClientDB = 9;
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 const SimplePdfSearchHandler = function SimplePdfSearchHandler() {}
-SimplePdfSearchHandler.prototype.search = async function(searchText, offset, limit, options, userId) {
+SimplePdfSearchHandler.prototype.search = async function(searchText, offset, limit, options, userId, storeHistory) {
 	console.log(`${userId} is doing a covid19 search for ${searchText} with offset ${offset}, limit ${limit}, options ${options}`);
 	const proxyBody = options;
 	proxyBody.searchText = searchText;
 	proxyBody.offset = offset;
 	proxyBody.limit = limit;
-	return documentSearchHelper({body: proxyBody, permissions: []}, userId);
+	return documentSearchHelper({body: proxyBody, permissions: []}, userId, storeHistory);
 }
 
-async function documentSearchHelper(req, userId) {
+async function documentSearchHelper(req, userId, storeHistory) {
 	const historyRec = {
 		user_id: userId,
 		clone_name: undefined,
@@ -97,7 +97,9 @@ async function documentSearchHelper(req, userId) {
 		let clientObj = getESClient(isClone, cloneData, permissions, index);
 
 		// log query to ES
-		storeEsRecord(clientObj.esClientName, offset, clone_name, userId, searchText)
+		if (storeHistory) {
+			await storeEsRecord(clientObj.esClientName, offset, clone_name, userId, searchText);
+		}
 
 		if (!forCacheReload && useGCCache && offset === 0) {
 			try {

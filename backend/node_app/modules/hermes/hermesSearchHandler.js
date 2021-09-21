@@ -15,7 +15,7 @@ class HermesSearchHandler extends SearchHandler {
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			searchText: '',
@@ -50,7 +50,7 @@ class HermesSearchHandler extends SearchHandler {
 			const cloneSpecificObject = {};
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 
 			const clientObj = {esClientName: 'gamechanger', esIndex: constants.HERMES_ELASTIC_SEARCH_OPTS.index};
@@ -141,7 +141,7 @@ class HermesSearchHandler extends SearchHandler {
 			}
 
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();

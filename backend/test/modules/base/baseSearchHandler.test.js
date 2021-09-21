@@ -31,7 +31,7 @@ describe('SearchHandler', function () {
 			const target = new SearchHandler(opts);
 
 			try {
-				const actual = await target.search('test', 0, 20, {test: 'test'}, 'gamechanger', [], 'test');
+				const actual = await target.search('test', 0, 20, {test: 'test'}, 'gamechanger', [], 'test', true);
 				const expected = {cloneName: 'gamechanger', limit: 20, offset: 0, searchText: 'test', test: 'test'};
 				assert.deepStrictEqual(actual, expected);
 				done();
@@ -72,7 +72,7 @@ describe('SearchHandler', function () {
 			const cloneSpecificObject = {};
 
 			try {
-				const actual = await target.getCachedResults(req, historyRec, cloneSpecificObject, 'Test');
+				const actual = await target.getCachedResults(req, historyRec, cloneSpecificObject, 'Test', true);
 				const expected = {isCached: true, test: ['test'], timeSinceCache: NaN};
 				assert.deepStrictEqual(actual, expected);
 				done();
