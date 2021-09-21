@@ -11,19 +11,19 @@ import {
 	ConstrainedIcon,
 	PageLink,
 	StyledBadgeSmall
-} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
-import BellIcon from "../../../images/icon/NewNotificationsIcon.png";
-import {setState} from "../../../sharedFunctions";
-import AppTutorialsIcon from "../../../images/icon/AppTutorialsIcon.png";
-import UserFeedbackIcon from "../../../images/icon/UserFeedbackIcon.png";
-import CrowdSourcingAppIcon from "../../../images/icon/NewCrowdSourcingIcon.png";
-import DataStatusTrackerIcon from "../../../images/icon/NewDataStatusTrackerIcon.png";
-import AnalystToolsIcon from "../../../images/icon/analyticswht.png";
-import CloneRequest from "../../../images/icon/CloneRequest.png";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
-import AdminIcon from "../../../images/icon/NewAdminIcon.png";
-import {Typography} from "@material-ui/core";
-import {getNotifications} from "../../notifications/Notifications";
+} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
+import {setState} from '../../../sharedFunctions';
+import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
+import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
+import CrowdSourcingAppIcon from '../../../images/icon/NewCrowdSourcingIcon.png';
+import DataStatusTrackerIcon from '../../../images/icon/NewDataStatusTrackerIcon.png';
+import AnalystToolsIcon from '../../../images/icon/analyticswht.png';
+import CloneRequest from '../../../images/icon/CloneRequest.png';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import AdminIcon from '../../../images/icon/NewAdminIcon.png';
+import {Typography} from '@material-ui/core';
+import {getNotifications} from '../../notifications/Notifications';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
