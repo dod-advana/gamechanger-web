@@ -10,7 +10,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import withStyles from "@material-ui/core/styles/withStyles";
 import {setState} from "../../sharedFunctions";
 import {trackEvent} from "../telemetry/Matomo";
-import {getTrackingNameForFactory} from "../../gamechangerUtils";
+import {getTrackingNameForFactory, encode} from "../../gamechangerUtils";
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -316,10 +316,11 @@ class ResponsibilityAssist extends Component {
 
 	handleOpen = () => { // TODO,  Need to test on server with PDFs
 		const { filename, pageNumber, searchText} = this.state;
-		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker' , 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(this.props.context.state.cloneData.clone_name), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		window.open(`/#/pdfviewer/gamechanger?filename=${filename}&${searchText ? 'prevSearchText="' + searchText + '"&' : ''}pageNumber=${pageNumber}&cloneIndex=${this.props.context.cloneData?.clone_name}`);
+		const cloneName = this.props.context.state.cloneData.clone_name;
+		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker' , 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'pageNumber', pageNumber);
+		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 	}
 
 	renderAnnotationCard = () => {
