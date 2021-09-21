@@ -623,7 +623,8 @@ const GCUserDashboard = (props) => {
 
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches.forEach((search) => {
+			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name)
+			userData.favorite_searches.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
 			});
@@ -639,7 +640,8 @@ const GCUserDashboard = (props) => {
 		}
 
 		if (userData.search_history) {
-			userData.search_history.forEach((search) => {
+			userData.search_history = userData.search_history.filter(search=>search.clone_name===cloneData.clone_name)
+			userData.search_history.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
 			});
@@ -660,7 +662,9 @@ const GCUserDashboard = (props) => {
 		}
 
 		if (userData.export_history) {
-			userData.export_history.forEach((hist) => {
+			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name)
+			userData.export_history.forEach(hist => {
+
 				let orgFilterText = '';
 				if (
 					hist.download_request_body &&
@@ -714,7 +718,8 @@ const GCUserDashboard = (props) => {
 			);
 			setFavoriteOrganizationsLoading(false);
 		}
-	}, [userData]);
+
+	}, [userData, cloneData.clone_name]);
 
 	useEffect(() => {}, [reload]);
 
@@ -780,29 +785,21 @@ const GCUserDashboard = (props) => {
 	const renderFavorites = () => {
 		return (
 			<div>
-				{Config.GAMECHANGER.SHOW_TOPICS && (
-					<GCAccordion
-						expanded={false}
-						header={'FAVORITE TOPICS'}
-						itemCount={topicFavoritesTotalCount}
-					>
-						{renderTopicFavorites()}
+				{Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' &&
+					<GCAccordion expanded={false} header={'FAVORITE TOPICS'} itemCount={topicFavoritesTotalCount}>
+						{ renderTopicFavorites() }
 					</GCAccordion>
-				)}
-				<GCAccordion
-					expanded={false}
-					header={'FAVORITE ORGANIZATIONS'}
-					itemCount={organizationFavoritesTotalCount}
-				>
-					{renderOrganizationFavorites()}
+				}
+				{ cloneData.clone_name === 'gamechanger' &&
+				<GCAccordion expanded={false} header={'FAVORITE ORGANIZATIONS'} itemCount={organizationFavoritesTotalCount}>
+					{ renderOrganizationFavorites() }
 				</GCAccordion>
-				<GCAccordion
-					expanded={false}
-					header={'FAVORITE DOCUMENTS'}
-					itemCount={documentFavoritesTotalCount}
-				>
-					{renderDocumentFavorites()}
+				}
+				{ cloneData.clone_name === 'gamechanger' && 
+				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
+					{ renderDocumentFavorites() }
 				</GCAccordion>
+				}
 
 				<GCAccordion
 					expanded={true}
