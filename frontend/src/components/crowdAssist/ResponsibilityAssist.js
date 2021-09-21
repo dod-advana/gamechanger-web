@@ -219,13 +219,22 @@ class ResponsibilityAssist extends Component {
 		} else if ( change < 0 ) {//previous, viewing 1 more before
 			if ( startPar !== 0) {
 				startPar = startPar + change;
-				this.setCurrentTokens([])
 			}else{
 				atStart = true;
 			}
 		}
 
-		this.setState({ startPar, endPar, atStart, atEnd });
+		this.setState({ startPar, endPar, atStart, atEnd }, () => {
+			if(change < 0){
+				const addedWordAmount = this.state.textsList.slice(startPar, endPar + 1)[0].split(' ').length - 1;
+				const newTokens = this.state.annotatedTokens.map(token => {
+					token.end += addedWordAmount;
+					token.start += addedWordAmount;
+					return token;
+				})
+				this.setCurrentTokens(newTokens);
+			}
+		});
 	}
 
 	setCurrentTokens = (newTokens) => {
