@@ -178,7 +178,7 @@ class SimpleSearchHandler extends SearchHandler {
 				} catch (e) {
 					this.logger.error(e.message, 'SHW1IT9', userId);
 				}
-			} else {
+			} else if (forCacheReload) {
 
 				try {
 
