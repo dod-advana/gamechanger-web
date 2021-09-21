@@ -70,7 +70,8 @@ describe('FavoritesController', function () {
 					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
 				},
 				gcUser,
-				favoriteSearch
+				favoriteSearch,
+				handler_factory: {}
 			};
 
 			const target = new FavoritesController(opts);
@@ -129,7 +130,8 @@ describe('FavoritesController', function () {
 				...constructorOptionsMock,
 				gcUser,
 				favoriteSearch,
-				gcHistory
+				gcHistory,
+				handler_factory: {}
 			};
 
 			const target = new FavoritesController(opts);
@@ -214,7 +216,8 @@ describe('FavoritesController', function () {
 					documentSearch: async () => {
 						return searchResultsMock;
 					}
-				}
+				},
+				handler_factory: {}
 			};
 
 			const target = new FavoritesController(opts);
@@ -262,7 +265,8 @@ describe('FavoritesController', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants,
-				favoriteTopic
+				favoriteTopic,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -320,7 +324,8 @@ describe('FavoritesController', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants,
-				favoriteOrganization
+				favoriteOrganization,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -378,7 +383,8 @@ describe('FavoritesController', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants,
-				favoriteDocument
+				favoriteDocument,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -436,7 +442,8 @@ describe('FavoritesController', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants,
-				favoriteGroup
+				favoriteGroup,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -500,6 +507,7 @@ describe('FavoritesController', function () {
 				...constructorOptionsMock,
 				constants,
 				favoriteDocumentsGroup,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -557,6 +565,7 @@ describe('FavoritesController', function () {
 				...constructorOptionsMock,
 				constants,
 				favoriteDocumentsGroup,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
@@ -631,7 +640,8 @@ describe('FavoritesController', function () {
 			const opts = {
 				...constructorOptionsMock,
 				constants,
-				favoriteSearch
+				favoriteSearch,
+				handler_factory: {}
 			};
 			const target = new FavoritesController(opts);
 
