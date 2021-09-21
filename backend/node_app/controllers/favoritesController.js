@@ -479,11 +479,12 @@ class FavoritesController {
 			const options = history.request_body;
 
 			// run the search as a non-user
-			const userId = '';
+			const userId = null;
 			const permissions = ['Webapp Super Admin', 'Tier 3 Support'];
 
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId);
+			const storeHistory = false;
+			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId, storeHistory);
 
 			// we will ignore recoverable errors even though they may alter the search results
 			// and use the assumption that degradations in search services will only result in

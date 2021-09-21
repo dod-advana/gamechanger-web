@@ -35,7 +35,7 @@ class SimpleSearchHandler extends SearchHandler {
 		this.mlApi = mlApi;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -83,10 +83,12 @@ class SimpleSearchHandler extends SearchHandler {
 			const clientObj = {esClientName: 'gamechanger', esIndex};
 
 			// log query to ES
-			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			// try to get search expansion
 			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
@@ -162,12 +164,12 @@ class SimpleSearchHandler extends SearchHandler {
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 
 			// try to store to cache
-			if (useGCCache && searchResults) {
+			if (storeHistory && useGCCache && searchResults) {
 				await this.storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, userId);
 			}
 
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
@@ -222,7 +224,7 @@ class SimpleSearchHandler extends SearchHandler {
 			return searchResults;
 
 		} catch (err) {
-			if (!forCacheReload){
+			if (storeHistory && !forCacheReload){
 				const { message } = err;
 				this.logger.error(message, 'W28XNE0', userId);
 				historyRec.endTime = new Date().toISOString();

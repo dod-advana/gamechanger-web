@@ -159,8 +159,10 @@ class ModularGameChangerController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		const {cloneName, searchText, offset = 0, limit = 18, options} = req.body;
 		try {
+			// NOTE: if this code changes then this will likely necessitate changes to `favoritesController.checkLeastRecentFavoritedSearch`
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId);
+			const storeHistory = true;
+			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory);
 			const error = handler.getError();
 			if (error.code) results.error = error;
 			res.status(200).send(results);
