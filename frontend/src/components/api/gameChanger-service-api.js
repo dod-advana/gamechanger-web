@@ -84,6 +84,7 @@ const endpoints = {
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
+	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -614,6 +615,11 @@ export default class GameChangerAPI {
 
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
+		return axiosGET(this.axios, url, {params:body});
+	}
+
+	getDocumentUsage = async (body) => {
+		const url = endpoints.getDocumentUsage;
 		return axiosGET(this.axios, url, {params:body});
 	}
 

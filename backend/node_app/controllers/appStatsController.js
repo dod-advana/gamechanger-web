@@ -22,6 +22,7 @@ class AppStatsController {
 		this.getAvgSearchesPerSession = this.getAvgSearchesPerSession.bind(this);
 		this.getTopSearches = this.getTopSearches.bind(this);
 		this.getDateNDaysAgo = this.getDateNDaysAgo.bind(this);
+		this.getDocumentUsageData = this.getDocumentUsageData.bind(this);
 	}
 	/**
 	 *
@@ -416,5 +417,76 @@ class AppStatsController {
 			connection.end();
 		}
 	}
+
+		/**
+	 * This method takes in options from the endpoint and queries matomo with those parameters.
+	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
+	 * @returns an array of data from Matomo.
+	 */
+	async queryDocumentUsageData(startDate, connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				select 
+					b.name as document,
+					count(a.idvisitor) as visit_count,
+					count(distinct a.idvisitor) as user_count,
+					GROUP_CONCAT(distinct hex(a.idvisitor) separator ', ') as user_list
+				from 
+					matomo_log_link_visit_action a,
+					matomo_log_action b
+				where 
+					b.name LIKE 'PDFViewer%' 
+					AND b.idaction = a.idaction_name
+					and a.server_time > ?
+				group by
+					b.name
+				order by
+					visit_count DESC;`,
+			[`${startDate}`],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
+				}
+				resolve(results);
+			});
+		});
+	}
+
+	/**
+	 * This method is called by an endpoint to query matomo to list documents, visit count, and list of users that visited. 
+	 * by a user
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	async getDocumentUsageData(req, res) {
+		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
+		const opts = { daysBack, offset, filters, sorting, pageSize };
+		const startDate = this.getDateNDaysAgo(opts.daysBack);
+	
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database
+			});
+			connection.connect();
+			const results = {
+				daysBack,
+				data: []
+			};
+			results.data = await this.queryDocumentUsageData(startDate, connection);
+			console.log(results.data);
+			res.status(200).send(results);
+		} catch (err) {
+			this.logger.error(err, '88ZHUHU');
+			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
 }
 module.exports.AppStatsController = AppStatsController;
