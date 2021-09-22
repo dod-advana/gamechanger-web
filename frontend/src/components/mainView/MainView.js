@@ -5,7 +5,7 @@ import {Button} from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {trackEvent} from "../telemetry/Matomo";
 import GCDataStatusTracker from "../dataTracker/GCDataStatusTracker";
-import GCResponsibilityTracker from "../analystTools/GCResponsibilityTracker";
+import AnalystTools from "../analystTools";
 import GCUserDashboard from "../user/GCUserDashboard";
 import GCAboutUs from "../aboutUs/GCAboutUs";
 import {
@@ -122,7 +122,7 @@ const MainView = (props) => {
 	
 	const getAnalystTools = () => {
 		return (
-			<GCResponsibilityTracker state={state} />
+			<AnalystTools context={context} />
 		);
 	}
 	
@@ -210,7 +210,7 @@ const MainView = (props) => {
 							<p style={{fontSize: '26px', marginLeft: '80px', fontFamily: 'Montserrat', fontWeight: 'bold', marginTop: '10px',
 								color: '#313541'}}>
 								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && "Data Status Tracker"}
-								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools <b style={{color: 'red', fontSize: 14}}>(Beta)</b></span>}
+								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools | {state.analystToolsPageDisplayed}</span>}
 								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
 							</p>
 						</div>

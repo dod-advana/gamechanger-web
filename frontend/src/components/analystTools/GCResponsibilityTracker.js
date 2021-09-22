@@ -2,8 +2,7 @@ import React, {useEffect, useState} from 'react';
 import propTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
-import "react-table/react-table.css";
-import { Tabs, Tab, TabPanel, TabList } from "react-tabs";
+import 'react-table/react-table.css';
 import {
 	Checkbox,
 	Dialog,
@@ -13,22 +12,22 @@ import {
 	IconButton, Popover,
 	TextField,
 	Typography
-} from "@material-ui/core";
-import {backgroundGreyDark, backgroundGreyLight, backgroundWhite} from "../common/gc-colors";
-import {gcOrange} from "../common/gc-colors";
-import GCPrimaryButton from "../common/GCButton";
+} from '@material-ui/core';
+import {backgroundGreyDark, backgroundGreyLight, backgroundWhite} from '../common/gc-colors';
+import {gcOrange} from '../common/gc-colors';
+import GCPrimaryButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import {trackEvent} from "../telemetry/Matomo";
-import Link from "@material-ui/core/Link";
-import Icon from "@material-ui/core/Icon";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CloseIcon from "@material-ui/icons/Close";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
-import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-import CheckCircleOutlinedIcon from "@material-ui/icons/CheckCircleOutlined";
-import {getTrackingNameForFactory, exportToCsv} from "../../gamechangerUtils";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import {trackEvent} from '../telemetry/Matomo';
+import Link from '@material-ui/core/Link';
+import Icon from '@material-ui/core/Icon';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CloseIcon from '@material-ui/icons/Close';
+import {makeStyles, withStyles} from '@material-ui/core/styles';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
+import {getTrackingNameForFactory, exportToCsv} from '../../gamechangerUtils';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
 
@@ -67,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 		color: 'black',
 		backgroundColor: backgroundGreyLight,
 		borderRadius: 0
-    },
+	},
 	checkedLabel: {
 		fontSize: 16
 	},
@@ -127,7 +126,6 @@ const GCResponsibilityTracker = (props) => {
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [tabIndex, setTabIndex] = useState('documents');
 	const [filters, setFilters] = useState([]);
 	const [sorts, setSorts] = useState([]);
 	const [pageIndex, setPageIndex] = useState(0);
@@ -200,11 +198,6 @@ const GCResponsibilityTracker = (props) => {
 		}
 	}
 
-	const handleTabClicked = (tabIndex) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `${tabIndex} tab clicked`);
-		setTabIndex(tabIndex);
-	}
-
 	const exportCSV = async () => {
 		try {
 			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
@@ -229,7 +222,7 @@ const GCResponsibilityTracker = (props) => {
 				width: 300,
 				Cell: row => (
 					<TableRow>
-						<Link href={"#"} onClick={(event)=> {
+						<Link href={'#'} onClick={(event)=> {
 							preventDefault(event);
 							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
 						}}
@@ -267,13 +260,13 @@ const GCResponsibilityTracker = (props) => {
 					<div style={{cursor: 'default'}}>
 						<>Other Organization/Personnel</>
 						<i onClick={(event) => {
-								openFilterPopper(event.target, 'otherOrgsPers');
-							}} className={"fa fa-filter"} style={{
-								color: "#E9691D",
-								marginLeft: '50px',
-								cursor: "pointer",
-								fontSize: 18
-							}}
+							openFilterPopper(event.target, 'otherOrgsPers');
+						}} className={'fa fa-filter'} style={{
+							color: '#E9691D',
+							marginLeft: '50px',
+							cursor: 'pointer',
+							fontSize: 18
+						}}
 						/>
 					</div>
 				),
@@ -294,7 +287,7 @@ const GCResponsibilityTracker = (props) => {
 				width: 200,
 				Cell: row => (
 					<TableRow>
-						{row.value? row.value.join(", "): '' }
+						{row.value? row.value.join(', '): '' }
 					</TableRow>
 				),
 			},
@@ -325,7 +318,7 @@ const GCResponsibilityTracker = (props) => {
 			<ReactTable
 				data={responsibilityTableData}
 				columns={dataColumns}
-				style={{ margin: '0 80px 20px 80px', height: 700 }}
+				style={{ height: 700, marginTop: 10 }}
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
@@ -377,7 +370,7 @@ const GCResponsibilityTracker = (props) => {
 						return {};
 					}
 				}
-			}/>
+				}/>
 		);
 	}
 	
@@ -437,16 +430,16 @@ const GCResponsibilityTracker = (props) => {
 		return (
 			<div>
 				<FormControl style={{width:'95%', margin:'20px 20px 10px 20px' }}>
-                    <TextField
-                        variant="outlined"
-                        placeholder="Enter issue information here..."
-                        multiline
-                        rows={9}
-                        width="75%"
-                        value={issueDescription}
-                        onBlur={e => setIssueDescription(e.target.value)}
-                    />
-                </FormControl>
+					<TextField
+						variant="outlined"
+						placeholder="Enter issue information here..."
+						multiline
+						rows={9}
+						width="75%"
+						value={issueDescription}
+						onBlur={e => setIssueDescription(e.target.value)}
+					/>
+				</FormControl>
 			</div>
 		);
 	}
@@ -469,25 +462,25 @@ const GCResponsibilityTracker = (props) => {
 	}
 	
 	const renderLoading = () => {
-        return(
-            <div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
-                <LoadingIndicator/>
-            </div>
-        );
-    };
+		return(
+			<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
+				<LoadingIndicator/>
+			</div>
+		);
+	};
 	
-    const renderSuccess = () => {
-        return(
-            <div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
-                <CheckCircleOutlinedIcon
-                    style={{alignSelf:'center',marginTop:'150px', height:'75px',width:'75px',filter: 'invert(26%) sepia(49%) saturate(1486%) hue-rotate(146deg) brightness(72%) contrast(103%)'}}/>
+	const renderSuccess = () => {
+		return(
+			<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
+				<CheckCircleOutlinedIcon
+					style={{alignSelf:'center',marginTop:'150px', height:'75px',width:'75px',filter: 'invert(26%) sepia(49%) saturate(1486%) hue-rotate(146deg) brightness(72%) contrast(103%)'}}/>
 
-                <h1 style={{marginTop:'50px',alignSelf:'center'}}>Thank You! We appreciate the feedback.</h1>
-            </div>
-        );
-    };
+				<h1 style={{marginTop:'50px',alignSelf:'center'}}>Thank You! We appreciate the feedback.</h1>
+			</div>
+		);
+	};
     
-    const handleFilterCheck = (event) => {
+	const handleFilterCheck = (event) => {
     	const tmpEntFilters = _.cloneDeep(otherEntRespFilters);
     	let selectAll = false;
     	
@@ -577,60 +570,44 @@ const GCResponsibilityTracker = (props) => {
 			<div style={styles.disclaimerContainer}>
 				Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to process data for this capability, please check back later or reach us by email if your document/s of interest are not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
 			</div>
-	
-			<div style={styles.tabContainer}>
-				<Tabs>
-					<div style={styles.tabButtonContainer}>
-						<TabList style={styles.tabsList}>
-							<Tab style={{...styles.tabStyle,
-								...(tabIndex === 'documents' ? styles.tabSelectedStyle : {}),
-								borderRadius: `5px 5px 0 0`
-								}} title="userHistory" onClick={() => handleTabClicked('documents')}>
-								<Typography variant="h6" display="inline" title="cardView">RESPONSIBILITY EXPLORER</Typography>
-							</Tab>
-						</TabList>
-						{ selectRows ?
-							<div>
-								<GCPrimaryButton buttonColor={'#131E43'} onClick={handleCancelSelect}>
-									Cancel <Icon className="fa fa-times" style={styles.buttons}/>
-								</GCPrimaryButton>
-								<GCPrimaryButton onClick={exportCSV}>
-									Export <Icon className="fa fa-external-link" style={styles.buttons}/>
-								</GCPrimaryButton>
-								<GCPrimaryButton buttonColor={'red'} onClick={() => hideShowReportModal(true)}>
-									Report <Icon className="fa fa-bug" style={styles.buttons}/>
-								</GCPrimaryButton>
-								<div style={styles.spacer}/>
-							</div>
-							:
-							<div>
-								<GCPrimaryButton onClick={() => setSelectRows(true)}>
-									Select Rows
-								</GCPrimaryButton>
-								<div style={styles.spacer}/>
-							</div>
-						}
+			
+			<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+				{ selectRows ?
+					<div>
+						<GCPrimaryButton buttonColor={'#131E43'} onClick={handleCancelSelect}>
+							Cancel <Icon className="fa fa-times" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<GCPrimaryButton onClick={exportCSV}>
+							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<GCPrimaryButton buttonColor={'red'} onClick={() => hideShowReportModal(true)}>
+							Report <Icon className="fa fa-bug" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<div style={styles.spacer}/>
 					</div>
-	
-					<div style={styles.panelContainer}>
-						<TabPanel>
-							{ renderDataTable() }
-						</TabPanel>
+					:
+					<div>
+						<GCPrimaryButton onClick={() => setSelectRows(true)}>
+							Select Rows
+						</GCPrimaryButton>
+						<div style={styles.spacer}/>
 					</div>
-				</Tabs>
+				}
 			</div>
+	
+			{ renderDataTable() }
 			
 			<Dialog
-                open={showReportModal}
-                scroll={'paper'}
-                maxWidth="lg"
-                disableEscapeKeyDown
-                disableBackdropClick
-                classes={{
-                    paperWidthLg: classes.dialogLg
+				open={showReportModal}
+				scroll={'paper'}
+				maxWidth="lg"
+				disableEscapeKeyDown
+				disableBackdropClick
+				classes={{
+					paperWidthLg: classes.dialogLg
 				}}
-            >
-                <DialogTitle >
+			>
+				<DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Report Issues with Data</Typography>
 					</div>
@@ -646,15 +623,15 @@ const GCResponsibilityTracker = (props) => {
 					}} onClick={() => hideShowReportModal(false)}>
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
-                </DialogTitle>
+				</DialogTitle>
 
-                <DialogContent style={{height: 300}}>
+				<DialogContent style={{height: 300}}>
 					{sendingReports && renderLoading()}
 					{reportsSent && renderSuccess()}
 					{!sendingReports && renderReportModal()}
-                </DialogContent>
+				</DialogContent>
 
-                <DialogActions>
+				<DialogActions>
 					<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>
 						<GCPrimaryButton
 							id={'editCloneSubmit'}
@@ -664,8 +641,8 @@ const GCResponsibilityTracker = (props) => {
 							Submit
 						</GCPrimaryButton>
 					</div>
-                </DialogActions>
-            </Dialog>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 };
@@ -728,11 +705,7 @@ const styles = {
 	},
 	disclaimerContainer: {
 		alignItems: 'center',
-		fontWeight: 'bold',
-		marginLeft: '80px',
-		marginRight: '80px',
-		paddingTop: '20px',
-		paddingBottom: '20px'
+		fontWeight: 'bold'
 	}
 }
 
