@@ -329,7 +329,14 @@ class ResponsibilityAssist extends Component {
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker' , 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'filename', filename);
 		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'pageNumber', pageNumber);
-		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
+		let searchTextArray;
+		let tempSearchText;
+		if(searchText){
+			searchTextArray = searchText.split(" ");
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += " ";
+			tempSearchText = searchTextArray.join(" ");
+		}
+		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${tempSearchText}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 	}
 
 	renderAnnotationCard = () => {
