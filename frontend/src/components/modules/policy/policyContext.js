@@ -80,6 +80,7 @@ const initState = {
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
+	analystToolsPageDisplayed: 'Responsibility Explorer',
 	listView: false,
 	
 	// Documents
