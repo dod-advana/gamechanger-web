@@ -98,6 +98,42 @@ const feedbackColumns = [
     },
 ];
 
+const documentUsageColumns = [
+    {
+        Header: 'Document',
+        accessor: 'document',
+        width: 500,
+        headerStyle: {textAlign: 'left', paddingLeft: '15px'},
+        Cell: row => (
+            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value.substring(12)}</TableRow>
+        )
+    },
+    {
+        Header: 'Visit Count',
+        accessor: 'visit_count',
+        width: 140,
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'Unique Viewers',
+        accessor: 'user_count',
+        width: 140,
+        Cell: row => (
+            <TableRow>{row.value}</TableRow>
+        )
+    },
+    {
+        Header: 'User List',
+        accessor: 'user_list',
+        headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
+        Cell: row => (
+            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
+        )
+    },
+];
+
 /**
  * This method queries Matomo for documents based on search.
  * The query is handled in gamechanger-api.
@@ -124,7 +160,22 @@ const getSearchPdfMapping = async (daysBack, setMappingData) => {
 		// daysBack, offset, filters, sorting, pageSize
 		const data = await gameChangerAPI.getFeedbackData();
         setFeedbackData(data.data.results);
-        console.log(data);
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+/**
+ * This method queries postgres for feedback data.
+ * The query is handled in gamechanger-api.
+ * @method getDocumentData
+ */
+ const getDocumentData = async (daysBack, setDocumentData) => {
+	try {
+		// daysBack, offset, filters, sorting, pageSize
+        const params = {daysBack}
+		const {data = {} } = await gameChangerAPI.getDocumentUsage(params);
+        setDocumentData(data.data);
 	} catch (e) {
 		console.error(e);
 	}
@@ -141,6 +192,7 @@ export default () => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
     const [feedbackData, setFeedbackData] = useState([]);
+    const [documentData, setDocumentData] = useState([]);
     const [daysBack, setDaysBack] = useState(3);
 
     // flags that parameters have been changed and on 
@@ -213,6 +265,7 @@ export default () => {
 	useEffect(() => {
 		getSearchPdfMapping(daysBack, setMappingData);
         getFeedbackData(setFeedbackData);
+        getDocumentData(daysBack, setDocumentData);
 	}, [daysBack]);
     
 
@@ -257,6 +310,23 @@ export default () => {
                 columns={feedbackColumns}
                 style={{margin: '0 80px 20px 80px', height: 700}}
                 defaultSorted = {[ { id: "event_name", desc: false } ]}
+            />
+
+            <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
+                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Document Usage Data</p>
+                <GCPrimaryButton
+						onClick={() => {
+							trackEvent('GAMECHANGER', "ExportDocumentUsage", "onClick");
+							
+						}}
+						style={{minWidth: 'unset'}}
+					>Export Document Usage</GCPrimaryButton>
+            </div>
+            <ReactTable
+                data={documentData}
+                columns={documentUsageColumns}
+                style={{margin: '0 80px 20px 80px', height: 700}}
+                defaultSorted = {[ { id: "visit_count", desc: true } ]}
             />
         </div>
     )
