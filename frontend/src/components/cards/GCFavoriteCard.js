@@ -342,6 +342,7 @@ const FavoriteCard = (props) => {
 										className={'summary-title-link'}
 										href={`#/${tiny_url}`}
 										target={'_blank'}
+										onClick={handleClearNotification}
 									>
 										{cardTitle}
 									</Link>
