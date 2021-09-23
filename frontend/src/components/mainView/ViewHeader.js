@@ -269,6 +269,7 @@ const ViewHeader = (props) => {
 								value={currentSort}
 								onChange={handleChangeSort}
 								classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+								className='MuiInputBase-root'
 								autoWidth
 							>
 								{categorySorting[activeCategoryTab].map(sort => {
@@ -318,6 +319,7 @@ const ViewHeader = (props) => {
 						value={dropdownValue}
 						onChange={handleChangeView}
 						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+						className='MuiInputBase-root'
 						autoWidth
 					>
 						{viewNames.map(view => {
