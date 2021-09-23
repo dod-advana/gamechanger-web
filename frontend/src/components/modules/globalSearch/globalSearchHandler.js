@@ -1,28 +1,30 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 import {
 	getQueryVariable,
 	getTrackingNameForFactory,
-	PAGE_DISPLAYED, RECENT_SEARCH_LIMIT, RESULTS_PER_PAGE
-} from "../../../gamechangerUtils";
-import { trackSearch } from "../../telemetry/Matomo";
+	PAGE_DISPLAYED,
+	RECENT_SEARCH_LIMIT,
+	RESULTS_PER_PAGE,
+} from '../../../gamechangerUtils';
+import { trackSearch } from '../../telemetry/Matomo';
 import {
 	checkUserInfo,
 	createTinyUrl,
 	getUserData,
 	isDecoupled,
 	setState,
-} from "../../../sharedFunctions";
-import GameChangerAPI from "../../api/gameChanger-service-api";
+} from '../../../sharedFunctions';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
 
 const GlobalSearchHandler = {
 	async handleSearch(state, dispatch) {
-		setState(dispatch, {runSearch: false});
-		
+		setState(dispatch, { runSearch: false });
+
 		const {
-			searchText = "",
+			searchText = '',
 			resultsPage,
 			listView,
 			userData,
@@ -30,26 +32,31 @@ const GlobalSearchHandler = {
 			tabName,
 			cloneData,
 			showTutorial,
-			selectedCategories
+			selectedCategories,
 		} = state;
-		
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
+
+		if (
+			isDecoupled &&
+			userData &&
+			userData.search_history &&
+			userData.search_history.length > 9
+		) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
 		}
-		
-		const favSearchUrls = userData.favorite_searches.map(search => {
+
+		const favSearchUrls = userData.favorite_searches.map((search) => {
 			return search.url;
 		});
-		
+
 		this.setSearchURL(state);
-		
+
 		let url = window.location.hash.toString();
-		url = url.replace("#/", "");
-		
+		url = url.replace('#/', '');
+
 		const searchFavorite = favSearchUrls.includes(url);
-		
+
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
 			runningSearch: true,
@@ -57,25 +64,30 @@ const GlobalSearchHandler = {
 			isDataTracker: false,
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
-			trending: ''
+			trending: '',
 		});
-		
+
 		const trimmed = searchText.trim();
 		if (_.isEmpty(trimmed)) return;
-		
-		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+
+		const recentSearches =
+			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
-	
+
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
-			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
+				recentSearchesParsed.pop();
+			localStorage.setItem(
+				`recent${cloneData.clone_name}Searches`,
+				JSON.stringify(recentSearchesParsed)
+			);
 		}
-		
+
 		const t0 = new Date().getTime();
-	
+
 		let searchResults = [];
-		
+
 		setState(dispatch, {
 			selectedDocuments: new Map(),
 			loading: true,
@@ -99,36 +111,34 @@ const GlobalSearchHandler = {
 			docTypeData: {},
 			runningEntitySearch: true,
 			runningTopicSearch: true,
-			hideTabs: true
+			hideTabs: true,
 		});
-		
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE)
-	
+
+		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+
 		const charsPadding = listView ? 750 : 90;
-	
+
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
-	
+
 		const tiny_url = await createTinyUrl(cloneData);
-		
-		const categoryMetadata =
-			{
-				Applications: {total: 0},
-				Dashboards: {total: 0},
-				DataSources: {total: 0},
-				Databases: {total: 0},
-				Documentation: {total: 0},
-				Organizations: {total: 0},
-				Services: {total: 0},
-			};
-		
+
+		const categoryMetadata = {
+			Applications: { total: 0 },
+			Dashboards: { total: 0 },
+			DataSources: { total: 0 },
+			Databases: { total: 0 },
+			Documentation: { total: 0 },
+			Organizations: { total: 0 },
+			Services: { total: 0 },
+		};
+
 		try {
-			
 			// Make the global search calls
 			let totalCount = 0;
 			let respData = {};
-			
+
 			try {
-				const {data} = await gameChangerAPI.modularSearch({
+				const { data } = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
 					searchText: searchText,
 					offset,
@@ -140,49 +150,48 @@ const GlobalSearchHandler = {
 						getApplications: selectedCategories.Applications,
 						getDashboards: selectedCategories.Dashboards,
 						getDataSources: selectedCategories.DataSources,
-						getDatabases: selectedCategories.Databases
+						getDatabases: selectedCategories.Databases,
 					},
 				});
 
 				respData = data;
-				
-				data.applications.hits.forEach(hit => {
+
+				data.applications.hits.forEach((hit) => {
 					hit.type = 'application';
 					searchResults.push(hit);
-				})
+				});
 				totalCount += data.applications.totalCount;
 				categoryMetadata.Applications.total = data.applications.totalCount || 0;
-				
-				data.dashboards.hits.forEach(hit => {
+
+				data.dashboards.hits.forEach((hit) => {
 					hit.type = 'dashboard';
 					searchResults.push(hit);
-				})
+				});
 				totalCount += data.dashboards.totalCount;
 				categoryMetadata.Dashboards.total = data.dashboards.totalCount || 0;
-				
-				data.dataSources.results.forEach(hit => {
+
+				data.dataSources.results.forEach((hit) => {
 					hit.type = 'dataSource';
 					searchResults.push(hit);
-				})
+				});
 				totalCount += data.dataSources.total;
 				categoryMetadata.DataSources.total = data.dataSources.total || 0;
-				
-				data.databases.results.forEach(hit => {
+
+				data.databases.results.forEach((hit) => {
 					hit.type = 'database';
 					searchResults.push(hit);
-				})
+				});
 				totalCount += data.databases.total;
 				categoryMetadata.Databases.total = data.databases.total || 0;
 			} catch (err) {
 				console.error(err);
 			}
-			
+
 			const t1 = new Date().getTime();
-			
+
 			let getUserDataFlag = true;
-	
+
 			if (searchResults && searchResults.length > 0) {
-				
 				if (!offset) {
 					trackSearch(
 						searchText,
@@ -213,9 +222,8 @@ const GlobalSearchHandler = {
 					metricsCounted: true,
 					loadingTinyUrl: false,
 					hideTabs: false,
-					categoryMetadata
+					categoryMetadata,
 				});
-				
 			} else {
 				if (!offset) {
 					trackSearch(
@@ -225,7 +233,7 @@ const GlobalSearchHandler = {
 						false
 					);
 				}
-				
+
 				setState(dispatch, {
 					loading: false,
 					count: 0,
@@ -240,17 +248,23 @@ const GlobalSearchHandler = {
 					prevSearchText: searchText,
 					isCachedResult: false,
 					loadingTinyUrl: false,
-					hasExpansionTerms: false
+					hasExpansionTerms: false,
 				});
 			}
-	
-			this.setSearchURL({...state, searchText, resultsPage, tabName, cloneData, searchSettings});
-	
+
+			this.setSearchURL({
+				...state,
+				searchText,
+				resultsPage,
+				tabName,
+				cloneData,
+				searchSettings,
+			});
+
 			if (getUserDataFlag) {
 				getUserData(dispatch);
 			}
-	
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 			setState(dispatch, {
 				prevSearchText: null,
@@ -260,21 +274,21 @@ const GlobalSearchHandler = {
 				searchResultsCount: 0,
 				runningSearch: false,
 				loadingTinyUrl: false,
-				hasExpansionTerms: false
+				hasExpansionTerms: false,
 			});
 		}
 	},
 
 	async handleApplicationsPagination(state, dispatch) {
 		const {
-			searchText = "",
+			searchText = '',
 			applicationsPage,
 			listView,
 			showTutorial,
-			cloneData
+			cloneData,
 		} = state;
 
-		const offset = ((applicationsPage - 1) * RESULTS_PER_PAGE);
+		const offset = (applicationsPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 		const limit = 18;
@@ -290,32 +304,32 @@ const GlobalSearchHandler = {
 				useGCCache,
 				tiny_url,
 				getApplications: true,
-				limit
-			}
+				limit,
+			},
 		});
 
 		if (resp.data) {
 			setState(dispatch, {
-				applicationsSearchResults: resp.data.applications.hits.map(hit => {
+				applicationsSearchResults: resp.data.applications.hits.map((hit) => {
 					hit.type = 'application';
 					return hit;
 				}),
 				applicationsLoading: false,
-				applicationsPagination: false
+				applicationsPagination: false,
 			});
 		}
 	},
 
 	async handleDashboardsPagination(state, dispatch) {
 		const {
-			searchText = "",
+			searchText = '',
 			dashboardsPage,
 			listView,
 			showTutorial,
-			cloneData
+			cloneData,
 		} = state;
 
-		const offset = ((dashboardsPage - 1) * RESULTS_PER_PAGE);
+		const offset = (dashboardsPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 		const limit = 18;
@@ -331,32 +345,32 @@ const GlobalSearchHandler = {
 				useGCCache,
 				tiny_url,
 				getDashboards: true,
-				limit
-			}
+				limit,
+			},
 		});
 
 		if (resp.data) {
 			setState(dispatch, {
-				dashboardsSearchResults: resp.data.dashboards.hits.map(hit => {
+				dashboardsSearchResults: resp.data.dashboards.hits.map((hit) => {
 					hit.type = 'dashboard';
 					return hit;
 				}),
 				dashboardsLoading: false,
-				dashboardsPagination: false
+				dashboardsPagination: false,
 			});
 		}
 	},
 
 	async handleDataSourcesPagination(state, dispatch) {
 		const {
-			searchText = "",
+			searchText = '',
 			dataSourcesPage,
 			listView,
 			showTutorial,
-			cloneData
+			cloneData,
 		} = state;
 
-		const offset = ((dataSourcesPage - 1) * RESULTS_PER_PAGE);
+		const offset = (dataSourcesPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 		const limit = 18;
@@ -372,32 +386,34 @@ const GlobalSearchHandler = {
 				useGCCache,
 				tiny_url,
 				getDataSources: true,
-				limit
-			}
+				limit,
+			},
 		});
 
 		if (resp.data) {
 			setState(dispatch, {
-				dataSourcesSearchResults: resp.data.dataSources.results.map(result => {
-					result.type = 'dataSource';
-					return result;
-				}),
+				dataSourcesSearchResults: resp.data.dataSources.results.map(
+					(result) => {
+						result.type = 'dataSource';
+						return result;
+					}
+				),
 				dataSourcesLoading: false,
-				dataSourcesPagination: false
+				dataSourcesPagination: false,
 			});
 		}
 	},
 
 	async handleDatabasesPagination(state, dispatch) {
 		const {
-			searchText = "",
+			searchText = '',
 			databasesPage,
 			listView,
 			showTutorial,
-			cloneData
+			cloneData,
 		} = state;
 
-		const offset = ((databasesPage - 1) * RESULTS_PER_PAGE);
+		const offset = (databasesPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 		const limit = 18;
@@ -413,18 +429,18 @@ const GlobalSearchHandler = {
 				useGCCache,
 				tiny_url,
 				getDatabases: true,
-				limit
-			}
+				limit,
+			},
 		});
 
 		if (resp.data) {
 			setState(dispatch, {
-				databasesSearchResults: resp.data.databases.results.map(result => {
+				databasesSearchResults: resp.data.databases.results.map((result) => {
 					result.type = 'database';
 					return result;
 				}),
 				databasesLoading: false,
-				databasesPagination: false
+				databasesPagination: false,
 			});
 		}
 	},
@@ -434,16 +450,18 @@ const GlobalSearchHandler = {
 
 		const parsed = {};
 
-		const keyword = getQueryVariable("keyword", url);
-		const categoriesURL = getQueryVariable("categories", url);
+		const keyword = getQueryVariable('keyword', url);
+		const categoriesURL = getQueryVariable('categories', url);
 
 		if (keyword) {
 			parsed.searchText = keyword;
 		}
 
 		if (categoriesURL) {
-			const categories = categoriesURL.split("_");
-			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
+			const categories = categoriesURL.split('_');
+			const selectedCategories = _.cloneDeep(
+				defaultState.selectedCategories || {}
+			);
 			for (const category in selectedCategories) {
 				selectedCategories[category] = categories.includes(category);
 			}
@@ -456,17 +474,20 @@ const GlobalSearchHandler = {
 	},
 
 	setSearchURL(state) {
-		const { searchText,  resultsPage } = state;
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+		const { searchText, resultsPage } = state;
+		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
-		const categoriesText = (state.selectedCategories
-			? Object.keys(_.pickBy(state.selectedCategories, value => !!value)).join('_')
-			: undefined);
+		const categoriesText = state.selectedCategories
+			? Object.keys(
+				_.pickBy(state.selectedCategories, (value) => !!value)
+			  ).join('_')
+			: undefined;
 
 		const params = new URLSearchParams();
 		if (searchText) params.append('keyword', searchText);
 		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined)
+			params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

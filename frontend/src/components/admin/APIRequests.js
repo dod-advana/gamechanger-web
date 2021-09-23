@@ -1,14 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import ReactTable from "react-table";
+import React, { useState, useEffect } from 'react';
+import ReactTable from 'react-table';
 import Popover from '@material-ui/core/Popover';
 import CloseIcon from '@material-ui/icons/Close';
 import styled from 'styled-components';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
-import GCAccordion from "../common/GCAccordion";
-import GCButton from "../common/GCButton";
+import GCAccordion from '../common/GCAccordion';
+import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
-import {styles, TableRow} from './util/GCAdminStyles';
+import { styles, TableRow } from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -17,8 +17,11 @@ const gameChangerAPI = new GameChangerAPI();
  * @class APIRequests
  */
 export default () => {
-    // State Variables
-    const [gcAPIRequestData, setGCAPIRequestData] = useState({approved: [], pending: []});
+	// State Variables
+	const [gcAPIRequestData, setGCAPIRequestData] = useState({
+		approved: [],
+		pending: [],
+	});
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
     const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
@@ -57,7 +60,7 @@ export default () => {
 		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
 			getApiKeyRequestData();
 		});
-	}
+	};
 	/**
      * Either approves or rejects a key request with an id and boolean
      * @method approveRejectAPIKeyRequestData

@@ -6,7 +6,6 @@ const hermesSearchHandler = require(`../modules/hermes/hermesSearchHandler`);
 const budgetSearchSearchHandler = require(`../modules/budgetSearch/budgetSearchSearchHandler`);
 
 class SearchHandlerFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {

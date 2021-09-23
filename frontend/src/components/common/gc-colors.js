@@ -60,6 +60,6 @@ export const infoLight = 'rgb( 216, 243, 253 )';
 
 export const colorMatched = '#43A047';
 export const colorNotMatched = '#FFD54F';
-export const colorUnmatchedTb = '#D84315'
-export const colorUnmatchedGl = '#D84315'
-export const colorUnmatchedJV = '#D84315'
+export const colorUnmatchedTb = '#D84315';
+export const colorUnmatchedGl = '#D84315';
+export const colorUnmatchedJV = '#D84315';
