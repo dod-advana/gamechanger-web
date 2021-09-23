@@ -13,13 +13,12 @@ const gameChangerAPI = new GameChangerAPI();
 
 const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name'];
 
-
 const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	const tableData = [];
 
 	const data = await gameChangerAPI.getCloneData();
 
-	_.forEach(data.data, result => {
+	_.forEach(data.data, (result) => {
 		tableData.push(result);
 	});
 	// Set the main clone table
@@ -30,9 +29,14 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	const stringFields = [];
 	const jsonFields = [];
 
-	tableMetaData.data[0].forEach(meta => {
-		if (meta.column_name !== 'createdAt' && meta.column_name !== 'updatedAt' && meta.column_name !== 'id') {
-			let i, frags = meta.column_name.split('_');
+	tableMetaData.data[0].forEach((meta) => {
+		if (
+			meta.column_name !== 'createdAt' &&
+			meta.column_name !== 'updatedAt' &&
+			meta.column_name !== 'id'
+		) {
+			let i,
+				frags = meta.column_name.split('_');
 
 			for (i = 0; i < frags.length; i++) {
 				frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1);
@@ -56,25 +60,30 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 		}
 	});
 	// Set the metadata
-	setCloneTableMetaData({ stringFields, booleanFields, jsonFields })
-}
+	setCloneTableMetaData({ stringFields, booleanFields, jsonFields });
+};
 
 /**
- * 
+ *
  * @class CloneList
  */
 export default () => {
 	// Component Properties
 	const [gcCloneTableData, setGCCloneTableData] = useState([]);
-	const [cloneTableMetaData, setCloneTableMetaData] = useState({ stringFields: [], booleanFields: [], jsonFields: [] });
-	const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
+	const [cloneTableMetaData, setCloneTableMetaData] = useState({
+		stringFields: [],
+		booleanFields: [],
+		jsonFields: [],
+	});
+	const [showCreateEditCloneModal, setShowCreateEditCloneModal] =
+		useState(false);
 	const [cloneToEdit, setCloneToEdit] = useState(null);
 	const [editCloneDataErrors, setEditCloneDataErrors] = useState({});
 
 	// Component Methods
 	const openCloneModal = (num = -99) => {
 		if (num >= 0) {
-			const filteredClones = _.filter(gcCloneTableData, clone => {
+			const filteredClones = _.filter(gcCloneTableData, (clone) => {
 				return clone.id === num;
 			});
 			const cloneEdit = { ...filteredClones[0] };
@@ -84,7 +93,7 @@ export default () => {
 		}
 
 		setShowCreateEditCloneModal(true);
-	}
+	};
 
 	const storeCloneData = (editCloneData = null) => {
 		if (!editCloneData) {
@@ -99,7 +108,7 @@ export default () => {
 
 		let error = false;
 		const cloneErrors = { ...editCloneDataErrors };
-		CLONE_MUST_BE_FILLED_KEYS.forEach(fieldKey => {
+		CLONE_MUST_BE_FILLED_KEYS.forEach((fieldKey) => {
 			if (!cloneDataToStore[fieldKey] || cloneDataToStore[fieldKey] === '') {
 				error = true;
 				cloneErrors[fieldKey] = true;
@@ -110,7 +119,7 @@ export default () => {
 		setEditCloneDataErrors(cloneErrors);
 
 		if (!error) {
-			gameChangerAPI.storeCloneData(cloneDataToStore).then(data => {
+			gameChangerAPI.storeCloneData(cloneDataToStore).then((data) => {
 				if (data.status === 200) {
 					setEditCloneDataErrors({});
 					setShowCreateEditCloneModal(false);
@@ -118,47 +127,45 @@ export default () => {
 				}
 			});
 		}
-	}
+	};
 
 	const deleteCloneData = async (id) => {
 		await gameChangerAPI.deleteCloneData(id);
-	}
+	};
 
 	useEffect(() => {
 		getCloneData(setGCCloneTableData, setCloneTableMetaData);
 	}, [setGCCloneTableData, setCloneTableMetaData]);
 
 	const getCloneModalTextDisplayName = (field) => {
-
 		if (CLONE_MUST_BE_FILLED_KEYS.includes(field.key)) {
 			return `* ${field.display_name}`;
-		}
-		else {
+		} else {
 			return field.display_name;
 		}
-	}
+	};
 
 	// The table columns
 	const columns = [
 		{
 			Header: 'Name',
 			accessor: 'display_name',
-			Cell: row => (
-				<TableRow>{row.value}</TableRow>
-			)
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
 		},
 		{
 			Header: 'Url',
 			accessor: 'url',
-			Cell: row => (
-				<TableRow><a href={`#/${row.value}`}>{`#/${row.value}`}</a></TableRow>
-			)
+			Cell: (row) => (
+				<TableRow>
+					<a href={`#/${row.value}`}>{`#/${row.value}`}</a>
+				</TableRow>
+			),
 		},
 		{
 			Header: 'Live',
 			accessor: 'is_live',
 			width: 200,
-			Cell: row => (
+			Cell: (row) => (
 				<TableRow>
 					<UOTToggleSwitch
 						leftLabel={'Off'}
@@ -166,73 +173,106 @@ export default () => {
 						rightActive={row.value}
 						onClick={() => {
 							if (!row.row._original.can_edit) return;
-							const filteredClones = _.filter(gcCloneTableData, clone => {
+							const filteredClones = _.filter(gcCloneTableData, (clone) => {
 								return clone.id === row.row.id;
 							});
 
 							const cloneEdit = { ...filteredClones[0] };
 
 							cloneEdit.is_live = !row.value;
-							trackEvent('GAMECHANGER_Admin', 'ToggleCloneIsLive', cloneEdit.name, cloneEdit.is_live ? 1 : 0);
+							trackEvent(
+								'GAMECHANGER_Admin',
+								'ToggleCloneIsLive',
+								cloneEdit.name,
+								cloneEdit.is_live ? 1 : 0
+							);
 							storeCloneData(cloneEdit);
 						}}
 						customColor={'#E9691D'}
 					/>
 				</TableRow>
-			)
+			),
 		},
 		{
 			Header: ' ',
 			accessor: 'id',
 			width: 150,
-			Cell: row => (
+			Cell: (row) => (
 				<TableRow>
-					{row.row._original.can_edit &&
+					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
+								trackEvent(
+									'GAMECHANGER_Admin',
+									'EditClone',
+									'onClick',
+									row.value
+								);
 								openCloneModal(row.value);
 							}}
 							style={{ minWidth: 'unset' }}
-						>Edit</GCButton>
-					}
+						>
+							Edit
+						</GCButton>
+					)}
 				</TableRow>
-			)
+			),
 		},
 		{
 			Header: ' ',
 			accessor: 'id',
 			width: 150,
-			Cell: row => (
+			Cell: (row) => (
 				<TableRow>
-					{row.row._original.can_edit &&
+					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
+								trackEvent(
+									'GAMECHANGER_Admin',
+									'DeleteClone',
+									'onClick',
+									row.value
+								);
 								deleteCloneData(row.value).then(() => {
 									getCloneData(setGCCloneTableData, setCloneTableMetaData);
 								});
 							}}
-							style={{ minWidth: 'unset', backgroundColor: 'red', borderColor: 'red' }}
-						>Delete</GCButton>
-					}
+							style={{
+								minWidth: 'unset',
+								backgroundColor: 'red',
+								borderColor: 'red',
+							}}
+						>
+							Delete
+						</GCButton>
+					)}
 				</TableRow>
-			)
-		}
+			),
+		},
 	];
 
 	return (
 		<>
 			<div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Gamechanger Clones</p>
+				<div
+					style={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						margin: '10px 80px',
+					}}
+				>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+						Gamechanger Clones
+					</p>
 					<GCButton
 						onClick={() => {
 							trackEvent('GAMECHANGER_Admin', 'CreateClone', 'onClick');
-							openCloneModal()
+							openCloneModal();
 						}}
 						style={{ minWidth: 'unset' }}
-					>Create Clone</GCButton>
+					>
+						Create Clone
+					</GCButton>
 				</div>
 
 				<ReactTable
@@ -251,5 +291,5 @@ export default () => {
 				getCloneModalTextDisplayName={getCloneModalTextDisplayName}
 			/>
 		</>
-	)
-}
+	);
+};
