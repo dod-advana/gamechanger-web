@@ -51,7 +51,6 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
 }
 
-
 const useStyles = makeStyles({
 	root: {
 		paddingTop: '16px',
@@ -71,6 +70,10 @@ const useStyles = makeStyles({
 		},
 		'& .MuiInput-underline:after':{
 			borderBottom: `3px solid ${gcOrange}`
+		},
+		'& .Mui-focused':{
+			borderColor: `${gcOrange}`,
+			color:`${gcOrange}`
 		}
 	},
 	selectRoot: {
