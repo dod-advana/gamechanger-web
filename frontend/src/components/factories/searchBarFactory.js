@@ -5,7 +5,6 @@ const globalSearchSearchBarHandler = require(`../modules/globalSearch/globalSear
 const budgetSearchSearchBarHandler = require(`../modules/budgetSearch/budgetSearchSearchBarHandler`);
 
 class SearchBarFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
