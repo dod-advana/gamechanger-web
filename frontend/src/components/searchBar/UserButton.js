@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Badge from "@material-ui/core/Badge";
+import Badge from '@material-ui/core/Badge';
 import { withStyles } from '@material-ui/core/styles';
-import { ConstrainedIcon } from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
-import UserIcon from "../../images/icon/UserIcon.png";
-import GCButton from "../common/GCButton";
-import { PAGE_DISPLAYED } from "../../gamechangerUtils";
+import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import UserIcon from '../../images/icon/UserIcon.png';
+import GCButton from '../common/GCButton';
+import { PAGE_DISPLAYED } from '../../gamechangerUtils';
 import { setState, clearDashboardNotification } from '../../sharedFunctions';
 
 const StyledBadge = withStyles((theme) => ({
