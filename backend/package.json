@@ -49,7 +49,7 @@
     "passport": "^0.4.0",
     "passport-ldapauth": "^2.1.4",
     "pdfmake": "^0.1.68",
-    "redis": "^2.8.0",
+    "redis": "^3.1.2",
     "secure-random": "1.1.1",
     "sequelize": "^6.6.2",
     "sonarqube-scanner": "^2.5.0",
