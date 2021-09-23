@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
-import SearchMatrixFactory from "../factories/searchMatrixFactory";
-import SearchHandlerFactory from "../factories/searchHandlerFactory"
+import SearchMatrixFactory from '../factories/searchMatrixFactory';
+import SearchHandlerFactory from '../factories/searchHandlerFactory';
 
 const useStyles = makeStyles({
 	radioButtonLabel: {
@@ -22,37 +22,37 @@ const useStyles = makeStyles({
 	},
 	titleText: {
 		fontSize: '14px',
-		fontFamily: 'Montserrat'
+		fontFamily: 'Montserrat',
 	},
 	tipText: {
 		maxWidth: '250px',
 		width: '250px',
 		margin: '0 auto',
 		fontSize: '12px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	optionText: {
 		margin: '20px 75px 0px',
 		fontSize: '14px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	dateOptionText: {
 		margin: '20px 0px 0px',
 		fontSize: '14px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	title: {
 		margin: '20px 75px 0px',
 		fontSize: '20px',
 		lineHeight: '20px',
-		fontWeight: 600
+		fontWeight: 600,
 	},
 	rootButton: {
 		visibility: 'hidden',
 		width: '0px',
 		padding: '0px',
 		border: '0px',
-		cursor: 'default'
+		cursor: 'default',
 	},
 	filterBox: {
 		backgroundColor: '#ffffff',
@@ -61,7 +61,7 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 		pointerEvents: 'none',
 		marginLeft: '5px',
-		marginRight: '5px'
+		marginRight: '5px',
 	},
 	checkBox: {
 		visibility: 'hidden',
@@ -77,11 +77,11 @@ const useStyles = makeStyles({
 			border: '2px solid #313541',
 			borderRadius: '10px',
 			'&, $tipText,$titleText': {
-				color: '#ffffff'
+				color: '#ffffff',
 			},
 			'&::after': {
 				fontFamily: 'FontAwesome',
-				content: "'\\f00c'",
+				content: `'\\f00c'`,
 				width: '20px',
 				height: '20px',
 				lineHeight: '10px',
@@ -95,7 +95,7 @@ const useStyles = makeStyles({
 				top: '10px',
 				right: '10px',
 				paddingTop: '3px',
-			}
+			},
 		},
 		'& + $checkboxPill': {
 			backgroundColor: '#313541',
@@ -103,7 +103,7 @@ const useStyles = makeStyles({
 			border: '2px solid #313541',
 			borderRadius: '10px',
 			color: '#ffffff',
-		}
+		},
 	},
 	checkboxPill: {
 		width: '145px',
@@ -120,7 +120,7 @@ const useStyles = makeStyles({
 		minHeight: '35px',
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
 	},
 	disabledButton: {
 		'& + $checkboxPill': {
@@ -128,18 +128,13 @@ const useStyles = makeStyles({
 			border: '2px solid grey',
 			borderRadius: '10px',
 			color: '#ffffff',
-		}
-	}
+		},
+	},
 });
 
 const AdvancedDropdown = (props) => {
 	// import context, add matrix handler stuff in here
-	const {
-		context,
-		open,
-		handleSubmit,
-		close
-	} = props;
+	const { context, open, handleSubmit, close } = props;
 	const ref = useRef();
 	const { state, dispatch } = context;
 	const classes = useStyles();
@@ -157,7 +152,9 @@ const AdvancedDropdown = (props) => {
 			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
 
-			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
+			const searchFactory = new SearchHandlerFactory(
+				state.cloneData.search_module
+			);
 			const searchHandlerTmp = searchFactory.createHandler();
 			// get pre-search data
 			searchHandlerTmp.getPresearchData(state, dispatch);
@@ -171,7 +168,7 @@ const AdvancedDropdown = (props) => {
 		// nested arrays of expanded terms from each searchTerm
 		let expansion = {};
 		if (comparableExpansion) {
-			expansion = JSON.parse(comparableExpansion)
+			expansion = JSON.parse(comparableExpansion);
 		}
 		let expandedTerms = Object.values(expansion || {});
 		const keys = Object.keys(expansion || {});
@@ -195,31 +192,51 @@ const AdvancedDropdown = (props) => {
 				expandedTerms = [...rest, a];
 			}
 		}
-
 	}, [state, comparableExpansion]);
 
 	useEffect(() => {
-		const handleClick = e => {
-			if (ref.current && !ref.current.contains(e.target) && !e.target.id.includes('option') && e.target.id !== 'advancedSearchButton' && !datePickerOpen) {
+		const handleClick = (e) => {
+			if (
+				ref.current &&
+				!ref.current.contains(e.target) &&
+				!e.target.id.includes('option') &&
+				e.target.id !== 'advancedSearchButton' &&
+				!datePickerOpen
+			) {
 				close();
 			}
 		};
-		document.addEventListener("mousedown", handleClick);
+		document.addEventListener('mousedown', handleClick);
 		return () => {
-			document.removeEventListener("mousedown", handleClick);
+			document.removeEventListener('mousedown', handleClick);
 		};
 	}, [close, datePickerOpen]);
 
-	const setDatePickerOpen = () => {setDatePicker(true)}
-	const setDatePickerClosed = () => {setDatePicker(false)}
-
+	const setDatePickerOpen = () => {
+		setDatePicker(true);
+	};
+	const setDatePickerClosed = () => {
+		setDatePicker(false);
+	};
 
 	return (
-		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{ display: (open ? 'block' : 'none') }}>
-			{matrixHandler && matrixHandler.getAdvancedOptions({ state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed })}
+		<AdvDropdownWrapper
+			ref={ref}
+			id="advanced-filters"
+			style={{ display: open ? 'block' : 'none' }}
+		>
+			{matrixHandler &&
+				matrixHandler.getAdvancedOptions({
+					state,
+					dispatch,
+					classes,
+					handleSubmit,
+					setDatePickerOpen,
+					setDatePickerClosed,
+				})}
 		</AdvDropdownWrapper>
-	)
-}
+	);
+};
 
 AdvancedDropdown.propTypes = {
 	context: PropTypes.shape({
@@ -229,11 +246,11 @@ AdvancedDropdown.propTypes = {
 			cloneData: PropTypes.shape({
 				main_view_module: PropTypes.string,
 				search_module: PropTypes.string,
-				clone_name: PropTypes.string
+				clone_name: PropTypes.string,
 			}),
 			history: PropTypes.object,
 			userData: PropTypes.shape({
-				favorite_searches: PropTypes.array
+				favorite_searches: PropTypes.array,
 			}),
 			isFavoriteSearch: PropTypes.bool,
 			docsPagination: PropTypes.bool,
@@ -244,11 +261,11 @@ AdvancedDropdown.propTypes = {
 			docsLoading: PropTypes.bool,
 			infiniteScrollPage: PropTypes.number,
 			pageDisplayed: PropTypes.string,
-			searchSettings: PropTypes.object
+			searchSettings: PropTypes.object,
 		}),
 		handleSubmit: PropTypes.func,
 		open: PropTypes.bool,
-		close: PropTypes.func
-	})
-}
+		close: PropTypes.func,
+	}),
+};
 export default AdvancedDropdown;

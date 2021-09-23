@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import {withStyles} from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
-import {gcBlue} from "../../components/common/gc-colors";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import {Typography} from "@material-ui/core";
-import RemoveIcon from "@material-ui/icons/Remove";
-import AddIcon from "@material-ui/icons/Add";
+import { withStyles } from '@material-ui/core/styles';
+import Accordion from '@material-ui/core/Accordion';
+import { gcBlue } from '../../components/common/gc-colors';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import { Typography } from '@material-ui/core';
+import RemoveIcon from '@material-ui/icons/Remove';
+import AddIcon from '@material-ui/icons/Add';
 
 const StyledAccordion = withStyles({
 	root: {
@@ -41,53 +41,52 @@ const StyledAccordionSummary = withStyles({
 			minHeight: 'unset',
 			height: '44px',
 			borderBottomLeftRadius: '0px !important',
-			borderBottomRightRadius: '0px !important'
+			borderBottomRightRadius: '0px !important',
 		},
 	},
 	content: {
 		'&$expanded': {
-			margin: '12px 0'
+			margin: '12px 0',
 		},
 	},
 	expanded: {},
 })(AccordionSummary);
 
 const StyledAccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-	textAlign: 'center',
-	height: 'fit-content !important'
-  },
+	root: {
+		padding: theme.spacing(2),
+		textAlign: 'center',
+		height: 'fit-content !important',
+	},
 }))(AccordionDetails);
 
 const PanelHeader = withStyles({
 	root: {
 		color: '#FFFFFF',
-  		fontFamily: 'Montserrat',
-  		fontSize: 16,
-  		fontWeight: 'bold',
-  		letterSpacing: 0,
+		fontFamily: 'Montserrat',
+		fontSize: 16,
+		fontWeight: 'bold',
+		letterSpacing: 0,
 		marginLeft: 10,
-		marginTop: 3
-	}
+		marginTop: 3,
+	},
 })(Typography);
 
 const CollapseIcon = withStyles({
 	root: {
 		color: '#ffffff',
-		fontSize: 22
-	}
+		fontSize: 22,
+	},
 })(RemoveIcon);
 
 const ExpandIcon = withStyles({
 	root: {
 		color: '#ffffff',
-		fontSize: 22
-	}
+		fontSize: 22,
+	},
 })(AddIcon);
 
 const GCAccordion = (props) => {
-	
 	const {
 		expanded,
 		children,
@@ -103,47 +102,83 @@ const GCAccordion = (props) => {
 		contentHeight,
 		notBordered,
 		onChange,
-		onClick = _.noop
+		onClick = _.noop,
 	} = props;
-	
+
 	const [isExpanded, setIsExpanded] = useState(false);
-	
+
 	useEffect(() => {
-		
 		setIsExpanded(expanded);
-		
-	}, [expanded])
-	
+	}, [expanded]);
+
 	const handleExpandAccordion = (expanded) => {
 		setIsExpanded(expanded);
 		if (onChange) {
 			onChange(expanded);
 		}
-	}
+	};
 
 	const borderString = notBordered ? '0px' : '1px solid rgba(0, 0, 0, .125)';
-	
+
 	return (
-		<StyledAccordion style={{border: borderString}} expanded={isExpanded} onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)} onClick={onClick}>
-			<StyledAccordionSummary style= {{ backgroundColor: headerBackground }} aria-controls="accordion-content" id="accordion-header"
-							  expandIcon={isExpanded ? <CollapseIcon style={{ color: headerTextColor }}/> : <ExpandIcon style={{ color: headerTextColor }} />}>
-				<PanelHeader style = {{ color: headerTextColor, fontWeight: headerTextWeight, width: headerWidth }}>{header}</PanelHeader>
-				{itemCount >= 0 &&
-				<Typography 
-					style={{color:'white', marginTop:'3px', marginLeft:'6px', fontSize:'14px', fontWeight:'900'}}>
+		<StyledAccordion
+			style={{ border: borderString }}
+			expanded={isExpanded}
+			onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)}
+			onClick={onClick}
+		>
+			<StyledAccordionSummary
+				style={{ backgroundColor: headerBackground }}
+				aria-controls="accordion-content"
+				id="accordion-header"
+				expandIcon={
+					isExpanded ? (
+						<CollapseIcon style={{ color: headerTextColor }} />
+					) : (
+						<ExpandIcon style={{ color: headerTextColor }} />
+					)
+				}
+			>
+				<PanelHeader
+					style={{
+						color: headerTextColor,
+						fontWeight: headerTextWeight,
+						width: headerWidth,
+					}}
+				>
+					{header}
+				</PanelHeader>
+				{itemCount >= 0 && (
+					<Typography
+						style={{
+							color: 'white',
+							marginTop: '3px',
+							marginLeft: '6px',
+							fontSize: '14px',
+							fontWeight: '900',
+						}}
+					>
 						({itemCount})
-				</Typography>}
+					</Typography>
+				)}
 			</StyledAccordionSummary>
-			<StyledAccordionDetails style={{ backgroundColor, padding: contentPadding, textAlign: contentAlign, height: contentHeight }}>
+			<StyledAccordionDetails
+				style={{
+					backgroundColor,
+					padding: contentPadding,
+					textAlign: contentAlign,
+					height: contentHeight,
+				}}
+			>
 				{children}
 			</StyledAccordionDetails>
 		</StyledAccordion>
-	)
-}
+	);
+};
 
 GCAccordion.defaultProps = {
-	expanded: false
-}
+	expanded: false,
+};
 
 GCAccordion.propTypes = {
 	expanded: PropTypes.bool,
@@ -157,7 +192,7 @@ GCAccordion.propTypes = {
 	contentPadding: PropTypes.string,
 	contentAlign: PropTypes.string,
 	contentHeight: PropTypes.string,
-	notBordered: PropTypes.bool
-}
+	notBordered: PropTypes.bool,
+};
 
 export default GCAccordion;
