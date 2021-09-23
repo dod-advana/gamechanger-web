@@ -1,7 +1,7 @@
-import React, {useState, useContext, useEffect} from 'react';
-import { SlideOutToolContext } from "@dod-advana/advana-side-nav/dist/SlideOutMenuContext";
+import React, { useState, useContext, useEffect } from 'react';
+import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 
-import SearchBanner from "../components/searchBar/GCSearchBanner";
+import SearchBanner from '../components/searchBar/GCSearchBanner';
 import MLDashboard from '../components/admin/MLDashboard';
 import GeneralAdminButtons from '../components/admin/GeneralAdminButtons';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
@@ -12,13 +12,18 @@ import CloneList from '../components/admin/CloneList';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
-import {ClosedAdminMenu, OpenedAdminMenu} from '../components/admin/AdminMenu';
+import {
+	ClosedAdminMenu,
+	OpenedAdminMenu,
+} from '../components/admin/AdminMenu';
 
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import {toolTheme} from '../components/admin/util/GCAdminStyles';
+import { toolTheme } from '../components/admin/util/GCAdminStyles';
 
-const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled =
+	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
+	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const PAGES = {
 	general: 'General',
@@ -30,13 +35,13 @@ const PAGES = {
 	internalUsers: 'Internal Users',
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
-	homepageEditor: 'Homepage Editor'
-}
+	homepageEditor: 'Homepage Editor',
+};
 /**
- * 
+ *
  * @class GamechangerAdminPage
  */
-const GamechangerAdminPage = props => {
+const GamechangerAdminPage = (props) => {
 	const { jupiter } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
@@ -45,12 +50,17 @@ const GamechangerAdminPage = props => {
 
 	const setLoginModal = (open) => {
 		setLoginModalOpen(open);
-	}
+	};
 
 	const renderSwitch = (page) => {
-		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
+		trackEvent(
+			'GAMECHANGER_Admin',
+			'ChangeAdminPage',
+			'onChange',
+			page.toString()
+		);
 
-		switch(page) {
+		switch (page) {
 			case PAGES.general:
 				return <GeneralAdminButtons />;
 			case PAGES.cloneList:
@@ -68,14 +78,14 @@ const GamechangerAdminPage = props => {
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
-				return <APIRequests />
+				return <APIRequests />;
 			case PAGES.homepageEditor:
 				return <HomepageEditor />;
 			default:
 				return <GeneralAdminButtons />;
 		}
-	}
-	
+	};
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		setToolState({
@@ -85,20 +95,22 @@ const GamechangerAdminPage = props => {
 			hideAllApplicationsSection: isDecoupled,
 			hideContentSection: false,
 			extraSupportLinks: [],
-			associatedApplications: []
+			associatedApplications: [],
 		});
 
 		return () => {
 			unsetTool();
 		};
-
 	}, [unsetTool, setToolState, setPageToView]);
 
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
-
-			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES})}</SlideOutMenuContent>
-			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES})}</SlideOutMenuContent>
+			<SlideOutMenuContent type="closed">
+				{ClosedAdminMenu({ setPageToView, PAGES })}
+			</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">
+				{OpenedAdminMenu({ setPageToView, PAGES })}
+			</SlideOutMenuContent>
 
 			<SearchBanner
 				onTitleClick={() => {
@@ -110,12 +122,10 @@ const GamechangerAdminPage = props => {
 				rawSearchResults={[]}
 				loginModalOpen={loginModalOpen}
 				setLoginModal={setLoginModal}
-			>
-			</SearchBanner>
+			></SearchBanner>
 
 			{renderSwitch(pageToView)}
-			
 		</div>
 	);
-}
+};
 export default GamechangerAdminPage;

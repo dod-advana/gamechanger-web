@@ -1,23 +1,24 @@
-import React from "react";
+import React from 'react';
 import PropTypes from 'prop-types';
-import {gcOrange} from "../../components/common/gc-colors";
-import TutorialOverlay from "@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay";
-import {setState} from "../../sharedFunctions";
-import {initializeTutorial} from "@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper";
-import {useMountEffect} from "../../gamechangerUtils";
+import { gcOrange } from '../../components/common/gc-colors';
+import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
+import { setState } from '../../sharedFunctions';
+import { initializeTutorial } from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper';
+import { useMountEffect } from '../../gamechangerUtils';
 
 async function initTutorial(dispatch, cloneName) {
 	try {
 		let nameToUse = '';
 		switch (cloneName) {
 			case 'gamechanger':
-				nameToUse = 'gamechanger'
+				nameToUse = 'gamechanger';
 				break;
 			default:
 				nameToUse = '';
 				break;
 		}
-		const { componentStepNumbers, tutorialJoyrideSteps } = await initializeTutorial(nameToUse);
+		const { componentStepNumbers, tutorialJoyrideSteps } =
+			await initializeTutorial(nameToUse);
 		setState(dispatch, {
 			componentStepNumbers,
 			tutorialJoyrideSteps,
@@ -28,27 +29,30 @@ async function initTutorial(dispatch, cloneName) {
 }
 
 const Tutorial = (props) => {
+	const { state, dispatch } = props.context;
 
-	const {state, dispatch} = props.context;
-	
 	useMountEffect(() => {
-		if (!sessionStorage.getItem(`${state.cloneData.clone_name}-userVersionChecked`)){
-			initTutorial(dispatch, state.cloneData.clone_name)
+		if (
+			!sessionStorage.getItem(
+				`${state.cloneData.clone_name}-userVersionChecked`
+			)
+		) {
+			initTutorial(dispatch, state.cloneData.clone_name);
 		}
 	});
-	
+
 	const resetState = () => {
-		dispatch({type: 'RESET_STATE'});
-	}
-	
+		dispatch({ type: 'RESET_STATE' });
+	};
+
 	const setStepIndex = (stepIndex) => {
 		setState(dispatch, { tutorialStepIndex: stepIndex });
-	}
-	
+	};
+
 	const setShowTutorial = (showTutorial) => {
 		setState(dispatch, { showTutorial: showTutorial });
-	}
-	
+	};
+
 	return (
 		<TutorialOverlay
 			tutorialJoyrideSteps={state.tutorialJoyrideSteps}
@@ -60,19 +64,19 @@ const Tutorial = (props) => {
 			setStepIndex={setStepIndex}
 		/>
 	);
-}
+};
 
 Tutorial.propTypes = {
 	context: PropTypes.shape({
 		state: PropTypes.shape({
 			cloneData: PropTypes.shape({
-				clone_name: PropTypes.string
+				clone_name: PropTypes.string,
 			}),
 			tutorialJoyrideSteps: PropTypes.arrayOf(PropTypes.object),
 			showTutorial: PropTypes.bool,
-			tutorialStepIndex: PropTypes.number
-		})
-	})
-}
+			tutorialStepIndex: PropTypes.number,
+		}),
+	}),
+};
 
 export default Tutorial;

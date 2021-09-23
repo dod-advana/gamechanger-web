@@ -4,20 +4,26 @@ import React from 'react';
 export default function SearchSection(props) {
 	const { section, color, children, icon } = props;
 
-	return <div style={styles.container(color)}>
-		<div style={styles.headerWrapper}>
-			<span style={styles.header(color)}>
-				{icon && <img src={icon} alt={`${section}-icon`} style={styles.icon} />}
+	return (
+		<div style={styles.container(color)}>
+			<div style={styles.headerWrapper}>
+				<span style={styles.header(color)}>
+					{icon && (
+						<img src={icon} alt={`${section}-icon`} style={styles.icon} />
+					)}
 
-				<Typography variant="h5" color="inherit" align="center">{section}</Typography>
-			</span>
-		</div>
+					<Typography variant="h5" color="inherit" align="center">
+						{section}
+					</Typography>
+				</span>
+			</div>
 
-		<div className="row" style={styles.childContainer}>
-			{children}
+			<div className="row" style={styles.childContainer}>
+				{children}
+			</div>
 		</div>
-	</div>
-};
+	);
+}
 
 const styles = {
 	container: (color) => ({
@@ -31,12 +37,12 @@ const styles = {
 	},
 	header: (color) => ({
 		backgroundColor: `${color}`,
-		borderRadius: "0px 5px 5px 0px",
+		borderRadius: '0px 5px 5px 0px',
 		color: 'white',
 		height: '100%',
 		padding: 15,
 		minWidth: 200,
-		display: 'inline-flex'
+		display: 'inline-flex',
 	}),
 	childContainer: {
 		paddingLeft: 20,
@@ -44,10 +50,10 @@ const styles = {
 	},
 	icon: {
 		height: 20,
-		marginRight: 15
+		marginRight: 15,
 	},
 	link: {
 		marginLeft: 15,
-		fontSize: '1.2em'
-	}
+		fontSize: '1.2em',
+	},
 };
