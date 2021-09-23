@@ -2,27 +2,27 @@ import { createContext } from 'react';
 
 export const SearchContext = createContext({
 	filters: {},
-	setFilters: () => { },
+	setFilters: () => {},
 
-	reset: () => { },
+	reset: () => {},
 
 	keyword: '',
-	setKeyword: () => { },
+	setKeyword: () => {},
 
 	gridView: true,
-	setGridView: () => { },
+	setGridView: () => {},
 
 	searchTypes: {},
-	dispatchSearchTypes: () => { },
+	dispatchSearchTypes: () => {},
 
-	orderBy: "",
-	setOrderBy: () => { },
+	orderBy: '',
+	setOrderBy: () => {},
 
 	activeTab: 'all',
-	setActiveTab: () => { },
+	setActiveTab: () => {},
 
 	resultMetaData: {},
-	dispatchResultMetaData: () => { },
+	dispatchResultMetaData: () => {},
 
-	returnHome: () => {}
+	returnHome: () => {},
 });

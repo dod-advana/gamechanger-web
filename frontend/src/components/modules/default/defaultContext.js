@@ -1,5 +1,9 @@
 import React, { useReducer } from 'react';
-import {orgFilters, typeFilters, SEARCH_TYPES} from "../../../gamechangerUtils";
+import {
+	orgFilters,
+	typeFilters,
+	SEARCH_TYPES,
+} from '../../../gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -21,11 +25,10 @@ const initState = {
 		show_graph: true,
 		show_crowd_source: true,
 		show_feedback: true,
-		
 	},
 	history: undefined,
 	historySet: false,
-	
+
 	// Notifications
 	notifications: [],
 	notificationIds: [],
@@ -34,16 +37,23 @@ const initState = {
 		unauthorizedError: false,
 		transformFailed: false,
 	},
-	
+
 	// User
-	userData: { favorite_searches: [], favorite_documents: [], favorite_topics: [], search_history: [], export_history: [], api_key:'' },
+	userData: {
+		favorite_searches: [],
+		favorite_documents: [],
+		favorite_topics: [],
+		search_history: [],
+		export_history: [],
+		api_key: '',
+	},
 	newUser: false,
 	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',
 		q1: '',
-		q2: ''
+		q2: '',
 	},
 
 	// Homepage
@@ -53,14 +63,14 @@ const initState = {
 	adminMajorPubs: [],
 	searchMajorPubs: [],
 	trendingLinks: [],
-	
+
 	// Tutorial
 	showTutorial: false,
 	clickedTutorial: false,
 	tutorialStepIndex: 0,
 	componentStepNumbers: {},
 	tutorialJoyrideSteps: [],
-	
+
 	// Show Modals
 	showFeedbackModal: false,
 	showAssistModal: false,
@@ -70,46 +80,52 @@ const initState = {
 	exportDialogVisible: false,
 	showEsQueryDialog: false,
 	showEsDocDialog: false,
-	
+
 	selectedDoc: {},
-	
+
 	loading: false,
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
 	listView: false,
 	qaResults: { question: [], answers: [] },
-	qaContext: {params: {}, context: []},
+	qaContext: { params: {}, context: [] },
 	selectedCategories: {
 		Documents: true,
 		Organizations: true,
-		Topics: true
-	},	
+		Topics: true,
+	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References', 'Popular']
+		Documents: [
+			'Relevance',
+			'Publishing Date',
+			'Alphabetical',
+			'References',
+			'Popular',
+		],
 	},
 
 	// Documents
 	iframePreviewLink: null,
 	detailViewId: 0,
 	docsLoading: false,
-	
+
 	// Export
 	selectedDocuments: new Map(),
 	docsDrawerOpen: false,
 	isSelectedDocs: false,
 	isDrawerReady: false,
-	
+
 	// Navigation
 	menuOpen: false,
 	tabName: '',
 	hideTabs: true,
 	activeCategoryTab: 'all',
-	
+
 	// Graph
 	runGraphSearch: false,
-	
+
 	// SideBar
 	sidebarDocTypes: [],
 	sidebarOrgs: [],
@@ -120,7 +136,7 @@ const initState = {
 	topicsForSearch: [],
 	runningTopicSearch: false,
 	showSideFilters: false,
-	
+
 	// Search
 	offset: 0,
 	esIndex: '',
@@ -151,11 +167,11 @@ const initState = {
 		typeFilter: typeFilters,
 		allTypesSelected: true,
 		specificTypesSelected: false,
-		searchFields: {'initial': {field: null, input: ''}},
+		searchFields: { initial: { field: null, input: '' } },
 		specificOrgsSelected: false,
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
-		includeRevoked: false
+		includeRevoked: false,
 	},
 	docsPagination: false,
 
@@ -172,7 +188,7 @@ const initState = {
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
 
-	intelligentSearchResults: {}
+	intelligentSearchResults: {},
 };
 
 const init = (initialState) => {
@@ -182,20 +198,20 @@ const init = (initialState) => {
 const handleSetAlert = (state, action) => {
 	const alerts = {
 		...state.alerts,
-		...action.payload
-	}
+		...action.payload,
+	};
 	return {
 		...state,
-		alerts
+		alerts,
 	};
-}
+};
 
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
-		...action.payload
-	}
-}
+		...action.payload,
+	};
+};
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -207,12 +223,12 @@ function reducer(state, action) {
 			return {
 				...state,
 				exportDialogVisible: action.payload,
-				isSelectedDocs: action.payload
+				isSelectedDocs: action.payload,
 			};
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				searchSettings: initState.searchSettings
+				searchSettings: initState.searchSettings,
 			};
 		case 'RESET_STATE':
 			return {
@@ -221,7 +237,7 @@ function reducer(state, action) {
 				componentStepNumbers: state.componentStepNumbers,
 				tutorialJoyrideSteps: state.tutorialJoyrideSteps,
 				userData: state.userData,
-				documentProperties: state.documentProperties
+				documentProperties: state.documentProperties,
 			};
 		default:
 			return state;
@@ -232,9 +248,9 @@ const DefaultContext = React.createContext(initState);
 
 const DefaultProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
-	
+
 	return (
-		<DefaultContext.Provider value={{state, dispatch}}>
+		<DefaultContext.Provider value={{ state, dispatch }}>
 			{props.children}
 		</DefaultContext.Provider>
 	);
