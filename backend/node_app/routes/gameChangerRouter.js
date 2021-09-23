@@ -162,6 +162,7 @@ router.post('/sendFrontendError', appSettings.logFrontendError);
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
+router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 

@@ -14,6 +14,7 @@ import Tutorial from "../components/tutorial/Tutorial";
 import SearchBar from "../components/searchBar/SearchBar";
 import GCUserInfoModal from "../components/user/GCUserInfoModal";
 import {Snackbar} from "@material-ui/core";
+import Feedback from "@dod-advana/advana-jira-feedback/dist/components/FeedbackModal"
 
 export const gcColors = {
 	buttonColor1: '#131E43',
@@ -62,8 +63,12 @@ const GameChangerPage = (props) => {
 					<Notifications context={context} />
 					
 					{/* User Feedback */}
-					<UserFeedback context={context} className="feedback-modal" />
-					
+					{/* <UserFeedback context={context} className="feedback-modal" /> */}
+					<Feedback 
+						open={state.showFeedbackModal} 
+						setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
+						handleSubmitFeedback={()=>alert('hi')}
+					/>
 					{/* Crowd Sourcing */}
 					{ cloneData.show_crowd_source && <GameChangerAssist context={context} primaryColor={gcOrange} /> }
 					

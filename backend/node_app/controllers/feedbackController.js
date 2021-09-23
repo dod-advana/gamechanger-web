@@ -83,6 +83,17 @@ class FeedbackController {
 			res.status(500).send(err);
 		}
 	}
+
+	async sendJiraFeedback(req, res) {
+		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		try{
+			console.log(req.body);
+			res.status(200).send()
+		} catch(err) {
+			this.logger.error(err, '0KYXA1V', userId);
+			res.status(500).send(err);
+		}
+	}
 }
 
 module.exports.FeedbackController = FeedbackController;
