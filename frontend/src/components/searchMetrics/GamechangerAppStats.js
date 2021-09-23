@@ -9,7 +9,6 @@ const PageWrapper = styled.div`
 	flex-direction: column;
 	align-items: center;
 	margin-top: 30px;
-
 `;
 
 const Heading = styled.div`
@@ -33,37 +32,38 @@ const ListItem = styled.div`
 
 	& > div {
 		margin: 8px;
-	};
+	}
 `;
 
 export default () => {
-
 	const styles = {
 		pageWrapper: {
 			alignItems: 'center',
-			textAlign: 'center'
+			textAlign: 'center',
 		},
 		contentDiv: {
-			alignItems: 'center'
-		}
-	}; 
+			alignItems: 'center',
+		},
+	};
 
 	const [data, setData] = useState([]);
 
 	const getAppStats = async () => {
 		try {
-			const { data = {} } = await gameChangerAPI.getAppStats({cloneData: {clone_name: 'gamechanger'}});
+			const { data = {} } = await gameChangerAPI.getAppStats({
+				cloneData: { clone_name: 'gamechanger' },
+			});
 			setData(data);
 		} catch (e) {
 			console.error(e);
 		}
-	}
+	};
 
 	const decodeHtml = (html) => {
-		var txt = document.createElement("textarea");
+		var txt = document.createElement('textarea');
 		txt.innerHTML = html;
 		return txt.value;
-	}
+	};
 
 	useEffect(() => {
 		getAppStats();
@@ -72,37 +72,39 @@ export default () => {
 	return (
 		<PageWrapper style={styles.pageWrapper}>
 			<Heading>App Stats</Heading>
-			{data.data && <div style={styles.contentDiv}>
-				<div>
-					<Heading>Days back</Heading>
-					<div>{data.daysBack}</div>
-				</div>
-				<div>
-					<Heading>Searches per session</Heading>
-					<div>{data.data.avgSearchesPerSession}</div>
-				</div>
-				{/* <div>
+			{data.data && (
+				<div style={styles.contentDiv}>
+					<div>
+						<Heading>Days back</Heading>
+						<div>{data.daysBack}</div>
+					</div>
+					<div>
+						<Heading>Searches per session</Heading>
+						<div>{data.data.avgSearchesPerSession}</div>
+					</div>
+					{/* <div>
 					<Heading>Top 10 Searches</Heading>
 					<div>{JSON.stringify(data.data.topSearches.data)}</div>
 				</div> */}
-				<div>
-				<Heading>Top 10 Searches</Heading>
-				<ListWrapper>
-					<ListItem key='header'>
-						<div>Search</div>
-						<div style={{ marginLeft: '50px' }}>Count</div>
-					</ListItem>
-					{data.data.topSearches.data.map(({ search, count }) => {
-						return (
-							<ListItem key={search}>
-								<div>{decodeHtml(search)}</div>
-								<div>{count}</div>
+					<div>
+						<Heading>Top 10 Searches</Heading>
+						<ListWrapper>
+							<ListItem key="header">
+								<div>Search</div>
+								<div style={{ marginLeft: '50px' }}>Count</div>
 							</ListItem>
-						)
-					})}
-				</ListWrapper>
+							{data.data.topSearches.data.map(({ search, count }) => {
+								return (
+									<ListItem key={search}>
+										<div>{decodeHtml(search)}</div>
+										<div>{count}</div>
+									</ListItem>
+								);
+							})}
+						</ListWrapper>
+					</div>
 				</div>
-			</div>}
+			)}
 		</PageWrapper>
-	)
-}
+	);
+};

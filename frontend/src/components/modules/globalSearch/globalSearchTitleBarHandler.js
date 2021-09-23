@@ -1,27 +1,33 @@
-import React from "react";
+import React from 'react';
 import AdvanaLightTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaLightTheme.png';
-import {SearchContext} from "./SearchContext";
-import SearchTabBar from "./SearchTabBar";
+import { SearchContext } from './SearchContext';
+import SearchTabBar from './SearchTabBar';
 
 const GlobalSearchTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
 			// onTitleClick,
 			componentStepNumbers,
-			cloneData
+			cloneData,
 		} = props;
 		return (
 			<img
 				src={AdvanaLightTheme}
 				style={styles.title}
-				onClick={() => window.location.href = 'https://advana.data.mil/'}
-				alt='globalsearch'
+				onClick={() => (window.location.href = 'https://advana.data.mil/')}
+				alt="globalsearch"
 				id={'titleButton'}
-				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}` : null}
+				className={
+					componentStepNumbers
+						? `tutorial-step-${
+							componentStepNumbers[`${cloneData.display_name} Title`]
+						  }`
+						: null
+				}
 			/>
 		);
 	},
-	
+
 	getCategoryTabs(props) {
 		const {
 			selectedCategories,
@@ -31,7 +37,7 @@ const GlobalSearchTitleBarHandler = {
 			// cloneData,
 			// dispatch
 		} = props;
-		
+
 		return (
 			<>
 				<SearchContext.Provider
@@ -42,29 +48,29 @@ const GlobalSearchTitleBarHandler = {
 						resultMetaData: categoryMetadata,
 						returnHome: () => {
 							window.location.href = 'https://advana.data.mil/';
-						}
+						},
 					}}
 				>
-					<SearchTabBar containerStyles={{width:'100%'}}/>
+					<SearchTabBar containerStyles={{ width: '100%' }} />
 				</SearchContext.Provider>
 			</>
-		)
+		);
 	},
-	
+
 	getTitleBarStyle(props) {
 		return {
 			...styles.titleBar,
-			borderBottom: '2px solid rgb(176, 186, 197)'
+			borderBottom: '2px solid rgb(176, 186, 197)',
 		};
-	}
-}
+	},
+};
 
 export default GlobalSearchTitleBarHandler;
 
 const styles = {
 	wording: {
 		color: '#131E43',
-		marginRight: 15
+		marginRight: 15,
 	},
 	titleBar: {
 		padding: '20px 1em',
@@ -73,12 +79,12 @@ const styles = {
 		alignItems: 'center',
 		flex: 1,
 		minHeight: 80,
-		width: '100%'
+		width: '100%',
 	},
 	title: {
 		margin: '-10px 50px -10px 55px',
 		cursor: 'pointer',
 		width: '255px',
-		height: '65x'
-	}
+		height: '65x',
+	},
 };
