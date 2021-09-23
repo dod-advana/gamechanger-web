@@ -1,7 +1,7 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import {axiosGET, axiosDELETE, axiosPOST} from '../../gamechangerUtils';
+import { axiosGET, axiosDELETE, axiosPOST } from '../../gamechangerUtils';
 // import util from '../advana/api/util';
 
 // import { getPdfViewerUrl } from '../advana/api/storage-service-api'
@@ -10,11 +10,13 @@ const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
 	modularSearch: '/api/gameChanger/modular/search',
 	modularExport: '/api/gameChanger/modular/export',
-	gameChangerSemanticSearchDownloadPOST: '/api/gameChanger/semanticSearch/download',
+	gameChangerSemanticSearchDownloadPOST:
+		'/api/gameChanger/semanticSearch/download',
 	gameChangerGraphSearchPOST: '/api/gameChanger/modular/graphSearch',
 	graphQueryPOST: '/api/gameChanger/modular/graphQuery',
 	getDocumentsToAnnotate: '/api/gameChanger/assist/getDocumentsToAnnotate',
-	saveDocumentAnnotationsPOST: '/api/gameChanger/assist/saveDocumentAnnotationsPOST',
+	saveDocumentAnnotationsPOST:
+		'/api/gameChanger/assist/saveDocumentAnnotationsPOST',
 	sendFeedbackPOST: '/api/gameChanger/sendFeedback',
 	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
 	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
@@ -61,7 +63,8 @@ const endpoints = {
 	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
 	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
 	setTrendingBlacklist: '/api/gameChanger/admin/trending/setTrendingBlacklist',
-	deleteTrendingBlacklist: '/api/gameChanger/admin/trending/deleteTrendingBlacklist',
+	deleteTrendingBlacklist:
+		'/api/gameChanger/admin/trending/deleteTrendingBlacklist',
 	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
 	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
@@ -75,7 +78,7 @@ const endpoints = {
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
-	getProcessStatus:'/api/gameChanger/admin/getProcessStatus',
+	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
 	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
@@ -91,9 +94,12 @@ const endpoints = {
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
-	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
-	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
+	getOtherEntityFilterList:
+		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
+	storeResponsibilityReportData:
+		'/api/gameChanger/responsibilities/storeReport',
+	approveRejectAPIKeyRequestPOST:
+		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
 	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
@@ -102,7 +108,7 @@ const endpoints = {
 	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
-	userFeedback:'/api/gamechanger/appSettings/userFeedback',
+	userFeedback: '/api/gamechanger/appSettings/userFeedback',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
@@ -112,8 +118,7 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 
-
-	exportHistoryDELETE: function(id){
+	exportHistoryDELETE: function (id) {
 		if (!id) {
 			throw new Error('id not passed to route');
 		}
@@ -127,28 +132,44 @@ const endpoints = {
 
 export default class GameChangerAPI {
 	constructor(opts = {}) {
-		const {
-			axios = axiosLib,
-		} = opts;
+		const { axios = axiosLib } = opts;
 
 		this.axios = axios.create({
 			baseURL: Config.API_URL,
-			httpsAgent: new https.Agent({ keepAlive: true, rejectUnauthorized: false }),
+			httpsAgent: new https.Agent({
+				keepAlive: true,
+				rejectUnauthorized: false,
+			}),
 		});
-
 	}
-	
+
 	exportHistoryDELETE = async (id) => {
 		const url = endpoints.exportHistoryDELETE(id);
 		return axiosDELETE(this.axios, url);
-	}
+	};
 
 	exportHistoryGET = async () => {
 		const url = endpoints.exportHistory;
 		return axiosGET(this.axios, url);
-	}
+	};
 
-	genericDocumentSearchPOST = async ({ searchText, offset, getIdList, orgFilterQuery, transformResults, isClone = false, cloneData = {}, index, charsPadding, orgFilter = {}, showTutorial, useGCCache = false, tiny_url, limit= 20, storedFields = [] }) => {
+	genericDocumentSearchPOST = async ({
+		searchText,
+		offset,
+		getIdList,
+		orgFilterQuery,
+		transformResults,
+		isClone = false,
+		cloneData = {},
+		index,
+		charsPadding,
+		orgFilter = {},
+		showTutorial,
+		useGCCache = false,
+		tiny_url,
+		limit = 20,
+		storedFields = [],
+	}) => {
 		const url = endpoints.modularSearch;
 		return axiosPOST(this.axios, url, {
 			searchText,
@@ -165,100 +186,101 @@ export default class GameChangerAPI {
 			useGCCache,
 			limit,
 			tiny_url,
-			storedFields
+			storedFields,
 		});
-	}
+	};
 
 	getCloneMeta = async (data) => {
 		const url = endpoints.getCloneMeta;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	modularSearch = async (data) => {
 		const url = endpoints.modularSearch;
 		data.options.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	modularExport = async (data) => {
 		const url = endpoints.modularExport;
-		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
+		const options =
+			(data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
 
 		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
 		return axiosPOST(this.axios, url, data, options);
-	}
+	};
 
 	createSearchHistoryCache = async () => {
 		const url = endpoints.gcCreateSearchHistoryCache;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	clearSearchHistoryCache = async () => {
 		const url = endpoints.gcClearSearchHistoryCache;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	createAbbreviationsCache = async () => {
 		const url = endpoints.gcCreateAbbreviationsCache;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	clearAbbreviationsCache = async () => {
 		const url = endpoints.gcClearAbbreviationsCache;
 		return axiosGET(this.axios, url);
-	}
-	
+	};
+
 	createGraphDataCache = async () => {
 		const url = endpoints.gcCreateGraphDataCache;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	clearGraphDataCache = async () => {
 		const url = endpoints.gcClearGraphDataCache;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	graphSearchPOST = async (body) => {
 		const url = endpoints.gameChangerGraphSearchPOST;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
 	// 	const url = endpoints.graphQueryPOST;
 	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
 	// }
-	
+
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
 		return axiosPOST(this.axios, url, { clone, cloneData });
-	}
+	};
 
 	saveDocumentAnnotations = async (annotationData) => {
 		const url = endpoints.saveDocumentAnnotationsPOST;
-		return axiosPOST(this.axios, url, {annotationData: annotationData});
-	}
+		return axiosPOST(this.axios, url, { annotationData: annotationData });
+	};
 
-	sendFeedbackPOST =  async(feedbackData) => {
+	sendFeedbackPOST = async (feedbackData) => {
 		const url = endpoints.sendFeedbackPOST;
-		return axiosPOST(this.axios, url, {feedbackData: feedbackData});
-	}
+		return axiosPOST(this.axios, url, { feedbackData: feedbackData });
+	};
 
 	sendClassificationAlertPOST = async (alertData) => {
 		const url = endpoints.sendClassificationAlertPOST;
-		return axiosPOST(this.axios, url, {alertData: alertData});
-	}
+		return axiosPOST(this.axios, url, { alertData: alertData });
+	};
 
 	getAllMatchesBetweenDoubleQuotes = (string) => {
 		const pattern = /".*?"/g;
 		let current;
 		let matches = [];
 		/*eslint-disable */
-		while(current = pattern.exec(string)){
-			if (current && current[0]) matches.push(current[0].replace(/"/g,''));
+		while ((current = pattern.exec(string))) {
+			if (current && current[0]) matches.push(current[0].replace(/"/g, ''));
 		}
 		/*eslint-enable */
 		return matches;
-	}
+	};
 
 	splitSearchText = (str) => {
 		//Case 1: exact phrase match. We only match the FIRST phrase due to pdfjs highlighting limitations
@@ -268,209 +290,249 @@ export default class GameChangerAPI {
 		const upperStr = str.toUpperCase();
 		const splits = upperStr.split(/ AND | OR /);
 		return splits.join(' ');
-	}
+	};
 
 	getPdfViewerUrl = (response, highlightText, pageNumber, fileName) => {
-		const generatedUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+		const generatedUrl = window.URL.createObjectURL(
+			new Blob([response.data], { type: 'application/pdf' })
+		);
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
-		if (highlightText) append += `#search=${this.splitSearchText(highlightText)}`;
-		if (pageNumber) append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
-		if (fileName) append += `${append[0] === '#' ? '&' : '#'}filename=${fileName}`;
+		if (highlightText)
+			append += `#search=${this.splitSearchText(highlightText)}`;
+		if (pageNumber)
+			append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
+		if (fileName)
+			append += `${append[0] === '#' ? '&' : '#'}filename=${fileName}`;
 		redirectUrl += append;
 		return redirectUrl;
-	}
+	};
 
-	dataStorageDownloadGET = async (fileName, highlightText, pageNumber, isClone = false, cloneData = {clone_name: 'gamechanger'}) => {
+	dataStorageDownloadGET = async (
+		fileName,
+		highlightText,
+		pageNumber,
+		isClone = false,
+		cloneData = { clone_name: 'gamechanger' }
+	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
-			
-			let filename = encodeURIComponent(`gamechanger${cloneData.clone_name !== 'gamechanger' ? `/projects/${cloneData.clone_name}` : ''}/pdf/${fileName}`)
 
-			if (cloneData.clone_name === 'eda'){
-				filename = encodeURIComponent(fileName)
+			let filename = encodeURIComponent(
+				`gamechanger${
+					cloneData.clone_name !== 'gamechanger'
+						? `/projects/${cloneData.clone_name}`
+						: ''
+				}/pdf/${fileName}`
+			);
+
+			if (cloneData.clone_name === 'eda') {
+				filename = encodeURIComponent(fileName);
 			}
 
-			axiosGET(this.axios, `${endpoints.dataStorageDownloadGET}?path=${encodeURIComponent(fileName)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${cloneData.clone_name}`, {
-				responseType: 'blob',
-				withCredentials: true
-			}).then(resp => {
-				const redirectUrl = this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
-				resolve(redirectUrl);
-			}).catch(e => {
-				console.error(e);
-				console.error('ERROR GC-service-api storageDownloadBlobGET', e.message)
-				reject(e.message)
-			});
+			axiosGET(
+				this.axios,
+				`${endpoints.dataStorageDownloadGET}?path=${encodeURIComponent(
+					fileName
+				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${
+					cloneData.clone_name
+				}`,
+				{
+					responseType: 'blob',
+					withCredentials: true,
+				}
+			)
+				.then((resp) => {
+					const redirectUrl = this.getPdfViewerUrl(
+						resp,
+						highlightText,
+						pageNumber,
+						fileName
+					);
+					resolve(redirectUrl);
+				})
+				.catch((e) => {
+					console.error(e);
+					console.error(
+						'ERROR GC-service-api storageDownloadBlobGET',
+						e.message
+					);
+					reject(e.message);
+				});
 		});
-	}
+	};
 
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		return axiosPOST(this.axios, url, {filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket}, {timeout: 0})
-	}
+		return axiosPOST(
+			this.axios,
+			url,
+			{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
+			{ timeout: 0 }
+		);
+	};
 
 	getCloneData = async () => {
 		const url = endpoints.gcCloneDataGET;
 		return axiosGET(this.axios, url);
-	}
-	
+	};
+
 	getCloneTableData = async () => {
 		const url = endpoints.gcCloneTableDataGET;
 		return axiosGET(this.axios, url);
-	}
-	
+	};
+
 	reloadHandlerMap = async () => {
 		const url = endpoints.reloadHandlerMapGET;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	storeCloneData = async (cloneData) => {
 		const url = endpoints.gcCloneDataPOST;
 		return axiosPOST(this.axios, url, { cloneData });
-	}
+	};
 
 	deleteCloneData = async (id) => {
 		const url = endpoints.gcCloneDataDeletePOST;
 		return axiosPOST(this.axios, url, { id });
-	}
+	};
 
 	getDataTrackerData = async (options) => {
 		const url = endpoints.gcDataTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
-	}
+	};
 
 	getBrowsingLibrary = async (options) => {
 		const url = endpoints.gcVersionedDocsPOST;
 		return axiosPOST(this.axios, url, options);
-	}
+	};
 
 	gcCrawlerTrackerData = async (options) => {
 		const url = endpoints.gcCrawlerTrackerData;
 		return axiosPOST(this.axios, url, options);
-	}
+	};
 
 	gcCrawlerSealData = async () => {
 		const url = endpoints.gcCrawlerSealData;
 		return axiosPOST(this.axios, url);
-	}
+	};
 
 	gcOrgSealData = async () => {
 		const url = endpoints.gcOrgSealData;
 		return axiosPOST(this.axios, url);
-	}
-	
+	};
+
 	getSourceTrackerData = async (options) => {
 		const url = endpoints.gcSourceTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
-	}
+	};
 
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
 		return axiosPOST(this.axios, url, options);
-	}
-	
+	};
+
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
-	}
-	
+	};
+
 	storeResponsibilityReportData = async (data) => {
 		const url = endpoints.storeResponsibilityReportData;
 		return axiosPOST(this.axios, url, data);
-	}
-	
+	};
+
 	getAdminData = async () => {
 		const url = endpoints.gcAdminDataGET;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	storeAdminData = async (adminData) => {
 		const url = endpoints.gcAdminDataPOST;
 		return axiosPOST(this.axios, url, { adminData });
-	}
+	};
 
 	deleteAdminData = async (username) => {
 		const url = endpoints.gcAdminDataDeletePOST;
 		return axiosPOST(this.axios, url, { username });
-	}
+	};
 
 	getGCCacheStatus = async () => {
 		const url = endpoints.getGCCacheStatus;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	toggleGCCacheStatus = async () => {
 		const url = endpoints.toggleGCCacheStatus;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getElasticSearchIndex = async () => {
 		const url = endpoints.getElasticSearchIndex;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	setElasticSearchIndex = async (index) => {
 		const url = endpoints.setElasticSearchIndex;
-		return axiosPOST(this.axios, url, {index});
-	}
+		return axiosPOST(this.axios, url, { index });
+	};
 
 	getNotifications = async () => {
 		const url = endpoints.notificationsGET;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	createNotification = async (body) => {
 		const url = endpoints.notificationCreatePOST;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	deleteNotification = async (id) => {
 		const url = endpoints.notificationDeletePOST;
 		return axiosPOST(this.axios, url, { id });
-	}
+	};
 
 	editNotificationActive = async (id, active) => {
 		const url = endpoints.notificationEditActivePOST;
 		return axiosPOST(this.axios, url, { id, active });
-	}
+	};
 
 	getAppMatomoStatus = async () => {
 		const url = endpoints.appMatomoStatus;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getUserMatomoStatus = async () => {
 		const url = endpoints.userMatomoStatus;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	setAppMatomoStatus = async (data) => {
 		const url = endpoints.appMatomoStatus;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	setUserMatomoStatus = async (data) => {
 		const url = endpoints.userMatomoStatus;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	shortenSearchURLPOST = async (longURL) => {
 		const url = endpoints.gcShortenSearchURLPOST;
 		return axiosPOST(this.axios, url, { url: longURL });
-	}
+	};
 
 	convertTinyURLPOST = async (tinyURL) => {
 		const url = endpoints.gcConvertTinyURLPOST;
 		return axiosPOST(this.axios, url, { url: tinyURL });
-	}
+	};
 
 	favoriteDocument = async (data) => {
 		const url = endpoints.favoriteDocumentPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	favoriteGroup = async (data) => {
 		const url = endpoints.favoriteGroupPOST;
@@ -490,336 +552,363 @@ export default class GameChangerAPI {
 	favoriteSearch = async (data) => {
 		const url = endpoints.favoriteSearchPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	checkFavoritedSearchesPOST = async () => {
 		const url = endpoints.checkFavoritedSearchesPOST;
 		return axiosPOST(this.axios, url);
-	}
-	
+	};
+
 	favoriteTopic = async (data) => {
 		const url = endpoints.favoriteTopicPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	favoriteOrganization = async (data) => {
 		const url = endpoints.favoriteOrganizationPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
-	trendingSearches = async(data) => {
+	trendingSearches = async (data) => {
 		const url = endpoints.trendingSearchesPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	getTrendingBlacklist = async () => {
 		const url = endpoints.getTrendingBlacklist;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	setTrendingBlacklist = async (data) => {
 		const url = endpoints.setTrendingBlacklist;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	deleteTrendingBlacklist = async (data) => {
 		const url = endpoints.deleteTrendingBlacklist;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 	// Starting ML endpoints
 	reloadModels = async (data) => {
 		const url = endpoints.reloadModels;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	downloadDependencies = async () => {
 		const url = endpoints.downloadDependencies;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	downloadCorpus = async (data) => {
 		const url = endpoints.downloadCorpus;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
-	trainModel = async (data) =>{
+	trainModel = async (data) => {
 		const url = endpoints.trainModel;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	getAPIInformation = async () => {
 		const url = endpoints.getAPIInformation;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getProcessStatus = async () => {
 		const url = endpoints.getProcessStatus;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getS3List = async () => {
 		const url = endpoints.getS3List;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getCurrentTransformer = async () => {
 		const url = endpoints.getCurrentTransformer;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getFilesInCorpus = async () => {
 		const url = endpoints.getFilesInCorpus;
 		return axiosGET(this.axios, url);
-	}
+	};
 	// End ML endpoints
 	getUserSettings = async () => {
 		const url = endpoints.getUserSettings;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	queryEs = async (opts) => {
 		const url = endpoints.queryEs;
 		return axiosPOST(this.axios, url, opts);
-	}
+	};
 
 	setUserBetaStatus = async (checked) => {
 		const url = endpoints.setUserBetaStatus;
-		return axiosPOST(this.axios, url, {status: checked});
-	}
-	
+		return axiosPOST(this.axios, url, { status: checked });
+	};
+
 	getInternalUsers = async () => {
 		const url = endpoints.getInternalUsers;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	getAppStats = async (data) => {
 		const url = endpoints.getAppStats;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	getRecentlyOpenedDocs = async (clone_name) => {
 		const url = endpoints.getRecentlyOpenedDocs;
 		return axiosPOST(this.axios, url, { clone_name });
-	}
+	};
 
 	recentSearchesPOST = async (clone_name) => {
 		const url = endpoints.recentSearchesPOST;
 		return axiosPOST(this.axios, url, { clone_name });
-	}
+	};
 
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
-		return axiosGET(this.axios, url, {params:body});
-	}
+		return axiosGET(this.axios, url, { params: body });
+	};
 
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	deleteInternalUser = async (id) => {
 		const url = endpoints.deleteInternalUser;
 		return axiosPOST(this.axios, url, { id });
-	}
+	};
 
 	getDocumentProperties = async () => {
 		const url = endpoints.getDocumentProperties;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	clearDashboardNotification = async (type) => {
 		const url = endpoints.clearDashboardNotification;
 		return axiosPOST(this.axios, url, { type });
-	}
+	};
 
 	clearFavoriteSearchUpdate = async (tinyurl) => {
 		const url = endpoints.clearFavoriteSearchUpdate;
 		return axiosPOST(this.axios, url, { tinyurl });
-	}
-	
-	getDataForSearch = async(body) => {
-		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {functionName: 'getDataForSearch', ...body});
-	}
-	
-	getDocumentsForEntity = async(cloneName, body) => {
-		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {cloneName, functionName: 'getDocumentsForEntity', options: body});
-	}
-	
-	getDocumentsForTopic = async(cloneName, body) => {
-		const url = endpoints.callGraphFunctionPOST;
-		return axiosPOST(this.axios, url, {cloneName, functionName: 'getDocumentsForTopic', options: body});
-	}
+	};
 
-	getTextSuggestion = async(body) => {
+	getDataForSearch = async (body) => {
+		const url = endpoints.callGraphFunctionPOST;
+		return axiosPOST(this.axios, url, {
+			functionName: 'getDataForSearch',
+			...body,
+		});
+	};
+
+	getDocumentsForEntity = async (cloneName, body) => {
+		const url = endpoints.callGraphFunctionPOST;
+		return axiosPOST(this.axios, url, {
+			cloneName,
+			functionName: 'getDocumentsForEntity',
+			options: body,
+		});
+	};
+
+	getDocumentsForTopic = async (cloneName, body) => {
+		const url = endpoints.callGraphFunctionPOST;
+		return axiosPOST(this.axios, url, {
+			cloneName,
+			functionName: 'getDocumentsForTopic',
+			options: body,
+		});
+	};
+
+	getTextSuggestion = async (body) => {
 		const url = endpoints.textSuggestionPOST;
 		return axiosPOST(this.axios, url, body);
-	}
-	
-	getDescriptionFromWikipedia = async(title) => {
+	};
+
+	getDescriptionFromWikipedia = async (title) => {
 		const api = `https://en.wikipedia.org/w/api.php?origin=*&format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=${title}`;
-		const body = { method: 'GET', dataType: 'json'};
+		const body = { method: 'GET', dataType: 'json' };
 		const myRequest = new Request(api, body);
-		return await fetch(myRequest).then(res => {
+		return await fetch(myRequest).then((res) => {
 			return res.json();
-		})
-	}
-	
+		});
+	};
+
 	getAPIKeyRequestData = async () => {
 		const url = endpoints.getAPIKeyRequestsGET;
 		return axiosGET(this.axios, url);
-	}
-	
+	};
+
 	revokeAPIKeyRequest = async (id) => {
 		const url = endpoints.revokeAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id });
-	}
-	
+	};
+
 	approveRejectAPIKeyRequest = async (id, approve) => {
 		const url = endpoints.approveRejectAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id, approve });
-	}
-	
+	};
+
 	createAPIKeyRequest = async (name, email, reason) => {
 		const url = endpoints.createAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { name, email, reason });
-	}
+	};
 
-	updateUserAPIRequestLimit = async() => {
+	updateUserAPIRequestLimit = async () => {
 		const url = endpoints.updateUserAPIRequestLimit;
 		return axiosGET(this.axios, url);
-	}
+	};
 	getCombinedSearchMode = async () => {
 		const url = endpoints.combinedSearchMode;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	setCombinedSearchMode = async (value) => {
 		const url = endpoints.combinedSearchMode;
 		const bodyValue = value ? 'true' : 'false';
-		return axiosPOST(this.axios, url, {value: bodyValue});
-	}
+		return axiosPOST(this.axios, url, { value: bodyValue });
+	};
 
 	getIntelligentAnswersMode = async () => {
 		const url = endpoints.intelligentAnswers;
-		return axiosGET(this.axios, url)
-	}
+		return axiosGET(this.axios, url);
+	};
 
 	setIntelligentAnswersMode = async (value) => {
 		const url = endpoints.intelligentAnswers;
 		const bodyValue = value ? 'true' : 'false';
-		return axiosPOST(this.axios, url, {value: bodyValue});
-	}
+		return axiosPOST(this.axios, url, { value: bodyValue });
+	};
 
 	getEntitySearchMode = async () => {
 		const url = endpoints.entitySearch;
-		return axiosGET(this.axios, url)
-	}
+		return axiosGET(this.axios, url);
+	};
 
 	setEntitySearchMode = async (value) => {
 		const url = endpoints.entitySearch;
 		const bodyValue = value ? 'true' : 'false';
-		return axiosPOST(this.axios, url, {value: bodyValue});
-	}
+		return axiosPOST(this.axios, url, { value: bodyValue });
+	};
 
 	getUserFeedbackMode = async () => {
 		const url = endpoints.userFeedback;
-		return axiosGET(this.axios, url)
-	}
+		return axiosGET(this.axios, url);
+	};
 
 	toggleUserFeedbackMode = async () => {
 		const url = endpoints.userFeedback;
-		return axiosPOST(this.axios, url, {})
-	}
+		return axiosPOST(this.axios, url, {});
+	};
 	getTopicSearchMode = async () => {
 		const url = endpoints.topicSearch;
-		return axiosGET(this.axios, url)
-	}
+		return axiosGET(this.axios, url);
+	};
 
 	setTopicSearchMode = async (value) => {
 		const url = endpoints.topicSearch;
 		const bodyValue = value ? 'true' : 'false';
-		return axiosPOST(this.axios, url, {value: bodyValue});
-	}
+		return axiosPOST(this.axios, url, { value: bodyValue });
+	};
 
 	getDescriptionFromWikipedia(title) {
 		const url = `https://en.wikipedia.org/w/api.php?origin=*&format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=${title}`;
 		return axiosGET(this.axios, url);
 	}
 
-	sendIntelligentSearchFeedback = async (eventName, intelligentSearchTitle, searchText, sentenceResults) => {
+	sendIntelligentSearchFeedback = async (
+		eventName,
+		intelligentSearchTitle,
+		searchText,
+		sentenceResults
+	) => {
 		const url = endpoints.intelligentSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, intelligentSearchTitle, searchText, sentenceResults });
-	}
+		return axiosPOST(this.axios, url, {
+			eventName,
+			intelligentSearchTitle,
+			searchText,
+			sentenceResults,
+		});
+	};
 
 	populateNewUserId = async () => {
 		const url = endpoints.populateNewUserId;
 		return axiosGET(this.axios, url);
-	}
-	
-	callGraphFunction = async(body) => {
+	};
+
+	callGraphFunction = async (body) => {
 		const url = endpoints.callGraphFunctionPOST;
 		return axiosPOST(this.axios, url, body);
-	}
-	
-	callSearchFunction = async(body) => {
+	};
+
+	callSearchFunction = async (body) => {
 		const url = endpoints.callSearchFunctionPOST;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
 		const url = endpoints.qaSearchFeedback;
-		return axiosPOST(this.axios, url, { eventName, question, answer, qaContext, params });
-	}
+		return axiosPOST(this.axios, url, {
+			eventName,
+			question,
+			answer,
+			qaContext,
+			params,
+		});
+	};
 
 	getFeedbackData = async () => {
 		const url = endpoints.getFeedbackData;
 		return axiosGET(this.axios, url);
-	}
-	
+	};
+
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
-		return axiosGET(this.axios, url, {params:body});
-	}
+		return axiosGET(this.axios, url, { params: body });
+	};
 
 	getWeeklySearchCount = async (body) => {
 		const url = endpoints.getWeeklySearchCount;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	getHomepageEditorData = async () => {
 		const url = endpoints.getHomepageEditorData;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	setHomepageEditorData = async (body) => {
 		const url = endpoints.setHomepageEditorData;
-		return axiosPOST(this.axios, url, body)
-	}
-	
+		return axiosPOST(this.axios, url, body);
+	};
+
 	sendFrontendErrorPOST = async (error) => {
 		const url = endpoints.sendFrontendErrorPOST;
 		return axiosPOST(this.axios, url, error);
-	}
+	};
 
 	getOrgImageOverrideURLs = async (names) => {
 		const url = endpoints.getOrgImageOverrideURLs;
-		return axiosGET(this.axios, url, { params: { names }});
-	}
+		return axiosGET(this.axios, url, { params: { names } });
+	};
 
 	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
-	}
+	};
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;
 		return axiosGET(this.axios, url);
-	}
+	};
 }
