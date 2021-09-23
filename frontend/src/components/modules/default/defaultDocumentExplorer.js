@@ -40,9 +40,7 @@ const styles = {
 	},
 	docExplorerPag: {
 		display: 'flex',
-		flexDirection: 'row-reverse',
 		width: '100%',
-		paddingRight: '25px',
 	},
 };
 function numberWithCommas(x) {
@@ -317,7 +315,6 @@ export default function DocumentExplorer({
 				>
 					{totalCount ? (
 						<div>
-							{numberWithCommas(totalCount)} results found.
 							<div className="view-toggle" onClick={() => handleViewToggle()}>
 								{viewTogle ? '+' : '-'}
 							</div>
@@ -335,7 +332,7 @@ export default function DocumentExplorer({
 						activePage={resultsPage}
 						itemsCountPerPage={resultsPerPage}
 						totalItemsCount={totalCount}
-						pageRangeDisplayed={6}
+						pageRangeDisplayed={4}
 						onChange={(page) => {
 							trackEvent(
 								getTrackingNameForFactory(cloneData.clone_name),
