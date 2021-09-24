@@ -22,11 +22,11 @@ const initState = {
 		show_graph: false,
 		show_crowd_source: false,
 		show_feedback: true,
-		config: {esIndex: 'globalsearch'}
+		config: { esIndex: 'globalsearch' },
 	},
 	history: undefined,
 	historySet: false,
-	
+
 	// Notifications
 	notifications: [],
 	notificationIds: [],
@@ -35,25 +35,32 @@ const initState = {
 		unauthorizedError: false,
 		transformFailed: false,
 	},
-	
+
 	// User
-	userData: { favorite_searches: [], favorite_documents: [], favorite_topics: [], search_history: [], export_history: [], api_key:'' },
+	userData: {
+		favorite_searches: [],
+		favorite_documents: [],
+		favorite_topics: [],
+		search_history: [],
+		export_history: [],
+		api_key: '',
+	},
 	newUser: false,
 	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',
 		q1: '',
-		q2: ''
+		q2: '',
 	},
-	
+
 	// Tutorial
 	showTutorial: false,
 	clickedTutorial: false,
 	tutorialStepIndex: 0,
 	componentStepNumbers: {},
 	tutorialJoyrideSteps: [],
-	
+
 	// Show Modals
 	showFeedbackModal: false,
 	showAssistModal: false,
@@ -61,25 +68,24 @@ const initState = {
 	loginModalOpen: false,
 	showSnackbar: false,
 	exportDialogVisible: false,
-	
+
 	loading: false,
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
 	listView: false,
-	
-	
+
 	// Navigation
 	menuOpen: false,
 	tabName: '',
 	hideTabs: false,
-	
+
 	// Graph
 	runGraphSearch: false,
-	
+
 	// SideBar
 	showSideFilters: true,
-	
+
 	// Search
 	offset: 0,
 	esIndex: '',
@@ -101,7 +107,7 @@ const initState = {
 	isFavoriteSearch: false,
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
-	
+
 	// Categories
 	selectedCategories: {
 		Applications: true,
@@ -119,41 +125,41 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References']
+		Documents: ['Relevance', 'Publishing Date', 'Alphabetical', 'References'],
 	},
-	
+
 	// category totals
 	categoryMetadata: {},
 
 	activeCategoryTab: 'all',
-	
+
 	applicationsLoading: false,
 	applicationsPage: 1,
 	applicationsPagination: false,
-	
+
 	dashboardsLoading: false,
 	dashboardsPage: 1,
 	dashboardsPagination: false,
-	
+
 	dataSourcesLoading: false,
 	dataSourcesPage: 1,
 	dataSourcesPagination: false,
-	
+
 	databasesLoading: false,
 	databasesPage: 1,
 	databasesPagination: false,
-	
+
 	documentationLoading: false,
 	documentationPage: 1,
 	documentationPagination: false,
-	
+
 	organizationsLoading: false,
 	organizationsPage: 1,
 	organizationsPagination: false,
-	
+
 	servicesLoading: false,
 	servicesPage: 1,
-	servicesPagination: false
+	servicesPagination: false,
 };
 
 const init = (initialState) => {
@@ -163,20 +169,20 @@ const init = (initialState) => {
 const handleSetAlert = (state, action) => {
 	const alerts = {
 		...state.alerts,
-		...action.payload
-	}
+		...action.payload,
+	};
 	return {
 		...state,
-		alerts
+		alerts,
 	};
-}
+};
 
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
-		...action.payload
-	}
-}
+		...action.payload,
+	};
+};
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -188,12 +194,12 @@ function reducer(state, action) {
 			return {
 				...state,
 				exportDialogVisible: action.payload,
-				isSelectedDocs: action.payload
+				isSelectedDocs: action.payload,
 			};
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				searchSettings: initState.searchSettings
+				searchSettings: initState.searchSettings,
 			};
 		case 'RESET_STATE':
 			return {
@@ -202,7 +208,7 @@ function reducer(state, action) {
 				componentStepNumbers: state.componentStepNumbers,
 				tutorialJoyrideSteps: state.tutorialJoyrideSteps,
 				userData: state.userData,
-				documentProperties: state.documentProperties
+				documentProperties: state.documentProperties,
 			};
 		default:
 			return state;
@@ -213,9 +219,9 @@ const GlobalSearchContext = React.createContext(initState);
 
 const GlobalSearchProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
-	
+
 	return (
-		<GlobalSearchContext.Provider value={{state, dispatch}}>
+		<GlobalSearchContext.Provider value={{ state, dispatch }}>
 			{props.children}
 		</GlobalSearchContext.Provider>
 	);
