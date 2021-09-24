@@ -9,21 +9,21 @@ export const CustomMark = ({
 	content, 
 	key
 }) => (
-    <mark
-        style={{
+	<mark
+		style={{
 			backgroundColor: color, 
 			padding: '2px 4px', color: 'white', 
 			borderRadius: '4px', 
 			marginRight: '3px'
 		}}
-        data-start={start}
-        data-end={end}
-        onClick={() => onClick({start: start, end: end})}
-        key={key}
-    >
-        {content}
-        {tag && (
-        	<span style={{fontSize: '0.7em', fontWeight: 500, marginLeft: 6}}></span>
-        )}
-  </mark>
+		data-start={start}
+		data-end={end}
+		onClick={() => onClick({start: start, end: end})}
+		key={key}
+	>
+		{content}
+		{tag && (
+        	<span style={{fontSize: '0.7em', fonßtWeight: 500, marginLeft: 6}}></span>
+		)}
+	</mark>
 )

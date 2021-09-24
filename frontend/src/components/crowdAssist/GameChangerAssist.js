@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import { PowerUserAnnotationCard } from './PowerUserAnnotationCard';
 import GeneralUserAnnotationCard from './GeneralUserAnnotationCard';
-import { random } from "underscore";
+import { random } from 'underscore';
 import styled from 'styled-components';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';

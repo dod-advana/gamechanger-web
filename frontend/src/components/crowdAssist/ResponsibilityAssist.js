@@ -1,16 +1,16 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { RespExplAnnotationCard } from './RespExplAnnotationCard'
 import styled from 'styled-components';
-import GameChangerAPI from "../api/gameChanger-service-api";
+import GameChangerAPI from '../api/gameChanger-service-api';
 import GCButton from '../common/GCButton';
 import { primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryDark, tertiaryGreen, primaryGreyLight, primaryRedDark } from '../../components/common/gc-colors';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@material-ui/core";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
-import withStyles from "@material-ui/core/styles/withStyles";
-import {setState} from "../../sharedFunctions";
-import {trackEvent} from "../telemetry/Matomo";
-import {getTrackingNameForFactory, encode} from "../../gamechangerUtils";
+import withStyles from '@material-ui/core/styles/withStyles';
+import {setState} from '../../sharedFunctions';
+import {trackEvent} from '../telemetry/Matomo';
+import {getTrackingNameForFactory, encode} from '../../gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI()
 
@@ -142,10 +142,10 @@ class ResponsibilityAssist extends Component {
 		const pageNumber = data.paragraphs[data.par_num]?.page_num_i + 1;
 		const searchText = `"${this.props.context.state.responsibilityText}"`;
 
-		const tagsList = [ "Entity",/* "Verb", */"Responsibility"];
-		const tagmap = {"Entity": highlightColors[3],
-						// "Verb": highlightColors[1],
-						"Responsibility": highlightColors[4]};
+		const tagsList = [ 'Entity',/* "Verb", */'Responsibility'];
+		const tagmap = {'Entity': highlightColors[3],
+			// "Verb": highlightColors[1],
+			'Responsibility': highlightColors[4]};
 
 		this.setState({
 			id: id,
@@ -243,7 +243,7 @@ class ResponsibilityAssist extends Component {
 
 	handlePowerSave = () => {
 		
-			/*
+		/*
 		if (isTutorial) return;
 
 		const userId = Auth.getUserId();
@@ -332,9 +332,9 @@ class ResponsibilityAssist extends Component {
 		let searchTextArray;
 		let tempSearchText;
 		if(searchText){
-			searchTextArray = searchText.split(" ");
-			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += " ";
-			tempSearchText = searchTextArray.join(" ");
+			searchTextArray = searchText.split(' ');
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
+			tempSearchText = searchTextArray.join(' ');
 		}
 		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${tempSearchText}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 	}
@@ -388,24 +388,24 @@ class ResponsibilityAssist extends Component {
 		return (
 			<Dialog
 				open={this.state.isModalOpen}
-                scroll={'paper'}
-                maxWidth="xl"
-                disableEscapeKeyDown
-                disableBackdropClick
-                classes={{
-                    paperWidthXl: classes.dialogXl
-                }}
-            >
-                <DialogTitle >
+				scroll={'paper'}
+				maxWidth="xl"
+				disableEscapeKeyDown
+				disableBackdropClick
+				classes={{
+					paperWidthXl: classes.dialogXl
+				}}
+			>
+				<DialogTitle >
 					<div style={{display: 'flex', width: '100%'}}>
 						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Responsibility Labeler: </Typography>
 					</div>
 					<CloseButton onClick={() => this.handleClose(true)}>
 						<CloseIcon fontSize="large" />
 					</CloseButton>
-                </DialogTitle>
+				</DialogTitle>
 
-                <DialogContent>
+				<DialogContent>
 					{loading ? (
 						<div>
 							<LoadingIndicator />
@@ -415,14 +415,14 @@ class ResponsibilityAssist extends Component {
 							{this.renderAnnotationCard()}
 						</div>
 					)}
-                </DialogContent>
+				</DialogContent>
 
-                <DialogActions>
+				<DialogActions>
 					<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>
 						<div style={{ justifyContent: 'flex-end' }}>
 							<GCButton
 								id={'gcOpenDoc'}
-								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								className={`tutorial-step-${componentStepNumbers['Previous Button']}`}
 								onClick={() => { this.handleOpen() }}
 								textStyle={{color: 'grey'}}
 								buttonColor={'white'}
@@ -432,7 +432,7 @@ class ResponsibilityAssist extends Component {
 							</GCButton>
 							<GCButton
 								id={'gcReject'}
-								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								className={`tutorial-step-${componentStepNumbers['Previous Button']}`}
 								onClick={() => { this.handleReject() }}
 								textStyle={{color: 'grey'}}
 								buttonColor={'white'}
@@ -443,7 +443,7 @@ class ResponsibilityAssist extends Component {
 							
 							<GCButton
 								id={'gcSubmit'}
-								className={`tutorial-step-${componentStepNumbers["Previous Button"]}`}
+								className={`tutorial-step-${componentStepNumbers['Previous Button']}`}
 								onClick={() => { this.handleSubmit() }}
 								borderColor={primaryGreyLight}
 							>
@@ -451,8 +451,8 @@ class ResponsibilityAssist extends Component {
 							</GCButton>
 						</div>
 					</div>
-                </DialogActions>
-            </Dialog>
+				</DialogActions>
+			</Dialog>
 		)
 	}
 }
