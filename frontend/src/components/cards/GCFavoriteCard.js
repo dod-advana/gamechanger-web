@@ -21,8 +21,8 @@ const StyledFavoriteDocumentCard = styled.div`
 	border-radius: 6px;
 	margin: 10px;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')} >
-		.main-info {
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
+	> .main-info {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
