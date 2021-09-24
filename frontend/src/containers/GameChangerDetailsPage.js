@@ -606,6 +606,9 @@ const GameChangerDetailsPage = (props) => {
 			fallbackSources.s3 = undefined;
 			fallbackSources.admin = sealURLOverride;
 			fallbackSources.entity = entity.image;
+			entity.details.forEach((detail, i) => {
+				if(detail.name === 'NodeVec') entity.details.splice(i,1);
+			})
 		}
 
 		return (
