@@ -315,14 +315,13 @@ const ViewHeader = (props) => {
 				<FormControl variant="outlined" classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
-						className={`tutorial-step-${componentStepNumbers['Change View']}`}
+						className={`MuiInputBase-root tutorial-step-${componentStepNumbers['Change View']}`}
 						labelId="view-name"
 						label="View"
 						id="view-name-select"
 						value={dropdownValue}
 						onChange={handleChangeView}
 						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-						className='MuiInputBase-root'
 						autoWidth
 					>
 						{viewNames.map(view => {
