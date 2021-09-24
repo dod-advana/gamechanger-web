@@ -90,21 +90,21 @@ export const SelectedDocsDrawer = (props) => {
 					style={{ backgroundColor: index % 2 === 0 ? 'white' : 'transparent' }}
 				>
 					<DrawerTableCell>
-                        <div 
+						<div 
 							style={{
 								display: 'flex',
 								alignItems: 'center',
 								width: '100%',
 								justifyContent: 'space-between'
-                        }}>
-                            <span style={{ fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
-                            <i 
+							}}>
+							<span style={{ fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
+							<i 
 								className="fa fa-times-circle fa-fw" 
 								style={{ cursor: 'pointer', height: 17 }} 
 								onClick={()=>handleRemoveSelection(key)} 
 							/>
-                        </div>
-                    </DrawerTableCell>
+						</div>
+					</DrawerTableCell>
 				</DrawerTableRow>
 			);
 			index += 1;
