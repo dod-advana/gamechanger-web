@@ -418,17 +418,54 @@ class AppStatsController {
 		}
 	}
 
-		/**
+	/**
+	 * This method returns a list of document/search pairs, and how many times that combo resulted in a pdfView
+	 * @param {Object} opts - 
+	 * @returns an array of data from Matomo.
+	 */
+		async querySearchDocumentsCount(connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				select 
+					b2.name as document,
+					b1.name as search,
+					count(b1.name) as count
+				from 
+					matomo_log_link_visit_action a1
+						inner join
+					matomo_log_link_visit_action a2 on a2.idlink_va = a1.idlink_va + 1,
+					matomo_log_action b1,
+					matomo_log_action b2
+				where 
+					b1.idaction = a1.idaction_name
+					and b2.idaction = a2.idaction_name
+					and b2.name like 'PDFViewer%' 
+					and (a1.search_cat = 'GAMECHANGER_gamechanger_combined' or a1.search_cat = 'GAMECHANGER_gamechanger')
+				group BY
+					document, search;`,
+				[],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				});
+		});
+	}
+
+	/**
 	 * This method takes in options from the endpoint and queries matomo with those parameters.
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-	async queryDocumentUsageData(startDate, connection){
+	async queryDocumentUsageData(connection){
 		return new Promise((resolve, reject) => {
 			connection.query(`
 				select 
 					b.name as document,
-					count(a.idvisitor) as visit_count,
+					GROUP_CONCAT(distinct a.idvisit separator ', ') as idvisits,
+					count(*) as visit_count,
 					count(distinct a.idvisitor) as user_count,
 					GROUP_CONCAT(distinct hex(a.idvisitor) separator ', ') as user_list
 				from 
@@ -437,12 +474,11 @@ class AppStatsController {
 				where 
 					b.name LIKE 'PDFViewer%' 
 					AND b.idaction = a.idaction_name
-					and a.server_time > ?
 				group by
 					b.name
 				order by
 					visit_count DESC;`,
-			[`${startDate}`],
+			[],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -460,10 +496,6 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getDocumentUsageData(req, res) {
-		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { daysBack, offset, filters, sorting, pageSize };
-		const startDate = this.getDateNDaysAgo(opts.daysBack);
-	
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -474,11 +506,25 @@ class AppStatsController {
 			});
 			connection.connect();
 			const results = {
-				daysBack,
 				data: []
 			};
-			results.data = await this.queryDocumentUsageData(startDate, connection);
-			console.log(results.data);
+
+			const searches = await this.querySearchDocumentsCount(connection);
+			const docUsageData = await this.queryDocumentUsageData(connection);
+
+			const searchMap = {};
+
+			for (let search of searches) {
+				if (!searchMap[search.document]) {
+					searchMap[search.document] = {};
+				}
+				searchMap[search.document][this.htmlDecode(search.search)] = search.count;
+			}
+
+			for (let document of docUsageData) {
+				document.searches = searchMap[document.document];
+			}
+			results.data = docUsageData;
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '88ZHUHU');

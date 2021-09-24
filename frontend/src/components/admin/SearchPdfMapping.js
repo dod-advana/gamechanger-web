@@ -89,7 +89,7 @@ const documentUsageColumns = [
         )
     },
     {
-        Header: 'Visit Count',
+        Header: 'View Count',
         accessor: 'visit_count',
         width: 140,
         Cell: row => (
@@ -105,13 +105,30 @@ const documentUsageColumns = [
         )
     },
     {
-        Header: 'User List',
+        Header: 'Viewer List',
         accessor: 'user_list',
         headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
         Cell: row => (
             <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
         )
     },
+    {
+        Header: 'Searches', 
+        accessor: 'searches',
+        Cell: row => {
+            const searches = row.value;
+            let result = []
+            if(searches !== undefined){
+                result = Object
+                    .keys(searches)
+                    .sort(function (a, b) { return searches[b] - searches[a]; })
+                    .map(item => item + ' (' + searches[item] + ')')
+                    .slice(0, 5);
+            }
+            return (<TableRow style={{textAlign: 'left' , paddingLeft: '15px', overflow: 'auto', wordWrap: 'break-word'}}>{result.join(', ')}</TableRow>);
+        }
+        
+    }
 ];
 
 /**
