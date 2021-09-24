@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	titleText: {
 		fontWeight: 900,
-        marginBottom: 5
+		marginBottom: 5
 	}
 }));
 
@@ -153,7 +153,7 @@ const DecoupledFooter = (props) => {
 	}
 
 	useEffect (() => {
-        initializeUserMatomoStatus();
+		initializeUserMatomoStatus();
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
 		getUserData();
 		getCloneData();
@@ -184,8 +184,8 @@ const DecoupledFooter = (props) => {
 		}else{
 			newRequestAPIKeyData.clones.push(cloneId);
 		}
-        setRequestAPIKeyData(newRequestAPIKeyData);
-    }
+		setRequestAPIKeyData(newRequestAPIKeyData);
+	}
 	
 	const renderAPIKeyRequestForm = () => {
 		return (
@@ -264,7 +264,7 @@ const DecoupledFooter = (props) => {
 								/>
 							)
 						})}
-                    </FormGroup>
+					</FormGroup>
 					{apiRequestError && <div style={{color: '#f44336'}}>{apiRequestError}</div>}
 				</div>
 			</>
@@ -284,11 +284,11 @@ const DecoupledFooter = (props) => {
 				gameChangerAPI
 					.updateUserAPIRequestLimit()
 					.then(()=>setAPIRequestLimit(apiRequestLimit-1));
-			setApiRequestError('');
-			handleClose();
-		}).catch(e => {
-			console.log(e);
-		});
+				setApiRequestError('');
+				handleClose();
+			}).catch(e => {
+				console.log(e);
+			});
 	}
 
 	return (
