@@ -1,18 +1,18 @@
 import React, {useState} from 'react'
-import {FormControlLabel, Radio, RadioGroup, Typography} from "@material-ui/core";
-import withStyles from "@material-ui/core/styles/withStyles";
-import GCAccordion from "../common/GCAccordion";
+import {FormControlLabel, Radio, RadioGroup, Typography} from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
+import GCAccordion from '../common/GCAccordion';
 
-import {TokenAnnotator} from "react-text-annotate";
-import {CustomMark} from "./CustomMark";
+import {TokenAnnotator} from 'react-text-annotate';
+import {CustomMark} from './CustomMark';
 import {backgroundWhite, primaryGreyLight} from '../common/gc-colors';
 import GCButton from '../common/GCButton';
 
 
 const CustomFormControlLabel = withStyles((theme) => ({
-  label: {
-    color: backgroundWhite
-  },
+	label: {
+		color: backgroundWhite
+	},
 }))(FormControlLabel);
 
 const StyledRadio = (props) => {
@@ -59,21 +59,21 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 	))
 
 	return (
-		<div className={`tutorial-step-${componentStepNumbers["Crowd Assist Panel"]}`} >
+		<div className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`} >
 			<div className={'section'}>
 				<GCAccordion expanded={true} header={'How to use this tool:'}
-								backgroundColor={'rgb(238,241,242)'}>
+					backgroundColor={'rgb(238,241,242)'}>
 					<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600}}>
-					<li style={{ textAlign: "justify" }}>
+						<li style={{ textAlign: 'justify' }}>
 							If this line was improperly labelled as a Responsibility, select the No Responsibility button; otherwise:
 						</li>
-						<li style={{ textAlign: "justify" }}>
+						<li style={{ textAlign: 'justify' }}>
 							Select an Hightlight Type.
 						</li>
-						<li style={{ textAlign: "justify" }}>
+						<li style={{ textAlign: 'justify' }}>
 							Highlight words, sentences, or parts of text that apply.
 						</li>
-						<li style={{ textAlign: "justify" }}>
+						<li style={{ textAlign: 'justify' }}>
 							Submit to tag the text with for review.
 						</li>
 					</ol>
@@ -107,7 +107,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 			</GCButton>
 			<div style={{ border: '2px solid #B0BAC5', boxShadow: '1px 1px gray', borderRadius: '5px', height: 200 }}>
 				<TokenAnnotator
-					className={`tutorial-step-${componentStepNumbers["Paragraph to Tag"]}`}
+					className={`tutorial-step-${componentStepNumbers['Paragraph to Tag']}`}
 					style={{
 						lineHeight: 1.5,
 						height: '100%',

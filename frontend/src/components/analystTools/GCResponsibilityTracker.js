@@ -798,7 +798,7 @@ const GCResponsibilityTracker = (props) => {
 				classes={{
 					paperWidthLg: classes.dialogLg,
 				}}
-            >
+			>
 				<DialogTitle >
 					<div style={{ display: 'flex', width: '100%' }}>
 						<Typography 
