@@ -17,9 +17,9 @@ class FeedbackController {
 		this.getFeedbackData = this.getFeedbackData.bind(this);
 	}
 
-    async sendIntelligentSearchFeedback(req, res) {
+	async sendIntelligentSearchFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
-    	const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
+		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
 			const feedback = await this.feedback.create({ 
 				event_name: eventName, 
@@ -87,8 +87,40 @@ class FeedbackController {
 	async sendJiraFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try{
-			console.log(req.body);
-			res.status(200).send()
+			const {name, email, feedback, rating} = req.body;
+
+			const authConfig = {
+				httpsAgent: new https.Agent({
+					rejectUnauthorized: false,
+					ca: fs.readFileSync(process.env.JIRA_CONFIG.ca),
+				}),
+				auth: {
+					username: process.env.JIRA_CONFIG.username,
+					password: process.env.JIRA_CONFIG.password
+				}
+			};
+
+			const url = `https://${process.env.JIRA_CONFIG.domain}/rest/api/2/issue/`;
+
+			const data = {
+				'fields': {
+					'project': {
+						'key': process.env.JIRA_CONFIG.project_key
+					},
+					'summary': 'User Submitted Feedback',
+					'description': `${feedback}. \n *Reporter*: ${name} \n *E-mail*: [mailto:${email}]`,
+					[process.env.JIRA_CONFIG.rating_id]: {
+						'value': rating + ''
+					},
+					'issuetype': {
+						'name': process.env.JIRA_CONFIG.feedbackType
+					}
+				}
+			};
+			
+			const result = await axios.post(url, data, authConfig);
+	
+			res.status(201).send(result.data);
 		} catch(err) {
 			this.logger.error(err, '0KYXA1V', userId);
 			res.status(500).send(err);
