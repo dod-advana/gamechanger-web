@@ -275,7 +275,7 @@ const GameChangerDetailsPage = (props) => {
 		return data;
 	};
 	
-	const dispatch = (data) => {
+	const dispatchUserData = (data) => {
 		setUserData(data.payload.userData);
 	}
 
@@ -349,7 +349,7 @@ const GameChangerDetailsPage = (props) => {
 													topic.toLowerCase(),
 													'',
 													!favorite,
-													dispatch
+													dispatchUserData
 												);
 	
 												if(favorite) {
