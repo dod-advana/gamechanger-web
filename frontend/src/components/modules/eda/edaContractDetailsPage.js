@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MainContainer } from '../../../containers/GameChangerDetailsPage';
-import Paper from 'material-ui/Paper/Paper';
+import {Paper} from '@material-ui/core';
 import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 import GameChangerAPI from '../../api/gameChanger-service-api';
