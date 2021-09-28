@@ -202,7 +202,6 @@ export default class SimpleTable extends React.Component {
 
 					rowCells.push(
 						<td
-							title={value}
 							style={{
 								...(cIdx === 0 ? firstColWidth : colWidth),
 								...extraWrapStyle,
