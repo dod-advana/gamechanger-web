@@ -269,47 +269,6 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			} catch (e) {
 				LOGGER.error(e.message, 'MPK1GGN', userId);
 			}
-		} else {
-
-			try {
-
-				// if doing a cache reload, check favorite search stats
-				const hashed_user = sparkMD5.hash(userId);
-
-				// check if this search is a favorite
-				const favoriteSearch = await FAVORITE_SEARCH.findOne({
-					where: {
-						user_id: hashed_user,
-						tiny_url: tiny_url
-					}
-				});
-
-				if (favoriteSearch !== null) {
-
-					let updated = false;
-					let count = favoriteSearch.document_count;
-
-					// favorite search is updated
-					if (searchResults.totalCount > favoriteSearch.document_count) {
-						updated = true;
-						count = searchResults.totalCount;
-					}
-
-					// update the favorite search info
-					FAVORITE_SEARCH.update({
-						run_by_cache: true,
-						updated_results: updated,
-						document_count: count
-					}, {
-						where: {
-							id: favoriteSearch.id
-						}
-					});
-				}
-
-			} catch (err) {
-				LOGGER.error(err.message, 'K361YCJ', userId);
-			}
 		}
 
 		return searchResults;
