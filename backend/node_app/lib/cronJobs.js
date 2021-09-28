@@ -72,12 +72,6 @@ class CronJobs {
 				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, '252AJHF', userId);
 				// }
 
-				// try {
-				// 	await this.favoritesController.checkFavoritedSearchesHelper(userId);
-				// } catch (e) {
-				// 	this.logger.error(`Cron job error in check favorited searches: ${e.message}`, 'FVW4J2H', userId);
-				// }
-
 			}, offset);
 
 		}, {
