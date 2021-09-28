@@ -22,6 +22,18 @@ const LabelStack = styled.div`
 const TableRow = styled.div`
 	text-align: center;
 `;
+
+const filterCaseInsensitiveIncludes = (filter, row) =>{
+	const id = filter.pivotId || filter.id;
+	console.log(row[id]);
+	return (
+			row[id] !== undefined ?
+					String(row[id].toLowerCase()).includes(filter.value.toLowerCase())
+			:
+					true
+	);
+}
+
 const columns = [
 	{
 		Header: 'Visit ID',
@@ -82,16 +94,18 @@ const documentUsageColumns = [
     {
         Header: 'Document',
         accessor: 'document',
-        width: 500,
+        width: 400,
         headerStyle: {textAlign: 'left', paddingLeft: '15px'},
+				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
         Cell: row => (
-            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value.substring(12)}</TableRow>
+            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value}</TableRow>
         )
     },
     {
         Header: 'View Count',
         accessor: 'visit_count',
         width: 140,
+				filterable: false,
         Cell: row => (
             <TableRow>{row.value}</TableRow>
         )
@@ -100,6 +114,7 @@ const documentUsageColumns = [
         Header: 'Unique Viewers',
         accessor: 'user_count',
         width: 140,
+				filterable: false,
         Cell: row => (
             <TableRow>{row.value}</TableRow>
         )
@@ -108,6 +123,8 @@ const documentUsageColumns = [
         Header: 'Viewer List',
         accessor: 'user_list',
         headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
+				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
+				style: { 'whiteSpace': 'unset' },
         Cell: row => (
             <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
         )
@@ -115,19 +132,9 @@ const documentUsageColumns = [
     {
         Header: 'Searches', 
         accessor: 'searches',
-        Cell: row => {
-            const searches = row.value;
-            let result = []
-            if(searches !== undefined){
-                result = Object
-                    .keys(searches)
-                    .sort(function (a, b) { return searches[b] - searches[a]; })
-                    .map(item => item + ' (' + searches[item] + ')')
-                    .slice(0, 5);
-            }
-            return (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{result.join(', ')}</TableRow>);
-        }
-        
+				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
+				style: { 'whiteSpace': 'unset' },
+        Cell: row => (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>)
     }
 ];
 
@@ -349,6 +356,7 @@ export default () => {
             <ReactTable
                 data={documentData}
                 columns={documentUsageColumns}
+								filterable={true}
                 style={{margin: '0 80px 20px 80px', height: 700}}
                 defaultSorted = {[ { id: "visit_count", desc: true } ]}
             />
