@@ -28,16 +28,6 @@ class CronJobs {
 
 	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
-
-		const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
-		if (favoriteSearchPollInterval >= 0) {
-			this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
-			distributedPoll('locks:checkLeastRecentFavoritedSearch',
-				this.favoritesController.checkLeastRecentFavoritedSearch,
-				favoriteSearchPollInterval);
-		} else {
-			this.logger.info('Polling for favorite search updates disabled.');
-		}
 	}
 
 	getReloadJob() {
@@ -91,6 +81,22 @@ class CronJobs {
 			scheduled: false
 		})
 
+	}
+
+	getUpdateFavoritedSearchesJob() {
+		return {
+			start: () => {
+				const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
+				if (favoriteSearchPollInterval >= 0) {
+					this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
+					distributedPoll('locks:checkLeastRecentFavoritedSearch',
+						this.favoritesController.checkLeastRecentFavoritedSearch,
+						favoriteSearchPollInterval);
+				} else {
+					this.logger.info('Polling for favorite search updates disabled.');
+				}
+			}
+		};
 	}
 }
 
