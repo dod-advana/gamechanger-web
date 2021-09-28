@@ -31,7 +31,9 @@ async function distributedPoll(lockName, promiseFn, ms, lockCheckMs = 1000) {
 				if (locked) {
 					try {
 						await redisLock.extend(ttl);
-					} catch (err) { /* swallow */ }
+					} catch (err) { 
+						LOGGER.error(err, 'PM6SV6G');
+					}
 					refreshTimer = setTimeout(autorefresh, autorefreshTimeout);
 					refreshTimer.unref && refreshTimer.unref();
 				}
