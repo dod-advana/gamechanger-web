@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
