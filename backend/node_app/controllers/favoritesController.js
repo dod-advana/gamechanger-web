@@ -60,8 +60,6 @@ class FavoritesController {
 		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
 		this.deleteFavoriteFromGroupPOST =this.deleteFavoriteFromGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
-		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
-		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
 		this.checkLeastRecentFavoritedSearch = this.checkLeastRecentFavoritedSearch.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
 	}
@@ -336,106 +334,6 @@ class FavoritesController {
 			console.log(err);
 			res.status(500).send(err);
 			return err;
-		}
-	}
-
-	async checkFavoritedSearches(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
-
-		try {
-			await this.checkFavoritedSearchesHelper(userId);
-			res.status(200).send('checked favorited searches for new results');
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, '4X6AOZ2', userId);
-		}
-	}
-
-	async checkFavoritedSearchesHelper(userId) {
-		try {
-			// get all users
-			const users = await this.gcUser.findAll();
-
-			for (const user of users) {
-
-				let numNotifications = 0;
-
-				// get all favorite searches for this user
-				try {
-					const favoriteSearches = await this.favoriteSearch.findAll({
-						where: {user_id: user.user_id},
-						raw: true
-					});
-
-					// for each favorite search, get its search request_body from gc history
-					for (const search of favoriteSearches) {
-
-						// if this hasn't been checked by the cache reload already
-						if (!search.run_by_cache) {
-							try {
-								// every favorited search has a tiny_url generated for it
-								const history = await this.gcHistory.findOne({
-									where: {
-										user_id: user.user_id,
-										tiny_url: search.tiny_url
-									}
-								});
-
-								if (history.request_body) {
-									const searchResults = await this.searchUtility.documentSearch(null, {body:history.request_body}, {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index}, userId);
-									if (searchResults.totalCount > search.document_count) {
-
-										numNotifications += 1;
-
-										await this.favoriteSearch.update({
-											updated_results: true,
-											run_by_cache: false,
-											document_count: searchResults.totalCount
-										},
-										{
-											where: {
-												id: search.id
-											}
-										});
-									}
-								} else {
-									this.logger.info('no request body data to make the search');
-								}
-
-
-							} catch (err) {
-								this.logger.error(err.message, 'DQ26224', userId);
-								this.logger.error(err);
-							}
-						} else {
-							await this.favoriteSearch.update({ run_by_cache: false },
-								{
-									where: {
-										id: search.id
-									}
-								});
-						}
-
-					}
-
-				} catch (err) {
-					const { message } = err;
-					this.addInternalUser.apply(message, '788WN93', userId);
-				}
-
-				let notifications = user.notifications ? Object.assign({}, user.notifications) : { favorites: 0, history: 0, total: 0 };
-				notifications.favorites = numNotifications;
-				notifications.total = numNotifications + notifications.history;
-
-				this.gcUser.update({ notifications }, {
-					where: {
-						user_id: user.user_id
-					}
-				});
-			}
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'M4ZSJKR', userId);
 		}
 	}
 	

@@ -67,7 +67,6 @@ const endpoints = {
 		'/api/gameChanger/admin/trending/deleteTrendingBlacklist',
 	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
-	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
 	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
@@ -552,11 +551,6 @@ export default class GameChangerAPI {
 	favoriteSearch = async (data) => {
 		const url = endpoints.favoriteSearchPOST;
 		return axiosPOST(this.axios, url, data);
-	};
-
-	checkFavoritedSearchesPOST = async () => {
-		const url = endpoints.checkFavoritedSearchesPOST;
-		return axiosPOST(this.axios, url);
 	};
 
 	favoriteTopic = async (data) => {
