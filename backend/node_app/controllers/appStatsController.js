@@ -569,9 +569,20 @@ class AppStatsController {
 					}
 				}
 			}
-			
+
 			for(const doc of docData){
-				doc.searches = docMap[doc.document];
+				const searches = docMap[doc.document];
+				if(searches !== undefined){
+					const sortSearches = Object
+						.keys(searches)
+						.sort(function (a, b) { return searches[b] - searches[a]; })
+						.map(item => item + ' (' + searches[item] + ')')
+						.slice(0, 5);
+					const strSearches = sortSearches.join(', ')
+					doc.searches = strSearches;
+				} else {
+					doc.searches = '';
+				}
 			}
 			results.data = docData;
 			res.status(200).send(results);
