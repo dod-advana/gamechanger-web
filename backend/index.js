@@ -269,6 +269,14 @@ try {
 	logger.error(`Error initializing API request reset cron job: ${e.message}`, 'J6BNFP3', 'Startup Process')
 }
 
+try {
+	// check for updated favorited search results in the background
+	const updateFavorited = cron.getUpdateFavoritedSearchesJob();
+	updateFavorited.start()
+} catch (e) {
+	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process')
+}
+
 app.use('/api/gamechanger', require('./node_app/routes/gameChangerRouter'));
 
 app.use('/api', require('./node_app/routes/advanaRouter'));
