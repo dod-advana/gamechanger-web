@@ -489,6 +489,35 @@ class AppStatsController {
 		});
 	}
 
+		/**
+	 * This method takes in options from the endpoint and queries matomo with those parameters.
+	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
+	 * @returns an array of data from Matomo.
+	 */
+		 async getSearchesAndPdfs(connection){
+			return new Promise((resolve, reject) => {
+				connection.query(`
+				select 
+					b.name as search_doc,
+					a.idvisit, 
+					a.server_time
+				from 
+					matomo_log_link_visit_action a,
+					matomo_log_action b
+				where 
+					(b.name LIKE 'PDFViewer%' OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
+					AND b.idaction = a.idaction_name;`,
+				[],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				});
+			});
+		}
+
 	/**
 	 * This method is called by an endpoint to query matomo to list documents, visit count, and list of users that visited. 
 	 * by a user
@@ -509,22 +538,42 @@ class AppStatsController {
 				data: []
 			};
 
-			const searches = await this.querySearchDocumentsCount(connection);
-			const docUsageData = await this.queryDocumentUsageData(connection);
+			const searches = await this.getSearchesAndPdfs(connection);
+			const docData = await this.queryDocumentUsageData(connection);
 
 			const searchMap = {};
 
 			for (let search of searches) {
-				if (!searchMap[search.document]) {
-					searchMap[search.document] = {};
+				if (!searchMap[search.idvisit]) {
+					searchMap[search.idvisit] = [];
 				}
-				searchMap[search.document][this.htmlDecode(search.search)] = search.count;
+				searchMap[search.idvisit].push({search_doc: search.search_doc, time: search.server_time});
 			}
 
-			for (let document of docUsageData) {
-				document.searches = searchMap[document.document];
+			const docMap = {}
+
+			for(const [visitID, arr] of  Object.entries(searchMap)){
+				let currentSearch = '';
+				for(const search_doc of arr){
+					const currItem = this.htmlDecode(search_doc.search_doc);
+					if(!currItem.startsWith('PDFViewer -')){
+						currentSearch = currItem;
+					} else if(currentSearch !==  ''){
+						if(docMap[currItem] === undefined){
+							docMap[currItem] = {};
+						}
+						if(docMap[currItem][currentSearch] === undefined){
+							docMap[currItem][currentSearch] = 0;
+						}
+						docMap[currItem][currentSearch] += 1; 
+					}
+				}
 			}
-			results.data = docUsageData;
+			
+			for(const doc of docData){
+				doc.searches = docMap[doc.document];
+			}
+			results.data = docData;
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '88ZHUHU');
