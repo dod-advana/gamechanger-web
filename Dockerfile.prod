@@ -75,11 +75,11 @@ RUN cd "$APP_SHARED_DIR" \
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
 RUN cd "${APP_FRONTEND_DIR}" \
-    && npm install
+    && npm install --production
 
 COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 RUN cd "${APP_BACKEND_DIR}" \
-    && npm install
+    && npm install --production
 
 COPY --chown="$APP_UID:$APP_GID" . "${APP_DIR}"
 RUN cd "${APP_FRONTEND_DIR}" \
