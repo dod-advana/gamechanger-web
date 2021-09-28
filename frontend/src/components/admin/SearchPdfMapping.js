@@ -125,7 +125,7 @@ const documentUsageColumns = [
                     .map(item => item + ' (' + searches[item] + ')')
                     .slice(0, 5);
             }
-            return (<TableRow style={{textAlign: 'left' , paddingLeft: '15px', overflow: 'auto', wordWrap: 'break-word'}}>{result.join(', ')}</TableRow>);
+            return (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{result.join(', ')}</TableRow>);
         }
         
     }
