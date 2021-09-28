@@ -308,37 +308,13 @@ export default function DocumentExplorer({
 			>
 				<div
 					className='doc-exp-nav'
-					style={{ 
-						paddingLeft: '10px', 
+					style={{  
 						color: grey800, 
 						fontWeight: 'bold', 
-						display: 'flex', 
-						flexDirection: 'column',
+						display: 'flex',
 						marginBottom: '10px'
 					}}
 				>
-					{totalCount ? (
-						<div>
-							<div 
-								style={{ 
-									display: 'flex',
-									height: 45,
-									width: 45,
-									alignItems: 'center',
-									justifyContent: 'center',
-									fontSize: 18,
-									borderRadius: 4,
-									marginTop: '5px'  
-								}}
-								className="view-toggle" 
-								onClick={() => handleViewToggle()}
-							>
-								{viewTogle ? '+' : '-'}
-							</div>
-						</div>
-					) : (
-						'Make a search to get started.'
-					)}
 					<div
 						style={styles.docExplorerPag}
 						className="gcPagination docExplorerPag"
@@ -359,6 +335,28 @@ export default function DocumentExplorer({
 							}}
 						/>
 					</div>
+					{totalCount ? (
+						<div>
+							<div 
+								style={{ 
+									display: 'flex',
+									height: 45,
+									width: 45,
+									alignItems: 'center',
+									justifyContent: 'center',
+									fontSize: 18,
+									borderRadius: 4,
+									marginRight: 2  
+								}}
+								className="view-toggle" 
+								onClick={() => handleViewToggle()}
+							>
+								{viewTogle ? '+' : '-'}
+							</div>
+						</div>
+					) : (
+						'Make a search to get started.'
+					)}
 				</div>
 
 				{loading && (
