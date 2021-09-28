@@ -5,7 +5,11 @@ async function poll(promiseFn, ms) {
 	ms = Math.max(0, ms);
 	while (true) {
 		const start = new Date().getTime();
-		await promiseFn();
+		try {
+			await promiseFn();
+		} catch (err) {
+			LOGGER.error(err, 'UYD8FE');
+		}
 		const end = new Date().getTime();
 		const timeout = Math.max(0, ms - (end - start));
 		await new Promise(resolve => setTimeout(resolve, timeout));
