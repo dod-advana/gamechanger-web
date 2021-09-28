@@ -288,10 +288,6 @@ const GameChangerDetailsPage = (props) => {
 	}, []);
 
 	useEffect(() => {
-		console.log(favoriteTopics)
-	},[favoriteTopics])
-
-	useEffect(() => {
 		gcUserManagementAPI.getUserData().then((data) => {
 			setUserData(data.data);
 			const favoriteTopicList = data.data.favorite_topics?.map(t => {
