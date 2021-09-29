@@ -96,6 +96,7 @@ const documentUsageColumns = [
         accessor: 'document',
         width: 400,
         headerStyle: {textAlign: 'left', paddingLeft: '15px'},
+				style: { 'whiteSpace': 'unset' },
 				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
         Cell: row => (
             <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value}</TableRow>
@@ -123,6 +124,7 @@ const documentUsageColumns = [
         Header: 'Viewer List',
         accessor: 'user_list',
         headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
+				sortable: false,
 				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
 				style: { 'whiteSpace': 'unset' },
         Cell: row => (
@@ -132,6 +134,7 @@ const documentUsageColumns = [
     {
         Header: 'Searches', 
         accessor: 'searches',
+				sortable: false,
 				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
 				style: { 'whiteSpace': 'unset' },
         Cell: row => (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>)
@@ -176,9 +179,7 @@ const getFeedbackData = async (setFeedbackData) => {
  */
  const getDocumentData = async (daysBack, setDocumentData) => {
 	try {
-		// daysBack, offset, filters, sorting, pageSize
-        const params = {daysBack}
-		const {data = {} } = await gameChangerAPI.getDocumentUsage(params);
+		const {data = {} } = await gameChangerAPI.getDocumentUsage();
         setDocumentData(data.data);
 	} catch (e) {
 		console.error(e);
