@@ -43,19 +43,80 @@ describe('PolicySearchHandler', function () {
 					isQuestion: () => {
 						return false;
 					}
+				},
+				redisDB: {
+					select: () => 'OK'
 				}
 			};
 			const target = new PolicySearchHandler(opts);
 
-			target.createRecObject = () => Promise.resolve({historyRec: [], cloneSpecificObject: [], clientObj: [] });
 			target.gatherExpansionTerms = () => Promise.resolve({expansionTerms: []});
 			target.doSearch = () => Promise.resolve({docs: ['test'], totalCount: 1});
 			target.enrichSearchResults = () => Promise.resolve(enrichSearchResultsExpected);
-			target.storeHistoryRecords = () => Promise.resolve();
+			target.storeRecordOfSearchInPg = jest.fn(() => Promise.resolve());
+			target.storeEsRecord = jest.fn(() => Promise.resolve());
 
 			target.searchHelper(req, 'test', true).then(actual => {
 				const expected = enrichSearchResultsExpected;
 				assert.deepStrictEqual(actual, expected);
+				expect(target.storeRecordOfSearchInPg).toHaveBeenCalled();
+				expect(target.storeEsRecord).toHaveBeenCalled();				
+			});
+		});
+
+		it('should not store history when requested', () => {
+			const req = {body: {
+				cloneName: 'gamechanger',
+				searchText: 'shark',
+				offset: 0,
+				options: {
+					searchType: 'Keyword',
+					orgFilterString: [],
+					transformResults: false,
+					charsPadding: 90,
+					typeFilterString: [],
+					showTutorial: false,
+					useGCCache: false,
+					tiny_url: 'gamechanger?tiny=282',
+					searchFields: {initial: {field: null, input: ''}},
+					accessDateFilter: [null, null],
+					publicationDateFilter: [null, null],
+					publicationDateAllTime: true,
+					includeRevoked: false,
+					limit: 6,
+					searchVersion: 1}
+			}};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				dataTracker: {},
+				mlApi: {},
+				searchUtility: {
+					isQuestion: () => {
+						return false;
+					}
+				},
+				redisDB: {
+					select: () => 'OK'
+				}
+			};
+			const target = new PolicySearchHandler(opts);
+
+			target.gatherExpansionTerms = () => Promise.resolve({expansionTerms: []});
+			target.doSearch = () => Promise.resolve({docs: ['test'], totalCount: 1});
+			target.enrichSearchResults = () => Promise.resolve(enrichSearchResultsExpected);
+			target.storeRecordOfSearchInPg = jest.fn(() => Promise.resolve());
+			target.storeEsRecord = jest.fn(() => Promise.resolve());
+
+			target.searchHelper(req, 'test', false).then(actual => {
+				const expected = enrichSearchResultsExpected;
+				assert.deepStrictEqual(actual, expected);
+				expect(target.storeRecordOfSearchInPg).not.toHaveBeenCalled();
+				expect(target.storeEsRecord).not.toHaveBeenCalled();
 			});
 		});
 	});
