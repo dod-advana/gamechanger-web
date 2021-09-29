@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const asyncRedisLib = require('async-redis');
 
+const redisAsyncClientDB = 7;
+
 function randomHex(bytes = 16) {
 	return crypto.randomBytes(bytes).toString('hex');
 }
@@ -18,17 +20,15 @@ class RedisLock {
 		const {
 			ttl = 5000,
 			timeout = 5000,
-			wait = 30,
 			uuid = randomHex,
 			redisClient,
 		} = opts;
 		this.ttl = Math.floor(ttl);
 		this.timeout = timeout;
-		this.wait = wait;
 		this.id = uuid();
 
 		if (!redisClient) {
-			this.redisClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
+			this.redisClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost', { db: redisAsyncClientDB });
 		}
 
 		this.lock = this.lock.bind(this);
