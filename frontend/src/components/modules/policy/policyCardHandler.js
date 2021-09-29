@@ -483,7 +483,7 @@ const clickFn = (
 	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
-			searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''
+			searchText ? `&prevSearchText=${searchText}` : ''
 		}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${
 			sourceUrl ? `&sourceUrl=${sourceUrl}` : ''
 		}`
