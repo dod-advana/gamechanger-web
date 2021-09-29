@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import {exactMatch, getTrackingNameForFactory} from '../../gamechangerUtils';
-import {trackEvent} from '../telemetry/Matomo';
 import {setState} from '../../sharedFunctions';
 import AnalystToolsFactory from '../factories/analystToolsFactory';
 

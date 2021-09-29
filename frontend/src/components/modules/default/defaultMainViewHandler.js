@@ -156,7 +156,7 @@ const DefaultMainViewHandler = {
 			searchHandler,
 		} = props;
 		
-		if (state.runSearch) return;
+		if (state.runSearch || state.runDocumentComparisonSearch) return;
 
 		const documentProperties = await getDocumentProperties(dispatch);
 		let newState = { ...state, documentProperties };

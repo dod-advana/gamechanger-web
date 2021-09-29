@@ -7,16 +7,27 @@ import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../gamechangerUtils';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
+import {setState} from '../../sharedFunctions';
 
 const AnalystTools = (props) => {
 	
 	const {context} = props;
-	const {state} = context;
+	const {state, dispatch} = context;
 	
 	const [tabIndex, setTabIndex] = useState('responsibility_explorer');
 	
 	const handleTabClicked = (tabIndex) => {
 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', `${tabIndex} tab clicked`);
+		
+		switch (tabIndex) {
+			case 'responsibility_explorer':
+				setState(dispatch, {analystToolsPageDisplayed: 'Responsibility Explorer'});
+				break;
+			case 'dct':
+				setState(dispatch, {analystToolsPageDisplayed: 'Document Comparison Tool'});
+				break;
+		}
+		
 		setTabIndex(tabIndex);
 	}
 	
@@ -39,7 +50,7 @@ const AnalystTools = (props) => {
 								borderRadius: `5px 5px 0 0`
 							}} title="userHistory" onClick={() => handleTabClicked('dct')}
 							>
-								<Typography variant="h6" display="inline" title="cardView">DOCUMENTS COMPARISON TOOL</Typography>
+								<Typography variant="h6" display="inline" title="cardView">DOCUMENT COMPARISON TOOL</Typography>
 								
 							</Tab>
 						</TabList>

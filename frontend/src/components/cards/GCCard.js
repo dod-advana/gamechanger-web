@@ -100,7 +100,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-front-buttons {
 						margin-top: auto;
 						display: flex;
-						border-top: 1px solid rgb(189, 189, 189);
+						border-top: ${({listView}) => listView ? '' : '1px solid rgb(189, 189, 189)'};
 						align-items: center;
 						padding: 0px 10px;
 						min-height: 60px;
@@ -315,7 +315,7 @@ function GCCard (props) {
 		closeGraphCard = () => {},
 		collection = [],
 		detailPage = false
-		} = props;
+	} = props;
 	
 	const cardType = item.type;  
 	const selected = state.selectedDocuments.has(item.filename);
@@ -676,6 +676,29 @@ function GCCard (props) {
 								<div className={'styled-card-front-buttons'}>
 									<div className={'styled-action-buttons-group'}>
 										{intelligentSearch && intelligentFeedbackComponent()}
+										{loaded && cardHandler.getFooter({
+											toggledMore,
+											graphView,
+											cloneName: state.cloneData.clone_name,
+											filename,
+											searchText,
+											setToggledMore,
+											closeGraphCard,
+											name: item.title,
+											item,
+											setModalOpen,
+											showEsDoc: () => {
+												console.log(item);
+												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
+											},
+											state
+										})}
+									</div>
+								</div>
+							}
+							{(state.listView && item.isCompare) &&
+								<div className={'styled-card-front-buttons'}>
+									<div className={'styled-action-buttons-group'}>
 										{loaded && cardHandler.getFooter({
 											toggledMore,
 											graphView,
