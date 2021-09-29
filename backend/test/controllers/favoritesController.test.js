@@ -1,4 +1,5 @@
 const assert = require('assert');
+const Sequelize = require('sequelize');
 const { FavoritesController } = require('../../node_app/controllers/favoritesController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
@@ -434,6 +435,452 @@ describe('FavoritesController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
+		});
+	});
+
+	describe('#checkLeastRecentFavoritedSearch', () => {
+		it('should check the least recent favorited search', async () => {
+			const favoriteSaves = [];
+			const initFavorite = {
+				user_id: '54baea34480635caea8437904697bd9c',
+				tiny_url: 'gamechanger?tiny=77',
+				document_count: 100,
+				updated_results: false,
+				last_checked: new Date(0),
+				save: jest.fn(async function() {
+					favoriteSaves.push({...this});
+				}),
+			};
+			const favorite = {...initFavorite};
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = {
+				request_body: {
+					cloneName: 'gamechanger',
+					searchText: 'pizza',
+					offset: 0,
+					limit: 10,
+					searchVersion: 1,
+				},
+			};
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = {
+				totalCount: 101,
+			};
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const userSaves = [];
+			const initUser = {
+				notifications: { favorites: 0, history: 0, total: 0 },
+				save: jest.fn(async function() {
+					userSaves.push({...this});
+				}),
+			};
+			const user = initUser;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = Symbol('transaction');
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+			
+			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
+			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
+			expect(favoriteSearch.findOne).toHaveBeenCalledWith({
+				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+			});
+
+			expect(favorite.save).toHaveBeenCalledTimes(2);
+			expect(favorite.save).toHaveBeenCalledWith();
+			expect(favorite.save).toHaveBeenCalledWith({ transaction: transactionObj });
+			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[1], {
+				...initFavorite, 
+				last_checked: Sequelize.fn('NOW'),
+				document_count: 101,
+				updated_results: true,
+			});
+
+			expect(gcHistory.findOne).toHaveBeenCalledTimes(1);
+			expect(gcHistory.findOne).toHaveBeenCalledWith({
+				where: {
+					user_id: '54baea34480635caea8437904697bd9c',
+					tiny_url: 'gamechanger?tiny=77',
+				},
+				order: [['run_at', 'DESC']]
+			});
+
+			expect(handler_factory.createHandler).toHaveBeenCalledTimes(1);
+			expect(handler_factory.createHandler).toHaveBeenCalledWith('search', 'gamechanger');
+
+			expect(searchHandler.search).toHaveBeenCalledTimes(1);
+			expect(searchHandler.search).toHaveBeenCalledWith('pizza', 0, 10, {
+				cloneName: 'gamechanger',
+				searchText: 'pizza',
+				offset: 0,
+				limit: 10,
+				searchVersion: 1,
+			}, 'gamechanger', ['Webapp Super Admin', 'Tier 3 Support'], null, false);
+
+			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
+			expect(gcUser.findOne).toHaveBeenCalledWith({ 
+				where: { user_id: '54baea34480635caea8437904697bd9c' },
+				transaction: transactionObj,
+			});
+
+			expect(user.save).toHaveBeenCalledTimes(1);
+			expect(user.save).toHaveBeenCalledWith({ transaction: transactionObj });
+			assert.deepStrictEqual(userSaves[0], {
+				...initUser, 
+				notifications: { favorites: 1, history: 0, total: 1 },
+			});
+
+			expect(logger.error).not.toHaveBeenCalled();
+		});
+
+		it('should only update the last checked timestamp if the number of search results has not changed', async () => {
+			const favoriteSaves = [];
+			const initFavorite = {
+				user_id: '54baea34480635caea8437904697bd9c',
+				tiny_url: 'gamechanger?tiny=77',
+				document_count: 100,
+				updated_results: false,
+				last_checked: new Date(0),
+				save: jest.fn(async function() {
+					favoriteSaves.push({...this});
+				}),
+			};
+			const favorite = {...initFavorite};
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = {
+				request_body: {
+					cloneName: 'gamechanger',
+					searchText: 'pizza',
+					offset: 0,
+					limit: 10,
+					searchVersion: 1,
+				},
+			};
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = {
+				totalCount: 100,
+			};
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const userSaves = [];
+			const initUser = {
+				notifications: { favorites: 0, history: 0, total: 0 },
+				save: jest.fn(async function() {
+					userSaves.push({...this});
+				}),
+			};
+			const user = initUser;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = Symbol('transaction');
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+
+			expect(favorite.save).toHaveBeenCalledTimes(1);
+			expect(favorite.save).toHaveBeenCalledWith();
+			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+
+			expect(user.save).not.toHaveBeenCalled();
+
+			expect(logger.error).not.toHaveBeenCalled();
+		});
+
+		it('should not update user notifications if the favorite update is already flagged', async () => {
+			const favoriteSaves = [];
+			const initFavorite = {
+				user_id: '54baea34480635caea8437904697bd9c',
+				tiny_url: 'gamechanger?tiny=77',
+				document_count: 100,
+				updated_results: true,
+				last_checked: new Date(0),
+				save: jest.fn(async function() {
+					favoriteSaves.push({...this});
+				}),
+			};
+			const favorite = {...initFavorite};
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = {
+				request_body: {
+					cloneName: 'gamechanger',
+					searchText: 'pizza',
+					offset: 0,
+					limit: 10,
+					searchVersion: 1,
+				},
+			};
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = {
+				totalCount: 101,
+			};
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const userSaves = [];
+			const initUser = {
+				notifications: { favorites: 0, history: 0, total: 0 },
+				save: jest.fn(async function() {
+					userSaves.push({...this});
+				}),
+			};
+			const user = initUser;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = Symbol('transaction');
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+
+			expect(favorite.save).toHaveBeenCalledTimes(2);
+			expect(favorite.save).toHaveBeenCalledWith();
+			expect(favorite.save).toHaveBeenCalledWith();
+			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[1], {
+				...initFavorite, 
+				last_checked: Sequelize.fn('NOW'),
+				document_count: 101,
+				updated_results: true,
+			});
+
+			expect(gcUser.findOne).not.toHaveBeenCalled();
+
+			expect(user.save).not.toHaveBeenCalled();
+
+			expect(logger.error).not.toHaveBeenCalled();
+		});
+
+		it('should not update user notifications if the document count decreases', async () => {
+			const favoriteSaves = [];
+			const initFavorite = {
+				user_id: '54baea34480635caea8437904697bd9c',
+				tiny_url: 'gamechanger?tiny=77',
+				document_count: 100,
+				updated_results: false,
+				last_checked: new Date(0),
+				save: jest.fn(async function() {
+					favoriteSaves.push({...this});
+				}),
+			};
+			const favorite = {...initFavorite};
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = {
+				request_body: {
+					cloneName: 'gamechanger',
+					searchText: 'pizza',
+					offset: 0,
+					limit: 10,
+					searchVersion: 1,
+				},
+			};
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = {
+				totalCount: 99,
+			};
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const userSaves = [];
+			const initUser = {
+				notifications: { favorites: 0, history: 0, total: 0 },
+				save: jest.fn(async function() {
+					userSaves.push({...this});
+				}),
+			};
+			const user = initUser;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = Symbol('transaction');
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+
+			expect(favorite.save).toHaveBeenCalledTimes(2);
+			expect(favorite.save).toHaveBeenCalledWith();
+			expect(favorite.save).toHaveBeenCalledWith();
+			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[1], {
+				...initFavorite, 
+				last_checked: Sequelize.fn('NOW'),
+				document_count: 99,
+				updated_results: false,
+			});
+
+			expect(gcUser.findOne).not.toHaveBeenCalled();
+
+			expect(user.save).not.toHaveBeenCalled();
+
+			expect(logger.error).not.toHaveBeenCalled();
+		});
+
+		it('should do nothing if there are no favorite searches to check', async () => {
+			const favorite = null;
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = null;
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = null;
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const user = null;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = Symbol('transaction');
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+			
+			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
+
+			expect(gcHistory.findOne).not.toHaveBeenCalled();
+
+			expect(handler_factory.createHandler).not.toHaveBeenCalled();
+
+			expect(searchHandler.search).not.toHaveBeenCalled();
+
+			expect(gcUser.findOne).not.toHaveBeenCalled();
+
+			expect(logger.error).not.toHaveBeenCalled();
 		});
 	});
 });
