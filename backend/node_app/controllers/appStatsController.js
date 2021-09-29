@@ -1,6 +1,8 @@
 const mysql = require('mysql');
 const LOGGER = require('../lib/logger');
 const constantsFile = require('../config/constants');
+const SearchUtility = require('../utils/searchUtility');
+const { DataLibrary } = require('../lib/dataLibrary');
 
 /**
  * This class queries matomo for app stats and passes
@@ -12,11 +14,17 @@ class AppStatsController {
 		const {
 			mysql_lib = mysql,
 			logger = LOGGER,
-			constants = constantsFile
+			constants = constantsFile,
+			searchUtility = new SearchUtility(opts),
+			dataApi = new DataLibrary(opts),
 		} = opts;
+
 		this.logger = logger;
 		this.constants = constants;
+		this.searchUtility = searchUtility;
+		this.dataApi = dataApi;
 		this.mysql = mysql_lib;
+	
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.getAvgSearchesPerSession = this.getAvgSearchesPerSession.bind(this);
@@ -419,42 +427,6 @@ class AppStatsController {
 	}
 
 	/**
-	 * This method returns a list of document/search pairs, and how many times that combo resulted in a pdfView
-	 * @param {Object} opts - 
-	 * @returns an array of data from Matomo.
-	 */
-		async querySearchDocumentsCount(connection){
-		return new Promise((resolve, reject) => {
-			connection.query(`
-				select 
-					b2.name as document,
-					b1.name as search,
-					count(b1.name) as count
-				from 
-					matomo_log_link_visit_action a1
-						inner join
-					matomo_log_link_visit_action a2 on a2.idlink_va = a1.idlink_va + 1,
-					matomo_log_action b1,
-					matomo_log_action b2
-				where 
-					b1.idaction = a1.idaction_name
-					and b2.idaction = a2.idaction_name
-					and b2.name like 'PDFViewer%' 
-					and (a1.search_cat = 'GAMECHANGER_gamechanger_combined' or a1.search_cat = 'GAMECHANGER_gamechanger')
-				group BY
-					document, search;`,
-				[],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(results);
-				});
-		});
-	}
-
-	/**
 	 * This method takes in options from the endpoint and queries matomo with those parameters.
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
@@ -472,7 +444,7 @@ class AppStatsController {
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					b.name LIKE 'PDFViewer%' 
+					b.name LIKE 'PDFViewer%gamechanger' 
 					AND b.idaction = a.idaction_name
 				group by
 					b.name
@@ -505,8 +477,11 @@ class AppStatsController {
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					(b.name LIKE 'PDFViewer%' OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
-					AND b.idaction = a.idaction_name;`,
+					( b.name LIKE 'PDFViewer%gamechanger'
+					OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
+					AND b.idaction = a.idaction_name
+				order by 
+					server_time asc;`,
 				[],
 				(error, results, fields) => {
 					if (error) {
@@ -526,6 +501,7 @@ class AppStatsController {
 	 */
 	async getDocumentUsageData(req, res) {
 		let connection;
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -541,8 +517,8 @@ class AppStatsController {
 			const searches = await this.getSearchesAndPdfs(connection);
 			const docData = await this.queryDocumentUsageData(connection);
 
+			// create search map, grouping searches by visit ID, ordered by time. 
 			const searchMap = {};
-
 			for (let search of searches) {
 				if (!searchMap[search.idvisit]) {
 					searchMap[search.idvisit] = [];
@@ -550,8 +526,8 @@ class AppStatsController {
 				searchMap[search.idvisit].push({search_doc: search.search_doc, time: search.server_time});
 			}
 
+			// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
 			const docMap = {}
-
 			for(const [visitID, arr] of  Object.entries(searchMap)){
 				let currentSearch = '';
 				for(const search_doc of arr){
@@ -570,6 +546,7 @@ class AppStatsController {
 				}
 			}
 
+			// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
 			for(const doc of docData){
 				const searches = docMap[doc.document];
 				if(searches !== undefined){
@@ -582,6 +559,26 @@ class AppStatsController {
 					doc.searches = strSearches;
 				} else {
 					doc.searches = '';
+				}
+				doc.document = doc.document.substring(12).split(' - ')[0];
+			}
+
+			// filename mapping to titles; pulled from ES
+			let filenames = docData.map(item => item.document);
+			const esQuery = this.searchUtility.getDocTitleQuery(filenames);
+			const esClientName = 'gamechanger';
+			const esIndex = 'gamechanger';
+			let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			esResults = esResults.body.hits.hits;
+			const filenameMap = {};
+			for(const doc of esResults){
+				const item = doc._source;
+				filenameMap[item.filename] = item.display_title_s;
+			}
+			for(const doc of docData){
+				const title = filenameMap[doc.document];
+				if(title !== undefined){
+					doc.document = title;
 				}
 			}
 			results.data = docData;
