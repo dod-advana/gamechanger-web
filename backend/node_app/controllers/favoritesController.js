@@ -396,9 +396,13 @@ class FavoritesController {
 			}
 			*/
 
-			if (results.totalCount > favorite.document_count) {
-				favorite.updated_results = true;
+			// if new total count is greater than stored favorite count and the favorite
+			// has not already been marked updated we add a notification, else just update
+			// the favorite document count (we don't worry about clearing notifications if
+			// the document count decreases)
+			if (results.totalCount > favorite.document_count && !favorite.updated_results) {
 				favorite.document_count = results.totalCount;
+				favorite.updated_results = true;
 				await this.sequelize.transaction(async (t) => {
 					await favorite.save({ transaction: t });
 					const user = await this.gcUser.findOne({ 
@@ -411,6 +415,9 @@ class FavoritesController {
 					user.notifications = notifications;
 					await user.save({ transaction: t });
 				});
+			} else if (results.totalCount != favorite.document_count) {
+				favorite.document_count = results.totalCount;
+				await favorite.save();
 			}
 		} catch (err) {
 			const { message } = err;
