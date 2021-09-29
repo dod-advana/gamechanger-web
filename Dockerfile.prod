@@ -1,8 +1,6 @@
 ARG BASE_IMAGE="node:14"
 FROM $BASE_IMAGE
 
-SHELL ["/bin/bash", "-c"]
-
 # to support RHEL-based and DEBIAN-based version of node
 # e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
 USER root
@@ -88,7 +86,6 @@ COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
 RUN mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
 
 # http & https
-HEALTHCHECK CMD which npm || true
 EXPOSE 8990 8443
 WORKDIR "${APP_BACKEND_DIR}"
 ENTRYPOINT ["node"]
