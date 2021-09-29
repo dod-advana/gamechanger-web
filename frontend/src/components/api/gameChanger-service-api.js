@@ -111,6 +111,7 @@ const endpoints = {
 	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
+	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
 
 
 	exportHistoryDELETE: function(id){
@@ -816,6 +817,11 @@ export default class GameChangerAPI {
 	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
+	}
+	
+	compareDocumentPOST = async ({ cloneName, documentText }) => {
+		const url = endpoints.compareDocumentPOST;
+		return axiosPOST(this.axios, url, { cloneName, documentText });
 	}
 
 	getFAQ = async () => {

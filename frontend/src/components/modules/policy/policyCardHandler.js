@@ -12,13 +12,15 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
-import {Popover, TextField} from '@material-ui/core';
+import {FormControlLabel, Popover, Switch, TextField, Typography} from '@material-ui/core';
 import {KeyboardArrowRight} from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import {crawlerMappingFunc} from '../../../gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
+import {makeStyles, withStyles} from '@material-ui/core/styles';
+import {gcOrange} from '../../common/gc-colors';
 
 const styles = {
 	footerButtonBack: {
@@ -51,6 +53,26 @@ const styles = {
 		fontSize: '14px'
 	},
 };
+
+const useStyles = makeStyles({
+	toggleControlText: {
+		fontSize: 14
+	}
+})
+
+const OrangeSwitch = withStyles({
+	switchBase: {
+		color: '#ffffff',
+		'&$checked': {
+			color: gcOrange,
+		},
+		'&$checked + $track': {
+			backgroundColor: gcOrange,
+		},
+	},
+	checked: {},
+	track: {},
+})(Switch);
 
 const colWidth = {
 	maxWidth: '900px',
@@ -102,7 +124,7 @@ const StyledFrontCardHeader = styled.div`
 	margin-right: ${({listView}) => listView ? '5px': '0px'};
 	
 	.title-text-selected-favorite-div {
-		max-height: ${({listView}) => listView ? '': '50px'};
+		max-height: ${({listView}) => listView ? '35px': '50px'};
 		height: ${({listView}) => listView ? '35px': ''};
 		overflow: hidden;
 		display: flex;
@@ -113,6 +135,7 @@ const StyledFrontCardHeader = styled.div`
 			display:  ${({docListView}) => docListView ? 'flex': ''};
 			alignItems:  ${({docListView}) => docListView ? 'top': ''};
 			height:  ${({docListView}) => docListView ? 'fit-content': ''};
+			max-width: ${({listView}) => listView ? '60%': ''};
 			
 			.text {
 				margin-top: ${({listView}) => listView ? '10px': '0px'};
@@ -247,9 +270,10 @@ const StyledListViewFrontCardContent = styled.div`
 	.expanded-hits {
 		display: flex;
 		height: 100%;
+	    width: 100%;
 		
 		.page-hits {
-			min-width: 100px;
+			min-width: 160px;
 			height: 100%;
 			border: 1px solid rgb(189, 189, 189);
     		border-top: 0px;
@@ -265,6 +289,26 @@ const StyledListViewFrontCardContent = styled.div`
 				color: #386F94;
 				
 				span {
+					font-size: ${CARD_FONT_SIZE}px;
+				}
+				
+				i {
+					font-size: ${CARD_FONT_SIZE}px;
+					margin-left: 10px;
+				}
+			}
+			
+			.paragraph-hit {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding-right: 5px;
+				padding-left: 5px;
+				border-top: 1px solid rgb(189, 189, 189);
+				cursor: pointer;
+				color: #386F94;
+				
+				& .par-hit {
 					font-size: ${CARD_FONT_SIZE}px;
 				}
 				
@@ -442,6 +486,7 @@ const StyledEntityTopicFrontCardContent = styled.div`
 		}
 	}
 `;
+
 const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
@@ -498,6 +543,7 @@ const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorit
 }
 	
 const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch}) => {
+	
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 	
@@ -552,12 +598,28 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						</StyledFrontCardSubHeader>
 					}
 					<div className={'selected-favorite'}>
-						<div style={{display: 'flex'}}>
-							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-							{checkboxComponent(item.filename, item.display_title_s, item.id)}
-							{favoriteComponent()}
-						</div>
+						{!item.isCompare ?
+							<div style={{display: 'flex'}}>
+								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+								{checkboxComponent(item.filename, item.display_title_s, item.id)}
+								{favoriteComponent()}
+							</div>
+							:
+							<div style={{marginTop: 10, marginLeft: 5}}>
+								{favoriteComponent()}
+							</div>
+						}
 					</div>
+					{item.isCompare &&
+						<div style={{marginTop: 2, paddingRight: 5}}>
+							<FormControlLabel
+								value="compare"
+								control={<OrangeSwitch/>}
+								label={<Typography style={{fontFamily: 'Montserrat', fontSize: 14, color: '#000000DE'}}>Quick Compare</Typography>}
+								labelPlacement="start"
+							/>
+						</div>
+					}
 				</div>
 			</div>
 			{docListView &&
@@ -718,8 +780,10 @@ const PolicyCardHandler = {
 			} = props;
 			
 			let hoveredSnippet = '';
-			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
+			if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+			} else if (Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
+				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 			const isWideCard = true;
@@ -757,6 +821,35 @@ const PolicyCardHandler = {
 														{page.title && <span >{page.title}</span>}
 														{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
 													</span>
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
+									</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
+								</div>
+							</GCAccordion>
+						}
+						{item.paragraphs.length > 0 &&
+							<GCAccordion header={'PARAGRAPH HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>
+										{_.chain(item.paragraphs).map((paragraph, key) => {
+											return (
+												<div className={'paragraph-hit'} key={key} style={{
+													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
+												}}
+												onMouseEnter={() => setHoveredHit(key) }
+												onClick={e => {
+													e.preventDefault();
+												}}
+												>
+													<div>
+														{paragraph.id && <div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${paragraph.id.split('_')[1]}`}</div>}
+														{paragraph.score && <div className={'par-hit'}>{`Score: ${paragraph.score.toFixed(5)}`}</div>}
+													</div>
 													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 												</div>
 											);
@@ -957,6 +1050,7 @@ const PolicyCardHandler = {
 				</div>
 			);
 		},
+		
 		getFooter: (props) => {
 			
 			const {
@@ -968,62 +1062,87 @@ const PolicyCardHandler = {
 				closeGraphCard,
 				showEsDoc,
 				item,
-				searchText
+				searchText,
+				state
 			} = props;
 			return (
 				<>
-					<>
-						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
-							onClick={(e) => {
-								e.preventDefault();
-								clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+					{!state.listView &&
+						<>
+							<>
+								<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
+								            onClick={(e) => {
+									            e.preventDefault();
+									            clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+								            }}
+								>
+									Open
+								</CardButton>
+								{graphView && <CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
+										e.preventDefault();
+										closeGraphCard();
+									}}
+								>
+									Close
+								</CardButton>}
+								<CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
+										window.open(`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`);
+										e.preventDefault();
+									}}
+								>
+									Details
+								</CardButton>
+								{(toggledMore && Permissions.isGameChangerAdmin()) &&
+								<CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										e.preventDefault();
+										showEsDoc();
+									}}
+								>
+									<i className="fa fa-code"/>
+								</CardButton>
+								}
+							</>
+							<div style={{...styles.viewMoreButton}} onClick={() => {
+								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
+								setToggledMore(!toggledMore)
 							}}
-						>
-							Open
-						</CardButton>
-						{graphView && <CardButton
-							style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-							href={'#'}
-							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
-								e.preventDefault();
-								closeGraphCard();
-							}}
-						>
-							Close
-						</CardButton>}
-						 <CardButton
-							style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-							href={'#'}
-							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
-								window.open(`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`);
-								e.preventDefault();
-							}}
-						 >
-							 Details
-						</CardButton>
-						{(toggledMore && Permissions.isGameChangerAdmin()) &&
-							 <CardButton
-							 	style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-							 	href={'#'}
-							 	onClick={(e) => {
-							 		e.preventDefault();
-							 		showEsDoc();
-							 	}}
-							 >
-								 <i className="fa fa-code"/>
-							 </CardButton>
-						}
-					</>
-					<div style={{...styles.viewMoreButton}} onClick={() => {
-						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
-						setToggledMore(!toggledMore)
-					}}
-					>
-						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
-					</div>
+							>
+								{toggledMore ? 'Overview' : 'More'}
+								<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+							</div>
+						</>
+					}
+					{(state.listView && item.isCompare) &&
+						<>
+							<GCButton
+								id={'ignore'}
+								onClick={() => { console.log('Ignored') }}
+								isSecondaryBtn={true}
+								style={{height: 36}}
+							>
+								Ignore
+							</GCButton>
+							<GCButton
+								id={'compare'}
+								onClick={() => { console.log('Compare') }}
+								isSecondaryBtn={false}
+								style={{height: 36}}
+							>
+								Compare
+							</GCButton>
+						</>
+					}
 				</>
 			);
 		},

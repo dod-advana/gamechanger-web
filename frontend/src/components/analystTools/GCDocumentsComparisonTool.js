@@ -3,32 +3,24 @@ import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import {Grid} from '@material-ui/core';
+import {Grid, IconButton} from '@material-ui/core';
 import Dropzone from 'react-dropzone';
-import GameChangerSearchMatrix from '../searchMetrics/GCSearchMatrix';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
+import FileIcon from '../../images/icon/draganddrop_img.svg'
+import GameChangerAPI from '../api/gameChanger-service-api';
+import {setState} from '../../sharedFunctions';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import {gcOrange} from '../common/gc-colors';
+import CancelIcon from '@material-ui/icons/Cancel';
+import Pagination from 'react-js-pagination';
+import {getTrackingNameForFactory, RESULTS_PER_PAGE} from '../../gamechangerUtils';
+import {trackEvent} from '../telemetry/Matomo';
+import {Card} from '../cards/GCCard';
+const _ = require('lodash');
 
-const useStyles = makeStyles((theme) => ({
-	inputBoxRoot: {
-		backgroundColor: '#FFFFFF',
-	},
-	outlinedInput: {
-		color: '#0000008A',
-		fontFamily: 'Montserrat',
-		fontSize: 14,
-		height: 247,
-		padding: '10px 0px 10px 10px',
-		'&focused $notchedOutline': {
-			border: `2px solid ${'#B6C6D8'} !important`,
-			borderRadius: 6
-		}
-	},
-	focused: {},
-	notchedOutline: {
-		border: `2px solid ${'#B6C6D8'} !important`,
-		borderRadius: 6
-	},
-}));
+const gameChangerAPI = new GameChangerAPI();
+
+const PAGE_SIZE = 20;
 
 const DocumentInputContainer = styled.div`
 	border: 1px dashed ${'#707070'};
@@ -66,6 +58,59 @@ const DocumentInputContainer = styled.div`
 		font-size: 14px;
 		font-family: Noto Sans;
 	}
+	
+	.document-imported-block {
+		display: flex;
+	
+		 & .document-text {
+			border: 2px solid ${'#B6C6D8'} !important;
+			border-radius: 6px;
+			background-color: ${'#ffffff'};
+			margin: 30px 0px 30px 30px;
+			width: 100%;
+			height: 250px;
+			
+			& .text {
+				padding: 5px
+			}
+		}
+		
+		& .remove-document {
+			padding-top: 16px
+		}
+	}
+	
+`;
+
+const SimilarDocumentsContainer = styled.div`
+
+	.displaying-results-text {
+		font-size: 24px;
+		font-family: Montserrat;
+		border-bottom: 2px solid ${'#BCCBDB'};
+		display: flex;
+		place-content: space-between;
+		margin-top: 5px;
+		
+		& .text {
+			margin: auto 0px;
+			
+			& span {
+				font-weight: bold;
+			}
+		}
+		
+		& .gcPagination {
+			& .pagination {
+				margin: unset;
+				font-size: 12px;
+			}
+		}
+	}
+	
+	.results-container {
+		margin-top: 5px;
+	}
 `;
 
 const GCDocumentsComparisonTool = (props) => {
@@ -73,8 +118,62 @@ const GCDocumentsComparisonTool = (props) => {
 	const classes = useStyles();
 	
 	const { context } = props;
+	const {state, dispatch} = context;
+	
+	const [paragraphText, setParagraphText] = useState('');
+	const [returnedDocs, setReturnedDocs] = useState([]);
+	const [viewableDocs, setViewableDocs] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [page, setPage] = useState(1);
+	
+	useEffect(() => {
+		if (state.runDocumentComparisonSearch) {
+			setLoading(true);
+			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, documentText: paragraphText}).then(resp => {
+				setReturnedDocs(resp.data.docs);
+				setState(dispatch, {runDocumentComparisonSearch: false});
+				setLoading(false);
+			});
+		}
+		
+	}, [state.runDocumentComparisonSearch, paragraphText]);
+	
+	useEffect(() => {
+		console.log(returnedDocs)
+		setViewableDocs(returnedDocs)
+	}, [returnedDocs]);
 	
 	const handleFilesDropped = (files) => {
+	
+	}
+	
+	const reset = () => {
+		setParagraphText('');
+		setReturnedDocs([]);
+		setViewableDocs([]);
+		setPage(1);
+	}
+	
+	const buildCards = (docs) => {
+		return _.map(docs, (item, idx) => {
+			item.type = 'document';
+			item.isCompare = true;
+			item.pageHits = [];
+			return (
+				<Card key={idx}
+					item={item}
+					idx={idx}
+					state={{
+						...state,
+						selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false
+					}}
+					dispatch={dispatch}
+				/>
+			);
+		});
+	}
+	
+	const handleChangePage = (page) => {
 	
 	}
 	
@@ -84,66 +183,135 @@ const GCDocumentsComparisonTool = (props) => {
 				<GCAnalystToolsSideBar context={context} />
 			</Grid>
 			<Grid item xs={10}>
-				<DocumentInputContainer>
-					<Grid container className={'input-container-grid'}>
-						<Grid item xs={3} className={'input-drop-zone'}>
-							<Dropzone
-								accept='.doc, .docx, .txt'
-								multiple={false}
-								onDrop={files => {
-									handleFilesDropped(files);
-								}}
-								style={{
-									border: 'unset',
-									borderRadius: 6,
-									width: '100%',
-									height: '100%'
-								}}
-							>
-								<div style={{height: '100%'}}>
-								
-								</div>
-							</Dropzone>
-						</Grid>
-						<Grid item xs={8}>
-							<Grid container style={{display: 'flex', flexDirection: 'column'}}>
-								<Grid item xs={12}>
-									<div className={'instruction-box'}>
-										Copy a paragraph into the box below, then click search to find any paragraphs in documents that match
+				{(!loading && returnedDocs.length <= 0) &&
+					<DocumentInputContainer>
+						<Grid container className={'input-container-grid'}>
+							<Grid item xs={3} className={'input-drop-zone'}>
+								<Dropzone
+									accept='.doc, .docx, .txt'
+									multiple={false}
+									onDrop={files => {
+										handleFilesDropped(files);
+									}}
+									style={{
+										border: 'unset',
+										borderRadius: 6,
+										width: '100%',
+										height: '100%'
+									}}
+								>
+									<div style={{height: '100%'}}>
+										<div style={{display: 'flex', justifyContent: 'center', marginTop: 60}}><img
+											src={FileIcon} style={{width: 86}} alt='File Icon'/></div>
+										<div style={{width: 180, ...styles.dropText}}>
+											<span style={styles.fakeLink}>Drag and drop</span> file here or <span
+												style={styles.fakeLink}>browse</span> to begin upload
+										</div>
+										<div style={styles.dropText}>
+											.doc, .docx, .txt, word documents accepted.
+										</div>
 									</div>
-								</Grid>
-								
-								<Grid container>
-									<Grid item xs={2}>
-										<div className={'or-use-text'}>
-											<span>Or use text field</span>
+								</Dropzone>
+							</Grid>
+							<Grid item xs={8}>
+								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
+									<Grid item xs={12}>
+										<div className={'instruction-box'}>
+											Copy a paragraph into the box below, then click search to find any paragraphs in
+											documents that match
 										</div>
 									</Grid>
-									<Grid item xs={10}>
-										<div className={'input-box'}>
-											<TextField
-												id="input-box"
-												multiline
-												rows={12}
-												variant="outlined"
-												className={classes.inputBoxRoot}
-												InputProps={{
-													classes: {
-														root: classes.outlinedInput,
-														focused: classes.focused,
-														notchedOutline: classes.notchedOutline,
-													},
-												}}
-												defaultValue={'Text Content Here'}
-												fullWidth={true}
-									        />
-										</div>
+									
+									<Grid container>
+										<Grid item xs={2}>
+											<div className={'or-use-text'}>
+												<span>Or use text field</span>
+											</div>
+										</Grid>
+										<Grid item xs={10}>
+											<div className={'input-box'}>
+												<TextField
+													id="input-box"
+													multiline
+													rows={12}
+													variant="outlined"
+													className={classes.inputBoxRoot}
+													onChange={(event) => {
+														setParagraphText(event.target.value);
+													}}
+													InputProps={{
+														classes: {
+															root: classes.outlinedInput,
+															focused: classes.focused,
+															notchedOutline: classes.notchedOutline,
+														},
+													}}
+													placeholder={'Text Content Here'}
+													fullWidth={true}
+												/>
+											</div>
+										</Grid>
 									</Grid>
 								</Grid>
 							</Grid>
 						</Grid>
-					</Grid>
-				</DocumentInputContainer>
+					</DocumentInputContainer>
+				}
+				{loading &&
+					<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
+						<LoadingIndicator customColor={gcOrange}/>
+					</div>
+				}
+				{(!loading && returnedDocs.length > 0) &&
+					<>
+						<DocumentInputContainer>
+							<div className={'document-imported-block'}>
+								<div className={'document-text'}>
+									<div className={'text'}>
+										{paragraphText}
+									</div>
+								</div>
+								<div className={'remove-document'}>
+									<IconButton
+										color="inherit"
+										aria-label="remove document"
+										component="span"
+										style={{color: 'red'}}
+										onClick={() => reset()}
+									>
+									    <CancelIcon fontSize={'inherit'} style={{fontSize: 20}}/>
+								    </IconButton>
+								</div>
+							</div>
+						</DocumentInputContainer>
+						
+						<SimilarDocumentsContainer>
+							<div className={'displaying-results-text'}>
+								<div className={'text'}>
+									Showing results {(page - 1) * PAGE_SIZE + 1} - {returnedDocs.length} of: <span>Possibly Relevant Documents</span>
+								</div>
+								<div className='gcPagination text-center'>
+									<Pagination
+										activePage={page}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={viewableDocs.length}
+										pageRangeDisplayed={8}
+										onChange={async page => {
+											handleChangePage(page);
+										}}
+									/>
+								</div>
+
+							</div>
+							
+							<div className={'results-container'}>
+								
+								{buildCards(viewableDocs)}
+							</div>
+							
+						</SimilarDocumentsContainer>
+					</>
+				}
 			</Grid>
 		</Grid>
 	)
@@ -152,5 +320,42 @@ const GCDocumentsComparisonTool = (props) => {
 GCDocumentsComparisonTool.propTypes = {
 	context: propTypes.objectOf( {})
 };
+
+const styles = {
+	fakeLink: {
+		textDecoration: 'underline',
+		color: '#386F94',
+		fontFamily: 'Noto Sans',
+		fontSize: 14,
+		cursor: 'pointer'
+	},
+	dropText: {
+		textAlign: 'center',
+		margin: 'auto',
+		paddingTop: 28
+	}
+}
+
+const useStyles = makeStyles((theme) => ({
+	inputBoxRoot: {
+		backgroundColor: '#FFFFFF',
+	},
+	outlinedInput: {
+		color: '#0000008A',
+		fontFamily: 'Montserrat',
+		fontSize: 14,
+		height: 247,
+		padding: '10px 0px 10px 10px',
+		'&focused $notchedOutline': {
+			border: `2px solid ${'#B6C6D8'} !important`,
+			borderRadius: 6
+		}
+	},
+	focused: {},
+	notchedOutline: {
+		border: `2px solid ${'#B6C6D8'} !important`,
+		borderRadius: 6
+	},
+}));
 
 export default GCDocumentsComparisonTool;
