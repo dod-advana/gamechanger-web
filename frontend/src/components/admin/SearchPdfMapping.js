@@ -27,10 +27,10 @@ const filterCaseInsensitiveIncludes = (filter, row) =>{
 	const id = filter.pivotId || filter.id;
 	console.log(row[id]);
 	return (
-			row[id] !== undefined ?
-					String(row[id].toLowerCase()).includes(filter.value.toLowerCase())
+		row[id] !== undefined ?
+			String(row[id].toLowerCase()).includes(filter.value.toLowerCase())
 			:
-					true
+			true
 	);
 }
 
@@ -91,54 +91,54 @@ const feedbackColumns = [
 ];
 
 const documentUsageColumns = [
-    {
-        Header: 'Document',
-        accessor: 'document',
-        width: 400,
-        headerStyle: {textAlign: 'left', paddingLeft: '15px'},
-				style: { 'whiteSpace': 'unset' },
-				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-        Cell: row => (
-            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value}</TableRow>
-        )
-    },
-    {
-        Header: 'View Count',
-        accessor: 'visit_count',
-        width: 140,
-				filterable: false,
-        Cell: row => (
-            <TableRow>{row.value}</TableRow>
-        )
-    },
-    {
-        Header: 'Unique Viewers',
-        accessor: 'user_count',
-        width: 140,
-				filterable: false,
-        Cell: row => (
-            <TableRow>{row.value}</TableRow>
-        )
-    },
-    {
-        Header: 'Viewer List',
-        accessor: 'user_list',
-        headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
-				sortable: false,
-				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-				style: { 'whiteSpace': 'unset' },
-        Cell: row => (
-            <TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
-        )
-    },
-    {
-        Header: 'Searches', 
-        accessor: 'searches',
-				sortable: false,
-				filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-				style: { 'whiteSpace': 'unset' },
-        Cell: row => (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>)
-    }
+	{
+		Header: 'Document',
+		accessor: 'document',
+		width: 400,
+		headerStyle: {textAlign: 'left', paddingLeft: '15px'},
+		style: { 'whiteSpace': 'unset' },
+		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
+		Cell: row => (
+			<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value}</TableRow>
+		)
+	},
+	{
+		Header: 'View Count',
+		accessor: 'visit_count',
+		width: 140,
+		filterable: false,
+		Cell: row => (
+			<TableRow>{row.value}</TableRow>
+		)
+	},
+	{
+		Header: 'Unique Viewers',
+		accessor: 'user_count',
+		width: 140,
+		filterable: false,
+		Cell: row => (
+			<TableRow>{row.value}</TableRow>
+		)
+	},
+	{
+		Header: 'Viewer List',
+		accessor: 'user_list',
+		headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
+		sortable: false,
+		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
+		style: { 'whiteSpace': 'unset' },
+		Cell: row => (
+			<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
+		)
+	},
+	{
+		Header: 'Searches', 
+		accessor: 'searches',
+		sortable: false,
+		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
+		style: { 'whiteSpace': 'unset' },
+		Cell: row => (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>)
+	}
 ];
 
 /**
@@ -166,7 +166,7 @@ const getFeedbackData = async (setFeedbackData) => {
 	try {
 		// daysBack, offset, filters, sorting, pageSize
 		const data = await gameChangerAPI.getFeedbackData();
-        setFeedbackData(data.data.results);
+		setFeedbackData(data.data.results);
 	} catch (e) {
 		console.error(e);
 	}
@@ -177,10 +177,10 @@ const getFeedbackData = async (setFeedbackData) => {
  * The query is handled in gamechanger-api.
  * @method getDocumentData
  */
- const getDocumentData = async (daysBack, setDocumentData) => {
+const getDocumentData = async (daysBack, setDocumentData) => {
 	try {
 		const {data = {} } = await gameChangerAPI.getDocumentUsage();
-        setDocumentData(data.data);
+		setDocumentData(data.data);
 	} catch (e) {
 		console.error(e);
 	}
@@ -195,9 +195,9 @@ const getFeedbackData = async (setFeedbackData) => {
 export default () => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
-    const [feedbackData, setFeedbackData] = useState([]);
-    const [documentData, setDocumentData] = useState([]);
-    const [daysBack, setDaysBack] = useState(3);
+	const [feedbackData, setFeedbackData] = useState([]);
+	const [documentData, setDocumentData] = useState([]);
+	const [daysBack, setDaysBack] = useState(3);
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -267,8 +267,8 @@ export default () => {
 
 	useEffect(() => {
 		getSearchPdfMapping(daysBack, setMappingData);
-        getFeedbackData(setFeedbackData);
-        getDocumentData(daysBack, setDocumentData);
+		getFeedbackData(setFeedbackData);
+		getDocumentData(daysBack, setDocumentData);
 	}, [daysBack]);
 
 	return (
@@ -344,23 +344,23 @@ export default () => {
 				style={{ margin: '0 80px 20px 80px', height: 700 }}
 				defaultSorted={[{ id: 'event_name', desc: false }]}
 			/>
-            <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-                <p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Document Usage Data</p>
-                <GCPrimaryButton
-						onClick={() => {
-							trackEvent('GAMECHANGER', "ExportDocumentUsage", "onClick");
+			<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
+				<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Document Usage Data</p>
+				<GCPrimaryButton
+					onClick={() => {
+						trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
 							
-						}}
-						style={{minWidth: 'unset'}}
-					>Export Document Usage</GCPrimaryButton>
-            </div>
-            <ReactTable
-                data={documentData}
-                columns={documentUsageColumns}
-								filterable={true}
-                style={{margin: '0 80px 20px 80px', height: 700}}
-                defaultSorted = {[ { id: "visit_count", desc: true } ]}
-            />
+					}}
+					style={{minWidth: 'unset'}}
+				>Export Document Usage</GCPrimaryButton>
+			</div>
+			<ReactTable
+				data={documentData}
+				columns={documentUsageColumns}
+				filterable={true}
+				style={{margin: '0 80px 20px 80px', height: 700}}
+				defaultSorted = {[ { id: 'visit_count', desc: true } ]}
+			/>
 		</div>
 	);
 };
