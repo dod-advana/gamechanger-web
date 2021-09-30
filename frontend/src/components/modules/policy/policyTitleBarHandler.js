@@ -41,21 +41,21 @@ const PolicyTitleBarHandler = {
 				{rawSearchResults?.length !== 0 &&
 					!loading &&
 					pageDisplayed === 'main' && (
-					<SearchContext.Provider
-						value={{
-							searchTypes: selectedCategories,
-							activeTab: activeCategoryTab,
-							setActiveTab: setActiveCategoryTab,
-							resultMetaData: categoryMetadata,
-							returnHome: () => {
-								window.location.href = `/#/${cloneData.clone_name}`;
-								dispatch({ type: 'RESET_STATE' });
-							},
-						}}
-					>
-						<SearchTabBar containerStyles={{ width: '100%' }} />
-					</SearchContext.Provider>
-				)}
+						<SearchContext.Provider
+							value={{
+								searchTypes: selectedCategories,
+								activeTab: activeCategoryTab,
+								setActiveTab: setActiveCategoryTab,
+								resultMetaData: categoryMetadata,
+								returnHome: () => {
+									window.location.href = `/#/${cloneData.clone_name}`;
+									dispatch({ type: 'RESET_STATE' });
+								},
+							}}
+						>
+							<SearchTabBar containerStyles={{ width: '100%' }} />
+						</SearchContext.Provider>
+					)}
 			</>
 		);
 	},
