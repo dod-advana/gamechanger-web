@@ -115,4 +115,9 @@ const resMock = {
 	}
 };
 
-module.exports = { constructorOptionsMock, AsyncRedisMock, reqMock, resMock };
+// flush the promise queue -- see: https://github.com/facebook/jest/issues/2157#issuecomment-279171856
+function flushPromises() {
+	return new Promise((resolve) => setImmediate(resolve));
+}
+
+module.exports = { constructorOptionsMock, AsyncRedisMock, reqMock, resMock, flushPromises };
