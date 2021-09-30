@@ -142,6 +142,9 @@ const getData = async ({
 				return [];
 			}
 		} else if (tabIndex === 'crawler') {
+			// const data = awair gameChangerAPI.gcCrawlerSealData({
+// combine tables match by name 
+			//})
 			const data = await gameChangerAPI.gcCrawlerTrackerData({
 				limit,
 				offset,
@@ -539,7 +542,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'crawler_name',
 				width: 350,
-				Cell: (row) => <TableRow>{crawlerMappingFunc(row.value)}</TableRow>,
+				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Status',
