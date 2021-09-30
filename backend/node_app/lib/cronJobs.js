@@ -89,9 +89,10 @@ class CronJobs {
 				const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
 				if (favoriteSearchPollInterval >= 0) {
 					this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
-					distributedPoll('locks:checkLeastRecentFavoritedSearch',
+					distributedPoll(
 						this.favoritesController.checkLeastRecentFavoritedSearch,
-						favoriteSearchPollInterval);
+						favoriteSearchPollInterval,
+						'locks:checkLeastRecentFavoritedSearch');
 				} else {
 					this.logger.info('Polling for favorite search updates disabled.');
 				}
