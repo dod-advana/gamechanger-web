@@ -299,6 +299,7 @@ export default function SideBar(props) {
 	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm
 		let expansion = {};
+		const maxExpansions = 10;
 		if(comparableExpansion) {
 			expansion = JSON.parse(comparableExpansion)
 		}
@@ -306,9 +307,9 @@ export default function SideBar(props) {
 		const keys = Object.keys(expansion || {});
 		const quotedKeys = keys.map((term) => `"${term}"`);
 		const exclude = new Set([...keys, ...quotedKeys]);
-		let topFive = new Set();
+		let topTerms = new Set();
 
-		while(topFive.size < 10){
+		while(topTerms.size < maxExpansions){
 			if(expandedTerms.length === 0){
 				break;
 			}
@@ -319,17 +320,18 @@ export default function SideBar(props) {
 				expandedTerms = [...rest];
 			} else {
 				if(!exclude.has(term)){
-					topFive.add(term);
+					//term.phrase = term.phrase.length > 30 ? term.phrase.substring(0, 30 - 3) + "..." : term.phrase;
+					topTerms.add(term);
 				}
 				expandedTerms = [...rest, a];
 			}
 		}
-		let topFiveArr = Array.from(topFive)
-		console.log(topFiveArr)
-		topFiveArr = topFiveArr.map(term => {
+		let topTermsArr = Array.from(topTerms)
+		console.log(topTermsArr)
+		topTermsArr = topTermsArr.map(term => {
 			return {...term, checked:exactMatch(state.searchText, term.phrase, " OR ")}
 		})
-		setExpansionTerms(topFiveArr);
+		setExpansionTerms(topTermsArr);
 
 	}, [state, comparableExpansion]);
 
@@ -397,7 +399,9 @@ export default function SideBar(props) {
 			<div style={{margin: '10px 0 10px 0'}}>
 				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
 					{expansionTerms.map(({phrase, source, checked}, idx) => {
-						const term = phrase
+						let term = phrase
+						term = term.length > 30 ? term.substring(0, 30 - 3) + "..." : term;
+
 						return (
 							<FormControlLabel
 								key={term}
