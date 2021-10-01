@@ -4,7 +4,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
 import { primary } from './gc-colors';
 
-
 const getStyles = (props) => ({
 	formControlLabelRoot: {
 		...props.rightLabelStyle,
@@ -28,15 +27,17 @@ const getStyles = (props) => ({
 		color: `${props.customColor ? props.customColor : primary} !important`,
 		'&checked': {
 			color: `${props.customColor ? props.customColor : primary} !important`,
-		}
+		},
 	},
 	switchBar: {
-		backgroundColor: `${props.customColor ? props.customColor : primary} !important`,
+		backgroundColor: `${
+			props.customColor ? props.customColor : primary
+		} !important`,
 		opacity: 0.5,
 	},
 });
 
-export default function(props) {
+export default function (props) {
 	
 	const classes = makeStyles(getStyles(props))();
 	

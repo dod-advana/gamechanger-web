@@ -7,7 +7,6 @@ const globalSearchTitleBarHandler = require(`../modules/globalSearch/globalSearc
 const budgetSearchTitleBarHandler = require(`../modules/budgetSearch/budgetSearchTitleBarHandler`);
 
 class TitleBarFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
