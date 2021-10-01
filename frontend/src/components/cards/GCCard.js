@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import _ from 'lodash';
 import {CARD_FONT_SIZE, getTrackingNameForFactory} from '../../gamechangerUtils';
-import {Divider, Checkbox} from '@material-ui/core';
+import {Divider, Checkbox, FormControlLabel, Typography, Switch} from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
 import {trackEvent} from '../telemetry/Matomo';
-import {makeStyles} from '@material-ui/core/styles';
+import {makeStyles, withStyles} from '@material-ui/core/styles';
 import GCButton from '../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
@@ -24,6 +24,7 @@ import {
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
+import {gcOrange} from '../common/gc-colors';
 
 const CARD_HEIGHT = 412;
 
@@ -34,6 +35,20 @@ var IS_IE = /*@cc_on!@*/false || !!document.documentMode;
 var IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const gameChangerAPI = new GameChangerAPI();
+
+const OrangeSwitch = withStyles({
+	switchBase: {
+		color: '#ffffff',
+		'&$checked': {
+			color: gcOrange,
+		},
+		'&$checked + $track': {
+			backgroundColor: gcOrange,
+		},
+	},
+	checked: {},
+	track: {},
+})(Switch);
 
 const StyledCardContainer = styled.div`
 	width: ${({listView, showSideFilters, graphView}) => listView ? '100%' : graphView ? '414px' : showSideFilters ? '33%' : '25%'};
@@ -359,6 +374,8 @@ function GCCard (props) {
 	const [loaded, setLoaded] = useState(false);
 	const [filename, setFilename] = useState('');
 	const [modalOpen, setModalOpen] = useState(false);
+	const [showQuickCompare, setShowQuickCompare] = useState(false);
+	const [compareIndex, setCompareIndex] = useState(0);
 
 	useEffect(() => {
 		// Create the factory
@@ -366,6 +383,7 @@ function GCCard (props) {
 			const factory = new CardFactory(state.cloneData.card_module);
 			const handler = factory.createHandler();
 			setCardHandler(handler[cardType])
+			setCompareIndex(0);
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
 			if (cardType === 'organization') {
@@ -398,7 +416,7 @@ function GCCard (props) {
 		}
 	}
 
-  const handleSaveFavorite = (favorite = false) => {
+	const handleSaveFavorite = (favorite = false) => {
 		switch(cardType){
 			case 'document':
 				const documentData = {
@@ -427,14 +445,14 @@ function GCCard (props) {
 
 	const handleCancelFavorite = () => {
     	setPopperIsOpen(false);
-			setPopperAnchorEl(null);
+		setPopperAnchorEl(null);
 	}
 
 	const favoriteComponent = () => {
 		return (
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement='top' arrow>
 				<i onClick={(event) => {
-            openFavoritePopper(event.target);
+					openFavoritePopper(event.target);
 				}} className={favorite ? 'fa fa-star' : 'fa fa-star-o'} style={{
 					color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
@@ -479,6 +497,29 @@ function GCCard (props) {
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments), selectedDocumentsForGraph: newDocArray });
+	}
+	
+	const quickCompareToggleComponent = () => {
+		return (
+			<GCTooltip title={`Quickly compare the matched paragraphs to the input document`} placement='top' arrow>
+				<div style={{marginTop: 2, paddingRight: 5}}>
+					<FormControlLabel
+						value="compare"
+						control={<OrangeSwitch checked={showQuickCompare} onChange={handleQuickCompareToggle}/>}
+						label={<Typography style={{fontFamily: 'Montserrat', fontSize: 14, color: '#000000DE'}}>Quick Compare</Typography>}
+						labelPlacement="start"
+					/>
+				</div>
+			</GCTooltip>
+		);
+	}
+	
+	const handleQuickCompareToggle = (e) => {
+		setShowQuickCompare(e.target.checked);
+	}
+	
+	const handleChangeCompareIndex = (change) => {
+		setCompareIndex(compareIndex + change);
 	}
 	
 	const intelligentFeedbackComponent = () => (
@@ -641,7 +682,7 @@ function GCCard (props) {
 						<div className={'styled-card-inner-wrapper'}>
 	
 							{/* START CARD HEADER */}
-							{loaded && cardHandler.getCardHeader({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch})}
+							{loaded && cardHandler.getCardHeader({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent})}
 							{/* END CARD HEADER */}
 	
 							{/* START CARD SUBHEADER */}
@@ -650,24 +691,37 @@ function GCCard (props) {
 	 
 							{/* START CARD CONTENT */}
 							<div className={`styled-card-front-content`}>
-								{loaded && cardHandler.getCardFront({
-									item,
-									state,
-									backBody: cardHandler.getCardBack({
-										item,
-										state,
-										detailPage
-									}),
-									hitsExpanded,
-									setHitsExpanded,
-									hoveredHit,
-									setHoveredHit,
-									metadataExpanded,
-									setMetadataExpanded,
-									intelligentSearch,
-									intelligentFeedbackComponent,
-									collection
-								})}
+								{loaded &&
+									<>
+										{showQuickCompare ? 
+											cardHandler.getDocumentQuickCompare({
+												item,
+												state,
+												compareIndex,
+												handleChangeCompareIndex
+											})
+											:
+											cardHandler.getCardFront({
+												item,
+												state,
+												backBody: cardHandler.getCardBack({
+													item,
+													state,
+													detailPage
+												}),
+												hitsExpanded,
+												setHitsExpanded,
+												hoveredHit,
+												setHoveredHit,
+												metadataExpanded,
+												setMetadataExpanded,
+												intelligentSearch,
+												intelligentFeedbackComponent,
+												collection
+											})
+										}
+									</>
+								}
 							</div>
 							{/* END CARD CONTENT */}
 	

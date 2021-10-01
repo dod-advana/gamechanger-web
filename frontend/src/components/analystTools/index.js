@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {backgroundGreyDark, backgroundWhite, gcOrange} from '../common/gc-colors';
 import {Typography} from '@material-ui/core';
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
@@ -25,6 +25,8 @@ const AnalystTools = (props) => {
 				break;
 			case 'dct':
 				setState(dispatch, {analystToolsPageDisplayed: 'Document Comparison Tool'});
+				break;
+			default:
 				break;
 		}
 		

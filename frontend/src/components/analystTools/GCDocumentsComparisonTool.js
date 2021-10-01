@@ -13,8 +13,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import {gcOrange} from '../common/gc-colors';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Pagination from 'react-js-pagination';
-import {getTrackingNameForFactory, RESULTS_PER_PAGE} from '../../gamechangerUtils';
-import {trackEvent} from '../telemetry/Matomo';
+import {RESULTS_PER_PAGE} from '../../gamechangerUtils';
 import {Card} from '../cards/GCCard';
 const _ = require('lodash');
 
@@ -136,10 +135,9 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 		}
 		
-	}, [state.runDocumentComparisonSearch, paragraphText]);
+	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch]);
 	
 	useEffect(() => {
-		console.log(returnedDocs)
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
 	
@@ -158,6 +156,7 @@ const GCDocumentsComparisonTool = (props) => {
 		return _.map(docs, (item, idx) => {
 			item.type = 'document';
 			item.isCompare = true;
+			item.dataToQuickCompareTo = paragraphText;
 			item.pageHits = [];
 			return (
 				<Card key={idx}
