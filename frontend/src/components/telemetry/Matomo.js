@@ -1,21 +1,23 @@
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GCAuth from '../common/GCAuth';
 import React, { useEffect } from 'react';
-import Config from '../../config/config'
+import Config from '../../config/config';
 
 import MatomoReactRouter from 'piwik-react-router';
-import SparkMD5 from "spark-md5";
+import SparkMD5 from 'spark-md5';
 
 const MATOMO_LINK = Config.MATOMO_LINK;
 
 let matomo = null;
 
-const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled =
+	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
+	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 try {
 	matomo = MatomoReactRouter({
 		url: MATOMO_LINK,
-		siteId: isDecoupled ? 2 : 1
+		siteId: isDecoupled ? 2 : 1,
 	});
 	// matomo = {
 	// 	push: (data) => { console.log(data) },
@@ -24,9 +26,9 @@ try {
 	// };
 } catch (e) {
 	matomo = {
-		push: () => { },
-		trackError: () => { },
-		setUserId: () => { }
+		push: () => {},
+		trackError: () => {},
+		setUserId: () => {},
 	};
 }
 
@@ -39,17 +41,21 @@ try {
  * @returns
  * @constructor
  */
-export const TrackerWrapper = (ComposedComponent, documentTitle, customDimensions) => {
+export const TrackerWrapper = (
+	ComposedComponent,
+	documentTitle,
+	customDimensions
+) => {
 	function WrappedComponent(props) {
-		useEffect (() => {
+		useEffect(() => {
 			trackPageView(documentTitle, customDimensions);
-		}, [])
+		}, []);
 
-		return <ComposedComponent {...props} />
+		return <ComposedComponent {...props} />;
 	}
 
 	return WrappedComponent;
-}
+};
 
 /***
  * Sets up the custom dimensions if provided.
@@ -63,13 +69,18 @@ export const TrackerWrapper = (ComposedComponent, documentTitle, customDimension
  * @param useMatomo
  */
 function setupDimensions(customDimensions, useMatomo) {
-	if (customDimensions && Array.isArray(customDimensions) && customDimensions.length && useMatomo) {
+	if (
+		customDimensions &&
+		Array.isArray(customDimensions) &&
+		customDimensions.length &&
+		useMatomo
+	) {
 		customDimensions.map((customDimension) =>
 			matomo.push([
 				'setCustomDimension',
 				customDimension.id,
 				customDimension.value,
-			]),
+			])
 		);
 	}
 }
@@ -80,15 +91,18 @@ function setupDimensions(customDimensions, useMatomo) {
  * @param customDimensions: false or an array of customDimensions.
  */
 export function trackPageView(documentTitle, customDimensions) {
-
 	try {
-		const useMatomo = JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		const useMatomo =
+			JSON.parse(localStorage.getItem('userMatomo')) &&
+			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
 
 		// Set User
-		const userId = isDecoupled ? GCAuth.getTokenPayload().cn : Auth.getUserId() || ' ';
+		const userId = isDecoupled
+			? GCAuth.getTokenPayload().cn
+			: Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
-		const id = regex.exec(userId)
+		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		// Set URL and Document Title
@@ -112,9 +126,8 @@ export function trackPageView(documentTitle, customDimensions) {
 		matomo.push(['trackContentImpressionsWithinNode', content]);
 		matomo.push(['enableLinkTracking']);
 	} catch (error) {
-		console.log(error)
+		console.log(error);
 	}
-
 }
 
 /***
@@ -126,16 +139,17 @@ export function trackPageView(documentTitle, customDimensions) {
  * @param customDimensions: false or an array of customDimensions.
  */
 export function trackEvent(category, action, name, value, customDimensions) {
-
 	try {
-		const useMatomo = JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		const useMatomo =
+			JSON.parse(localStorage.getItem('userMatomo')) &&
+			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
 
 		// Track Event
-		matomo.push(['trackEvent', category, action, name, value])
+		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
 		// Nothing
 	}
@@ -147,9 +161,10 @@ export function trackEvent(category, action, name, value, customDimensions) {
  * @param eventName: Event name.
  */
 export function trackError(e, eventName) {
-
 	try {
-		const useMatomo = JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		const useMatomo =
+			JSON.parse(localStorage.getItem('userMatomo')) &&
+			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
 
 		matomo.trackError(e, eventName);
@@ -166,14 +181,12 @@ export function trackError(e, eventName) {
  * @param customDimensions: false or an array of customDimensions.
  */
 export function trackSearch(keyword, category, count, customDimensions) {
-
 	try {
 		setupDimensions(customDimensions, true);
 
-		matomo.push(['trackSiteSearch', keyword, category, count])
+		matomo.push(['trackSiteSearch', keyword, category, count]);
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 		// Nothing
 	}
-
 }

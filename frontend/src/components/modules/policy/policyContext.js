@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import {orgFilters, typeFilters} from '../../../gamechangerUtils';
+import { orgFilters, typeFilters } from '../../../gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -24,11 +24,11 @@ const initState = {
 		show_graph: true,
 		show_crowd_source: true,
 		show_feedback: true,
-		config: {esIndex: 'gamechanger'}
+		config: { esIndex: 'gamechanger' },
 	},
 	history: undefined,
 	historySet: false,
-	
+
 	// Notifications
 	notifications: [],
 	notificationIds: [],
@@ -37,16 +37,23 @@ const initState = {
 		unauthorizedError: false,
 		transformFailed: false,
 	},
-	
+
 	// User
-	userData: { favorite_searches: [], favorite_documents: [], favorite_topics: [], search_history: [], export_history: [], api_key:'' },
+	userData: {
+		favorite_searches: [],
+		favorite_documents: [],
+		favorite_topics: [],
+		search_history: [],
+		export_history: [],
+		api_key: '',
+	},
 	newUser: false,
 	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',
 		q1: '',
-		q2: ''
+		q2: '',
 	},
 
 	// Homepage
@@ -56,14 +63,14 @@ const initState = {
 	adminMajorPubs: [],
 	searchMajorPubs: [],
 	trendingLinks: [],
-	
+
 	// Tutorial
 	showTutorial: false,
 	clickedTutorial: false,
 	tutorialStepIndex: 0,
 	componentStepNumbers: {},
 	tutorialJoyrideSteps: [],
-	
+
 	// Show Modals
 	showFeedbackModal: false,
 	showAssistModal: false,
@@ -73,35 +80,35 @@ const initState = {
 	exportDialogVisible: false,
 	showEsQueryDialog: false,
 	showEsDocDialog: false,
-	
+
 	selectedDoc: {},
-	
+
 	loading: false,
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
 	analystToolsPageDisplayed: 'Responsibility Explorer',
 	listView: false,
-	
+
 	// Documents
 	iframePreviewLink: null,
 	detailViewId: 0,
-	
+
 	// Export
 	selectedDocuments: new Map(),
 	selectedDocumentsForGraph: [],
 	docsDrawerOpen: false,
 	isSelectedDocs: false,
 	isDrawerReady: false,
-	
+
 	// Navigation
 	menuOpen: false,
 	tabName: '',
 	hideTabs: true,
-	
+
 	// Graph
 	runGraphSearch: false,
-	
+
 	// SideBar
 	sidebarDocTypes: [],
 	sidebarOrgs: [],
@@ -112,7 +119,7 @@ const initState = {
 	topicsForSearch: [],
 	runningTopicSearch: false,
 	showSideFilters: true,
-	
+
 	// Search
 	offset: 0,
 	esIndex: '',
@@ -128,7 +135,7 @@ const initState = {
 	count: 0,
 	resultsPage: 1,
 	docsPagination: false,
-	docsLoading: false,	
+	docsLoading: false,
 
 	entityCount: 0,
 	entityPage: 1,
@@ -152,8 +159,8 @@ const initState = {
 	expansionDict: {},
 	rawSearchResults: [],
 	docSearchResults: [],
-	qaResults: {question: '', answers: []},
-	qaContext: {params: {}, context: []},
+	qaResults: { question: '', answers: [] },
+	qaContext: { params: {}, context: [] },
 	isFavoriteSearch: false,
 	resetSettingsSwitch: false,
 	snackBarMsg: '',
@@ -168,7 +175,7 @@ const initState = {
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
 		allOrgsSelected: true,
-		searchFields: {'initial': {field: null, input: ''}},
+		searchFields: { initial: { field: null, input: '' } },
 		specificCategoriesSelected: false,
 		specificOrgsSelected: false,
 		allTypesSelected: true,
@@ -176,7 +183,7 @@ const initState = {
 		publicationDateAllTime: true,
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
-		includeRevoked: false
+		includeRevoked: false,
 	},
 	
 	analystToolsSearchSettings: {
@@ -211,11 +218,17 @@ const initState = {
 	selectedCategories: {
 		Documents: true,
 		Organizations: true,
-		Topics: true
+		Topics: true,
 	},
 
 	categorySorting: {
-		Documents: ['Relevance','Publishing Date', 'Alphabetical', 'References', 'Popular']
+		Documents: [
+			'Relevance',
+			'Publishing Date',
+			'Alphabetical',
+			'References',
+			'Popular',
+		],
 	},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
@@ -223,9 +236,9 @@ const initState = {
 	// category totals
 	categoryMetadata: {},
 	activeCategoryTab: 'all',
-	
+
 	backendErrorMsg: '',
-	showBackendError: false
+	showBackendError: false,
 };
 
 const init = (initialState) => {
@@ -235,20 +248,20 @@ const init = (initialState) => {
 const handleSetAlert = (state, action) => {
 	const alerts = {
 		...state.alerts,
-		...action.payload
-	}
+		...action.payload,
+	};
 	return {
 		...state,
-		alerts
+		alerts,
 	};
-}
+};
 
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
-		...action.payload
-	}
-}
+		...action.payload,
+	};
+};
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -260,12 +273,12 @@ function reducer(state, action) {
 			return {
 				...state,
 				exportDialogVisible: action.payload,
-				isSelectedDocs: action.payload
+				isSelectedDocs: action.payload,
 			};
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				searchSettings: initState.searchSettings
+				searchSettings: initState.searchSettings,
 			};
 		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
 			return {
@@ -280,7 +293,7 @@ function reducer(state, action) {
 				componentStepNumbers: state.componentStepNumbers,
 				tutorialJoyrideSteps: state.tutorialJoyrideSteps,
 				userData: state.userData,
-				documentProperties: state.documentProperties
+				documentProperties: state.documentProperties,
 			};
 		default:
 			return state;
@@ -291,9 +304,9 @@ const PolicyContext = React.createContext(initState);
 
 const PolicyProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
-	
+
 	return (
-		<PolicyContext.Provider value={{state, dispatch}}>
+		<PolicyContext.Provider value={{ state, dispatch }}>
 			{props.children}
 		</PolicyContext.Provider>
 	);
