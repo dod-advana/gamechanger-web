@@ -12,15 +12,13 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
-import {FormControlLabel, Popover, Switch, TextField, Typography} from '@material-ui/core';
+import {Popover, TextField, Typography} from '@material-ui/core';
 import {KeyboardArrowRight} from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import {crawlerMappingFunc} from '../../../gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
-import {makeStyles, withStyles} from '@material-ui/core/styles';
-import {gcOrange} from '../../common/gc-colors';
 
 const styles = {
 	footerButtonBack: {
@@ -53,26 +51,6 @@ const styles = {
 		fontSize: '14px'
 	},
 };
-
-const useStyles = makeStyles({
-	toggleControlText: {
-		fontSize: 14
-	}
-})
-
-const OrangeSwitch = withStyles({
-	switchBase: {
-		color: '#ffffff',
-		'&$checked': {
-			color: gcOrange,
-		},
-		'&$checked + $track': {
-			backgroundColor: gcOrange,
-		},
-	},
-	checked: {},
-	track: {},
-})(Switch);
 
 const colWidth = {
 	maxWidth: '900px',
@@ -487,6 +465,41 @@ const StyledEntityTopicFrontCardContent = styled.div`
 	}
 `;
 
+const StyledQuickCompareContent = styled.div`
+	background-color: ${'#E1E8EE'};
+    padding: 20px 0px;
+    
+    .prev-next-buttons {
+        display: flex;
+        justify-content: right;
+        margin-right: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .paragraph-display {
+         display: flex;
+         place-content: space-evenly;
+    
+        & .compare-block {
+	        background-color: ${'#ffffff'};
+	        border: 2px solid ${'#BCCBDB'};
+	        border-radius: 6px;
+	        width: 48%;
+	        padding: 5px;
+	        
+	        & .compare-header {
+		        color: ${'#000000DE'};
+		        font-size: 16px;
+		        font-family: Montserrat;
+		        font-weight: bold;
+		        margin-bottom: 10px;
+	        }
+	    }
+    }
+    
+    
+`
+
 const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
@@ -542,7 +555,7 @@ const addFavoriteTopicToMetadata = (data, userData, setFavoriteTopic, setFavorit
 	return temp
 }
 	
-const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch}) => {
+const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent}) => {
 	
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
@@ -611,14 +624,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						}
 					</div>
 					{item.isCompare &&
-						<div style={{marginTop: 2, paddingRight: 5}}>
-							<FormControlLabel
-								value="compare"
-								control={<OrangeSwitch/>}
-								label={<Typography style={{fontFamily: 'Montserrat', fontSize: 14, color: '#000000DE'}}>Quick Compare</Typography>}
-								labelPlacement="start"
-							/>
-						</div>
+						quickCompareToggleComponent()
 					}
 				</div>
 			</div>
@@ -961,6 +967,51 @@ const PolicyCardHandler = {
 					</StyledFrontCardContent>
 				);
 			}
+		},
+		
+		getDocumentQuickCompare: (props) => {
+			const {item, compareIndex, handleChangeCompareIndex} = props;
+			
+			return (
+				<StyledQuickCompareContent>
+					{item.paragraphs.length > 1 &&
+						<div className={'prev-next-buttons'}>
+							<GCButton
+								id={'prev'}
+								onClick={() => {
+									handleChangeCompareIndex(-1);
+								}}
+								isSecondaryBtn={true}
+								style={{height: 36}}
+								disabled={compareIndex === 0}
+							>
+								Previous
+							</GCButton>
+							<GCButton
+								id={'next'}
+								onClick={() => {
+									handleChangeCompareIndex(1);
+								}}
+								isSecondaryBtn={true}
+								style={{height: 36}}
+								disabled={compareIndex >= item.paragraphs.length - 1}
+							>
+								Next
+							</GCButton>
+						</div>
+					}
+					<div className={'paragraph-display'}>
+						<div className={'compare-block'}>
+							<Typography className={'compare-header'}>Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph: {item.paragraphs[compareIndex].id.split('_')[1]} Score: {item.paragraphs[compareIndex].score.toFixed(5)}</Typography>
+							{item.paragraphs[compareIndex]?.par_raw_text_t}
+						</div>
+						<div className={'compare-block'}>
+							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
+							{item.dataToQuickCompareTo}
+						</div>
+					</div>
+				</StyledQuickCompareContent>
+			);
 		},
 		
 		getCardBack: ({item, state, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked}) => {
