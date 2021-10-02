@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import {Grid, IconButton} from '@material-ui/core';
+import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography} from '@material-ui/core';
 import Dropzone from 'react-dropzone';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import FileIcon from '../../images/icon/draganddrop_img.svg'
@@ -13,13 +13,60 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import {gcOrange} from '../common/gc-colors';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Pagination from 'react-js-pagination';
-import {RESULTS_PER_PAGE} from '../../gamechangerUtils';
+import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../gamechangerUtils';
 import {Card} from '../cards/GCCard';
+import CloseIcon from '@material-ui/icons/Close';
+import GCButton from '../common/GCButton';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 20
+
+const CloseButton = styled.div`
+	padding: 6px;
+	background-color: white;
+	border-radius: 5px;
+	color: #8091a5 !important;
+	border: 1px solid #b0b9be;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0.4;
+	position: absolute;
+	right: 15px;
+	top: 15px;
+`;
+
+const DocumentCompareContainer = styled.div`
+
+	.relevant-doc-text-container {
+		
+		& .relevant-doc-text {}
+	}
+	
+	.compare-area {
+	
+		& .uploaded-doc {
+			background-color: ${'#ffffff'};
+	        border: 2px solid ${'#BCCBDB'};
+	        border-radius: 6px;
+	        width: 560px;
+	        padding: 5px;
+	        
+	        & .compare-header {
+		        color: ${'#000000DE'};
+		        font-size: 16px;
+		        font-family: Montserrat;
+		        font-weight: bold;
+		        margin-bottom: 10px;
+	        }
+		}
+		
+		& .relevant-document {}
+	}
+`;
 
 const DocumentInputContainer = styled.div`
 	border: 1px dashed ${'#707070'};
@@ -124,6 +171,8 @@ const GCDocumentsComparisonTool = (props) => {
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [page, setPage] = useState(1);
+	const [compareFilename, setCompareFilename] = useState(undefined);
+	
 	
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
@@ -140,6 +189,33 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
+	
+	useEffect(() => {
+		if (state.compareModalOpen) {
+			setCompareFilename(encode(state.compareFilename))
+		}
+	}, [state.compareModalOpen, state.compareFilename]);
+	
+	const measuredRef = useCallback(
+		(node) => {
+			if (node !== null && compareFilename) {
+				if (compareFilename) {
+					gameChangerAPI
+						.dataStorageDownloadGET(
+							compareFilename,
+							'',
+							1,
+							true,
+							state.cloneData
+						)
+						.then((url) => {
+							node.src = url;
+						});
+				}
+			}
+		},
+		[compareFilename, state.cloneData]
+	);
 	
 	const handleFilesDropped = (files) => {
 	
@@ -177,12 +253,74 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	return (
-		<Grid container style={{marginTop: 20}} spacing={4}>
-			<Grid item xs={2}>
-				<GCAnalystToolsSideBar context={context} />
-			</Grid>
-			<Grid item xs={10}>
-				{(!loading && returnedDocs.length <= 0) &&
+		<>
+			<Dialog
+				open={state.compareModalOpen}
+				scroll={'paper'}
+				maxWidth="xl"
+				disableEscapeKeyDown
+				disableBackdropClick
+				classes={{
+					paperWidthXl: classes.dialogXl,
+				}}
+			>
+				<DialogTitle>
+					<CloseButton onClick={() => setState(dispatch, {compareModalOpen: false})}>
+						<CloseIcon fontSize="large" />
+					</CloseButton>
+				</DialogTitle>
+
+				<DialogContent>
+					<DocumentCompareContainer>
+						<div className={'relevant-doc-text-container'}>
+							<Typography className={'relevant-doc-text'}>This document may contain relevant information to your search</Typography>
+						</div>
+						<div className={'compare-area'}>
+							<div className={'uploaded-doc'}>
+								<Typography className={'compare-header'}>Uploaded Document</Typography>
+								{paragraphText}
+							</div>
+							<div className={'relevant-document'}>
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'pdfViewer'}
+									ref={measuredRef}
+									onLoad={() =>
+										handlePdfOnLoad(
+											'pdfViewer',
+											'viewerContainer',
+											compareFilename,
+											'PDF Viewer'
+										)
+									}
+									style={{ width: '100%', height: '100%' }}
+								/>
+							</div>
+						</div>
+					</DocumentCompareContainer>
+				</DialogContent>
+
+				<DialogActions>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							width: '100%',
+							margin: '0px 18px',
+						}}
+					>
+					
+					</div>
+				</DialogActions>
+			</Dialog>
+			
+			<Grid container style={{marginTop: 20}} spacing={4}>
+				<Grid item xs={2}>
+					<GCAnalystToolsSideBar context={context} />
+				</Grid>
+				<Grid item xs={10}>
+					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
 							<Grid item xs={3} className={'input-drop-zone'}>
@@ -255,13 +393,13 @@ const GCDocumentsComparisonTool = (props) => {
 							</Grid>
 						</Grid>
 					</DocumentInputContainer>
-				}
-				{loading &&
+					}
+					{loading &&
 					<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
 						<LoadingIndicator customColor={gcOrange}/>
 					</div>
-				}
-				{(!loading && returnedDocs.length > 0) &&
+					}
+					{(!loading && returnedDocs.length > 0) &&
 					<>
 						<DocumentInputContainer>
 							<div className={'document-imported-block'}>
@@ -310,9 +448,11 @@ const GCDocumentsComparisonTool = (props) => {
 							
 						</SimilarDocumentsContainer>
 					</>
-				}
+					}
+				</Grid>
 			</Grid>
-		</Grid>
+		</>
+		
 	)
 };
 
@@ -332,7 +472,7 @@ const styles = {
 		textAlign: 'center',
 		margin: 'auto',
 		paddingTop: 28
-	}
+	},
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -354,6 +494,11 @@ const useStyles = makeStyles((theme) => ({
 	notchedOutline: {
 		border: `2px solid ${'#B6C6D8'} !important`,
 		borderRadius: 6
+	},
+	dialogXl: {
+		maxWidth: '1360px',
+		minWidth: '1000px',
+		backgroundColor: '#EFF1F6'
 	},
 }));
 

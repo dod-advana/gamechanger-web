@@ -585,6 +585,10 @@ function GCCard(props) {
 		setCompareIndex(compareIndex + change);
 	}
 	
+	const handleCompareDocument = (filename) => {
+		setState(dispatch, {compareModalOpen: true, compareFilename: filename});
+	}
+	
 	const intelligentFeedbackComponent = () => (
 		<div style={styles.tooltipRow}>
 			<GCTooltip
@@ -628,7 +632,7 @@ function GCCard(props) {
 								);
 							}
 						}}
-					></i>
+					/>
 					<i
 						className={classes.feedback + ' fa fa-thumbs-down'}
 						style={{ color: feedback === 'thumbsDown' ? '#D2222D' : 'white' }}
@@ -650,7 +654,7 @@ function GCCard(props) {
 								);
 							}
 						}}
-					></i>
+					/>
 				</div>
 			</Fade>
 		</div>
@@ -864,7 +868,7 @@ function GCCard(props) {
 										})}
 									</div>
 								</div>
-							}
+							)}
 							{(state.listView && item.isCompare) &&
 								<div className={'styled-card-front-buttons'}>
 									<div className={'styled-action-buttons-group'}>
@@ -883,11 +887,12 @@ function GCCard(props) {
 												console.log(item);
 												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
 											},
-											state
+											state,
+											handleCompareDocument
 										})}
 									</div>
 								</div>
-							)}
+							}
 							{/* END CARD FRONT FOOTER */}
 						</div>
 					</div>
