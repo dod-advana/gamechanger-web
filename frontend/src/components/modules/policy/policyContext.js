@@ -207,6 +207,9 @@ const initState = {
 		accessDateFilter: [null, null],
 		includeRevoked: false
 	},
+	
+	compareModalOpen: false,
+	compareFilename: null,
 
 	// Presearch Filters
 	presearchSources: {},

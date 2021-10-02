@@ -962,7 +962,7 @@ const PolicyCardHandler = {
 									</div>
 								</div>
 							</GCAccordion>
-						}
+						)}
 						{item.paragraphs.length > 0 &&
 							<GCAccordion header={'PARAGRAPH HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 								<div className={'expanded-hits'}>
@@ -995,7 +995,7 @@ const PolicyCardHandler = {
 									</div>
 								</div>
 							</GCAccordion>
-						)}
+						}
 						<GCAccordion
 							header={'DOCUMENT METADATA'}
 							headerBackground={'rgb(238,241,242)'}
@@ -1386,7 +1386,8 @@ const PolicyCardHandler = {
 				showEsDoc,
 				item,
 				searchText,
-				state
+				state,
+				handleCompareDocument
 			} = props;
 			return (
 				<>
@@ -1458,7 +1459,7 @@ const PolicyCardHandler = {
 							</GCButton>
 							<GCButton
 								id={'compare'}
-								onClick={() => { console.log('Compare') }}
+								onClick={() => { handleCompareDocument(item.filename) }}
 								isSecondaryBtn={false}
 								style={{height: 36}}
 							>
