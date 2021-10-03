@@ -1223,7 +1223,7 @@ const PolicyCardHandler = {
 						</div>
 						<div className={'compare-block'}>
 							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
-							{item.dataToQuickCompareTo}
+							{item.dataToQuickCompareTo[item.paragraphs[compareIndex].paragraphIdBeingMatched]}
 						</div>
 					</div>
 				</StyledQuickCompareContent>

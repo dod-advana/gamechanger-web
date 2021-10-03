@@ -40,19 +40,32 @@ const CloseButton = styled.div`
 `;
 
 const DocumentCompareContainer = styled.div`
+	height: 500px;
 
 	.relevant-doc-text-container {
+		text-align: right;
+		margin-right: 60px;
 		
-		& .relevant-doc-text {}
+		& .relevant-doc-text {
+			color: ${'#000000DE'}
+			font-family: Montserrat;
+			font-size: 14px;
+			margin-bottom: 20px;
+		}
 	}
 	
 	.compare-area {
+		display: flex;
+		place-content: space-evenly;
+		margin: auto;
+		width: 100%;
+		height: 740px;
 	
 		& .uploaded-doc {
 			background-color: ${'#ffffff'};
 	        border: 2px solid ${'#BCCBDB'};
 	        border-radius: 6px;
-	        width: 560px;
+	        width: 48%;
 	        padding: 5px;
 	        
 	        & .compare-header {
@@ -64,7 +77,9 @@ const DocumentCompareContainer = styled.div`
 	        }
 		}
 		
-		& .relevant-document {}
+		& .relevant-document {
+			width: 48%;
+		}
 	}
 `;
 
@@ -167,6 +182,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const {state, dispatch} = context;
 	
 	const [paragraphText, setParagraphText] = useState('');
+	const [paragraphs, setParagraphs] = useState([]);
 	const [returnedDocs, setReturnedDocs] = useState([]);
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -177,7 +193,14 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
-			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, documentText: paragraphText}).then(resp => {
+			
+			const paragraphs = paragraphText.split('\n').map(paragraph => {
+				return paragraph.trim();
+			}).filter(paragraph => paragraph.length > 0);
+			
+			setParagraphs(paragraphs);
+			
+			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs}).then(resp => {
 				setReturnedDocs(resp.data.docs);
 				setState(dispatch, {runDocumentComparisonSearch: false});
 				setLoading(false);
@@ -232,7 +255,7 @@ const GCDocumentsComparisonTool = (props) => {
 		return _.map(docs, (item, idx) => {
 			item.type = 'document';
 			item.isCompare = true;
-			item.dataToQuickCompareTo = paragraphText;
+			item.dataToQuickCompareTo = paragraphs;
 			item.pageHits = [];
 			return (
 				<Card key={idx}
@@ -376,6 +399,7 @@ const GCDocumentsComparisonTool = (props) => {
 													onChange={(event) => {
 														setParagraphText(event.target.value);
 													}}
+													onClick={() => setState(dispatch, {inputActive: 'compareInput'})}
 													InputProps={{
 														classes: {
 															root: classes.outlinedInput,
@@ -405,7 +429,12 @@ const GCDocumentsComparisonTool = (props) => {
 							<div className={'document-imported-block'}>
 								<div className={'document-text'}>
 									<div className={'text'}>
-										{paragraphText}
+										{paragraphs.map(paragraph => (
+											<>
+												<div>{paragraph}</div>
+												<br />
+											</>
+										))}
 									</div>
 								</div>
 								<div className={'remove-document'}>
@@ -496,9 +525,10 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: 6
 	},
 	dialogXl: {
-		maxWidth: '1360px',
-		minWidth: '1000px',
-		backgroundColor: '#EFF1F6'
+		maxWidth: '1920px',
+		minWidth: '1500px',
+		backgroundColor: '#EFF1F6',
+		height: 850
 	},
 }));
 

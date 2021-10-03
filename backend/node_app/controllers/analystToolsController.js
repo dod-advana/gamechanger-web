@@ -26,20 +26,24 @@ class AnalystToolsController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			
-			const { cloneName, documentText = '' } = req.body;
+			const { cloneName, paragraphs = [] } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
 			
 			// ML API Call Goes Here
-			const paragraphResults = await this.mlApi.getSentenceTransformerResults(documentText, userId);
+			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
+			const paragraphResults = await Promise.all(paragraphSearches);
 			
 			const resultsObject = {};
 			
 			paragraphResults.forEach(result => {
-				resultsObject[result.id] = {
-					score: result.score,
-					text: result.text
-				};
-			})
+				Object.keys(result).forEach(id => {
+					resultsObject[result[id].id] = {
+						score: result[id].score,
+						text: result[id].text,
+						paragraphIdBeingMatched: result.paragraphIdBeingMatched
+					};
+				});
+			});
 			
 			const ids = Object.keys(resultsObject);
 			
@@ -57,8 +61,6 @@ class AnalystToolsController {
 			res.status(500).send(e);
 		}
 	}
-	
-	
 	
 	cleanUpEsResultsForDocumentComparisonTool(raw, paragraphResults,user) {
 		try {
