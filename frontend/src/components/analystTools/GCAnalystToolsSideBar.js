@@ -162,7 +162,7 @@ const useStyles = makeStyles({
 			},
 			'&::after': {
 				fontFamily: 'FontAwesome',
-				content: "'\\f00c'",
+				content: '\'\\f00c\'',
 				width: '20px',
 				height: '20px',
 				lineHeight: '10px',

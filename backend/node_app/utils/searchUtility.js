@@ -1454,24 +1454,28 @@ class SearchUtility {
 						}
 						else if (r.inner_hits.paragraphs && isCompareReturn) {
 							result.paragraphs = [];
+							result.score = 0;
 							
 							r.inner_hits.paragraphs.hits.hits.forEach(paragraph => {
 								const entities = [];
 								Object.keys(paragraph._source.entities).forEach(entKey => {
 									paragraph._source.entities[entKey].forEach(org => {
 										entities.push(org);
-									})
-								})
-								
+									});
+								});
+								result.score += paragraphResults[paragraph._source.id].score;
 								result.paragraphs.push({
 									id: paragraph._source.id,
 									par_raw_text_t: paragraph._source.par_raw_text_t,
 									page_num_i: paragraph._source.page_num_i,
 									entities: entities,
 									score: paragraphResults[paragraph._source.id].score,
-									transformTextMatch: paragraphResults[paragraph._source.id].text
-								})
-							})
+									transformTextMatch: paragraphResults[paragraph._source.id].text,
+									paragraphIdBeingMatched: paragraphResults[paragraph._source.id].paragraphIdBeingMatched
+								});
+							});
+							
+							result.score /= result.paragraphs.length;
 						} else {
 							r.inner_hits.pages.hits.hits.forEach((phit) => {
 								const pageIndex = phit._nested.offset;
@@ -1522,8 +1526,13 @@ class SearchUtility {
 					results.docs.push(result);
 				}
 			});
+			
 			results.searchTerms = searchTerms;
 			results.expansionDict = expansionDict;
+			
+			if (isCompareReturn) {
+				results.docs.sort((a, b) => b.score - a.score);
+			}
 
 			return results;
 		} catch (err) {

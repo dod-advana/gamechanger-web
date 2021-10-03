@@ -112,6 +112,7 @@ const PolicySearchBarHandler = {
 						onFocus={() => {
 							setDropdownOpen(true);
 						}}
+						onClick={() => setState(dispatch, {inputActive: 'searchInput'})}
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>
