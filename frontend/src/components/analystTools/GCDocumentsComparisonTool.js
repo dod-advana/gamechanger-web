@@ -16,7 +16,6 @@ import Pagination from 'react-js-pagination';
 import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../gamechangerUtils';
 import {Card} from '../cards/GCCard';
 import CloseIcon from '@material-ui/icons/Close';
-import GCButton from '../common/GCButton';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -43,14 +42,16 @@ const DocumentCompareContainer = styled.div`
 	height: 500px;
 
 	.relevant-doc-text-container {
-		text-align: right;
-		margin-right: 60px;
+		display: flex;
+		place-content: space-evenly;
+		width: 100%;
 		
 		& .relevant-doc-text {
 			color: ${'#000000DE'}
 			font-family: Montserrat;
 			font-size: 14px;
 			margin-bottom: 20px;
+			width: 48%;
 		}
 	}
 	
@@ -66,7 +67,7 @@ const DocumentCompareContainer = styled.div`
 	        border: 2px solid ${'#BCCBDB'};
 	        border-radius: 6px;
 	        width: 48%;
-	        padding: 5px;
+	        padding: 10px;
 	        
 	        & .compare-header {
 		        color: ${'#000000DE'};
@@ -187,7 +188,8 @@ const GCDocumentsComparisonTool = (props) => {
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [page, setPage] = useState(1);
-	const [compareFilename, setCompareFilename] = useState(undefined);
+	const [compareDocument, setCompareDocument] = useState(undefined);
+	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
 	
 	
 	useEffect(() => {
@@ -215,19 +217,36 @@ const GCDocumentsComparisonTool = (props) => {
 	
 	useEffect(() => {
 		if (state.compareModalOpen) {
-			setCompareFilename(encode(state.compareFilename))
+			const doc = returnedDocs.filter(document => {
+				return document.filename === state.compareFilename;
+			})[0];
+			
+			let tmpCompareIdx;
+			doc.paragraphs.forEach(par => {
+				if (tmpCompareIdx === undefined) {
+					tmpCompareIdx = par.paragraphIdBeingMatched;
+				}
+			});
+			
+			setCompareParagraphIndex(tmpCompareIdx);
+			setCompareDocument(doc);
 		}
-	}, [state.compareModalOpen, state.compareFilename]);
+	}, [returnedDocs, state.compareModalOpen, state.compareFilename]);
 	
 	const measuredRef = useCallback(
 		(node) => {
-			if (node !== null && compareFilename) {
-				if (compareFilename) {
+			if (node !== null && compareDocument) {
+				
+				const matchingPars = compareDocument.paragraphs.filter(par => {
+					return par.paragraphIdBeingMatched === compareParagraphIndex;
+				});
+				
+				if (compareDocument && matchingPars.length > 0) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
-							compareFilename,
-							'',
-							1,
+							encode(compareDocument.filename || ''),
+							`"${paragraphs[compareParagraphIndex]}"`,
+							matchingPars[0].page_num_i + 1,
 							true,
 							state.cloneData
 						)
@@ -237,8 +256,20 @@ const GCDocumentsComparisonTool = (props) => {
 				}
 			}
 		},
-		[compareFilename, state.cloneData]
+		[paragraphs, compareDocument, state.cloneData, compareParagraphIndex]
 	);
+	
+	const getMatchingParsCount = (compareIdx) => {
+		return compareDocument.paragraphs.filter(par => {
+			return par.paragraphIdBeingMatched === compareIdx;
+		}).length;
+	}
+	
+	const handleSetCompareIndex = (idx) => {
+		if (getMatchingParsCount(idx) > 0){
+			setCompareParagraphIndex(idx);
+		}
+	}
 	
 	const handleFilesDropped = (files) => {
 	
@@ -296,31 +327,49 @@ const GCDocumentsComparisonTool = (props) => {
 				<DialogContent>
 					<DocumentCompareContainer>
 						<div className={'relevant-doc-text-container'}>
+							<Typography className={'relevant-doc-text'}>Click each paragraph below to jump to the page the match was found on</Typography>
 							<Typography className={'relevant-doc-text'}>This document may contain relevant information to your search</Typography>
 						</div>
-						<div className={'compare-area'}>
-							<div className={'uploaded-doc'}>
-								<Typography className={'compare-header'}>Uploaded Document</Typography>
-								{paragraphText}
+						{compareDocument &&
+							<div className={'compare-area'}>
+								<div className={'uploaded-doc'}>
+									<Typography className={'compare-header'}>Uploaded Document</Typography>
+									{paragraphs.map((paragraph, idx) => (
+										<>
+											<div
+												style={{
+													border: idx === compareParagraphIndex ? `2px solid ${'#386f94'}` : '',
+													padding: idx === compareParagraphIndex ? `5px` : '',
+													borderRadius: 6,
+													cursor: getMatchingParsCount(idx) > 0 ? 'pointer' : ''
+												}}
+												onClick={() => handleSetCompareIndex(idx)}
+											>
+												{paragraph}
+											</div>
+											<br/>
+										</>
+									))}
+								</div>
+								<div className={'relevant-document'}>
+									<iframe
+										title={'PDFViewer'}
+										className="aref"
+										id={'pdfViewer'}
+										ref={measuredRef}
+										onLoad={() =>
+											handlePdfOnLoad(
+												'pdfViewer',
+												'viewerContainer',
+												compareDocument.filename,
+												'PDF Viewer'
+											)
+										}
+										style={{width: '100%', height: '100%'}}
+									/>
+								</div>
 							</div>
-							<div className={'relevant-document'}>
-								<iframe
-									title={'PDFViewer'}
-									className="aref"
-									id={'pdfViewer'}
-									ref={measuredRef}
-									onLoad={() =>
-										handlePdfOnLoad(
-											'pdfViewer',
-											'viewerContainer',
-											compareFilename,
-											'PDF Viewer'
-										)
-									}
-									style={{ width: '100%', height: '100%' }}
-								/>
-							</div>
-						</div>
+						}
 					</DocumentCompareContainer>
 				</DialogContent>
 
@@ -506,7 +555,7 @@ const styles = {
 
 const useStyles = makeStyles((theme) => ({
 	inputBoxRoot: {
-		backgroundColor: '#FFFFFF',
+		backgroundColor: '#FFFFFF'
 	},
 	outlinedInput: {
 		color: '#0000008A',
@@ -517,12 +566,16 @@ const useStyles = makeStyles((theme) => ({
 		'&focused $notchedOutline': {
 			border: `2px solid ${'#B6C6D8'} !important`,
 			borderRadius: 6
+		},
+		'& textarea': {
+			height: '100%'
 		}
 	},
 	focused: {},
 	notchedOutline: {
 		border: `2px solid ${'#B6C6D8'} !important`,
-		borderRadius: 6
+		borderRadius: 6,
+		height: '100%'
 	},
 	dialogXl: {
 		maxWidth: '1920px',
