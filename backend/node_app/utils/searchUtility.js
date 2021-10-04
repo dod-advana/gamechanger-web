@@ -1403,7 +1403,6 @@ class SearchUtility {
 				const { _source = {} } = r;
 				const { topics_rs = {} } = _source;
 				result.topics_rs = Object.keys(topics_rs);
-				result.paragraphs = [];
 
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
