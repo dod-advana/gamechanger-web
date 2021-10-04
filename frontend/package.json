@@ -53,6 +53,7 @@
 		"sanitize-html": "^2.4.0",
 		"spark-md5": "^3.0.0",
 		"styled-components": "^4.2.1",
+		"ts-jest": "^27.0.5",
 		"typeface-montserrat": "0.0.54",
 		"typeface-noto-sans": "0.0.54",
 		"underscore": "^1.8.3",
@@ -60,12 +61,18 @@
 		"xlsx": "^0.17.0"
 	},
 	"devDependencies": {
+		"babel-jest": "^27.2.4",
+		"chai": "^4.3.4",
 		"decompress-tar": "^4.0.0",
 		"decompress-tarbz2": "^4.0.0",
 		"decompress-targz": "^4.0.0",
+		"enzyme": "^3.11.0",
+		"enzyme-adapter-react-16": "^1.15.6",
 		"eslint": "^7.11.0",
 		"eslint-plugin-import": "^2.23.4",
 		"eslint-plugin-react": "^7.24.0",
+		"jest": "^27.2.4",
+		"jest-environment-jsdom": "^27.0.6",
 		"react-scripts": "^4.0.3",
 		"sass": "^1.38.0",
 		"sass-loader": "^12.1.0",
@@ -89,6 +96,10 @@
 		"eslint": "eslint --fix --debug -c package.json ./src/"
 	},
 	"jest": {
+		"moduleDirectories": [
+			"node_modules",
+			"src"
+		],
 		"moduleNameMapper": {
 			"\\.(css|less)$": "identity-obj-proxy",
 			"\\.(pdf|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/test/mock.js"
@@ -101,7 +112,11 @@
 		"transformIgnorePatterns": [
 			"<rootDir>/test/fsd/util",
 			"<rootDir>/node_modules/"
-		]
+		],
+		"transform": {
+			"\\.[jt]sx?$": "babel-jest"
+		},
+		"testEnvironment": "jsdom"
 	},
 	"browserslist": {
 		"production": [
@@ -161,7 +176,21 @@
 			]
 		},
 		"env": {
-			"es6": true
+			"es6": true,
+			"development": {
+				"plugins": [
+					"transform-es2015-modules-commonjs"
+				]
+			},
+			"test": {
+				"plugins": [
+					"transform-es2015-modules-commonjs",
+					"@babel/plugin-proposal-class-properties"
+				],
+				"presets": [
+					"@babel/preset-react"
+				]
+			}
 		},
 		"parserOptions": {
 			"ecmaVersion": 2018,

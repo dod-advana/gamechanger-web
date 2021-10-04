@@ -26,7 +26,7 @@ const TableRow = styled.div`
 	text-align: center;
 `;
 
-const filterCaseInsensitiveIncludes = (filter, row) =>{
+export const filterCaseInsensitiveIncludes = (filter, row) =>{
 	const id = filter.pivotId || filter.id;
 	return (
 		row[id] !== undefined ?
