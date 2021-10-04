@@ -61,60 +61,6 @@ class AnalystToolsController {
 			res.status(500).send(e);
 		}
 	}
-	
-	cleanUpEsResultsForDocumentComparisonTool(raw, paragraphResults,user) {
-		try {
-			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
-				return { totalCount: 0, docs: [] };
-			}
-
-			let results = {};
-
-			results.totalCount = raw.body.hits.total.value;
-			results.docs = [];
-
-			raw.body.hits.hits.forEach((r) => {
-
-				const result = this.searchUtility.transformEsFields(r.fields);
-				const doc = {
-					doc_id: result.id,
-					doc_type: result.doc_type,
-					doc_num: result.doc_num,
-					display_title_s: result.display_title_s,
-					display_org_s: result.display_org_s,
-					display_doc_type_s: result.display_doc_type_s,
-					ref_list: result.ref_list,
-					pagerank_r: result.pagerank_r,
-					ref_name: `${result.doc_type} ${result.doc_num}`,
-					paragraphs: [],
-					topics: Object.keys(r._source.topics_rs)
-				};
-				r.inner_hits.paragraphs.hits.hits.forEach(paragraph => {
-					const entities = [];
-					Object.keys(paragraph._source.entities).forEach(entKey => {
-						paragraph._source.entities[entKey].forEach(org => {
-							entities.push(org);
-						})
-					})
-					
-					doc.paragraphs.push({
-						id: paragraph._source.id,
-						par_raw_text_t: paragraph._source.par_raw_text_t,
-						entities: entities,
-						score: paragraphResults[paragraph._source.id].score,
-						transformTextMatch: paragraphResults[paragraph._source.id].text
-					})
-				})
-
-				results.docs.push(doc);
-			});
-
-			return results;
-		} catch (err) {
-			this.logger.error(err, 'ZT0UBU2', user);
-		}
-	}
-
 }
 
 module.exports.AnalystToolsController = AnalystToolsController;
