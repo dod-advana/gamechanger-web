@@ -431,7 +431,7 @@ class AppStatsController {
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-	async queryDocumentUsageData(connection){
+	async queryDocumentUsageData(startDate, connection){
 		return new Promise((resolve, reject) => {
 			connection.query(`
 				select 
@@ -446,11 +446,12 @@ class AppStatsController {
 				where 
 					b.name LIKE 'PDFViewer%gamechanger' 
 					AND b.idaction = a.idaction_name
+					and a.server_time > ?
 				group by
 					b.name
 				order by
 					visit_count DESC;`,
-			[],
+			[`${startDate}`],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -466,7 +467,7 @@ class AppStatsController {
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-		 async getSearchesAndPdfs(connection){
+		 async getSearchesAndPdfs(startDate, connection){
 			return new Promise((resolve, reject) => {
 				connection.query(`
 				select 
@@ -480,9 +481,10 @@ class AppStatsController {
 					( b.name LIKE 'PDFViewer%gamechanger'
 					OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
 					AND b.idaction = a.idaction_name
+					AND server_time > ?
 				order by 
 					server_time asc;`,
-				[],
+				[`${startDate}`],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -502,6 +504,9 @@ class AppStatsController {
 	async getDocumentUsageData(req, res) {
 		let connection;
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
+		const opts = { daysBack, offset, filters, sorting, pageSize };
+		const startDate = this.getDateNDaysAgo(opts.daysBack);
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -514,8 +519,8 @@ class AppStatsController {
 				data: []
 			};
 
-			const searches = await this.getSearchesAndPdfs(connection);
-			const docData = await this.queryDocumentUsageData(connection);
+			const searches = await this.getSearchesAndPdfs(startDate, connection);
+			const docData = await this.queryDocumentUsageData(startDate, connection);
 
 			// create search map, grouping searches by visit ID, ordered by time. 
 			const searchMap = {};

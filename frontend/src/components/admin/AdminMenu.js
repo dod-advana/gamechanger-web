@@ -108,7 +108,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 					<ConstrainedIcon src={DashboardIcon} />
 				</HoverNavItem>
 			</Tooltip>
-			<Tooltip title="Search PDF Mapping" placement="right" arrow>
+			<Tooltip title="User Tracker Tools" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -256,7 +256,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					toolTheme={toolTheme}
 				>
 					<ConstrainedIcon src={ReportIcon} />
-					<span style={{ marginLeft: '10px' }}>Search PDF Mapping</span>
+					<span style={{ marginLeft: '10px' }}>User Tracker Tools</span>
 				</HoverNavItem>
 			</Tooltip>
 
