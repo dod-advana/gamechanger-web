@@ -26,6 +26,7 @@ import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
+import { Link } from 'react-router-dom';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -161,40 +162,44 @@ const PolicyNavigationHandler = {
 					</HoverNavItem>
 				</GCTooltip>
 				<GCTooltip title="Data Tracker" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'showDataTracker'
-							);
-						}}
-						active={state.pageDisplayed === PAGE_DISPLAYED.dataTracker}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={DataStatusTrackerIcon} />
-					</HoverNavItem>
+					<Link to={`/gamechanger/${PAGE_DISPLAYED.dataTracker}`}>
+						<HoverNavItem
+							centered
+							onClick={() => {
+								setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'SidebarInteraction',
+									'showDataTracker'
+								);
+							}}
+							active={state.pageDisplayed === PAGE_DISPLAYED.dataTracker}
+							toolTheme={toolTheme}
+						>
+							<ConstrainedIcon src={DataStatusTrackerIcon} />
+						</HoverNavItem>
+					</Link>
 				</GCTooltip>
 				<GCTooltip title="Analyst Tools" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							setState(dispatch, {
-								pageDisplayed: PAGE_DISPLAYED.analystTools,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'showResponsibilityTracker',
-								'onCLick'
-							);
-						}}
-						active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AnalystToolsIcon} />
-					</HoverNavItem>
+					<Link to={`/gamechanger/${PAGE_DISPLAYED.analystTools}`}>
+						<HoverNavItem
+							onClick={() => {
+								setState(dispatch, {
+									pageDisplayed: PAGE_DISPLAYED.analystTools,
+								});
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'showResponsibilityTracker',
+									'onCLick'
+								);
+							}}
+							centered
+							active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
+							toolTheme={toolTheme}
+						>
+							<ConstrainedIcon src={AnalystToolsIcon} />
+						</HoverNavItem>
+					</Link>
 				</GCTooltip>
 				<GCTooltip title="Clone Request" placement="right" arrow>
 					<a
@@ -220,21 +225,23 @@ const PolicyNavigationHandler = {
 					</a>
 				</GCTooltip>
 				<GCTooltip title="About Us" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'showAboutUs'
-							);
-						}}
-						active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AboutUsIcon} />
-					</HoverNavItem>
+					<Link to={`/gameChanger/${PAGE_DISPLAYED.aboutUs}`}>
+						<HoverNavItem
+							centered
+							onClick={() => {
+								setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'SidebarInteraction',
+									'showAboutUs'
+								);
+							}}
+							active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
+							toolTheme={toolTheme}
+						>
+							<ConstrainedIcon src={AboutUsIcon} />
+						</HoverNavItem>
+					</Link>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>

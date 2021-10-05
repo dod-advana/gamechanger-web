@@ -24,7 +24,11 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-
+import {
+	Route,
+	Switch,
+	Link
+} from 'react-router-dom';
 const gameChangerAPI = new GameChangerAPI();
 
 const MainView = (props) => {
@@ -137,11 +141,11 @@ const MainView = (props) => {
 	};
 
 	const getAnalystTools = () => {
-		return <GCResponsibilityTracker state={state} />;
+		return <GCResponsibilityTracker state={state} dispatch={dispatch}/>;
 	};
 
 	const getDataTracker = () => {
-		return <GCDataStatusTracker state={state} />;
+		return <GCDataStatusTracker state={state} dispatch={dispatch}/>;
 	};
 
 	const getUserDashboard = () => {
@@ -193,7 +197,7 @@ const MainView = (props) => {
 	};
 
 	const getAboutUs = () => {
-		return <GCAboutUs state={state} />;
+		return <GCAboutUs state={state} dispatch={dispatch}/>;
 	};
 
 	const handleDeleteFavoriteSearch = async (search) => {
@@ -243,41 +247,43 @@ const MainView = (props) => {
 					)}
 					<React.Fragment>
 						{state.pageDisplayed !== 'aboutUs' && (
-							<Button
-								style={{
-									marginLeft: '10px',
-									marginTop: '8px',
-									fontFamily: 'Montserrat',
-									color: '#313541',
-									position: 'absolute',
-								}}
-								startIcon={<ArrowBackIcon />}
-								onClick={() => {
-									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
-									let viewName;
-									switch (state.pageDisplayed) {
-										case PAGE_DISPLAYED.dataTracker:
-											viewName = 'DataTracker';
-											break;
-										case PAGE_DISPLAYED.userDashboard:
-											viewName = 'UserDashboard';
-											break;
-										case PAGE_DISPLAYED.analystTools:
-											viewName = 'AnalystTools';
-											break;
-										default:
-											viewName = 'Main';
-											break;
-									}
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										viewName,
-										'Back'
-									);
-								}}
-							>
-								<></>
-							</Button>
+							<Link to='/gamechanger'>
+								<Button
+									style={{
+										marginLeft: '10px',
+										marginTop: '8px',
+										fontFamily: 'Montserrat',
+										color: '#313541',
+										position: 'absolute',
+									}}
+									startIcon={<ArrowBackIcon />}
+									onClick={() => {
+										setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+										let viewName;
+										switch (state.pageDisplayed) {
+											case PAGE_DISPLAYED.dataTracker:
+												viewName = 'DataTracker';
+												break;
+											case PAGE_DISPLAYED.userDashboard:
+												viewName = 'UserDashboard';
+												break;
+											case PAGE_DISPLAYED.analystTools:
+												viewName = 'AnalystTools';
+												break;
+											default:
+												viewName = 'Main';
+												break;
+										}
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											viewName,
+											'Back'
+										);
+									}}
+								>
+									<></>
+								</Button>
+							</Link>
 						)}
 						<div>
 							<p
@@ -347,30 +353,58 @@ const MainView = (props) => {
 		return mainViewHandler.renderHideTabs(props);
 	};
 
-	switch (state.pageDisplayed) {
-		case PAGE_DISPLAYED.analystTools:
-			return getNonMainPageOuterContainer(getAnalystTools);
-		case PAGE_DISPLAYED.dataTracker:
-			return getNonMainPageOuterContainer(getDataTracker);
-		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserDashboard);
-		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs);
-		case PAGE_DISPLAYED.main:
-		default:
-			if (mainViewHandler) {
-				return mainViewHandler.getMainView({
-					state,
-					dispatch,
-					setCurrentTime,
-					renderHideTabs,
-					pageLoaded,
-					getViewPanels,
-				});
-			} else {
-				return <></>;
+	// switch (state.pageDisplayed) {
+	// 	case PAGE_DISPLAYED.analystTools:
+	// 		return getNonMainPageOuterContainer(getAnalystTools);
+	// 	case PAGE_DISPLAYED.dataTracker:
+	// 		return getNonMainPageOuterContainer(getDataTracker);
+	// 	case PAGE_DISPLAYED.userDashboard:
+	// 		return getNonMainPageOuterContainer(getUserDashboard);
+	// 	case PAGE_DISPLAYED.aboutUs:
+	// 		return getNonMainPageOuterContainer(getAboutUs);
+	// 	case PAGE_DISPLAYED.main:
+	// 	default:
+	// 		if (mainViewHandler) {
+	// 			return mainViewHandler.getMainView({
+	// 				state,
+	// 				dispatch,
+	// 				setCurrentTime,
+	// 				renderHideTabs,
+	// 				pageLoaded,
+	// 				getViewPanels,
+	// 			});
+	// 		} else {
+	// 			return <></>;
+	// 		}
+	// }
+	return(
+		<Switch>
+			{mainViewHandler && 
+				<Route exact path={`/${state.cloneData.url}`}>
+					{mainViewHandler.getMainView({
+						state,
+						dispatch,
+						setCurrentTime,
+						renderHideTabs,
+						pageLoaded,
+						getViewPanels,
+					})}
+				</Route>
 			}
-	}
+			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.analystTools}`}>
+				{getNonMainPageOuterContainer(getAnalystTools)}
+			</Route>
+			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.dataTracker}`}>
+				{getNonMainPageOuterContainer(getDataTracker)}
+			</Route>
+			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.userDashboard}`}>
+				{getNonMainPageOuterContainer(getUserDashboard)}
+			</Route>
+			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.aboutUs}`}>
+				{getNonMainPageOuterContainer(getAboutUs)}
+			</Route>
+		</Switch>
+	)
 };
 
 MainView.propTypes = {

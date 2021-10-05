@@ -25,6 +25,7 @@ import { gcOrange } from '../common/gc-colors';
 import GCPrimaryButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { trackEvent } from '../telemetry/Matomo';
+import { setState } from '../../sharedFunctions'
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -33,7 +34,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
-import { getTrackingNameForFactory, exportToCsv } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, exportToCsv, PAGE_DISPLAYED } from '../../gamechangerUtils';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
@@ -132,7 +133,7 @@ const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = (props) => {
 	const classes = useStyles();
-	const { state } = props;
+	const { state, dispatch } = props;
 	/*
 	const {
 		cloneData
@@ -176,7 +177,10 @@ const GCResponsibilityTracker = (props) => {
 			setOtherEntRespFilters(tmpFilters);
 			setVisibleOtherEntRespFilters(tmpFilters);
 		});
-	}, []);
+		setState(dispatch, {
+			pageDisplayed: PAGE_DISPLAYED.analystTools,
+		});
+	}, [dispatch]);
 
 	useEffect(() => {
 		if (otherEntRespSearchText === '') {
