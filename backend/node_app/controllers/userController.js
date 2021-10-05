@@ -3,7 +3,9 @@ const GC_USER = require('../models').gc_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_GROUP= require('../models').favorite_groups;
 const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
+const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
 const GC_HISTORY = require('../models').gc_history;
 const EXPORT_HISTORY = require('../models').export_history;
 const LOGGER = require('../lib/logger');
@@ -29,7 +31,9 @@ class UserController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteGroup = FAVORITE_GROUP,
 			favoriteOrganization = FAVORITE_ORGANIZATION,
+			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
 			gcHistory = GC_HISTORY,
 			exportHistory = EXPORT_HISTORY,
 			searchUtility = new SearchUtility(opts),
@@ -51,7 +55,9 @@ class UserController {
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteGroup = favoriteGroup;
 		this.favoriteOrganization = favoriteOrganization;
+		this.favoriteDocumentsGroup = favoriteDocumentsGroup;
 		this.gcHistory = gcHistory;
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
@@ -112,6 +118,22 @@ class UserController {
 					raw: true
 				});
 
+				const favorite_groups = await this.favoriteGroup.findAll({
+					where: {user_id: user.user_id},
+					raw: true
+				})
+				favorite_groups.forEach(async (group, index) => {
+					const res = await this.favoriteDocumentsGroup.findAll({
+						attributes: ['favorite_document_id'],
+						where: {favorite_group_id: group.id},
+						raw: true
+					})
+					const favoriteList = [];
+					res.forEach(fav => favoriteList.push(fav.favorite_document_id))
+					favorite_groups[index].favorites = favoriteList;
+				})
+				user.favorite_groups = favorite_groups;
+				
 				const favorite_organizations = await this.favoriteOrganization.findAll({
 					where: {user_id: user.user_id},
 					raw: true
@@ -158,6 +180,7 @@ class UserController {
 					const esQuery = {
 						_source: false,
 						stored_fields: [ 'filename', 'title', 'id', 'summary_30', 'doc_type', 'doc_num'],
+						size: favorite_documents.length,
 						query: {
 							terms: { filename: filenames }
 						}
@@ -183,6 +206,7 @@ class UserController {
 					favorite_documents.forEach(doc => {
 						const docData = returnDocsTemp.find(data => data.filename === doc.filename);
 						if (docData) {
+							doc.favorite_id = doc.id;
 							doc.title = `${docData.doc_type} ${docData.doc_num} ${docData.title}`;
 							doc.doc_type = docData.doc_type;
 							doc.doc_num = docData.doc_num;
@@ -624,13 +648,17 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
+			
+			const hashed_user = this.sparkMD5.hash(userId);
+			
 			let ids = await this.gcHistory.findAll({
 				attributes: [
 					[Sequelize.fn('MAX', Sequelize.col('id')), 'id']
 				],
 				where: {
 					clone_name,
-					had_error: 'f'
+					had_error: 'f',
+					user_id: hashed_user
 				},
 				group: ['search'],
 				order: [[Sequelize.col('id'), 'DESC']],
