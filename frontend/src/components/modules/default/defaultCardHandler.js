@@ -13,7 +13,7 @@ import {
 	orgAlias,
 	getMetadataForPropertyTable,
 	encode,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';

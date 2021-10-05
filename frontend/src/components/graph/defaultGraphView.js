@@ -5,8 +5,8 @@ import {
 	getTypeQuery,
 	numberWithCommas,
 	SEARCH_TYPES,
-} from '../../gamechangerUtils';
-import { getSearchObjectFromString, setState } from '../../sharedFunctions';
+} from '../../utils/gamechangerUtils';
+import { getSearchObjectFromString, setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedPolicyGraphView } from './policyGraphView';
 import ViewHeader from '../mainView/ViewHeader';

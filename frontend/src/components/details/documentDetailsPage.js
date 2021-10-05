@@ -15,7 +15,7 @@ import Pagination from 'react-js-pagination';
 import {
 	getTrackingNameForFactory,
 	numberWithCommas,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';

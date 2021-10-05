@@ -5,7 +5,7 @@ import XLSX from 'xlsx';
 import { Typography } from '@material-ui/core';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
-import GameChangerAPI from '../api//gameChanger-service-api';
+import GameChangerAPI from '../api/gameChanger-service-api';
 import GCPrimaryButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { styles } from './util/GCAdminStyles';
@@ -32,7 +32,7 @@ export const filterCaseInsensitiveIncludes = (filter, row) =>{
 		row[id] !== undefined ?
 			String(row[id].toLowerCase()).includes(filter.value.toLowerCase())
 			:
-			true
+			false
 	);
 }
 

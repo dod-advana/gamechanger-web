@@ -7,7 +7,7 @@ import {
 	PAGE_DISPLAYED,
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
 import {
 	checkUserInfo,
@@ -16,7 +16,7 @@ import {
 	getUserData,
 	isDecoupled,
 	setState,
-} from '../../../sharedFunctions';
+} from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();

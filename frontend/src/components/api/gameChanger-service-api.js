@@ -1,7 +1,7 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import { axiosGET, axiosDELETE, axiosPOST } from '../../gamechangerUtils';
+import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
 // import util from '../advana/api/util';
 
 // import { getPdfViewerUrl } from '../advana/api/storage-service-api'

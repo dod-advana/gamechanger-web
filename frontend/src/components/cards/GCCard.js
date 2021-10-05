@@ -5,7 +5,7 @@ import _ from 'lodash';
 import {
 	CARD_FONT_SIZE,
 	getTrackingNameForFactory,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import { Divider, Checkbox } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
@@ -23,7 +23,7 @@ import {
 	handleSaveFavoriteTopic,
 	handleSaveFavoriteOrganization,
 	setState,
-} from '../../sharedFunctions';
+} from '../../utils/sharedFunctions';
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';

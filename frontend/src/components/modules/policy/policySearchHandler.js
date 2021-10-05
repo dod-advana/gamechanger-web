@@ -11,7 +11,7 @@ import {
 	RESULTS_PER_PAGE,
 	SEARCH_TYPES,
 	displayBackendError,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
 import {
 	checkUserInfo,
@@ -20,7 +20,7 @@ import {
 	getUserData,
 	isDecoupled,
 	setState,
-} from '../../../sharedFunctions';
+} from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 

@@ -5,7 +5,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory, orgColorMap } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, orgColorMap } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';

@@ -12,7 +12,8 @@ import Chip from '@material-ui/core/Chip';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
-import { encode, getTrackingNameForFactory } from '../../gamechangerUtils';
+import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px;

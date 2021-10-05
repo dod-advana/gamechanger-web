@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 // import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
 import { trackEvent } from '../../telemetry/Matomo';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { backgroundWhite, gcOrange } from '../../common/gc-colors';
@@ -13,7 +13,7 @@ import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { Typography } from '@material-ui/core';
 import '../../../containers/gamechanger.css';
 import ResultView from '../../mainView/ResultView';
