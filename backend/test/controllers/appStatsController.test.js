@@ -3,7 +3,6 @@ const { constructorOptionsMock } = require('../resources/testUtility');
 const {
   AppStatsController,
 } = require('../../node_app/controllers/appStatsController');
-const { reqMock, resMock } = require('../resources/testUtility');
 
 describe('AppStatsController', function () {
   describe('#getAppStats', () => {
@@ -158,11 +157,10 @@ describe('AppStatsController', function () {
           return mySqlConnection;
         },
       };
-      const opts = { 
+      const tmpOpts = { 
+        ...opts,
         mysql_lib, 
-        constants,
-        dataApi: {},
-        searchUtility: {},  
+        constants
       };
       const req = {
         body: {
@@ -201,7 +199,7 @@ describe('AppStatsController', function () {
         },
         daysBack: 7,
       };
-      const target = new AppStatsController(opts);
+      const target = new AppStatsController(tmpOpts);
       await target.getAppStats(req, res);
       assert.equal(passedCode, 200);
       assert.deepEqual(sentData, expectedData);
@@ -209,14 +207,6 @@ describe('AppStatsController', function () {
     });
 
     it('should get application stats with internal users to exclude', async (done) => {
-      let constants = {
-        MATOMO_DB_CONFIG: {
-          host: 'fakeHost',
-          user: 'fakeUser',
-          password: 'fakePassword',
-          database: 'fakeDatabase',
-        },
-      };
       let mysqlParams = null;
       let connectCalled = false;
       let endCalled = false;
@@ -255,11 +245,9 @@ describe('AppStatsController', function () {
           return mySqlConnection;
         },
       };
-      const opts = { 
+      const tmpOpts = { 
+        ...opts,
         mysql_lib, 
-        constants,
-        dataApi: {},
-        searchUtility: {},  
       };
       const req = {
         body: {
@@ -298,7 +286,7 @@ describe('AppStatsController', function () {
         },
         daysBack: 7,
       };
-      const target = new AppStatsController(opts);
+      const target = new AppStatsController(tmpOpts);
       await target.getAppStats(req, res);
       assert.equal(passedCode, 200);
       assert.deepEqual(sentData, expectedData);
@@ -306,14 +294,7 @@ describe('AppStatsController', function () {
     });
 
     it('should get application stats with queries to exclude for top queries', async (done) => {
-      let constants = {
-        MATOMO_DB_CONFIG: {
-          host: 'fakeHost',
-          user: 'fakeUser',
-          password: 'fakePassword',
-          database: 'fakeDatabase',
-        },
-      };
+
       let mysqlParams = null;
       let connectCalled = false;
       let endCalled = false;
@@ -353,11 +334,9 @@ describe('AppStatsController', function () {
           return mySqlConnection;
         },
       };
-      const opts = { 
-        mysql_lib, 
-        constants,
-        dataApi: {},
-        searchUtility: {},  
+      const tmpOpts = { 
+        ...opts,
+        mysql_lib,  
       };
 
       const req = {
@@ -399,7 +378,7 @@ describe('AppStatsController', function () {
         },
       };
 
-      const target = new AppStatsController(opts);
+      const target = new AppStatsController(tmpOpts);
       await target.getAppStats(req, res);
       assert.equal(passedCode, 200);
       assert.deepEqual(sentData, expectedData);
@@ -464,7 +443,14 @@ describe('AppStatsController', function () {
       const req = {
         body: {
           isClone: false,
-          cloneData: { clone_name: 'gamechanger' },
+          cloneData: { clone_name: 'gamechanger' }
+        },
+        query: {
+          daysBack: 3, 
+          offset: 0, 
+          filters: [], 
+          sorting: [], 
+          pageSize: 1
         },
         get: (header) => ('test')
       };
