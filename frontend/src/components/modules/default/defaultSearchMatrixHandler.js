@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
 const DefaultSearchMatrixHandler = {
 	getSearchMatrixItems(props) {
-		return <></>
-	}
-}
+		return <></>;
+	},
+};
 
 export default DefaultSearchMatrixHandler;

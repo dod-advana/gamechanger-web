@@ -4,5 +4,4 @@ PolicyCardGenerator.prototype.generateCards = (data) => {
 	console.log(data);
 };
 
-
 export const generator = new PolicyCardGenerator();

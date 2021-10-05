@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Dialog from 'material-ui/Dialog';
+import Dialog from '@material-ui/core/Dialog';
 import UOTPrimaryButton from './GCPrimaryButton';
 import UOTSecondaryButton from './GCSecondaryButton';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/Close';
 
 const UOTDialog = (props) => {
-	const hasBtn = props.primaryLabel || props.secondaryLabel || props.tertiaryLabel ? true : false;
+	const hasBtn =
+		props.primaryLabel || props.secondaryLabel || props.tertiaryLabel
+			? true
+			: false;
 
 	const styles = {
 		dialog: {
@@ -17,13 +20,13 @@ const UOTDialog = (props) => {
 		},
 		mainContainer: {
 			paddingLeft: 20,
-			paddingRight: 20
+			paddingRight: 20,
 		},
 		title: {
 			fontFamily: 'Roboto',
 			fontSize: 24,
 			color: '#3c4144',
-			paddingBottom: 20
+			paddingBottom: 20,
 		},
 		label: {
 			height: 15,
@@ -33,25 +36,25 @@ const UOTDialog = (props) => {
 		contentRow: {
 			marginBottom: hasBtn ? 20 : 0,
 			maxHeight: props.maxHeight || 400,
-			overflowY: 'auto'
+			overflowY: 'auto',
 		},
 		secondaryButton: {
 			marginRight: 10,
-			display: 'inline'
-		}
+			display: 'inline',
+		},
 	};
 
 	const CloseButton = styled.div`
 		padding: 6px;
 		background-color: white;
 		border-radius: 5px;
-		color: #8091A5 !important;
-		border: 1px solid #B0B9BE;
+		color: #8091a5 !important;
+		border: 1px solid #b0b9be;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		flex: .4;
+		flex: 0.4;
 		position: absolute;
 		right: 0px;
 		top: 0px;
@@ -65,10 +68,13 @@ const UOTDialog = (props) => {
 			contentStyle={styles.dialog}
 			autoScrollBodyContent={true}
 			bodyStyle={props.bodyStyle}
-			paperProps={props.paperProps}	// container
+			paperProps={props.paperProps} // container
 			bodyClassName={props.bodyClassName}
 		>
-			<div className="row" style={{ ...styles.mainContainer, ...props.mainContainerStyle }}>
+			<div
+				className="row"
+				style={{ ...styles.mainContainer, ...props.mainContainerStyle }}
+			>
 				<div className="col-xs-12">
 					<div className="row" style={props?.titleStyle}>
 						<div className="col-xs-12">
@@ -85,44 +91,42 @@ const UOTDialog = (props) => {
 							{props.children}
 						</div>
 					</div>
-					{hasBtn &&
-					<div className="row" style={styles.buttonRow}>
-						<div className="col-xs-12">
-							<div className="pull-right">
-								{props.tertiaryLabel &&
-									<UOTSecondaryButton
-										label={props.tertiaryLabel}
-										onClick={props.tertiaryAction}
-										marginRight={10}
-										id="tertiary-dialog-btn"
-									/>
-								}	
-								{props.secondaryLabel &&
-									<UOTSecondaryButton
-										label={props.secondaryLabel}
-										onClick={props.secondaryAction}
-										marginRight={10}
-										id="secondary-dialog-btn"
-									/>
-								}
-								{props.primaryLabel && 
-									<UOTPrimaryButton
-										label={props.primaryLabel}
-										onClick={props.primaryAction}
-										disabled={props.disabled}
-										id="primary-dialog-btn"
-									/>
-								}
+					{hasBtn && (
+						<div className="row" style={styles.buttonRow}>
+							<div className="col-xs-12">
+								<div className="pull-right">
+									{props.tertiaryLabel && (
+										<UOTSecondaryButton
+											label={props.tertiaryLabel}
+											onClick={props.tertiaryAction}
+											marginRight={10}
+											id="tertiary-dialog-btn"
+										/>
+									)}
+									{props.secondaryLabel && (
+										<UOTSecondaryButton
+											label={props.secondaryLabel}
+											onClick={props.secondaryAction}
+											marginRight={10}
+											id="secondary-dialog-btn"
+										/>
+									)}
+									{props.primaryLabel && (
+										<UOTPrimaryButton
+											label={props.primaryLabel}
+											onClick={props.primaryAction}
+											disabled={props.disabled}
+											id="primary-dialog-btn"
+										/>
+									)}
+								</div>
 							</div>
 						</div>
-					</div>
-					}
-
+					)}
 				</div>
 			</div>
 		</Dialog>
 	);
-
 };
 
 UOTDialog.propTypes = {
@@ -132,7 +136,7 @@ UOTDialog.propTypes = {
 	primaryAction: PropTypes.func.isRequired,
 	disabled: PropTypes.bool,
 	secondaryLabel: PropTypes.string,
-	secondaryAction: PropTypes.func
+	secondaryAction: PropTypes.func,
 };
 
 export default UOTDialog;

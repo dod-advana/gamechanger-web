@@ -1,39 +1,45 @@
 import React from 'react';
-import { Tooltip} from "@material-ui/core";
-import {ConstrainedIcon} from "@dod-advana/advana-side-nav/dist/SlideOutMenu";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
+import { Tooltip } from '@material-ui/core';
+import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import CreateIcon from '@material-ui/icons/Create';
 
-import AdminIcon from "../../images/icon/AdminIcon.png";
-import CloneIcon from "../../images/icon/CloneIcon.png";
-import AuthIcon from "../../images/icon/Authority.png";
+import AdminIcon from '../../images/icon/AdminIcon.png';
+import CloneIcon from '../../images/icon/CloneIcon.png';
+import AuthIcon from '../../images/icon/Authority.png';
 import AnalystToolsIcon from '../../images/icon/analyticswht.png';
 import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
 import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
-import { HoverNavItem } from '../../components/navigation/NavItems'
-import {toolTheme} from './util/GCAdminStyles';
+import { HoverNavItem } from '../../components/navigation/NavItems';
+import { toolTheme } from './util/GCAdminStyles';
 /**
  * This file containes two components ClosedAdminMenu and OpenedAdminMenu
  * Both of theses components are the admin page menu on the left and have a list of buttons with icons.
  * When you click on a button from the menu it renders that page in the main open area.
  */
- const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled =
+	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
+	process.env.REACT_APP_GC_DECOUPLED === 'true';
 /**
  * @class ClosedAdminMenu
- * @param {method} props.setPageToView - Renders the selected component in the open space 
+ * @param {method} props.setPageToView - Renders the selected component in the open space
  * @param {Object} props.PAGES  - a dictionary of component names to pass into setPageToView
  */
 const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
+		<div
+			style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+		>
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
 						centered
-						onClick={() => { setPageToView(PAGES.general); return false; }}
+						onClick={() => {
+							setPageToView(PAGES.general);
+							return false;
+						}}
 						toolTheme={toolTheme}
 					>
 						<ConstrainedIcon src={AdminIcon} />
@@ -41,13 +47,13 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{(Permissions.isGameChangerAdmin() && isDecoupled) && (
+			{Permissions.isGameChangerAdmin() && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
 						centered
-						onClick={() => { 
-							setPageToView(PAGES.adminList); 
-							return false; 
+						onClick={() => {
+							setPageToView(PAGES.adminList);
+							return false;
 						}}
 						toolTheme={toolTheme}
 					>
@@ -70,7 +76,9 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			<Tooltip title="Service Notifications" placement="right" arrow>
-				<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)}
+				<HoverNavItem
+					centered
+					onClick={() => setPageToView(PAGES.notifications)}
 					toolTheme={toolTheme}
 				>
 					<AddAlert style={{ fontSize: 30 }} />
@@ -79,7 +87,9 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem centered onClick={() => setPageToView(PAGES.internalUsers)}
+					<HoverNavItem
+						centered
+						onClick={() => setPageToView(PAGES.internalUsers)}
 						toolTheme={toolTheme}
 					>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
@@ -117,16 +127,19 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 					onClick={() => {
 						setPageToView(PAGES.appStats);
 						return false;
-					}}>
+					}}
+				>
 					<ConstrainedIcon src={AnalystToolsIcon} />
 				</HoverNavItem>
 			</Tooltip>
-			
+
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
-					<HoverNavItem centered onClick={() => {
-						setPageToView(PAGES.apiKeys);
-					}}
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setPageToView(PAGES.apiKeys);
+						}}
 						toolTheme={toolTheme}
 					>
 						<VpnKeyIcon style={{ fontSize: 30 }} />
@@ -136,9 +149,11 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
-					<HoverNavItem centered onClick={() => {
-						setPageToView(PAGES.homepageEditor);
-					}}
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setPageToView(PAGES.homepageEditor);
+						}}
 						toolTheme={toolTheme}
 					>
 						<CreateIcon style={{ fontSize: 30 }} />
@@ -147,37 +162,41 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			)}
 		</div>
 	);
-}
+};
 /**
  * @class OpenedAdminMenu
- * @param {method} props.setPageToView - Renders the selected component in the open space 
+ * @param {method} props.setPageToView - Renders the selected component in the open space
  * @param {Object} props.PAGES  - a dictionary of component names to pass into setPageToView
  */
 const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
-
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
-						onClick={() => { setPageToView(PAGES.general); return false; }}
+						onClick={() => {
+							setPageToView(PAGES.general);
+							return false;
+						}}
 						toolTheme={toolTheme}
 					>
-						<ConstrainedIcon src={AdminIcon} /><span style={{ marginLeft: '10px' }}>Admin Page</span>
+						<ConstrainedIcon src={AdminIcon} />
+						<span style={{ marginLeft: '10px' }}>Admin Page</span>
 					</HoverNavItem>
 				</Tooltip>
 			)}
 
-			{(Permissions.isGameChangerAdmin() && isDecoupled) && (
+			{Permissions.isGameChangerAdmin() && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
-						onClick={() => { 
-							setPageToView(PAGES.adminList); 
-							return false; 
+						onClick={() => {
+							setPageToView(PAGES.adminList);
+							return false;
 						}}
 						toolTheme={toolTheme}
 					>
-						<ConstrainedIcon src={AuthIcon} /><span style={{ marginLeft: '10px' }}>Manage Admins</span>
+						<ConstrainedIcon src={AuthIcon} />
+						<span style={{ marginLeft: '10px' }}>Manage Admins</span>
 					</HoverNavItem>
 				</Tooltip>
 			)}
@@ -190,12 +209,14 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					}}
 					toolTheme={toolTheme}
 				>
-					<ConstrainedIcon src={CloneIcon} /><span style={{ marginLeft: '10px' }}>Clone Gamechanger</span>
+					<ConstrainedIcon src={CloneIcon} />
+					<span style={{ marginLeft: '10px' }}>Clone Gamechanger</span>
 				</HoverNavItem>
 			</Tooltip>
 
 			<Tooltip title="Show Notifications" placement="right" arrow>
-				<HoverNavItem onClick={() => setPageToView(PAGES.notifications)}
+				<HoverNavItem
+					onClick={() => setPageToView(PAGES.notifications)}
 					toolTheme={toolTheme}
 				>
 					<AddAlert style={{ fontSize: 30 }} />
@@ -205,7 +226,8 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem onClick={() => setPageToView(PAGES.internalUsers)}
+					<HoverNavItem
+						onClick={() => setPageToView(PAGES.internalUsers)}
 						toolTheme={toolTheme}
 					>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
@@ -221,7 +243,8 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					}}
 					toolTheme={toolTheme}
 				>
-					<ConstrainedIcon src={DashboardIcon} /><span style={{ marginLeft: '10px' }}>ML Dashboard</span>
+					<ConstrainedIcon src={DashboardIcon} />
+					<span style={{ marginLeft: '10px' }}>ML Dashboard</span>
 				</HoverNavItem>
 			</Tooltip>
 			<Tooltip title="Search PDF Mapping" placement="right" arrow>
@@ -232,7 +255,8 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					}}
 					toolTheme={toolTheme}
 				>
-					<ConstrainedIcon src={ReportIcon} /><span style={{ marginLeft: '10px' }}>Search PDF Mapping</span>
+					<ConstrainedIcon src={ReportIcon} />
+					<span style={{ marginLeft: '10px' }}>Search PDF Mapping</span>
 				</HoverNavItem>
 			</Tooltip>
 
@@ -242,16 +266,19 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					onClick={() => {
 						setPageToView(PAGES.appStats);
 						return false;
-					}}>
-					<ConstrainedIcon src={AnalystToolsIcon} /><span style={{ marginLeft: '10px' }}>View Stats</span>
+					}}
+				>
+					<ConstrainedIcon src={AnalystToolsIcon} />
+					<span style={{ marginLeft: '10px' }}>View Stats</span>
 				</HoverNavItem>
 			</Tooltip>
-			
+
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
-					<HoverNavItem onClick={() => {
-						setPageToView(PAGES.apiKeys);
-					}}
+					<HoverNavItem
+						onClick={() => {
+							setPageToView(PAGES.apiKeys);
+						}}
 						toolTheme={toolTheme}
 					>
 						<VpnKeyIcon style={{ fontSize: 30 }} />
@@ -262,9 +289,10 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 
 			{Permissions.isGameChangerAdmin() && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
-					<HoverNavItem onClick={() => {
-						setPageToView(PAGES.homepageEditor);
-					}}
+					<HoverNavItem
+						onClick={() => {
+							setPageToView(PAGES.homepageEditor);
+						}}
 						toolTheme={toolTheme}
 					>
 						<CreateIcon style={{ fontSize: 30 }} />
@@ -272,9 +300,8 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					</HoverNavItem>
 				</Tooltip>
 			)}
-
 		</div>
 	);
-}
+};
 
-export {ClosedAdminMenu, OpenedAdminMenu}
+export { ClosedAdminMenu, OpenedAdminMenu };
