@@ -194,7 +194,7 @@ const useStyles = makeStyles({
 		visibility: 'hidden',
 		backgroundColor: '#ffffff',
 		borderRadius: '5px',
-		padding: '2px',
+		padding: '4px',
 		border: '2px solid #bdccde',
 	},
 	checkedButton: {
@@ -233,7 +233,7 @@ const useStyles = makeStyles({
 		},
 	},
 	checkboxPill: {
-		width: '145px',
+		width: '200px',
 		textAlign: 'center',
 		borderRadius: '10px',
 		lineHeight: 1.2,
