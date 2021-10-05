@@ -242,7 +242,7 @@ const useStyles = makeStyles({
 		backgroundColor: 'white',
 		boxSizing: 'border-box',
 		color: 'black',
-		minHeight: '35px',
+		minHeight: '40px',
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',

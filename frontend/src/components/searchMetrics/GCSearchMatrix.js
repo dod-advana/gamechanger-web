@@ -265,9 +265,7 @@ export default function SearchMatrix(props) {
 
 	const [matrixHandler, setMatrixHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
-	const [expansionTerms, setExpansionTerms] = React.useState([]);
 
-	const comparableExpansion = JSON.stringify(state.expansionDict);
 
 	useEffect(() => {
 		// Create the factory
@@ -279,110 +277,6 @@ export default function SearchMatrix(props) {
 			setLoaded(true);
 		}
 	}, [state, loaded]);
-
-	useEffect(() => {
-		// nested arrays of expanded terms from each searchTerm
-		let expansion = {};
-		if (comparableExpansion) {
-			expansion = JSON.parse(comparableExpansion);
-		}
-		let expandedTerms = Object.values(expansion || {});
-		const keys = Object.keys(expansion || {});
-		const quotedKeys = keys.map((term) => `"${term}"`);
-		const exclude = new Set([...keys, ...quotedKeys]);
-		let topFive = new Set();
-
-		while(topFive.size < 10){
-			if(expandedTerms.length === 0){
-				break;
-			}
-			const frontArr = expandedTerms[0];
-			const term = frontArr.shift();
-			const [a, ...rest] = expandedTerms;
-			if (!term) {
-				expandedTerms = [...rest];
-			} else {
-				if (!exclude.has(term)) {
-					topFive.add(term);
-				}
-				expandedTerms = [...rest, a];
-			}
-		}
-		let topFiveArr = Array.from(topFive);
-		topFiveArr = topFiveArr.map((term) => {
-			return {
-				...term,
-				checked: exactMatch(state.searchText, term.phrase, ' OR '),
-			};
-		});
-		setExpansionTerms(topFiveArr);
-	}, [state, comparableExpansion]);
-
-	useEffect(() => {
-		if (
-			state.searchSettings.isFilterUpdate &&
-			state.searchSettings.expansionTermAdded
-		) {
-			let newSearchText = state.searchText.trim();
-			expansionTerms.forEach(({ phrase, source, checked }) => {
-				if (checked && !exactMatch(newSearchText, phrase, ' OR ')) {
-					trackEvent(
-						getTrackingNameForFactory(state.cloneData.clone_name),
-						'QueryExpansion',
-						'SearchTermAdded',
-						`${phrase}_${source}`
-					);
-					newSearchText = newSearchText.trim()
-						? `${newSearchText} OR ${phrase}`
-						: phrase;
-				} else if (!checked && exactMatch(newSearchText, `${phrase}`, ' OR ')) {
-					newSearchText = newSearchText.replace(` OR ${phrase}`, '').trim();
-				}
-				newSearchText = phrase
-			})
-			const newSearchSettings = _.cloneDeep(state.searchSettings);
-			newSearchSettings.expansionTermAdded = false;
-			setState(dispatch, {
-				searchText: newSearchText,
-				runSearch: true,
-				searchSettings: newSearchSettings,
-			});
-		}
-	}, [state, expansionTerms, dispatch]);
-
-	const handleSubmit = (event) => {
-		if (event) {
-			event.preventDefault();
-		}
-		let newSearchText = state.searchText.trim();
-		expansionTerms.forEach(({ phrase, source, checked }) => {
-			if (checked && !exactMatch(newSearchText, phrase, ' OR ')) {
-				trackEvent(
-					getTrackingNameForFactory(state.cloneData.clone_name),
-					'QueryExpansion',
-					'SearchTermAdded',
-					`${phrase}_${source}`
-				);
-				newSearchText = newSearchText.trim()
-					? `${newSearchText} OR ${phrase}`
-					: phrase;
-			} else if (!checked && exactMatch(newSearchText, `${phrase}`, ' OR ')) {
-				newSearchText = newSearchText.replace(` OR ${phrase}`, '').trim();
-			}
-		});
-		setState(dispatch, { searchText: newSearchText, runSearch: true });
-	};
-
-	const handleAddSearchTerm = (phrase, source, idx) => {
-		const temp = _.cloneDeep(expansionTerms);
-		temp[idx].checked = !temp[idx].checked;
-		const newSearchSettings = _.cloneDeep(state.searchSettings);
-		console.log(newSearchSettings)
-		newSearchSettings.expansionTermAdded = true;
-		newSearchSettings.isFilterUpdate = true;
-		setState(dispatch, { searchSettings: newSearchSettings });
-		setExpansionTerms(temp);
-	};
 
 	const handleSelectAllCategories = (state, dispatch) => {
 		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
@@ -548,9 +442,6 @@ export default function SearchMatrix(props) {
 									state,
 									classes,
 									dispatch,
-									expansionTerms,
-									handleAddSearchTerm,
-									handleSubmit,
 								})}
 						</div>
 					</div>
@@ -563,7 +454,6 @@ export default function SearchMatrix(props) {
 SearchMatrix.propTypes = {
 	context: PropTypes.shape({
 		state: PropTypes.shape({
-			expansionDict: PropTypes.object,
 			cloneDataSet: PropTypes.bool,
 			cloneData: PropTypes.shape({
 				main_view_module: PropTypes.string,
