@@ -329,7 +329,7 @@ export default () => {
 							onClick={() => {
 								setTabIndex('pdfMapping');
 								setDaysBack(3);
-								}
+							}
 							}						>
 							<Typography variant="h6" display="inline">
 								Search PDF Mapping
@@ -358,7 +358,7 @@ export default () => {
 							onClick={() => {
 								setTabIndex('userTracker');
 								setDaysBack(30);
-								}
+							}
 							}
 						>
 							<Typography variant="h6" display="inline">
