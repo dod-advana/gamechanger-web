@@ -70,7 +70,7 @@
 		"eslint": "^7.11.0",
 		"eslint-plugin-import": "^2.23.4",
 		"eslint-plugin-react": "^7.24.0",
-		"jest": "^27.2.4",
+		"jest": "^26.6.0",
 		"jest-environment-jsdom": "^27.0.6",
 		"react-scripts": "^4.0.3",
 		"sass": "^1.38.0",
