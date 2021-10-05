@@ -22,6 +22,8 @@ import GraphIcon from '../../images/icon/GC 318@3x.png';
 import ScaleIcon from '../../images/icon/GC 319@3x.png';
 import NLPIcon from '../../images/icon/GC 320@3x.png';
 import PentagonImage from '../../images/GC-Ourstoryimg.png';
+import { setState } from '../../sharedFunctions';
+import { PAGE_DISPLAYED } from '../../gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -130,6 +132,10 @@ const GCAboutUs = (props) => {
 
 		fetchData();
 	}, []);
+
+	useEffect(() => {
+		setState(props.dispatch, {pageDisplayed: PAGE_DISPLAYED.aboutUs})
+	}, [props.dispatch])
 
 	useEffect(() => {
 		window.addEventListener('scroll', onScroll);

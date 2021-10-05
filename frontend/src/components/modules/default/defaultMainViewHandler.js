@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import _ from 'lodash';
 
 import ViewHeader from '../../mainView/ViewHeader';
@@ -390,7 +390,7 @@ const DefaultMainViewHandler = {
 
 		const isSelectedDocs =
 			selectedDocuments && selectedDocuments.size ? true : false;
-
+		
 		return (
 			<>
 				{exportDialogVisible && (
