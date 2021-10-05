@@ -1,17 +1,15 @@
 import _ from 'underscore';
-import DocumentIcon from './images/icon/Document.png';
-import OrganizationIcon from './images/icon/Organization.png';
-import { trackEvent } from './components/telemetry/Matomo';
+import DocumentIcon from '../images/icon/Document.png';
+import OrganizationIcon from '../images/icon/Organization.png';
+import { trackEvent } from '../components/telemetry/Matomo';
 // import util from "./components/advana/api/util";
-import Config from './config/config.js';
+import Config from '../config/config.js';
 import { getTextColorBasedOnBackground } from './graphUtils';
 import { useEffect } from 'react';
 import styled from 'styled-components';
-import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { setState } from './sharedFunctions';
-const CryptoJS = require('crypto-js');
-const Base64 = require('crypto-js/enc-base64');
+
 const Color = require('color');
 
 export const RESULTS_PER_PAGE = 18;
@@ -715,28 +713,6 @@ export const formatDate = (dateObj, separator) => {
 	const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(dateObj);
 
 	return `${month}${separator}${day}${separator}${year}`;
-};
-
-export const getSignature = (options, url) => {
-	const signature = Base64.stringify(
-		CryptoJS.SHA256(url, Auth.getTokenPayload() || 'NoToken')
-	);
-	options.headers = { 'X-UA-SIGNATURE': signature };
-};
-
-export const axiosPOST = async (axios, url, data, options = {}) => {
-	getSignature(options, url);
-	return axios.post(url, data, options);
-};
-
-export const axiosGET = async (axios, url, options = {}) => {
-	getSignature(options, url.split('?')[0]);
-	return axios.get(url, options);
-};
-
-export const axiosDELETE = async (axios, url, options = {}) => {
-	getSignature(options, url);
-	return axios.delete(url, options);
 };
 
 export const getQueryVariable = (name, url) => {

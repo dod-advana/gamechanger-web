@@ -2,7 +2,7 @@ import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 // import util from "../advana/api/util";
-import { axiosGET, axiosPOST } from '../../gamechangerUtils';
+import { axiosGET, axiosPOST } from '../../utils/axiosUtils';
 
 const endpoints = {
 	postUserAppVersion: '/api/userAppVersion',

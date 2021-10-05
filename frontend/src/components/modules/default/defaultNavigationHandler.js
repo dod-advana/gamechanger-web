@@ -6,14 +6,14 @@ import {
 	getCloneTitleForFactory,
 	getTrackingNameForFactory,
 	PAGE_DISPLAYED,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import {
 	ConstrainedIcon,
 	PageLink,
 	StyledBadgeSmall
 } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
-import {setState} from '../../../sharedFunctions';
+import {setState} from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
 import CrowdSourcingAppIcon from '../../../images/icon/NewCrowdSourcingIcon.png';
