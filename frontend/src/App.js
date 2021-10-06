@@ -208,7 +208,7 @@ const App = () => {
 										return true;
 									}}
 								/>
-							);
+							));
 						}
 					} else {
 						const url = new URL(window.location.href).hostname;
