@@ -505,8 +505,6 @@ export default function PolicyGraphView(props) {
 		elem.style.cursor = node ? 'pointer' : null;
 		setNodeHoverID(node ? node.id : -1);
 
-		console.log(node);
-
 		if (node) {
 			highlightSelectedNodes(node, filteredGraph.edges);
 		} else {
@@ -636,16 +634,18 @@ export default function PolicyGraphView(props) {
 				break;
 		}
 
-		menuItems.push({
-			className: 'fa fa-book fa-2x',
-			onClick: () =>
-				handleContextMenuButtonClicked(
-					() => handleShowGraphCard(),
-					false,
-					'showGraphCard'
-				),
-			tooltip: `Display the ${cardText} card`,
-		});
+		if (nodeLabel !== 'UKN_Document') {
+			menuItems.push({
+				className: 'fa fa-book fa-2x',
+				onClick: () =>
+					handleContextMenuButtonClicked(
+						() => handleShowGraphCard(),
+						false,
+						'showGraphCard'
+					),
+				tooltip: `Display the ${cardText} card`,
+			});
+		}
 
 		if (nodeLabel === 'Publication' && !notInOriginal) {
 			menuItems.push({
