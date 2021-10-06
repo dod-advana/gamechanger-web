@@ -743,7 +743,7 @@ export default function PolicyGraphView(props) {
 								).toFixed(4) + '%';
 							const topBack =
 								(
-									50 +
+									28 +
 									31 *
 										Math.sin(
 											-0.5 * Math.PI -
