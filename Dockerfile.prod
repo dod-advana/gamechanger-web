@@ -1,38 +1,20 @@
 ARG BASE_IMAGE="node:14"
 FROM $BASE_IMAGE
 
-SHELL ["/bin/bash", "-c"]
-
 # to support RHEL-based and DEBIAN-based version of node
 # e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
 USER root
-RUN (type -P "yum" &> /dev/null) && ( \
-        yum update -y \
-        && yum install -y \
-            git \
-            python38 \
-            python38-devel \
-            make \
-            gcc \
-            gcc-c++ \
-        && yum clean all \
-        && rm -rf /var/cache/yum \
-     ) || ((type -P "apt-get" &> /dev/null) && ( \
-        apt-get update \
-        && apt-get upgrade  -y \
-        && apt-get install -y \
-            git \
-            python3 \
-            python3-dev \
-            make \
-            gcc-6 \
-        && apt-get clean \
-        && rm -rf /var/cache/apt/lists \
-    )) || ( \
-        >&2 echo "[ERROR] Unsupported Base Image" \
-        && exit 1 \
-    )
-
+RUN  yum update -y \
+     && yum install -y \
+        git \
+        python38 \
+        python38-devel \
+        make \
+        gcc \
+        gcc-c++ \
+     && yum clean all \
+     && rm -rf /var/cache/yum
+     
 # non-root app USER/GROUP
 ARG APP_UID=1000
 ARG APP_GID=1000
@@ -62,7 +44,7 @@ ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
-    && ([[ -n "$NPM_AUTH_TOKEN" ]] && ( \
+    && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
         _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
         && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
     ))
@@ -74,20 +56,20 @@ RUN cd "$APP_SHARED_DIR" \
 
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
-RUN cd "${APP_FRONTEND_DIR}" \
-    && npm install
+WORKDIR "${APP_FRONTEND_DIR}"
+RUN npm install  --production
+COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
+RUN npm run build
 
 COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
-RUN cd "${APP_BACKEND_DIR}" \
-    && npm install
+WORKDIR "${APP_BACKEND_DIR}"
+RUN npm install  --production
 
-COPY --chown="$APP_UID:$APP_GID" . "${APP_DIR}"
-RUN cd "${APP_FRONTEND_DIR}" \
-    && npm run build \
-    && mv build "${APP_BACKEND_DIR}"
+COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
+
+RUN mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
 
 # http & https
-HEALTHCHECK CMD which npm || true
 EXPOSE 8990 8443
 WORKDIR "${APP_BACKEND_DIR}"
 ENTRYPOINT ["node"]
