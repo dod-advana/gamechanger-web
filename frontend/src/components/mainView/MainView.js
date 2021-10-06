@@ -379,18 +379,6 @@ const MainView = (props) => {
 	// }
 	return(
 		<Switch>
-			{mainViewHandler && 
-				<Route exact path={`/${state.cloneData.url}`}>
-					{mainViewHandler.getMainView({
-						state,
-						dispatch,
-						setCurrentTime,
-						renderHideTabs,
-						pageLoaded,
-						getViewPanels,
-					})}
-				</Route>
-			}
 			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.analystTools}`}>
 				{getNonMainPageOuterContainer(getAnalystTools)}
 			</Route>
@@ -403,6 +391,18 @@ const MainView = (props) => {
 			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.aboutUs}`}>
 				{getNonMainPageOuterContainer(getAboutUs)}
 			</Route>
+			{mainViewHandler && 
+				<Route>
+					{mainViewHandler.getMainView({
+						state,
+						dispatch,
+						setCurrentTime,
+						renderHideTabs,
+						pageLoaded,
+						getViewPanels,
+					})}
+				</Route>
+			}
 		</Switch>
 	)
 };
