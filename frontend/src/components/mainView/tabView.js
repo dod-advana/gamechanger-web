@@ -5,7 +5,7 @@ import {
 	getTrackingNameForFactory,
 	PAGE_BORDER_RADIUS,
 	useMountEffect,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import {
 	backgroundGreyDark,
 	backgroundWhite,
@@ -18,7 +18,7 @@ import {
 	checkUserInfo,
 	createCopyTinyUrl,
 	setState,
-} from '../../sharedFunctions';
+} from '../../utils/sharedFunctions';
 import { SelectedDocsDrawer } from '../searchBar/GCSelectedDocsDrawer';
 
 const StyledTabsList = styled(TabList)`

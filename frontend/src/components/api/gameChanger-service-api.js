@@ -1,7 +1,7 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import { axiosGET, axiosDELETE, axiosPOST } from '../../gamechangerUtils';
+import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
 // import util from '../advana/api/util';
 
 // import { getPdfViewerUrl } from '../advana/api/storage-service-api'
@@ -87,6 +87,7 @@ const endpoints = {
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
+	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -679,6 +680,11 @@ export default class GameChangerAPI {
 		const url = endpoints.getSearchPdfMapping;
 		return axiosGET(this.axios, url, { params: body });
 	};
+
+	getDocumentUsage = async (body) => {
+		const url = endpoints.getDocumentUsage;
+		return axiosGET(this.axios, url, {params:body});
+	}
 
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;

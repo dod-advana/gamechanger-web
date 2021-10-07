@@ -1982,6 +1982,27 @@ class SearchUtility {
 		};
 	}
 
+	getDocTitleQuery(filenames){
+		return {
+			"_source": [
+				"filename",
+				"display_title_s"
+			],
+			"size": filenames.length,
+			"query": {
+				"bool": {
+					"must": [
+						{
+							"terms": {
+								"filename.search": filenames
+							}
+						}
+					]
+				}
+			}
+		}
+	}
+
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
 		let esIndex = 'gamechanger';

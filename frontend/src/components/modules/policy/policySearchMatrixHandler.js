@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { ThemeProvider } from '@material-ui/core/styles';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import themeDatePicker from '../../common/theme-datepicker';
 import {
 	MuiPickersUtilsProvider,
@@ -18,7 +18,7 @@ import {
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);

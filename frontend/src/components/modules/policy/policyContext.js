@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { orgFilters, typeFilters } from '../../../gamechangerUtils';
+import { orgFilters, typeFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
