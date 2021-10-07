@@ -1,6 +1,8 @@
 const FEEDBACK = require('../models').feedback;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
+const constants = require('../config/constants');
+const { JIRA_CONFIG } = constants;
 
 class FeedbackController {
 	constructor(opts = {}) {
@@ -92,28 +94,28 @@ class FeedbackController {
 			const authConfig = {
 				httpsAgent: new https.Agent({
 					rejectUnauthorized: false,
-					ca: fs.readFileSync(process.env.JIRA_CONFIG.ca),
+					ca: fs.readFileSync(JIRA_CONFIG.ca),
 				}),
 				auth: {
-					username: process.env.JIRA_CONFIG.username,
-					password: process.env.JIRA_CONFIG.password
+					username: JIRA_CONFIG.username,
+					password: JIRA_CONFIG.password
 				}
 			};
 
-			const url = `https://${process.env.JIRA_CONFIG.domain}/rest/api/2/issue/`;
+			const url = `https://${JIRA_CONFIG.domain}/rest/api/2/issue/`;
 
 			const data = {
 				'fields': {
 					'project': {
-						'key': process.env.JIRA_CONFIG.project_key
+						'key': JIRA_CONFIG.project_key
 					},
 					'summary': 'User Submitted Feedback',
 					'description': `${feedback}. \n *Reporter*: ${name} \n *E-mail*: [mailto:${email}]`,
-					[process.env.JIRA_CONFIG.rating_id]: {
+					[JIRA_CONFIG.rating_id]: {
 						'value': rating + ''
 					},
 					'issuetype': {
-						'name': process.env.JIRA_CONFIG.feedbackType
+						'name': JIRA_CONFIG.feedbackType
 					}
 				}
 			};

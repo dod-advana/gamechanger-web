@@ -210,5 +210,14 @@ module.exports = Object.freeze({
 		ORGANIZATION: process.env.SERVICE_ACCOUNT_ORG,
 		ENVIRONMENT: process.env.SERVICE_ACCOUNT_ENV,
 	},
-	REQUEST_TYPE_ID: 113
+	REQUEST_TYPE_ID: 113,
+	JIRA_CONFIG:{
+		username: 'drospond',
+		password: process.env.JIRA_PASSWORD,
+		domain: 'support.advana.boozallencsn.com',
+		ca: process.env.JIRA_CA,
+		project_key: 'UOT',
+		rating_id: 'customfield_10401',
+		feedbackType: 'Customer Satisfaction Feedback'
+	},
 });
