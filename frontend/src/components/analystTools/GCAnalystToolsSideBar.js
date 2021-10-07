@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import {setState} from '../../sharedFunctions';
+import {setState} from '../../utils/sharedFunctions';
 import AnalystToolsFactory from '../factories/analystToolsFactory';
 
 export default function GCAnalystToolsSideBar(props) {

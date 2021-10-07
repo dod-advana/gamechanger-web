@@ -293,7 +293,8 @@ const MainView = (props) => {
 								}}
 							>
 								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
-								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools | {state.analystToolsPageDisplayed}</span>}
+								{(state.pageDisplayed === PAGE_DISPLAYED.analystTools && state.analystToolsPageDisplayed !== 'Document Comparison Tool') && <span>Analyst Tools | {state.analystToolsPageDisplayed}</span>}
+								{(state.pageDisplayed === PAGE_DISPLAYED.analystTools && state.analystToolsPageDisplayed === 'Document Comparison Tool') && <span>Analyst Tools | {state.analystToolsPageDisplayed} <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b></span>}
 								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && (
 									<span>User Dashboard</span>
 								)}

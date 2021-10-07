@@ -8,12 +8,12 @@ import Dropzone from 'react-dropzone';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import FileIcon from '../../images/icon/draganddrop_img.svg'
 import GameChangerAPI from '../api/gameChanger-service-api';
-import {setState} from '../../sharedFunctions';
+import {setState} from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcOrange} from '../common/gc-colors';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Pagination from 'react-js-pagination';
-import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../gamechangerUtils';
+import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../utils/gamechangerUtils';
 import {Card} from '../cards/GCCard';
 import CloseIcon from '@material-ui/icons/Close';
 const _ = require('lodash');
@@ -96,6 +96,25 @@ const DocumentInputContainer = styled.div`
 		border: 2px solid ${'#B6C6D8'} !important;
 		border-radius: 6px;
 		background-color: ${'#ffffff'};
+		
+		& .coming-soon {
+		    position: absolute;
+		    width: 349px;
+		    height: 327px;
+		    background-color: rgba(0,0,0,0.3);
+		    z-index: 99;
+		    border: 2px solid ${'#B6C6D8'} !important;
+			border-radius: 6px;
+			
+			& .coming-soon-text {
+			    color: red;
+			    text-align-last: center;
+			    margin-top: 140px;
+			    font-family: 'Montserrat';
+			    font-weight: bold;
+			}
+		}
+		
 	}
 	
 	.instruction-box {
@@ -396,6 +415,9 @@ const GCDocumentsComparisonTool = (props) => {
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
 							<Grid item xs={3} className={'input-drop-zone'}>
+								<div className={'coming-soon'}>
+									<Typography className={'coming-soon-text'}>COMING SOON</Typography>
+								</div>
 								<Dropzone
 									accept='.doc, .docx, .txt'
 									multiple={false}
