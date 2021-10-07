@@ -13,7 +13,7 @@ import {
 	getReferenceListMetadataPropertyTable,
 	getTrackingNameForFactory,
 	invertedCrawlerMappingFunc,
-} from '../gamechangerUtils';
+} from '../utils/gamechangerUtils';
 import Pagination from 'react-js-pagination';
 import { Card } from '../components/cards/GCCard';
 import GCAccordion from '../components/common/GCAccordion';

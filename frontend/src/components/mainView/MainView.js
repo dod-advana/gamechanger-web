@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
 	getTrackingNameForFactory,
 	PAGE_DISPLAYED,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import { Button } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
@@ -19,7 +19,7 @@ import {
 	handleSaveFavoriteTopic,
 	handleSaveFavoriteOrganization,
 	setState,
-} from '../../sharedFunctions';
+} from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';

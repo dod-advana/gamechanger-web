@@ -5,7 +5,7 @@ import {
 	capitalizeFirst,
 	CARD_FONT_SIZE,
 	getTrackingNameForFactory,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Link, Typography } from '@material-ui/core';
