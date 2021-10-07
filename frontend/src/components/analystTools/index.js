@@ -4,10 +4,10 @@ import {Typography} from '@material-ui/core';
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import propTypes from 'prop-types';
 import {trackEvent} from '../telemetry/Matomo';
-import {getTrackingNameForFactory} from '../../gamechangerUtils';
+import {getTrackingNameForFactory} from '../../utils/gamechangerUtils';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
-import {setState} from '../../sharedFunctions';
+import {setState} from '../../utils/sharedFunctions';
 
 const AnalystTools = (props) => {
 	
