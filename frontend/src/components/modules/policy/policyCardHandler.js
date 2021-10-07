@@ -10,7 +10,7 @@ import {
 	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
@@ -20,7 +20,7 @@ import GCButton from '../../common/GCButton';
 import { Popover, TextField, Typography } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
-import { crawlerMappingFunc } from '../../../gamechangerUtils';
+import { crawlerMappingFunc } from '../../../utils/gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';

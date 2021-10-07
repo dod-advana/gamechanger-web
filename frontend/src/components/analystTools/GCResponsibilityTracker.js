@@ -32,7 +32,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
-import { getTrackingNameForFactory, exportToCsv } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');

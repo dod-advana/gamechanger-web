@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Notification from './Notification';
-import { useMountEffect } from '../../gamechangerUtils';
-import { setState } from '../../sharedFunctions';
+import { useMountEffect } from '../../utils/gamechangerUtils';
+import { setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 
 let notificationInterval;
