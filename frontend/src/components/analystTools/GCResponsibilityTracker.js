@@ -3,7 +3,6 @@ import propTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import {
 	Checkbox,
 	Dialog,
@@ -33,7 +32,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
-import { getTrackingNameForFactory, exportToCsv } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
@@ -142,7 +141,6 @@ const GCResponsibilityTracker = (props) => {
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [tabIndex, setTabIndex] = useState('documents');
 	const [filters, setFilters] = useState([]);
 	const [sorts, setSorts] = useState([]);
 	const [pageIndex, setPageIndex] = useState(0);
@@ -231,15 +229,6 @@ const GCResponsibilityTracker = (props) => {
 		}
 	};
 
-	const handleTabClicked = (tabIndex) => {
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
-			`${tabIndex} tab clicked`
-		);
-		setTabIndex(tabIndex);
-	};
-
 	const exportCSV = async () => {
 		try {
 			const { results = [] } = await getData({
@@ -278,17 +267,11 @@ const GCResponsibilityTracker = (props) => {
 				width: 300,
 				Cell: (row) => (
 					<TableRow>
-						<Link
-							href={'#'}
-							onClick={(event) => {
-								preventDefault(event);
-								fileClicked(
-									row.row._original.filename,
-									row.row.responsibilityText,
-									1
-								);
-							}}
-							style={{ color: '#386F94' }}
+						<Link href={'#'} onClick={(event)=> {
+							preventDefault(event);
+							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
+						}}
+						style={{ color: '#386F94' }}
 						>
 							<div>
 								<p>{row.value}</p>
@@ -313,17 +296,14 @@ const GCResponsibilityTracker = (props) => {
 				Header: () => (
 					<div style={{ cursor: 'default' }}>
 						<>Other Organization/Personnel</>
-						<i
-							onClick={(event) => {
-								openFilterPopper(event.target, 'otherOrgsPers');
-							}}
-							className={'fa fa-filter'}
-							style={{
-								color: '#E9691D',
-								marginLeft: '50px',
-								cursor: 'pointer',
-								fontSize: 18,
-							}}
+						<i onClick={(event) => {
+							openFilterPopper(event.target, 'otherOrgsPers');
+						}} className={'fa fa-filter'} style={{
+							color: '#E9691D',
+							marginLeft: '50px',
+							cursor: 'pointer',
+							fontSize: 18
+						}}
 						/>
 					</div>
 				),
@@ -338,8 +318,10 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentsReferenced',
 				style: { whiteSpace: 'unset' },
 				width: 200,
-				Cell: (row) => (
-					<TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>
+				Cell: row => (
+					<TableRow>
+						{row.value? row.value.join(', '): '' }
+					</TableRow>
 				),
 			},
 			{
@@ -378,7 +360,7 @@ const GCResponsibilityTracker = (props) => {
 			<ReactTable
 				data={responsibilityTableData}
 				columns={dataColumns}
-				style={{ margin: '0 80px 20px 80px', height: 700 }}
+				style={{ height: 700, marginTop: 10 }}
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
@@ -700,64 +682,33 @@ const GCResponsibilityTracker = (props) => {
 				check back later or reach us by email if your document/s of interest are
 				not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
 			</div>
-
-			<div style={styles.tabContainer}>
-				<Tabs>
-					<div style={styles.tabButtonContainer}>
-						<TabList style={styles.tabsList}>
-							<Tab
-								style={{
-									...styles.tabStyle,
-									...(tabIndex === 'documents' ? styles.tabSelectedStyle : {}),
-									borderRadius: `5px 5px 0 0`,
-								}}
-								title="userHistory"
-								onClick={() => handleTabClicked('documents')}
-							>
-								<Typography variant="h6" display="inline" title="cardView">
-									RESPONSIBILITY EXPLORER
-								</Typography>
-							</Tab>
-						</TabList>
-						{selectRows ? (
-							<div>
-								<GCPrimaryButton
-									buttonColor={'#131E43'}
-									onClick={handleCancelSelect}
-								>
-									Cancel <Icon className="fa fa-times" style={styles.buttons} />
-								</GCPrimaryButton>
-								<GCPrimaryButton onClick={exportCSV}>
-									Export{' '}
-									<Icon
-										className="fa fa-external-link"
-										style={styles.buttons}
-									/>
-								</GCPrimaryButton>
-								<GCPrimaryButton
-									buttonColor={'red'}
-									onClick={() => hideShowReportModal(true)}
-								>
-									Report <Icon className="fa fa-bug" style={styles.buttons} />
-								</GCPrimaryButton>
-								<div style={styles.spacer} />
-							</div>
-						) : (
-							<div>
-								<GCPrimaryButton onClick={() => setSelectRows(true)}>
-									Select Rows
-								</GCPrimaryButton>
-								<div style={styles.spacer} />
-							</div>
-						)}
+			
+			<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+				{ selectRows ?
+					<div>
+						<GCPrimaryButton buttonColor={'#131E43'} onClick={handleCancelSelect}>
+							Cancel <Icon className="fa fa-times" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<GCPrimaryButton onClick={exportCSV}>
+							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<GCPrimaryButton buttonColor={'red'} onClick={() => hideShowReportModal(true)}>
+							Report <Icon className="fa fa-bug" style={styles.buttons}/>
+						</GCPrimaryButton>
+						<div style={styles.spacer}/>
 					</div>
-
-					<div style={styles.panelContainer}>
-						<TabPanel>{renderDataTable()}</TabPanel>
+					:
+					<div>
+						<GCPrimaryButton onClick={() => setSelectRows(true)}>
+							Select Rows
+						</GCPrimaryButton>
+						<div style={styles.spacer}/>
 					</div>
-				</Tabs>
+				}
 			</div>
-
+	
+			{ renderDataTable() }
+			
 			<Dialog
 				open={showReportModal}
 				scroll={'paper'}
@@ -883,11 +834,7 @@ const styles = {
 	},
 	disclaimerContainer: {
 		alignItems: 'center',
-		fontWeight: 'bold',
-		marginLeft: '80px',
-		marginRight: '80px',
-		paddingTop: '20px',
-		paddingBottom: '20px',
+		fontWeight: 'bold'
 	},
 };
 

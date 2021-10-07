@@ -8,10 +8,10 @@ import {
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
-import UserButton from '../../searchBar/UserButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import UserButton from '../../searchBar/UserButton';
 const gameChangerAPI = new GameChangerAPI();
 
 const EDASearchBarHandler = {

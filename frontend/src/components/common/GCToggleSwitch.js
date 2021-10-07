@@ -38,22 +38,29 @@ const getStyles = (props) => ({
 });
 
 export default function (props) {
+	
 	const classes = makeStyles(getStyles(props))();
+	
+	const {
+		disabled,
+		onClickLeft,
+		onClick
+	} = props;
 
 	return (
 		<>
 			<label
 				onClick={() => {
-					if (props.disabled) return;
-					else if (props.onClickLeft) props.onClickLeft();
-					else props.onClick();
+					if (disabled) return;
+					else if (onClickLeft) onClickLeft();
+					else onClick();
 				}}
 				style={{
 					marginRight: 15,
 					fontSize: 15,
 					color: '#3c4144',
 					fontWeight: props.rightActive ? '500' : '700',
-					...(props.disabled ? {} : { cursor: 'pointer' }),
+					...(props.disabled ? {} : { cursor: 'pointer'}),
 					userSelect: 'none',
 					...props.leftLabelStyle,
 				}}
@@ -70,7 +77,7 @@ export default function (props) {
 						classes={{
 							switchBase: classes.switch,
 							track: classes.switchBar,
-							input: classes.input,
+							input: classes.input
 						}}
 						disabled={props.disabled}
 					/>
@@ -78,11 +85,9 @@ export default function (props) {
 				label={props.rightLabel}
 				classes={{
 					root: classes.formControlLabelRoot,
-					label: props.rightActive
-						? classes.labelAbsActive
-						: classes.labelAbsInactive,
+					label: props.rightActive ? classes.labelAbsActive : classes.labelAbsInactive
 				}}
 			/>
 		</>
-	);
+	)
 }
