@@ -12,32 +12,42 @@ import TutorialImage from '../../../images/analytics/policy/GC-tooltip.png';
 
 let timeoutId = null;
 
-
 const GCCarousel = ({ classes, includeOnlyList }) => {
 	const [carouselIndex, setCarouselIndex] = useState(0);
 
-	let carouselOptions = [SearchImage, CardImage, GraphImage, ExplorerImage, CrowdsourceImage, TutorialImage];
+	let carouselOptions = [
+		SearchImage,
+		CardImage,
+		GraphImage,
+		ExplorerImage,
+		CrowdsourceImage,
+		TutorialImage,
+	];
 	let carouselText = [
 		'Search Results: Search the corpus of requirements and policy using simple or complex queries. Each result is tied to an interactive card with information-rich metadata.',
 		'Card View: Every card is equivalent to a document and has information-rich metadata which users can interact with by flipping any card around.',
 		'Graph View: Our interactive Graph View provides the ability to visualize complex relationships between documents.',
 		'Document Explorer: The Document Explorer tab provides a preview of each document to enable further research through a given query, allowing users to see all information at a single glance.',
 		'Assists: In order to validate our models, we leverage all users to assist in tagging data to support our Natural Language Processing (NLP) development.',
-		'Automated Tutorial: We ensure our users have the best tools to support their research and provide automated tutorials to guide use of the platform.'
-	]
+		'Automated Tutorial: We ensure our users have the best tools to support their research and provide automated tutorials to guide use of the platform.',
+	];
 
-	if(includeOnlyList){
-		carouselOptions = carouselOptions.filter((_, i) => includeOnlyList.includes(i));
+	if (includeOnlyList) {
+		carouselOptions = carouselOptions.filter((_, i) =>
+			includeOnlyList.includes(i)
+		);
 		carouselText = carouselText.filter((_, i) => includeOnlyList.includes(i));
-	};
+	}
 
 	const onNext = () => {
-		let next = ((carouselIndex + 1) > (carouselOptions.length - 1)) ? 0 : carouselIndex + 1;
+		let next =
+			carouselIndex + 1 > carouselOptions.length - 1 ? 0 : carouselIndex + 1;
 		setCarouselIndex(next);
 	};
 
 	const onPrev = () => {
-		let prev = ((carouselIndex - 1) < 0) ? (carouselOptions.length - 1) : carouselIndex - 1;
+		let prev =
+			carouselIndex - 1 < 0 ? carouselOptions.length - 1 : carouselIndex - 1;
 		setCarouselIndex(prev);
 	};
 
@@ -53,25 +63,48 @@ const GCCarousel = ({ classes, includeOnlyList }) => {
 	}, [carouselIndex, onNextCb]);
 
 	return [
-		<div style={{ minHeight: 500, marginTop: 50 }} key='option'>
-			<img src={carouselOptions[carouselIndex]} style={{ width: '100%' }} alt="Carousel Images" />
+		<div style={{ minHeight: 500, marginTop: 50 }} key="option">
+			<img
+				src={carouselOptions[carouselIndex]}
+				style={{ width: '100%' }}
+				alt="Carousel Images"
+			/>
 		</div>,
-		<div style={{ width: "100%" }} key='scrollButtons'>
-			<Button variant='outlined' onClick={onPrev} style={{ float: 'left', left: '-20px' }} classes={classes}>
+		<div style={{ width: '100%' }} key="scrollButtons">
+			<Button
+				variant="outlined"
+				onClick={onPrev}
+				style={{ float: 'left', left: '-20px' }}
+				classes={classes}
+			>
 				<CheveronLeftIcon style={styles.icon} />
 			</Button>
-			<Button variant='outlined' onClick={onNext} style={{ float: 'right', right: '-20px' }} classes={classes}>
+			<Button
+				variant="outlined"
+				onClick={onNext}
+				style={{ float: 'right', right: '-20px' }}
+				classes={classes}
+			>
 				<CheveronRightIcon style={styles.icon} />
 			</Button>
 		</div>,
-		<div key='text'>
+		<div key="text">
 			<p>{carouselText[carouselIndex]}</p>
 		</div>,
-		<div style={styles.tileWrapper} key='indexTiles'>
+		<div style={styles.tileWrapper} key="indexTiles">
 			{carouselOptions.map((option, index) => {
-				return <div style={{ ...styles.tinyTile, backgroundColor: (index === carouselIndex) ? '#13A792' : "#B0BAC5" }} onClick={() => tinyTileClick(index)} key={'indexTile' + index}></div>;
+				return (
+					<div
+						style={{
+							...styles.tinyTile,
+							backgroundColor: index === carouselIndex ? '#13A792' : '#B0BAC5',
+						}}
+						onClick={() => tinyTileClick(index)}
+						key={'indexTile' + index}
+					></div>
+				);
 			})}
-		</div>
+		</div>,
 	];
 };
 
@@ -82,13 +115,13 @@ const styles = {
 	mainText: {
 		fontSize: 70,
 		fontWeight: 'bold',
-		lineHeight: '84px'
+		lineHeight: '84px',
 	},
 	whiteColor: {
 		color: 'white',
 	},
 	image: {
-		width: "100%"
+		width: '100%',
 	},
 	icon: {
 		fontSize: 40,
@@ -99,21 +132,21 @@ const styles = {
 		width: 40,
 		marginLeft: 3,
 		marginRight: 3,
-		cursor: 'pointer'
+		cursor: 'pointer',
 	},
 	tileWrapper: {
 		display: 'inline-flex',
 		justifyContent: 'center',
 		float: 'left',
-		width: "100%",
-		marginBottom: 50
+		width: '100%',
+		marginBottom: 50,
 	},
 	caption: {
-		color: "#56B1AC",
+		color: '#56B1AC',
 		marginBottom: 15,
 		marginLeft: 60,
 		marginTop: 8,
-		textTransform: 'uppercase'
+		textTransform: 'uppercase',
 	},
 };
 
@@ -121,7 +154,7 @@ const materialStyles = () => ({
 	root: {
 		width: 65,
 		top: '-300px',
-		backgroundColor: "#B0BAC5",
+		backgroundColor: '#B0BAC5',
 		opacity: '.5',
 		'&:hover': {
 			backgroundColor: '#3F4A56',

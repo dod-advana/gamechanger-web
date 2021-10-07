@@ -1,36 +1,36 @@
-import React from "react";
-import {KeyboardArrowRight} from "@material-ui/icons";
-import styled from "styled-components";
+import React from 'react';
+import { KeyboardArrowRight } from '@material-ui/icons';
+import styled from 'styled-components';
 import {
 	capitalizeFirst,
 	CARD_FONT_SIZE,
-	getTrackingNameForFactory
-} from "../../../gamechangerUtils";
-import {CardButton} from "../../common/CardButton";
-import {trackEvent} from "../../telemetry/Matomo";
-import {Link, Typography} from "@material-ui/core";
-import _ from "underscore";
-import Permissions from "@dod-advana/advana-platform-ui/dist/utilities/permissions";
-import CONFIG from "../../../config/config";
-import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
-import BetaModal from "../../common/BetaModal";
-import QLIKICON from "../../../images/icon/QLIK.svg";
-import moment from "moment";
-import {parseOwnerName} from "./search";
-import {primary} from "../../common/gc-colors";
+	getTrackingNameForFactory,
+} from '../../../gamechangerUtils';
+import { CardButton } from '../../common/CardButton';
+import { trackEvent } from '../../telemetry/Matomo';
+import { Link, Typography } from '@material-ui/core';
+import _ from 'underscore';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
+import CONFIG from '../../../config/config';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+import BetaModal from '../../common/BetaModal';
+import QLIKICON from '../../../images/icon/QLIK.svg';
+import moment from 'moment';
+import { parseOwnerName } from './search';
+import { primary } from '../../common/gc-colors';
 
 const styles = {
 	container: {
-		marginBottom: 15
+		marginBottom: 15,
 	},
 	footerButtonBack: {
-        margin: '0 10px 0 0 ',
-		padding: '8px 12px'
+		margin: '0 10px 0 0 ',
+		padding: '8px 12px',
 	},
 	button: {
 		height: 50,
 		width: 120,
-		margin: 'auto 0px auto auto'
+		margin: 'auto 0px auto auto',
 	},
 	link: {
 		fontSize: 16,
@@ -38,24 +38,24 @@ const styles = {
 		color: '#386F94',
 		letter: '-0.4px',
 		fontWeight: '600',
-		margin: 'auto 0px'
+		margin: 'auto 0px',
 	},
 	linkIcon: {
 		fontSize: 19,
-		verticalAlign: 'middle'
+		verticalAlign: 'middle',
 	},
 	viewMoreChevron: {
 		fontSize: 14,
 		color: primary,
 		fontWeight: 'normal',
-		marginLeft: 5
-    },
+		marginLeft: 5,
+	},
 	viewMoreButton: {
 		fontSize: 16,
 		color: primary,
 		fontWeight: 'bold',
 		cursor: 'pointer',
-		minWidth: 60
+		minWidth: 60,
 	},
 
 	title: (restricted) => ({
@@ -64,14 +64,14 @@ const styles = {
 		borderRadius: '5px 5px 0 0',
 		borderBottom: 0,
 		height: 70,
-		padding: 15
+		padding: 15,
 	}),
 	body: (restricted) => ({
 		border: '1px solid #9BB1C8',
 		padding: 15,
 		height: 330,
 		backgroundColor: restricted ? '#B6C6D8' : 'white',
-		textAlign: 'left'
+		textAlign: 'left',
 	}),
 	footer: (restricted) => ({
 		border: '1px solid #9BB1C8',
@@ -82,7 +82,7 @@ const styles = {
 		display: 'flex',
 		backgroundColor: restricted ? '#B6C6D8' : 'white',
 		justifyContent: 'flex-end',
-	})
+	}),
 };
 
 const StyledFrontCardHeader = styled.div`
@@ -90,46 +90,47 @@ const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({restricted}) => !restricted ? 'white': 'rgba(223,230,238,0.5)'};
+	background-color: ${({ restricted }) =>
+		!restricted ? 'white' : 'rgba(223,230,238,0.5)'};
 	font-weight: bold;
 	font-family: Montserrat;
-	height: ${({listView}) => listView ? 'fit-content': '59px'};
-	padding: ${({listView}) => listView ? '0px': '5px'};
-	margin-left: ${({listView}) => listView ? '4px': '0px'};
-	margin-right: ${({listView}) => listView ? '10px': '0px'};
-	
+	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
+	padding: ${({ listView }) => (listView ? '0px' : '5px')};
+	margin-left: ${({ listView }) => (listView ? '4px' : '0px')};
+	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
+
 	.title-text-selected-favorite-div {
-		max-height: ${({listView}) => listView ? '': '50px'};
-		height: ${({listView}) => listView ? '35px': ''};
+		max-height: ${({ listView }) => (listView ? '' : '50px')};
+		height: ${({ listView }) => (listView ? '35px' : '')};
 		overflow: hidden;
 		display: flex;
 		justify-content: space-between;
-		
+
 		.title-text {
 			cursor: pointer;
-			display:  ${({listView}) => listView ? 'flex': ''};
-			alignItems:  ${({listView}) => listView ? 'top': ''};
-			height:  ${({listView}) => listView ? 'fit-content': ''};
-			
+			display: ${({ listView }) => (listView ? 'flex' : '')};
+			alignitems: ${({ listView }) => (listView ? 'top' : '')};
+			height: ${({ listView }) => (listView ? 'fit-content' : '')};
+
 			.text {
-				margin-top: ${({listView}) => listView ? '10px': '0px'};
+				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
 			}
-			
+
 			.list-view-arrow {
 				display: inline-block;
 				margin-top: 7px;
 			}
 		}
-		
+
 		.selected-favorite {
 			display: inline-block;
-			font-family: "Noto Sans";
+			font-family: 'Noto Sans';
 			font-weight: 400;
 			font-size: ${CARD_FONT_SIZE}px;
-			margin-top: ${({listView}) => listView ? '2px': '0px'};
+			margin-top: ${({ listView }) => (listView ? '2px' : '0px')};
 		}
 	}
-	
+
 	.list-view-sub-header {
 		font-size: 0.8em;
 		display: flex;
@@ -163,15 +164,15 @@ const StyledFrontCardHeader = styled.div`
 // `;
 
 const StyledFrontCardContent = styled.div`
-	font-family: "Noto Sans";
+	font-family: 'Noto Sans';
 	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
-	
+
 	.image-container {
 		text-align: center;
 		margin-top: 5px;
 	}
-	
+
 	img {
 		height: 175px;
 		width: 300px;
@@ -182,11 +183,11 @@ const StyledFrontCardContent = styled.div`
 		background-repeat: no-repeat;
 		background-position: center;
 	}
-	
+
 	.body-container {
 		display: flex;
 		height: 100%;
-		
+
 		.body-text {
 			min-width: 100px;
 			height: 100%;
@@ -196,7 +197,11 @@ const StyledFrontCardContent = styled.div`
 `;
 
 const clickFn = (cloneName, href, type) => {
-	trackEvent(getTrackingNameForFactory(cloneName), `SearchResults_${capitalizeFirst(type)}_Click` , href);
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		`SearchResults_${capitalizeFirst(type)}_Click`,
+		href
+	);
 	window.open(href);
 };
 
@@ -227,7 +232,7 @@ const cardSubHeaderHandler = (props) => {
 	// 		typeColor = 'rgb(233, 105, 29)';
 	// 		break;
 	// }
-	
+
 	return (
 		<>
 			{/*{!state.listView && !toggledMore &&*/}
@@ -244,341 +249,390 @@ const cardSubHeaderHandler = (props) => {
 const GlobalSearchCardHandler = {
 	application: {
 		getCardHeader: (props) => {
-			
-			const {item, state, graphView} = props;
-			
+			const { item, state, graphView } = props;
+
 			const docListView = state.listView && !graphView;
-			
+
 			let { link_label, permission, type, href } = item;
 			if (!_.isNull(permission)) {
 				permission = Permissions?.[permission]?.();
-			}
-			else permission = true;
-			
+			} else permission = true;
+
 			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={!permission}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					restricted={!permission}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-							<div className={'title-text'}
-								 onClick={() => clickFn(state.cloneData.clone_name, href, type)}
-							>
-								<div className={'text'}>
-									{link_label}
+						<div
+							className={'title-text'}
+							onClick={() => clickFn(state.cloneData.clone_name, href, type)}
+						>
+							<div className={'text'}>{link_label}</div>
+							{docListView && (
+								<div className={'list-view-arrow'}>
+									<KeyboardArrowRight
+										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
+									/>
 								</div>
-								{docListView &&
-									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}/>
-									</div>
-								}
+							)}
+						</div>
+						{docListView && (
+							<div className={'list-view-sub-header'}>
+								<p> {capitalizeFirst(type)} </p>
 							</div>
-							{docListView &&
-								<div className={'list-view-sub-header'}>
-									<p> {capitalizeFirst(type)} </p>
-								</div>
-							}
+						)}
 						{/*</GCTooltip>*/}
 					</div>
 				</StyledFrontCardHeader>
 			);
 		},
-		
+
 		getCardSubHeader: (props) => {
 			return cardSubHeaderHandler(props);
 		},
-		
+
 		getCardFront: (props) => {
-			
-			const {item} = props;
-			
+			const { item } = props;
+
 			let { description } = item;
-			
+
 			return (
 				<StyledFrontCardContent isWideCard={true}>
-					{description &&
+					{description && (
 						<div className={'body-container'}>
 							<div className={'body-text'}>{description}</div>
 						</div>
-					}
+					)}
 				</StyledFrontCardContent>
 			);
 		},
-		
+
 		getCardBack: (props) => {
-			
-			
-			return (
-				<></>
-			);
+			return <></>;
 		},
-		
+
 		getFooter: (props) => {
-			
-			const {item, state} = props;
-			
+			const { item, state } = props;
+
 			let { permission, href, type } = item;
 			if (!_.isNull(permission)) {
 				permission = Permissions?.[permission]?.();
-			}
-			else permission = true;
-			
-			const url = !permission? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
-			
-			const RestrictedLink = <Link
-				href={url}
-				onClick={() => clickFn(state.cloneData.clone_name, url, type)}
-				style={styles.link}
-			>
-				Request Access
-				<KeyboardArrowRightIcon style={styles.linkIcon} />
-			</Link>;
-			
+			} else permission = true;
+
+			const url = !permission
+				? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`
+				: href;
+
+			const RestrictedLink = (
+				<Link
+					href={url}
+					onClick={() => clickFn(state.cloneData.clone_name, url, type)}
+					style={styles.link}
+				>
+					Request Access
+					<KeyboardArrowRightIcon style={styles.linkIcon} />
+				</Link>
+			);
+
 			return (
 				<>
-					{!permission ?
+					{!permission ? (
 						RestrictedLink
-						:
-						<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={url}>
+					) : (
+						<CardButton
+							target={'_blank'}
+							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+							href={url}
+						>
 							Open
 						</CardButton>
-					}
+					)}
 				</>
 			);
 		},
-		
+
 		getCardExtras: (props) => {
-		
-			return (
-				<></>
-			);
+			return <></>;
 		},
-		
+
 		getFilename: (item) => {
 			return '';
 		},
 	},
-	
+
 	dashboard: {
 		getCardHeader: (props) => {
-			
-			const {item, state, graphView} = props;
-			
+			const { item, state, graphView } = props;
+
 			const docListView = state.listView && !graphView;
-			
+
 			let { name, id, restricted, type } = item;
-			
+
 			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={restricted}>
+				<StyledFrontCardHeader
+					listView={state.listView}
+					restricted={restricted}
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-							<div className={'title-text'}
-								 onClick={() => clickFn(state.cloneData.clone_name, getUrl(id, restricted), type)}
-							>
-								<div className={'text'}>
-									{name}
-								</div>
-								{docListView &&
-									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}/>
-									</div>
-								}
-							</div>
-							{docListView &&
-								<div className={'list-view-sub-header'}>
-									<p> {capitalizeFirst(type)} </p>
-								</div>
+						<div
+							className={'title-text'}
+							onClick={() =>
+								clickFn(
+									state.cloneData.clone_name,
+									getUrl(id, restricted),
+									type
+								)
 							}
+						>
+							<div className={'text'}>{name}</div>
+							{docListView && (
+								<div className={'list-view-arrow'}>
+									<KeyboardArrowRight
+										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
+									/>
+								</div>
+							)}
+						</div>
+						{docListView && (
+							<div className={'list-view-sub-header'}>
+								<p> {capitalizeFirst(type)} </p>
+							</div>
+						)}
 						{/*</GCTooltip>*/}
 					</div>
 				</StyledFrontCardHeader>
 			);
 		},
-		
+
 		getCardSubHeader: (props) => {
-			
 			return cardSubHeaderHandler(props);
 		},
-		
+
 		getCardFront: (props) => {
-			
-			const {item} = props;
-			
+			const { item } = props;
+
 			const { name, description, thumbnail } = item;
-			
+
 			return (
 				<StyledFrontCardContent isWideCard={true}>
 					<div className={'image-container'}>
 						<img
-							src={thumbnail ? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` + new URLSearchParams({ location: thumbnail }).toString() : undefined}
+							src={
+								thumbnail
+									? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` +
+									  new URLSearchParams({ location: thumbnail }).toString()
+									: undefined
+							}
 							style={styles.image}
 							alt={thumbnail ? name : undefined}
 						/>
 					</div>
-					
-					{description &&
+
+					{description && (
 						<div className={'body-container'}>
 							<div className={'body-text'}>{description}</div>
 						</div>
-					}
+					)}
 				</StyledFrontCardContent>
 			);
 		},
-		
+
 		getCardBack: (props) => {
-			
-			const {item} = props;
-			
-			const { lastReloadTime, modifiedDate, publishTime, restricted, owner } = item;
-			
+			const { item } = props;
+
+			const { lastReloadTime, modifiedDate, publishTime, restricted, owner } =
+				item;
+
 			return (
 				<div style={styles.body(restricted)}>
-					<Typography variant="body2" >Data last reloaded: {new moment(lastReloadTime).format('MM-DD-YYYY').toString()}</Typography>
-					<Typography variant="body2" >Last modified date: {new moment(modifiedDate).format('MM-DD-YYYY').toString()}</Typography>
-					<Typography variant="body2" >Published date: {new moment(publishTime).format('MM-DD-YYYY').toString()}</Typography>
-					<Typography variant="body2" >Lead Developer: {parseOwnerName(owner?.name)}</Typography>
+					<Typography variant="body2">
+						Data last reloaded:{' '}
+						{new moment(lastReloadTime).format('MM-DD-YYYY').toString()}
+					</Typography>
+					<Typography variant="body2">
+						Last modified date:{' '}
+						{new moment(modifiedDate).format('MM-DD-YYYY').toString()}
+					</Typography>
+					<Typography variant="body2">
+						Published date:{' '}
+						{new moment(publishTime).format('MM-DD-YYYY').toString()}
+					</Typography>
+					<Typography variant="body2">
+						Lead Developer: {parseOwnerName(owner?.name)}
+					</Typography>
 				</div>
 			);
 		},
-		
+
 		getFooter: (props) => {
-			
-			const {item, toggledMore, setToggledMore, cloneName, setModalOpen} = props;
-			
+			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } =
+				props;
+
 			let { restricted, betaAvailable, id } = item;
-			
-			const PreparedLink = <CardButton
-				href={getUrl(id, restricted)}
-				onClick={(e) => {
-					if (!restricted && betaAvailable) {
-						e.preventDefault();
-						setModalOpen(true);
-					}
-					trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch', getUrl(id, restricted));
-				}}
-				style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-				target='_blank'
-			>
-		
-				{restricted ? 'Request Access' : 'Launch'}
-			</CardButton>;
-			
+
+			const PreparedLink = (
+				<CardButton
+					href={getUrl(id, restricted)}
+					onClick={(e) => {
+						if (!restricted && betaAvailable) {
+							e.preventDefault();
+							setModalOpen(true);
+						}
+						trackEvent(
+							getTrackingNameForFactory(cloneName),
+							'CardInteraction',
+							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
+							getUrl(id, restricted)
+						);
+					}}
+					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+					target="_blank"
+				>
+					{restricted ? 'Request Access' : 'Launch'}
+				</CardButton>
+			);
+
 			return (
 				<>
 					{PreparedLink}
-					<div style={{...styles.viewMoreButton}} onClick={() => {
-						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
-							setToggledMore(!toggledMore)
+					<div
+						style={{ ...styles.viewMoreButton }}
+						onClick={() => {
+							trackEvent(
+								getTrackingNameForFactory(cloneName),
+								'CardInteraction',
+								'flipCard',
+								toggledMore ? 'Overview' : 'More'
+							);
+							setToggledMore(!toggledMore);
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={styles.viewMoreChevron}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
 		},
-		
+
 		getCardExtras: (props) => {
-			
-			const {modalOpen, setModalOpen, item} = props;
-			
-			const {id} = item;
-			
+			const { modalOpen, setModalOpen, item } = props;
+
+			const { id } = item;
+
 			const openWindowCloseModal = (url) => {
 				setModalOpen(false);
 				window.open(url, '_blank');
-			}
+			};
 			const onCancelClick = () => setModalOpen(false);
-			const onLegacyClick = () => openWindowCloseModal(`${CONFIG.QLIK_URL}/sense/app/${id}`);
+			const onLegacyClick = () =>
+				openWindowCloseModal(`${CONFIG.QLIK_URL}/sense/app/${id}`);
 			const onBetaClick = () => openWindowCloseModal(`#/qlik/app/${id}`);
-		
+
 			return (
 				<>
-					{modalOpen && <BetaModal open={true} onCancelClick={onCancelClick} onLegacyClick={onLegacyClick} onBetaClick={onBetaClick} />}
+					{modalOpen && (
+						<BetaModal
+							open={true}
+							onCancelClick={onCancelClick}
+							onLegacyClick={onLegacyClick}
+							onBetaClick={onBetaClick}
+						/>
+					)}
 				</>
 			);
 		},
-		
+
 		getFilename: (item) => {
 			return '';
 		},
 	},
-	
+
 	dataSource: {
 		getCardHeader: (props) => {
-			
-			const {item, state, graphView} = props;
-			
+			const { item, state, graphView } = props;
+
 			const docListView = state.listView && !graphView;
-			
+
 			let { name, id } = item.resource;
-			
+
 			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-			
+
 			return (
 				<StyledFrontCardHeader listView={state.listView} restricted={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-							<div className={'title-text'}
-								 onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
-							>
-								<div className={'text'}>
-									{name}
-								</div>
-								{docListView &&
-									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}/>
-									</div>
-								}
-							</div>
-							{docListView &&
-								<div className={'list-view-sub-header'}>
-									<p> {capitalizeFirst(item.type)} </p>
-								</div>
+						<div
+							className={'title-text'}
+							onClick={() =>
+								clickFn(state.cloneData.clone_name, url, item.type)
 							}
+						>
+							<div className={'text'}>{name}</div>
+							{docListView && (
+								<div className={'list-view-arrow'}>
+									<KeyboardArrowRight
+										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
+									/>
+								</div>
+							)}
+						</div>
+						{docListView && (
+							<div className={'list-view-sub-header'}>
+								<p> {capitalizeFirst(item.type)} </p>
+							</div>
+						)}
 						{/*</GCTooltip>*/}
 					</div>
 				</StyledFrontCardHeader>
 			);
 		},
-		
+
 		getCardSubHeader: (props) => {
-			
 			return cardSubHeaderHandler(props);
 		},
-		
+
 		getCardFront: (props) => {
-			
-			const {item} = props;
-			
+			const { item } = props;
+
 			let { name, lastModifiedOn, status } = item.resource;
-			
+
 			return (
 				<StyledFrontCardContent isWideCard={true}>
-						<div className={'body-container'}>
-							<div className={'body-text'}>
-								<Typography variant="body1" style={styles.metadata}>Name: {name}</Typography>
-								<Typography variant="body1" style={styles.metadata}>Last Updated: {new moment(lastModifiedOn).toString()}</Typography>
-								<Typography variant="body1" style={styles.metadata}>Status: {status?.name}</Typography>
-							</div>
+					<div className={'body-container'}>
+						<div className={'body-text'}>
+							<Typography variant="body1" style={styles.metadata}>
+								Name: {name}
+							</Typography>
+							<Typography variant="body1" style={styles.metadata}>
+								Last Updated: {new moment(lastModifiedOn).toString()}
+							</Typography>
+							<Typography variant="body1" style={styles.metadata}>
+								Status: {status?.name}
+							</Typography>
 						</div>
+					</div>
 				</StyledFrontCardContent>
 			);
 		},
-		
+
 		getCardBack: (props) => {
-			
-			return (
-				<></>
-			);
+			return <></>;
 		},
-		
+
 		getFooter: (props) => {
-			
-			const {item, state} = props;
-			
+			const { item, state } = props;
+
 			let { id } = item.resource;
-			
+
 			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-			
+
 			return (
 				<>
 					<CardButton
@@ -587,104 +641,103 @@ const GlobalSearchCardHandler = {
 							e.preventDefault();
 							clickFn(state.cloneData.clone_name, url, item.type);
 						}}
-						style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-						target='_blank'
+						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+						target="_blank"
 					>
 						Open
 					</CardButton>
 				</>
 			);
 		},
-		
+
 		getCardExtras: (props) => {
-			return (
-				<>
-				</>
-			);
+			return <></>;
 		},
-		
+
 		getFilename: (item) => {
 			return '';
 		},
 	},
-	
+
 	database: {
 		getCardHeader: (props) => {
-			
-			const {item, state, graphView} = props;
-			
+			const { item, state, graphView } = props;
+
 			const docListView = state.listView && !graphView;
-			
+
 			let { name, id } = item.resource;
-			
+
 			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-			
+
 			return (
 				<StyledFrontCardHeader listView={state.listView} restricted={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-							<div className={'title-text'}
-								 onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
-							>
-								<div className={'text'}>
-									{name}
-								</div>
-								{docListView &&
-									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}/>
-									</div>
-								}
-							</div>
-							{docListView &&
-								<div className={'list-view-sub-header'}>
-									<p> {capitalizeFirst(item.type)} </p>
-								</div>
+						<div
+							className={'title-text'}
+							onClick={() =>
+								clickFn(state.cloneData.clone_name, url, item.type)
 							}
+						>
+							<div className={'text'}>{name}</div>
+							{docListView && (
+								<div className={'list-view-arrow'}>
+									<KeyboardArrowRight
+										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
+									/>
+								</div>
+							)}
+						</div>
+						{docListView && (
+							<div className={'list-view-sub-header'}>
+								<p> {capitalizeFirst(item.type)} </p>
+							</div>
+						)}
 						{/*</GCTooltip>*/}
 					</div>
 				</StyledFrontCardHeader>
 			);
 		},
-		
+
 		getCardSubHeader: (props) => {
-			
 			return cardSubHeaderHandler(props);
 		},
-		
+
 		getCardFront: (props) => {
-			
-			const {item} = props;
-			
+			const { item } = props;
+
 			let { name, lastModifiedOn, status } = item.resource;
-			
+
 			return (
 				<StyledFrontCardContent isWideCard={true}>
-						<div className={'body-container'}>
-							<div className={'body-text'}>
-								<Typography variant="body1" style={styles.metadata}>Name: {name}</Typography>
-								<Typography variant="body1" style={styles.metadata}>Last Updated: {new moment(lastModifiedOn).toString()}</Typography>
-								<Typography variant="body1" style={styles.metadata}>Status: {status?.name}</Typography>
-							</div>
+					<div className={'body-container'}>
+						<div className={'body-text'}>
+							<Typography variant="body1" style={styles.metadata}>
+								Name: {name}
+							</Typography>
+							<Typography variant="body1" style={styles.metadata}>
+								Last Updated: {new moment(lastModifiedOn).toString()}
+							</Typography>
+							<Typography variant="body1" style={styles.metadata}>
+								Status: {status?.name}
+							</Typography>
 						</div>
+					</div>
 				</StyledFrontCardContent>
 			);
 		},
-		
+
 		getCardBack: (props) => {
-			
-			return (
-				<></>
-			);
+			return <></>;
 		},
-		
+
 		getFooter: (props) => {
-			
-			const {item, state} = props;
-			
+			const { item, state } = props;
+
 			let { id } = item.resource;
-			
+
 			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-			
+
 			return (
 				<>
 					<CardButton
@@ -693,26 +746,23 @@ const GlobalSearchCardHandler = {
 							e.preventDefault();
 							clickFn(state.cloneData.clone_name, url, item.type);
 						}}
-						style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-						target='_blank'
+						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+						target="_blank"
 					>
 						Open
 					</CardButton>
 				</>
 			);
 		},
-		
+
 		getCardExtras: (props) => {
-			return (
-				<>
-				</>
-			);
+			return <></>;
 		},
-		
+
 		getFilename: (item) => {
 			return '';
 		},
 	},
-}
+};
 
 export default GlobalSearchCardHandler;

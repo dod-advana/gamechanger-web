@@ -3,7 +3,6 @@ const policySearchMatrixHandler = require(`../modules/policy/policySearchMatrixH
 const globalSearchMatrixHandler = require(`../modules/globalSearch/globalSearchMatrixHandler`);
 const edaSearchMatrixHandler = require(`../modules/eda/edaSearchMatrixHandler`);
 class SearchMatrixFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
