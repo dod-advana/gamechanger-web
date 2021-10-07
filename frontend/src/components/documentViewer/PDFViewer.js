@@ -34,6 +34,8 @@ export default function PDFViewer({ location }) {
 							)
 							.then((url) => {
 								node.src = url;
+							}).catch((err) => {
+								console.error(err);
 							});
 					}
 				});
