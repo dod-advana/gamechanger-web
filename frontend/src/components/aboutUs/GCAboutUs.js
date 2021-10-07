@@ -108,7 +108,7 @@ const GCAboutUs = (props) => {
 				setSelectedCategory(categoryOrder[closestNegative].toLowerCase());
 			}
 		},
-		[categoryOrder, selectedCategory]
+		[categoryOrder, ignoreNextScrollEvent, selectedCategory]
 	);
 
 	useEffect(() => {

@@ -7,7 +7,7 @@ import {
 	getSearchObjectFromString,
 	getUserData,
 	setState,
-} from '../../../sharedFunctions';
+} from '../../../utils/sharedFunctions';
 import DefaultDocumentExplorer from './defaultDocumentExplorer';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { Card } from '../../cards/GCCard';
@@ -23,7 +23,7 @@ import {
 	getTypeQuery,
 	getQueryVariable,
 	RESULTS_PER_PAGE,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import { gcOrange } from '../../common/gc-colors';
 import { DidYouMean } from '../../searchBar/SearchBarStyledComponents';
