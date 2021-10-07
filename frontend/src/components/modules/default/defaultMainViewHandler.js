@@ -172,9 +172,14 @@ const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
 
 const DefaultMainViewHandler = {
 	async handlePageLoad(props) {
-		const { state, dispatch, history, searchHandler } = props;
-
-		if (state.runSearch) return;
+		const {
+			state,
+			dispatch,
+			history,
+			searchHandler,
+		} = props;
+		
+		if (state.runSearch || state.runDocumentComparisonSearch) return;
 
 		const documentProperties = await getDocumentProperties(dispatch);
 		let newState = { ...state, documentProperties };
