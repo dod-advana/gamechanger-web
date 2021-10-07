@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
@@ -99,8 +99,6 @@ const DocumentInputContainer = styled.div`
 		
 		& .coming-soon {
 		    position: absolute;
-		    width: 349px;
-		    height: 327px;
 		    background-color: rgba(0,0,0,0.3);
 		    z-index: 99;
 		    border: 2px solid ${'#B6C6D8'} !important;
@@ -209,6 +207,9 @@ const GCDocumentsComparisonTool = (props) => {
 	const [page, setPage] = useState(1);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
+	const [dropBoxWidthHeight, setDropBoxWidthHeight] = useState({width: 0, height: 0});
+	
+	const dropboxRef = useRef();
 	
 	
 	useEffect(() => {
@@ -233,6 +234,12 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
+	
+	useEffect(() => {
+		if (dropboxRef.current) {
+			setDropBoxWidthHeight({width: dropboxRef.current.offsetWidth, height: dropboxRef.current.offsetHeight});
+		}
+	}, [dropboxRef]);
 	
 	useEffect(() => {
 		if (state.compareModalOpen) {
@@ -414,9 +421,9 @@ const GCDocumentsComparisonTool = (props) => {
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
-							<Grid item xs={3} className={'input-drop-zone'}>
-								<div className={'coming-soon'}>
-									<Typography className={'coming-soon-text'}>COMING SOON</Typography>
+							<Grid item xs={3} className={'input-drop-zone'} ref={dropboxRef}>
+								<div className={'coming-soon'} style={{width: dropBoxWidthHeight.width, height: dropBoxWidthHeight.height}}>
+									<Typography className={'coming-soon-text'} >COMING SOON</Typography>
 								</div>
 								<Dropzone
 									accept='.doc, .docx, .txt'
