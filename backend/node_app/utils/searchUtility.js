@@ -65,6 +65,7 @@ class SearchUtility {
 		try {
 			let result = {};
 			let toReturn;
+			result[key] = [];
 
 			let nextSynIndex = 0;
 			let nextAbbIndex = 0;
@@ -72,19 +73,15 @@ class SearchUtility {
 			let nextIsSyn = false;
 			let nextIsAbb = true;
 			let timesSinceLastAdd = 0;
-			let expandedWords = expansionDict['qexp']
-			let similarWords = expansionDict['wordsim']
-			console.log("expansion list")
-			console.log(expansionDict)
-			console.log("synonyms list")
-			console.log(synonyms)
-			console.log("related list")
-			console.log(relatedSearches)
-			console.log("abbrev list")
-			console.log(abbreviationExpansions)
-			console.log("key:", key)
-			result[key] = [];
-			console.log("result:", result)
+
+			let expandedWords = {}
+			let similarWords = {}
+			//let expandedWords= (typeof expansionDict['qexp']  === 'undefined') ? [] : expansionDict['qexp'] ;
+			if (expansionDict) {
+				expandedWords = expansionDict['qexp']
+				similarWords = expansionDict['wordsim']
+			}
+
 
 			let wordsList = [];
 			for (var word in similarWords){
@@ -93,16 +90,12 @@ class SearchUtility {
 			for (var word in expandedWords){
 				wordsList = wordsList.concat(expandedWords[word])
 			}
-			console.log("combined query exp")
-			console.log(wordsList)
 
 			if (relatedSearches && relatedSearches.length > 0) {
-				console.log("related")
 				relatedSearches.forEach((term) => {
 					result[key].push({phrase: term, source: 'related'})
 				})
 			}
-			console.log(result[key])
 			while (result[key].length < 12 && timesSinceLastAdd < 18) {
 				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
 					let syn = synonyms[nextSynIndex];
@@ -194,11 +187,9 @@ class SearchUtility {
 			// });
 			var ordered =[];
 			var currList = [];
-			console.log(toReturn[key])
 			toReturn[key].forEach((y) => {
 					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
-					y.phrase = y.phrase.replace(/^"(.*)"$/, '$1').trim();
-					console.log(y.phrase)
+					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
 					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
 							currList.push(y.phrase.toLowerCase())
@@ -1393,7 +1384,6 @@ class SearchUtility {
 			simWordList = simWordList.concat(similarWords[key])
 		}
 		let similarWordsQuery = simWordList.join("* OR *")
-		console.log(similarWordsQuery)
 		const query = 
 			{
 				size: 1,
