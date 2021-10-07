@@ -61,7 +61,6 @@ const GameChangerPage = (props) => {
 					<Feedback 
 						open={state.showFeedbackModal} 
 						setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
-						handleSubmitFeedback={()=>alert('hi')}
 					/>
 					{/* Crowd Sourcing */}
 					{cloneData.show_crowd_source && (
