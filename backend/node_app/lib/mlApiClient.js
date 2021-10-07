@@ -39,6 +39,7 @@ class MLApiClient {
 		this.getExpandedSearchTerms = this.getExpandedSearchTerms.bind(this);
 		this.transformResults = this.transformResults.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
+		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
 		
 		
 		// Get methods
@@ -68,6 +69,13 @@ class MLApiClient {
 	async getSentenceTransformerResults(searchText, userId = 'unknown') {
 		const data = { text: searchText }
 		return await this.postData('transSentenceSearch', userId, data);
+	}
+	
+	async getSentenceTransformerResultsForCompare(searchText, userId = 'unknown', paragraphIdBeingMatched) {
+		const data = { text: searchText }
+		const returnData = await this.postData('transSentenceSearch', userId, data);
+		
+		return {...returnData, paragraphIdBeingMatched};
 	}
 
 	async transformResults(searchText, docs, userId = 'unknown') {

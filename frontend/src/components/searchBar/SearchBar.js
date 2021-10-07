@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { setState } from '../../sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 import ModularSearchBarHandler from './ModularSearchBarHandler';
 import SearchBanner from './GCSearchBanner';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';

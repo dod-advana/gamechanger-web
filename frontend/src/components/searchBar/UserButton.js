@@ -5,8 +5,8 @@ import { withStyles } from '@material-ui/core/styles';
 import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import UserIcon from '../../images/icon/UserIcon.png';
 import GCButton from '../common/GCButton';
-import { PAGE_DISPLAYED } from '../../gamechangerUtils';
-import { setState, clearDashboardNotification } from '../../sharedFunctions';
+import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
+import { setState, clearDashboardNotification } from '../../utils/sharedFunctions';
 
 const StyledBadge = withStyles((theme) => ({
 	badge: {

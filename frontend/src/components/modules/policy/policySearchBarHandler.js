@@ -11,6 +11,7 @@ import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
+import { setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import UserButton from '../../searchBar/UserButton';
 const gameChangerAPI = new GameChangerAPI();
@@ -50,6 +51,7 @@ const PolicySearchBarHandler = {
 		const {
 			context,
 			state,
+			dispatch,
 			classes,
 			searchFavoritePopperAnchorEl,
 			advancedSearchOpen,
@@ -104,6 +106,7 @@ const PolicySearchBarHandler = {
 						onFocus={() => {
 							setDropdownOpen(true);
 						}}
+						onClick={() => setState(dispatch, {inputActive: 'searchInput'})}
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>

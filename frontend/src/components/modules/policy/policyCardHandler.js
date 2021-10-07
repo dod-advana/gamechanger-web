@@ -10,17 +10,17 @@ import {
 	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
-import { Popover, TextField } from '@material-ui/core';
+import { Popover, TextField, Typography } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
-import { crawlerMappingFunc } from '../../../gamechangerUtils';
+import { crawlerMappingFunc } from '../../../utils/gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
@@ -108,18 +108,19 @@ const StyledFrontCardHeader = styled.div`
 	margin-right: ${({ listView }) => (listView ? '5px' : '0px')};
 
 	.title-text-selected-favorite-div {
-		max-height: ${({ listView }) => (listView ? '' : '50px')};
-		height: ${({ listView }) => (listView ? '35px' : '')};
+		max-height: ${({listView}) => listView ? '35px': '50px'};
+		height: ${({listView}) => listView ? '35px': ''};
 		overflow: hidden;
 		display: flex;
 		justify-content: space-between;
 
 		.title-text {
 			cursor: pointer;
-			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
-			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-
+			display:  ${({docListView}) => docListView ? 'flex': ''};
+			alignItems:  ${({docListView}) => docListView ? 'top': ''};
+			height:  ${({docListView}) => docListView ? 'fit-content': ''};
+			max-width: ${({listView}) => listView ? '60%': ''};
+			
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
 			}
@@ -262,9 +263,10 @@ const StyledListViewFrontCardContent = styled.div`
 	.expanded-hits {
 		display: flex;
 		height: 100%;
-
+	    width: 100%;
+		
 		.page-hits {
-			min-width: 100px;
+			min-width: 160px;
 			height: 100%;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
@@ -282,7 +284,27 @@ const StyledListViewFrontCardContent = styled.div`
 				span {
 					font-size: ${CARD_FONT_SIZE}px;
 				}
-
+				
+				i {
+					font-size: ${CARD_FONT_SIZE}px;
+					margin-left: 10px;
+				}
+			}
+			
+			.paragraph-hit {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding-right: 5px;
+				padding-left: 5px;
+				border-top: 1px solid rgb(189, 189, 189);
+				cursor: pointer;
+				color: #386F94;
+				
+				& .par-hit {
+					font-size: ${CARD_FONT_SIZE}px;
+				}
+				
 				i {
 					font-size: ${CARD_FONT_SIZE}px;
 					margin-left: 10px;
@@ -457,37 +479,47 @@ const StyledEntityTopicFrontCardContent = styled.div`
 		}
 	}
 `;
-const clickFn = (
-	filename,
-	cloneName,
-	searchText,
-	pageNumber = 0,
-	sourceUrl
-) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'PDFOpen'
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'filename',
-		filename
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'pageNumber',
-		pageNumber
-	);
-	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
-			searchText ? `&prevSearchText=${searchText}` : ''
-		}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${
-			sourceUrl ? `&sourceUrl=${sourceUrl}` : ''
-		}`
-	);
+
+const StyledQuickCompareContent = styled.div`
+	background-color: ${'#E1E8EE'};
+    padding: 20px 0px;
+    
+    .prev-next-buttons {
+        display: flex;
+        justify-content: right;
+        margin-right: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .paragraph-display {
+         display: flex;
+         place-content: space-evenly;
+    
+        & .compare-block {
+	        background-color: ${'#ffffff'};
+	        border: 2px solid ${'#BCCBDB'};
+	        border-radius: 6px;
+	        width: 48%;
+	        padding: 5px;
+	        
+	        & .compare-header {
+		        color: ${'#000000DE'};
+		        font-size: 16px;
+		        font-family: Montserrat;
+		        font-weight: bold;
+		        margin-bottom: 10px;
+	        }
+	    }
+    }
+    
+    
+`
+
+const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
 const addFavoriteTopicToMetadata = (
@@ -552,20 +584,13 @@ const addFavoriteTopicToMetadata = (
 				</div>
 			);
 		}
-		return metaData;
-	});
-	return temp;
-};
-
-const getCardHeaderHandler = ({
-	item,
-	state,
-	idx,
-	checkboxComponent,
-	favoriteComponent,
-	graphView,
-	intelligentSearch,
-}) => {
+		return metaData
+	})
+	return temp
+}
+	
+const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent}) => {
+	
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
@@ -654,12 +679,21 @@ const getCardHeaderHandler = ({
 						</StyledFrontCardSubHeader>
 					)}
 					<div className={'selected-favorite'}>
-						<div style={{ display: 'flex' }}>
-							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-							{checkboxComponent(item.filename, item.display_title_s, item.id)}
-							{favoriteComponent()}
-						</div>
+						{!item.isCompare ?
+							<div style={{display: 'flex'}}>
+								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+								{checkboxComponent(item.filename, item.display_title_s, item.id)}
+								{favoriteComponent()}
+							</div>
+							:
+							<div style={{marginTop: 10, marginLeft: 5}}>
+								{favoriteComponent()}
+							</div>
+						}
 					</div>
+					{item.isCompare &&
+						quickCompareToggleComponent()
+					}
 				</div>
 			</div>
 			{docListView && (
@@ -863,8 +897,10 @@ const PolicyCardHandler = {
 			} = props;
 
 			let hoveredSnippet = '';
-			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
+			if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+			} else if (Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
+				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 			const isWideCard = true;
@@ -901,52 +937,54 @@ const PolicyCardHandler = {
 							>
 								<div className={'expanded-hits'}>
 									<div className={'page-hits'}>
-										{_.chain(item.pageHits)
-											.map((page, key) => {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-															clickFn(
-																item.filename,
-																state.cloneData.clone_name,
-																state.searchText,
-																page.pageNumber
-															);
-														}}
-													>
-														<span>
-															{page.title && <span>{page.title}</span>}
-															{page.pageNumber && (
-																<span>
-																	{page.pageNumber === 0
-																		? 'ID'
-																		: `Page ${page.pageNumber}`}
-																</span>
-															)}
-														</span>
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key
-																		? 'white'
-																		: 'rgb(189, 189, 189)',
-															}}
-														/>
+										{_.chain(item.pageHits).map((page, key) => {
+											return (
+												<div className={'page-hit'} key={key} style={{
+													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
+												}}
+												onMouseEnter={() => setHoveredHit(key) }
+												onClick={e => {
+													e.preventDefault();
+													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
+												}}
+												>
+													<span>
+														{page.title && <span >{page.title}</span>}
+														{page.pageNumber && <span >{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
+													</span>
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
+									</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
+								</div>
+							</GCAccordion>
+						)}
+						{item.paragraphs.length > 0 &&
+							<GCAccordion header={'PARAGRAPH HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>
+										{_.chain(item.paragraphs).map((paragraph, key) => {
+											return (
+												<div className={'paragraph-hit'} key={key} style={{
+													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
+												}}
+												onMouseEnter={() => setHoveredHit(key) }
+												onClick={e => {
+													e.preventDefault();
+												}}
+												>
+													<div>
+														{paragraph.id && <div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${paragraph.id.split('_')[1]}`}</div>}
+														{paragraph.score && <div className={'par-hit'}>{`Score: ${paragraph.score.toFixed(5)}`}</div>}
 													</div>
-												);
-											})
-											.value()}
+													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
+												</div>
+											);
+										}).value()}
 									</div>
 									<div className={'expanded-metadata'}>
 										<blockquote
@@ -957,7 +995,7 @@ const PolicyCardHandler = {
 									</div>
 								</div>
 							</GCAccordion>
-						)}
+						}
 						<GCAccordion
 							header={'DOCUMENT METADATA'}
 							headerBackground={'rgb(238,241,242)'}
@@ -1146,14 +1184,54 @@ const PolicyCardHandler = {
 				);
 			}
 		},
-
-		getCardBack: ({
-			item,
-			state,
-			setFavoriteTopic,
-			setFavorite,
-			handleFavoriteTopicClicked,
-		}) => {
+		
+		getDocumentQuickCompare: (props) => {
+			const {item, compareIndex, handleChangeCompareIndex} = props;
+			
+			return (
+				<StyledQuickCompareContent>
+					{item.paragraphs.length > 1 &&
+						<div className={'prev-next-buttons'}>
+							<GCButton
+								id={'prev'}
+								onClick={() => {
+									handleChangeCompareIndex(-1);
+								}}
+								isSecondaryBtn={true}
+								style={{height: 36}}
+								disabled={compareIndex === 0}
+							>
+								Previous
+							</GCButton>
+							<GCButton
+								id={'next'}
+								onClick={() => {
+									handleChangeCompareIndex(1);
+								}}
+								isSecondaryBtn={true}
+								style={{height: 36}}
+								disabled={compareIndex >= item.paragraphs.length - 1}
+							>
+								Next
+							</GCButton>
+						</div>
+					}
+					<div className={'paragraph-display'}>
+						<div className={'compare-block'}>
+							<Typography className={'compare-header'}>Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph: {item.paragraphs[compareIndex].id.split('_')[1]} Score: {item.paragraphs[compareIndex].score.toFixed(5)}</Typography>
+							{item.paragraphs[compareIndex]?.par_raw_text_t}
+						</div>
+						<div className={'compare-block'}>
+							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
+							{item.dataToQuickCompareTo[item.paragraphs[compareIndex].paragraphIdBeingMatched]}
+						</div>
+					</div>
+				</StyledQuickCompareContent>
+			);
+		},
+		
+		getCardBack: ({item, state, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked}) => {
+			
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item;
 			const previewDataReflist =
@@ -1296,6 +1374,7 @@ const PolicyCardHandler = {
 				</div>
 			);
 		},
+		
 		getFooter: (props) => {
 			const {
 				filename,
@@ -1307,93 +1386,87 @@ const PolicyCardHandler = {
 				showEsDoc,
 				item,
 				searchText,
+				state,
+				handleCompareDocument
 			} = props;
 			return (
 				<>
-					<>
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-							href={'#'}
-							onClick={(e) => {
-								e.preventDefault();
-								clickFn(
-									filename,
-									cloneName,
-									searchText,
-									0,
-									item.download_url_s
-								);
+					{!state.listView &&
+						<>
+							<>
+								<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
+								            onClick={(e) => {
+									            e.preventDefault();
+									            clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+								            }}
+								>
+									Open
+								</CardButton>
+								{graphView && <CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
+										e.preventDefault();
+										closeGraphCard();
+									}}
+								>
+									Close
+								</CardButton>}
+								<CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
+										window.open(`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`);
+										e.preventDefault();
+									}}
+								>
+									Details
+								</CardButton>
+								{(toggledMore && Permissions.isGameChangerAdmin()) &&
+								<CardButton
+									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									href={'#'}
+									onClick={(e) => {
+										e.preventDefault();
+										showEsDoc();
+									}}
+								>
+									<i className="fa fa-code"/>
+								</CardButton>
+								}
+							</>
+							<div style={{...styles.viewMoreButton}} onClick={() => {
+								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
+								setToggledMore(!toggledMore)
 							}}
-						>
-							Open
-						</CardButton>
-						{graphView && (
-							<CardButton
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								onClick={(e) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'Close Graph Card'
-									);
-									e.preventDefault();
-									closeGraphCard();
-								}}
 							>
-								Close
-							</CardButton>
-						)}
-						<CardButton
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-							href={'#'}
-							onClick={(e) => {
-								trackEvent(
-									getTrackingNameForFactory(cloneName),
-									'CardInteraction',
-									'showDocumentDetails'
-								);
-								window.open(
-									`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`
-								);
-								e.preventDefault();
-							}}
-						>
-							Details
-						</CardButton>
-						{toggledMore && Permissions.isGameChangerAdmin() && (
-							<CardButton
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								onClick={(e) => {
-									e.preventDefault();
-									showEsDoc();
-								}}
+								{toggledMore ? 'Overview' : 'More'}
+								<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+							</div>
+						</>
+					}
+					{(state.listView && item.isCompare) &&
+						<>
+							<GCButton
+								id={'ignore'}
+								onClick={() => { console.log('Ignored') }}
+								isSecondaryBtn={true}
+								style={{height: 36}}
 							>
-								<i className="fa fa-code" />
-							</CardButton>
-						)}
-					</>
-					<div
-						style={{ ...styles.viewMoreButton }}
-						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
-							setToggledMore(!toggledMore);
-						}}
-					>
-						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
-					</div>
+								Ignore
+							</GCButton>
+							<GCButton
+								id={'compare'}
+								onClick={() => { handleCompareDocument(item.filename) }}
+								isSecondaryBtn={false}
+								style={{height: 36}}
+							>
+								Compare
+							</GCButton>
+						</>
+					}
 				</>
 			);
 		},
