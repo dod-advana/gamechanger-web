@@ -5,7 +5,7 @@ import {
 	FormControl,
 	FormGroup,
 	FormControlLabel,
-	Checkbox,
+	Checkbox, Typography,
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import {
@@ -596,32 +596,52 @@ const PolicyAnalyticsToolsHandler = {
 			state,
 			dispatch,
 			classes,
+			sideFilterOverlayDimension
 		} = props;
-
+		
 		return (
 			<>
-				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderSources(state, dispatch, classes) }
-					</GCAccordion>
-				</div>
-				
-				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.analystToolsSearchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderTypes(state, dispatch, classes) }
-					</GCAccordion>
-				</div>
-				
-				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={!state.analystToolsSearchSettings.publicationDateAllTime} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderDates(state, dispatch, classes) }
-					</GCAccordion>
-				</div>
-				
-				<div style={{width: '100%', marginBottom: 10}}>
-					<GCAccordion expanded={state.analystToolsSearchSettings.includeRevoked} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-						{ renderStatus(state, dispatch, classes) }
-					</GCAccordion>
+				<div>
+					<div className={'coming-soon'} style={{
+						width: sideFilterOverlayDimension.width,
+						height: 210,
+						position: 'absolute',
+						backgroundColor: 'rgba(0,0,0,0.3)',
+						zIndex: 99,
+						border: `2px solid ${'#B6C6D8'} !important`,
+						borderRadius: 6
+					}}>
+						<Typography className={'coming-soon-text'} style={{
+							color: 'red',
+							textAlignLast: 'center',
+							marginTop: 90,
+							fontFamily: 'Montserrat',
+							fontWeight: 'bold'
+						}}>COMING SOON</Typography>
+					</div>
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+							{ renderSources(state, dispatch, classes) }
+						</GCAccordion>
+					</div>
+					
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion expanded={state.analystToolsSearchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+							{ renderTypes(state, dispatch, classes) }
+						</GCAccordion>
+					</div>
+					
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion expanded={!state.analystToolsSearchSettings.publicationDateAllTime} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+							{ renderDates(state, dispatch, classes) }
+						</GCAccordion>
+					</div>
+					
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion expanded={state.analystToolsSearchSettings.includeRevoked} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+							{ renderStatus(state, dispatch, classes) }
+						</GCAccordion>
+					</div>
 				</div>
 				
 				<button
@@ -641,22 +661,22 @@ const PolicyAnalyticsToolsHandler = {
 					</span>
 				</button>
 				
-				<button
-					type="button"
-					style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runDocumentComparisonSearch: true });
-					}}
-				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'
-					}}>
-						Clear Filters
-					</span>
-				</button>
+				{/*<button*/}
+				{/*	type="button"*/}
+				{/*	style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}*/}
+				{/*	onClick={() => {*/}
+				{/*		resetAdvancedSettings(dispatch);*/}
+				{/*		setState(dispatch, { runDocumentComparisonSearch: true });*/}
+				{/*	}}*/}
+				{/*>*/}
+				{/*	<span style={{*/}
+				{/*		fontFamily: 'Montserrat',*/}
+				{/*		fontWeight: 600,*/}
+				{/*		width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'*/}
+				{/*	}}>*/}
+				{/*		Clear Filters*/}
+				{/*	</span>*/}
+				{/*</button>*/}
 			</>
 		);
 	},
