@@ -79,4 +79,5 @@
 .* /api/gamechanger/aboutGC/getFAQ .*
 .*/api/gamechanger/getElasticSearchIndex .*
 .*/api/gamechanger/getHomepageEditorData .*
+.*/api/gamechanger/analyticsTools/compareDocument .*
 
