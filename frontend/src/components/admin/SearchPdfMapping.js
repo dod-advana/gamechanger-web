@@ -298,19 +298,6 @@ export default () => {
 
 	return (
 		<div style={{ ...TabStyles.tabContainer, minHeight: 'calc(100vh-100px)' }}>
-			<div
-				style={{
-					display: 'flex',
-					justifyContent: 'space-between',
-					padding: '10px 80px',
-					position: 'absolute',
-					right: '0px',
-				}}
-			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-					Machine Learning API
-				</p>
-			</div>
 			<Tabs>
 				<div
 					style={{
