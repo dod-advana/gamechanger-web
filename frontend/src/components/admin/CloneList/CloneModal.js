@@ -80,7 +80,7 @@ export default ({
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
 			if(cloneToEdit.available_at !== null){
-				cloneToEdit.available_at = JSON.parse(cloneToEdit.available_at).join(', ');
+				cloneToEdit.available_at = cloneToEdit.available_at.join(', ');
 			}
 			setEditCloneData(cloneToEdit);
 		} else {

@@ -11,7 +11,7 @@ import CloneModal from './CloneModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
-const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name'];
+const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'available_at'];
 
 const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	const tableData = [];
@@ -42,6 +42,7 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 				frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1);
 			}
 			const display_name = frags.join(' ');
+			
 			switch (meta.data_type) {
 				case 'integer':
 					stringFields.push({ key: meta.column_name, display_name });
@@ -108,7 +109,7 @@ export default () => {
 
 		if(cloneDataToStore.available_at !== undefined){
 			const dataArray = cloneDataToStore.available_at.split(',').map(item => item.trim());
-			cloneDataToStore.available_at = JSON.stringify(dataArray);
+			cloneDataToStore.available_at = dataArray;
 		}
 
 		let error = false;

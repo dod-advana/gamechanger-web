@@ -176,17 +176,41 @@ const App = () => {
 					const name = clone.clone_name;
 					const GamechangerProvider = getProvider(name);
 
-					if (isDecoupled) {
-						const url = new URL(window.location.href).hostname;
-						if(clone.available_at === null){
-							clone.available_at = []; // if there's nothing at all, set as empty array
+					const url = new URL(window.location.href).hostname;
+					if(clone.available_at === null){
+						clone.available_at = []; // if there's nothing at all, set as empty array
+					}
+					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
+						if (clone.permissions_required) {
+							cloneRoutes.push(
+								<PrivateTrackedRoute
+									key={idx}
+									path={`/${clone.url}`}
+									render={(props) => (
+										<GamechangerProvider>
+											<GamechangerPage
+												{...props}
+												tutorialData={
+													tutorialData && tutorialData[name]
+														? tutorialData[name].newUserTutorial
+														: null
+												}
+												history={history}
+												isClone={true}
+												cloneData={clone}
+											/>
+										</GamechangerProvider>
+									)}
+									pageName={clone.display_name}
+									allowFunction={() => {
+										return Permissions.allowGCClone(clone.clone_name);
+									}}
+								/>
+							);
 						} else {
-							clone.available_at = JSON.parse(clone.available_at);
-						}
-						if (_.find(clone.available_at, (item) => item === url || item === 'all') !== undefined){
-							cloneRoutes.push((
-								<PrivateTrackedRoute 
-									key={idx} 
+							cloneRoutes.push(
+								<PrivateTrackedRoute
+									key={idx}
 									path={`/${clone.url}`}
 									render={(props) => (
 										<GamechangerProvider>
@@ -209,69 +233,6 @@ const App = () => {
 									}}
 								/>
 							);
-						}
-					} else {
-						const url = new URL(window.location.href).hostname;
-						console.log(clone.available_at);
-						if(clone.available_at === null){
-							clone.available_at = []; // if there's nothing at all, set as empty array
-						} else {
-							clone.available_at = JSON.parse(clone.available_at);
-						}
-						if(_.find(clone.available_at, (item) => item === url || item === 'all') !== undefined){
-							if (clone.permissions_required) {
-								cloneRoutes.push(
-									<PrivateTrackedRoute
-										key={idx}
-										path={`/${clone.url}`}
-										render={(props) => (
-											<GamechangerProvider>
-												<GamechangerPage
-													{...props}
-													tutorialData={
-														tutorialData && tutorialData[name]
-															? tutorialData[name].newUserTutorial
-															: null
-													}
-													history={history}
-													isClone={true}
-													cloneData={clone}
-												/>
-											</GamechangerProvider>
-										)}
-										pageName={clone.display_name}
-										allowFunction={() => {
-											return Permissions.allowGCClone(clone.clone_name);
-										}}
-									/>
-								);
-							} else {
-								cloneRoutes.push(
-									<PrivateTrackedRoute
-										key={idx}
-										path={`/${clone.url}`}
-										render={(props) => (
-											<GamechangerProvider>
-												<GamechangerPage
-													{...props}
-													tutorialData={
-														tutorialData && tutorialData[name]
-															? tutorialData[name].newUserTutorial
-															: null
-													}
-													history={history}
-													isClone={true}
-													cloneData={clone}
-												/>
-											</GamechangerProvider>
-										)}
-										pageName={clone.display_name}
-										allowFunction={() => {
-											return true;
-										}}
-									/>
-								);
-							}
 						}
 					}
 				}
