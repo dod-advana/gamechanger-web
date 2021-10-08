@@ -13,10 +13,9 @@ import { green, red, yellow, orange } from '@material-ui/core/colors';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
-import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, crawlerMappingFunc, PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
-import { crawlerMappingFunc } from '../../gamechangerUtils';
-import { setState } from '../../sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 
 const TableRow = styled.div`
 	text-align: left;

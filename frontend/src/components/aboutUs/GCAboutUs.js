@@ -22,8 +22,8 @@ import GraphIcon from '../../images/icon/GC 318@3x.png';
 import ScaleIcon from '../../images/icon/GC 319@3x.png';
 import NLPIcon from '../../images/icon/GC 320@3x.png';
 import PentagonImage from '../../images/GC-Ourstoryimg.png';
-import { setState } from '../../sharedFunctions';
-import { PAGE_DISPLAYED } from '../../gamechangerUtils';
+import { setState } from '../../utils/sharedFunctions';
+import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -110,7 +110,7 @@ const GCAboutUs = (props) => {
 				setSelectedCategory(categoryOrder[closestNegative].toLowerCase());
 			}
 		},
-		[categoryOrder, selectedCategory]
+		[categoryOrder, ignoreNextScrollEvent, selectedCategory]
 	);
 
 	useEffect(() => {

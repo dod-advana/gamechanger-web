@@ -8,7 +8,7 @@ import {
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
-import { PAGE_DISPLAYED } from '../../../gamechangerUtils';
+import { PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
 import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import UserIcon from '../../../images/icon/UserIcon.png';
 import Popover from '@material-ui/core/Popover';
@@ -17,7 +17,7 @@ import {
 	setState,
 	getUserData,
 	clearDashboardNotification,
-} from '../../../sharedFunctions';
+} from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
