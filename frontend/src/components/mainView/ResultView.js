@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useMountEffect } from '../../gamechangerUtils';
-import { setState } from '../../sharedFunctions';
+import { useMountEffect } from '../../utils/gamechangerUtils';
+import { setState } from '../../utils/sharedFunctions';
 
 const ResultView = (props) => {
 	const { context, viewPanels = {} } = props;

@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
 import { makeStyles } from '@material-ui/core/styles';
-import { getTrackingNameForFactory, exactMatch } from '../../gamechangerUtils';
-import { setState } from '../../sharedFunctions';
+import { getTrackingNameForFactory, exactMatch } from '../../utils/gamechangerUtils';
+import { setState } from '../../utils/sharedFunctions';
 import _ from 'lodash';
 import SearchMatrixFactory from '../factories/searchMatrixFactory';
 import {
@@ -14,7 +14,7 @@ import {
 	Checkbox,
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { commaThousands } from '../../gamechangerUtils';
+import { commaThousands } from '../../utils/gamechangerUtils';
 
 const styles = {
 	innerContainer: {

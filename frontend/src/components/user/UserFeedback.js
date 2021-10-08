@@ -20,7 +20,7 @@ import GCButton from '../common/GCButton';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import GameChangerAPI from '../api/gameChanger-service-api';
 
-import { setState } from '../../sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
