@@ -20,7 +20,7 @@ import Popover from '@material-ui/core/Popover';
 import Popper from '@material-ui/core/Popper';
 import Link from '@material-ui/core/Link';
 import Badge from '@material-ui/core/Badge';
-import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery, PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
+import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
 import FavoriteCard from '../cards/GCFavoriteCard';
 import ReactTable from 'react-table';
 import TextField from '@material-ui/core/TextField';
@@ -722,10 +722,6 @@ const GCUserDashboard = (props) => {
 	}, [userData, cloneData.clone_name]);
 
 	useEffect(() => {}, [reload]);
-
-	useEffect(() => {
-		setState(dispatch, {pageDisplayed: PAGE_DISPLAYED.userDashboard})
-	}, [dispatch])
 
 	const handleTabClicked = (tabIndex, lastIndex, event) => {
 		const tabName = event.target.title;
