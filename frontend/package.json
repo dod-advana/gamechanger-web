@@ -19,23 +19,19 @@
 		"anchorme": "^2.1.2",
 		"axios": "^0.21.1",
 		"bezier-js": "4.0.3",
-		"bootstrap": "3.3.7",
-		"browserslist": "^4.16.6",
-		"color": "^3.1.3",
-		"crypto-js": "^4.0.0",
-		"date-fns": "^2.14.0",
+		"bootstrap": "^3.4.1",
+		"color": "^3.2.1",
+		"crypto-js": "^4.1.1",
+		"date-fns": "^2.23.0",
 		"email-validator": "^2.0.4",
 		"flexboxgrid": "^6.3.1",
 		"font-awesome": "^4.7.0",
 		"history": "^4.6.1",
 		"html-react-parser": "^0.13.0",
-		"html2canvas": "^1.0.0-rc.5",
+		"html2canvas": "^1.3.2",
 		"jws": "^3.1.4",
 		"lodash": "^4.17.10",
-		"material-ui": "^0.20.0",
 		"moment": "^2.18.1",
-		"node-fetch": "^3.0.0-beta.9",
-		"node-sass": "^4.0.0",
 		"npm-force-resolutions": "0.0.10",
 		"piwik-react-router": "^0.12.1",
 		"prop-types": "^15.5.8",
@@ -43,18 +39,22 @@
 		"react-bottom-scroll-listener": "^5.0.0",
 		"react-collapse": "^4.0.3",
 		"react-dom": "16.8.1",
+		"react-dropzone": "6.2.4",
 		"react-error-boundary": "^3.1.3",
 		"react-force-graph": "^1.41.7",
 		"react-js-pagination": "^3.0.2",
 		"react-modal": "^3.4.4",
 		"react-motion": "^0.5.2",
 		"react-router-dom": "5.2.0",
+		"react-scripts": "^4.0.3",
 		"react-select": "^1.0.0-rc.10",
 		"react-table": "6.8.0",
 		"react-tabs": "^2.2.2",
 		"react-text-annotate": "^0.3.0",
 		"recharts": "1.8.5",
 		"sanitize-html": "^2.4.0",
+		"sass": "^1.38.0",
+		"sass-loader": "^12.1.0",
 		"spark-md5": "^3.0.0",
 		"styled-components": "^4.2.1",
 		"typeface-montserrat": "0.0.54",
@@ -64,11 +64,17 @@
 		"xlsx": "^0.17.0"
 	},
 	"devDependencies": {
-		"eslint": "^6.6.0",
+		"chai": "^4.3.4",
+		"decompress-tar": "^4.0.0",
+		"decompress-tarbz2": "^4.0.0",
+		"decompress-targz": "^4.0.0",
+		"enzyme": "^3.11.0",
+		"enzyme-adapter-react-16": "^1.15.6",
+		"eslint": "^7.11.0",
 		"eslint-plugin-import": "^2.23.4",
 		"eslint-plugin-react": "^7.24.0",
-		"react-scripts": "3.4.0",
-		"sonarqube-scanner": "^2.5.0"
+		"sonarqube-scanner": "^2.5.0",
+		"typescript": "^4.4.3"
 	},
 	"scripts": {
 		"109": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=test109 yarn start",
@@ -83,9 +89,14 @@
 		"test-coverage": "jest --coverage --coverageDirectory=coverage/jest",
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
-		"sonarscan": "sonar-scanner"
+		"sonarscan": "sonar-scanner",
+		"eslint": "eslint --fix --debug -c package.json ./src/"
 	},
 	"jest": {
+		"moduleDirectories": [
+			"node_modules",
+			"src"
+		],
 		"moduleNameMapper": {
 			"\\.(css|less)$": "identity-obj-proxy",
 			"\\.(pdf|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/test/mock.js"
@@ -98,7 +109,11 @@
 		"transformIgnorePatterns": [
 			"<rootDir>/test/fsd/util",
 			"<rootDir>/node_modules/"
-		]
+		],
+		"transform": {
+			"\\.[jt]sx?$": "babel-jest"
+		},
+		"testEnvironment": "jsdom"
 	},
 	"browserslist": {
 		"production": [
@@ -119,7 +134,7 @@
 		"rules": {
 			"max-len": 0,
 			"indent": [
-				1,
+				"warn",
 				"tab",
 				{
 					"SwitchCase": 1
@@ -131,7 +146,7 @@
 			"strict": 0,
 			"no-throw-literal": 0,
 			"quotes": [
-				"error",
+				"warn",
 				"single",
 				{
 					"allowTemplateLiterals": true
@@ -139,9 +154,21 @@
 			],
 			"no-eval": 0,
 			"no-irregular-whitespace": [
-				"error",
+				"warn",
 				{
 					"skipComments": true
+				}
+			],
+			"import/no-anonymous-default-export": [
+				"warn",
+				{
+					"allowArray": false,
+					"allowArrowFunction": true,
+					"allowAnonymousClass": false,
+					"allowAnonymousFunction": true,
+					"allowCallExpression": true,
+					"allowLiteral": false,
+					"allowObject": true
 				}
 			]
 		},

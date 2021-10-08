@@ -6,7 +6,6 @@ const defaultCardHandler = require('../modules/default/defaultCardHandler');
 const budgetSearchCardHandler = require('../modules/budgetSearch/budgetSearchCardHandler');
 
 class CardFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {
