@@ -5,7 +5,7 @@ import {
 	getTrackingNameForFactory,
 	getTypeIcon,
 	getTypeTextColor,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 // import {
 // 	List,
 // 	ListItem,
@@ -22,7 +22,7 @@ import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import _ from 'lodash';
-// import {setState} from "../../../sharedFunctions";
+// import {setState} from "../../../utils/sharedFunctions";
 // import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
 // import {gcOrange} from "../../common/gc-colors";
 // import GameChangerAPI from "../../api/gameChanger-service-api";

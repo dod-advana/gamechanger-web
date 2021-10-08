@@ -10,7 +10,7 @@ import {
 	TextField,
 	Radio,
 } from '@material-ui/core';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';

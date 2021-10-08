@@ -11,12 +11,12 @@ import {
 	getNodeOutlineColors,
 	getTextColorBasedOnBackground,
 	shuffleArray,
-} from '../../graphUtils';
+} from '../../utils/graphUtils';
 import {
 	convertHexToRgbA,
 	getLinkColor,
 	getTrackingNameForFactory,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import styled from 'styled-components';
 import { FormControl, Input, InputLabel, Popover } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
