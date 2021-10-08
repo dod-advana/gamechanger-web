@@ -166,25 +166,6 @@ class SearchUtility {
 		let cleaned = {};
 		cleaned[key] = [];
 		if (toReturn && toReturn[key] && toReturn[key].length) {
-			// let phrases = [];
-			// toReturn[key].forEach((x) => {
-			// 	phrases.push(x.phrase);
-			// });
-
-			// phrases = phrases.sort();
-			// let ordered = [];
-			// phrases.forEach((phr) => {
-			// 	toReturn[key].forEach((y) => {
-			// 		if (y.phrase === phr) {
-			// 			//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
-			// 			y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
-
-			// 			if (y.phrase && y.phrase !== '' && y.phrase !== key) {
-			// 				ordered.push(y);
-			// 			}
-			// 		}
-			// 	});
-			// });
 			var ordered =[];
 			var currList = [];
 			let orig = key.replace(/[^\w\s]|_/g, "").trim()
