@@ -206,7 +206,7 @@ class DataTrackerController {
 			res.status(502).send({ error: e.message, message: 'Error retrieving crawler metadata' });
 		}
 	}
-// getCrawlerSealData - getCrawlerInfoData
+
 	async getCrawlerInfoData(req, res) {
 		let userId = 'webapp_unknown';
 		try {
