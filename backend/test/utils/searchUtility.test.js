@@ -729,6 +729,15 @@ describe('SearchUtility', function () {
 			let expected =       {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "expansion3", "source": "abbreviations"}]};
 			assert.deepEqual(actual, expected);
 		});
+		it('should clean expansions by getting rid of duplicates even if one is capitalized', () => {
+			const target = new SearchUtility(opts);
+			const key = 'something';
+			let toReturn = {"something": [{"phrase": "THING", "source": "related"}, {"phrase": "thing", "source": "related"}]}
+
+			let actual = target.cleanExpansions(key, toReturn);
+			let expected =   {"something": [{"phrase": "THING", "source": "related"}]};
+			assert.deepEqual(actual, expected);
+		});
 	});
 	describe('#getQueryVariable()', () => {
 		it('should return back the value for a query variable', () => {
