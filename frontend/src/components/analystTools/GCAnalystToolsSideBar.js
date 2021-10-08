@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import {setState} from '../../utils/sharedFunctions';
 import AnalystToolsFactory from '../factories/analystToolsFactory';
@@ -15,6 +15,15 @@ export default function GCAnalystToolsSideBar(props) {
 	
 	const [analystToolsSideBarHandler, setAnalystToolsSideBarHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
+	const [sideFilterOverlayDimension, setSideFilterOverlayDimension] = useState({width: 0, height: 0});
+	
+	const sideBarFilterRef = useRef();
+	
+	useEffect(() => {
+		if (sideBarFilterRef.current) {
+			setSideFilterOverlayDimension({width: sideBarFilterRef.current.offsetWidth, height: sideBarFilterRef.current.offsetHeight});
+		}
+	}, [sideBarFilterRef]);
 	
 	useEffect(() => {
 		// Create the factory
@@ -39,12 +48,13 @@ export default function GCAnalystToolsSideBar(props) {
 			<div className={''}>
 				<div style={styles.innerContainer}>
 					<div style={styles.cardBody}>
-						<div style={styles.innerContainer}>
+						<div style={styles.innerContainer} ref={sideBarFilterRef}>
 							{loaded && analystToolsSideBarHandler.getSideBarItems({
 								state,
 								classes,
 								dispatch,
-								handleSubmit
+								handleSubmit,
+								sideFilterOverlayDimension
 							})}
 						</div>
 					</div>

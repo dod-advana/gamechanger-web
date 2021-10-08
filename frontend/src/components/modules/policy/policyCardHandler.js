@@ -895,11 +895,11 @@ const PolicyCardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
-
+			
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-			} else if (Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
+			} else if (item.paragraphs && Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
 				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
 			const contextHtml = hoveredSnippet;
@@ -928,7 +928,7 @@ const PolicyCardHandler = {
 			if (state.listView && !intelligentSearch) {
 				return (
 					<StyledListViewFrontCardContent>
-						{item.pageHits.length > 0 && (
+						{item.pageHits?.length > 0 && (
 							<GCAccordion
 								header={'PAGE HITS'}
 								headerBackground={'rgb(238,241,242)'}
@@ -963,7 +963,7 @@ const PolicyCardHandler = {
 								</div>
 							</GCAccordion>
 						)}
-						{item.paragraphs.length > 0 &&
+						{item.paragraphs?.length > 0 &&
 							<GCAccordion header={'PARAGRAPH HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 								<div className={'expanded-hits'}>
 									<div className={'page-hits'}>
