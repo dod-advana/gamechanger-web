@@ -15,8 +15,6 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
-import { crawlerMappingFunc } from '../../gamechangerUtils';
-import { map, mapObject } from 'underscore';
 
 const TableRow = styled.div`
 	text-align: left;
