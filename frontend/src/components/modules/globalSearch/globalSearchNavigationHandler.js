@@ -2,14 +2,14 @@ import React from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { HoverNavItem, NavItem } from '../../navigation/NavItems';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import {
 	ConstrainedIcon,
 	PageLink,
 	StyledBadgeSmall,
 } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
