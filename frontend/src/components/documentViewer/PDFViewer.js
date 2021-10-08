@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import { encode, handlePdfOnLoad } from '../../gamechangerUtils';
+import { encode, handlePdfOnLoad } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -34,6 +34,8 @@ export default function PDFViewer({ location }) {
 							)
 							.then((url) => {
 								node.src = url;
+							}).catch((err) => {
+								console.error(err);
 							});
 					}
 				});

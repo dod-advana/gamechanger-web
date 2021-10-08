@@ -10,6 +10,7 @@
 .vscode/*
 jest_0/
 jest/
+*.snap
 
 # production
 /build

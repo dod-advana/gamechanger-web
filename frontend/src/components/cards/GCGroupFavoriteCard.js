@@ -10,7 +10,7 @@ import moment from 'moment';
 
 // Local Imports
 import {trackEvent} from '../telemetry/Matomo';
-import { getTrackingNameForFactory, encode } from '../../gamechangerUtils';
+import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip'
 import GCButton from '../common/GCButton';
 import {CardButton} from '../common/CardButton';

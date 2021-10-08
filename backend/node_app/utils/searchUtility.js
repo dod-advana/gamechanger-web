@@ -1461,7 +1461,7 @@ class SearchUtility {
 		}
 	}
 
-	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
+	cleanUpEsResults(raw, searchTerms, user, selectedDocuments = [], expansionDict, index, query, isCompareReturn = false, paragraphResults = []) {
 		try {
 			let results = {
 				query,
@@ -1499,7 +1499,7 @@ class SearchUtility {
 					result.pageHits = [];
 					const pageSet = new Set();
 					if (r.inner_hits) {
-						if (r.inner_hits.paragraphs) {
+						if (r.inner_hits.paragraphs && !isCompareReturn) {
 							r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
 								const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
 								let pageNumber = pageIndex + 1;
@@ -1523,19 +1523,49 @@ class SearchUtility {
 							});
 							
 							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-							if(r.highlight){
-								if(r.highlight['display_title_s.search']){
-									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
+							if (r.highlight) {
+								if (r.highlight['display_title_s.search']) {
+									result.pageHits.push({
+										title: 'Title',
+										snippet: r.highlight['display_title_s.search'][0]
+									});
 								}
-								if(r.highlight.keyw_5){
+								if (r.highlight.keyw_5) {
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
 								}
-								if(r.highlight['filename.search']){
-									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								if (r.highlight['filename.search']) {
+									result.pageHits.push({
+										title: 'Filename',
+										snippet: r.highlight['filename.search'][0]
+									});
 								}
 							}
 							result.pageHitCount = pageSet.size;
+						}
+						else if (r.inner_hits.paragraphs && isCompareReturn) {
+							result.paragraphs = [];
+							result.score = 0;
 							
+							r.inner_hits.paragraphs.hits.hits.forEach(paragraph => {
+								const entities = [];
+								Object.keys(paragraph._source.entities).forEach(entKey => {
+									paragraph._source.entities[entKey].forEach(org => {
+										entities.push(org);
+									});
+								});
+								result.score += paragraphResults[paragraph._source.id].score;
+								result.paragraphs.push({
+									id: paragraph._source.id,
+									par_raw_text_t: paragraph._source.par_raw_text_t,
+									page_num_i: paragraph._source.page_num_i,
+									entities: entities,
+									score: paragraphResults[paragraph._source.id].score,
+									transformTextMatch: paragraphResults[paragraph._source.id].text,
+									paragraphIdBeingMatched: paragraphResults[paragraph._source.id].paragraphIdBeingMatched
+								});
+							});
+							
+							result.score /= result.paragraphs.length;
 						} else {
 							r.inner_hits.pages.hits.hits.forEach((phit) => {
 								const pageIndex = phit._nested.offset;
@@ -1586,8 +1616,13 @@ class SearchUtility {
 					results.docs.push(result);
 				}
 			});
+			
 			results.searchTerms = searchTerms;
 			results.expansionDict = expansionDict;
+			
+			if (isCompareReturn) {
+				results.docs.sort((a, b) => b.score - a.score);
+			}
 
 			return results;
 		} catch (err) {
@@ -2037,6 +2072,27 @@ class SearchUtility {
 		};
 	}
 
+	getDocTitleQuery(filenames){
+		return {
+			"_source": [
+				"filename",
+				"display_title_s"
+			],
+			"size": filenames.length,
+			"query": {
+				"bool": {
+					"must": [
+						{
+							"terms": {
+								"filename.search": filenames
+							}
+						}
+					]
+				}
+			}
+		}
+	}
+
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
 		let esIndex = 'gamechanger';
@@ -2326,6 +2382,73 @@ class SearchUtility {
 		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
 		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
 	return question;
+	}
+	
+	getDocumentParagraphsByParIDs(ids = []) {
+		return {
+			_source: {
+				includes: ['pagerank_r', 'kw_doc_score_r', 'topics_rs']
+			},
+			'stored_fields': [
+				'filename',
+				'title',
+				'page_count',
+				'doc_type',
+				'doc_num',
+				'ref_list',
+				'id',
+				'summary_30',
+				'keyw_5',
+				'p_text',
+				'type',
+				'p_page',
+				'display_title_s',
+				'display_org_s',
+				'display_doc_type_s',
+				'is_revoked_b',
+				'access_timestamp_dt',
+				'publication_date_dt',
+				'crawler_used_s',
+				'topics_rs'
+			],
+			'query': {
+				'bool': {
+					'should': [
+						{
+							'nested': {
+								'path': 'paragraphs',
+								'inner_hits': {
+									'_source': true,
+									'highlight': {
+									  'fields': {
+  										'paragraphs.filename.search': {
+  										  'number_of_fragments': 0
+  										},
+  										'paragraphs.par_raw_text_t': {
+  										  'fragment_size': 200,
+  										  'number_of_fragments': 1
+  										}
+									  },
+									  'fragmenter': 'span'
+									}
+								},
+								'query': {
+									'bool': {
+										'must': [
+											{
+												'terms': {
+													'paragraphs.id': ids
+												}
+											}
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		}
 	}
 
 }
