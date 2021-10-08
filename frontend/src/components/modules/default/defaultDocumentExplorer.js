@@ -13,7 +13,7 @@ import {
 	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';

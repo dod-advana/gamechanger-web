@@ -3,7 +3,7 @@ import Fade from '@material-ui/core/Fade';
 import { makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import _ from 'lodash';
-import { getTrackingNameForFactory } from '../../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import Popover from '@material-ui/core/Popover';
 import { Checkbox } from '@material-ui/core';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -12,7 +12,7 @@ import GCButton from '../../common/GCButton';
 import TextField from '@material-ui/core/TextField';
 
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { handleSaveFavoriteDocument, setState } from '../../../sharedFunctions';
+import { handleSaveFavoriteDocument, setState } from '../../../utils/sharedFunctions';
 import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
 import GameChangerAPI from '../../api/gameChanger-service-api';

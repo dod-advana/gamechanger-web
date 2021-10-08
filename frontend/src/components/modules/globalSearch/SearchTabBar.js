@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import _ from 'lodash';
 import Typography from '@material-ui/core/Typography';
 
-import { commaThousands } from '../../../gamechangerUtils';
+import { commaThousands } from '../../../utils/gamechangerUtils';
 
 import { SearchContext } from './SearchContext';
 import JumpButton from './JumpButton';

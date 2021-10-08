@@ -8,7 +8,7 @@ import GCAccordion from '../common/GCAccordion';
 import { Card } from '../cards/GCCard';
 import { MainContainer } from '../../containers/GameChangerDetailsPage';
 import Pagination from 'react-js-pagination';
-import { numberWithCommas } from '../../gamechangerUtils';
+import { numberWithCommas } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
