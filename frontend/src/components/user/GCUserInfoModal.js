@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core';
 import GCButton from '../common/GCButton';
 import EmailValidator from 'email-validator';
-import { getUserData, setState } from '../../sharedFunctions';
+import { getUserData, setState } from '../../utils/sharedFunctions';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import styled from 'styled-components';

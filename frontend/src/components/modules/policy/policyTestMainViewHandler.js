@@ -7,7 +7,7 @@ import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Typography } from '@material-ui/core';
-import { setState, handleSaveFavoriteTopic } from '../../../sharedFunctions';
+import { setState, handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -22,7 +22,7 @@ import {
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import {
 	TrendingSearchContainer,
 	RecentSearchContainer,

@@ -8,14 +8,14 @@ import {
 	getLines,
 	getNodeOutlineColors,
 	getTextColorBasedOnBackground,
-} from '../../graphUtils';
+} from '../../utils/graphUtils';
 import {
 	convertHexToRgbA,
 	getDocTypeStyles,
 	getLinkColor,
 	getTrackingNameForFactory,
 	typeColorMap,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import { trackEvent } from '../telemetry/Matomo';
 import Config from '../../config/config';
