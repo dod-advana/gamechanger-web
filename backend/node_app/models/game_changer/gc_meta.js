@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.BOOLEAN
 			},
 			available_at: {
-				type: DataTypes.STRING
+				type: DataTypes.ARRAY(DataTypes.STRING)
 			},
 			createdAt: {
 				type: DataTypes.DATE
