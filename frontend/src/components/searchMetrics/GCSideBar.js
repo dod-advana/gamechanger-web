@@ -9,7 +9,7 @@ import {
 	getTrackingNameForFactory,
 	orgColorMap,
 	exactMatch,
-} from '../../gamechangerUtils';
+} from  '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';
