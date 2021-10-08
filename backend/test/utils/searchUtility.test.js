@@ -138,8 +138,8 @@ describe('SearchUtility', function () {
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {something: []});
+			let expected = {something: []};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should return empty list for key if none of the sources are defined', () => {
@@ -147,13 +147,13 @@ describe('SearchUtility', function () {
 
 			const expansionDict = undefined;
 			const synonyms = undefined;
-			const relatedSearches = [];
+			const relatedSearches = undefined;
 			const key = 'something';
 			const abbs = undefined;
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {something: []});
+			let expected = {something: []};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should just use ML terms if no synonyms are detected', () => {
@@ -162,13 +162,12 @@ describe('SearchUtility', function () {
 			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
 			const synonyms = [];
 			const relatedSearches = [];
-
 			const key = 'something';
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]});
+			let expected = {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should just use ML terms if synonyms are undefined', () => {
@@ -181,10 +180,52 @@ describe('SearchUtility', function () {
 			const abbs = undefined;
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]});
+			let expected =  {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]};
+			assert.deepEqual(result, expected);
 		});
 
+		it('should just use ML terms if related searches are undefined', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const synonyms = undefined;
+			const relatedSearches = undefined;
+			const key = 'something';
+			const abbs = undefined;
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected =  {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]};
+			assert.deepEqual(result, expected);
+		});
+		it('should just use related searches if no synonyms or ML expansions are detected', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = {};
+			const synonyms = [];
+			const relatedSearches = ["related search"];
+			const key = 'something';
+			const abbs = [];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "related search", "source": "related"}]};
+			assert.deepEqual(result, expected);
+		});
+
+		it('should just use related searches if no synonyms or ML expansions undefined', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = undefined;
+			const synonyms = [];
+			const relatedSearches = ["related search"];
+			const key = 'something';
+			const abbs = [];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "related search", "source": "related"}]};
+			assert.deepEqual(result, expected);
+		});
+
+		
 		it('should just use synonyms if no ML terms are detected', () => {
 			const target = new SearchUtility(opts);
 
@@ -195,8 +236,8 @@ describe('SearchUtility', function () {
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches,key, abbs);
-
-			assert.deepEqual(result, {something: [{phrase: 'thing1', source: 'thesaurus'}, {phrase: 'thing2', source: 'thesaurus'}]});
+			let expected =  {something: [{phrase: 'thing1', source: 'thesaurus'}, {phrase: 'thing2', source: 'thesaurus'}]};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should just use synonyms if ML terms are undefined', () => {
@@ -210,8 +251,8 @@ describe('SearchUtility', function () {
 			const abbs = undefined;
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {something: [{phrase: 'thing1', source: 'thesaurus'}, {phrase: 'thing2', source: 'thesaurus'}]});
+			let expected = {something: [{phrase: 'thing1', source: 'thesaurus'}, {phrase: 'thing2', source: 'thesaurus'}]};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should just use abbreviations if no synonyms + ML terms are detected', () => {
@@ -225,11 +266,11 @@ describe('SearchUtility', function () {
 			const abbs = ['expansion1', 'expansion2'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {something: [{phrase: 'expansion1', source: 'abbreviations'}, {phrase: 'expansion2', source: 'abbreviations'}]});
+			let expected = {something: [{phrase: 'expansion1', source: 'abbreviations'}, {phrase: 'expansion2', source: 'abbreviations'}]};
+			assert.deepEqual(result, expected);
 		});
 
-		it('should just use abbs if synonyms + ML terms are undefined', () => {
+		it('should just use abbs if synonyms + ML terms are undefined and no related search', () => {
 			const target = new SearchUtility(opts);
 
 			const expansionDict = undefined;
@@ -240,17 +281,16 @@ describe('SearchUtility', function () {
 			const abbs = ['expansion1', 'expansion2'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {something: [{phrase: 'expansion1', source: 'abbreviations'}, {phrase: 'expansion2', source: 'abbreviations'}]});
+			let expected = {something: [{phrase: 'expansion1', source: 'abbreviations'}, {phrase: 'expansion2', source: 'abbreviations'}]};
+			assert.deepEqual(result, expected);
 		});
 
-		it('should combine ML terms and synonyms if there are 3 of each, and no abbreviationss', () => {
+		it('should combine ML terms and synonyms if there are 3 of each, and no abbreviations and no related search', () => {
 			const target = new SearchUtility(opts);
 
 			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
 			const synonyms = ['thing4', 'thing5', 'thing6'];
 			const relatedSearches = [];
-
 			const key = 'something';
 			const abbs = [];
 
@@ -258,7 +298,19 @@ describe('SearchUtility', function () {
 			let expected = {"something": [{"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing2", "source": "ML-QE"}]};
 			assert.deepEqual(result, expected);
 		});
+		it('should combine ML terms, synonyms, and related search if there are 3 of each, and no abbreviations', () => {
+			const target = new SearchUtility(opts);
 
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const synonyms = ['thing4', 'thing5', 'thing6'];
+			const relatedSearches = ['related 1', 'related 2'];
+			const key = 'something';
+			const abbs = [];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "related 2", "source": "related"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing2", "source": "ML-QE"}]};
+			assert.deepEqual(result, expected);
+		});
 		it('should combine ML terms and abbreviations if there are 3 of each, and no synonyms', () => {
 			const target = new SearchUtility(opts);
 
@@ -363,7 +415,20 @@ describe('SearchUtility', function () {
 			let expected = {"something else": [{"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "abbreviations"}, {"phrase": "thing2", "source": "ML-QE"}, {"phrase": "thing42", "source": "abbreviations"}]};
 			assert.deepEqual(result, expected);
 		});
+		it('should combine all if there are > 3 of each with a space, and no synonyms', () => {
+			const target = new SearchUtility(opts);
 
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const relatedSearches = ['related 1', 'related 2', 'related 3'];
+
+			const synonyms = [];
+			const key = 'something else';
+			const abbs = ['thing4', 'thing5', 'thing6', 'thing42'];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something else": [{"phrase": "related 1", "source": "related"}, {"phrase": "related 2", "source": "related"}, {"phrase": "related 3", "source": "related"}, {"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "abbreviations"}, {"phrase": "thing2", "source": "ML-QE"}, {"phrase": "thing42", "source": "abbreviations"}]};
+			assert.deepEqual(result, expected);
+		});
 		it('should combine abbreviations and synonyms if there are > 3 of each with a space, and no ML terms', () => {
 			const target = new SearchUtility(opts);
 
@@ -375,14 +440,29 @@ describe('SearchUtility', function () {
 			const abbs = ['thing1', 'thing2', 'thing3', 'thing41'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-			let expected =       {"something else": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing41", "source": "abbreviations"}, {"phrase": "thing42", "source": "thesaurus"}]}
+			let expected = {"something else": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing41", "source": "abbreviations"}, {"phrase": "thing42", "source": "thesaurus"}]}
+			assert.deepEqual(result, expected);
+		});
+
+		it('should combine all if there are > 3 of each with a space, and no ML terms', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = {};
+			const synonyms = ['thing4', 'thing5', 'thing6', 'thing42'];
+			const relatedSearches = ['related 1', 'related 2', 'related 3'];
+
+			const key = 'something else';
+			const abbs = ['thing1', 'thing2', 'thing3', 'thing41'];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something else": [{"phrase": "related 1", "source": "related"}, {"phrase": "related 2", "source": "related"}, {"phrase": "related 3", "source": "related"}, {"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing41", "source": "abbreviations"}, {"phrase": "thing42", "source": "thesaurus"}]}
 			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms if there are 4 ML terms and 2 synonyms, no abbreviations', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3', 'thing4']};
 			const relatedSearches = [];
 
 			const synonyms = ['thing4', 'thing5'];
@@ -397,7 +477,7 @@ describe('SearchUtility', function () {
 		it('should combine ML terms and synonyms if there are 4 synonyms and 2 ML terms, no abbreviations', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1']}, wordsim: ['thing3']};
 			const relatedSearches = [];
 
 			const synonyms = ['thing4', 'thing5', 'thing6', 'thing7'];
@@ -405,14 +485,14 @@ describe('SearchUtility', function () {
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-			let expected = {"something": [{"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing2", "source": "ML-QE"}, {"phrase": "thing7", "source": "thesaurus"}]};
+			let expected = {"something": [{"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing7", "source": "thesaurus"}]};
 			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms if there are 4 ML terms and 2 abbreviations, no synonyms', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3', 'thing4']};
 			const relatedSearches = [];
 
 			const synonyms = [];
@@ -424,7 +504,7 @@ describe('SearchUtility', function () {
 			assert.deepEqual(result, expected);
 		});
 
-		it('should combine ML terms and synonyms if there are 4 synonyms and 2 ML terms, no synonyms', () => {
+		it('should combine ML terms and synonyms if there are 4 synonyms and 3 ML terms, no synonyms', () => {
 			const target = new SearchUtility(opts);
 
 			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
@@ -452,9 +532,9 @@ describe('SearchUtility', function () {
 			const abbs = ['thing1', 'thing2', 'thing3', 'thing41'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing41", "source": "abbreviations"}]}
-			);
+			let expected = {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing41", "source": "abbreviations"}]};
+			assert.deepEqual(result, expected)
+			
 		});
 
 		it('should combine abbreviations and synonyms if there are 4 synonyms and 2 ML terms, no ML terms', () => {
@@ -468,15 +548,14 @@ describe('SearchUtility', function () {
 			const abbs = ['thing1', 'thing2'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing7", "source": "thesaurus"}]}
-			);
+			let expected = {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing7", "source": "thesaurus"}]};
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are 6 ML terms and no synonyms or abbreviations', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3', 'thing4', 'thing5', 'thing6']};
 			const synonyms = [];
 			const relatedSearches = [];
 
@@ -484,15 +563,15 @@ describe('SearchUtility', function () {
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing4", "source": "ML-QE"}, {"phrase": "thing5", "source": "ML-QE"}, {"phrase": "thing6", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]};
 
-			assert.deepEqual(result, {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]}
-			);
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are 6 ML terms and undefined synonyms and abbreviations', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3', 'thing4', 'thing5', 'thing6']};
 			const synonyms = undefined;
 			const relatedSearches = [];
 
@@ -500,9 +579,8 @@ describe('SearchUtility', function () {
 			const abbs = undefined;
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result,  {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]}
-			);
+			let expected = {"something": [{"phrase": "thing3", "source": "ML-QE"}, {"phrase": "thing4", "source": "ML-QE"}, {"phrase": "thing5", "source": "ML-QE"}, {"phrase": "thing6", "source": "ML-QE"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "thing2", "source": "ML-QE"}]};
+			assert.deepEqual(result,  expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are 6 synonyms and no ML terms or abbreviations', () => {
@@ -516,9 +594,9 @@ describe('SearchUtility', function () {
 			const abbs = [];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result,  {"something": [{"phrase": "thing1", "source": "thesaurus"}, {"phrase": "thing2", "source": "thesaurus"}, {"phrase": "thing3", "source": "thesaurus"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing6", "source": "thesaurus"}]}
-			);
+			let expected =  {"something": [{"phrase": "thing1", "source": "thesaurus"}, {"phrase": "thing2", "source": "thesaurus"}, {"phrase": "thing3", "source": "thesaurus"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing6", "source": "thesaurus"}]}
+			
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are 6 synonyms and undefined ML terms and abbreviations', () => {
@@ -546,9 +624,8 @@ describe('SearchUtility', function () {
 			const abbs = ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing6", "source": "abbreviations"}]}
-			);
+			let expected = {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing6", "source": "abbreviations"}]}
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are 6 abbreviations and undefined ML terms and synonyms', () => {
@@ -562,9 +639,9 @@ describe('SearchUtility', function () {
 			const abbs = ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing6", "source": "abbreviations"}]}
-			);
+			let expected = {"something": [{"phrase": "thing1", "source": "abbreviations"}, {"phrase": "thing2", "source": "abbreviations"}, {"phrase": "thing3", "source": "abbreviations"}, {"phrase": "thing4", "source": "abbreviations"}, {"phrase": "thing5", "source": "abbreviations"}, {"phrase": "thing6", "source": "abbreviations"}]}
+			
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are > 2 of each and checking for removal of search term in ML terms', () => {
@@ -578,15 +655,15 @@ describe('SearchUtility', function () {
 			const abbs = ['expansion1', 'expansion2', 'expansion3'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
-
-			assert.deepEqual(result, {"something": [{"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "expansion3", "source": "abbreviations"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing2", "source": "ML-QE"}, {"phrase": "thing42", "source": "thesaurus"}]}
-			);
+			let expected = {"something": [{"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "thing5", "source": "thesaurus"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "expansion3", "source": "abbreviations"}, {"phrase": "thing6", "source": "thesaurus"}, {"phrase": "thing2", "source": "ML-QE"}, {"phrase": "thing42", "source": "thesaurus"}]}
+			
+			assert.deepEqual(result, expected);
 		});
 
 		it('should combine ML terms and synonyms and abbreviations if there are > 2 of two categories and 1 of the other and checking for removal of search term in ML terms', () => {
 			const target = new SearchUtility(opts);
 
-			const expansionDict = {qexp: {something : ['thing1', 'thing2']}, wordsim: ['thing3']};
+			const expansionDict = {qexp: {something : ['thing1', 'thing1']}, wordsim: ['thing3']};
 			const synonyms = ['thing4'];
 			const relatedSearches = [];
 
@@ -594,12 +671,65 @@ describe('SearchUtility', function () {
 			const abbs = ['expansion1', 'expansion2', 'expansion3'];
 
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "expansion3", "source": "abbreviations"}]}
+			assert.deepEqual(result, expected);
+		});
+		it('should combine all if there are > 2 of two categories and 1 of the other and checking for removal of search term in ML terms', () => {
+			const target = new SearchUtility(opts);
 
-			assert.deepEqual(result, {"something": [{"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "expansion3", "source": "abbreviations"}, {"phrase": "thing2", "source": "ML-QE"}]}
-			);
+			const expansionDict = {qexp: {something : ['thing1', 'thing1']}, wordsim: ['thing3']};
+			const synonyms = ['thing4'];
+			const relatedSearches = ['related 1', 'related 2'];
+
+			const key = 'something';
+			const abbs = ['expansion1', 'expansion2', 'expansion3'];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected ={"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "related 2", "source": "related"}, {"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing4", "source": "thesaurus"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "thing1", "source": "ML-QE"}, {"phrase": "expansion3", "source": "abbreviations"}]};
+			assert.deepEqual(result, expected);
+		});
+
+		it('should combine all if and remove duplicates', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = {qexp: {something : ['thing1', 'thing1']}, wordsim: ['thing3']};
+			const synonyms = ['thing1'];
+			const relatedSearches = ['related 1', 'thing1'];
+
+			const key = 'something';
+			const abbs = ['expansion1', 'expansion2', 'expansion3'];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "thing1", "source": "related"}, {"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "thing3", "source": "ML-QE"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "expansion3", "source": "abbreviations"}]};
+			assert.deepEqual(result, expected);
+		});
+		it('ML Exp has empty lists and combines others', () => {
+			const target = new SearchUtility(opts);
+
+			const expansionDict = {qexp: {something : []}, wordsim: []};
+			const synonyms = ['thing1'];
+			const relatedSearches = ['related 1', 'thing1'];
+
+			const key = 'something';
+			const abbs = ['expansion1', 'expansion2', 'expansion3'];
+
+			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
+			let expected = {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "thing1", "source": "related"}, {"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "expansion3", "source": "abbreviations"}]};
+			assert.deepEqual(result, expected);
 		});
 	});
 
+	describe('#cleanExpansions()', () => {
+		it('should clean expansions by removing duplciates and punctuations', () => {
+			const target = new SearchUtility(opts);
+			const key = 'something';
+			let toReturn = {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "related 1", "source": "related"}, {"phrase": "expansion1/", "source": "abbreviations"}, {"phrase": "'expansion2'", "source": "abbreviations"}, {"phrase": "expansion3", "source": "abbreviations"}]};
+
+			let actual = target.cleanExpansions(key, toReturn);
+			let expected =       {"something": [{"phrase": "related 1", "source": "related"}, {"phrase": "expansion1", "source": "abbreviations"}, {"phrase": "expansion2", "source": "abbreviations"}, {"phrase": "expansion3", "source": "abbreviations"}]};
+			assert.deepEqual(actual, expected);
+		});
+	});
 	describe('#getQueryVariable()', () => {
 		it('should return back the value for a query variable', () => {
 			const constants = {
