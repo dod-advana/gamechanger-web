@@ -15,7 +15,7 @@ import LoadingBar from '../common/LoadingBar';
 import './export-results-dialog.css';
 import moment from 'moment';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 
