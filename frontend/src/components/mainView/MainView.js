@@ -24,11 +24,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import {
-	Route,
-	Switch,
-	Link
-} from 'react-router-dom';
+
 const gameChangerAPI = new GameChangerAPI();
 
 const MainView = (props) => {
@@ -39,6 +35,11 @@ const MainView = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
 	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		const urlArray = window.location.href.split('/');
+		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]})
+	}, [dispatch])
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
@@ -147,12 +148,12 @@ const MainView = (props) => {
 	}
 	
 	const getDataTracker = () => {
-		return <GCDataStatusTracker state={state} dispatch={dispatch}/>;
+		return <GCDataStatusTracker state={state} />;
 	};
 
 	const getUserDashboard = () => {
 		return (
-			<GCUserDashboard state={state} dispatch={dispatch} userData={state.userData} updateUserData={() => getUserData(dispatch)}
+			<GCUserDashboard state={state} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
 				saveFavoriteSearch={(
@@ -199,7 +200,7 @@ const MainView = (props) => {
 	};
 
 	const getAboutUs = () => {
-		return <GCAboutUs state={state} dispatch={dispatch}/>;
+		return <GCAboutUs state={state} />;
 	};
 
 	const handleDeleteFavoriteSearch = async (search) => {
@@ -249,43 +250,41 @@ const MainView = (props) => {
 					)}
 					<React.Fragment>
 						{state.pageDisplayed !== 'aboutUs' && (
-							<Link to='/gamechanger'>
-								<Button
-									style={{
-										marginLeft: '10px',
-										marginTop: '8px',
-										fontFamily: 'Montserrat',
-										color: '#313541',
-										position: 'absolute',
-									}}
-									startIcon={<ArrowBackIcon />}
-									onClick={() => {
-										setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
-										let viewName;
-										switch (state.pageDisplayed) {
-											case PAGE_DISPLAYED.dataTracker:
-												viewName = 'DataTracker';
-												break;
-											case PAGE_DISPLAYED.userDashboard:
-												viewName = 'UserDashboard';
-												break;
-											case PAGE_DISPLAYED.analystTools:
-												viewName = 'AnalystTools';
-												break;
-											default:
-												viewName = 'Main';
-												break;
-										}
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											viewName,
-											'Back'
-										);
-									}}
-								>
-									<></>
-								</Button>
-							</Link>
+							<Button
+								style={{
+									marginLeft: '10px',
+									marginTop: '8px',
+									fontFamily: 'Montserrat',
+									color: '#313541',
+									position: 'absolute',
+								}}
+								startIcon={<ArrowBackIcon />}
+								onClick={() => {
+									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+									let viewName;
+									switch (state.pageDisplayed) {
+										case PAGE_DISPLAYED.dataTracker:
+											viewName = 'DataTracker';
+											break;
+										case PAGE_DISPLAYED.userDashboard:
+											viewName = 'UserDashboard';
+											break;
+										case PAGE_DISPLAYED.analystTools:
+											viewName = 'AnalystTools';
+											break;
+										default:
+											viewName = 'Main';
+											break;
+									}
+									trackEvent(
+										getTrackingNameForFactory(state.cloneData.clone_name),
+										viewName,
+										'Back'
+									);
+								}}
+							>
+								<></>
+							</Button>
 						)}
 						<div>
 							<p
@@ -349,58 +348,58 @@ const MainView = (props) => {
 		return mainViewHandler.renderHideTabs(props);
 	};
 
-	// switch (state.pageDisplayed) {
-	// 	case PAGE_DISPLAYED.analystTools:
-	// 		return getNonMainPageOuterContainer(getAnalystTools);
-	// 	case PAGE_DISPLAYED.dataTracker:
-	// 		return getNonMainPageOuterContainer(getDataTracker);
-	// 	case PAGE_DISPLAYED.userDashboard:
-	// 		return getNonMainPageOuterContainer(getUserDashboard);
-	// 	case PAGE_DISPLAYED.aboutUs:
-	// 		return getNonMainPageOuterContainer(getAboutUs);
-	// 	case PAGE_DISPLAYED.main:
-	// 	default:
-	// 		if (mainViewHandler) {
-	// 			return mainViewHandler.getMainView({
-	// 				state,
-	// 				dispatch,
-	// 				setCurrentTime,
-	// 				renderHideTabs,
-	// 				pageLoaded,
-	// 				getViewPanels,
-	// 			});
-	// 		} else {
-	// 			return <></>;
-	// 		}
-	// }
-	return(
-		<Switch>
-			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.analystTools}`}>
-				{getNonMainPageOuterContainer(getAnalystTools)}
-			</Route>
-			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.dataTracker}`}>
-				{getNonMainPageOuterContainer(getDataTracker)}
-			</Route>
-			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.userDashboard}`}>
-				{getNonMainPageOuterContainer(getUserDashboard)}
-			</Route>
-			<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.aboutUs}`}>
-				{getNonMainPageOuterContainer(getAboutUs)}
-			</Route>
-			{mainViewHandler && 
-				<Route>
-					{mainViewHandler.getMainView({
-						state,
-						dispatch,
-						setCurrentTime,
-						renderHideTabs,
-						pageLoaded,
-						getViewPanels,
-					})}
-				</Route>
+	switch (state.pageDisplayed) {
+		case PAGE_DISPLAYED.analystTools:
+			return getNonMainPageOuterContainer(getAnalystTools);
+		case PAGE_DISPLAYED.dataTracker:
+			return getNonMainPageOuterContainer(getDataTracker);
+		case PAGE_DISPLAYED.userDashboard:
+			return getNonMainPageOuterContainer(getUserDashboard);
+		case PAGE_DISPLAYED.aboutUs:
+			return getNonMainPageOuterContainer(getAboutUs);
+		case PAGE_DISPLAYED.main:
+		default:
+			if (mainViewHandler) {
+				return mainViewHandler.getMainView({
+					state,
+					dispatch,
+					setCurrentTime,
+					renderHideTabs,
+					pageLoaded,
+					getViewPanels,
+				});
+			} else {
+				return <></>;
 			}
-		</Switch>
-	)
+	}
+	// return(
+	// 	<Switch>
+	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.analystTools}`}>
+	// 			{getNonMainPageOuterContainer(getAnalystTools)}
+	// 		</Route>
+	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.dataTracker}`}>
+	// 			{getNonMainPageOuterContainer(getDataTracker)}
+	// 		</Route>
+	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.userDashboard}`}>
+	// 			{getNonMainPageOuterContainer(getUserDashboard)}
+	// 		</Route>
+	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.aboutUs}`}>
+	// 			{getNonMainPageOuterContainer(getAboutUs)}
+	// 		</Route>
+	// 		{mainViewHandler && 
+	// 			<Route>
+	// 				{mainViewHandler.getMainView({
+	// 					state,
+	// 					dispatch,
+	// 					setCurrentTime,
+	// 					renderHideTabs,
+	// 					pageLoaded,
+	// 					getViewPanels,
+	// 				})}
+	// 			</Route>
+	// 		}
+	// 	</Switch>
+	// )
 };
 
 MainView.propTypes = {

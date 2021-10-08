@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
 	SearchBarForm,
 	SearchBarInput,
@@ -189,26 +188,25 @@ const PolicySearchBarHandler = {
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<Link to={`/gamechanger/${PAGE_DISPLAYED.userDashboard}`}>
-					<GCButton
-						onClick={() => {
-							getUserData(dispatch);
-							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
-							clearDashboardNotification('total', state, dispatch);
-						}}
-						style={{
-							height: 50,
-							width: 60,
-							minWidth: 'none',
-							padding: '0 18px',
-							margin: '0 0 0 4%',
-							backgroundColor: '#131E43',
-							border: '#131E43',
-						}}
-					>
-						<ConstrainedIcon src={UserIcon} />
-					</GCButton>
-				</Link>
+				<GCButton
+					onClick={() => {
+						window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`)
+						getUserData(dispatch);
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+						clearDashboardNotification('total', state, dispatch);
+					}}
+					style={{
+						height: 50,
+						width: 60,
+						minWidth: 'none',
+						padding: '0 18px',
+						margin: '0 0 0 4%',
+						backgroundColor: '#131E43',
+						border: '#131E43',
+					}}
+				>
+					<ConstrainedIcon src={UserIcon} />
+				</GCButton>
 
 				<Popover
 					onClose={() => {
