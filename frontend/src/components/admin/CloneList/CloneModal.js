@@ -79,6 +79,9 @@ export default ({
 
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
+			if(cloneToEdit.available_at !== null){
+				cloneToEdit.available_at = cloneToEdit.available_at.join(', ');
+			}
 			setEditCloneData(cloneToEdit);
 		} else {
 			setEditCloneData({ ...DEFAULT_VALUES });
