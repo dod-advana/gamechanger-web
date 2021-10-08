@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { checkUserInfo, createCopyTinyUrl, setState } from '../../sharedFunctions';
-import { getCurrentView } from '../..//gamechangerUtils';
+import { checkUserInfo, createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
+import { getCurrentView } from '../../utils/gamechangerUtils';
 import _ from 'lodash';
 import {Button} from '@material-ui/core';
 
@@ -16,7 +16,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from '../common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import {trackEvent} from '../telemetry/Matomo';
-import {getTrackingNameForFactory} from '../../gamechangerUtils';
+import {getTrackingNameForFactory} from '../../utils/gamechangerUtils';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/false || !!document.documentMode;
