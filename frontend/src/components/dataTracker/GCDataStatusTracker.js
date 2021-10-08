@@ -16,6 +16,7 @@ import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 import { crawlerMappingFunc } from '../../gamechangerUtils';
+import { map, mapObject } from 'underscore';
 
 const TableRow = styled.div`
 	text-align: left;
@@ -141,10 +142,14 @@ const getData = async ({
 			} else {
 				return [];
 			}
+		} else if (tabIndex === 'crawlerInfo') {
+			const data = await gameChangerAPI.gcCrawlerSealData();
+			if (data && data.data){
+				return data.data;
+			} else {
+				return [];
+			}
 		} else if (tabIndex === 'crawler') {
-			// const data = awair gameChangerAPI.gcCrawlerSealData({
-// combine tables match by name 
-			//})
 			const data = await gameChangerAPI.gcCrawlerTrackerData({
 				limit,
 				offset,
@@ -174,6 +179,7 @@ const GCDataStatusTracker = (props) => {
 	const { state } = props;
 
 	const [dataTableData, setDataTableData] = useState([]);
+	const [crawlerMapping, setCrawlerMapping] = useState([]);
 	const [crawlerTableData, setCrawlerTableData] = useState([]);
 	const [crawlerTableUpdate, setCrawlerTableUpdate] = useState([]);
 	const [neo4jPropertiesData, setNeo4jPropertiesData] = useState([]);
@@ -189,7 +195,8 @@ const GCDataStatusTracker = (props) => {
 	const [loadingNeo4jCounts, setLoadingNeo4jCounts] = useState(true);
 	const [numPages, setNumPages] = useState(0);
 	const [tabIndex, setTabIndex] = useState('documents');
-
+	
+	
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
@@ -221,11 +228,14 @@ const GCDataStatusTracker = (props) => {
 				option: 'status',
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
+			const crawlerInfoPostgresTable = await gameChangerAPI.gcCrawlerSealData();
+			setCrawlerMapping(crawlerInfoPostgresTable);
 			setNumPages(pageCount);
 			setCrawlerTableData(docs);
 		} catch (e) {
 			setCrawlerTableData([]);
 			setNumPages(0);
+			setCrawlerMapping([]);
 			console.error(e);
 		} finally {
 			setLoading(false);
@@ -243,9 +253,12 @@ const GCDataStatusTracker = (props) => {
 				option: 'last',
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
+			const crawlerInfoPostgresTable = await gameChangerAPI.gcCrawlerSealData();
+			setCrawlerMapping(crawlerInfoPostgresTable);
 			setNumPages(pageCount);
 			setCrawlerTableUpdate(docs);
 		} catch (e) {
+			setCrawlerTableData([]);
 			setCrawlerTableUpdate([]);
 			setNumPages(0);
 			console.error(e);
@@ -395,6 +408,16 @@ const GCDataStatusTracker = (props) => {
 			);
 		}
 	};
+	
+	const matchCrawlerName = (crawler_name) => {
+		if (crawlerMapping && crawlerMapping.data) {
+			for (let crawler of crawlerMapping.data) {
+				if (crawler_name === crawler.crawler){
+					return(crawler.display_source_s + '-' + crawler.source_title);
+				}
+			}
+		}
+	}
 
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
@@ -542,7 +565,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'crawler_name',
 				width: 350,
-				Cell: (row) => <TableRow>{row.value}</TableRow>,
+				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
 			},
 			{
 				Header: 'Status',
@@ -654,7 +677,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'crawler_name',
 				width: 350,
-				Cell: (row) => <TableRow>{crawlerMappingFunc(row.value)}</TableRow>,
+				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
 			},
 			{
 				Header: 'Last Successful Ingest',
