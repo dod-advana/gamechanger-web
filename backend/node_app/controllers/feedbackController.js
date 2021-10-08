@@ -17,6 +17,7 @@ class FeedbackController {
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
+		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
 	}
 
 	async sendIntelligentSearchFeedback(req, res) {
