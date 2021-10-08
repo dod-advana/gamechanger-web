@@ -1,6 +1,8 @@
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
+const FAVORITE_GROUP = require('../models').favorite_groups;
+const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
 const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
@@ -19,6 +21,8 @@ class FavoritesController {
 			favoriteDocument = FAVORITE_DOCUMENT,
 			favoriteSearch = FAVORITE_SEARCH,
 			favoriteTopic = FAVORITE_TOPIC,
+			favoriteGroup = FAVORITE_GROUP,
+			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
 			favoriteOrganization = FAVORITE_ORGANIZATION,
 			sparkMD5 = sparkMD5Lib,
 			gcUser = GC_USER,
@@ -32,6 +36,8 @@ class FavoritesController {
 		this.favoriteDocument = favoriteDocument;
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
+		this.favoriteGroup = favoriteGroup;
+		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
 		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
 		this.gcUser = gcUser;
@@ -43,6 +49,9 @@ class FavoritesController {
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
+		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
+		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
+		this.deleteFavoriteFromGroupPOST =this.deleteFavoriteFromGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
 		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
@@ -57,7 +66,7 @@ class FavoritesController {
 			const hashed_user = this.sparkMD5.hash(userId);
 			const new_id = getTenDigitUserId(userId)
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
-			const { filename, favorite_name, favorite_summary, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
+			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteDocument.findOrCreate(
@@ -83,6 +92,11 @@ class FavoritesController {
 						filename: filename
 					}
 				});
+				this.favoriteDocumentsGroup.destroy({
+					where: {
+						favorite_document_id: favorite_id
+					}
+				})
 				res.status(200).send(deleted);
 			}
 		} catch (err) {
@@ -210,6 +224,108 @@ class FavoritesController {
 			}
 		} catch (err) {
 			this.logger.error(err, 'QNFUWTT', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async favoriteGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const hashed_user = getTenDigitUserId(userId) ? this.sparkMD5.hash(getTenDigitUserId(userId)) : this.sparkMD5.hash(userId);
+			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids} = req.body;
+
+			if (create) {
+				const [group] = await this.favoriteGroup.findOrCreate(
+					{
+						where: { user_id: hashed_user, group_name: group_name },
+						defaults: {
+							user_id: hashed_user,
+							group_type: group_type,
+							group_name: group_name,
+							group_description: group_description,
+							is_clone: is_clone,
+							clone_index: clone_index
+						}
+					}
+				);
+				res.status(200).send(group);
+			} else {
+				const deletedGroup = await this.favoriteGroup.destroy({
+					where: {
+						id: group_ids,
+					}
+				});
+				const deletedFavs = await this.favoriteDocumentsGroup.destroy({
+					where: {
+						favorite_group_id: group_ids
+					}
+				})
+				res.status(200).send({deletedGroup, deletedFavs});
+			}
+		} catch (err) {
+			this.logger.error(err, '2EA9CTR', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async addToFavoriteGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const hashed_user = getTenDigitUserId(userId) ? this.sparkMD5.hash(getTenDigitUserId(userId)) : this.sparkMD5.hash(userId);
+
+			const { groupId, documentIds } = req.body;
+			const docObjects = documentIds.map(docId => {
+				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId}
+			})
+			
+			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
+				where:{
+					favorite_group_id: groupId
+				}
+			})
+			let totalInGroup = documentIds.length + existingFavorites.length;
+			existingFavorites.forEach(fav => {
+				if(documentIds.includes(fav.dataValues.favorite_document_id)){
+					totalInGroup--;
+				}
+			})
+			if(totalInGroup > 5){
+				return res.status(400);
+			}
+
+			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
+				returning: true,
+				ignoreDuplicates: true
+			})
+			res.status(200).send(favorites);
+		} catch (err) {
+			this.logger.error(err, '1YT9HQB', userId);
+			res.status(500).send(err);
+			return err;
+		}
+	}
+
+	async deleteFavoriteFromGroupPOST(req, res) {
+		let userId = 'Unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { groupId, documentId } = req.body;
+
+			const removed = await this.favoriteDocumentsGroup.destroy({
+				where: {
+					favorite_group_id: groupId,
+					favorite_document_id: documentId
+				}
+			})
+			res.status(200).send({removed});
+		} catch (err) {
+			this.logger.error(err, '2XR1QAD', userId);
+			console.log(err);
 			res.status(500).send(err);
 			return err;
 		}

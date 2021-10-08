@@ -29,6 +29,9 @@
 .* /api/gamechanger/favorites/checkSearches .*
 .* /api/gamechanger/favorites/topic .*
 .* /api/gamechanger/favorites/organization .*
+.* /api/gamechanger/favorites/group .*
+.* /api/gamechanger/favorites/addToGroup .*
+.* /api/gamechanger/favorites/removeFromGroup .*
 .* /api/gamechanger/clearFavoriteSearchUpdate .*
 .* /api/gamechanger/trending/trendingSearches .*
 .* /api/gamechanger/trending/getTrendingBlacklist .*
@@ -74,3 +77,7 @@
 .*/api/gamechanger/getOrgImageOverrideURLs .*
 .*/api/gamechanger/saveOrgImageOverrideURL .*
 .* /api/gamechanger/aboutGC/getFAQ .*
+.*/api/gamechanger/getElasticSearchIndex .*
+.*/api/gamechanger/getHomepageEditorData .*
+.*/api/gamechanger/analyticsTools/compareDocument .*
+

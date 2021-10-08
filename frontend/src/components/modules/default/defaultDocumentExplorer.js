@@ -1,25 +1,26 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'underscore';
-import GameChangerAPI from "../../api/gameChanger-service-api";
+import GameChangerAPI from '../../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
 import SimpleTable from '../../common/SimpleTable';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 // import { primary } from "../experimental/uot-colors";
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
-import { grey800 } from 'material-ui/styles/colors';
+import grey from '@material-ui/core/colors/grey';
 import {
 	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,
-	handlePdfOnLoad, getTrackingNameForFactory
-} from '../../../gamechangerUtils';
+	handlePdfOnLoad,
+	getTrackingNameForFactory,
+} from '../../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
-import { trackEvent } from "../../telemetry/Matomo";
+import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 
-const gameChangerAPI = new GameChangerAPI()
-
+const gameChangerAPI = new GameChangerAPI();
+const grey800 = grey[800];
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
@@ -33,36 +34,66 @@ const styles = {
 		justifyContent: 'center',
 		alignItems: 'center',
 		// fontFamily: 'Noto Sans',
-		fontFamily: "Montserrat",
+		fontFamily: 'Montserrat',
 		fontWeight: 'bold',
-		fontSize: '1em'
+		fontSize: '1em',
 	},
 	docExplorerPag: {
 		display: 'flex',
 		flexDirection: 'row-reverse',
 		width: '100%',
-		paddingRight: '25px'
-	}
+		paddingRight: '25px',
+	},
 };
 function numberWithCommas(x) {
 	if (!x) return x;
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isClone = false, cloneData = {}) => {
+const getIframePreviewLinkInferred = (
+	filename,
+	prevSearchText,
+	pageNumber,
+	isClone = false,
+	cloneData = {}
+) => {
 	return new Promise((resolve, reject) => {
-		gameChangerAPI.dataStorageDownloadGET(filename, prevSearchText, pageNumber, isClone, cloneData).then(url => {
-			resolve(url);
-		})
-	})
-}
+		gameChangerAPI
+			.dataStorageDownloadGET(
+				filename,
+				prevSearchText,
+				pageNumber,
+				isClone,
+				cloneData
+			)
+			.then((url) => {
+				resolve(url);
+			});
+	});
+};
 
-
-export default function DocumentExplorer({ data = [], totalCount, searchText = '', prevSearchText = '', loading, resultsPage, resultsPerPage, onPaginationClick, isClone = false, cloneData = {} }) {
+export default function DocumentExplorer({
+	data = [],
+	totalCount,
+	searchText = '',
+	prevSearchText = '',
+	loading,
+	resultsPage,
+	resultsPerPage,
+	onPaginationClick,
+	isClone = false,
+	cloneData = {},
+}) {
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = React.useState(null);
-	const [iframePreviewLink, setIframePreviewLink] = React.useState({ dataIdx: 0, pageHitIdx: 0 });
-	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({ dataIdx: -1, pageHitIdx: -1 });
+	const [iframePreviewLink, setIframePreviewLink] = React.useState({
+		dataIdx: 0,
+		pageHitIdx: 0,
+	});
+	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({
+		dataIdx: -1,
+		pageHitIdx: -1,
+	});
 	const [iframeLoading, setIframeLoading] = React.useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = React.useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
@@ -71,123 +102,185 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	const [fileUrl, setFileUrl] = React.useState(null);
 	const [filename, setFilename] = React.useState(null);
 
+	const measuredRef = useCallback(
+		(node) => {
+			if (node !== null) {
+				const { dataIdx, pageHitIdx } = iframePreviewLink;
+				const rec = data[dataIdx];
+				if (rec) {
+					// const filepath = rec.filepath;
 
-	const measuredRef = useCallback(node => {
-		if (node !== null) {
-			const { dataIdx, pageHitIdx } = iframePreviewLink;
-			const rec = data[dataIdx];
-			if (rec) {
-				// const filepath = rec.filepath;
-				
-				const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
-				const pageNumber = pageObj ? pageObj.pageNumber : 1;
-				if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
-					setIframeLoading(true);
-					getIframePreviewLinkInferred(filename, prevSearchText, pageNumber, isClone, cloneData).then(url => {
-						node.src = url;
-						setIframeLoading(false);
-						setPrevIframPreviewLink(iframePreviewLink);
-					});
+					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
+					const pageNumber = pageObj ? pageObj.pageNumber : 1;
+					if (
+						filename &&
+						JSON.stringify(prevIframPreviewLink) !==
+							JSON.stringify(iframePreviewLink)
+					) {
+						setIframeLoading(true);
+						getIframePreviewLinkInferred(
+							filename,
+							prevSearchText,
+							pageNumber,
+							isClone,
+							cloneData
+						).then((url) => {
+							node.src = url;
+							setIframeLoading(false);
+							setPrevIframPreviewLink(iframePreviewLink);
+						});
+					}
 				}
 			}
-		}
-	}, [iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]);
+		},
+		[
+			iframePreviewLink,
+			prevSearchText,
+			prevIframPreviewLink,
+			isClone,
+			cloneData,
+			data,
+			filename,
+		]
+	);
 
 	useEffect(() => {
-		const {dataIdx}  = iframePreviewLink;
+		const { dataIdx } = iframePreviewLink;
 		const rec = data[dataIdx];
-			if (rec) {		
-				setFilename(rec.filename);
-				setFileUrl(rec.download_url_s);
-			}
+		if (rec) {
+			setFilename(rec.filename);
+			setFileUrl(rec.download_url_s);
+		}
 	}, [filename, data, iframePreviewLink]);
 
 	useEffect(() => {
-		
 		if (!collapseKeys) {
 			let initialCollapseKeys = {};
 			_.each(data, (d, k) => {
 				initialCollapseKeys[k] = false;
-
-			})
+			});
 			setCollapseKeys(initialCollapseKeys);
-			
-			
 		}
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
-		 trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction' ,'RightPanelToggle', rightPanelOpen ? 'Close' : 'Open');
-	 	setRightPanelOpen(!rightPanelOpen);
+		trackEvent(
+			getTrackingNameForFactory(cloneData.clone_name),
+			'DocumentExplorerInteraction',
+			'RightPanelToggle',
+			rightPanelOpen ? 'Close' : 'Open'
+		);
+		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-	 	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction' ,'LeftPanelToggle', leftPanelOpen ? 'Close' : 'Open');
-	 	setLeftPanelOpen(!leftPanelOpen);
+		trackEvent(
+			getTrackingNameForFactory(cloneData.clone_name),
+			'DocumentExplorerInteraction',
+			'LeftPanelToggle',
+			leftPanelOpen ? 'Close' : 'Open'
+		);
+		setLeftPanelOpen(!leftPanelOpen);
 	}
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
 	function handleViewToggle() {
-		if(collapseKeys){
-			let collapse = Object.assign({},collapseKeys);
-			for (let key in collapse){
-				collapse[key]= !viewTogle;
-			} 
-			setCollapseKeys(collapse)
+		if (collapseKeys) {
+			let collapse = Object.assign({}, collapseKeys);
+			for (let key in collapse) {
+				collapse[key] = !viewTogle;
+			}
+			setCollapseKeys(collapse);
 		}
 		setViewTogle(!viewTogle);
-   	}
+	}
 
 	function handleQuoteLinkClick(e, pageKey, key) {
-	 	const rec = data[key];
+		const rec = data[key];
 		if (rec) {
-	 		const fileName = rec.id;
-	 		const pageObj = rec.pageHits[pageKey];
-			 const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			 trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction' , 'PDFOpen');
-			 trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'filename', fileName);
-			 trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'pageNumber', pageNumber);
-			 setPdfLoaded(false);
-	 	}
-	 	e.preventDefault();
-	 	setIframePreviewLink({
-	 		pageHitIdx: pageKey,
-	 		dataIdx: key
-	 	});
+			const fileName = rec.id;
+			const pageObj = rec.pageHits[pageKey];
+			const pageNumber = pageObj ? pageObj.pageNumber : 1;
+			trackEvent(
+				getTrackingNameForFactory(cloneData.clone_name),
+				'DocumentExplorerInteraction',
+				'PDFOpen'
+			);
+			trackEvent(
+				getTrackingNameForFactory(cloneData.clone_name),
+				'DocumentExplorerInteraction',
+				'filename',
+				fileName
+			);
+			trackEvent(
+				getTrackingNameForFactory(cloneData.clone_name),
+				'DocumentExplorerInteraction',
+				'pageNumber',
+				pageNumber
+			);
+			setPdfLoaded(false);
+		}
+		e.preventDefault();
+		setIframePreviewLink({
+			pageHitIdx: pageKey,
+			dataIdx: key,
+		});
 	}
-	
-	function handlePdfOnLoadStart () {
-		
-		if (!iframeLoading && !pdfLoaded){
+
+	function handlePdfOnLoadStart() {
+		if (!iframeLoading && !pdfLoaded) {
 			const { dataIdx } = iframePreviewLink;
 			const rec = data[dataIdx];
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-						handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
-						setPdfLoaded(true);
-					
+					handlePdfOnLoad(
+						'docPdfViewer',
+						'viewerContainer',
+						fileName,
+						'PDF Viewer'
+					);
+					setPdfLoaded(true);
 				}
-			} catch(err) {
+			} catch (err) {
 				console.log(err);
-				console.log('Doc Explorer: failed to load pdf')
+				console.log('Doc Explorer: failed to load pdf');
 			}
 		}
-		
 	}
 
-	const previewPathname = data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
-	const previewData = (data.length > 0 && data[iframePreviewLink.dataIdx] && getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) || [];
-	const previewDataReflist = (data.length > 0 && data[iframePreviewLink.dataIdx] && getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) || [];
-	const iframePanelSize = 12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+	const previewPathname =
+		data.length > 0 &&
+		data[iframePreviewLink.dataIdx] &&
+		data[iframePreviewLink.dataIdx].filepath;
+	const previewData =
+		(data.length > 0 &&
+			data[iframePreviewLink.dataIdx] &&
+			getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) ||
+		[];
+	const previewDataReflist =
+		(data.length > 0 &&
+			data[iframePreviewLink.dataIdx] &&
+			getReferenceListMetadataPropertyTable(
+				data[iframePreviewLink.dataIdx].ref_list
+			)) ||
+		[];
+	const iframePanelSize =
+		12 -
+		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
+		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	// This checks if there are any documents loaded and assigns the default collapse keys to the cards default to open.
-	if(collapseKeys && Object.keys(collapseKeys).length === 0 && data.length > 0){
+	if (
+		collapseKeys &&
+		Object.keys(collapseKeys).length === 0 &&
+		data.length > 0
+	) {
 		let collapseDictionary = {};
-		for(let i=0; i<data.length; i++){
-			collapseDictionary[i.toString()]=false;
+		for (let i = 0; i < data.length; i++) {
+			collapseDictionary[i.toString()] = false;
 		}
-		setCollapseKeys(collapseDictionary)
+		setCollapseKeys(collapseDictionary);
 	}
 
 	let leftBarExtraStyles = {};
@@ -199,157 +292,330 @@ export default function DocumentExplorer({ data = [], totalCount, searchText = '
 	};
 	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
-	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 }
-	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 }
+	if (!leftPanelOpen)
+		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
+	if (!rightPanelOpen)
+		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div className="row" style={{ height: 'calc(100% - 62px)', marginTop: '10px' }}>
-			<div className={`col-xs-${LEFT_PANEL_COL_WIDTH}`} style={{ display: leftPanelOpen ? 'block' : 'none', paddingRight: 0, borderRight: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
-				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
-					{
-						totalCount ?
-						<div>{numberWithCommas(totalCount)} results found.
-							<div className='view-toggle' onClick={() => handleViewToggle()}>
-								{viewTogle? '+':'-'}
+		<div
+			className="row"
+			style={{ height: 'calc(100% - 62px)', marginTop: '10px' }}
+		>
+			<div
+				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
+				style={{
+					display: leftPanelOpen ? 'block' : 'none',
+					paddingRight: 0,
+					borderRight: '1px solid lightgrey',
+					height: '100%',
+					overflow: 'scroll',
+				}}
+			>
+				<div
+					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
+				>
+					{totalCount ? (
+						<div>
+							{numberWithCommas(totalCount)} results found.
+							<div className="view-toggle" onClick={() => handleViewToggle()}>
+								{viewTogle ? '+' : '-'}
 							</div>
 						</div>
-						: 'Make a search to get started.'
-					}				
+					) : (
+						'Make a search to get started.'
+					)}
 				</div>
 
-				<div style={styles.docExplorerPag} className='gcPagination docExplorerPag'>
+				<div
+					style={styles.docExplorerPag}
+					className="gcPagination docExplorerPag"
+				>
 					<Pagination
 						activePage={resultsPage}
 						itemsCountPerPage={resultsPerPage}
 						totalItemsCount={totalCount}
 						pageRangeDisplayed={6}
 						onChange={(page) => {
-							trackEvent(getTrackingNameForFactory(cloneData.clone_name), "DocumentExplorerInteraction", "Pagination", page);
+							trackEvent(
+								getTrackingNameForFactory(cloneData.clone_name),
+								'DocumentExplorerInteraction',
+								'Pagination',
+								page
+							);
 							onPaginationClick(page);
 						}}
-						style={{ margin: '10px 0'}}
+						style={{ margin: '10px 0' }}
 					/>
 				</div>
 
-				{loading &&
-				<div style={{ margin: '0 auto' }}>
-					<LoadingIndicator customColor={'#E9691D'}/>
-				</div>}
-				{!loading && _.map(data, (item, key) => {
-					const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
-					const displayTitle = item.title === "NA" ? `${item.doc_type} ${item.doc_num}` : `${item.doc_type} ${item.doc_num} - ${item.title}` ;
-					
-					
-
-					if (item.type === 'document'){
-						return <div key={key}>
-						<div className="searchdemo-modal-result-header" onClick={(e) => {
-								e.preventDefault();
-								setCollapseKeys({ ...collapseKeys, [key]: !collapsed })
-							}}>
-							<i style={{ marginRight: collapsed ? 14 : 10, fontSize: 20, cursor: 'pointer' }} className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`} />
-							<span className="gc-document-explorer-result-header-text" >{displayTitle}</span>
-							<span style={{ width: 30, marginLeft: 'auto' }} className="badge">{item.pageHitCount}</span>
-						</div>
-						<Collapse isOpened={!collapsed}>
-							<div>
-								{_.chain(item.pageHits).map((page, pageKey) => {
-									let isHighlighted = false;
-									const dataObj = data[iframePreviewLink.dataIdx];
-									if (dataObj) {
-										const pageObj = data[iframePreviewLink.dataIdx].pageHits[iframePreviewLink.pageHitIdx];
-										if (pageObj) {
-											isHighlighted = data[iframePreviewLink.dataIdx].filename === item.filename && pageKey === iframePreviewLink.pageHitIdx;
-										}
-									}
-
-									let blockquoteClass = 'searchdemo-blockquote-sm';
-
-									if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
-									return <div key={key + pageKey} style={{ position: 'relative' }}>
-										<a href="#noref" className="searchdemo-quote-link" onClick={(e) => {
-											handleQuoteLinkClick(e, pageKey, key);
-										}}>
-											<div className={blockquoteClass} dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.snippet.replace(/<em>/g, '<span class="highlight-search-demo" style="background-color: #E9691D;">').replace(/<\/em>/g, '</span>') + '...') }}></div>
-										</a>
-										{isHighlighted && <span className="searchdemo-arrow-right-sm"></span>}
-									</div>
-								}).value()
-								}
-
-							</div>
-						</Collapse>
+				{loading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={'#E9691D'} />
 					</div>
-					} else {
-						return null;
-					}
-				})}
+				)}
+				{!loading &&
+					_.map(data, (item, key) => {
+						const collapsed = collapseKeys
+							? collapseKeys[key.toString()]
+							: true;
+						const displayTitle =
+							item.title === 'NA'
+								? `${item.doc_type} ${item.doc_num}`
+								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
+
+						if (item.type === 'document') {
+							return (
+								<div key={key}>
+									<div
+										className="searchdemo-modal-result-header"
+										onClick={(e) => {
+											e.preventDefault();
+											setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
+										}}
+									>
+										<i
+											style={{
+												marginRight: collapsed ? 14 : 10,
+												fontSize: 20,
+												cursor: 'pointer',
+											}}
+											className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
+										/>
+										<span className="gc-document-explorer-result-header-text">
+											{displayTitle}
+										</span>
+										<span
+											style={{ width: 30, marginLeft: 'auto' }}
+											className="badge"
+										>
+											{item.pageHitCount}
+										</span>
+									</div>
+									<Collapse isOpened={!collapsed}>
+										<div>
+											{_.chain(item.pageHits)
+												.map((page, pageKey) => {
+													let isHighlighted = false;
+													const dataObj = data[iframePreviewLink.dataIdx];
+													if (dataObj) {
+														const pageObj =
+															data[iframePreviewLink.dataIdx].pageHits[
+																iframePreviewLink.pageHitIdx
+															];
+														if (pageObj) {
+															isHighlighted =
+																data[iframePreviewLink.dataIdx].filename ===
+																	item.filename &&
+																pageKey === iframePreviewLink.pageHitIdx;
+														}
+													}
+
+													let blockquoteClass = 'searchdemo-blockquote-sm';
+
+													if (isHighlighted)
+														blockquoteClass +=
+															' searchdemo-blockquote-sm-active';
+													return (
+														<div
+															key={key + pageKey}
+															style={{ position: 'relative' }}
+														>
+															<a
+																href="#noref"
+																className="searchdemo-quote-link"
+																onClick={(e) => {
+																	handleQuoteLinkClick(e, pageKey, key);
+																}}
+															>
+																<div
+																	className={blockquoteClass}
+																	dangerouslySetInnerHTML={{
+																		__html: sanitizeHtml(
+																			page.snippet
+																				.replace(
+																					/<em>/g,
+																					'<span class="highlight-search-demo" style="background-color: #E9691D;">'
+																				)
+																				.replace(/<\/em>/g, '</span>') + '...'
+																		),
+																	}}
+																></div>
+															</a>
+															{isHighlighted && (
+																<span className="searchdemo-arrow-right-sm"></span>
+															)}
+														</div>
+													);
+												})
+												.value()}
+										</div>
+									</Collapse>
+								</div>
+							);
+						} else {
+							return null;
+						}
+					})}
 			</div>
-			<div className={`col-xs-${iframePanelSize}`} style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}>
-				<div style={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column' }}>
-					<div className="searchdemo-vertical-bar-toggle" style={{...leftBarExtraStyles, bottom:'0px'}} onClick={() => handleLeftPanelToggle()}>
+			<div
+				className={`col-xs-${iframePanelSize}`}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
+			>
+				<div
+					style={{
+						display: 'flex',
+						width: '100%',
+						height: '100%',
+						flexDirection: 'column',
+					}}
+				>
+					<div
+						className="searchdemo-vertical-bar-toggle"
+						style={{ ...leftBarExtraStyles, bottom: '0px' }}
+						onClick={() => handleLeftPanelToggle()}
+					>
 						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
+							className={`fa ${
+								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
+							} fa-angle-double-up`}
+							style={{
+								color: 'white',
+								verticalAlign: 'sub',
+								height: 20,
+								width: 20,
+								margin: '20px 0 20px 2px',
+							}}
 						/>
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
+							className={`fa ${
+								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
+							} fa-angle-double-up`}
+							style={{
+								color: 'white',
+								verticalAlign: 'sub',
+								height: 20,
+								width: 20,
+								margin: '20px 0 20px 2px',
+							}}
 						/>
 					</div>
-					{!iframeLoading && previewPathname && <div className="preview-pathname" style={styles.iframeHeader}>{previewPathname}</div>}				
-					<div style={{ paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0), paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0), height: "100%" }}>
-						<div style={{height: '100%'}}>
-							{filename && filename.endsWith('pdf') &&
-	
-								<iframe title={'PDFViewer'} className="aref" id={'PdfViewer'} ref={measuredRef} onLoad={handlePdfOnLoadStart} style={{ borderStyle: 'none', display: (data.length > 0 && !iframeLoading) ? 'initial' : 'none' }} width="100%" height="100%%"></iframe>
-							}
-							
-							{filename && filename.endsWith('html') &&
-	
-								<iframe title={'PDFViewer'} className="aref" id={'pdfViewer'} src={fileUrl} style={{width: "100%", height:"100%"}}></iframe>
-							}
+					{!iframeLoading && previewPathname && (
+						<div className="preview-pathname" style={styles.iframeHeader}>
+							{previewPathname}
+						</div>
+					)}
+					<div
+						style={{
+							paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0),
+							paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0),
+							height: '100%',
+						}}
+					>
+						<div style={{ height: '100%' }}>
+							{filename && filename.endsWith('pdf') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'PdfViewer'}
+									ref={measuredRef}
+									onLoad={handlePdfOnLoadStart}
+									style={{
+										borderStyle: 'none',
+										display:
+											data.length > 0 && !iframeLoading ? 'initial' : 'none',
+									}}
+									width="100%"
+									height="100%%"
+								></iframe>
+							)}
+
+							{filename && filename.endsWith('html') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'pdfViewer'}
+									src={fileUrl}
+									style={{ width: '100%', height: '100%' }}
+								></iframe>
+							)}
 						</div>
 					</div>
 
-					{iframeLoading && <div style={{ margin: '0 auto' }}><LoadingIndicator customColor={'#E9691D'}/></div>}
-					<div className="searchdemo-vertical-bar-toggle" style={{...rightBarExtraStyles, bottom:'0px'}} onClick={() => handleRightPanelToggle()}>
+					{iframeLoading && (
+						<div style={{ margin: '0 auto' }}>
+							<LoadingIndicator customColor={'#E9691D'} />
+						</div>
+					)}
+					<div
+						className="searchdemo-vertical-bar-toggle"
+						style={{ ...rightBarExtraStyles, bottom: '0px' }}
+						onClick={() => handleRightPanelToggle()}
+					>
 						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
+							className={`fa ${
+								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
+							} fa-angle-double-up`}
+							style={{
+								color: 'white',
+								verticalAlign: 'sub',
+								height: 20,
+								width: 20,
+								margin: '20px 0 20px 2px',
+							}}
 						/>
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{ color: 'white', verticalAlign: 'sub', height: 20, width: 20, margin: '20px 0 20px 2px' }}
+							className={`fa ${
+								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
+							} fa-angle-double-up`}
+							style={{
+								color: 'white',
+								verticalAlign: 'sub',
+								height: 20,
+								width: 20,
+								margin: '20px 0 20px 2px',
+							}}
 						/>
 					</div>
 				</div>
-
 			</div>
-            <div className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`} style={{ display: rightPanelOpen ? 'block' : 'none', paddingLeft: 0, borderLeft: '1px solid lightgrey', height: '100%', overflow: 'scroll' }}>
-                <SimpleTable tableClass={'magellan-table'}
-                    zoom={0.8}
-                    headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-                    rows={previewData}
-                    height={'auto'}
-                    dontScroll={true}
-                    colWidth={colWidth}
-                    disableWrap={true}
-                    title={'Metadata'}
-                />
-                <div style={{marginTop: -18}}> <SimpleTable tableClass={'magellan-table'}
-                    zoom={0.8}
-                    headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-                    rows={previewDataReflist}
-                    height={'auto'}
-                    dontScroll={true}
-                    colWidth={colWidthRefTable}
-                    disableWrap={true}
-                /></div>
-            </div>
+			<div
+				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
+				style={{
+					display: rightPanelOpen ? 'block' : 'none',
+					paddingLeft: 0,
+					borderLeft: '1px solid lightgrey',
+					height: '100%',
+					overflow: 'scroll',
+				}}
+			>
+				<SimpleTable
+					tableClass={'magellan-table'}
+					zoom={0.8}
+					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+					rows={previewData}
+					height={'auto'}
+					dontScroll={true}
+					colWidth={colWidth}
+					disableWrap={true}
+					title={'Metadata'}
+				/>
+				<div style={{ marginTop: -18 }}>
+					{' '}
+					<SimpleTable
+						tableClass={'magellan-table'}
+						zoom={0.8}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={previewDataReflist}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidthRefTable}
+						disableWrap={true}
+					/>
+				</div>
+			</div>
 		</div>
 	);
 }
-
