@@ -372,34 +372,6 @@ const MainView = (props) => {
 				return <></>;
 			}
 	}
-	// return(
-	// 	<Switch>
-	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.analystTools}`}>
-	// 			{getNonMainPageOuterContainer(getAnalystTools)}
-	// 		</Route>
-	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.dataTracker}`}>
-	// 			{getNonMainPageOuterContainer(getDataTracker)}
-	// 		</Route>
-	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.userDashboard}`}>
-	// 			{getNonMainPageOuterContainer(getUserDashboard)}
-	// 		</Route>
-	// 		<Route exact path={`/${state.cloneData.url}/${PAGE_DISPLAYED.aboutUs}`}>
-	// 			{getNonMainPageOuterContainer(getAboutUs)}
-	// 		</Route>
-	// 		{mainViewHandler && 
-	// 			<Route>
-	// 				{mainViewHandler.getMainView({
-	// 					state,
-	// 					dispatch,
-	// 					setCurrentTime,
-	// 					renderHideTabs,
-	// 					pageLoaded,
-	// 					getViewPanels,
-	// 				})}
-	// 			</Route>
-	// 		}
-	// 	</Switch>
-	// )
 };
 
 MainView.propTypes = {
