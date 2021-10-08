@@ -7,14 +7,13 @@ const { USER_TOKEN_ENDPOINT } = Config;
 axios.defaults.withCredentials = true;
 
 class GCAuth {
-
 	/**
 	 * Authenticate a user. Save a token string in Local Storage
 	 *
 	 * @param {string} token
 	 */
 	static saveUser(token) {
-		sessionStorage.clear();				// may need to clear prefixed keys only? ex. darq-
+		sessionStorage.clear(); // may need to clear prefixed keys only? ex. darq-
 		localStorage.removeItem('token');
 		localStorage.setItem('token', token);
 	}
@@ -31,7 +30,7 @@ class GCAuth {
 		const tokenPayload = this.getTokenPayload();
 		let displayName = null;
 		if (tokenPayload != null) {
-			displayName = tokenPayload.displayName || ""
+			displayName = tokenPayload.displayName || '';
 		}
 		return displayName;
 	}
@@ -40,31 +39,34 @@ class GCAuth {
 	static getUserId() {
 		const tokenPayload = this.getTokenPayload();
 		if (tokenPayload != null) {
-			return tokenPayload.id || null
+			return tokenPayload.id || null;
+		} else {
+			return null;
 		}
-		else { return null; }
 	}
 
 	static getUserSandbox() {
 		const tokenPayload = this.getTokenPayload();
 		if (tokenPayload != null) {
-			return tokenPayload.sandboxId || null
+			return tokenPayload.sandboxId || null;
+		} else {
+			return null;
 		}
-		else { return null; }
 	}
 
 	static getUserPermissions() {
 		const tokenPayload = this.getTokenPayload();
 		if (tokenPayload != null) {
-			return (tokenPayload.perms) ? tokenPayload.perms : [];
+			return tokenPayload.perms ? tokenPayload.perms : [];
+		} else {
+			return null;
 		}
-		else { return null; }
 	}
 
 	static userDisabled() {
 		const tokenPayload = this.getTokenPayload();
 		if (tokenPayload != null) {
-			return (tokenPayload.disabled);
+			return tokenPayload.disabled;
 		} else {
 			return null;
 		}
@@ -84,24 +86,24 @@ class GCAuth {
 		let token = this.getToken();
 		if (token != null) {
 			var decodedToken = jws.decode(token);
-			return (decodedToken) ? decodedToken.payload : null;
-		}
-		else {
+			return decodedToken ? decodedToken.payload : null;
+		} else {
 			return null;
 		}
 	}
 
 	static refreshUserToken(callback, errCallback) {
-		axios.post(USER_TOKEN_ENDPOINT).then((response) => {
-			this.saveUser(response.data.token);
-			if (callback)
-				callback();
-		}).catch(error => {
-			console.error(error)
-			localStorage.removeItem('token');
-			if (errCallback)
-				errCallback();
-		});
+		axios
+			.post(USER_TOKEN_ENDPOINT)
+			.then((response) => {
+				this.saveUser(response.data.token);
+				if (callback) callback();
+			})
+			.catch((error) => {
+				console.error(error);
+				localStorage.removeItem('token');
+				if (errCallback) errCallback();
+			});
 	}
 
 	static saveDataApiToken(token) {

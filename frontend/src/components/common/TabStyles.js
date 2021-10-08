@@ -1,4 +1,4 @@
-import { backgroundGreyDark, backgroundWhite, gcOrange} from "./gc-colors";
+import { backgroundGreyDark, backgroundWhite, gcOrange } from './gc-colors';
 
 const TabStyles = {
 	tabsList: {
@@ -7,7 +7,7 @@ const TabStyles = {
 		display: 'flex',
 		alignItems: 'center',
 		flex: 9,
-		margin: '10px 0 10px 50px'
+		margin: '10px 0 10px 50px',
 	},
 	tabStyle: {
 		width: '140px',
@@ -26,7 +26,7 @@ const TabStyles = {
 		height: 45,
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
 	},
 	tabSelectedStyle: {
 		border: '1px solid transparent',
@@ -51,10 +51,8 @@ const TabStyles = {
 		alignItems: 'center',
 		marginTop: 10,
 		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20
-	}
-	
+		paddingBottom: 20,
+	},
+};
 
-}
-
-export default TabStyles
+export default TabStyles;

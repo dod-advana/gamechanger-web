@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography } from '@material-ui/core';
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	TextField,
+	Typography,
+} from '@material-ui/core';
 
 import GCButton from '../../common/GCButton';
 import { styles, GCCheckbox, useStyles } from '../util/GCAdminStyles';
@@ -24,16 +31,21 @@ const DEFAULT_VALUES = {
 	metadata_creation_group: '',
 	source_s3_bucket: '',
 	source_s3_prefix: '',
-}
+};
 
 /**
- * 
+ *
  * @class CloneModal
  */
 
-
-export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEditCloneModal, setShowCreateEditCloneModal, getCloneModalTextDisplayName }) => {
-
+export default ({
+	storeCloneData,
+	cloneToEdit,
+	cloneTableMetaData,
+	showCreateEditCloneModal,
+	setShowCreateEditCloneModal,
+	getCloneModalTextDisplayName,
+}) => {
 	// console.log('cloneToEdit\n', JSON.stringify(cloneToEdit))
 	// State Variables
 	const [editCloneData, setEditCloneData] = useState({});
@@ -45,10 +57,13 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 		setEditCloneData({});
 		setEditCloneDataErrors({});
 		setShowCreateEditCloneModal(false);
-	}
+	};
 
 	const handleCheck = (event) => {
-		setEditCloneData({ ...editCloneData, [event.target.name]: event.target.checked })
+		setEditCloneData({
+			...editCloneData,
+			[event.target.name]: event.target.checked,
+		});
 	};
 
 	const handleTextChange = (event, key) => {
@@ -62,7 +77,6 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 		setEditCloneData(tmpData);
 	};
 
-
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
 			if(cloneToEdit.available_at !== null){
@@ -72,8 +86,7 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 		} else {
 			setEditCloneData({ ...DEFAULT_VALUES });
 		}
-
-	}, [showCreateEditCloneModal, cloneToEdit])
+	}, [showCreateEditCloneModal, cloneToEdit]);
 
 	return (
 		<Dialog
@@ -83,23 +96,31 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 			disableEscapeKeyDown
 			disableBackdropClick
 			classes={{
-				paperWidthLg: classes.dialogLg
+				paperWidthLg: classes.dialogLg,
 			}}
 		>
-			<DialogTitle >
+			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
-					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{editCloneData.id && editCloneData.id > 0 ? 'Edit Clone' : 'Create Clone'}</Typography>
+					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+						{editCloneData.id && editCloneData.id > 0
+							? 'Edit Clone'
+							: 'Create Clone'}
+					</Typography>
 				</div>
-				<IconButton aria-label="close" style={{
-					position: 'absolute',
-					right: '0px',
-					top: '0px',
-					height: 60,
-					width: 60,
-					color: 'black',
-					backgroundColor: styles.backgroundGreyLight,
-					borderRadius: 0
-				}} onClick={() => closeCloneModal()}>
+				<IconButton
+					aria-label="close"
+					style={{
+						position: 'absolute',
+						right: '0px',
+						top: '0px',
+						height: 60,
+						width: 60,
+						color: 'black',
+						backgroundColor: styles.backgroundGreyLight,
+						borderRadius: 0,
+					}}
+					onClick={() => closeCloneModal()}
+				>
 					<CloseIcon style={{ fontSize: 30 }} />
 				</IconButton>
 			</DialogTitle>
@@ -107,13 +128,15 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 			<DialogContent style={{ height: 700 }}>
 				<div style={{ margin: '0 20px' }}>
 					<div>
-						<Typography variant="h4" style={styles.modalHeaders}>Input Fields</Typography>
-						{cloneTableMetaData.stringFields.map(field => (
+						<Typography variant="h4" style={styles.modalHeaders}>
+							Input Fields
+						</Typography>
+						{cloneTableMetaData.stringFields.map((field) => (
 							<TextField
 								key={field.key}
 								label={getCloneModalTextDisplayName(field)}
 								value={editCloneData[field.key]}
-								onChange={event => handleTextChange(event, field.key)}
+								onChange={(event) => handleTextChange(event, field.key)}
 								className={classes.textField}
 								helperText={field.display_name}
 								margin="dense"
@@ -122,8 +145,10 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 						))}
 					</div>
 					<div>
-						<Typography variant="h4" style={styles.modalHeaders}>Boolean Fields</Typography>
-						{cloneTableMetaData.booleanFields.map(field => (
+						<Typography variant="h4" style={styles.modalHeaders}>
+							Boolean Fields
+						</Typography>
+						{cloneTableMetaData.booleanFields.map((field) => (
 							<FormControlLabel
 								key={field.key}
 								control={
@@ -143,7 +168,14 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 			</DialogContent>
 
 			<DialogActions>
-				<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '0px 18px' }}>
+				<div
+					style={{
+						display: 'flex',
+						justifyContent: 'flex-end',
+						width: '100%',
+						margin: '0px 18px',
+					}}
+				>
 					<GCButton
 						id={'editCloneSubmit'}
 						onClick={() => storeCloneData(editCloneData)}
@@ -154,5 +186,5 @@ export default ({ storeCloneData, cloneToEdit, cloneTableMetaData, showCreateEdi
 				</div>
 			</DialogActions>
 		</Dialog>
-	)
-}
+	);
+};
