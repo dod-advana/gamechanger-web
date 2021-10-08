@@ -11,9 +11,9 @@ import {
 	RESULTS_PER_PAGE,
 	scrollToContentTop,
 	StyledCenterContainer,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import { Card } from '../../cards/GCCard';
 import ViewHeader from '../../mainView/ViewHeader';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
