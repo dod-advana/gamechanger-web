@@ -183,6 +183,7 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
+								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`)
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.dataTracker,
 								});
@@ -204,6 +205,7 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
+								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`)
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.analystTools,
 								});
