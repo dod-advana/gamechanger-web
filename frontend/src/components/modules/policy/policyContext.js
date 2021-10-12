@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { orgFilters, typeFilters } from '../../../gamechangerUtils';
+import { orgFilters, typeFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -74,6 +74,8 @@ const initState = {
 	// Show Modals
 	showFeedbackModal: false,
 	showAssistModal: false,
+	showResponsibilityAssistModal: false,
+	reloadResponsibilityTable: true, // not for a modal
 	assistVoluntary: true,
 	loginModalOpen: false,
 	showSnackbar: false,
@@ -87,6 +89,7 @@ const initState = {
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
+	analystToolsPageDisplayed: 'Responsibility Explorer',
 	listView: false,
 
 	// Documents
@@ -153,6 +156,8 @@ const initState = {
 	prevSearchText: null,
 	runSearch: false,
 	runningSearch: false,
+	runDocumentComparisonSearch: false,
+	runningDocumentComparisonSearch: false,
 	expansionDict: {},
 	rawSearchResults: [],
 	docSearchResults: [],
@@ -182,6 +187,31 @@ const initState = {
 		accessDateFilter: [null, null],
 		includeRevoked: false,
 	},
+	
+	analystToolsSearchSettings: {
+		isFilterUpdate: false,
+		orgUpdate: false,
+		typeUpdate: false,
+		expansionTermAdded: false,
+		originalOrgFilters: orgFilters,
+		originalTypeFilters: typeFilters,
+		orgFilter: orgFilters,
+		typeFilter: typeFilters,
+		allCategoriesSelected: true,
+		allOrgsSelected: true,
+		searchFields: {'initial': {field: null, input: ''}},
+		specificCategoriesSelected: false,
+		specificOrgsSelected: false,
+		allTypesSelected: true,
+		specificTypesSelected: false,
+		publicationDateAllTime: true,
+		publicationDateFilter: [null, null],
+		accessDateFilter: [null, null],
+		includeRevoked: false
+	},
+	
+	compareModalOpen: false,
+	compareFilename: null,
 
 	// Presearch Filters
 	presearchSources: {},
@@ -254,6 +284,11 @@ function reducer(state, action) {
 			return {
 				...state,
 				searchSettings: initState.searchSettings,
+			};
+		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
+			return {
+				...state,
+				analystToolsSearchSettings: initState.analystToolsSearchSettings
 			};
 		case 'RESET_STATE':
 			window.location.href = `#/${state.cloneData.url}`;

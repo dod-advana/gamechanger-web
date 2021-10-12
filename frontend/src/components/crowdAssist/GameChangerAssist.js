@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import { PowerUserAnnotationCard } from './PowerUserAnnotationCard';
-import GeneralUserAnnotationCard from '../cards/GeneralUserAnnotationCard';
+import GeneralUserAnnotationCard from './GeneralUserAnnotationCard';
 import { random } from 'underscore';
 import styled from 'styled-components';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -26,7 +26,7 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
-import { setState } from '../../sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 

@@ -3,7 +3,7 @@ import {
 	orgFilters,
 	typeFilters,
 	SEARCH_TYPES,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
