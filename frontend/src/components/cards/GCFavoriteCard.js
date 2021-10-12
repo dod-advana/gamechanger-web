@@ -12,7 +12,8 @@ import Chip from '@material-ui/core/Chip';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
-import { encode, getTrackingNameForFactory } from '../../gamechangerUtils';
+import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px;
@@ -21,8 +22,8 @@ const StyledFavoriteDocumentCard = styled.div`
 	border-radius: 6px;
 	margin: 10px;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')} >
-		.main-info {
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
+	> .main-info {
 		height: 100%;
 		display: flex;
 		flex-direction: column;

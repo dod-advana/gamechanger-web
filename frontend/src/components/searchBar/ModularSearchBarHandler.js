@@ -4,12 +4,12 @@ import _ from 'underscore';
 import { makeStyles } from '@material-ui/core/styles';
 import { AccessTime, Search } from '@material-ui/icons';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import {
 	handleSaveFavoriteSearch,
 	setState,
 	checkUserInfo,
-} from '../../sharedFunctions';
+} from '../../utils/sharedFunctions';
 import SearchBarFactory from '../factories/searchBarFactory';
 
 const useStyles = makeStyles((theme) => ({
@@ -157,7 +157,7 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		function onKeyDown(e) {
-			if (e.key === 'Enter') {
+			if (e.key === 'Enter' && state.inputActive !== 'compareInput') {
 				setState(dispatch, {
 					searchText: searchText,
 					resultsPage: 1,
@@ -170,7 +170,7 @@ const ModularSearchBarHandler = (props) => {
 		}
 		window.addEventListener('keydown', onKeyDown);
 		return () => window.removeEventListener('keydown', onKeyDown);
-	}, [dispatch, searchText]);
+	}, [dispatch, searchText, state.inputActive]);
 
 	useEffect(() => {
 		// if clicked outside of searchbar, close dropdown

@@ -26,7 +26,7 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
-import { setState } from '../../sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
