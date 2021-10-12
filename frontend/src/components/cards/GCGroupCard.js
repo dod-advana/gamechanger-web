@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 // Local Imports
 import {SelectedDocsDrawer} from '../searchBar/GCSelectedDocsDrawer';
-import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../sharedFunctions';
+import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../utils/sharedFunctions';
 import GroupFavoriteCard from '../cards/GCGroupFavoriteCard';
 
 

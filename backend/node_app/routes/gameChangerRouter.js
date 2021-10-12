@@ -22,6 +22,7 @@ const { TrendingSearchesController } = require('../controllers/trendingSearchesC
 const { AppSettingsController } = require('../controllers/appSettingsController');
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
+const { AnalystToolsController } = require('../controllers/analystToolsController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -43,6 +44,7 @@ const trending = new TrendingSearchesController();
 const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
+const analyticsTools = new AnalystToolsController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -152,6 +154,7 @@ router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 router.post('/getAppStats', appStatsController.getAppStats);
 router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
 router.post('/appSettings/combinedSearch', appSettings.setCombinedSearchMode);
@@ -171,5 +174,7 @@ router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
+
+router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
 
 module.exports = router;
