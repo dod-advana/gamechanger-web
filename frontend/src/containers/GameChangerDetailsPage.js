@@ -14,6 +14,7 @@ import {
 	getTrackingNameForFactory,
 	invertedCrawlerMappingFunc,
 } from '../utils/gamechangerUtils';
+import { handleSaveFavoriteTopic } from '../utils/sharedFunctions';
 import Pagination from 'react-js-pagination';
 import { Card } from '../components/cards/GCCard';
 import GCAccordion from '../components/common/GCAccordion';
