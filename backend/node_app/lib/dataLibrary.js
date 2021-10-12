@@ -313,7 +313,7 @@ class DataLibrary {
 			else{
 				const params = {
 					Bucket: dest,
-					Key: filekey
+					Key: decodeURIComponent(filekey)
 				};
 	
 				if (samplingType === 'head') {
@@ -323,7 +323,7 @@ class DataLibrary {
 				}
 	
 				try {
-					res.setHeader(`Content-Disposition`, `attachment; filename=${filekey}`);
+					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
 					this.awsS3Client.getObject(params).createReadStream().pipe(res);
 				} catch (err) {
 					this.logger.error(err, 'IPOQHZS', userId);

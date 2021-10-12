@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import './gamechanger.css';
 import MainView from '../components/mainView/MainView';
 import { getContext } from '../components/factories/contextFactory';
-import { setState } from '../sharedFunctions';
+import { setState } from '../utils/sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
 import Notifications from '../components/notifications/Notifications';
