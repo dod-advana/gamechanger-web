@@ -31,12 +31,15 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.ARRAY(DataTypes.TEXT),
 				allowNull: true
 			},
-
+			status: {
+				type: DataTypes.TEXT,
+				defaultValue: "active"
+			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'responsibilities',
-			timestamps: true
+			timestamps: false
 		}
 	);
 	return RESPONSIBILITIES;
