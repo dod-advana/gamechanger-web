@@ -260,6 +260,7 @@ const MainView = (props) => {
 								}}
 								startIcon={<ArrowBackIcon />}
 								onClick={() => {
+									window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}`);
 									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
 									let viewName;
 									switch (state.pageDisplayed) {
