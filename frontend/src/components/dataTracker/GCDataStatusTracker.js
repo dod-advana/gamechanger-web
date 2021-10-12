@@ -527,7 +527,7 @@ const GCDataStatusTracker = (props) => {
 			<ReactTable
 				data={dataTableData}
 				columns={dataColumns}
-				style={{ margin: '0 80px 20px 80px', height: 700 }}
+				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 700 }}
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
@@ -562,8 +562,8 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'crawler_name',
-				width: 350,
 				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
+                style: { 'whiteSpace': 'unset' },
 			},
 			{
 				Header: 'Status',
@@ -645,7 +645,7 @@ const GCDataStatusTracker = (props) => {
 			<ReactTable
 				data={crawlerTableData}
 				columns={crawlerColumns}
-				style={{ margin: '0 80px 20px 80px', height: 1000 }}
+				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 1000 }}
 				pageSize={20}
 				showPageSizeOptions={false}
 				filterable={false}
@@ -674,8 +674,8 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'crawler_name',
-				width: 350,
 				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
+                style: { 'whiteSpace': 'unset' },
 			},
 			{
 				Header: 'Last Successful Ingest',
@@ -758,7 +758,8 @@ const GCDataStatusTracker = (props) => {
 					getTheadTrProps={() => {
 						return {
 							style: {
-								height: 'fit-content',
+                                whiteSpace: 'unset',
+                                height: 'fit-content',
 								textAlign: 'left',
 								fontWeight: 'bold',
 							},
