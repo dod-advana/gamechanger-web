@@ -89,8 +89,12 @@ const GroupCard = (props) => {
 		const doc = state.userData.favorite_documents.find(doc => {
 			return favId === doc.favorite_id;
 		})
-		favFilenames.set(doc.filename,doc.filename);
-		if(!searchTextlist.includes(doc.search_text)) searchTextlist.push(doc.search_text)
+		if(doc){
+			favFilenames.set(doc.filename,doc.filename);
+			if(!searchTextlist.includes(doc.search_text)) searchTextlist.push(doc.search_text)
+		}else{
+			handleRemoveFavoriteFromGroup(group.id, favId, dispatch);
+		}
 	})
 	const combinedSearchText = searchTextlist.join(' OR ');
 

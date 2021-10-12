@@ -59,7 +59,7 @@ const AnalystTools = (props) => {
 						
 						<div style={styles.panelContainer}>
 							<TabPanel>
-								<GCResponsibilityTracker state={state}/>
+								<GCResponsibilityTracker state={state} dispatch={dispatch}/>
 							</TabPanel>
 							<TabPanel>
 								<GCDocumentsComparisonTool context={context}/>
