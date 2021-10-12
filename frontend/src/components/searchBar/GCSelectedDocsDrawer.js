@@ -26,9 +26,10 @@ const DrawerTitle = styled(ListItem)`
 `;
 
 const DrawerTable = styled(Table)`
-	border: 1px solid ${backgroundGreyDark};
-	margin: 0 16px;
-	width: 93% !important;
+    border: 1px solid ${backgroundGreyDark};
+    margin: 0 16px;
+    width: 93% !important;
+    table-layout:fixed;
 `;
 
 const DrawerTableRow = styled(TableRow)`
@@ -43,8 +44,9 @@ const ButtonRow = styled.div`
 `;
 
 const DrawerTableCell = styled(TableCell)`
-	display: flex !important;
-	justify-content: space-between !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    max-width: 100% !important;
 `;
 
 export const SelectedDocsDrawer = (props) => {
@@ -88,19 +90,18 @@ export const SelectedDocsDrawer = (props) => {
 					style={{ backgroundColor: index % 2 === 0 ? 'white' : 'transparent' }}
 				>
 					<DrawerTableCell>
-						<div
+						<div 
 							style={{
 								display: 'flex',
 								alignItems: 'center',
 								width: '100%',
-								justifyContent: 'space-between',
-							}}
-						>
-							<span style={{ fontSize: 16 }}>{value}</span>
-							<i
-								className="fa fa-times-circle fa-fw"
-								style={{ cursor: 'pointer', height: 17 }}
-								onClick={() => handleRemoveSelection(key)}
+								justifyContent: 'space-between'
+							}}>
+							<span style={{ fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
+							<i 
+								className="fa fa-times-circle fa-fw" 
+								style={{ cursor: 'pointer', height: 17 }} 
+								onClick={()=>handleRemoveSelection(key)} 
 							/>
 						</div>
 					</DrawerTableCell>
