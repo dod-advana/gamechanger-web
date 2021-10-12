@@ -109,6 +109,7 @@ class UserController {
 
 				const favorite_searches = await this.favoriteSearch.findAll({
 					where: {user_id: user.user_id},
+					order: [['id', 'DESC']],
 					raw: true
 				});
 

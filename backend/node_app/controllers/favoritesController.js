@@ -12,6 +12,9 @@ const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility')
 const constantsFile = require('../config/constants');
+const Sequelize = require('sequelize');
+const { HandlerFactory } = require('../factories/handlerFactory');
+const db = require('../models');
 
 class FavoritesController {
 
@@ -25,11 +28,13 @@ class FavoritesController {
 			favoriteDocumentsGroup = FAVORITE_DOCUMENTS_GROUP,
 			favoriteOrganization = FAVORITE_ORGANIZATION,
 			sparkMD5 = sparkMD5Lib,
+			sequelize = db['game_changer'],
 			gcUser = GC_USER,
 			gcHistory = GC_HISTORY,
 			search = new SearchController(opts),
 			searchUtility = new SearchUtility(opts),
-			constants = constantsFile
+			constants = constantsFile,
+			handler_factory = new HandlerFactory(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -40,11 +45,13 @@ class FavoritesController {
 		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
 		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
+		this.sequelize = sequelize;
 		this.gcUser = gcUser;
 		this.gcHistory = gcHistory;
 		this.search = search;
 		this.searchUtility = searchUtility;
 		this.constants = constants;
+		this.handler_factory = handler_factory;
 
 		this.favoriteDocumentPOST = this.favoriteDocumentPOST.bind(this);
 		this.favoriteSearchPOST = this.favoriteSearchPOST.bind(this);
@@ -53,8 +60,7 @@ class FavoritesController {
 		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
 		this.deleteFavoriteFromGroupPOST =this.deleteFavoriteFromGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
-		this.checkFavoritedSearches = this.checkFavoritedSearches.bind(this);
-		this.checkFavoritedSearchesHelper = this.checkFavoritedSearchesHelper.bind(this);
+		this.checkLeastRecentFavoritedSearch = this.checkLeastRecentFavoritedSearch.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
 	}
 
@@ -330,104 +336,92 @@ class FavoritesController {
 			return err;
 		}
 	}
-
-	async checkFavoritedSearches(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
-
+	
+	async checkLeastRecentFavoritedSearch() {
 		try {
-			await this.checkFavoritedSearchesHelper(userId);
-			res.status(200).send('checked favorited searches for new results');
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, '4X6AOZ2', userId);
-		}
-	}
+			const favorite = await this.favoriteSearch.findOne({
+				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+			});
+			if (!favorite) {
+				this.logger.info('no favorite searches to check');
+				return;
+			}
 
-	async checkFavoritedSearchesHelper(userId) {
-		try {
-			// get all users
-			const users = await this.gcUser.findAll();
+			// update timestamp first so we don't get stuck on a specific search in the case
+			// that the search fails
+			favorite.last_checked = Sequelize.fn('NOW');
+			await favorite.save();
 
-			for (const user of users) {
+			// every favorited search has a tiny_url generated for it so look for the
+			// search body the last time it was run in the search history;
+			// this is a kludge because the backend has no functionality to directly
+			// convert a tiny url to a search
+			const history = await this.gcHistory.findOne({
+				where: {
+					user_id: favorite.user_id,
+					tiny_url: favorite.tiny_url
+				},
+				order: [['run_at', 'DESC']]
+			});
 
-				let numNotifications = 0;
+			if (!history || !history.request_body) {
+				this.logger.error('no request body data to make the search', 'B32AUDE');
+				return;
+			}
+			
+			// largely copypasta-ed from modularGameChangerController.js
+			// so will need to be updated if ^ changes (we can't directly use the original code as-is);
+			// unfortunately the recorded `request_body` in the history isn't the actual original search body,
+			// so we attempt to transform it back into the original format (not sure how brittle this is)
+			const { cloneName, searchText, offset = 0, limit = 1 /*, options */} = history.request_body;
+			const options = history.request_body;
 
-				// get all favorite searches for this user
-				try {
-					const favoriteSearches = await this.favoriteSearch.findAll({
-						where: {user_id: user.user_id},
-						raw: true
+			// run the search as a non-user
+			const userId = null;
+			const permissions = ['Webapp Super Admin', 'Tier 3 Support'];
+
+			const handler = this.handler_factory.createHandler('search', cloneName);
+			const storeHistory = false;
+			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId, storeHistory);
+
+			// we will ignore recoverable errors even though they may alter the search results
+			// and use the assumption that degradations in search services will only result in
+			// fewer search results so that below only *more* search results should trigger a
+			// search result update
+			/*
+			const error = handler.getError();
+			if (error.code) {
+				this.logger.error('favorites search error', 'YN3USY3');
+				return;
+			}
+			*/
+
+			// if new total count is greater than stored favorite count and the favorite
+			// has not already been marked updated we add a notification, else just update
+			// the favorite document count (we don't worry about clearing notifications if
+			// the document count decreases)
+			if (results.totalCount > favorite.document_count && !favorite.updated_results) {
+				favorite.document_count = results.totalCount;
+				favorite.updated_results = true;
+				await this.sequelize.transaction(async (t) => {
+					await favorite.save({ transaction: t });
+					const user = await this.gcUser.findOne({ 
+						where: { user_id: favorite.user_id },
+						transaction: t,
 					});
-
-					// for each favorite search, get its search request_body from gc history
-					for (const search of favoriteSearches) {
-
-						// if this hasn't been checked by the cache reload already
-						if (!search.run_by_cache) {
-							try {
-								// every favorited search has a tiny_url generated for it
-								const history = await this.gcHistory.findOne({
-									where: {
-										user_id: user.user_id,
-										tiny_url: search.tiny_url
-									}
-								});
-
-								if (history.request_body) {
-									const searchResults = await this.searchUtility.documentSearch(null, {body:history.request_body}, {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index}, userId);
-									if (searchResults.totalCount > search.document_count) {
-
-										numNotifications += 1;
-
-										await this.favoriteSearch.update({
-											updated_results: true,
-											run_by_cache: false,
-											document_count: searchResults.totalCount
-										},
-										{
-											where: {
-												id: search.id
-											}
-										});
-									}
-								} else {
-									this.logger.log('no request body data to make the search');
-								}
-
-
-							} catch (err) {
-								this.logger.error(err.message, 'DQ26224', userId);
-								this.logger.error(err);
-							}
-						} else {
-							await this.favoriteSearch.update({ run_by_cache: false },
-								{
-									where: {
-										id: search.id
-									}
-								});
-						}
-
-					}
-
-				} catch (err) {
-					const { message } = err;
-					this.addInternalUser.apply(message, '788WN93', userId);
-				}
-
-				let notifications = user.notifications ? Object.assign({}, user.notifications) : { favorites: 0, history: 0, total: 0 };
-				notifications.favorites = numNotifications;
-				notifications.total = numNotifications + notifications.history;
-
-				this.gcUser.update({ notifications }, {
-					where: {
-						user_id: user.user_id
-					}
+					const notifications = Object.assign({ favorites: 0, history: 0, total: 0 }, user.notifications);
+					notifications.favorites += 1;
+					notifications.total += 1;
+					user.notifications = notifications;
+					await user.save({ transaction: t });
 				});
+			} else if (results.totalCount != favorite.document_count) {
+				favorite.document_count = results.totalCount;
+				await favorite.save();
 			}
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, 'M4ZSJKR', userId);
+			this.logger.error(message || err, 'D8HNW90');
 		}
 	}
 

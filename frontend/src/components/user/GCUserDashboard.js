@@ -40,7 +40,7 @@ const gameChangerAPI = new GameChangerAPI();
 const StyledBadge = withStyles((theme) => ({
 	badge: {
 		backgroundColor: '#AD0000',
-		right: '-11px',
+		right: '-11px !important',
 		top: 0,
 		color: 'white',
 		fontSize: 12,
@@ -294,6 +294,7 @@ const GCUserDashboard = (props) => {
 		updateUserData,
 		handleSaveFavoriteDocument,
 		handleDeleteSearch,
+		handleClearFavoriteSearchNotification,
 		saveFavoriteSearch,
 		clearDashboardNotification,
 		handleFavoriteTopic,
@@ -945,6 +946,7 @@ const GCUserDashboard = (props) => {
 				cardTitle={search.search_name}
 				tiny_url={search.tiny_url}
 				handleDeleteFavorite={handleDeleteFavoriteSearch}
+				handleClearFavoriteSearchNotification={_handleClearFavoriteSearchNotification}
 				summary={searchSettings}
 				details={searchDetails}
 				overlayText={searchOverlayText}
@@ -964,6 +966,12 @@ const GCUserDashboard = (props) => {
 		handleDeleteSearch(favoriteSearchesSlice[idx]);
 		updateUserData();
 	};
+
+	const _handleClearFavoriteSearchNotification = async (idx) => {
+		favoriteSearchesSlice[idx].updated_results = false;
+		handleClearFavoriteSearchNotification(favoriteSearchesSlice[idx]);
+		updateUserData();
+	}
 
 	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
@@ -2441,6 +2449,7 @@ GCUserDashboard.propTypes = {
 	updateUserData: PropTypes.func,
 	handleSaveFavoriteDocument: PropTypes.func,
 	handleDeleteSearch: PropTypes.func,
+	handleClearFavoriteSearchNotification: PropTypes.func,
 	saveFavoriteSearch: PropTypes.func,
 	clearDashboardNotification: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
