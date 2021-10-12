@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'react-select/dist/react-select.css';
-// import Config from './config/config';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
 import { getProvider } from './components/factories/contextFactory';
 import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement';
@@ -24,7 +23,7 @@ import { useMatomo } from '@datapunt/matomo-tracker-react';
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from 'spark-md5';
-import _ from 'underscore';
+import _ from 'lodash';
 import GCAuth from './components/common/GCAuth';
 import './styles.css';
 import 'font-awesome/css/font-awesome.css';
@@ -174,12 +173,41 @@ const App = () => {
 			const cloneRoutes = [];
 			_.forEach(data.data, (clone, idx) => {
 				if (clone.is_live) {
-					// gameChangerClones.push(clone);
 					const name = clone.clone_name;
 					const GamechangerProvider = getProvider(name);
 
-					if (isDecoupled) {
-						if (clone.clone_to_gamechanger) {
+					const url = new URL(window.location.href).hostname;
+					if(clone.available_at === null){
+						clone.available_at = []; // if there's nothing at all, set as empty array
+					}
+					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
+						if (clone.permissions_required) {
+							cloneRoutes.push(
+								<PrivateTrackedRoute
+									key={idx}
+									path={`/${clone.url}`}
+									render={(props) => (
+										<GamechangerProvider>
+											<GamechangerPage
+												{...props}
+												tutorialData={
+													tutorialData && tutorialData[name]
+														? tutorialData[name].newUserTutorial
+														: null
+												}
+												history={history}
+												isClone={true}
+												cloneData={clone}
+											/>
+										</GamechangerProvider>
+									)}
+									pageName={clone.display_name}
+									allowFunction={() => {
+										return Permissions.allowGCClone(clone.clone_name);
+									}}
+								/>
+							);
+						} else {
 							cloneRoutes.push(
 								<PrivateTrackedRoute
 									key={idx}
@@ -205,62 +233,6 @@ const App = () => {
 									}}
 								/>
 							);
-						}
-					} else {
-						if (clone.clone_to_advana) {
-							if (clone.permissions_required) {
-								cloneRoutes.push(
-									<PrivateTrackedRoute
-										key={idx}
-										path={`/${clone.url}`}
-										render={(props) => (
-											<GamechangerProvider>
-												<GamechangerPage
-													{...props}
-													tutorialData={
-														tutorialData && tutorialData[name]
-															? tutorialData[name].newUserTutorial
-															: null
-													}
-													history={history}
-													isClone={true}
-													cloneData={clone}
-												/>
-											</GamechangerProvider>
-										)}
-										pageName={clone.display_name}
-										allowFunction={() => {
-											return Permissions.allowGCClone(clone.clone_name);
-										}}
-									/>
-								);
-							} else {
-								cloneRoutes.push(
-									<PrivateTrackedRoute
-										key={idx}
-										path={`/${clone.url}`}
-										render={(props) => (
-											<GamechangerProvider>
-												<GamechangerPage
-													{...props}
-													tutorialData={
-														tutorialData && tutorialData[name]
-															? tutorialData[name].newUserTutorial
-															: null
-													}
-													history={history}
-													isClone={true}
-													cloneData={clone}
-												/>
-											</GamechangerProvider>
-										)}
-										pageName={clone.display_name}
-										allowFunction={() => {
-											return true;
-										}}
-									/>
-								);
-							}
 						}
 					}
 				}
