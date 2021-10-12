@@ -94,12 +94,12 @@ const endpoints = {
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
-	getOtherEntityFilterList:
-		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData:
-		'/api/gameChanger/responsibilities/storeReport',
-	approveRejectAPIKeyRequestPOST:
-		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
+	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
+	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
+	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
+	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
 	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
@@ -433,8 +433,23 @@ export default class GameChangerAPI {
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
 		return axiosPOST(this.axios, url, options);
-	};
+	}
 
+	getResponsibilityDoc = async (options) => {
+		const url = endpoints.getResponsibilityDoc;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	setRejectionStatus = async (options) => {
+		const url = endpoints.setRejectionStatus;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	updateResponsibility = async (options) => {
+		const url = endpoints.updateResponsibility;
+		return axiosPOST(this.axios, url, options);
+	}
+	
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
