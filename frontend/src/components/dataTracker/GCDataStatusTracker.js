@@ -411,7 +411,7 @@ const GCDataStatusTracker = (props) => {
 		if (crawlerMapping && crawlerMapping.data) {
 			for (let crawler of crawlerMapping.data) {
 				if (crawler_name === crawler.crawler){
-					return(crawler.display_source_s + '-' + crawler.source_title);
+                    return(crawler.data_source_s + '-' + crawler.source_title);
 				}
 			}
 		}
