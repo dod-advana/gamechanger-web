@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcColors } from '../../containers/GameChangerPage';
-import Paper from 'material-ui/Paper/Paper';
+import {Paper} from '@material-ui/core';
 import SimpleTable from '../common/SimpleTable';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GCAccordion from '../common/GCAccordion';
 import { Card } from '../cards/GCCard';
 import { MainContainer } from '../../containers/GameChangerDetailsPage';
 import Pagination from 'react-js-pagination';
-import { numberWithCommas } from '../../gamechangerUtils';
+import { numberWithCommas } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 

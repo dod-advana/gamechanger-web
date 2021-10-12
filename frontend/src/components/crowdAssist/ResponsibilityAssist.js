@@ -8,9 +8,9 @@ import { primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryDark, tertiaryGr
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
-import {setState} from '../../sharedFunctions';
+import {setState} from '../../utils/sharedFunctions';
 import {trackEvent} from '../telemetry/Matomo';
-import {getTrackingNameForFactory, encode} from '../../gamechangerUtils';
+import {getTrackingNameForFactory, encode} from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI()
 
