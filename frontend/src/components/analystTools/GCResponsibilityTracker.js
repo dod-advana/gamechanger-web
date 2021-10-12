@@ -131,7 +131,7 @@ const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = (props) => {
 	const classes = useStyles();
-	const { state, dispatch } = props;
+	const { state } = props;
 	/*
 	const {
 		cloneData
@@ -174,7 +174,7 @@ const GCResponsibilityTracker = (props) => {
 			setOtherEntRespFilters(tmpFilters);
 			setVisibleOtherEntRespFilters(tmpFilters);
 		});
-	}, [dispatch]);
+	}, []);
 
 	useEffect(() => {
 		if (otherEntRespSearchText === '') {
