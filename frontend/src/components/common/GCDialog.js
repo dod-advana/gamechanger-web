@@ -4,6 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import UOTPrimaryButton from './GCPrimaryButton';
 import UOTSecondaryButton from './GCSecondaryButton';
 import styled from 'styled-components';
+import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 
 const UOTDialog = (props) => {
@@ -11,16 +12,20 @@ const UOTDialog = (props) => {
 		props.primaryLabel || props.secondaryLabel || props.tertiaryLabel
 			? true
 			: false;
-
-	const styles = {
+	
+	const useStyles = makeStyles(() => ({
 		dialog: {
 			width: '100%',
 			maxWidth: props.width || 800,
 			...props.dialogStyle,
 		},
+	}));
+
+	const classes = useStyles();
+
+	const styles = {
 		mainContainer: {
-			paddingLeft: 20,
-			paddingRight: 20,
+			padding: 20
 		},
 		title: {
 			fontFamily: 'Roboto',
@@ -65,11 +70,9 @@ const UOTDialog = (props) => {
 			modal={false}
 			open={props.open}
 			onRequestClose={props.onRequestClose}
-			contentStyle={styles.dialog}
 			autoScrollBodyContent={true}
-			bodyStyle={props.bodyStyle}
 			paperProps={props.paperProps} // container
-			bodyClassName={props.bodyClassName}
+			classes={{paper: classes.dialog}}
 		>
 			<div
 				className="row"

@@ -7,10 +7,10 @@
     font-weight: 600;
 }
 
-.MuiFormLabel-root.Mui-focused {
+label[class *= 'MuiFormLabel-root'].Mui-focused {
     color: #E9691D !important;
 }
 
-.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+div[class *= 'MuiOutlinedInput-root'].Mui-focused fieldset[class *= 'MuiOutlinedInput-notchedOutline']{
     border-color: #E9691D !important;
 }

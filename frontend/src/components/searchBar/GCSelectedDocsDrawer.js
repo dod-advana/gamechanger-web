@@ -153,7 +153,7 @@ export const SelectedDocsDrawer = (props) => {
 					<img
 						src={ExportIcon}
 						style={{
-							margin: '0 0 3px 5px',
+							margin: '0 0 3px 3px',
 							width: 15,
 							opacity:
 								!rawSearchResults || rawSearchResults.length <= 0 ? 0.6 : 1,

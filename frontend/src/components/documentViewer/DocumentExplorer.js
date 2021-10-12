@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
@@ -14,7 +15,7 @@ import {
 	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import { getEDAMetadataForPropertyTable } from '../modules/eda/edaUtils';
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../telemetry/Matomo';

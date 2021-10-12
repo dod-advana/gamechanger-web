@@ -17,6 +17,9 @@
 .* /api/gamechanger/assist/saveDocumentAnnotationsPOST .*
 .* /api/gamechanger/getThumbnail .*
 .* /api/gamechanger/responsibilities/get .*
+.* /api/gamechanger/responsibilities/getDoc .*
+.* /api/gamechanger/responsibilities/setRejectionStatus .*
+.* /api/gamechanger/responsibilities/updateResponsibility .*
 .* /api/gamechanger/responsibilities/getOtherEntityFilterList .*
 .* /api/gamechanger/responsibilities/storeReport .*
 .* /api/gamechanger/getNotifications .*
@@ -79,4 +82,5 @@
 .* /api/gamechanger/aboutGC/getFAQ .*
 .*/api/gamechanger/getElasticSearchIndex .*
 .*/api/gamechanger/getHomepageEditorData .*
+.*/api/gamechanger/analyticsTools/compareDocument .*
 

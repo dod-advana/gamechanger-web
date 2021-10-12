@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
 import { getTrackingNameForFactory, SEARCH_TYPES } from './gamechangerUtils';
-import { trackEvent } from './components/telemetry/Matomo';
-import GameChangerAPI from './components/api/gameChanger-service-api';
-import GamechangerUserManagementAPI from './components/api/GamechangerUserManagement';
+import { trackEvent } from '../components/telemetry/Matomo';
+import GameChangerAPI from '../components/api/gameChanger-service-api';
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
