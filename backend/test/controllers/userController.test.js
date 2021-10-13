@@ -802,9 +802,16 @@ describe('UserController', function () {
 			{ user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { gamechanger: { total: 0, favorites: 5, history: 0 } }, search_settings: {} },
 			{ user_id: '0bd353b670d1d110d89797153f99edf3', notifications: {}, search_settings: {} },
 		];
+		const sequelize = {
+			transaction: jest.fn(async function(fn) {
+				const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
+				await fn(transactionObj);
+			}),
+		};
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
+			sequelize,
 			gcUser: {
 				findOne(data) {
 					const user = users.find(user => user.user_id === data.where.user_id);

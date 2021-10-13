@@ -408,6 +408,9 @@ class FavoritesController {
 					const user = await this.gcUser.findOne({ 
 						where: { user_id: favorite.user_id },
 						transaction: t,
+						// there is a race condition between this select and the notification json modification
+						// and update so we lock the row for update
+						lock: t.LOCK.UPDATE,
 					});
 					const notifications = Object.assign({}, user.notifications);
 					const cloneNotifications = Object.assign({ favorites: 0, history: 0, total: 0 }, notifications[cloneName]);

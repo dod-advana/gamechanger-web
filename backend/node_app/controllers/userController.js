@@ -62,6 +62,7 @@ class UserController {
 		this.exportHistory = exportHistory;
 		this.searchUtility = searchUtility;
 		this.search = search;
+		this.sequelize = sequelize;
 		this.externalAPI = externalAPI;
 		this.emailUtility = emailUtility;
 		this.constants = constants;
@@ -535,24 +536,31 @@ class UserController {
 		try {
 			const hashed_user = this.sparkMD5.hash(userId);
 
-			const userData = await this.gcUser.findOne({
-				where: {
-					user_id: hashed_user
+			await this.sequelize.transaction(async (t) => {
+				const userData = await this.gcUser.findOne({
+					where: {
+						user_id: hashed_user
+					},
+					transaction: t,
+					// there is a race condition between this select and the notification json modification
+					// and update so we lock the row for update
+					lock: t.LOCK.UPDATE,
+				});
+
+				const { cloneName, type } = req.body;
+
+				// only update if the notification exists and is non-zero
+				if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+					userData.notifications[cloneName][type] = 0;
+					await this.gcUser.update({ notifications: userData.notifications },
+						{
+							where: {
+								user_id: hashed_user
+							},
+							transaction: t,
+						});
 				}
 			});
-
-			const { cloneName, type } = req.body;
-
-			// only update if the notification exists and is non-zero
-			if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
-				userData.notifications[cloneName][type] = 0;
-				await this.gcUser.update({ notifications: userData.notifications },
-					{
-						where: {
-							user_id: hashed_user
-						}
-					});
-			}
 
 			res.status(200).send();
 		} catch (err) {
