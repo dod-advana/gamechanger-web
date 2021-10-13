@@ -27,7 +27,14 @@ import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
 import GCAccordion from '../common/GCAccordion';
-import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from '../../utils/sharedFunctions';
+import {
+	handleGenerateGroup,
+	getSearchObjectFromString,
+	setCurrentTime,
+	getUserData,
+	setState,
+	clearDashboardNotification
+} from '../../utils/sharedFunctions';
 import GCGroupCard from '../../components/cards/GCGroupCard';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -296,7 +303,6 @@ const GCUserDashboard = (props) => {
 		handleDeleteSearch,
 		handleClearFavoriteSearchNotification,
 		saveFavoriteSearch,
-		clearDashboardNotification,
 		handleFavoriteTopic,
 		handleFavoriteOrganization,
 		checkUserInfo,
@@ -2185,11 +2191,11 @@ const GCUserDashboard = (props) => {
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userFavorites"
-							onClick={() => clearDashboardNotification('favorites')}
+							onClick={() => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch)}
 						>
 							<StyledBadge
 								badgeContent={
-									userData.notifications ? userData.notifications.favorites : 0
+									userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
 								}
 							>
 								<Typography variant="h6" display="inline" title="cardView">
@@ -2443,7 +2449,7 @@ GCUserDashboard.propTypes = {
 		),
 		favorite_topics: PropTypes.arrayOf(PropTypes.object),
 		favorite_organizations: PropTypes.arrayOf(PropTypes.object),
-		notifications: PropTypes.objectOf(PropTypes.number),
+		notifications: PropTypes.objectOf(PropTypes.object),
 		api_key: PropTypes.string,
 	}),
 	updateUserData: PropTypes.func,
@@ -2451,7 +2457,6 @@ GCUserDashboard.propTypes = {
 	handleDeleteSearch: PropTypes.func,
 	handleClearFavoriteSearchNotification: PropTypes.func,
 	saveFavoriteSearch: PropTypes.func,
-	clearDashboardNotification: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
 	handleFavoriteOrganization: PropTypes.func,
 	checkUserInfo: PropTypes.func,
