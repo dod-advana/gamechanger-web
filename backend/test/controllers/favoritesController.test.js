@@ -487,7 +487,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -552,6 +552,7 @@ describe('FavoritesController', function () {
 			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
 			expect(gcUser.findOne).toHaveBeenCalledWith({ 
 				where: { user_id: '54baea34480635caea8437904697bd9c' },
+				lock: transactionObj.LOCK.UPDATE,
 				transaction: transactionObj,
 			});
 
@@ -613,7 +614,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -678,6 +679,7 @@ describe('FavoritesController', function () {
 			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
 			expect(gcUser.findOne).toHaveBeenCalledWith({ 
 				where: { user_id: '54baea34480635caea8437904697bd9c' },
+				lock: transactionObj.LOCK.UPDATE,
 				transaction: transactionObj,
 			});
 
@@ -742,7 +744,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -823,7 +825,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -913,7 +915,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -975,7 +977,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
