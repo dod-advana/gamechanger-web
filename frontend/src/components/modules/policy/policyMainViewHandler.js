@@ -533,12 +533,12 @@ const PolicyMainViewHandler = {
 										trackEvent(
 											getTrackingNameForFactory(cloneData.clone_name),
 											'SourceOpened',
-											source.display_source_s
+											source.data_source_s
 										);
 										window.open(
 											`#/gamechanger-details?cloneName=${
 												cloneData.clone_name
-											}&type=source&sourceName=${source.display_source_s.toLowerCase()}`
+											}&type=source&sourceName=${source.data_source_s.toLowerCase()}`
 										);
 									}}
 								>
@@ -551,7 +551,7 @@ const PolicyMainViewHandler = {
 											marginLeft: '20px',
 										}}
 									>
-										{source.display_source_s}
+										{source.data_source_s}
 									</Typography>
 								</SourceContainer>
 							))}
