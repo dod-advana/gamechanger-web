@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import './gamechanger.css';
 import MainView from '../components/mainView/MainView';
 import { getContext } from '../components/factories/contextFactory';
-import { setState } from '../sharedFunctions';
+import { setState } from '../utils/sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
 import Notifications from '../components/notifications/Notifications';
@@ -14,6 +14,7 @@ import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import GCUserInfoModal from '../components/user/GCUserInfoModal';
 import { Snackbar } from '@material-ui/core';
+import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 export const gcColors = {
 	buttonColor1: '#131E43',
@@ -60,10 +61,15 @@ const GameChangerPage = (props) => {
 					<UserFeedback context={context} className="feedback-modal" />
 
 					{/* Crowd Sourcing */}
-					{cloneData.show_crowd_source && (
-						<GameChangerAssist context={context} primaryColor={gcOrange} />
+					{ cloneData.show_crowd_source && (
+						<GameChangerAssist context={context} primaryColor={gcOrange} /> 
 					)}
 
+					{/* Crowd Sourcing */}
+					{ cloneData.show_crowd_source && (
+						<ResponsibilityAssist context={context} primaryColor={gcOrange} /> 
+					)}
+					
 					{/* Tutorial Overlay */}
 					{cloneData.show_tutorial && <Tutorial context={context} />}
 

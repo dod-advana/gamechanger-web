@@ -21,7 +21,7 @@ class SearchHandler {
 		this.searchUtility = searchUtility;
 	}
 
-	async search(searchText, offset, limit, options, cloneName, permissions, userId) {
+	async search(searchText, offset, limit, options, cloneName, permissions, userId, storeHistory) {
 		// Setup the request
 		this.logger.info(`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(options)}`);
 		const proxyBody = options;
@@ -30,7 +30,7 @@ class SearchHandler {
 		proxyBody.limit = limit;
 		proxyBody.cloneName = cloneName;
 
-		return await this.searchHelper({body: proxyBody, permissions}, userId);
+		return await this.searchHelper({body: proxyBody, permissions}, userId, storeHistory);
 	}
 
 	async callFunction(functionName, options, cloneName, permissions, userId, res) {
@@ -43,7 +43,7 @@ class SearchHandler {
 		return await this.callFunctionHelper({body: proxyBody, permissions}, userId, res);
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		return req.body;
 	}
 
@@ -51,7 +51,7 @@ class SearchHandler {
 		return req.body;
 	}
 
-	async getCachedResults(req, historyRec, cloneSpecificObject, userId) {
+	async getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory) {
 		try {
 			const {
 				showTutorial = false,

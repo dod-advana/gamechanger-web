@@ -9,9 +9,9 @@ import {
 	getTrackingNameForFactory,
 	scrollToContentTop,
 	getQueryVariable,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { setState } from '../../../sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';

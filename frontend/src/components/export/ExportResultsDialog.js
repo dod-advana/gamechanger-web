@@ -12,11 +12,10 @@ import {
 } from '@material-ui/core';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingBar from '../common/LoadingBar';
-import { backgroundGreyDark } from '../../components/common/gc-colors';
 import './export-results-dialog.css';
 import moment from 'moment';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../gamechangerUtils';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -87,21 +86,6 @@ const styles = {
 		flex: 1,
 		display: 'flex',
 		justifyContent: 'flex-end',
-	},
-	selectedDocsTable: {
-		border: `1px solid ${backgroundGreyDark}`,
-		margin: '3% 1%',
-		width: '45%',
-	},
-	tableContainer: {
-		width: '100%',
-		height: 300,
-		overflow: 'auto',
-	},
-	selectedDocsTableCol: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		padding: 10,
 	},
 };
 
@@ -238,7 +222,7 @@ const ExportResultsDialog = ({
 			primaryAction={() => {}}
 			contentStyle={{ padding: 0 }}
 			titleStyle={{ padding: 0 }}
-			mainContainerStyle={{ padding: 0, margin: 0 }}
+			mainContainerStyle={{ margin: 0 }}
 			handleClose={handleClose}
 		>
 			<h2>&nbsp;Export is currently limited to 10000 results</h2>

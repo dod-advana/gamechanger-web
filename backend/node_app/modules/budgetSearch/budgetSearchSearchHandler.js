@@ -24,7 +24,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		this.budgetSearchSearchUtility = budgetSearchSearchUtility;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -61,12 +61,14 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			const operator = 'and';
 			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
 			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
@@ -80,7 +82,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			return searchResults;
 
 		} catch (err) {
-			if (!forCacheReload){
+			if (storeHistory && !forCacheReload){
 				const { message } = err;
 				this.logger.error(message, 'WHMU1G2', userId);
 				historyRec.endTime = new Date().toISOString();

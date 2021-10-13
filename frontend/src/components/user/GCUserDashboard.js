@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import GameChangerAPI from '../api//gameChanger-service-api';
+import GameChangerAPI from '../api/gameChanger-service-api';
 import { trackEvent } from '../telemetry/Matomo';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@material-ui/core';
@@ -20,14 +20,14 @@ import Popover from '@material-ui/core/Popover';
 import Popper from '@material-ui/core/Popper';
 import Link from '@material-ui/core/Link';
 import Badge from '@material-ui/core/Badge';
-import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../gamechangerUtils';
+import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
 import FavoriteCard from '../cards/GCFavoriteCard';
 import ReactTable from 'react-table';
 import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
 import GCAccordion from '../common/GCAccordion';
-import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from '../../sharedFunctions';
+import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from '../../utils/sharedFunctions';
 import GCGroupCard from '../../components/cards/GCGroupCard';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -40,7 +40,7 @@ const gameChangerAPI = new GameChangerAPI();
 const StyledBadge = withStyles((theme) => ({
 	badge: {
 		backgroundColor: '#AD0000',
-		right: '-11px',
+		right: '-11px !important',
 		top: 0,
 		color: 'white',
 		fontSize: 12,
@@ -294,6 +294,7 @@ const GCUserDashboard = (props) => {
 		updateUserData,
 		handleSaveFavoriteDocument,
 		handleDeleteSearch,
+		handleClearFavoriteSearchNotification,
 		saveFavoriteSearch,
 		clearDashboardNotification,
 		handleFavoriteTopic,
@@ -945,6 +946,7 @@ const GCUserDashboard = (props) => {
 				cardTitle={search.search_name}
 				tiny_url={search.tiny_url}
 				handleDeleteFavorite={handleDeleteFavoriteSearch}
+				handleClearFavoriteSearchNotification={_handleClearFavoriteSearchNotification}
 				summary={searchSettings}
 				details={searchDetails}
 				overlayText={searchOverlayText}
@@ -964,6 +966,12 @@ const GCUserDashboard = (props) => {
 		handleDeleteSearch(favoriteSearchesSlice[idx]);
 		updateUserData();
 	};
+
+	const _handleClearFavoriteSearchNotification = async (idx) => {
+		favoriteSearchesSlice[idx].updated_results = false;
+		handleClearFavoriteSearchNotification(favoriteSearchesSlice[idx]);
+		updateUserData();
+	}
 
 	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
@@ -2441,6 +2449,7 @@ GCUserDashboard.propTypes = {
 	updateUserData: PropTypes.func,
 	handleSaveFavoriteDocument: PropTypes.func,
 	handleDeleteSearch: PropTypes.func,
+	handleClearFavoriteSearchNotification: PropTypes.func,
 	saveFavoriteSearch: PropTypes.func,
 	clearDashboardNotification: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
