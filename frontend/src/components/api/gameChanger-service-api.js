@@ -101,6 +101,7 @@ const endpoints = {
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
+	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
 	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
 	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
@@ -768,17 +769,22 @@ export default class GameChangerAPI {
 	revokeAPIKeyRequest = async (id) => {
 		const url = endpoints.revokeAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id });
-	};
+	}
 
+	updateAPIKeyDescription = async (description, key) => {
+		const url = endpoints.updateAPIKeyDescriptionPOST;
+		return axiosPOST(this.axios, url, { description, key })
+	}
+	
 	approveRejectAPIKeyRequest = async (id, approve) => {
 		const url = endpoints.approveRejectAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id, approve });
-	};
-
-	createAPIKeyRequest = async (name, email, reason) => {
+	}
+	
+	createAPIKeyRequest = async (name, email, reason, clones) => {
 		const url = endpoints.createAPIKeyRequestPOST;
-		return axiosPOST(this.axios, url, { name, email, reason });
-	};
+		return axiosPOST(this.axios, url, { name, email, reason, clones });
+	}
 
 	updateUserAPIRequestLimit = async () => {
 		const url = endpoints.updateUserAPIRequestLimit;
