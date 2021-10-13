@@ -439,7 +439,7 @@ describe('FavoritesController', function () {
 	});
 
 	describe('#checkLeastRecentFavoritedSearch', () => {
-		it('should check the least recent favorited search', async () => {
+		it('should check the least recent favorited search and increment existing notifications', async () => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -478,7 +478,7 @@ describe('FavoritesController', function () {
 			};
 			const userSaves = [];
 			const initUser = {
-				notifications: { favorites: 0, history: 0, total: 0 },
+				notifications: { gamechanger: { favorites: 1, history: 1, total: 1 } },
 				save: jest.fn(async function() {
 					userSaves.push({...this});
 				}),
@@ -487,7 +487,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -552,6 +552,7 @@ describe('FavoritesController', function () {
 			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
 			expect(gcUser.findOne).toHaveBeenCalledWith({ 
 				where: { user_id: '54baea34480635caea8437904697bd9c' },
+				lock: transactionObj.LOCK.UPDATE,
 				transaction: transactionObj,
 			});
 
@@ -559,7 +560,137 @@ describe('FavoritesController', function () {
 			expect(user.save).toHaveBeenCalledWith({ transaction: transactionObj });
 			assert.deepStrictEqual(userSaves[0], {
 				...initUser, 
-				notifications: { favorites: 1, history: 0, total: 1 },
+				notifications: { gamechanger: { favorites: 2, history: 1, total: 2 } },
+			});
+
+			expect(logger.error).not.toHaveBeenCalled();
+		});
+
+		it('should check the least recent favorited search and create new notifications if none exist', async () => {
+			const favoriteSaves = [];
+			const initFavorite = {
+				user_id: '54baea34480635caea8437904697bd9c',
+				tiny_url: 'covid19?tiny=77',
+				document_count: 100,
+				updated_results: false,
+				last_checked: new Date(0),
+				save: jest.fn(async function() {
+					favoriteSaves.push({...this});
+				}),
+			};
+			const favorite = {...initFavorite};
+			const favoriteSearch = {
+				findOne: jest.fn(async () => favorite),
+			};
+			const searchHistory = {
+				request_body: {
+					cloneName: 'covid19',
+					searchText: 'pizza',
+					offset: 0,
+					limit: 10,
+					searchVersion: 1,
+				},
+			};
+			const gcHistory = {
+				findOne: jest.fn(async() => searchHistory),
+			};
+			const searchResult = {
+				totalCount: 101,
+			};
+			const searchHandler = {
+				search: jest.fn(async () => searchResult),
+			};
+			const handler_factory = {
+				createHandler: jest.fn(() => searchHandler),
+			};
+			const userSaves = [];
+			const initUser = {
+				notifications: { gamechanger: { favorites: 1, history: 1, total: 1 } },
+				save: jest.fn(async function() {
+					userSaves.push({...this});
+				}),
+			};
+			const user = initUser;
+			const gcUser = {
+				findOne: jest.fn(async () => user),
+			};
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
+			const sequelize = {
+				transaction: jest.fn(async function(fn) {
+					await fn(transactionObj);
+				}),
+			};
+			const logger = {
+				...constructorOptionsMock.logger,
+				error: jest.fn(),
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				favoriteSearch,
+				gcHistory,
+				gcUser,
+				handler_factory,
+				sequelize,
+				logger,
+			};
+
+			const target = new FavoritesController(opts);
+			await target.checkLeastRecentFavoritedSearch();
+			
+			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
+			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
+			expect(favoriteSearch.findOne).toHaveBeenCalledWith({
+				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+			});
+
+			expect(favorite.save).toHaveBeenCalledTimes(2);
+			expect(favorite.save).toHaveBeenCalledWith();
+			expect(favorite.save).toHaveBeenCalledWith({ transaction: transactionObj });
+			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[1], {
+				...initFavorite, 
+				last_checked: Sequelize.fn('NOW'),
+				document_count: 101,
+				updated_results: true,
+			});
+
+			expect(gcHistory.findOne).toHaveBeenCalledTimes(1);
+			expect(gcHistory.findOne).toHaveBeenCalledWith({
+				where: {
+					user_id: '54baea34480635caea8437904697bd9c',
+					tiny_url: 'covid19?tiny=77',
+				},
+				order: [['run_at', 'DESC']]
+			});
+
+			expect(handler_factory.createHandler).toHaveBeenCalledTimes(1);
+			expect(handler_factory.createHandler).toHaveBeenCalledWith('search', 'covid19');
+
+			expect(searchHandler.search).toHaveBeenCalledTimes(1);
+			expect(searchHandler.search).toHaveBeenCalledWith('pizza', 0, 10, {
+				cloneName: 'covid19',
+				searchText: 'pizza',
+				offset: 0,
+				limit: 10,
+				searchVersion: 1,
+			}, 'covid19', ['Webapp Super Admin', 'Tier 3 Support'], null, false);
+
+			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
+			expect(gcUser.findOne).toHaveBeenCalledWith({ 
+				where: { user_id: '54baea34480635caea8437904697bd9c' },
+				lock: transactionObj.LOCK.UPDATE,
+				transaction: transactionObj,
+			});
+
+			expect(user.save).toHaveBeenCalledTimes(1);
+			expect(user.save).toHaveBeenCalledWith({ transaction: transactionObj });
+			assert.deepStrictEqual(userSaves[0], {
+				...initUser, 
+				notifications: { 
+					covid19: { favorites: 1, history: 0, total: 1 },
+					gamechanger: { favorites: 1, history: 1, total: 1 }
+				},
 			});
 
 			expect(logger.error).not.toHaveBeenCalled();
@@ -604,7 +735,7 @@ describe('FavoritesController', function () {
 			};
 			const userSaves = [];
 			const initUser = {
-				notifications: { favorites: 0, history: 0, total: 0 },
+				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
 				save: jest.fn(async function() {
 					userSaves.push({...this});
 				}),
@@ -613,7 +744,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -685,7 +816,7 @@ describe('FavoritesController', function () {
 			};
 			const userSaves = [];
 			const initUser = {
-				notifications: { favorites: 0, history: 0, total: 0 },
+				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
 				save: jest.fn(async function() {
 					userSaves.push({...this});
 				}),
@@ -694,7 +825,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -775,7 +906,7 @@ describe('FavoritesController', function () {
 			};
 			const userSaves = [];
 			const initUser = {
-				notifications: { favorites: 0, history: 0, total: 0 },
+				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
 				save: jest.fn(async function() {
 					userSaves.push({...this});
 				}),
@@ -784,7 +915,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);
@@ -846,7 +977,7 @@ describe('FavoritesController', function () {
 			const gcUser = {
 				findOne: jest.fn(async () => user),
 			};
-			const transactionObj = Symbol('transaction');
+			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
 				transaction: jest.fn(async function(fn) {
 					await fn(transactionObj);

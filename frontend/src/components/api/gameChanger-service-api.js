@@ -711,9 +711,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	clearDashboardNotification = async (type) => {
+	clearDashboardNotification = async (cloneName, type) => {
 		const url = endpoints.clearDashboardNotification;
-		return axiosPOST(this.axios, url, { type });
+		return axiosPOST(this.axios, url, { cloneName, type });
 	};
 
 	clearFavoriteSearchUpdate = async (tinyurl) => {
