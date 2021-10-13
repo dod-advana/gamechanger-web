@@ -7,15 +7,19 @@ describe('ExternalAPIController', function () {
 	describe('#getAPIKeyRequests()', () => {
 
 		const apiKeyList = [
-			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true'}
+			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true', description: 'test'}
 		];
+
+		const apiKeyCloneAssociation = [
+			{apiKeyId: 0, cloneId: 5, clone_name: 'gamechanger'}
+		];
+
 		const apiKeys = {
-			findAll: async (data) => {
-				const returnKeys = [];
-				apiKeyList.forEach(key => {
-					if (key.username === data.where.username) returnKeys.push(key);
-				});
-				return Promise.resolve(returnKeys);
+			findOne: async (data) => {
+				const returnKey = apiKeyList.find(key => key.username === data.where.username);
+				const clone_meta = apiKeyCloneAssociation.filter(clone => clone.apiKeyId === returnKey.id);
+				returnKey.clone_meta = clone_meta.map(clone => { return {id: clone.cloneId, clone_name: clone.clone_name } })
+				return Promise.resolve(returnKey);
 			}
 		};
 
@@ -26,7 +30,8 @@ describe('ExternalAPIController', function () {
 		];
 		const apiKeyRequests = {
 			findAll: async (data) => {
-				return Promise.resolve(apiKeyRequestList);
+				const response = apiKeyRequestList.map(request => { return { ...request, dataValues: request} })
+				return Promise.resolve(response);
 			}
 		};
 
@@ -59,10 +64,10 @@ describe('ExternalAPIController', function () {
 		it('should return all api requests that are not rejected', (done) => {
 			const expected = {
 				approved: [
-					{approved: true, email: 'test@test.com', id: 0, keys: ['aklfjdkh'], name: 'Test Test', reason: 'For testing', rejected: false},
+					{approved: true, description:'test', email: 'test@test.com', id: 0, key: 'aklfjdkh', keyClones: [{clone_name: 'gamechanger', id: 5}], name: 'Test Test', reason: 'For testing', rejected: false, username: 'test'},
 				],
 				pending: [
-					{approved: false, email: 'john@test.com', id: 1, name: 'Test Test', reason: 'For testing', rejected: false}
+					{approved: false, email: 'john@test.com', id: 1, name: 'Test Test', reason: 'For testing', rejected: false, username: 'john'}
 				]
 			};
 
@@ -90,12 +95,19 @@ describe('ExternalAPIController', function () {
 			{id: 2, username: 'bad', name: 'Test Test', email: 'bad@test.com', reason: 'For testing', approved: false, rejected: true},
 			{id: 3, username: 'john', name: 'Test Test', email: 'john@test.com', reason: 'For testing', approved: false, rejected: false}
 		];
+
+		const apiKeyRequestCloneAssociation = [
+			{apiKeyRequestId: 0, cloneId: 5, clone_name: 'gamechanger'}
+		];
+
 		const apiKeyRequests = {
 			findOne: async (data) => {
 				let returnRequest = {};
 				apiKeyRequestList.forEach(request => {
-					if (request.id === data.where.id) returnRequest = request;
+					if (request.id === data.where.id) returnRequest.dataValues = request;
 				});
+				const clone_meta = apiKeyRequestCloneAssociation.filter(clone => clone.apiKeyRequestId === returnRequest.id);
+				returnRequest.dataValues.clone_meta = clone_meta.map(clone => { return {id: clone.cloneId, clone_name: clone.clone_name } })
 				return Promise.resolve(returnRequest);
 			},
 			update: async (data, where) => {
@@ -108,11 +120,17 @@ describe('ExternalAPIController', function () {
 				return Promise.resolve();
 			}
 		};
+		const apiKeyClones = {
+			bulkCreate: async (data) => {
+				return Promise.resolve([{id:0, apiKeyId:0, cloneId: 0}]);
+			}
+		}
 
 		const opts = {
 			...constructorOptionsMock,
 			apiKeys,
-			apiKeyRequests
+			apiKeyRequests,
+			apiKeyClones
 		};
 
 		const target = new ExternalAPIController(opts);
@@ -257,15 +275,22 @@ describe('ExternalAPIController', function () {
 					throw new Error('Duplicate found');
 				} else {
 					apiKeyRequest.push(data);
-					return Promise.resolve(data);
+					return Promise.resolve({dataValues: data});
 				}
 			}
 		};
 
+		const apiKeyRequestClones = {
+			bulkCreate: async (data) => {
+				return Promise.resolve([{id:0, apiKeyRequestId:0, cloneId: 1}]);
+			}
+		}
+
 		const opts = {
 			...constructorOptionsMock,
 			apiKeys,
-			apiKeyRequests
+			apiKeyRequests,
+			apiKeyRequestClones
 		};
 
 		const target = new ExternalAPIController(opts);
@@ -291,7 +316,8 @@ describe('ExternalAPIController', function () {
 			body: {
 				name: 'Test',
 				email: 'Test',
-				reason: 'Test'
+				reason: 'Test',
+				clones: [1]
 			},
 			get(key) {
 				return this.headers[key];
@@ -354,6 +380,59 @@ describe('ExternalAPIController', function () {
 			const testUser = 'cliff';
 			const expectedKey = await target.getAPIKey(testUser);
 			assert.equal(expectedKey, '');
+		})
+	})
+
+	describe('#updateAPIKeyDescription()', () => {
+		const apiKeyList = [
+			{id: 0, apiKey: 'aklfjdkh', username: 'test', active: 'true', description: 'testing'}
+		];
+
+		const apiKeys = {
+			update: async (data, where) => {
+				apiKeyList.forEach(key => {
+					if (key.apiKey === where.where.apiKey) {
+						key.description = data.description;
+					}
+				});
+				return Promise.resolve([1]);
+			}
+		};
+		const opts = {
+			...constructorOptionsMock,
+			apiKeys
+		};
+
+		const target = new ExternalAPIController(opts);
+
+		let resCode;
+		let resData;
+		const res = {
+			...resMock,
+			send: (data) => {
+				resData = data;
+				return data;
+			}
+		};
+
+		const req = {
+			headers: {
+				SSL_CLIENT_S_DN_CN: 'john'
+			},
+			body: {
+				key: 'aklfjdkh',
+				description: 'new description'
+			},
+			get(key) {
+				return this.headers[key];
+			}
+		};
+
+		it("should update the description of an API key", async (done) => {
+			target.updateAPIKeyDescription(req, res).then(() => {
+				assert.deepStrictEqual(resData, { status: [1] });
+				done();
+			});
 		})
 	})
 

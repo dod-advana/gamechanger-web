@@ -29,6 +29,7 @@ const { Thesaurus } = require('./node_app/lib/thesaurus');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 const ApiKey = models.api_key;
+const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
 
@@ -168,8 +169,18 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		if (!req.headers['x-api-key']) {
 			res.sendStatus(403);
 		} else {
-			const key = await ApiKey.findAll({ where: { apiKey: req.headers['x-api-key'] }, raw: true });
-			if (key && key.active) {
+			const [key] = await ApiKey.findAll({ 
+				where: { apiKey: req.headers['x-api-key'] }, 
+				raw: false,
+				include: [{
+					model: CloneMeta,
+					attributes: ['clone_name'],
+					through: {attributes: []}
+				}],
+			});
+			let cloneAccess;
+			if(key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
+			if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 				req.headers['ssl_client_s_dn_cn'] = key.username;
 				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
 				next();
