@@ -255,3 +255,7 @@ export const setCurrentTime = (dispatch) => {
 
 	return currentTime;
 }
+
+export const sendJiraFeedback = (data) => {
+	gameChangerAPI.sendJiraFeedback(data);
+}

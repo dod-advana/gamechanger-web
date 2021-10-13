@@ -2,7 +2,10 @@ const FEEDBACK = require('../models').feedback;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
 const constants = require('../config/constants');
+const https = require('https');
+const fs = require('fs');
 const { JIRA_CONFIG } = constants;
+const axios = require('axios').default;
 
 class FeedbackController {
 	constructor(opts = {}) {
