@@ -13,7 +13,6 @@ import GCUserDashboard from '../user/GCUserDashboard';
 import GCAboutUs from '../aboutUs/GCAboutUs';
 import {
 	checkUserInfo,
-	clearDashboardNotification,
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
@@ -183,9 +182,6 @@ const MainView = (props) => {
 						favorite,
 						dispatch
 					)
-				}
-				clearDashboardNotification={(type) =>
-					clearDashboardNotification(type, state, dispatch)
 				}
 				cloneData={state.cloneData}
 				checkUserInfo={() => {

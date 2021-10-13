@@ -24,12 +24,17 @@ const StyledBadge = withStyles((theme) => ({
 const UserButton = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
+	const { userData, cloneData } = state;
 
 	return (
-		<StyledBadge badgeContent={state.userData?.notifications?.total}>
+		<StyledBadge 
+			badgeContent={
+				userData?.notifications ? userData.notifications[cloneData.clone_name]?.total : undefined
+			}
+		>
 			<GCButton
 				onClick={() => {
-					clearDashboardNotification('total', state, dispatch);
+					clearDashboardNotification(state.cloneData.clone_name, 'total', state, dispatch);
 					setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				}}
 				style={{ height: 50, width: 60, minWidth: 'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor: '#131E43', border: '#131E43' }}
