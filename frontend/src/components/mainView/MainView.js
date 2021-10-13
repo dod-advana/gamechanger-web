@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import {
 	getTrackingNameForFactory,
 	PAGE_DISPLAYED,
-} from '../../gamechangerUtils';
+} from '../../utils/gamechangerUtils';
 import { Button } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
-import GCResponsibilityTracker from '../analystTools/GCResponsibilityTracker';
+import AnalystTools from '../analystTools';
 import GCUserDashboard from '../user/GCUserDashboard';
 import GCAboutUs from '../aboutUs/GCAboutUs';
 import {
@@ -19,7 +19,7 @@ import {
 	handleSaveFavoriteTopic,
 	handleSaveFavoriteOrganization,
 	setState,
-} from '../../sharedFunctions';
+} from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
@@ -137,9 +137,11 @@ const MainView = (props) => {
 	};
 
 	const getAnalystTools = () => {
-		return <GCResponsibilityTracker state={state} />;
-	};
-
+		return (
+			<AnalystTools context={context} />
+		);
+	}
+	
 	const getDataTracker = () => {
 		return <GCDataStatusTracker state={state} />;
 	};
@@ -149,6 +151,7 @@ const MainView = (props) => {
 			<GCUserDashboard state={state} dispatch={dispatch} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
+				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
 				saveFavoriteSearch={(
 					favoriteName,
 					favoriteSummary,
@@ -198,6 +201,11 @@ const MainView = (props) => {
 
 	const handleDeleteFavoriteSearch = async (search) => {
 		await gameChangerAPI.favoriteSearch(search);
+		await getUserData(dispatch);
+	};
+
+	const handleClearFavoriteSearchNotification = async (search) => {
+		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
 		await getUserData(dispatch);
 	};
 
@@ -290,14 +298,8 @@ const MainView = (props) => {
 									color: '#313541',
 								}}
 							>
-								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker &&
-									'Data Status Tracker'}
-								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && (
-									<span>
-										Analyst Tools{' '}
-										<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
-									</span>
-								)}
+								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
+								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools | {state.analystToolsPageDisplayed} <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b></span>}
 								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && (
 									<span>User Dashboard</span>
 								)}

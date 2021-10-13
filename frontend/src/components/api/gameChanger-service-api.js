@@ -1,7 +1,7 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import { axiosGET, axiosDELETE, axiosPOST } from '../../gamechangerUtils';
+import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
 // import util from '../advana/api/util';
 
 // import { getPdfViewerUrl } from '../advana/api/storage-service-api'
@@ -67,7 +67,6 @@ const endpoints = {
 		'/api/gameChanger/admin/trending/deleteTrendingBlacklist',
 	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
-	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
 	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
@@ -87,6 +86,7 @@ const endpoints = {
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
+	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -94,12 +94,12 @@ const endpoints = {
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
-	getOtherEntityFilterList:
-		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData:
-		'/api/gameChanger/responsibilities/storeReport',
-	approveRejectAPIKeyRequestPOST:
-		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
+	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
+	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
+	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
+	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
 	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
 	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
@@ -118,6 +118,7 @@ const endpoints = {
 	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
+	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -433,8 +434,23 @@ export default class GameChangerAPI {
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
 		return axiosPOST(this.axios, url, options);
-	};
+	}
 
+	getResponsibilityDoc = async (options) => {
+		const url = endpoints.getResponsibilityDoc;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	setRejectionStatus = async (options) => {
+		const url = endpoints.setRejectionStatus;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	updateResponsibility = async (options) => {
+		const url = endpoints.updateResponsibility;
+		return axiosPOST(this.axios, url, options);
+	}
+	
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
@@ -553,11 +569,6 @@ export default class GameChangerAPI {
 	favoriteSearch = async (data) => {
 		const url = endpoints.favoriteSearchPOST;
 		return axiosPOST(this.axios, url, data);
-	};
-
-	checkFavoritedSearchesPOST = async () => {
-		const url = endpoints.checkFavoritedSearchesPOST;
-		return axiosPOST(this.axios, url);
 	};
 
 	favoriteTopic = async (data) => {
@@ -679,6 +690,11 @@ export default class GameChangerAPI {
 		const url = endpoints.getSearchPdfMapping;
 		return axiosGET(this.axios, url, { params: body });
 	};
+
+	getDocumentUsage = async (body) => {
+		const url = endpoints.getDocumentUsage;
+		return axiosGET(this.axios, url, {params:body});
+	}
 
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
@@ -911,6 +927,11 @@ export default class GameChangerAPI {
 	saveOrgImageOverrideURL = async ({ name, imageURL }) => {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
+	};
+	
+	compareDocumentPOST = async ({ cloneName, paragraphs }) => {
+		const url = endpoints.compareDocumentPOST;
+		return axiosPOST(this.axios, url, { cloneName, paragraphs });
 	};
 
 	getFAQ = async () => {

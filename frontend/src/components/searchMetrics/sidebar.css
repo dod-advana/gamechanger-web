@@ -188,7 +188,7 @@
     bottom: 113px;
     background-color: white;
     border-radius: 8px;
-    z-index: 9999;
+    z-index: 1299;
   }
   .feedback-modal:focus {
     outline: 0;

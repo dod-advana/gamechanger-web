@@ -38,18 +38,18 @@ class PolicySearchHandler extends SearchHandler {
 		this.favorite_Search = favorite_search;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const {
 			offset,
 			useGCCache,
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, storeHistory);
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');
-		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 		// }
 
 		// cleaning incomplete double quote issue
@@ -61,7 +61,9 @@ class PolicySearchHandler extends SearchHandler {
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		if (storeHistory) {
+			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		}
 		return enrichedResults;
 	}
 
@@ -102,7 +104,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	// searchHelper function breakouts
-	async createRecObject(body, userId){
+	async createRecObject(body, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -149,7 +151,9 @@ class PolicySearchHandler extends SearchHandler {
 			await this.redisDB.select(redisAsyncClientDB);
 
 			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 			return {historyRec, cloneSpecificObject, clientObj};
 		} catch (e) {
 			this.logger.error(e.message, 'AC3CP8H');
@@ -448,47 +452,6 @@ class PolicySearchHandler extends SearchHandler {
 					await this.storeRecordOfSearchInPg(historyRec, userId);
 				} catch (e) {
 					this.logger.error(e.message, 'MPK1GGN', userId);
-				}
-			} else {
-
-				try {
-
-					// if doing a cache reload, check favorite search stats
-					const hashed_user = sparkMD5.hash(userId);
-
-					// check if this search is a favorite
-					const favoriteSearch = await this.favorite_Search.findOne({
-						where: {
-							user_id: hashed_user,
-							tiny_url: tiny_url
-						}
-					});
-
-					if (favoriteSearch !== null) {
-
-						let updated = false;
-						let count = favoriteSearch.document_count;
-
-						// favorite search is updated
-						if (searchResults.totalCount > favoriteSearch.document_count) {
-							updated = true;
-							count = searchResults.totalCount;
-						}
-
-						// update the favorite search info
-						await this.favorite_Search.update({
-							run_by_cache: true,
-							updated_results: updated,
-							document_count: count
-						}, {
-							where: {
-								id: favoriteSearch.id
-							}
-						});
-					}
-
-				} catch (err) {
-					this.logger.error(err.message, 'K361YCJ', userId);
 				}
 			}
 		} catch (err) {

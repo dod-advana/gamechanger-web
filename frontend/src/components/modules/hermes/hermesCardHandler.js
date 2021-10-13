@@ -8,7 +8,7 @@ import {
 	getSubTypes,
 	getTrackingNameForFactory,
 	getTypeDisplay,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
 import { primary } from '../../../components/common/gc-colors';

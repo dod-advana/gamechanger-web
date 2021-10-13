@@ -33,7 +33,7 @@ class GlobalSearchHandler extends SearchHandler {
 		this.database = database;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			searchText: '',
@@ -64,7 +64,7 @@ class GlobalSearchHandler extends SearchHandler {
 			const cloneSpecificObject = {};
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			const searchResults = {applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0};
 
@@ -94,13 +94,15 @@ class GlobalSearchHandler extends SearchHandler {
 			}
 
 			// try storing results record
-			try {
-				const { totalCount } = searchResults;
-				historyRec.endTime = new Date().toISOString();
-				historyRec.numResults = totalCount;
-				await this.storeRecordOfSearchInPg(historyRec, userId);
-			} catch (e) {
-				this.logger.error(e.message, 'BG3V9N8', userId);
+			if (storeHistory) {
+				try {
+					const { totalCount } = searchResults;
+					historyRec.endTime = new Date().toISOString();
+					historyRec.numResults = totalCount;
+					await this.storeRecordOfSearchInPg(historyRec, userId);
+				} catch (e) {
+					this.logger.error(e.message, 'BG3V9N8', userId);
+				}
 			}
 
 			return searchResults;

@@ -7,7 +7,7 @@ import {
 	getSearchObjectFromString,
 	getUserData,
 	setState,
-} from '../../../sharedFunctions';
+} from '../../../utils/sharedFunctions';
 import DefaultDocumentExplorer from './defaultDocumentExplorer';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { Card } from '../../cards/GCCard';
@@ -23,7 +23,7 @@ import {
 	getTypeQuery,
 	getQueryVariable,
 	RESULTS_PER_PAGE,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import { gcOrange } from '../../common/gc-colors';
 import { DidYouMean } from '../../searchBar/SearchBarStyledComponents';
@@ -172,9 +172,14 @@ const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
 
 const DefaultMainViewHandler = {
 	async handlePageLoad(props) {
-		const { state, dispatch, history, searchHandler } = props;
-
-		if (state.runSearch) return;
+		const {
+			state,
+			dispatch,
+			history,
+			searchHandler,
+		} = props;
+		
+		if (state.runSearch || state.runDocumentComparisonSearch) return;
 
 		const documentProperties = await getDocumentProperties(dispatch);
 		let newState = { ...state, documentProperties };
@@ -375,6 +380,7 @@ const DefaultMainViewHandler = {
 			edaSearchSettings,
 			currentSort,
 			currentOrder,
+			currentViewName
 		} = state;
 		const {
 			allOrgsSelected,
@@ -417,7 +423,7 @@ const DefaultMainViewHandler = {
 						order={currentOrder}
 					/>
 				)}
-				{loading && (
+				{loading && currentViewName !== 'Explorer' && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>

@@ -12,7 +12,7 @@ import {
 	getReferenceListMetadataPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
-} from '../../../gamechangerUtils';
+} from '../../../utils/gamechangerUtils';
 import {
 	getEDAMetadataForPropertyTable,
 	getDisplayTitle,

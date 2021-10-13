@@ -12,7 +12,8 @@ import Chip from '@material-ui/core/Chip';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
-import { encode, getTrackingNameForFactory } from '../../gamechangerUtils';
+import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px;
@@ -21,8 +22,8 @@ const StyledFavoriteDocumentCard = styled.div`
 	border-radius: 6px;
 	margin: 10px;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')} >
-		.main-info {
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
+	> .main-info {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -246,6 +247,7 @@ const FavoriteCard = (props) => {
 		cardTitle,
 		tiny_url,
 		handleDeleteFavorite,
+		handleClearFavoriteSearchNotification,
 		details,
 		overlayText,
 		summary,
@@ -285,6 +287,10 @@ const FavoriteCard = (props) => {
 		setPopoverAnchorEl(null);
 		handleDeleteFavorite(idx);
 	};
+
+	const handleClearNotification = () => {
+		handleClearFavoriteSearchNotification(idx);
+	}
 
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>
@@ -337,12 +343,14 @@ const FavoriteCard = (props) => {
 										className={'summary-title-link'}
 										href={`#/${tiny_url}`}
 										target={'_blank'}
+										onClick={handleClearNotification}
 									>
 										{cardTitle}
 									</Link>
 									{updated && (
 										<Chip
 											label="New Results"
+											onDelete={handleClearNotification}
 											style={{
 												backgroundColor: '#069FD9',
 												color: 'white',
@@ -458,6 +466,7 @@ const FavoriteCard = (props) => {
 FavoriteCard.propTypes = {
 	cardTitle: PropTypes.string.isRequired,
 	handleDeleteFavorite: PropTypes.func.isRequired,
+	handleClearFavoriteSearchNotification: PropTypes.func.isRequired,
 	summary: PropTypes.string.isRequired,
 	idx: PropTypes.number.isRequired,
 	tiny_url: PropTypes.string,
