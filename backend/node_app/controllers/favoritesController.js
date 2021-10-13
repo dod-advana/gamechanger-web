@@ -409,9 +409,11 @@ class FavoritesController {
 						where: { user_id: favorite.user_id },
 						transaction: t,
 					});
-					const notifications = Object.assign({ favorites: 0, history: 0, total: 0 }, user.notifications);
-					notifications.favorites += 1;
-					notifications.total += 1;
+					const notifications = Object.assign({}, user.notifications);
+					const cloneNotifications = Object.assign({ favorites: 0, history: 0, total: 0 }, notifications[cloneName]);
+					cloneNotifications.favorites += 1;
+					cloneNotifications.total += 1;
+					notifications[cloneName] = cloneNotifications;
 					user.notifications = notifications;
 					await user.save({ transaction: t });
 				});

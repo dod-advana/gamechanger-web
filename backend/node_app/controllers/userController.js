@@ -95,7 +95,7 @@ class UserController {
 					where: { user_id: hashed_user },
 					defaults: {
 						user_id: hashed_user,
-						notifications: { total: 0, favorites: 0, history: 0}
+						notifications: {}
 					},
 					raw: true,
 				}
@@ -331,7 +331,7 @@ class UserController {
 					defaults: {
 						user_id: hashed_user,
 						is_beta: false,
-						notifications: { total: 0, favorites: 0, history: 0 }
+						notifications: {}
 					},
 					raw: true
 				}
@@ -541,22 +541,18 @@ class UserController {
 				}
 			});
 
-			const { type } = req.body;
+			const { cloneName, type } = req.body;
 
-			if (userData.notifications) {
-				userData.notifications[type] = 0;
-			} else {
-				userData.notifications = {
-					total: 0, favorites: 0, history: 0
-				};
+			// only update if the notification exists and is non-zero
+			if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+				userData.notifications[cloneName][type] = 0;
+				await this.gcUser.update({ notifications: userData.notifications },
+					{
+						where: {
+							user_id: hashed_user
+						}
+					});
 			}
-
-			await this.gcUser.update({ notifications: userData.notifications },
-				{
-					where: {
-						user_id: hashed_user
-					}
-				});
 
 			res.status(200).send();
 		} catch (err) {
