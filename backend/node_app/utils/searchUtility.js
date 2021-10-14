@@ -1361,34 +1361,36 @@ class SearchUtility {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let relatedSearches = []
-		let similarWords = expansionDict['wordsim']
-		let simWordList = Object.keys(expansionDict['wordsim'])
-		for (var key in similarWords) {
-			simWordList = simWordList.concat(similarWords[key])
-		}
-		let similarWordsQuery = simWordList.join("* OR *")
-		const query = 
-			{
-				size: 1,
-				query: {
-					query_string: {
-						query: `*${similarWordsQuery}*`,
-						fuzziness: 5
-					}
-				},
-				aggs: {
-					related: {
-						terms: {
-							field: 'search_query',
-							min_doc_count: 5
-						},
-						aggs: {
-							user: { terms: {field: 'user_id', size: 2}}
+
+		try {
+			let similarWords = expansionDict['wordsim']
+			let simWordList = Object.keys(expansionDict['wordsim'])
+			for (var key in similarWords) {
+				simWordList = simWordList.concat(similarWords[key])
+			}
+			let similarWordsQuery = simWordList.join("* OR *")
+			const query = 
+				{
+					size: 1,
+					query: {
+						query_string: {
+							query: `*${similarWordsQuery}*`,
+							fuzziness: 5
+						}
+					},
+					aggs: {
+						related: {
+							terms: {
+								field: 'search_query',
+								min_doc_count: 5
+							},
+							aggs: {
+								user: { terms: {field: 'user_id', size: 2}}
+							}
 						}
 					}
 				}
-			}
-		try {
+		
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
 			let aggs = results.body.aggregations.related.buckets;
 			let maxCount = 0;
@@ -1405,7 +1407,7 @@ class SearchUtility {
 				 });
 			}
 		} catch (err) {
-			this.logger.error(err.message, 'ALS01AZ', user);
+			this.logger.error(err.message, 'ALS01AZ', userId);
 		}
 
 		return relatedSearches
