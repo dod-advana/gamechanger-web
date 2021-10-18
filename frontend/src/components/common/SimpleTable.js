@@ -196,10 +196,12 @@ export default class SimpleTable extends React.Component {
 							className="fa fa-pencil"
 						/>
 					);
+					
 					if (!value || _.isBoolean(value)) value = '';
+					if(r[c]?.constructor === Array) r[c] = r[c].join(', ');
+
 					rowCells.push(
 						<td
-							title={value}
 							style={{
 								...(cIdx === 0 ? firstColWidth : colWidth),
 								...extraWrapStyle,

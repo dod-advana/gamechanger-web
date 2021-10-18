@@ -91,7 +91,8 @@ module.exports = Object.freeze({
 		allow_daterange: true,
 		historyIndex: process.env.GAMECHANGER_ELASTICSEARCH_HISTORY_INDEX,
 		entityIndex: process.env.GAMECHANGER_ELASTICSEARCH_ENTITIES_INDEX,
-		textSuggestIndex: process.env.GAMECHANGER_ELASTICSEARCH_SUGGEST_INDEX
+		textSuggestIndex: process.env.GAMECHANGER_ELASTICSEARCH_SUGGEST_INDEX,
+		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
 	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',

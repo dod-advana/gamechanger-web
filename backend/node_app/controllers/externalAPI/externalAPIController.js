@@ -1,6 +1,9 @@
 const LOGGER = require('../../lib/logger');
 const ApiKey = require('../../models').api_key;
 const ApiKeyRequests = require('../../models').api_key_request;
+const ApiKeyRequestClones = require('../../models').api_key_request_clone;
+const ApiKeyClones = require('../../models').api_key_clone;
+const CloneMeta = require('../../models').clone_meta;
 const EmailUtility = require('../../utils/emailUtility');
 const constantsFile = require('../../config/constants');
 const hat = require('hat');
@@ -85,6 +88,9 @@ class ExternalAPIController {
 			constants = constantsFile,
 			apiKeys = ApiKey,
 			apiKeyRequests = ApiKeyRequests,
+			apiKeyRequestClones = ApiKeyRequestClones,
+			apiKeyClones = ApiKeyClones,
+			cloneMeta = CloneMeta,
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
@@ -96,12 +102,16 @@ class ExternalAPIController {
 		this.logger = logger;
 		this.apiKeys = apiKeys;
 		this.apiKeyRequests = apiKeyRequests;
+		this.apiKeyRequestClones = apiKeyRequestClones;
+		this.apiKeyClones = apiKeyClones;
+		this.cloneMeta = cloneMeta;
 		this.emailUtility = emailUtility;
 
 		this.getAPIKeyRequests = this.getAPIKeyRequests.bind(this);
 		this.approveRejectAPIKeyRequest = this.approveRejectAPIKeyRequest.bind(this);
 		this.revokeAPIKeyRequest = this.revokeAPIKeyRequest.bind(this);
 		this.createAPIKeyRequest = this.createAPIKeyRequest.bind(this);
+		this.updateAPIKeyDescription = this.updateAPIKeyDescription.bind(this);
 		this.getAPIKey = this.getAPIKey.bind(this);
 		this.sendApprovalEmail = this.sendApprovalEmail.bind(this);
 	}
@@ -111,19 +121,39 @@ class ExternalAPIController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const requests = await this.apiKeyRequests.findAll({ raw: true });
+			const requests = await this.apiKeyRequests.findAll({ 
+				raw: false,
+				include: [{
+					model: this.cloneMeta,
+					attributes: ['id', 'clone_name'],
+					through: {attributes: []}
+				}],
+			});
 
 			const pending = []; const approved = [];
 
 			for (const request of requests) {
 				if (request.approved) {
-					const keys = await this.apiKeys.findAll({ raw: true, where: { username: request.username }});
-					request.keys = keys.map(key => { return key.apiKey; });
-					delete request.username;
-					approved.push(request);
+					const key = await this.apiKeys.findOne({ 
+						raw: false, 
+						where: { 
+							username: request.username,
+							active: true
+						 },
+						include: [{
+							model: this.cloneMeta,
+							attributes: ['id', 'clone_name'],
+							through: {attributes: []}
+						}],
+					});
+					if(key){
+						request.dataValues.key = key.apiKey;
+						request.dataValues.keyClones = key.clone_meta;
+						request.dataValues.description = key.description;
+						approved.push(request.dataValues);
+					}
 				} else if (!request.approved && !request.rejected) {
-					delete request.username;
-					pending.push(request);
+					pending.push(request.dataValues);
 				}
 			}
 
@@ -142,21 +172,41 @@ class ExternalAPIController {
 			const {id, approve = false} = req.body;
 
 			if (id >= 0) {
-				const request = await this.apiKeyRequests.findOne({ where: { id }, raw: true });
+				const request = await this.apiKeyRequests.findOne({ 
+					where: { id }, 
+					raw: false,
+					include: [{
+						model: this.cloneMeta,
+						attributes: ['id'],
+						through: {attributes: []}
+					}],
+				});
 
 				if (request) {
 					if (approve) {
 						// Create an APIKey and store it then approve
 						const apiKey = hat();
 						const key = await this.apiKeys.create({
-							username: request.username,
+							username: request.dataValues.username,
 							apiKey,
-							active: true
+							active: true,
+							description: request.reason
 						});
+						const joinObjects = request.dataValues.clone_meta.map(clone => {
+							return {
+								apiKeyId: key.dataValues.id,
+								cloneId: clone.id
+							}
+						})
+						
+						const joins = await this.apiKeyClones.bulkCreate(joinObjects, {
+							returning: true,
+							ignoreDuplicates: true
+						})	
 
-						if (key) {
+						if (joins) {
 							await this.apiKeyRequests.update({ approved: true, rejected: false }, { where: { id } });
-							this.sendApprovalEmail(request, apiKey, userId);
+							this.sendApprovalEmail(request.dataValues, apiKey, userId);
 							res.sendStatus(200);
 						} else {
 							res.sendStatus(400);
@@ -210,7 +260,7 @@ class ExternalAPIController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {name, email, reason} = req.body;
+			const {name, email, reason, clones} = req.body;
 
 			if (name && email && reason) {
 				try {
@@ -221,7 +271,19 @@ class ExternalAPIController {
 						reason
 					});
 
-					if (request) res.sendStatus(200);
+					const joinObjects = clones.map(cloneId => {
+						return {
+							apiKeyRequestId: request.dataValues.id,
+							cloneId
+						}
+					})
+					
+					const joins = await this.apiKeyRequestClones.bulkCreate(joinObjects, {
+						returning: true,
+						ignoreDuplicates: true
+					})
+
+					if (joins) res.sendStatus(200);
 					else res.sendStatus(400);
 				} catch (err) {
 					res.status(400).send({status: 'request already exists'});
@@ -233,6 +295,20 @@ class ExternalAPIController {
 		} catch (err) {
 			this.logger.error(err, 'GUJ8UVG', userId);
 			res.status(500).send(err);
+		}
+	}
+
+	async updateAPIKeyDescription(req, res) {
+		let userId = 'webapp_unknown';
+		try{
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { description, key } = req.body;
+			const update = await this.apiKeys.update({ description }, { where: { apiKey: key } });
+			if (update) {
+				res.status(200).send({status: update})
+			} else { res.status(400) }
+		} catch(err) {
+			this.logger.error(err, "MJID22P", userId)
 		}
 	}
 
