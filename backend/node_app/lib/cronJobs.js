@@ -4,9 +4,10 @@ const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
 const LOGGER = require('../lib/logger');
+const { distributedPoll } = require('../utils/pollUtility');
 
 class CronJobs {
-	constructor(opts = {}){
+	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
 			cacheController = new CacheController(),
@@ -25,7 +26,7 @@ class CronJobs {
 		this.init();
 	}
 
-	init(){
+	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
 	}
 
@@ -53,18 +54,12 @@ class CronJobs {
 				// } catch (e) {
 				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, 'ZFH252A', userId);
 				// }
-				
+
 				// try {
 				// 	await this.cacheController.clearGraphDataCacheHelper(userId, true);
 				// 	await this.cacheController.createGraphDataCacheHelper(userId);
 				// } catch (e) {
 				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, '252AJHF', userId);
-				// }
-
-				// try {
-				// 	await this.favoritesController.checkFavoritedSearchesHelper(userId);
-				// } catch (e) {
-				// 	this.logger.error(`Cron job error in check favorited searches: ${e.message}`, 'FVW4J2H', userId);
 				// }
 
 			}, offset);
@@ -86,6 +81,23 @@ class CronJobs {
 			scheduled: false
 		})
 
+	}
+
+	getUpdateFavoritedSearchesJob() {
+		return {
+			start: () => {
+				const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
+				if (favoriteSearchPollInterval >= 0) {
+					this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
+					distributedPoll(
+						this.favoritesController.checkLeastRecentFavoritedSearch,
+						favoriteSearchPollInterval,
+						'locks:checkLeastRecentFavoritedSearch');
+				} else {
+					this.logger.info('Polling for favorite search updates disabled.');
+				}
+			}
+		};
 	}
 }
 

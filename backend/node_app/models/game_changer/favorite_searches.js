@@ -1,4 +1,7 @@
 'use strict';
+
+const { Sequelize } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
 	const FAVORITE_SEARCH = sequelize.define('favorite_searches',
 		{
@@ -39,7 +42,12 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			run_by_cache: {
 				type: DataTypes.BOOLEAN,
-			}
+			},
+			last_checked: {
+				type: DataTypes.DATE,
+				allowNull: false,
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		},
 		{
 			freezeTableName: true,

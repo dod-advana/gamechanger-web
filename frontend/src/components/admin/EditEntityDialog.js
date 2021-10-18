@@ -4,7 +4,6 @@ import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
 import { FormControl, Typography, TextField } from '@material-ui/core';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import { backgroundGreyDark } from '../common/gc-colors';
 import '../../components/export/export-results-dialog.css';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -34,21 +33,6 @@ const styles = {
 		flex: 1,
 		display: 'flex',
 		justifyContent: 'flex-end',
-	},
-	selectedDocsTable: {
-		border: `1px solid ${backgroundGreyDark}`,
-		margin: '3% 1%',
-		width: '45%',
-	},
-	tableContainer: {
-		width: '100%',
-		height: 300,
-		overflow: 'auto',
-	},
-	selectedDocsTableCol: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		padding: 10,
 	},
 };
 
@@ -91,7 +75,7 @@ const EditEntityDialog = ({
 			primaryAction={() => {}}
 			contentStyle={{ padding: 0 }}
 			titleStyle={{ padding: 0 }}
-			mainContainerStyle={{ padding: 0, margin: 0 }}
+			mainContainerStyle={{ margin: 0 }}
 			handleClose={handleClose}
 		>
 			<FormControl style={{ width: '100%', marginTop: 5 }}>

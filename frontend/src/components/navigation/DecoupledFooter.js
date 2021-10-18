@@ -2,7 +2,16 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
-import { Button, Modal, TextField, Typography } from '@material-ui/core';
+import {
+	Button,
+	Modal, 
+	TextField,
+	Typography,
+	FormGroup,
+	FormControlLabel,
+	Checkbox
+} from '@material-ui/core';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
 // import {trackPageView} from "../../../utilities/telemetry/Matomo";
@@ -35,8 +44,21 @@ const useStyles = makeStyles((theme) => ({
 	},
 	dialogLg: {
 		maxWidth: '800px',
-		minWidth: '800px',
+		minWidth: '800px'
 	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		marginLeft: '5px',
+		marginRight: '5px'
+	},
+	titleText: {
+		fontWeight: 900,
+		marginBottom: 5
+	}
 }));
 
 const FooterContainer = styled.div`
@@ -94,10 +116,11 @@ const DecoupledFooter = (props) => {
 
 	const { setUserMatomo } = props;
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-	const [showRequestAPIKeyModal, setShowRequestAPIKeyModal] = useState(false);
 	const [useMatomo, setUseMatomo] = useState(false);
-	const [requestAPIKeyData, setRequestAPIKeyData] = useState({});
+	const [requestAPIKeyData, setRequestAPIKeyData] = useState({name: '', email: '', reason: '', clones: []});
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
+	const [cloneMeta,  setCloneMeta] = useState([]);
+	const [apiRequestError, setApiRequestError] = useState('');
 
 	const getUserData = async () => {
 		try {
@@ -119,28 +142,51 @@ const DecoupledFooter = (props) => {
 		}
 	};
 
-	useEffect(() => {
+	const getCloneData = async () => {
+		try {
+			const { data } = await gameChangerAPI.getCloneData();
+			setCloneMeta(data);
+		} catch(err) {
+			console.error('Error getting clone meta data: ', err);
+		}
+		
+	}
+
+	useEffect (() => {
 		initializeUserMatomoStatus();
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
 		getUserData();
-	}, []);
-
-	useEffect(() => {
-		setRequestAPIKeyData({ name: '', email: '', reason: '' });
-	}, [showRequestAPIKeyModal]);
+		getCloneData();
+	}, [])
 
 	const setUserMatomoStatus = (status) => {
-		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then(
-			(data) => {
-				setUseMatomo(data.data);
-				setUserMatomo(data.data);
-			},
-			(err) => {
-				console.log(err);
-			}
-		);
-	};
+		
+		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then((data) => {
+			setUseMatomo(data.data);
+			setUserMatomo(data.data);
+		}, (err) => {
+			console.log(err);
+		});
+	}
 
+	const handleClose = () => {
+		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
+		window.location = '#/gamechanger';
+	}
+
+	const handleCloneChange = (cloneId) => {
+		setApiRequestError('');
+		const newRequestAPIKeyData = {...requestAPIKeyData};
+		if(!newRequestAPIKeyData.clones) newRequestAPIKeyData.clones =[];
+		const index = newRequestAPIKeyData.clones.indexOf(cloneId);
+		if(index > -1){
+			newRequestAPIKeyData.clones.splice(index, 1);
+		}else{
+			newRequestAPIKeyData.clones.push(cloneId);
+		}
+		setRequestAPIKeyData(newRequestAPIKeyData);
+	}
+	
 	const renderAPIKeyRequestForm = () => {
 		return (
 			<>
@@ -196,28 +242,54 @@ const DecoupledFooter = (props) => {
 						margin="dense"
 						variant="outlined"
 					/>
+					<Typography variant="h3" style={{ width: '100%', fontSize:'24px' }}>Select clones to access</Typography>
+					<FormGroup style={{margin: '0px 10px', width: '100%', flexDirection: 'row'}}>
+						{cloneMeta.map((clone) => {
+							return  (
+								<FormControlLabel
+									key={clone.id}
+									name={clone.clone_name}
+									value={clone}
+									control={<Checkbox
+										onClick={() => handleCloneChange(clone.id)}
+										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+										checked={requestAPIKeyData?.clones.includes(clone.id)}
+										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+										name={clone.clone_name}
+										className={classes.filterBox}
+									/>}
+									label={clone.clone_name}
+									labelPlacement="end"
+									className={classes.titleText}
+								/>
+							)
+						})}
+					</FormGroup>
+					{apiRequestError && <div style={{color: '#f44336'}}>{apiRequestError}</div>}
 				</div>
 			</>
 		);
 	};
 
 	const sendAPIKeyRequest = () => {
+		if(!requestAPIKeyData.clones.length) return setApiRequestError('Select at least one clone');
 		gameChangerAPI
 			.createAPIKeyRequest(
-				requestAPIKeyData.name,
-				requestAPIKeyData.email,
-				requestAPIKeyData.reason
+				requestAPIKeyData.name, 
+				requestAPIKeyData.email, 
+				requestAPIKeyData.reason, 
+				requestAPIKeyData.clones
 			)
-			.then((resp) => {
+			.then(resp => {
 				gameChangerAPI
 					.updateUserAPIRequestLimit()
-					.then(() => setAPIRequestLimit(apiRequestLimit - 1));
-				setShowRequestAPIKeyModal(false);
-			})
-			.catch((e) => {
+					.then(()=>setAPIRequestLimit(apiRequestLimit-1));
+				setApiRequestError('');
+				handleClose();
+			}).catch(e => {
 				console.log(e);
 			});
-	};
+	}
 
 	return (
 		<FooterContainer>
@@ -306,7 +378,7 @@ const DecoupledFooter = (props) => {
 					path="/gamechanger/APIKey"
 					children={
 						<RequestAPIKeyDialog
-							handleClose={() => (window.location = '#/gamechanger')}
+							handleClose={handleClose}
 							handleSave={sendAPIKeyRequest}
 							apiRequestLimit={apiRequestLimit}
 							renderContent={renderAPIKeyRequestForm}
