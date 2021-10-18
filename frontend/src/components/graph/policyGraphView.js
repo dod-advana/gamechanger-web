@@ -231,58 +231,62 @@ const makeFilteredGraph = (is2D, graph, collections) => {
 };
 
 const filterGraphData = (nodes, edges) => {
+	const visibleEdges = edges.filter(edge => !edge.source.hidden && !edge.target.hidden);
+
 	const filteredGraph = { nodes: [], edges: [], relationships: [] };
 
 	const docOrgNumbers = {};
 
-	const edgeCount = edges.length;
+	const edgeCount = visibleEdges.length;
 	const edgeIds = [];
 
 	const idToNodeMap = {};
 	const edgeToNodeCountMap = {};
 
 	_.forEach(nodes, (node) => {
-		filteredGraph.nodes.push(node);
-		idToNodeMap[node.id] = node;
-		edgeToNodeCountMap[node.id] = 0;
+		if (!node.hidden) {
+			filteredGraph.nodes.push(node);
+			idToNodeMap[node.id] = node;
+			edgeToNodeCountMap[node.id] = 0;
 
-		const displayOrg = node['display_org_s']
-			? node['display_org_s']
-			: 'Uncategorized';
+			const displayOrg = node['display_org_s']
+				? node['display_org_s']
+				: 'Uncategorized';
 
-		switch (node.label) {
-			case 'Entity':
-				if (docOrgNumbers.hasOwnProperty('Entity')) {
-					docOrgNumbers['Entity'] += 1;
-				} else {
-					docOrgNumbers['Entity'] = 1;
-				}
-				break;
-			case 'Topic':
-				if (docOrgNumbers.hasOwnProperty('Topic')) {
-					docOrgNumbers['Topic'] += 1;
-				} else {
-					docOrgNumbers['Topic'] = 1;
-				}
-				break;
-			case 'UKN_Document':
-				if (docOrgNumbers.hasOwnProperty('UKN_Document')) {
-					docOrgNumbers['UKN_Document'] += 1;
-				} else {
-					docOrgNumbers['UKN_Document'] = 1;
-				}
-				break;
-			default:
-				if (docOrgNumbers.hasOwnProperty(displayOrg)) {
-					docOrgNumbers[displayOrg] += 1;
-				} else {
-					docOrgNumbers[displayOrg] = 1;
-				}
-				break;
+			switch (node.label) {
+				case 'Entity':
+					if (docOrgNumbers.hasOwnProperty('Entity')) {
+						docOrgNumbers['Entity'] += 1;
+					} else {
+						docOrgNumbers['Entity'] = 1;
+					}
+					break;
+				case 'Topic':
+					if (docOrgNumbers.hasOwnProperty('Topic')) {
+						docOrgNumbers['Topic'] += 1;
+					} else {
+						docOrgNumbers['Topic'] = 1;
+					}
+					break;
+				case 'UKN_Document':
+					if (docOrgNumbers.hasOwnProperty('UKN_Document')) {
+						docOrgNumbers['UKN_Document'] += 1;
+					} else {
+						docOrgNumbers['UKN_Document'] = 1;
+					}
+					break;
+				default:
+					if (docOrgNumbers.hasOwnProperty(displayOrg)) {
+						docOrgNumbers[displayOrg] += 1;
+					} else {
+						docOrgNumbers[displayOrg] = 1;
+					}
+					break;
+			}
 		}
 	});
 
-	_.forEach(edges, (edge) => {
+	_.forEach(visibleEdges, (edge) => {
 		if (!edgeIds.includes(edge.id)) {
 			try {
 				filteredGraph.edges.push(edge);
@@ -1632,6 +1636,7 @@ export default function PolicyGraphView(props) {
 			node.fx = null;
 			node.fy = null;
 			node.fz = null;
+			node.hidden = false;
 		});
 
 		setShouldRender(true);
