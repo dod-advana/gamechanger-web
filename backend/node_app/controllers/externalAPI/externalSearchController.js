@@ -54,6 +54,22 @@ class ExternalSearchController {
 				if (typeof typeFilterString === 'string') {
 					typeFilterString = req.query.typeFilter ? [req.query.typeFilter] : [];
 				}
+
+				let publicationDateFilterStart;
+				let publicationDateFilterEnd;
+				let publicationDateAllTime = true;
+				const publicationDateFilter = [null, null];
+				if(req.query.publicationDateFilterStart) {
+					publicationDateFilterStart = new Date(req.query.publicationDateFilterStart);
+					publicationDateAllTime = false;
+				}
+				if(req.query.publicationDateFilterEnd) {
+					publicationDateFilterEnd = new Date(req.query.publicationDateFilterEnd);
+					publicationDateAllTime = false;
+				}
+				if(publicationDateFilterStart instanceof Date && !isNaN(publicationDateFilterStart)) publicationDateFilter[0] = req.query.publicationDateFilterStart;
+				if(publicationDateFilterEnd instanceof Date && !isNaN(publicationDateFilterEnd)) publicationDateFilter[1] = req.query.publicationDateFilterEnd;
+
 				// Format filter from query
 				const body = {
 					searchText: req.query.search,
@@ -66,6 +82,8 @@ class ExternalSearchController {
 						typeFilter: {},
 						orgFilterString: orgFilterString,
 						typeFilterString: typeFilterString,
+						publicationDateFilter,
+						publicationDateAllTime,
 						tiny_url: 'gamechanger?tiny=4',
 					}
 				};

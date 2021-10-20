@@ -37,7 +37,7 @@ class EdaSearchHandler extends SearchHandler {
 		// this.sep_async_redis = sep_async_redis;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -74,12 +74,14 @@ class EdaSearchHandler extends SearchHandler {
 			const operator = 'and';
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
@@ -93,7 +95,7 @@ class EdaSearchHandler extends SearchHandler {
 			return searchResults;
 
 		} catch (err) {
-			if (!forCacheReload){
+			if (storeHistory && !forCacheReload){
 				const { message } = err;
 				this.logger.error(message, '3VOOUHO', userId);
 				historyRec.endTime = new Date().toISOString();

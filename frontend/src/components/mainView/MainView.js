@@ -13,7 +13,6 @@ import GCUserDashboard from '../user/GCUserDashboard';
 import GCAboutUs from '../aboutUs/GCAboutUs';
 import {
 	checkUserInfo,
-	clearDashboardNotification,
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
@@ -156,6 +155,7 @@ const MainView = (props) => {
 			<GCUserDashboard state={state} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
+				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
 				saveFavoriteSearch={(
 					favoriteName,
 					favoriteSummary,
@@ -188,9 +188,6 @@ const MainView = (props) => {
 						dispatch
 					)
 				}
-				clearDashboardNotification={(type) =>
-					clearDashboardNotification(type, state, dispatch)
-				}
 				cloneData={state.cloneData}
 				checkUserInfo={() => {
 					return checkUserInfo(state, dispatch);
@@ -205,6 +202,11 @@ const MainView = (props) => {
 
 	const handleDeleteFavoriteSearch = async (search) => {
 		await gameChangerAPI.favoriteSearch(search);
+		await getUserData(dispatch);
+	};
+
+	const handleClearFavoriteSearchNotification = async (search) => {
+		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
 		await getUserData(dispatch);
 	};
 

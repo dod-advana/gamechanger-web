@@ -380,6 +380,7 @@ const DefaultMainViewHandler = {
 			edaSearchSettings,
 			currentSort,
 			currentOrder,
+			currentViewName
 		} = state;
 		const {
 			allOrgsSelected,
@@ -422,7 +423,7 @@ const DefaultMainViewHandler = {
 						order={currentOrder}
 					/>
 				)}
-				{loading && (
+				{loading && currentViewName !== 'Explorer' && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
