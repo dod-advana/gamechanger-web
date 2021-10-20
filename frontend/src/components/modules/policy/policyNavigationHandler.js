@@ -344,6 +344,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="Data Tracker" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`)
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -361,6 +362,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="Analyst Tools" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`)
 							setState(dispatch, {
 								pageDisplayed: PAGE_DISPLAYED.analystTools,
 							});
@@ -398,6 +400,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="About Us" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
