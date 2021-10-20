@@ -31,6 +31,7 @@ services:
         ports:
             # - "5860:5860"
             - "8990:8990"
+            - "9229:9229"
         volumes:
             - ./backend/:/usr/src/app/
             - /usr/src/app/node_modules

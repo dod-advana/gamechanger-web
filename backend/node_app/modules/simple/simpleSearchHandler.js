@@ -35,7 +35,7 @@ class SimpleSearchHandler extends SearchHandler {
 		this.mlApi = mlApi;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -83,10 +83,12 @@ class SimpleSearchHandler extends SearchHandler {
 			const clientObj = {esClientName: 'gamechanger', esIndex};
 
 			// log query to ES
-			this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			// try to get search expansion
 			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
@@ -162,12 +164,12 @@ class SimpleSearchHandler extends SearchHandler {
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 
 			// try to store to cache
-			if (useGCCache && searchResults) {
+			if (storeHistory && useGCCache && searchResults) {
 				await this.storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, userId);
 			}
 
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
@@ -176,53 +178,12 @@ class SimpleSearchHandler extends SearchHandler {
 				} catch (e) {
 					this.logger.error(e.message, 'SHW1IT9', userId);
 				}
-			} else {
-
-				try {
-
-					// if doing a cache reload, check favorite search stats
-					const hashed_user = sparkMD5.hash(userId);
-
-					// check if this search is a favorite
-					const favoriteSearch = await FAVORITE_SEARCH.findOne({
-						where: {
-							user_id: hashed_user,
-							tiny_url: tiny_url
-						}
-					});
-
-					if (favoriteSearch !== null) {
-
-						let updated = false;
-						let count = favoriteSearch.document_count;
-
-						// favorite search is updated
-						if (searchResults.totalCount > favoriteSearch.document_count) {
-							updated = true;
-							count = searchResults.totalCount;
-						}
-
-						// update the favorite search info
-						FAVORITE_SEARCH.update({
-							run_by_cache: true,
-							updated_results: updated,
-							document_count: count
-						}, {
-							where: {
-								id: favoriteSearch.id
-							}
-						});
-					}
-
-				} catch (err) {
-					this.logger.error(err.message, 'ULWTVPC', userId);
-				}
 			}
 
 			return searchResults;
 
 		} catch (err) {
-			if (!forCacheReload){
+			if (storeHistory && !forCacheReload){
 				const { message } = err;
 				this.logger.error(message, 'W28XNE0', userId);
 				historyRec.endTime = new Date().toISOString();

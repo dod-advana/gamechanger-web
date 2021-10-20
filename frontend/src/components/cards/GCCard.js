@@ -78,26 +78,15 @@ const StyledCardContainer = styled.div`
 			background-color: transparent;
 			border-radius: 5px;
 			display: flex;
-			border: ${({ listView, isRevoked, selected }) =>
-		listView
-			? 'none'
-			: selected
-				? '2px solid #386F94'
-				: isRevoked
-					? '2px solid #e50000'
-					: '2px solid rgb(224, 224, 224)'};
-			box-shadow: ${({ listView, selected }) =>
-		listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
-
-			transition: ${({ listView }) =>
-		listView
-			? 'transform .5s !important;'
-			: 'box-shadow .2s, transform .5s !important'};
+			border: ${({ listView, isRevoked, selected }) => listView ? 'none': selected ? '2px solid #386F94' : isRevoked? '2px solid #e50000' : '2px solid rgb(224, 224, 224)'};
+			box-shadow: ${({ listView, selected }) => listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+			transition: ${({ listView }) =>listView ? 'transform .5s !important;' : 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
 			transform-style: preserve-3d !important;
 			position: relative;
 			width: 100%;
 			height: 100%;
+
 
 			&:hover {
 				box-shadow: #386f94 0px 0px 2px 2px !important;
@@ -116,12 +105,7 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView, intelligentSearch }) =>
-		listView
-			? intelligentSearch
-				? '#9BB1C8'
-				: 'white'
-			: 'rgb(238,241,242)'};
+					background-color: ${({ listView, intelligentSearch }) =>listView ? intelligentSearch ? '#9BB1C8': 'white' : 'rgb(238,241,242)'};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -166,8 +150,7 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView }) =>
-		listView ? 'white' : 'rgb(238,241,242)'};
+					background-color: ${({ listView }) => listView ? 'white' : 'rgb(238,241,242)'};
 
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
@@ -356,12 +339,17 @@ function GCCard(props) {
 
 	let isFavorite = false;
 	let favorite_id = null;
-	switch(cardType){
+	switch (cardType) {
 		case 'document':
 			const faveDocs = state.userData ? state.userData.favorite_documents : [];
-			const favDocInfo = _.find(faveDocs, (doc) => {return doc.id === item.id});
+			const favDocInfo = _.find(faveDocs, (doc) => {
+				return doc.id === item.id;
+			});
 			favorite_id = favDocInfo?.favorite_id;
-			isFavorite = _.find(faveDocs, (doc) => {return doc.id === item.id}) !== undefined;
+			isFavorite =
+				_.find(faveDocs, (doc) => {
+					return doc.id === item.id;
+				}) !== undefined;
 			break;
 		case 'topic':
 			const faveTopics = state.userData ? state.userData.favorite_topics : [];

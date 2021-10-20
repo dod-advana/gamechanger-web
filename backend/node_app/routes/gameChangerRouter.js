@@ -57,7 +57,7 @@ router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
 
 router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
-router.post('/getCrawlerSeals', dataTracker.getCrawlerSealData);
+router.post('/getCrawlerSeals', dataTracker.getCrawlerInfoData);
 router.post('/getOrgSeals', dataTracker.getOrgSealData);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
@@ -77,6 +77,9 @@ router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
 router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
+router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
+router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
+router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 
@@ -115,7 +118,6 @@ router.delete('/user/exportHistory/:historyId', exportHistory.deleteExportHistor
 
 router.post('/favorites/document', favorites.favoriteDocumentPOST);
 router.post('/favorites/search', favorites.favoriteSearchPOST);
-router.post('/favorites/checkSearches', favorites.checkFavoritedSearches);
 router.post('/favorites/topic', favorites.favoriteTopicPOST);
 router.post('/favorites/group', favorites.favoriteGroupPOST);
 router.post('/favorites/addToGroup', favorites.addToFavoriteGroupPOST);
@@ -148,6 +150,7 @@ router.post('/textSuggestion', textSuggest.getTextSuggestion);
 
 router.get('/admin/getAPIKeyRequests', apiController.getAPIKeyRequests);
 router.post('/admin/approveRejectAPIKeyRequest', apiController.approveRejectAPIKeyRequest);
+router.post('/admin/updateAPIKeyDescription', apiController.updateAPIKeyDescription);
 router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
