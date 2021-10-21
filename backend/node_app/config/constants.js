@@ -212,10 +212,10 @@ module.exports = Object.freeze({
 	},
 	REQUEST_TYPE_ID: 113,
 	JIRA_CONFIG:{
-		username: 'drospond',
+		username: 'raul.alfaro',
 		password: process.env.JIRA_PASSWORD,
 		domain: 'support.advana.boozallencsn.com',
-		ca: process.env.JIRA_CA,
+		// ca: process.env.JIRA_CA,
 		project_key: 'UOT',
 		rating_id: 'customfield_10401',
 		feedbackType: 'Customer Satisfaction Feedback'
