@@ -216,8 +216,8 @@ module.exports = Object.freeze({
 		password: process.env.JIRA_PASSWORD,
 		domain: 'support.advana.boozallencsn.com',
 		// ca: process.env.JIRA_CA,
-		project_key: 'UOT',
+		project_key: 'TP',
 		rating_id: 'customfield_10401',
-		feedbackType: 'Customer Satisfaction Feedback'
+		feedbackType: 'Feedback'
 	},
 });
