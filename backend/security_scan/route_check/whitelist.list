@@ -58,6 +58,7 @@
 .* /api/gamechanger/sendFeedback/intelligentSearch .*
 .* /api/gamechanger/sendFeedback/QA .*
 .* /api/gamechanger/sendFeedback/getFeedbackData .*
+.* /api/gamechanger/sendFeedback/jira .*
 .* /api/matomo .*
 .* /api/matomo/user .*
 .* /api/tutorialOverlay .*

@@ -96,10 +96,7 @@ class FeedbackController {
 			const {name, email, feedback, rating} = req.body;
 
 			const authConfig = {
-				httpsAgent: new https.Agent({
-					rejectUnauthorized: false,
-					ca: fs.readFileSync(JIRA_CONFIG.ca),
-				}),
+				httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 				auth: {
 					username: JIRA_CONFIG.username,
 					password: JIRA_CONFIG.password
@@ -129,7 +126,7 @@ class FeedbackController {
 			res.status(201).send(result.data);
 		} catch(err) {
 			this.logger.error(err, '0KYXA1V', userId);
-			res.status(500).send(err);
+			res.status(500).send({error: true});
 		}
 	}
 }
