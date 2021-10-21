@@ -839,3 +839,15 @@ export const displayBackendError = (resp, dispatch = () => {}) => {
 		});
 	}
 };
+
+export const convertDCTScoreToText = (score) => {
+	if (score >= 0.85) {
+		return 'High';
+	} else if (score >= 0.75 && score < 0.85) {
+		return 'Medium';
+	} else if (score >= 0.65 && score < 0.75) {
+		return 'Low';
+	} else {
+		return 'No Match';
+	}
+};
