@@ -348,6 +348,18 @@ const handleSelectAllTypes = (state, dispatch) => {
 	}
 };
 
+const handleSelectArchivedCongress = (event, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	newSearchSettings.archivedCongressSelected = event.target.checked;
+	newSearchSettings.isFilterUpdate = true;
+	setState(dispatch, {
+		searchSettings: newSearchSettings,
+		metricsCounted: false,
+		runSearch: true,
+		runGraphSearch: true,
+	});
+};
+
 const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let typeName = event.target.name;
@@ -418,6 +430,31 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								/>
 							}
 							label="All types"
+							labelPlacement="end"
+							style={styles.titleText}
+						/>
+						<FormControlLabel
+							name="Archived Congress"
+							value="Archived Congress"
+							classes={{ label: classes.titleText }}
+							control={
+								<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
+									checked={state.searchSettings.archivedCongressSelected}
+									checkedIcon={
+										<i style={{ color: '#E9691D' }} className="fa fa-check" />
+									}
+									name="Archived Congress"
+									style={styles.filterBox}
+								/>
+							}
+							label="Archived Congress"
 							labelPlacement="end"
 							style={styles.titleText}
 						/>
@@ -523,6 +560,33 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								/>
 							}
 							label="All types"
+							labelPlacement="end"
+							style={styles.titleText}
+						/>
+					</FormGroup>
+					<FormGroup row style={{ marginBottom: '10px' }}>
+						<FormControlLabel
+							name="Archived Congress"
+							value="Archived Congress"
+							classes={{ label: classes.titleText }}
+							control={
+								<Checkbox
+									classes={{ root: classes.filterBox }}
+									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
+									icon={
+										<CheckBoxOutlineBlankIcon
+											style={{ visibility: 'hidden' }}
+										/>
+									}
+									checked={state.searchSettings.archivedCongressSelected}
+									checkedIcon={
+										<i style={{ color: '#E9691D' }} className="fa fa-check" />
+									}
+									name="Archived Congress"
+									style={styles.filterBox}
+								/>
+							}
+							label="Archived Congress"
 							labelPlacement="end"
 							style={styles.titleText}
 						/>
