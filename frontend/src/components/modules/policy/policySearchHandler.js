@@ -67,6 +67,7 @@ const PolicySearchHandler = {
 			typeFilter,
 			allOrgsSelected,
 			allTypesSelected,
+			archivedCongressSelected,
 			includeRevoked,
 			accessDateFilter,
 			publicationDateFilter,
@@ -239,6 +240,7 @@ const PolicySearchHandler = {
 					publicationDateFilter,
 					publicationDateAllTime,
 					includeRevoked,
+					archivedCongressSelected
 				},
 				limit: 18,
 			});
