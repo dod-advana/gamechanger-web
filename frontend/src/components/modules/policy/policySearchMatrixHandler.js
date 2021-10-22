@@ -942,37 +942,6 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 };
 
-const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
-	return (
-		<div style={{ margin: '10px 0 10px 0' }}>
-			<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
-				{expansionTerms.map(({ phrase, source, checked }, idx) => {
-					const term = phrase;
-					return (
-						<FormControlLabel
-							key={term}
-							value={term}
-							classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-							control={
-								<Checkbox
-									classes={{
-										root: classes.rootButton,
-										checked: classes.checkedButton,
-									}}
-									name={term}
-									checked={checked}
-									onClick={() => handleAddSearchTerm(phrase, source, idx)}
-								/>
-							}
-							label={term}
-							labelPlacement="end"
-						/>
-					);
-				})}
-			</FormGroup>
-		</div>
-	);
-};
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
@@ -980,13 +949,13 @@ const resetAdvancedSettings = (dispatch) => {
 
 const PolicySearchMatrixHandler = {
 	getSearchMatrixItems(props) {
-		const { state, dispatch, classes, expansionTerms, handleAddSearchTerm } =
-			props;
+		
+		const {
+			state,
+			dispatch,
+			classes,
+		} = props;
 
-		let expansionTermSelected = false;
-		expansionTerms.forEach((term) => {
-			if (term.checked === true) expansionTermSelected = true;
-		});
 
 		return (
 			<>
@@ -1037,23 +1006,6 @@ const PolicySearchMatrixHandler = {
 						{renderStatus(state, dispatch, classes)}
 					</GCAccordion>
 				</div>
-				{expansionTerms.length > 0 && (
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={expansionTermSelected}
-							header={'RELATED TERMS'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							{renderExpansionTerms(
-								expansionTerms,
-								handleAddSearchTerm,
-								classes
-							)}
-						</GCAccordion>
-					</div>
-				)}
 
 				<button
 					type="button"

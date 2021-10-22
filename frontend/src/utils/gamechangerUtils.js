@@ -2,7 +2,6 @@ import _ from 'underscore';
 import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
-// import util from "./components/advana/api/util";
 import Config from '../config/config.js';
 import { getTextColorBasedOnBackground } from './graphUtils';
 import { useEffect } from 'react';

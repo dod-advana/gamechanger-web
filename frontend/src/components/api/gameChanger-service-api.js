@@ -67,7 +67,6 @@ const endpoints = {
 		'/api/gameChanger/admin/trending/deleteTrendingBlacklist',
 	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
 	favoriteSearchPOST: '/api/gameChanger/favorites/search',
-	checkFavoritedSearchesPOST: '/api/gameChanger/favorites/checkSearches',
 	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
 	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
@@ -95,13 +94,14 @@ const endpoints = {
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
-	getOtherEntityFilterList:
-		'/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData:
-		'/api/gameChanger/responsibilities/storeReport',
-	approveRejectAPIKeyRequestPOST:
-		'/api/gameChanger/admin/approveRejectAPIKeyRequest',
+	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
+	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
+	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
+	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
+	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
 	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
 	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
@@ -436,8 +436,23 @@ export default class GameChangerAPI {
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
 		return axiosPOST(this.axios, url, options);
-	};
+	}
 
+	getResponsibilityDoc = async (options) => {
+		const url = endpoints.getResponsibilityDoc;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	setRejectionStatus = async (options) => {
+		const url = endpoints.setRejectionStatus;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	updateResponsibility = async (options) => {
+		const url = endpoints.updateResponsibility;
+		return axiosPOST(this.axios, url, options);
+	}
+	
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
@@ -556,11 +571,6 @@ export default class GameChangerAPI {
 	favoriteSearch = async (data) => {
 		const url = endpoints.favoriteSearchPOST;
 		return axiosPOST(this.axios, url, data);
-	};
-
-	checkFavoritedSearchesPOST = async () => {
-		const url = endpoints.checkFavoritedSearchesPOST;
-		return axiosPOST(this.axios, url);
 	};
 
 	favoriteTopic = async (data) => {
@@ -703,9 +713,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	clearDashboardNotification = async (type) => {
+	clearDashboardNotification = async (cloneName, type) => {
 		const url = endpoints.clearDashboardNotification;
-		return axiosPOST(this.axios, url, { type });
+		return axiosPOST(this.axios, url, { cloneName, type });
 	};
 
 	clearFavoriteSearchUpdate = async (tinyurl) => {
@@ -761,17 +771,22 @@ export default class GameChangerAPI {
 	revokeAPIKeyRequest = async (id) => {
 		const url = endpoints.revokeAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id });
-	};
+	}
 
+	updateAPIKeyDescription = async (description, key) => {
+		const url = endpoints.updateAPIKeyDescriptionPOST;
+		return axiosPOST(this.axios, url, { description, key })
+	}
+	
 	approveRejectAPIKeyRequest = async (id, approve) => {
 		const url = endpoints.approveRejectAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id, approve });
-	};
-
-	createAPIKeyRequest = async (name, email, reason) => {
+	}
+	
+	createAPIKeyRequest = async (name, email, reason, clones) => {
 		const url = endpoints.createAPIKeyRequestPOST;
-		return axiosPOST(this.axios, url, { name, email, reason });
-	};
+		return axiosPOST(this.axios, url, { name, email, reason, clones });
+	}
 
 	updateUserAPIRequestLimit = async () => {
 		const url = endpoints.updateUserAPIRequestLimit;

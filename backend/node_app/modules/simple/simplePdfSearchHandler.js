@@ -24,16 +24,16 @@ const abbreviationRedisAsyncClientDB = 9;
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 const SimplePdfSearchHandler = function SimplePdfSearchHandler() {}
-SimplePdfSearchHandler.prototype.search = async function(searchText, offset, limit, options, userId) {
+SimplePdfSearchHandler.prototype.search = async function(searchText, offset, limit, options, userId, storeHistory) {
 	console.log(`${userId} is doing a covid19 search for ${searchText} with offset ${offset}, limit ${limit}, options ${options}`);
 	const proxyBody = options;
 	proxyBody.searchText = searchText;
 	proxyBody.offset = offset;
 	proxyBody.limit = limit;
-	return documentSearchHelper({body: proxyBody, permissions: []}, userId);
+	return documentSearchHelper({body: proxyBody, permissions: []}, userId, storeHistory);
 }
 
-async function documentSearchHelper(req, userId) {
+async function documentSearchHelper(req, userId, storeHistory) {
 	const historyRec = {
 		user_id: userId,
 		clone_name: undefined,
@@ -97,7 +97,9 @@ async function documentSearchHelper(req, userId) {
 		let clientObj = getESClient(isClone, cloneData, permissions, index);
 
 		// log query to ES
-		storeEsRecord(clientObj.esClientName, offset, clone_name, userId, searchText)
+		if (storeHistory) {
+			await storeEsRecord(clientObj.esClientName, offset, clone_name, userId, searchText);
+		}
 
 		if (!forCacheReload && useGCCache && offset === 0) {
 			try {
@@ -266,47 +268,6 @@ async function documentSearchHelper(req, userId) {
 				await storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
 			} catch (e) {
 				LOGGER.error(e.message, 'MPK1GGN', userId);
-			}
-		} else {
-
-			try {
-
-				// if doing a cache reload, check favorite search stats
-				const hashed_user = sparkMD5.hash(userId);
-
-				// check if this search is a favorite
-				const favoriteSearch = await FAVORITE_SEARCH.findOne({
-					where: {
-						user_id: hashed_user,
-						tiny_url: tiny_url
-					}
-				});
-
-				if (favoriteSearch !== null) {
-
-					let updated = false;
-					let count = favoriteSearch.document_count;
-
-					// favorite search is updated
-					if (searchResults.totalCount > favoriteSearch.document_count) {
-						updated = true;
-						count = searchResults.totalCount;
-					}
-
-					// update the favorite search info
-					FAVORITE_SEARCH.update({
-						run_by_cache: true,
-						updated_results: updated,
-						document_count: count
-					}, {
-						where: {
-							id: favoriteSearch.id
-						}
-					});
-				}
-
-			} catch (err) {
-				LOGGER.error(err.message, 'K361YCJ', userId);
 			}
 		}
 

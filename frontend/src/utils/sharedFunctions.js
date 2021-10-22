@@ -23,20 +23,16 @@ export const setState = (dispatch, newState) => {
 };
 
 // set one of the notification types for this user to 0 (not shown)
-export const clearDashboardNotification = (type, state, dispatch) => {
-	gameChangerAPI.clearDashboardNotification(type);
-	const userData = Object.assign({}, state.userData);
+export const clearDashboardNotification = (cloneName, type, state, dispatch) => {
+	let userData = state.userData;
 
-	if (userData.notifications) {
-		userData.notifications[type] = 0;
-	} else {
-		userData.notifications = {
-			total: 0,
-			favorites: 0,
-			history: 0,
-		};
+	// only update if the notification exists and is non-zero
+	if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+		/* await */ gameChangerAPI.clearDashboardNotification(cloneName, type);
+		userData = _.cloneDeep(userData);
+		userData.notifications[cloneName][type] = 0;
+		setState(dispatch, { userData });
 	}
-	setState(dispatch, { userData });
 };
 
 export const handleSearchTypeUpdate = (

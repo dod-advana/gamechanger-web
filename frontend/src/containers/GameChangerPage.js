@@ -14,9 +14,10 @@ import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import GCUserInfoModal from '../components/user/GCUserInfoModal';
 import { sendJiraFeedback } from '../utils/sharedFunctions';
-import {Snackbar} from '@material-ui/core';
+import { Snackbar } from '@material-ui/core';
 import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal'
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -78,10 +79,15 @@ const GameChangerPage = (props) => {
 						<UserFeedback context={context} className="feedback-modal" />
 					}
 					{/* Crowd Sourcing */}
-					{cloneData.show_crowd_source && (
-						<GameChangerAssist context={context} primaryColor={gcOrange} />
+					{ cloneData.show_crowd_source && (
+						<GameChangerAssist context={context} primaryColor={gcOrange} /> 
 					)}
 
+					{/* Crowd Sourcing */}
+					{ cloneData.show_crowd_source && (
+						<ResponsibilityAssist context={context} primaryColor={gcOrange} /> 
+					)}
+					
 					{/* Tutorial Overlay */}
 					{cloneData.show_tutorial && <Tutorial context={context} />}
 
