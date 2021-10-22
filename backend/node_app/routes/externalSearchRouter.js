@@ -17,7 +17,7 @@ const controller = new ExternalSearchController();
  * /api/gamechanger/external/search/keywordSearch:
  *   get:
  *      tags: [Search]
- *      description: This api takes returns the results of a key word search
+ *      description: This api returns the results of a key word search
  *      produces:
  *        - application/json
  *      parameters:
@@ -60,6 +60,20 @@ const controller = new ExternalSearchController();
  *            default: []
  *            items:
  *              type: string
+ *        - name: publicationDateFilterStart
+ *          in: query
+ *          required: false
+ *          schema:
+ *            type: string
+ *            format: date-time
+ *            default: null
+ *        - name: publicationDateFilterEnd
+ *          in: query
+ *          required: false
+ *          schema:
+ *            type: string
+ *            default: null
+ *            format: date-time
  *      responses:
  *         401:
  *            $ref: "#/components/responses/UnauthorizedError"

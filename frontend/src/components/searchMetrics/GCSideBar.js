@@ -5,14 +5,26 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory, orgColorMap } from '../../utils/gamechangerUtils';
+import {
+	getTrackingNameForFactory,
+	orgColorMap,
+	exactMatch,
+} from  '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';
+import { makeStyles } from '@material-ui/core/styles';
+import _ from 'lodash';
+import { setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import DefaultSeal from '../mainView/img/GC Default Seal.png';
 import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
 
+import {
+	FormGroup,
+	FormControlLabel,
+	Checkbox,
+} from '@material-ui/core';
 const gcColors = {
 	buttonColor1: '#131E43',
 	buttonColor2: '#E9691D',
@@ -113,11 +125,167 @@ export const StyledTopTopics = styled.div`
 	}
 `;
 
+const useStyles = makeStyles({
+	radioButtonLabel: {
+		position: 'relative',
+		backgroundColor: '#ffffff',
+		padding: '5px 10px 10px 10px',
+		marginRight: '20px',
+		fontSize: '26px',
+		height: '90px',
+		lineHeight: '150px',
+		display: 'block',
+		cursor: 'pointer',
+		boxSizing: 'border-box',
+		borderRadius: '10px',
+		border: '2px solid #bdccde',
+	},
+	titleText: {
+		fontSize: '14px',
+	},
+	tipText: {
+		maxWidth: '250px',
+		width: '250px',
+		margin: '0 auto',
+		fontSize: '12px',
+		lineHeight: '20px',
+	},
+	optionText: {
+		margin: '20px 75px 0px',
+		fontSize: '14px',
+		lineHeight: '20px',
+	},
+	dateOptionText: {
+		margin: '20px 0px 0px',
+		fontSize: '14px',
+		lineHeight: '20px',
+	},
+	title: {
+		margin: '20px 75px 0px',
+		fontSize: '20px',
+		lineHeight: '20px',
+		fontWeight: 600,
+	},
+	rootButton: {
+		visibility: 'hidden',
+		width: '0px',
+		padding: '0px',
+		border: '0px',
+		cursor: 'default',
+	},
+	rootLabel: {
+		cursor: 'pointer',
+		display: 'inline-flex',
+		alignItems: 'center',
+		marginRight: '26px',
+		marginBottom: '15px',
+		verticalAlign: 'middle',
+	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		marginLeft: '5px',
+		marginRight: '5px',
+	},
+	checkBox: {
+		visibility: 'hidden',
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '4px',
+		border: '2px solid #bdccde',
+	},
+	checkedButton: {
+		'& + $radioButtonLabel': {
+			backgroundColor: '#313541',
+			boxShadow: '0px 0px 15px grey',
+			border: '2px solid #313541',
+			borderRadius: '10px',
+			'&, $tipText,$titleText': {
+				color: '#ffffff',
+			},
+			'&::after': {
+				fontFamily: 'FontAwesome',
+				content: `'\\f00c'`,
+				width: '20px',
+				height: '20px',
+				lineHeight: '10px',
+				borderRadius: '100%',
+				fontSize: '15px',
+				border: '2px solid #333',
+				backgroundColor: '#ffffff',
+				color: '#E9691D',
+				zIndex: 999,
+				position: 'absolute',
+				top: '10px',
+				right: '10px',
+				paddingTop: '3px',
+			},
+		},
+		'& + $checkboxPill': {
+			backgroundColor: '#313541',
+			boxShadow: '0px 0px 5px grey',
+			border: '2px solid #313541',
+			borderRadius: '10px',
+			color: '#ffffff',
+		},
+	},
+	checkboxPill: {
+		width: '200px',
+		textAlign: 'center',
+		borderRadius: '10px',
+		lineHeight: 1.2,
+		fontSize: '12px',
+		border: '2px solid #bdccde',
+		backgroundColor: 'white',
+		boxSizing: 'border-box',
+		color: 'black',
+		minHeight: '40px',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	disabledButton: {
+		'& + $checkboxPill': {
+			backgroundColor: 'rgba(0, 0, 0, 0.38)',
+			border: '2px solid grey',
+			borderRadius: '10px',
+			color: '#ffffff',
+		},
+	},
+});
+
+export const StyledAddTermButton = styled.button`
+	border: none;
+	height: 30px;
+	border-radius: 15px;
+	background-color: white;
+	color: black;
+	white-space: nowrap;
+	text-align: center;
+	display: inline-block;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-bottom: 6px;
+	cursor: pointer;
+	border: 1px solid darkgray;
+
+	&:hover {
+		background-color: #e9691d;
+		color: white;
+	}
+`;
 const gameChangerAPI = new GameChangerAPI();
+
 export default function SideBar(props) {
 	const { cloneData = {}, context } = props;
 
-	const { state } = context;
+	const { state, dispatch } = context;
+	const classes = useStyles();
 
 	const [topEntities, setTopEntities] = useState([]);
 	const [topTopics, setTopTopics] = useState([]);
@@ -127,9 +295,57 @@ export default function SideBar(props) {
 	const [runningEntitySearch, setRunningEntitySearch] = useState(
 		state.runningEntitySearch
 	);
+	const [expansionTerms, setExpansionTerms] = React.useState([]);
+
+	let expansionTermSelected = true;
+	expansionTerms.forEach((term) => {
+		if (term.checked === true) expansionTermSelected = true;
+	});
+	const comparableExpansion = JSON.stringify(state.expansionDict);
+
 	// eslint-disable-next-line no-unused-vars
 	const [orgSources, setOrgSources] = useState([]); // Will use when s3 performance fixed
 	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
+
+	useEffect(() => {
+		// nested arrays of expanded terms from each searchTerm
+		let expansion = {};
+		const maxExpansions = 10;
+		if (comparableExpansion) {
+			expansion = JSON.parse(comparableExpansion);
+		}
+		let expandedTerms = Object.values(expansion || {});
+		const keys = Object.keys(expansion || {});
+		const quotedKeys = keys.map((term) => `'${term}'`);
+		const exclude = new Set([...keys, ...quotedKeys]);
+		let topTerms = new Set();
+
+		while (topTerms.size < maxExpansions) {
+			if (expandedTerms.length === 0) {
+				break;
+			}
+			const frontArr = expandedTerms[0];
+			const term = frontArr.shift();
+			const [a, ...rest] = expandedTerms;
+			if (!term) {
+				expandedTerms = [...rest];
+			} else {
+				if (!exclude.has(term)) {
+					topTerms.add(term);
+				}
+				expandedTerms = [...rest, a];
+			}
+		}
+		let topTermsArr = Array.from(topTerms);
+		console.log(topTermsArr);
+		topTermsArr = topTermsArr.map((term) => {
+			return {
+				...term,
+				checked: exactMatch(state.searchText, term.phrase, ' OR '),
+			};
+		});
+		setExpansionTerms(topTermsArr);
+	}, [state, comparableExpansion]);
 
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
@@ -145,6 +361,34 @@ export default function SideBar(props) {
 		setRunningTopicSearch(state.runningTopicSearch);
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
+
+	useEffect(() => {
+		if (state.searchSettings.expansionTermAdded) {
+			let newSearchText = state.searchText.trim();
+			expansionTerms.forEach(({ phrase, source, checked }) => {
+				if (checked && !exactMatch(newSearchText, phrase, ' OR ')) {
+					trackEvent(
+						getTrackingNameForFactory(state.cloneData.clone_name),
+						'QueryExpansion',
+						'SearchTermAdded',
+						`${phrase}_${source}`
+					);
+					//newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
+					newSearchText = phrase;
+				} else if (!checked && exactMatch(newSearchText, `${phrase}`, ' OR ')) {
+					newSearchText = newSearchText.replace(` OR ${phrase}`, '').trim();
+				}
+			});
+
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.expansionTermAdded = false;
+			setState(dispatch, {
+				searchText: newSearchText,
+				runSearch: true,
+				searchSettings: newSearchSettings,
+			});
+		}
+	}, [state, expansionTerms, dispatch]);
 
 	useEffect(() => {
 		gameChangerAPI
@@ -260,6 +504,54 @@ export default function SideBar(props) {
 			</StyledTopEntities>
 		);
 	};
+	const renderExpansionTerms = (
+		expansionTerms,
+		handleAddSearchTerm,
+		classes
+	) => {
+		return (
+			<div style={{ margin: '10px 0 10px 0' }}>
+				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
+					{expansionTerms.map(({ phrase, source, checked }, idx) => {
+						let term = phrase;
+						term = term.length > 25 ? term.substring(0, 25 - 3) + '...' : term;
+
+						return (
+							<GCTooltip
+								key={phrase}
+								title={phrase}
+								arrow
+								enterDelay={30}
+								leaveDelay={10}
+							>
+								<FormControlLabel
+									key={term}
+									value={term}
+									classes={{
+										root: classes.rootLabel,
+										label: classes.checkboxPill,
+									}}
+									control={
+										<Checkbox
+											classes={{
+												root: classes.rootButton,
+												checked: classes.checkedButton,
+											}}
+											name={term}
+											checked={checked}
+											onClick={() => handleAddSearchTerm(phrase, source, idx)}
+										/>
+									}
+									label={term}
+									labelPlacement="end"
+								/>
+							</GCTooltip>
+						);
+					})}
+				</FormGroup>
+			</div>
+		);
+	};
 
 	const renderTopTopics = () => {
 		return (
@@ -326,6 +618,15 @@ export default function SideBar(props) {
 		);
 	};
 
+	const handleAddSearchTerm = (phrase, source, idx) => {
+		const temp = _.cloneDeep(expansionTerms);
+		temp[idx].checked = !temp[idx].checked;
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.expansionTermAdded = true;
+		newSearchSettings.isFilterUpdate = true;
+		setState(dispatch, { searchSettings: newSearchSettings });
+		setExpansionTerms(temp);
+	};
 	return (
 		<div
 			className={''}
@@ -335,6 +636,27 @@ export default function SideBar(props) {
 				<div style={styles.innerContainer}>
 					<div style={styles.cardBody} className={`tutorial-step-unknown2`}>
 						<div style={styles.innerContainer}>
+							{expansionTerms.length > 0 && (
+								<div style={{ width: '100%', marginBottom: 10 }}>
+									<GCTooltip
+										title={'Select a document for export'}
+										placement="top"
+										arrow
+									>
+										<GCAccordion
+											expanded={expansionTermSelected}
+											header={'SEARCHES'}
+											headerTextWeight={'normal'}
+										>
+											{renderExpansionTerms(
+												expansionTerms,
+												handleAddSearchTerm,
+												classes
+											)}
+										</GCAccordion>
+									</GCTooltip>
+								</div>
+							)}
 							{topEntities.length > 0 && (
 								<>
 									<div style={{ width: '100%', marginBottom: 10 }}>

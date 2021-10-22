@@ -17,6 +17,9 @@
 .* /api/gamechanger/assist/saveDocumentAnnotationsPOST .*
 .* /api/gamechanger/getThumbnail .*
 .* /api/gamechanger/responsibilities/get .*
+.* /api/gamechanger/responsibilities/getDoc .*
+.* /api/gamechanger/responsibilities/setRejectionStatus .*
+.* /api/gamechanger/responsibilities/updateResponsibility .*
 .* /api/gamechanger/responsibilities/getOtherEntityFilterList .*
 .* /api/gamechanger/responsibilities/storeReport .*
 .* /api/gamechanger/getNotifications .*
@@ -26,7 +29,6 @@
 .* /api/gamechanger/user/exportHistory/:historyId .*
 .* /api/gamechanger/favorites/document .*
 .* /api/gamechanger/favorites/search .*
-.* /api/gamechanger/favorites/checkSearches .*
 .* /api/gamechanger/favorites/topic .*
 .* /api/gamechanger/favorites/organization .*
 .* /api/gamechanger/favorites/group .*
