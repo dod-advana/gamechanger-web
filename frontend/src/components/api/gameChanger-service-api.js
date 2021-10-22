@@ -110,6 +110,7 @@ const endpoints = {
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
+	jiraFeedback: '/api/gamechanger/appSettings/jiraFeedback',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
@@ -816,6 +817,16 @@ export default class GameChangerAPI {
 
 	toggleUserFeedbackMode = async () => {
 		const url = endpoints.userFeedback;
+		return axiosPOST(this.axios, url, {});
+	};
+
+	getJiraFeedbackMode = async () => {
+		const url = endpoints.jiraFeedback;
+		return axiosGET(this.axios, url);
+	};
+
+	toggleJiraFeedbackMode = async () => {
+		const url = endpoints.jiraFeedback;
 		return axiosPOST(this.axios, url, {});
 	};
 
