@@ -164,6 +164,8 @@ router.get('/appSettings/entitySearch', appSettings.getEntitySearchMode);
 router.post('/appSettings/entitySearch', appSettings.setEntitySearchMode);
 router.get('/appSettings/userFeedback', appSettings.getUserFeedbackMode);
 router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
+router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
+router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);

@@ -212,12 +212,11 @@ module.exports = Object.freeze({
 	},
 	REQUEST_TYPE_ID: 113,
 	JIRA_CONFIG:{
-		username: 'raul.alfaro',
+		username: process.env.JIRA_USERNAME,
 		password: process.env.JIRA_PASSWORD,
-		domain: 'support.advana.boozallencsn.com',
-		// ca: process.env.JIRA_CA,
-		project_key: 'TP',
-		rating_id: 'customfield_10401',
-		feedbackType: 'Feedback'
+		domain: process.env.JIRA_DOMAIN,
+		project_key: process.env.JIRA_PROJECT_KEY,
+		rating_id: process.env.JIRA_RATING_ID,
+		feedbackType: process.env.JIRA_FEEDBACK_TYPE
 	},
 });

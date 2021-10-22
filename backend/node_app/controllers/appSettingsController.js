@@ -22,7 +22,8 @@ class AppSettingsController {
 			intelligentAnswers:'intelligent_answers',
 			entitySearch:'entity_search',
 			combinedSearch:'combined_search',
-			topicSearch:'topic_search'
+			topicSearch:'topic_search',
+			jiraFeedback:'jira_feedback'
 		}
 		
 		// Binding the key for combined search mode to get and set
@@ -40,6 +41,9 @@ class AppSettingsController {
 		// Binding the key for combined search mode to get and toggle
 		this.getUserFeedbackMode = this.getMode.bind(this, this.keys.userFeedback);
 		this.toggleUserFeedbackMode = this.toggleMode.bind(this, this.keys.userFeedback);
+
+		this.getJiraFeedbackMode = this.getMode.bind(this, this.keys.jiraFeedback);
+		this.toggleJiraFeedbackMode = this.toggleMode.bind(this, this.keys.jiraFeedback);
 
 		// Binding the key for topic search mode to get and set
 		this.getTopicSearchMode = this.getMode.bind(this, this.keys.topicSearch);
@@ -107,7 +111,7 @@ class AppSettingsController {
 			const updatedResult = await this.appSettings.update(dataValues, { where: {key: key} });
 			res.status(200).send({ updatedResult });
 		} catch (err) {
-			this.logger.error(err, 'PQNAF35', userId);
+			this.logger.error(err, 'PQNAF36', userId);
 			res.status(500).send(err);
 		}
 	}
