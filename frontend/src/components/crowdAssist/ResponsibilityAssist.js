@@ -333,7 +333,11 @@ class ResponsibilityAssist extends Component {
 		let tempSearchText;
 		if(searchText){
 			searchTextArray = searchText.split(' ');
-			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) {
+				searchTextArray[0] += ' ';
+			}else{
+				tempSearchText = searchText;
+			}
 			tempSearchText = searchTextArray.join(' ');
 		}
 		window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${tempSearchText}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
