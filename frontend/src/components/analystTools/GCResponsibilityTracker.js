@@ -489,11 +489,7 @@ const GCResponsibilityTracker = (props) => {
 		let tempSearchText;
 		if(searchText){
 			const searchTextArray = searchText.split(' ');
-			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) {
-				searchTextArray[0] += ' ';
-			}else{
-				tempSearchText = searchText;
-			}
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
 			tempSearchText = searchTextArray.join(' ');
 		}
 		window.open(
