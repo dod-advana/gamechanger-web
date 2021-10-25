@@ -6,7 +6,7 @@ FROM $BASE_IMAGE
 USER root
 RUN yum install -y \
         git \
-        make \
+        make
      
 # non-root app USER/GROUP
 ARG APP_UID=1000
