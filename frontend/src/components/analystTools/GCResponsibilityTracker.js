@@ -486,9 +486,16 @@ const GCResponsibilityTracker = (props) => {
 			'pageNumber',
 			pageNumber
 		);
+		let tempSearchText;
+		if(searchText){
+			const searchTextArray = searchText.split(' ');
+			console.log(searchTextArray)
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
+			tempSearchText = searchTextArray.join(' ');
+		}
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${filename.replace('.json', '.pdf')}&${
-				searchText ? 'prevSearchText="' + searchText + '"&' : ''
+				searchText ? 'prevSearchText="' + tempSearchText + '"&' : ''
 			}pageNumber=${pageNumber}&cloneIndex=${state.cloneData?.clone_name}`
 		);
 	};
