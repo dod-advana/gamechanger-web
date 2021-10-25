@@ -6,13 +6,7 @@ FROM $BASE_IMAGE
 USER root
 RUN yum install -y \
         git \
-        python38 \
-        python38-devel \
         make \
-        gcc \
-        gcc-c++ \
-     && yum clean all \
-     && rm -rf /var/cache/yum
      
 # non-root app USER/GROUP
 ARG APP_UID=1000
@@ -67,6 +61,7 @@ RUN npm install  --production
 COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
 
 RUN mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
+RUN cd "${APP_BACKEND_DIR}" && rm -rf "${APP_FRONTEND_DIR}"
 
 # http & https
 EXPOSE 8990 8443
