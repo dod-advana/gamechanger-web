@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { trackEvent } from '../telemetry/Matomo';
 import { makeStyles } from '@material-ui/core/styles';
-import { getTrackingNameForFactory, exactMatch } from '../../utils/gamechangerUtils';
 import { setState } from '../../utils/sharedFunctions';
 import _ from 'lodash';
 import SearchMatrixFactory from '../factories/searchMatrixFactory';
