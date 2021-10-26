@@ -6,8 +6,10 @@ import propTypes from 'prop-types';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../utils/gamechangerUtils';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
+import ResponsibilityTracker from '../components/analystTools/NewGCResponsibilityTracker';
 import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
 import {setState} from '../../utils/sharedFunctions';
+import ResponsibilityAssist from '../crowdAssist/ResponsibilityAssist';
 
 const AnalystTools = (props) => {
 	
@@ -59,7 +61,8 @@ const AnalystTools = (props) => {
 						
 						<div style={styles.panelContainer}>
 							<TabPanel>
-								<GCResponsibilityTracker state={state} dispatch={dispatch}/>
+								{/* <GCResponsibilityTracker state={state} dispatch={dispatch}/> */}
+								<ResponsibilityTracker state={state} dispatch={dispatch}/>
 							</TabPanel>
 							<TabPanel>
 								<GCDocumentsComparisonTool context={context}/>
