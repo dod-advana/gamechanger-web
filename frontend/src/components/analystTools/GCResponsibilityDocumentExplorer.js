@@ -17,12 +17,10 @@ import {
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
-import { setState } from '../../utils/sharedFunctions';
 // import GamechangerPdfViewer from '../documentViewer/PDFViewer'
 import PDFHighlighter from './PDFHighlighter';
 
 const gameChangerAPI = new GameChangerAPI();
-const PAGE_SIZE = 10;
 const grey800 = grey[800];
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 3;
@@ -68,9 +66,11 @@ const getIframePreviewLinkInferred = (
 	});
 };
 
-export default function ResponsibilityTracker({
+
+export default function ResponsibilityDocumentExplorer({
 	state,
-	dispatch,
+	responsibilityData,
+	loading,
 	data = [],
 	totalCount = 1,
 	prevSearchText = '',
@@ -99,76 +99,7 @@ export default function ResponsibilityTracker({
 	const [viewTogle, setViewTogle] = useState(false);
 	const [fileUrl, setFileUrl] = useState(null);
 	const [filename, setFilename] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
-	const [numPages, setNumPages] = useState(0);
-	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
-	const [pageIndex, setPageIndex] = useState(0);
-	const [sorts, setSorts] = useState([]);
-	const [filters, setFilters] = useState([]);
 	const [isEditing, setIsEditing] = useState(true);
-
-	useEffect(() => {
-		if (state.reloadResponsibilityTable) {
-			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
-			setState(dispatch, {reloadResponsibilityTable: false});
-		}
-	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
-	                                                // TODO : Resolve ^^^ correctly
-
-	useEffect(() => {
-		console.log(responsibilityTableData)
-	}, [responsibilityTableData])
-
-	const getData = async ({
-		limit = PAGE_SIZE,
-		offset = 0,
-		sorted = [],
-		filtered = [],
-	}) => {
-		const order = sorted.map(({ id, desc }) => [id, desc ? 'DESC' : 'ASC']);
-		const where = filtered;
-                                                    
-		try {
-			const { data } = await gameChangerAPI.getResponsibilityData({
-				limit,
-				offset,
-				order,
-				where,
-			});
-			return data;
-		} catch (err) {
-			this.logger.error(err.message, 'GEADAKS');
-			return []
-		}
-	};
-
-	 const handleFetchData = async ({ page, sorted, filtered }) => {
-		try {
-			setLoading(true);
-			const tmpFiltered = _.map(filtered, _.clone);
-			if (otherEntRespFiltersList.length > 0) {
-				tmpFiltered.push({
-					id: 'otherOrganizationPersonnel',
-					value: otherEntRespFiltersList,
-				});
-			}
-			const { totalCount, results = [] } = await getData({
-				offset: page * PAGE_SIZE,
-				sorted,
-				filtered: tmpFiltered,
-			});
-			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
-			setNumPages(pageCount);
-			setResponsibilityTableData(results);
-		} catch (e) {
-			setResponsibilityTableData([]);
-			setNumPages(0);
-			console.error(e);
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -439,12 +370,11 @@ export default function ResponsibilityTracker({
 					</div>
 				)}
 				{!loading &&
-					_.map(responsibilityTableData, (item) => {
-						const key = item.id;
+					_.map(Object.keys(responsibilityData), (entity, key) => {
 						const collapsed = collapseKeys
 							? collapseKeys[key.toString()]
 							: true;
-						const displayTitle = item.documentTitle;
+						const displayTitle = entity;
 						return (
 							<div key={key}>
 								<div
@@ -474,61 +404,53 @@ export default function ResponsibilityTracker({
 								</div>
 								<Collapse isOpened={!collapsed}>
 									<div>
-										{_.chain(item.pageHits)
-											.map((page, pageKey) => {
-												let isHighlighted = false;
-												const dataObj = data[iframePreviewLink.dataIdx];
-												if (dataObj) {
-													const pageObj =
+										{responsibilityData[entity].map((responsibility, pageKey) => {
+											let isHighlighted = false;
+											const dataObj = data[iframePreviewLink.dataIdx];
+											if (dataObj) {
+												const pageObj =
 															data[iframePreviewLink.dataIdx].pageHits[
 																iframePreviewLink.pageHitIdx
 															];
-													if (pageObj) {
-														isHighlighted =
+												if (pageObj) {
+													isHighlighted =
 																data[iframePreviewLink.dataIdx].filename ===
-																	item.filename &&
+																	responsibility.filename &&
 																pageKey === iframePreviewLink.pageHitIdx;
-													}
 												}
+											}
 
-												let blockquoteClass = 'searchdemo-blockquote-sm';
+											let blockquoteClass = 'searchdemo-blockquote-sm';
+											console.log('responsibility: ', responsibility)
 
-												if (isHighlighted)
-													blockquoteClass +=
+											if (isHighlighted)
+												blockquoteClass +=
 															' searchdemo-blockquote-sm-active';
-												return (
-													<div
-														key={key + pageKey}
-														style={{ position: 'relative' }}
+											return (
+												<div
+													key={key + pageKey}
+													style={{ position: 'relative' }}
+												>
+													<a
+														href="#noref"
+														className="searchdemo-quote-link"
+														onClick={(e) => {
+															handleQuoteLinkClick(e, pageKey, key);
+														}}
 													>
-														<a
-															href="#noref"
-															className="searchdemo-quote-link"
-															onClick={(e) => {
-																handleQuoteLinkClick(e, pageKey, key);
-															}}
-														>
-															<div
-																className={blockquoteClass}
-																dangerouslySetInnerHTML={{
-																	__html: sanitizeHtml(
-																		page.snippet
-																			.replace(
-																				/<em>/g,
-																				'<span class="highlight-search-demo" style="background-color: #E9691D;">'
-																			)
-																			.replace(/<\/em>/g, '</span>') + '...'
-																	),
-																}}
-															></div>
-														</a>
-														{isHighlighted && (
-															<span className="searchdemo-arrow-right-sm"></span>
-														)}
-													</div>
-												);
-											})
-											.value()}
+														<div className={blockquoteClass}>
+															<span class="highlight-search-demo" style={{backgroundColor: '#E9691D'}}>
+																{responsibility.responsibilityText}
+															</span>
+														</div>
+													</a>
+													{isHighlighted && (
+														<span className="searchdemo-arrow-right-sm"></span>
+													)}
+												</div>
+											);
+										})
+										}
 									</div>
 								</Collapse>
 							</div>
