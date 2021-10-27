@@ -307,7 +307,7 @@ export default function ResponsibilityDocumentExplorer({
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
 					borderRight: '1px solid lightgrey',
-					height: '100%',
+					height: '800px',
 					overflow: 'scroll',
 				}}
 			>
@@ -406,22 +406,21 @@ export default function ResponsibilityDocumentExplorer({
 									<div>
 										{responsibilityData[entity].map((responsibility, pageKey) => {
 											let isHighlighted = false;
-											const dataObj = data[iframePreviewLink.dataIdx];
+											const dataObj = responsibilityData[entity];
 											if (dataObj) {
 												const pageObj =
-															data[iframePreviewLink.dataIdx].pageHits[
+															responsibilityData[entity][
 																iframePreviewLink.pageHitIdx
 															];
 												if (pageObj) {
+													const selectedEntity = Object.keys(responsibilityData)[iframePreviewLink.dataIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
 													isHighlighted =
-																data[iframePreviewLink.dataIdx].filename ===
-																	responsibility.filename &&
+																selectedEntity === responsibility.organizationPersonnel &&
 																pageKey === iframePreviewLink.pageHitIdx;
 												}
 											}
 
 											let blockquoteClass = 'searchdemo-blockquote-sm';
-											console.log('responsibility: ', responsibility)
 
 											if (isHighlighted)
 												blockquoteClass +=
@@ -439,7 +438,7 @@ export default function ResponsibilityDocumentExplorer({
 														}}
 													>
 														<div className={blockquoteClass}>
-															<span class="highlight-search-demo" style={{backgroundColor: '#E9691D'}}>
+															<span>
 																{responsibility.responsibilityText}
 															</span>
 														</div>
@@ -592,7 +591,7 @@ export default function ResponsibilityDocumentExplorer({
 					display: rightPanelOpen ? 'block' : 'none',
 					paddingLeft: 0,
 					borderLeft: '1px solid lightgrey',
-					height: '100%',
+					height: '800px',
 					overflow: 'scroll',
 				}}
 			>
