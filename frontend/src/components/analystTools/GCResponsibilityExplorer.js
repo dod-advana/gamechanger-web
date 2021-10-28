@@ -57,7 +57,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	const PAGE_SIZE = 10;
+	let PAGE_SIZE = 10;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
@@ -170,7 +170,17 @@ export default function GCResponsibilityExplorer({
 				</FormControl>
 			</div>
 			{reView === 'Chart' && <GCResponsibilityTracker state={state} dispatch={dispatch} responsibilityData={responsibilityData} loading={loading}/>}
-			{reView === 'Document' && <ResponsibilityDocumentExplorer state={state} dispatch={dispatch} responsibilityData={docResponsibilityData} loading={loading}/>}
+			{reView === 'Document' && 
+                <ResponsibilityDocumentExplorer 
+                	state={state} 
+                	dispatch={dispatch} 
+                	responsibilityData={docResponsibilityData} 
+                	loading={loading}
+                	onPaginationClick={(page) => {
+                		console.log(page)
+                		// setState(dispatch, { resultsPage: page, runSearch: true });
+                	}}
+                />}
 		</div>
 	)
 }
