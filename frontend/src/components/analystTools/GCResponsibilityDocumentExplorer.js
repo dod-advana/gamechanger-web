@@ -8,15 +8,12 @@ import '../cards/keyword-result-card.css';
 import '../../containers/gamechanger.css';
 import grey from '@material-ui/core/colors/grey';
 import {
-	getReferenceListMetadataPropertyTable,
-	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
 } from '../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../telemetry/Matomo';
-import sanitizeHtml from 'sanitize-html';
 // import GamechangerPdfViewer from '../documentViewer/PDFViewer'
 import PDFHighlighter from './PDFHighlighter';
 
@@ -72,7 +69,7 @@ export default function ResponsibilityDocumentExplorer({
 	responsibilityData,
 	loading,
 	data = [],
-	totalCount = 1,
+	totalCount = 100,
 	prevSearchText = '',
 	resultsPage,
 	resultsPerPage,
@@ -248,22 +245,30 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	}
 
+	const getMetadataForTable = (data) => {
+		const keyMap = {
+			filename: 'File Name',
+			documentTitle: 'Document Title',
+			organizationPersonnel: 'Organization/Personnel',
+			responsibilityText: 'Responsibility Text',
+			documentsReferenced: 'Documents Referenced'
+		}
+		const metaData = [];
+		Object.keys(data).forEach(key => {
+			if(keyMap[key]){
+				metaData.push({
+					Key: keyMap[key],
+					Value: data[key]
+				})
+			}
+		})
+		return metaData
+	}
+
 	const previewPathname =
 		data.length > 0 &&
 		data[iframePreviewLink.dataIdx] &&
 		data[iframePreviewLink.dataIdx].filepath;
-	const previewData =
-		(data.length > 0 &&
-			data[iframePreviewLink.dataIdx] &&
-			getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) ||
-		[];
-	const previewDataReflist =
-		(data.length > 0 &&
-			data[iframePreviewLink.dataIdx] &&
-			getReferenceListMetadataPropertyTable(
-				data[iframePreviewLink.dataIdx].ref_list
-			)) ||
-		[];
 	const iframePanelSize =
 		12 -
 		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
@@ -289,7 +294,6 @@ export default function ResponsibilityDocumentExplorer({
 		minWidth: '75%',
 		maxWidth: '75%',
 	};
-	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
 	if (!leftPanelOpen)
 		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
@@ -595,30 +599,19 @@ export default function ResponsibilityDocumentExplorer({
 					overflow: 'scroll',
 				}}
 			>
+				{ !loading &&
 				<SimpleTable
 					tableClass={'magellan-table'}
 					zoom={0.8}
 					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-					rows={previewData}
+					rows={getMetadataForTable(responsibilityData[Object.keys(responsibilityData)[iframePreviewLink.dataIdx]][iframePreviewLink.pageHitIdx])}
 					height={'auto'}
 					dontScroll={true}
 					colWidth={colWidth}
 					disableWrap={true}
 					title={'Metadata'}
 				/>
-				<div style={{ marginTop: -18 }}>
-					{' '}
-					<SimpleTable
-						tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewDataReflist}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidthRefTable}
-						disableWrap={true}
-					/>
-				</div>
+				}
 			</div>
 		</div>
 	);
