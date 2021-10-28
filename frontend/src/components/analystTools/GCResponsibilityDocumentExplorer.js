@@ -80,14 +80,16 @@ export default function ResponsibilityDocumentExplorer({
 	const { cloneData } = state;
 
 	// Set out state variables and access functions
-	const [collapseKeys, setCollapseKeys] = useState(null);
+	const [collapseKeys, setCollapseKeys] = useState({});
 	const [iframePreviewLink, setIframePreviewLink] = useState({
 		dataIdx: 0,
-		pageHitIdx: 0,
+		entityIdx: 0,
+		responsibilityIdx: 0
 	});
 	const [prevIframPreviewLink, setPrevIframPreviewLink] = useState({
 		dataIdx: -1,
-		pageHitIdx: -1,
+		entityIdx: -1,
+		responsibilityIdx: 0
 	});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -101,12 +103,12 @@ export default function ResponsibilityDocumentExplorer({
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null) {
-				const { dataIdx, pageHitIdx } = iframePreviewLink;
+				const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
 				const rec = data[dataIdx];
 				if (rec) {
 					// const filepath = rec.filepath;
 
-					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
+					const pageObj = rec.pageHits ? rec.pageHits[entityIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
 					if (
 						filename &&
@@ -160,7 +162,6 @@ export default function ResponsibilityDocumentExplorer({
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
-		console.log('toggle right panel')
 		trackEvent(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
@@ -192,11 +193,11 @@ export default function ResponsibilityDocumentExplorer({
 		setViewTogle(!viewTogle);
 	}
 
-	function handleQuoteLinkClick(e, pageKey, key) {
+	function handleQuoteLinkClick(e, respKey, entKey, key) {
 		const rec = data[key];
 		if (rec) {
 			const fileName = rec.id;
-			const pageObj = rec.pageHits[pageKey];
+			const pageObj = rec.pageHits[entKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
@@ -219,7 +220,8 @@ export default function ResponsibilityDocumentExplorer({
 		}
 		e.preventDefault();
 		setIframePreviewLink({
-			pageHitIdx: pageKey,
+			responsibilityIdx: respKey,
+			entityIdx: entKey,
 			dataIdx: key,
 		});
 	}
@@ -247,6 +249,9 @@ export default function ResponsibilityDocumentExplorer({
 	}
 
 	const getMetadataForTable = (data) => {
+		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
+		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
+		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -255,11 +260,11 @@ export default function ResponsibilityDocumentExplorer({
 			documentsReferenced: 'Documents Referenced'
 		}
 		const metaData = [];
-		Object.keys(data).forEach(key => {
+		Object.keys(responsibility).forEach(key => {
 			if(keyMap[key]){
 				metaData.push({
 					Key: keyMap[key],
-					Value: data[key]
+					Value: responsibility[key]
 				})
 			}
 		})
@@ -375,27 +380,25 @@ export default function ResponsibilityDocumentExplorer({
 					</div>
 				)}
 				{!loading &&
-					_.map(Object.keys(responsibilityData), (entity, key) => {
-						const collapsed = collapseKeys
-							? collapseKeys[key.toString()]
-							: true;
-						const displayTitle = entity;
+					_.map(Object.keys(responsibilityData), (doc, key) => {
+						const docCollapsed = collapseKeys[doc] ? collapseKeys[doc] : false;
+						const displayTitle = doc;
 						return (
 							<div key={key}>
 								<div
 									className="searchdemo-modal-result-header"
 									onClick={(e) => {
 										e.preventDefault();
-										setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
+										setCollapseKeys({ ...collapseKeys, [doc]: !docCollapsed });
 									}}
 								>
 									<i
 										style={{
-											marginRight: collapsed ? 14 : 10,
+											marginRight: docCollapsed ? 14 : 10,
 											fontSize: 20,
 											cursor: 'pointer',
 										}}
-										className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
+										className={`fa fa-caret-${!docCollapsed ? 'down' : 'right'}`}
 									/>
 									<span className="gc-document-explorer-result-header-text">
 										{displayTitle}
@@ -407,55 +410,90 @@ export default function ResponsibilityDocumentExplorer({
 										{item.pageHitCount}
 									</span> */}
 								</div>
-								<Collapse isOpened={!collapsed}>
-									<div>
-										{responsibilityData[entity].map((responsibility, pageKey) => {
-											let isHighlighted = false;
-											const dataObj = responsibilityData[entity];
-											if (dataObj) {
-												const pageObj =
-															responsibilityData[entity][
-																iframePreviewLink.pageHitIdx
-															];
-												if (pageObj) {
-													const selectedEntity = Object.keys(responsibilityData)[iframePreviewLink.dataIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-													isHighlighted =
-																selectedEntity === responsibility.organizationPersonnel &&
-																pageKey === iframePreviewLink.pageHitIdx;
-												}
-											}
+								<Collapse isOpened={!docCollapsed}>
+									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
+										const entCollapsed = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
+										return <>
+											<div
+												className="searchdemo-modal-result-header"
+												onClick={(e) => {
+													e.preventDefault();
+													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entCollapsed });
+												}}
+												style={{marginLeft: 20}}
+											>
+												<i
+													style={{
+														marginRight: entCollapsed ? 14 : 10,
+														fontSize: 20,
+														cursor: 'pointer',
+													}}
+													className={`fa fa-caret-${!entCollapsed ? 'down' : 'right'}`}
+												/>
+												<span className="gc-document-explorer-result-header-text">
+													{entity}
+												</span>
+												{/* <span
+											style={{ width: 30, marginLeft: 'auto' }}
+												className="badge"
+											>
+												{item.pageHitCount}
+											</span> */}
+											</div>
+											<Collapse isOpened={!entCollapsed && !docCollapsed}>
+												<div>
+													{responsibilityData[doc][entity].map((responsibility, respKey) => {
+														let isHighlighted = false;
+														const dataObj = responsibilityData[doc];
+														if (dataObj) {
+															const pageObj =
+																responsibilityData[doc][entity][
+																	iframePreviewLink.entityIdx
+																];
+															if (pageObj) {
+																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx]
+																const selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
+																isHighlighted =
+																	selectedDoc === responsibility.documentTitle &&
+																	selectedEntity === responsibility.organizationPersonnel &&
+																	respKey === iframePreviewLink.responsibilityIdx;
+															}
+														}
 
-											let blockquoteClass = 'searchdemo-blockquote-sm';
+														let blockquoteClass = 'searchdemo-blockquote-sm';
 
-											if (isHighlighted)
-												blockquoteClass +=
-															' searchdemo-blockquote-sm-active';
-											return (
-												<div
-													key={key + pageKey}
-													style={{ position: 'relative' }}
-												>
-													<a
-														href="#noref"
-														className="searchdemo-quote-link"
-														onClick={(e) => {
-															handleQuoteLinkClick(e, pageKey, key);
-														}}
-													>
-														<div className={blockquoteClass}>
-															<span>
-																{responsibility.responsibilityText}
-															</span>
-														</div>
-													</a>
-													{isHighlighted && (
-														<span className="searchdemo-arrow-right-sm"></span>
-													)}
+														if (isHighlighted)
+															blockquoteClass +=
+																' searchdemo-blockquote-sm-active';
+														return (
+															<div
+																key={key + respKey}
+																style={{ position: 'relative' }}
+															>
+																<a
+																	href="#noref"
+																	className="searchdemo-quote-link"
+																	onClick={(e) => {
+																		handleQuoteLinkClick(e, respKey, entKey, key);
+																	}}
+																>
+																	<div className={blockquoteClass} style={{marginLeft: 40}}>
+																		<span>
+																			{responsibility.responsibilityText}
+																		</span>
+																	</div>
+																</a>
+																{isHighlighted && (
+																	<span className="searchdemo-arrow-right-sm"></span>
+																)}
+															</div>
+														);
+													})
+													}
 												</div>
-											);
-										})
-										}
-									</div>
+											</Collapse>
+										</>
+									})}
 								</Collapse>
 							</div>
 						);
@@ -606,7 +644,7 @@ export default function ResponsibilityDocumentExplorer({
 					tableClass={'magellan-table'}
 					zoom={0.8}
 					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-					rows={getMetadataForTable(responsibilityData[Object.keys(responsibilityData)[iframePreviewLink.dataIdx]][iframePreviewLink.pageHitIdx])}
+					rows={getMetadataForTable(responsibilityData)}
 					height={'auto'}
 					dontScroll={true}
 					colWidth={colWidth}
