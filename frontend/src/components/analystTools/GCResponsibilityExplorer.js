@@ -109,10 +109,12 @@ export default function GCResponsibilityExplorer({
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility, i) => {
+			const doc = responsibility.documentTitle;
 			let entity = responsibility.organizationPersonnel;
 			if(!entity) entity = 'NO ENTITY';
-			if(!groupedData[entity]) groupedData[entity]= [];
-			groupedData[entity].push(responsibility)
+			if(!groupedData[doc]) groupedData[doc] = {}
+			if(!groupedData[doc][entity]) groupedData[doc][entity]= [];
+			groupedData[doc][entity].push(responsibility);
 		})
 		setDocResponsibilityData(groupedData);
 	}
