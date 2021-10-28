@@ -381,7 +381,7 @@ export default function ResponsibilityDocumentExplorer({
 				)}
 				{!loading &&
 					_.map(Object.keys(responsibilityData), (doc, key) => {
-						const docCollapsed = collapseKeys[doc] ? collapseKeys[doc] : false;
+						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
 						const displayTitle = doc;
 						return (
 							<div key={key}>
@@ -389,16 +389,16 @@ export default function ResponsibilityDocumentExplorer({
 									className="searchdemo-modal-result-header"
 									onClick={(e) => {
 										e.preventDefault();
-										setCollapseKeys({ ...collapseKeys, [doc]: !docCollapsed });
+										setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
 									}}
 								>
 									<i
 										style={{
-											marginRight: docCollapsed ? 14 : 10,
+											marginRight: docOpen ? 10 : 14,
 											fontSize: 20,
 											cursor: 'pointer',
 										}}
-										className={`fa fa-caret-${!docCollapsed ? 'down' : 'right'}`}
+										className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
 									/>
 									<span className="gc-document-explorer-result-header-text">
 										{displayTitle}
@@ -410,25 +410,25 @@ export default function ResponsibilityDocumentExplorer({
 										{item.pageHitCount}
 									</span> */}
 								</div>
-								<Collapse isOpened={!docCollapsed}>
+								<Collapse isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
-										const entCollapsed = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
+										const entOpen = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
 										return <>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
 													e.preventDefault();
-													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entCollapsed });
+													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
 												}}
 												style={{marginLeft: 20}}
 											>
 												<i
 													style={{
-														marginRight: entCollapsed ? 14 : 10,
+														marginRight: entOpen ? 10 : 14,
 														fontSize: 20,
 														cursor: 'pointer',
 													}}
-													className={`fa fa-caret-${!entCollapsed ? 'down' : 'right'}`}
+													className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
 												/>
 												<span className="gc-document-explorer-result-header-text">
 													{entity}
@@ -440,7 +440,7 @@ export default function ResponsibilityDocumentExplorer({
 												{item.pageHitCount}
 											</span> */}
 											</div>
-											<Collapse isOpened={!entCollapsed && !docCollapsed}>
+											<Collapse isOpened={entOpen && docOpen}>
 												<div>
 													{responsibilityData[doc][entity].map((responsibility, respKey) => {
 														let isHighlighted = false;

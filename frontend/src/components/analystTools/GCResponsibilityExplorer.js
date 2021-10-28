@@ -57,7 +57,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	let PAGE_SIZE = 10;
+	let PAGE_SIZE = 160;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
