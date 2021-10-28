@@ -160,6 +160,7 @@ export default function ResponsibilityDocumentExplorer({
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
+		console.log('toggle right panel')
 		trackEvent(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
@@ -558,7 +559,7 @@ export default function ResponsibilityDocumentExplorer({
 					)}
 					<div
 						className="searchdemo-vertical-bar-toggle"
-						style={{ ...rightBarExtraStyles, bottom: '0px' }}
+						style={{ ...rightBarExtraStyles, bottom: '0px', zIndex: 100 }}
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
@@ -597,6 +598,7 @@ export default function ResponsibilityDocumentExplorer({
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',
+					zIndex: 100
 				}}
 			>
 				{ !loading &&
