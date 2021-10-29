@@ -152,14 +152,17 @@ export default function ResponsibilityDocumentExplorer({
 	}, [filename, data, iframePreviewLink]);
 
 	useEffect(() => {
-		if (!collapseKeys) {
+		if (Object.keys(collapseKeys).length <= 0 && !loading) {
 			let initialCollapseKeys = {};
-			_.each(data, (d, k) => {
-				initialCollapseKeys[k] = false;
-			});
+			Object.keys(responsibilityData).forEach(doc => {
+				initialCollapseKeys[doc] = false;
+				Object.keys(responsibilityData[doc]).forEach(entity => {
+					initialCollapseKeys[doc + entity] = false;
+				})
+			})
 			setCollapseKeys(initialCollapseKeys);
 		}
-	}, [data, collapseKeys]);
+	}, [responsibilityData, collapseKeys, loading]);
 
 	function handleRightPanelToggle() {
 		trackEvent(
@@ -280,19 +283,6 @@ export default function ResponsibilityDocumentExplorer({
 		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
 		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
-	// This checks if there are any documents loaded and assigns the default collapse keys to the cards default to open.
-	if (
-		collapseKeys &&
-		Object.keys(collapseKeys).length === 0 &&
-		data.length > 0
-	) {
-		let collapseDictionary = {};
-		for (let i = 0; i < data.length; i++) {
-			collapseDictionary[i.toString()] = false;
-		}
-		setCollapseKeys(collapseDictionary);
-	}
-
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
 
@@ -366,7 +356,7 @@ export default function ResponsibilityDocumentExplorer({
 								className="view-toggle" 
 								onClick={() => handleViewToggle()}
 							>
-								{viewTogle ? '+' : '-'}
+								{viewTogle ? '-' : '+'}
 							</div>
 						</div>
 					) : (
