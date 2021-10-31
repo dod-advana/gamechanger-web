@@ -74,6 +74,8 @@ const initState = {
 	// Show Modals
 	showFeedbackModal: false,
 	showAssistModal: false,
+	showResponsibilityAssistModal: false,
+	reloadResponsibilityTable: true, // not for a modal
 	assistVoluntary: true,
 	loginModalOpen: false,
 	showSnackbar: false,

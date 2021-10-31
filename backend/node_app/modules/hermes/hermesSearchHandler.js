@@ -15,7 +15,7 @@ class HermesSearchHandler extends SearchHandler {
 		super({redisClientDB: redisAsyncClientDB, ...opts});
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			searchText: '',
@@ -50,7 +50,7 @@ class HermesSearchHandler extends SearchHandler {
 			const cloneSpecificObject = {};
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 
 			const clientObj = {esClientName: 'gamechanger', esIndex: constants.HERMES_ELASTIC_SEARCH_OPTS.index};
@@ -141,7 +141,7 @@ class HermesSearchHandler extends SearchHandler {
 			}
 
 			// try storing results record
-			if (!forCacheReload) {
+			if (storeHistory && !forCacheReload) {
 				try {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
@@ -149,47 +149,6 @@ class HermesSearchHandler extends SearchHandler {
 					await this.storeRecordOfSearchInPg(historyRec, userId);
 				} catch (e) {
 					this.logger.error(e.message, 'CWDCQLF', userId);
-				}
-			} else {
-
-				try {
-
-					// if doing a cache reload, check favorite search stats
-					const hashed_user = sparkMD5.hash(userId);
-
-					// check if this search is a favorite
-					const favoriteSearch = await FAVORITE_SEARCH.findOne({
-						where: {
-							user_id: hashed_user,
-							tiny_url: tiny_url
-						}
-					});
-
-					if (favoriteSearch !== null) {
-
-						let updated = false;
-						let count = favoriteSearch.document_count;
-
-						// favorite search is updated
-						if (searchResults.totalCount > favoriteSearch.document_count) {
-							updated = true;
-							count = searchResults.totalCount;
-						}
-
-						// update the favorite search info
-						FAVORITE_SEARCH.update({
-							run_by_cache: true,
-							updated_results: updated,
-							document_count: count
-						}, {
-							where: {
-								id: favoriteSearch.id
-							}
-						});
-					}
-
-				} catch (err) {
-					this.logger.error(err.message, '6Z82DDP', userId);
 				}
 			}
 

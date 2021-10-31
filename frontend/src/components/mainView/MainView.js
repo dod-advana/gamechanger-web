@@ -13,7 +13,6 @@ import GCUserDashboard from '../user/GCUserDashboard';
 import GCAboutUs from '../aboutUs/GCAboutUs';
 import {
 	checkUserInfo,
-	clearDashboardNotification,
 	getUserData,
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
@@ -62,7 +61,7 @@ const MainView = (props) => {
 	}, [state, dispatch, pageLoaded]);
 
 	useEffect(() => {
-		const favSearchUrls = state.userData?.favorite_searches.map((search) => {
+		const favSearchUrls = state.userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 
@@ -151,6 +150,7 @@ const MainView = (props) => {
 			<GCUserDashboard state={state} dispatch={dispatch} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
+				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
 				saveFavoriteSearch={(
 					favoriteName,
 					favoriteSummary,
@@ -183,9 +183,6 @@ const MainView = (props) => {
 						dispatch
 					)
 				}
-				clearDashboardNotification={(type) =>
-					clearDashboardNotification(type, state, dispatch)
-				}
 				cloneData={state.cloneData}
 				checkUserInfo={() => {
 					return checkUserInfo(state, dispatch);
@@ -200,6 +197,11 @@ const MainView = (props) => {
 
 	const handleDeleteFavoriteSearch = async (search) => {
 		await gameChangerAPI.favoriteSearch(search);
+		await getUserData(dispatch);
+	};
+
+	const handleClearFavoriteSearchNotification = async (search) => {
+		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
 		await getUserData(dispatch);
 	};
 
@@ -293,8 +295,7 @@ const MainView = (props) => {
 								}}
 							>
 								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
-								{(state.pageDisplayed === PAGE_DISPLAYED.analystTools && state.analystToolsPageDisplayed !== 'Document Comparison Tool') && <span>Analyst Tools | {state.analystToolsPageDisplayed}</span>}
-								{(state.pageDisplayed === PAGE_DISPLAYED.analystTools && state.analystToolsPageDisplayed === 'Document Comparison Tool') && <span>Analyst Tools | {state.analystToolsPageDisplayed} <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b></span>}
+								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools | {state.analystToolsPageDisplayed} <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b></span>}
 								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && (
 									<span>User Dashboard</span>
 								)}

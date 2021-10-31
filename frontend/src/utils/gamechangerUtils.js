@@ -2,7 +2,6 @@ import _ from 'underscore';
 import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
-// import util from "./components/advana/api/util";
 import Config from '../config/config.js';
 import { getTextColorBasedOnBackground } from './graphUtils';
 import { useEffect } from 'react';
@@ -838,5 +837,17 @@ export const displayBackendError = (resp, dispatch = () => {}) => {
 			showBackendError: true,
 			backendErrorMsg: errorMessage,
 		});
+	}
+};
+
+export const convertDCTScoreToText = (score) => {
+	if (score >= 0.85) {
+		return 'High';
+	} else if (score >= 0.75 && score < 0.85) {
+		return 'Medium';
+	} else if (score >= 0.65 && score < 0.75) {
+		return 'Low';
+	} else {
+		return 'No Match';
 	}
 };
