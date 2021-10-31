@@ -41,6 +41,7 @@ const GCButton = (props) => {
 				cursor: !disabled ? 'pointer' : 'not-allowed',
 				fontSize: 16,
 				color: !disabled ? fontColor : 'rgb(255, 255, 255, .6)',
+				textTransform: 'none',
 				...style,
 			}}
 			{...remaining}

@@ -247,6 +247,7 @@ const FavoriteCard = (props) => {
 		cardTitle,
 		tiny_url,
 		handleDeleteFavorite,
+		handleClearFavoriteSearchNotification,
 		details,
 		overlayText,
 		summary,
@@ -286,6 +287,10 @@ const FavoriteCard = (props) => {
 		setPopoverAnchorEl(null);
 		handleDeleteFavorite(idx);
 	};
+
+	const handleClearNotification = () => {
+		handleClearFavoriteSearchNotification(idx);
+	}
 
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>
@@ -338,12 +343,14 @@ const FavoriteCard = (props) => {
 										className={'summary-title-link'}
 										href={`#/${tiny_url}`}
 										target={'_blank'}
+										onClick={handleClearNotification}
 									>
 										{cardTitle}
 									</Link>
 									{updated && (
 										<Chip
 											label="New Results"
+											onDelete={handleClearNotification}
 											style={{
 												backgroundColor: '#069FD9',
 												color: 'white',
@@ -459,6 +466,7 @@ const FavoriteCard = (props) => {
 FavoriteCard.propTypes = {
 	cardTitle: PropTypes.string.isRequired,
 	handleDeleteFavorite: PropTypes.func.isRequired,
+	handleClearFavoriteSearchNotification: PropTypes.func.isRequired,
 	summary: PropTypes.string.isRequired,
 	idx: PropTypes.number.isRequired,
 	tiny_url: PropTypes.string,

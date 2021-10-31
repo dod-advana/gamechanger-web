@@ -50,6 +50,7 @@ class SearchUtility {
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
+		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 
 	}
 
@@ -60,10 +61,11 @@ class SearchUtility {
 		return `${cloneName}_${hashed}`;
 	}
 
-	combineExpansionTerms(expansionDict, synonyms, key, abbreviationExpansions, userId) {
+	combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbreviationExpansions, userId) {
 		try {
 			let result = {};
 			let toReturn;
+			result[key] = [];
 
 			let nextSynIndex = 0;
 			let nextAbbIndex = 0;
@@ -71,9 +73,30 @@ class SearchUtility {
 			let nextIsSyn = false;
 			let nextIsAbb = true;
 			let timesSinceLastAdd = 0;
-			result = {};
-			result[key] = [];
-			while (result[key].length < 6 && timesSinceLastAdd < 18) {
+
+			let expandedWords = {}
+			let similarWords = {}
+			//let expandedWords= (typeof expansionDict['qexp']  === 'undefined') ? [] : expansionDict['qexp'] ;
+			if (expansionDict) {
+				expandedWords = expansionDict['qexp']
+				similarWords = expansionDict['wordsim']
+			}
+
+
+			let wordsList = [];
+			for (var word in similarWords){
+				wordsList = wordsList.concat(similarWords[word])
+			}
+			for (var word in expandedWords){
+				wordsList = wordsList.concat(expandedWords[word])
+			}
+
+			if (relatedSearches && relatedSearches.length > 0) {
+				relatedSearches.forEach((term) => {
+					result[key].push({phrase: term, source: 'related'})
+				})
+			}
+			while (result[key].length < 12 && timesSinceLastAdd < 18) {
 				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
 					let syn = synonyms[nextSynIndex];
 					let found = false;
@@ -98,18 +121,18 @@ class SearchUtility {
 						result[key].push({phrase: abb, source: 'abbreviations'});
 					}
 					nextAbbIndex++;
-				} else if (!nextIsAbb && !nextIsSyn && expansionDict && expansionDict[key] && expansionDict[key][nextMlIndex]) {
-					let phrase = expansionDict[key][nextMlIndex];
-					let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
-					if (cleanedPhrase && cleanedPhrase !== '') {
+				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
+					let phrase = wordsList[nextMlIndex];
+					//let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
+					if (phrase && phrase !== '') {
 						let found = false;
 						result[key].forEach((r) => {
-							if (r.phrase === cleanedPhrase) {
+							if (r.phrase === phrase) {
 								found = true;
 							}
 						});
 						if (!found) {
-							result[key].push({phrase: cleanedPhrase, source: 'ML-QE'});
+							result[key].push({phrase: phrase, source: 'ML-QE'});
 						}
 					}
 					nextMlIndex++;
@@ -126,9 +149,12 @@ class SearchUtility {
 					nextIsAbb = true;
 				}
 			}
+
 			toReturn = result;
 			let cleaned = this.cleanExpansions(key, toReturn);
+
 			// this.logger.info('cleaned: ' + cleaned);
+			
 			return cleaned;
 		} catch (err) {
 			const { message } = err;
@@ -140,25 +166,19 @@ class SearchUtility {
 		let cleaned = {};
 		cleaned[key] = [];
 		if (toReturn && toReturn[key] && toReturn[key].length) {
-			let phrases = [];
-			toReturn[key].forEach((x) => {
-				phrases.push(x.phrase);
-			});
-
-			phrases = phrases.sort();
-			let ordered = [];
-			phrases.forEach((phr) => {
-				toReturn[key].forEach((y) => {
-					if (y.phrase === phr) {
-						y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
-						if (y.phrase && y.phrase !== '' && y.phrase !== key) {
+			var ordered =[];
+			var currList = [];
+			let orig = key.replace(/[^\w\s]|_/g, "").trim()
+			currList.push(orig)
+			toReturn[key].forEach((y) => {
+					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
+					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
+					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
-						}
+							currList.push(y.phrase.toLowerCase())
 					}
 				});
-			});
-
-			cleaned[key] = ordered;
+			cleaned[key] = ordered
 		}
 
 		return cleaned;
@@ -1337,7 +1357,61 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
+		// need to caps all search text for ID and Title since it's stored like that in ES
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
+		let relatedSearches = []
 
+		try {
+			let similarWords = expansionDict['wordsim']
+			let simWordList = Object.keys(expansionDict['wordsim'])
+			for (var key in similarWords) {
+				simWordList = simWordList.concat(similarWords[key])
+			}
+			let similarWordsQuery = simWordList.join("* OR *")
+			const query = 
+				{
+					size: 1,
+					query: {
+						query_string: {
+							query: `*${similarWordsQuery}*`,
+							fuzziness: 5
+						}
+					},
+					aggs: {
+						related: {
+							terms: {
+								field: 'search_query',
+								min_doc_count: 5
+							},
+							aggs: {
+								user: { terms: {field: 'user_id', size: 2}}
+							}
+						}
+					}
+				}
+		
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			let aggs = results.body.aggregations.related.buckets;
+			let maxCount = 0;
+			if (aggs.length > 0) {
+				aggs.forEach(term => {
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					if (word !== searchText && term.user.buckets.length > 1){
+						word = word.replace(/\s{2,}/g," ");
+						if (!relatedSearches.includes(word) && maxCount < maxSearches){
+							relatedSearches.push(word);
+							maxCount += 1;
+						}
+					}
+				 });
+			}
+		} catch (err) {
+			this.logger.error(err.message, 'ALS01AZ', userId);
+		}
+
+		return relatedSearches
+	}
 
 	cleanUpIdEsResultsForGraphCache(raw, user) {
 		try {
@@ -1753,7 +1827,6 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 	
