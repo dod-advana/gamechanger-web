@@ -14,6 +14,7 @@ import {
 	getTrackingNameForFactory,
 	invertedCrawlerMappingFunc,
 } from '../utils/gamechangerUtils';
+import { handleSaveFavoriteTopic } from '../utils/sharedFunctions';
 import Pagination from 'react-js-pagination';
 import { Card } from '../components/cards/GCCard';
 import GCAccordion from '../components/common/GCAccordion';
@@ -131,233 +132,16 @@ const FavoriteTopic = styled.button`
 	> i {
 		color: ${({ favorited }) => (favorited ? '#E9691D' : '#B0B9BE')};
 	}
-	&:hover {
-		background-color: #e9691d;
-		color: white;
-		> i {
-			color: ${({ favorited }) => (favorited ? '#FFFFFF' : '#B0B9BE')};
-		}
-	}
 `;
 
-function useQuery(location, setQuery, query) {
-	if (!query) {
-		setQuery(new URLSearchParams(location.search));
-	}
-}
 
-const getEntityData = async (name, cloneName) => {
-	const data = {};
-
-	const resp = await gameChangerAPI.callGraphFunction({
-		functionName: 'getEntityDataDetailsPage',
-		cloneName: cloneName,
-		options: {
-			entityName: name,
-		},
-	});
-
-	if (resp.data.nodes) {
-		const tmpEntity = resp.data.nodes[0];
-		tmpEntity.details = [];
-		Object.keys(tmpEntity).forEach((key) => {
-			if (tmpEntity[key] !== '') {
-				if (
-					key !== 'image' &&
-					key !== 'properties' &&
-					key !== 'label' &&
-					key !== 'value' &&
-					key !== 'details' &&
-					key !== 'id'
-				) {
-					if (key === 'website') {
-						tmpEntity.details.push({
-							name: key.charAt(0).toUpperCase() + key.slice(1),
-							value: <a href={tmpEntity[key]}>{tmpEntity[key]}</a>,
-						});
-					} else {
-						tmpEntity.details.push({
-							name: key.charAt(0).toUpperCase() + key.slice(1),
-							value: tmpEntity[key],
-						});
-					}
-				}
-			}
-		});
-
-		data.entity = tmpEntity;
-	}
-
-	data.graph = resp.data.graph;
-
-	return data;
-};
-
-const getTopicData = async (name, cloneName) => {
-	const data = { topic: {}, graph: { nodes: [], edges: [] }, isNeo4j: true };
-
-	const resp = await gameChangerAPI.callGraphFunction({
-		functionName: 'getTopicDataDetailsPage',
-		cloneName: cloneName,
-		options: {
-			topicName: name,
-		},
-	});
-
-	if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0) {
-		const tmpTopic = resp.data.topicData.nodes[0];
-		tmpTopic.details = [
-			{
-				key: 'Documents Referenced',
-				value: resp.data.topicData.nodeProperties.documentCountsForTopic.low,
-			},
-		];
-
-		data.topic = tmpTopic;
-
-		data.graph = resp.data.graph;
-	} else {
-		data.topic = { name, details: [] };
-		data.isNeo4j = false;
-	}
-
-	return data;
-};
-
-const getDocumentData = async (doc_id, cloneName) => {
-	const data = { document: {} };
-	const resp = await gameChangerAPI.callSearchFunction({
-		functionName: 'getSingleDocumentFromES',
-		cloneName: cloneName,
-		options: {
-			docIds: [doc_id],
-		},
-	});
-
-	data.document = resp.data.docs[0];
-
-	const docData = getMetadataForPropertyTable(data.document);
-	const { ref_list = [] } = data.document;
-	const previewDataReflist = getReferenceListMetadataPropertyTable(
-		ref_list,
-		true
-	);
-
-	const labelText = data.document.isRevoked
-		? 'Cancel Date'
-		: 'Verification Date';
-	let dateText = 'Unknown';
-	if (
-		data.document.current_as_of !== undefined &&
-		data.document.current_as_of !== ''
-	) {
-		const currentDate = new Date(data.document.current_as_of);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-			currentDate
-		);
-		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-			currentDate
-		);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-			currentDate
-		);
-		dateText = `${month}-${day}-${year}`;
-	}
-
-	let publicationDate;
-	if (
-		data.document.publication_date_dt !== undefined &&
-		data.document.publication_date_dt !== ''
-	) {
-		const currentDate = new Date(data.document.publication_date_dt);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-			currentDate
-		);
-		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-			currentDate
-		);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-			currentDate
-		);
-		publicationDate = `${month}-${day}-${year}`;
-	} else {
-		publicationDate = `unknown`;
-	}
-
-	const favoritableData = [
-		{ Key: 'Published', Value: publicationDate },
-		{ Key: labelText, Value: dateText },
-		...addFavoriteTopicToMetadata(docData, cloneName),
-	];
-
-	data.document.details = favoritableData;
-	data.document.refList = previewDataReflist;
-
-	return data;
-};
-
-const getSourceData = async (searchText, cloneName) => {
-	const t0 = new Date().getTime();
-	const { data } = await gameChangerAPI.callSearchFunction({
-		functionName: 'getDocumentsBySourceFromESHelper',
-		cloneName,
-		options: {
-			searchText: invertedCrawlerMappingFunc(searchText),
-		},
-	});
-	const t1 = new Date().getTime();
-	data.timeFound = ((t1 - t0) / 1000).toFixed(2);
-	return data;
-};
-
-const addFavoriteTopicToMetadata = (data, cloneName) => {
-	const temp = _.cloneDeep(data);
-	temp.map((metaData) => {
-		if (metaData.Key === 'Topics') {
-			metaData.Key = (
-				<div>
-					Topics
-					<br />
-					<b style={{ color: 'red' }}>(Beta)</b>
-				</div>
-			);
-			const topics = metaData.Value;
-			metaData.Value = (
-				<div>
-					{topics.map((topic, index) => {
-						topic = topic.trim();
-						return (
-							<FavoriteTopic
-								key={index}
-								onClick={(event) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'TopicOpened',
-										topic
-									);
-									window.open(
-										`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
-									);
-								}}
-								favorited={false}
-							>
-								{topic}
-							</FavoriteTopic>
-						);
-					})}
-				</div>
-			);
-		}
-		return metaData;
-	});
-	return temp;
-};
 
 const GameChangerDetailsPage = (props) => {
 	const { location } = props;
 
 	const [cloneData, setCloneData] = useState({});
 	const [userData, setUserData] = useState({});
+	const [favoriteTopics, setFavoriteTopics] = useState([]);
 	const [entity, setEntity] = useState(null);
 	const [query, setQuery] = useState(null);
 	const [runningQuery, setRunningQuery] = useState(false);
@@ -393,6 +177,110 @@ const GameChangerDetailsPage = (props) => {
 
 	const graphRef = useRef();
 
+	function useQuery(location, setQuery, query) {
+		if (!query) {
+			setQuery(new URLSearchParams(location.search));
+		}
+	}
+	
+	const getEntityData = async (name, cloneName) => {
+		const data = {};
+	
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getEntityDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				entityName: name,
+			},
+		});
+	
+		if (resp.data.nodes) {
+			const tmpEntity = resp.data.nodes[0];
+			tmpEntity.details = [];
+			Object.keys(tmpEntity).forEach((key) => {
+				if (tmpEntity[key] !== '') {
+					if (
+						key !== 'image' &&
+						key !== 'properties' &&
+						key !== 'label' &&
+						key !== 'value' &&
+						key !== 'details' &&
+						key !== 'id'
+					) {
+						if (key === 'website') {
+							tmpEntity.details.push({
+								name: key.charAt(0).toUpperCase() + key.slice(1),
+								value: <a href={tmpEntity[key]}>{tmpEntity[key]}</a>,
+							});
+						} else {
+							tmpEntity.details.push({
+								name: key.charAt(0).toUpperCase() + key.slice(1),
+								value: tmpEntity[key],
+							});
+						}
+					}
+				}
+			});
+	
+			data.entity = tmpEntity;
+		}
+	
+		data.graph = resp.data.graph;
+	
+		return data;
+	};
+	
+	const getTopicData = async (name, cloneName) => {
+		const data = { topic: {}, graph: { nodes: [], edges: [] }, isNeo4j: true };
+	
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getTopicDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				topicName: name,
+			},
+		});
+	
+		if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0) {
+			const tmpTopic = resp.data.topicData.nodes[0];
+			tmpTopic.details = [
+				{
+					key: 'Documents Referenced',
+					value: resp.data.topicData.nodeProperties.documentCountsForTopic.low,
+				},
+			];
+	
+			data.topic = tmpTopic;
+	
+			data.graph = resp.data.graph;
+		} else {
+			data.topic = { name, details: [] };
+			data.isNeo4j = false;
+		}
+	
+		return data;
+	};
+	
+	const getSourceData = async (searchText, cloneName) => {
+		const t0 = new Date().getTime();
+		const { data } = await gameChangerAPI.callSearchFunction({
+			functionName: 'getDocumentsBySourceFromESHelper',
+			cloneName,
+			options: {
+				searchText: invertedCrawlerMappingFunc(searchText),
+			},
+		});
+		const t1 = new Date().getTime();
+		data.timeFound = ((t1 - t0) / 1000).toFixed(2);
+		return data;
+	};
+	
+	const dispatchUserData = (data) => {
+		setUserData(data.payload.userData);
+	}
+
+	
+
 	useQuery(location, setQuery, query);
 
 	useEffect(() => {
@@ -402,7 +290,157 @@ const GameChangerDetailsPage = (props) => {
 	useEffect(() => {
 		gcUserManagementAPI.getUserData().then((data) => {
 			setUserData(data.data);
+			const favoriteTopicList = data.data.favorite_topics?.map(t => {
+				return t.topic_name.toLowerCase();
+			});
+			setFavoriteTopics(favoriteTopicList);
 		});
+	},[])
+
+	useEffect(() => {
+		const addFavoriteTopicToMetadata = (data, cloneName) => {
+			const temp = _.cloneDeep(data);
+			temp.map((metaData) => {
+				if (metaData.Key === 'Topics') {
+					metaData.Key = (
+						<div>
+							Topics
+							<br />
+							<b style={{ color: 'red' }}>(Beta)</b>
+						</div>
+					);
+					const topics = metaData.Value;
+					metaData.Value = (
+						<div>
+							{topics.map((topic, index) => {
+								const favorite = favoriteTopics.includes(topic.toLowerCase());
+								topic = topic.trim();
+								return (
+									<FavoriteTopic
+										key={index}
+										onClick={(event) => {
+											trackEvent(
+												getTrackingNameForFactory(cloneName),
+												'TopicOpened',
+												topic
+											);
+											window.open(
+												`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
+											);
+										}}
+										favorited={favorite}
+									>
+										{topic}
+										<i
+											className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
+											style={{
+												color: favorite ? '#E9691D' : 'rgb(224,224,224)',
+												marginLeft: 10,
+												cursor: 'pointer',
+												fontSize: 20,
+											}}
+											onClick={(event) => {
+												event.stopPropagation();
+												handleSaveFavoriteTopic(
+													topic.toLowerCase(),
+													'',
+													!favorite,
+													dispatchUserData
+												);
+	
+												if(favorite) {
+													const newFavorites = [...favoriteTopics]
+													newFavorites.splice(favoriteTopics.indexOf(topic.toLowerCase()), 1);
+													setFavoriteTopics(newFavorites);
+												}else{
+													const newFavorites = [...favoriteTopics]
+													newFavorites.push(topic.toLowerCase());
+													setFavoriteTopics(newFavorites);
+												}
+											}}
+										/>
+									</FavoriteTopic>
+								);
+							})}
+						</div>
+					);
+				}
+				return metaData;
+			});
+			return temp;
+		};
+
+		const getDocumentData = async (doc_id, cloneName) => {
+			const data = { document: {} };
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getSingleDocumentFromES',
+				cloneName: cloneName,
+				options: {
+					docIds: [doc_id],
+				},
+			});
+		
+			data.document = resp.data.docs[0];
+		
+			const docData = getMetadataForPropertyTable(data.document);
+			const { ref_list = [] } = data.document;
+			const previewDataReflist = getReferenceListMetadataPropertyTable(
+				ref_list,
+				true
+			);
+		
+			const labelText = data.document.isRevoked
+				? 'Cancel Date'
+				: 'Verification Date';
+			let dateText = 'Unknown';
+			if (
+				data.document.current_as_of !== undefined &&
+				data.document.current_as_of !== ''
+			) {
+				const currentDate = new Date(data.document.current_as_of);
+				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
+					currentDate
+				);
+				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
+					currentDate
+				);
+				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
+					currentDate
+				);
+				dateText = `${month}-${day}-${year}`;
+			}
+		
+			let publicationDate;
+			if (
+				data.document.publication_date_dt !== undefined &&
+				data.document.publication_date_dt !== ''
+			) {
+				const currentDate = new Date(data.document.publication_date_dt);
+				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
+					currentDate
+				);
+				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
+					currentDate
+				);
+				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
+					currentDate
+				);
+				publicationDate = `${month}-${day}-${year}`;
+			} else {
+				publicationDate = `unknown`;
+			}
+		
+			const favoritableData = [
+				{ Key: 'Published', Value: publicationDate },
+				{ Key: labelText, Value: dateText },
+				...addFavoriteTopicToMetadata(docData, cloneName),
+			];
+		
+			data.document.details = favoritableData;
+			data.document.refList = previewDataReflist;
+		
+			return data;
+		};
 
 		const cloneName = query.get('cloneName');
 		gameChangerAPI.getCloneMeta({ cloneName }).then((data) => {
@@ -476,7 +514,7 @@ const GameChangerDetailsPage = (props) => {
 			default:
 				break;
 		}
-	}, [query]);
+	}, [query, favoriteTopics]);
 
 	useEffect(() => {
 		if (!entity || !cloneData) return;
@@ -522,14 +560,22 @@ const GameChangerDetailsPage = (props) => {
 			.getDocumentsForTopic(cloneData.clone_name, { docIds, searchText })
 			.then((resp) => {
 				const t1 = new Date().getTime();
-				setDocCount(resp.data.totalCount);
 				setDocResultsPage(1);
-				setDocResults(resp.data.docs);
-				setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE + 1));
-				if (resp.data.docs.length > 0) {
-					setTimeFound(((t1 - t0) / 1000).toFixed(2));
+				if(resp.data.docs){
+					setDocCount(resp.data.totalCount);
+					setDocResults(resp.data.docs);
+					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE + 1));
+					if (resp.data.docs.length > 0) {
+						setTimeFound(((t1 - t0) / 1000).toFixed(2));
+						setGettingDocuments(false);
+					}
+				}else{
+					setDocCount(0);
 					setGettingDocuments(false);
 				}
+				
+			}).catch(er => {
+				console.log(er)
 			});
 	}, [topic, graph, cloneData]);
 
@@ -606,6 +652,9 @@ const GameChangerDetailsPage = (props) => {
 			fallbackSources.s3 = undefined;
 			fallbackSources.admin = sealURLOverride;
 			fallbackSources.entity = entity.image;
+			entity.details.forEach((detail, i) => {
+				if(detail.name === 'NodeVec') entity.details.splice(i,1);
+			})
 		}
 
 		return (

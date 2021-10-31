@@ -82,7 +82,7 @@ const GCAboutUs = (props) => {
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;
 
-	if (categoryRefs.current.length !== arrLength) {
+	if (categoryRefs.current?.length !== arrLength) {
 		categoryRefs.current = Array(arrLength)
 			.fill()
 			.map((_, i) => categoryRefs.current[i] || createRef());

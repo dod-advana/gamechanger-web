@@ -231,20 +231,6 @@
   cursor: pointer;
   color: white
 }
-.view-toggle{
-  padding: 6px 12px;
-  line-height: 1.42857143;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  float: right;
-  width:34.34px;
-  margin-right: 25px;
-  cursor: pointer;
-  user-select: none;
-}
-.view-toggle:hover{
-  background-color: #eee;
-}
 .searchdemo-vertical-bar-toggle:hover {
   background-color: #131E43;
 }

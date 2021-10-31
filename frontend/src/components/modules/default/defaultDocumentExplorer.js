@@ -40,15 +40,9 @@ const styles = {
 	},
 	docExplorerPag: {
 		display: 'flex',
-		flexDirection: 'row-reverse',
 		width: '100%',
-		paddingRight: '25px',
 	},
 };
-function numberWithCommas(x) {
-	if (!x) return x;
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
 
 const getIframePreviewLinkInferred = (
 	filename,
@@ -300,7 +294,7 @@ export default function DocumentExplorer({
 	return (
 		<div
 			className="row"
-			style={{ height: 'calc(100% - 62px)', marginTop: '10px' }}
+			style={{ height: 'calc(100% - 70px)', marginTop: '10px' }}
 		>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
@@ -313,40 +307,56 @@ export default function DocumentExplorer({
 				}}
 			>
 				<div
-					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
+					className='doc-exp-nav'
+					style={{  
+						color: grey800, 
+						fontWeight: 'bold', 
+						display: 'flex',
+						marginBottom: '10px'
+					}}
 				>
+					<div
+						style={styles.docExplorerPag}
+						className="gcPagination docExplorerPag"
+					>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={resultsPerPage}
+							totalItemsCount={totalCount}
+							pageRangeDisplayed={3}
+							onChange={(page) => {
+								trackEvent(
+									getTrackingNameForFactory(cloneData.clone_name),
+									'DocumentExplorerInteraction',
+									'Pagination',
+									page
+								);
+								onPaginationClick(page);
+							}}
+						/>
+					</div>
 					{totalCount ? (
 						<div>
-							{numberWithCommas(totalCount)} results found.
-							<div className="view-toggle" onClick={() => handleViewToggle()}>
+							<div 
+								style={{ 
+									display: 'flex',
+									height: 45,
+									width: 45,
+									alignItems: 'center',
+									justifyContent: 'center',
+									fontSize: 18,
+									borderRadius: 4,
+									marginRight: 2  
+								}}
+								className="view-toggle" 
+								onClick={() => handleViewToggle()}
+							>
 								{viewTogle ? '+' : '-'}
 							</div>
 						</div>
 					) : (
 						'Make a search to get started.'
 					)}
-				</div>
-
-				<div
-					style={styles.docExplorerPag}
-					className="gcPagination docExplorerPag"
-				>
-					<Pagination
-						activePage={resultsPage}
-						itemsCountPerPage={resultsPerPage}
-						totalItemsCount={totalCount}
-						pageRangeDisplayed={6}
-						onChange={(page) => {
-							trackEvent(
-								getTrackingNameForFactory(cloneData.clone_name),
-								'DocumentExplorerInteraction',
-								'Pagination',
-								page
-							);
-							onPaginationClick(page);
-						}}
-						style={{ margin: '10px 0' }}
-					/>
 				</div>
 
 				{loading && (

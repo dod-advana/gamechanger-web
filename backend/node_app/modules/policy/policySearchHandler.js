@@ -38,18 +38,18 @@ class PolicySearchHandler extends SearchHandler {
 		this.favorite_Search = favorite_search;
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, userId, storeHistory) {
 		const {
 			offset,
 			useGCCache,
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId);
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, storeHistory);
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');
-		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId);
+		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 		// }
 
 		// cleaning incomplete double quote issue
@@ -61,7 +61,9 @@ class PolicySearchHandler extends SearchHandler {
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		if (storeHistory) {
+			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+		}
 		return enrichedResults;
 	}
 
@@ -102,7 +104,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	// searchHelper function breakouts
-	async createRecObject(body, userId){
+	async createRecObject(body, userId, storeHistory) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -149,7 +151,9 @@ class PolicySearchHandler extends SearchHandler {
 			await this.redisDB.select(redisAsyncClientDB);
 
 			// log query to ES
-			await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			if (storeHistory) {
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+			}
 			return {historyRec, cloneSpecificObject, clientObj};
 		} catch (e) {
 			this.logger.error(e.message, 'AC3CP8H');
@@ -162,14 +166,16 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			searchText,
 			forCacheReload = false,
+			cloneName,
 		} = body;
 		try {
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
-			const {synonyms, text} = this.thesaurusExpansion(searchText, termsArray);
+			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId)
+			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, termsArray[0], cleanedAbbreviations, userId);
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
@@ -195,16 +201,23 @@ class PolicySearchHandler extends SearchHandler {
 	thesaurusExpansion(searchText, termsArray){
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
+		let synList = []
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			lookUpTerm = termsArray[0].replace(/\"/g, '');
+			for(var term in termsArray){
+				lookUpTerm = termsArray[term].replace(/\"/g, '');
+				const synonyms = thesaurus.lookUp(lookUpTerm);
+				if (synonyms && synonyms.length > 1){
+					synList = synList.concat(synonyms.slice(0,2))
+				}
+			}
 		}
-		const synonyms = thesaurus.lookUp(lookUpTerm);
+		//const synonyms = thesaurus.lookUp(lookUpTerm);
 		let text = searchText;
 		if (!useText && termsArray && termsArray.length && termsArray[0]) {
 			text = termsArray[0];
 		}
-		return {synonyms, text};
+		return [synList, text];
 	}
 
 	async abbreviationCleaner(termsArray){
@@ -448,47 +461,6 @@ class PolicySearchHandler extends SearchHandler {
 					await this.storeRecordOfSearchInPg(historyRec, userId);
 				} catch (e) {
 					this.logger.error(e.message, 'MPK1GGN', userId);
-				}
-			} else {
-
-				try {
-
-					// if doing a cache reload, check favorite search stats
-					const hashed_user = sparkMD5.hash(userId);
-
-					// check if this search is a favorite
-					const favoriteSearch = await this.favorite_Search.findOne({
-						where: {
-							user_id: hashed_user,
-							tiny_url: tiny_url
-						}
-					});
-
-					if (favoriteSearch !== null) {
-
-						let updated = false;
-						let count = favoriteSearch.document_count;
-
-						// favorite search is updated
-						if (searchResults.totalCount > favoriteSearch.document_count) {
-							updated = true;
-							count = searchResults.totalCount;
-						}
-
-						// update the favorite search info
-						await this.favorite_Search.update({
-							run_by_cache: true,
-							updated_results: updated,
-							document_count: count
-						}, {
-							where: {
-								id: favoriteSearch.id
-							}
-						});
-					}
-
-				} catch (err) {
-					this.logger.error(err.message, 'K361YCJ', userId);
 				}
 			}
 		} catch (err) {

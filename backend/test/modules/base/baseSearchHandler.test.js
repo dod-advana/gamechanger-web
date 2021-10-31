@@ -26,24 +26,26 @@ describe('SearchHandler', function () {
 	};
 
 	describe('#search', () => {
-		it('it should return the body passed to it sense it is the base and doesnt do a search', async (done) => {
+		it('it should return the body passed to it sense it is the base and doesnt do a search', async () => {
 
 			const target = new SearchHandler(opts);
+			const searchHelperSpy = jest.spyOn(target, 'searchHelper');
 
 			try {
-				const actual = await target.search('test', 0, 20, {test: 'test'}, 'gamechanger', [], 'test');
+				const actual = await target.search('test', 0, 20, {test: 'test'}, 'gamechanger', [], 'test', true);
 				const expected = {cloneName: 'gamechanger', limit: 20, offset: 0, searchText: 'test', test: 'test'};
 				assert.deepStrictEqual(actual, expected);
-				done();
+				expect(searchHelperSpy).toHaveBeenCalledWith({body: expected, permissions: []}, 'test', true);
 			} catch (e) {
 				assert.fail(e);
-				done();
+			} finally {
+				searchHelperSpy.mockRestore();
 			}
 		});
 	});
 
 	describe('#getCachedResults', () => {
-		it('it should return fake cached results based off the request info', async (done) => {
+		it('it should return fake cached results based off the request info', async () => {
 
 			const target = new SearchHandler(opts);
 
@@ -72,19 +74,17 @@ describe('SearchHandler', function () {
 			const cloneSpecificObject = {};
 
 			try {
-				const actual = await target.getCachedResults(req, historyRec, cloneSpecificObject, 'Test');
+				const actual = await target.getCachedResults(req, historyRec, cloneSpecificObject, 'Test', true);
 				const expected = {isCached: true, test: ['test'], timeSinceCache: NaN};
 				assert.deepStrictEqual(actual, expected);
-				done();
 			} catch (e) {
 				assert.fail(e);
-				done();
 			}
 		});
 	});
 
 	describe('#storeCachedResults', () => {
-		it('it should store fake cached results based off the request info', async (done) => {
+		it('it should store fake cached results based off the request info', async () => {
 
 			const target = new SearchHandler(opts);
 
@@ -117,10 +117,8 @@ describe('SearchHandler', function () {
 				await target.storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, 'Test');
 				const expected = {gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e: '["Test"]', 'gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e:time': 'test', gamechanger_f740af5d2e2819eeb0063eca402fcce8: '{"test":["test"]}'};
 				assert.deepStrictEqual(redisData, expected);
-				done();
 			} catch (e) {
 				assert.fail(e);
-				done();
 			}
 		});
 	});
