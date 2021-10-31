@@ -16,6 +16,7 @@ import Pagination from 'react-js-pagination';
 import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../utils/gamechangerUtils';
 import {Card} from '../cards/GCCard';
 import CloseIcon from '@material-ui/icons/Close';
+import GCTooltip from '../common/GCToolTip';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -144,7 +145,7 @@ const DocumentInputContainer = styled.div`
 		 & .document-text {
 			border: 2px solid ${'#B6C6D8'} !important;
 			border-radius: 6px;
-			background-color: ${'#ffffff'};
+			background-color: ${'rgb(239, 242, 246)'};
 			margin: 30px 0px 30px 30px;
 			width: 100%;
 			height: 250px;
@@ -516,15 +517,17 @@ const GCDocumentsComparisonTool = (props) => {
 									</div>
 								</div>
 								<div className={'remove-document'}>
-									<IconButton
-										color="inherit"
-										aria-label="remove document"
-										component="span"
-										style={{color: 'red'}}
-										onClick={() => reset()}
-									>
-									    <CancelIcon fontSize={'inherit'} style={{fontSize: 20}}/>
-								    </IconButton>
+									<GCTooltip title={'Click to start over'} placement="top" arrow>
+										<IconButton
+											color="inherit"
+											aria-label="remove document"
+											component="span"
+											style={{color: 'red'}}
+											onClick={() => reset()}
+										>
+										    <CancelIcon fontSize={'inherit'} style={{fontSize: 20}}/>
+									    </IconButton>
+									</GCTooltip>
 								</div>
 							</div>
 						</DocumentInputContainer>

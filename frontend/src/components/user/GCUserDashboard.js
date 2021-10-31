@@ -27,7 +27,14 @@ import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
 import Modal from 'react-modal';
 import GCAccordion from '../common/GCAccordion';
-import { handleGenerateGroup, getSearchObjectFromString, setCurrentTime, getUserData, setState } from '../../utils/sharedFunctions';
+import {
+	handleGenerateGroup,
+	getSearchObjectFromString,
+	setCurrentTime,
+	getUserData,
+	setState,
+	clearDashboardNotification
+} from '../../utils/sharedFunctions';
 import GCGroupCard from '../../components/cards/GCGroupCard';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -40,7 +47,7 @@ const gameChangerAPI = new GameChangerAPI();
 const StyledBadge = withStyles((theme) => ({
 	badge: {
 		backgroundColor: '#AD0000',
-		right: '-11px',
+		right: '-11px !important',
 		top: 0,
 		color: 'white',
 		fontSize: 12,
@@ -294,8 +301,8 @@ const GCUserDashboard = (props) => {
 		updateUserData,
 		handleSaveFavoriteDocument,
 		handleDeleteSearch,
+		handleClearFavoriteSearchNotification,
 		saveFavoriteSearch,
-		clearDashboardNotification,
 		handleFavoriteTopic,
 		handleFavoriteOrganization,
 		checkUserInfo,
@@ -945,6 +952,7 @@ const GCUserDashboard = (props) => {
 				cardTitle={search.search_name}
 				tiny_url={search.tiny_url}
 				handleDeleteFavorite={handleDeleteFavoriteSearch}
+				handleClearFavoriteSearchNotification={_handleClearFavoriteSearchNotification}
 				summary={searchSettings}
 				details={searchDetails}
 				overlayText={searchOverlayText}
@@ -964,6 +972,12 @@ const GCUserDashboard = (props) => {
 		handleDeleteSearch(favoriteSearchesSlice[idx]);
 		updateUserData();
 	};
+
+	const _handleClearFavoriteSearchNotification = async (idx) => {
+		favoriteSearchesSlice[idx].updated_results = false;
+		handleClearFavoriteSearchNotification(favoriteSearchesSlice[idx]);
+		updateUserData();
+	}
 
 	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
@@ -2177,11 +2191,11 @@ const GCUserDashboard = (props) => {
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userFavorites"
-							onClick={() => clearDashboardNotification('favorites')}
+							onClick={() => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch)}
 						>
 							<StyledBadge
 								badgeContent={
-									userData.notifications ? userData.notifications.favorites : 0
+									userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
 								}
 							>
 								<Typography variant="h6" display="inline" title="cardView">
@@ -2435,14 +2449,14 @@ GCUserDashboard.propTypes = {
 		),
 		favorite_topics: PropTypes.arrayOf(PropTypes.object),
 		favorite_organizations: PropTypes.arrayOf(PropTypes.object),
-		notifications: PropTypes.objectOf(PropTypes.number),
+		notifications: PropTypes.objectOf(PropTypes.object),
 		api_key: PropTypes.string,
 	}),
 	updateUserData: PropTypes.func,
 	handleSaveFavoriteDocument: PropTypes.func,
 	handleDeleteSearch: PropTypes.func,
+	handleClearFavoriteSearchNotification: PropTypes.func,
 	saveFavoriteSearch: PropTypes.func,
-	clearDashboardNotification: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
 	handleFavoriteOrganization: PropTypes.func,
 	checkUserInfo: PropTypes.func,

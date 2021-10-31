@@ -1,7 +1,7 @@
 import React from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
-	CARD_FONT_SIZE,
+	CARD_FONT_SIZE, convertDCTScoreToText,
 	encode,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
@@ -964,7 +964,7 @@ const PolicyCardHandler = {
 							</GCAccordion>
 						)}
 						{item.paragraphs?.length > 0 &&
-							<GCAccordion header={'PARAGRAPH HITS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+							<GCAccordion header={`PARAGRAPH HITS: ${item.paragraphs.length}`} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 								<div className={'expanded-hits'}>
 									<div className={'page-hits'}>
 										{_.chain(item.paragraphs).map((paragraph, key) => {
@@ -979,7 +979,7 @@ const PolicyCardHandler = {
 												>
 													<div>
 														{paragraph.id && <div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${paragraph.id.split('_')[1]}`}</div>}
-														{paragraph.score && <div className={'par-hit'}>{`Score: ${paragraph.score.toFixed(5)}`}</div>}
+														{paragraph.score && <div className={'par-hit'}>{`Score: ${convertDCTScoreToText(paragraph.score)}`}</div>}
 													</div>
 													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 												</div>
@@ -1218,12 +1218,12 @@ const PolicyCardHandler = {
 					}
 					<div className={'paragraph-display'}>
 						<div className={'compare-block'}>
-							<Typography className={'compare-header'}>Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph: {item.paragraphs[compareIndex].id.split('_')[1]} Score: {item.paragraphs[compareIndex].score.toFixed(5)}</Typography>
-							{item.paragraphs[compareIndex]?.par_raw_text_t}
-						</div>
-						<div className={'compare-block'}>
 							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
 							{item.dataToQuickCompareTo[item.paragraphs[compareIndex].paragraphIdBeingMatched]}
+						</div>
+						<div className={'compare-block'}>
+							<Typography className={'compare-header'}>Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph: {item.paragraphs[compareIndex].id.split('_')[1]} Score: {convertDCTScoreToText(item.paragraphs[compareIndex].score)}</Typography>
+							{item.paragraphs[compareIndex]?.par_raw_text_t}
 						</div>
 					</div>
 				</StyledQuickCompareContent>
@@ -1449,14 +1449,16 @@ const PolicyCardHandler = {
 					}
 					{(state.listView && item.isCompare) &&
 						<>
-							<GCButton
-								id={'ignore'}
-								onClick={() => { console.log('Ignored') }}
-								isSecondaryBtn={true}
-								style={{height: 36}}
-							>
-								Ignore
-							</GCButton>
+							<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
+								<GCButton
+									id={'ignore'}
+									onClick={() => { console.log('Ignored') }}
+									isSecondaryBtn={true}
+									style={{height: 36}}
+								>
+									Ignore
+								</GCButton>
+							</GCTooltip>
 							<GCButton
 								id={'compare'}
 								onClick={() => { handleCompareDocument(item.filename) }}

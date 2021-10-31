@@ -31,7 +31,7 @@ class DataTrackerController {
 		this.getTrackedSource = this.getTrackedSource.bind(this);
 		this.crawlerDateHelper = this.crawlerDateHelper.bind(this);
 		this.getCrawlerMetadata = this.getCrawlerMetadata.bind(this);
-		this.getCrawlerSealData = this.getCrawlerSealData.bind(this);
+		this.getCrawlerInfoData = this.getCrawlerInfoData.bind(this);
 		this.getOrgSealData = this.getOrgSealData.bind(this);
 	}
 
@@ -207,7 +207,7 @@ class DataTrackerController {
 		}
 	}
 
-	async getCrawlerSealData(req, res) {
+	async getCrawlerInfoData(req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');

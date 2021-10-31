@@ -23,19 +23,21 @@ import {
 import { gcOrange } from '../common/gc-colors';
 import GCPrimaryButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import { trackEvent } from '../telemetry/Matomo';
+import {trackEvent} from '../telemetry/Matomo';
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CloseIcon from '@material-ui/icons/Close';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import {makeStyles, withStyles} from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
+import { setState } from '../../utils/sharedFunctions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
+
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -122,22 +124,18 @@ const getData = async ({
 			where,
 		});
 		return data;
-	} catch (e) {
-		return [];
+	} catch (err) {
+		this.logger.error(err.message, 'GEADAKS');
+		return []
 	}
 };
 
 const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = (props) => {
+	
+	const {state, dispatch} = props;
 	const classes = useStyles();
-	const { state } = props;
-	/*
-	const {
-		cloneData
-	} = props;
-	*/
-
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
@@ -199,7 +197,15 @@ const GCResponsibilityTracker = (props) => {
 		handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
 	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const handleFetchData = async ({ page, sorted, filtered }) => {
+	useEffect(() => {
+		if (state.reloadResponsibilityTable) {
+			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
+			setState(dispatch, {reloadResponsibilityTable: false});
+		}
+	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	                                                // TODO : Resolve ^^^ correctly
+
+	 const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
@@ -239,24 +245,56 @@ const GCResponsibilityTracker = (props) => {
 			});
 			const rtnResults = results.filter((result) => {
 				return selectedIds.includes(result.id);
-			});
+			})
 			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'ResponsibilityTracker',
-				'ExportCSV',
+				getTrackingNameForFactory(state.cloneData.clone_name), 
+				'ResponsibilityTracker', 
+				'ExportCSV', 
 				selectedIds.length > 0 ? rtnResults.length : results.length
 			);
 			exportToCsv(
-				'ResponsibilityData.csv',
-				selectedIds.length > 0 ? rtnResults : results,
+				'ResponsibilityData.csv', 
+				selectedIds.length > 0 ? rtnResults : results, 
 				true
 			);
-			setSelectedIds([]);
-			setSelectRows(false);
+			deselectRows();
 		} catch (e) {
 			console.error(e);
 		}
 	};
+
+	const reportButtonAction = async () => {
+		getRowData();
+	}
+
+	const getRowData = async () => {
+		try {
+			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
+			const rtnResults = results.filter(result => {
+				return selectedIds.includes(result.id);
+			})
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+
+			const rtn = selectedIds.length > 0 ? rtnResults : results;
+			const id = rtn[0].id;
+			const filename = rtn[0].filename;
+			const responsibilityText = rtn[0].responsibilityText;
+
+			setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
+
+			deselectRows();
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	const deselectRows = async () => {
+		responsibilityTableData.forEach(result => {
+			result.selected = false;
+		});
+		setSelectRows(false);
+		setSelectedIds([]);
+	}
 
 	const renderDataTable = () => {
 		const dataColumns = [
@@ -398,8 +436,7 @@ const GCResponsibilityTracker = (props) => {
 					if (rowInfo && rowInfo.row) {
 						return {
 							onClick: (e, t) => {
-								// console.log(filters);
-							},
+							 },
 							onMouseEnter: (e) => {
 								setHoveredRow(rowInfo.index);
 							},
@@ -449,47 +486,46 @@ const GCResponsibilityTracker = (props) => {
 			'pageNumber',
 			pageNumber
 		);
+		let tempSearchText;
+		if(searchText){
+			const searchTextArray = searchText.split(' ');
+			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
+			tempSearchText = searchTextArray.join(' ');
+		}
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${filename.replace('.json', '.pdf')}&${
-				searchText ? 'prevSearchText="' + searchText + '"&' : ''
+				searchText ? 'prevSearchText="' + tempSearchText + '"&' : ''
 			}pageNumber=${pageNumber}&cloneIndex=${state.cloneData?.clone_name}`
 		);
 	};
 
 	const handleSelected = (id) => {
-		let selected;
-		responsibilityTableData.forEach((result) => {
-			if (result.id === id) {
-				selected = !result.selected;
-				result.selected = selected;
+		responsibilityTableData.forEach(row => {
+			if(row['id'] === id){
+				row.selected = !row.selected;
+				trackEvent(
+					getTrackingNameForFactory(state.cloneData.clone_name), 
+					'ResponsibilityTracker', 
+					`ID ${row.selected ? 'Selected' : 'Des-Selected'}`, 
+					id);
+				if (row.selected) {
+					selectedIds.push(id);
+				} else {
+					selectedIds.splice(selectedIds.indexOf(id), 1);
+				}
 			}
-		});
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
-			`ID ${selected ? 'Selected' : 'Des-Selected'}`,
-			id
-		);
-		if (!selected) {
-			selectedIds.splice(selectedIds.indexOf(id), 1);
-		} else {
-			selectedIds.push(id);
-		}
-	};
-
+		})
+	}
+	
 	const handleCancelSelect = () => {
+		deselectRows();
 		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
+			getTrackingNameForFactory(state.cloneData.clone_name), 
+			'ResponsibilityTracker', 
 			'Cancel Select Rows'
 		);
-		responsibilityTableData.forEach((result) => {
-			result.selected = false;
-		});
-		setSelectRows(false);
-		setSelectedIds([]);
-	};
-
+	}
+	
 	const hideShowReportModal = (show) => {
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
@@ -692,8 +728,8 @@ const GCResponsibilityTracker = (props) => {
 						<GCPrimaryButton onClick={exportCSV}>
 							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 						</GCPrimaryButton>
-						<GCPrimaryButton buttonColor={'red'} onClick={() => hideShowReportModal(true)}>
-							Report <Icon className="fa fa-bug" style={styles.buttons}/>
+						<GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
+							Update <Icon className="fa fa-bug" style={styles.buttons}/>
 						</GCPrimaryButton>
 						<div style={styles.spacer}/>
 					</div>
@@ -719,11 +755,11 @@ const GCResponsibilityTracker = (props) => {
 					paperWidthLg: classes.dialogLg,
 				}}
 			>
-				<DialogTitle>
+				<DialogTitle >
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography
-							variant="h3"
-							display="inline"
+						<Typography 
+							variant="h3" 
+							display="inline" 
 							style={{ fontWeight: 700 }}
 						>
 							Report Issues with Data
