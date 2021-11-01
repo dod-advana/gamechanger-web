@@ -1097,7 +1097,11 @@ export default function GraphNodeCluster2D(props) {
 	const handleSimulationStop = onSimulationStop
 		? onSimulationStop
 		: () => {
-			setShouldRunSimulation(false);
+			if (graphData.nodes?.[0].x !== null) {
+				setShouldRunSimulation(false);
+			} else {
+				setShouldRunSimulation(true);
+			}
 
 			if (!graphRendered1stTime) {
 				recenterGraph();
