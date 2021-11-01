@@ -13,7 +13,7 @@ import { green, red, yellow, orange } from '@material-ui/core/colors';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
-import { getTrackingNameForFactory, crawlerMappingFunc } from '../../utils/gamechangerUtils';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 
 const TableRow = styled.div`
@@ -413,6 +413,9 @@ const GCDataStatusTracker = (props) => {
 				if (crawler_name === crawler.crawler){
                     return(crawler.data_source_s + ' - ' + crawler.source_title);
 				}
+                else {
+                    return (crawler_name);
+                }
 			}
 		}
 	}
