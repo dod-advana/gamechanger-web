@@ -37,11 +37,12 @@ const modelColumns = [
  */
 export default (props) => {
 	// Set state variables
-	const [downloadedModelsList, setDonwloadedModelsList] = useState({
+	const [downloadedModelsList, setDownloadedModelsList] = useState({
 		transformers: {},
 		sentence: {},
-		qexp: {},
+		qexp: {}
 	});
+
 	const [modelTable, setModelTable] = useState([]);
 	const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
@@ -53,6 +54,11 @@ export default (props) => {
 	const [selectedQEXP, setSelectedQEXP] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
+	const [evalModelName, setEvalModelName] = useState('');
+	const [buildType, setBuildType] = useState('sentence');
+	const [skipOriginal, setSkipOriginal] = useState(true);
+	const [validationData, setValidationData] = useState('latest');
+	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
@@ -113,7 +119,7 @@ export default (props) => {
 		try {
 			// set downloadedModelsList
 			const list = await gameChangerAPI.getModelsList();
-			setDonwloadedModelsList(list.data);
+			setDownloadedModelsList(list.data);
 			const modelList = [];
 			for (const type in list.data) {
 				for (const model in list.data[type]) {
@@ -122,8 +128,8 @@ export default (props) => {
 						model,
 						config: JSON.stringify(list.data[type][model], null, 2),
 					});
-				}
-			}
+				};
+			};
 			setModelTable(modelList);
 			props.updateLogs('Successfully queried models list', 0);
 		} catch (e) {
@@ -153,6 +159,7 @@ export default (props) => {
 	const triggerTrainModel = async () => {
 		try {
 			await gameChangerAPI.trainModel({
+				build_type: buildType,
 				version: version,
 				encoder_model: modelName,
 				gpu: gpu,
@@ -164,6 +171,28 @@ export default (props) => {
 			props.updateLogs('Error training model: ' + e.toString(), 2);
 		}
 	};
+
+	/**
+	 * @method triggerEvaluateModel
+	 */
+	const triggerEvaluateModel = async () => {
+		try {
+			await gameChangerAPI.trainModel({
+				build_type: 'eval',
+				model_name: evalModelName,
+				validation_data: validationData,
+				skip_original: skipOriginal,
+				sample_limit: sampleLimit
+			});
+			props.updateLogs('Started evaluating', 0);
+			props.getProcesses();
+		} catch (e) {
+			console.log('\nERROR EVALUATING MODEL')
+			console.log(e)
+			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
+		}
+	};
+	
 	/**
 	 * @method triggerReloadModels
 	 */
@@ -343,7 +372,7 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Reload Models</b>
+						<b>Reload Index</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
@@ -357,7 +386,7 @@ export default (props) => {
 						<div>
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									Sentence Model:
+									Sentence Index:
 								</div>
 								<Select
 									value={selectedSentence}
@@ -381,7 +410,7 @@ export default (props) => {
 
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									QEXP Model:
+									QEXP Index:
 								</div>
 								<Select
 									value={selectedQEXP}
@@ -438,6 +467,15 @@ export default (props) => {
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
+							<div style={{ width: '120px', display: 'inline-block' }}>
+								Build Type:
+							</div>
+							<Input
+								value={buildType}
+								onChange={(e) => setBuildType(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+							/>
 							<div
 								style={{
 									width: '60px',
@@ -474,6 +512,74 @@ export default (props) => {
 							<Checkbox
 								checked={upload}
 								onChange={(e) => setUpload(e.target.checked)}
+							/>
+						</div>
+					</div>
+
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Evaluate Model</b>
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerEvaluateModel();
+							}}
+							disabled={checkTraining()}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Evaluate
+						</GCPrimaryButton>
+						<div>
+							<div style={{ width: '120px', display: 'inline-block' }}>
+								Model:
+							</div>
+							<Input
+								value={evalModelName}
+								onChange={(e) => setEvalModelName(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+							/>
+							<div style={{ width: '120px', display: 'inline-block' }}>
+								Validation Data:
+							</div>
+							<Input
+								value={validationData}
+								onChange={(e) => setValidationData(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '20px',
+								}}
+							>
+								Skip Original:
+							</div>
+							<Checkbox
+								checked={skipOriginal}
+								onChange={(e) => setSkipOriginal(e.target.checked)}
+							/>
+						</div>
+						<div>
+							<div style={{ width: '120px', display: 'inline-block' }}>
+								Sample Limit:
+							</div>
+							<Input
+								value={sampleLimit}
+								onChange={(e) => setSampleLimit(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
 						</div>
 					</div>
