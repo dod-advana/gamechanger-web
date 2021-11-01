@@ -1637,7 +1637,7 @@ export default function PolicyGraphView(props) {
 		});
 
 		setShouldRender(true);
-		setReloadGraph(true);
+		setReloadGraph(!reloadGraph);
 		setRunSimulation(!runSimulation);
 	};
 
