@@ -560,14 +560,22 @@ const GameChangerDetailsPage = (props) => {
 			.getDocumentsForTopic(cloneData.clone_name, { docIds, searchText })
 			.then((resp) => {
 				const t1 = new Date().getTime();
-				setDocCount(resp.data.totalCount);
 				setDocResultsPage(1);
-				setDocResults(resp.data.docs);
-				setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE + 1));
-				if (resp.data.docs.length > 0) {
-					setTimeFound(((t1 - t0) / 1000).toFixed(2));
+				if(resp.data.docs){
+					setDocCount(resp.data.totalCount);
+					setDocResults(resp.data.docs);
+					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE + 1));
+					if (resp.data.docs.length > 0) {
+						setTimeFound(((t1 - t0) / 1000).toFixed(2));
+						setGettingDocuments(false);
+					}
+				}else{
+					setDocCount(0);
 					setGettingDocuments(false);
 				}
+				
+			}).catch(er => {
+				console.log(er)
 			});
 	}, [topic, graph, cloneData]);
 
