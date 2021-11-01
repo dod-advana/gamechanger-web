@@ -445,7 +445,7 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Train Model</b>
+						<b>Train Model / Re-Build Index</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
