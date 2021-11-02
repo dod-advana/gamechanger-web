@@ -57,24 +57,27 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	let PAGE_SIZE = 160;
+	let PAGE_SIZE = 20;
+	const DOCS_PER_PAGE = 1;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
 	const [docResponsibilityData, setDocResponsibilityData] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [pageIndex, setPageIndex] = useState(0);
 	const [sorts, setSorts] = useState([]);
 	const [filters, setFilters] = useState([]);
 	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
 	const [numPages, setNumPages] = useState(0);
+	const [offsets, setOffsets] = useState([]);
+	const [resultsPage, setResultsPage] = useState(1);
+	const[reloadResponsibilities, setReloadResponsibilities] = useState(true);
 
 	useEffect(() => {
-		if (state.reloadResponsibilityTable) {
-			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
-			setState(dispatch, {reloadResponsibilityTable: false});
+		if (reloadResponsibilities) {
+			handleFetchData({ page: resultsPage, sorted: sorts, filtered: filters });
+			setReloadResponsibilities(false);
 		}
-	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	 }, [reloadResponsibilities, resultsPage, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -86,8 +89,19 @@ export default function GCResponsibilityExplorer({
 					value: otherEntRespFiltersList,
 				});
 			}
+			let offset = 0;
+			let limit = 0;
+			for(let i = 1; i < page * DOCS_PER_PAGE; i++){
+				if(!offsets[i]) break;
+				offset += offsets[i];
+			}
+			for(let i = page * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE + DOCS_PER_PAGE; i++){
+				if(!offsets[i]) break;
+				limit += offsets[i];
+			}
 			const { totalCount, results = [] } = await getData({
-				offset: page * PAGE_SIZE,
+				limit,
+				offset,
 				sorted,
 				filtered: tmpFiltered,
 			});
@@ -139,6 +153,16 @@ export default function GCResponsibilityExplorer({
 				order,
 				where,
 			});
+			if(data.offsets){
+				const newOffsets = {};
+				data.offsets.forEach((resp, i) => {
+					if(!newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()]) {
+						newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] = 0;
+					}
+					newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] += resp;
+				})
+				setOffsets(newOffsets);
+			}
 			return data;
 		} catch (err) {
 			this.logger.error(err.message, 'GEADAKS');
@@ -178,9 +202,12 @@ export default function GCResponsibilityExplorer({
                 	dispatch={dispatch} 
                 	responsibilityData={docResponsibilityData} 
                 	loading={loading}
+                	docsPerPage={DOCS_PER_PAGE}
+                	totalCount={Object.keys(offsets).length}
+                	resultsPage={resultsPage}
                 	onPaginationClick={(page) => {
-                		console.log(page)
-                		// setState(dispatch, { resultsPage: page, runSearch: true });
+                		setResultsPage(page);
+                		setReloadResponsibilities(true);
                 	}}
                 />}
 		</div>

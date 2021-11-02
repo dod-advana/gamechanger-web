@@ -66,13 +66,13 @@ const getIframePreviewLinkInferred = (
 
 export default function ResponsibilityDocumentExplorer({
 	state,
-	responsibilityData,
+	responsibilityData = {},
 	loading,
 	data = [],
-	totalCount = 100,
+	totalCount,
 	prevSearchText = '',
 	resultsPage,
-	resultsPerPage,
+	docsPerPage,
 	onPaginationClick,
 	isClone = true,
 }) {
@@ -89,7 +89,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [prevIframPreviewLink, setPrevIframPreviewLink] = useState({
 		dataIdx: -1,
 		entityIdx: -1,
-		responsibilityIdx: 0
+		responsibilityIdx: -1
 	});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -142,17 +142,17 @@ export default function ResponsibilityDocumentExplorer({
 		]
 	);
 
-	useEffect(() => {
-		const { dataIdx } = iframePreviewLink;
-		const rec = data[dataIdx];
-		if (rec) {
-			setFilename(rec.filename);
-			setFileUrl(rec.download_url_s);
-		}
-	}, [filename, data, iframePreviewLink]);
+	// useEffect(() => {
+	// 	const { dataIdx } = iframePreviewLink;
+	// 	const rec = data[dataIdx];
+	// 	if (rec) {
+	// 		setFilename(rec.filename);
+	// 		setFileUrl(rec.download_url_s);
+	// 	}
+	// }, [filename, data, iframePreviewLink]);
 
 	useEffect(() => {
-		if (Object.keys(collapseKeys).length <= 0 && !loading) {
+		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach(doc => {
 				initialCollapseKeys[doc] = false;
@@ -162,7 +162,7 @@ export default function ResponsibilityDocumentExplorer({
 			})
 			setCollapseKeys(initialCollapseKeys);
 		}
-	}, [responsibilityData, collapseKeys, loading]);
+	}, [responsibilityData, collapseKeys]);
 
 	function handleRightPanelToggle() {
 		trackEvent(
@@ -251,7 +251,8 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	}
 
-	const getMetadataForTable = (data) => {
+	const getMetadataForTable = () => {
+		if(!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
 		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
 		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
@@ -326,7 +327,7 @@ export default function ResponsibilityDocumentExplorer({
 					>
 						<Pagination
 							activePage={resultsPage}
-							itemsCountPerPage={resultsPerPage}
+							itemsCountPerPage={docsPerPage}
 							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
 							onChange={(page) => {
@@ -336,6 +337,12 @@ export default function ResponsibilityDocumentExplorer({
 									'Pagination',
 									page
 								);
+								setIframePreviewLink({
+									dataIdx: 0,
+									entityIdx: 0,
+									responsibilityIdx: 0
+								})
+								setCollapseKeys({});
 								onPaginationClick(page);
 							}}
 						/>
@@ -491,7 +498,7 @@ export default function ResponsibilityDocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ paddingLeft: 0, paddingRight: 0 }}
+				style={{ paddingLeft: 0, paddingRight: 0, height: 800}}
 			>
 				<div
 					style={{
@@ -634,7 +641,7 @@ export default function ResponsibilityDocumentExplorer({
 					tableClass={'magellan-table'}
 					zoom={0.8}
 					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-					rows={getMetadataForTable(responsibilityData)}
+					rows={getMetadataForTable()}
 					height={'auto'}
 					dontScroll={true}
 					colWidth={colWidth}
