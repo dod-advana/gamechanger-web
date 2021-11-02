@@ -413,10 +413,12 @@ const GCDataStatusTracker = (props) => {
 				if (crawler_name === crawler.crawler){
                     return(crawler.data_source_s + ' - ' + crawler.source_title);
 				}
-                else {
-                    return (crawler_name);
-                }
 			}
+            for (let crawler of crawlerMapping.data) {
+                if (crawler_name !== crawler.crawler) {
+                    return(crawler_name);
+                }
+            }
 		}
 	}
 
