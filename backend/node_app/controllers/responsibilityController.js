@@ -5,7 +5,8 @@ const sparkMD5Lib = require('spark-md5');
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
-const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
+const { Op } = Sequelize;
 
 
 class ResponsibilityController {
@@ -84,56 +85,56 @@ class ResponsibilityController {
 
 	paraNumQuery(filename, text){
 		const query = {
-			"_source": {
-				"includes": [
-					"pagerank_r",
-					"kw_doc_score_r",
-					"orgs_rs",
-					"topics_rs"
+			'_source': {
+				'includes': [
+					'pagerank_r',
+					'kw_doc_score_r',
+					'orgs_rs',
+					'topics_rs'
 				]
 			},
-			"stored_fields": [
-				"filename",
+			'stored_fields': [
+				'filename',
 			],
-			"from": 0,
-			"size": 1,
-			"track_total_hits": true,
-			"query": {
-				"bool": {
-					"must": [],
-					"should": [
+			'from': 0,
+			'size': 1,
+			'track_total_hits': true,
+			'query': {
+				'bool': {
+					'must': [],
+					'should': [
 						{
-							"nested": {
-								"path": "paragraphs",
-								"inner_hits": {
-									"_source": false,
-									"stored_fields": [
-										"paragraphs.par_inc_count",
-										"paragraphs.filename",
-										"paragraphs.par_raw_text_t"
+							'nested': {
+								'path': 'paragraphs',
+								'inner_hits': {
+									'_source': false,
+									'stored_fields': [
+										'paragraphs.par_inc_count',
+										'paragraphs.filename',
+										'paragraphs.par_raw_text_t'
 									],
 								},
-								"query": {
-									"bool": {
-										"should": [
+								'query': {
+									'bool': {
+										'should': [
 											{
-												"query_string": {
-													"query": text,
-													"default_field": "paragraphs.par_raw_text_t",
-													"default_operator": "or",
-													"fuzzy_max_expansions": 100,
-													"fuzziness": "AUTO"
+												'query_string': {
+													'query': text,
+													'default_field': 'paragraphs.par_raw_text_t',
+													'default_operator': 'or',
+													'fuzzy_max_expansions': 100,
+													'fuzziness': 'AUTO'
 												}
 											},
 										],
-										"must": [
+										'must': [
 											{
-												"query_string": {
-													"query": filename,
-													"default_field": "paragraphs.filename",
-													"default_operator": "and",
-													"fuzzy_max_expansions": 100,
-													"fuzziness": "AUTO"
+												'query_string': {
+													'query': filename,
+													'default_field': 'paragraphs.filename',
+													'default_operator': 'and',
+													'fuzzy_max_expansions': 100,
+													'fuzziness': 'AUTO'
 												}
 											}
 										],
@@ -143,13 +144,13 @@ class ResponsibilityController {
 							}
 						}
 					],
-					"minimum_should_match": 1,
+					'minimum_should_match': 1,
 				}
 			},
-			"sort": [
+			'sort': [
 				{
-					"_score": {
-						"order": "desc"
+					'_score': {
+						'order': 'desc'
 					}
 				}
 			]
@@ -184,7 +185,7 @@ class ResponsibilityController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
-			const { cloneData = {}, filename = "", text = "" } = req.body;
+			const { cloneData = {}, filename = '', text = '' } = req.body;
 			let esQuery = this.paraNumQuery(filename, text);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
@@ -290,8 +291,9 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const {limit = 10, offset = 0, order = [], where = []} = req.body;
-			order.push(['id', 'ASC']);
+			const {offset = 0, order = [], where = []} = req.body;
+			let { limit =10 } = req.body;
+			order.push(['filename', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
 				if (id === 'id') {
@@ -320,6 +322,18 @@ class ResponsibilityController {
 				}
 			});
 			tmpWhere['status'] = {[Op.not]: 'rejected'};
+			const docOffsets = await this.responsibilities.findAndCountAll({
+				where: tmpWhere,
+				group: 'filename',
+				order: order,
+				attributes: [
+					[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
+					'filename',
+				]
+			});
+			const newOffsets = [];
+			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
+			if(!limit) limit = newOffsets[0];
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
@@ -335,7 +349,7 @@ class ResponsibilityController {
 					'documentsReferenced'
 				]
 			});
-			res.status(200).send({totalCount: results.count, results: results.rows});
+			res.status(200).send({offsets: newOffsets, totalCount: results.count, results: results.rows});
 
 		} catch (err) {
 			this.logger.error(err, 'ASDED20', userId);
@@ -381,10 +395,10 @@ class ResponsibilityController {
 				responsibilityText: annotatedResponsibilityText,
 				status: 'revised'
 			},
-				{
-					where: { id: id },
-					subQuery: false
-				}
+			{
+				where: { id: id },
+				subQuery: false
+			}
 			);
 			res.status(200).send();
 
