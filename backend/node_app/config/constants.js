@@ -111,6 +111,7 @@ module.exports = Object.freeze({
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
+		legislation_index: 'gamechanger_legislation',
 		history_index: 'search_history',
 		requestTimeout: 60000
 	},
