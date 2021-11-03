@@ -36,32 +36,35 @@ USER "$APP_UID:$APP_GID"
 ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
+
+COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
+COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
+
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
         _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
         && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
-    ))
-
-RUN cd "$APP_SHARED_DIR" \
-    && npm install nodemon \
-    && npm install sequelize-cli \
-    && npm install jest
-
-# note on copy+chown: do not use $USER var, it will - surprisingly - be root
-COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
-WORKDIR "${APP_FRONTEND_DIR}"
-RUN npm install --production
-COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
-RUN npm run build
-
-COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
-WORKDIR "${APP_BACKEND_DIR}"
-RUN npm install --production
-
-COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
-
-RUN mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
-RUN cd "${APP_BACKEND_DIR}" && rm -rf "${APP_FRONTEND_DIR}"
+    )) \
+    && (\ 
+        cd "$APP_SHARED_DIR" \
+        && npm install nodemon \
+        && npm install sequelize-cli \
+        && npm install jest \
+    )\
+    && (\
+        cd "${APP_FRONTEND_DIR}" \
+        && npm install --production \
+        && npm run build \
+    )\
+    && (\
+        cd "${APP_BACKEND_DIR}" \
+        && npm install --production \
+        && mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}" \
+        && cd "${APP_BACKEND_DIR}" \
+        && rm -rf "${APP_FRONTEND_DIR}" \
+    )\
+    && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
 # http & https
 EXPOSE 8990 8443
