@@ -337,7 +337,6 @@ export default function SideBar(props) {
 			}
 		}
 		let topTermsArr = Array.from(topTerms);
-		console.log(topTermsArr);
 		topTermsArr = topTermsArr.map((term) => {
 			return {
 				...term,

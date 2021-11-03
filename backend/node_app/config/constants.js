@@ -111,6 +111,7 @@ module.exports = Object.freeze({
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
+		legislation_index: 'gamechanger_legislation',
 		history_index: 'search_history',
 		requestTimeout: 60000
 	},
@@ -211,5 +212,13 @@ module.exports = Object.freeze({
 		ORGANIZATION: process.env.SERVICE_ACCOUNT_ORG,
 		ENVIRONMENT: process.env.SERVICE_ACCOUNT_ENV,
 	},
-	REQUEST_TYPE_ID: 113
+	REQUEST_TYPE_ID: 113,
+	JIRA_CONFIG:{
+		username: process.env.JIRA_USERNAME,
+		password: process.env.JIRA_PASSWORD,
+		domain: process.env.JIRA_DOMAIN,
+		project_key: process.env.JIRA_PROJECT_KEY,
+		rating_id: process.env.JIRA_RATING_ID,
+		feedbackType: process.env.JIRA_FEEDBACK_TYPE
+	},
 });

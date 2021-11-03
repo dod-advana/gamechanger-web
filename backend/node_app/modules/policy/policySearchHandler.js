@@ -134,7 +134,13 @@ class PolicySearchHandler extends SearchHandler {
 			searchFields = {},
 			includeRevoked
 		} = body;
-		const clientObj = {esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index};
+		
+		const clientObj = {
+			esClientName: 'gamechanger',
+			esIndex: body.archivedCongressSelected ?
+				[this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index] :
+				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index
+		};
 
 		try {
 			historyRec.searchText = searchText;
