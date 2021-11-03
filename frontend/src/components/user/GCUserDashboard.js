@@ -2176,7 +2176,7 @@ const GCUserDashboard = (props) => {
 	}
 
 	return (
-		<div style={styles.tabContainer}>
+		<div style={styles.tabContainer} id='gc-user-dash'>
 			<Tabs
 				onSelect={(tabIndex, lastIndex, event) =>
 					handleTabClicked(tabIndex, lastIndex, event)
