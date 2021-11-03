@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="node:14"
+ARG BASE_IMAGE="registry.access.redhat.com/ubi8/nodejs-14:1-50"
 FROM $BASE_IMAGE
 
 # to support RHEL-based and DEBIAN-based version of node
