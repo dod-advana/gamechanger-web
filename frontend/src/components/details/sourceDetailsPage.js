@@ -32,8 +32,7 @@ const getSourceData = async (source, cloneName, page) => {
 	return data;
 };
 
-const SourceDetailsPage = (props) => {
-	const { source, cloneData, initialSourceData } = props;
+const SourceDetailsPage = ({ source, cloneData, initialSourceData, userData, rawSearchResults }) => {
 	const upperSource = source
 		.split(' ')
 		.map((s) => s.charAt(0).toUpperCase() + s.substring(1))
@@ -63,6 +62,8 @@ const SourceDetailsPage = (props) => {
 						componentStepNumbers: {},
 						listView: true,
 						showSideFilters: false,
+						userData,
+						rawSearchResults
 					}}
 					dispatch={() => {}}
 				/>
