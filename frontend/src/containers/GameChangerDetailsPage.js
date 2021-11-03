@@ -976,6 +976,8 @@ const GameChangerDetailsPage = (props) => {
 					source={source}
 					cloneData={cloneData}
 					initialSourceData={initialSourceData}
+					userData={userData}
+					rawSearchResults={docResults}
 				/>
 			)}
 
