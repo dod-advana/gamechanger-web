@@ -61,7 +61,7 @@ S3_REGION="${S3_REGION:-us-east-1}"
 
 PG_HOST="${PG_HOST:-postgres}"
 PG_PORT="${PG_PORT:-5432}"
-PG_UM_DB="${PG_UM_DB:-uot}"
+PG_UM_DB="${PG_UM_DB:-postgres}"
 PG_DST_DB="${PG_DST_DB:-data_api}"
 PG_USER="${PG_USER:-postgres}"
 PG_PASSWORD="${PG_PASSWORD:-password}"
