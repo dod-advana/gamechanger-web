@@ -16,7 +16,7 @@ import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils'
 
 
 const StyledFavoriteDocumentCard = styled.div`
-	width: 387px;
+	width: 387px !important;
 	height: 250px;
 	background-color: #f4f4f4;
 	border-radius: 6px;
