@@ -36,8 +36,8 @@ module.exports = Object.freeze({
 			game_changer: {
 				username: process.env.POSTGRES_USER_GAME_CHANGER,
 				password: process.env.POSTGRES_PASSWORD_GAME_CHANGER,
-				database: 'game_changer',
-				data_api_database: 'data_api',
+				database: process.env.POSTGRES_DB_GAME_CHANGER?.trim() || 'game_changer',
+				data_api_database: process.env.PG_DST_DB?.trim() || 'data_api',
 				host: process.env.POSTGRES_HOST_GAME_CHANGER,
 				port: 5432,
 				dialect: 'postgres',
@@ -46,7 +46,7 @@ module.exports = Object.freeze({
 			'gc-orchestration': {
 				username: process.env.POSTGRES_USER_GC_ORCHESTRATION,
 				password: process.env.POSTGRES_PASSWORD_GC_ORCHESTRATION,
-				database: 'gc-orchestration',
+				database: process.env.POSTGRES_DB_GC_ORCHESTRATION?.trim() || 'gc-orchestration',
 				host: process.env.POSTGRES_HOST_GC_ORCHESTRATION,
 				port: 5432,
 				dialect: 'postgres',
@@ -55,7 +55,7 @@ module.exports = Object.freeze({
 			uot: {
 				username: process.env.POSTGRES_USER_UOT,
 				password: process.env.POSTGRES_PASSWORD_UOT,
-				database: 'uot',
+				database: process.env.PG_UM_DB?.trim() || 'uot',
 				host: process.env.POSTGRES_HOST_UOT,
 				port: 5432,
 				dialect: 'postgres',
@@ -64,7 +64,7 @@ module.exports = Object.freeze({
 			eda: {
 				username: process.env.POSTGRES_USER_EDA,
 				password: process.env.POSTGRES_PASSWORD_EDA,
-				database: 'eda',
+				database: process.env.POSTGRES_DB_EDA?.trim() || 'eda',
 				host: process.env.POSTGRES_HOST_EDA,
 				port: 5432,
 				dialect: 'postgres',
