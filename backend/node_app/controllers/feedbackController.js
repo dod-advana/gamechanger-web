@@ -1,6 +1,11 @@
 const FEEDBACK = require('../models').feedback;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
+const constants = require('../config/constants');
+const https = require('https');
+const fs = require('fs');
+const { JIRA_CONFIG } = constants;
+const axios = require('axios').default;
 
 class FeedbackController {
 	constructor(opts = {}) {
@@ -15,11 +20,12 @@ class FeedbackController {
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
+		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
 	}
 
-    async sendIntelligentSearchFeedback(req, res) {
+	async sendIntelligentSearchFeedback(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
-    	const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
+		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
 			const feedback = await this.feedback.create({ 
 				event_name: eventName, 
@@ -81,6 +87,46 @@ class FeedbackController {
 		} catch (err) {
 			this.logger.error(err, '9FCQYV2', userId);
 			res.status(500).send(err);
+		}
+	}
+
+	async sendJiraFeedback(req, res) {
+		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		try{
+			const {name, email, feedback, rating} = req.body;
+
+			const authConfig = {
+				httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+				auth: {
+					username: JIRA_CONFIG.username,
+					password: JIRA_CONFIG.password
+				}
+			};
+
+			const url = `https://${JIRA_CONFIG.domain}/rest/api/2/issue/`;
+
+			const data = {
+				'fields': {
+					'project': {
+						'key': JIRA_CONFIG.project_key
+					},
+					'summary': 'User Submitted Feedback',
+					'description': `${feedback}. \n *Reporter*: ${name} \n *E-mail*: [mailto:${email}]`,
+					[JIRA_CONFIG.rating_id]: {
+						'value': rating + ''
+					},
+					'issuetype': {
+						'name': JIRA_CONFIG.feedbackType
+					}
+				}
+			};
+			
+			const result = await axios.post(url, data, authConfig);
+	
+			res.status(201).send(result.data);
+		} catch(err) {
+			this.logger.error(err, '0KYXA1V', userId);
+			res.status(500).send({error: true});
 		}
 	}
 }

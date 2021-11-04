@@ -16,7 +16,7 @@ import GCButton from '../common/GCButton';
 import {CardButton} from '../common/CardButton';
 
 const StyledFavoriteDocumentCard = styled.div`
-	width: 387px;
+	width: 387px !important;
 	height: 250px;
    background-color: #F4F4F4;
    border-radius: 6px;
