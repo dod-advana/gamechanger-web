@@ -61,8 +61,7 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     )\
     && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
-COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
-COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
+COPY --chown="$APP_UID:$APP_GID" ./ "${APP_DIR}"
 
 RUN (\
         cd "${APP_FRONTEND_DIR}" \
