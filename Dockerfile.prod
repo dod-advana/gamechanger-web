@@ -38,8 +38,7 @@ ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 
 COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
-COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
-COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
+COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
@@ -55,16 +54,23 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && (\
         cd "${APP_FRONTEND_DIR}" \
         && npm install --production \
-        && npm run build \
     )\
     && (\
         cd "${APP_BACKEND_DIR}" \
         && npm install --production \
+    )\
+    && rm -rf "${NPM_CONFIG_USERCONFIG}"
+
+COPY --chown="$APP_UID:$APP_GID" ./frontend "${APP_FRONTEND_DIR}"
+COPY --chown="$APP_UID:$APP_GID" ./backend "${APP_BACKEND_DIR}"
+
+RUN (\
+        cd "${APP_FRONTEND_DIR}" \
+        && npm run build \
         && mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}" \
         && cd "${APP_BACKEND_DIR}" \
         && rm -rf "${APP_FRONTEND_DIR}" \
-    )\
-    && rm -rf "${NPM_CONFIG_USERCONFIG}"
+    )
 
 # http & https
 EXPOSE 8990 8443
