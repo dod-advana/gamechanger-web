@@ -320,7 +320,7 @@ export default class GameChangerAPI {
 		cloneData = { clone_name: 'gamechanger' }
 	) => {
 		return new Promise((resolve, reject) => {
-			const s3Bucket = cloneData?.s3_bucket ?? 'advana-raw-zone/bronze';
+			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 
 			let filename = encodeURIComponent(
 				`gamechanger${
