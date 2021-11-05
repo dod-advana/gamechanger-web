@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import _ from 'underscore';
+import _, { isElement } from 'underscore';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
 import SimpleTable from '../common/SimpleTable';
@@ -16,6 +16,7 @@ import Pagination from 'react-js-pagination';
 import { trackEvent } from '../telemetry/Matomo';
 // import GamechangerPdfViewer from '../documentViewer/PDFViewer'
 import PDFHighlighter from './PDFHighlighter';
+import GCButton from '../common/GCButton';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -43,7 +44,7 @@ const styles = {
 
 const getIframePreviewLinkInferred = (
 	filename,
-	prevSearchText,
+	responsibilityText,
 	pageNumber,
 	isClone = false,
 	cloneData = {}
@@ -52,7 +53,7 @@ const getIframePreviewLinkInferred = (
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				prevSearchText,
+				responsibilityText,
 				pageNumber,
 				isClone,
 				cloneData
@@ -97,28 +98,24 @@ export default function ResponsibilityDocumentExplorer({
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [viewTogle, setViewTogle] = useState(false);
 	const [fileUrl, setFileUrl] = useState(null);
-	const [filename, setFilename] = useState(null);
 	const [isEditing, setIsEditing] = useState(true);
+	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null) {
-				const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
-				const rec = data[dataIdx];
+				const rec = Object.keys(responsibilityData).length;
 				if (rec) {
-					// const filepath = rec.filepath;
-
-					const pageObj = rec.pageHits ? rec.pageHits[entityIdx] : {};
-					const pageNumber = pageObj ? pageObj.pageNumber : 1;
+					const pageNumber = 1;
 					if (
-						filename &&
+						selectedResponsibility.filename &&
 						JSON.stringify(prevIframPreviewLink) !==
 							JSON.stringify(iframePreviewLink)
 					) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
-							filename,
-							prevSearchText,
+							selectedResponsibility.filename,
+							selectedResponsibility.responsibilityText,
 							pageNumber,
 							isClone,
 							cloneData
@@ -133,23 +130,25 @@ export default function ResponsibilityDocumentExplorer({
 		},
 		[
 			iframePreviewLink,
-			prevSearchText,
+			selectedResponsibility,
 			prevIframPreviewLink,
 			isClone,
 			cloneData,
-			data,
-			filename,
+			responsibilityData,
 		]
 	);
 
-	// useEffect(() => {
-	// 	const { dataIdx } = iframePreviewLink;
-	// 	const rec = data[dataIdx];
-	// 	if (rec) {
-	// 		setFilename(rec.filename);
-	// 		setFileUrl(rec.download_url_s);
-	// 	}
-	// }, [filename, data, iframePreviewLink]);
+	useEffect(() => {
+		if(Object.keys(responsibilityData).length){
+			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
+			const doc = Object.keys(responsibilityData)[dataIdx];
+			const entity = Object.keys(responsibilityData[doc])[entityIdx];
+			const resp = responsibilityData[doc][entity][responsibilityIdx];
+			if (resp) {
+				setSelectedResponsibility(resp);
+			}
+		}
+	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
 		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
@@ -266,9 +265,53 @@ export default function ResponsibilityDocumentExplorer({
 		const metaData = [];
 		Object.keys(responsibility).forEach(key => {
 			if(keyMap[key]){
+				const editButtons = key === 'responsibilityText' || key === 'organizationPersonnel'
+					? 
+					<div className='row' style={{justifyContent: 'right'}}>
+						<GCButton
+							onClick={() => {
+								if(isEditing){
+									setIsEditing(false);
+								}else{
+									//TODO
+									console.log('reject')
+								}
+							}}
+							style={{
+								height: 40,
+								minWidth: 40,
+								padding: '2px 8px 0px',
+								fontSize: 14,
+								margin: '16px 0px 0px 10px',
+							}}
+							isSecondaryBtn
+						>
+							{isEditing ? 'Cancel' : 'Reject'}
+						</GCButton>
+						{!isEditing && <GCButton
+							onClick={() => {
+								setIsEditing(true);
+								setIframeLoading(false);
+							}}
+							style={{
+								height: 40,
+								minWidth: 40,
+								padding: '2px 8px 0px',
+								fontSize: 14,
+								margin: '16px 0px 0px 10px',
+							}}
+						>
+							Edit
+						</GCButton>}
+					</div>
+					:
+					<></>
 				metaData.push({
 					Key: keyMap[key],
-					Value: responsibility[key]
+					Value: <>
+						{responsibility[key]}
+						{editButtons}
+					</>
 				})
 			}
 		})
@@ -554,7 +597,7 @@ export default function ResponsibilityDocumentExplorer({
 						<div style={{ height: '100%' }}>
 							{!isEditing ?
 								<>
-									{filename && filename.endsWith('pdf') && (
+									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
 											title={'PDFViewer'}
 											className="aref"
@@ -571,7 +614,7 @@ export default function ResponsibilityDocumentExplorer({
 										></iframe>
 									)}
 
-									{filename && filename.endsWith('html') && (
+									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('html') && (
 										<iframe
 											title={'PDFViewer'}
 											className="aref"
@@ -582,7 +625,10 @@ export default function ResponsibilityDocumentExplorer({
 									)}
 								</>
 								:
-								<PDFHighlighter />
+								<PDFHighlighter 
+									selectedResponsibility={selectedResponsibility}
+									setIsEditing={setIsEditing}
+								/>
 							}
 						</div>
 					</div>

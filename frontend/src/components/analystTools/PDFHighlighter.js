@@ -1,26 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
 	PdfLoader,
 	PdfHighlighter,
-	Tip,
 	Highlight,
 	Popup,
 	AreaHighlight,
 } from 'react-pdf-highlighter';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import Tip from './Tip';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import testpdf from './zztest.pdf';
 
-export default function PDFHighlighter() {
+const gameChangerAPI = new GameChangerAPI();
 
-	const [highlights, setHighlights] = useState([]);
+export default function PDFHighlighter({ selectedResponsibility, setIsEditing }) {
 
-	const getNextId = () => String(Math.random()).slice(2);
-
-	const addHighlight = (highlight) => {
-		setHighlights(
-			[{ ...highlight, id: getNextId() }, ...highlights],
-		);
-	}
+	const highlights = [];
 
 	let scrollViewerTo = (highlight) => {};
 
@@ -37,6 +32,16 @@ export default function PDFHighlighter() {
 	}
 
 	const parseIdFromHash = () => document.location.hash.slice('#highlight-'.length);
+
+	const updateResponsibility = (updatedResp) => {
+		const { id } = selectedResponsibility;
+		const updateProps = {
+			responsibilityText: updatedResp
+		}
+		gameChangerAPI.updateResponsibility({id, updateProps}).then(() => {
+			setIsEditing(false)
+		});
+	}
 
 	return (
 		<PdfLoader url={'https://arxiv.org/pdf/1708.08021.pdf'} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
@@ -62,9 +67,8 @@ export default function PDFHighlighter() {
 					) => (
 						<Tip
 							onOpen={transformSelection}
-							onConfirm={(comment) => {
-								addHighlight({ content, position, comment });
-
+							onConfirm={() => {
+								updateResponsibility(content.text);
 								hideTipAndSelection();
 							}}
 						/>
