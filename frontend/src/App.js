@@ -34,7 +34,6 @@ import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/Tut
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import Config from './config/config';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
-import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
 import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
@@ -46,10 +45,10 @@ import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/Classifica
 
 import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoundPage';
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
-import DecoupledFooter from './components/navigation/DecoupledFooter';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
 import BudgetSearchProfilePage from './containers/BudgetSearchProfilePage';
+import GCFooter from './components/navigation/GCFooter';
 require('typeface-noto-sans');
 require('typeface-montserrat');
 
@@ -272,10 +271,6 @@ const App = () => {
 		return includePaths.includes(location.pathname);
 	};
 
-	const setUserMatomo = (value) => {
-		localStorage.setItem('userMatomo', value);
-	};
-
 	const getStyleType = (match, location) => {
 		let style = styles.newContainer;
 		if (isShowNothingButComponent(location)) {
@@ -407,10 +402,7 @@ const App = () => {
 											</ErrorBoundary>
 										</>
 									</SlideOutMenuContextHandler>
-									{isDecoupled && (
-										<DecoupledFooter setUserMatomo={setUserMatomo} />
-									)}
-									{!isDecoupled && <AdvanaFooter />}
+									<GCFooter />
 								</div>
 							)}
 						/>

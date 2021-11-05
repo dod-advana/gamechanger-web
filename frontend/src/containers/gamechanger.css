@@ -94,3 +94,7 @@
     background-color: white;
     min-height: calc(100vh - 30px);
 }
+
+#gc-user-dash .row > * { 
+    width: auto; 
+}
