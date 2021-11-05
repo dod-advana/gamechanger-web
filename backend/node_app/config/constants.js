@@ -79,6 +79,7 @@ module.exports = Object.freeze({
 	LOG_FILE: path.dirname(require.main.filename) + '/logs/gc-node-api/gc-node-api',
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
 	GAME_CHANGER_OPTS: {
+		isDemoDeployment: process.env.GAMECHANGER_DEMO_DEPLOYMENT?.trim() === 'true',
 		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
