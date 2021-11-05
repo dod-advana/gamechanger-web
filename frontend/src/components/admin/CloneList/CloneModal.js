@@ -24,7 +24,7 @@ const DEFAULT_VALUES = {
 	navigation_module: 'default/defaultNavigationHandler',
 	search_module: 'simple/simpleSearchHandler',
 	search_bar_module: 'default/defaultSearchBarHandler',
-	s3_bucket: 'advana-raw-zone/bronze',
+	s3_bucket: 'advana-data-zone/bronze',
 	title_bar_module: 'default/defaultTitleBarHandler',
 	data_source_name: '',
 	source_agency_name: '',

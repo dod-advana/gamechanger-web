@@ -10,7 +10,7 @@ import GroupFavoriteCard from '../cards/GCGroupFavoriteCard';
 
 
 const StyledFavoriteGroupCard = styled.div`
-    width: 420px;
+    width: 420px !important;
 	height: 600px;
     background-color: #FFFFFF
     border: 1px solid #CFCFCF;
