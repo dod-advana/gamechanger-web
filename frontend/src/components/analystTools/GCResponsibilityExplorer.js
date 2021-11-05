@@ -57,8 +57,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	let PAGE_SIZE = 20;
-	const DOCS_PER_PAGE = 1;
+	const DOCS_PER_PAGE = 3;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
@@ -67,7 +66,6 @@ export default function GCResponsibilityExplorer({
 	const [sorts, setSorts] = useState([]);
 	const [filters, setFilters] = useState([]);
 	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
-	const [numPages, setNumPages] = useState(0);
 	const [offsets, setOffsets] = useState([]);
 	const [resultsPage, setResultsPage] = useState(1);
 	const[reloadResponsibilities, setReloadResponsibilities] = useState(true);
@@ -91,29 +89,27 @@ export default function GCResponsibilityExplorer({
 			}
 			let offset = 0;
 			let limit = 0;
-			for(let i = 1; i < page * DOCS_PER_PAGE; i++){
+			for(let i = 1; i <= page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
 				if(!offsets[i]) break;
 				offset += offsets[i];
 			}
-			for(let i = page * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE + DOCS_PER_PAGE; i++){
+			for(let i = 1 + (page - 1) * DOCS_PER_PAGE; i <= page * DOCS_PER_PAGE; i++){
 				if(!offsets[i]) break;
 				limit += offsets[i];
 			}
-			const { totalCount, results = [] } = await getData({
+            //TODO correct number of docs not coming in look into it
+			const { results = [] } = await getData({
 				limit,
 				offset,
 				sorted,
 				filtered: tmpFiltered,
 			});
-			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
-			setNumPages(pageCount);
 			// results.forEach((result) => {
 			// 	result.selected = selectedIds.includes(result.id);
 			// });
 			setResponsibilityData(results);
 		} catch (e) {
 			setResponsibilityData([]);
-			setNumPages(0);
 			console.error(e);
 		} finally {
 			setLoading(false);
@@ -122,7 +118,7 @@ export default function GCResponsibilityExplorer({
 
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
-		data.forEach((responsibility, i) => {
+		data.forEach((responsibility) => {
 			const doc = responsibility.documentTitle;
 			let entity = responsibility.organizationPersonnel;
 			if(!entity) entity = 'NO ENTITY';
@@ -138,7 +134,7 @@ export default function GCResponsibilityExplorer({
 	}, [responsibilityData])
 
 	const getData = async ({
-		limit = PAGE_SIZE,
+		limit,
 		offset = 0,
 		sorted = [],
 		filtered = [],
@@ -177,7 +173,7 @@ export default function GCResponsibilityExplorer({
 
 	return (
 		<div>
-			<div className='row' style={{ height: 100, marginTop: '10px' }}>
+			<div className='row' style={{ height: 100, marginTop: '10px', justifyContent: 'right' }}>
 				<FormControl variant="outlined" classes={{root:classes.root}}>
 					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 					<Select
@@ -195,7 +191,13 @@ export default function GCResponsibilityExplorer({
 					</Select>
 				</FormControl>
 			</div>
-			{reView === 'Chart' && <GCResponsibilityTracker state={state} dispatch={dispatch} responsibilityData={responsibilityData} loading={loading}/>}
+			{reView === 'Chart' && 
+                <GCResponsibilityTracker 
+                	state={state} 
+                	dispatch={dispatch} 
+                	responsibilityData={responsibilityData} 
+                	loading={loading}/>
+			}
 			{reView === 'Document' && 
                 <ResponsibilityDocumentExplorer 
                 	state={state} 

@@ -12,7 +12,7 @@ import {setState} from '../../utils/sharedFunctions';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory, encode} from '../../utils/gamechangerUtils';
 
-const gameChangerAPI = new GameChangerAPI()
+const gameChangerAPI = new GameChangerAPI();
 
 const highlightColors = [primaryPurple, primaryAlt, primaryRedDark, primaryDark, tertiaryGreen, tertiaryGoldDarkest];
 
@@ -309,7 +309,11 @@ class ResponsibilityAssist extends Component {
 				})
 			}
 		});
-		gameChangerAPI.updateResponsibility({id: id, annotatedEntity: annotatedEntity, annotatedResponsibilityText: annotatedResponsibilityText}).then(() => {
+		const updatedProps = {
+			organizationPersonnel: annotatedEntity,
+			responsibilityText: annotatedResponsibilityText,
+		}
+		gameChangerAPI.updateResponsibility({id: id, updatedProps}).then(() => {
 			setState(this.props.context.dispatch, {reloadResponsibilityTable: true});
 			this.handleClose(true);
 		});

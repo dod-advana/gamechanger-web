@@ -292,7 +292,7 @@ class ResponsibilityController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const {offset = 0, order = [], where = []} = req.body;
-			let { limit =10 } = req.body;
+			let { limit, DOCS_PER_PAGE = 10 } = req.body;
 			order.push(['filename', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
@@ -333,7 +333,12 @@ class ResponsibilityController {
 			});
 			const newOffsets = [];
 			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
-			if(!limit) limit = newOffsets[0];
+			if(!limit){
+				for(let i = 1; i <= DOCS_PER_PAGE; i++){
+					if(!newOffsets[i]) break;
+					limit += newOffsets[i];
+				}
+			};
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
@@ -389,10 +394,9 @@ class ResponsibilityController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const { id, annotatedEntity, annotatedResponsibilityText } = req.body;
+			const { id, updateProps } = req.body;
 			const result = await this.responsibilities.update({
-				organizationPersonnel: annotatedEntity,
-				responsibilityText: annotatedResponsibilityText,
+				...updateProps,
 				status: 'revised'
 			},
 			{
