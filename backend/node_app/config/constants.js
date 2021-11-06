@@ -80,6 +80,7 @@ module.exports = Object.freeze({
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
 	GAME_CHANGER_OPTS: {
 		isDemoDeployment: process.env.GAMECHANGER_DEMO_DEPLOYMENT?.trim() === 'true',
+		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || "007",
 		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
