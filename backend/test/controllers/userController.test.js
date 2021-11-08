@@ -1005,4 +1005,167 @@ describe('UserController', function () {
 			assert.equal(resCode, 200);
 		});
 	});
+
+	describe('#resetAPIRequestLimit', () => {
+		it('should reset all API request limits to 3', async () => {
+			const id = {
+				getDataValue() { return 1; }
+			};
+
+			const gcUser = {
+				findAll() {
+					return [id];
+				},
+				update(data, where) {
+					if (data.api_requests === 3 && where.where.id.length > 0) {
+						return Promise.resolve([1, 1]);
+					} else {
+						return Promise.resolve('Fail');
+					}
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcUser
+			};
+			
+			const target = new UserController(opts);
+			const actual = await target.resetAPIRequestLimit();
+			const expected = 1;
+
+			assert.equal(actual, expected);
+		});
+	});
+
+	describe('#populateNewUserId', () => {
+		it('should update user ids in the tables', async () => {
+			const user = {
+				dataValues: {
+					user_id: 1,
+					new_user_id: 2
+				}
+			};
+
+			const gcHistoryTable = {
+				findAll() {
+					return [user];
+				},
+				update(data, where) {
+					if (data.new_user_id === 2 && where.where.user_id === 1) {
+						return Promise.resolve();
+					} else {
+						return Promise.resolve('Fail');
+					}
+				}
+			};
+
+			const table = {
+				findAll() {
+					return [];
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcHistory: gcHistoryTable,
+				exportHistory: table,
+				favoriteDocument: table,
+				favoriteSearch: table,
+				favoriteTopic: table
+			};
+			
+			const target = new UserController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.populateNewUserId(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			assert.equal(resCode, 200);
+		});
+	});
+
+	describe('#getRecentSearches', () => {
+		it('should get recent searches', async () => {
+			const ids = [{ id: 1 }];
+
+			const searches = [{
+				request_body: { test: 'test' },
+				run_at: 1
+			}];
+
+			const gcHistory = {
+				findAll(data) {
+					if (data.group){
+						return Promise.resolve(ids);
+					} else {
+						return Promise.resolve(searches);
+					}
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcHistory
+			};
+			
+			const target = new UserController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					cloneName: 'gamechanger'
+				}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getRecentSearches(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = [{
+				run_at: 1,
+				test: 'test'
+			}];
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
+		});
+	});
 });
