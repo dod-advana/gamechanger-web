@@ -122,6 +122,7 @@ describe('DocumentController', function () {
 
 		});
 	});
+	
 	describe('#getAPIInformation', () => {
 		it('should have fake information on the API', async (done) => {
 
@@ -130,9 +131,9 @@ describe('DocumentController', function () {
 				mlApi: {
 					getAPIInformation() {
 						return Promise.resolve({
-							"API": "FOR TRANSFORMERS",
-							"API_Name":"GAMECHANGER ML API",
-							"Version": 2
+							'API': 'FOR TRANSFORMERS',
+							'API_Name':'GAMECHANGER ML API',
+							'Version': 2
 						});
 					}
 				}
@@ -161,12 +162,11 @@ describe('DocumentController', function () {
 			await target.getAPIInformation(req, res);
 
 			assert.strictEqual(JSON.stringify(resMsg), JSON.stringify({
-				"API": "FOR TRANSFORMERS",
-				"API_Name":"GAMECHANGER ML API",
-				"Version": 2
+				'API': 'FOR TRANSFORMERS',
+				'API_Name':'GAMECHANGER ML API',
+				'Version': 2
 			}));
 			done();
-
 		});
 	});
 });
