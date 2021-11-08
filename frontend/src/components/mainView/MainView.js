@@ -61,7 +61,7 @@ const MainView = (props) => {
 	}, [state, dispatch, pageLoaded]);
 
 	useEffect(() => {
-		const favSearchUrls = state.userData?.favorite_searches.map((search) => {
+		const favSearchUrls = state.userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 

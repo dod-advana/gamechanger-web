@@ -56,10 +56,12 @@
 .* /api/gamechanger/appSettings/intelligentAnswers .*
 .* /api/gamechanger/appSettings/entitySearch .*
 .* /api/gamechanger/appSettings/userFeedback .*
+.* /api/gamechanger/appSettings/jiraFeedback .*
 .* /api/gamechanger/appSettings/topicSearch .*
 .* /api/gamechanger/sendFeedback/intelligentSearch .*
 .* /api/gamechanger/sendFeedback/QA .*
 .* /api/gamechanger/sendFeedback/getFeedbackData .*
+.* /api/gamechanger/sendFeedback/jira .*
 .* /api/matomo .*
 .* /api/matomo/user .*
 .* /api/tutorialOverlay .*

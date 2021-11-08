@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './gamechanger.css';
 import MainView from '../components/mainView/MainView';
 import { getContext } from '../components/factories/contextFactory';
@@ -6,15 +6,20 @@ import { setState } from '../utils/sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
 import Notifications from '../components/notifications/Notifications';
-import UserFeedback from '../components/user/UserFeedback';
 import { gcOrange } from '../components/common/gc-colors';
 import GCErrorSnackbar from '../components/common/GCErrorSnackbar';
 import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
+import UserFeedback from '../components/user/UserFeedback';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import GCUserInfoModal from '../components/user/GCUserInfoModal';
+import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
+import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal'
+import GameChangerAPI from '../components/api/gameChanger-service-api';
 import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
+
+const gameChangerAPI = new GameChangerAPI();
 
 export const gcColors = {
 	buttonColor1: '#131E43',
@@ -33,6 +38,13 @@ const GameChangerPage = (props) => {
 	const cloneName = cloneData.clone_name;
 	const context = useContext(getContext(cloneName));
 	const { state, dispatch } = context;
+	const [jiraFeedback, setJiraFeedback] = useState(false);
+
+	useEffect(() => {
+		gameChangerAPI.getJiraFeedbackMode().then(({data}) => {
+			setJiraFeedback(data.value === 'true');
+		})
+	}, [])
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
@@ -58,8 +70,14 @@ const GameChangerPage = (props) => {
 					<Notifications context={context} />
 
 					{/* User Feedback */}
-					<UserFeedback context={context} className="feedback-modal" />
-
+					{jiraFeedback ? 
+						<Feedback 
+							open={state.showFeedbackModal} 
+							setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
+							handleSubmit={sendJiraFeedback}
+						/> :
+						<UserFeedback context={context} className="feedback-modal" />
+					}
 					{/* Crowd Sourcing */}
 					{ cloneData.show_crowd_source && (
 						<GameChangerAssist context={context} primaryColor={gcOrange} /> 

@@ -20,6 +20,7 @@ export default () => {
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
 	const [userFeedback, setUserFeedback] = useState(true);
+	const [jiraFeedback, setJiraFeedback] = useState(true);
 	const [topicSearch, setTopicSearch] = useState(true);
 
 	// EsIndexModal and TrendingBlacklistModal state variables
@@ -232,6 +233,28 @@ export default () => {
 		}
 	};
 
+	const toggleJiraFeedback = async () => {
+		const title = 'Request Jira Feedback: ';
+		createAlert(title, 'info', 'Started');
+		try {
+			await gameChangerAPI.toggleJiraFeedbackMode().then((res) => {
+				createAlert(
+					'Toggling Jira feedback value',
+					'success',
+					'updated Jira feedback mode'
+				);
+				getJiraFeedback();
+			});
+		} catch (e) {
+			console.log(e);
+			createAlert(
+				'Toggling Jira feedback value',
+				'error',
+				'failed updating Jira feedback mode'
+			);
+		}
+	};
+
 	const getCombinedSearch = async () => {
 		try {
 			const { data } = await gameChangerAPI.getCombinedSearchMode();
@@ -270,6 +293,15 @@ export default () => {
 			console.error('Error getting user feedback mode', e);
 		}
 	};
+	const getJiraFeedback = async () => {
+		try {
+			const { data } = await gameChangerAPI.getJiraFeedbackMode();
+			const value = data.value === 'true';
+			setJiraFeedback(value);
+		} catch (e) {
+			console.error('Error getting jira feedback mode', e);
+		}
+	};
 
 	const getTopicSearch = async () => {
 		try {
@@ -286,6 +318,7 @@ export default () => {
 		getEntitySearch();
 		getUserFeedback();
 		getTopicSearch();
+		getJiraFeedback();
 	}, []);
 
 	return (
@@ -562,6 +595,29 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Toggle User Feedback
+									</span>
+								</h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper
+							style={
+								jiraFeedback
+									? styles.paper
+									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
+							}
+							zDepth={2}
+						>
+							<Link
+								to="#"
+								onClick={toggleJiraFeedback}
+								style={{ textDecoration: 'none' }}
+							>
+								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
+								<h2 style={styles.featureName}>
+									<span style={styles.featureNameLink}>
+										Toggle Jira User Feedback
 									</span>
 								</h2>
 							</Link>

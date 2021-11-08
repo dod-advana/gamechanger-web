@@ -1174,7 +1174,6 @@ export default function PolicyGraphView(props) {
 		const nodeIds = graph.nodes.map((node) => {
 			return node.id;
 		});
-		const parentId = node.id;
 		graphData.nodes.forEach((node) => {
 			if (!nodeIds.includes(node.id)) {
 				node.notInOriginalSearch = true;
@@ -1184,8 +1183,6 @@ export default function PolicyGraphView(props) {
 		});
 		const edgeIds = [];
 		graphData.edges.forEach((edge) => {
-			edge.source = parentId;
-			edge.target = 200000 + edge.target;
 			if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
 				edge.notInOriginalSearch = true;
 				graph.edges.push(edge);
@@ -1640,7 +1637,7 @@ export default function PolicyGraphView(props) {
 		});
 
 		setShouldRender(true);
-		setReloadGraph(true);
+		setReloadGraph(!reloadGraph);
 		setRunSimulation(!runSimulation);
 	};
 
