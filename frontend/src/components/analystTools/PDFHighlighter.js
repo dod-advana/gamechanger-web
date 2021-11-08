@@ -13,7 +13,13 @@ import testpdf from './zztest.pdf';
 
 const gameChangerAPI = new GameChangerAPI();
 
-export default function PDFHighlighter({ selectedResponsibility, setIsEditing }) {
+export default function PDFHighlighter({ 
+	selectedResponsibility, 
+	setIsEditingEntity, 
+	isEditingEntity, 
+	isEditingResp, 
+	setIsEditingResp, 
+	setReloadResponsibilities }) {
 
 	const highlights = [];
 
@@ -35,11 +41,16 @@ export default function PDFHighlighter({ selectedResponsibility, setIsEditing })
 
 	const updateResponsibility = (updatedResp) => {
 		const { id } = selectedResponsibility;
-		const updateProps = {
-			responsibilityText: updatedResp
+		const updateProps = {};
+		if(isEditingResp){
+			updateProps.responsibilityText = updatedResp;
+		}else if(isEditingEntity){
+			updateProps.organizationPersonnel = updatedResp;
 		}
 		gameChangerAPI.updateResponsibility({id, updateProps}).then(() => {
-			setIsEditing(false)
+			setIsEditingEntity(false);
+			setIsEditingResp(false);
+			setReloadResponsibilities(true);
 		});
 	}
 

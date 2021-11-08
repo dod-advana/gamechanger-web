@@ -76,6 +76,7 @@ export default function ResponsibilityDocumentExplorer({
 	docsPerPage,
 	onPaginationClick,
 	isClone = true,
+	setReloadResponsibilities
 }) {
 
 	const { cloneData } = state;
@@ -98,7 +99,8 @@ export default function ResponsibilityDocumentExplorer({
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [viewTogle, setViewTogle] = useState(false);
 	const [fileUrl, setFileUrl] = useState(null);
-	const [isEditing, setIsEditing] = useState(true);
+	const [isEditingResp, setIsEditingResp] = useState(false);
+	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 
 	const measuredRef = useCallback(
@@ -268,13 +270,16 @@ export default function ResponsibilityDocumentExplorer({
 				const editButtons = key === 'responsibilityText' || key === 'organizationPersonnel'
 					? 
 					<div className='row' style={{justifyContent: 'right'}}>
-						<GCButton
+						{(key === 'responsibilityText' || isEditingEntity) && <GCButton
 							onClick={() => {
-								if(isEditing){
-									setIsEditing(false);
+								if(isEditingResp || isEditingEntity){
+									setIsEditingEntity(false);
+									setIsEditingResp(false);
+									
 								}else{
-									//TODO
-									console.log('reject')
+									gameChangerAPI.setRejectionStatus({id: selectedResponsibility.id}).then(() => {
+										setReloadResponsibilities(true);
+									})
 								}
 							}}
 							style={{
@@ -286,12 +291,30 @@ export default function ResponsibilityDocumentExplorer({
 							}}
 							isSecondaryBtn
 						>
-							{isEditing ? 'Cancel' : 'Reject'}
-						</GCButton>
-						{!isEditing && <GCButton
+							{key === 'organizationPersonnel' && <>{isEditingEntity ? 'Cancel' : 'Reject'}</>}
+							{key === 'responsibilityText' && <>{isEditingResp ? 'Cancel' : 'Reject'}</>}
+						</GCButton>}
+						{!isEditingResp && key === 'responsibilityText' && <GCButton
 							onClick={() => {
-								setIsEditing(true);
+								setIsEditingResp(true);
 								setIframeLoading(false);
+								console.log('edit resp');
+							}}
+							style={{
+								height: 40,
+								minWidth: 40,
+								padding: '2px 8px 0px',
+								fontSize: 14,
+								margin: '16px 0px 0px 10px',
+							}}
+						>
+							Edit
+						</GCButton>}
+						{!isEditingEntity && key === 'organizationPersonnel' && <GCButton
+							onClick={() => {
+								setIsEditingEntity(true);
+								setIframeLoading(false);
+								console.log('edit entity');
 							}}
 							style={{
 								height: 40,
@@ -343,7 +366,7 @@ export default function ResponsibilityDocumentExplorer({
 	return (
 		<div
 			className="row"
-			style={{ height: 'calc(100% - 70px)', marginTop: '10px' }}
+			style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
 		>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
@@ -595,7 +618,8 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{!isEditing ?
+							{false ?
+							// {!isEditingResp || isEditingEntity ?
 								<>
 									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
@@ -627,7 +651,11 @@ export default function ResponsibilityDocumentExplorer({
 								:
 								<PDFHighlighter 
 									selectedResponsibility={selectedResponsibility}
-									setIsEditing={setIsEditing}
+									isEditingEntity={isEditingEntity}
+									isEditingResp={isEditingResp}
+									setIsEditingEntity={setIsEditingEntity}
+									setIsEditingResp={setIsEditingResp}
+									setReloadResponsibilities={setReloadResponsibilities}
 								/>
 							}
 						</div>

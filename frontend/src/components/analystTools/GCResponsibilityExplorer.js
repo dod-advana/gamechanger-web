@@ -97,7 +97,7 @@ export default function GCResponsibilityExplorer({
 				if(!offsets[i]) break;
 				limit += offsets[i];
 			}
-            //TODO correct number of docs not coming in look into it
+			//TODO correct number of docs not coming in look into it
 			const { results = [] } = await getData({
 				limit,
 				offset,
@@ -211,6 +211,7 @@ export default function GCResponsibilityExplorer({
                 		setResultsPage(page);
                 		setReloadResponsibilities(true);
                 	}}
+                	setReloadResponsibilities={setReloadResponsibilities}
                 />}
 		</div>
 	)
