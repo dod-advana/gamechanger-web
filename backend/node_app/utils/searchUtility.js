@@ -483,7 +483,7 @@ class SearchUtility {
 									fields: ['display_title_s.search'],
 									operator: 'AND',
 									type: 'phrase',
-									boost: 4
+									boost: 6
 								  }
 							}
 						],
@@ -705,20 +705,20 @@ class SearchUtility {
 	}
 
 	getESQueryOneDoc (id, userId) {
-	// get contents of single document searching by doc id
-	try {
-		return {
-			size: 1,
-			query: {
-				match: {
-					id: id
+		// get contents of single document searching by doc id
+		try {
+			return {
+				size: 1,
+				query: {
+					match: {
+						id: id
+					}
 				}
 			}
+		} catch (err) {
+			this.logger.error(err, 'TJKFH5F', userId);
+			}
 		}
-	} catch (err) {
-		this.logger.error(err, 'TJKFH5F', userId);
-		}
-	}
 
 	// makes phrases to add to ES queries for entities or gamechanger indices
 	makeBigramQueries (searchTextList, alias) {
@@ -1802,7 +1802,6 @@ class SearchUtility {
 			this.logger.error(msg, 'U1EIAR2', userId);
 			throw msg;
 		}
-	
 	}
 
 	async documentSearch(req, body, clientObj, userId) {
@@ -1817,7 +1816,6 @@ class SearchUtility {
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
-	
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
 			if (esQuery === '') {
