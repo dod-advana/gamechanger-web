@@ -122,7 +122,7 @@ describe('DocumentController', function () {
 
 		});
 	});
-	
+
 	describe('#getAPIInformation', () => {
 		it('should have fake information on the API', async (done) => {
 
@@ -167,6 +167,148 @@ describe('DocumentController', function () {
 				'Version': 2
 			}));
 			done();
+		});
+	});
+
+	describe('#getData', () => {
+		it('should query the ML API', async () => {
+			const mlApi = {
+				getAPIInformation() {
+					return Promise.resolve('test');
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				mlApi
+			};
+			
+			const target = new TransformerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			await target.getData('getAPIInformation', req, res);
+
+			assert.deepStrictEqual(resMsg, 'test');
+		});
+
+		it('should throw an error', async () => {
+			const opts = {
+				...constructorOptionsMock
+			};
+			
+			const target = new TransformerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			await target.getData('getAPIInformation', req, res);
+
+			assert.equal(resCode, 500);
+		});
+	});
+
+	describe('#postData', () => {
+		it('should post to the ML API', async () => {
+			const mlApi = {
+				getAPIInformation() {
+					return Promise.resolve('test');
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				mlApi
+			};
+			
+			const target = new TransformerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			await target.postData('getAPIInformation', req, res);
+
+			assert.deepStrictEqual(resMsg, 'test');
+		});
+
+		it('should throw an error', async () => {
+			const opts = {
+				...constructorOptionsMock
+			};
+			
+			const target = new TransformerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			await target.postData('getAPIInformation', req, res);
+
+			assert.equal(resCode, 500);
 		});
 	});
 });
