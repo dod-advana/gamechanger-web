@@ -52,7 +52,7 @@ export default (props) => {
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
-	const [skipOriginal, setSkipOriginal] = useState(true);
+	const [evalType, setEvalType] = useState('original');
 	const [validationData, setValidationData] = useState('latest');
 	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
@@ -208,7 +208,7 @@ export default (props) => {
 				build_type: 'eval',
 				model_name: evalModelName,
 				validation_data: validationData,
-				skip_original: skipOriginal,
+				eval_type: evalType,
 				sample_limit: sampleLimit
 			});
 			props.updateLogs('Started evaluating', 0);
@@ -637,11 +637,13 @@ export default (props) => {
 									marginLeft: '20px',
 								}}
 							>
-								Skip Original:
+								Eval Type:
 							</div>
-							<Checkbox
-								checked={skipOriginal}
-								onChange={(e) => setSkipOriginal(e.target.checked)}
+							<Input
+								value={evalType}
+								onChange={(e) => setEvalType(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
 						</div>
 						<div>
