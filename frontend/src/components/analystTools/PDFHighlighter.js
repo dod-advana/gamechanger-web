@@ -79,7 +79,7 @@ export default function PDFHighlighter({
 						<Tip
 							onOpen={transformSelection}
 							onConfirm={() => {
-								updateResponsibility(content.text);
+								updateResponsibility(content.text.trim());
 								hideTipAndSelection();
 							}}
 						/>
