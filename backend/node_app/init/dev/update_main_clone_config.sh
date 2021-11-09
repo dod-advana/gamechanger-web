@@ -84,29 +84,29 @@ INSERT INTO
   )
   ON CONFLICT (clone_name)
   DO
-    UPDATE
-      SET id = ${CLONE_CONFIG_RECORD[id]},
-      SET clone_name = ${CLONE_CONFIG_RECORD[clone_name]},
-      SET search_module = ${CLONE_CONFIG_RECORD[search_module]},
-      SET export_module = ${CLONE_CONFIG_RECORD[export_module]},
-      SET "updatedAt" = ${CLONE_CONFIG_RECORD[updatedAt]},
-      SET display_name = ${CLONE_CONFIG_RECORD[display_name]},
-      SET title_bar_module = ${CLONE_CONFIG_RECORD[title_bar_module]},
-      SET navigation_module = ${CLONE_CONFIG_RECORD[navigation_module]},
-      SET card_module = ${CLONE_CONFIG_RECORD[card_module]},
-      SET is_live = ${CLONE_CONFIG_RECORD[is_live]},
-      SET url = ${CLONE_CONFIG_RECORD[url]},
-      SET permissions_required = ${CLONE_CONFIG_RECORD[permissions_required]},
-      SET clone_to_sipr = ${CLONE_CONFIG_RECORD[clone_to_sipr]},
-      SET show_graph = ${CLONE_CONFIG_RECORD[show_graph]},
-      SET show_tutorial = ${CLONE_CONFIG_RECORD[show_tutorial]},
-      SET show_crowd_source = ${CLONE_CONFIG_RECORD[show_crowd_source]},
-      SET show_feedback = ${CLONE_CONFIG_RECORD[show_feedback]},
-      SET config = ${CLONE_CONFIG_RECORD[config]},
-      SET graph_module = ${CLONE_CONFIG_RECORD[graph_module]},
-      SET main_view_module = ${CLONE_CONFIG_RECORD[main_view_module]},
-      SET available_at = ${CLONE_CONFIG_RECORD[available_at]},
-      SET s3_bucket = ${CLONE_CONFIG_RECORD[s3_bucket]}
+    UPDATE SET
+      id = ${CLONE_CONFIG_RECORD[id]},
+      clone_name = ${CLONE_CONFIG_RECORD[clone_name]},
+      search_module = ${CLONE_CONFIG_RECORD[search_module]},
+      export_module = ${CLONE_CONFIG_RECORD[export_module]},
+      "updatedAt" = ${CLONE_CONFIG_RECORD[updatedAt]},
+      display_name = ${CLONE_CONFIG_RECORD[display_name]},
+      title_bar_module = ${CLONE_CONFIG_RECORD[title_bar_module]},
+      navigation_module = ${CLONE_CONFIG_RECORD[navigation_module]},
+      card_module = ${CLONE_CONFIG_RECORD[card_module]},
+      is_live = ${CLONE_CONFIG_RECORD[is_live]},
+      url = ${CLONE_CONFIG_RECORD[url]},
+      permissions_required = ${CLONE_CONFIG_RECORD[permissions_required]},
+      clone_to_sipr = ${CLONE_CONFIG_RECORD[clone_to_sipr]},
+      show_graph = ${CLONE_CONFIG_RECORD[show_graph]},
+      show_tutorial = ${CLONE_CONFIG_RECORD[show_tutorial]},
+      show_crowd_source = ${CLONE_CONFIG_RECORD[show_crowd_source]},
+      show_feedback = ${CLONE_CONFIG_RECORD[show_feedback]},
+      config = ${CLONE_CONFIG_RECORD[config]},
+      graph_module = ${CLONE_CONFIG_RECORD[graph_module]},
+      main_view_module = ${CLONE_CONFIG_RECORD[main_view_module]},
+      available_at = ${CLONE_CONFIG_RECORD[available_at]},
+      s3_bucket = ${CLONE_CONFIG_RECORD[s3_bucket]}
   ;
 
 EOFXXX
