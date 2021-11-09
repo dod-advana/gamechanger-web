@@ -284,7 +284,7 @@ describe('TextSuggestionController', function () {
 		const target = new TextSuggestionController(opts);
 
 		it('should return parsed common searches', () => {
-			const data = [{"key":"missile defense","doc_count":14,"user":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"Becca Tester","doc_count":3},{"key":"steve","doc_count":1}]}},{"key":"missile defense governance","doc_count":7,"user":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[]}}]
+			const data = [{'key':'missile defense','doc_count':14,'user':{'doc_count_error_upper_bound':0,'sum_other_doc_count':0,'buckets':[{'key':'Becca Tester','doc_count':3},{'key':'steve','doc_count':1}]}},{'key':'missile defense governance','doc_count':7,'user':{'doc_count_error_upper_bound':0,'sum_other_doc_count':0,'buckets':[]}}]
 			const expected = ['missile defense'];
 			const actual = target.getPreHistoryCorrected(data);
 			assert.deepStrictEqual(actual, expected);
