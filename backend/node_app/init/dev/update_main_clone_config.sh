@@ -79,7 +79,7 @@ INSERT INTO
     ${CLONE_CONFIG_RECORD[config]},
     ${CLONE_CONFIG_RECORD[graph_module]},
     ${CLONE_CONFIG_RECORD[main_view_module]},
-    ${CLONE_CONFIG_RECORD[available_at]}
+    ${CLONE_CONFIG_RECORD[available_at]},
     ${CLONE_CONFIG_RECORD[s3_bucket]}
   )
   ON CONFLICT (clone_name)
