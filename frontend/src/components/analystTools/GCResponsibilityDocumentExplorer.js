@@ -288,6 +288,7 @@ export default function ResponsibilityDocumentExplorer({
 								padding: '2px 8px 0px',
 								fontSize: 14,
 								margin: '16px 0px 0px 10px',
+								width: 'auto'
 							}}
 							isSecondaryBtn
 						>
@@ -298,7 +299,6 @@ export default function ResponsibilityDocumentExplorer({
 							onClick={() => {
 								setIsEditingResp(true);
 								setIframeLoading(false);
-								console.log('edit resp');
 							}}
 							style={{
 								height: 40,
@@ -306,6 +306,7 @@ export default function ResponsibilityDocumentExplorer({
 								padding: '2px 8px 0px',
 								fontSize: 14,
 								margin: '16px 0px 0px 10px',
+								width: 'auto'
 							}}
 						>
 							Edit
@@ -314,7 +315,6 @@ export default function ResponsibilityDocumentExplorer({
 							onClick={() => {
 								setIsEditingEntity(true);
 								setIframeLoading(false);
-								console.log('edit entity');
 							}}
 							style={{
 								height: 40,
@@ -322,6 +322,7 @@ export default function ResponsibilityDocumentExplorer({
 								padding: '2px 8px 0px',
 								fontSize: 14,
 								margin: '16px 0px 0px 10px',
+								width: 'auto'
 							}}
 						>
 							Edit
@@ -483,7 +484,7 @@ export default function ResponsibilityDocumentExplorer({
 													e.preventDefault();
 													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
 												}}
-												style={{marginLeft: 20}}
+												style={{marginLeft: 20, backgroundColor: '#eceff1'}}
 											>
 												<i
 													style={{

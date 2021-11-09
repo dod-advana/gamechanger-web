@@ -158,6 +158,10 @@ const GCResponsibilityTracker = (props) => {
 	);
 	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
 
+	useEffect(()=>{
+		console.log(filters)
+	}, [filters])
+
 	useEffect(() => {
 		gameChangerAPI.getOtherEntityFilterList().then((resp) => {
 			const tmpFilters = {

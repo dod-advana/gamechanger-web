@@ -12,6 +12,8 @@ import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
 import { setState } from '../../utils/sharedFunctions';
+import JumpButton from '../modules/globalSearch/JumpButton';
+import GCResponsibilitySearch from './GCResponsibilitySearch';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -65,10 +67,10 @@ export default function GCResponsibilityExplorer({
 	const [loading, setLoading] = useState(true);
 	const [sorts, setSorts] = useState([]);
 	const [filters, setFilters] = useState([]);
-	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
 	const [offsets, setOffsets] = useState([]);
 	const [resultsPage, setResultsPage] = useState(1);
-	const[reloadResponsibilities, setReloadResponsibilities] = useState(true);
+	const [reloadResponsibilities, setReloadResponsibilities] = useState(false);
+	const [preSearch, setPresSearch] = useState(true);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -81,12 +83,6 @@ export default function GCResponsibilityExplorer({
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
-			if (otherEntRespFiltersList.length > 0) {
-				tmpFiltered.push({
-					id: 'otherOrganizationPersonnel',
-					value: otherEntRespFiltersList,
-				});
-			}
 			let offset = 0;
 			let limit = 0;
 			for(let i = 1; i <= page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
@@ -144,6 +140,7 @@ export default function GCResponsibilityExplorer({
                                                     
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
+				docView: true,
 				limit,
 				offset,
 				order,
@@ -173,46 +170,73 @@ export default function GCResponsibilityExplorer({
 
 	return (
 		<div>
-			<div className='row' style={{ height: 100, marginTop: '10px', justifyContent: 'right' }}>
-				<FormControl variant="outlined" classes={{root:classes.root}}>
-					<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
-					<Select
-						className={`MuiInputBase-root`}
-						labelId="re-view-name"
-						label="View"
-						id="re-view-name-select"
-						value={reView}
-						onChange={handleChangeView}
-						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-						autoWidth
-					>
-						<MenuItem key={`Document`} value={'Document'}>Document View</MenuItem>,
-						<MenuItem key={`Chart`} value={'Chart'}>Chart View</MenuItem>
-					</Select>
-				</FormControl>
-			</div>
-			{reView === 'Chart' && 
-                <GCResponsibilityTracker 
-                	state={state} 
-                	dispatch={dispatch} 
-                	responsibilityData={responsibilityData} 
-                	loading={loading}/>
+			{preSearch ?
+				<GCResponsibilitySearch 
+					setPreSearch={setPresSearch}
+					setFilters={setFilters}
+					setReloadResponsibilities={setReloadResponsibilities}
+				/>
+				: 
+				<>
+                	<div className='row' style={{ height: 65, marginTop: '10px', paddingLeft: 0 }}>
+                		<div style={{ display: 'flex', paddingLeft: 0 }}>
+                			<div style={{
+                				width: 440,
+                				padding: '0 10px',
+                				height: '100%',
+                				display: 'flex',
+                				alignItems: 'center',
+                			}}>
+                				<JumpButton
+                					style={{ marginTop: 0 }}
+                					reverse={true}
+                					label="Back to Home"
+                					action={() => {setPresSearch(true)}}
+                				/>
+                			</div>
+                			<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', marginTop: '-10px'}}>
+                				<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
+                				<Select
+                					className={`MuiInputBase-root`}
+                					labelId="re-view-name"
+                					label="View"
+                					id="re-view-name-select"
+                					value={reView}
+                					onChange={handleChangeView}
+                					classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+                					autoWidth
+                				>
+                					<MenuItem key={`Document`} value={'Document'}>Document View</MenuItem>,
+                					<MenuItem key={`Chart`} value={'Chart'}>Chart View</MenuItem>
+                				</Select>
+                			</FormControl>
+                		</div>
+                	</div>
+                	{reView === 'Chart' && 
+                    <GCResponsibilityTracker 
+                    	state={state} 
+                    	dispatch={dispatch} 
+                    	responsibilityData={responsibilityData} 
+                    	loading={loading}/>
+                	}
+                	{reView === 'Document' && 
+                    <ResponsibilityDocumentExplorer 
+                    	state={state} 
+                    	dispatch={dispatch} 
+                    	responsibilityData={docResponsibilityData} 
+                    	loading={loading}
+                    	docsPerPage={DOCS_PER_PAGE}
+                    	totalCount={Object.keys(offsets).length}
+                    	resultsPage={resultsPage}
+                    	onPaginationClick={(page) => {
+                    		setResultsPage(page);
+                    		setReloadResponsibilities(true);
+                    	}}
+                    	setReloadResponsibilities={setReloadResponsibilities}
+                    />
+                	}
+				</>
 			}
-			{reView === 'Document' && 
-                <ResponsibilityDocumentExplorer 
-                	state={state} 
-                	dispatch={dispatch} 
-                	responsibilityData={docResponsibilityData} 
-                	loading={loading}
-                	docsPerPage={DOCS_PER_PAGE}
-                	totalCount={Object.keys(offsets).length}
-                	resultsPage={resultsPage}
-                	onPaginationClick={(page) => {
-                		setResultsPage(page);
-                		setReloadResponsibilities(true);
-                	}}
-                	setReloadResponsibilities={setReloadResponsibilities}
-                />}
 		</div>
 	)
 }

@@ -291,7 +291,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const {offset = 0, order = [], where = []} = req.body;
+			const { offset = 0, order = [], where = [], docView } = req.body;
 			let { limit, DOCS_PER_PAGE = 10 } = req.body;
 			order.push(['filename', 'ASC']);
 			const tmpWhere = {};
@@ -322,23 +322,25 @@ class ResponsibilityController {
 				}
 			});
 			tmpWhere['status'] = {[Op.not]: 'rejected'};
-			const docOffsets = await this.responsibilities.findAndCountAll({
-				where: tmpWhere,
-				group: 'filename',
-				order: order,
-				attributes: [
-					[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
-					'filename',
-				]
-			});
 			const newOffsets = [];
-			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
-			if(!limit){
-				for(let i = 1; i <= DOCS_PER_PAGE; i++){
-					if(!newOffsets[i]) break;
-					limit += newOffsets[i];
-				}
-			};
+			if(docView){
+				const docOffsets = await this.responsibilities.findAndCountAll({
+					where: tmpWhere,
+					group: 'filename',
+					order: order,
+					attributes: [
+						[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
+						'filename',
+					]
+				});
+				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
+				if(!limit){
+					for(let i = 1; i <= DOCS_PER_PAGE; i++){
+						if(!newOffsets[i]) break;
+						limit += newOffsets[i];
+					}
+				};
+			}
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,
