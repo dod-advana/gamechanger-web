@@ -1883,15 +1883,13 @@ class SearchUtility {
 	}
 
 	reorderFirst(results, titleResults) {
-
+		// reorders a matching title result to the top of the results
 		let reorderedHits = []
 		let firstResult = titleResults.body.hits.hits[0]
 		let firstTitle = firstResult._source.display_title_s
 		let inResults = false;
-		let start = -1
 		try {
 			results.body.hits.hits.forEach((r) => {
-				start += 1
 				if (r.fields.display_title_s[0] !== firstTitle) {
 					reorderedHits.push(r);
 				} else {
