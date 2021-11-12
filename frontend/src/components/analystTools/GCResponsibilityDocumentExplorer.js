@@ -463,113 +463,124 @@ export default function ResponsibilityDocumentExplorer({
 						'Make a search to get started.'
 					)}
 				</div>
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={!state.searchSettings.publicationDateAllTime}
-						header={'DOCUMENT TITLE'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<Autocomplete
-							classes={{ root: classes.root }}
-							multiple
-							options={documentList}
-							getOptionLabel={(option) => option.documentTitle}
-							defaultValue={[]}
-							onChange={(event, newValue) => {
-								setDocTitle(newValue);
-							}}
-							renderInput={(params) => (
-								<TextField
-									{...params}
+				<GCAccordion
+					expanded={!state.searchSettings.publicationDateAllTime}
+					header={'FILTERS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					<div style={{ width: '100%' }}>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={!state.searchSettings.publicationDateAllTime}
+								header={'DOCUMENT TITLE'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<Autocomplete
 									classes={{ root: classes.root }}
-									variant="outlined"
-									label="Document Titles"
+									multiple
+									options={documentList}
+									getOptionLabel={(option) => option.documentTitle}
+									defaultValue={[]}
+									onChange={(event, newValue) => {
+										setDocTitle(newValue);
+									}}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											classes={{ root: classes.root }}
+											variant="outlined"
+											label="Document Titles"
+										/>
+									)}
 								/>
-							)}
-						/>
-					</GCAccordion>
-				</div><div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={!state.searchSettings.publicationDateAllTime}
-						header={'ORGANIZATION'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<Autocomplete
-							classes={{ root: classes.root }}
-							multiple
-							options={[]}
-							freeSolo
-							autoSelect
-							getOptionLabel={(option) => option}
-							defaultValue={[]}
-							onChange={(event, newValue) => {
-								setOrganization(newValue);
-							}}
-							renderInput={(params) => (
-								<TextField
-									{...params}
+							</GCAccordion>
+						</div><div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={!state.searchSettings.publicationDateAllTime}
+								header={'ORGANIZATION'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<Autocomplete
 									classes={{ root: classes.root }}
-									variant="outlined"
-									label="Organizations"
+									multiple
+									options={[]}
+									freeSolo
+									autoSelect
+									getOptionLabel={(option) => option}
+									defaultValue={[]}
+									onChange={(event, newValue) => {
+										setOrganization(newValue);
+									}}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											classes={{ root: classes.root }}
+											variant="outlined"
+											label="Organizations"
+										/>
+									)}
 								/>
-							)}
-						/>
-					</GCAccordion>
-				</div><div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={!state.searchSettings.publicationDateAllTime}
-						header={'RESPONSIBILITY TEXT'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<div style={styles.formField}>
-							<TextField
-								classes={{ root: classes.root }}
-								variant="outlined"
-								placeholder='Responsibility Text'
-								value={responsibilityText?.value || ''}
-								onChange={(e) => setResponsibilityText({id: 'responsibilityText', value: e.target.value})}
-							/>
+							</GCAccordion>
 						</div>
-					</GCAccordion>
-					<GCButton 
-						onClick={() => {
-							setResponsibilityText({});
-							setOrganization([]);
-							setDocTitle([]);
-						}}
-						style={{display: 'block', width: '100%', margin: '20px 0 10px 0'}}
-						isSecondaryBtn
-					>
-					Clear Filters
-					</GCButton>
-					<GCButton 
-						onClick={() => {
-							const filters = [];
-							if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
-							if(organziation.length) {
-								organziation.forEach(org => {
-									filters.push({id: 'organizationPersonnel', value: org})
-								})
-							};
-							if(docTitle.length) {
-								docTitle.forEach(doc => {
-									filters.push({id: 'documentTitle', value: doc.documentTitle})
-								})
-							};
-							setFilters(filters);
-							setReloadResponsibilities(true);
-						}}
-						style={{display: 'block', width: '100%', margin: '0 0 30px 0'}}
-					>
-					Update Search
-					</GCButton>
-				</div>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={!state.searchSettings.publicationDateAllTime}
+								header={'RESPONSIBILITY TEXT'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<div style={{width:'100%'}}>
+									<TextField
+										classes={{ root: classes.root }}
+										variant="outlined"
+										placeholder='Responsibility Text'
+										value={responsibilityText?.value || ''}
+										onChange={(e) => setResponsibilityText({id: 'responsibilityText', value: e.target.value})}
+									/>
+								</div>
+							</GCAccordion>
+							<GCButton 
+								onClick={() => {
+									setResponsibilityText({});
+									setOrganization([]);
+									setDocTitle([]);
+								}}
+								style={{display: 'block', width: '100%', margin: '20px 0 10px 0'}}
+								isSecondaryBtn
+							>
+								Clear Filters
+							</GCButton>
+							<GCButton 
+								onClick={() => {
+									const filters = [];
+									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
+									if(organziation.length) {
+										organziation.forEach(org => {
+											filters.push({id: 'organizationPersonnel', value: org})
+										})
+									};
+									if(docTitle.length) {
+										docTitle.forEach(doc => {
+											filters.push({id: 'documentTitle', value: doc.documentTitle})
+										})
+									};
+									setFilters(filters);
+									setReloadResponsibilities(true);
+								}}
+								style={{display: 'block', width: '100%', margin: 0 }}
+							>
+								Update Search
+							</GCButton>
+						</div>
+					</div>
+				</GCAccordion>
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={'#E9691D'} />
