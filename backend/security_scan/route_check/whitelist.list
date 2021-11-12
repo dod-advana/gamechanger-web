@@ -18,6 +18,7 @@
 .* /api/gamechanger/getThumbnail .*
 .* /api/gamechanger/responsibilities/get .*
 .* /api/gamechanger/responsibilities/getDoc .*
+.* /api/gamechanger/responsibilities/getDocTitles .*
 .* /api/gamechanger/responsibilities/setRejectionStatus .*
 .* /api/gamechanger/responsibilities/updateResponsibility .*
 .* /api/gamechanger/responsibilities/getOtherEntityFilterList .*

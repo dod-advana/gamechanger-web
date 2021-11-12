@@ -69,8 +69,11 @@ export default function GCResponsibilityExplorer({
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
 	const [resultsPage, setResultsPage] = useState(1);
-	const [reloadResponsibilities, setReloadResponsibilities] = useState(false);
-	const [preSearch, setPresSearch] = useState(true);
+	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
+	const [docTitle, setDocTitle] = useState([]);
+	const [documentList, setDocumentList] = useState([]);
+	const [organziation, setOrganization] = useState([]);
+	const [responsibilityText, setResponsibilityText] = useState({});
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -78,6 +81,14 @@ export default function GCResponsibilityExplorer({
 			setReloadResponsibilities(false);
 		}
 	 }, [reloadResponsibilities, resultsPage, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	 useEffect(() => {
+		const fetchDocTitles = async() => {
+			const { data } = await gameChangerAPI.getResponsibilityDocTitles();
+			setDocumentList(data.results);
+		}
+		fetchDocTitles();
+	 },[])
 
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -170,72 +181,56 @@ export default function GCResponsibilityExplorer({
 
 	return (
 		<div>
-			{preSearch ?
-				<GCResponsibilitySearch 
-					setPreSearch={setPresSearch}
-					setFilters={setFilters}
+			<div className='row' style={{ height: 65, marginTop: '10px', paddingLeft: 0 }}>
+				<div style={{ display: 'flex', paddingLeft: 0 }}>
+					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', marginTop: '-10px'}}>
+						<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
+						<Select
+							className={`MuiInputBase-root`}
+							labelId="re-view-name"
+							label="View"
+							id="re-view-name-select"
+							value={reView}
+							onChange={handleChangeView}
+							classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+							autoWidth
+						>
+							<MenuItem key={`Document`} value={'Document'}>Document View</MenuItem>,
+							<MenuItem key={`Chart`} value={'Chart'}>Chart View</MenuItem>
+						</Select>
+					</FormControl>
+				</div>
+			</div>
+			{reView === 'Chart' && 
+			<GCResponsibilityTracker 
+				state={state} 
+				dispatch={dispatch} 
+				responsibilityData={responsibilityData} 
+				loading={loading}/>
+			}
+			{reView === 'Document' && 
+				<ResponsibilityDocumentExplorer 
+					state={state} 
+					dispatch={dispatch} 
+					responsibilityData={docResponsibilityData} 
+					loading={loading}
+					docsPerPage={DOCS_PER_PAGE}
+					totalCount={Object.keys(offsets).length}
+					resultsPage={resultsPage}
+					onPaginationClick={(page) => {
+						setResultsPage(page);
+						setReloadResponsibilities(true);
+					}}
 					setReloadResponsibilities={setReloadResponsibilities}
+					docTitle={docTitle}
+					setDocTitle={setDocTitle}
+					organziation={organziation}
+					setOrganization={setOrganization}
+					responsibilityText={responsibilityText}
+					setResponsibilityText={setResponsibilityText}
+					setFilters={setFilters}
+					documentList={documentList}
 				/>
-				: 
-				<>
-                	<div className='row' style={{ height: 65, marginTop: '10px', paddingLeft: 0 }}>
-                		<div style={{ display: 'flex', paddingLeft: 0 }}>
-                			<div style={{
-                				width: 440,
-                				padding: '0 10px',
-                				height: '100%',
-                				display: 'flex',
-                				alignItems: 'center',
-                			}}>
-                				<JumpButton
-                					style={{ marginTop: 0 }}
-                					reverse={true}
-                					label="Back to Home"
-                					action={() => {setPresSearch(true)}}
-                				/>
-                			</div>
-                			<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', marginTop: '-10px'}}>
-                				<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
-                				<Select
-                					className={`MuiInputBase-root`}
-                					labelId="re-view-name"
-                					label="View"
-                					id="re-view-name-select"
-                					value={reView}
-                					onChange={handleChangeView}
-                					classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-                					autoWidth
-                				>
-                					<MenuItem key={`Document`} value={'Document'}>Document View</MenuItem>,
-                					<MenuItem key={`Chart`} value={'Chart'}>Chart View</MenuItem>
-                				</Select>
-                			</FormControl>
-                		</div>
-                	</div>
-                	{reView === 'Chart' && 
-                    <GCResponsibilityTracker 
-                    	state={state} 
-                    	dispatch={dispatch} 
-                    	responsibilityData={responsibilityData} 
-                    	loading={loading}/>
-                	}
-                	{reView === 'Document' && 
-                    <ResponsibilityDocumentExplorer 
-                    	state={state} 
-                    	dispatch={dispatch} 
-                    	responsibilityData={docResponsibilityData} 
-                    	loading={loading}
-                    	docsPerPage={DOCS_PER_PAGE}
-                    	totalCount={Object.keys(offsets).length}
-                    	resultsPage={resultsPage}
-                    	onPaginationClick={(page) => {
-                    		setResultsPage(page);
-                    		setReloadResponsibilities(true);
-                    	}}
-                    	setReloadResponsibilities={setReloadResponsibilities}
-                    />
-                	}
-				</>
 			}
 		</div>
 	)

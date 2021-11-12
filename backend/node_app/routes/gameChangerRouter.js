@@ -77,6 +77,7 @@ router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
 router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
+router.post('/responsibilities/getDocTitles', responsibility.getResponsibilityDocTitles);
 router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
