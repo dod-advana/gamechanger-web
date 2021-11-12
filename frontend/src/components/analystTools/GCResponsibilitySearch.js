@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { TextField, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import GCButton from '../common/GCButton';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const styles = {
 	formField: {
@@ -17,13 +18,19 @@ const useStyles = makeStyles({
 	}
 })
 
-export default function GCResponsibilitySearch({ setPreSearch, setReloadResponsibilities, setFilters }) {
+export default function GCResponsibilitySearch({ 
+	setPreSearch, 
+	setReloadResponsibilities, 
+	setFilters, 
+	docTitle, 
+	setDocTitle,
+	organziation, 
+	setOrganization,
+	responsibilityText, 
+	setResponsibilityText
+}) {
 
 	const classes = useStyles();
-
-	const [docTitle, setDocTitle] = useState([]);
-	const [organziation, setOrganization] = useState([]);
-	const [responsibilityText, setResponsibilityText] = useState({});
 
 	const handleDocChange = event => {
 		setDocTitle(
@@ -40,21 +47,60 @@ export default function GCResponsibilitySearch({ setPreSearch, setReloadResponsi
             	: event.target.value
 		);
 	};
-
-	const handleRespChange = (text) => {
-		setResponsibilityText({id: 'responsibilityText', value: text});
-	}
+	const top100Films = [
+		{ title: 'DoDD 1000.20', year: 1994 },
+		{ title: 'DoDD 1000.21E', year: 1972 },
+		{ title: 'DoDD 1332.41', year: 1974 },
+		{ title: 'DoDI 3115.15', year: 2008 },
+		{ title: 'DoDI 1225.08', year: 1957 },
+	]
 
 	return (
 		<div>
 			<div style={styles.formField}>
+				<Autocomplete
+					multiple
+					id="tags-standard"
+					options={top100Films}
+					getOptionLabel={(option) => option.title}
+					defaultValue={[]}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							classes={{ root: classes.root }}
+							variant="outlined"
+							label="Document Titles"
+							// placeholder="Document Titles"
+						/>
+					)}
+				/>
+			</div>
+			<div style={styles.formField}>
+				<Autocomplete
+					multiple
+					id="tags-standard"
+					options={top100Films}
+					getOptionLabel={(option) => option.title}
+					defaultValue={[]}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							classes={{ root: classes.root }}
+							variant="outlined"
+							label="Organizations"
+							// placeholder="Organization"
+						/>
+					)}
+				/>
+			</div>
+			{/* <div style={styles.formField}>
 				<TextField
 					classes={{ root: classes.root }}
 					select
 					name="docTitle"
 					id="docTitle"
 					variant="outlined"
-					label="docTitle"
+					label="Document Title"
 					SelectProps={{
 						multiple: true,
 						value: docTitle,
@@ -73,7 +119,7 @@ export default function GCResponsibilitySearch({ setPreSearch, setReloadResponsi
 					name="organziation"
 					id="organziation"
 					variant="outlined"
-					label="organziation"
+					label="Organziation"
 					SelectProps={{
 						multiple: true,
 						value: organziation,
@@ -84,30 +130,47 @@ export default function GCResponsibilitySearch({ setPreSearch, setReloadResponsi
 					<MenuItem value="user1">User1</MenuItem>
 					<MenuItem value="user2">User2</MenuItem>
 				</TextField>
-			</div>
+			</div> */}
 			<div style={styles.formField}>
 				<TextField
 					classes={{ root: classes.root }}
 					variant="outlined"
 					placeholder='Responsibility Text'
 					value={responsibilityText?.value || ''}
-					onChange={(e) => handleRespChange(e.target.value)}
+					onChange={(e) => setResponsibilityText({id: 'responsibilityText', value: e.target.value})}
 				/>
 			</div>
-			<GCButton 
-				onClick={() => {
-					const filters = [];
-					if(responsibilityText) filters.push(responsibilityText);
-					if(organziation.length) filters.push(organziation);
-					if(docTitle.docTitle) filters.push(docTitle);
-					setFilters(filters);
-					setReloadResponsibilities(true);
-					setPreSearch(false);
-				}}
-				style={{margin: 0}}
-			>
-                Search
-			</GCButton>
+			<div style={{
+				width: 500,
+				display: 'flex',
+				justifyContent: 'right'
+			}}>
+				<GCButton 
+					onClick={() => {
+						setResponsibilityText({});
+						setOrganization([]);
+						setDocTitle([]);
+					}}
+					style={{margin: 0}}
+					isSecondaryBtn
+				>
+					Clear Filters
+				</GCButton>
+				<GCButton 
+					onClick={() => {
+						const filters = [];
+						if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
+						if(organziation.length) filters.push(organziation);
+						if(docTitle.docTitle) filters.push(docTitle);
+						setFilters(filters);
+						setReloadResponsibilities(true);
+						setPreSearch(false);
+					}}
+					style={{marginLeft: 10}}
+				>
+					Search
+				</GCButton>
+			</div>
 		</div>
 	)
 }

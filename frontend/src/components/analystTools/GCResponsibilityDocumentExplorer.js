@@ -1,12 +1,16 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import _, { isElement } from 'underscore';
-import GameChangerAPI from '../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
+import { TextField } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { makeStyles } from '@material-ui/core/styles';
+import grey from '@material-ui/core/colors/grey';
 import SimpleTable from '../common/SimpleTable';
+import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import '../cards/keyword-result-card.css';
 import '../../containers/gamechanger.css';
-import grey from '@material-ui/core/colors/grey';
+import GCAccordion from '../common/GCAccordion';
 import {
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
@@ -41,6 +45,11 @@ const styles = {
 		width: '100%',
 	},
 };
+const useStyles = makeStyles({
+	root: {
+		width: '100%'
+	}
+})
 
 const getIframePreviewLinkInferred = (
 	filename,
@@ -76,10 +85,19 @@ export default function ResponsibilityDocumentExplorer({
 	docsPerPage,
 	onPaginationClick,
 	isClone = true,
-	setReloadResponsibilities
+	setReloadResponsibilities,
+	docTitle, 
+	setDocTitle,
+	organziation, 
+	setOrganization,
+	responsibilityText, 
+	setResponsibilityText,
+	setFilters,
+	documentList
 }) {
 
 	const { cloneData } = state;
+	const classes = useStyles();
 
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState({});
@@ -364,6 +382,14 @@ export default function ResponsibilityDocumentExplorer({
 	if (!rightPanelOpen)
 		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
+	const top100Films = [
+		{ title: 'DoDD 1000.20', year: 1994 },
+		{ title: 'DoDD 1000.21E', year: 1972 },
+		{ title: 'DoDD 1332.41', year: 1974 },
+		{ title: 'DoDI 3115.15', year: 2008 },
+		{ title: 'DoDI 1225.08', year: 1957 },
+	]
+
 	return (
 		<div
 			className="row"
@@ -373,7 +399,7 @@ export default function ResponsibilityDocumentExplorer({
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
-					paddingRight: 0,
+					paddingRight: 10,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',
@@ -437,7 +463,113 @@ export default function ResponsibilityDocumentExplorer({
 						'Make a search to get started.'
 					)}
 				</div>
-
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={!state.searchSettings.publicationDateAllTime}
+						header={'DOCUMENT TITLE'}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<Autocomplete
+							classes={{ root: classes.root }}
+							multiple
+							options={documentList}
+							getOptionLabel={(option) => option.documentTitle}
+							defaultValue={[]}
+							onChange={(event, newValue) => {
+								setDocTitle(newValue);
+							}}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									classes={{ root: classes.root }}
+									variant="outlined"
+									label="Document Titles"
+								/>
+							)}
+						/>
+					</GCAccordion>
+				</div><div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={!state.searchSettings.publicationDateAllTime}
+						header={'ORGANIZATION'}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<Autocomplete
+							classes={{ root: classes.root }}
+							multiple
+							options={[]}
+							freeSolo
+							autoSelect
+							getOptionLabel={(option) => option}
+							defaultValue={[]}
+							onChange={(event, newValue) => {
+								setOrganization(newValue);
+							}}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									classes={{ root: classes.root }}
+									variant="outlined"
+									label="Organizations"
+								/>
+							)}
+						/>
+					</GCAccordion>
+				</div><div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={!state.searchSettings.publicationDateAllTime}
+						header={'RESPONSIBILITY TEXT'}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<div style={styles.formField}>
+							<TextField
+								classes={{ root: classes.root }}
+								variant="outlined"
+								placeholder='Responsibility Text'
+								value={responsibilityText?.value || ''}
+								onChange={(e) => setResponsibilityText({id: 'responsibilityText', value: e.target.value})}
+							/>
+						</div>
+					</GCAccordion>
+					<GCButton 
+						onClick={() => {
+							setResponsibilityText({});
+							setOrganization([]);
+							setDocTitle([]);
+						}}
+						style={{display: 'block', width: '100%', margin: '20px 0 10px 0'}}
+						isSecondaryBtn
+					>
+					Clear Filters
+					</GCButton>
+					<GCButton 
+						onClick={() => {
+							const filters = [];
+							if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
+							if(organziation.length) {
+								organziation.forEach(org => {
+									filters.push({id: 'organizationPersonnel', value: org})
+								})
+							};
+							if(docTitle.length) {
+								docTitle.forEach(doc => {
+									filters.push({id: 'documentTitle', value: doc.documentTitle})
+								})
+							};
+							setFilters(filters);
+							setReloadResponsibilities(true);
+						}}
+						style={{display: 'block', width: '100%', margin: '0 0 30px 0'}}
+					>
+					Update Search
+					</GCButton>
+				</div>
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={'#E9691D'} />

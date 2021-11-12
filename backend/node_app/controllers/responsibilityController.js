@@ -39,6 +39,7 @@ class ResponsibilityController {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanDocument = this.cleanDocument.bind(this);
 		this.getResponsibilityData = this.getResponsibilityData.bind(this);
+		this.getResponsibilityDocTitles = this.getResponsibilityDocTitles.bind(this);
 		this.storeResponsibilityReports = this.storeResponsibilityReports.bind(this);
 		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this);
 		this.rejectResponsibility = this.rejectResponsibility.bind(this);
@@ -291,8 +292,8 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView } = req.body;
-			let { limit, DOCS_PER_PAGE = 10 } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10 } = req.body;
+			let { limit } = req.body;
 			order.push(['filename', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
@@ -315,9 +316,10 @@ class ResponsibilityController {
 							};
 						}
 					} else {
-						tmpWhere[id] = {
+						if(!tmpWhere[id]) tmpWhere[id]= {[Op.or]: []};
+						tmpWhere[id][Op.or].push({
 							[Op.iLike]: `%${value}%`
-						};
+						});
 					}
 				}
 			});
@@ -360,6 +362,56 @@ class ResponsibilityController {
 
 		} catch (err) {
 			this.logger.error(err, 'ASDED20', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getResponsibilityDocTitles(req, res) {
+		let userId = 'unknown_webapp';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const { order = [], where = [] } = req.body;
+			order.push(['filename', 'ASC']);
+			const tmpWhere = {};
+			where.forEach(({id, value}) => {
+				if (id === 'id') {
+					tmpWhere[id] = {
+						[Op.eq]: value
+					};
+				} else {
+					if (id === 'otherOrganizationPersonnel') {
+						if (value.includes(null)) {
+							tmpWhere[id] = {
+								[Op.or]: [
+									{ [Op.like]: { [Op.any]: value } },
+									{ [Op.eq]: null },
+								]
+							}
+						} else {
+							tmpWhere[id] = {
+								[Op.like]: { [Op.any]: value }
+							};
+						}
+					} else {
+						tmpWhere[id] = {
+							[Op.iLike]: `%${value}%`
+						};
+					}
+				}
+			});
+			tmpWhere['status'] = {[Op.not]: 'rejected'};
+			const results = await this.responsibilities.findAll({
+				group: ['documentTitle'],
+				where: tmpWhere,
+				attributes: [
+					'documentTitle',
+				]
+			});
+			res.status(200).send({results});
+
+		} catch (err) {
+			this.logger.error(err, 'BTEFE31', userId);
 			res.status(500).send(err);
 		}
 	}
