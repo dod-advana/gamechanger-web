@@ -494,11 +494,12 @@ export default (props) => {
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div
 								style={{
 									width: '60px',
-									display: 'inline-block',
-									marginLeft: '20px',
+									display: 'inline-block'
 								}}
 							>
 								GPU:
@@ -507,22 +508,20 @@ export default (props) => {
 								checked={gpu}
 								onChange={(e) => setgpu(e.target.checked)}
 							/>
-						</div>
-						<div>
-							<div style={{ width: '120px', display: 'inline-block' }}>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
 								Version:
 							</div>
 							<Input
 								value={version}
 								onChange={(e) => setVersion(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
 							/>
 							<div
 								style={{
 									width: '60px',
 									display: 'inline-block',
-									marginLeft: '20px',
+									marginLeft: '10px',
 								}}
 							>
 								Upload:
@@ -628,13 +627,14 @@ export default (props) => {
 								value={validationData}
 								onChange={(e) => setValidationData(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div
 								style={{
 									width: '60px',
-									display: 'inline-block',
-									marginLeft: '20px',
+									display: 'inline-block'
 								}}
 							>
 								Eval Type:
@@ -645,16 +645,14 @@ export default (props) => {
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
-						</div>
-						<div>
-							<div style={{ width: '120px', display: 'inline-block' }}>
+							<div style={{ width: '70px', display: 'inline-block' }}>
 								Sample Limit:
 							</div>
 							<Input
 								value={sampleLimit}
 								onChange={(e) => setSampleLimit(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+								style={{ fontSize: 'small', minWidth: '50px', margin: '10px' }}
 							/>
 						</div>
 					</div>
