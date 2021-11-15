@@ -36,6 +36,11 @@ const MainView = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
+		const urlArray = window.location.href.split('/');
+		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]})
+	}, [dispatch])
+
+	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const factory = new MainViewFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
@@ -147,7 +152,7 @@ const MainView = (props) => {
 
 	const getUserDashboard = () => {
 		return (
-			<GCUserDashboard state={state} dispatch={dispatch} userData={state.userData} updateUserData={() => getUserData(dispatch)}
+			<GCUserDashboard state={state} userData={state.userData} updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
 				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
@@ -257,6 +262,7 @@ const MainView = (props) => {
 								}}
 								startIcon={<ArrowBackIcon />}
 								onClick={() => {
+									window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}`);
 									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
 									let viewName;
 									switch (state.pageDisplayed) {
