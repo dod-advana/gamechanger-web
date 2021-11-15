@@ -1,6 +1,7 @@
 // Router for /api/ac routes
 const express = require('express');
 const router = express.Router();
+const constants = require('../config/constants');
 
 const { DocumentController } = require('../controllers/documentController');
 const { SearchController } = require('../controllers/searchController');
@@ -154,10 +155,14 @@ router.post('/admin/updateAPIKeyDescription', apiController.updateAPIKeyDescript
 router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
-router.post('/getAppStats', appStatsController.getAppStats);
-router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
-router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
-router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
+
+  router.post('/getAppStats', appStatsController.getAppStats);
+  router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
+  router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+  router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+
+}
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
 router.post('/appSettings/combinedSearch', appSettings.setCombinedSearchMode);
