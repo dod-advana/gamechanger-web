@@ -41,13 +41,18 @@ export default function PDFHighlighter({
 
 	const updateResponsibility = (updatedResp) => {
 		const { id } = selectedResponsibility;
-		const updateProps = {};
+		let updatedColumn = '';
 		if(isEditingResp){
-			updateProps.responsibilityText = updatedResp;
+			updatedColumn = 'responsibilityText';
 		}else if(isEditingEntity){
-			updateProps.organizationPersonnel = updatedResp;
+			updatedColumn = 'organizationPersonnel';
 		}
-		gameChangerAPI.updateResponsibility({id, updateProps}).then(() => {
+		gameChangerAPI.storeResponsibilityReportData({
+			id, 
+			issue_description: 'needs review',
+			updatedColumn,
+			updatedText: updatedResp
+		}).then(() => {
 			setIsEditingEntity(false);
 			setIsEditingResp(false);
 			setReloadResponsibilities(true);

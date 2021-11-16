@@ -9,6 +9,7 @@ import InternalUsersManagement from '../components/user/InternalUserManagement';
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
 import CloneList from '../components/admin/CloneList';
+import ResponsibilityUpdates from '../components/admin/ResponsibilityUpdates';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
@@ -36,6 +37,7 @@ const PAGES = {
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
+	responsibilityUpdates: 'Responsibility Updates'
 };
 /**
  *
@@ -81,6 +83,8 @@ const GamechangerAdminPage = (props) => {
 				return <APIRequests />;
 			case PAGES.homepageEditor:
 				return <HomepageEditor />;
+			case PAGES.responsibilityUpdates:
+				return <ResponsibilityUpdates />;
 			default:
 				return <GeneralAdminButtons />;
 		}

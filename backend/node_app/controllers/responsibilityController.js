@@ -41,6 +41,7 @@ class ResponsibilityController {
 		this.getResponsibilityData = this.getResponsibilityData.bind(this);
 		this.getResponsibilityDocTitles = this.getResponsibilityDocTitles.bind(this);
 		this.storeResponsibilityReports = this.storeResponsibilityReports.bind(this);
+		this.getResponsibilityUpdates = this.getResponsibilityUpdates.bind(this);
 		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this);
 		this.rejectResponsibility = this.rejectResponsibility.bind(this);
 		this.updateResponsibility = this.updateResponsibility.bind(this);
@@ -444,14 +445,37 @@ class ResponsibilityController {
 		}
 	}
 
+	// async updateResponsibility(req, res) {
+	// 	const userId = req.get('SSL_CLIENT_S_DN_CN');
+
+	// 	try {
+	// 		const { id, updateProps } = req.body;
+	// 		const result = await this.responsibilities.update({
+	// 			...updateProps,
+	// 			status: 'revised'
+	// 		},
+	// 		{
+	// 			where: { id: id },
+	// 			subQuery: false
+	// 		}
+	// 		);
+	// 		res.status(200).send();
+
+	// 	} catch (err) {
+	// 		const { message } = err;
+	// 		this.logger.error(message, 'IORFMS75', userId);
+
+	// 		res.status(500).send(err);
+	// 	}
+	// }
+
 	async updateResponsibility(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const { id, updateProps } = req.body;
-			const result = await this.responsibilities.update({
-				...updateProps,
-				status: 'revised'
+			const { id, status } = req.body;
+			const result = await this.responsibility_reports.update({
+				status: status
 			},
 			{
 				where: { id: id },
@@ -472,40 +496,41 @@ class ResponsibilityController {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {id, issue_description} = req.body;
+			const {id, issue_description, updatedColumn, updatedText} = req.body;
 
 			const hashed_user = sparkMD5Lib.hash(userId);
-
-			if (id && issue_description) {
-				const [report, created] = await this.responsibility_reports.findOrCreate(
-					{
-						where: { reporter_hashed_username: hashed_user, responsibility_id: id },
-						defaults: {
-							reporter_hashed_username: hashed_user,
-							responsibility_id: id,
-							issue_description: issue_description
-						}
-					}
-				);
-				if (created) {
-					const emailBody = `<h2>Responsibility Issue Report from ${userId}</h2>
-						<p>Responsibility Row in Postgres: ${id}</p>
-						<p>${issue_description}</p>`;
-					try{
-						await this.emailUtility.sendEmail(emailBody, 'Responsibility Issue Report', this.constants.GAME_CHANGER_OPTS.emailAddress, null, null, userId);
-						res.status(200).send(report);
-					}catch(error){
-						this.logger.error(JSON.stringify(error), 'YXBG3G4', userId);
-						res.status(200).send(report);
-					};
-				} else {
-					res.status(200).send(report);
-				}
-			} else {
-				res.status(400).send('Responsibility id not included or the description of the issue not included.');
-			}
+			const report = await this.responsibility_reports.create({
+				responsibility_id: id,
+				reporter_hashed_username: hashed_user,
+				issue_description,
+				updatedColumn,
+				updatedText
+			})
+				
+			res.status(200).send(report);
 		} catch (err) {
+			console.log(err)
 			this.logger.error(err, '5PO0TJR', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getResponsibilityUpdates(req, res) {
+		let userId = 'unknown_webapp';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const { where } = req.body;
+
+			const updates = await this.responsibility_reports.findAll({
+				include: RESPONSIBILITIES,
+				where
+			})
+				
+			res.status(200).send(updates);
+		} catch (err) {
+			console.log(err)
+			this.logger.error(err, 'DPI0RJS', userId);
 			res.status(500).send(err);
 		}
 	}

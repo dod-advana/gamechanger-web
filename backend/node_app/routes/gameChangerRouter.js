@@ -83,6 +83,7 @@ router.post('/responsibilities/setRejectionStatus', responsibility.rejectRespons
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
+router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);
 
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);

@@ -100,6 +100,7 @@ const endpoints = {
 	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
 	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	getResponsibilityUpdates: '/api/gameChanger/responsibilities/getUpdates',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
 	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
@@ -466,6 +467,11 @@ export default class GameChangerAPI {
 
 	storeResponsibilityReportData = async (data) => {
 		const url = endpoints.storeResponsibilityReportData;
+		return axiosPOST(this.axios, url, data);
+	};
+
+	getResponsibilityUpdates = async (data) => {
+		const url = endpoints.getResponsibilityUpdates;
 		return axiosPOST(this.axios, url, data);
 	};
 
