@@ -411,14 +411,14 @@ const GCDataStatusTracker = (props) => {
 		if (crawlerMapping && crawlerMapping.data) {
 			for (let crawler of crawlerMapping.data) {
 				if (crawler_name === crawler.crawler){
-                    return(crawler.data_source_s + ' - ' + crawler.source_title);
+					return(crawler.data_source_s + ' - ' + crawler.source_title);
 				}
 			}
-            for (let crawler of crawlerMapping.data) {
-                if (crawler_name !== crawler.crawler) {
-                    return(crawler_name);
-                }
-            }
+			for (let crawler of crawlerMapping.data) {
+				if (crawler_name !== crawler.crawler) {
+					return(crawler_name);
+				}
+			}
 		}
 	}
 
@@ -568,7 +568,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'crawler_name',
 				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
-                style: { 'whiteSpace': 'unset' },
+				style: { 'whiteSpace': 'unset' },
 			},
 			{
 				Header: 'Status',
@@ -680,7 +680,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'crawler_name',
 				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
-                style: { 'whiteSpace': 'unset' },
+				style: { 'whiteSpace': 'unset' },
 			},
 			{
 				Header: 'Last Successful Ingest',
@@ -763,8 +763,8 @@ const GCDataStatusTracker = (props) => {
 					getTheadTrProps={() => {
 						return {
 							style: {
-                                whiteSpace: 'unset',
-                                height: 'fit-content',
+								whiteSpace: 'unset',
+								height: 'fit-content',
 								textAlign: 'left',
 								fontWeight: 'bold',
 							},
