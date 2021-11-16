@@ -1145,8 +1145,12 @@ describe('SearchUtility', function () {
 			const query = "dodi 8110.01 mission partner"
 			const target = new SearchUtility(tmpOpts);
 			const result = await target.getTitle(query, clientObj, userId);
-			const actual = result.body.hits.hits[0]._source.display_title_s
-			const expected = "DoDI 8110.01 Mission Partner Environment Information Sharing Capability Implementation for the DoD"
+			let titles = [];
+			result.body.hits.hits.forEach((r) => {
+				titles.push(r.fields.display_title_s[0])
+			})
+			const actual = titles
+			const expected = ["SECNAVINST 5030.8C GENERAL GUIDANCE FOR THE CLASSIFICATION OF NAVAL VESSELS AND BATTLE FORCE SHIP COUNTING PROCEDURES", "OPNAVINST 3501.363B REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR COASTAL RIVERINE FORCES", "OPNAVINST 3111.17A STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY", "CFETP 2A9X1X BomberSpecial (BS) Integrated CommunicationNavigationMission Systems", "AJP 3.14 ALLIED JOINT DOCTRINE FOR FORCE PROTECTION", "OPNAVINST 3111.17B STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY", "CJCSI 1805.01B Enlisted Professional Military Education Policy", "AFI 36-2670 TOTAL FORCE DEVELOPMENT", "OPNAVINST 5100.19F NAVY SAFETY AND OCCUPATIONAL HEALTH PROGRAM MANUAL FOR FORCES AFLOAT", "CJCS GDE 3401D CJCS Guide to the Chairman's Readiness System", "ATP 99 URBAN TACTICS", "DoDFMR V2ACH3 Volume 2A, Chapter 3 : \"Operation and Maintenance Appropriations\"", "AFMAN 13-1BCCV3 OPERATING PROCEDURES-BATTLE CONTROL CENTER (BCC)", "AFJQS 8U000 Air Force Job Qualification Standard (AFJQS) Unit Deployment Manager (UDM)", "DAFI 10-401 OPERATIONS PLANNING AND EXECUTION", "DoDM 4160.21 Defense Materiel Disposition: Instructions for Hazardous Property and Other Special Processing Materiel", "CFETP 1C5X1C2 COMMAND AND CONTROL BATTLE MANAGEMENT OPERATONS", "OPNAVINST 3501.93F REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR NAVAL BEACH GROUPS AND THEIR ELEMENTS", "CJCSI 3030.01 IMPLEMENTING JOINT FORCE DEVELOPMENT AND DESIGN", "CJCSI 3115.01 Common Tactical Picture Reporting Requirements"]
 			assert.deepStrictEqual(actual, expected);
 		});
 	});

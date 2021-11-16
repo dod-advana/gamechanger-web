@@ -51,7 +51,7 @@ class SearchUtility {
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
-
+		this.getTitle = this.getTitle.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
