@@ -160,6 +160,20 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 					</HoverNavItem>
 				</Tooltip>
 			)}
+
+			{Permissions.isGameChangerAdmin() && (
+				<Tooltip title="Responsibility Updates" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setPageToView(PAGES.responsibilityUpdates);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AnalystToolsIcon} />
+					</HoverNavItem>
+				</Tooltip>
+			)}
 		</div>
 	);
 };

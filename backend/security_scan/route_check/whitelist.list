@@ -23,6 +23,7 @@
 .* /api/gamechanger/responsibilities/updateResponsibility .*
 .* /api/gamechanger/responsibilities/getOtherEntityFilterList .*
 .* /api/gamechanger/responsibilities/storeReport .*
+.* /api/gamechanger/responsibilities/getUpdates .*
 .* /api/gamechanger/getNotifications .*
 .* /api/gamechanger/megamenu/links .*
 .* /api/gamechanger/tutorialOverlay .*
