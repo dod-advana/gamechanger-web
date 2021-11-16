@@ -98,6 +98,15 @@ app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
+if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
+	app.use(async function (req, res, next) {
+		req.headers['x-env-ssl_client_certificate'] = (
+			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`
+		);
+		next();
+	});
+}
+
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const cn = req.get('x-env-ssl_client_certificate');

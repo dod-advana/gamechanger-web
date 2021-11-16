@@ -205,6 +205,7 @@ export const getCloneTitleForFactory = (cloneData, upperCase) => {
 	return upperCase ? cloneData.clone_name.toUpperCase() : cloneData.clone_name;
 };
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
 export const useMountEffect = (fun) => useEffect(fun, []);
 
 export const typeFilters = {
