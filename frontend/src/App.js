@@ -166,8 +166,6 @@ const App = () => {
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
 
-	const initialUrl = localStorage.getItem('userInitialUrl')
-	if(!initialUrl) localStorage.setItem('userInitialUrl', window.location.href)
 	const getGamechangerClones = async (tutorialData) => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
@@ -316,11 +314,7 @@ const App = () => {
 			setInitialized(true);
 			initialize();
 		}
-		const initialUrl = localStorage.getItem('userInitialUrl')
-		if(initialUrl && initialUrl !== window.location.href) {
-			window.location.href = initialUrl;
-		}
-		localStorage.removeItem('userInitialUrl');
+
 	}, [initialized]);
 
 	if (!initialized || !tokenLoaded) {
