@@ -51,7 +51,7 @@ class SearchUtility {
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
-
+		this.getTitle = this.getTitle.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -473,7 +473,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${parsedQuery}*`,
-										boost: 6
+										boost: 10
 									}
 								}
 							},
@@ -483,8 +483,13 @@ class SearchUtility {
 									fields: ['display_title_s.search'],
 									operator: 'AND',
 									type: 'phrase',
-									boost: 4
+									boost: 10
 								  }
+							},
+							{
+								match: {
+									"filename.search": parsedQuery + ".pdf"
+							  }
 							}
 						],
 						minimum_should_match: 1,
@@ -611,6 +616,29 @@ class SearchUtility {
 		}
 	}
 
+	async getTitle (parsedQuery, clientObj, userId) {
+	// get contents of single document searching by doc display title
+		try {
+			let results = {}
+			let { esClientName, esIndex } = clientObj;
+			let titleQuery = {
+				size: 1,
+				query: {
+					wildcard: {
+						"display_title_s.search": {
+							value: `*${parsedQuery}*`
+						}
+					}
+				}
+			}
+            results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
+            return results
+        } catch (err) {
+            this.logger.error(err, 'TJKBNOF', userId);
+            }
+        }
+
+
 	getESQueryUsingOneID(id, user, limit = 100, maxLength=200) {
 		try {
 			return {
@@ -705,20 +733,20 @@ class SearchUtility {
 	}
 
 	getESQueryOneDoc (id, userId) {
-	// get contents of single document searching by doc id
-	try {
-		return {
-			size: 1,
-			query: {
-				match: {
-					id: id
+		// get contents of single document searching by doc id
+		try {
+			return {
+				size: 1,
+				query: {
+					match: {
+						id: id
+					}
 				}
 			}
+		} catch (err) {
+			this.logger.error(err, 'TJKFH5F', userId);
+			}
 		}
-	} catch (err) {
-		this.logger.error(err, 'TJKFH5F', userId);
-		}
-	}
 
 	// makes phrases to add to ES queries for entities or gamechanger indices
 	makeBigramQueries (searchTextList, alias) {
@@ -1802,7 +1830,6 @@ class SearchUtility {
 			this.logger.error(msg, 'U1EIAR2', userId);
 			throw msg;
 		}
-	
 	}
 
 	async documentSearch(req, body, clientObj, userId) {
@@ -1817,7 +1844,6 @@ class SearchUtility {
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
-	
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
 			if (esQuery === '') {
@@ -1827,11 +1853,15 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+            const titleResults = await this.getTitle(body.parsedQuery, clientObj, userId);
+			let results;
+			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-	
+				if (titleResults !== undefined) {
+					results = this.reorderFirst(results, titleResults);
+				}
 				if (getIdList) {
-					return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+					return this.cleanUpIdEsResults(results, titleResults, searchTerms, userId, expansionDict);
 				}
 	
 				if (forGraphCache){
@@ -1850,8 +1880,30 @@ class SearchUtility {
 			this.logger.error(message, 'WBJNDK3', userId);
 			throw e;
 		}
-		
-		
+	}
+
+	reorderFirst(results, titleResults) {
+		// reorders a matching title result to the top of the results
+		let reorderedHits = []
+		let firstResult = titleResults.body.hits.hits[0]
+		let firstTitle = firstResult._source.display_title_s
+		let inResults = false;
+		try {
+			results.body.hits.hits.forEach((r) => {
+				if (r.fields.display_title_s[0] !== firstTitle) {
+					reorderedHits.push(r);
+				} else {
+					inResults = true;
+					reorderedHits.unshift(r);
+				}
+			});
+			if (inResults === true) {
+				results.body.hits.hits = reorderedHits
+			};
+			return results
+		} catch (e) {
+			this.logger.error(e, 'JKJDFPOF', '');
+		}
 	}
 	
 	getEntityQuery(searchText, offset = 0, limit = 6) {
