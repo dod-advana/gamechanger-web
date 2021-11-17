@@ -473,15 +473,62 @@ class ResponsibilityController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const { id, status } = req.body;
-			const result = await this.responsibility_reports.update({
-				status: status
-			},
-			{
-				where: { id: id },
-				subQuery: false
+			const { update, responsibility, status } = req.body;
+			const { id: updateId, updatedText, updatedColumn } = update;
+			const { id: responsibilityId, responsibilityText, organizationPersonnel} = responsibility;
+			let responsibilityStatus;
+			const foundResp = await this.responsibilities.findOne({
+				where: {id: responsibilityId},
+				include: {
+					model: RESPONSIBILITY_REPORTS,
+					where: {issue_description: 'review'}
+				}
+			})
+			if(status === 'accepted'){ 
+				if(!foundResp?.dataValues.responsibility_reports.length) {
+					responsibilityStatus = 'updated';
+				}else{
+					responsibilityStatus = 'updated, review'
+				}
+				await this.responsibilities.update({
+					[updatedColumn]: updatedText,
+					status: responsibilityStatus
+				}, 
+				{
+					where: {
+						id: responsibilityId
+					}
+				})
+				let responsibilityUpdate;
+				if(updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
+				if(updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
+				await this.responsibility_reports.update({
+					updatedText: responsibilityUpdate,
+					issue_description: status
+				}, 
+				{
+					where: {
+						id: updateId
+					}
+				})
 			}
-			);
+			if(status === 'rejected'){
+				await this.responsibility_reports.destroy({
+					where: {
+						id: updateId
+					}
+				})
+				if(!foundResp?.dataValues.responsibility_reports.length){
+					await this.responsibilities.update({
+						status: 'active'
+					},
+					{
+						where: {
+							id: responsibilityId
+						}
+					})
+				}
+			}
 			res.status(200).send();
 
 		} catch (err) {
@@ -496,7 +543,7 @@ class ResponsibilityController {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {id, issue_description, updatedColumn, updatedText} = req.body;
+			const {id, issue_description, updatedColumn, updatedText, textPosition} = req.body;
 
 			const hashed_user = sparkMD5Lib.hash(userId);
 			const report = await this.responsibility_reports.create({
@@ -504,8 +551,17 @@ class ResponsibilityController {
 				reporter_hashed_username: hashed_user,
 				issue_description,
 				updatedColumn,
-				updatedText
+				updatedText,
+				textPosition
 			})
+			await this.responsibilities.update({
+				status: 'review'
+			},
+			{
+				where: { id: id },
+				subQuery: false
+			}
+			);
 				
 			res.status(200).send(report);
 		} catch (err) {
@@ -515,22 +571,96 @@ class ResponsibilityController {
 		}
 	}
 
+	// async getResponsibilityUpdates(req, res) {
+	// 	let userId = 'unknown_webapp';
+	// 	try {
+	// 		userId = req.get('SSL_CLIENT_S_DN_CN');
+
+	// 		const { where } = req.body;
+
+	// 		const updates = await this.responsibility_reports.findAll({
+	// 			include: RESPONSIBILITIES,
+	// 			where
+	// 		})
+				
+	// 		res.status(200).send(updates);
+	// 	} catch (err) {
+	// 		console.log(err)
+	// 		this.logger.error(err, 'DPI0RJS', userId);
+	// 		res.status(500).send(err);
+	// 	}
+	// }
+
 	async getResponsibilityUpdates(req, res) {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { where } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10 } = req.body;
+			let { limit } = req.body;
+			order.push(['filename', 'ASC']);
+			const tmpWhere = {};
+			where.forEach(({id, value}) => {
+				if (id === 'id') {
+					tmpWhere[id] = {
+						[Op.eq]: value
+					};
+				} else {
+					if (id === 'otherOrganizationPersonnel') {
+						if (value.includes(null)) {
+							tmpWhere[id] = {
+								[Op.or]: [
+									{ [Op.like]: { [Op.any]: value } },
+									{ [Op.eq]: null },
+								]
+							}
+						} else {
+							tmpWhere[id] = {
+								[Op.like]: { [Op.any]: value }
+							};
+						}
+					} else {
+						if(!tmpWhere[id]) tmpWhere[id]= {[Op.or]: []};
+						tmpWhere[id][Op.or].push({
+							[Op.iLike]: `%${value}%`
+						});
+					}
+				}
+			});
+			tmpWhere['status'] = {[Op.like]: 'review'};
+			const newOffsets = [];
+			const docOffsets = await this.responsibilities.findAndCountAll({
+				where: tmpWhere,
+				group: 'filename',
+				order: order,
+				attributes: [
+					[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
+					'filename',
+				]
+			});
+			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
+			if(!limit){
+				for(let i = 0; i < DOCS_PER_PAGE; i++){
+					if(!newOffsets[i]) break;
+					limit += newOffsets[i];
+				}
+			};
+			const results = await this.responsibilities.findAndCountAll({
+				limit,
+				offset,
+				order: order,
+				where: {
+					status: 'review'
+				},
+				include: {
+					model: RESPONSIBILITY_REPORTS,
+					where: { issue_description: 'review'}
+				}
+			});
+			res.status(200).send({offsets: newOffsets, totalCount: results.count, results: results.rows});
 
-			const updates = await this.responsibility_reports.findAll({
-				include: RESPONSIBILITIES,
-				where
-			})
-				
-			res.status(200).send(updates);
 		} catch (err) {
-			console.log(err)
-			this.logger.error(err, 'DPI0RJS', userId);
+			this.logger.error(err, 'ASDED20', userId);
 			res.status(500).send(err);
 		}
 	}

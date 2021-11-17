@@ -19,7 +19,9 @@ export default function PDFHighlighter({
 	isEditingEntity, 
 	isEditingResp, 
 	setIsEditingResp, 
-	setReloadResponsibilities }) {
+	onConfirmSubmit,
+	setReloadResponsibilities 
+}) {
 
 	const highlights = [];
 
@@ -39,7 +41,7 @@ export default function PDFHighlighter({
 
 	const parseIdFromHash = () => document.location.hash.slice('#highlight-'.length);
 
-	const updateResponsibility = (updatedResp) => {
+	const updateResponsibility = (updatedResp, textPosition) => {
 		const { id } = selectedResponsibility;
 		let updatedColumn = '';
 		if(isEditingResp){
@@ -51,12 +53,23 @@ export default function PDFHighlighter({
 			id, 
 			issue_description: 'needs review',
 			updatedColumn,
-			updatedText: updatedResp
+			updatedText: updatedResp,
+			textPosition
 		}).then(() => {
 			setIsEditingEntity(false);
 			setIsEditingResp(false);
-			setReloadResponsibilities(true);
-		});
+			onConfirmSubmit(
+				'Update Successful',
+				'success',
+				'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
+			);
+		}).catch(() => {
+			onConfirmSubmit(
+				'Update error',
+				'error',
+				'There was an error sending your responsibility update. Please try againg later.'
+			);
+		})
 	}
 
 	return (
@@ -80,15 +93,15 @@ export default function PDFHighlighter({
 						content,
 						hideTipAndSelection,
 						transformSelection
-					) => (
-						<Tip
+					) => {
+						return <Tip
 							onOpen={transformSelection}
 							onConfirm={() => {
-								updateResponsibility(content.text.trim());
+								updateResponsibility(content.text.trim(), position);
 								hideTipAndSelection();
 							}}
 						/>
-					)}
+					}}
 					highlightTransform={(
 						highlight,
 						index,

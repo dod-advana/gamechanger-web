@@ -21,6 +21,8 @@ import { trackEvent } from '../telemetry/Matomo';
 // import GamechangerPdfViewer from '../documentViewer/PDFViewer'
 import PDFHighlighter from './PDFHighlighter';
 import GCButton from '../common/GCButton';
+import UOTAlert from '../common/GCAlert';
+import { styles as adminStyles} from '../../components/admin/util/GCAdminStyles'
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -120,6 +122,19 @@ export default function ResponsibilityDocumentExplorer({
 	const [isEditingResp, setIsEditingResp] = useState(false);
 	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
+
+	const [alertActive, setAlertActive] = useState(false);
+	const [alertTitle, setAlertTitle] = useState('');
+	const [alertType, setAlertType] = useState('');
+	const [alertMessage, setAlertMessage] = useState('');
+
+
+	const createAlert = (title, type, message) => {
+		setAlertTitle(title);
+		setAlertType(type);
+		setAlertMessage(message);
+		setAlertActive(true);
+	};
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -381,14 +396,6 @@ export default function ResponsibilityDocumentExplorer({
 		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
 	if (!rightPanelOpen)
 		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
-
-	const top100Films = [
-		{ title: 'DoDD 1000.20', year: 1994 },
-		{ title: 'DoDD 1000.21E', year: 1972 },
-		{ title: 'DoDD 1332.41', year: 1974 },
-		{ title: 'DoDI 3115.15', year: 2008 },
-		{ title: 'DoDI 1225.08', year: 1957 },
-	]
 
 	return (
 		<div
@@ -800,6 +807,7 @@ export default function ResponsibilityDocumentExplorer({
 									setIsEditingEntity={setIsEditingEntity}
 									setIsEditingResp={setIsEditingResp}
 									setReloadResponsibilities={setReloadResponsibilities}
+									onConfirmSubmit={createAlert}
 								/>
 							}
 						</div>
@@ -868,6 +876,21 @@ export default function ResponsibilityDocumentExplorer({
 				/>
 				}
 			</div>
+			{alertActive ? (
+				<UOTAlert
+					title={alertTitle}
+					type={alertType}
+					elementId="Admin-Button"
+					message={alertMessage}
+					onHide={() => setAlertActive(false)}
+					containerStyles={{
+						...adminStyles.alert, 
+						top: 230,
+						width: '88%',}}
+				/>
+			) : (
+				<></>
+			)}
 		</div>
 	);
 }

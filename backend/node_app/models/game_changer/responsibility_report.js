@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
 			updatedText: {
 				type: DataTypes.TEXT,
 				allowNull: false
+			},
+			textPosition: {
+				type: DataTypes.JSON,
+				allowNull: true
 			}
 		},
 		{
