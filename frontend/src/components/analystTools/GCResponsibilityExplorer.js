@@ -11,9 +11,6 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
-import { setState } from '../../utils/sharedFunctions';
-import JumpButton from '../modules/globalSearch/JumpButton';
-import GCResponsibilitySearch from './GCResponsibilitySearch';
 
 const gameChangerAPI = new GameChangerAPI();
 
