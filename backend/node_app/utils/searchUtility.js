@@ -465,7 +465,8 @@ class SearchUtility {
 							{
 								wildcard: {
 									'keyw_5': {
-										value: `*${parsedQuery}*`
+										value: `*${parsedQuery}*`,
+										boost: 2
 									}
 								}
 							},
@@ -474,6 +475,14 @@ class SearchUtility {
 									'display_title_s.search': {
 										value: `*${parsedQuery}*`,
 										boost: 8
+									}
+								}
+							},
+							{
+								wildcard: {
+									'filename.search': {
+										value: `*${parsedQuery}*`,
+										boost: 4
 									}
 								}
 							}
@@ -488,7 +497,8 @@ class SearchUtility {
 					require_field_match: false,
 					fields: {
 						'display_title_s.search': {},
-						'keyw_5': {}
+						'keyw_5': {},
+						'filename.search': {}
 					},
 					fragment_size: 10,
 					fragmenter: 'simple',
@@ -1529,7 +1539,10 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5.join(', ')});
+									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
+								if (r.highlight['filename.search']) {
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1586,6 +1599,9 @@ class SearchUtility {
 								}
 								if(r.highlight.keyw_5){
 									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+								}
+								if (r.highlight['filename.search']) {
+									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1798,6 +1814,7 @@ class SearchUtility {
 				}
 			}
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
+
 			let results;
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (this.checkValidResults(results)) {
