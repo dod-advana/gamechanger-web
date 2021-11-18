@@ -98,6 +98,7 @@ const endpoints = {
 	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
 	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
 	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
+	updateResponsibilityReport: '/api/gameChanger/responsibilities/updateResponsibilityReport',
 	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	getResponsibilityUpdates: '/api/gameChanger/responsibilities/getUpdates',
@@ -457,6 +458,11 @@ export default class GameChangerAPI {
 
 	updateResponsibility = async (options) => {
 		const url = endpoints.updateResponsibility;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	updateResponsibilityReport = async (options) => {
+		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
 	}
 	

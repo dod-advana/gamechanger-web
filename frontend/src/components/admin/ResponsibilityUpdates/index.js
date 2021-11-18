@@ -244,6 +244,16 @@ export default function ResponsibilityUpdates({
 		setReloadResponsibilities(true);
 	}
 
+	const editUpdate = async (update) => {
+		const data = {
+			update, 
+			responsibility: selectedResponsibility, 
+			status: 'accepted'
+		}
+		await gameChangerAPI.updateResponsibility(data)
+		setReloadResponsibilities(true);
+	}
+
 	function handleRightPanelToggle() {
 		setRightPanelOpen(!rightPanelOpen);
 	}
@@ -308,6 +318,22 @@ export default function ResponsibilityUpdates({
 			metaData.push({
 				Key: 'Actions',
 				Value: <div className='row' style={{justifyContent: 'right'}}>
+					<GCButton
+						onClick={() => {
+							// editUpdate(update)
+						}}
+						style={{
+							height: 40,
+							minWidth: 40,
+							padding: '2px 8px 0px',
+							fontSize: 14,
+							margin: '16px 0px 0px 10px',
+							width: 'auto'
+						}}
+						isSecondaryBtn
+					>
+						Edit
+					</GCButton>
 					<GCButton
 						onClick={() => {
 							rejectUpdate(update)

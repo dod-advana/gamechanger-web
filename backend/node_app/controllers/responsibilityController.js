@@ -45,6 +45,7 @@ class ResponsibilityController {
 		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this);
 		this.rejectResponsibility = this.rejectResponsibility.bind(this);
 		this.updateResponsibility = this.updateResponsibility.bind(this);
+		this.updateResponsibilityReport = this.updateResponsibilityReport.bind(this);
 	}
 	
 	async getOtherEntResponsibilityFilterList(req, res) {
@@ -535,6 +536,30 @@ class ResponsibilityController {
 			const { message } = err;
 			this.logger.error(message, 'IORFMS75', userId);
 
+			res.status(500).send(err);
+		}
+	}
+
+	async updateResponsibilityReport(req, res) {
+		let userId = 'unknown_webapp';
+		try{
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { id, update } = req.body;
+
+			const result = this.responsibility_report.update({
+				updatedText: update.updatedText,
+				textPosition: update.textPosition
+			}, 
+			{
+				where: {
+					id
+				}
+			})
+
+			res.status(200).send(result);
+		}catch (err) {
+			console.log(err)
+			this.logger.error(err, '1PU0TKR', userId);
 			res.status(500).send(err);
 		}
 	}
