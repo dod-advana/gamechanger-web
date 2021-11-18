@@ -808,6 +808,7 @@ export default function ResponsibilityDocumentExplorer({
 									setIsEditingResp={setIsEditingResp}
 									setReloadResponsibilities={setReloadResponsibilities}
 									onConfirmSubmit={createAlert}
+									highlights={[]}
 								/>
 							}
 						</div>
