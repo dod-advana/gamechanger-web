@@ -9,7 +9,7 @@ import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import Pagination from 'react-js-pagination';
 import PDFHighlighter from '../../analystTools/PDFHighlighter';
-import { styles } from '../util/GCAdminStyles';
+import { styles as adminStyles } from '../util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -17,8 +17,7 @@ const grey800 = grey[800];
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
-const pageStyles = {
-	...styles,
+const styles = {
 	iframeHeader: {
 		backgroundImage: 'linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95))',
 		height: 20,
@@ -35,6 +34,11 @@ const pageStyles = {
 		display: 'flex',
 		width: '100%',
 	},
+	updateMetaText: {
+		'&:hover': {
+			cursor: 'pointer'
+		}
+	}
 };
 
 const getIframePreviewLinkInferred = (
@@ -83,6 +87,9 @@ export default function ResponsibilityUpdates({
 	const [offsets, setOffsets] = useState([]);
 	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
 	const [resultsPage, setResultsPage] = useState(1);
+	const [selectedUpdate, setSelectedUpdate] = useState({});
+	const [highlights, setHighlights] = useState([])
+	const [scrollId, setScrollId] = useState('');
 
 	useEffect(() => {
 		if(Object.keys(responsibilityData).length){
@@ -95,6 +102,19 @@ export default function ResponsibilityUpdates({
 			}
 		}
 	}, [responsibilityData, iframePreviewLink]);
+
+	useEffect(() => {
+		if(selectedResponsibility?.responsibility_reports){
+			setSelectedUpdate(selectedResponsibility.responsibility_reports[0])
+		}
+	}, [selectedResponsibility])
+
+	useEffect(() => {
+		setScrollId(selectedUpdate.id);
+		if(selectedUpdate?.textPosition){
+			setHighlights([{position: selectedUpdate.textPosition, id: selectedUpdate.id}])
+		}
+	}, [selectedUpdate])
 
 	useEffect(() => {
 		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
@@ -273,7 +293,15 @@ export default function ResponsibilityUpdates({
 			})
 			metaData.push({
 				Key: 'Updated Text',
-				Value: update.updatedText
+				Value: <div 
+					onClick={() => {
+						setSelectedUpdate(update);
+						setHighlights([{position: update.textPosition, id: selectedUpdate.id}])
+					}}
+					style={styles.updateMetaText}
+				>
+					{update.updatedText}
+				</div>
 			})
 			metaData.push({
 				Key: 'Actions',
@@ -343,7 +371,7 @@ export default function ResponsibilityUpdates({
 				className="row"
 				style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
 			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10, marginBottom: 20 }}>
+				<p style={{ ...adminStyles.sectionHeader, marginLeft: 0, marginTop: 10, marginBottom: 20 }}>
 					Responsibility Updates
 				</p>
 				<div
@@ -366,7 +394,7 @@ export default function ResponsibilityUpdates({
 						}}
 					>
 						<div
-							style={pageStyles.docExplorerPag}
+							style={styles.docExplorerPag}
 							className="gcPagination docExplorerPag"
 						>
 							<Pagination
@@ -554,7 +582,7 @@ export default function ResponsibilityUpdates({
 							/>
 						</div>
 						{!iframeLoading && previewPathname && (
-							<div className="preview-pathname" style={pageStyles.iframeHeader}>
+							<div className="preview-pathname" style={styles.iframeHeader}>
 								{previewPathname}
 							</div>
 						)}
@@ -573,6 +601,9 @@ export default function ResponsibilityUpdates({
 									setIsEditingEntity={setIsEditingEntity}
 									setIsEditingResp={setIsEditingResp}
 									setReloadResponsibilities={setReloadResponsibilities}
+									highlights={highlights}
+									scrollId={scrollId}
+									setScrollId={setScrollId}
 								/>
 							</div>
 						</div>

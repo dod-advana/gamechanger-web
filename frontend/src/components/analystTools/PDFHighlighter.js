@@ -9,7 +9,6 @@ import {
 import GameChangerAPI from '../api/gameChanger-service-api';
 import Tip from './Tip';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import testpdf from './zztest.pdf';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -20,26 +19,33 @@ export default function PDFHighlighter({
 	isEditingResp, 
 	setIsEditingResp, 
 	onConfirmSubmit,
+	highlights,
+	scrollId,
+	setScrollId,
 	setReloadResponsibilities 
 }) {
+	useEffect(() => {
+		scrollToHighlight();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	},[scrollId])
 
-	const highlights = [];
-
-	let scrollViewerTo = (highlight) => {};
-
-	const scrollToHighlightFromHash = () => {
-		const highlight = getHighlightById(parseIdFromHash());
+	const scrollToHighlight = () => {
+		const highlight = getHighlightById(scrollId);
 
 		if (highlight) {
 			scrollViewerTo(highlight);
 		}
 	};
 
+	let scrollViewerTo = (highlight) => {};
+
 	const getHighlightById = (id) => {
 		return highlights.find((highlight) => highlight.id === id);
 	}
 
-	const parseIdFromHash = () => document.location.hash.slice('#highlight-'.length);
+	const resetScroll = () => {
+		setScrollId('');
+	  };
 
 	const updateResponsibility = (updatedResp, textPosition) => {
 		const { id } = selectedResponsibility;
@@ -51,7 +57,7 @@ export default function PDFHighlighter({
 		}
 		gameChangerAPI.storeResponsibilityReportData({
 			id, 
-			issue_description: 'needs review',
+			issue_description: 'review',
 			updatedColumn,
 			updatedText: updatedResp,
 			textPosition
@@ -79,14 +85,13 @@ export default function PDFHighlighter({
 					pdfDocument={pdfDocument}
 					enableAreaSelection={(event) => event.altKey}
 					onScrollChange={() => {
-						document.location.hash = '';
-											  }
-					}
+						// resetScroll();
+					}}
 					// pdfScaleValue="page-width"
 					scrollRef={(scrollTo) => {
 						scrollViewerTo = scrollTo;
 
-						scrollToHighlightFromHash();
+						scrollToHighlight();
 					}}
 					onSelectionFinished={(
 						position,
