@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import _ from 'underscore';
 import { Collapse } from 'react-collapse';
 import grey from '@material-ui/core/colors/grey';
+import styled from 'styled-components';
 import SimpleTable from '../../common/SimpleTable';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
@@ -33,13 +34,15 @@ const styles = {
 	docExplorerPag: {
 		display: 'flex',
 		width: '100%',
-	},
-	updateMetaText: {
-		'&:hover': {
-			cursor: 'pointer'
-		}
 	}
 };
+const UpdateMetaText = styled.div`
+        color: #1E88E5;
+		&:hover {
+			cursor: pointer;
+			text-decoration: underline;
+		}
+    `;
 
 const getIframePreviewLinkInferred = (
 	filename,
@@ -293,15 +296,14 @@ export default function ResponsibilityUpdates({
 			})
 			metaData.push({
 				Key: 'Updated Text',
-				Value: <div 
+				Value: <UpdateMetaText 
 					onClick={() => {
 						setSelectedUpdate(update);
 						setHighlights([{position: update.textPosition, id: selectedUpdate.id}])
 					}}
-					style={styles.updateMetaText}
 				>
 					{update.updatedText}
-				</div>
+				</UpdateMetaText>
 			})
 			metaData.push({
 				Key: 'Actions',
