@@ -1797,7 +1797,7 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-            const titleResults = await this.getTitle(body.parsedQuery, clientObj, userId);
+            const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 			let results;
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (this.checkValidResults(results)) {
