@@ -31,7 +31,7 @@ class TextSuggestionController {
 
 			const index = req.body.index ? req.body.index : this.constants.GAME_CHANGER_OPTS.index;
 			// const data = await this.dataApi.getTextSuggestion({ ...req.body, index }, userId);
-			console.log(req.body.searchText)
+
 			if (req.body.searchText.length > 3){
 				const data = await this.textSuggestData({ ...req.body, index }, userId);
 				let corrected;
