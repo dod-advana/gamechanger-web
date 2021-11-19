@@ -96,6 +96,7 @@ const endpoints = {
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
 	getResponsibilityDocTitles: '/api/gameChanger/responsibilities/getDocTitles',
 	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	getResponsibilityDocLink: '/api/gameChanger/responsibilities/getDocLink',
 	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
 	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
 	updateResponsibilityReport: '/api/gameChanger/responsibilities/updateResponsibilityReport',
@@ -443,6 +444,11 @@ export default class GameChangerAPI {
 
 	getResponsibilityDocTitles = async (options) => {
 		const url = endpoints.getResponsibilityDocTitles;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	getResponsibilityDocLink = async (options) => {
+		const url = endpoints.getResponsibilityDocLink;
 		return axiosPOST(this.axios, url, options);
 	}
 
