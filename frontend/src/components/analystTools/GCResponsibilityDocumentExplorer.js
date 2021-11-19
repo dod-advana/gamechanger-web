@@ -324,7 +324,11 @@ export default function ResponsibilityDocumentExplorer({
 									
 								}else{
 									gameChangerAPI.setRejectionStatus({id: selectedResponsibility.id}).then(() => {
-										setReloadResponsibilities(true);
+										createAlert(
+											'Update Successful',
+											'success',
+											'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
+										);
 									})
 								}
 							}}

@@ -128,7 +128,7 @@ const styles = {
 		border: '2px solid',
 		display: 'flex',
 		justifyContent: 'space-between',
-		zIndex: 10,
+		zIndex: 100,
 	},
 	title: {
 		fontWeight: 'bold',
