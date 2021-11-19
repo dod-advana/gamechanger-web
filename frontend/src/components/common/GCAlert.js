@@ -16,7 +16,7 @@ import {
 } from './gc-colors';
 
 const DEFAULT_ALERT_TYPE = 'info';
-const HIDE_TIMER = 10 * 1000;
+const HIDE_TIMER = 10 * 1000000;
 
 const alertStyles = {
 	success: {
@@ -128,7 +128,7 @@ const styles = {
 		border: '2px solid',
 		display: 'flex',
 		justifyContent: 'space-between',
-		zIndex: 100,
+		zIndex: 10,
 	},
 	title: {
 		fontWeight: 'bold',
