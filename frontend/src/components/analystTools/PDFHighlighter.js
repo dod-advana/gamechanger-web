@@ -14,7 +14,8 @@ export default function PDFHighlighter({
 	scrollId,
 	setScrollId,
 	handleSave,
-	saveActive
+	saveActive,
+	documentLink
 }) {
 	useEffect(() => {
 		scrollToHighlight();
@@ -40,7 +41,7 @@ export default function PDFHighlighter({
 	  };
 
 	return (
-		<PdfLoader url={'https://arxiv.org/pdf/1708.08021.pdf'} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
+		<PdfLoader url={documentLink} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
 			{(pdfDocument) => (
 				<PdfHighlighter
 					pdfDocument={pdfDocument}

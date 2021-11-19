@@ -35,6 +35,7 @@ class ResponsibilityController {
 		this.oneDocQuery = this.oneDocQuery.bind(this);
 		this.paraNumQuery = this.paraNumQuery.bind(this);
 		this.queryOneDocES = this.queryOneDocES.bind(this);
+		this.getFileLink = this.getFileLink.bind(this);
 		this.getParagraphNum = this.getParagraphNum.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanDocument = this.cleanDocument.bind(this);
@@ -93,7 +94,8 @@ class ResponsibilityController {
 					'pagerank_r',
 					'kw_doc_score_r',
 					'orgs_rs',
-					'topics_rs'
+					'topics_rs',
+					'download_url_s',
 				]
 			},
 			'stored_fields': [
@@ -114,6 +116,7 @@ class ResponsibilityController {
 									'stored_fields': [
 										'paragraphs.par_inc_count',
 										'paragraphs.filename',
+										'paragraphs.page_num_i',
 										'paragraphs.par_raw_text_t'
 									],
 								},
@@ -219,6 +222,43 @@ class ResponsibilityController {
 			res.send(returnObj);
 		} catch (err) {
 			this.logger.error(err, 'QEDSN75', userId);
+		}
+
+	}
+
+	async getFileLink(req, res) {
+		// using a filename and a string, get back a list of paragraphs for the document AND
+		// the paragraph number for the string.
+		let userId = 'webapp_unknown';
+		try{
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const permissions = req.permissions ? req.permissions : [];
+
+			const { cloneData = {}, filename = '', text = '' } = req.body;
+			let esQuery = this.paraNumQuery(filename, text);
+			let esClientName = 'gamechanger';
+			let esIndex = 'gamechanger';
+			switch (cloneData.clone_name) {
+				case 'eda':
+					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+						esClientName = 'eda';
+						esIndex = 'eda';
+					} else {
+						throw 'Unauthorized';
+					}
+					break;
+				default:
+					esClientName = 'gamechanger';
+					esIndex = this.constants.GAME_CHANGER_OPTS.index;
+			}
+
+			let rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			// console.log('raw: ', rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[1].fields);
+			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s
+
+			res.send(fileLink);
+		} catch (err) {
+			this.logger.error(err, 'QRDSM32', userId);
 		}
 
 	}
@@ -558,7 +598,6 @@ class ResponsibilityController {
 
 			res.status(200).send(result);
 		}catch (err) {
-			console.log(err)
 			this.logger.error(err, '1PU0TKR', userId);
 			res.status(500).send(err);
 		}
@@ -590,7 +629,6 @@ class ResponsibilityController {
 				
 			res.status(200).send(report);
 		} catch (err) {
-			console.log(err)
 			this.logger.error(err, '5PO0TJR', userId);
 			res.status(500).send(err);
 		}

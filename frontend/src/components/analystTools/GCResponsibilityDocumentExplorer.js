@@ -122,6 +122,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [isEditingResp, setIsEditingResp] = useState(false);
 	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
+	const [documentLink, setDocumentLink] = useState('');
 
 	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
@@ -172,6 +173,18 @@ export default function ResponsibilityDocumentExplorer({
 			responsibilityData,
 		]
 	);
+
+	useEffect(() => {
+		const getFileName = async () => {
+			const payload = {
+				filename: selectedResponsibility.filename,
+				text: selectedResponsibility.updatedText
+			}
+			const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
+			setDocumentLink(data);
+		}
+		getFileName();
+	}, [selectedResponsibility])
 
 	useEffect(() => {
 		if(Object.keys(responsibilityData).length){
@@ -718,8 +731,7 @@ export default function ResponsibilityDocumentExplorer({
 																key={key + respKey}
 																style={{ position: 'relative' }}
 															>
-																<a
-																	href="#noref"
+																<div
 																	className="searchdemo-quote-link"
 																	onClick={(e) => {
 																		handleQuoteLinkClick(e, respKey, entKey, key);
@@ -730,7 +742,7 @@ export default function ResponsibilityDocumentExplorer({
 																			{responsibility.responsibilityText}
 																		</span>
 																	</div>
-																</a>
+																</div>
 																{isHighlighted && (
 																	<span className="searchdemo-arrow-right-sm"></span>
 																)}
@@ -838,6 +850,7 @@ export default function ResponsibilityDocumentExplorer({
 									handleSave={updateResponsibility}
 									highlights={[]}
 									saveActive={isEditingEntity || isEditingResp}
+									documentLink={documentLink}
 								/>
 							}
 						</div>
