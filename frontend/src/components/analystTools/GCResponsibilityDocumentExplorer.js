@@ -324,8 +324,9 @@ export default function ResponsibilityDocumentExplorer({
 								width: 'auto'
 							}}
 							isSecondaryBtn
+							disabled={isEditingEntity && key === 'responsibilityText'}
 						>
-							{key === 'organizationPersonnel' && <>{isEditingEntity ? 'Cancel' : 'Reject'}</>}
+							{key === 'organizationPersonnel' && <>{'Cancel'}</>}
 							{key === 'responsibilityText' && <>{isEditingResp ? 'Cancel' : 'Reject'}</>}
 						</GCButton>}
 						{!isEditingResp && key === 'responsibilityText' && <GCButton
@@ -341,6 +342,7 @@ export default function ResponsibilityDocumentExplorer({
 								margin: '16px 0px 0px 10px',
 								width: 'auto'
 							}}
+							disabled={isEditingEntity}
 						>
 							Edit
 						</GCButton>}
@@ -357,6 +359,7 @@ export default function ResponsibilityDocumentExplorer({
 								margin: '16px 0px 0px 10px',
 								width: 'auto'
 							}}
+							disabled={isEditingResp}
 						>
 							Edit
 						</GCButton>}
@@ -373,6 +376,37 @@ export default function ResponsibilityDocumentExplorer({
 			}
 		})
 		return metaData
+	}
+
+	const updateResponsibility = (updatedResp, textPosition) => {
+		const { id } = selectedResponsibility;
+		let updatedColumn = '';
+		if(isEditingResp){
+			updatedColumn = 'responsibilityText';
+		}else if(isEditingEntity){
+			updatedColumn = 'organizationPersonnel';
+		}
+		gameChangerAPI.storeResponsibilityReportData({
+			id, 
+			issue_description: 'review',
+			updatedColumn,
+			updatedText: updatedResp,
+			textPosition
+		}).then(() => {
+			setIsEditingEntity(false);
+			setIsEditingResp(false);
+			createAlert(
+				'Update Successful',
+				'success',
+				'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
+			);
+		}).catch(() => {
+			createAlert(
+				'Update error',
+				'error',
+				'There was an error sending your responsibility update. Please try againg later.'
+			);
+		})
 	}
 
 	const previewPathname =
@@ -801,14 +835,9 @@ export default function ResponsibilityDocumentExplorer({
 								</>
 								:
 								<PDFHighlighter 
-									selectedResponsibility={selectedResponsibility}
-									isEditingEntity={isEditingEntity}
-									isEditingResp={isEditingResp}
-									setIsEditingEntity={setIsEditingEntity}
-									setIsEditingResp={setIsEditingResp}
-									setReloadResponsibilities={setReloadResponsibilities}
-									onConfirmSubmit={createAlert}
+									handleSave={updateResponsibility}
 									highlights={[]}
+									saveActive={isEditingEntity || isEditingResp}
 								/>
 							}
 						</div>

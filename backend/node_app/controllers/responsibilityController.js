@@ -544,11 +544,11 @@ class ResponsibilityController {
 		let userId = 'unknown_webapp';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { id, update } = req.body;
+			const { id, updatedText, textPosition } = req.body;
 
-			const result = this.responsibility_report.update({
-				updatedText: update.updatedText,
-				textPosition: update.textPosition
+			const result = this.responsibility_reports.update({
+				updatedText,
+				textPosition
 			}, 
 			{
 				where: {
