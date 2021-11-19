@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import {
 	PdfLoader,
 	PdfHighlighter,
@@ -6,23 +6,15 @@ import {
 	Popup,
 	AreaHighlight,
 } from 'react-pdf-highlighter';
-import GameChangerAPI from '../api/gameChanger-service-api';
 import Tip from './Tip';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
-const gameChangerAPI = new GameChangerAPI();
-
 export default function PDFHighlighter({ 
-	selectedResponsibility, 
-	setIsEditingEntity, 
-	isEditingEntity, 
-	isEditingResp, 
-	setIsEditingResp, 
-	onConfirmSubmit,
 	highlights,
 	scrollId,
 	setScrollId,
-	setReloadResponsibilities 
+	handleSave,
+	saveActive
 }) {
 	useEffect(() => {
 		scrollToHighlight();
@@ -47,37 +39,6 @@ export default function PDFHighlighter({
 		setScrollId('');
 	  };
 
-	const updateResponsibility = (updatedResp, textPosition) => {
-		const { id } = selectedResponsibility;
-		let updatedColumn = '';
-		if(isEditingResp){
-			updatedColumn = 'responsibilityText';
-		}else if(isEditingEntity){
-			updatedColumn = 'organizationPersonnel';
-		}
-		gameChangerAPI.storeResponsibilityReportData({
-			id, 
-			issue_description: 'review',
-			updatedColumn,
-			updatedText: updatedResp,
-			textPosition
-		}).then(() => {
-			setIsEditingEntity(false);
-			setIsEditingResp(false);
-			onConfirmSubmit(
-				'Update Successful',
-				'success',
-				'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
-			);
-		}).catch(() => {
-			onConfirmSubmit(
-				'Update error',
-				'error',
-				'There was an error sending your responsibility update. Please try againg later.'
-			);
-		})
-	}
-
 	return (
 		<PdfLoader url={'https://arxiv.org/pdf/1708.08021.pdf'} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
 			{(pdfDocument) => (
@@ -99,13 +60,17 @@ export default function PDFHighlighter({
 						hideTipAndSelection,
 						transformSelection
 					) => {
-						return <Tip
-							onOpen={transformSelection}
-							onConfirm={() => {
-								updateResponsibility(content.text.trim(), position);
-								hideTipAndSelection();
-							}}
-						/>
+						return (
+							<>
+								{saveActive && <Tip
+									onOpen={transformSelection}
+									onConfirm={() => {
+										handleSave(content.text.trim(), position);
+										hideTipAndSelection();
+									}}
+								/>}
+							</>
+						)
 					}}
 					highlightTransform={(
 						highlight,

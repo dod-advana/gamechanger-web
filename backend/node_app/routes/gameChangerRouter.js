@@ -82,7 +82,7 @@ router.post('/responsibilities/getDocTitles', responsibility.getResponsibilityDo
 router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
-router.post('/responsibilities/updateResponsibilityResport', responsibility.updateResponsibilityReport)
+router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport)
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);

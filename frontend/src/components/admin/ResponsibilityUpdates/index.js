@@ -82,8 +82,7 @@ export default function ResponsibilityUpdates({
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
-	const [isEditingResp, setIsEditingResp] = useState(false);
-	const [isEditingEntity, setIsEditingEntity] = useState(false);
+	const [editing, setEditing] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 	const [responsibilityData, setResponsibilityData] = useState({});
 	const [loading, setLoading] = useState(true);
@@ -244,14 +243,15 @@ export default function ResponsibilityUpdates({
 		setReloadResponsibilities(true);
 	}
 
-	const editUpdate = async (update) => {
+	const editUpdate = async (updatedResp, textPosition) => {
 		const data = {
-			update, 
-			responsibility: selectedResponsibility, 
-			status: 'accepted'
+			id: selectedUpdate.id, 
+			updatedText: updatedResp,
+			textPosition: textPosition
 		}
-		await gameChangerAPI.updateResponsibility(data)
+		await gameChangerAPI.updateResponsibilityReport(data)
 		setReloadResponsibilities(true);
+		setEditing(false)
 	}
 
 	function handleRightPanelToggle() {
@@ -320,7 +320,8 @@ export default function ResponsibilityUpdates({
 				Value: <div className='row' style={{justifyContent: 'right'}}>
 					<GCButton
 						onClick={() => {
-							// editUpdate(update)
+							setSelectedUpdate(update);
+							setEditing(true)
 						}}
 						style={{
 							height: 40,
@@ -623,15 +624,11 @@ export default function ResponsibilityUpdates({
 						>
 							<div style={{ height: '100%' }}>
 								<PDFHighlighter 
-									selectedResponsibility={selectedResponsibility}
-									isEditingEntity={isEditingEntity}
-									isEditingResp={isEditingResp}
-									setIsEditingEntity={setIsEditingEntity}
-									setIsEditingResp={setIsEditingResp}
-									setReloadResponsibilities={setReloadResponsibilities}
+									handleSave={editUpdate}
 									highlights={highlights}
 									scrollId={scrollId}
 									setScrollId={setScrollId}
+									saveActive={editing}
 								/>
 							</div>
 						</div>
