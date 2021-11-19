@@ -485,6 +485,11 @@ class SearchUtility {
 										boost: 4
 									}
 								}
+							},
+							{
+								match: {
+									"display_title_s.search": parsedQuery
+								}
 							}
 						],
 						minimum_should_match: 1,
@@ -631,6 +636,7 @@ class SearchUtility {
 				}
 			}
             results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
+			console.log(JSON.stringify(results));
             return results
         } catch (err) {
             this.logger.error(err, 'TJKBNOF', userId);
