@@ -27,7 +27,7 @@ class GlobalSearchHandler extends SearchHandler {
 			database = databaseFile
 		} = opts;
 		super({redisClientDB: redisAsyncClientDB, ...opts});
-		
+
 		this.logger = logger;
 		this.constants = constants;
 		this.database = database;
@@ -115,7 +115,7 @@ class GlobalSearchHandler extends SearchHandler {
 			throw message;
 		}
 	}
-	
+
 	async callFunctionHelper(req, userId, res) {
 		const {functionName} = req.body;
 
@@ -128,7 +128,7 @@ class GlobalSearchHandler extends SearchHandler {
 				);
 		}
 	}
-	
+
 	async getApplicationResults(searchText, offset, limit, userId) {
 		try {
 			const hitQuery = `select description, permission, href, link_label, id
@@ -154,7 +154,7 @@ class GlobalSearchHandler extends SearchHandler {
 			return { hits: [], totalCount: 0, count: 0 };
 		}
 	};
-	
+
 	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
 		const defaultSearchOptions = {
 			keywords: dcUtils.cleanSearchText(searchText),
@@ -175,25 +175,25 @@ class GlobalSearchHandler extends SearchHandler {
 			limit,
 			offset
 		};
-	
+
 		try {
 			if (!searchText) throw new Error('keywords is required in the request body');
-	
+
 			const url = dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, dcUtils.getAuthConfig());
-	
+
 			return response.data || [];
 		} catch (err) {
 			this.logger.error(err, 'FE656U9', userId);
 			return [];
 		}
 	};
-	
+
 	performApplicationSearch(allApps, searchText) {
 		// create a map of apps keyed by id field so that we can reference them from the search results
 		let apps = __.keyBy(allApps, 'id');
-	
+
 		// create lunr search index
 		let idx = lunr(function () {
 			// key field in our data that search results will be keyed by
@@ -204,42 +204,43 @@ class GlobalSearchHandler extends SearchHandler {
 			// data to search
 			allApps.forEach(function (app) { this.add(app); }, this);
 		});
-	
+
 		// perform search
 		let searchResults = idx.search(searchText);
-	
+
 		return [apps, searchResults];
 	};
-	
+
 	generateRespData(apps, searchResults, offset, limit) {
 		try {
 			let ret = [];
-	
+
 			let pagedResult = searchResults.slice(offset, offset + limit);
-	
+
 			for (let res of pagedResult) {
 				ret.push({ ...apps[res.ref], score: res.score });
 			}
-	
+
 			return { hits: ret, totalCount: searchResults.length, count: ret.length };
 		} catch (e) {
 			this.logger.error(e, 'QW8UGJM');
 			return { hits: [], totalCount: 0, count: 0 };
 		}
 	};
-	
+
 	async getQlikApps(params = {}, userId) {
 		try {
 			let url = `${QLIK_URL}/qrs/app/full`;
-			return await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
+			let result = await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
+			return result
 		} catch (err) {
 			if (!userId) // most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
 				this.logger.error(err, 'O799J51', userId);
-	
+
 			return {};
 		}
 	};
-	
+
 	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
 		return {
 			params: {
@@ -255,15 +256,15 @@ class GlobalSearchHandler extends SearchHandler {
 			})
 		};
 	};
-	
+
 	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
 		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
 	};
-	
+
 	performSearch(allApps, searchText) {
 		// create a map of apps keyed by id field so that we can reference them from the search results
 		let apps = _.keyBy(allApps, 'id');
-	
+
 		// create lunr search index
 		let idx = lunr(function () {
 			// key field in our data that search results will be keyed by
@@ -272,24 +273,30 @@ class GlobalSearchHandler extends SearchHandler {
 			this.field('name');
 			this.field('description');
 			this.field('stream', { extractor: ({ stream: { name } }) => name });
-	
+
+			this.field('customProperties', { extractor: ({ customProperties }) => customProperties.reduce((prev, curr) => {
+				return prev.concat([ curr?.value, curr?.schemaPath, curr?.definition?.name ])
+			}, []) });
+
+			this.field('tags', { extractor: ({ tags: { name } }) => name });
+
 			// data to search
 			allApps.forEach(function (app) { this.add(app); }, this);
 		});
-	
+
 		// perform search
 		let searchResults = idx.search(searchText);
-	
+
 		return [apps, searchResults];
 	};
-	
+
 	mergeUserApps(apps, userApps) {
 		for (let app of apps) {
 			app.restricted = (!_.find(userApps, (userApp) => userApp.id === app.id));
 		}
 		return apps;
 	};
-	
+
 }
 
 
