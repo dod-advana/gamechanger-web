@@ -18,7 +18,7 @@ import { trackEvent } from '../telemetry/Matomo';
 
 const TableRow = styled.div`
 	text-align: left;
-	height: 20px;
+	height: fit-content;
 `;
 const CenterRow = styled.div`
 	text-align: center;
@@ -651,7 +651,7 @@ const GCDataStatusTracker = (props) => {
 				data={crawlerTableData}
 				columns={crawlerColumns}
 				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 1000 }}
-				pageSize={20}
+				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={false}
 				loading={loading}
