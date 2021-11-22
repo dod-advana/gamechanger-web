@@ -16,7 +16,7 @@ import {
 } from './gc-colors';
 
 const DEFAULT_ALERT_TYPE = 'info';
-const HIDE_TIMER = 10 * 1000000;
+const HIDE_TIMER = 10 * 1000;
 
 const alertStyles = {
 	success: {
