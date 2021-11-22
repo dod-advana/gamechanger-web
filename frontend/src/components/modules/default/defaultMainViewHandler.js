@@ -396,7 +396,7 @@ const DefaultMainViewHandler = {
 
 		const isSelectedDocs =
 			selectedDocuments && selectedDocuments.size ? true : false;
-
+		
 		return (
 			<>
 				{exportDialogVisible && (

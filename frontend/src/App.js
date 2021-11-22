@@ -314,6 +314,7 @@ const App = () => {
 			setInitialized(true);
 			initialize();
 		}
+
 	}, [initialized]);
 
 	if (!initialized || !tokenLoaded) {
