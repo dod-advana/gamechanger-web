@@ -251,9 +251,7 @@ class ResponsibilityController {
 					esClientName = 'gamechanger';
 					esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			}
-
-			let rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			// console.log('raw: ', rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[1].fields);
+			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s
 
 			res.send(fileLink);

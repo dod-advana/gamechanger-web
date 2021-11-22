@@ -44,28 +44,6 @@ const UpdateMetaText = styled.div`
 		}
     `;
 
-const getIframePreviewLinkInferred = (
-	filename,
-	responsibilityText,
-	pageNumber,
-	isClone = false,
-	cloneData = {}
-) => {
-	return new Promise((resolve, reject) => {
-		gameChangerAPI
-			.dataStorageDownloadGET(
-				filename,
-				responsibilityText,
-				pageNumber,
-				isClone,
-				cloneData
-			)
-			.then((url) => {
-				resolve(url);
-			});
-	});
-};
-
 export default function ResponsibilityUpdates({
 	data = [],
 }) {
@@ -79,7 +57,6 @@ export default function ResponsibilityUpdates({
 		entityIdx: 0,
 		responsibilityIdx: 0
 	});
-	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [editing, setEditing] = useState(false);
@@ -92,6 +69,7 @@ export default function ResponsibilityUpdates({
 	const [selectedUpdate, setSelectedUpdate] = useState({});
 	const [highlights, setHighlights] = useState([])
 	const [scrollId, setScrollId] = useState('');
+	const [documentLink, setDocumentLink] = useState('');
 
 	useEffect(() => {
 		if(Object.keys(responsibilityData).length){
@@ -138,6 +116,20 @@ export default function ResponsibilityUpdates({
 		}
 	 }, [reloadResponsibilities, resultsPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
+	 useEffect(() => {
+		const getFileName = async () => {
+			const payload = {
+				filename: selectedResponsibility.filename,
+				text: selectedUpdate.updatedText
+			}
+			if(payload.filename){
+				const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
+				setDocumentLink(data);
+			}
+		}
+		getFileName();
+	}, [selectedResponsibility, selectedUpdate])
+
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
@@ -152,16 +144,12 @@ export default function ResponsibilityUpdates({
 				if(!offsets[i]) break;
 				limit += offsets[i];
 			}
-			//TODO correct number of docs not coming in look into it
 			const { results = [] } = await getData({
 				limit,
 				offset,
 				sorted,
 				filtered: tmpFiltered,
 			});
-			// results.forEach((result) => {
-			// 	result.selected = selectedIds.includes(result.id);
-			// });
 			groupResponsibilities(results);
 		} catch (e) {
 			setResponsibilityData([]);
@@ -320,8 +308,9 @@ export default function ResponsibilityUpdates({
 				Value: <div className='row' style={{justifyContent: 'right'}}>
 					<GCButton
 						onClick={() => {
+							if(editing) return setEditing(false);
 							setSelectedUpdate(update);
-							setEditing(true)
+							setEditing(`${update.id}`);
 						}}
 						style={{
 							height: 40,
@@ -331,9 +320,10 @@ export default function ResponsibilityUpdates({
 							margin: '16px 0px 0px 10px',
 							width: 'auto'
 						}}
+						disabled={editing && editing !== `${update.id}`}
 						isSecondaryBtn
 					>
-						Edit
+						{editing === `${update.id}` ? 'Cancel' : 'Edit'}
 					</GCButton>
 					<GCButton
 						onClick={() => {
@@ -347,6 +337,7 @@ export default function ResponsibilityUpdates({
 							margin: '16px 0px 0px 10px',
 							width: 'auto'
 						}}
+						disabled={editing}
 						isSecondaryBtn
 					>
 						Reject
@@ -363,6 +354,7 @@ export default function ResponsibilityUpdates({
 							margin: '16px 0px 0px 10px',
 							width: 'auto'
 						}}
+						disabled={editing}
 					>
 						Accept
 					</GCButton>
@@ -372,10 +364,6 @@ export default function ResponsibilityUpdates({
 		return metaData
 	}
 
-	const previewPathname =
-		data.length > 0 &&
-		data[iframePreviewLink.dataIdx] &&
-		data[iframePreviewLink.dataIdx].filepath;
 	const iframePanelSize =
 		12 -
 		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
@@ -610,11 +598,6 @@ export default function ResponsibilityUpdates({
 								}}
 							/>
 						</div>
-						{!iframeLoading && previewPathname && (
-							<div className="preview-pathname" style={styles.iframeHeader}>
-								{previewPathname}
-							</div>
-						)}
 						<div
 							style={{
 								paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0),
@@ -622,22 +605,28 @@ export default function ResponsibilityUpdates({
 								height: '100%',
 							}}
 						>
-							<div style={{ height: '100%' }}>
-								<PDFHighlighter 
-									handleSave={editUpdate}
-									highlights={highlights}
-									scrollId={scrollId}
-									setScrollId={setScrollId}
-									saveActive={editing}
-								/>
-							</div>
+							{!loading && !Object.keys(responsibilityData).length ?
+								<p style={{
+									fontSize: 16,
+									fontWeight: 600,
+									fontFamily: 'Noto Sans',
+									textAlign: 'center',
+								}}>
+									No updates left to review
+								</p>
+								:
+								<div style={{ height: '100%' }}>
+									<PDFHighlighter 
+										handleSave={editUpdate}
+										highlights={highlights}
+										scrollId={scrollId}
+										setScrollId={setScrollId}
+										saveActive={editing}
+										documentLink={documentLink}
+									/>
+								</div>
+							}
 						</div>
-
-						{iframeLoading && (
-							<div style={{ margin: '0 auto' }}>
-								<LoadingIndicator customColor={'#E9691D'} />
-							</div>
-						)}
 						<div
 							className="searchdemo-vertical-bar-toggle"
 							style={{ ...rightBarExtraStyles, bottom: '0px', zIndex: 100 }}
@@ -682,7 +671,8 @@ export default function ResponsibilityUpdates({
 						zIndex: 100
 					}}
 				>
-					{ !loading &&
+					{!loading 
+						?
 						<>
 							<SimpleTable
 								tableClass={'magellan-table'}
@@ -709,6 +699,8 @@ export default function ResponsibilityUpdates({
 								/>
 							}
 						</>
+						:
+						<></>
 					}
 				</div>
 			</div>
