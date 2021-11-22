@@ -1636,6 +1636,7 @@ export default function PolicyGraphView(props) {
 			node.hidden = false;
 		});
 
+		setContextOpen(false);
 		setShouldRender(true);
 		setReloadGraph(!reloadGraph);
 		setRunSimulation(!runSimulation);
