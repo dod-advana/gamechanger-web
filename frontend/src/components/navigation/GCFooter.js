@@ -10,6 +10,9 @@ const isDecoupled =
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const FooterDiv = styled.div`
+	width: 100%;
+	-webkit-align-items: center;
+	display: flex;
 	& button {
 		margin: 0 8px;
 	}
@@ -62,7 +65,6 @@ const styles = {
 	footerStyle: {
 		display: 'flex',
 		position: 'absolute',
-		marginTop: 20
 	},
 	footerText: {
 		color: '#ffffff',

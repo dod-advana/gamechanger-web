@@ -4,6 +4,7 @@ import React, {
 	useRef,
 	useCallback,
 	createRef,
+	useMemo
 } from 'react';
 import styled from 'styled-components';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
@@ -70,15 +71,18 @@ const GCAboutUs = (props) => {
 	const [FAQdata, setFAQdata] = useState([]);
 	const categoryRefs = useRef([]);
 
-	const categoryOrder = [
-		'General',
-		'Clones',
-		'Search',
-		'Graph View',
-		'Data',
-		'Analyst Tools',
-		'Collaboration',
-	];
+	const categoryOrder = useMemo(() => {
+		return [
+			'General',
+			'Clones',
+			'Search',
+			'Graph View',
+			'Data',
+			'Analyst Tools',
+			'Collaboration',
+		]
+	},[])
+
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;
 
