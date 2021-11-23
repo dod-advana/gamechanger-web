@@ -123,6 +123,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 	const [documentLink, setDocumentLink] = useState('');
+	const [clearFilters, setClearFilters] = useState(false);
 
 	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
@@ -556,6 +557,7 @@ export default function ResponsibilityDocumentExplorer({
 							>
 								<Autocomplete
 									classes={{ root: classes.root }}
+									key={clearFilters}
 									multiple
 									options={documentList}
 									getOptionLabel={(option) => option.documentTitle}
@@ -583,6 +585,7 @@ export default function ResponsibilityDocumentExplorer({
 							>
 								<Autocomplete
 									classes={{ root: classes.root }}
+									key={clearFilters}
 									multiple
 									options={[]}
 									freeSolo
@@ -626,6 +629,7 @@ export default function ResponsibilityDocumentExplorer({
 									setResponsibilityText({});
 									setOrganization([]);
 									setDocTitle([]);
+									setClearFilters(!clearFilters);
 								}}
 								style={{display: 'block', width: '100%', margin: '20px 0 10px 0'}}
 								isSecondaryBtn
