@@ -75,11 +75,13 @@ export default function ResponsibilityUpdates({
 		if(Object.keys(responsibilityData).length){
 			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
 			const doc = Object.keys(responsibilityData)[dataIdx];
-			const entity = Object.keys(responsibilityData[doc])[entityIdx];
+			let entity;
+			if(responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[entityIdx];
 			let resp;
-			if(responsibilityData[doc][entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
+			if(responsibilityData?.[doc]?.[entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
 			if (resp) {
 				setSelectedResponsibility(resp);
+				setSelectedUpdate(resp.responsibility_reports[0]);
 			}
 		}
 	}, [responsibilityData, iframePreviewLink]);
@@ -265,9 +267,10 @@ export default function ResponsibilityUpdates({
 	const getResponsibilityMetaData = () => {
 		if(!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
+		let entity;
+		if(responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
 		let responsibility;
-		if(responsibilityData[doc][entity]) responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
+		if(responsibilityData[doc]?.[entity]) responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -514,8 +517,9 @@ export default function ResponsibilityUpdates({
 																	iframePreviewLink.entityIdx
 																];
 															if (pageObj) {
-																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx]
-																const selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
+																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
+																let selectedEntity;
+																if(responsibilityData[selectedDoc]) selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
 																isHighlighted =
 																	selectedDoc === responsibility.documentTitle &&
 																	selectedEntity === responsibility.organizationPersonnel &&
