@@ -38,14 +38,18 @@ const styles = {
 		textAlign: 'left'
 	},
 	groupName: {
-		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		fontSize: 18,
+		marginRight: 60,
+		overflow: 'scroll',
+		maxHeight: 30
 	},
 	groupDescription: {
-		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		fontSize: 14
+		fontSize: 14,
+		marginRight: 60,
+		overflow: 'scroll',
+		maxHeight: 40
 	},
 	details: {
 		marginTop: -5,
