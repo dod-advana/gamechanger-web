@@ -76,7 +76,8 @@ export default function ResponsibilityUpdates({
 			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
 			const doc = Object.keys(responsibilityData)[dataIdx];
 			const entity = Object.keys(responsibilityData[doc])[entityIdx];
-			const resp = responsibilityData[doc][entity][responsibilityIdx];
+			let resp;
+			if(responsibilityData[doc][entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
 			if (resp) {
 				setSelectedResponsibility(resp);
 			}
@@ -265,7 +266,8 @@ export default function ResponsibilityUpdates({
 		if(!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
 		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
-		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
+		let responsibility;
+		if(responsibilityData[doc][entity]) responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -273,14 +275,16 @@ export default function ResponsibilityUpdates({
 			responsibilityText: 'Responsibility Text',
 		}
 		const metaData = [];
-		Object.keys(responsibility).forEach(key => {
-			if(keyMap[key]){
-				metaData.push({
-					Key: keyMap[key],
-					Value: responsibility[key]
-				})
-			}
-		})
+		if(responsibility){
+			Object.keys(responsibility).forEach(key => {
+				if(keyMap[key]){
+					metaData.push({
+						Key: keyMap[key],
+						Value: responsibility[key]
+					})
+				}
+			})
+		}
 		return metaData
 	}
 
@@ -292,7 +296,7 @@ export default function ResponsibilityUpdates({
 				Key: 'Update Type',
 				Value: update.updatedColumn
 			})
-			metaData.push({
+			if(update.updatedColumn !== 'Reject') metaData.push({
 				Key: 'Updated Text',
 				Value: <UpdateMetaText 
 					onClick={() => {
@@ -306,25 +310,27 @@ export default function ResponsibilityUpdates({
 			metaData.push({
 				Key: 'Actions',
 				Value: <div className='row' style={{justifyContent: 'right'}}>
-					<GCButton
-						onClick={() => {
-							if(editing) return setEditing(false);
-							setSelectedUpdate(update);
-							setEditing(`${update.id}`);
-						}}
-						style={{
-							height: 40,
-							minWidth: 40,
-							padding: '2px 8px 0px',
-							fontSize: 14,
-							margin: '16px 0px 0px 10px',
-							width: 'auto'
-						}}
-						disabled={editing && editing !== `${update.id}`}
-						isSecondaryBtn
-					>
-						{editing === `${update.id}` ? 'Cancel' : 'Edit'}
-					</GCButton>
+					{update.updatedColumn !== 'Reject' &&
+							<GCButton
+								onClick={() => {
+									if(editing) return setEditing(false);
+									setSelectedUpdate(update);
+									setEditing(`${update.id}`);
+								}}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+									width: 'auto'
+								}}
+								disabled={editing && editing !== `${update.id}`}
+								isSecondaryBtn
+							>
+								{editing === `${update.id}` ? 'Cancel' : 'Edit'}
+							</GCButton>
+					}
 					<GCButton
 						onClick={() => {
 							rejectUpdate(update)

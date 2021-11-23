@@ -457,12 +457,6 @@ class ResponsibilityController {
 	}
 
 	async rejectResponsibility(req, res) {
-		// 1. have id of row
-		// 2. use id to write status to 'rejected'
-
-		// UPDATE RESPONSIBILITIES
-		// SET status = 'rejected'
-		// where id = <id>
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
@@ -516,6 +510,27 @@ class ResponsibilityController {
 			const { id: updateId, updatedText, updatedColumn } = update;
 			const { id: responsibilityId, responsibilityText, organizationPersonnel} = responsibility;
 			let responsibilityStatus;
+			if(updatedColumn === 'Reject'){
+				await this.responsibilities.update({
+					status: 'rejected'
+				}, 
+				{
+					where: {
+						id: responsibilityId
+					}
+				})
+				await this.responsibility_reports.update({
+					issue_description: status
+				}, 
+				{
+					where: {
+						id: updateId
+					}
+				})
+
+				return res.status(200).send();
+			}
+
 			const foundResp = await this.responsibilities.findOne({
 				where: {id: responsibilityId},
 				include: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import _, { isElement } from 'underscore';
+import _ from 'underscore';
 import { Collapse } from 'react-collapse';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -323,13 +323,7 @@ export default function ResponsibilityDocumentExplorer({
 									setIsEditingResp(false);
 									
 								}else{
-									gameChangerAPI.setRejectionStatus({id: selectedResponsibility.id}).then(() => {
-										createAlert(
-											'Update Successful',
-											'success',
-											'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
-										);
-									})
+									rejectResponsibility(selectedResponsibility);
 								}
 							}}
 							style={{
@@ -393,6 +387,29 @@ export default function ResponsibilityDocumentExplorer({
 			}
 		})
 		return metaData
+	}
+
+	const rejectResponsibility = (responsibility) => {
+		gameChangerAPI.storeResponsibilityReportData({
+			id: responsibility.id, 
+			issue_description: 'review',
+			updatedColumn: 'Reject',
+			updatedText: ''
+		}).then(() => {
+			setIsEditingEntity(false);
+			setIsEditingResp(false);
+			createAlert(
+				'Update Successful',
+				'success',
+				'Thank you for the help. Your update will now be reviewed before the responsiblity is updated.'
+			);
+		}).catch(() => {
+			createAlert(
+				'Update error',
+				'error',
+				'There was an error sending your responsibility update. Please try againg later.'
+			);
+		})
 	}
 
 	const updateResponsibility = (updatedResp, textPosition) => {
