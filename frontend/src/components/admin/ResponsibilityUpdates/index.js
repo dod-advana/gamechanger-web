@@ -44,9 +44,7 @@ const UpdateMetaText = styled.div`
 		}
     `;
 
-export default function ResponsibilityUpdates({
-	data = [],
-}) {
+export default function ResponsibilityUpdates() {
 
 	const DOCS_PER_PAGE = 3;
 

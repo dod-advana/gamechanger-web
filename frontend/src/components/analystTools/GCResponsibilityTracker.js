@@ -38,6 +38,16 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
 
+const FilterInput = ({value, setValue}) => {
+	return(
+		<input 
+			type="text" 
+			value={value} 
+			style={{width: '100%'}}
+			onChange={(e) => {setValue(e.target.value)}}
+		/>
+	)
+}
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -132,14 +142,24 @@ const getData = async ({
 
 const preventDefault = (event) => event.preventDefault();
 
-const GCResponsibilityTracker = (props) => {
-	
-	const {state, dispatch} = props;
+const GCResponsibilityTracker = ({
+	state, 
+	dispatch,
+	filters,
+	setFilters,
+	docTitle,
+	setDocTitle,
+	organization,
+	setOrganization,
+	responsibilityText,
+	setResponsibilityText
+}) => {
+
 	const classes = useStyles();
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [filters, setFilters] = useState([]);
+
 	const [sorts, setSorts] = useState([]);
 	const [pageIndex, setPageIndex] = useState(0);
 	const [hoveredRow, setHoveredRow] = useState(null);
@@ -157,10 +177,7 @@ const GCResponsibilityTracker = (props) => {
 		{}
 	);
 	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
-
-	useEffect(()=>{
-		console.log(filters)
-	}, [filters])
+	const [reloadResponsibilityTable, setReloadResponsibilityTable] = useState(true);
 
 	useEffect(() => {
 		gameChangerAPI.getOtherEntityFilterList().then((resp) => {
@@ -202,12 +219,29 @@ const GCResponsibilityTracker = (props) => {
 	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (state.reloadResponsibilityTable) {
+		if (reloadResponsibilityTable) {
 			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
-			setState(dispatch, {reloadResponsibilityTable: false});
+			setReloadResponsibilityTable(false);
 		}
-	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
-	                                                // TODO : Resolve ^^^ correctly
+	 // eslint-disable-next-line react-hooks/exhaustive-deps
+	 }, [pageIndex, sorts, filters]); 
+
+	 useEffect(() => {
+		const newFilters = [];
+		if(Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
+		if(organization.length) {
+			organization.forEach(org => {
+				newFilters.push({id: 'organizationPersonnel', value: org})
+			})
+		};
+		if(docTitle.length) {
+			docTitle.forEach(doc => {
+				newFilters.push({id: 'documentTitle', value: doc.documentTitle})
+			})
+		};
+		setFilters(newFilters);
+		setReloadResponsibilityTable(true);
+	 },[docTitle, organization, responsibilityText, setFilters])
 
 	 const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -307,6 +341,17 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentTitle',
 				style: { whiteSpace: 'unset' },
 				width: 300,
+				Filter: 
+					<FilterInput 
+						value={docTitle.map(doc => doc.documentTitle).join(' AND ')} 
+						setValue={(filter) => {
+							const splitFilter = filter.split(' AND ');
+							const parsedFilter = splitFilter.map(filter => {
+								return {documentTitle: filter}
+							})
+							setDocTitle(parsedFilter)
+						}}
+					/>,
 				Cell: (row) => (
 					<TableRow>
 						<Link href={'#'} onClick={(event)=> {
@@ -326,12 +371,25 @@ const GCResponsibilityTracker = (props) => {
 				Header: 'Organization/Personnel',
 				accessor: 'organizationPersonnel',
 				style: { whiteSpace: 'unset' },
+				Filter: 
+					<FilterInput 
+						value={organization.join(' AND ')} 
+						setValue={(filter) => {
+							const parsedFilter = filter.split(' AND ');
+							setOrganization(parsedFilter)
+						}}
+					/>,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Responsibility Text',
 				accessor: 'responsibilityText',
 				style: { whiteSpace: 'unset' },
+				Filter: 
+					<FilterInput 
+						value={responsibilityText?.value || ''} 
+						setValue={(filter) => setResponsibilityText({id: 'responsibilityText', value: filter})}
+					/>,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -360,6 +418,7 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentsReferenced',
 				style: { whiteSpace: 'unset' },
 				width: 200,
+				filterable: false,
 				Cell: row => (
 					<TableRow>
 						{row.value? row.value.join(', '): '' }
@@ -406,11 +465,10 @@ const GCResponsibilityTracker = (props) => {
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
-				onFilteredChange={(newFilters) => {
-					setFilters(newFilters);
-				}}
+				manualSortBy={true}
 				onSortedChange={(newSorts) => {
 					setSorts(newSorts);
+					setReloadResponsibilityTable(true);
 				}}
 				onPageChange={(pageIndex) => setPageIndex(pageIndex)}
 				defaultSorted={[

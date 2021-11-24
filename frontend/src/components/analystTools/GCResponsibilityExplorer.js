@@ -69,7 +69,7 @@ export default function GCResponsibilityExplorer({
 	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
 	const [docTitle, setDocTitle] = useState([]);
 	const [documentList, setDocumentList] = useState([]);
-	const [organziation, setOrganization] = useState([]);
+	const [organization, setOrganization] = useState([]);
 	const [responsibilityText, setResponsibilityText] = useState({});
 
 	useEffect(() => {
@@ -201,9 +201,16 @@ export default function GCResponsibilityExplorer({
 			{reView === 'Chart' && 
 			<GCResponsibilityTracker 
 				state={state} 
-				dispatch={dispatch} 
-				responsibilityData={responsibilityData} 
-				loading={loading}/>
+				dispatch={dispatch}
+				filters={filters}
+				setFilters={setFilters}
+				docTitle={docTitle}
+				setDocTitle={setDocTitle}
+				organization={organization}
+				setOrganization={setOrganization}
+				responsibilityText={responsibilityText}
+				setResponsibilityText={setResponsibilityText}
+			/>
 			}
 			{reView === 'Document' && 
 				<ResponsibilityDocumentExplorer 
@@ -221,7 +228,7 @@ export default function GCResponsibilityExplorer({
 					setReloadResponsibilities={setReloadResponsibilities}
 					docTitle={docTitle}
 					setDocTitle={setDocTitle}
-					organziation={organziation}
+					organization={organization}
 					setOrganization={setOrganization}
 					responsibilityText={responsibilityText}
 					setResponsibilityText={setResponsibilityText}
