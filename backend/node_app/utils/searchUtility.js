@@ -524,7 +524,7 @@ class SearchUtility {
 					query.sort = [ {"display_title_s": {"order" : order}} ]
 					break;
 				case 'Popular':
-					query.sort = [ {"pop_score.keyword": {"order" : order}} ]
+					query.sort = [ {"pop_score": {"order" : order}} ]
 					break;
 				case 'References':
 					query.sort = [{"_script": {
@@ -1949,14 +1949,14 @@ class SearchUtility {
 				size: limit,
 				query: {
 					range: {
-						'pop_score.keyword': {
+						'pop_score': {
 							gte: 10
 						}
 					}
 				},
 				sort: [
 					{
-						'pop_score.keyword': {
+						'pop_score': {
 							order: "desc"
 						}
 					}
