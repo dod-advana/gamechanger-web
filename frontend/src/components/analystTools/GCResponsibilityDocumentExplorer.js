@@ -82,7 +82,6 @@ export default function ResponsibilityDocumentExplorer({
 	loading,
 	data = [],
 	totalCount,
-	prevSearchText = '',
 	resultsPage,
 	docsPerPage,
 	onPaginationClick,
@@ -90,7 +89,7 @@ export default function ResponsibilityDocumentExplorer({
 	setReloadResponsibilities,
 	docTitle, 
 	setDocTitle,
-	organziation, 
+	organization, 
 	setOrganization,
 	responsibilityText, 
 	setResponsibilityText,
@@ -561,7 +560,7 @@ export default function ResponsibilityDocumentExplorer({
 									multiple
 									options={documentList}
 									getOptionLabel={(option) => option.documentTitle}
-									defaultValue={[]}
+									defaultValue={docTitle}
 									onChange={(event, newValue) => {
 										setDocTitle(newValue);
 									}}
@@ -591,7 +590,7 @@ export default function ResponsibilityDocumentExplorer({
 									freeSolo
 									autoSelect
 									getOptionLabel={(option) => option}
-									defaultValue={[]}
+									defaultValue={organization}
 									onChange={(event, newValue) => {
 										setOrganization(newValue);
 									}}
@@ -640,8 +639,8 @@ export default function ResponsibilityDocumentExplorer({
 								onClick={() => {
 									const filters = [];
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
-									if(organziation.length) {
-										organziation.forEach(org => {
+									if(organization.length) {
+										organization.forEach(org => {
 											filters.push({id: 'organizationPersonnel', value: org})
 										})
 									};

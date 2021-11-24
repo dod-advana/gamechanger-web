@@ -736,7 +736,7 @@ class ResponsibilityController {
 			res.status(200).send({offsets: newOffsets, totalCount: results.count, results: results.rows});
 
 		} catch (err) {
-			this.logger.error(err, 'ASDED20', userId);
+			this.logger.error(err, 'BSRE320', userId);
 			res.status(500).send(err);
 		}
 	}
