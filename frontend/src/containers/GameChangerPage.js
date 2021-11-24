@@ -17,7 +17,7 @@ import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
 import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal'
 import GameChangerAPI from '../components/api/gameChanger-service-api';
-import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
+// import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -84,9 +84,9 @@ const GameChangerPage = (props) => {
 					)}
 
 					{/* Crowd Sourcing */}
-					{ cloneData.show_crowd_source && (
+					{/* { cloneData.show_crowd_source && (
 						<ResponsibilityAssist context={context} primaryColor={gcOrange} /> 
-					)}
+					)} */}
 					
 					{/* Tutorial Overlay */}
 					{cloneData.show_tutorial && <Tutorial context={context} />}

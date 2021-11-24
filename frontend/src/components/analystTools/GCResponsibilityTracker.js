@@ -33,7 +33,7 @@ import {makeStyles, withStyles} from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
-import { setState } from '../../utils/sharedFunctions';
+// import { setState } from '../../utils/sharedFunctions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
@@ -301,30 +301,30 @@ const GCResponsibilityTracker = ({
 		}
 	};
 
-	const reportButtonAction = async () => {
-		getRowData();
-	}
+	// const reportButtonAction = async () => {
+	// 	getRowData();
+	// }
 
-	const getRowData = async () => {
-		try {
-			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
-			const rtnResults = results.filter(result => {
-				return selectedIds.includes(result.id);
-			})
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+	// const getRowData = async () => {
+	// 	try {
+	// 		const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
+	// 		const rtnResults = results.filter(result => {
+	// 			return selectedIds.includes(result.id);
+	// 		})
+	// 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
 
-			const rtn = selectedIds.length > 0 ? rtnResults : results;
-			const id = rtn[0].id;
-			const filename = rtn[0].filename;
-			const responsibilityText = rtn[0].responsibilityText;
+	// 		const rtn = selectedIds.length > 0 ? rtnResults : results;
+	// 		const id = rtn[0].id;
+	// 		const filename = rtn[0].filename;
+	// 		const responsibilityText = rtn[0].responsibilityText;
 
-			setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
+	// 		setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
 
-			deselectRows();
-		} catch (e) {
-			console.error(e);
-		}
-	}
+	// 		deselectRows();
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 	}
+	// }
 
 	const deselectRows = async () => {
 		responsibilityTableData.forEach(result => {
@@ -790,9 +790,9 @@ const GCResponsibilityTracker = ({
 						<GCPrimaryButton onClick={exportCSV}>
 							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 						</GCPrimaryButton>
-						<GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
+						{/* <GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
 							Update <Icon className="fa fa-bug" style={styles.buttons}/>
-						</GCPrimaryButton>
+						</GCPrimaryButton> */}
 						<div style={styles.spacer}/>
 					</div>
 					:
