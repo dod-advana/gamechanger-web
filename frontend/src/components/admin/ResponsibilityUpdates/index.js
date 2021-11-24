@@ -86,15 +86,17 @@ export default function ResponsibilityUpdates() {
 
 	useEffect(() => {
 		if(selectedResponsibility?.responsibility_reports){
+			const newHighlights = [];
+			selectedResponsibility.responsibility_reports.forEach(report => {
+				newHighlights.push({position: report.textPosition, id: report.id})
+			})
+			setHighlights(newHighlights);
 			setSelectedUpdate(selectedResponsibility.responsibility_reports[0])
 		}
 	}, [selectedResponsibility])
 
 	useEffect(() => {
 		setScrollId(selectedUpdate.id);
-		if(selectedUpdate?.textPosition){
-			setHighlights([{position: selectedUpdate.textPosition, id: selectedUpdate.id}])
-		}
 	}, [selectedUpdate])
 
 	useEffect(() => {
@@ -302,7 +304,6 @@ export default function ResponsibilityUpdates() {
 				Value: <UpdateMetaText 
 					onClick={() => {
 						setSelectedUpdate(update);
-						setHighlights([{position: update.textPosition, id: selectedUpdate.id}])
 					}}
 				>
 					{update.updatedText}
