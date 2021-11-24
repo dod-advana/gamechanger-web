@@ -199,7 +199,7 @@ export default function ResponsibilityDocumentExplorer({
 	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
-		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
+		if (Object.keys(responsibilityData).length) {
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach(doc => {
 				initialCollapseKeys[doc] = false;
@@ -209,7 +209,7 @@ export default function ResponsibilityDocumentExplorer({
 			})
 			setCollapseKeys(initialCollapseKeys);
 		}
-	}, [responsibilityData, collapseKeys]);
+	}, [responsibilityData]);
 
 	function handleRightPanelToggle() {
 		trackEvent(
