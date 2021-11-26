@@ -36,10 +36,6 @@ export default function PDFHighlighter({
 		return highlights.find((highlight) => `${highlight.id}` === id);
 	}
 
-	const resetScroll = () => {
-		setScrollId('');
-	  };
-
 	return (
 		<PdfLoader url={documentLink} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
 			{(pdfDocument) => (
