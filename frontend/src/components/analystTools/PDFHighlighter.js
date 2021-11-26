@@ -33,7 +33,7 @@ export default function PDFHighlighter({
 	let scrollViewerTo = (highlight) => {};
 
 	const getHighlightById = (id) => {
-		return highlights.find((highlight) => highlight.id === id);
+		return highlights.find((highlight) => `${highlight.id}` === id);
 	}
 
 	const resetScroll = () => {
@@ -46,9 +46,7 @@ export default function PDFHighlighter({
 				<PdfHighlighter
 					pdfDocument={pdfDocument}
 					enableAreaSelection={(event) => event.altKey}
-					onScrollChange={() => {
-						// resetScroll();
-					}}
+					onScrollChange={() => {}}
 					// pdfScaleValue="page-width"
 					scrollRef={(scrollTo) => {
 						scrollViewerTo = scrollTo;

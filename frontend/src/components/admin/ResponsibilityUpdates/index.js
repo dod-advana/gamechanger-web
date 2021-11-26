@@ -68,6 +68,7 @@ export default function ResponsibilityUpdates() {
 	const [highlights, setHighlights] = useState([])
 	const [scrollId, setScrollId] = useState('');
 	const [documentLink, setDocumentLink] = useState('');
+	const [refreshDocument, setRefreshDocument] = useState(false);
 
 	useEffect(() => {
 		if(Object.keys(responsibilityData).length){
@@ -79,7 +80,6 @@ export default function ResponsibilityUpdates() {
 			if(responsibilityData?.[doc]?.[entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
 			if (resp) {
 				setSelectedResponsibility(resp);
-				setSelectedUpdate(resp.responsibility_reports[0]);
 			}
 		}
 	}, [responsibilityData, iframePreviewLink]);
@@ -96,7 +96,17 @@ export default function ResponsibilityUpdates() {
 	}, [selectedResponsibility])
 
 	useEffect(() => {
-		setScrollId(selectedUpdate.id);
+		if(refreshDocument){
+			setDocumentLink(refreshDocument);
+			setRefreshDocument(false);
+		}
+	}, [refreshDocument])
+
+	useEffect(() => {
+		setScrollId(`${selectedUpdate.id}`);
+		setRefreshDocument(documentLink);
+		setDocumentLink('')
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedUpdate])
 
 	useEffect(() => {
@@ -122,8 +132,7 @@ export default function ResponsibilityUpdates() {
 	 useEffect(() => {
 		const getFileName = async () => {
 			const payload = {
-				filename: selectedResponsibility.filename,
-				text: selectedUpdate.updatedText
+				filename: selectedResponsibility.filename
 			}
 			if(payload.filename){
 				const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
@@ -131,7 +140,7 @@ export default function ResponsibilityUpdates() {
 			}
 		}
 		getFileName();
-	}, [selectedResponsibility, selectedUpdate])
+	}, [selectedResponsibility])
 
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
