@@ -11,6 +11,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
+import { GroupAdd } from '@material-ui/icons';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -56,7 +57,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	const DOCS_PER_PAGE = 3;
+	const DOCS_PER_PAGE = 10;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
@@ -93,15 +94,14 @@ export default function GCResponsibilityExplorer({
 			const tmpFiltered = _.cloneDeep(filtered);
 			let offset = 0;
 			let limit = 0;
-			for(let i = 1; i <= page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
+			for(let i = 0; i < page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
 				if(!offsets[i]) break;
 				offset += offsets[i];
 			}
-			for(let i = 1 + (page - 1) * DOCS_PER_PAGE; i <= page * DOCS_PER_PAGE; i++){
+			for(let i =(page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
 				if(!offsets[i]) break;
 				limit += offsets[i];
 			}
-			//TODO correct number of docs not coming in look into it
 			const { results = [] } = await getData({
 				limit,
 				offset,
@@ -155,14 +155,7 @@ export default function GCResponsibilityExplorer({
 				where,
 			});
 			if(data.offsets){
-				const newOffsets = {};
-				data.offsets.forEach((resp, i) => {
-					if(!newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()]) {
-						newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] = 0;
-					}
-					newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] += resp;
-				})
-				setOffsets(newOffsets);
+				setOffsets(data.offsets);
 			}
 			return data;
 		} catch (err) {
@@ -219,7 +212,7 @@ export default function GCResponsibilityExplorer({
 					responsibilityData={docResponsibilityData} 
 					loading={loading}
 					docsPerPage={DOCS_PER_PAGE}
-					totalCount={Object.keys(offsets).length}
+					totalCount={offsets.length}
 					resultsPage={resultsPage}
 					onPaginationClick={(page) => {
 						setResultsPage(page);

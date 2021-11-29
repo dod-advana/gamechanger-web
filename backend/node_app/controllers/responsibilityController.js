@@ -335,7 +335,7 @@ class ResponsibilityController {
 
 			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10 } = req.body;
 			let { limit } = req.body;
-			order.push(['filename', 'ASC']);
+			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
 				if (id === 'id') {
@@ -357,7 +357,7 @@ class ResponsibilityController {
 							};
 						}
 					} else {
-						if(!tmpWhere[id]) tmpWhere[id]= {[Op.or]: []};
+						if(!tmpWhere[id]) tmpWhere[id] = {[Op.or]: []};
 						tmpWhere[id][Op.or].push({
 							[Op.iLike]: `%${value}%`
 						});
@@ -369,14 +369,14 @@ class ResponsibilityController {
 			if(docView){
 				const docOffsets = await this.responsibilities.findAndCountAll({
 					where: tmpWhere,
-					group: 'filename',
+					group: 'documentTitle',
 					order: order,
 					attributes: [
-						[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
-						'filename',
+						[Sequelize.fn('COUNT', Sequelize.col('documentTitle')), 'documentCount'],
+						'documentTitle',
 					]
 				});
-				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
+				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.documentCount)))
 				if(!limit){
 					for(let i = 1; i <= DOCS_PER_PAGE; i++){
 						if(!newOffsets[i]) break;
