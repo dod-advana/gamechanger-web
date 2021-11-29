@@ -136,7 +136,7 @@ export default function ResponsibilityUpdates() {
 			}
 			if(payload.filename){
 				const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
-				setDocumentLink(data);
+				setDocumentLink(data.fileLink);
 			}
 		}
 		getFileName();
@@ -638,7 +638,6 @@ export default function ResponsibilityUpdates() {
 										handleSave={editUpdate}
 										highlights={highlights}
 										scrollId={scrollId}
-										setScrollId={setScrollId}
 										saveActive={editing}
 										documentLink={documentLink}
 									/>

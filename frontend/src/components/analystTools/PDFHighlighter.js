@@ -12,7 +12,6 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 export default function PDFHighlighter({ 
 	highlights,
 	scrollId,
-	setScrollId,
 	handleSave,
 	saveActive,
 	documentLink
