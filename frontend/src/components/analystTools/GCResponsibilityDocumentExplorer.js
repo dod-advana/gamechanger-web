@@ -883,8 +883,8 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{false ?
-							// {!isEditingResp || isEditingEntity ?
+							{/* {false ? */}
+							{!isEditingResp || isEditingEntity ?
 								<>
 									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
