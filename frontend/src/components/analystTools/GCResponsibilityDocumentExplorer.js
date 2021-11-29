@@ -123,6 +123,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 	const [documentLink, setDocumentLink] = useState('');
 	const [clearFilters, setClearFilters] = useState(false);
+	const [highlights, setHighlights] = useState([])
 
 	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
@@ -174,17 +175,17 @@ export default function ResponsibilityDocumentExplorer({
 		]
 	);
 
-	useEffect(() => {
-		const getFileName = async () => {
-			const payload = {
-				filename: selectedResponsibility.filename,
-				text: selectedResponsibility.updatedText
-			}
-			const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
-			setDocumentLink(data);
-		}
-		getFileName();
-	}, [selectedResponsibility])
+	// useEffect(() => {
+	// 	const getFileName = async () => {
+	// 		const payload = {
+	// 			filename: selectedResponsibility.filename,
+	// 			text: selectedResponsibility.responsibilityText
+	// 		}
+	// 		const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
+	// 		setDocumentLink(data.fileLink);
+	// 	}
+	// 	getFileName();
+	// }, [selectedResponsibility])
 
 	useEffect(() => {
 		if(Object.keys(responsibilityData).length){
@@ -210,6 +211,12 @@ export default function ResponsibilityDocumentExplorer({
 			setCollapseKeys(initialCollapseKeys);
 		}
 	}, [responsibilityData]);
+
+	useEffect(() => {
+		setIsEditingEntity(false);
+		setIsEditingResp(false);
+		setDocumentLink('');
+	}, [selectedResponsibility])
 
 	function handleRightPanelToggle() {
 		trackEvent(
@@ -298,6 +305,43 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	}
 
+	const getResponsibilityPageInfo = async () => {
+		const payload = {
+			filename: selectedResponsibility.filename,
+			text: selectedResponsibility.responsibilityText
+		}
+		const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
+		if(data){
+			setHighlights([ {
+				content: {},
+				position: {
+					boundingRect: {
+						'x1': 100,
+						'y1': 100,
+						'x2': 101,
+						'y2': 101,
+						'width': 1,
+						'height': 1320
+					},
+					'rects': [
+						{
+							'x1': 100,
+							'y1': 100,
+							'x2': 101,
+							'y2': 101,
+							'width': 1,
+							'height': 1320
+						}
+					],
+					'pageNumber': data.pageNumber + 1
+				},
+				'id': 0
+			}])
+			setDocumentLink(data.fileLink);
+			setIframeLoading(false);
+		}
+	}
+
 	const getMetadataForTable = () => {
 		if(!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
@@ -321,7 +365,7 @@ export default function ResponsibilityDocumentExplorer({
 								if(isEditingResp || isEditingEntity){
 									setIsEditingEntity(false);
 									setIsEditingResp(false);
-									
+									setDocumentLink('');
 								}else{
 									rejectResponsibility(selectedResponsibility);
 								}
@@ -342,8 +386,8 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingResp && key === 'responsibilityText' && <GCButton
 							onClick={() => {
+								getResponsibilityPageInfo();
 								setIsEditingResp(true);
-								setIframeLoading(false);
 							}}
 							style={{
 								height: 40,
@@ -359,8 +403,8 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingEntity && key === 'organizationPersonnel' && <GCButton
 							onClick={() => {
+								getResponsibilityPageInfo();
 								setIsEditingEntity(true);
-								setIframeLoading(false);
 							}}
 							style={{
 								height: 40,
@@ -839,8 +883,8 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{/* {false ? */}
-							{!isEditingResp || isEditingEntity ?
+							{false ?
+							// {!isEditingResp || isEditingEntity ?
 								<>
 									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
@@ -872,7 +916,8 @@ export default function ResponsibilityDocumentExplorer({
 								:
 								<PDFHighlighter 
 									handleSave={updateResponsibility}
-									highlights={[]}
+									highlights={highlights}
+									scrollId={'0'}
 									saveActive={isEditingEntity || isEditingResp}
 									documentLink={documentLink}
 								/>

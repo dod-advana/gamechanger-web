@@ -252,9 +252,10 @@ class ResponsibilityController {
 					esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			}
 			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			const pageNumber = rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields['paragraphs.page_num_i'][0];
 			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s
 
-			res.send(fileLink);
+			res.send({fileLink, pageNumber});
 		} catch (err) {
 			this.logger.error(err, 'QRDSM32', userId);
 		}
