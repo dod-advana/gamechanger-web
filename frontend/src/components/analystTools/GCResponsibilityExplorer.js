@@ -11,7 +11,6 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
-import { GroupAdd } from '@material-ui/icons';
 
 const gameChangerAPI = new GameChangerAPI();
 

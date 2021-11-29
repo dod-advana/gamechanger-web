@@ -285,11 +285,9 @@ export default function ResponsibilityDocumentExplorer({
 
 	function handlePdfOnLoadStart() {
 		if (!iframeLoading && !pdfLoaded) {
-			const { dataIdx } = iframePreviewLink;
-			const rec = data[dataIdx];
 			try {
-				if (rec && !pdfLoaded) {
-					const fileName = rec.id;
+				if (selectedResponsibility.filename && !pdfLoaded) {
+					const fileName = selectedResponsibility.filename + '_0';
 					handlePdfOnLoad(
 						'docPdfViewer',
 						'viewerContainer',
