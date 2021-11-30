@@ -121,6 +121,8 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	initializeLTR: '/api/gamechanger/admin/initializeLTR',
+	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -954,6 +956,16 @@ export default class GameChangerAPI {
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
+	};
+
+	initializeLTR = async () => {
+		const url = endpoints.initializeLTR;
+		return axiosGET(this.axios, url);
+	};
+
+	createModelLTR = async () => {
+		const url = endpoints.createModelLTR;
 		return axiosGET(this.axios, url);
 	};
 }

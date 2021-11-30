@@ -91,6 +91,8 @@ router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/initializeLTR', transformer.initializeLTR);
+router.get('/admin/createModelLTR', transformer.createModelLTR);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
