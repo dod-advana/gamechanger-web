@@ -178,6 +178,8 @@ router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
 router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
+router.get('/appSettings/ltr', appSettings.getLTRMode);
+router.post('/appSettings/ltr', appSettings.toggleLTRMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
