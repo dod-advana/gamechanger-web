@@ -336,6 +336,8 @@ export default function GraphNodeCluster2D(props) {
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
 
 	const [dagMode, setDagMode] = React.useState(false);
+	
+	const [resetGraphClicked, setResetGraphClicked] = React.useState(false);
 
 	const { nodes, edges } = graph;
 	const graphData = { nodes, links: edges };
@@ -1097,7 +1099,7 @@ export default function GraphNodeCluster2D(props) {
 	const handleSimulationStop = onSimulationStop
 		? onSimulationStop
 		: () => {
-			if (graphData.nodes?.[0].x !== null) {
+			if (graphData.nodes?.[0]?.x !== null) {
 				setShouldRunSimulation(false);
 			} else {
 				setShouldRunSimulation(true);
@@ -1151,6 +1153,11 @@ export default function GraphNodeCluster2D(props) {
 				centralNode.fx = centralNode?.x;
 				centralNode.fy = centralNode?.y;
 				centralNode.fz = centralNode?.z;
+			}
+
+			if (resetGraphClicked) {
+				recenterGraph();
+				setResetGraphClicked(false);
 			}
 		  };
 
@@ -1529,6 +1536,7 @@ export default function GraphNodeCluster2D(props) {
 									'ResetGraph'
 								);
 								handleResetGraph();
+								setResetGraphClicked(true);
 							}}
 						>
 							<RefreshIcon fontSize="inherit" style={{ fontSize: 26 }} />

@@ -8,7 +8,7 @@ RUN yum install -y \
         git \
         make
 
-RUN yum -y update libsolv
+RUN yum -y update libsolv libgcc libstdc++
      
 # non-root app USER/GROUP
 ARG APP_UID=1000
