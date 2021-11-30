@@ -166,6 +166,7 @@ export default function GCResponsibilityExplorer({
 	const handleChangeView = (event) => {
 		const { value } = event.target;
 		setReView(value);
+		if(value === 'Document') setReloadResponsibilities(true)
 	}
 
 	return (
