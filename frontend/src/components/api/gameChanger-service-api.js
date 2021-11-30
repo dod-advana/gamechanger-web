@@ -111,6 +111,7 @@ const endpoints = {
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
 	jiraFeedback: '/api/gamechanger/appSettings/jiraFeedback',
+	ltr: '/api/gamechanger/appSettings/ltr',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
@@ -851,6 +852,16 @@ export default class GameChangerAPI {
 		const url = endpoints.sendJiraFeedback;
 		return axiosPOST(this.axios, url, body)
 	}
+
+	getLTRMode = async () => {
+		const url = endpoints.ltr;
+		return axiosGET(this.axios, url);
+	};
+
+	toggleLTR = async () => {
+		const url = endpoints.ltr;
+		return axiosPOST(this.axios, url, {});
+	};
 
 	getTopicSearchMode = async () => {
 		const url = endpoints.topicSearch;
