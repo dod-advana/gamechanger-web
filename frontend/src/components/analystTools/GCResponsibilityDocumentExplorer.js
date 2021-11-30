@@ -581,7 +581,7 @@ export default function ResponsibilityDocumentExplorer({
 					)}
 				</div>
 				<GCAccordion
-					expanded={!state.searchSettings.publicationDateAllTime}
+					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length}
 					header={'FILTERS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -590,7 +590,7 @@ export default function ResponsibilityDocumentExplorer({
 					<div style={{ width: '100%' }}>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={!state.searchSettings.publicationDateAllTime}
+								expanded={docTitle.length}
 								header={'DOCUMENT TITLE'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
@@ -618,7 +618,7 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={!state.searchSettings.publicationDateAllTime}
+								expanded={organization.length}
 								header={'ORGANIZATION'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
@@ -649,7 +649,7 @@ export default function ResponsibilityDocumentExplorer({
 						</div>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={!state.searchSettings.publicationDateAllTime}
+								expanded={Object.keys(responsibilityText).length}
 								header={'RESPONSIBILITY TEXT'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
