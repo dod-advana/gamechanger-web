@@ -56,15 +56,17 @@ const useStyles = makeStyles({
 const getIframePreviewLinkInferred = (
 	filename,
 	responsibilityText,
+	organization,
 	pageNumber,
 	isClone = false,
 	cloneData = {}
 ) => {
+	const highlightText = `"${responsibilityText}""${organization}"`
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				responsibilityText,
+				highlightText,
 				pageNumber,
 				isClone,
 				cloneData
@@ -238,6 +240,7 @@ export default function ResponsibilityDocumentExplorer({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
+							selectedResponsibility.organizationPersonnel,
 							pageNumber,
 							isClone,
 							cloneData
