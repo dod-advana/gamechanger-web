@@ -93,6 +93,7 @@ export default function ResponsibilityUpdates() {
 			setHighlights(newHighlights);
 			setSelectedUpdate(selectedResponsibility.responsibility_reports[0])
 		}
+		setEditing(false)
 	}, [selectedResponsibility])
 
 	useEffect(() => {
@@ -103,6 +104,14 @@ export default function ResponsibilityUpdates() {
 	}, [refreshDocument])
 
 	useEffect(() => {
+		if(editing){
+			setEditing(false);
+			const newHighlights = [];
+			selectedResponsibility.responsibility_reports.forEach(report => {
+				newHighlights.push({position: report.textPosition, id: report.id})
+			})
+			setHighlights(newHighlights);
+		}
 		setScrollId(`${selectedUpdate.id}`);
 		setRefreshDocument(documentLink);
 		setDocumentLink('')
@@ -324,9 +333,17 @@ export default function ResponsibilityUpdates() {
 					{update.updatedColumn !== 'Reject' &&
 							<GCButton
 								onClick={() => {
-									if(editing) return setEditing(false);
+									if(editing) {
+										const newHighlights = [];
+										selectedResponsibility.responsibility_reports.forEach(report => {
+											newHighlights.push({position: report.textPosition, id: report.id})
+										})
+										setHighlights(newHighlights);
+										return setEditing(false)
+									};
 									setSelectedUpdate(update);
 									setEditing(`${update.id}`);
+									setHighlights([]);
 								}}
 								style={{
 									height: 40,
