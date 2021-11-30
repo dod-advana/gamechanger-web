@@ -21,6 +21,8 @@ const MLRoutes = {
 	'reloadModels':`${transformerBaseUrl}/reloadModels`,
 	'downloadCorpus':`${transformerBaseUrl}/downloadCorpus`,
 	'trainModel':`${transformerBaseUrl}/trainModel`,
+	'initializeLTR':`${transformerBaseUrl}/LTR/initLTR`,
+	'createModelLTR':`${transformerBaseUrl}/LTR/createModel`,
 	
 }
 /**
@@ -50,6 +52,8 @@ class MLApiClient {
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
+		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
+		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		// Post methods
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');

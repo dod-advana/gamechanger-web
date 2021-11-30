@@ -27,7 +27,9 @@ class TransformerController {
 			'getProcessStatus': this.mlApi.getProcessStatus,
 			'reloadModels': this.mlApi.reloadModels,
 			'downloadCorpus': this.mlApi.downloadCorpus,
-			'trainModel': this.mlApi.trainModel
+			'trainModel': this.mlApi.trainModel,
+			'initializeLTR': this.mlApi.initializeLTR,
+			'createModelLTR': this.mlApi.createModelLTR
 		}
 
 		// Get methods
@@ -38,6 +40,8 @@ class TransformerController {
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
+		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
+		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		// Post methods
 		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
