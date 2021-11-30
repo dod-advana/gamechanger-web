@@ -2,9 +2,6 @@ import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
-// import util from '../advana/api/util';
-
-// import { getPdfViewerUrl } from '../advana/api/storage-service-api'
 
 const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
@@ -80,7 +77,6 @@ const endpoints = {
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
-	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
@@ -661,11 +657,6 @@ export default class GameChangerAPI {
 	queryEs = async (opts) => {
 		const url = endpoints.queryEs;
 		return axiosPOST(this.axios, url, opts);
-	};
-
-	setUserBetaStatus = async (checked) => {
-		const url = endpoints.setUserBetaStatus;
-		return axiosPOST(this.axios, url, { status: checked });
 	};
 
 	getInternalUsers = async () => {

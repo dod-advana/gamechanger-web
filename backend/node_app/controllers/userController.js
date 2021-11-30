@@ -17,6 +17,7 @@ const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const Op = Sequelize.Op;
 
 class UserController {
@@ -71,10 +72,12 @@ class UserController {
 		this.deleteInternalUser = this.deleteInternalUser.bind(this);
 		this.addInternalUser = this.addInternalUser.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
-		this.setUserBetaStatus = this.setUserBetaStatus.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
+		this.getUserDataForUserList = this.getUserDataForUserList.bind(this);
+		this.updateOrCreateUser = this.updateOrCreateUser.bind(this);
+		this.updateOrCreateUserHelper = this.updateOrCreateUserHelper.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
 		this.sendClassificationAlert = this.sendClassificationAlert.bind(this);
 		this.clearDashboardNotification = this.clearDashboardNotification.bind(this);
@@ -84,25 +87,47 @@ class UserController {
 		this.getRecentSearches = this.getRecentSearches.bind(this);
 	}
 
+	async getUserDataForUserList(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			this.gcUser.findAll({ attributes: [
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'organization',
+				'is_beta',
+				'is_admin'
+			], raw: true }).then(results => {
+				res.status(200).send({ users: results, timeStamp: new Date().toISOString() });
+			});
+		} catch (err) {
+			this.logger.error(err, 'RQ0WSQP', userId);
+			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
 	async getUserData(req, res) {
 		let userId = 'Unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(userId);
 
-			const [user, created] = await this.gcUser.findOrCreate(
+			let user = await this.gcUser.findOne(
 				{
-					where: { user_id: hashed_user },
+					where: { user_id: user_id },
 					defaults: {
-						user_id: hashed_user,
+						user_id: user_id,
 						notifications: {}
 					},
 					raw: true,
 				}
 			);
 
-			if (!created) {
+			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
 					where: {user_id: user.user_id},
 					raw: true
@@ -303,6 +328,7 @@ class UserController {
 				}
 
 			} else {
+				user = {}
 				user.favorite_documents = [];
 				user.favorite_searches = [];
 				user.search_history = [];
@@ -319,53 +345,78 @@ class UserController {
 		}
 	}
 
+	async updateOrCreateUser(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { userData, fromApp } = req.body;
+			res.status(200).send(await this.updateOrCreateUserHelper(userData, userId, fromApp));
+		} catch (err) {
+			this.logger.error(err, 'VFA1YU7', userId);
+			res.status(500).send(`Error adding or updating user: ${err.message}`);
+		}
+	}
+
+	async updateOrCreateUserHelper(userData, userId, fromApp = false) {
+		try {
+			let foundItem;
+
+			const user_id = getUserIdFromSAMLUserId(userData.id);
+
+			if (fromApp) {
+				foundItem = await this.gcUser.findOne({ where: {id: userData.id}, raw: true});
+			} else {
+				foundItem = await this.gcUser.findOne({where: {user_id: user_id}, raw: true});
+			}
+
+			if (!foundItem) {
+				if (fromApp){
+					await this.gcUser.create(userData);
+				} else {
+					await this.gcUser.create({
+						user_id: user_id,
+						first_name: userData.firstName,
+						last_name: userData.lastName,
+						is_beta: false,
+						is_admin: false
+					});
+				}
+				return true;
+			} else {
+				if (fromApp) {
+					await this.gcUser.update(userData, {where: {id: userData.id}});
+				}
+			}
+
+			return true;
+		} catch (err) {
+			this.logger.error(err, '2XY95Z7', userId);
+			return false;
+		}
+	}
+
 	async getUserSettings(req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(userId);
 
-			const [user] = await this.gcUser.findOrCreate(
+			const user = await this.gcUser.findOne(
 				{
-					where: { user_id: hashed_user },
-					defaults: {
-						user_id: hashed_user,
-						is_beta: false,
-						notifications: {}
-					},
+					where: { user_id: user_id },
 					raw: true
 				}
 			);
-			user.submitted_info = true;
+
+			if (user) {
+				user.submitted_info = true;
+			}
+
 			res.status(200).send(user);
 		} catch (err) {
 			this.logger.error(err.message, 'ZX1SWBU', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setUserBetaStatus(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
-			const { status } = req.body;
-
-			await this.gcUser.update(
-				{
-					is_beta: status
-				},
-				{
-					where: {
-						user_id: hashed_user
-					}
-				}
-			);
-			res.status(200).send(status);
-		} catch (err) {
-			this.logger.error(err.message, 'NGED0R4', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -374,8 +425,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
+			const user_id = getUserIdFromSAMLUserId(userId);
 
 			await this.gcUser.update(
 				{
@@ -384,7 +434,7 @@ class UserController {
 				},
 				{
 					where: {
-						user_id: hashed_user
+						user_id: user_id
 					}
 				}
 			);
@@ -464,8 +514,8 @@ class UserController {
 			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
 			res.status(200).send({status: 'good'});
 			// }).catch(error => {
-				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				// res.status(500).send(error);
+			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+			// res.status(500).send(error);
 			// });
 
 			// const axios = require('axios');
@@ -518,10 +568,10 @@ class UserController {
 			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
 			this.logger.info(`Classification alert: ${emailBody}`);
 			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
-				res.status(200).send({status: 'good'});
+			res.status(200).send({status: 'good'});
 			// }).catch(error => {
-				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				// res.status(500).send(error);
+			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+			// res.status(500).send(error);
 			// });
 		} catch (err) {
 			const { message } = err;
@@ -534,12 +584,12 @@ class UserController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(userId);
 
 			await this.sequelize.transaction(async (t) => {
 				const userData = await this.gcUser.findOne({
 					where: {
-						user_id: hashed_user
+						user_id: user_id
 					},
 					transaction: t,
 					// there is a race condition between this select and the notification json modification
@@ -555,7 +605,7 @@ class UserController {
 					await this.gcUser.update({ notifications: userData.notifications },
 						{
 							where: {
-								user_id: hashed_user
+								user_id: user_id
 							},
 							transaction: t,
 						});
@@ -575,9 +625,9 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(userId);
 
-			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
+			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: user_id } });
 			
 			res.status(200).send();
 		} catch(err) {
@@ -654,7 +704,7 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
 			
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(userId);
 			
 			let ids = await this.gcHistory.findAll({
 				attributes: [
@@ -663,7 +713,7 @@ class UserController {
 				where: {
 					clone_name,
 					had_error: 'f',
-					user_id: hashed_user
+					user_id: user_id
 				},
 				group: ['search'],
 				order: [[Sequelize.col('id'), 'DESC']],

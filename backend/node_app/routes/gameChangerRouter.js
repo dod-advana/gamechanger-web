@@ -134,7 +134,6 @@ router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
-router.post('/setUserBetaStatus', user.setUserBetaStatus);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
 router.post('/admin/addInternalUser', user.addInternalUser);

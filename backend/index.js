@@ -2,25 +2,19 @@
 
 require('dotenv').config();
 const express = require('express');
-const passport = require('passport');
-const ldapStrategy = require('passport-ldapauth');
 const http = require('http');
 const fs = require('fs');
 const https = require('https'); // module for https
-const session = require('express-session');
 const bodyParser = require('body-parser');
 const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
-const _ = require('lodash');
-const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const redis = require('redis');
 const asyncRedisLib = require('async-redis');
-const client = redis.createClient(process.env.REDIS_URL || 'redis://localhost');
 const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const constants = require('./node_app/config/constants');
 const models = require('./node_app/models');
+const User = models.gc_user
 const Admin = models.admin;
 const LOGGER = require('./node_app/lib/logger');
 const path = require('path');
@@ -32,12 +26,15 @@ const ApiKey = models.api_key;
 const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
+const { UserController } = require('./node_app/controllers/userController');
+const {getUserIdFromSAMLUserId} = require('./node_app/utils/userUtility');
 
 const app = express();
 const jsonParser = bodyParser.json();
 const logger = LOGGER;
 const port = 8990;
 const securePort = 8443;
+const userController = new UserController();
 
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
@@ -75,10 +72,10 @@ try {
 		for (let envvar in process.env) {
 			if (envvar.startsWith('REACT_APP_'))
 				result[envvar] = process.env[envvar];
-		};
+		}
 
 		fs.writeFileSync(
-			path.join(__dirname, "./build", "config.js"),
+			path.join(__dirname, './build', 'config.js'),
 			`window.__env__ = ${JSON.stringify(result)}`
 		);
 	}
@@ -90,13 +87,17 @@ try {
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
-	app.set("trust proxy", constants.EXPRESS_TRUST_PROXY)
+	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY)
 }
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
+
+app.use(AAA.redisSession());
+AAA.setupSaml(app)
+app.use(AAA.ensureAuthenticated);
 
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	app.use(async function (req, res, next) {
@@ -107,44 +108,30 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	});
 }
 
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	app.use(async function (req, res, next) {
-		const cn = req.get('x-env-ssl_client_certificate');
-		if (!cn) {
-			res.sendStatus(401);
-		} else {
-			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
-			req.headers['ssl_client_s_dn_cn'] = cn;
-			req.headers['SSL_CLIENT_S_DN_CN'] = cn;
+app.use(async function (req, res, next) {
+	let cn;
+	if (req.session.user) {
+		cn = req.session.user.cn;
+		req.headers['ssl_client_s_dn_cn'] = cn;
+		req.headers['SSL_CLIENT_S_DN_CN'] = cn;
+		req.permissions = req.session.user.perms;
+	}
 
-			redisAsyncClient.select(12);
-			const perms = await redisAsyncClient.get(`${req.user.cn}-perms`);
+	redisAsyncClient.select(12);
+	const perms = await redisAsyncClient.get(`${cn}-perms`);
 
-			if (perms) {
-				req.permissions = perms;
-			} else {
-				req.permissions = [];
-			}
-			next();
-		}
-	});
-} else {
-	app.use(AAA.redisSession());
-	AAA.setupSaml(app)
-	app.use(AAA.ensureAuthenticated);
+	if (perms) {
+		req.permissions = req.permissions.concat(JSON.parse(perms));
+	}
 
-	app.use(async function (req, res, next) {
-		if (req.user) { req.headers['ssl_client_s_dn_cn'] = req.user.id; };
-		if(req.session && req.session.user) {req.permissions = req.session.user.perms;}
-		next();
-	});
-}
+	next();
+});
 
 app.use(function (req, res, next) {
 	let approvedClients = constants.APPROVED_API_CALLERS;
 	const { headers, hostname } = req;
 	const { origin } = headers;
-	const userId = constants.GAME_CHANGER_OPTS.isDecoupled ? req.get('x-env-ssl_client_certificate') : req.get('SSL_CLIENT_S_DN_CN');
+	const userId = req.get('SSL_CLIENT_S_DN_CN');
 	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
 	if (approvedClients.includes(hostname)) {
 		res.setHeader('Access-Control-Allow-Origin', hostname);
@@ -168,101 +155,122 @@ app.use(function (req, res, next) {
 	}
 });
 
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	// Setting up swagger
-	const swaggerSpec = swaggerJSDoc(SwaggerDefinition);
-	app.use('/api/gamechanger/external/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions));
+// Setting up swagger
+const swaggerSpec = swaggerJSDoc(SwaggerDefinition);
+app.use('/api/gamechanger/external/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions));
 
-	// External API Middleware to validate the API Key and pass the user to the headers
-	app.use('/api/gamechanger/external', async function (req, res, next) {
-		if (!req.headers['x-api-key']) {
-			res.sendStatus(403);
+// External API Middleware to validate the API Key and pass the user to the headers
+app.use('/api/gamechanger/external', async function (req, res, next) {
+	if (!req.headers['x-api-key']) {
+		res.sendStatus(403);
+	} else {
+		const [key] = await ApiKey.findAll({
+			where: { apiKey: req.headers['x-api-key'] },
+			raw: false,
+			include: [{
+				model: CloneMeta,
+				attributes: ['clone_name'],
+				through: {attributes: []}
+			}],
+		});
+		let cloneAccess;
+		if(key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
+		if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
+			req.headers['ssl_client_s_dn_cn'] = key.username;
+			req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
+			next();
 		} else {
-			const [key] = await ApiKey.findAll({ 
-				where: { apiKey: req.headers['x-api-key'] }, 
-				raw: false,
-				include: [{
-					model: CloneMeta,
-					attributes: ['clone_name'],
-					through: {attributes: []}
-				}],
-			});
-			let cloneAccess;
-			if(key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
-			if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
-				req.headers['ssl_client_s_dn_cn'] = key.username;
-				req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
-				next();
-			} else {
-				res.sendStatus(403);
-			}
+			res.sendStatus(403);
 		}
-	});
+	}
+});
 
-	app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
-}
+app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
 
 app.post('/api/auth/token', async function (req, res) {
 
-	if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-		let cn = 'unknown user';
-		let perms = [''];
-		try {
-			cn = req.user.cn;
-			const admin = await Admin.findOne({ where: { username: cn } });
+	let cn = 'unknown user';
+	let perms = ['View gamechanger'];
+	const sessUser = req.session.user;
 
-			if (admin) {
-				perms = ['Gamechanger Admin'];
-			}
-		} catch (e) {
-			logger.error(e.message, '9SuBdeus', cn);
-			res.sendStatus(500);
+	try {
+		cn = sessUser.cn;
+
+		await userController.updateOrCreateUserHelper(sessUser, cn);
+
+		const user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(sessUser.id) }, raw: true });
+		const admin = await Admin.findOne({ where: { username: cn } });
+
+		if (admin) {
+			perms.push('Gamechanger Admin');
 		}
+
+		if (user) {
+			if (user.is_beta) perms.push('Gamechanger Beta');
+			if (user.is_admin) perms.push('Gamechanger Admin');
+		}
+
+		sessUser.id = getUserIdFromSAMLUserId(sessUser.id);
+
+		if (sessUser.disabled === undefined) {
+			sessUser.disabled = false;
+		}
+
+		if (sessUser.displayName === undefined) {
+			sessUser.displayName = `${sessUser.firstName} ${sessUser.lastName}`;
+		}
+
+		if (sessUser.sandboxId === undefined) {
+			sessUser.sandboxId = 1;
+		}
+
+		sessUser.perms = sessUser.perms.concat(perms);
+
+		console.log(sessUser)
 
 		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
 
-		const jwtClaims = { perms, cn };
+		const jwtClaims = { ...sessUser, perms };
 
 		jwtClaims['csrf-token'] = csrfHash;
+
 		let token = '';
-		try {
-			token = jwt.sign(jwtClaims, private_key, {
-				algorithm: 'RS256'
-			});
 
-			redisAsyncClient.select(12);
-			await redisAsyncClient.set(`${cn}-token`, token);
-			await redisAsyncClient.set(`${cn}-perms`, perms);
+		token = jwt.sign(jwtClaims, private_key, {
+			algorithm: 'RS256'
+		});
 
-			res.json({
-				token: token
-			});
-		} catch (e) {
-			logger.error(e.message, '9SuBdeut', cn);
-			res.sendStatus(500);
-		}
-	} else {
-		AAA.getToken(req, res);
+		redisAsyncClient.select(12);
+		await redisAsyncClient.set(`${cn}-token`, token);
+		await redisAsyncClient.set(`${cn}-perms`, JSON.stringify(perms));
+
+		res.json({
+			token: token
+		});
+
+	} catch (e) {
+		logger.error(e.message, '9SuBdeus', cn);
+		res.sendStatus(500);
 	}
 });
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	app.use(async function (req, res, next) {
-		const signatureFromApp = req.get('x-ua-signature');
-		redisAsyncClient.select(12);
-		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
-		if (signatureFromApp === calculatedSignature) {
+
+app.use(async function (req, res, next) {
+	const signatureFromApp = req.get('x-ua-signature');
+	redisAsyncClient.select(12);
+	const sessUser = req.session.user;
+	const userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
+	const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+	if (signatureFromApp === calculatedSignature) {
+		next();
+	} else {
+		if (req.url.includes('getThumbnail')) {
 			next();
-		} else {
-			if (req.url.includes('getThumbnail')) {
-				next();
-			}
-			else {
-				res.status(403).send({ code: 'not authorized' });
-			}
 		}
-	});
-}
+		else {
+			res.status(403).send({ code: 'not authorized' });
+		}
+	}
+});
 
 app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
@@ -271,6 +279,11 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 		res.sendStatus(403);
 	}
 });
+
+app.use('/api/gamechanger', require('./node_app/routes/gameChangerRouter'));
+
+app.use('/api', require('./node_app/routes/advanaRouter'));
+app.use('/api/gamechanger/modular', require('./node_app/routes/modularGameChangerRouter'));
 
 const cron = new CronJobs();
 try {
@@ -297,11 +310,6 @@ try {
 	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process')
 }
 
-app.use('/api/gamechanger', require('./node_app/routes/gameChangerRouter'));
-
-app.use('/api', require('./node_app/routes/advanaRouter'));
-app.use('/api/gamechanger/modular', require('./node_app/routes/modularGameChangerRouter'));
-
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
 	key: constants.TLS_KEY,
@@ -317,7 +325,7 @@ http.createServer(app).listen(port);
 
 // shoutout to the user
 logger.boot(`
-====> Is decoupled? ${constants.GAME_CHANGER_OPTS.isDecoupled}
+====> Root Clone? ${constants.GAME_CHANGER_OPTS.rootClone}
 ====> http port: ${port}
 ====> https port: ${securePort}
 ====> Environment: ${process.env.REACT_APP_NODE_ENV === undefined ? 'production' : process.env.REACT_APP_NODE_ENV}
