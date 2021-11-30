@@ -80,7 +80,6 @@ export default function ResponsibilityDocumentExplorer({
 	state,
 	responsibilityData = {},
 	loading,
-	data = [],
 	totalCount,
 	resultsPage,
 	docsPerPage,
@@ -117,7 +116,6 @@ export default function ResponsibilityDocumentExplorer({
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [viewTogle, setViewTogle] = useState(false);
-	const [fileUrl, setFileUrl] = useState(null);
 	const [isEditingResp, setIsEditingResp] = useState(false);
 	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
@@ -137,6 +135,93 @@ export default function ResponsibilityDocumentExplorer({
 		setAlertMessage(message);
 		setAlertActive(true);
 	};
+
+	useEffect(() => {
+		if(Object.keys(responsibilityData).length){
+			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
+			const doc = Object.keys(responsibilityData)[dataIdx];
+			const entity = Object.keys(responsibilityData[doc])[entityIdx];
+			const resp = responsibilityData[doc][entity][responsibilityIdx];
+			if (resp) {
+				setSelectedResponsibility(resp);
+			}
+		}
+	}, [responsibilityData, iframePreviewLink]);
+
+	useEffect(() => {
+		if (Object.keys(responsibilityData).length) {
+			let initialCollapseKeys = {};
+			Object.keys(responsibilityData).forEach(doc => {
+				initialCollapseKeys[doc] = false;
+				Object.keys(responsibilityData[doc]).forEach(entity => {
+					initialCollapseKeys[doc + entity] = false;
+				})
+			})
+			setCollapseKeys(initialCollapseKeys);
+		}
+	}, [responsibilityData]);
+
+	useEffect(() => {
+		setIsEditingEntity(false);
+		setIsEditingResp(false);
+		setDocumentLink('');
+	}, [selectedResponsibility])
+
+	function handleRightPanelToggle() {
+		trackEvent(
+			getTrackingNameForFactory(cloneData.clone_name),
+			'ResponsibilityExplorerInteraction',
+			'RightPanelToggle',
+			rightPanelOpen ? 'Close' : 'Open'
+		);
+		setRightPanelOpen(!rightPanelOpen);
+	}
+
+	function handleLeftPanelToggle() {
+		trackEvent(
+			getTrackingNameForFactory(cloneData.clone_name),
+			'ResponsibilityExplorerInteraction',
+			'LeftPanelToggle',
+			leftPanelOpen ? 'Close' : 'Open'
+		);
+		setLeftPanelOpen(!leftPanelOpen);
+	}
+
+	// This toggles whether the Document Header texts are open or not by setting collapseKeys
+	function handleViewToggle() {
+		if (collapseKeys) {
+			let collapse = Object.assign({}, collapseKeys);
+			for (let key in collapse) {
+				collapse[key] = !viewTogle;
+			}
+			setCollapseKeys(collapse);
+		}
+		setViewTogle(!viewTogle);
+	}
+
+	function handleQuoteLinkClick(e, respKey, entKey, key) {
+		// if (Object.keys(selectedResponsibility).length) {
+		// 	const fileName = selectedResponsibility.filename;
+		// 	trackEvent(
+		// 		getTrackingNameForFactory(cloneData.clone_name),
+		// 		'ResponsibilityExplorerInteraction',
+		// 		'PDFOpen'
+		// 	);
+		// 	trackEvent(
+		// 		getTrackingNameForFactory(cloneData.clone_name),
+		// 		'ResponsibilityExplorerInteraction',
+		// 		'filename',
+		// 		fileName
+		// 	);
+		// 	setPdfLoaded(false);
+		// }
+		e.preventDefault();
+		setIframePreviewLink({
+			responsibilityIdx: respKey,
+			entityIdx: entKey,
+			dataIdx: key,
+		});
+	}
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -174,114 +259,6 @@ export default function ResponsibilityDocumentExplorer({
 			responsibilityData,
 		]
 	);
-
-	// useEffect(() => {
-	// 	const getFileName = async () => {
-	// 		const payload = {
-	// 			filename: selectedResponsibility.filename,
-	// 			text: selectedResponsibility.responsibilityText
-	// 		}
-	// 		const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
-	// 		setDocumentLink(data.fileLink);
-	// 	}
-	// 	getFileName();
-	// }, [selectedResponsibility])
-
-	useEffect(() => {
-		if(Object.keys(responsibilityData).length){
-			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
-			const doc = Object.keys(responsibilityData)[dataIdx];
-			const entity = Object.keys(responsibilityData[doc])[entityIdx];
-			const resp = responsibilityData[doc][entity][responsibilityIdx];
-			if (resp) {
-				setSelectedResponsibility(resp);
-			}
-		}
-	}, [responsibilityData, iframePreviewLink]);
-
-	useEffect(() => {
-		if (Object.keys(responsibilityData).length) {
-			let initialCollapseKeys = {};
-			Object.keys(responsibilityData).forEach(doc => {
-				initialCollapseKeys[doc] = false;
-				Object.keys(responsibilityData[doc]).forEach(entity => {
-					initialCollapseKeys[doc + entity] = false;
-				})
-			})
-			setCollapseKeys(initialCollapseKeys);
-		}
-	}, [responsibilityData]);
-
-	useEffect(() => {
-		setIsEditingEntity(false);
-		setIsEditingResp(false);
-		setDocumentLink('');
-	}, [selectedResponsibility])
-
-	function handleRightPanelToggle() {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'DocumentExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
-		);
-		setRightPanelOpen(!rightPanelOpen);
-	}
-
-	function handleLeftPanelToggle() {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'DocumentExplorerInteraction',
-			'LeftPanelToggle',
-			leftPanelOpen ? 'Close' : 'Open'
-		);
-		setLeftPanelOpen(!leftPanelOpen);
-	}
-
-	// This toggles whether the Document Header texts are open or not by setting collapseKeys
-	function handleViewToggle() {
-		if (collapseKeys) {
-			let collapse = Object.assign({}, collapseKeys);
-			for (let key in collapse) {
-				collapse[key] = !viewTogle;
-			}
-			setCollapseKeys(collapse);
-		}
-		setViewTogle(!viewTogle);
-	}
-
-	function handleQuoteLinkClick(e, respKey, entKey, key) {
-		const rec = data[key];
-		if (rec) {
-			const fileName = rec.id;
-			const pageObj = rec.pageHits[entKey];
-			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'PDFOpen'
-			);
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'filename',
-				fileName
-			);
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'pageNumber',
-				pageNumber
-			);
-			setPdfLoaded(false);
-		}
-		e.preventDefault();
-		setIframePreviewLink({
-			responsibilityIdx: respKey,
-			entityIdx: entKey,
-			dataIdx: key,
-		});
-	}
 
 	function handlePdfOnLoadStart() {
 		if (!iframeLoading && !pdfLoaded) {
@@ -485,10 +462,6 @@ export default function ResponsibilityDocumentExplorer({
 		})
 	}
 
-	const previewPathname =
-		data.length > 0 &&
-		data[iframePreviewLink.dataIdx] &&
-		data[iframePreviewLink.dataIdx].filepath;
 	const iframePanelSize =
 		12 -
 		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
@@ -543,7 +516,7 @@ export default function ResponsibilityDocumentExplorer({
 							onChange={(page) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),
-									'DocumentExplorerInteraction',
+									'ResponsibilityExplorerInteraction',
 									'Pagination',
 									page
 								);
@@ -730,12 +703,6 @@ export default function ResponsibilityDocumentExplorer({
 									<span className="gc-document-explorer-result-header-text">
 										{displayTitle}
 									</span>
-									{/* <span
-										style={{ width: 30, marginLeft: 'auto' }}
-										className="badge"
-									>
-										{item.pageHitCount}
-									</span> */}
 								</div>
 								<Collapse isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
@@ -760,12 +727,6 @@ export default function ResponsibilityDocumentExplorer({
 												<span className="gc-document-explorer-result-header-text">
 													{entity}
 												</span>
-												{/* <span
-											style={{ width: 30, marginLeft: 'auto' }}
-												className="badge"
-											>
-												{item.pageHitCount}
-											</span> */}
 											</div>
 											<Collapse isOpened={entOpen && docOpen}>
 												<div>
@@ -868,11 +829,6 @@ export default function ResponsibilityDocumentExplorer({
 							}}
 						/>
 					</div>
-					{!iframeLoading && previewPathname && (
-						<div className="preview-pathname" style={styles.iframeHeader}>
-							{previewPathname}
-						</div>
-					)}
 					<div
 						style={{
 							paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0),
@@ -894,20 +850,10 @@ export default function ResponsibilityDocumentExplorer({
 											style={{
 												borderStyle: 'none',
 												display:
-                                                data.length > 0 && !iframeLoading ? 'initial' : 'none',
+                                                Object.keys(responsibilityData).length > 0 && !iframeLoading ? 'initial' : 'none',
 											}}
 											width="100%"
 											height="100%%"
-										></iframe>
-									)}
-
-									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('html') && (
-										<iframe
-											title={'PDFViewer'}
-											className="aref"
-											id={'pdfViewer'}
-											src={fileUrl}
-											style={{ width: '100%', height: '100%' }}
 										></iframe>
 									)}
 								</>

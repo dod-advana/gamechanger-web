@@ -62,7 +62,6 @@ export default function GCResponsibilityExplorer({
 	const [responsibilityData, setResponsibilityData] = useState([]);
 	const [docResponsibilityData, setDocResponsibilityData] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [sorts, setSorts] = useState([]);
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
 	const [resultsPage, setResultsPage] = useState(1);
@@ -74,10 +73,10 @@ export default function GCResponsibilityExplorer({
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
-			handleFetchData({ page: resultsPage, sorted: sorts, filtered: filters });
+			handleFetchData({ page: resultsPage, sorted: [], filtered: filters });
 			setReloadResponsibilities(false);
 		}
-	 }, [reloadResponsibilities, resultsPage, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	 }, [reloadResponsibilities, resultsPage, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	 useEffect(() => {
 		const fetchDocTitles = async() => {
@@ -107,9 +106,6 @@ export default function GCResponsibilityExplorer({
 				sorted,
 				filtered: tmpFiltered,
 			});
-			// results.forEach((result) => {
-			// 	result.selected = selectedIds.includes(result.id);
-			// });
 			setResponsibilityData(results);
 		} catch (e) {
 			setResponsibilityData([]);
