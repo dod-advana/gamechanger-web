@@ -333,8 +333,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10 } = req.body;
-			let { limit } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page } = req.body;
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
@@ -366,6 +365,7 @@ class ResponsibilityController {
 			});
 			tmpWhere['status'] = {[Op.not]: 'rejected'};
 			const newOffsets = [];
+			let newLimit = 0;
 			if(docView){
 				const docOffsets = await this.responsibilities.findAndCountAll({
 					where: tmpWhere,
@@ -377,15 +377,13 @@ class ResponsibilityController {
 					]
 				});
 				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.documentCount)))
-				if(!limit){
-					for(let i = 1; i <= DOCS_PER_PAGE; i++){
-						if(!newOffsets[i]) break;
-						limit += newOffsets[i];
-					}
-				};
+				for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
+					if(!newOffsets[i]) break;
+					newLimit += newOffsets[i];
+				}
 			}
 			const results = await this.responsibilities.findAndCountAll({
-				limit,
+				limit: newLimit,
 				offset,
 				order: order,
 				where: tmpWhere,
@@ -673,7 +671,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10 } = req.body;
+			const { offset = 0, order = [], where = [], DOCS_PER_PAGE = 10 } = req.body;
 			let { limit } = req.body;
 			order.push(['filename', 'ASC']);
 			const tmpWhere = {};
