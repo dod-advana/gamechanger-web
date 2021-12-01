@@ -61,6 +61,7 @@ const getIframePreviewLinkInferred = (
 	cloneData = {}
 ) => {
 	let highlightText = responsibilityText;
+	highlightText = highlightText.replace(/&/g, '%26');
 	//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
 	if(highlightText){
 		const textArray = highlightText.split(' ');
