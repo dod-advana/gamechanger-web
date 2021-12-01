@@ -64,7 +64,7 @@ const getIframePreviewLinkInferred = (
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				responsibilityText,
+				`"${responsibilityText}"`,
 				pageNumber,
 				isClone,
 				cloneData
@@ -847,10 +847,9 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{/* {false ? */}
 							{!isEditingResp || isEditingEntity ?
 								<>
-									{/* {selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
+									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
 											title={'PDFViewer'}
 											className="aref"
@@ -865,7 +864,7 @@ export default function ResponsibilityDocumentExplorer({
 											width="100%"
 											height="100%%"
 										></iframe>
-									)} */}
+									)}
 								</>
 								:
 								<PDFHighlighter 
