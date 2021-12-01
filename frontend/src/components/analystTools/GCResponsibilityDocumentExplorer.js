@@ -82,6 +82,7 @@ export default function ResponsibilityDocumentExplorer({
 	loading,
 	totalCount,
 	resultsPage,
+	setResultsPage,
 	docsPerPage,
 	onPaginationClick,
 	isClone = true,
@@ -673,6 +674,7 @@ export default function ResponsibilityDocumentExplorer({
 										})
 									};
 									setFilters(filters);
+									setResultsPage(1);
 									setReloadResponsibilities(true);
 								}}
 								style={{display: 'block', width: '100%', margin: 0 }}

@@ -91,19 +91,14 @@ export default function GCResponsibilityExplorer({
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
 			let offset = 0;
-			let limit = 0;
 			for(let i = 0; i < page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
 				if(!offsets[i]) break;
 				offset += offsets[i];
 			}
-			for(let i =(page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
-				if(!offsets[i]) break;
-				limit += offsets[i];
-			}
 			const { results = [] } = await getData({
-				limit,
 				offset,
 				sorted,
+				page,
 				filtered: tmpFiltered,
 			});
 			setResponsibilityData(results);
@@ -133,7 +128,6 @@ export default function GCResponsibilityExplorer({
 	}, [responsibilityData])
 
 	const getData = async ({
-		limit,
 		offset = 0,
 		sorted = [],
 		filtered = [],
@@ -144,7 +138,7 @@ export default function GCResponsibilityExplorer({
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
 				docView: true,
-				limit,
+				page: resultsPage,
 				offset,
 				order,
 				where,
@@ -210,6 +204,7 @@ export default function GCResponsibilityExplorer({
 					docsPerPage={DOCS_PER_PAGE}
 					totalCount={offsets.length}
 					resultsPage={resultsPage}
+					setResultsPage={setResultsPage}
 					onPaginationClick={(page) => {
 						setResultsPage(page);
 						setReloadResponsibilities(true);
