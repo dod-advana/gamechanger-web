@@ -171,10 +171,10 @@ class DataTrackerController {
 					return crawlerData
 				})
 				let resp = []
-				Object.keys(level_value).map(data =>{
+				Object.keys(level_value).slice(offset, offset + limit).map(data =>{
 					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
 				})
-				res.status(200).send({totalCount: resp.length, docs: resp});
+				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
 			}else if (option === 'last'){
 				let level_value;
 				let crawlerData = {};
@@ -196,10 +196,10 @@ class DataTrackerController {
 					return crawlerData
 				})
 				let resp = []
-				Object.keys(level_value).map(data =>{
+				Object.keys(level_value).slice(offset, offset + limit).map(data =>{
 					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
 				})
-				res.status(200).send({totalCount: resp.length, docs: resp});
+				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UXV7V8R', userId);

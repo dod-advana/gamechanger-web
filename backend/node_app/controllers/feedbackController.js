@@ -94,7 +94,7 @@ class FeedbackController {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try{
 			const {name, email, feedback, rating} = req.body;
-
+			console.log('(JIRA FEEDBACK) req.body: ', req.body);
 			const authConfig = {
 				httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 				auth: {
@@ -104,6 +104,7 @@ class FeedbackController {
 			};
 
 			const url = `https://${JIRA_CONFIG.domain}/rest/api/2/issue/`;
+			console.log('(JIRA FEEDBACK) url: ', url);
 
 			const data = {
 				'fields': {
@@ -120,11 +121,14 @@ class FeedbackController {
 					}
 				}
 			};
+			console.log('(JIRA FEEDBACK) data: ', data);
 			
 			const result = await axios.post(url, data, authConfig);
+			console.log('(JIRA FEEDBACK) result.data: ', result.data);
 	
 			res.status(201).send(result.data);
 		} catch(err) {
+			console.log('(JIRA FEEDBACK) error response ', err.response);
 			this.logger.error(err, '0KYXA1V', userId);
 			res.status(500).send({error: true});
 		}
