@@ -56,17 +56,15 @@ const useStyles = makeStyles({
 const getIframePreviewLinkInferred = (
 	filename,
 	responsibilityText,
-	organization,
 	pageNumber,
 	isClone = false,
 	cloneData = {}
 ) => {
-	const highlightText = `"${responsibilityText}""${organization}"`
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				highlightText,
+				responsibilityText,
 				pageNumber,
 				isClone,
 				cloneData
@@ -142,7 +140,9 @@ export default function ResponsibilityDocumentExplorer({
 		if(Object.keys(responsibilityData).length){
 			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
 			const doc = Object.keys(responsibilityData)[dataIdx];
+			if(!doc) return;
 			const entity = Object.keys(responsibilityData[doc])[entityIdx];
+			if(!entity) return;
 			const resp = responsibilityData[doc][entity][responsibilityIdx];
 			if (resp) {
 				setSelectedResponsibility(resp);
@@ -161,6 +161,11 @@ export default function ResponsibilityDocumentExplorer({
 			})
 			setCollapseKeys(initialCollapseKeys);
 		}
+		setIframePreviewLink({
+			dataIdx: 0,
+			entityIdx: 0,
+			responsibilityIdx: 0
+		})
 	}, [responsibilityData]);
 
 	useEffect(() => {
@@ -240,7 +245,6 @@ export default function ResponsibilityDocumentExplorer({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
-							selectedResponsibility.organizationPersonnel,
 							pageNumber,
 							isClone,
 							cloneData
@@ -323,6 +327,7 @@ export default function ResponsibilityDocumentExplorer({
 	const getMetadataForTable = () => {
 		if(!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
+		if(!doc) return [];
 		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
 		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
@@ -843,7 +848,7 @@ export default function ResponsibilityDocumentExplorer({
 							{/* {false ? */}
 							{!isEditingResp || isEditingEntity ?
 								<>
-									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
+									{/* {selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
 											title={'PDFViewer'}
 											className="aref"
@@ -858,7 +863,7 @@ export default function ResponsibilityDocumentExplorer({
 											width="100%"
 											height="100%%"
 										></iframe>
-									)}
+									)} */}
 								</>
 								:
 								<PDFHighlighter 
