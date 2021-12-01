@@ -847,26 +847,23 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{!isEditingResp && !isEditingEntity ?
-								<>
-									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
-										<iframe
-											title={'PDFViewer'}
-											className="aref"
-											id={'PdfViewer'}
-											ref={measuredRef}
-											onLoad={handlePdfOnLoadStart}
-											style={{
-												borderStyle: 'none',
-												display:
-                                                Object.keys(responsibilityData).length > 0 && !iframeLoading ? 'initial' : 'none',
-											}}
-											width="100%"
-											height="100%%"
-										></iframe>
-									)}
-								</>
-								:
+							{selectedResponsibility.filename && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'PdfViewer'}
+									ref={measuredRef}
+									onLoad={handlePdfOnLoadStart}
+									style={{
+										borderStyle: 'none',
+										display:
+											!isEditingResp && !isEditingEntity && Object.keys(responsibilityData).length > 0 && !iframeLoading ? 'initial' : 'none',
+									}}
+									width="100%"
+									height="100%%"
+								></iframe>
+							)}
+							{(isEditingResp || isEditingEntity) &&
 								<PDFHighlighter 
 									handleSave={updateResponsibility}
 									highlights={highlights}
