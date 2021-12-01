@@ -226,8 +226,6 @@ app.post('/api/auth/token', async function (req, res) {
 
 		sessUser.perms = sessUser.perms.concat(perms);
 
-		console.log(sessUser)
-
 		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
 
 		const jwtClaims = { ...sessUser, perms };
