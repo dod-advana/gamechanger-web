@@ -60,11 +60,18 @@ const getIframePreviewLinkInferred = (
 	isClone = false,
 	cloneData = {}
 ) => {
+	let highlightText = responsibilityText;
+	//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
+	if(highlightText){
+		const textArray = highlightText.split(' ');
+		if(textArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) textArray[0] += ' ';
+		highlightText = textArray.join(' ');
+	}
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				`"${responsibilityText}"`,
+				`"${highlightText}"`,
 				pageNumber,
 				isClone,
 				cloneData
