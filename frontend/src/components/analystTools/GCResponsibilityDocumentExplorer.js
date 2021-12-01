@@ -288,10 +288,10 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	}
 
-	const getResponsibilityPageInfo = async () => {
+	const getResponsibilityPageInfo = async (text) => {
 		const payload = {
 			filename: selectedResponsibility.filename,
-			text: selectedResponsibility.responsibilityText
+			text
 		}
 		const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
 		if(data){
@@ -370,7 +370,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingResp && key === 'responsibilityText' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo();
+								getResponsibilityPageInfo(responsibility.responsibilityText);
 								setIsEditingResp(true);
 							}}
 							style={{
@@ -387,7 +387,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingEntity && key === 'organizationPersonnel' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo();
+								getResponsibilityPageInfo(responsibility.organizationPersonnel || responsibility.responsibilityText);
 								setIsEditingEntity(true);
 							}}
 							style={{
@@ -847,9 +847,9 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{!isEditingResp || isEditingEntity ?
+							{!isEditingResp && !isEditingEntity ?
 								<>
-									{selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
+									{/* {selectedResponsibility.filename && selectedResponsibility.filename.endsWith('pdf') && (
 										<iframe
 											title={'PDFViewer'}
 											className="aref"
@@ -864,7 +864,7 @@ export default function ResponsibilityDocumentExplorer({
 											width="100%"
 											height="100%%"
 										></iframe>
-									)}
+									)} */}
 								</>
 								:
 								<PDFHighlighter 
