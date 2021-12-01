@@ -8981,8 +8981,6 @@
 									var subqueryLen = subquery.length;
 									var matchIdx = -subqueryLen;
 
-									subquery = subquery.replace(/\=/ig, ' ');
-
 									while (true) {
 										matchIdx = pageContent.indexOf(
 											subquery,

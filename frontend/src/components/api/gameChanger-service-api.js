@@ -293,8 +293,7 @@ export default class GameChangerAPI {
 	splitSearchText = (str) => {
 		//Case 1: exact phrase match. We only match the FIRST phrase due to pdfjs highlighting limitations
 		const phraseMatches = this.getAllMatchesBetweenDoubleQuotes(str);
-		if (phraseMatches.length > 0) console.log('TEST: ' ,phraseMatches.join('%3D') + '&phrase=true');
-		if (phraseMatches.length > 0) return phraseMatches.join('%3D') + '&phrase=true';
+		if (phraseMatches.length > 0) return phraseMatches[0] + '&phrase=true';
 		//Case 2: no phrases, but boolean operators that need separated
 		const upperStr = str.toUpperCase();
 		const splits = upperStr.split(/ AND | OR /);
