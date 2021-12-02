@@ -19,6 +19,10 @@ const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
 const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const Op = Sequelize.Op;
+const ApiKeyRequests = require('../models').api_key_request;
+const ApiKey = require('../models').api_key;
+const FEEDBACK = require('../models').feedback;
+const GC_ASSISTS = require('../models').gc_assists;
 
 class UserController {
 
@@ -47,6 +51,10 @@ class UserController {
 				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
 			}),
 			dataApi = new DataLibrary(opts),
+			apiKeyRequests = ApiKeyRequests,
+			apiKey = ApiKey,
+			feedback = FEEDBACK,
+			gcAssists = GC_ASSISTS
 		} = opts;
 
 		this.logger = logger;
@@ -68,9 +76,13 @@ class UserController {
 		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
+		this.apiKeyRequests = apiKeyRequests;
+		this.apiKey = apiKey;
+		this.feedback = feedback;
+		this.gcAssists = gcAssists;
 
 		this.deleteInternalUser = this.deleteInternalUser.bind(this);
-		this.addInternalUser = this.addInternalUser.bind(this);
+		this.syncUserTable = this.syncUserTable.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
@@ -99,6 +111,7 @@ class UserController {
 				'email',
 				'organization',
 				'is_beta',
+				'is_internal',
 				'is_admin'
 			], raw: true }).then(results => {
 				res.status(200).send({ users: results, timeStamp: new Date().toISOString() });
@@ -362,7 +375,7 @@ class UserController {
 		try {
 			let foundItem;
 
-			const user_id = getUserIdFromSAMLUserId(userData.id);
+			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id) : userId;
 
 			if (fromApp) {
 				foundItem = await this.gcUser.findOne({ where: {id: userData.id}, raw: true});
@@ -379,13 +392,26 @@ class UserController {
 						first_name: userData.firstName,
 						last_name: userData.lastName,
 						is_beta: false,
-						is_admin: false
+						is_admin: false,
+						is_internal: false
 					});
 				}
 				return true;
 			} else {
 				if (fromApp) {
 					await this.gcUser.update(userData, {where: {id: userData.id}});
+				} else {
+					const tempUser = {
+						first_name: foundItem.first_name,
+						last_name: foundItem.last_name,
+						cn: foundItem.cn
+					}
+
+					if ((!tempUser.first_name || tempUser.first_name === null || tempUser.first_name === '') && userData.firstName) tempUser.first_name = userData.firstName;
+					if ((!tempUser.last_name || tempUser.last_name === null || tempUser.last_name === '') && userData.lastName) tempUser.last_name = userData.lastName;
+					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn) tempUser.cn = userData.cn;
+
+					await this.gcUser.update(tempUser, {where: {user_id: user_id}});
 				}
 			}
 
@@ -393,6 +419,265 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, '2XY95Z7', userId);
 			return false;
+		}
+	}
+
+	async deleteUserData(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { userRowId } = req.body;
+			const user = await this.gcUser.findOne({ where: { id: userRowId } });
+			await user.destroy();
+
+			res.status(200).send({ deleted: true });
+		} catch (err) {
+			this.logger.error(err, 'K4822BB', userId);
+			res.status(500).send(`Error delete user: ${err.message}`);
+		}
+	}
+
+	async syncUserTable(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+
+			// First pull all the users that have a CN as that means they are using new system
+			const newUsers = await this.gcUser.findAll({
+				where: {
+					cn: {
+						[Op.not]: null
+					}
+				},
+				raw: true
+			});
+
+			// Loop through new users
+			for (const user of newUsers) {
+				const decoupledUserIdHashed = this.sparkMD5.hash(user.cn);
+				const coupledUserIDWithAtMilHashed = this.sparkMD5.hash(`${user.user_id}@mil`);
+				const coupledUserIDHashed = this.sparkMD5.hash(user.user_id);
+
+				const hashedIds = [decoupledUserIdHashed, coupledUserIDWithAtMilHashed, coupledUserIDHashed];
+
+				// Pull any users that match these ids
+				const oldUsers = await this.gcUser.findAll({
+					where: {
+						user_id: {
+							[Op.in]: hashedIds
+						}
+					},
+					raw: true
+				});
+
+				// Combine basic user data and delete the old user
+				for (const oldUser of oldUsers) {
+					if (oldUser.is_beta !== null) user.is_beta = oldUser.is_beta;
+					if (oldUser.notifications !== null) user.notifications = oldUser.notifications;
+					if (oldUser.api_requests !== null) user.api_requests = oldUser.api_requests;
+					if (oldUser.user_info !== null) user.user_info = oldUser.user_info;
+					if (oldUser.submitted_info !== null) user.submitted_info = oldUser.submitted_info;
+					
+					const nonHashedIds = [user.cn, `${user.user_id}@mil`];
+					const allIds = hashedIds.concat(nonHashedIds);
+					
+					// API Key Requests
+					let foundRecords = await this.apiKeyRequests.findAll({
+						where: {
+							username: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const apiKeyRequest of foundRecords) {
+						apiKeyRequest.username = user.user_id;
+						await this.apiKeyRequests.update(apiKeyRequest, {where: {id: apiKeyRequest.id}});
+					}
+
+					// API Keys
+					foundRecords = await this.apiKey.findAll({
+						where: {
+							username: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const apiKey of foundRecords) {
+						apiKey.username = user.user_id;
+						await this.apiKey.update(apiKey, {where: {id: apiKey.id}});
+					}
+
+					// Export History
+					foundRecords = await this.exportHistory.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const history of foundRecords) {
+						history.user_id = user.user_id;
+						await this.exportHistory.update(history, {where: {id: history.id}});
+					}
+
+					// Favorite Documents
+					foundRecords = await this.favoriteDocument.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteDocument.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Documents Group
+					foundRecords = await this.favoriteDocumentsGroup.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteDocumentsGroup.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Groups
+					foundRecords = await this.favoriteGroup.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteGroup.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Organizations
+					foundRecords = await this.favoriteOrganization.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteOrganization.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Searches
+					foundRecords = await this.favoriteSearch.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteSearch.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Topics
+					foundRecords = await this.favoriteTopic.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteTopic.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Feedback
+					foundRecords = await this.feedback.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const feedback of foundRecords) {
+						feedback.user_id = user.user_id;
+						await this.feedback.update(feedback, {where: {id: feedback.id}});
+					}
+
+					// GC Assists
+					foundRecords = await this.gcAssists.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const assist of foundRecords) {
+						assist.user_id = user.user_id;
+						await this.gcAssists.update(assist, {where: {id: assist.id}});
+					}
+
+					// GC History
+					foundRecords = await this.gcHistory.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const history of foundRecords) {
+						history.user_id = user.user_id;
+						await this.gcHistory.update(history, {where: {id: history.id}});
+					}
+
+					// Delete Old User
+					this.gcUser.destroy({
+						where: {
+							id: oldUser.id
+						}
+					});
+				}
+
+				// Update newUser
+				await this.gcUser.update(user, {where: {id: user.id}});
+			}
+
+			res.status(200).send({ syncd: true });
+		} catch (err) {
+			this.logger.error(err, 'K4822BB', userId);
+			res.status(500).send(`Error delete user: ${err.message}`);
 		}
 	}
 
@@ -456,33 +741,6 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, '8QJXVTA', userId);
 			res.status(500).send(`Error getting internal users list: ${err.message}`);
-		}
-	}
-
-	async addInternalUser(req, res) {
-		let userId = 'webapp_unknown';
-
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { trackByRequest = false } = req.body;
-			let username;
-			if (trackByRequest){
-				username = userId;
-			} else {
-				username = req.body.username || '';
-			}
-			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.findOne({ where: { username } });
-			if (exists) {
-				const { id, username } = exists;
-				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
-			} else {
-				const created = await this.internalUserTracking.create({ username });
-				res.status(200).send(created);
-			}
-		} catch (err) {
-			this.logger.error(err, 'VEUUDWQ', userId);
-			res.status(500).send(`Error adding internal user: ${err.message}`);
 		}
 	}
 

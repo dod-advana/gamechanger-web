@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				unique: true,
 			},
+			cn: {
+				type: DataTypes.TEXT,
+				unique: false,
+			},
 			first_name: {
 				type: DataTypes.TEXT
 			},
@@ -24,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT
 			},
 			is_beta: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false
+			},
+			is_internal: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false
 			},

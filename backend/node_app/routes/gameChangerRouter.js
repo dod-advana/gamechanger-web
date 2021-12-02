@@ -132,11 +132,15 @@ router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklis
 router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
+router.get('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/admin/syncUserTable', user.syncUserTable);
+router.post('/admin/createUpdateUser', user.updateOrCreateUser);
+router.post('/admin/deleteUserData', user.deleteUserData);
+
 router.get('/user/getUserData', user.getUserData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
-router.post('/admin/addInternalUser', user.addInternalUser);
 router.post('/admin/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
 router.post('/sendClassificationAlert', user.sendClassificationAlert);

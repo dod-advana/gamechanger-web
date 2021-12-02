@@ -12,7 +12,7 @@ import AuthIcon from '../../images/icon/Authority.png';
 import AnalystToolsIcon from '../../images/icon/analyticswht.png';
 import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
 import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
-import { HoverNavItem } from '../../components/navigation/NavItems';
+import { HoverNavItem } from '../navigation/NavItems';
 import { toolTheme } from './util/GCAdminStyles';
 /**
  * This file containes two components ClosedAdminMenu and OpenedAdminMenu
@@ -86,10 +86,10 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
+				<Tooltip title="Manage Users" placement="right" arrow>
 					<HoverNavItem
 						centered
-						onClick={() => setPageToView(PAGES.internalUsers)}
+						onClick={() => setPageToView(PAGES.userList)}
 						toolTheme={toolTheme}
 					>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
@@ -225,9 +225,9 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
+				<Tooltip title="Manage Users" placement="right" arrow>
 					<HoverNavItem
-						onClick={() => setPageToView(PAGES.internalUsers)}
+						onClick={() => setPageToView(PAGES.userList)}
 						toolTheme={toolTheme}
 					>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />

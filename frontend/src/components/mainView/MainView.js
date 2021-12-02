@@ -23,6 +23,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import UserProfilePage from '../user/UserProfilePage';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -152,51 +153,53 @@ const MainView = (props) => {
 
 	const getUserDashboard = () => {
 		return (
-			<GCUserDashboard 
-				state={state} 
-				userData={state.userData} 
-				updateUserData={() => getUserData(dispatch)}
-				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
-				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
-				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
-				saveFavoriteSearch={(
-					favoriteName,
-					favoriteSummary,
-					favorite,
-					tinyUrl,
-					searchText,
-					count
-				) =>
-					handleSaveFavoriteSearchHistory(
+			<UserProfilePage>
+				<GCUserDashboard
+					state={state}
+					userData={state.userData}
+					updateUserData={() => getUserData(dispatch)}
+					handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
+					handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
+					handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
+					saveFavoriteSearch={(
 						favoriteName,
 						favoriteSummary,
 						favorite,
 						tinyUrl,
 						searchText,
 						count
-					)
-				}
-				handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
-					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
-				}
-				handleFavoriteOrganization={({
-					organization_name,
-					organization_summary,
-					favorite,
-				}) =>
-					handleSaveFavoriteOrganization(
+					) =>
+						handleSaveFavoriteSearchHistory(
+							favoriteName,
+							favoriteSummary,
+							favorite,
+							tinyUrl,
+							searchText,
+							count
+						)
+					}
+					handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
+						handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
+					}
+					handleFavoriteOrganization={({
 						organization_name,
 						organization_summary,
 						favorite,
-						dispatch
-					)
-				}
-				cloneData={state.cloneData}
-				checkUserInfo={() => {
-					return checkUserInfo(state, dispatch);
-				}}
-				dispatch={dispatch}
-			/>
+					}) =>
+						handleSaveFavoriteOrganization(
+							organization_name,
+							organization_summary,
+							favorite,
+							dispatch
+						)
+					}
+					cloneData={state.cloneData}
+					checkUserInfo={() => {
+						return checkUserInfo(state, dispatch);
+					}}
+					dispatch={dispatch}
+				/>
+			</UserProfilePage>
 		);
 	};
 

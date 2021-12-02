@@ -312,6 +312,15 @@ export default () => {
 			console.error('Error getting topic search mode', e);
 		}
 	};
+
+	const syncOldUserTableToNew = async () => {
+		try {
+			await gameChangerAPI.syncUserTable();
+		} catch (e) {
+			console.error('Error syncing user table', e);
+		}
+	}
+
 	useEffect(() => {
 		getCombinedSearch();
 		getIntelligentAnswers();
@@ -618,6 +627,22 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Toggle Jira User Feedback
+									</span>
+								</h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper style={styles.paper} zDepth={2}>
+							<Link
+								to="#"
+								onClick={syncOldUserTableToNew}
+								style={{ textDecoration: 'none' }}
+							>
+								<i style={styles.image} className="fa fa-id-badge fa-2x" />
+								<h2 style={styles.featureName}>
+									<span style={styles.featureNameLink}>
+										Sync User Table
 									</span>
 								</h2>
 							</Link>

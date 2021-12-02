@@ -6,6 +6,7 @@ const { DataLibrary} = require('../../lib/dataLibrary');
 const BudgetSearchSearchUtility = require('./budgetSearchSearchUtility');
 
 const SearchHandler = require('../base/searchHandler');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 class BudgetSearchSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -26,7 +27,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req.session.user.id),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -62,7 +63,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
 			// log query to ES
 			if (storeHistory) {
-				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, historyRec.user_id, searchText);
 			}
 
 			let searchResults;
@@ -99,7 +100,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			if (offset === 0){
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
 					clone_name: clone_log
@@ -120,7 +121,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 				selectedDocuments,
 				expansionDict = {},
 			} = body;
-			body.searchText += " OR AI-Enabled OR AI-Enabling OR Core-AI";
+			body.searchText += ' OR AI-Enabled OR AI-Enabling OR Core-AI';
 
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
@@ -177,17 +178,17 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		const {functionName} = req.body;
 
 		try {
-            switch (functionName) {
+			switch (functionName) {
 				case 'getMainPageData': 
 					return await this.getMainPageData(req, userId);
-                default:
-                    this.logger.error(
-                        `There is no function called ${functionName} defined in the budgetSearchSearchHandler`,
-                        '71739D8',
-                        userId
-                    );
-                    return {};
-            }
+				default:
+					this.logger.error(
+						`There is no function called ${functionName} defined in the budgetSearchSearchHandler`,
+						'71739D8',
+						userId
+					);
+					return {};
+			}
 		} catch (err) {
 			console.log(e);
 			const { message } = e;
