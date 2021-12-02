@@ -184,7 +184,6 @@ export default function GCResponsibilityExplorer({
 			{reView === 'Chart' && 
 			<GCResponsibilityTracker 
 				state={state} 
-				dispatch={dispatch}
 				filters={filters}
 				setFilters={setFilters}
 				docTitle={docTitle}

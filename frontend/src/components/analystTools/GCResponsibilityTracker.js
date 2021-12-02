@@ -144,7 +144,6 @@ const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = ({
 	state, 
-	dispatch,
 	filters,
 	setFilters,
 	docTitle,
@@ -470,7 +469,10 @@ const GCResponsibilityTracker = ({
 					setSorts(newSorts);
 					setReloadResponsibilityTable(true);
 				}}
-				onPageChange={(pageIndex) => setPageIndex(pageIndex)}
+				onPageChange={(pageIndex) => {
+					setPageIndex(pageIndex);
+					setReloadResponsibilityTable(true);
+				}}
 				defaultSorted={[
 					{
 						id: 'id',
@@ -480,7 +482,6 @@ const GCResponsibilityTracker = ({
 				loading={loading}
 				manual={true}
 				pages={numPages}
-				onFetchData={handleFetchData}
 				getTheadTrProps={() => {
 					return {
 						style: {
