@@ -88,8 +88,9 @@ export default function ResponsibilityUpdates() {
 		if(selectedResponsibility?.responsibility_reports){
 			const newHighlights = [];
 			selectedResponsibility.responsibility_reports.forEach(report => {
-				newHighlights.push({position: report.textPosition, id: report.id})
+				if(report.textPosition) newHighlights.push({position: report.textPosition, id: report.id})
 			})
+			console.log('line 93: ', newHighlights)
 			setHighlights(newHighlights);
 			setSelectedUpdate(selectedResponsibility.responsibility_reports[0])
 		}
@@ -110,6 +111,7 @@ export default function ResponsibilityUpdates() {
 			selectedResponsibility.responsibility_reports.forEach(report => {
 				newHighlights.push({position: report.textPosition, id: report.id})
 			})
+			console.log('line 114: ', newHighlights)
 			setHighlights(newHighlights);
 		}
 		setScrollId(`${selectedUpdate.id}`);
