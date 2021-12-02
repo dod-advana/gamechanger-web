@@ -157,7 +157,7 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		function onKeyDown(e) {
-			if (e.key === 'Enter' && state.inputActive !== 'compareInput' && dropdownOpen) {
+			if (e.key === 'Enter' && state.inputActive !== 'compareInput' && cursor) {
 				setState(dispatch, {
 					searchText: searchText,
 					resultsPage: 1,
@@ -170,7 +170,7 @@ const ModularSearchBarHandler = (props) => {
 		}
 		window.addEventListener('keydown', onKeyDown);
 		return () => window.removeEventListener('keydown', onKeyDown);
-	}, [dispatch, searchText, state.inputActive, dropdownOpen]);
+	}, [dispatch, searchText, state.inputActive, cursor]);
 
 	useEffect(() => {
 		// if clicked outside of searchbar, close dropdown
@@ -293,7 +293,6 @@ const ModularSearchBarHandler = (props) => {
 	const handleOnBlur = (e) => {
 		setCursor(null);
 		setOriginalText(null);
-		setDropdownOpen(false);
 	};
 
 	const handleSubmit = (event) => {
