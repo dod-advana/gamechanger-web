@@ -321,6 +321,10 @@ export default function ResponsibilityUpdates() {
 				Key: 'Updated Text',
 				Value: <UpdateMetaText 
 					onClick={() => {
+						if(update.id === selectedUpdate.id) {
+							setRefreshDocument(documentLink);
+							return setDocumentLink('');
+						}
 						setSelectedUpdate(update);
 					}}
 				>
@@ -494,12 +498,6 @@ export default function ResponsibilityUpdates() {
 									<span className="gc-document-explorer-result-header-text">
 										{displayTitle}
 									</span>
-									{/* <span
-										style={{ width: 30, marginLeft: 'auto' }}
-										className="badge"
-									>
-										{item.pageHitCount}
-									</span> */}
 								</div>
 								<Collapse isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
@@ -524,12 +522,6 @@ export default function ResponsibilityUpdates() {
 												<span className="gc-document-explorer-result-header-text">
 													{entity}
 												</span>
-												{/* <span
-											style={{ width: 30, marginLeft: 'auto' }}
-												className="badge"
-											>
-												{item.pageHitCount}
-											</span> */}
 											</div>
 											<Collapse isOpened={entOpen && docOpen}>
 												<div>
