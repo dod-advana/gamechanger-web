@@ -115,11 +115,6 @@ export default function ResponsibilityDocumentExplorer({
 		entityIdx: 0,
 		responsibilityIdx: 0
 	});
-	const [prevIframPreviewLink, setPrevIframPreviewLink] = useState({
-		dataIdx: -1,
-		entityIdx: -1,
-		responsibilityIdx: -1
-	});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -183,6 +178,38 @@ export default function ResponsibilityDocumentExplorer({
 		setDocumentLink('');
 	}, [selectedResponsibility])
 
+	const measuredRef = useCallback(
+		(node) => {
+			if (node !== null) {
+				const rec = Object.keys(responsibilityData).length;
+				if (rec) {
+					const pageNumber = 1;
+					if (
+						selectedResponsibility.filename
+					) {
+						setIframeLoading(true);
+						getIframePreviewLinkInferred(
+							selectedResponsibility.filename,
+							selectedResponsibility.responsibilityText,
+							pageNumber,
+							isClone,
+							cloneData
+						).then((url) => {
+							node.src = url;
+							setIframeLoading(false);
+						});
+					}
+				}
+			}
+		},
+		[
+			selectedResponsibility,
+			isClone,
+			cloneData,
+			responsibilityData,
+		]
+	);
+
 	function handleRightPanelToggle() {
 		trackEvent(
 			getTrackingNameForFactory(cloneData.clone_name),
@@ -238,43 +265,6 @@ export default function ResponsibilityDocumentExplorer({
 			dataIdx: key,
 		});
 	}
-
-	const measuredRef = useCallback(
-		(node) => {
-			if (node !== null) {
-				const rec = Object.keys(responsibilityData).length;
-				if (rec) {
-					const pageNumber = 1;
-					if (
-						selectedResponsibility.filename &&
-						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
-					) {
-						setIframeLoading(true);
-						getIframePreviewLinkInferred(
-							selectedResponsibility.filename,
-							selectedResponsibility.responsibilityText,
-							pageNumber,
-							isClone,
-							cloneData
-						).then((url) => {
-							node.src = url;
-							setIframeLoading(false);
-							setPrevIframPreviewLink(iframePreviewLink);
-						});
-					}
-				}
-			}
-		},
-		[
-			iframePreviewLink,
-			selectedResponsibility,
-			prevIframPreviewLink,
-			isClone,
-			cloneData,
-			responsibilityData,
-		]
-	);
 
 	function handlePdfOnLoadStart() {
 		if (!iframeLoading && !pdfLoaded) {
