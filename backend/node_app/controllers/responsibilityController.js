@@ -333,7 +333,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.body;
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({id, value}) => {
@@ -355,6 +355,11 @@ class ResponsibilityController {
 								[Op.like]: { [Op.any]: value }
 							};
 						}
+					} else if (docView && id === 'documentTitle'){
+						if(!tmpWhere[Op.or]) tmpWhere[Op.or] = [];
+						tmpWhere[Op.or].push({
+							[id]: value
+						});
 					} else {
 						if(!tmpWhere[id]) tmpWhere[id] = {[Op.or]: []};
 						tmpWhere[id][Op.or].push({
@@ -383,7 +388,7 @@ class ResponsibilityController {
 				}
 			}
 			const results = await this.responsibilities.findAndCountAll({
-				limit: newLimit,
+				limit: docView ? newLimit : limit,
 				offset,
 				order: order,
 				where: tmpWhere,
@@ -476,6 +481,8 @@ class ResponsibilityController {
 			res.status(500).send(err);
 		}
 	}
+
+	// Old update function for chart responsibility update functionality:
 
 	// async updateResponsibility(req, res) {
 	// 	const userId = req.get('SSL_CLIENT_S_DN_CN');
