@@ -1,5 +1,6 @@
 const { MLApiClient } = require('../../lib/mlApiClient');
 const ExportHandler = require('../base/exportHandler');
+const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
 
 class SimpleExportHandler extends ExportHandler {
 	constructor(opts={}) {
@@ -45,12 +46,12 @@ class SimpleExportHandler extends ExportHandler {
 			try {
 				const { docs } = searchResults;
 				if (historyId) {
-					await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
+					await this.exportHistory.updateExportHistoryDate(res, historyId, getUserIdFromSAMLUserId(req.session.user.id));
 				} else {
 					await this.exportHistory.storeExportHistory(res, req.body, {
 						totalCount: docs.length,
 						searchTerms
-					}, userId);
+					}, getUserIdFromSAMLUserId(req.session.user.id));
 				}
 
 				if (format === 'pdf') {

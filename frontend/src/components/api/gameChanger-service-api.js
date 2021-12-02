@@ -117,6 +117,10 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
+	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
+	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -945,6 +949,26 @@ export default class GameChangerAPI {
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
+	};
+
+	getUserData = async () => {
+		const url = endpoints.gcUserDataGET;
+		return axiosGET(this.axios, url);
+	}
+
+	storeUserData = async (userData) => {
+		const url = endpoints.gcUserDataPOST;
+		return axiosPOST(this.axios, url, { userData, fromApp: true });
+	}
+
+	deleteUserData = async (userRowId) => {
+		const url = endpoints.gcUserDataDeletePOST;
+		return axiosPOST(this.axios, url, { userRowId });
+	}
+
+	syncUserTable = async () => {
+		const url = endpoints.syncUserTableGET;
 		return axiosGET(this.axios, url);
 	};
 }

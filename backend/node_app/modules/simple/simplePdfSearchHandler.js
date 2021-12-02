@@ -17,6 +17,7 @@ const thesaurus = new Thesaurus();
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const GC_HISTORY = require('../../models').gc_history;
 const modularEsSearchUtil = require('../../utils/modularEsSearchUtil');
+const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
 
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
@@ -35,7 +36,7 @@ SimplePdfSearchHandler.prototype.search = async function(searchText, offset, lim
 
 async function documentSearchHelper(req, userId, storeHistory) {
 	const historyRec = {
-		user_id: userId,
+		user_id: getUserIdFromSAMLUserId(req.session.user.id),
 		clone_name: undefined,
 		search: '',
 		startTime: new Date().toISOString(),
@@ -98,7 +99,7 @@ async function documentSearchHelper(req, userId, storeHistory) {
 
 		// log query to ES
 		if (storeHistory) {
-			await storeEsRecord(clientObj.esClientName, offset, clone_name, userId, searchText);
+			await storeEsRecord(clientObj.esClientName, offset, clone_name, historyRec.user_id, searchText);
 		}
 
 		if (!forCacheReload && useGCCache && offset === 0) {
@@ -289,12 +290,9 @@ async function storeRecordOfSearchInPg(historyRec, isClone, cloneData = {}, show
 	let userId = 'Unknown';
 	try {
 		const { user_id, searchText, startTime, endTime, hadError, numResults, searchType, cachedResult, orgFilters, tiny_url, request_body, search_version, clone_name } = historyRec;
-		const hashed_user = sparkMD5.hash(user_id);
-
-		if (user_id) userId = user_id;
 
 		const obj = {
-			user_id: hashed_user,
+			user_id: user_id,
 			search: searchText,
 			run_at: startTime,
 			completion_time: endTime,
@@ -350,7 +348,7 @@ async function storeEsRecord(esClient, offset, clone_name, userId, searchText){
 		if (offset === 0){
 			let clone_log = clone_name ? clone_name : 'policy';
 			const searchLog = {
-				user_id: sparkMD5.hash(userId),
+				user_id: userId,
 				search_query: searchText,
 				run_time: new Date().getTime(),
 				clone_name: clone_log

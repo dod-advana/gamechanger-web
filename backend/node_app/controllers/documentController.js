@@ -9,6 +9,7 @@ const axios = require('axios');
 const https = require('https');
 const url = require('url');
 const { Op } = require('sequelize');
+const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
 const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
@@ -193,11 +194,9 @@ class DocumentController {
 		try {
 			const { annotationData } = req.body;
 
-			const hashed_user = this.sparkMD5.hash(userId);
-
 			annotationData.forEach(answer => {
 				if (answer.incorrect_reason === '') answer.incorrect_reason = 0;
-				answer.user_id = hashed_user;
+				answer.user_id = getUserIdFromSAMLUserId(req.session.user.id);
 				this.gcCrowdAssist.create(answer);
 			});
 

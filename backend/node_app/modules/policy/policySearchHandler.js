@@ -10,6 +10,7 @@ const thesaurus = new Thesaurus();
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const _ = require('lodash');
 const SearchHandler = require('../base/searchHandler');
+const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
@@ -45,7 +46,7 @@ class PolicySearchHandler extends SearchHandler {
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, storeHistory);
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, true, getUserIdFromSAMLUserId(req.session.user.id));
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');
@@ -83,7 +84,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'getDocumentsBySourceFromESHelper':
 				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
-				let { clientObj } = await this.createRecObject(req.body, userId);
+				let { clientObj } = await this.createRecObject(req.body, userId, false, getUserIdFromSAMLUserId(req.session.user.id));
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
@@ -104,9 +105,9 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	// searchHelper function breakouts
-	async createRecObject(body, userId, storeHistory) {
+	async createRecObject(body, userId, storeHistory, non_hashed_id) {
 		const historyRec = {
-			user_id: userId,
+			user_id: non_hashed_id,
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -158,7 +159,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			// log query to ES
 			if (storeHistory) {
-				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, non_hashed_id, searchText);
 			}
 			return {historyRec, cloneSpecificObject, clientObj};
 		} catch (e) {
@@ -732,7 +733,7 @@ class PolicySearchHandler extends SearchHandler {
 			if (offset === 0){
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
 					clone_name: clone_log
