@@ -536,7 +536,6 @@ class ResponsibilityController {
 
 				return res.status(200).send();
 			}
-
 			const foundResp = await this.responsibilities.findOne({
 				where: {id: responsibilityId},
 				include: {
@@ -545,7 +544,7 @@ class ResponsibilityController {
 				}
 			})
 			if(status === 'accepted'){ 
-				if(!foundResp?.dataValues.responsibility_reports.length) {
+				if(foundResp?.dataValues.responsibility_reports.length <= 1) {
 					responsibilityStatus = 'updated';
 				}else{
 					responsibilityStatus = 'updated, review'
@@ -578,7 +577,7 @@ class ResponsibilityController {
 						id: updateId
 					}
 				})
-				if(!foundResp?.dataValues.responsibility_reports.length){
+				if(foundResp?.dataValues.responsibility_reports.length <= 1){
 					await this.responsibilities.update({
 						status: 'active'
 					},
@@ -627,6 +626,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {id, issue_description, updatedColumn, updatedText, textPosition} = req.body;
+			if(id == null || !issue_description) return res.status(400)
 
 			const hashed_user = sparkMD5Lib.hash(userId);
 			const report = await this.responsibility_reports.create({

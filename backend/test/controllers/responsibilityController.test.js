@@ -1,4 +1,5 @@
 const assert = require('assert');
+const { includes } = require('lodash');
 const { ResponsibilityController } = require('../../node_app/controllers/responsibilityController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
@@ -40,9 +41,9 @@ const esRawResults= {
 								_nested: {},
 								_score: 194.13794,
 								fields: {
-								'paragraphs.par_inc_count': [ 65 ],
-								'paragraphs.filename': [ 'test.pdf' ],
-								'paragraphs.par_raw_text_t': ['test']
+									'paragraphs.par_inc_count': [ 65 ],
+									'paragraphs.filename': [ 'test.pdf' ],
+									'paragraphs.par_raw_text_t': ['test']
 								}
 							}] 
 						}
@@ -138,7 +139,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: { where: [{id: "id", value:"test"}, {id: "otherOrganizationPersonnel", value: "test"}, {id: "otherOrganizationPersonnel", value: [null]}, {id: "test", value: "test"}] }
+				body: { where: [{id: 'id', value:'test'}, {id: 'otherOrganizationPersonnel', value: 'test'}, {id: 'otherOrganizationPersonnel', value: [null]}, {id: 'test', value: 'test'}] }
 			};
 
 			let resCode;
@@ -171,69 +172,29 @@ describe('ResponsibilityController', function () {
 		const opts = {
 			...constructorOptionsMock,
 			responsibility_reports: {
-				findOrCreate(data) {
-					const reportFound = responsibility_reports.find(report => (report.responsibility_id === data.where.responsibility_id && report.reporter_hashed_username === data.where.reporter_hashed_username));
-					if(reportFound){
-						return Promise.resolve([reportFound, false]);
-					} else{
-						const report = {id: 1, ...data.defaults};
-						responsibility_reports.push(report);
-						return Promise.resolve([report, true]);
-					}
+				create(data) {
+					return Promise.resolve({responsibility_report: 'dummy report'});
 				}
 			},
-			constants: {
-				GAME_CHANGER_OPTS: {
-					emailAddress: 'test@test.com'
-				}
-			},
-			emailUtility: {
-				sendEmail: async (html, subject, recipientEmails, userEmail, attachments = null, userId) => {
-					return Promise.resolve();
+			responsibilities: {
+				update(data){
+					return Promise.resolve([1]);
 				}
 			}
 		};
-
-		it('should find the existing report', async () => {
-			const target = new ResponsibilityController(opts);
-
-			const req = {
-				...reqMock,
-				body: {id: 2, issue_description: 'test'}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			try {
-				await target.storeResponsibilityReports(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			const expected = [{id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2}];
-			const expectedReport = {id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2};
-			assert.deepStrictEqual(responsibility_reports, expected);
-			assert.deepStrictEqual(resMsg, expectedReport);
-			assert.strictEqual(resCode, 200);
-		});
 
 		it('should create a report successfully', async () => {
 			const target = new ResponsibilityController(opts);
 
 			const req = {
 				...reqMock,
-				body: {id: 1, issue_description: 'Test'}
+				body: {
+					id: 0, 
+					issue_description: 'review', 
+					updatedColumn: 'responsibilityText', 
+					updatedText: 'this is a test', 
+					textPosition: { boundingRect: {}, rects: [], pageNumber: 1 }
+				}
 			};
 
 			let resCode;
@@ -255,10 +216,8 @@ describe('ResponsibilityController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = [{id: 2, issue_description: 'test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 2}, {id: 1, issue_description: 'Test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 1}];
-			const expectedReport = {id: 1, issue_description: 'Test', reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0', responsibility_id: 1};
-			assert.deepStrictEqual(responsibility_reports, expected);
-			assert.deepStrictEqual(resMsg, expectedReport);
+			const expected = {responsibility_report: 'dummy report'}
+			assert.deepStrictEqual(resMsg, expected);
 			assert.strictEqual(resCode, 200);
 		});
 
@@ -289,8 +248,6 @@ describe('ResponsibilityController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expectedReport = 'Responsibility id not included or the description of the issue not included.';
-			assert.deepStrictEqual(resMsg, expectedReport);
 			assert.strictEqual(resCode, 400);
 
 		});
@@ -337,8 +294,8 @@ describe('ResponsibilityController', function () {
 				permissions: 'Gamechanger Admin',
 				body: { 
 					cloneData: { clone_name: 'gamechanger' }, 
-					filename: "test", 
-					text: "test" 
+					filename: 'test', 
+					text: 'test' 
 				},
 			};
 
@@ -348,8 +305,8 @@ describe('ResponsibilityController', function () {
 				assert.fail(e);
 			}
 			const expected = {
-				doc_id: "test",
-				doc_num: "test",
+				doc_id: 'test',
+				doc_num: 'test',
 				par_num: 65,
 				paragraphs: [{
 					type: 'paragraph',
@@ -421,27 +378,56 @@ describe('ResponsibilityController', function () {
 
 	describe('#updateResponsibility', () => {
 
+		const reportList = [{
+			id: 7, updatedColumn: 'responsibilityText', updatedText: 'Test update', issue_description: 'review'
+		}]
 		const responsibilitiesList = [{
-			id: 0, filename: 'test', documentTitle: 'test', organizationPersonnel: 'test', responsibilityText: 'test', otherOrganizationPersonnel: 'test', documentsReferenced: {}, status: 'active'
+			id: 0, filename: 'test', documentTitle: 'test', organizationPersonnel: 'test', responsibilityText: 'test', otherOrganizationPersonnel: 'test', documentsReferenced: {}, status: 'active', responsibility_reports: [reportList[0]]
 		}]
 		const responsibilities = {
 			update: async (data, where) => {
 				let updates = 0;
 				const responsibilityToUpdate = responsibilitiesList.find(responsibility => responsibility.id === where.where.id);
-				responsibilityToUpdate.status = 'revised';
-				responsibilityToUpdate.organizationPersonnel = data.annotatedEntity;
-				responsibilityToUpdate.responsibilityText = data.annotatedResponsibilityText;
-				if(responsibilityToUpdate.status === 'revised') updates++;
+				responsibilityToUpdate.status = data.status;
+				if(Object.keys(data).includes('responsibilityText')) responsibilityToUpdate.responsibilityText = data.updatedText;
+				if(Object.keys(data).includes('organizationPersonnel')) responsibilityToUpdate.organizationPersonnel = data.updatedText;
+				updates++;
 				return Promise.resolve([updates]);
+			},
+			findOne : async (data) => {
+				const responsibilityToUpdate = responsibilitiesList.find(responsibility => responsibility.id === data.where.id);
+				return Promise.resolve({
+					dataValues: {
+						responsibility_reports: responsibilityToUpdate.responsibility_reports
+					}
+				})
+			}
+		}
+		const responsibility_reports = {
+			update: async (data, where) => {
+				let updates = 0;
+				const reportToUpdate = reportList.find(report => report.id === where.where.id);
+				if(data.updatedText) reportToUpdate.updatedText = data.updatedText;
+				reportToUpdate.issue_description = data.issue_description;
+				updates++;
+				return Promise.resolve([updates]);
+			},
+			destroy: async (data) => {
+				let deleteCount = 0;
+				const index = reportList.findIndex(report => report.id === data.where.id);
+				reportList.splice(index, 1);
+				deleteCount++;
+				return Promise.resolve([deleteCount]);
 			}
 		}
 
 		const opts = {
 			...constructorOptionsMock,
-			responsibilities
+			responsibilities,
+			responsibility_reports
 		};
 
-		it('should update a resposibility and return a 200 status code', async () => {
+		it('should update a resposibility and return a 200 status code given an accepted update status', async () => {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
@@ -461,9 +447,18 @@ describe('ResponsibilityController', function () {
 			const req = {
 				...reqMock,
 				body: { 
-					id: 0, 
-					annotatedEntity: "updated entity", 
-					annotatedResponsibilityText: "updated text"},
+					update: {
+						  id: 7,
+						  updatedColumn: 'responsibilityText',
+						  updatedText: 'Test update',
+					},
+					responsibility: {
+						  id: 0,
+						  organizationPersonnel: 'Test Org',
+						  responsibilityText: 'Test text',
+					},
+					status: 'accepted'
+				},
 			};
 
 			try {
@@ -472,8 +467,92 @@ describe('ResponsibilityController', function () {
 				assert.fail(e);
 			}
 			assert.strictEqual(resCode, 200);
-
 		});
+
+		it('should update a resposibility and return a 200 status code given a Reject update status', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+				body: { 
+					update: {
+						  id: 7,
+						  updatedColumn: 'responsibilityText',
+						  updatedText: 'Test update',
+					},
+					responsibility: {
+						  id: 0,
+						  organizationPersonnel: 'Test Org',
+						  responsibilityText: 'Test text',
+					},
+					status: 'Reject'
+				},
+			};
+
+			try {
+				await target.updateResponsibility(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.strictEqual(resCode, 200);
+		});
+
+		it('should remove a report and return a 200 status code given a rejected update status', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+				body: { 
+					update: {
+						  id: 7,
+						  updatedColumn: 'responsibilityText',
+						  updatedText: 'Test update',
+					},
+					responsibility: {
+						  id: 0,
+						  organizationPersonnel: 'Test Org',
+						  responsibilityText: 'Test text',
+					},
+					status: 'rejected'
+				},
+			};
+
+			try {
+				await target.updateResponsibility(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.strictEqual(resCode, 200);
+		});
+
 	});
 
 });
