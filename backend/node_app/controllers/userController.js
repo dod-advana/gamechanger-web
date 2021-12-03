@@ -127,7 +127,7 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			let user = await this.gcUser.findOne(
 				{
@@ -331,7 +331,7 @@ class UserController {
 					user.search_history = [];
 				}
 
-				const api_key = await this.externalAPI.getAPIKey(userId);
+				const api_key = await this.externalAPI.getAPIKey(user_id);
 				user.api_key = api_key;
 
 				if (export_history) {
@@ -341,7 +341,10 @@ class UserController {
 				}
 
 			} else {
-				user = {}
+				user = {
+					user_id: user_id,
+					notifications: {}
+				};
 				user.favorite_documents = [];
 				user.favorite_searches = [];
 				user.search_history = [];
@@ -375,7 +378,7 @@ class UserController {
 		try {
 			let foundItem;
 
-			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id) : userId;
+			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id, false) : userId;
 
 			if (fromApp) {
 				foundItem = await this.gcUser.findOne({ where: {id: userData.id}, raw: true});
@@ -686,7 +689,7 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			const user = await this.gcUser.findOne(
 				{
@@ -710,7 +713,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.gcUser.update(
 				{
@@ -842,7 +845,7 @@ class UserController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.sequelize.transaction(async (t) => {
 				const userData = await this.gcUser.findOne({
@@ -883,7 +886,7 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: user_id } });
 			
@@ -962,7 +965,7 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
 			
-			const user_id = getUserIdFromSAMLUserId(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 			
 			let ids = await this.gcHistory.findAll({
 				attributes: [

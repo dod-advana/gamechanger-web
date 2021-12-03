@@ -409,7 +409,7 @@ class AppStatsController {
 		let connection;
 		try {
 			const { clone_name } = req.body
-			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req.session.user.id));
+			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,

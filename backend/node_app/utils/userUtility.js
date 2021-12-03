@@ -4,8 +4,18 @@ function getTenDigitUserId (user_id) {
 	return id ? id[0] : null
 }
 
-function getUserIdFromSAMLUserId (userId) {
-	return userId.split('@')[0];
+function getUserIdFromSAMLUserId (obj, fromReq = true) {
+	if (!fromReq) {
+		return obj.split('@')[0];
+	}
+
+	if (obj.session && obj.session.user && obj.session.user.id) {
+		return obj.session.user.id.split('@')[0];
+	} else if (obj.headers && obj.get('SSL_CLIENT_S_DN_CN')) {
+		return obj.get('SSL_CLIENT_S_DN_CN');
+	} else {
+		return 'Unknown User'
+	}
 }
 
 module.exports = { getTenDigitUserId, getUserIdFromSAMLUserId } 

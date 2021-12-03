@@ -196,7 +196,7 @@ class DocumentController {
 
 			annotationData.forEach(answer => {
 				if (answer.incorrect_reason === '') answer.incorrect_reason = 0;
-				answer.user_id = getUserIdFromSAMLUserId(req.session.user.id);
+				answer.user_id = getUserIdFromSAMLUserId(req);
 				this.gcCrowdAssist.create(answer);
 			});
 

@@ -58,7 +58,7 @@ class ExportHistoryController {
 			const hist = await this.exportHistory.findAll({
 				raw: true,
 				where: {
-					user_id: getUserIdFromSAMLUserId(req.session.user.id)
+					user_id: getUserIdFromSAMLUserId(req) || userId
 				},
 				order: [
 					['updatedAt', 'DESC']
