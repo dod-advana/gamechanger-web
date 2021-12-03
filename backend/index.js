@@ -198,7 +198,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 		await userController.updateOrCreateUserHelper(sessUser, cn);
 
-		const user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(sessUser.id) }, raw: true });
+		const user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 		const admin = await Admin.findOne({ where: { username: cn } });
 
 		if (admin) {
@@ -210,7 +210,7 @@ app.post('/api/auth/token', async function (req, res) {
 			if (user.is_admin) perms.push('Gamechanger Admin');
 		}
 
-		sessUser.id = getUserIdFromSAMLUserId(sessUser.id);
+		sessUser.id = getUserIdFromSAMLUserId(req);
 
 		if (sessUser.disabled === undefined) {
 			sessUser.disabled = false;

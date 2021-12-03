@@ -38,7 +38,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: getUserIdFromSAMLUserId(req.session.user.id),
+			user_id: getUserIdFromSAMLUserId(req),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),

@@ -46,12 +46,12 @@ class SimpleExportHandler extends ExportHandler {
 			try {
 				const { docs } = searchResults;
 				if (historyId) {
-					await this.exportHistory.updateExportHistoryDate(res, historyId, getUserIdFromSAMLUserId(req.session.user.id));
+					await this.exportHistory.updateExportHistoryDate(res, historyId, getUserIdFromSAMLUserId(req));
 				} else {
 					await this.exportHistory.storeExportHistory(res, req.body, {
 						totalCount: docs.length,
 						searchTerms
-					}, getUserIdFromSAMLUserId(req.session.user.id));
+					}, getUserIdFromSAMLUserId(req));
 				}
 
 				if (format === 'pdf') {

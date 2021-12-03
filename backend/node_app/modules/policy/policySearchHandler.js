@@ -46,7 +46,7 @@ class PolicySearchHandler extends SearchHandler {
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, true, getUserIdFromSAMLUserId(req.session.user.id));
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, true, getUserIdFromSAMLUserId(req));
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');
@@ -84,7 +84,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'getDocumentsBySourceFromESHelper':
 				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
-				let { clientObj } = await this.createRecObject(req.body, userId, false, getUserIdFromSAMLUserId(req.session.user.id));
+				let { clientObj } = await this.createRecObject(req.body, userId, false, getUserIdFromSAMLUserId(req));
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);

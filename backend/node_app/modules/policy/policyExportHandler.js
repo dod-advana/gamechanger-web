@@ -2,7 +2,7 @@ const { MLApiClient } = require('../../lib/mlApiClient');
 const ExportHandler = require('../base/exportHandler');
 const _ = require('lodash');
 const constantsFile = require('../../config/constants');
-const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 const APP_SETTINGS = require('../../models').app_settings;
 
 class PolicyExportHandler extends ExportHandler {
@@ -84,12 +84,12 @@ class PolicyExportHandler extends ExportHandler {
 				docs = cleanedDocs;
 
 				if (historyId) {
-					await this.exportHistory.updateExportHistoryDate(res, historyId, getUserIdFromSAMLUserId(req.session.user.id));
+					await this.exportHistory.updateExportHistoryDate(res, historyId, getUserIdFromSAMLUserId(req));
 				} else {
 					await this.exportHistory.storeExportHistory(res, req.body, {
 						totalCount: docs.length,
 						searchTerms
-					}, getUserIdFromSAMLUserId(req.session.user.id));
+					}, getUserIdFromSAMLUserId(req));
 				}
 
 				if (format === 'pdf') {
