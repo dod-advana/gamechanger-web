@@ -556,7 +556,6 @@ describe('ResponsibilityController', function () {
 	});
 
 	describe('#getFileLink', () => {
-
 		const dataApi = {
 			queryElasticSearch: async (esClientName, esIndex, esQuery, userId) => {
 				return Promise.resolve({
@@ -625,6 +624,52 @@ describe('ResponsibilityController', function () {
 				assert.fail(e);
 			}
 			const expected = {fileLink: 'test URL', pageNumber: 15}
+			assert.deepStrictEqual(resMsg, expected);
+			assert.strictEqual(resCode, 200);
+		});
+
+	});
+
+	describe('#getResponsibilityDocTitles', () => {
+		const documentList = ['Doc1', 'Doc2', 'Doc3']
+		const responsibilities = {
+			findAll: async (data) => {
+				return Promise.resolve(documentList);
+			}
+		}
+
+		const opts = {
+			...constructorOptionsMock,
+			responsibilities,
+		};
+
+		it('should return a list of all responsibility document titles', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+			};
+
+			try {
+				await target.getResponsibilityDocTitles(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {results: ['Doc1', 'Doc2', 'Doc3']}
 			assert.deepStrictEqual(resMsg, expected);
 			assert.strictEqual(resCode, 200);
 		});
