@@ -724,6 +724,7 @@ export default (props) => {
 							onClick={() => {
 								triggerCreateModelLTR();
 							}}
+							disabled={checkReloading()}
 							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
 						>
 							Create Model
