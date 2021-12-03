@@ -555,4 +555,79 @@ describe('ResponsibilityController', function () {
 
 	});
 
+	describe('#getFileLink', () => {
+
+		const dataApi = {
+			queryElasticSearch: async (esClientName, esIndex, esQuery, userId) => {
+				return Promise.resolve({
+					body:{
+						hits:{
+							hits:[{
+								inner_hits:{
+									paragraphs:{
+										hits: {
+											hits: [{
+												fields: {
+													'paragraphs.page_num_i': [15]
+												}
+											}]
+										}
+									}
+								},
+								_source: {download_url_s: 'test URL'}
+							}]
+						}
+					}
+				});
+			}
+		}
+		const constants = {
+			GAME_CHANGER_OPTS: {
+				index: 'gamechanger'
+			}
+		}
+
+		const opts = {
+			...constructorOptionsMock,
+			dataApi,
+			constants
+		};
+
+		it('should return source URL and the page number the text is found on', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+				body: { 
+					cloneData: {clone_name: 'gamechanger'}, 
+					filename: 'test.pdf', 
+					text: 'test text'
+				},
+			};
+
+			try {
+				await target.getFileLink(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {fileLink: 'test URL', pageNumber: 15}
+			assert.deepStrictEqual(resMsg, expected);
+			assert.strictEqual(resCode, 200);
+		});
+
+	});
 });
