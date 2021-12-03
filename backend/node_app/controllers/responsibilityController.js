@@ -229,15 +229,12 @@ class ResponsibilityController {
 	async getFileLink(req, res) {
 		// using a filename and a string, get back a list of paragraphs for the document AND
 		// the paragraph number for the string.
-		console.log('start getFileLink')
 		let userId = 'webapp_unknown';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
-			console.log('perm: ',permissions)
 
 			const { cloneData = {}, filename = '', text = '' } = req.body;
-			console.log('body: ', req.body)
 			let esQuery = this.paraNumQuery(filename, text);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
@@ -254,15 +251,9 @@ class ResponsibilityController {
 					esClientName = 'gamechanger';
 					esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			}
-			console.log('preresults')
 			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			console.log('rawResults: ', rawResults)
-			console.log('rawResults.body.hits.hits[0]: ', rawResults.body.hits.hits[0])
-			console.log('rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields: ', rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields)
 			const pageNumber = rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields['paragraphs.page_num_i'][0];
 			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s
-			console.log('page: ', pageNumber);
-			console.log('fileLink: ', fileLink)
 
 			res.status(200).send({fileLink, pageNumber});
 		} catch (err) {
@@ -425,39 +416,12 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { order = [], where = [] } = req.body;
-			order.push(['filename', 'ASC']);
-			const tmpWhere = {};
-			where.forEach(({id, value}) => {
-				if (id === 'id') {
-					tmpWhere[id] = {
-						[Op.eq]: value
-					};
-				} else {
-					if (id === 'otherOrganizationPersonnel') {
-						if (value.includes(null)) {
-							tmpWhere[id] = {
-								[Op.or]: [
-									{ [Op.like]: { [Op.any]: value } },
-									{ [Op.eq]: null },
-								]
-							}
-						} else {
-							tmpWhere[id] = {
-								[Op.like]: { [Op.any]: value }
-							};
-						}
-					} else {
-						tmpWhere[id] = {
-							[Op.iLike]: `%${value}%`
-						};
-					}
-				}
-			});
-			tmpWhere['status'] = {[Op.not]: 'rejected'};
+			const where = {};
+			where['status'] = {[Op.not]: 'rejected'};
+			
 			const results = await this.responsibilities.findAll({
 				group: ['documentTitle'],
-				where: tmpWhere,
+				where,
 				attributes: [
 					'documentTitle',
 				]
