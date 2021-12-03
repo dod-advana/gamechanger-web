@@ -1,5 +1,5 @@
 const FEEDBACK = require('../models').feedback;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const constants = require('../config/constants');
 const https = require('https');

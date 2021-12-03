@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../../utils/searchUtility')
 const { ExportHistoryController } = require('../../controllers/exportHistoryController');
 const { Reports } = require('../../lib/reports');

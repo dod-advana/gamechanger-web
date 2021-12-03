@@ -1,6 +1,6 @@
 const {HandlerFactory} = require('../factories/handlerFactory');
 const CLONE_META = require('../models').clone_meta;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class ModularGameChangerController {
 	constructor(opts = {}) {

@@ -1,5 +1,5 @@
 const asyncRedisLib = require('async-redis');
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../../utils/searchUtility');
 const { getTenDigitUserId } = require('../../utils/userUtility');
 const GC_HISTORY = require('../../models').gc_history;

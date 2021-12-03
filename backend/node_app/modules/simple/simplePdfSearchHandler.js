@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../../utils/searchUtility');
 const searchUtility = new SearchUtility();
 const constants = require('../../config/constants');
@@ -9,15 +9,12 @@ const { MLApiClient } = require('../../lib/mlApiClient');
 const mlApi = new MLApiClient();
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
 const dataTracker = new DataTrackerController();
-const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
 const dataLibrary = new DataLibrary();
 const {Thesaurus} = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
-const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const GC_HISTORY = require('../../models').gc_history;
-const modularEsSearchUtil = require('../../utils/modularEsSearchUtil');
-const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;

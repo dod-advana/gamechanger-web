@@ -1,5 +1,5 @@
 const constantsFile = require('../config/constants');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const GC_ASSISTS = require('../models').gc_assists;
 const ORGANIZATION_URLS = require('../models').organization_urls;
 const { DataLibrary } = require('../lib/dataLibrary');
