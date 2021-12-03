@@ -469,7 +469,7 @@ describe('ResponsibilityController', function () {
 			assert.strictEqual(resCode, 200);
 		});
 
-		it('should update a resposibility and return a 200 status code given a Reject update status', async () => {
+		it('should update a resposibility and return a 200 status code given a Reject updateCollumn', async () => {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
@@ -491,15 +491,15 @@ describe('ResponsibilityController', function () {
 				body: { 
 					update: {
 						  id: 7,
-						  updatedColumn: 'responsibilityText',
-						  updatedText: 'Test update',
+						  updatedColumn: 'Reject',
+						  updatedText: '',
 					},
 					responsibility: {
 						  id: 0,
 						  organizationPersonnel: 'Test Org',
 						  responsibilityText: 'Test text',
 					},
-					status: 'Reject'
+					status: 'accepted'
 				},
 			};
 
@@ -670,6 +670,64 @@ describe('ResponsibilityController', function () {
 				assert.fail(e);
 			}
 			const expected = {results: ['Doc1', 'Doc2', 'Doc3']}
+			assert.deepStrictEqual(resMsg, expected);
+			assert.strictEqual(resCode, 200);
+		});
+
+	});
+
+	describe('#updateResponsibilityReport', () => {
+		const reportList = [{
+			id: 0, updatedColumn: 'responsibilityText', updatedText: 'Test update', issue_description: 'review'
+		}]
+		const responsibility_reports = {
+			update: async (data, where) => {
+				let updates = 0;
+				const reportToUpdate = reportList.find(report => report.id === where.where.id);
+				reportToUpdate.updatedText = data.updatedText;
+				reportToUpdate.textPosition = data.textPosition;
+				updates++;
+				return Promise.resolve([updates]);
+			}
+		}
+
+		const opts = {
+			...constructorOptionsMock,
+			responsibility_reports,
+		};
+
+		it('should update a responsiblity report and return a status code 200', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+				body: {
+					id: 0, 
+					updatedText: 'test', 
+					textPosition: { boundingRect: {}, rects: [], pageNumber: 1 }
+				}
+			};
+
+			try {
+				await target.updateResponsibilityReport(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = [1]
 			assert.deepStrictEqual(resMsg, expected);
 			assert.strictEqual(resCode, 200);
 		});

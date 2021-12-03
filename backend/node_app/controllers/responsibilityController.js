@@ -418,7 +418,7 @@ class ResponsibilityController {
 
 			const where = {};
 			where['status'] = {[Op.not]: 'rejected'};
-			
+
 			const results = await this.responsibilities.findAll({
 				group: ['documentTitle'],
 				where,
@@ -490,7 +490,7 @@ class ResponsibilityController {
 			const { id: updateId, updatedText, updatedColumn } = update;
 			const { id: responsibilityId, responsibilityText, organizationPersonnel} = responsibility;
 			let responsibilityStatus;
-			if(updatedColumn === 'Reject'){
+			if(updatedColumn === 'Reject' && status === 'accepted'){
 				await this.responsibilities.update({
 					status: 'rejected'
 				}, 
@@ -578,7 +578,7 @@ class ResponsibilityController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { id, updatedText, textPosition } = req.body;
 
-			const result = this.responsibility_reports.update({
+			const result = await this.responsibility_reports.update({
 				updatedText,
 				textPosition
 			}, 
@@ -587,7 +587,6 @@ class ResponsibilityController {
 					id
 				}
 			})
-
 			res.status(200).send(result);
 		}catch (err) {
 			this.logger.error(err, '1PU0TKR', userId);
