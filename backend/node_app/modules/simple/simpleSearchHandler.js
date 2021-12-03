@@ -5,18 +5,14 @@ const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
 const {Thesaurus} = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
-const FAVORITE_SEARCH = require('../../models').favorite_searches;
-const LOGGER = require('../../lib/logger');
-
+const LOGGER = require('@dod-advana/advana-logger');
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
-
 const SearchHandler = require('../base/searchHandler');
-const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 class SimpleSearchHandler extends SearchHandler {
 	constructor(opts = {}) {

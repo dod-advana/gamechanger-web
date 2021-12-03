@@ -1,5 +1,5 @@
 const FAQ = require('../models').faq;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class AboutGcController {
 	constructor(opts = {}) {

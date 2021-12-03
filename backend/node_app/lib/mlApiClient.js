@@ -1,5 +1,5 @@
 const constants = require('../config/constants');
-const loggerLib = require('../lib/logger');
+const loggerLib = require('@dod-advana/advana-logger');
 const axiosLib = require('axios');
 
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;

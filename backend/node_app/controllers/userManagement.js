@@ -8,7 +8,7 @@ const underscore = require('underscore');
 
 // internal imports
 const eventHistory = require('./eventHistory');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const Permission = require('../models').permission;
 const permissions = require('./permissions');
 const role = require('../models').role;

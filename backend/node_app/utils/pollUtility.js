@@ -1,5 +1,5 @@
 const { RedisLockManager, RedisKeyLockedError } = require('../utils/redisLock');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 async function poll(promiseFn, ms, opts = {}) {
 	const {

@@ -1,16 +1,14 @@
-const LOGGER = require('../../lib/logger');
 const SearchUtility = require('../../utils/searchUtility');
 const constantsFile = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
 const {Thesaurus} = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const _ = require('lodash');
 const SearchHandler = require('../base/searchHandler');
-const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;

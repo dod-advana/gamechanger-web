@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchHandler = require('../base/searchHandler');
 const lunr = require('lunr');
 const __ = require('lodash');

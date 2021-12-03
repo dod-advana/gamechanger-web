@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const ApiKey = require('../../models').api_key;
 const ApiKeyRequests = require('../../models').api_key_request;
 const ApiKeyRequestClones = require('../../models').api_key_request_clone;

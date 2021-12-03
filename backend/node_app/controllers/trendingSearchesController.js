@@ -1,6 +1,6 @@
 const GC_HISTORY = require('../models').gc_history;
 const GC_TRENDING_BLACKLIST = require('../models').gc_trending_blacklist;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
 
