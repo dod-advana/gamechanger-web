@@ -651,41 +651,14 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], DOCS_PER_PAGE = 10 } = req.body;
-			let { limit } = req.body;
+			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
 			order.push(['filename', 'ASC']);
-			const tmpWhere = {};
-			where.forEach(({id, value}) => {
-				if (id === 'id') {
-					tmpWhere[id] = {
-						[Op.eq]: value
-					};
-				} else {
-					if (id === 'otherOrganizationPersonnel') {
-						if (value.includes(null)) {
-							tmpWhere[id] = {
-								[Op.or]: [
-									{ [Op.like]: { [Op.any]: value } },
-									{ [Op.eq]: null },
-								]
-							}
-						} else {
-							tmpWhere[id] = {
-								[Op.like]: { [Op.any]: value }
-							};
-						}
-					} else {
-						if(!tmpWhere[id]) tmpWhere[id]= {[Op.or]: []};
-						tmpWhere[id][Op.or].push({
-							[Op.iLike]: `%${value}%`
-						});
-					}
-				}
-			});
-			tmpWhere['status'] = {[Op.like]: 'review'};
+			const where = {};
+			where['status'] = {[Op.like]: 'review'};
 			const newOffsets = [];
+			let limit = 0;
 			const docOffsets = await this.responsibilities.findAndCountAll({
-				where: tmpWhere,
+				where: where,
 				group: 'filename',
 				order: order,
 				attributes: [
@@ -694,12 +667,10 @@ class ResponsibilityController {
 				]
 			});
 			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
-			if(!limit){
-				for(let i = 0; i < DOCS_PER_PAGE; i++){
-					if(!newOffsets[i]) break;
-					limit += newOffsets[i];
-				}
-			};
+			for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
+				if(!newOffsets[i]) break;
+				limit += newOffsets[i];
+			}
 			const results = await this.responsibilities.findAndCountAll({
 				limit,
 				offset,

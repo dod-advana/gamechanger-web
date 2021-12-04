@@ -117,6 +117,11 @@ describe('ResponsibilityController', function () {
 			...constructorOptionsMock,
 			responsibilities: {
 				findAndCountAll(data) {
+					if(data.group){
+						const parsedResults = responsiblities.map(resp => {return {dataValues:{...resp, documentCount: 10} }})
+						const docOffsets = {rows: parsedResults};
+						return Promise.resolve(docOffsets);
+					}
 					return Promise.resolve(responsibilities);
 				}
 			}
@@ -140,6 +145,50 @@ describe('ResponsibilityController', function () {
 			const req = {
 				...reqMock,
 				body: { where: [{id: 'id', value:'test'}, {id: 'otherOrganizationPersonnel', value: 'test'}, {id: 'otherOrganizationPersonnel', value: [null]}, {id: 'test', value: 'test'}] }
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getResponsibilityData(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {count: 84, rows: [{otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 0, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 1, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.'}, {otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 2, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 3, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.'}, {otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 4, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 5, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 6, organizationPersonnel: 'The Director, DIA,', references: 'DoDD 5105.72', responsibilityText: 'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and'}, {otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 7, organizationPersonnel: 'The Director, DIA,', references: 'DoDD 5000.1', responsibilityText: 'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 8, organizationPersonnel: 'The Director, DIA,', documentsReferenced: [], responsibilityText: 'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.'}, {otherOrganizationPersonnel: '', filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  id: 9, organizationPersonnel: 'The Director, DIA,', references: 'Executive Order 13388, DoDD 2000.12', responsibilityText: 'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).'}]};
+			assert.deepStrictEqual(responsibilities, expected);
+
+		});
+
+		it('should get the responsibilities with offsets and limits set for document view', async () => {
+			responsibilities = {count: 84, rows: [
+				{id: 0, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', documentsReferenced: []}, 
+				{id: 1, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', documentsReferenced: []}, 
+				{id: 2, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', documentsReferenced: []}, 
+				{id: 3, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', documentsReferenced: []}, 
+				{id: 4, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', documentsReferenced: []}, 
+				{id: 5, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', documentsReferenced: []}, 
+				{id: 6, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', references: 'DoDD 5105.72'}, 
+				{id: 7, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency', references: 'DoDD 5000.1'}, 
+				{id: 8, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', documentsReferenced: []}, 
+				{id: 9, filename: 'DoDD 1000.20.pdf', documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',  responsibilityText: 'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).', organizationPersonnel: 'The Director, DIA,', otherOrganizationPersonnel: '', references: 'Executive Order 13388, DoDD 2000.12'}
+			]};
+			const target = new ResponsibilityController(opts);
+
+			const req = {
+				...reqMock,
+				body: { docView: true, where: [{id: 'id', value:'test'}, {id: 'otherOrganizationPersonnel', value: [null]}], page: 1 }
 			};
 
 			let resCode;
@@ -731,6 +780,67 @@ describe('ResponsibilityController', function () {
 			assert.deepStrictEqual(resMsg, expected);
 			assert.strictEqual(resCode, 200);
 		});
+	});
 
+	describe('#getResponsibilityUpdates', () => {
+		const responsibilitiesList = [
+			{id: 0, filename: 'test', documentTitle: 'test', organizationPersonnel: 'test', responsibilityText: 'test', otherOrganizationPersonnel: 'test', documentsReferenced: {}, status: 'active'},
+			{id: 0, filename: 'test', documentTitle: 'test', organizationPersonnel: 'test', responsibilityText: 'test', otherOrganizationPersonnel: 'test', documentsReferenced: {}, status: 'review'}
+		]
+		const responsibilities = {
+			findAndCountAll: async (data) => {
+				if(data.group) {
+					const results = responsibilitiesList.filter(resp => resp.status === 'review');
+					const parsedResults = results.map(resp => {return {dataValues:{...resp, filenameCount: 1} }})
+					const docOffsets = {rows: parsedResults};
+					return Promise.resolve(docOffsets);
+				}else {
+					const rows = responsibilitiesList.filter(resp => data.where.status === resp.status);
+					const count = rows.length;
+					const results = {count, rows}
+					return Promise.resolve(results);
+				}
+			}
+		}
+
+		const opts = {
+			...constructorOptionsMock,
+			responsibilities,
+		};
+
+		it('should return all responsibility updates', async () => {
+			const target = new ResponsibilityController(opts);
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			const req = {
+				...reqMock,
+				body: {
+					offset: 0, 
+					page: 0
+				}
+			};
+
+			try {
+				await target.getResponsibilityUpdates(req, res);
+			} catch (e) {
+				assert.fail(e);
+			}
+			const expected = {'offsets': [1], 'results': [{'documentTitle': 'test', 'documentsReferenced': {}, 'filename': 'test', 'id': 0, 'organizationPersonnel': 'test', 'otherOrganizationPersonnel': 'test', 'responsibilityText': 'test', 'status': 'review'}], 'totalCount': 1}
+			assert.deepStrictEqual(resMsg, expected);
+			assert.strictEqual(resCode, 200);
+		});
 	});
 });
