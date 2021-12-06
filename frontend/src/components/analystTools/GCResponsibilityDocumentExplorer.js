@@ -557,7 +557,7 @@ export default function ResponsibilityDocumentExplorer({
 							</div>
 						</div>
 					) : (
-						'Make a search to get started.'
+						'No Results'
 					)}
 				</div>
 				<GCAccordion
