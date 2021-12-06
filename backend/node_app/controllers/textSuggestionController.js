@@ -126,7 +126,7 @@ class TextSuggestionController {
 			suggesterArray.forEach(term => {
 				let usercount = term.user.buckets
 				if ((usercount.length > 1) && (usercount[0].doc_count > 2)) {
-					presearch.push(term["key"]);
+					presearch.push(term['key']);
 				}
 			 });
 		}

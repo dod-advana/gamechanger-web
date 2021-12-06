@@ -222,6 +222,9 @@ const PolicySearchHandler = {
 			let combinedSearch = await gameChangerAPI.getCombinedSearchMode();
 			combinedSearch = combinedSearch.data.value === 'true';
 
+			let ltr = await gameChangerAPI.getLTRMode();
+			ltr = ltr.data.value === 'true';
+
 			const resp = await gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
 				searchText: searchObject.search,
@@ -240,7 +243,8 @@ const PolicySearchHandler = {
 					publicationDateFilter,
 					publicationDateAllTime,
 					includeRevoked,
-					archivedCongressSelected
+					archivedCongressSelected,
+					ltr
 				},
 				limit: 18,
 			});
