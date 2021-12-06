@@ -664,6 +664,7 @@ export default function ResponsibilityDocumentExplorer({
 									setOrganization([]);
 									setDocTitle([]);
 									setClearFilters(!clearFilters);
+									setFilters([]);
 									setResultsPage(1);
 									setReloadResponsibilities(true);
 								}}
