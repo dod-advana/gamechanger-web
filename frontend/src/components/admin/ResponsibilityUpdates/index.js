@@ -43,6 +43,11 @@ const UpdateMetaText = styled.div`
 			text-decoration: underline;
 		}
     `;
+const defaultIframPreviewLink = {
+	dataIdx: 0,
+	entityIdx: 0,
+	responsibilityIdx: 0
+}
 
 export default function ResponsibilityUpdates() {
 
@@ -50,11 +55,7 @@ export default function ResponsibilityUpdates() {
 
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState({});
-	const [iframePreviewLink, setIframePreviewLink] = useState({
-		dataIdx: 0,
-		entityIdx: 0,
-		responsibilityIdx: 0
-	});
+	const [iframePreviewLink, setIframePreviewLink] = useState(defaultIframPreviewLink);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [editing, setEditing] = useState(false);
@@ -167,6 +168,7 @@ export default function ResponsibilityUpdates() {
 			}
 			const { results = [] } = await getData({
 				limit,
+				page: resultsPage, 
 				offset,
 				sorted,
 				filtered: tmpFiltered,
@@ -182,6 +184,7 @@ export default function ResponsibilityUpdates() {
 
 	const getData = async ({
 		limit,
+		page = 1,
 		offset = 0,
 		sorted = [],
 		filtered = [],
@@ -192,6 +195,7 @@ export default function ResponsibilityUpdates() {
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityUpdates({
 				docView: true,
+				page,
 				limit,
 				offset,
 				order,
@@ -232,6 +236,13 @@ export default function ResponsibilityUpdates() {
 		setReloadResponsibilities(true);
 	}
 
+	const handleMoveSelectedResp = () => {
+		if(selectedResponsibility.responsibility_reports?.length > 1) {
+			return
+		}
+		setIframePreviewLink(defaultIframPreviewLink);
+	}
+
 	const acceptUpdate = async (update) => {
 		const data = {
 			update, 
@@ -239,6 +250,7 @@ export default function ResponsibilityUpdates() {
 			status: 'accepted'
 		}
 		await gameChangerAPI.updateResponsibility(data)
+		handleMoveSelectedResp();
 		setReloadResponsibilities(true);
 	}
 
@@ -249,6 +261,7 @@ export default function ResponsibilityUpdates() {
 			status: 'rejected'
 		}
 		await gameChangerAPI.updateResponsibility(data)
+		handleMoveSelectedResp();
 		setReloadResponsibilities(true);
 	}
 
