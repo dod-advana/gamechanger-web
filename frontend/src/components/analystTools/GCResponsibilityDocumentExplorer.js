@@ -161,7 +161,7 @@ export default function ResponsibilityDocumentExplorer({
 				createAlert(
 					'Text Not Found',
 					'error',
-					'The exact respsonsibility text could not be found in the PDF due to a discrepensy'
+					'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
 				);
 			}
 		}

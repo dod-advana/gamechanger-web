@@ -756,7 +756,7 @@ describe('ResponsibilityController', function () {
 					const docOffsets = {rows: parsedResults};
 					return Promise.resolve(docOffsets);
 				}else {
-					const rows = responsibilitiesList.filter(resp => data.where.status === resp.status);
+					const rows = responsibilitiesList.filter(resp => resp.status === 'review');
 					const count = rows.length;
 					const results = {count, rows}
 					return Promise.resolve(results);
