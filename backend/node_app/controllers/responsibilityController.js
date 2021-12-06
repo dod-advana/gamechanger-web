@@ -654,11 +654,11 @@ class ResponsibilityController {
 			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
 			order.push(['filename', 'ASC']);
 			const where = {};
-			where['status'] = {[Op.like]: 'review'};
+			where['status'] = {[Op.like]: '%review%'};
 			const newOffsets = [];
 			let limit = 0;
 			const docOffsets = await this.responsibilities.findAndCountAll({
-				where: where,
+				where,
 				group: 'filename',
 				order: order,
 				attributes: [
@@ -675,9 +675,7 @@ class ResponsibilityController {
 				limit,
 				offset,
 				order: order,
-				where: {
-					status: 'review'
-				},
+				where,
 				include: {
 					model: RESPONSIBILITY_REPORTS,
 					where: { issue_description: 'review'}
