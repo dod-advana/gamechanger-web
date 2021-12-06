@@ -155,6 +155,19 @@ export default function ResponsibilityDocumentExplorer({
 	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
+		if(pdfLoaded){
+			const notFound = document.getElementById('PdfViewer').contentWindow.document.getElementsByClassName('notFound');
+			if(notFound?.length){
+				createAlert(
+					'Text Not Found',
+					'error',
+					'The exact respsonsibility text could not be found in the PDF due to a discrepensy'
+				);
+			}
+		}
+	},[pdfLoaded])
+
+	useEffect(() => {
 		if (Object.keys(responsibilityData).length) {
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach(doc => {
