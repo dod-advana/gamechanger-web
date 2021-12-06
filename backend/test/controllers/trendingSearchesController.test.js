@@ -156,4 +156,352 @@ describe('TrendingSearchesController', function () {
 		});
 	});
 
+	describe('#getTrendingBlacklist', () => {
+		it('should get the trending blacklist', async () => {
+			const gcTrendingBlacklist = {
+				findAll() {
+					return Promise.resolve([{ test: 'test' }]);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcTrendingBlacklist
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = [{
+				test: 'test'
+			}];
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
+		});
+
+		it('should throw an error', async () => {
+			const opts = {
+				...constructorOptionsMock
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			assert.equal(resCode, 500);
+		});
+	});
+
+	describe('#setTrendingBlacklist', () => {
+		it('should set the trending blacklist', async () => {
+			const gcTrendingBlacklist = {
+				findOrCreate() {
+					return Promise.resolve('test');
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcTrendingBlacklist
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.setTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = 'test';
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
+		});
+
+		it('should return an error', async () => {
+			const opts = {
+				...constructorOptionsMock
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.setTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			assert.equal(resCode, 500);
+		});
+	});
+
+	describe('#deleteTrendingBlacklist', () => {
+		it('should delete the trending blacklist', async () => {
+			const gcTrendingBlacklist = {
+				destroy() {
+					return 'test';
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcTrendingBlacklist
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.deleteTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = 'test';
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
+		});
+
+		it('should return an error', async () => {
+			const gcTrendingBlacklist = {
+				destroy() {
+					throw 'error';
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcTrendingBlacklist
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.deleteTrendingBlacklist(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			assert.equal(resCode, 500);
+		});
+	});
+
+	describe('#getWeeklySearchCount', () => {
+		it('should get the weekly search count', async () => {
+			const gcHistory = {
+				count() {
+					return Promise.resolve(1);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcHistory
+			};
+			
+			const target = new TrendingSearchesController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					trendingLinks: [{search: 'link'}]
+				}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getWeeklySearchCount(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = [{
+				count: 1,
+				search: 'link'
+			}];
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
+		});
+	});
+
+	it('should return an error', async () => {
+		const opts = {
+			...constructorOptionsMock
+		};
+		
+		const target = new TrendingSearchesController(opts);
+
+		const req = {
+			...reqMock,
+			body: {
+				trendingLinks: [{search: 'link'}]
+			}
+		};
+
+		let resCode;
+		let resMsg;
+	
+		const res = {
+			status(code) {
+				resCode = code;
+				return this;
+			},
+			send(msg) {
+				resMsg = msg;
+				return this;
+			}
+		};
+
+		try {
+			await target.getWeeklySearchCount(req, res);
+		} catch (e) {
+			assert.fail();
+		}
+
+		const expected = [{
+			count: 1,
+			search: 'link'
+		}];
+
+		assert.equal(resCode, 500);
+	});
 });
