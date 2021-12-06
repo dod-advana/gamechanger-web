@@ -61,6 +61,9 @@ export default (props) => {
 	const [batchSize, setBatchSize] = useState(32);
 	const [warmupSteps, setWarmupSteps] = useState(100);
 	const [epochs, setEpochs] = useState(3);
+	
+	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
+	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
 
 	/**
 	 * Load all the initial data on transformers and s3
@@ -239,6 +242,31 @@ export default (props) => {
 			props.updateLogs('Error reloading models: ' + e.toString(), 2);
 		}
 	};
+
+	const triggerInitializeLTR = async () => {
+		try {
+			await gameChangerAPI.initializeLTR().then((data) => {
+				setLTRInitializedStatus(data.status);
+			});
+			props.updateLogs('Initializing LTR', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error initializing LTR: ' + e.toString(), 2);
+		}
+	};
+
+	const triggerCreateModelLTR = async () => {
+		try {
+			await gameChangerAPI.createModelLTR().then((data) => {
+				setLTRModelCreatedStatus(data.status);
+			});
+			props.updateLogs('Creating LTR model', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error creating LTR model: ' + e.toString(), 2);
+		}
+	};
+
 	/**
 	 * @method checkCorpusDownloading
 	 */
@@ -655,6 +683,65 @@ export default (props) => {
 								style={{ fontSize: 'small', minWidth: '50px', margin: '10px' }}
 							/>
 						</div>
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>LTR</b>
+						<br />
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerInitializeLTR();
+							}}
+							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
+						>
+							Initialize
+						</GCPrimaryButton>
+						{ltrInitializedStatus &&
+							<div
+								style={{
+									minWidth: '200px',
+									display: 'inline-block'
+								}}
+							>
+								{ltrInitializedStatus === 200 ?
+									'Initialize request successful' :
+									`Initialize reqeust returned code ${ltrInitializedStatus}`
+								}
+							</div>
+						}
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerCreateModelLTR();
+							}}
+							disabled={checkReloading()}
+							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
+						>
+							Create Model
+						</GCPrimaryButton>
+						{ltrModelCreatedStatus &&
+							<div
+								style={{
+									minWidth: '200px',
+									display: 'inline-block'
+								}}
+							>
+								{ltrModelCreatedStatus === 200 ?
+									'Create model request successful' :
+									`Create model reqeust returned code ${ltrModelCreatedStatus}`
+								}
+							</div>
+						}
 					</div>
 				</BorderDiv>
 			</div>

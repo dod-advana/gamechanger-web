@@ -22,6 +22,7 @@ export default () => {
 	const [userFeedback, setUserFeedback] = useState(true);
 	const [jiraFeedback, setJiraFeedback] = useState(true);
 	const [topicSearch, setTopicSearch] = useState(true);
+	const [ltr, setLTR] = useState(true);
 
 	// EsIndexModal and TrendingBlacklistModal state variables
 	const [showEditEsIndexModal, setShowEditEsIndexModal] = useState(false);
@@ -255,6 +256,28 @@ export default () => {
 		}
 	};
 
+	const toggleLTR = async () => {
+		const title = 'Toggling LTR: ';
+		createAlert(title, 'info', 'Started');
+		try {
+			await gameChangerAPI.toggleLTR().then(() => {
+				createAlert(
+					'Toggling LTR',
+					'success',
+					'updated LTR'
+				);
+				getLTR();
+			});
+		} catch (e) {
+			console.log(e);
+			createAlert(
+				'Toggling LTR',
+				'error',
+				'failed toggling LTR'
+			);
+		}
+	};
+
 	const getCombinedSearch = async () => {
 		try {
 			const { data } = await gameChangerAPI.getCombinedSearchMode();
@@ -303,6 +326,16 @@ export default () => {
 		}
 	};
 
+	const getLTR = async () => {
+		try {
+			const { data } = await gameChangerAPI.getLTRMode();
+			const value = data.value === 'true';
+			setLTR(value);
+		} catch (e) {
+			console.error('Error getting LTR mode', e);
+		}
+	};
+
 	const getTopicSearch = async () => {
 		try {
 			const { data } = await gameChangerAPI.getTopicSearchMode();
@@ -319,6 +352,7 @@ export default () => {
 		getUserFeedback();
 		getTopicSearch();
 		getJiraFeedback();
+		getLTR();
 	}, []);
 
 	return (
@@ -618,6 +652,29 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Toggle Jira User Feedback
+									</span>
+								</h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper
+							style={
+								ltr
+									? styles.paper
+									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
+							}
+							zDepth={2}
+						>
+							<Link
+								to="#"
+								onClick={toggleLTR}
+								style={{ textDecoration: 'none' }}
+							>
+								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
+								<h2 style={styles.featureName}>
+									<span style={styles.featureNameLink}>
+										Toggle LTR
 									</span>
 								</h2>
 							</Link>

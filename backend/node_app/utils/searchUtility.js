@@ -368,7 +368,8 @@ class SearchUtility {
 			order = 'desc',
 			includeHighlights = true,
 			docIds = {},
-			selectedDocuments
+			selectedDocuments,
+			ltr = false
 		 }, 
 		 user) {
 
@@ -610,6 +611,20 @@ class SearchUtility {
 					)
 
 			}
+
+			if (ltr) {
+				query.rescore = {
+					query: {
+						rescore_query: {
+							sltr: {
+								params: { keywords: `${parsedQuery}` },
+								model: 'ltr_model'
+							}
+						}
+					}					
+				}
+			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
