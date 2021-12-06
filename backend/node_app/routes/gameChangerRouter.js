@@ -91,6 +91,8 @@ router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/initializeLTR', transformer.initializeLTR);
+router.get('/admin/createModelLTR', transformer.createModelLTR);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
@@ -176,6 +178,8 @@ router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
 router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
+router.get('/appSettings/ltr', appSettings.getLTRMode);
+router.post('/appSettings/ltr', appSettings.toggleLTRMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
