@@ -115,6 +115,7 @@ const endpoints = {
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
 	jiraFeedback: '/api/gamechanger/appSettings/jiraFeedback',
+	ltr: '/api/gamechanger/appSettings/ltr',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
@@ -125,6 +126,8 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	initializeLTR: '/api/gamechanger/admin/initializeLTR',
+	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -874,6 +877,16 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body)
 	}
 
+	getLTRMode = async () => {
+		const url = endpoints.ltr;
+		return axiosGET(this.axios, url);
+	};
+
+	toggleLTR = async () => {
+		const url = endpoints.ltr;
+		return axiosPOST(this.axios, url, {});
+	};
+
 	getTopicSearchMode = async () => {
 		const url = endpoints.topicSearch;
 		return axiosGET(this.axios, url);
@@ -978,6 +991,16 @@ export default class GameChangerAPI {
 
 	getFAQ = async () => {
 		const url = endpoints.getFAQ;
+		return axiosGET(this.axios, url);
+	};
+
+	initializeLTR = async () => {
+		const url = endpoints.initializeLTR;
+		return axiosGET(this.axios, url);
+	};
+
+	createModelLTR = async () => {
+		const url = endpoints.createModelLTR;
 		return axiosGET(this.axios, url);
 	};
 }

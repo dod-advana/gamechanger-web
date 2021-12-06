@@ -227,12 +227,21 @@ export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
 		.map((x) => x.trim())
 		.chunk(4)
 		.value();
-	return _.map(trimmed, (x) => ({
-		References: x[0],
-		' ': x[1] || '',
-		'  ': x[2],
-		'   ': x[3],
-	}));
+	return _.map(trimmed, (x) => {
+		if (x.length === 2) {
+			return {
+				References: x[0],
+				' ': x[1] || '',
+			};
+		} else {
+			return {
+				References: x[0],
+				' ': x[1] || '',
+				'  ': x[2],
+				'   ': x[3],
+			};
+		}
+	});
 };
 
 export const getMetadataForPropertyTable = (item) => {
