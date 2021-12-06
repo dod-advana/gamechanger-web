@@ -561,7 +561,7 @@ export default function ResponsibilityDocumentExplorer({
 					)}
 				</div>
 				<GCAccordion
-					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length}
+					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length ? true : false}
 					header={'FILTERS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -570,7 +570,7 @@ export default function ResponsibilityDocumentExplorer({
 					<div style={{ width: '100%' }}>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={docTitle.length}
+								expanded={docTitle.length ? true : false}
 								header={'DOCUMENT TITLE'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
@@ -598,7 +598,7 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={organization.length}
+								expanded={organization.length ? true : false}
 								header={'ORGANIZATION'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
@@ -629,7 +629,7 @@ export default function ResponsibilityDocumentExplorer({
 						</div>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={Object.keys(responsibilityText).length}
+								expanded={Object.keys(responsibilityText).length ? true : false}
 								header={'RESPONSIBILITY TEXT'}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
