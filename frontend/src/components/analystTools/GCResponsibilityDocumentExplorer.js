@@ -651,6 +651,8 @@ export default function ResponsibilityDocumentExplorer({
 									setOrganization([]);
 									setDocTitle([]);
 									setClearFilters(!clearFilters);
+									setResultsPage(1);
+									setReloadResponsibilities(true);
 								}}
 								style={{display: 'block', width: '100%', margin: '20px 0 10px 0'}}
 								isSecondaryBtn
