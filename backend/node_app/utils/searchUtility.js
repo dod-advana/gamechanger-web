@@ -473,6 +473,14 @@ class SearchUtility {
 							},
 							{
 								wildcard: {
+									'display_source': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
 									'display_title_s.search': {
 										value: `*${parsedQuery}*`,
 										boost: 8
@@ -487,6 +495,22 @@ class SearchUtility {
 									}
 								}
 							},
+							{
+								wildcard: {
+									'display_source_s.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
+									'top_entities_t.search': {
+										value: `*${parsedQuery}*`,
+										boost: 2
+									}
+								}
+							},								
 							{
 								match: {
 									"display_title_s.search": parsedQuery
@@ -504,7 +528,10 @@ class SearchUtility {
 					fields: {
 						'display_title_s.search': {},
 						'keyw_5': {},
-						'filename.search': {}
+						'filename.search': {},
+						'display_source_s.search': {},
+						'top_entities_t': {},
+						'topics_s': {}
 					},
 					fragment_size: 10,
 					fragmenter: 'simple',
@@ -1565,6 +1592,15 @@ class SearchUtility {
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
+								if (r.highlight['display_source_s.search']) {
+									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
+								}
+								if (r.highlight.top_entities_t) {
+									result.pageHits.push({title: 'Top Entities', snippet: r.highlight.top_entities_t[0]});
+								}
+								if (r.highlight.topics_s) {
+									result.pageHits.push({title: 'Topics', snippet: r.highlight.topics_s[0]});
+								}
 							}
 							result.pageHitCount = pageSet.size;
 						}
@@ -1623,6 +1659,15 @@ class SearchUtility {
 								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
+								if (r.highlight['display_source_s.search']) {
+									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
+								}
+								if (r.highlight.top_entities_t) {
+									result.pageHits.push({title: 'Top Entities', snippet: r.highlight.top_entities_t[0]});
+								}
+								if (r.highlight.topics_s) {
+									result.pageHits.push({title: 'Topics', snippet: r.highlight.topics_s[0]});
 								}
 							}
 							result.pageHitCount = pageSet.size;
