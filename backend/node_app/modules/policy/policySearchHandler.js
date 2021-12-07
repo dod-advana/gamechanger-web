@@ -573,7 +573,7 @@ class PolicySearchHandler extends SearchHandler {
 		try {
 			return {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_rs']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_s']
 				},
 				stored_fields: [
 					'filename',

@@ -261,7 +261,7 @@ export const getMetadataForPropertyTable = (item) => {
 	];
 
 	if (Config.GAMECHANGER.SHOW_TOPICS) {
-		dataKeys.push({ name: 'topics_rs', keyLabel: 'Topics' });
+		dataKeys.push({ name: 'topics_s', keyLabel: 'Topics' });
 	}
 	_.each(dataKeys, (dataKey) => {
 		let oldKey = dataKey.name;
