@@ -718,7 +718,9 @@ class SearchUtility {
 					'is_revoked_b',
 					'access_timestamp_dt',
 					'publication_date_dt',
-					'crawler_used_s'
+					'crawler_used_s',
+					'topics_s'
+
 				],
 				track_total_hits: true,
 				size: limit,
@@ -1549,9 +1551,11 @@ class SearchUtility {
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
-				const { _source = {} } = r;
-				const { topics_s = {} } = _source;
-				result.topics_s = topics_s
+				// const { _source = {} } = r;
+				// const { topics_s = {} } = _source;
+				// result.topics_s = topics_s;
+				// console.log(result.topics_s)
+
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
@@ -1598,13 +1602,10 @@ class SearchUtility {
 									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
 								}
 								if (r.highlight.top_entities_t) {
-									console.log(result.top_entities_t)
 									var new_highlights =  this.highlight_keywords(result.top_entities_t, r.highlight.top_entities_t);
 									result.pageHits.push({title: 'Entities', snippet: new_highlights});
 								}
 								if (r.highlight.topics_s) {
-									console.log(result.topics_s)
-
 									var new_highlights =  this.highlight_keywords(result.topics_s, r.highlight.topics_s);
 									result.pageHits.push({title: 'Topics', snippet: new_highlights});
 								}
@@ -1690,6 +1691,11 @@ class SearchUtility {
 					} else {
 						result['keyw_5'] = '';
 					}
+				
+
+					//result['topics_s'] = result['topics_s']
+					//console.log(result['topics_s'])
+
 					if (!result.ref_list) {
 						result.ref_list = [];
 					}
@@ -1722,8 +1728,7 @@ class SearchUtility {
 			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`)
 		}
 		let complete_words = all_words_str.split(', ')
-		console.log("complete words")
-		console.log(complete_words)
+
 		return complete_words;
 	}
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
@@ -2079,9 +2084,9 @@ class SearchUtility {
 		try {
 			let query = {
 				_source: {
-					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_s"]
+					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs"]
 				},
-				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
+				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "topics_s","ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
 				from: 0,
 				size: 18,
 				track_total_hits: true,
@@ -2089,11 +2094,11 @@ class SearchUtility {
 					bool: {
 						must: [],
 						should: [{
-							  query_string: {
-								  query: "marine_pubs",
-								  default_field: "crawler_used_s"
-							   }
-						  }],
+							wildcard: {
+								'display_source_s.search': {
+									value: `*${searchText}*`
+							  }
+						  }}],
 						minimum_should_match: 1
 					}
 				},
@@ -2188,7 +2193,7 @@ class SearchUtility {
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
-		let esIndex = 'gamechanger';
+		let esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
 
 		switch (cloneName) {
 			case 'eda':

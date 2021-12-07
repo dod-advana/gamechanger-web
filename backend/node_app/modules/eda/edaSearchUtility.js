@@ -645,7 +645,7 @@ class EDASearchUtility {
 				let result = this.searchUtility.transformEsFields(r.fields);
 				const { _source = {}, fields = {} } = r;
 				const { topics_s = {} } = _source;
-				result.topics_s = Object.keys(topics_s);
+				result.topics_s = topics_s
 	
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
