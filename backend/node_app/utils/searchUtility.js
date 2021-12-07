@@ -359,7 +359,9 @@ class SearchUtility {
 				'crawler_used_s',
 				'download_url_s',
 				'source_page_url_s',
-				'source_fqdn_s'
+				'source_fqdn_s',
+				'topics_s',
+				'top_entities_t'
 			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
@@ -1548,9 +1550,9 @@ class SearchUtility {
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
 				const { _source = {} } = r;
-				const { topics_rs = {} } = _source;
-				result.topics_rs = Object.keys(topics_rs);
-
+				//const { topics_s = {} } = _source;
+				//result.topics_s = Object.keys(topics_s);
+				console.log(r)
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
@@ -1587,7 +1589,8 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									result.pageHits.push({title: 'Keywords', snippet: new_highlights});
 								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
@@ -1596,10 +1599,15 @@ class SearchUtility {
 									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
 								}
 								if (r.highlight.top_entities_t) {
-									result.pageHits.push({title: 'Top Entities', snippet: r.highlight.top_entities_t[0]});
+									console.log(result.top_entities_t)
+									var new_highlights =  this.highlight_keywords(result.top_entities_t, r.highlight.top_entities_t);
+									result.pageHits.push({title: 'Entities', snippet: new_highlights});
 								}
 								if (r.highlight.topics_s) {
-									result.pageHits.push({title: 'Topics', snippet: r.highlight.topics_s[0]});
+									console.log(result.topics_s)
+
+									var new_highlights =  this.highlight_keywords(result.topics_s, r.highlight.topics_s);
+									result.pageHits.push({title: 'Topics', snippet: new_highlights});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1655,8 +1663,8 @@ class SearchUtility {
 									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
 								}
 								if(r.highlight.keyw_5){
-									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-								}
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									result.pageHits.push({title: 'Keywords', snippet: new_highlights});								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
 								}
@@ -1664,10 +1672,12 @@ class SearchUtility {
 									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
 								}
 								if (r.highlight.top_entities_t) {
-									result.pageHits.push({title: 'Top Entities', snippet: r.highlight.top_entities_t[0]});
+									var new_highlights =  this.highlight_keywords(result.top_entities_t, r.highlight.top_entities_t);
+									result.pageHits.push({title: 'Entities', snippet: new_highlights});
 								}
 								if (r.highlight.topics_s) {
-									result.pageHits.push({title: 'Topics', snippet: r.highlight.topics_s[0]});
+									var new_highlights =  this.highlight_keywords(result.topics_s, r.highlight.topics_s);
+									result.pageHits.push({title: 'Topics', snippet: new_highlights});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1700,7 +1710,23 @@ class SearchUtility {
 			this.logger.error(err.message, 'GL7EDI3', user);
 		}
 	}
-	
+	highlight_keywords(all_words, highlights) {
+		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '');});
+		if (all_words instanceof Array){
+			var all_words_str = all_words.join(", ")
+		}
+		else {
+			var all_words_str = all_words
+		}
+		for (let ind in resultHighlights) {
+			var word = resultHighlights[ind]
+			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`)
+		}
+		let complete_words = all_words_str.split(', ')
+		console.log("complete words")
+		console.log(complete_words)
+		return complete_words;
+	}
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
 		try {
 			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
@@ -1773,7 +1799,7 @@ class SearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
+		const arrayFields = ['keyw_5', 'topics_s', 'top_entities_t',  'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
 		const edaArrayFields = ['pds_header_items_eda_ext_n','pds_line_items_eda_ext_n','syn_header_items_eda_ext_n','syn_line_items_eda_ext_n']
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
