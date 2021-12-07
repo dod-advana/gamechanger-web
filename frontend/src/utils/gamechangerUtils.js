@@ -257,6 +257,8 @@ export const getMetadataForPropertyTable = (item) => {
 		{ name: 'doc_type', keyLabel: 'Document Type' },
 		{ name: 'doc_num', keyLabel: 'Document Number' },
 		{ name: 'pageHitCount', keyLabel: 'Page Matches' },
+		{ name: 'topics_s', keyLabel: 'Topics' }
+
 		//{ name: 'ref_list', keyLabel: 'references', valueFunction: (val) => _.first(val) },
 	];
 
