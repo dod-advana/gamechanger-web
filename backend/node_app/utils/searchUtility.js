@@ -393,7 +393,7 @@ class SearchUtility {
 			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
 				},
 				stored_fields: storedFields,
 				from: offset,
@@ -696,7 +696,7 @@ class SearchUtility {
 						'pagerank_r',
 						'kw_doc_score_r',
 						'pagerank',
-						'topics_rs'
+						'topics_s'
 					]
 				},
 				stored_fields: [
@@ -1550,9 +1550,8 @@ class SearchUtility {
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
 				const { _source = {} } = r;
-				//const { topics_s = {} } = _source;
-				//result.topics_s = Object.keys(topics_s);
-				console.log(r)
+				const { topics_s = {} } = _source;
+				result.topics_s = topics_s
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
 					const pageSet = new Set();
@@ -2080,7 +2079,7 @@ class SearchUtility {
 		try {
 			let query = {
 				_source: {
-					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_rs"]
+					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_s"]
 				},
 				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
 				from: 0,
@@ -2481,7 +2480,7 @@ class SearchUtility {
 	getDocumentParagraphsByParIDs(ids = []) {
 		return {
 			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r', 'topics_rs']
+				includes: ['pagerank_r', 'kw_doc_score_r', 'topics_s']
 			},
 			'stored_fields': [
 				'filename',
@@ -2503,7 +2502,7 @@ class SearchUtility {
 				'access_timestamp_dt',
 				'publication_date_dt',
 				'crawler_used_s',
-				'topics_rs'
+				'topics_s'
 			],
 			'query': {
 				'bool': {
