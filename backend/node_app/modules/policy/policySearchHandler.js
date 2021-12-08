@@ -488,9 +488,11 @@ class PolicySearchHandler extends SearchHandler {
 			const esQuery = this.searchUtility.getElasticsearchDocDataFromId(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 
 				const searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+				//console.log(JSON.stringify(searchResults, null, 4));
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {
@@ -520,7 +522,6 @@ class PolicySearchHandler extends SearchHandler {
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 
 				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
-				console.log(esResults)
 				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results
 				return {...searchResults, esQuery};

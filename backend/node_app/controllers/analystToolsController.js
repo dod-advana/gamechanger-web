@@ -32,29 +32,34 @@ class AnalystToolsController {
 			// ML API Call Goes Here
 			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
 			const paragraphResults = await Promise.all(paragraphSearches);
-			
+			console.log(paragraphSearches)
+
 			const resultsObject = {};
 			
 			paragraphResults.forEach(result => {
 				Object.keys(result).forEach(id => {
-					resultsObject[result[id].id] = {
-						score: result[id].score,
-						text: result[id].text,
-						paragraphIdBeingMatched: result.paragraphIdBeingMatched
-					};
+					if (result[id].id){
+						resultsObject[result[id].id] = {
+							score: result[id].score,
+							text: result[id].text,
+							paragraphIdBeingMatched: result.paragraphIdBeingMatched
+						};
+					}
 				});
 			});
 			
 			const ids = Object.keys(resultsObject);
-			
+			console.log(ids)
 			// Query ES
 			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids);
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
+			console.log(JSON.stringify(esQuery))
+			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
+
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-			
+
 			// Aggregate Data
 			const returnData = this.searchUtility.cleanUpEsResults(esResults, [], userId, [], {}, null, esQuery, true, resultsObject);
-			
+			console.log(returnData)
 			res.status(200).send(returnData);
 		} catch(e) {
 			this.logger.error(e, '60OOE62', userId);

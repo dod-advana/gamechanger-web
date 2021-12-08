@@ -681,7 +681,6 @@ class SearchUtility {
 				}
 			}
             results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-			console.log(JSON.stringify(results));
             return results
         } catch (err) {
             this.logger.error(err, 'TJKBNOF', userId);
@@ -2187,7 +2186,15 @@ class SearchUtility {
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
-		let esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
+		let esIndex = '';
+		try {
+			esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
+		}catch (err) {
+			this.logger.error(err, 'GE2ALRF','');
+			console.log("Setting ES Index to default");
+			esIndex = 'gamechanger';
+
+		}
 
 		switch (cloneName) {
 			case 'eda':
@@ -2322,7 +2329,7 @@ class SearchUtility {
 								addNode(this.buildNodeVisObject(obj.start, isTest, user));
 								addNode(this.buildNodeVisObject(obj.end, isTest, user));
 								addEdge(this.buildEdgeVisObject(obj.relationship, isTest, user));
-							}
+							}s
 						} else if (recType === 'Array') {
 							for (let obj of v) {
 								const recType = this.getNeo4jType(obj, isTest);
@@ -2520,7 +2527,7 @@ class SearchUtility {
 	getDocumentParagraphsByParIDs(ids = []) {
 		return {
 			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r', 'topics_s']
+				includes: ['pagerank_r', 'kw_doc_score_r']
 			},
 			'stored_fields': [
 				'filename',
