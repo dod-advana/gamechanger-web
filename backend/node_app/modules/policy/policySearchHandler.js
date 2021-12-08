@@ -531,6 +531,7 @@ class PolicySearchHandler extends SearchHandler {
 				return {...searchResults, esQuery};
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'IH0JGPR', userId);
+				if (this.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
 				return { totalCount: 0, docs: [], esQuery };
 			}
 
@@ -559,6 +560,8 @@ class PolicySearchHandler extends SearchHandler {
 				return {...searchResults, esQuery};
 			} else {
 				this.logger.error('Error with Elasticsearch results', '54TP85I', userId);
+				if (this.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+
 				return { totalCount: 0, docs: [], esQuery };
 			}
 
