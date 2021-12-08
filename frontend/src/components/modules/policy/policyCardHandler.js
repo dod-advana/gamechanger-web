@@ -413,7 +413,6 @@ const StyledFrontCardContent = styled.div`
 				> blockquote {
 					font-size: ${CARD_FONT_SIZE}px;
 					line-height: 20px;
-
 					background: #dde1e0;
 					margin-bottom: 0;
 					height: 165px;
@@ -548,7 +547,6 @@ const addFavoriteTopicToMetadata = (
 				</div>
 			);
 			var topics = metaData.Value;
-			//topics = topics.split(", ");
 			metaData.Value = (
 				<div>
 					{topics.map((topic, index) => {

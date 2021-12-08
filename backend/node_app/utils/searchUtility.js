@@ -52,6 +52,7 @@ class SearchUtility {
 		this.getTypeQuery = this.getTypeQuery.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
+		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -2474,7 +2475,48 @@ class SearchUtility {
 		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
 	return question;
 	}
-	
+	getElasticsearchDocDataFromId({ docIds }, user) {
+		try {
+			return {
+				_source: {
+					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank']
+				},
+				stored_fields: [
+					'filename',
+					'title',
+					'page_count',
+					'doc_type',
+					'doc_num',
+					'ref_list',
+					'id',
+					'summary_30',
+					'keyw_5',
+					'type',
+					'pagerank_r',
+					'display_title_s',
+					'display_org_s',
+					'display_doc_type_s',
+					'access_timestamp_dt',
+					'publication_date_dt',
+					'crawler_used_s',
+					'topics_s',
+					'top_entities_t'
+				],
+				track_total_hits: true,
+				size: 100,
+				query: {
+					bool: {
+						must: {
+							terms: {id: docIds}
+						}
+					}
+				}
+			};
+		} catch (err) {
+			this.logger.error(err, 'MEJL7W8', user);
+		}
+	}
+
 	getDocumentParagraphsByParIDs(ids = []) {
 		return {
 			_source: {
