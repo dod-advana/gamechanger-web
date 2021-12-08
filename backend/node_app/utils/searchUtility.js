@@ -1551,10 +1551,6 @@ class SearchUtility {
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
-				// const { _source = {} } = r;
-				// const { topics_s = {} } = _source;
-				// result.topics_s = topics_s;
-				// console.log(result.topics_s)
 
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
@@ -1691,10 +1687,6 @@ class SearchUtility {
 					} else {
 						result['keyw_5'] = '';
 					}
-				
-
-					//result['topics_s'] = result['topics_s']
-					//console.log(result['topics_s'])
 
 					if (!result.ref_list) {
 						result.ref_list = [];
@@ -1716,6 +1708,7 @@ class SearchUtility {
 		}
 	}
 	highlight_keywords(all_words, highlights) {
+		// purpose is to highlight words from the entire list.
 		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '');});
 		if (all_words instanceof Array){
 			var all_words_str = all_words.join(", ")

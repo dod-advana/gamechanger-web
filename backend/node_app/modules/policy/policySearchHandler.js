@@ -78,8 +78,6 @@ class PolicySearchHandler extends SearchHandler {
 		switch (functionName) {
 			case 'getSingleDocumentFromES':
 				return await this.getSingleDocumentFromESHelper(req, userId);
-			case 'getDocumentsForDetailsPageFromES':
-				return await this.getDocumentsForDetailsPageFromESHelper(req, userId);
 			case 'getDocumentsBySourceFromESHelper':
 				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
@@ -493,7 +491,6 @@ class PolicySearchHandler extends SearchHandler {
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 
 				const searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
-				console.log(searchResults)
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {
@@ -507,39 +504,8 @@ class PolicySearchHandler extends SearchHandler {
 			return { totalCount: 0, docs: [] };
 		}
 	}
+	
 
-	async getDocumentsForDetailsPageFromESHelper(req, userId) {
-		let esQuery = '';
-		try {
-			const permissions = req.permissions ? req.permissions : [];
-
-			const { cloneName } = req.body;
-
-			esQuery = this.getElasticsearchDocDataFromId(req.body, userId);
-
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
-
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-			console.log(esResults)
-
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
-				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
-				console.log(searchResults)
-				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-				// insert crawler dates into search results
-				return {...searchResults, esQuery};
-			} else {
-				this.logger.error('Error with Elasticsearch results', 'IH0JGPR', userId);
-				return { totalCount: 0, docs: [], esQuery };
-			}
-
-		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
-			this.logger.error(msg, 'Z9DWH7K', userId);
-			throw msg;
-		}
-	}
 
 	async getDocumentsBySourceFromESHelper(req, userId) {
 		let esQuery = '';

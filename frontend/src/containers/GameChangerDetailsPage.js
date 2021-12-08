@@ -300,7 +300,6 @@ const GameChangerDetailsPage = (props) => {
 	useEffect(() => {
 		const addFavoriteTopicToMetadata = (data, cloneName) => {
 			const temp = _.cloneDeep(data);
-			console.log(temp)
 			temp.map((metaData) => {
 				if (metaData.Key === 'Topics') {
 					metaData.Key = (
