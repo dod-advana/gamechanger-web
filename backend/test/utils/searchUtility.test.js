@@ -1529,4 +1529,54 @@ describe('SearchUtility', function () {
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
+	describe('#highlightKeywords', () => {
+		it('it should return a list of highlighted keys given a list of words and one to be highlighted', () => {
+			const tmpOpts = {
+				...opts,
+				constants: {GAME_CHANGER_OPTS: {allow_daterange: false}}
+			};
+			
+			let target = new SearchUtility(tmpOpts);
+			let full_kw = [			
+				'space allocations',
+				'space allocation',
+				'space acquisition'
+ 			]
+			let highlighted_kw = [ '<em>acquisition</em>' ]
+
+			const actual = target.highlight_keywords(full_kw, highlighted_kw);
+			
+			const expected = [			
+				'space allocations',
+				'space allocation',
+				'space <em>acquisition</em>'
+ 			]
+			
+			assert.deepStrictEqual(actual, expected);
+		});
+		it('it should return a list of highlighted keys given a list of words and multiple words to be highlighted', () => {
+			const tmpOpts = {
+				...opts,
+				constants: {GAME_CHANGER_OPTS: {allow_daterange: false}}
+			};
+			
+			let target = new SearchUtility(tmpOpts);
+			let full_kw = [			
+				'space allocations',
+				'space allocation',
+				'space acquisition'
+ 			]
+			let highlighted_kw = [ '<em>acquisition</em>', '<em>allocations</em>', ]
+
+			const actual = target.highlight_keywords(full_kw, highlighted_kw);
+			
+			const expected = [			
+				'space <em>allocations</em>',
+				'space allocation',
+				'space <em>acquisition</em>'
+ 			]
+			
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
 });
