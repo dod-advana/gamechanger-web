@@ -89,7 +89,7 @@ class ResponsibilityController {
 					"pagerank_r",
 					"kw_doc_score_r",
 					"orgs_rs",
-					"topics_rs"
+					"topics_s"
 				]
 			},
 			"stored_fields": [

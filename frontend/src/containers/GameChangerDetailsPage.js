@@ -309,7 +309,8 @@ const GameChangerDetailsPage = (props) => {
 							<b style={{ color: 'red' }}>(Beta)</b>
 						</div>
 					);
-					const topics = metaData.Value;
+					var topics = metaData.Value;
+
 					metaData.Value = (
 						<div>
 							{topics.map((topic, index) => {
@@ -379,7 +380,6 @@ const GameChangerDetailsPage = (props) => {
 					docIds: [doc_id],
 				},
 			});
-		
 			data.document = resp.data.docs[0];
 		
 			const docData = getMetadataForPropertyTable(data.document);

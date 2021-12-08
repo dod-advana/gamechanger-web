@@ -149,7 +149,7 @@ const DocumentDetailsPage = (props) => {
 		if (docIds.length > 0) {
 			gameChangerAPI
 				.callSearchFunction({
-					functionName: 'getDocumentsForDetailsPageFromES',
+					functionName: 'getSingleDocumentFromES',
 					cloneName: cloneData.clone_name,
 					options: {
 						docIds: docIds,
