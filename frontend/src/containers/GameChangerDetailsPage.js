@@ -380,7 +380,6 @@ const GameChangerDetailsPage = (props) => {
 					docIds: [doc_id],
 				},
 			});
-		
 			data.document = resp.data.docs[0];
 		
 			const docData = getMetadataForPropertyTable(data.document);
