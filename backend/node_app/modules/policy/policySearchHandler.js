@@ -485,7 +485,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			const { cloneName } = req.body;
 
-			const esQuery = this.getElasticsearchDocDataFromId(req.body, userId);
+			const esQuery = this.searchUtility.getElasticsearchDocDataFromId(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
@@ -536,46 +536,6 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	getElasticsearchDocDataFromId({ docIds }, user) {
-		try {
-			return {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank']
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'type',
-					'pagerank_r',
-					'display_title_s',
-					'display_org_s',
-					'display_doc_type_s',
-					'access_timestamp_dt',
-					'publication_date_dt',
-					'crawler_used_s',
-					'topics_s'
-				],
-				track_total_hits: true,
-				size: 100,
-				query: {
-					bool: {
-						must: {
-							terms: {id: docIds}
-						}
-					}
-				}
-			};
-		} catch (err) {
-			this.logger.error(err, 'MEJL7W8', user);
-		}
-	}
 
 	// uses searchtext to get entity + parent, return entitySearch object
 	async entitySearch(searchText, offset, limit = 6, userId) {
