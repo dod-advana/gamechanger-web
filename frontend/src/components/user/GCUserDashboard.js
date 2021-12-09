@@ -922,7 +922,7 @@ const GCUserDashboard = (props) => {
 					{search.pubDate}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Include Cancelled:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
 					{search.isRevoked ? 'true' : 'false'}
 				</div>
 			</>
