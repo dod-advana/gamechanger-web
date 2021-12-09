@@ -168,16 +168,13 @@ const renderRecentSearches = (search, state, dispatch) => {
 				/>
 			</div>
 			<Typography style={styles.subtext}>
-				Organization Filter:
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
+				Organization Filter: {orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Type Filter:
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
+				Type Filter: {typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Publication Date:
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				Publication Date: {publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
 			</Typography>
 			<Typography style={styles.subtext}>
 				Include Canceled: {includeRevoked ? 'Yes' : 'No'}
