@@ -445,7 +445,9 @@ const GCUserDashboard = (props) => {
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
+					<p>
+						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
+					</p>
 				</div>
 			),
 		},
@@ -547,7 +549,9 @@ const GCUserDashboard = (props) => {
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
+					<p>
+						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
+					</p>
 				</div>
 			),
 		},
