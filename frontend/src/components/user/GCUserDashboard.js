@@ -439,17 +439,6 @@ const GCUserDashboard = (props) => {
 			),
 		},
 		{
-			Header: () => <p>Search Type</p>,
-			filterable: false,
-			accessor: 'searchType',
-			width: 200,
-			Cell: (row) => (
-				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
-				</div>
-			),
-		},
-		{
 			Header: () => <p>Search Date</p>,
 			filterable: false,
 			accessor: 'completion_time',
@@ -548,17 +537,6 @@ const GCUserDashboard = (props) => {
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
 					<p>{row.value.totalCount}</p>
-				</div>
-			),
-		},
-		{
-			Header: () => <p>Search Type</p>,
-			filterable: false,
-			accessor: 'download_request_body.searchType',
-			width: 200,
-			Cell: (row) => (
-				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
 				</div>
 			),
 		},
