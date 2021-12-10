@@ -389,9 +389,11 @@ class SearchUtility {
 				}
 			}
 			storedFields = [...storedFields, ...extStoredFields];
-			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
-			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
-			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
+			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
+			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
+			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
+			console.log(plainQuery)
+			console.log(this.isVerbatim(searchText))
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -469,7 +471,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'keyw_5': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 2
 									}
 								}
@@ -477,7 +479,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'display_source': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 2
 									}
 								}
@@ -485,7 +487,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'display_title_s.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 8
 									}
 								}
@@ -493,7 +495,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'filename.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 4
 									}
 								}
@@ -501,7 +503,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'display_source_s.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 2
 									}
 								}
@@ -509,14 +511,14 @@ class SearchUtility {
 							{
 								wildcard: {
 									'top_entities_t.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 2
 									}
 								}
 							},								
 							{
 								match: {
-									"display_title_s.search": parsedQuery
+									"display_title_s.search": plainQuery
 								}
 							}
 						],
@@ -660,7 +662,20 @@ class SearchUtility {
 			this.logger.error(err, '2OQQD7D', user);
 		}
 	}
-
+	isVerbatim(searchText){
+		let verbatim = false;
+		if( (searchText.startsWith('"') && searchText.endsWith('"')) || (searchText.startsWith(`'`) && searchText.endsWith(`'`))){
+			verbatim = true;
+		}
+		return verbatim;
+	}
+	isVerbatimSuggest(searchText){
+		let verbatim = false;
+		if( (searchText.startsWith('"') || (searchText.startsWith(`'`)))){
+			verbatim = true;
+		}
+		return verbatim;
+	}
 	async getTitle (parsedQuery, clientObj, userId) {
 	// get contents of single document searching by doc display title
 		try {
@@ -1332,11 +1347,13 @@ class SearchUtility {
 	}
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
-		// multi search in ES if text is more than 3
+		// multi search in ES
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+
 		let query = {
 				suggest: {
 					suggester: {
-						text: searchText,
+						text: plainQuery,
 						term: {
 							field: field,
 							sort: sort,
@@ -1352,6 +1369,8 @@ class SearchUtility {
 	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases' }) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchTextCaps = searchText.toUpperCase();
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
 			let query = [
@@ -1367,7 +1386,7 @@ class SearchUtility {
 								{
 									wildcard: {
 										'display_title_s.search': {
-											value: `*${searchTextCaps}*`,
+											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
 										}
@@ -1392,7 +1411,7 @@ class SearchUtility {
 					query: {
 						prefix: {
 							search_query: {
-								value: `${searchText}`
+								value: `${plainQuery}`
 							}
 
 						}
@@ -1422,7 +1441,7 @@ class SearchUtility {
 					query: {
 						prefix: {
 							name: {
-								value: `${searchText}`
+								value: `${plainQuery}`
 							}
 
 						}
