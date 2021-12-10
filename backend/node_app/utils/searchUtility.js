@@ -2114,7 +2114,6 @@ class SearchUtility {
 					}
 				}]
 			}
-			console.log(query)
 			return query
 		} catch(err){
 			this.logger.error(err, 'G3WEJ64','');
