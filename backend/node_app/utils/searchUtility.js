@@ -1367,8 +1367,6 @@ class SearchUtility {
 	}
 
 	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases' }) {
-		// need to caps all search text for ID and Title since it's stored like that in ES
-		const searchTextCaps = searchText.toUpperCase();
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 
 		// multi search in ES if text is more than 3
