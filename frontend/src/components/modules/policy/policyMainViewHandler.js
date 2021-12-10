@@ -119,7 +119,6 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 const renderRecentSearches = (search, state, dispatch) => {
 	const {
 		searchText,
-		favorite,
 		orgFilterString,
 		publicationDateAllTime,
 		publicationDateFilter,
@@ -158,14 +157,6 @@ const renderRecentSearches = (search, state, dispatch) => {
 		>
 			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 				<Typography style={styles.containerText}>{searchText}</Typography>
-				<i
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						cursor: 'pointer',
-						fontSize: 20,
-					}}
-				/>
 			</div>
 			<Typography style={styles.subtext}>
 				Organization Filter:
@@ -457,14 +448,6 @@ const PolicyMainViewHandler = {
 											? search
 											: search.substring(0, 22) + '...'
 									}`}</Typography>
-									<i
-										className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-										style={{
-											color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-											cursor: 'pointer',
-											fontSize: 20,
-										}}
-									/>
 								</div>
 								<Typography style={styles.subtext}>
 									<i
