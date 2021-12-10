@@ -515,13 +515,21 @@ class PolicySearchHandler extends SearchHandler {
 			const { searchText, offset = 0, limit = 18, cloneName } = req.body;
 
 			esQuery = this.searchUtility.getSourceQuery(searchText, offset, limit);
+			//console.log("ES QUERY\n")
+			//console.log(JSON.stringify(esQuery,null,4))
 			const clientObj = this.searchUtility.getESClient(cloneName, permissions)
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-
+			console.log("ES results\n")
+			//console.log(JSON.stringify(esResults,null,4))
+			console.log(JSON.stringify(esResults))
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
+				console.log("inside es results")
 				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
-				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
+				console.log("cleaned results\n")
+
+				//console.log(JSON.stringify(searchResults,null,4))
+
+				//searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results
 				return {...searchResults, esQuery};
 			} else {
