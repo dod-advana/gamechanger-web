@@ -2206,7 +2206,6 @@ class SearchUtility {
 			esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
 		}catch (err) {
 			this.logger.error(err, 'GE2ALRF','');
-			this.logger.warn("Setting ES Index to default");
 			esIndex = 'gamechanger';
 
 		}
