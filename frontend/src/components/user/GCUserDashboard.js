@@ -902,11 +902,6 @@ const GCUserDashboard = (props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		let searchFields = '';
-		for (const field of search.searchFields) {
-			searchFields += `[${field}] `;
-		}
-
 		const searchSettings = (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
@@ -914,8 +909,8 @@ const GCUserDashboard = (props) => {
 					{search.orgFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Search Filters:</span>{' '}
-					{searchFields}
+					<span style={{ fontWeight: 'bold' }}>Type Filters:</span>{' '}
+					{search.typeFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Publication Date:</span>{' '}
@@ -1476,7 +1471,6 @@ const GCUserDashboard = (props) => {
 					typeFilterString: download_request_body.typeFilterString,
 					selectedDocuments: download_request_body.selectedDocuments,
 					tiny_url: download_request_body.tiny_url,
-					searchFields: download_request_body.searchFields,
 					edaSearchSettings: download_request_body.edaSearchSettings,
 					sort: download_request_body.sort,
 					order: download_request_body.order,
@@ -2113,7 +2107,6 @@ const GCUserDashboard = (props) => {
 								isClone = {true}
 								cloneData = {state.cloneData}
 								searchType={state.searchSettings.searchType}
-								searchFields={state.searchSettings.searchFields}
 								edaSearchSettings={state.edaSearchSettings}
 								sort={state.currentSort}
 								order={state.currentOrder}
