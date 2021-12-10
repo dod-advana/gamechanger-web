@@ -392,8 +392,6 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			console.log(plainQuery)
-			console.log(this.isVerbatim(searchText))
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -2208,7 +2206,7 @@ class SearchUtility {
 			esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
 		}catch (err) {
 			this.logger.error(err, 'GE2ALRF','');
-			console.log("Setting ES Index to default");
+			this.logger.warn("Setting ES Index to default");
 			esIndex = 'gamechanger';
 
 		}
@@ -2346,7 +2344,7 @@ class SearchUtility {
 								addNode(this.buildNodeVisObject(obj.start, isTest, user));
 								addNode(this.buildNodeVisObject(obj.end, isTest, user));
 								addEdge(this.buildEdgeVisObject(obj.relationship, isTest, user));
-							}s
+							}
 						} else if (recType === 'Array') {
 							for (let obj of v) {
 								const recType = this.getNeo4jType(obj, isTest);
