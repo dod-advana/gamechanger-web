@@ -79,7 +79,6 @@ const auxDisplayBackFields = [
 	'Classification'
 ];
 const auxDisplayTitleField = 'PresentationTitle';
-const auxDisplayFrontFields = [''];
 const auxDisplayFieldJSONMap = {
 	PresentationID: 'Presentation ID',
 	Status: 'Status',
@@ -244,8 +243,7 @@ const makeRows = (
 };
 
 const renderHighlights = (
-	highlights,
-	capitalizeFirst,
+	text,
 	hoveredHit,
 	setHoveredHit,
 	setHighlightText
@@ -259,51 +257,44 @@ const renderHighlights = (
 		text: '',
 	};
 
-	for (const field in highlights) {
-		const highlight = highlights[field];
-		let label = 1;
-		for (const text of highlight) {
-			const highlightLabel = `${capitalizeFirst(field)} ${label}`;
-			label += 1;
-			if (firstHighlight.first) {
-				firstHighlight.first = false;
-				firstHighlight.highlight = highlightLabel;
-				firstHighlight.text = text;
-			}
-			highlightList.push(
-				<>
-					<div
-						key={highlightLabel}
-						style={{
-							display: 'flex',
-							justifyContent: 'space-between',
-							alignItems: 'center',
-							paddingRight: '5px',
-							paddingLeft: '5px',
-							borderTop: '1px solid rgb(189, 189, 189)',
-							cursor: 'pointer',
-							color: '#386F94',
-							backgroundColor: 'white',
-							...(hoveredHit === highlightLabel && {
-								backgroundColor: '#E9691D',
-								color: 'white',
-							}),
-						}}
-						onMouseEnter={() => {
-							setHoveredHit(highlightLabel);
-							setHighlightText(text);
-						}}
-					>
-						<span style={{ fontSize }}>{highlightLabel}</span>
-						<i
-							className="fa fa-chevron-right"
-							style={{ marginLeft: 10, fontSize, color: 'white' }}
-						/>
-					</div>
-				</>
-			);
-		}
+	const highlightLabel = `Abstract`;
+	if (firstHighlight.first) {
+		firstHighlight.first = false;
+		firstHighlight.highlight = highlightLabel;
+		firstHighlight.text = text;
 	}
+	highlightList.push(
+		<>
+			<div
+				key={highlightLabel}
+				style={{
+					display: 'flex',
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					paddingRight: '5px',
+					paddingLeft: '5px',
+					borderTop: '1px solid rgb(189, 189, 189)',
+					cursor: 'pointer',
+					color: '#386F94',
+					backgroundColor: 'white',
+					...(hoveredHit === highlightLabel && {
+						backgroundColor: '#E9691D',
+						color: 'white',
+					}),
+				}}
+				onMouseEnter={() => {
+					setHoveredHit(highlightLabel);
+					setHighlightText(text);
+				}}
+			>
+				<span style={{ fontSize }}>{highlightLabel}</span>
+				<i
+					className="fa fa-chevron-right"
+					style={{ marginLeft: 10, fontSize, color: 'white' }}
+				/>
+			</div>
+		</>
+	);
 
 	if (hoveredHit === 0) {
 		setHoveredHit(firstHighlight.highlight);
@@ -424,42 +415,22 @@ const CDOCardHandler = {
 				highlightText = text;
 			};
 
-			let displayNameMap;
-			if (auxDisplayFieldJSONMap) {
-				try {
-					displayNameMap = auxDisplayFieldJSONMap;
-				} catch (e) {
-					console.log(e);
-					// console.log('Something went wrong parsing display map');
-				}
-			}
-
-			const frontItems = makeRows(
-				auxDisplayFrontFields,
-				item,
-				displayNameMap,
-				false
-			);
-
 			return (
 				<div style={styles.bodyContainer}>
-					{frontItems}
-					{item && item.highlight && (
+					{item?.['Abstract Text'] && (
 						<div
 							style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}
 						>
 							<div
 								style={{
 									minWidth: 100,
-									height: 190,
 									border: '1px solid rgb(189, 189, 189)',
 									borderTop: 0,
 									overflow: 'scroll',
 								}}
 							>
 								{renderHighlights(
-									item.highlight,
-									capitalizeFirst,
+									item['Abstract Text'],
 									hoveredHit,
 									setHoveredHit,
 									setHighlightText
@@ -467,14 +438,14 @@ const CDOCardHandler = {
 							</div>
 							<div
 								style={{
-									height: 150,
 									border: '1px solid rgb(189, 189, 189)',
 									borderLeft: 0,
-									width: '100%',
+									maxWidth: '72%'
 								}}
 							>
 								<blockquote
 									className="searchdemo-blockquote"
+									style={{height: '100%', overflow: 'scroll', wordWrap: 'break-word'}}
 									dangerouslySetInnerHTML={{
 										__html: sanitizeHtml(highlightText),
 									}}
@@ -495,7 +466,6 @@ const CDOCardHandler = {
 					displayNameMap = auxDisplayFieldJSONMap;
 				} catch (e) {
 					console.log(e);
-					// console.log('Something went wrong parsing display map');
 				}
 			}
 
