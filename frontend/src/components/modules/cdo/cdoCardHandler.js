@@ -10,7 +10,6 @@ import {
 	getTypeDisplay,
 } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
-import { CardButton } from '../../common/CardButton';
 import { primary } from '../../../components/common/gc-colors';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
@@ -182,12 +181,12 @@ const StyledFrontCardSubHeader = styled.div`
 	}
 `;
 
-const clickFn = (body) => {
-	let data = `<pre> ${body} </pre>`;
-	let myWindow = window.open('data:text/html,', '_blank', '');
-	myWindow.document.write(data);
-	myWindow.focus();
-};
+// const clickFn = (body) => {
+// 	let data = `<pre> ${body} </pre>`;
+// 	let myWindow = window.open('data:text/html,', '_blank', '');
+// 	myWindow.document.write(data);
+// 	myWindow.focus();
+// };
 
 const Row = ({ label, value, minWidth = 'inherit' }) => {
 	return (
@@ -337,7 +336,7 @@ const CDOCardHandler = {
 						<GCTooltip title={title} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.body) : () => {}}
+								// onClick={docListView ? () => clickFn(item.body) : () => {}}
 							>
 								<div className={'text'}>{title}</div>
 								{docListView && (
@@ -493,11 +492,11 @@ const CDOCardHandler = {
 		},
 
 		getFooter: (props) => {
-			const { item, cloneName, toggledMore, setToggledMore } = props;
+			const { cloneName, toggledMore, setToggledMore } = props;
 
 			return (
 				<>
-					<CardButton
+					{/* <CardButton
 						target={'_blank'}
 						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 						href={'#'}
@@ -507,7 +506,7 @@ const CDOCardHandler = {
 						}}
 					>
 						Open
-					</CardButton>
+					</CardButton> */}
 					<div
 						style={{ ...styles.viewMoreButton }}
 						onClick={() => {
