@@ -14,10 +14,10 @@ import {
 } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import { setState } from '../../../utils/sharedFunctions';
-import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
-import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
-import CrowdSourcingAppIcon from '../../../images/icon/NewCrowdSourcingIcon.png';
-import DataStatusTrackerIcon from '../../../images/icon/NewDataStatusTrackerIcon.png';
+import AppTutorialsIcon from '../../../images/icon/helpicon.png';
+import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
+import CrowdSourcingAppIcon from '../../../images/icon/crowdsourcing.png';
+import DataStatusTrackerIcon from '../../../images/icon/datatracker.png';
 import AnalystToolsIcon from '../../../images/icon/analyticswht.png';
 import CloneRequest from '../../../images/icon/CloneRequest.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
