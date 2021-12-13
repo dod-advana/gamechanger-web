@@ -55,7 +55,7 @@ class Reports {
 			const header = ['Filename', 'Title', 'Document Number', 'Document Type', 'Match Count', 'Publishing Organization', 'Publication Date', 'Verified On', 'Cancelled', 'Keywords', 'Topics', 'Reference List'];
 			stringifier.write(header);
 
-			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_rs, doc.ref_list];
+			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_s, doc.ref_list];
 				stringifier.write(item);
 			});
 		}

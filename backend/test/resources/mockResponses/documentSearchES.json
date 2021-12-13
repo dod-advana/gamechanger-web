@@ -22,7 +22,7 @@
               "_score":22.919777,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "battle":0.17685316043686258,
                     "ships":0.38350625558942847,
                     "craft":0.39695043438489025,
@@ -246,7 +246,7 @@
               "_score":22.682438,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "operations":0.11807675394370686,
                     "conduct":0.13946259728833543,
                     "coastal riverine":0.6678928733010219,
@@ -367,7 +367,7 @@
               "_score":18.953144,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "opnav":0.5254204437886674,
                     "comusfltforcom":0.26124934558410773,
                     "compacflt":0.25474649876152783,
@@ -602,7 +602,7 @@
               "_score":18.711739,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "theory operation":0.3852182183473526,
                     "isolate malfunctions":0.4306068033595191,
                     "operational checks":0.22321458459368881,
@@ -728,7 +728,7 @@
               "_score":18.266731,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "measures":0.23586466233348508,
                     "defence":0.3138934423919668,
                     "threat":0.16085620159549263,
@@ -846,7 +846,7 @@
               "_score":18.21796,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "opnav":0.5496594737836475,
                     "basing":0.2192134179392774,
                     "laydown":0.18384210033709858,
@@ -1075,7 +1075,7 @@
               "_score":17.465366,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "comprehend":0.3632079632392854,
                     "joint":0.2838521725877893,
                     "senior enlisted":0.254744745594808,
@@ -1219,7 +1219,7 @@
               "_score":17.17682,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "developmental education":0.29630525493157683,
                     "education":0.26415808485709363,
                     "training":0.29078477170220957,
@@ -1463,7 +1463,7 @@
               "_score":17.140087,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "asbestos":0.16055892711835743,
                     "safety":0.14889455564566031,
                     "hazmat":0.25105902074307446,
@@ -1598,7 +1598,7 @@
               "_score":16.99253,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "assessment":0.19143808937732187,
                     "gsorts":0.33194771640508575,
                     "readiness":0.46713296220116984,
@@ -1748,7 +1748,7 @@
               "_score":16.844742,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "defence":0.16050015509057217,
                     "buildings":0.20785727804683854,
                     "should":0.16731726974991273,
@@ -1970,7 +1970,7 @@
               "_score":16.516312,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "total":0.1565241048042554,
                     "subactivity":0.35463049008721104,
                     "financial management":0.18830269604077807,
@@ -2183,7 +2183,7 @@
               "_score":16.489025,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "battle":0.22150569286466043,
                     "pacaf":0.20515873838912627,
                     "mission":0.18344008254766841,
@@ -2405,7 +2405,7 @@
               "_score":16.31647,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "afjqs":0.8462398982747852,
                     "trainee initials":0.15659159127114589,
                     "start complete":0.16262380740354204,
@@ -2533,7 +2533,7 @@
               "_score":16.156916,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "majcom":0.18254606014006464,
                     "forces":0.2441923993843707,
                     "force":0.3411972190749937,
@@ -2702,7 +2702,7 @@
               "_score":16.042898,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "disposition":0.3918747304257941,
                     "generating activities":0.26239589314717565,
                     "generating activity":0.23607415894375403,
@@ -2886,7 +2886,7 @@
               "_score":15.922409,
               "_source":{
                  "kw_doc_score_r":0.00001,
-                 "topics_rs":{
+                 "topics_s":{
                     "specialty":0.2183179771463266,
                     "skill":0.18571216995914352,
                     "training":0.33288572314729054,
@@ -3036,7 +3036,7 @@
               "_score":15.494996,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "amphibious":0.23943898064651375,
                     "beach":0.22201642116733294,
                     "craft":0.2800563228381303,
@@ -3159,7 +3159,7 @@
               "_score":15.376995,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "development":0.17431017690361306,
                     "unclassified":0.17405145851335432,
                     "joint":0.4072605000805401,
@@ -3352,7 +3352,7 @@
               "_score":15.350658,
               "_source":{
                  "kw_doc_score_r":null,
-                 "topics_rs":{
+                 "topics_s":{
                     "gentext":0.4544433268471699,
                     "jfccs":0.2548771616945694,
                     "cjcsi":0.4043028136145143,
@@ -3671,7 +3671,7 @@
         "params":{
            "method":"POST",
            "path":"/gamechanger/_search",
-           "body":"{\"_source\":{\"includes\":[\"pagerank_r\",\"kw_doc_score_r\",\"orgs_rs\",\"topics_rs\"]},\"stored_fields\":[\"filename\",\"title\",\"page_count\",\"doc_type\",\"doc_num\",\"ref_list\",\"id\",\"summary_30\",\"keyw_5\",\"p_text\",\"type\",\"p_page\",\"display_title_s\",\"display_org_s\",\"display_doc_type_s\",\"is_revoked_b\",\"access_timestamp_dt\",\"publication_date_dt\",\"crawler_used_s\"],\"from\":0,\"size\":20,\"aggregations\":{\"doc_type_aggs\":{\"terms\":{\"field\":\"doc_type\",\"size\":10000}}},\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"paragraphs\",\"inner_hits\":{\"_source\":false,\"stored_fields\":[\"paragraphs.page_num_i\",\"paragraphs.filename\",\"paragraphs.par_raw_text_t\"],\"from\":0,\"size\":5,\"highlight\":{\"fields\":{\"paragraphs.filename.search\":{\"number_of_fragments\":0},\"paragraphs.par_raw_text_t\":{\"fragment_size\":180,\"number_of_fragments\":1}},\"fragmenter\":\"span\"}},\"query\":{\"bool\":{\"should\":[{\"wildcard\":{\"paragraphs.filename.search\":{\"value\":\"battle force*\",\"boost\":15}}},{\"query_string\":{\"query\":\"battle force\",\"default_field\":\"paragraphs.par_raw_text_t\",\"default_operator\":\"and\",\"fuzzy_max_expansions\":100,\"fuzziness\":\"AUTO\"}}]}}}},{\"query_string\":{\"query\":\"is_revoked_b:false\"}},{\"query_string\":{\"query\":\"doc_type:(*) OR display_org_s:(undefined)\"}}],\"should\":[{\"multi_match\":{\"query\":\"battle force\",\"fields\":[\"keyw_5^2\",\"id^2\",\"summary_30\",\"paragraphs.par_raw_text_t\"],\"operator\":\"or\"}},{\"rank_feature\":{\"field\":\"pagerank_r\",\"boost\":0.5}},{\"rank_feature\":{\"field\":\"kw_doc_score_r\",\"boost\":0.1}}]}}}",
+           "body":"{\"_source\":{\"includes\":[\"pagerank_r\",\"kw_doc_score_r\",\"orgs_rs\",\"topics_s\"]},\"stored_fields\":[\"filename\",\"title\",\"page_count\",\"doc_type\",\"doc_num\",\"ref_list\",\"id\",\"summary_30\",\"keyw_5\",\"p_text\",\"type\",\"p_page\",\"display_title_s\",\"display_org_s\",\"display_doc_type_s\",\"is_revoked_b\",\"access_timestamp_dt\",\"publication_date_dt\",\"crawler_used_s\"],\"from\":0,\"size\":20,\"aggregations\":{\"doc_type_aggs\":{\"terms\":{\"field\":\"doc_type\",\"size\":10000}}},\"track_total_hits\":true,\"query\":{\"bool\":{\"must\":[{\"nested\":{\"path\":\"paragraphs\",\"inner_hits\":{\"_source\":false,\"stored_fields\":[\"paragraphs.page_num_i\",\"paragraphs.filename\",\"paragraphs.par_raw_text_t\"],\"from\":0,\"size\":5,\"highlight\":{\"fields\":{\"paragraphs.filename.search\":{\"number_of_fragments\":0},\"paragraphs.par_raw_text_t\":{\"fragment_size\":180,\"number_of_fragments\":1}},\"fragmenter\":\"span\"}},\"query\":{\"bool\":{\"should\":[{\"wildcard\":{\"paragraphs.filename.search\":{\"value\":\"battle force*\",\"boost\":15}}},{\"query_string\":{\"query\":\"battle force\",\"default_field\":\"paragraphs.par_raw_text_t\",\"default_operator\":\"and\",\"fuzzy_max_expansions\":100,\"fuzziness\":\"AUTO\"}}]}}}},{\"query_string\":{\"query\":\"is_revoked_b:false\"}},{\"query_string\":{\"query\":\"doc_type:(*) OR display_org_s:(undefined)\"}}],\"should\":[{\"multi_match\":{\"query\":\"battle force\",\"fields\":[\"keyw_5^2\",\"id^2\",\"summary_30\",\"paragraphs.par_raw_text_t\"],\"operator\":\"or\"}},{\"rank_feature\":{\"field\":\"pagerank_r\",\"boost\":0.5}},{\"rank_feature\":{\"field\":\"kw_doc_score_r\",\"boost\":0.1}}]}}}",
            "querystring":"",
            "headers":{
               "user-agent":"elasticsearch-js/7.11.0 (linux 4.19.121-linuxkit-x64; Node.js v10.9.0)",
