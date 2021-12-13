@@ -152,7 +152,7 @@ module.exports = Object.freeze({
 		auxRetrieveFields: ['']
 	},
 	CDO_ELASTIC_SEARCH_OPTS: {
-		index: 'gc-cdo',
+		index: HERMES_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},
