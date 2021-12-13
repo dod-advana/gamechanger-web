@@ -151,6 +151,11 @@ module.exports = Object.freeze({
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},
+	CDO_ELASTIC_SEARCH_OPTS: {
+		index: process.env.CDO_ELASTICSEARCH_INDEX,
+		auxSearchFields: [''],
+		auxRetrieveFields: ['']
+	},
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
