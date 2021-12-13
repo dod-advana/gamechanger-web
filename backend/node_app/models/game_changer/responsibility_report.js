@@ -18,6 +18,18 @@ module.exports = (sequelize, DataTypes) => {
 			issue_description: {
 				type: DataTypes.TEXT,
 				allowNull: false
+			},
+			updatedColumn: {
+				type: DataTypes.TEXT,
+				allowNull: false
+			},
+			updatedText: {
+				type: DataTypes.TEXT,
+				allowNull: true
+			},
+			textPosition: {
+				type: DataTypes.JSON,
+				allowNull: true
 			}
 		},
 		{
@@ -26,5 +38,12 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: true
 		}
 	);
+
+	RESPONSIBILITY_REPORTS.associate = (models) => {
+		RESPONSIBILITY_REPORTS.belongsTo(models.responsibilities, { 
+			foreignKey: 'responsibility_id'
+		})
+	}
+
 	return RESPONSIBILITY_REPORTS;
 };

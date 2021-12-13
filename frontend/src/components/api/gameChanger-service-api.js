@@ -94,11 +94,15 @@ const endpoints = {
 	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
 	textSuggestionPOST: '/api/gameChanger/textSuggestion',
 	getResponsibilityData: '/api/gameChanger/responsibilities/get',
+	getResponsibilityDocTitles: '/api/gameChanger/responsibilities/getDocTitles',
 	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
+	getResponsibilityDocLink: '/api/gameChanger/responsibilities/getDocLink',
 	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
 	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
+	updateResponsibilityReport: '/api/gameChanger/responsibilities/updateResponsibilityReport',
 	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
+	getResponsibilityUpdates: '/api/gameChanger/responsibilities/getUpdates',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
 	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
 	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
@@ -441,6 +445,16 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, options);
 	}
 
+	getResponsibilityDocTitles = async (options) => {
+		const url = endpoints.getResponsibilityDocTitles;
+		return axiosPOST(this.axios, url, options);
+	}
+
+	getResponsibilityDocLink = async (options) => {
+		const url = endpoints.getResponsibilityDocLink;
+		return axiosPOST(this.axios, url, options);
+	}
+
 	getResponsibilityDoc = async (options) => {
 		const url = endpoints.getResponsibilityDoc;
 		return axiosPOST(this.axios, url, options);
@@ -455,6 +469,11 @@ export default class GameChangerAPI {
 		const url = endpoints.updateResponsibility;
 		return axiosPOST(this.axios, url, options);
 	}
+
+	updateResponsibilityReport = async (options) => {
+		const url = endpoints.updateResponsibilityReport;
+		return axiosPOST(this.axios, url, options);
+	}
 	
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
@@ -463,6 +482,11 @@ export default class GameChangerAPI {
 
 	storeResponsibilityReportData = async (data) => {
 		const url = endpoints.storeResponsibilityReportData;
+		return axiosPOST(this.axios, url, data);
+	};
+
+	getResponsibilityUpdates = async (data) => {
+		const url = endpoints.getResponsibilityUpdates;
 		return axiosPOST(this.axios, url, data);
 	};
 
