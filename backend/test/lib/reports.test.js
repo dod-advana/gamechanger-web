@@ -24,7 +24,7 @@ describe('Reports', function () {
 			"ref_list": ["Title 21", "AR 30-22", "AR 40-25", "AR 40-657", "AR 40-656", "AR 350-1", "AR 614-200", "AR 600-38", "AR 735-5", "PAM 30-22", "PAM 750-8", "STP 10-92G1-SM-TG", "STP 10-92G25-SM-TG", "STP 21-1-SMCT", "STP 21-24-SMCT", "TB MED  530", "TB MED 530", "FM 10-23-2", "TM 4-41.11", "TM 10-412", "TM 4-41.12"],
 			"publication_date_dt": "2012-04-23T00:00:00",
 			"page_count": 186,
-			"topics_rs": ["diner", "recipe", "cooking", "dining facility", "dough"],
+			"topics_s": ["diner", "recipe", "cooking", "dining facility", "dough"],
 			"pageHits": [{
 				"snippet": "addition to grilled sandwiches and the deli bar .Entrees may include other hot sandwiches such as the Sloppy Joe , Cannon Ball , and Fishwich or other popular short order entrees such as <em>pizza</em>",
 				"pageNumber": 116

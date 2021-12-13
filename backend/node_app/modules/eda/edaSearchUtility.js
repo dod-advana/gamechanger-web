@@ -644,8 +644,8 @@ class EDASearchUtility {
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.searchUtility.transformEsFields(r.fields);
 				const { _source = {}, fields = {} } = r;
-				const { topics_rs = {} } = _source;
-				result.topics_rs = Object.keys(topics_rs);
+				const { topics_s = {} } = _source;
+				result.topics_s = topics_s
 	
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
