@@ -636,7 +636,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleRenderLegend = () => {
 		return (
-			<div style={styles.legendKey}>
+			<div style={{ ...styles.legendKey, maxHeight: `calc(${graphHeight}px - 15px)` }}>
 				<div style={styles.legendRow} key="legendKeys">
 					<div style={{ fontWeight: 'bold' }}>Icon</div>
 					<div style={{ fontWeight: 'bold', marginLeft: '1em', width: '80%' }}>

@@ -8,7 +8,7 @@ import GCAccordion from '../common/GCAccordion';
 import { Card } from '../cards/GCCard';
 import { MainContainer } from '../../containers/GameChangerDetailsPage';
 import Pagination from 'react-js-pagination';
-import { numberWithCommas } from '../../utils/gamechangerUtils';
+import { numberWithCommas, invertedCrawlerMappingFunc } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -24,7 +24,7 @@ const getSourceData = async (source, cloneName, page) => {
 		functionName: 'getDocumentsBySourceFromESHelper',
 		cloneName,
 		options: {
-			searchText: source,
+			searchText: invertedCrawlerMappingFunc(source),
 			offset: (page - 1) * 18,
 		},
 	});
