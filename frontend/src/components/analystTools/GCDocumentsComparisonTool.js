@@ -423,9 +423,6 @@ const GCDocumentsComparisonTool = (props) => {
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
 							<Grid item xs={3} className={'input-drop-zone'} ref={dropboxRef}>
-								<div className={'coming-soon'} style={{width: dropBoxWidthHeight.width, height: dropBoxWidthHeight.height}}>
-									<Typography className={'coming-soon-text'} >COMING SOON</Typography>
-								</div>
 								<Dropzone
 									accept='.doc, .docx, .txt'
 									multiple={false}
