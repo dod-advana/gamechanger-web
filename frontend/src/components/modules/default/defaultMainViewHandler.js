@@ -507,10 +507,14 @@ const DefaultMainViewHandler = {
 	},
 
 	getViewNames(props) {
-		return [
-			{ name: 'Card', title: 'Card View', id: 'gcCardView' },
-			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' },
-		];
+		const { cloneData } = props;
+		const views = [
+			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
+		]
+		if(cloneData.clone_name !== 'hermes') views.push(
+				{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
+			)
+		return views;
 	},
 
 	getExtraViewPanels(props) {
