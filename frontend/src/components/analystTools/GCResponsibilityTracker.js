@@ -33,11 +33,21 @@ import {makeStyles, withStyles} from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
-import { setState } from '../../utils/sharedFunctions';
+// import { setState } from '../../utils/sharedFunctions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
 
+const FilterInput = ({value, setValue}) => {
+	return(
+		<input 
+			type="text" 
+			value={value} 
+			style={{width: '100%'}}
+			onChange={(e) => {setValue(e.target.value)}}
+		/>
+	)
+}
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -132,14 +142,23 @@ const getData = async ({
 
 const preventDefault = (event) => event.preventDefault();
 
-const GCResponsibilityTracker = (props) => {
-	
-	const {state, dispatch} = props;
+const GCResponsibilityTracker = ({
+	state, 
+	filters,
+	setFilters,
+	docTitle,
+	setDocTitle,
+	organization,
+	setOrganization,
+	responsibilityText,
+	setResponsibilityText
+}) => {
+
 	const classes = useStyles();
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [filters, setFilters] = useState([]);
+
 	const [sorts, setSorts] = useState([]);
 	const [pageIndex, setPageIndex] = useState(0);
 	const [hoveredRow, setHoveredRow] = useState(null);
@@ -157,6 +176,7 @@ const GCResponsibilityTracker = (props) => {
 		{}
 	);
 	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
+	const [reloadResponsibilityTable, setReloadResponsibilityTable] = useState(true);
 
 	useEffect(() => {
 		gameChangerAPI.getOtherEntityFilterList().then((resp) => {
@@ -198,12 +218,29 @@ const GCResponsibilityTracker = (props) => {
 	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (state.reloadResponsibilityTable) {
+		if (reloadResponsibilityTable) {
 			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
-			setState(dispatch, {reloadResponsibilityTable: false});
+			setReloadResponsibilityTable(false);
 		}
-	 }, [state, dispatch, pageIndex, sorts, filters]); // eslint-disable-line react-hooks/exhaustive-deps
-	                                                // TODO : Resolve ^^^ correctly
+	 // eslint-disable-next-line react-hooks/exhaustive-deps
+	 }, [pageIndex, sorts, filters]); 
+
+	 useEffect(() => {
+		const newFilters = [];
+		if(Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
+		if(organization.length) {
+			organization.forEach(org => {
+				newFilters.push({id: 'organizationPersonnel', value: org})
+			})
+		};
+		if(docTitle.length) {
+			docTitle.forEach(doc => {
+				newFilters.push({id: 'documentTitle', value: doc.documentTitle})
+			})
+		};
+		setFilters(newFilters);
+		setReloadResponsibilityTable(true);
+	 },[docTitle, organization, responsibilityText, setFilters])
 
 	 const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -263,30 +300,30 @@ const GCResponsibilityTracker = (props) => {
 		}
 	};
 
-	const reportButtonAction = async () => {
-		getRowData();
-	}
+	// const reportButtonAction = async () => {
+	// 	getRowData();
+	// }
 
-	const getRowData = async () => {
-		try {
-			const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
-			const rtnResults = results.filter(result => {
-				return selectedIds.includes(result.id);
-			})
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
+	// const getRowData = async () => {
+	// 	try {
+	// 		const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
+	// 		const rtnResults = results.filter(result => {
+	// 			return selectedIds.includes(result.id);
+	// 		})
+	// 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
 
-			const rtn = selectedIds.length > 0 ? rtnResults : results;
-			const id = rtn[0].id;
-			const filename = rtn[0].filename;
-			const responsibilityText = rtn[0].responsibilityText;
+	// 		const rtn = selectedIds.length > 0 ? rtnResults : results;
+	// 		const id = rtn[0].id;
+	// 		const filename = rtn[0].filename;
+	// 		const responsibilityText = rtn[0].responsibilityText;
 
-			setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
+	// 		setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
 
-			deselectRows();
-		} catch (e) {
-			console.error(e);
-		}
-	}
+	// 		deselectRows();
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 	}
+	// }
 
 	const deselectRows = async () => {
 		responsibilityTableData.forEach(result => {
@@ -303,6 +340,17 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentTitle',
 				style: { whiteSpace: 'unset' },
 				width: 300,
+				Filter: 
+					<FilterInput 
+						value={docTitle.map(doc => doc.documentTitle).join(' AND ')} 
+						setValue={(filter) => {
+							const splitFilter = filter.split(' AND ');
+							const parsedFilter = splitFilter.map(filter => {
+								return {documentTitle: filter}
+							})
+							setDocTitle(parsedFilter)
+						}}
+					/>,
 				Cell: (row) => (
 					<TableRow>
 						<Link href={'#'} onClick={(event)=> {
@@ -322,12 +370,25 @@ const GCResponsibilityTracker = (props) => {
 				Header: 'Organization/Personnel',
 				accessor: 'organizationPersonnel',
 				style: { whiteSpace: 'unset' },
+				Filter: 
+					<FilterInput 
+						value={organization.join(' AND ')} 
+						setValue={(filter) => {
+							const parsedFilter = filter.split(' AND ');
+							setOrganization(parsedFilter)
+						}}
+					/>,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Responsibility Text',
 				accessor: 'responsibilityText',
 				style: { whiteSpace: 'unset' },
+				Filter: 
+					<FilterInput 
+						value={responsibilityText?.value || ''} 
+						setValue={(filter) => setResponsibilityText({id: 'responsibilityText', value: filter})}
+					/>,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -356,6 +417,7 @@ const GCResponsibilityTracker = (props) => {
 				accessor: 'documentsReferenced',
 				style: { whiteSpace: 'unset' },
 				width: 200,
+				filterable: false,
 				Cell: row => (
 					<TableRow>
 						{row.value? row.value.join(', '): '' }
@@ -402,13 +464,15 @@ const GCResponsibilityTracker = (props) => {
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
-				onFilteredChange={(newFilters) => {
-					setFilters(newFilters);
-				}}
+				manualSortBy={true}
 				onSortedChange={(newSorts) => {
 					setSorts(newSorts);
+					setReloadResponsibilityTable(true);
 				}}
-				onPageChange={(pageIndex) => setPageIndex(pageIndex)}
+				onPageChange={(pageIndex) => {
+					setPageIndex(pageIndex);
+					setReloadResponsibilityTable(true);
+				}}
 				defaultSorted={[
 					{
 						id: 'id',
@@ -418,7 +482,6 @@ const GCResponsibilityTracker = (props) => {
 				loading={loading}
 				manual={true}
 				pages={numPages}
-				onFetchData={handleFetchData}
 				getTheadTrProps={() => {
 					return {
 						style: {
@@ -728,9 +791,9 @@ const GCResponsibilityTracker = (props) => {
 						<GCPrimaryButton onClick={exportCSV}>
 							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
 						</GCPrimaryButton>
-						<GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
+						{/* <GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
 							Update <Icon className="fa fa-bug" style={styles.buttons}/>
-						</GCPrimaryButton>
+						</GCPrimaryButton> */}
 						<div style={styles.spacer}/>
 					</div>
 					:

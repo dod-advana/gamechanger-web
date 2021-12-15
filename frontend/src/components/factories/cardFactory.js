@@ -1,5 +1,6 @@
 const policyCardHandler = require('../modules/policy/policyCardHandler');
 const hermesCardHandler = require('../modules/hermes/hermesCardHandler');
+const cdoCardHandler = require('../modules/cdo/cdoCardHandler');
 const globalSearchCardHandler = require('../modules/globalSearch/globalSearchCardHandler');
 const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
@@ -14,6 +15,9 @@ class CardFactory {
 					break;
 				case 'hermes/hermesCardHandler':
 					this.handler = hermesCardHandler;
+					break;
+				case 'cdo/cdoCardHandler':
+					this.handler = cdoCardHandler;
 					break;
 				case 'globalSearch/globalSearchCardHandler':
 					this.handler = globalSearchCardHandler;

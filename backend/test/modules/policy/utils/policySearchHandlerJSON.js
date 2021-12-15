@@ -5,7 +5,7 @@ const searchHelperExpected = {
            "pagerank_r",
            "kw_doc_score_r",
            "orgs_rs",
-           "topics_rs"
+           "topics_s"
         ]
      },
      "stored_fields":[
@@ -166,7 +166,7 @@ const searchHelperExpected = {
         "display_doc_type_s":"Document",
         "publication_date_dt":"2017-10-25T00:00:00",
         "page_count":275,
-        "topics_rs":[
+        "topics_s":[
            "submarine",
            "recompression",
            "escape",
@@ -206,7 +206,7 @@ const searchHelperExpected = {
         "publication_date_dt":"2021-01-21T00:00:00",
         "source_fqdn_s":"www.govinfo.gov",
         "page_count":3,
-        "topics_rs":[
+        "topics_s":[
            "shark",
            "essed",
            "dskbc",
@@ -261,7 +261,7 @@ const searchHelperExpected = {
         "publication_date_dt":"2021-01-04T00:00:00",
         "source_fqdn_s":"www.govinfo.gov",
         "page_count":60,
-        "topics_rs":[
+        "topics_s":[
            "fishery",
            "dskbc",
            "bills",
@@ -309,7 +309,7 @@ const searchHelperExpected = {
         "publication_date_dt":"2017-10-25T00:00:00",
         "source_fqdn_s":"nso.nato.int",
         "page_count":275,
-        "topics_rs":[
+        "topics_s":[
            "submarine",
            "recompression",
            "escape",
@@ -355,7 +355,7 @@ const searchHelperExpected = {
         "publication_date_dt":"2020-06-30T00:00:00",
         "source_fqdn_s":"www.med.navy.mil",
         "page_count":142,
-        "topics_rs":[
+        "topics_s":[
            "swimming",
            "aquatic venues",
            "recreational",
@@ -405,7 +405,7 @@ const searchHelperExpected = {
         "publication_date_dt":"2020-03-27T00:00:00",
         "source_fqdn_s":"www.e-publishing.af.mil",
         "page_count":17,
-        "topics_rs":[
+        "topics_s":[
            "afman",
            "profile",
            "aerobatic",
@@ -578,7 +578,7 @@ const createRecObjectExpected = { historyRec:
 
 const elasticSearchDocDataExpected = {
    _source: {
-      includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_rs']
+      includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_s']
    },
    stored_fields: [
       'filename',

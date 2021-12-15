@@ -23,7 +23,8 @@ class AppSettingsController {
 			entitySearch:'entity_search',
 			combinedSearch:'combined_search',
 			topicSearch:'topic_search',
-			jiraFeedback:'jira_feedback'
+			jiraFeedback:'jira_feedback',
+			ltr: 'ltr'
 		}
 		
 		// Binding the key for combined search mode to get and set
@@ -48,6 +49,9 @@ class AppSettingsController {
 		// Binding the key for topic search mode to get and set
 		this.getTopicSearchMode = this.getMode.bind(this, this.keys.topicSearch);
 		this.setTopicSearchMode = this.setMode.bind(this, this.keys.topicSearch);
+
+		this.getLTRMode = this.getMode.bind(this, this.keys.ltr);
+		this.toggleLTRMode = this.toggleMode.bind(this, this.keys.ltr);
 
 		this.logFrontendError = this.logFrontendError.bind(this);
 	}

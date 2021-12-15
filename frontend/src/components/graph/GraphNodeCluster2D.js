@@ -336,6 +336,8 @@ export default function GraphNodeCluster2D(props) {
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
 
 	const [dagMode, setDagMode] = React.useState(false);
+	
+	const [resetGraphClicked, setResetGraphClicked] = React.useState(false);
 
 	const { nodes, edges } = graph;
 	const graphData = { nodes, links: edges };
@@ -634,7 +636,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleRenderLegend = () => {
 		return (
-			<div style={styles.legendKey}>
+			<div style={{ ...styles.legendKey, maxHeight: `calc(${graphHeight}px - 15px)` }}>
 				<div style={styles.legendRow} key="legendKeys">
 					<div style={{ fontWeight: 'bold' }}>Icon</div>
 					<div style={{ fontWeight: 'bold', marginLeft: '1em', width: '80%' }}>
@@ -1152,6 +1154,11 @@ export default function GraphNodeCluster2D(props) {
 				centralNode.fy = centralNode?.y;
 				centralNode.fz = centralNode?.z;
 			}
+
+			if (resetGraphClicked) {
+				recenterGraph();
+				setResetGraphClicked(false);
+			}
 		  };
 
 	const handleUpdateNodeSize = updateNodeSize
@@ -1529,6 +1536,7 @@ export default function GraphNodeCluster2D(props) {
 									'ResetGraph'
 								);
 								handleResetGraph();
+								setResetGraphClicked(true);
 							}}
 						>
 							<RefreshIcon fontSize="inherit" style={{ fontSize: 26 }} />
