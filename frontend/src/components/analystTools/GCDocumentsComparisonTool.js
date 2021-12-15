@@ -96,30 +96,14 @@ const DocumentInputContainer = styled.div`
 	.input-drop-zone {
 		border: 2px solid ${'#B6C6D8'} !important;
 		border-radius: 6px;
-		background-color: ${'#ffffff'};
-		
-		& .coming-soon {
-		    position: absolute;
-		    background-color: rgba(0,0,0,0.3);
-		    z-index: 99;
-		    border: 2px solid ${'#B6C6D8'} !important;
-			border-radius: 6px;
-			
-			& .coming-soon-text {
-			    color: red;
-			    text-align-last: center;
-			    margin-top: 140px;
-			    font-family: 'Montserrat';
-			    font-weight: bold;
-			}
-		}
-		
+		background-color: ${'#ffffff'};		
 	}
 	
 	.instruction-box {
-		font-size: 14px;
+		font-size: 24px;
 		font-family: Noto Sans;
-		margin: 0px 30px 60px 30px;
+		width: 100%;
+		display: flex;
 	}
 	
 	.or-use-text {
@@ -422,33 +406,6 @@ const GCDocumentsComparisonTool = (props) => {
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
-							<Grid item xs={3} className={'input-drop-zone'} ref={dropboxRef}>
-								<Dropzone
-									accept='.doc, .docx, .txt'
-									multiple={false}
-									onDrop={files => {
-										handleFilesDropped(files);
-									}}
-									style={{
-										border: 'unset',
-										borderRadius: 6,
-										width: '100%',
-										height: '100%'
-									}}
-								>
-									<div style={{height: '100%'}}>
-										<div style={{display: 'flex', justifyContent: 'center', marginTop: 60}}><img
-											src={FileIcon} style={{width: 86}} alt='File Icon'/></div>
-										<div style={{width: 180, ...styles.dropText}}>
-											<span style={styles.fakeLink}>Drag and drop</span> file here or <span
-												style={styles.fakeLink}>browse</span> to begin upload
-										</div>
-										<div style={styles.dropText}>
-											.doc, .docx, .txt, word documents accepted.
-										</div>
-									</div>
-								</Dropzone>
-							</Grid>
 							<Grid item xs={8}>
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
 									<Grid item xs={12}>
