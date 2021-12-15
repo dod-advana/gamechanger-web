@@ -86,7 +86,7 @@ const DocumentCompareContainer = styled.div`
 `;
 
 const DocumentInputContainer = styled.div`
-	border: 1px dashed ${'#707070'};
+	border: 1px ${'#707070'};
 	background-color: ${'#F6F8FA'};
 	
 	.input-container-grid {
@@ -100,9 +100,8 @@ const DocumentInputContainer = styled.div`
 	}
 	
 	.instruction-box {
-		font-size: 24px;
+		font-size: 22px;
 		font-family: Noto Sans;
-		width: 100%;
 		display: flex;
 	}
 	
@@ -410,8 +409,7 @@ const GCDocumentsComparisonTool = (props) => {
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
 									<Grid item xs={12}>
 										<div className={'instruction-box'}>
-											Copy a paragraph into the box below, then click search to find any paragraphs in
-											documents that match
+											Copy a paragraph into the box below and click submit to view similar documents
 										</div>
 									</Grid>
 									
