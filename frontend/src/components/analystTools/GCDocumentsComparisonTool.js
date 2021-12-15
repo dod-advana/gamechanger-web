@@ -102,7 +102,7 @@ const DocumentInputContainer = styled.div`
 	.instruction-box {
 		font-size: 22px;
 		font-family: Noto Sans;
-		display: flex;
+		margin-bottom: 20px;
 	}
 	
 	.or-use-text {
@@ -175,7 +175,9 @@ const SimilarDocumentsContainer = styled.div`
 		margin-top: 5px;
 	}
 `;
-
+const resetAdvancedSettings = (dispatch) => {
+	dispatch({type: 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS'});
+}
 const GCDocumentsComparisonTool = (props) => {
 	
 	const classes = useStyles();
@@ -409,22 +411,17 @@ const GCDocumentsComparisonTool = (props) => {
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
 									<Grid item xs={12}>
 										<div className={'instruction-box'}>
-											Copy a paragraph into the box below and click submit to view similar documents
+											Copy a paragraph into the box below to search for similar documents
 										</div>
 									</Grid>
 									
 									<Grid container>
-										<Grid item xs={2}>
-											<div className={'or-use-text'}>
-												<span>Or use text field</span>
-											</div>
-										</Grid>
 										<Grid item xs={10}>
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
 													multiline
-													rows={12}
+													rows={18}
 													variant="outlined"
 													className={classes.inputBoxRoot}
 													onChange={(event) => {
@@ -447,6 +444,22 @@ const GCDocumentsComparisonTool = (props) => {
 								</Grid>
 							</Grid>
 						</Grid>
+										<button
+					type="button"
+					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5, marginBottom: 10 }}
+					onClick={() => {
+						resetAdvancedSettings(dispatch);
+						setState(dispatch, { runDocumentComparisonSearch: true });
+					}}
+				>
+					<span style={{
+						fontFamily: 'Montserrat',
+						fontWeight: 600,
+						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
+					}}>
+						Submit
+					</span>
+				</button>
 					</DocumentInputContainer>
 					}
 					{loading &&
