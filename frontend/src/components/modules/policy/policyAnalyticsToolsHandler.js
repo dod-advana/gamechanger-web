@@ -602,6 +602,9 @@ const PolicyAnalyticsToolsHandler = {
 		return (
 			<>
 				<div>
+					<div style={{width: '100%', fontSize: '16px', fontStyle: 'italic', marginTop: '60px', marginBottom: '20px'}}>
+						Apply filters to your search
+					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
 						<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
@@ -628,22 +631,7 @@ const PolicyAnalyticsToolsHandler = {
 					</div>
 				</div>
 				
-				<button
-					type="button"
-					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5, marginBottom: 10 }}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runDocumentComparisonSearch: true });
-					}}
-				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
-					}}>
-						Submit
-					</span>
-				</button>
+			
 				
 				{/*<button*/}
 				{/*	type="button"*/}
