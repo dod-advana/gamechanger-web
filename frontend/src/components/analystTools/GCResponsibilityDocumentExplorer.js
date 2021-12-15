@@ -155,7 +155,7 @@ export default function ResponsibilityDocumentExplorer({
 	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
-		if(pdfLoaded){
+		if(!iframeLoading){
 			const notFound = document.getElementById('PdfViewer').contentWindow.document.getElementsByClassName('notFound');
 			if(notFound?.length){
 				createAlert(
@@ -165,7 +165,7 @@ export default function ResponsibilityDocumentExplorer({
 				);
 			}
 		}
-	},[pdfLoaded])
+	},[iframeLoading])
 
 	useEffect(() => {
 		if (Object.keys(responsibilityData).length) {
