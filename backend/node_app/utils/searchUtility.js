@@ -1477,7 +1477,6 @@ class SearchUtility {
 			}
 
 			let similarWordsQuery = simWordList.join("* OR *")
-			console.log(similarWordsQuery)
 			const query = 
 				{
 					size: 1,
