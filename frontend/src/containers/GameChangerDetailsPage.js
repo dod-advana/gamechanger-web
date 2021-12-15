@@ -35,7 +35,7 @@ import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png'
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
-const RESULTS_PER_PAGE = 18;
+const RESULTS_PER_PAGE = 20;
 
 const colWidth = {
 	maxWidth: '900px',
