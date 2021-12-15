@@ -602,23 +602,7 @@ const PolicyAnalyticsToolsHandler = {
 		return (
 			<>
 				<div>
-					<div className={'coming-soon'} style={{
-						width: sideFilterOverlayDimension.width,
-						height: 210,
-						position: 'absolute',
-						backgroundColor: 'rgba(0,0,0,0.3)',
-						zIndex: 99,
-						border: `2px solid ${'#B6C6D8'} !important`,
-						borderRadius: 6
-					}}>
-						<Typography className={'coming-soon-text'} style={{
-							color: 'red',
-							textAlignLast: 'center',
-							marginTop: 90,
-							fontFamily: 'Montserrat',
-							fontWeight: 'bold'
-						}}>COMING SOON</Typography>
-					</div>
+					
 					<div style={{width: '100%', marginBottom: 10}}>
 						<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderSources(state, dispatch, classes) }
