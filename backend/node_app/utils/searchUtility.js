@@ -1453,14 +1453,32 @@ class SearchUtility {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let relatedSearches = []
-
+		let simWordList = []
 		try {
-			let similarWords = expansionDict['wordsim']
-			let simWordList = Object.keys(expansionDict['wordsim'])
-			for (var key in similarWords) {
-				simWordList = simWordList.concat(similarWords[key])
+			if (expansionDict['wordsim']){
+				let similarWords = expansionDict['wordsim']
+				simWordList = Object.keys(expansionDict['wordsim'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
 			}
+			if (expansionDict['qexp']){
+				let similarWords = expansionDict['qexp']
+				simWordList = Object.keys(expansionDict['qexp'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
+			}			
+			if (simWordList.length <1) {
+				simWordList = [searchText]
+			}
+			for (var key in simWordList){
+				simWordList[key] = simWordList[key].replace(/["']/g, "")
+				
+			}
+
 			let similarWordsQuery = simWordList.join("* OR *")
+			console.log(similarWordsQuery)
 			const query = 
 				{
 					size: 1,
