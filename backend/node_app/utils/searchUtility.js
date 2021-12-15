@@ -172,7 +172,6 @@ class SearchUtility {
 			let orig = key.replace(/[^\w\s]|_/g, "").trim()
 			currList.push(orig)
 			toReturn[key].forEach((y) => {
-					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
 					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
 					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
