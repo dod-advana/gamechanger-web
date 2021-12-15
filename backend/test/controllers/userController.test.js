@@ -403,16 +403,16 @@ describe('UserController', function () {
 
 			const favorite_groups = [{
 				id: 1,
-				user_id: "27d1ca9e10b731476b7641eae2710ac0",
-				group_type: "document",
-				group_name: "Test",
-				group_description: "Test",
+				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				group_type: 'document',
+				group_name: 'Test',
+				group_description: 'Test',
 				is_clone: true,
-				clone_index: "Test",
+				clone_index: 'Test',
 			}]
 
 			const favorite_documents_groups = [{
-				user_id: "27d1ca9e10b731476b7641eae2710ac0",
+				user_id: '27d1ca9e10b731476b7641eae2710ac0',
 				favorite_group_id: 1,
 				favorite_document_id: 1,
 			}]
@@ -666,7 +666,7 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', "favorite_id": 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}],"favorite_groups": [{"clone_index": "Test", "favorites": [1], "group_description": "Test", "group_name": "Test", "group_type": "document", "id": 1, "is_clone": true, "user_id": "27d1ca9e10b731476b7641eae2710ac0"}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'favorite_id': 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}],'favorite_groups': [{'clone_index': 'Test', 'favorites': [1], 'group_description': 'Test', 'group_name': 'Test', 'group_type': 'document', 'id': 1, 'is_clone': true, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(resMsg, expected);
 
 		});
@@ -1003,6 +1003,169 @@ describe('UserController', function () {
 			const expected = {user_info:{ email: 'test@example.com', org: 'org', q1: 'a1', q2: 'a2'}, submitted_info: true, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
 			assert.deepStrictEqual(users[0], expected);
 			assert.equal(resCode, 200);
+		});
+	});
+
+	describe('#resetAPIRequestLimit', () => {
+		it('should reset all API request limits to 3', async () => {
+			const id = {
+				getDataValue() { return 1; }
+			};
+
+			const gcUser = {
+				findAll() {
+					return [id];
+				},
+				update(data, where) {
+					if (data.api_requests === 3 && where.where.id.length > 0) {
+						return Promise.resolve([1, 1]);
+					} else {
+						return Promise.resolve('Fail');
+					}
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcUser
+			};
+			
+			const target = new UserController(opts);
+			const actual = await target.resetAPIRequestLimit();
+			const expected = 1;
+
+			assert.equal(actual, expected);
+		});
+	});
+
+	describe('#populateNewUserId', () => {
+		it('should update user ids in the tables', async () => {
+			const user = {
+				dataValues: {
+					user_id: 1,
+					new_user_id: 2
+				}
+			};
+
+			const gcHistoryTable = {
+				findAll() {
+					return [user];
+				},
+				update(data, where) {
+					if (data.new_user_id === 2 && where.where.user_id === 1) {
+						return Promise.resolve();
+					} else {
+						return Promise.resolve('Fail');
+					}
+				}
+			};
+
+			const table = {
+				findAll() {
+					return [];
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcHistory: gcHistoryTable,
+				exportHistory: table,
+				favoriteDocument: table,
+				favoriteSearch: table,
+				favoriteTopic: table
+			};
+			
+			const target = new UserController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.populateNewUserId(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			assert.equal(resCode, 200);
+		});
+	});
+
+	describe('#getRecentSearches', () => {
+		it('should get recent searches', async () => {
+			const ids = [{ id: 1 }];
+
+			const searches = [{
+				request_body: { test: 'test' },
+				run_at: 1
+			}];
+
+			const gcHistory = {
+				findAll(data) {
+					if (data.group){
+						return Promise.resolve(ids);
+					} else {
+						return Promise.resolve(searches);
+					}
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				gcHistory
+			};
+			
+			const target = new UserController(opts);
+
+			const req = {
+				...reqMock,
+				body: {
+					cloneName: 'gamechanger'
+				}
+			};
+
+			let resCode;
+			let resMsg;
+		
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			try {
+				await target.getRecentSearches(req, res);
+			} catch (e) {
+				assert.fail();
+			}
+
+			const expected = [{
+				run_at: 1,
+				test: 'test'
+			}];
+
+			assert.equal(resCode, 200);
+			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
 });

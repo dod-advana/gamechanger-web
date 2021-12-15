@@ -18,10 +18,14 @@
 .* /api/gamechanger/getThumbnail .*
 .* /api/gamechanger/responsibilities/get .*
 .* /api/gamechanger/responsibilities/getDoc .*
+.* /api/gamechanger/responsibilities/getDocLink .*
+.* /api/gamechanger/responsibilities/getDocTitles .*
 .* /api/gamechanger/responsibilities/setRejectionStatus .*
 .* /api/gamechanger/responsibilities/updateResponsibility .*
+.* /api/gamechanger/responsibilities/updateResponsibilityReport .*
 .* /api/gamechanger/responsibilities/getOtherEntityFilterList .*
 .* /api/gamechanger/responsibilities/storeReport .*
+.* /api/gamechanger/responsibilities/getUpdates .*
 .* /api/gamechanger/getNotifications .*
 .* /api/gamechanger/megamenu/links .*
 .* /api/gamechanger/tutorialOverlay .*
@@ -58,6 +62,7 @@
 .* /api/gamechanger/appSettings/userFeedback .*
 .* /api/gamechanger/appSettings/jiraFeedback .*
 .* /api/gamechanger/appSettings/topicSearch .*
+.* /api/gamechanger/appSettings/ltr .*
 .* /api/gamechanger/sendFeedback/intelligentSearch .*
 .* /api/gamechanger/sendFeedback/QA .*
 .* /api/gamechanger/sendFeedback/getFeedbackData .*

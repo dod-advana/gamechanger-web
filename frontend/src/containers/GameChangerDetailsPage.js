@@ -35,7 +35,7 @@ import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png'
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
-const RESULTS_PER_PAGE = 18;
+const RESULTS_PER_PAGE = 20;
 
 const colWidth = {
 	maxWidth: '900px',
@@ -529,13 +529,14 @@ const GameChangerDetailsPage = (props) => {
 			.getDocumentsForEntity(cloneData.clone_name, {
 				entityName: entity.name,
 				searchText,
+				limit: 1000,
 			})
 			.then((resp) => {
 				const t1 = new Date().getTime();
 				setDocCount(resp.data.totalCount);
 				setDocResultsPage(1);
 				setDocResults(resp.data.docs);
-				setVisibleDocs(resp.data.docs.slice(1, RESULTS_PER_PAGE + 1));
+				setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE));
 				if (resp.data.docs.length > 0 || resp.data.totalCount === 0) {
 					setTimeFound(((t1 - t0) / 1000).toFixed(2));
 					setGettingDocuments(false);
@@ -564,7 +565,7 @@ const GameChangerDetailsPage = (props) => {
 				if(resp.data.docs){
 					setDocCount(resp.data.totalCount);
 					setDocResults(resp.data.docs);
-					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE + 1));
+					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE));
 					if (resp.data.docs.length > 0) {
 						setTimeFound(((t1 - t0) / 1000).toFixed(2));
 						setGettingDocuments(false);
@@ -625,7 +626,7 @@ const GameChangerDetailsPage = (props) => {
 		setVisibleDocs(
 			docResults.slice(
 				(page - 1) * RESULTS_PER_PAGE,
-				page * RESULTS_PER_PAGE + 1
+				page * RESULTS_PER_PAGE
 			)
 		);
 	};

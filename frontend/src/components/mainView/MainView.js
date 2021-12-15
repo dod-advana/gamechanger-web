@@ -46,7 +46,7 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			const viewNames = handler.getViewNames();
+			const viewNames = handler.getViewNames({cloneData: state.cloneData});
 
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
