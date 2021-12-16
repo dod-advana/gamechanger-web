@@ -6,6 +6,7 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
+const { performance } = require('perf_hooks');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -1543,6 +1544,7 @@ class SearchUtility {
 				totalCount: (selectedDocuments && selectedDocuments.length > 0) ? selectedDocuments.length : raw.body.hits.total.value,
 				docs: [],
 			};
+			var startTime = performance.now()
 
 			let docTypes = [];
 			let docOrgs = [];
@@ -1716,7 +1718,8 @@ class SearchUtility {
 			if (isCompareReturn) {
 				results.docs.sort((a, b) => b.score - a.score);
 			}
-
+			var endTime = performance.now()
+			console.log(`Call to CLEAN ES RESULTS took ${endTime - startTime} milliseconds`)
 			return results;
 		} catch (err) {
 			this.logger.error(err.message, 'GL7EDI3', user);
@@ -1920,7 +1923,11 @@ class SearchUtility {
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
+			var startTime = performance.now()
+
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			var endTime = performance.now()
+			console.log(`Call to ES SEARCH took ${endTime - startTime} milliseconds`)
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);
@@ -1934,6 +1941,7 @@ class SearchUtility {
 				} else {
 					return this.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}
+				
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
