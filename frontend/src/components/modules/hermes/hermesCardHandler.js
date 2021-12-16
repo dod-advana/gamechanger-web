@@ -254,8 +254,7 @@ const renderHighlights = (
 	highlights,
 	capitalizeFirst,
 	hoveredHit,
-	setHoveredHit,
-	setHighlightText
+	setHoveredHit
 ) => {
 	const fontSize = 12;
 	const highlightList = [];
@@ -270,8 +269,7 @@ const renderHighlights = (
 		const highlight = highlights[field];
 		let label = 1;
 		for (const text of highlight) {
-			const highlightLabel = `${capitalizeFirst(field)} ${label}`;
-			label += 1;
+			const highlightLabel = `${field} ${label}`;
 			if (firstHighlight.first) {
 				firstHighlight.first = false;
 				firstHighlight.highlight = highlightLabel;
@@ -298,10 +296,9 @@ const renderHighlights = (
 						}}
 						onMouseEnter={() => {
 							setHoveredHit(highlightLabel);
-							setHighlightText(text);
 						}}
 					>
-						<span style={{ fontSize }}>{highlightLabel}</span>
+						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label}`}</span>
 						<i
 							className="fa fa-chevron-right"
 							style={{ marginLeft: 10, fontSize, color: 'white' }}
@@ -309,12 +306,11 @@ const renderHighlights = (
 					</div>
 				</>
 			);
+			label += 1;
 		}
 	}
-
 	if (hoveredHit === 0) {
 		setHoveredHit(firstHighlight.highlight);
-		setHighlightText(firstHighlight.text);
 	}
 
 	return highlightList;
@@ -419,17 +415,16 @@ const HermesCardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, hoveredHit, setHoveredHit } = props;
 
-			let hoveredHit = 0;
-			const setHoveredHit = (hit) => {
-				hoveredHit = hit;
-			};
-
-			let highlightText = 'Highlight missing';
-			const setHighlightText = (text) => {
-				highlightText = text;
-			};
+			let hoveredSnippet = '';
+			if(hoveredHit){
+				const sliceIndex = hoveredHit.match(/\d+$/).index;
+				const type = hoveredHit.slice(0, sliceIndex).trim();
+				const index = hoveredHit.slice(sliceIndex) - 1;
+				hoveredSnippet = item.highlight[type][index];
+			}
+			const highlightText = hoveredSnippet;
 
 			let displayNameMap;
 			if (auxDisplayFieldJSONMap) {
@@ -437,7 +432,6 @@ const HermesCardHandler = {
 					displayNameMap = auxDisplayFieldJSONMap;
 				} catch (e) {
 					console.log(e);
-					// console.log('Something went wrong parsing display map');
 				}
 			}
 
@@ -469,7 +463,6 @@ const HermesCardHandler = {
 									capitalizeFirst,
 									hoveredHit,
 									setHoveredHit,
-									setHighlightText
 								)}
 							</div>
 							<div
@@ -502,7 +495,6 @@ const HermesCardHandler = {
 					displayNameMap = auxDisplayFieldJSONMap;
 				} catch (e) {
 					console.log(e);
-					// console.log('Something went wrong parsing display map');
 				}
 			}
 

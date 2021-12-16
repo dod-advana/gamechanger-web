@@ -73,6 +73,9 @@
     text-decoration: none;
     color: black;
   }
+  .searchdemo-quote-link:hover{
+    cursor: pointer;
+  }
   .searchdemo-arrow-right {
     width: 0;
     height: 0;

@@ -228,19 +228,24 @@ export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
 		.chunk(4)
 		.value();
 	return _.map(trimmed, (x) => {
-		if (x.length === 2) {
-			return {
-				References: x[0],
-				' ': x[1] || '',
-			};
-		} else {
-			return {
-				References: x[0],
-				' ': x[1] || '',
-				'  ': x[2],
-				'   ': x[3],
-			};
-		}
+		let y = {};
+		x.forEach((element, index) => {
+			switch (index) {
+				default:
+					y['References'] = element;
+					break;
+				case 1:
+					y[' '] = element;
+					break;
+				case 2:
+					y['  '] = element;
+					break;
+				case 3:
+					y['   '] = element;
+					break;
+			}
+		});
+		return y;
 	});
 };
 
@@ -257,11 +262,13 @@ export const getMetadataForPropertyTable = (item) => {
 		{ name: 'doc_type', keyLabel: 'Document Type' },
 		{ name: 'doc_num', keyLabel: 'Document Number' },
 		{ name: 'pageHitCount', keyLabel: 'Page Matches' },
+		{ name: 'top_entities_t', keyLabel: 'Entities' },
+
 		//{ name: 'ref_list', keyLabel: 'references', valueFunction: (val) => _.first(val) },
 	];
 
 	if (Config.GAMECHANGER.SHOW_TOPICS) {
-		dataKeys.push({ name: 'topics_rs', keyLabel: 'Topics' });
+		dataKeys.push({ name: 'topics_s', keyLabel: 'Topics' });
 	}
 	_.each(dataKeys, (dataKey) => {
 		let oldKey = dataKey.name;
