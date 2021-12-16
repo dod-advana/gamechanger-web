@@ -413,7 +413,6 @@ const StyledFrontCardContent = styled.div`
 				> blockquote {
 					font-size: ${CARD_FONT_SIZE}px;
 					line-height: 20px;
-
 					background: #dde1e0;
 					margin-bottom: 0;
 					height: 165px;
@@ -537,6 +536,7 @@ const addFavoriteTopicToMetadata = (
 		favorites = favorite_topics.map(({ topic_name }) => topic_name);
 	}
 	const temp = _.cloneDeep(data);
+
 	temp.map((metaData) => {
 		if (metaData.Key === 'Topics') {
 			metaData.Key = (
@@ -546,7 +546,7 @@ const addFavoriteTopicToMetadata = (
 					<b style={{ color: 'red' }}>(Beta)</b>
 				</div>
 			);
-			const topics = metaData.Value;
+			var topics = metaData.Value;
 			metaData.Value = (
 				<div>
 					{topics.map((topic, index) => {

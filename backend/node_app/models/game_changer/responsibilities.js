@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			status: {
 				type: DataTypes.TEXT,
-				defaultValue: "active"
+				defaultValue: 'active'
 			},
 		},
 		{
@@ -42,5 +42,12 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: false
 		}
 	);
+
+	RESPONSIBILITIES.associate = (models) => {
+		RESPONSIBILITIES.hasMany(models.responsibility_report, { 
+			foreignKey: 'responsibility_id'
+		})
+	}
+
 	return RESPONSIBILITIES;
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import Paper from '@material-ui/core/Paper';
@@ -55,6 +55,8 @@ const getGraphDataFull = (
 
 const DocumentDetailsPage = (props) => {
 	const { document, cloneData, userData, rawSearchResults } = props;
+
+	const ref = useRef(null);
 
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
@@ -149,7 +151,7 @@ const DocumentDetailsPage = (props) => {
 		if (docIds.length > 0) {
 			gameChangerAPI
 				.callSearchFunction({
-					functionName: 'getDocumentsForDetailsPageFromES',
+					functionName: 'getSingleDocumentFromES',
 					cloneName: cloneData.clone_name,
 					options: {
 						docIds: docIds,
@@ -418,15 +420,14 @@ const DocumentDetailsPage = (props) => {
 					</Paper>
 				</div>
 				<div className={'graph-top-docs'}>
-					<div className={'section'}>
+					<div className={'section'} ref={ref}>
 						<GCAccordion
 							expanded={true}
 							header={'GRAPH VIEW (BETA)'}
 							backgroundColor={'rgb(238,241,242)'}
 						>
 							<MemoizedPolicyGraphView
-								width={1420}
-								height={670}
+								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
 								runningSearchProp={runningQuery}
 								notificationCountProp={0}

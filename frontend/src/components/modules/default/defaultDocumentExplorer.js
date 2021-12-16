@@ -375,6 +375,7 @@ export default function DocumentExplorer({
 								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
 						if (item.type === 'document') {
+							const pageHits = item.pageHits.filter(hit => hit.pageNumber)
 							return (
 								<div key={key}>
 									<div
@@ -404,7 +405,7 @@ export default function DocumentExplorer({
 									</div>
 									<Collapse isOpened={!collapsed}>
 										<div>
-											{_.chain(item.pageHits)
+											{_.chain(pageHits)
 												.map((page, pageKey) => {
 													let isHighlighted = false;
 													const dataObj = data[iframePreviewLink.dataIdx];
