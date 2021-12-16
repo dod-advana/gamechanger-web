@@ -14,6 +14,7 @@ const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
 const testing = false;
+const { performance } = require('perf_hooks');
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -58,9 +59,12 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/["]+/g,'');
 		}
 		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
+		var startTime = performance.now()
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
+		var endTime = performance.now()
+		console.log(`Call to ES SearchHelper took ${endTime - startTime} milliseconds`)
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		}
@@ -173,6 +177,8 @@ class PolicySearchHandler extends SearchHandler {
 			cloneName,
 		} = body;
 		try {
+			var startTime = performance.now()
+
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
@@ -180,6 +186,8 @@ class PolicySearchHandler extends SearchHandler {
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId)
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, termsArray[0], cleanedAbbreviations, userId);
+			var endTime = performance.now()
+			console.log(`Call to gather Expansions took ${endTime - startTime} milliseconds`)
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
@@ -286,8 +294,9 @@ class PolicySearchHandler extends SearchHandler {
 			offset,
 		} = req.body;
 		try {
+			var startTime = performance.now()
+
 			let enrichedResults = searchResults;
-			let sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
 			//set empty values
 			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
 			enrichedResults.intelligentSearch = {};
@@ -295,23 +304,28 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
-			enrichedResults.sentenceResults = sentenceResults;
-
-			// QA data
-			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
-			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
-			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
-				enrichedResults.qaResults = QA
-			}
+			let sentenceResults = {}
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
+			if (intelligentSearchOn){
+				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
+				enrichedResults.sentenceResults = sentenceResults;
+
+			}
+
 			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
 				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
+			}
+			// QA data
+			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
+			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
+			if(intelligentAnswersOn && intelligentSearchOn){
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
+				enrichedResults.qaResults = QA
 			}
 
 			// add entities
@@ -341,7 +355,8 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
 			}
-
+			var endTime = performance.now()
+			console.log(`Call to combined search took ${endTime - startTime} milliseconds`)
 			return enrichedResults;
 		} catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
