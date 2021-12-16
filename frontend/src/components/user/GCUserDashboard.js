@@ -905,11 +905,11 @@ const GCUserDashboard = (props) => {
 		const searchSettings = (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Organization Filters:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
 					{search.orgFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Type Filters:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Type Filter:</span>{' '}
 					{search.typeFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
@@ -1836,7 +1836,7 @@ const GCUserDashboard = (props) => {
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
 								<span style={{ fontWeight: 'bold' }}>
-									Organization Filters:
+									Organization Filter:
 								</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>
