@@ -1544,7 +1544,6 @@ class SearchUtility {
 				totalCount: (selectedDocuments && selectedDocuments.length > 0) ? selectedDocuments.length : raw.body.hits.total.value,
 				docs: [],
 			};
-			var startTime = performance.now()
 
 			let docTypes = [];
 			let docOrgs = [];
@@ -1718,8 +1717,6 @@ class SearchUtility {
 			if (isCompareReturn) {
 				results.docs.sort((a, b) => b.score - a.score);
 			}
-			var endTime = performance.now()
-			console.log(`Call to CLEAN ES RESULTS took ${endTime - startTime} milliseconds`)
 			return results;
 		} catch (err) {
 			this.logger.error(err.message, 'GL7EDI3', user);
@@ -1923,11 +1920,8 @@ class SearchUtility {
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
-			var startTime = performance.now()
 
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			var endTime = performance.now()
-			console.log(`Call to ES SEARCH took ${endTime - startTime} milliseconds`)
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);

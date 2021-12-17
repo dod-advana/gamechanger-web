@@ -62,9 +62,11 @@ class PolicySearchHandler extends SearchHandler {
 		var startTime = performance.now()
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		var startTimeInt = performance.now()
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
+		var endTimeInt = performance.now()
 		var endTime = performance.now()
-		console.log(`Call to ES SearchHelper took ${endTime - startTime} milliseconds`)
+		this.logger.info(`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${endTimeInt - startTimeInt}`)
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		}
@@ -177,7 +179,6 @@ class PolicySearchHandler extends SearchHandler {
 			cloneName,
 		} = body;
 		try {
-			var startTime = performance.now()
 
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
@@ -186,8 +187,6 @@ class PolicySearchHandler extends SearchHandler {
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId)
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, termsArray[0], cleanedAbbreviations, userId);
-			var endTime = performance.now()
-			console.log(`Call to gather Expansions took ${endTime - startTime} milliseconds`)
 			return expansionDict;
 		} catch (e) {
 			this.logger.error(e.message, 'B6X9EPJ');
