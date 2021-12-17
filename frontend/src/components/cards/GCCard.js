@@ -656,7 +656,7 @@ function GCCard(props) {
 			selected={selected}
 			allowScroll={allowScroll}
 			showSideFilters={state.showSideFilters}
-			ntelligentSearch={intelligentSearch}
+			intelligentSearch={intelligentSearch}
 			graphView={graphView}
 		>
 			<Popover
