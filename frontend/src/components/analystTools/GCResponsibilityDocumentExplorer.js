@@ -418,10 +418,10 @@ export default function ResponsibilityDocumentExplorer({
 					<></>
 				metaData.push({
 					Key: keyMap[key],
-					Value: <>
+					Value: <div style={{wordBreak: 'break-word'}}>
 						{responsibility[key]}
 						{editButtons}
-					</>
+					</div>
 				})
 			}
 		})
