@@ -504,13 +504,14 @@ export default function ResponsibilityDocumentExplorer({
 	return (
 		<div
 			className="row"
-			style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
+			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 10,
+					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',
@@ -959,7 +960,7 @@ export default function ResponsibilityDocumentExplorer({
 				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
 				style={{
 					display: rightPanelOpen ? 'block' : 'none',
-					paddingLeft: 0,
+					padding: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',

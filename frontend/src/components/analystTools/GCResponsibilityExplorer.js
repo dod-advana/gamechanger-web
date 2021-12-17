@@ -161,9 +161,9 @@ export default function GCResponsibilityExplorer({
 
 	return (
 		<div>
-			<div className='row' style={{ height: 65, marginTop: '10px', paddingLeft: 0 }}>
-				<div style={{ display: 'flex', paddingLeft: 0 }}>
-					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', marginTop: '-10px'}}>
+			<div className='row' style={{ height: 65, margin: 0, padding: 0 }}>
+				<div style={{ display: 'flex', padding: 0 }}>
+					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', margin: '-10px 0px 0px auto'}}>
 						<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 						<Select
 							className={`MuiInputBase-root`}
