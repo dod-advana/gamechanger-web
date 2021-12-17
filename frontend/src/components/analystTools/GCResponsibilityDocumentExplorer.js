@@ -101,6 +101,7 @@ export default function ResponsibilityDocumentExplorer({
 	setOrganization,
 	responsibilityText, 
 	setResponsibilityText,
+	filters,
 	setFilters,
 	documentList
 }) {
@@ -575,7 +576,9 @@ export default function ResponsibilityDocumentExplorer({
 				</div>
 				<GCAccordion
 					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length ? true : false}
-					header={'FILTERS'}
+					header={
+						<span>FILTERS  {filters.length ? <span style={{color: '#ed691d'}}>{`(${filters.length})`}</span> : ''}</span>
+					}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -584,7 +587,15 @@ export default function ResponsibilityDocumentExplorer({
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={docTitle.length ? true : false}
-								header={'DOCUMENT TITLE'}
+								header={
+									<span>
+										DOCUMENT TITLE  {
+											filters.filter(f => f.id === 'documentTitle').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'documentTitle').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
@@ -612,7 +623,15 @@ export default function ResponsibilityDocumentExplorer({
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={organization.length ? true : false}
-								header={'ORGANIZATION'}
+								header={
+									<span>
+										ORGANIZATION  {
+											filters.filter(f => f.id === 'organizationPersonnel').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'organizationPersonnel').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
@@ -644,6 +663,15 @@ export default function ResponsibilityDocumentExplorer({
 							<GCAccordion
 								expanded={Object.keys(responsibilityText).length ? true : false}
 								header={'RESPONSIBILITY TEXT'}
+								header={
+									<span>
+										RESPONSIBILITY TEXT  {
+											filters.filter(f => f.id === 'responsibilityText').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'responsibilityText').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}

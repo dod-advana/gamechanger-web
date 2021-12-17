@@ -215,6 +215,7 @@ export default function GCResponsibilityExplorer({
 					setOrganization={setOrganization}
 					responsibilityText={responsibilityText}
 					setResponsibilityText={setResponsibilityText}
+					filters={filters}
 					setFilters={setFilters}
 					documentList={documentList}
 				/>
