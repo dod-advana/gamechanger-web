@@ -501,10 +501,10 @@ const GCDocumentsComparisonTool = (props) => {
 											color="inherit"
 											aria-label="remove document"
 											component="span"
-											style={{color: 'red'}}
+											style={{color: 'white', backgroundColor: gcOrange, borderRadius: '5px', marginTop: '15px', marginLeft: '5px', padding:'5px 10px',fontFamily: 'Montserrat', fontWeight: 600}}
 											onClick={() => reset()}
-										>
-										    <CancelIcon fontSize={'inherit'} style={{fontSize: 20}}/>
+										> 
+										Reset
 									    </IconButton>
 									</GCTooltip>
 								</div>
