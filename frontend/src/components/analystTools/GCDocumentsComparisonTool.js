@@ -134,6 +134,7 @@ const DocumentInputContainer = styled.div`
 			background-color: ${'rgb(239, 242, 246)'};
 			margin: 30px 0px 30px 30px;
 			width: 100%;
+			overflow: scroll;
 			height: 250px;
 			
 			& .text {
