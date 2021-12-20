@@ -400,7 +400,12 @@ const GCDocumentsComparisonTool = (props) => {
 				</DialogActions>
 			</Dialog>
 			
-			<Grid container style={{marginTop: 20}} spacing={4}>
+			<Grid container style={{marginTop: 20}}>
+				<Grid item xs={12}>
+					<div style={{fontWeight:'bold', alignItems: 'center'}}>
+					Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to process data for this capability, please check back later or reach us by email if your document/s of interest are not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
+					</div>
+				</Grid>
 				<Grid item xs={2}>
 					<GCAnalystToolsSideBar context={context} />
 				</Grid>
@@ -408,16 +413,16 @@ const GCDocumentsComparisonTool = (props) => {
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
-							<Grid item xs={10}>
+							<Grid item xs={12}>
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
-									<Grid item xs={10}>
+									<Grid item xs={12}>
 										<div className={'instruction-box'}>
-											Copy a paragraph into the box below to search for similar documents
+											To search for similar documents, paste text into the box below.
 										</div>
 									</Grid>
 									
 									<Grid container>
-										<Grid item xs={10}>
+										<Grid item xs={12}>
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
@@ -445,9 +450,12 @@ const GCDocumentsComparisonTool = (props) => {
 								</Grid>
 							</Grid>
 						</Grid>
+						<Grid container style={{justifyContent:'flex-end', marginLeft:'30px'}}>
+						<Grid item xs={-2}>
+						
 										<button
 					type="button"
-					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5, marginBottom: 10 }}
+					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5}}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
 						setState(dispatch, { runDocumentComparisonSearch: true });
@@ -456,11 +464,13 @@ const GCDocumentsComparisonTool = (props) => {
 					<span style={{
 						fontFamily: 'Montserrat',
 						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginRight: '-1px', color: '#ffffff'
+						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
 					}}>
 						Submit
 					</span>
 				</button>
+				</Grid>
+				</Grid>
 					</DocumentInputContainer>
 					}
 					{loading &&
@@ -584,3 +594,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default GCDocumentsComparisonTool;
+/*	
+style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5, margin: '0 0 0 1150px'}}				
+*/
