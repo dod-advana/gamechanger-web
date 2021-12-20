@@ -119,6 +119,7 @@ const DocumentInputContainer = styled.div`
 	
 	.input-box {
 		font-size: 14px;
+		overflow: scroll;
 		font-family: Noto Sans;
 	}
 	
@@ -421,7 +422,7 @@ const GCDocumentsComparisonTool = (props) => {
 												<TextField
 													id="input-box"
 													multiline
-													rows={18}
+													rows={1000}
 													variant="outlined"
 													className={classes.inputBoxRoot}
 													onChange={(event) => {
