@@ -602,7 +602,7 @@ const PolicyAnalyticsToolsHandler = {
 		return (
 			<>
 				<div>
-					<div style={{width: '100%', fontSize: '16px', fontStyle: 'italic', marginTop: '60px', marginBottom: '20px'}}>
+					<div style={{width: '100%', fontSize: '14px', fontStyle: 'initial', marginLeft: '30px', marginTop: '60px', marginBottom: '20px'}}>
 						Apply filters to your search
 					</div>
 					
