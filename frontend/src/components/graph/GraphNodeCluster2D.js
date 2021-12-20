@@ -1439,6 +1439,7 @@ export default function GraphNodeCluster2D(props) {
 		if (forceGraphRef) {
 			// forceGraphRef.d3Force('charge').strength(chargeStrength);
 			// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
+			forceGraphRef.d3Force('charge').distanceMin(20);
 		}
 
 		return (
