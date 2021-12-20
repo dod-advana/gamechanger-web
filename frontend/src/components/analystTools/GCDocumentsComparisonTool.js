@@ -100,9 +100,11 @@ const DocumentInputContainer = styled.div`
 	}
 	
 	.instruction-box {
-		font-size: 22px;
+		font-size: 20px;
+		font-style: initial;
 		font-family: Noto Sans;
-		margin-bottom: 20px;
+		font-color: ${'#2f3f4a'};
+		margin-bottom: 15px;
 	}
 	
 	.or-use-text {
