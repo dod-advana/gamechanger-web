@@ -663,7 +663,6 @@ export default function ResponsibilityDocumentExplorer({
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={Object.keys(responsibilityText).length ? true : false}
-								header={'RESPONSIBILITY TEXT'}
 								header={
 									<span>
 										RESPONSIBILITY TEXT  {

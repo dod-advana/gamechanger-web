@@ -7,10 +7,15 @@ import {
 	Select
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Icon from '@material-ui/core/Icon';
+import {trackEvent} from '../telemetry/Matomo';
+import GCButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
+import GCToolTip from '../common/GCToolTip';
+import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -73,7 +78,7 @@ export default function GCResponsibilityExplorer({
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
-			handleFetchData({ page: resultsPage, sorted: [], filtered: filters });
+			handleFetchData({ page: resultsPage, filtered: filters });
 			setReloadResponsibilities(false);
 		}
 	 }, [reloadResponsibilities, resultsPage, filters]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -86,7 +91,7 @@ export default function GCResponsibilityExplorer({
 		fetchDocTitles();
 	 },[])
 
-	const handleFetchData = async ({ page, sorted, filtered }) => {
+	const handleFetchData = async ({ page, filtered }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
@@ -97,8 +102,6 @@ export default function GCResponsibilityExplorer({
 			}
 			const { results = [] } = await getData({
 				offset,
-				sorted,
-				page,
 				filtered: tmpFiltered,
 			});
 			setResponsibilityData(results);
@@ -129,19 +132,16 @@ export default function GCResponsibilityExplorer({
 
 	const getData = async ({
 		offset = 0,
-		sorted = [],
 		filtered = [],
 	}) => {
-		const order = sorted.map(({ id, desc }) => [id, desc ? 'DESC' : 'ASC']);
-		const where = filtered;
                                                     
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
 				docView: true,
 				page: resultsPage,
 				offset,
-				order,
-				where,
+				order: [],
+				where: filtered,
 			});
 			if(data.offsets){
 				setOffsets(data.offsets);
@@ -159,11 +159,50 @@ export default function GCResponsibilityExplorer({
 		if(value === 'Document') setReloadResponsibilities(true)
 	}
 
+	const exportCSV = async () => {
+		try {
+			const { data } = await gameChangerAPI.getResponsibilityData({
+				limit: null,
+				offset: 0,
+				order: [],
+				where: filters,
+			});
+
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name), 
+				'ResponsibilityTracker', 
+				'ExportCSV', 
+				data?.results?.length
+			);
+			exportToCsv(
+				'ResponsibilityData.csv', 
+				data.results, 
+				true
+			);
+		} catch (e) {
+			console.error(e);
+			return [];
+		}
+	};
+
 	return (
 		<div>
 			<div className='row' style={{ height: 65, margin: 0, padding: 0 }}>
-				<div style={{ display: 'flex', padding: 0 }}>
-					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', margin: '-10px 0px 0px auto'}}>
+				<div style={{ display: 'flex', justifyContent: 'flex-end', padding: 0 }}>
+					<GCButton 
+						onClick={exportCSV}
+						style={{
+							minWidth: 50,
+							padding: '0px 7px',
+							margin: '6px 10px 0px 0px',
+							height: 50,
+						}}
+					>
+						<GCToolTip title="Export" placement="bottom" arrow enterDelay={500} >
+							<Icon className="fa fa-external-link" style={{paddingTop: 2, transform: 'scale(1.3)'}}/>
+						</GCToolTip>
+					</GCButton>
+					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', margin: '-10px 0px 0px 0px'}}>
 						<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 						<Select
 							className={`MuiInputBase-root`}
