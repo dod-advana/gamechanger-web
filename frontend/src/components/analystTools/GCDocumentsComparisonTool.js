@@ -408,9 +408,9 @@ const GCDocumentsComparisonTool = (props) => {
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
-							<Grid item xs={8}>
+							<Grid item xs={10}>
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
-									<Grid item xs={12}>
+									<Grid item xs={10}>
 										<div className={'instruction-box'}>
 											Copy a paragraph into the box below to search for similar documents
 										</div>
@@ -456,7 +456,7 @@ const GCDocumentsComparisonTool = (props) => {
 					<span style={{
 						fontFamily: 'Montserrat',
 						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
+						width: '100%', marginTop: '5px', marginBottom: '10px', marginRight: '-1px', color: '#ffffff'
 					}}>
 						Submit
 					</span>
