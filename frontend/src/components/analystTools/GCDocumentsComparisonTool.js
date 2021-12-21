@@ -406,8 +406,7 @@ const GCDocumentsComparisonTool = (props) => {
 			<Grid container style={{marginTop: 20}}>
 				<Grid item xs={12}>
 					<div style={{fontWeight:'bold', alignItems: 'center'}}>
-					Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to process data for this capability, please check back later or reach us by email if your document/s of interest are not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
-					</div>
+					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.					</div>
 				</Grid>
 				<Grid item xs={2}>
 					<GCAnalystToolsSideBar context={context} />
