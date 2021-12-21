@@ -87,10 +87,12 @@ const DocumentCompareContainer = styled.div`
 
 const DocumentInputContainer = styled.div`
 	border: 1px ${'#707070'};
-	background-color: ${'#F6F8FA'};
+	
 	
 	.input-container-grid {
-		margin: 30px;
+		margin-top: 30px;
+		margin-left: 30px;
+		padding: 0px 5px;
 	}
 	
 	.input-drop-zone {
@@ -103,8 +105,9 @@ const DocumentInputContainer = styled.div`
 		font-size: 20px;
 		font-style: initial;
 		font-family: Noto Sans;
+		padding: 10px;
 		font-color: ${'#2f3f4a'};
-		margin-bottom: 15px;
+		margin-bottom: 10px;
 	}
 	
 	.or-use-text {
@@ -415,16 +418,16 @@ const GCDocumentsComparisonTool = (props) => {
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
-							<Grid item xs={12}>
-								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
-									<Grid item xs={12}>
+							<Grid item xs={11}>
+								<Grid container style={{display: 'flex'}}>
+									<Grid item xs={11}>
 										<div className={'instruction-box'}>
 											To search for similar documents, paste text into the box below.
 										</div>
 									</Grid>
 									
 									<Grid container>
-										<Grid item xs={12}>
+										<Grid item xs={11}>
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
@@ -452,12 +455,12 @@ const GCDocumentsComparisonTool = (props) => {
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid container style={{justifyContent:'flex-end', marginLeft:'30px'}}>
-						<Grid item xs={-2}>
+						<Grid container style={{padding:'15px', justifyContent: 'flex-end'}}>
+						<Grid item xs={3}>
 						
 										<button
 					type="button"
-					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5}}
+					style={{ border: 'none', lineHeight:'31px', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: '36px', borderRadius: '5px'}}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
 						setState(dispatch, { runDocumentComparisonSearch: true });
@@ -466,7 +469,7 @@ const GCDocumentsComparisonTool = (props) => {
 					<span style={{
 						fontFamily: 'Montserrat',
 						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
+						width: '100%', alignItems: 'inherit', padding: '0 15px', color: '#ffffff'
 					}}>
 						Submit
 					</span>
