@@ -86,13 +86,16 @@ const DocumentCompareContainer = styled.div`
 `;
 
 const DocumentInputContainer = styled.div`
-	border: 1px ${'#707070'};
+	border: 5px ${'#FFFFFF'};
+	border-radius: 5px;
+	background-color: ${'#F6F8FA'};
+	
 	
 	
 	.input-container-grid {
 		margin-top: 30px;
-		margin-left: 30px;
-		padding: 0px 5px;
+		margin-left: 80px;
+		padding: 5px 5px;
 	}
 	
 	.input-drop-zone {
@@ -106,6 +109,7 @@ const DocumentInputContainer = styled.div`
 		font-style: initial;
 		font-family: Noto Sans;
 		padding: 10px;
+		margin-left: 10px;
 		font-color: ${'#2f3f4a'};
 		margin-bottom: 10px;
 	}
@@ -125,6 +129,7 @@ const DocumentInputContainer = styled.div`
 	.input-box {
 		font-size: 14px;
 		overflow: scroll;
+		width: 98%;
 		font-family: Noto Sans;
 	}
 	
@@ -411,10 +416,12 @@ const GCDocumentsComparisonTool = (props) => {
 					<div style={{fontWeight:'bold', alignItems: 'center'}}>
 					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.					</div>
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={3}>
+					<div style={{padding: '15px'}}>
 					<GCAnalystToolsSideBar context={context} />
+					</div>
 				</Grid>
-				<Grid item xs={10}>
+				<Grid item xs={8}>
 					{(!loading && returnedDocs.length <= 0) &&
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'}>
@@ -426,7 +433,7 @@ const GCDocumentsComparisonTool = (props) => {
 										</div>
 									</Grid>
 									
-									<Grid container>
+									<Grid container style={{display: 'flex'}}>
 										<Grid item xs={11}>
 											<div className={'input-box'}>
 												<TextField
@@ -456,16 +463,16 @@ const GCDocumentsComparisonTool = (props) => {
 							</Grid>
 						</Grid>
 						<Grid container style={{padding:'15px', justifyContent: 'flex-end'}}>
-						<Grid item xs={3}>
-						
+							
+								<Grid item xs={3}>
 										<button
-					type="button"
-					style={{ border: 'none', lineHeight:'31px', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: '36px', borderRadius: '5px'}}
-					onClick={() => {
+								type="button"
+						style={{ margin: '0 0 0 40px', border: '2px', minWidth: '110px', lineHeight:'31px', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: '36px', borderRadius: '5px'}}
+						onClick={() => {
 						resetAdvancedSettings(dispatch);
 						setState(dispatch, { runDocumentComparisonSearch: true });
 					}}
-				>
+						>
 					<span style={{
 						fontFamily: 'Montserrat',
 						fontWeight: 600,
@@ -475,6 +482,7 @@ const GCDocumentsComparisonTool = (props) => {
 					</span>
 				</button>
 				</Grid>
+				
 				</Grid>
 					</DocumentInputContainer>
 					}
