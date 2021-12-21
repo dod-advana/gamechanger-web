@@ -157,14 +157,16 @@ export default function ResponsibilityDocumentExplorer({
 
 	useEffect(() => {
 		if(!iframeLoading){
-			const notFound = document.getElementById('PdfViewer')?.contentWindow?.document.getElementsByClassName('notFound');
-			if(notFound?.length){
-				createAlert(
-					'Text Not Found',
-					'error',
-					'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
-				);
-			}
+			setTimeout(() => {
+				const notFound = document.getElementById('PdfViewer')?.contentWindow?.document.getElementsByClassName('notFound');
+				if(notFound?.length){
+					createAlert(
+						'Text Not Found',
+						'error',
+						'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
+					);
+				}
+			}, 2000)
 		}
 	},[iframeLoading])
 
