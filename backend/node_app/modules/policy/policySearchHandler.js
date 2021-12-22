@@ -293,7 +293,7 @@ class PolicySearchHandler extends SearchHandler {
 			offset,
 		} = req.body;
 		try {
-			var startTime = performance.now()
+			let sentenceResults = {}
 
 			let enrichedResults = searchResults;
 			//set empty values
@@ -303,7 +303,7 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
-			let sentenceResults = {}
+			enrichedResults.sentenceResults = {};
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
@@ -354,8 +354,6 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
 			}
-			var endTime = performance.now()
-			console.log(`Call to combined search took ${endTime - startTime} milliseconds`)
 			return enrichedResults;
 		} catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
