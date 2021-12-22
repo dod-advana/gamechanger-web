@@ -303,7 +303,7 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
-			enrichedResults.sentenceResults = {};
+			enrichedResults.sentenceResults = [];
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
