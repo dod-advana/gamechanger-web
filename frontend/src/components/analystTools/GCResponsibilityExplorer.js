@@ -8,6 +8,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import {trackEvent} from '../telemetry/Matomo';
 import GCButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -69,19 +70,19 @@ export default function GCResponsibilityExplorer({
 	const [loading, setLoading] = useState(true);
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
-	const [resultsPage, setResultsPage] = useState(1);
 	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
 	const [docTitle, setDocTitle] = useState([]);
 	const [documentList, setDocumentList] = useState([]);
 	const [organization, setOrganization] = useState([]);
 	const [responsibilityText, setResponsibilityText] = useState({});
+	const [infiniteCount, setInfiniteCount] = useState(1);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
-			handleFetchData({ page: resultsPage, filtered: filters });
+			handleFetchData({ page: 1, filtered: filters });
 			setReloadResponsibilities(false);
 		}
-	 }, [reloadResponsibilities, resultsPage, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	 }, [reloadResponsibilities, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	 useEffect(() => {
 		const fetchDocTitles = async() => {
@@ -91,7 +92,17 @@ export default function GCResponsibilityExplorer({
 		fetchDocTitles();
 	 },[])
 
-	const handleFetchData = async ({ page, filtered }) => {
+	 const scrollRef = useBottomScrollListener(
+		() => {
+			if(Object.keys(docResponsibilityData)?.length < offsets.length){
+				setInfiniteCount(infiniteCount + 1);
+				handleFetchData({ page: infiniteCount, filtered: filters, scroll: true });
+			}
+		},
+		{ debounce: 5000 }
+	)
+
+	const handleFetchData = async ({ page, filtered, scroll }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
@@ -104,7 +115,12 @@ export default function GCResponsibilityExplorer({
 				offset,
 				filtered: tmpFiltered,
 			});
-			setResponsibilityData(results);
+			if(scroll) {
+				setResponsibilityData([...responsibilityData, ...results]);
+			} else{
+				setResponsibilityData(results);
+			}
+			
 		} catch (e) {
 			setResponsibilityData([]);
 			console.error(e);
@@ -138,7 +154,7 @@ export default function GCResponsibilityExplorer({
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
 				docView: true,
-				page: resultsPage,
+				page: infiniteCount,
 				offset,
 				order: [],
 				where: filtered,
@@ -239,14 +255,8 @@ export default function GCResponsibilityExplorer({
 					dispatch={dispatch} 
 					responsibilityData={docResponsibilityData} 
 					loading={loading}
-					docsPerPage={DOCS_PER_PAGE}
 					totalCount={offsets.length}
-					resultsPage={resultsPage}
-					setResultsPage={setResultsPage}
-					onPaginationClick={(page) => {
-						setResultsPage(page);
-						setReloadResponsibilities(true);
-					}}
+					setResultsPage={setInfiniteCount}
 					setReloadResponsibilities={setReloadResponsibilities}
 					docTitle={docTitle}
 					setDocTitle={setDocTitle}
@@ -257,6 +267,7 @@ export default function GCResponsibilityExplorer({
 					filters={filters}
 					setFilters={setFilters}
 					documentList={documentList}
+					infiniteScrollRef={scrollRef}
 				/>
 			}
 		</div>
