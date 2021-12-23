@@ -1850,6 +1850,7 @@ class SearchUtility {
 	async getSentResults(searchText, userId) {
 		let sentResults = [];
 		try {
+			searchText = searchText.replace(/\?/g, '');
 			sentResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		} catch (e) {
 			this.logger.error(e, 'PQKLW5XN', userId);
