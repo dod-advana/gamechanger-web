@@ -88,13 +88,18 @@ const DocumentCompareContainer = styled.div`
 `;
 
 const DocumentInputContainer = styled.div`
-	border: 1px ${'#707070'};
+	border: 5px ${'#FFFFFF'};
+	border-radius: 5px;
 	background-color: ${'#F6F8FA'};
 	padding: 20px;
 	margin: 20px 0px 0px 20px;
 	
+	
+	
 	.input-container-grid {
-		margin: 30px;
+		margin-top: 30px;
+		margin-left: 80px;
+		padding: 5px 5px;
 	}
 	
 	.input-drop-zone {
@@ -107,8 +112,10 @@ const DocumentInputContainer = styled.div`
 		font-size: 1.1em;
 		font-style: initial;
 		font-family: Noto Sans;
+		padding: 10px;
+		margin-left: 10px;
 		font-color: ${'#2f3f4a'};
-		margin-bottom: 15px;
+		margin-bottom: 10px;
 	}
 	
 	.or-use-text {
@@ -126,6 +133,7 @@ const DocumentInputContainer = styled.div`
 	.input-box {
 		font-size: 14px;
 		overflow: scroll;
+		width: 98%;
 		font-family: Noto Sans;
 	}
 
@@ -142,6 +150,7 @@ const DocumentInputContainer = styled.div`
 			background-color: ${'rgb(239, 242, 246)'};
 			margin: 30px 0px 30px 30px;
 			width: 100%;
+			overflow: scroll;
 			height: 250px;
 			
 			& .text {
@@ -431,8 +440,8 @@ const GCDocumentsComparisonTool = (props) => {
 										</div>
 									</Grid>
 									
-									<Grid container>
-										<Grid item xs={12}>
+									<Grid container style={{display: 'flex'}}>
+										<Grid item xs={11}>
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
