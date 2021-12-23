@@ -44,21 +44,15 @@ export default function GCAnalystToolsSideBar(props) {
 	}
 	
 	return (
-		<div className={''} style={{ height: 'fit-content', minWidth: '100%' }}>
-			<div className={''}>
-				<div style={styles.innerContainer}>
-					<div style={styles.cardBody}>
-						<div style={styles.innerContainer} ref={sideBarFilterRef}>
-							{loaded && analystToolsSideBarHandler.getSideBarItems({
-								state,
-								classes,
-								dispatch,
-								handleSubmit,
-								sideFilterOverlayDimension
-							})}
-						</div>
-					</div>
-				</div> 
+		<div style={styles.cardBody}>
+			<div style={styles.innerContainer} ref={sideBarFilterRef}>
+				{loaded && analystToolsSideBarHandler.getSideBarItems({
+					state,
+					classes,
+					dispatch,
+					handleSubmit,
+					sideFilterOverlayDimension
+				})}
 			</div>
 		</div>
 	);
