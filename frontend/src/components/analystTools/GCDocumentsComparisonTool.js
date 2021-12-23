@@ -17,6 +17,8 @@ import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../utils/gamechanger
 import {Card} from '../cards/GCCard';
 import CloseIcon from '@material-ui/icons/Close';
 import GCTooltip from '../common/GCToolTip';
+import GCButton from '../common/GCButton';
+
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -88,6 +90,8 @@ const DocumentCompareContainer = styled.div`
 const DocumentInputContainer = styled.div`
 	border: 1px ${'#707070'};
 	background-color: ${'#F6F8FA'};
+	padding: 20px;
+	margin: 20px 0px 0px 20px;
 	
 	.input-container-grid {
 		margin: 30px;
@@ -100,7 +104,7 @@ const DocumentInputContainer = styled.div`
 	}
 	
 	.instruction-box {
-		font-size: 20px;
+		font-size: 1.1em;
 		font-style: initial;
 		font-family: Noto Sans;
 		font-color: ${'#2f3f4a'};
@@ -123,6 +127,10 @@ const DocumentInputContainer = styled.div`
 		font-size: 14px;
 		overflow: scroll;
 		font-family: Noto Sans;
+	}
+
+	fieldset {
+		height: auto !important;
 	}
 	
 	.document-imported-block {
@@ -149,6 +157,7 @@ const DocumentInputContainer = styled.div`
 `;
 
 const SimilarDocumentsContainer = styled.div`
+	margin: 20px 0px 0px 20px;
 
 	.displaying-results-text {
 		font-size: 24px;
@@ -404,17 +413,16 @@ const GCDocumentsComparisonTool = (props) => {
 			
 			<Grid container style={{marginTop: 20}}>
 				<Grid item xs={12}>
-					<div style={{fontWeight:'bold', alignItems: 'center'}}>
-					Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to process data for this capability, please check back later or reach us by email if your document/s of interest are not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
+					<div style={{fontWeight:'bold', alignItems: 'center', fontFamily: 'Noto Sans',}}>
+					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.
 					</div>
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={3} style={{marginTop: 20}}>
 					<GCAnalystToolsSideBar context={context} />
 				</Grid>
-				<Grid item xs={10}>
-					{(!loading && returnedDocs.length <= 0) &&
+				<Grid item xs={9}>
 					<DocumentInputContainer>
-						<Grid container className={'input-container-grid'}>
+						<Grid container className={'input-container-grid'} style={{margin: 0}}>
 							<Grid item xs={12}>
 								<Grid container style={{display: 'flex', flexDirection: 'column'}}>
 									<Grid item xs={12}>
@@ -428,10 +436,12 @@ const GCDocumentsComparisonTool = (props) => {
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
+													disabled={returnedDocs.length > 0}
 													multiline
 													rows={1000}
 													variant="outlined"
 													className={classes.inputBoxRoot}
+													value={paragraphText}
 													onChange={(event) => {
 														setParagraphText(event.target.value);
 													}}
@@ -452,29 +462,24 @@ const GCDocumentsComparisonTool = (props) => {
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid container style={{justifyContent:'flex-end', marginLeft:'30px'}}>
-						<Grid item xs={-2}>
-						
-										<button
-					type="button"
-					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5}}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runDocumentComparisonSearch: true });
-					}}
-				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
-					}}>
-						Submit
-					</span>
-				</button>
-				</Grid>
-				</Grid>
+						<Grid container style={{justifyContent:'flex-end'}}>
+							<GCTooltip 
+								title={returnedDocs.length > 0 ? 'Click to start over' : 'Compare Documents'} 
+								placement="top" arrow
+							>
+								<GCButton
+									style={{ marginTop: 20 }}
+									onClick={() => {
+										if(!loading && returnedDocs.length > 0) return reset();
+										resetAdvancedSettings(dispatch);
+										setState(dispatch, { runDocumentComparisonSearch: true });
+									}}
+								>
+									{!loading && returnedDocs.length > 0 ? 'Reset' : 'Submit'}
+								</GCButton>
+							</GCTooltip>
+						</Grid>
 					</DocumentInputContainer>
-					}
 					{loading &&
 					<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
 						<LoadingIndicator customColor={gcOrange}/>
@@ -482,34 +487,6 @@ const GCDocumentsComparisonTool = (props) => {
 					}
 					{(!loading && returnedDocs.length > 0) &&
 					<>
-						<DocumentInputContainer>
-							<div className={'document-imported-block'}>
-								<div className={'document-text'}>
-									<div className={'text'}>
-										{paragraphs.map(paragraph => (
-											<>
-												<div>{paragraph}</div>
-												<br />
-											</>
-										))}
-									</div>
-								</div>
-								<div className={'remove-document'}>
-									<GCTooltip title={'Click to start over'} placement="top" arrow>
-										<IconButton
-											color="inherit"
-											aria-label="remove document"
-											component="span"
-											style={{color: 'red'}}
-											onClick={() => reset()}
-										>
-										    <CancelIcon fontSize={'inherit'} style={{fontSize: 20}}/>
-									    </IconButton>
-									</GCTooltip>
-								</div>
-							</div>
-						</DocumentInputContainer>
-						
 						<SimilarDocumentsContainer>
 							<div className={'displaying-results-text'}>
 								<div className={'text'}>
