@@ -78,11 +78,15 @@ router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
 router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
+router.post('/responsibilities/getDocTitles', responsibility.getResponsibilityDocTitles);
 router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
+router.post('/responsibilities/getDocLink', responsibility.getFileLink);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
+router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport)
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
+router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);
 
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);
