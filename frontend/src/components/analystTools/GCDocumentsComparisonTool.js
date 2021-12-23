@@ -112,8 +112,6 @@ const DocumentInputContainer = styled.div`
 		font-size: 1.1em;
 		font-style: initial;
 		font-family: Noto Sans;
-		padding: 10px;
-		margin-left: 10px;
 		font-color: ${'#2f3f4a'};
 		margin-bottom: 10px;
 	}
@@ -133,7 +131,6 @@ const DocumentInputContainer = styled.div`
 	.input-box {
 		font-size: 14px;
 		overflow: scroll;
-		width: 98%;
 		font-family: Noto Sans;
 	}
 
@@ -441,7 +438,7 @@ const GCDocumentsComparisonTool = (props) => {
 									</Grid>
 									
 									<Grid container style={{display: 'flex'}}>
-										<Grid item xs={11}>
+										<Grid item xs={12}>
 											<div className={'input-box'}>
 												<TextField
 													id="input-box"
