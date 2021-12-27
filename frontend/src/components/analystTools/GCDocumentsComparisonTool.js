@@ -13,7 +13,13 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import {gcOrange} from '../common/gc-colors';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Pagination from 'react-js-pagination';
-import {encode, handlePdfOnLoad, RESULTS_PER_PAGE} from '../../utils/gamechangerUtils';
+import {
+	encode, 
+	handlePdfOnLoad, 
+	RESULTS_PER_PAGE,
+	getOrgToOrgQuery,
+	getTypeQuery
+} from '../../utils/gamechangerUtils';
 import {Card} from '../cards/GCCard';
 import CloseIcon from '@material-ui/icons/Close';
 import GCTooltip from '../common/GCToolTip';
@@ -193,6 +199,46 @@ const SimilarDocumentsContainer = styled.div`
 		margin-top: 5px;
 	}
 `;
+
+const getPresearchData = async (state, dispatch) => {
+	const { cloneData } = state;
+	if (_.isEmpty(state.presearchSources)) {
+		const resp = await gameChangerAPI.callSearchFunction({
+			functionName: 'getPresearchData',
+			cloneName: cloneData.clone_name,
+			options: {},
+		});
+
+		const orgFilters = {};
+		for (const key in resp.data.orgs) {
+			orgFilters[resp.data.orgs[[key]]] = false;
+		}
+		const typeFilters = {};
+		for (const key in resp.data.types) {
+			let name = resp.data.types[key];
+			if (name.slice(-1) !== 's') {
+				name = name + 's';
+			}
+			typeFilters[name] = false;
+		}
+		const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
+		newSearchSettings.orgFilter = orgFilters;
+		newSearchSettings.typeFilter = typeFilters;
+		if (_.isEmpty(state.presearchSources)) {
+			setState(dispatch, { presearchSources: orgFilters });
+		}
+		if (_.isEmpty(state.presearchTypes)) {
+			setState(dispatch, { presearchTypes: typeFilters });
+		}
+		setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+	} else {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.orgFilter = state.presearchSources;
+		newSearchSettings.typeFilter = state.presearchTypes;
+		setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+	}
+}
+
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS'});
 }
@@ -202,6 +248,15 @@ const GCDocumentsComparisonTool = (props) => {
 	
 	const { context } = props;
 	const {state, dispatch} = context;
+	const { analystToolsSearchSettings } = state;
+	const { 
+		allOrgsSelected,
+		orgFilter,
+		allTypesSelected,
+		typeFilter,
+		publicationDateFilter,
+		includeRevoked
+	} = analystToolsSearchSettings;
 	
 	const [paragraphText, setParagraphText] = useState('');
 	const [paragraphs, setParagraphs] = useState([]);
@@ -212,10 +267,17 @@ const GCDocumentsComparisonTool = (props) => {
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
 	const [dropBoxWidthHeight, setDropBoxWidthHeight] = useState({width: 0, height: 0});
+	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	
 	const dropboxRef = useRef();
 	
-	
+	useEffect(() => {
+		if(!filtersLoaded){
+			getPresearchData(state, dispatch);
+			setFiltersLoaded(true);
+		}
+	}, [state, dispatch, filtersLoaded])
+
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
@@ -225,8 +287,15 @@ const GCDocumentsComparisonTool = (props) => {
 			}).filter(paragraph => paragraph.length > 0);
 			
 			setParagraphs(paragraphs);
+
+			const filters = {
+				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
+				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
+				dateFilter: publicationDateFilter,
+				canceledDocs: includeRevoked
+			}
 			
-			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs}).then(resp => {
+			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs, filters}).then(resp => {
 				setReturnedDocs(resp.data.docs);
 				setState(dispatch, {runDocumentComparisonSearch: false});
 				setLoading(false);

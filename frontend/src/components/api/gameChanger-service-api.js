@@ -984,9 +984,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { name, imageURL });
 	};
 	
-	compareDocumentPOST = async ({ cloneName, paragraphs }) => {
+	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
-		return axiosPOST(this.axios, url, { cloneName, paragraphs });
+		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
 	};
 
 	getFAQ = async () => {
