@@ -2539,8 +2539,8 @@ class SearchUtility {
 		}
 	}
 
-	getDocumentParagraphsByParIDs(ids = []) {
-		return {
+	getDocumentParagraphsByParIDs(ids = [], filters = {}) {
+		const query = {
 			_source: {
 				includes: ['pagerank_r', 'kw_doc_score_r']
 			},
@@ -2568,6 +2568,8 @@ class SearchUtility {
 			],
 			'query': {
 				'bool': {
+					'must': [],
+					'filter': [],
 					'should': [
 						{
 							'nested': {
@@ -2604,6 +2606,46 @@ class SearchUtility {
 				}
 			}
 		}
+
+		if (filters?.orgFilters?.length > 0) {
+			query.query.bool.filter.push(
+				{
+					terms: {
+						display_org_s: orgFilterString
+					}
+				}
+			);
+		}
+		if (filters?.typeFilters?.length > 0) {
+			query.query.bool.filter.push(
+				{
+					terms: {
+						display_doc_type_s: typeFilterString
+					}
+				}
+			);
+		}
+		if (this.constants.GAME_CHANGER_OPTS.allow_daterange && filters.dateFilter[0] && filters.dateFilter[1]){
+			if (filters.dateFilter[0] && filters.dateFilter[1]) {
+				query.query.bool.must.push({
+					range: {
+						publication_date_dt: {
+							gte: filters.dateFilter[0].split('.')[0],
+							lte: filters.dateFilter[1].split('.')[0]
+						}
+					}
+				});
+			}
+		}
+		if (!filters?.canceledDocs) {
+			query.query.bool.filter.push({
+				term: {
+					is_revoked_b: 'false'
+				}
+			});
+		}
+		
+		return query;
 	}
 
 }

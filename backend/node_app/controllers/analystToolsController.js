@@ -26,7 +26,7 @@ class AnalystToolsController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			
-			const { cloneName, paragraphs = [] } = req.body;
+			const { cloneName, paragraphs = [], filters } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
 			
 			// ML API Call Goes Here
@@ -49,7 +49,7 @@ class AnalystToolsController {
 			
 			const ids = Object.keys(resultsObject);
 			// Query ES
-			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids);
+			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
 
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
