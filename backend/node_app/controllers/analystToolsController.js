@@ -2,6 +2,7 @@ const LOGGER = require('../lib/logger');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
+const { result } = require('underscore');
 
 class AnalystToolsController {
 	constructor(opts = {}) {
@@ -33,9 +34,20 @@ class AnalystToolsController {
 			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
+			const filteredParagraphResults = [];
+			paragraphResults.forEach(result => {
+				const newObj = {};
+				Object.keys(result).forEach(id => {
+					if(result[id]?.score >= 0.65){
+						newObj[id] = result[id];
+					}
+				})
+				filteredParagraphResults.push(newObj)
+			})
+
 			const resultsObject = {};
 			
-			paragraphResults.forEach(result => {
+			filteredParagraphResults.forEach(result => {
 				Object.keys(result).forEach(id => {
 					if (result[id].id){
 						resultsObject[result[id].id] = {
@@ -56,6 +68,10 @@ class AnalystToolsController {
 
 			// Aggregate Data
 			const returnData = this.searchUtility.cleanUpEsResults(esResults, [], userId, [], {}, null, esQuery, true, resultsObject);
+
+			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0)
+			returnData.docs = cleanedDocs;
+
 			res.status(200).send(returnData);
 		} catch(e) {
 			this.logger.error(e, '60OOE62', userId);
