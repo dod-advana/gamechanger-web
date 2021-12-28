@@ -2611,7 +2611,7 @@ class SearchUtility {
 			query.query.bool.filter.push(
 				{
 					terms: {
-						display_org_s: orgFilterString
+						display_org_s: filters.orgFilters
 					}
 				}
 			);
@@ -2620,7 +2620,7 @@ class SearchUtility {
 			query.query.bool.filter.push(
 				{
 					terms: {
-						display_doc_type_s: typeFilterString
+						display_doc_type_s: filters.typeFilters
 					}
 				}
 			);

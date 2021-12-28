@@ -375,6 +375,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const reset = () => {
+		// resetAdvancedSettings(dispatch);
 		setParagraphText('');
 		setReturnedDocs([]);
 		setViewableDocs([]);
@@ -546,7 +547,6 @@ const GCDocumentsComparisonTool = (props) => {
 									style={{ marginTop: 20 }}
 									onClick={() => {
 										if(!loading && returnedDocs.length > 0) return reset();
-										resetAdvancedSettings(dispatch);
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
 								>
