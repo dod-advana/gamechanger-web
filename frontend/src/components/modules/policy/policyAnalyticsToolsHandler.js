@@ -5,7 +5,7 @@ import {
 	FormControl,
 	FormGroup,
 	FormControlLabel,
-	Checkbox, Typography,
+	Checkbox,
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import {
@@ -18,7 +18,6 @@ import {
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import {trackEvent} from '../../telemetry/Matomo';
-import {gcOrange} from '../../common/gc-colors';
 import {setState} from '../../../utils/sharedFunctions';
 import {getTrackingNameForFactory} from '../../../utils/gamechangerUtils';
 
@@ -46,19 +45,6 @@ const handleSelectAllOrgs = (state, dispatch) => {
 }
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
-	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
-	newSearchSettings.orgFilter = {
-		...newSearchSettings.orgFilter,
-		[orgName]: event.target.checked
-	};
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.orgUpdate = true;
-	setState(dispatch, {analystToolsSearchSettings: newSearchSettings, metricsCounted: false});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
-}
-
-const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	let orgName = event.target.name;
 	newSearchSettings.orgFilter = {
@@ -124,7 +110,7 @@ const renderSources = (state, dispatch, classes) => {
 									key={`${org}`}
 									value={`${originalOrgFilters[org]}`}
 									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
 									label={`${org}`}
 									labelPlacement="end"
 								/>
@@ -470,10 +456,6 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 }
 
-const resetAdvancedSettings = (dispatch) => {
-	dispatch({type: 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS'});
-}
-
 const PolicyAnalyticsToolsHandler = {
 	getSideBarItems(props) {
 		
@@ -481,7 +463,6 @@ const PolicyAnalyticsToolsHandler = {
 			state,
 			dispatch,
 			classes,
-			sideFilterOverlayDimension
 		} = props;
 		
 		return (
@@ -515,25 +496,6 @@ const PolicyAnalyticsToolsHandler = {
 						</GCAccordion>
 					</div>
 				</div>
-				
-			
-				
-				{/*<button*/}
-				{/*	type="button"*/}
-				{/*	style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}*/}
-				{/*	onClick={() => {*/}
-				{/*		resetAdvancedSettings(dispatch);*/}
-				{/*		setState(dispatch, { runDocumentComparisonSearch: true });*/}
-				{/*	}}*/}
-				{/*>*/}
-				{/*	<span style={{*/}
-				{/*		fontFamily: 'Montserrat',*/}
-				{/*		fontWeight: 600,*/}
-				{/*		width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'*/}
-				{/*	}}>*/}
-				{/*		Clear Filters*/}
-				{/*	</span>*/}
-				{/*</button>*/}
 			</>
 		);
 	},
