@@ -302,7 +302,7 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 		}
 		
-	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch]);
+	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked]);
 	
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
@@ -375,7 +375,6 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const reset = () => {
-		// resetAdvancedSettings(dispatch);
 		setParagraphText('');
 		setReturnedDocs([]);
 		setViewableDocs([]);
@@ -495,6 +494,13 @@ const GCDocumentsComparisonTool = (props) => {
 				</Grid>
 				<Grid item xs={3} style={{marginTop: 20}}>
 					<GCAnalystToolsSideBar context={context} />
+					<GCButton 
+						isSecondaryBtn 
+						onClick={() => resetAdvancedSettings(dispatch)}
+						style={{margin: 0, width: '100%'}}
+					>
+						Clear filters
+					</GCButton>
 				</Grid>
 				<Grid item xs={9}>
 					<DocumentInputContainer>
