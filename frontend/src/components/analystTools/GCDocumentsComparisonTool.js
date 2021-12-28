@@ -1,17 +1,14 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography} from '@material-ui/core';
-import Dropzone from 'react-dropzone';
+import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography} from '@material-ui/core';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
-import FileIcon from '../../images/icon/draganddrop_img.svg'
 import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcOrange} from '../common/gc-colors';
-import CancelIcon from '@material-ui/icons/Cancel';
 import Pagination from 'react-js-pagination';
 import {
 	encode, 
@@ -266,10 +263,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [page, setPage] = useState(1);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
-	const [dropBoxWidthHeight, setDropBoxWidthHeight] = useState({width: 0, height: 0});
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
-	
-	const dropboxRef = useRef();
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -307,12 +301,6 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
-	
-	useEffect(() => {
-		if (dropboxRef.current) {
-			setDropBoxWidthHeight({width: dropboxRef.current.offsetWidth, height: dropboxRef.current.offsetHeight});
-		}
-	}, [dropboxRef]);
 	
 	useEffect(() => {
 		if (state.compareModalOpen) {
@@ -368,10 +356,6 @@ const GCDocumentsComparisonTool = (props) => {
 		if (getMatchingParsCount(idx) > 0){
 			setCompareParagraphIndex(idx);
 		}
-	}
-	
-	const handleFilesDropped = (files) => {
-	
 	}
 	
 	const reset = () => {
@@ -605,21 +589,6 @@ const GCDocumentsComparisonTool = (props) => {
 GCDocumentsComparisonTool.propTypes = {
 	context: propTypes.objectOf( {})
 };
-
-const styles = {
-	fakeLink: {
-		textDecoration: 'underline',
-		color: '#386F94',
-		fontFamily: 'Noto Sans',
-		fontSize: 14,
-		cursor: 'pointer'
-	},
-	dropText: {
-		textAlign: 'center',
-		margin: 'auto',
-		paddingTop: 28
-	},
-}
 
 const useStyles = makeStyles((theme) => ({
 	inputBoxRoot: {
