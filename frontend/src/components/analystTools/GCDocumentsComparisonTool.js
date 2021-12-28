@@ -264,6 +264,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
+	const [noResults, setNoResults] = useState(false);
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -271,6 +272,10 @@ const GCDocumentsComparisonTool = (props) => {
 			setFiltersLoaded(true);
 		}
 	}, [state, dispatch, filtersLoaded])
+
+	useEffect(() => {
+		setNoResults(false)
+	}, [paragraphText])
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
@@ -290,9 +295,15 @@ const GCDocumentsComparisonTool = (props) => {
 			}
 			
 			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs, filters}).then(resp => {
+				if(resp.data.docs.length <= 0) setNoResults(true);
 				setReturnedDocs(resp.data.docs);
 				setState(dispatch, {runDocumentComparisonSearch: false});
 				setLoading(false);
+			}).catch(() =>{
+				setReturnedDocs([]);
+				setState(dispatch, {runDocumentComparisonSearch: false});
+				setLoading(false);
+				console.log('server error')
 			});
 		}
 		
@@ -549,6 +560,15 @@ const GCDocumentsComparisonTool = (props) => {
 					<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
 						<LoadingIndicator customColor={gcOrange}/>
 					</div>
+					}
+					{noResults && !loading && 
+						<SimilarDocumentsContainer>
+							<div className={'displaying-results-text'}>
+								<div className={'text'}>
+									No results found
+								</div>
+							</div>
+						</SimilarDocumentsContainer>
 					}
 					{(!loading && returnedDocs.length > 0) &&
 					<>
