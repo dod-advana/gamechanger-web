@@ -2625,7 +2625,7 @@ class SearchUtility {
 				}
 			);
 		}
-		if (this.constants.GAME_CHANGER_OPTS.allow_daterange && filters.dateFilter[0] && filters.dateFilter[1]){
+		if (this.constants.GAME_CHANGER_OPTS.allow_daterange && filters?.dateFilter?.[0] && filters?.dateFilter?.[1]){
 			if (filters.dateFilter[0] && filters.dateFilter[1]) {
 				query.query.bool.must.push({
 					range: {
