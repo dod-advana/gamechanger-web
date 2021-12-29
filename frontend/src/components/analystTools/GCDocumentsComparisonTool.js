@@ -546,6 +546,7 @@ const GCDocumentsComparisonTool = (props) => {
 								<GCButton
 									style={{ marginTop: 20 }}
 									onClick={() => {
+										setNoResults(false);
 										if(!loading && returnedDocs.length > 0) return reset();
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
