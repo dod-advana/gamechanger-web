@@ -77,7 +77,6 @@ const initState = {
 	showResponsibilityAssistModal: false,
 	reloadResponsibilityTable: true, // not for a modal
 	assistVoluntary: true,
-	loginModalOpen: false,
 	showSnackbar: false,
 	exportDialogVisible: false,
 	showEsQueryDialog: false,

@@ -135,8 +135,6 @@ const SearchBanner = (props) => {
 		onTitleClick,
 		componentStepNumbers = [],
 		isDataTracker,
-		loginModalOpen,
-		setLoginModal,
 		jupiter,
 		cloneData,
 		detailsType,
@@ -215,7 +213,7 @@ const SearchBanner = (props) => {
 								<PillButton
 									margin={'0 60px 0 5px'}
 									justifyContent="center"
-									onClick={() => setLoginModal(true)}
+									onClick={() => window.location.href = 'https://advana.data.mil/'}
 								>
 									<TitleText>ADVANA</TitleText>
 								</PillButton>
@@ -241,72 +239,8 @@ const SearchBanner = (props) => {
 					cloneData,
 					dispatch,
 					loading,
-				})}
-
-			<Modal
-				style={{
-					content: {
-						inset: '28% 35%',
-						padding: 'none',
-					},
-					overlay: {
-						backgroundColor: 'rgba(0, 0, 0, 0.75)',
-						zIndex: 10000,
-					},
-				}}
-				isOpen={loginModalOpen}
-				onClose={() => setLoginModal(false)}
-			>
-				<LoginModalHeader>
-					<CloseButton onClick={() => setLoginModal(false)}>
-						<CloseIcon fontSize="large" />
-					</CloseButton>
-				</LoginModalHeader>
-				<LoginModalBody>
-					<LoginModalBodyDiv>
-						<TitleText style={{ fontSize: 25 }}>Advana Account</TitleText>
-					</LoginModalBodyDiv>
-					<LoginModalBodyDiv>
-						<AdvanaLogo src={AdvanaStackedLogo} alt="advana" />
-					</LoginModalBodyDiv>
-					<LoginModalBodyDiv width="85%">
-						<a
-							href="https://advana.data.mil/"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								textDecoration: 'none',
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								border: 'none',
-								borderRadius: '5px',
-							}}
-						>
-							<GCButton style={{ flex: 1 }} isSecondaryBtn={true}>
-								Login here
-							</GCButton>
-						</a>
-
-						<a
-							href="https://signup.data.mil/"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								textDecoration: 'none',
-								color: 'white',
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								border: 'none',
-								borderRadius: '5px',
-							}}
-						>
-							<GCButton style={{ flex: 2 }}>Sign up for an account</GCButton>
-						</a>
-					</LoginModalBodyDiv>
-				</LoginModalBody>
-			</Modal>
+				})
+			}
 		</div>
 	);
 };
@@ -317,8 +251,6 @@ SearchBanner.propTypes = {
 	onTitleClick: PropTypes.func,
 	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
 	isDataTracker: PropTypes.bool,
-	loginModalOpen: PropTypes.bool,
-	setLoginModal: PropTypes.func,
 	jupiter: PropTypes.bool,
 	cloneData: PropTypes.object,
 	detailsType: PropTypes.string,
