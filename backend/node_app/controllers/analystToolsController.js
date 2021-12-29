@@ -42,6 +42,7 @@ class AnalystToolsController {
 						newObj[id] = result[id];
 					}
 				})
+				newObj.paragraphIdBeingMatched = result.paragraphIdBeingMatched;
 				filteredParagraphResults.push(newObj)
 			})
 
