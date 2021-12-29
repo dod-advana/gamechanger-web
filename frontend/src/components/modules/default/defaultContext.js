@@ -75,7 +75,6 @@ const initState = {
 	showFeedbackModal: false,
 	showAssistModal: false,
 	assistVoluntary: true,
-	loginModalOpen: false,
 	showSnackbar: false,
 	exportDialogVisible: false,
 	showEsQueryDialog: false,
