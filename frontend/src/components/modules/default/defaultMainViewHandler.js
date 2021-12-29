@@ -512,8 +512,8 @@ const DefaultMainViewHandler = {
 			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
 		]
 		if(cloneData.clone_name !== 'hermes') views.push(
-				{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
-			)
+			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
+		)
 		return views;
 	},
 

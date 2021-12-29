@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import styled from 'styled-components';
-import Modal from 'react-modal';
 import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
-import AdvanaStackedLogo from '@dod-advana/advana-platform-ui/dist/images/Stackedlogo.png';
 import TitleBarFactory from '../factories/titleBarFactory';
 import AdvanaMegaMenuPill, {
 	PillButton,
 	TitleText,
 } from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
-import GCButton from '../common/GCButton';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -81,52 +76,6 @@ const styles = {
 		margin: '.5em 0',
 	},
 };
-
-const LoginModalHeader = styled.div`
-	display: flex;
-	width: 100%;
-	height: 10%;
-	align-items: center;
-	justify-content: flex-end;
-	font-size: 23px;
-	padding-top: 20px;
-`;
-
-const LoginModalBody = styled.div`
-	display: flex;
-	width: 100%;
-	height: 90%;
-	align-items: center;
-	justify-content: space-between;
-	flex-direction: column;
-	padding: 20px;
-`;
-
-const LoginModalBodyDiv = styled.div`
-	width: ${({ width }) => (width ? width : '100%')};
-	display: flex;
-	justify-content: center;
-`;
-
-const AdvanaLogo = styled.img`
-	width: 40%;
-`;
-
-const CloseButton = styled.div`
-	padding: 6px;
-	background-color: white;
-	border-radius: 5px;
-	color: #8091a5 !important;
-	border: 1px solid #b0b9be;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex: 0.4;
-	position: absolute;
-	right: 15px;
-	top: 15px;
-`;
 
 const SearchBanner = (props) => {
 	const {
