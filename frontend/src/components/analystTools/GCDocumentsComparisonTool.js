@@ -102,7 +102,6 @@ const DocumentInputContainer = styled.div`
 	.input-container-grid {
 		margin-top: 30px;
 		margin-left: 80px;
-		padding: 5px 5px;
 	}
 	
 	.input-drop-zone {
