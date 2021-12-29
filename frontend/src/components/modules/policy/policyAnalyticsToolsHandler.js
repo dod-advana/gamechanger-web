@@ -20,6 +20,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import {trackEvent} from '../../telemetry/Matomo';
 import {setState} from '../../../utils/sharedFunctions';
 import {getTrackingNameForFactory} from '../../../utils/gamechangerUtils';
+import { gcOrange } from '../../common/gc-colors';
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
@@ -464,6 +465,15 @@ const PolicyAnalyticsToolsHandler = {
 			dispatch,
 			classes,
 		} = props;
+
+		const { analystToolsSearchSettings } = state;
+
+		const sourceCount = analystToolsSearchSettings.specificOrgsSelected && 
+			Object.keys(analystToolsSearchSettings.orgFilter).filter(org => analystToolsSearchSettings.orgFilter[org]).length;
+		const typeCount = analystToolsSearchSettings.specificTypesSelected && 
+			Object.keys(analystToolsSearchSettings.typeFilter).filter(type => analystToolsSearchSettings.typeFilter[type]).length;
+		const dateActive = analystToolsSearchSettings?.publicationDateFilter[0] && analystToolsSearchSettings?.publicationDateFilter[1];
+		const statusActive = analystToolsSearchSettings.includeRevoked;
 		
 		return (
 			<>
@@ -473,25 +483,25 @@ const PolicyAnalyticsToolsHandler = {
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={analystToolsSearchSettings.specificOrgsSelected} header={<>SOURCE  <span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderSources(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={analystToolsSearchSettings.specificTypesSelected} header={<>TYPE  <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderTypes(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={!state.analystToolsSearchSettings.publicationDateAllTime} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={!analystToolsSearchSettings.publicationDateAllTime} header={<>PUBLICATION DATE  <span style={styles.filterCount}>{dateActive ? '(1)' : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderDates(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.includeRevoked} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={statusActive} header={<>STATUS  <span style={styles.filterCount}>{statusActive ? '(1)' : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderStatus(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
@@ -502,6 +512,9 @@ const PolicyAnalyticsToolsHandler = {
 }
 
 const styles = {
+	filterCount: {
+		color: gcOrange
+	},
 	innerContainer: {
 		display: 'flex',
 		height: '100%',
