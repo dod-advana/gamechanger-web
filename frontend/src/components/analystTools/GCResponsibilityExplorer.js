@@ -17,6 +17,7 @@ import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
 import GCToolTip from '../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+import { isOverflown } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -85,6 +86,13 @@ export default function GCResponsibilityExplorer({
 	 }, [reloadResponsibilities, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	 useEffect(() => {
+		const leftPanel = document.getElementById('re-left-panel');
+		if(!loading && !isOverflown(leftPanel) && Object.keys(docResponsibilityData)?.length < offsets.length){
+			handleInfiniteScroll();
+		}
+	 }, [docResponsibilityData, loading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+	 useEffect(() => {
 		const fetchDocTitles = async() => {
 			const { data } = await gameChangerAPI.getResponsibilityDocTitles();
 			setDocumentList(data.results);
@@ -94,13 +102,23 @@ export default function GCResponsibilityExplorer({
 
 	 const scrollRef = useBottomScrollListener(
 		() => {
-			if(Object.keys(docResponsibilityData)?.length < offsets.length){
-				setInfiniteCount(infiniteCount + 1);
-				handleFetchData({ page: infiniteCount, filtered: filters, scroll: true });
+			if(!loading && Object.keys(docResponsibilityData)?.length < offsets.length){
+				handleInfiniteScroll();
 			}
 		},
-		{ debounce: 5000 }
+		{ 
+			debounce: 200,
+			debounceOptions: {
+				leading: true,
+				trailing: false
+			}
+		}
 	)
+
+	const handleInfiniteScroll = () => {
+		setInfiniteCount(infiniteCount + 1);
+		handleFetchData({ page: infiniteCount, filtered: filters, scroll: true });
+	}
 
 	const handleFetchData = async ({ page, filtered, scroll }) => {
 		try {

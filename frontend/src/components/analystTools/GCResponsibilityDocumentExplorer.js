@@ -471,6 +471,7 @@ export default function ResponsibilityDocumentExplorer({
 			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
+				id='re-left-panel'
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
@@ -595,6 +596,11 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 							<GCButton 
 								onClick={() => {
+									setIframePreviewLink({
+										dataIdx: 0,
+										entityIdx: 0,
+										responsibilityIdx: 0
+									})
 									setResponsibilityText({});
 									setOrganization([]);
 									setDocTitle([]);
@@ -610,6 +616,11 @@ export default function ResponsibilityDocumentExplorer({
 							</GCButton>
 							<GCButton 
 								onClick={() => {
+									setIframePreviewLink({
+										dataIdx: 0,
+										entityIdx: 0,
+										responsibilityIdx: 0
+									})
 									const filters = [];
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
 									if(organization.length) {
@@ -796,7 +807,7 @@ export default function ResponsibilityDocumentExplorer({
 						}}
 					>
 						<div style={{ height: '100%' }}>
-							{/* {selectedResponsibility.filename && (
+							{selectedResponsibility.filename && (
 								<iframe
 									title={'PDFViewer'}
 									className="aref"
@@ -811,7 +822,7 @@ export default function ResponsibilityDocumentExplorer({
 									width="100%"
 									height="100%%"
 								></iframe>
-							)} */}
+							)}
 							{(isEditingResp || isEditingEntity) &&
 								<PDFHighlighter 
 									handleSave={updateResponsibility}
