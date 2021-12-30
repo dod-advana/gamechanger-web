@@ -471,7 +471,6 @@ export default function ResponsibilityDocumentExplorer({
 			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
-				id='re-left-panel'
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
@@ -672,7 +671,7 @@ export default function ResponsibilityDocumentExplorer({
 								<Collapse isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
 										const entOpen = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
-										return <>
+										return <div key={entKey}>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
@@ -744,7 +743,7 @@ export default function ResponsibilityDocumentExplorer({
 													}
 												</div>
 											</Collapse>
-										</>
+										</div>
 									})}
 								</Collapse>
 							</div>
