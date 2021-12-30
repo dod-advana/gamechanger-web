@@ -255,7 +255,3 @@ export const setCurrentTime = (dispatch) => {
 export const sendJiraFeedback = (data) => {
 	return gameChangerAPI.sendJiraFeedback(data);
 }
-
-export const isOverflown = ({ clientWidth, clientHeight, scrollWidth, scrollHeight }) => {
-	return scrollHeight > clientHeight || scrollWidth > clientWidth;
-}

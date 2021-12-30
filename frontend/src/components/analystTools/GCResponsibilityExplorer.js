@@ -17,7 +17,6 @@ import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
 import GCToolTip from '../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import { isOverflown } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -63,7 +62,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	const DOCS_PER_PAGE = 10;
+	const DOCS_PER_PAGE = 15;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
@@ -84,13 +83,6 @@ export default function GCResponsibilityExplorer({
 			setReloadResponsibilities(false);
 		}
 	 }, [reloadResponsibilities, filters]); // eslint-disable-line react-hooks/exhaustive-deps
-
-	 useEffect(() => {
-		const leftPanel = document.getElementById('re-left-panel');
-		if(!loading && !isOverflown(leftPanel) && Object.keys(docResponsibilityData)?.length < offsets.length){
-			handleInfiniteScroll();
-		}
-	 }, [docResponsibilityData, loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	 useEffect(() => {
 		const fetchDocTitles = async() => {
@@ -116,8 +108,8 @@ export default function GCResponsibilityExplorer({
 	)
 
 	const handleInfiniteScroll = () => {
+		handleFetchData({ page: infiniteCount +1, filtered: filters, scroll: true });
 		setInfiniteCount(infiniteCount + 1);
-		handleFetchData({ page: infiniteCount, filtered: filters, scroll: true });
 	}
 
 	const handleFetchData = async ({ page, filtered, scroll }) => {
@@ -130,6 +122,7 @@ export default function GCResponsibilityExplorer({
 				offset += offsets[i];
 			}
 			const { results = [] } = await getData({
+				page,
 				offset,
 				filtered: tmpFiltered,
 			});
@@ -165,6 +158,7 @@ export default function GCResponsibilityExplorer({
 	}, [responsibilityData])
 
 	const getData = async ({
+		page = 1,
 		offset = 0,
 		filtered = [],
 	}) => {
@@ -172,10 +166,11 @@ export default function GCResponsibilityExplorer({
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
 				docView: true,
-				page: infiniteCount,
+				page: page,
 				offset,
 				order: [],
 				where: filtered,
+				DOCS_PER_PAGE
 			});
 			if(data.offsets){
 				setOffsets(data.offsets);
