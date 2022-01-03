@@ -77,7 +77,6 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const { docIds, pubIds, searchTerms } = searchResults;
 			const { docs, searchTerms, totalCount } = searchResults;
-			console.log(totalCount);
 
 			let results = {};
 			let query = '';
