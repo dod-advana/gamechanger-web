@@ -6,6 +6,7 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
+const { performance } = require('perf_hooks');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -172,7 +173,6 @@ class SearchUtility {
 			let orig = key.replace(/[^\w\s]|_/g, "").trim()
 			currList.push(orig)
 			toReturn[key].forEach((y) => {
-					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
 					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
 					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
@@ -1453,13 +1453,30 @@ class SearchUtility {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let relatedSearches = []
-
+		let simWordList = []
 		try {
-			let similarWords = expansionDict['wordsim']
-			let simWordList = Object.keys(expansionDict['wordsim'])
-			for (var key in similarWords) {
-				simWordList = simWordList.concat(similarWords[key])
+			if (expansionDict['wordsim']){
+				let similarWords = expansionDict['wordsim']
+				simWordList = Object.keys(expansionDict['wordsim'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
 			}
+			if (expansionDict['qexp']){
+				let similarWords = expansionDict['qexp']
+				simWordList = Object.keys(expansionDict['qexp'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
+			}			
+			if (simWordList.length <1) {
+				simWordList = [searchText]
+			}
+			for (var key in simWordList){
+				simWordList[key] = simWordList[key].replace(/["']/g, "")
+				
+			}
+
 			let similarWordsQuery = simWordList.join("* OR *")
 			const query = 
 				{
@@ -1716,7 +1733,6 @@ class SearchUtility {
 			if (isCompareReturn) {
 				results.docs.sort((a, b) => b.score - a.score);
 			}
-
 			return results;
 		} catch (err) {
 			this.logger.error(err.message, 'GL7EDI3', user);
@@ -1862,7 +1878,7 @@ class SearchUtility {
 		let filename;
 		let result;
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.60){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
@@ -1921,6 +1937,7 @@ class SearchUtility {
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
+
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
@@ -1935,6 +1952,7 @@ class SearchUtility {
 				} else {
 					return this.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}
+				
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
