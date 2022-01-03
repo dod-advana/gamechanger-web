@@ -157,8 +157,8 @@ describe('PolicyGraphHandler', function () {
 			try {
 				const actual = await target.searchHelper(req, 'test');
 				// const expected = {graphData: {edges: [], labels: ['Document'], nodeProperties: {Document: ['doc_id', 'doc_type', 'doc_num', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'pagerank_r', 'ref_name']}, nodes: [{display_doc_type_s: undefined, display_org_s: undefined, display_title_s: undefined, doc_id: 'AFMAN 11-246V7.pdf_0', doc_num: '11-246V7', doc_type: 'AFMAN', id: 0, label: 'Document', pageRank: 1, pagerank_r: undefined, properties: ['doc_id', 'doc_type', 'doc_num', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'pagerank_r', 'ref_name'], ref_name: 'AFMAN 11-246V7', value: 1}], relProperties: {}, relationships: []}, query: {params: [], query: 'Mocked from ES'}, searchTerms: ['artificial', 'intelligence']};
-				const expected = {"graphData": {"edges": [{"curvature": 0, "id": 1359510, "label": "BELONGS_TO", "properties": [], "rotation": 0, "source": 1123268, "target": 1123269, "value": 1}, {"curvature": 0, "id": 1536492, "label": "REFERENCES", "properties": [], "rotation": 0, "source": 1123269, "target": 1123269, "value": 1}], "labels": ["Document", "Publication"], "nodeProperties": {"Document": ["kw_doc_score_r", "display_org_s", "display_title_s", "signature", "subject", "change_date", "doc_num", "doc_type", "version_hash_s", "type", "title", "group_s", "access_timestamp_dt", "download_url_s", "display_doc_type_s", "ref_list", "page_count", "init_date", "crawler_used_s", "author", "summary_30", "topics", "is_revoked_b", "classification", "doc_id", "source_page_url_s", "keyw_5", "filename", "cac_login_required_b", "name", "source_fqdn_s", "publication_date_dt", "pagerank_r"], "Publication": ["name", "display_org_s", "display_doc_type_s", "doc_type", "doc_num"]}, "nodes": [{"access_timestamp_dt": "2021-03-10T15:52:33", "author": "NA", "cac_login_required_b": "False", "change_date": "NA", "classification": "NA", "crawler_used_s": "air_force_pubs", "display_doc_type_s": "Document", "display_org_s": "Dept. of the Air Force", "display_title_s": "AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)", "doc_id": "AFMAN 11-246V7.pdf_0", "doc_num": "11-246V7", "doc_type": "AFMAN", "download_url_s": "https://static.e-publishing.af.mil/production/1/af_a3/publication/afman11-246v7/afman11-246v7.pdf", "filename": "AFMAN 11-246V7.pdf", "group_s": "AFMAN 11-246V7.pdf_0", "id": 1123268, "init_date": "NA", "is_revoked_b": false, "keyw_5": ["profile includes", "straight line", "rolling turn", "records created", "quarter cloverleaves", "pull-push-pull humpty", "positive snap", "mark kelly", "major command-level", "high-speed flyover"], "kw_doc_score_r": 0, "label": 
-				"Document", "name": "AFMAN 11-246V7", "pageRank": 0.07500000000000001, "page_count": 17, "pagerank_r": 0.00003509842455928412, "properties": ["kw_doc_score_r", "display_org_s", "display_title_s", "signature", "subject", "change_date", "doc_num", "doc_type", "version_hash_s", "type", "title", "group_s", "access_timestamp_dt", "download_url_s", "display_doc_type_s", "ref_list", "page_count", "init_date", "crawler_used_s", "author", "summary_30", "topics", "is_revoked_b", "classification", "doc_id", "source_page_url_s", "keyw_5", "filename", "cac_login_required_b", "name", "source_fqdn_s", "publication_date_dt", "pagerank_r"], "publication_date_dt": "2020-03-27T00:00:00", "ref_list": ["AFI 11-246V7", "AFI 11-209", "AFI 33-360", "AFMAN 11-246", "AFMAN 33-363", "AFMAN 11-246V7", "AFMAN 11-2Sailplane", "AFMAN 11-2SailplaneV1", "AFPD 1", "AFM 11-24", "AFM 33-36", "AF 847"], "signature": "NA", "source_fqdn_s": "www.e-publishing.af.mil", "source_page_url_s": "https://www.e-publishing.af.mil/Product-Index/#/?view=pubs&orgID=10141&catID=1&series=-1&modID=449&tabID=131", "subject": "NA", "summary_30": "provide procedures for Air Force performance of sailplane aircraft demonstrations. Unit commanders may not authorize profile changes for actual demonstrations. demonstration pilots to practice and evaluate proposed profile changes prior to submitting a", "title": "AIRCRAFT DEMONSTRATIONS (SAILPLANES)", "topics": ["Demonstration", "Afman", "Aerobatic", "Sailplane", "Profile"], "type": "document", "value": 1, "version_hash_s": "3c441cba611ef5cd50a9c2ce7d9bf22bdc7e08bd498c11708861e9b61bb1d03b"}, {"display_doc_type_s": "Document", "display_org_s": "Dept. of the Air Force", "doc_num": "11-246V7", "doc_type": "AFMAN", "id": 1123269, "label": "Publication", "name": "AFMAN 11-246V7", "pageRank": 0.925, "properties": ["name", "display_org_s", "display_doc_type_s", "doc_type", "doc_num"], "value": 1}], "relProperties": {"BELONGS_TO": [], "REFERENCES": []}, "relationships": ["BELONGS_TO", "REFERENCES"]}, "query": {"params": {"ids": ["AFMAN 11-246V7.pdf_0"]}, "query": "MATCH (d:Document) WHERE d.doc_id in $ids\n\t\t\t\t\tOPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)\n\t\t\t\t\tWHERE NOT d = d2 AND d2.doc_id in $ids\n\t\t\t\t\tRETURN d, pt;"}, "searchTerms": ["artificial", "intelligence"]};
+				const expected = {'graphData': {'edges': [{'curvature': 0, 'id': 1359510, 'label': 'BELONGS_TO', 'properties': [], 'rotation': 0, 'source': 1123268, 'target': 1123269, 'value': 1}, {'curvature': 0, 'id': 1536492, 'label': 'REFERENCES', 'properties': [], 'rotation': 0, 'source': 1123269, 'target': 1123269, 'value': 1}], 'labels': ['Document', 'Publication'], 'nodeProperties': {'Document': ['kw_doc_score_r', 'display_org_s', 'display_title_s', 'signature', 'subject', 'change_date', 'doc_num', 'doc_type', 'version_hash_s', 'type', 'title', 'group_s', 'access_timestamp_dt', 'download_url_s', 'display_doc_type_s', 'ref_list', 'page_count', 'init_date', 'crawler_used_s', 'author', 'summary_30', 'topics', 'is_revoked_b', 'classification', 'doc_id', 'source_page_url_s', 'keyw_5', 'filename', 'cac_login_required_b', 'name', 'source_fqdn_s', 'publication_date_dt', 'pagerank_r'], 'Publication': ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num']}, 'nodes': [{'access_timestamp_dt': '2021-03-10T15:52:33', 'author': 'NA', 'cac_login_required_b': 'False', 'change_date': 'NA', 'classification': 'NA', 'crawler_used_s': 'air_force_pubs', 'display_doc_type_s': 'Document', 'display_org_s': 'Dept. of the Air Force', 'display_title_s': 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)', 'doc_id': 'AFMAN 11-246V7.pdf_0', 'doc_num': '11-246V7', 'doc_type': 'AFMAN', 'download_url_s': 'https://static.e-publishing.af.mil/production/1/af_a3/publication/afman11-246v7/afman11-246v7.pdf', 'filename': 'AFMAN 11-246V7.pdf', 'group_s': 'AFMAN 11-246V7.pdf_0', 'id': 1123268, 'init_date': 'NA', 'is_revoked_b': false, 'keyw_5': ['profile includes', 'straight line', 'rolling turn', 'records created', 'quarter cloverleaves', 'pull-push-pull humpty', 'positive snap', 'mark kelly', 'major command-level', 'high-speed flyover'], 'kw_doc_score_r': 0, 'label': 
+				'Document', 'name': 'AFMAN 11-246V7', 'pageRank': 0.07500000000000001, 'page_count': 17, 'pagerank_r': 0.00003509842455928412, 'properties': ['kw_doc_score_r', 'display_org_s', 'display_title_s', 'signature', 'subject', 'change_date', 'doc_num', 'doc_type', 'version_hash_s', 'type', 'title', 'group_s', 'access_timestamp_dt', 'download_url_s', 'display_doc_type_s', 'ref_list', 'page_count', 'init_date', 'crawler_used_s', 'author', 'summary_30', 'topics', 'is_revoked_b', 'classification', 'doc_id', 'source_page_url_s', 'keyw_5', 'filename', 'cac_login_required_b', 'name', 'source_fqdn_s', 'publication_date_dt', 'pagerank_r'], 'publication_date_dt': '2020-03-27T00:00:00', 'ref_list': ['AFI 11-246V7', 'AFI 11-209', 'AFI 33-360', 'AFMAN 11-246', 'AFMAN 33-363', 'AFMAN 11-246V7', 'AFMAN 11-2Sailplane', 'AFMAN 11-2SailplaneV1', 'AFPD 1', 'AFM 11-24', 'AFM 33-36', 'AF 847'], 'signature': 'NA', 'source_fqdn_s': 'www.e-publishing.af.mil', 'source_page_url_s': 'https://www.e-publishing.af.mil/Product-Index/#/?view=pubs&orgID=10141&catID=1&series=-1&modID=449&tabID=131', 'subject': 'NA', 'summary_30': 'provide procedures for Air Force performance of sailplane aircraft demonstrations. Unit commanders may not authorize profile changes for actual demonstrations. demonstration pilots to practice and evaluate proposed profile changes prior to submitting a', 'title': 'AIRCRAFT DEMONSTRATIONS (SAILPLANES)', 'topics': ['Demonstration', 'Afman', 'Aerobatic', 'Sailplane', 'Profile'], 'type': 'document', 'value': 1, 'version_hash_s': '3c441cba611ef5cd50a9c2ce7d9bf22bdc7e08bd498c11708861e9b61bb1d03b'}, {'display_doc_type_s': 'Document', 'display_org_s': 'Dept. of the Air Force', 'doc_num': '11-246V7', 'doc_type': 'AFMAN', 'id': 1123269, 'label': 'Publication', 'name': 'AFMAN 11-246V7', 'pageRank': 0.925, 'properties': ['name', 'display_org_s', 'display_doc_type_s', 'doc_type', 'doc_num'], 'value': 1}], 'relProperties': {'BELONGS_TO': [], 'REFERENCES': []}, 'relationships': ['BELONGS_TO', 'REFERENCES']}, 'query': {'params': {'ids': ['AFMAN 11-246V7.pdf_0']}, 'query': 'MATCH (d:Document) WHERE d.doc_id in $ids\n\t\t\t\t\tOPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)\n\t\t\t\t\tWHERE NOT d = d2 AND d2.doc_id in $ids\n\t\t\t\t\tRETURN d, pt;'}, 'searchTerms': ['artificial', 'intelligence']};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
 				assert.fail(e);
@@ -379,164 +379,164 @@ describe('PolicyGraphHandler', function () {
 		it('it should return document given a doc id', async (done) => {
 
 			const esResultsMock =  {
-				"body": {
-					"took": 3,
-					"timed_out": false,
-					"_shards": {
-						"total": 3,
-						"successful": 3,
-						"skipped": 0,
-						"failed": 0
+				'body': {
+					'took': 3,
+					'timed_out': false,
+					'_shards': {
+						'total': 3,
+						'successful': 3,
+						'skipped': 0,
+						'failed': 0
 					},
-					"hits": {
-						"total": {
-							"value": 1,
-							"relation": "eq"
+					'hits': {
+						'total': {
+							'value': 1,
+							'relation': 'eq'
 						},
-						"max_score": 1,
-						"hits": [
+						'max_score': 1,
+						'hits': [
 							{
-								"_index": "gamechanger_test4",
-								"_type": "_doc",
-								"_id": "401cdb14f03e3243b57f324a66fef494dfe6986cf4d46572e7cc56fa71120a18",
-								"_score": 1,
-								"_source": {
-									"kw_doc_score_r": 0.00001,
-									"pagerank_r": 0.00001
+								'_index': 'gamechanger_test4',
+								'_type': '_doc',
+								'_id': '401cdb14f03e3243b57f324a66fef494dfe6986cf4d46572e7cc56fa71120a18',
+								'_score': 1,
+								'_source': {
+									'kw_doc_score_r': 0.00001,
+									'pagerank_r': 0.00001
 								},
-								"fields": {
-									"display_title_s": [
-										"DoDI 5000.02T Operation of the Defense Acquisition System"
+								'fields': {
+									'display_title_s': [
+										'DoDI 5000.02T Operation of the Defense Acquisition System'
 									],
-									"display_org_s": [
-										"Dept. of Defense"
+									'display_org_s': [
+										'Dept. of Defense'
 									],
-									"crawler_used_s": [
-										"dod_issuances"
+									'crawler_used_s': [
+										'dod_issuances'
 									],
-									"doc_num": [
-										"5000.02T"
+									'doc_num': [
+										'5000.02T'
 									],
-									"summary_30": [
-										""
+									'summary_30': [
+										''
 									],
-									"top_entities_t": [
-										"DoD",
-										"Program",
-										"DoD Instruction",
-										"HSI",
-										"the Defense Acquisition System"
+									'top_entities_t': [
+										'DoD',
+										'Program',
+										'DoD Instruction',
+										'HSI',
+										'the Defense Acquisition System'
 									],
-									"topics_s": [
-										"acquisition",
-										"enclosure",
-										"instruction",
-										"cybersecurity",
-										"change enclosure"
+									'topics_s': [
+										'acquisition',
+										'enclosure',
+										'instruction',
+										'cybersecurity',
+										'change enclosure'
 									],
-									"doc_type": [
-										"DoDI"
+									'doc_type': [
+										'DoDI'
 									],
-									"title": [
-										"Operation of the Defense Acquisition System"
+									'title': [
+										'Operation of the Defense Acquisition System'
 									],
-									"type": [
-										"document"
+									'type': [
+										'document'
 									],
-									"keyw_5": [
-										"dodi 02t",
-										"formal coordination",
-										"information technology",
-										"formal coordinatio",
-										"acquisition programs",
-										"usd pubs@osd",
-										"training plans",
-										"systems engineering",
-										"qualification criteria",
-										"national intelligence"
+									'keyw_5': [
+										'dodi 02t',
+										'formal coordination',
+										'information technology',
+										'formal coordinatio',
+										'acquisition programs',
+										'usd pubs@osd',
+										'training plans',
+										'systems engineering',
+										'qualification criteria',
+										'national intelligence'
 									],
-									"filename": [
-										"DoDI 5000.02T CH 10.pdf"
+									'filename': [
+										'DoDI 5000.02T CH 10.pdf'
 									],
-									"access_timestamp_dt": [
-										"2021-07-13T23:23:37"
+									'access_timestamp_dt': [
+										'2021-07-13T23:23:37'
 									],
-									"id": [
-										"DoDI 5000.02T CH 10.pdf_0"
+									'id': [
+										'DoDI 5000.02T CH 10.pdf_0'
 									],
-									"display_doc_type_s": [
-										"Instruction"
+									'display_doc_type_s': [
+										'Instruction'
 									],
-									"ref_list": [
-										"DoD 5000.04-M",
-										"DoD 5015.02-STD",
-										"DoD 5400.11-R",
-										"DoDD 5000.01",
-										"DoDD 5135.02",
-										"DoDD 5105.84",
-										"DoDD 5250.01",
-										"DoDD 1322.18",
-										"DoDD 5400.11",
-										"DoDD 5000.71",
-										"DoDD 5205.02E",
-										"DoDI 5000.02",
-										"DoDI 5025.01",
-										"DoDI 5000.85",
-										"DoDI 5010.44",
-										"DoDI 5000.88",
-										"DoDI 5000.89",
-										"DoDI 5000.73",
-										"DoDI 5000.82",
-										"DoDI 5000.81",
-										"DoDI 5000.83",
-										"DoDI 5000.90",
-										"DoDI 5000.74",
-										"DoDI 8500.01",
-										"DoDI 7041.03",
-										"DoDI 8330.01",
-										"DoDI 8320.02",
-										"DoDI 8410.03",
-										"DoDI 8320.04",
-										"DoDI 5200.39",
-										"DoDI 5200.44",
-										"DoDI 4650.01",
-										"DoDI O-5240.24",
-										"DoDI 4630.09",
-										"DoDI 5000.66",
-										"DoDI 2040.02",
-										"DoDI 2010.06",
-										"DoDI 8510.01",
-										"DoDI 5000.61",
-										"DoDI 4151.22",
-										"DoDI 5000.67",
-										"DoDI 1100.22",
-										"DoDI 7041.04",
-										"DoDI 5400.16",
-										"DoDI 3200.12",
-										"DoDI 4140.67",
-										"DoDI 5205.13",
-										"DoDI 8530.01",
-										"DoDI 5000.75",
-										"DoDM 4160.28, Volume 1",
-										"DoDM 8400.01",
-										"Title 10",
-										"Title 15",
-										"Title 40",
-										"Title 47",
-										"Title 42",
-										"Title 44",
-										"Title 29",
-										"Title 32",
-										"EO 12114",
-										"EO 13691",
-										"OMBM M-04-08",
-										"OMBM M-04-16",
-										"OMBM M-05-25"
+									'ref_list': [
+										'DoD 5000.04-M',
+										'DoD 5015.02-STD',
+										'DoD 5400.11-R',
+										'DoDD 5000.01',
+										'DoDD 5135.02',
+										'DoDD 5105.84',
+										'DoDD 5250.01',
+										'DoDD 1322.18',
+										'DoDD 5400.11',
+										'DoDD 5000.71',
+										'DoDD 5205.02E',
+										'DoDI 5000.02',
+										'DoDI 5025.01',
+										'DoDI 5000.85',
+										'DoDI 5010.44',
+										'DoDI 5000.88',
+										'DoDI 5000.89',
+										'DoDI 5000.73',
+										'DoDI 5000.82',
+										'DoDI 5000.81',
+										'DoDI 5000.83',
+										'DoDI 5000.90',
+										'DoDI 5000.74',
+										'DoDI 8500.01',
+										'DoDI 7041.03',
+										'DoDI 8330.01',
+										'DoDI 8320.02',
+										'DoDI 8410.03',
+										'DoDI 8320.04',
+										'DoDI 5200.39',
+										'DoDI 5200.44',
+										'DoDI 4650.01',
+										'DoDI O-5240.24',
+										'DoDI 4630.09',
+										'DoDI 5000.66',
+										'DoDI 2040.02',
+										'DoDI 2010.06',
+										'DoDI 8510.01',
+										'DoDI 5000.61',
+										'DoDI 4151.22',
+										'DoDI 5000.67',
+										'DoDI 1100.22',
+										'DoDI 7041.04',
+										'DoDI 5400.16',
+										'DoDI 3200.12',
+										'DoDI 4140.67',
+										'DoDI 5205.13',
+										'DoDI 8530.01',
+										'DoDI 5000.75',
+										'DoDM 4160.28, Volume 1',
+										'DoDM 8400.01',
+										'Title 10',
+										'Title 15',
+										'Title 40',
+										'Title 47',
+										'Title 42',
+										'Title 44',
+										'Title 29',
+										'Title 32',
+										'EO 12114',
+										'EO 13691',
+										'OMBM M-04-08',
+										'OMBM M-04-16',
+										'OMBM M-05-25'
 									],
-									"publication_date_dt": [
-										"2015-01-07T00:00:00"
+									'publication_date_dt': [
+										'2015-01-07T00:00:00'
 									],
-									"page_count": [
+									'page_count': [
 										27
 									]
 								}
@@ -578,7 +578,7 @@ describe('PolicyGraphHandler', function () {
 			try {
 				const actual = await target.callFunctionHelper(req, 'test');
 
-				const expected =  {"doc_orgs": [], "doc_types": [], "docs": [{"access_timestamp_dt": "2021-07-13T23:23:37", "crawler_used_s": "dod_issuances", "current_as_of": "TEST", "display_doc_type_s": "Instruction", "display_org_s": "Dept. of Defense", "display_title_s": "DoDI 5000.02T Operation of the Defense Acquisition System", "doc_num": "5000.02T", "doc_type": "DoDI", "esIndex": "Test", "filename": "DoDI 5000.02T CH 10.pdf", "id": "DoDI 5000.02T CH 10.pdf_0", "keyw_5": "dodi 02t, formal coordination, information technology, formal coordinatio, acquisition programs, usd pubs@osd, training plans, systems engineering, qualification criteria, national intelligence", "pageHits": [], "page_count": 27, "publication_date_dt": "2015-01-07T00:00:00", "ref_list": ["DoD 5000.04-M", "DoD 5015.02-STD", "DoD 5400.11-R", "DoDD 5000.01", "DoDD 5135.02", "DoDD 5105.84", "DoDD 5250.01", "DoDD 1322.18", "DoDD 5400.11", "DoDD 5000.71", "DoDD 5205.02E", "DoDI 5000.02", "DoDI 5025.01", "DoDI 5000.85", "DoDI 5010.44", "DoDI 5000.88", "DoDI 5000.89", "DoDI 5000.73", "DoDI 5000.82", "DoDI 5000.81", "DoDI 5000.83", "DoDI 5000.90", "DoDI 5000.74", "DoDI 8500.01", "DoDI 7041.03", "DoDI 8330.01", "DoDI 8320.02", "DoDI 8410.03", "DoDI 8320.04", "DoDI 5200.39", "DoDI 5200.44", "DoDI 4650.01", "DoDI O-5240.24", "DoDI 4630.09", "DoDI 5000.66", "DoDI 2040.02", "DoDI 2010.06", "DoDI 8510.01", "DoDI 5000.61", "DoDI 4151.22", "DoDI 5000.67", "DoDI 1100.22", "DoDI 7041.04", "DoDI 5400.16", "DoDI 3200.12", "DoDI 4140.67", "DoDI 5205.13", "DoDI 8530.01", "DoDI 5000.75", "DoDM 4160.28, Volume 1", "DoDM 8400.01", "Title 10", "Title 15", "Title 40", "Title 47", "Title 42", "Title 44", "Title 29", "Title 32", "EO 12114", "EO 13691", "OMBM M-04-08", "OMBM M-04-16", "OMBM M-05-25"], "summary_30": "", "title": "Operation of the Defense Acquisition System", "top_entities_t": ["DoD", "Program", "DoD Instruction", "HSI", "the Defense Acquisition System"], "topics_s": ["acquisition", "enclosure", "instruction", "cybersecurity", "change enclosure"], "type": "document"}], "expansionDict": null, "query": {"_source": {"includes": ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_s"]}, "aggregations": {"doc_org_aggs": {"terms": {"field": "display_org_s", "size": 10000}}, "doc_type_aggs": {"terms": {"field": "display_doc_type_s", "size": 10000}}}, "from": 0, "highlight": {"boundary_scanner": "word", "fields": {"display_source_s.search": {}, "display_title_s.search": {}, "filename.search": {}, "keyw_5": {}, "top_entities_t": {}, "topics_s": {}}, "fragment_size": 10, "fragmenter": "simple", "require_field_match": false, "type": "unified"}, "query": {"bool": {"filter": [{"term": {"is_revoked_b": "false"}}], "minimum_should_match": 1, "must": [{"terms": {"id": ["Test"]}}], "should": [{"nested": {"inner_hits": {"_source": false, "from": 0, "highlight": {"fields": {"paragraphs.par_raw_text_t": {"fragment_size": 270, "number_of_fragments":1, "type":"plain"}, "paragraphs.par_raw_text_t.gc_english": {"fragment_size": 270, "number_of_fragments":1, "type":"plain"}}, "fragmenter": "span"}, "size": 5, "stored_fields": ["paragraphs.page_num_i", "paragraphs.par_raw_text_t"]}, "path": "paragraphs", "query": {"bool": {"should": [{"query_string": {"analyzer":"gc_english", "default_field":"paragraphs.par_raw_text_t.gc_english", "default_operator": "and", "fuzziness": "AUTO", "fuzzy_max_expansions": 100, "query": "artificial intelligence"}}]}}}}, {"wildcard": {"keyw_5": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_source": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_title_s.search": {"boost": 8, "value": "*artificial intelligence*"}}}, {"wildcard": {"filename.search": {"boost": 4, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_source_s.search": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"top_entities_t.search": {"boost": 2, "value": "*artificial intelligence*"}}}, {"match": {"display_title_s.search": "artificial intelligence"}}]}}, "size": 20, "sort": [{"_score": {"order": "desc"}}], "stored_fields": ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s", "topics_s", "top_entities_t"], "track_total_hits": true}, "searchTerms": ["artificial", "intelligence"], "totalCount": 1}
+				const expected =  {'doc_orgs': [], 'doc_types': [], 'docs': [{'access_timestamp_dt': '2021-07-13T23:23:37', 'crawler_used_s': 'dod_issuances', 'current_as_of': 'TEST', 'display_doc_type_s': 'Instruction', 'display_org_s': 'Dept. of Defense', 'display_title_s': 'DoDI 5000.02T Operation of the Defense Acquisition System', 'doc_num': '5000.02T', 'doc_type': 'DoDI', 'esIndex': 'Test', 'filename': 'DoDI 5000.02T CH 10.pdf', 'id': 'DoDI 5000.02T CH 10.pdf_0', 'keyw_5': 'dodi 02t, formal coordination, information technology, formal coordinatio, acquisition programs, usd pubs@osd, training plans, systems engineering, qualification criteria, national intelligence', 'pageHits': [], 'page_count': 27, 'publication_date_dt': '2015-01-07T00:00:00', 'ref_list': ['DoD 5000.04-M', 'DoD 5015.02-STD', 'DoD 5400.11-R', 'DoDD 5000.01', 'DoDD 5135.02', 'DoDD 5105.84', 'DoDD 5250.01', 'DoDD 1322.18', 'DoDD 5400.11', 'DoDD 5000.71', 'DoDD 5205.02E', 'DoDI 5000.02', 'DoDI 5025.01', 'DoDI 5000.85', 'DoDI 5010.44', 'DoDI 5000.88', 'DoDI 5000.89', 'DoDI 5000.73', 'DoDI 5000.82', 'DoDI 5000.81', 'DoDI 5000.83', 'DoDI 5000.90', 'DoDI 5000.74', 'DoDI 8500.01', 'DoDI 7041.03', 'DoDI 8330.01', 'DoDI 8320.02', 'DoDI 8410.03', 'DoDI 8320.04', 'DoDI 5200.39', 'DoDI 5200.44', 'DoDI 4650.01', 'DoDI O-5240.24', 'DoDI 4630.09', 'DoDI 5000.66', 'DoDI 2040.02', 'DoDI 2010.06', 'DoDI 8510.01', 'DoDI 5000.61', 'DoDI 4151.22', 'DoDI 5000.67', 'DoDI 1100.22', 'DoDI 7041.04', 'DoDI 5400.16', 'DoDI 3200.12', 'DoDI 4140.67', 'DoDI 5205.13', 'DoDI 8530.01', 'DoDI 5000.75', 'DoDM 4160.28, Volume 1', 'DoDM 8400.01', 'Title 10', 'Title 15', 'Title 40', 'Title 47', 'Title 42', 'Title 44', 'Title 29', 'Title 32', 'EO 12114', 'EO 13691', 'OMBM M-04-08', 'OMBM M-04-16', 'OMBM M-05-25'], 'summary_30': '', 'title': 'Operation of the Defense Acquisition System', 'top_entities_t': ['DoD', 'Program', 'DoD Instruction', 'HSI', 'the Defense Acquisition System'], 'topics_s': ['acquisition', 'enclosure', 'instruction', 'cybersecurity', 'change enclosure'], 'type': 'document'}], 'expansionDict': null, 'query': {'_source': {'includes': ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']}, 'aggregations': {'doc_org_aggs': {'terms': {'field': 'display_org_s', 'size': 10000}}, 'doc_type_aggs': {'terms': {'field': 'display_doc_type_s', 'size': 10000}}}, 'from': 0, 'highlight': {'boundary_scanner': 'word', 'fields': {'display_source_s.search': {}, 'display_title_s.search': {}, 'filename.search': {}, 'keyw_5': {}, 'top_entities_t': {}, 'topics_s': {}}, 'fragment_size': 10, 'fragmenter': 'simple', 'require_field_match': false, 'type': 'unified'}, 'query': {'bool': {'filter': [{'term': {'is_revoked_b': 'false'}}], 'minimum_should_match': 1, 'must': [{'terms': {'id': ['Test']}}], 'should': [{'nested': {'inner_hits': {'_source': false, 'from': 0, 'highlight': {'fields': {'paragraphs.par_raw_text_t': {'fragment_size': 270, 'number_of_fragments':1, 'type':'plain'}, 'paragraphs.par_raw_text_t.gc_english': {'fragment_size': 270, 'number_of_fragments':1, 'type':'plain'}}, 'fragmenter': 'span'}, 'size': 5, 'stored_fields': ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t']}, 'path': 'paragraphs', 'query': {'bool': {'should': [{'query_string': {'analyzer':'gc_english', 'default_field':'paragraphs.par_raw_text_t.gc_english', 'default_operator': 'and', 'fuzziness': 'AUTO', 'fuzzy_max_expansions': 100, 'query': 'artificial intelligence'}}]}}}}, {'wildcard': {'keyw_5': {'boost': 2, 'value': '*artificial intelligence*'}}}, {'wildcard': {'display_source': {'boost': 2, 'value': '*artificial intelligence*'}}}, {'wildcard': {'display_title_s.search': {'boost': 8, 'value': '*artificial intelligence*'}}}, {'wildcard': {'filename.search': {'boost': 4, 'value': '*artificial intelligence*'}}}, {'wildcard': {'display_source_s.search': {'boost': 2, 'value': '*artificial intelligence*'}}}, {'wildcard': {'top_entities_t.search': {'boost': 2, 'value': '*artificial intelligence*'}}}, {'match': {'display_title_s.search': 'artificial intelligence'}}]}}, 'size': 20, 'sort': [{'_score': {'order': 'desc'}}], 'stored_fields': ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'ref_list', 'id', 'summary_30', 'keyw_5', 'p_text', 'type', 'p_page', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'is_revoked_b', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s', 'download_url_s', 'source_page_url_s', 'source_fqdn_s', 'topics_s', 'top_entities_t'], 'track_total_hits': true}, 'searchTerms': ['artificial', 'intelligence'], 'totalCount': 1}
 
 
 
