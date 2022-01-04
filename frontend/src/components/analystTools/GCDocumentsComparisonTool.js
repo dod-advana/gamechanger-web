@@ -264,6 +264,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
+	const [filterChange, setFilterChange] = useState(false);
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -271,6 +272,10 @@ const GCDocumentsComparisonTool = (props) => {
 			setFiltersLoaded(true);
 		}
 	}, [state, dispatch, filtersLoaded])
+
+	useEffect(() => {
+		setFilterChange(true);
+	}, [orgFilter, typeFilter, publicationDateFilter, includeRevoked])
 
 	useEffect(() => {
 		setNoResults(false)
@@ -495,6 +500,16 @@ const GCDocumentsComparisonTool = (props) => {
 					>
 						Clear filters
 					</GCButton>
+					{!loading && returnedDocs.length > 0 && <GCButton 
+						onClick={() => { 
+							setNoResults(false);
+							setState(dispatch, { runDocumentComparisonSearch: true });
+						}}
+						style={{margin: '10px 0 0 0', width: '100%'}}
+						disabled={!filterChange}
+					>
+						Apply filters
+					</GCButton>}
 				</Grid>
 				<Grid item xs={9}>
 					<DocumentInputContainer>
@@ -547,6 +562,7 @@ const GCDocumentsComparisonTool = (props) => {
 									style={{ marginTop: 20 }}
 									onClick={() => {
 										setNoResults(false);
+										setFilterChange(false);
 										if(!loading && returnedDocs.length > 0) return reset();
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
