@@ -18,11 +18,7 @@ const DefaultSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(
 		value,
 		cloneData,
-		setAutocorrect,
-		setPresearchTitle,
-		setPresearchTopic,
-		setPresearchOrg,
-		setPredictions
+		setAutocorrect
 	) {
 		try {
 			const index = cloneData?.clone_data?.esCluster ?? '';
