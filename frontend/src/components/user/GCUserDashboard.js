@@ -2175,6 +2175,37 @@ const GCUserDashboard = (props) => {
 		);
 	}
 
+	const tabList = [];
+	const favoritesTabMeta = {
+		title: 'userFavorites',
+		onClick: () => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch),
+		children: <StyledBadge
+			badgeContent={
+				userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
+			}
+		>
+			<Typography variant="h6" display="inline" title="cardView">
+				FAVORITES
+			</Typography>
+		</StyledBadge>,
+		panel: renderFavorites()
+	}
+	const historyTabMeta = {
+		title: 'userHistory',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">HISTORY</Typography>,
+		panel: renderHistory()
+	}
+	const groupTabMeta = {
+		title: 'userGroups',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>,
+		panel: renderGroups()
+	}
+	if(cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
+	tabList.push(historyTabMeta);
+	
+
 	return (
 		<div style={styles.tabContainer} id='gc-user-dash'>
 			<Tabs
@@ -2184,43 +2215,23 @@ const GCUserDashboard = (props) => {
 			>
 				<div style={styles.tabButtonContainer}>
 					<TabList style={styles.tabsList}>
-						<Tab
-							style={{
-								...styles.tabStyle,
-								...(tabIndex === 0 ? styles.tabSelectedStyle : {}),
-								borderRadius: `5px 0 0 0`,
-							}}
-							title="userFavorites"
-							onClick={() => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch)}
-						>
-							<StyledBadge
-								badgeContent={
-									userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
-								}
-							>
-								<Typography variant="h6" display="inline" title="cardView">
-									FAVORITES
-								</Typography>
-							</StyledBadge>
-						</Tab>
-						<Tab
-							style={{
-								...styles.tabStyle,
-								...(tabIndex === 1 ? styles.tabSelectedStyle : {}),
-								borderRadius: ` 0 5px 0 0`,
-							}}
-							title="userHistory"
-						>
-							<Typography variant="h6" display="inline" title="cardView">
-								HISTORY
-							</Typography>
-						</Tab>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex=== 2 ? styles.tabSelectedStyle : {}),
-							borderRadius: ` 0 5px 0 0`
-						}} title="userGroups">
-							<Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>
-						</Tab>
+						{tabList.map((tab, index) => {
+							const tl = index === 0 ? '5px' : '0';
+							const tr = index === tabList.length - 1 ? '5px' : '0';
+							return (
+								<Tab
+									style={{
+										...styles.tabStyle,
+										...(tabIndex === index ? styles.tabSelectedStyle : {}),
+										borderRadius: `${tl} ${tr} 0 0`,
+									}}
+									title={tab.title}
+									onClick={tab.onClick}
+								>
+									{tab.children}
+								</Tab>
+							)
+						})}
 					</TabList>
 
 					<div style={styles.spacer} />
@@ -2301,15 +2312,7 @@ const GCUserDashboard = (props) => {
 				</div>
 
 				<div style={styles.panelContainer}>
-					<TabPanel>
-						{ renderFavorites() }
-					</TabPanel>
-					<TabPanel>
-						{ renderHistory() }
-					</TabPanel>
-					<TabPanel>
-						{ renderGroups() }
-					</TabPanel>
+					{tabList.map(tab => <TabPanel> {tab.panel} </TabPanel>)}
 				</div>
 			</Tabs>
 		</div>
