@@ -1382,7 +1382,7 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s.search': {
+										title: {
 											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
