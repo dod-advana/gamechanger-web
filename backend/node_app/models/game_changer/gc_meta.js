@@ -91,10 +91,7 @@ module.exports = (sequelize, DataTypes) => {
 			document_view: {
 				type: DataTypes.BOOLEAN
 			},
-			user_dashboard: {
-				type: DataTypes.BOOLEAN
-			},
-			search_suggestions: {
+			user_favorites: {
 				type: DataTypes.BOOLEAN
 			},
 			createdAt: {
