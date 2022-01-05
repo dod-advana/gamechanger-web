@@ -88,6 +88,15 @@ module.exports = (sequelize, DataTypes) => {
 			available_at: {
 				type: DataTypes.ARRAY(DataTypes.STRING)
 			},
+			document_view: {
+				type: DataTypes.BOOLEAN
+			},
+			user_dashboard: {
+				type: DataTypes.BOOLEAN
+			},
+			search_suggestions: {
+				type: DataTypes.BOOLEAN
+			},
 			createdAt: {
 				type: DataTypes.DATE
 			},
