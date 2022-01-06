@@ -185,6 +185,9 @@ const initState = {
 	topicPagination: false,
 	topicsLoading: false,
 
+	replaceResults: true,
+	infiniteScrollPage: 1,
+
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
 
