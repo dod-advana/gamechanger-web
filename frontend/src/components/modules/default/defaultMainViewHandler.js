@@ -423,13 +423,8 @@ const DefaultMainViewHandler = {
 						order={currentOrder}
 					/>
 				)}
-				{loading && currentViewName !== 'Explorer' && (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
-				)}
 				{hideSearchResults && renderHideTabs(props)}
-				{!hideSearchResults && pageLoaded && (
+				{((!hideSearchResults && pageLoaded) || !state.replaceResults) && (
 					<div style={styles.tabButtonContainer}>
 						<ResultView
 							context={{ state, dispatch }}
@@ -437,6 +432,11 @@ const DefaultMainViewHandler = {
 							viewPanels={getViewPanels()}
 						/>
 						<div style={styles.spacer} />
+					</div>
+				)}
+				{loading && currentViewName !== 'Explorer' && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcOrange} />
 					</div>
 				)}
 				{state.showEsQueryDialog && (
@@ -646,7 +646,7 @@ const DefaultMainViewHandler = {
 				<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 					<div>
 						<div id="game-changer-content-top" />
-						{!loading && (
+						{(!loading || !state.replaceResults) && (
 							<StyledCenterContainer showSideFilters={showSideFilters}>
 								{showSideFilters && (
 									<div className={'left-container'}>
@@ -670,7 +670,7 @@ const DefaultMainViewHandler = {
 									</div>
 								)}
 								<div className={'right-container'}>
-									{!hideTabs && <ViewHeader {...props} />}
+									{(!hideTabs || !state.replaceResults) && <ViewHeader {...props} />}
 									<div
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 									>
@@ -688,14 +688,14 @@ const DefaultMainViewHandler = {
 												className="row"
 												style={{ marginLeft: 0, marginRight: 0 }}
 											>
-												{!loading && getSearchResults(rawSearchResults)}
+												{(!loading || !state.replaceResults) && getSearchResults(rawSearchResults)}
 											</div>
 										</div>
 									</div>
 								</div>
 							</StyledCenterContainer>
 						)}
-						{!iframePreviewLink && (
+						{!iframePreviewLink && state.cloneData?.clone_name.toLowerCase() !== 'cdo' && (
 							<div style={styles.paginationWrapper} className={'gcPagination'}>
 								<Pagination
 									activePage={resultsPage}

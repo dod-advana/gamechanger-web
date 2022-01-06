@@ -43,7 +43,7 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 };
 
 const CDOSearchHandler = {
-	async handleSearch(state, dispatch) {
+	async handleSearch(state, dispatch, replaceResults = true) {
 		setState(dispatch, { runSearch: false });
 
 		const {
@@ -130,8 +130,8 @@ const CDOSearchHandler = {
 			metricsLoading: true,
 			noResultsMessage: null,
 			autocompleteItems: [],
-			rawSearchResults: [],
-			docSearchResults: [],
+			rawSearchResults: replaceResults ? [] : state.rawSearchResults,
+			docSearchResults: replaceResults ? [] : state.docSearchResults,
 			searchResultsCount: 0,
 			count: 0,
 			resultsDownloadURL: '',
@@ -146,7 +146,9 @@ const CDOSearchHandler = {
 			hideTabs: true,
 		});
 
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+		const offset = 
+			((replaceResults ? resultsPage : state.infiniteScrollPage) - 1) *
+			RESULTS_PER_PAGE;
 
 		const charsPadding = listView ? 750 : 90;
 
@@ -233,25 +235,44 @@ const CDOSearchHandler = {
 							false
 						);
 					}
-
-					setState(dispatch, {
-						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						prevSearchText: searchText,
-						loading: false,
-						count: totalCount + (foundEntity ? 1 : 0),
-						rawSearchResults: searchResults,
-						docSearchResults: docs,
-						searchResultsCount: searchResults.length,
-						autocompleteItems: [],
-						expansionDict,
-						isCachedResult: isCached,
-						timeSinceCache,
-						hasExpansionTerms,
-						metricsLoading: false,
-						metricsCounted: true,
-						loadingTinyUrl: false,
-						hideTabs: false,
-					});
+					if (replaceResults) {
+						setState(dispatch, {
+							timeFound: ((t1 - t0) / 1000).toFixed(2),
+							prevSearchText: searchText,
+							loading: false,
+							count: totalCount + (foundEntity ? 1 : 0),
+							rawSearchResults: searchResults,
+							docSearchResults: docs,
+							searchResultsCount: searchResults.length,
+							autocompleteItems: [],
+							expansionDict,
+							isCachedResult: isCached,
+							timeSinceCache,
+							hasExpansionTerms,
+							metricsLoading: false,
+							metricsCounted: true,
+							loadingTinyUrl: false,
+							hideTabs: false,
+						});
+					} else {
+						setState(dispatch, {
+							loading: false,
+							rawSearchResults: [...state.rawSearchResults, ...searchResults],
+							docSearchResults: [...state.docSearchResults, ...docs],
+							searchResultsCount: searchResults.length,
+							autocompleteItems: [],
+							expansionDict,
+							isCachedResult: isCached,
+							timeSinceCache,
+							hasExpansionTerms,
+							metricsLoading: false,
+							metricsCounted: true,
+							loadingTinyUrl: false,
+							hideTabs: false,
+							docsLoading: false,
+							docsPagination: false
+						});
+					}
 				} else {
 					if (!offset) {
 						trackSearch(
