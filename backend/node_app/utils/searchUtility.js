@@ -1364,7 +1364,7 @@ class SearchUtility {
 
 	}
 
-	getESpresearchMultiQuery({ searchText, title = 'display_title_s.search', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
+	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 
 		// multi search in ES if text is more than 3
@@ -1382,7 +1382,7 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s.search': {
+										'display_title_s': {
 											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
