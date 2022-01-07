@@ -64,7 +64,6 @@ class CDOSearchHandler extends SearchHandler {
 				req.body.parsedQuery = parsedQuery;
 				const auxSearchFields = constants.CDO_ELASTIC_SEARCH_OPTS.auxSearchFields;
 				const auxRetrieveFields = constants.CDO_ELASTIC_SEARCH_OPTS.auxRetrieveFields;
-
 				let esQuery = {
 					from: offset,
 					size: limit,
@@ -131,7 +130,7 @@ class CDOSearchHandler extends SearchHandler {
 				});
 			} catch (e) {
 				const { message } = e;
-				this.logger.error(message, 'QMKINJ6', userId);
+				this.logger.error(message, 'SOLINT0', userId);
 				throw message;
 			}
 
