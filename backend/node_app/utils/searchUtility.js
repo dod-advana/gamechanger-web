@@ -1364,12 +1364,13 @@ class SearchUtility {
 
 	}
 
-	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases' }) {
+	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
-			let query = [
+			let query = []
+			let titleQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.index
 				},
@@ -1381,7 +1382,7 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s.search': {
+										'display_title_s': {
 											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
@@ -1398,7 +1399,18 @@ class SearchUtility {
 							]
 						}
 					}
-				},
+				}
+			];
+			if (title !== 'display_title_s.search'){
+				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search']
+				titleQuery[1]['query']['bool']['must'][0]['wildcard'][title] = {
+					value: `*${plainQuery}*`,
+					boost: 1.0,
+					rewrite: 'constant_score'
+				}
+			}
+
+			let searchHistoryQuery = [ 
 				{
 					index: this.constants.GAME_CHANGER_OPTS.historyIndex
 				},
@@ -1425,7 +1437,9 @@ class SearchUtility {
 							}
 						}
 					}
-				},
+				}
+			];
+			let entitiesQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.entityIndex
 				},
@@ -1444,6 +1458,15 @@ class SearchUtility {
 					},
 				}
 			];
+			if (queryTypes.includes('title')) {
+				query = query.concat(titleQuery);
+			}
+			if (queryTypes.includes('searchhistory')){
+				query = query.concat(searchHistoryQuery);
+			}
+			if (queryTypes.includes('entities')){
+				query = query.concat(entitiesQuery)
+			}
 			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
