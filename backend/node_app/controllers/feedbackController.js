@@ -116,6 +116,9 @@ class FeedbackController {
 					[JIRA_CONFIG.rating_id]: {
 						'value': rating + ''
 					},
+					[JIRA_CONFIG.advana_product]: {
+						'value': 'GAMECHANGER'
+					},
 					'issuetype': {
 						'name': JIRA_CONFIG.feedbackType
 					}
