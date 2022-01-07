@@ -383,7 +383,7 @@ const CDOCardHandler = {
 
 			type = `Author: ${type}`;
 
-			const orgColor = '#9BB1C8';
+			const orgColor = '#4B5777';
 
 			return (
 				<>
