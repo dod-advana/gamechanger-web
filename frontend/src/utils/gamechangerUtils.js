@@ -168,7 +168,7 @@ export const StyledCenterContainer = styled.div`
 		
 		.results-count-view-buttons-container {
 			display: flex;
-			justify-content: space-between;
+			justify-content: right;
 			margin: 20px 0
     		
     		.view-buttons-container {
