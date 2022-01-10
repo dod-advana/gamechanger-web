@@ -77,7 +77,7 @@ class MLApiClient {
 	
 	async getSentenceTransformerResultsForCompare(searchText, userId = 'unknown', paragraphIdBeingMatched) {
 		const data = { text: searchText }
-		const returnData = await this.postData('transSentenceSearch', userId, data);
+		const returnData = await this.postData('transSentenceSearch', userId, data, '?num_results=15');
 		
 		return {...returnData, paragraphIdBeingMatched};
 	}
@@ -118,12 +118,13 @@ class MLApiClient {
 	 * @param {Object} postData 
 	 * @returns an object with the ml api response data
 	 */
-	async postData(key, userId, postData) {
+	async postData(key, userId, postData, queryString) {
 		const headers = {
 			ssl_client_s_dn_cn: userId
 		};
 		try {
-			const url = MLRoutes[key];
+			let url = MLRoutes[key];
+			if(queryString) url += queryString;
 			const { data } = await this.axios({
 				url,
 				method: 'post',
