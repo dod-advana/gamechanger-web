@@ -38,6 +38,7 @@ class ResponsibilityController {
 		this.getFileLink = this.getFileLink.bind(this);
 		this.getParagraphNum = this.getParagraphNum.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
+		this.cleanEsQueryText = this.cleanEsQueryText.bind(this);
 		this.cleanDocument = this.cleanDocument.bind(this);
 		this.getResponsibilityData = this.getResponsibilityData.bind(this);
 		this.getResponsibilityDocTitles = this.getResponsibilityDocTitles.bind(this);
@@ -226,6 +227,15 @@ class ResponsibilityController {
 
 	}
 
+	cleanEsQueryText(text){
+		let cleanText = text;
+
+		const colonIndex = text.match(/:+$/)?.index;
+		if(colonIndex) cleanText = cleanText.slice(0, colonIndex);
+
+		return cleanText;
+	}
+
 	async getFileLink(req, res) {
 		// using a filename and a string, get back a list of paragraphs for the document AND
 		// the paragraph number for the string.
@@ -235,7 +245,10 @@ class ResponsibilityController {
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneData = {}, filename = '', text = '' } = req.body;
-			let esQuery = this.paraNumQuery(filename, text);
+			
+			const cleanedText = this.cleanEsQueryText(text);
+
+			let esQuery = this.paraNumQuery(filename, cleanedText);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
 			switch (cloneData.clone_name) {

@@ -7,10 +7,16 @@ import {
 	Select
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Icon from '@material-ui/core/Icon';
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import {trackEvent} from '../telemetry/Matomo';
+import GCButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcOrange } from '../common/gc-colors';
 import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
+import GCToolTip from '../common/GCToolTip';
+import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -56,7 +62,7 @@ export default function GCResponsibilityExplorer({
 }) {
 
 	const classes = useStyles();
-	const DOCS_PER_PAGE = 10;
+	const DOCS_PER_PAGE = 15;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
@@ -64,19 +70,19 @@ export default function GCResponsibilityExplorer({
 	const [loading, setLoading] = useState(true);
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
-	const [resultsPage, setResultsPage] = useState(1);
 	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
 	const [docTitle, setDocTitle] = useState([]);
 	const [documentList, setDocumentList] = useState([]);
 	const [organization, setOrganization] = useState([]);
 	const [responsibilityText, setResponsibilityText] = useState({});
+	const [infiniteCount, setInfiniteCount] = useState(1);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
-			handleFetchData({ page: resultsPage, sorted: [], filtered: filters });
+			handleFetchData({ page: 1, filtered: filters });
 			setReloadResponsibilities(false);
 		}
-	 }, [reloadResponsibilities, resultsPage, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+	 }, [reloadResponsibilities, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	 useEffect(() => {
 		const fetchDocTitles = async() => {
@@ -86,7 +92,27 @@ export default function GCResponsibilityExplorer({
 		fetchDocTitles();
 	 },[])
 
-	const handleFetchData = async ({ page, sorted, filtered }) => {
+	 const scrollRef = useBottomScrollListener(
+		() => {
+			if(!loading && Object.keys(docResponsibilityData)?.length < offsets.length){
+				handleInfiniteScroll();
+			}
+		},
+		{ 
+			debounce: 200,
+			debounceOptions: {
+				leading: true,
+				trailing: false
+			}
+		}
+	)
+
+	const handleInfiniteScroll = () => {
+		handleFetchData({ page: infiniteCount +1, filtered: filters, scroll: true });
+		setInfiniteCount(infiniteCount + 1);
+	}
+
+	const handleFetchData = async ({ page, filtered, scroll }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
@@ -96,12 +122,16 @@ export default function GCResponsibilityExplorer({
 				offset += offsets[i];
 			}
 			const { results = [] } = await getData({
-				offset,
-				sorted,
 				page,
+				offset,
 				filtered: tmpFiltered,
 			});
-			setResponsibilityData(results);
+			if(scroll) {
+				setResponsibilityData([...responsibilityData, ...results]);
+			} else{
+				setResponsibilityData(results);
+			}
+			
 		} catch (e) {
 			setResponsibilityData([]);
 			console.error(e);
@@ -128,20 +158,19 @@ export default function GCResponsibilityExplorer({
 	}, [responsibilityData])
 
 	const getData = async ({
+		page = 1,
 		offset = 0,
-		sorted = [],
 		filtered = [],
 	}) => {
-		const order = sorted.map(({ id, desc }) => [id, desc ? 'DESC' : 'ASC']);
-		const where = filtered;
                                                     
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityData({
 				docView: true,
-				page: resultsPage,
+				page: page,
 				offset,
-				order,
-				where,
+				order: [],
+				where: filtered,
+				DOCS_PER_PAGE
 			});
 			if(data.offsets){
 				setOffsets(data.offsets);
@@ -159,11 +188,50 @@ export default function GCResponsibilityExplorer({
 		if(value === 'Document') setReloadResponsibilities(true)
 	}
 
+	const exportCSV = async () => {
+		try {
+			const { data } = await gameChangerAPI.getResponsibilityData({
+				limit: null,
+				offset: 0,
+				order: [],
+				where: filters,
+			});
+
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name), 
+				'ResponsibilityTracker', 
+				'ExportCSV', 
+				data?.results?.length
+			);
+			exportToCsv(
+				'ResponsibilityData.csv', 
+				data.results, 
+				true
+			);
+		} catch (e) {
+			console.error(e);
+			return [];
+		}
+	};
+
 	return (
 		<div>
-			<div className='row' style={{ height: 65, marginTop: '10px', paddingLeft: 0 }}>
-				<div style={{ display: 'flex', paddingLeft: 0 }}>
-					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', marginTop: '-10px'}}>
+			<div className='row' style={{ height: 65, margin: 0, padding: 0 }}>
+				<div style={{ display: 'flex', justifyContent: 'flex-end', padding: 0 }}>
+					<GCButton 
+						onClick={exportCSV}
+						style={{
+							minWidth: 50,
+							padding: '0px 7px',
+							margin: '6px 10px 0px 0px',
+							height: 50,
+						}}
+					>
+						<GCToolTip title="Export" placement="bottom" arrow enterDelay={500} >
+							<Icon className="fa fa-external-link" style={{paddingTop: 2, transform: 'scale(1.3)'}}/>
+						</GCToolTip>
+					</GCButton>
+					<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', margin: '-10px 0px 0px 0px'}}>
 						<InputLabel classes={{root: classes.formlabel}} id="view-name-select">View</InputLabel>
 						<Select
 							className={`MuiInputBase-root`}
@@ -200,14 +268,8 @@ export default function GCResponsibilityExplorer({
 					dispatch={dispatch} 
 					responsibilityData={docResponsibilityData} 
 					loading={loading}
-					docsPerPage={DOCS_PER_PAGE}
 					totalCount={offsets.length}
-					resultsPage={resultsPage}
-					setResultsPage={setResultsPage}
-					onPaginationClick={(page) => {
-						setResultsPage(page);
-						setReloadResponsibilities(true);
-					}}
+					setResultsPage={setInfiniteCount}
 					setReloadResponsibilities={setReloadResponsibilities}
 					docTitle={docTitle}
 					setDocTitle={setDocTitle}
@@ -215,8 +277,10 @@ export default function GCResponsibilityExplorer({
 					setOrganization={setOrganization}
 					responsibilityText={responsibilityText}
 					setResponsibilityText={setResponsibilityText}
+					filters={filters}
 					setFilters={setFilters}
 					documentList={documentList}
+					infiniteScrollRef={scrollRef}
 				/>
 			}
 		</div>
