@@ -2,6 +2,7 @@ const LOGGER = require('../lib/logger');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
+const { result } = require('underscore');
 
 class AnalystToolsController {
 	constructor(opts = {}) {
@@ -26,16 +27,28 @@ class AnalystToolsController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			
-			const { cloneName, paragraphs = [] } = req.body;
+			const { cloneName, paragraphs = [], filters } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
 			
 			// ML API Call Goes Here
 			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
+			const filteredParagraphResults = [];
+			paragraphResults.forEach(result => {
+				const newObj = {};
+				Object.keys(result).forEach(id => {
+					if(result[id]?.score >= 0.65){
+						newObj[id] = result[id];
+					}
+				})
+				newObj.paragraphIdBeingMatched = result.paragraphIdBeingMatched;
+				filteredParagraphResults.push(newObj)
+			})
+
 			const resultsObject = {};
 			
-			paragraphResults.forEach(result => {
+			filteredParagraphResults.forEach(result => {
 				Object.keys(result).forEach(id => {
 					if (result[id].id){
 						resultsObject[result[id].id] = {
@@ -49,13 +62,17 @@ class AnalystToolsController {
 			
 			const ids = Object.keys(resultsObject);
 			// Query ES
-			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids);
+			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
 
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
 			// Aggregate Data
 			const returnData = this.searchUtility.cleanUpEsResults(esResults, [], userId, [], {}, null, esQuery, true, resultsObject);
+
+			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0)
+			returnData.docs = cleanedDocs;
+
 			res.status(200).send(returnData);
 		} catch(e) {
 			this.logger.error(e, '60OOE62', userId);

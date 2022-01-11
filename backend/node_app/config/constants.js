@@ -227,6 +227,7 @@ module.exports = Object.freeze({
 		domain: process.env.JIRA_DOMAIN,
 		project_key: process.env.JIRA_PROJECT_KEY,
 		rating_id: process.env.JIRA_RATING_ID,
+		advana_product: process.env.JIRA_ADVANA_PRODUCT,
 		feedbackType: process.env.JIRA_FEEDBACK_TYPE
 	},
 });
