@@ -18,7 +18,7 @@ import {
 	getTrackingNameForFactory,
 } from '../../utils/gamechangerUtils';
 import styled from 'styled-components';
-import { FormControl, Input, InputLabel, Popover } from '@material-ui/core';
+import { FormControl, Input, InputLabel, Popper } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
@@ -27,7 +27,6 @@ import { SvgIcon } from '@material-ui/core';
 import { trackEvent } from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const NODE_ALPHA = 1;
 const HIDDEN_NODE_ALPHA = 0.08;
@@ -74,12 +73,6 @@ const styles = {
 		cursor: 'pointer',
 	},
 };
-
-const useStyles = makeStyles({
-	root: {
-		zIndex: '1000 !important',
-	},
-});
 
 const CloseButton = styled.div`
 	padding: 6px;
@@ -301,8 +294,6 @@ export default function GraphNodeCluster2D(props) {
 	} = props;
 
 	const graphRef = useRef();
-
-	const classes = useStyles();
 
 	const [shouldRunSimulation, setShouldRunSimulation] = React.useState(true);
 	const [highlightNodes, setHighlightNodes] = React.useState(new Set());
@@ -727,22 +718,14 @@ export default function GraphNodeCluster2D(props) {
 			);
 		});
 		return (
-			<Popover
+			<Popper
 				onClose={() => handleCloseGroupNodeMenu()}
 				id={'graph-legend-node-group'}
 				open={nodeGroupMenuOpenProp || nodeGroupMenuOpen}
 				anchorEl={nodeGroupMenuTargetProp || nodeGroupMenuTarget}
-				anchorOrigin={{
-					vertical: 'top',
-					horizontal: 'right',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'left',
-				}}
-				classes={{
-					root: classes.root,
-				}}
+				placement={'right-start'}
+				modifiers={{ offset: { offset: '-20, 30' } }}
+				style={{ zIndex: 1000 }}
 			>
 				<div
 					style={{
@@ -798,7 +781,7 @@ export default function GraphNodeCluster2D(props) {
 						</div>
 					</div>
 				</div>
-			</Popover>
+			</Popper>
 		);
 	};
 
@@ -1439,6 +1422,7 @@ export default function GraphNodeCluster2D(props) {
 		if (forceGraphRef) {
 			// forceGraphRef.d3Force('charge').strength(chargeStrength);
 			// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
+			forceGraphRef.d3Force('charge').distanceMin(20);
 		}
 
 		return (

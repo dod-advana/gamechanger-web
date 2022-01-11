@@ -168,7 +168,7 @@ export const StyledCenterContainer = styled.div`
 		
 		.results-count-view-buttons-container {
 			display: flex;
-			justify-content: space-between;
+			justify-content: right;
 			margin: 20px 0
     		
     		.view-buttons-container {
@@ -745,13 +745,17 @@ export const decodeTinyUrl = (url) => {
 	returnData.isRevoked = getQueryVariable('revoked', url) === 'true';
 
 	const orgURL = getQueryVariable('orgFilter', url);
+	const typeURL = getQueryVariable('typeFilter', url);
 	const pubDateURL = getQueryVariable('pubDate', url);
-	const searchFieldsURL = getQueryVariable('searchFields', url);
 
 	returnData.orgFilterObject = Object.assign({}, orgFilters);
+	returnData.typeFilterObject = Object.assign({}, typeFilters);
 
 	if (orgURL) {
 		setFilterVariables(returnData.orgFilterObject, orgURL);
+	}
+	if (typeURL) {
+		setFilterVariables(returnData.typeFilterObject, typeURL);
 	}
 
 	let orgFilterText = '';
@@ -766,6 +770,18 @@ export const decodeTinyUrl = (url) => {
 	}
 	returnData.orgFilterText = orgFilterText;
 
+	let typeFilterText = '';
+	Object.keys(returnData.typeFilterObject).forEach((key) => {
+		if (returnData.typeFilterObject[key]) {
+			typeFilterText += `${key}, `;
+		}
+	});
+	typeFilterText = typeFilterText.slice(0, typeFilterText.length - 2);
+	if (typeFilterText === '') {
+		typeFilterText = 'All types';
+	}
+	returnData.typeFilterText = typeFilterText;
+
 	if (Object.values(SEARCH_TYPES).indexOf(returnData.searchType) === -1) {
 		returnData.searchType = 'Keyword';
 	}
@@ -778,7 +794,6 @@ export const decodeTinyUrl = (url) => {
 	returnData.useSemanticSearch =
 		returnData.searchType === SEARCH_TYPES.semantic;
 	returnData.pubDate = '';
-	returnData.searchFields = [];
 
 	if (!pubDateURL || pubDateURL.indexOf('_') === -1) {
 		returnData.pubDate = 'All';
@@ -794,16 +809,6 @@ export const decodeTinyUrl = (url) => {
 			)}`;
 		} catch (err) {
 			console.log(err);
-		}
-	}
-
-	if (searchFieldsURL && searchFieldsURL.length > 0) {
-		const searchFieldPairs = searchFieldsURL.split('_');
-		for (const pair of searchFieldPairs) {
-			const keyValue = pair.split('-');
-			if (keyValue && keyValue.length === 2) {
-				returnData.searchFields.push(`${keyValue[0]}: "${keyValue[1]}"`);
-			}
 		}
 	}
 

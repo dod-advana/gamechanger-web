@@ -23,7 +23,7 @@ const s3Columns = [
 	},
 ];
 
-const S3_CORPUS_PATH = 'gamechanger/json';
+const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 
 /**
  * This class queries the ml api information and provides controls

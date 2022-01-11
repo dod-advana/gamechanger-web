@@ -1375,47 +1375,41 @@ export default function PolicyGraphView(props) {
 	 */
 
 	const renderNodeLegendItems = () => {
-		return (
-			<>
-				{!runningSearch &&
-					Object.keys(legendData)
-						.sort()
-						.map((key) => {
-							return (
-								<GCTooltip
-									key={key}
-									title={`${docOrgNumbers[key]} node${
-										docOrgNumbers[key] > 1 ? 's' : ''
-									} associated`}
-									arrow
-									enterDelay={30}
-								>
-									<StyledLegendClickable
-										key={legendData[key].name}
-										onClick={(event) =>
-											handleLegendNodeClick(event.target, key)
-										}
-										typeSelected={orgTypeSelected}
-										type={key}
-									>
-										<div
-											style={{
-												backgroundColor: legendData[key].color,
-												width: '1em',
-												height: '1em',
-												borderRadius: '50%',
-												marginTop: '4px',
-											}}
-										></div>
-										<div style={{ marginLeft: '2em', width: '80%' }}>
-											{legendData[key].name}
-										</div>
-									</StyledLegendClickable>
-								</GCTooltip>
-							);
-						})}
-			</>
-		);
+		// console.log(Object.keys(legendData).sort());
+		return (!runningSearch && Object.keys(legendData).sort().map((key) => {
+			return (
+				<GCTooltip
+					key={key}
+					title={`${docOrgNumbers[key]} node${
+						docOrgNumbers[key] > 1 ? 's' : ''
+					} associated`}
+					arrow
+					enterDelay={30}
+				>
+					<StyledLegendClickable
+						key={legendData[key].name}
+						onClick={(event) =>
+							handleLegendNodeClick(event.target, key)
+						}
+						typeSelected={orgTypeSelected}
+						type={key}
+					>
+						<div
+							style={{
+								backgroundColor: legendData[key].color,
+								width: '1em',
+								height: '1em',
+								borderRadius: '50%',
+								marginTop: '4px',
+							}}
+						></div>
+						<div style={{ marginLeft: '2em', width: '80%' }}>
+							{legendData[key].name}
+						</div>
+					</StyledLegendClickable>
+				</GCTooltip>
+			);
+		}));
 	};
 
 	const handleLegendNodeClick = (target, legendKey) => {
@@ -1426,7 +1420,7 @@ export default function PolicyGraphView(props) {
 			legendKey !== orgTypeSelected
 		);
 		setOrgTypeSelected(legendKey === orgTypeSelected ? null : legendKey);
-		if (nodeGroupMenuOpen) {
+		if (legendKey === orgTypeSelected) {
 			setNodeGroupMenuOpen(false);
 			setNodeGroupMenuTarget(null);
 			setNodeGroupMenuLabel('');

@@ -159,22 +159,19 @@ const renderRecentSearches = (search, state, dispatch) => {
 				<Typography style={styles.containerText}>{searchText}</Typography>
 			</div>
 			<Typography style={styles.subtext}>
-				Organization Filter:
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
+				<strong>Organization Filter: </strong>{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Type Filter:
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
+				<strong>Type Filter: </strong>{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Publication Date:
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				<strong>Publication Date: </strong>{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Include Canceled: {includeRevoked ? 'Yes' : 'No'}
+				<strong>Include Canceled: </strong>{includeRevoked ? 'Yes' : 'No'}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Search Time:{' '}
+				<strong>Search Time:{' '}</strong>
 				{moment(Date.parse(run_at)).utc().format('YYYY-MM-DD HH:mm UTC')}
 			</Typography>
 		</RecentSearchContainer>

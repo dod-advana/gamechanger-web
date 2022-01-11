@@ -922,25 +922,6 @@ const DefaultCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip
-							title={'Check back soon for a new document details page.'}
-						>
-							<CardButton
-								disabled={true}
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								onClick={(e) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'showDocumentDetails'
-									);
-									e.preventDefault();
-								}}
-							>
-								Details
-							</CardButton>
-						</GCTooltip>
 						{toggledMore && Permissions.isGameChangerAdmin() && (
 							<CardButton
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}

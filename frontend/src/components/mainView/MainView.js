@@ -108,13 +108,24 @@ const MainView = (props) => {
 			if (state.databasesPagination && searchHandler) {
 				searchHandler.handleDatabasesPagination(state, dispatch);
 			}
+		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo') {
+			if (state.docsPagination && searchHandler) {
+				setState(dispatch, {
+					docsPagination: false,
+				});
+				searchHandler.handleSearch(
+					state,
+					dispatch,
+					state.replaceResults
+				);
+			}
 		}
 	}, [state, dispatch, searchHandler]);
 
 	useBottomScrollListener(
 		() => {
 			if (
-				state.activeCategoryTab !== 'all' &&
+				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
 				!state.docsPagination
 			) {
