@@ -192,8 +192,8 @@ export const StyledLegendClickable = styled.div`
 	transition: opacity 0.3s ease-in-out;
 	border-radius: 6px;
 	padding: 5px;
-	opacity: ${({ type, typeSelected }) =>
-		typeSelected ? (type === typeSelected ? 1 : 0.2) : 1};
+	opacity: ${({ type, typesSelected }) => 
+		typesSelected.length === 0 || typesSelected.includes(type) ? 1 : 0.2};
 
 	&:hover {
 		background: rgba(222, 235, 255, 0.5);
@@ -573,7 +573,7 @@ export default function GraphNodeCluster2D(props) {
 												onClick={(event) =>
 													handleLegendNodeClick(key, event.target)
 												}
-												typeSelected={nodeLabelSelected}
+												typesSelected={nodeLabelSelected ? [nodeLabelSelected] : []}
 												type={key}
 											>
 												<div
