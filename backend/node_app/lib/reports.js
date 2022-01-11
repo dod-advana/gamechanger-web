@@ -111,6 +111,7 @@ class Reports {
 		const dataContent = data.docs.map(function (doc) {
 
 			const snippets = doc.pageHits ? doc.pageHits.map(function (snip) {
+				console.log(snip);
 				const splitReplace = snip.snippet.replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
 				return {
 					stack: [
