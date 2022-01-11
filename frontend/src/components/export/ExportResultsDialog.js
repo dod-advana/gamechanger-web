@@ -168,7 +168,7 @@ const ExportResultsDialog = ({
 				format: selectedFormat,
 				searchText: searchObject.search,
 				options: {
-					limit: 10000,
+					
 					searchType,
 					index,
 					classificationMarking:
