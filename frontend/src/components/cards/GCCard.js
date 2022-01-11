@@ -553,7 +553,7 @@ function GCCard(props) {
 	const quickCompareToggleComponent = () => {
 		return (
 			<GCTooltip title={`Quickly compare the matched paragraphs to the input document`} placement='top' arrow>
-				<div style={{marginTop: 2, paddingRight: 5}}>
+				<div style={{marginTop: 2, paddingRight: 5, minWidth: 178}}>
 					<FormControlLabel
 						value="compare"
 						control={<OrangeSwitch checked={showQuickCompare} onChange={handleQuickCompareToggle}/>}

@@ -601,7 +601,7 @@ describe('TextSuggestionController', function () {
 
 			const req = {
 				...reqMock,
-				body: { index: 'gamechanger', searchText: 'navy' }
+				body: { index: 'gamechanger', searchText: 'navy', suggestions: true }
 			};
 			let resMsg;		
 			const res = {
