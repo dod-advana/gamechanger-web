@@ -582,7 +582,7 @@ const GetQAResults = (props) => {
 					}}
 				>
 					<strong>
-						<b style={{ fontSize: 14 }}>Open Document</b>
+						<b style={{ fontSize: 14 }}>Open Details</b>
 					</strong>
 				</Link>
 				{feedbackComponent(
