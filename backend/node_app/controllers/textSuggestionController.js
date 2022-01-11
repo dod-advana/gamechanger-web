@@ -79,6 +79,14 @@ class TextSuggestionController {
 					presearchOrg: presearchEntity.presearchOrg || [],
 					predictions: presearchHistory || []
 				});
+			}else{
+				res.send({
+					autocorrect: [],
+					presearchTitle: [],
+					presearchTopic: [],
+					presearchOrg: [],
+					predictions: []
+				});
 			}
 
 
