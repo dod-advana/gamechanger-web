@@ -372,7 +372,9 @@ class SearchUtility {
 			includeHighlights = true,
 			docIds = {},
 			selectedDocuments,
-			ltr = false
+			ltr = false,
+			paragraphLimit = 5, 
+			hasHighlights = true
 		 }, 
 		 user) {
 
@@ -428,8 +430,8 @@ class SearchUtility {
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
-										size: 5,
-										highlight: {
+										size: paragraphLimit,
+										highlight: hasHighlights ? {
 											fields: {
 												'paragraphs.par_raw_text_t': {
 													fragment_size: 3 * charsPadding,
@@ -446,7 +448,8 @@ class SearchUtility {
 												},
 											},
 											fragmenter: 'span'
-										}
+										} :
+										{}
 									},
 									query: {
 										bool: {
@@ -526,7 +529,7 @@ class SearchUtility {
 						
 					}
 				},
-				highlight: {
+				highlight: hasHighlights ? {
 					require_field_match: false,
 					fields: {
 						'display_title_s.search': {},
@@ -541,7 +544,8 @@ class SearchUtility {
 					type: 'unified',
 					boundary_scanner: 'word'
 
-				}
+				} :
+				{}
 			};
 
 			switch(sort){

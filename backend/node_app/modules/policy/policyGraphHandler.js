@@ -545,7 +545,9 @@ class PolicyGraphHandler extends GraphHandler {
 				publicationDateFilter,
 				storedFields: ['id'],
 				orgFilter,
-				includeRevoked
+				includeRevoked,
+				paragraphLimit: 1,
+				hasHighlights: false
 			};
 
 			// const gT0 = new Date().getTime();
@@ -560,7 +562,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
+			if (esResults?.body?.hits?.total?.value > 0) {
 
 				const {docIds} = this.searchUtility.cleanUpIdEsResults(esResults, searchTerms, userId, []);
 
