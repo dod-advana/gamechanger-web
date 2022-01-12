@@ -533,7 +533,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const searchBody = {
 				searchText: searchText,
-				limit: 500,
+				limit: 200,
 				index: index || this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
 				getIdList: true,
 				expandTerms,
