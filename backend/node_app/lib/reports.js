@@ -118,7 +118,7 @@ class Reports {
 						{ text: ' '},
 						{ text: 'Snippets: ', fontSize:13},
 						{ text: ' ' },
-						{ text: 'Page ' + snip.pageNumber },
+						{ text: 'Page ' + snip.pageNumber ? snip.pageNumber : 'N/A'  },
 						{ text: ' ' },
 						{ text: splitReplace },
 						{ text: ' ' },
