@@ -303,46 +303,52 @@ export function numberWithCommas(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-const crawlerMapping = {
-	dod_issuances: 'WHS DoD Directives Division',
-	army_pubs: 'Army Publishing Directorate',
-	jcs_pubs: 'Joint Chiefs of Staff Library',
-	jcs_manual_uploads: 'Joint Chiefs of Staff',
-	dod_manual_uploads: 'Dept. of Defense',
-	army_manual_uploads: 'US Army',
-	ic_policies: 'Director of National Intelligence',
-	us_code: 'Office of the Law Revision Counsel',
-	ex_orders: 'Federal Register',
-	opm_pubs: 'OMB Publication',
-	air_force_pubs: 'Dept. of the Air Force E-Publishing',
-	marine_pubs: 'Marine Corps Publications Electronic Library',
-	secnav_pubs: 'Dept. of the Navy Issuances',
-	navy_reserves: 'U.S. Navy Reserve Publications',
-	navy_med_pubs: 'Navy Medicine Directives',
-	Bupers_Crawler: 'Bureau of Naval Personnel Instructions',
-	milpersman_crawler: 'Navy Personnel Command Instructions',
-	nato_stanag: 'NATO Publications',
-	fmr_pubs: 'DoD Financial Management Regulation',
-	legislation_pubs: 'Congressional Legislation',
-	Army_Reserve: 'U.S. Army Reserve Publications',
-	Memo: 'OSD Executive Executive Secretary',
-	dha_pubs: 'Military Health System',
-	jumbo_FAR: 'Federal Acquisition Regulation',
-	jumbo_DFAR: 'Defense Federal Acquisition Regulation',
-	National_Guard: 'National Guard Bureau Publications Library',
-	Coast_Guard: 'US Coast Guard Directives',
-	dfar_subpart_regs: 'Defense Federal Acquisition Regulation',
-	far_subpart_regs: 'Federal Acquisition Regulation',
-	Chief_National_Guard_Bureau_Instructions:
-		'National Guard Bureau Instructions',
-};
 
+
+const crawlerMapping = {
+	dod_issuances: ['WHS DoD Directives Division', 'Dept. of Defense'],
+	army_pubs: ['Army Publishing Directorate', 'Dept. of the Army', 'US Army'],
+	jcs_pubs: ['Joint Chiefs of Staff Library', 'CJCS Directives Library', 'Joint Chiefs of Staff'],
+	// leaving in case these exist or added back
+	//jcs_manual_uploads: ['Joint Chiefs of Staff'],
+	//dod_manual_uploads: ['Dept. of Defense'],
+	//army_manual_uploads: ['US Army'],
+	ic_policies: ['Director of National Intelligence', 'Office Of Director Of National Intelligence'],
+	us_code: ['Office of Law Revision Counsel'],
+	ex_orders: ['Federal Register', 'Executive Office of The President'],
+	opm_pubs: ['OMB Publication'],
+	air_force_pubs: ['Dept. of the Air Force E-Publishing'],
+	marine_pubs: ['Marine Corps Publications Electronic Library'],
+	secnav_pubs: ['Dept. of the Navy Issuances'],
+	navy_reserves: ['U.S. Navy Reserve Publications', 'U.S. Navy Reserve'],
+	navy_med_pubs: ['Navy Medicine Directives', 'Navy Medicine'],
+	Bupers_Crawler: ['Bureau of Naval Personnel Instructions', 'Mynavy Hr'],
+	milpersman_crawler: ['Navy Personnel Command Instructions'],
+	nato_stanag: ['NATO Publications', 'NATO Standardization Office'],
+	fmr_pubs: ['DoD Financial Management Regulation', 'Under Secretary Of Defense (comptroller)',  'Defense Publications'],
+	legislation_pubs: ['Congressional Legislation', 'U.S. Government Publishing Office'],
+	Army_Reserve: ['U.S. Army Reserve Publications'],
+	Memo: ['OSD Executive Secretary'],
+	dha_pubs: ['Military Health System'],
+	jumbo_FAR: ['Federal Acquisition Regulation', 'Acquisition Publications'],
+	jumbo_DFAR: ['Defense Federal Acquisition Regulation'],
+	National_Guard: ['National Guard Bureau Publications Library', 'National Guard Bureau Publications & Forms Library', 'National Guard Bureau Publications'],
+	Coast_Guard: ['US Coast Guard Directives', 'Coast Guard Deputy Commandant For Mission Support'],
+	dfar_subpart_regs: ['Defense Federal Acquisition Regulation'],
+	far_subpart_regs: ['Federal Acquisition Regulation'],
+	Chief_National_Guard_Bureau_Instructions: ['National Guard Bureau Instructions'],
+	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board']
+};
 export const invertedCrawlerMappingFunc = (item) => {
-	const inverted = {};
-	Object.keys(crawlerMapping).forEach((key) => {
-		inverted[crawlerMapping[key].toLowerCase()] = key;
-	});
-	return inverted[item];
+	let crawler = "";
+	for(let key in crawlerMapping) {
+		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())){
+			crawler = key
+			break;
+		}
+	};
+
+	return crawler;
 };
 
 export const crawlerMappingFunc = (item) => {
