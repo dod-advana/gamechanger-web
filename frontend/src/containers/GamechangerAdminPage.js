@@ -47,12 +47,7 @@ const GamechangerAdminPage = (props) => {
 	const { jupiter } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
-	const [loginModalOpen, setLoginModalOpen] = useState(false);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
-
-	const setLoginModal = (open) => {
-		setLoginModalOpen(open);
-	};
 
 	const renderSwitch = (page) => {
 		trackEvent(
@@ -124,8 +119,6 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-				loginModalOpen={loginModalOpen}
-				setLoginModal={setLoginModal}
 			></SearchBanner>
 
 			{renderSwitch(pageToView)}
