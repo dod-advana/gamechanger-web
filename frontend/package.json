@@ -43,6 +43,7 @@
 		"jws": "^3.1.4",
 		"lodash": "^4.17.10",
 		"moment": "^2.18.1",
+		"node-forge": "^1.2.1",
 		"npm-force-resolutions": "0.0.10",
 		"piwik-react-router": "^0.12.1",
 		"prop-types": "^15.5.8",
