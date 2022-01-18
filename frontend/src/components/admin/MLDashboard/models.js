@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Select, MenuItem, Input, Checkbox } from '@material-ui/core';
+import { Select, MenuItem, Input, Checkbox, Button } from '@material-ui/core';
 import ReactTable from 'react-table';
 import { BorderDiv, TableRow } from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
@@ -7,6 +7,7 @@ import GCPrimaryButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
 import './index.scss';
+import Processes from './processes';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -24,7 +25,18 @@ const modelColumns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
-
+const dataColumns = [
+	{
+		Header: 'Path',
+		accessor: 'path',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Name',
+		accessor: 'name',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+];
 /**
  * This class provides controls to veiw and control the
  * resouces loaded locally to the ml api.
@@ -39,6 +51,7 @@ export default (props) => {
 	});
 
 	const [modelTable, setModelTable] = useState([]);
+	const [dataTable, setDataTable] = useState([])
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
@@ -64,7 +77,6 @@ export default (props) => {
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
-
 	/**
 	 * Load all the initial data on transformers and s3
 	 * @method onload
@@ -73,6 +85,7 @@ export default (props) => {
 		getCurrentTransformer();
 		getModelsList();
 		getCorpusCount();
+		getLocalData();
 	};
 	/**
 	 * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
@@ -123,6 +136,58 @@ export default (props) => {
 		}
 	};
 
+
+	const deleteLocalModels = async (model,type) =>{
+
+		await gameChangerAPI.deleteLocalModel({
+			'model':model,
+			'type':type
+		});
+		props.getProcesses();
+		getModelsList()
+	}
+	/**
+	 * Get a list of all the proccesses running and completed
+	 * @method getAllProcessData
+	 */
+	const getAllProcessData = () => {
+		const processList = [];
+		if (props.processes.process_status) {
+			for (const key in props.processes.process_status) {
+				if (key !== 'flags') {
+					const status = key.split(': ');
+					if (['models', 'training'].includes(status[0])){
+						processList.push({
+							...props.processes.process_status[key],
+							process: status[1],
+							category: status[0],
+							date:'Currently Running'
+						});
+					}
+				}
+			}
+		}
+		if (props.processes && props.processes.completed_process) {
+			for (const completed of props.processes.completed_process) {
+				const completed_process = completed.process.split(': ');
+				if (['models', 'training'].includes(completed_process[0])){
+					processList.push({
+						...completed,
+						process: completed_process[1],
+						category: completed_process[0],
+						progress: completed.total
+					});
+				}
+			}
+		}
+		return processList;
+	};
+
+	const getLocalData = async () => {
+		const dataList =  await gameChangerAPI.getDataList();
+		console.log('data',dataList)
+		setDataTable(dataList.data.dirs)
+	}
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getModelsList
@@ -305,6 +370,7 @@ export default (props) => {
 
 	useEffect(() => {
 		onload();
+		props.getProcesses();
 		// eslint-disable-next-line
 	}, []);
 
@@ -329,6 +395,11 @@ export default (props) => {
 				>
 					Refresh
 				</GCPrimaryButton>
+			</div>
+			<div>
+				<Processes
+					processData={getAllProcessData()}
+				/>
 			</div>
 			<div className="info">
 				<BorderDiv className="half">
@@ -399,6 +470,14 @@ export default (props) => {
 											<pre className="code-block">
 												<code>{row.original.config}</code>
 											</pre>
+											<GCPrimaryButton
+												onClick={() => {
+													deleteLocalModels(row.original.model,row.original.type);
+												}}
+												style={{ float: 'left', minWidth: 'unset' }}
+											>
+												Delete
+											</GCPrimaryButton>
 										</div>
 									);
 								}}
@@ -743,6 +822,44 @@ export default (props) => {
 							</div>
 						}
 					</div>
+				</BorderDiv>
+				<BorderDiv className="half" style={{ float: 'right' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block' }}>Local Data:</div>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<ReactTable
+								data={dataTable}
+								columns={dataColumns}
+								className="striped -highlight"
+								defaultPageSize={10}
+								// SubComponent={(row) => {
+								// 	return (
+								// 		<div className="code-container">
+								// 			<pre className="code-block">
+								// 				<code>{row.original.config}</code>
+								// 			</pre>
+								// 			<GCPrimaryButton
+								// 				onClick={() => {
+								// 					deleteLocalModels(row.original.model,row.original.type);
+								// 				}}
+								// 				style={{ float: 'left', minWidth: 'unset' }}
+								// 			>
+								// 				Delete
+								// 			</GCPrimaryButton>
+								// 		</div>
+								// 	);
+								// }}
+							/>
+						</div>
+					</fieldset>
 				</BorderDiv>
 			</div>
 		</div>

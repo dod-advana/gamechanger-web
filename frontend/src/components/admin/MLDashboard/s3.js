@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '@material-ui/core';
+import { Input,IconButton  } from '@material-ui/core';
 import { TableRow, BorderDiv } from './util/styledDivs';
+import { CloudDownload  } from '@material-ui/icons';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
+import Processes from './processes';
+
 import 'react-table/react-table.css';
 import './index.scss';
 
 const gameChangerAPI = new GameChangerAPI();
 
-const s3Columns = [
-	{
-		Header: 'Tar File',
-		accessor: 'file',
-		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	},
-	{
-		Header: 'Upload Time',
-		accessor: 'upload',
-		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	},
-];
+
 
 const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 
@@ -65,6 +57,54 @@ export default (props) => {
 		}
 	};
 
+	/**
+	 * Pass a file from s3 to download into the ml-api
+	 * @method downloadS3File
+	 */
+	const  downloadS3File = async (row) => {
+
+		await gameChangerAPI.downloadS3File({
+			'file':row.original.file
+		});
+		props.getProcesses();
+	}
+
+	/**
+	 * Get a list of all the proccesses running and completed
+	 * @method getAllProcessData
+	 */
+	 const getAllProcessData = () => {
+		const processList = [];
+		if (props.processes.process_status) {
+			for (const key in props.processes.process_status) {
+				if (key !== 'flags') {
+					const status = key.split(': ');
+					if (['s3', 'corpus'].includes(status[0])){
+						processList.push({
+							...props.processes.process_status[key],
+							process: status[1],
+							category: status[0],
+							date:'Currently Running'
+						});
+					}
+				}
+			}
+		}
+		if (props.processes && props.processes.completed_process) {
+			for (const completed of props.processes.completed_process) {
+				const completed_process = completed.process.split(': ');
+				if (['s3', 'corpus'].includes(completed_process[0])){
+					processList.push({
+						...completed,
+						process: completed_process[1],
+						category: completed_process[0],
+						progress: completed.total
+					});
+				}
+			}
+		}
+		return processList;
+	};
 	/**
 	 * @method triggerDownloadModel
 	 */
@@ -123,9 +163,29 @@ export default (props) => {
 
 	useEffect(() => {
 		getS3List();
+		props.getProcesses();
 		// eslint-disable-next-line
 	}, []);
 
+	const s3Columns = [
+		{
+			Header: 'Tar File',
+			accessor: 'file',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Upload Time',
+			accessor: 'upload',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Download',
+			accessor: '',
+			Cell: (row) => <TableRow><IconButton onClick={() => {
+				downloadS3File(row)
+			}} style={{ color: "white" }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
+		},
+	];
 	return (
 		<div>
 			<div
@@ -147,6 +207,13 @@ export default (props) => {
 				>
 					Refresh
 				</GCPrimaryButton>
+			</div>
+			<div>
+			<div>
+				<Processes
+					processData={getAllProcessData()}
+				/>
+			</div>
 			</div>
 			<div className="info">
 				<BorderDiv className="half">

@@ -119,7 +119,7 @@ export default () => {
 								INFORMATION
 							</Typography>
 						</Tab>
-						<Tab
+						{/* <Tab
 							style={{
 								...TabStyles.tabStyle,
 								...(tabIndex === 'processes' ? TabStyles.tabSelectedStyle : {}),
@@ -131,7 +131,7 @@ export default () => {
 							<Typography variant="h6" display="inline">
 								PROCESSES
 							</Typography>
-						</Tab>
+						</Tab> */}
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
@@ -142,7 +142,7 @@ export default () => {
 							onClick={() => setTabIndex('s3')}
 						>
 							<Typography variant="h6" display="inline">
-								S3
+								DATA CONTROL
 							</Typography>
 						</Tab>
 						<Tab
@@ -155,7 +155,7 @@ export default () => {
 							onClick={() => setTabIndex('models')}
 						>
 							<Typography variant="h6" display="inline">
-								MODELS
+								MODEL CONTROL
 							</Typography>
 						</Tab>
 					</TabList>
@@ -167,13 +167,13 @@ export default () => {
 					<TabPanel>
 						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
 					</TabPanel>
-					<TabPanel>
+					{/* <TabPanel>
 						<Processes
 							processes={processes}
 							getProcesses={getProcesses}
 							updateLogs={updateLogs}
 						/>
-					</TabPanel>
+					</TabPanel> */}
 					<TabPanel>
 						<S3
 							processes={processes}
