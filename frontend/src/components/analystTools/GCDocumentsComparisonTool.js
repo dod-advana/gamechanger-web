@@ -265,6 +265,8 @@ const GCDocumentsComparisonTool = (props) => {
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
 	const [filterChange, setFilterChange] = useState(false);
+	const [highlightList, setHighlightList] = useState([]);
+	const [highlightIndex, setHighlightindex] = useState(0);
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -342,12 +344,12 @@ const GCDocumentsComparisonTool = (props) => {
 				const matchingPars = compareDocument.paragraphs.filter(par => {
 					return par.paragraphIdBeingMatched === compareParagraphIndex;
 				});
-				
+
 				if (compareDocument && matchingPars.length > 0) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
 							encode(compareDocument.filename || ''),
-							`"${paragraphs[compareParagraphIndex]}"`,
+							`"${highlightList[highlightIndex].par_raw_text_t}"`,
 							matchingPars[0].page_num_i + 1,
 							true,
 							state.cloneData
@@ -358,7 +360,7 @@ const GCDocumentsComparisonTool = (props) => {
 				}
 			}
 		},
-		[paragraphs, compareDocument, state.cloneData, compareParagraphIndex]
+		[compareDocument, state.cloneData, compareParagraphIndex, highlightList, highlightIndex]
 	);
 	
 	const getMatchingParsCount = (compareIdx) => {
@@ -368,8 +370,12 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const handleSetCompareIndex = (idx) => {
-		if (getMatchingParsCount(idx) > 0){
+		const parCount = getMatchingParsCount(idx);
+		if (parCount > 0){
 			setCompareParagraphIndex(idx);
+			const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === compareParagraphIndex);
+			setHighlightList(highlights);
+			setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
 		}
 	}
 	
