@@ -21,7 +21,11 @@ class TransformerController {
 		this.registry = {
 			'getAPIInformation': this.mlApi.getAPIInformation,
 			'getS3List': this.mlApi.getS3List,
+			'downloadDependencies': this.mlApi.downloadDependencies,
+			'downloadS3File': this.mlApi.downloadS3File,
+			'deleteLocalModel': this.mlApi.deleteLocalModel,
 			'getModelsList': this.mlApi.getModelsList,
+			'getDataList': this.mlApi.getDataList,
 			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
 			'getFilesInCorpus': this.mlApi.getFilesInCorpus,
 			'getProcessStatus': this.mlApi.getProcessStatus,
@@ -36,6 +40,7 @@ class TransformerController {
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getDataList = this.getData.bind(this,'getDataList')
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
@@ -47,6 +52,10 @@ class TransformerController {
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
+		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
+		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+
+
 	}
 	/**
 	 * A generic get method to query the ML API. 
