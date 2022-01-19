@@ -1,9 +1,12 @@
 import React from 'react';
 import { Typography } from '@material-ui/core';
+import testLogo from '../../../images/logos/TestLogo.png';
+import Hermes from '../../../images/logos/Hermes-logo.png';
 
 const DefaultTitleBarHandler = {
 	getTitleBar: (props) => {
 		const { onTitleClick, componentStepNumbers, cloneData } = props;
+		console.log(cloneData.display_name);
 		return (
 			<div
 				className={`tutorial-step-${
@@ -11,12 +14,12 @@ const DefaultTitleBarHandler = {
 				}`}
 				onClick={onTitleClick}
 			>
-				<Typography variant="h1" style={styles.wording} display="inline">
-					{cloneData.display_name}
-				</Typography>
-				<Typography variant="h6" style={styles.wording} display="inline">
-					Powered by GAMECHANGER
-				</Typography>
+				<img
+					src={'cloneData.display_name'}
+					style={styles.title}
+					id={'titleButton'}
+				/>
+				
 			</div>
 		);
 	},
@@ -54,3 +57,12 @@ const styles = {
 		width: '100%',
 	},
 };
+/*
+<Typography variant="h1" style={styles.wording} display="inline">
+					{cloneData.display_name}
+				</Typography>
+				<Typography variant="h6" style={styles.wording} display="inline">
+					Powered by GAMECHANGER
+				</Typography>(/
+					)
+*/
