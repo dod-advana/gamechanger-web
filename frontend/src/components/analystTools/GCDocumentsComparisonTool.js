@@ -9,11 +9,9 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcOrange} from '../common/gc-colors';
-import Pagination from 'react-js-pagination';
 import {
 	encode, 
-	handlePdfOnLoad, 
-	RESULTS_PER_PAGE,
+	handlePdfOnLoad,
 	getOrgToOrgQuery,
 	getTypeQuery
 } from '../../utils/gamechangerUtils';
@@ -406,10 +404,6 @@ const GCDocumentsComparisonTool = (props) => {
 		});
 	}
 	
-	const handleChangePage = (page) => {
-	
-	}
-	
 	return (
 		<>
 			<Dialog
@@ -599,18 +593,6 @@ const GCDocumentsComparisonTool = (props) => {
 								<div className={'text'}>
 									Showing results {(page - 1) * PAGE_SIZE + 1} - {returnedDocs.length} of: <span>Possibly Relevant Documents</span>
 								</div>
-								<div className='gcPagination text-center'>
-									<Pagination
-										activePage={page}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={viewableDocs.length}
-										pageRangeDisplayed={8}
-										onChange={async page => {
-											handleChangePage(page);
-										}}
-									/>
-								</div>
-
 							</div>
 							
 							<div className={'results-container'}>
