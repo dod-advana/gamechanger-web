@@ -34,23 +34,12 @@ class AnalystToolsController {
 			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
-			const filteredParagraphResults = [];
-			paragraphResults.forEach(result => {
-				const newObj = {};
-				Object.keys(result).forEach(id => {
-					if(result[id]?.score >= 0.65){
-						newObj[id] = result[id];
-					}
-				})
-				newObj.paragraphIdBeingMatched = result.paragraphIdBeingMatched;
-				filteredParagraphResults.push(newObj)
-			})
-
+			console.log('paragraph results: ', paragraphResults.length)
 			const resultsObject = {};
 			
-			filteredParagraphResults.forEach(result => {
+			paragraphResults.forEach(result => {
 				Object.keys(result).forEach(id => {
-					if (result[id].id){
+					if (result[id].id && result[id]?.score >= 0.65){
 						resultsObject[result[id].id] = {
 							score: result[id].score,
 							text: result[id].text,
@@ -61,6 +50,7 @@ class AnalystToolsController {
 			});
 			
 			const ids = Object.keys(resultsObject);
+			console.log('ids: ', ids.length)
 			// Query ES
 			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
