@@ -34,7 +34,6 @@ class AnalystToolsController {
 			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
-			console.log('paragraph results: ', paragraphResults.length)
 			const resultsObject = {};
 			
 			paragraphResults.forEach(result => {
@@ -48,9 +47,8 @@ class AnalystToolsController {
 					}
 				});
 			});
-			
+
 			const ids = Object.keys(resultsObject);
-			console.log('ids: ', ids.length)
 			// Query ES
 			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
