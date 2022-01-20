@@ -162,7 +162,6 @@ class TrendingSearchesController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			console.log("hello")
 			const { trendingLinks=[] } = req.body;
 			const results = await new Promise((resolve, reject) => {
 				const counts = [];
@@ -176,13 +175,11 @@ class TrendingSearchesController {
 						}
 					}));
 				})
-				console.log(trendingLinks)
 				Promise.all(counts).then(values => {
 					const trendingLinksWithCount = trendingLinks.map((trending,idx) => {return {...trending, count:values[idx]}})
 					resolve(trendingLinksWithCount);
 				}).catch(e=>reject(e));
 			});
-			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, 'RZ18OVI', userId);
