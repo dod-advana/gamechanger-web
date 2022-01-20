@@ -194,5 +194,6 @@ router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
+router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 
 module.exports = router;
