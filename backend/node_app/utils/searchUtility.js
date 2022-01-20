@@ -1403,7 +1403,6 @@ class SearchUtility {
 			  }
 		
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
-			console.log(results)
 			let aggs = results.body.aggregations.searchTerms.buckets;
 			let maxCount = 0;
 			if (aggs.length > 0) {
