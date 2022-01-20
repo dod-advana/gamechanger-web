@@ -23,14 +23,18 @@ ENV APP_SHARED_DIR="${APP_ROOT}/shared"
 ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin" 
 ENV PATH="${APP_SHARED_BIN}:${PATH}"
 ENV NPM_CONFIG_USERCONFIG="${APP_ROOT}/.nmprc"
+ENV LOGS="/logs/uotapp"
 
 RUN mkdir -p \
         "${APP_DIR}" \
         "${APP_BACKEND_DIR}" \
         "${APP_FRONTEND_DIR}" \
         "${APP_SHARED_DIR}" \
+        "${LOGS}" \
     && touch "${NPM_CONFIG_USERCONFIG}" \
-    && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}"
+    && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}" \
+    && chown -R "$APP_UID:$APP_GID" "${LOGS}"
+
 
 USER "$APP_UID:$APP_GID"
 # thou shall not root
