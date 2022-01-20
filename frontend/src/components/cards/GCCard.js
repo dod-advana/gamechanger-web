@@ -576,6 +576,10 @@ function GCCard(props) {
 	const handleCompareDocument = (filename) => {
 		setState(dispatch, {compareModalOpen: true, compareFilename: filename});
 	}
+
+	const handleIgnore = (filename) => {
+		setState(dispatch, {ignoredDocs: [...state.ignoredDocs, filename]});
+	}
 	
 	const intelligentFeedbackComponent = () => (
 		<div style={styles.tooltipRow}>
@@ -876,7 +880,8 @@ function GCCard(props) {
 												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
 											},
 											state,
-											handleCompareDocument
+											handleCompareDocument,
+											handleIgnore
 										})}
 									</div>
 								</div>
