@@ -111,13 +111,14 @@ class Reports {
 		const dataContent = data.docs.map(function (doc) {
 
 			const snippets = doc.pageHits ? doc.pageHits.map(function (snip) {
-				const splitReplace = snip.snippet.replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
+				const splitReplace = snip.snippet.toString().replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
+				
 				return {
 					stack: [
 						{ text: ' '},
 						{ text: 'Snippets: ', fontSize:13},
 						{ text: ' ' },
-						{ text: 'Page ' + snip.pageNumber },
+						{ text: 'Page ' + snip.pageNumber ? snip.pageNumber : 'N/A'  },
 						{ text: ' ' },
 						{ text: splitReplace },
 						{ text: ' ' },

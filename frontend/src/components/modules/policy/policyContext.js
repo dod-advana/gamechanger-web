@@ -77,7 +77,6 @@ const initState = {
 	showResponsibilityAssistModal: false,
 	reloadResponsibilityTable: true, // not for a modal
 	assistVoluntary: true,
-	loginModalOpen: false,
 	showSnackbar: false,
 	exportDialogVisible: false,
 	showEsQueryDialog: false,
@@ -286,10 +285,13 @@ function reducer(state, action) {
 				searchSettings: initState.searchSettings,
 			};
 		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
-			return {
+			const newState = {
 				...state,
 				analystToolsSearchSettings: initState.analystToolsSearchSettings
 			};
+			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
+			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
+			return newState
 		case 'RESET_STATE':
 			window.location.href = `#/${state.cloneData.url}`;
 			return {

@@ -182,7 +182,10 @@ GCAccordion.defaultProps = {
 
 GCAccordion.propTypes = {
 	expanded: PropTypes.bool,
-	header: PropTypes.string.isRequired,
+	header: PropTypes.oneOfType([
+		PropTypes.string.isRequired,
+		PropTypes.element.isRequired
+	]), 
 	children: PropTypes.element,
 	backgroundColor: PropTypes.string,
 	itemCount: PropTypes.number,

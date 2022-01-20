@@ -180,6 +180,7 @@
 .gc-document-explorer-result-header-text:visited{
   color: #131E43;
   font-weight: bold;
+  word-break: break-word;
 }
 
 .edit-clone-modal {

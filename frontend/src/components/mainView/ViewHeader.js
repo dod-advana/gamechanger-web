@@ -260,7 +260,9 @@ const ViewHeader = (props) => {
 					</div>
 				</> : <> </>
 			} 
-			<div className={'view-buttons-container'}>
+			<div className={'view-buttons-container'}
+				style={cloneData.clone_name !== 'gamechanger' ? {marginRight: 35} : {}}
+			>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
 						<FormControl variant="outlined" classes={{root:classes.root}}>

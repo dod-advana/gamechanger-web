@@ -787,7 +787,7 @@ describe('SearchUtility', function () {
 			const body = { searchText: 'mission', index: 'gamechanger' };
 			let target = new SearchUtility(tmpOpts);
 			let actual = target.getESpresearchMultiQuery(body);
-			const expected = [{'index':'gamechanger'},{'size':4,'_source':['display_title_s'],'query':{'bool':{'must':[{'wildcard':{'display_title_s.search':{'value':'*mission*','boost':1,'rewrite':'constant_score'}}}],'filter':[{'term':{'is_revoked_b':false}}]}}},{'index':'search_history'},{'size':1,'query':{'prefix':{'search_query':{'value':'mission'}}},'aggs':{'search_query':{'terms':{'field':'search_query','min_doc_count':5},'aggs':{'user':{'terms':{'field':'user_id','size':3}}}}}},{'index':'entities'},{'size':2,'_source':{'includes':['name','aliases','entity_type']},'query':{'prefix':{'name':{'value':'mission'}}}}]
+			const expected = [{'index':'gamechanger'},{'size':4,'_source':['display_title_s'],'query':{'bool':{'must':[{'wildcard':{'display_title_s':{'value':'*mission*','boost':1,'rewrite':'constant_score'}}}],'filter':[{'term':{'is_revoked_b':false}}]}}},{'index':'search_history'},{'size':1,'query':{'prefix':{'search_query':{'value':'mission'}}},'aggs':{'search_query':{'terms':{'field':'search_query','min_doc_count':5},'aggs':{'user':{'terms':{'field':'user_id','size':3}}}}}},{'index':'entities'},{'size':2,'_source':{'includes':['name','aliases','entity_type']},'query':{'prefix':{'name':{'value':'mission'}}}}]
 
 			assert.deepStrictEqual(actual, expected);
 		});
@@ -1521,13 +1521,22 @@ describe('SearchUtility', function () {
 			const parsedQuery = 'artificial intelligence';
 			let target = new SearchUtility(tmpOpts);
 			
-			const actual = target.getDocumentParagraphsByParIDs([0, 1, 2, 3]);
+			const actual = target.getDocumentParagraphsByParIDs(
+				[0, 1, 2, 3],
+				{
+					orgFilters: [ 'Coast Guard' ],
+					typeFilters: [ 'CFR Index' ],
+					dateFilter: [ '2021-12-01T05:00:00.000Z', '2021-12-30T05:00:00.428Z' ],
+					canceledDocs: true
+				}
+			);
 			
-			const expected = {'_source':{'includes':['pagerank_r','kw_doc_score_r']},'stored_fields':['filename','title','page_count','doc_type','doc_num','ref_list','id','summary_30','keyw_5','p_text','type','p_page','display_title_s','display_org_s','display_doc_type_s','is_revoked_b','access_timestamp_dt','publication_date_dt','crawler_used_s','topics_s'],'query':{'bool':{'should':[{'nested':{'path':'paragraphs','inner_hits':{'_source':true,'highlight':{'fields':{'paragraphs.filename.search':{'number_of_fragments':0},'paragraphs.par_raw_text_t':{'fragment_size':200,'number_of_fragments':1}},'fragmenter':'span'}},'query':{'bool':{'must':[{'terms':{'paragraphs.id':[0,1,2,3]}}]}}}}]}}};
+			const expected = {'_source':{'includes':['pagerank_r','kw_doc_score_r']},'stored_fields':['filename','title','page_count','doc_type','doc_num','ref_list','id','summary_30','keyw_5','p_text','type','p_page','display_title_s','display_org_s','display_doc_type_s','is_revoked_b','access_timestamp_dt','publication_date_dt','crawler_used_s','topics_s'],'query':{'bool':{"filter": [{"terms": {"display_org_s": ["Coast Guard",],},},{"terms": {"display_doc_type_s": ["CFR Index",],},},],"must":[],'should':[{'nested':{'path':'paragraphs','inner_hits':{'_source':true,'highlight':{'fields':{'paragraphs.filename.search':{'number_of_fragments':0},'paragraphs.par_raw_text_t':{'fragment_size':200,'number_of_fragments':1}},'fragmenter':'span'}},'query':{'bool':{'must':[{'terms':{'paragraphs.id':[0,1,2,3]}}]}}}}]}}};
 			
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
+
 	describe('#highlightKeywords', () => {
 		it('it should return a list of highlighted keys given a list of words and one to be highlighted', () => {
 			const tmpOpts = {

@@ -383,7 +383,7 @@ const CDOCardHandler = {
 
 			type = `Author: ${type}`;
 
-			const orgColor = '#9BB1C8';
+			const orgColor = '#4B5777';
 
 			return (
 				<>
@@ -425,7 +425,6 @@ const CDOCardHandler = {
 									minWidth: 100,
 									border: '1px solid rgb(189, 189, 189)',
 									borderTop: 0,
-									overflow: 'scroll',
 								}}
 							>
 								{renderHighlights(
@@ -439,12 +438,13 @@ const CDOCardHandler = {
 								style={{
 									border: '1px solid rgb(189, 189, 189)',
 									borderLeft: 0,
-									maxWidth: '72%'
+									maxWidth: props?.state?.listView ? '100%' : '72%',
+									width: '100%'
 								}}
 							>
 								<blockquote
 									className="searchdemo-blockquote"
-									style={{height: '100%', overflow: 'scroll', wordWrap: 'break-word'}}
+									style={{height: '100%', overflowY: 'scroll', wordWrap: 'break-word'}}
 									dangerouslySetInnerHTML={{
 										__html: sanitizeHtml(highlightText),
 									}}
