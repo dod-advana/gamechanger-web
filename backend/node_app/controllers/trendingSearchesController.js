@@ -158,35 +158,35 @@ class TrendingSearchesController {
 			res.status(500).send(results);
 		}
 	}
-	async getWeeklySearchCount_(req, res) {
-		let userId = 'Unknown';
+	// async getWeeklySearchCount_(req, res) {
+	// 	let userId = 'Unknown';
 
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { trendingLinks=[] } = req.body;
-			const results = await new Promise((resolve, reject) => {
-				const counts = [];
-				trendingLinks.forEach(async ({search}) => {
-					counts.push(this.gcHistory.count({
-						where:{
-							search,
-							run_at: {
-								[Op.gte]: sequelize.literal('NOW() - INTERVAL \'14d\''),
-							}
-						}
-					}));
-				})
-				Promise.all(counts).then(values => {
-					const trendingLinksWithCount = trendingLinks.map((trending,idx) => {return {...trending, count:values[idx]}})
-					resolve(trendingLinksWithCount);
-				}).catch(e=>reject(e));
-			});
-			res.status(200).send(results);
-		} catch (err) {
-			this.logger.error(err, 'RZ18OVI', userId);
-			res.status(500).send(err);
-		}
-	}
+	// 	try {
+	// 		userId = req.get('SSL_CLIENT_S_DN_CN');
+	// 		const { trendingLinks=[] } = req.body;
+	// 		const results = await new Promise((resolve, reject) => {
+	// 			const counts = [];
+	// 			trendingLinks.forEach(async ({search}) => {
+	// 				counts.push(this.gcHistory.count({
+	// 					where:{
+	// 						search,
+	// 						run_at: {
+	// 							[Op.gte]: sequelize.literal('NOW() - INTERVAL \'14d\''),
+	// 						}
+	// 					}
+	// 				}));
+	// 			})
+	// 			Promise.all(counts).then(values => {
+	// 				const trendingLinksWithCount = trendingLinks.map((trending,idx) => {return {...trending, count:values[idx]}})
+	// 				resolve(trendingLinksWithCount);
+	// 			}).catch(e=>reject(e));
+	// 		});
+	// 		res.status(200).send(results);
+	// 	} catch (err) {
+	// 		this.logger.error(err, 'RZ18OVI', userId);
+	// 		res.status(500).send(err);
+	// 	}
+	// }
 }
 
 module.exports.TrendingSearchesController = TrendingSearchesController;
