@@ -1364,7 +1364,38 @@ class SearchUtility {
 		return query
 
 	}
+	getSearchCountQuery(daysBack){
+		const query = 
+		{
+			"size": 1, 
+			"query": {
+			  "range": {
+				"run_time": {
+				  "gte": `now-${daysBack}d/d`,
+				  "lt": "now/d"
+				}
+			  }
+			},
+			"aggs": {
+			  "searchTerms": {
+				"terms": {
+				  "field": "search_query",
+				  "size": 1000
+				},
+				"aggs": {
+					"user":{
+						"terms":{
+							"field": "user_id",
+							"size": 2							
+						}
 
+					}
+				}
+			  }
+			}
+		  }
+		  return query;
+	}
 	async getSearchCount(daysBack, userId, esClientName='gamechanger', maxSearches=10){
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
@@ -1372,35 +1403,7 @@ class SearchUtility {
 		let searches = []
 		try {
 
-			const query = 
-			{
-				"size": 1, 
-				"query": {
-				  "range": {
-					"run_time": {
-					  "gte": `now-${daysBack}d/d`,
-					  "lt": "now/d"
-					}
-				  }
-				},
-				"aggs": {
-				  "searchTerms": {
-					"terms": {
-					  "field": "search_query",
-					  "size": 1000
-					},
-					"aggs": {
-						"user":{
-							"terms":{
-								"field": "user_id",
-								"size": 2							
-							}
-
-						}
-					}
-				  }
-				}
-			  }
+			const query = this.getSearchCountQuery(daysBack)
 		
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
 			let aggs = results.body.aggregations.searchTerms.buckets;
