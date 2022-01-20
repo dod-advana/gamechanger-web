@@ -150,12 +150,10 @@ class TrendingSearchesController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			console.log("hello")
-			let results = await this.searchUtility.getSearchCount()
-			console.log(results)
+			let results = await this.searchUtility.getSearchCount(userId=userId)
 			res.status(200).send(results);
 		} catch (err) {
-			this.logger.error(err, 'RZ18OVI', "unknown");
+			this.logger.error(err, 'RZ18OVI', userId);
 			res.status(500).send(err);
 		}
 	}

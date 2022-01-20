@@ -336,8 +336,6 @@ const PolicyMainViewHandler = {
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage =
-			localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
 		if (prevSearchText) {
 			if (!resetSettingsSwitch) {
 				dispatch({ type: 'RESET_SEARCH_SETTINGS' });
@@ -355,10 +353,8 @@ const PolicyMainViewHandler = {
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
 		let trendingLinks = [];
-		console.log(trending)
 
 		if (trending) {
-			console.log(trending)
 			trending.data.forEach((search) => {
 				if (search.search) {
 					trendingLinks.push({
