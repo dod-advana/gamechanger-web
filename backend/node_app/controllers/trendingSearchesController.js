@@ -1,6 +1,7 @@
 const GC_HISTORY = require('../models').gc_history;
 const GC_TRENDING_BLACKLIST = require('../models').gc_trending_blacklist;
 const LOGGER = require('../lib/logger');
+const SearchUtility = require('../utils/searchUtility');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
 
@@ -10,18 +11,23 @@ class TrendingSearchesController {
 		const {
 			logger = LOGGER,
 			gcHistory = GC_HISTORY,
-			gcTrendingBlacklist = GC_TRENDING_BLACKLIST
+			gcTrendingBlacklist = GC_TRENDING_BLACKLIST,
+			searchUtility = new SearchUtility(opts),
+
+
 		} = opts;
 
 		this.logger = logger;
 		this.gcHistory = gcHistory;
 		this.gcTrendingBlacklist = gcTrendingBlacklist;
+		this.searchUtility = searchUtility;
 
 		this.trendingSearchesPOST = this.trendingSearchesPOST.bind(this);
 		this.getTrendingBlacklist = this.getTrendingBlacklist.bind(this);
 		this.setTrendingBlacklist = this.setTrendingBlacklist.bind(this);
 		this.deleteTrendingBlacklist = this.deleteTrendingBlacklist.bind(this);
 		this.getWeeklySearchCount = this.getWeeklySearchCount.bind(this);
+		
 	}
 
 	async trendingSearchesPOST(req, res) {
@@ -38,6 +44,7 @@ class TrendingSearchesController {
 			let exclusionSql = {search: {$and: [
 				{$notLike: '%artificial intelligence%'},
 				{$notLike: '%pizza%'},
+				{$notLike: 'pizza'},
 				{$notLike: '%cyber%'},
 				{$notLike: '%military intelligence program%'},
 				{$notLike: '%"artificial intelligence" and president%'},
@@ -138,13 +145,26 @@ class TrendingSearchesController {
 			return err;
 		}
 	}
-
 	async getWeeklySearchCount(req, res) {
 		let userId = 'Unknown';
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			
+			console.log("hello")
+			let results = await this.searchUtility.getSearchCount()
+			console.log(results)
+			res.status(200).send(results);
+		} catch (err) {
+			this.logger.error(err, 'RZ18OVI', "unknown");
+			res.status(500).send(err);
+		}
+	}
+	async getWeeklySearchCount_(req, res) {
+		let userId = 'Unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			console.log("hello")
 			const { trendingLinks=[] } = req.body;
 			const results = await new Promise((resolve, reject) => {
 				const counts = [];
@@ -153,17 +173,18 @@ class TrendingSearchesController {
 						where:{
 							search,
 							run_at: {
-								[Op.gte]: sequelize.literal('NOW() - INTERVAL \'7d\''),
+								[Op.gte]: sequelize.literal('NOW() - INTERVAL \'14d\''),
 							}
 						}
 					}));
 				})
+				console.log(trendingLinks)
 				Promise.all(counts).then(values => {
 					const trendingLinksWithCount = trendingLinks.map((trending,idx) => {return {...trending, count:values[idx]}})
 					resolve(trendingLinksWithCount);
 				}).catch(e=>reject(e));
 			});
-			
+			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, 'RZ18OVI', userId);

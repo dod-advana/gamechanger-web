@@ -54,6 +54,7 @@ class SearchUtility {
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
+		this.getSearchCount = this.getSearchCount.bind(this)
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1364,6 +1365,70 @@ class SearchUtility {
 
 	}
 
+	async getSearchCount(daysBack=7, maxSearches=10, esClientName='gamechanger', userId= "unknown"){
+		// need to caps all search text for ID and Title since it's stored like that in ES
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
+		let searchCounts = []
+		let searches = []
+		try {
+
+			const query = 
+			{
+				"size": 1, 
+				"query": {
+				  "range": {
+					"run_time": {
+					  "gte": `now-${daysBack}d/d`,
+					  "lt": "now/d"
+					}
+				  }
+				},
+				"aggs": {
+				  "searchTerms": {
+					"terms": {
+					  "field": "search_query",
+					  "size": 5000
+					},
+					"aggs": {
+						"user":{
+							"terms":{
+								"field": "user_id",
+								"size": 2							
+							}
+
+						}
+					}
+				  }
+				}
+			  }
+		
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			console.log(results)
+			let aggs = results.body.aggregations.searchTerms.buckets;
+			let maxCount = 0;
+			if (aggs.length > 0) {
+				aggs.forEach(term => {
+					let searchCount = {}
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					searchCount['search'] = word;
+					searchCount['count'] = term.doc_count;
+					if (term.user.buckets.length > 1){
+						word = word.replace(/\s{2,}/g," ");
+						if (!searches.includes(word) && maxCount < maxSearches){
+							searchCounts.push(searchCount)
+							searches.push(word)
+							maxCount += 1;
+						}
+					}
+				});
+			}
+			return searchCounts;
+		} catch (err) {
+			this.logger.error(err.message, 'ALS01AZ', userId);
+		}
+
+		return searchCounts
+	}
 	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 
