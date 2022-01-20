@@ -25,6 +25,8 @@ const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 export default (props) => {
 	// Set state variables
 	const [s3List, setS3List] = useState([]);
+	const [s3DataList, setS3DataList] = useState([]);
+
 	const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
 
 	// flags that parameters have been changed and on
@@ -32,7 +34,7 @@ export default (props) => {
 	const [downloading, setDownloading] = useState(false);
 
 	/**
-	 * Get all the tar files in s3 with their upload time.
+	 * Get all the model tar files in s3 with their upload time.
 	 * @method getS3List
 	 */
 	const getS3List = async () => {
@@ -56,15 +58,42 @@ export default (props) => {
 			throw e;
 		}
 	};
+	
+	/**
+	 * Get all the tar data files in s3 with their upload time.
+	 * @method getS3DataList
+	 */
+	 const getS3DataList = async () => {
+		try {
+			// set transformerList
+			const slist = await gameChangerAPI.getS3DataList();
+			const setList = [];
+			// slist is an array of arrays of length 2.
+			// First is the name of the tar file,
+			// the second is the time it was uploaded to s3
+			for (const s3 of slist.data) {
+				setList.push({
+					file: s3[0],
+					upload: s3[1],
+				});
+			}
+			setS3DataList(setList);
+			props.updateLogs('Successfully queried s3 data', 0);
+		} catch (e) {
+			props.updateLogs('Error querying s3 data: ' + e.toString(), 2);
+			throw e;
+		}
+	};
 
 	/**
 	 * Pass a file from s3 to download into the ml-api
 	 * @method downloadS3File
 	 */
-	const  downloadS3File = async (row) => {
+	const  downloadS3File = async (row,type) => {
 
 		await gameChangerAPI.downloadS3File({
-			'file':row.original.file
+			'file':row.original.file,
+			'type':type
 		});
 		props.getProcesses();
 	}
@@ -163,6 +192,7 @@ export default (props) => {
 
 	useEffect(() => {
 		getS3List();
+		getS3DataList();
 		props.getProcesses();
 		// eslint-disable-next-line
 	}, []);
@@ -182,7 +212,26 @@ export default (props) => {
 			Header: 'Download',
 			accessor: '',
 			Cell: (row) => <TableRow><IconButton onClick={() => {
-				downloadS3File(row)
+				downloadS3File(row,'models')
+			}} style={{ color: "white" }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
+		},
+	];
+	const s3DataColumns = [
+		{
+			Header: 'Tar File',
+			accessor: 'file',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Upload Time',
+			accessor: 'upload',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Download',
+			accessor: '',
+			Cell: (row) => <TableRow><IconButton onClick={() => {
+				downloadS3File(row,'ml-data')
 			}} style={{ color: "white" }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
 		},
 	];
@@ -202,6 +251,7 @@ export default (props) => {
 				<GCPrimaryButton
 					onClick={() => {
 						getS3List();
+						getS3DataList();
 					}}
 					style={{ minWidth: 'unset' }}
 				>
@@ -295,6 +345,25 @@ export default (props) => {
 						<div className="info-container">
 							<ReactTable
 								data={s3List}
+								columns={s3Columns}
+								className="striped -highlight"
+								defaultPageSize={5}
+							/>
+						</div>
+					</fieldset>
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block' }}>S3 Data:</div>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<ReactTable
+								data={s3DataList}
 								columns={s3Columns}
 								className="striped -highlight"
 								defaultPageSize={5}

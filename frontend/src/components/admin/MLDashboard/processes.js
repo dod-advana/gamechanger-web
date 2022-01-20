@@ -80,7 +80,9 @@ const allColumns = [
 		id: 'progress',
 		Cell: (row) => (
 			<TableRow>
-				{row.original.progress} of {row.original.total}
+				<ProgressBar
+ 					progress={(100 * row.original.progress) / row.original.total}
+ 				/>
 			</TableRow>
 		),
 	},

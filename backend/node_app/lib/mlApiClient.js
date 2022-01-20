@@ -8,6 +8,7 @@ const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const MLRoutes = {
 	'getCurrentTransformer':`${transformerBaseUrl}/getCurrentTransformer`,
 	'getS3List':`${transformerBaseUrl}/s3?function=models`,
+	'getS3DataList':`${transformerBaseUrl}/s3?function=data`,
 	'downloadS3File':`${transformerBaseUrl}/downloadS3File`,
 	'deleteLocalModel':`${transformerBaseUrl}/deleteLocalModel`,
 	'downloadDependencies':`${transformerBaseUrl}/download`,
@@ -52,6 +53,7 @@ class MLApiClient {
 		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
