@@ -1387,7 +1387,8 @@ const PolicyCardHandler = {
 				item,
 				searchText,
 				state,
-				handleCompareDocument
+				handleCompareDocument,
+				handleIgnore
 			} = props;
 			return (
 				<>
@@ -1452,7 +1453,7 @@ const PolicyCardHandler = {
 							<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
 								<GCButton
 									id={'ignore'}
-									onClick={() => { console.log('Ignored') }}
+									onClick={() => { handleIgnore(item.filename) }}
 									isSecondaryBtn={true}
 									style={{height: 36}}
 								>

@@ -3,7 +3,8 @@ import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography} from '@material-ui/core';
+import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography, Collapse} from '@material-ui/core';
+import { TransitionGroup } from 'react-transition-group';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
@@ -334,6 +335,14 @@ const GCDocumentsComparisonTool = (props) => {
 			setCompareDocument(doc);
 		}
 	}, [returnedDocs, state.compareModalOpen, state.compareFilename]);
+
+	useEffect(() => {
+		if(state.ignoredDocs.length){
+			const filteredDocs = viewableDocs.filter(doc => !state.ignoredDocs.includes(doc.filename));
+			setViewableDocs(filteredDocs);
+			setState( dispatch, {ignoredDocs: []})
+		}
+	}, [state.ignoredDocs, viewableDocs, dispatch])
 	
 	const measuredRef = useCallback(
 		(node) => {
@@ -385,23 +394,27 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const buildCards = (docs) => {
-		return _.map(docs, (item, idx) => {
-			item.type = 'document';
-			item.isCompare = true;
-			item.dataToQuickCompareTo = paragraphs;
-			item.pageHits = [];
-			return (
-				<Card key={idx}
-					item={item}
-					idx={idx}
-					state={{
-						...state,
-						selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false
-					}}
-					dispatch={dispatch}
-				/>
-			);
-		});
+		return <TransitionGroup>
+			{_.map(docs, (item, idx) => {
+				item.type = 'document';
+				item.isCompare = true;
+				item.dataToQuickCompareTo = paragraphs;
+				item.pageHits = [];
+				return (
+					<Collapse key={item.filename} timeout={1000}>
+						<Card key={idx}
+							item={item}
+							idx={idx}
+							state={{
+								...state,
+								selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false
+							}}
+							dispatch={dispatch}
+						/>
+					</Collapse>
+				);
+			})}
+		</TransitionGroup>
 	}
 	
 	return (
