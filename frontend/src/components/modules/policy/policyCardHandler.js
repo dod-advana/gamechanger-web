@@ -1805,7 +1805,7 @@ const PolicyCardHandler = {
 								);
 							}}
 						>
-							Open
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton
@@ -2055,7 +2055,7 @@ const PolicyCardHandler = {
 								);
 							}}
 						>
-							Open
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton

@@ -4,7 +4,6 @@ import { Collapse } from 'react-collapse';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
-import grey from '@material-ui/core/colors/grey';
 import SimpleTable from '../common/SimpleTable';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
@@ -15,38 +14,16 @@ import {
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
 } from '../../utils/gamechangerUtils';
-
-import Pagination from 'react-js-pagination';
 import { trackEvent } from '../telemetry/Matomo';
-// import GamechangerPdfViewer from '../documentViewer/PDFViewer'
 import PDFHighlighter from './PDFHighlighter';
 import GCButton from '../common/GCButton';
 import UOTAlert from '../common/GCAlert';
 import { styles as adminStyles} from '../../components/admin/util/GCAdminStyles'
 
 const gameChangerAPI = new GameChangerAPI();
-const grey800 = grey[800];
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
-const styles = {
-	iframeHeader: {
-		backgroundImage: 'linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95))',
-		height: 20,
-		width: '100%',
-		color: 'white',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		fontFamily: 'Montserrat',
-		fontWeight: 'bold',
-		fontSize: '1em',
-	},
-	docExplorerPag: {
-		display: 'flex',
-		width: '100%',
-	},
-};
 const useStyles = makeStyles({
 	root: {
 		width: '100%'
@@ -89,10 +66,7 @@ export default function ResponsibilityDocumentExplorer({
 	responsibilityData = {},
 	loading,
 	totalCount,
-	resultsPage,
 	setResultsPage,
-	docsPerPage,
-	onPaginationClick,
 	isClone = true,
 	setReloadResponsibilities,
 	docTitle, 
@@ -101,8 +75,10 @@ export default function ResponsibilityDocumentExplorer({
 	setOrganization,
 	responsibilityText, 
 	setResponsibilityText,
+	filters,
 	setFilters,
-	documentList
+	documentList,
+	infiniteScrollRef
 }) {
 
 	const { cloneData } = state;
@@ -119,7 +95,6 @@ export default function ResponsibilityDocumentExplorer({
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [pdfLoaded, setPdfLoaded] = useState(false);
-	const [viewTogle, setViewTogle] = useState(false);
 	const [isEditingResp, setIsEditingResp] = useState(false);
 	const [isEditingEntity, setIsEditingEntity] = useState(false);
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
@@ -155,17 +130,19 @@ export default function ResponsibilityDocumentExplorer({
 	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
-		if(pdfLoaded){
-			const notFound = document.getElementById('PdfViewer').contentWindow.document.getElementsByClassName('notFound');
-			if(notFound?.length){
-				createAlert(
-					'Text Not Found',
-					'error',
-					'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
-				);
-			}
+		if(!iframeLoading){
+			setTimeout(() => {
+				const notFound = document.getElementById('PdfViewer')?.contentWindow?.document.getElementsByClassName('notFound');
+				if(notFound?.length){
+					createAlert(
+						'Text Not Found',
+						'error',
+						'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
+					);
+				}
+			}, 2000)
 		}
-	},[pdfLoaded])
+	},[iframeLoading])
 
 	useEffect(() => {
 		if (Object.keys(responsibilityData).length) {
@@ -241,18 +218,6 @@ export default function ResponsibilityDocumentExplorer({
 			leftPanelOpen ? 'Close' : 'Open'
 		);
 		setLeftPanelOpen(!leftPanelOpen);
-	}
-
-	// This toggles whether the Document Header texts are open or not by setting collapseKeys
-	function handleViewToggle() {
-		if (collapseKeys) {
-			let collapse = Object.assign({}, collapseKeys);
-			for (let key in collapse) {
-				collapse[key] = !viewTogle;
-			}
-			setCollapseKeys(collapse);
-		}
-		setViewTogle(!viewTogle);
 	}
 
 	function handleQuoteLinkClick(e, respKey, entKey, key) {
@@ -418,10 +383,10 @@ export default function ResponsibilityDocumentExplorer({
 					<></>
 				metaData.push({
 					Key: keyMap[key],
-					Value: <>
+					Value: <div style={{wordBreak: 'break-word'}}>
 						{responsibility[key]}
 						{editButtons}
-					</>
+					</div>
 				})
 			}
 		})
@@ -503,79 +468,25 @@ export default function ResponsibilityDocumentExplorer({
 	return (
 		<div
 			className="row"
-			style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
+			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 10,
+					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',
 				}}
+				ref={infiniteScrollRef}
 			>
-				<div
-					className='doc-exp-nav'
-					style={{  
-						color: grey800, 
-						fontWeight: 'bold', 
-						display: 'flex',
-						marginBottom: '10px'
-					}}
-				>
-					<div
-						style={styles.docExplorerPag}
-						className="gcPagination docExplorerPag"
-					>
-						<Pagination
-							activePage={resultsPage}
-							itemsCountPerPage={docsPerPage}
-							totalItemsCount={totalCount}
-							pageRangeDisplayed={3}
-							onChange={(page) => {
-								trackEvent(
-									getTrackingNameForFactory(cloneData.clone_name),
-									'ResponsibilityExplorerInteraction',
-									'Pagination',
-									page
-								);
-								setIframePreviewLink({
-									dataIdx: 0,
-									entityIdx: 0,
-									responsibilityIdx: 0
-								})
-								setCollapseKeys({});
-								onPaginationClick(page);
-							}}
-						/>
-					</div>
-					{totalCount ? (
-						<div>
-							<div 
-								style={{ 
-									display: 'flex',
-									height: 45,
-									width: 45,
-									alignItems: 'center',
-									justifyContent: 'center',
-									fontSize: 18,
-									borderRadius: 4,
-									marginRight: 2  
-								}}
-								className="view-toggle" 
-								onClick={() => handleViewToggle()}
-							>
-								{viewTogle ? '-' : '+'}
-							</div>
-						</div>
-					) : (
-						'No Results'
-					)}
-				</div>
 				<GCAccordion
 					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length ? true : false}
-					header={'FILTERS'}
+					header={
+						<span>FILTERS  {filters.length ? <span style={{color: '#ed691d'}}>{`(${filters.length})`}</span> : ''}</span>
+					}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -584,7 +495,15 @@ export default function ResponsibilityDocumentExplorer({
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={docTitle.length ? true : false}
-								header={'DOCUMENT TITLE'}
+								header={
+									<span>
+										DOCUMENT TITLE  {
+											filters.filter(f => f.id === 'documentTitle').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'documentTitle').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
@@ -612,7 +531,15 @@ export default function ResponsibilityDocumentExplorer({
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={organization.length ? true : false}
-								header={'ORGANIZATION'}
+								header={
+									<span>
+										ORGANIZATION  {
+											filters.filter(f => f.id === 'organizationPersonnel').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'organizationPersonnel').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
@@ -643,7 +570,15 @@ export default function ResponsibilityDocumentExplorer({
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
 								expanded={Object.keys(responsibilityText).length ? true : false}
-								header={'RESPONSIBILITY TEXT'}
+								header={
+									<span>
+										RESPONSIBILITY TEXT  {
+											filters.filter(f => f.id === 'responsibilityText').length ? 
+												<span style={{color: '#ed691d'}}>{`(${filters.filter(f => f.id === 'responsibilityText').length})`}</span> 
+												: ''
+										}
+									</span>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
@@ -660,6 +595,11 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 							<GCButton 
 								onClick={() => {
+									setIframePreviewLink({
+										dataIdx: 0,
+										entityIdx: 0,
+										responsibilityIdx: 0
+									})
 									setResponsibilityText({});
 									setOrganization([]);
 									setDocTitle([]);
@@ -675,6 +615,11 @@ export default function ResponsibilityDocumentExplorer({
 							</GCButton>
 							<GCButton 
 								onClick={() => {
+									setIframePreviewLink({
+										dataIdx: 0,
+										entityIdx: 0,
+										responsibilityIdx: 0
+									})
 									const filters = [];
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
 									if(organization.length) {
@@ -698,12 +643,7 @@ export default function ResponsibilityDocumentExplorer({
 						</div>
 					</div>
 				</GCAccordion>
-				{loading && (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={'#E9691D'} />
-					</div>
-				)}
-				{!loading &&
+				{Object.keys(responsibilityData).length > 0 &&
 					_.map(Object.keys(responsibilityData), (doc, key) => {
 						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
 						const displayTitle = doc;
@@ -731,7 +671,7 @@ export default function ResponsibilityDocumentExplorer({
 								<Collapse isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
 										const entOpen = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
-										return <>
+										return <div key={entKey}>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
@@ -803,12 +743,17 @@ export default function ResponsibilityDocumentExplorer({
 													}
 												</div>
 											</Collapse>
-										</>
+										</div>
 									})}
 								</Collapse>
 							</div>
 						);
 					})}
+				{loading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={'#E9691D'} />
+					</div>
+				)}
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
@@ -931,14 +876,14 @@ export default function ResponsibilityDocumentExplorer({
 				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
 				style={{
 					display: rightPanelOpen ? 'block' : 'none',
-					paddingLeft: 0,
+					padding: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
 					overflow: 'scroll',
 					zIndex: 100
 				}}
 			>
-				{ !loading &&
+				{ Object.keys(responsibilityData).length > 0 &&
 				<SimpleTable
 					tableClass={'magellan-table'}
 					zoom={0.8}

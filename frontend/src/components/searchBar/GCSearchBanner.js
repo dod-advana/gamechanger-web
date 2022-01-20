@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import styled from 'styled-components';
-import Modal from 'react-modal';
 import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
-import AdvanaStackedLogo from '@dod-advana/advana-platform-ui/dist/images/Stackedlogo.png';
 import TitleBarFactory from '../factories/titleBarFactory';
 import AdvanaMegaMenuPill, {
 	PillButton,
 	TitleText,
 } from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
-import GCButton from '../common/GCButton';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -82,52 +77,6 @@ const styles = {
 	},
 };
 
-const LoginModalHeader = styled.div`
-	display: flex;
-	width: 100%;
-	height: 10%;
-	align-items: center;
-	justify-content: flex-end;
-	font-size: 23px;
-	padding-top: 20px;
-`;
-
-const LoginModalBody = styled.div`
-	display: flex;
-	width: 100%;
-	height: 90%;
-	align-items: center;
-	justify-content: space-between;
-	flex-direction: column;
-	padding: 20px;
-`;
-
-const LoginModalBodyDiv = styled.div`
-	width: ${({ width }) => (width ? width : '100%')};
-	display: flex;
-	justify-content: center;
-`;
-
-const AdvanaLogo = styled.img`
-	width: 40%;
-`;
-
-const CloseButton = styled.div`
-	padding: 6px;
-	background-color: white;
-	border-radius: 5px;
-	color: #8091a5 !important;
-	border: 1px solid #b0b9be;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex: 0.4;
-	position: absolute;
-	right: 15px;
-	top: 15px;
-`;
-
 const SearchBanner = (props) => {
 	const {
 		style,
@@ -135,8 +84,6 @@ const SearchBanner = (props) => {
 		onTitleClick,
 		componentStepNumbers = [],
 		isDataTracker,
-		loginModalOpen,
-		setLoginModal,
 		jupiter,
 		cloneData,
 		detailsType,
@@ -215,7 +162,7 @@ const SearchBanner = (props) => {
 								<PillButton
 									margin={'0 60px 0 5px'}
 									justifyContent="center"
-									onClick={() => setLoginModal(true)}
+									onClick={() => window.location.href = 'https://advana.data.mil/'}
 								>
 									<TitleText>ADVANA</TitleText>
 								</PillButton>
@@ -241,72 +188,8 @@ const SearchBanner = (props) => {
 					cloneData,
 					dispatch,
 					loading,
-				})}
-
-			<Modal
-				style={{
-					content: {
-						inset: '28% 35%',
-						padding: 'none',
-					},
-					overlay: {
-						backgroundColor: 'rgba(0, 0, 0, 0.75)',
-						zIndex: 10000,
-					},
-				}}
-				isOpen={loginModalOpen}
-				onClose={() => setLoginModal(false)}
-			>
-				<LoginModalHeader>
-					<CloseButton onClick={() => setLoginModal(false)}>
-						<CloseIcon fontSize="large" />
-					</CloseButton>
-				</LoginModalHeader>
-				<LoginModalBody>
-					<LoginModalBodyDiv>
-						<TitleText style={{ fontSize: 25 }}>Advana Account</TitleText>
-					</LoginModalBodyDiv>
-					<LoginModalBodyDiv>
-						<AdvanaLogo src={AdvanaStackedLogo} alt="advana" />
-					</LoginModalBodyDiv>
-					<LoginModalBodyDiv width="85%">
-						<a
-							href="https://advana.data.mil/"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								textDecoration: 'none',
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								border: 'none',
-								borderRadius: '5px',
-							}}
-						>
-							<GCButton style={{ flex: 1 }} isSecondaryBtn={true}>
-								Login here
-							</GCButton>
-						</a>
-
-						<a
-							href="https://signup.data.mil/"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								textDecoration: 'none',
-								color: 'white',
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								border: 'none',
-								borderRadius: '5px',
-							}}
-						>
-							<GCButton style={{ flex: 2 }}>Sign up for an account</GCButton>
-						</a>
-					</LoginModalBodyDiv>
-				</LoginModalBody>
-			</Modal>
+				})
+			}
 		</div>
 	);
 };
@@ -317,8 +200,6 @@ SearchBanner.propTypes = {
 	onTitleClick: PropTypes.func,
 	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
 	isDataTracker: PropTypes.bool,
-	loginModalOpen: PropTypes.bool,
-	setLoginModal: PropTypes.func,
 	jupiter: PropTypes.bool,
 	cloneData: PropTypes.object,
 	detailsType: PropTypes.string,

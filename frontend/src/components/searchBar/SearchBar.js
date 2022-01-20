@@ -43,10 +43,6 @@ const SearchBar = (props) => {
 		setState(dispatch, { menuOpen: !state.menuOpen });
 	};
 
-	const setLoginModal = (open) => {
-		setState(dispatch, { loginModalOpen: open });
-	};
-
 	const handleCategoryTabChange = (tabName) => {
 		mainViewHandler.handleCategoryTabChange({ tabName, state, dispatch });
 	};
@@ -67,8 +63,6 @@ const SearchBar = (props) => {
 				cloneData={state.cloneData}
 				expansionDict={state.expansionDict}
 				searchText={state.searchText}
-				loginModalOpen={state.loginModalOpen}
-				setLoginModal={setLoginModal}
 				jupiter={props.jupiter}
 				rawSearchResults={rawSearchResults}
 				selectedCategories={state.selectedCategories}
@@ -106,7 +100,6 @@ SearchBar.propTypes = {
 				publicationDateFilter: PropTypes.arrayOf(PropTypes.string),
 				accessDateFilter: PropTypes.arrayOf(PropTypes.string),
 			}),
-			loginModalOpen: PropTypes.bool,
 			expansionDict: PropTypes.object,
 			selectedCategories: PropTypes.objectOf(PropTypes.bool),
 			activeCategoryTab: PropTypes.string,

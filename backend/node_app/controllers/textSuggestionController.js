@@ -30,11 +30,14 @@ class TextSuggestionController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const index = req.body.index ? req.body.index : this.constants.GAME_CHANGER_OPTS.index;
-			// const data = await this.dataApi.getTextSuggestion({ ...req.body, index }, userId);
+			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
+			let corrected;
+			let presearchTitle;
+			let presearchHistory;
+			let presearchEntity = { presearchTopic: [], presearchOrg: [] }
 
 			if (req.body.searchText.length > 3){
 				const data = await this.textSuggestData({ ...req.body, index }, userId);
-				let corrected;
 				try {
 					corrected = this.getSingleCorrected(data.suggest.suggester);
 				} catch (err) {
@@ -44,31 +47,30 @@ class TextSuggestionController {
 				if (corrected.length > 0){
 					req.body.searchText = corrected;
 				}
-				const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
+				if (suggestionsFlag === true){
+					const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
 				
-				let presearchTitle;
-				try {
-					presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
-				} catch (err) {
-					const { message } = err;
-					this.logger.error(message, 'JBVZKTF', userId);
-				}
-	
-				let presearchHistory;
-				try {
-					presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[1].aggregations.search_query.buckets);
-				} catch (err) {
-					const { message } = err;
-					this.logger.error(message, 'JBVZKTG', userId);
-				}
-				// for future use
-				// let predictions = [];
-				let presearchEntity;
-				try {
-					presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
-				} catch (err) {
-					const { message } = err;
-					this.logger.error(message, 'JBVZKTF', userId);
+					try {
+						presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
+					} catch (err) {
+						const { message } = err;
+						this.logger.error(message, 'JBVZKTF', userId);
+					}
+		
+					try {
+						presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[1].aggregations.search_query.buckets);
+					} catch (err) {
+						const { message } = err;
+						this.logger.error(message, 'JBVZKTG', userId);
+					}
+					// for future use
+					// let predictions = [];
+					try {
+						presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
+					} catch (err) {
+						const { message } = err;
+						this.logger.error(message, 'JBVZKTF', userId)
+				};
 				}
 				return res.send({
 					autocorrect: corrected ? [corrected] : [],

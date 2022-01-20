@@ -5,7 +5,7 @@ import {
 	FormControl,
 	FormGroup,
 	FormControlLabel,
-	Checkbox, Typography,
+	Checkbox,
 } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import {
@@ -18,9 +18,9 @@ import {
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import {trackEvent} from '../../telemetry/Matomo';
-import {gcOrange} from '../../common/gc-colors';
 import {setState} from '../../../utils/sharedFunctions';
 import {getTrackingNameForFactory} from '../../../utils/gamechangerUtils';
+import { gcOrange } from '../../common/gc-colors';
 
 const handleSelectSpecificOrgs = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
@@ -47,19 +47,6 @@ const handleSelectAllOrgs = (state, dispatch) => {
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
-	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(')-1);
-	newSearchSettings.orgFilter = {
-		...newSearchSettings.orgFilter,
-		[orgName]: event.target.checked
-	};
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.orgUpdate = true;
-	setState(dispatch, {analystToolsSearchSettings: newSearchSettings, metricsCounted: false});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
-}
-
-const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	let orgName = event.target.name;
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
@@ -69,7 +56,7 @@ const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 }
 
-const renderSources = (state, dispatch, classes, searchbar = false) => {
+const renderSources = (state, dispatch, classes) => {
 	const { originalOrgFilters, orgFilter } = state.analystToolsSearchSettings;
 	const betterOrgData = {};
 	for(let i=0; i<originalOrgFilters.length; i++) {
@@ -79,123 +66,66 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			{searchbar ? (
-				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
+			<>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name='All sources'
+						value='All sources'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllOrgs(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.analystToolsSearchSettings.allOrgsSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='All sources'
-							value='All sources'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectAllOrgs(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.allOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='All sources'
-								style={styles.filterBox}
-							/>}
-							label='All sources'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-						<FormControlLabel
+							style={styles.filterBox}
+						/>}
+						label='All sources'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+					<FormControlLabel
+						name='Specific source(s)'
+						value='Specific source(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificOrgs(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.analystToolsSearchSettings.specificOrgsSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='Specific source(s)'
-							value='Specific source(s)'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.specificOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='Specific source(s)'
-								style={styles.filterBox}
-							/>}
-							label='Specific source(s)'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.analystToolsSearchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
-							if(index < 10 || state.seeMoreSources){
-								return (
-									<FormControlLabel
-										key={`${org}`}
-										value={`${originalOrgFilters[org]}`}
-										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChangeAdv(event, state, dispatch)} />}
-										label={`${org}`}
-										labelPlacement="end"
-									/>
-								)
-							} else {
-								return null;
-							}
-						})}
-					</FormGroup>
-					{state.analystToolsSearchSettings.specificOrgsSelected &&
-							// eslint-disable-next-line
-							<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
-					}
-				</>
-			) : (
-				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
-							name='All sources'
-							value='All sources'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectAllOrgs(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.allOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='All sources'
-								style={styles.filterBox}
-							/>}
-							label='All sources'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row>
-						<FormControlLabel
-							name='Specific source(s)'
-							value='Specific source(s)'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.specificOrgsSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='Specific source(s)'
-								style={styles.filterBox}
-							/>}
-							label='Specific source(s)'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.analystToolsSearchSettings.specificOrgsSelected && Object.keys(betterOrgData).map(org => {
+							style={styles.filterBox}
+						/>}
+						label='Specific source(s)'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+					{state.analystToolsSearchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
+						if(index < 10 || state.seeMoreSources){
 							return (
 								<FormControlLabel
-									disabled={!betterOrgData[org] && !state.analystToolsSearchSettings.orgFilter[org]}
-									key={`${org} (${betterOrgData[org]})`}
-									value={`${org} (${betterOrgData[org]})`}
+									key={`${org}`}
+									value={`${originalOrgFilters[org]}`}
 									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org} (${betterOrgData[org]})`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
-									label={`${org} (${betterOrgData[org]})`}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
+									label={`${org}`}
 									labelPlacement="end"
 								/>
 							)
-						})}
-					</FormGroup>
-				</>)}
+						} else {
+							return null;
+						}
+					})}
+				</FormGroup>
+				{state.analystToolsSearchSettings.specificOrgsSelected &&
+						// eslint-disable-next-line
+						<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
+				}
+			</>
 		</FormControl>
 	);
 }
@@ -245,7 +175,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 }
 
 
-const renderTypes = (state, dispatch, classes, searchbar = false) => {
+const renderTypes = (state, dispatch, classes) => {
 	const { originalTypeFilters, typeFilter } = state.analystToolsSearchSettings;
 	const betterTypeData = {};
 	for(let i=0; i<originalTypeFilters.length; i++) {
@@ -254,124 +184,66 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			{searchbar ? (
-				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
+			<>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name='All types'
+						value='All types'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectAllTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.analystToolsSearchSettings.allTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='All types'
-							value='All types'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectAllTypes(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.allTypesSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='All types'
-								style={styles.filterBox}
-							/>}
-							label='All types'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-						<FormControlLabel
+							style={styles.filterBox}
+						/>}
+						label='All types'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+					<FormControlLabel
+						name='Specific type(s)'
+						value='Specific type(s)'
+						classes={{ label: classes.titleText }}
+						control={<Checkbox
+							classes={{ root: classes.filterBox }}
+							onClick={() => handleSelectSpecificTypes(state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={state.analystToolsSearchSettings.specificTypesSelected}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='Specific type(s)'
-							value='Specific type(s)'
-							classes={{ label: classes.titleText }}
-							control={<Checkbox
-								classes={{ root: classes.filterBox }}
-								onClick={() => handleSelectSpecificTypes(state, dispatch)}
-								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								checked={state.analystToolsSearchSettings.specificTypesSelected}
-								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name='Specific type(s)'
-								style={styles.filterBox}
-							/>}
-							label='Specific type(s)'
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.analystToolsSearchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
-							if(index < 10 || state.seeMoreTypes){
-								return (
-									<FormControlLabel
-										key={`${type}`}
-										value={`${type}`}
-										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.analystToolsSearchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
-										label={`${type}`}
-										labelPlacement="end"
-									/>
-								)
-							} else {
-								return null;
-							}
-						})}
-					</FormGroup>
-					{state.analystToolsSearchSettings.specificTypesSelected &&
-					// eslint-disable-next-line
-					<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
-					}
-				</>
-			) 
-				: (
-					<>
-						<FormGroup row style={{ marginBottom: '10px' }}>
-							<FormControlLabel
-								name='All types'
-								value='All types'
-								classes={{ label: classes.titleText }}
-								control={<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllTypes(state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.analystToolsSearchSettings.allTypesSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name='All types'
-									style={styles.filterBox}
-								/>}
-								label='All types'
-								labelPlacement="end"
-								style={styles.titleText}
-							/>
-						</FormGroup>
-						<FormGroup row>
-							<FormControlLabel
-								name='Specific type(s)'
-								value='Specific type(s)'
-								classes={{ label: classes.titleText }}
-								control={<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectSpecificTypes(state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.analystToolsSearchSettings.specificTypesSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name='Specific type(s)'
-									style={styles.filterBox}
-								/>}
-								label='Specific type(s)'
-								labelPlacement="end"
-								style={styles.titleText}
-							/>
-						</FormGroup>
-						<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-							{state.analystToolsSearchSettings.specificTypesSelected && Object.keys(betterTypeData).map(type => {
-								return (
-									<FormControlLabel
-										disabled={!betterTypeData[type] && !state.analystToolsSearchSettings.typeFilter[type]}
-										key={`${type} (${betterTypeData[type]})`}
-										value={`${type} (${betterTypeData[type]})`}
-										classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-										control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type} (${betterTypeData[type]})`} checked={state.analystToolsSearchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)} />}
-										label={`${type} (${betterTypeData[type]})`}
-										labelPlacement="end"
-									/>
-								)
-							})}
-						</FormGroup>
-					</>)}
+							style={styles.filterBox}
+						/>}
+						label='Specific type(s)'
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
+				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+					{state.analystToolsSearchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+						if(index < 10 || state.seeMoreTypes){
+							return (
+								<FormControlLabel
+									key={`${type}`}
+									value={`${type}`}
+									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.analystToolsSearchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
+									label={`${type}`}
+									labelPlacement="end"
+								/>
+							)
+						} else {
+							return null;
+						}
+					})}
+				</FormGroup>
+				{state.analystToolsSearchSettings.specificTypesSelected &&
+				// eslint-disable-next-line
+				<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
+				}
+			</>
 		</FormControl>
 	);
 }
@@ -585,10 +457,6 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 }
 
-const resetAdvancedSettings = (dispatch) => {
-	dispatch({type: 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS'});
-}
-
 const PolicyAnalyticsToolsHandler = {
 	getSideBarItems(props) {
 		
@@ -596,93 +464,57 @@ const PolicyAnalyticsToolsHandler = {
 			state,
 			dispatch,
 			classes,
-			sideFilterOverlayDimension
 		} = props;
+
+		const { analystToolsSearchSettings } = state;
+
+		const sourceCount = analystToolsSearchSettings.specificOrgsSelected && 
+			Object.keys(analystToolsSearchSettings.orgFilter).filter(org => analystToolsSearchSettings.orgFilter[org]).length;
+		const typeCount = analystToolsSearchSettings.specificTypesSelected && 
+			Object.keys(analystToolsSearchSettings.typeFilter).filter(type => analystToolsSearchSettings.typeFilter[type]).length;
+		const dateActive = analystToolsSearchSettings?.publicationDateFilter[0] && analystToolsSearchSettings?.publicationDateFilter[1];
+		const statusActive = analystToolsSearchSettings.includeRevoked;
 		
 		return (
 			<>
 				<div>
-					<div className={'coming-soon'} style={{
-						width: sideFilterOverlayDimension.width,
-						height: 210,
-						position: 'absolute',
-						backgroundColor: 'rgba(0,0,0,0.3)',
-						zIndex: 99,
-						border: `2px solid ${'#B6C6D8'} !important`,
-						borderRadius: 6
-					}}>
-						<Typography className={'coming-soon-text'} style={{
-							color: 'red',
-							textAlignLast: 'center',
-							marginTop: 90,
-							fontFamily: 'Montserrat',
-							fontWeight: 'bold'
-						}}>COMING SOON</Typography>
+					<div style={{ marginBottom: 20 }}>
+						Apply filters to your search
 					</div>
+					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.specificOrgsSelected} header={'SOURCE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={analystToolsSearchSettings.specificOrgsSelected} header={<>SOURCE  <span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderSources(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.specificTypesSelected} header={'TYPE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={analystToolsSearchSettings.specificTypesSelected} header={<>TYPE  <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderTypes(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={!state.analystToolsSearchSettings.publicationDateAllTime} header={'PUBLICATION DATE'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={!analystToolsSearchSettings.publicationDateAllTime} header={<>PUBLICATION DATE  <span style={styles.filterCount}>{dateActive ? '(1)' : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderDates(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
-						<GCAccordion expanded={state.analystToolsSearchSettings.includeRevoked} header={'STATUS'} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
+						<GCAccordion expanded={statusActive} header={<>STATUS  <span style={styles.filterCount}>{statusActive ? '(1)' : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
 							{ renderStatus(state, dispatch, classes) }
 						</GCAccordion>
 					</div>
 				</div>
-				
-				<button
-					type="button"
-					style={{ border: 'none', backgroundColor: gcOrange, padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5, marginBottom: 10 }}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runDocumentComparisonSearch: true });
-					}}
-				>
-					<span style={{
-						fontFamily: 'Montserrat',
-						fontWeight: 600,
-						width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px', color: '#ffffff'
-					}}>
-						Submit
-					</span>
-				</button>
-				
-				{/*<button*/}
-				{/*	type="button"*/}
-				{/*	style={{ border: 'none', backgroundColor: '#B0BAC5', padding: '0 15px', display: 'flex', height: 50, alignItems: 'center', borderRadius: 5 }}*/}
-				{/*	onClick={() => {*/}
-				{/*		resetAdvancedSettings(dispatch);*/}
-				{/*		setState(dispatch, { runDocumentComparisonSearch: true });*/}
-				{/*	}}*/}
-				{/*>*/}
-				{/*	<span style={{*/}
-				{/*		fontFamily: 'Montserrat',*/}
-				{/*		fontWeight: 600,*/}
-				{/*		width: '100%', marginTop: '5px', marginBottom: '10px', marginLeft: '-1px'*/}
-				{/*	}}>*/}
-				{/*		Clear Filters*/}
-				{/*	</span>*/}
-				{/*</button>*/}
 			</>
 		);
 	},
 }
 
 const styles = {
+	filterCount: {
+		color: gcOrange
+	},
 	innerContainer: {
 		display: 'flex',
 		height: '100%',

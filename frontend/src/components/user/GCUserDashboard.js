@@ -439,24 +439,15 @@ const GCUserDashboard = (props) => {
 			),
 		},
 		{
-			Header: () => <p>Search Type</p>,
-			filterable: false,
-			accessor: 'searchType',
-			width: 200,
-			Cell: (row) => (
-				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
-				</div>
-			),
-		},
-		{
 			Header: () => <p>Search Date</p>,
 			filterable: false,
 			accessor: 'completion_time',
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
+					<p>
+						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
+					</p>
 				</div>
 			),
 		},
@@ -552,24 +543,15 @@ const GCUserDashboard = (props) => {
 			),
 		},
 		{
-			Header: () => <p>Search Type</p>,
-			filterable: false,
-			accessor: 'download_request_body.searchType',
-			width: 200,
-			Cell: (row) => (
-				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
-				</div>
-			),
-		},
-		{
 			Header: () => <p>Export Date</p>,
 			filterable: false,
 			accessor: 'updatedAt',
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
+					<p>
+						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
+					</p>
 				</div>
 			),
 		},
@@ -920,27 +902,22 @@ const GCUserDashboard = (props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		let searchFields = '';
-		for (const field of search.searchFields) {
-			searchFields += `[${field}] `;
-		}
-
 		const searchSettings = (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Organization Filters:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
 					{search.orgFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Search Filters:</span>{' '}
-					{searchFields}
+					<span style={{ fontWeight: 'bold' }}>Type Filter:</span>{' '}
+					{search.typeFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Publication Date:</span>{' '}
 					{search.pubDate}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Include Cancelled:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
 					{search.isRevoked ? 'true' : 'false'}
 				</div>
 			</>
@@ -1494,7 +1471,6 @@ const GCUserDashboard = (props) => {
 					typeFilterString: download_request_body.typeFilterString,
 					selectedDocuments: download_request_body.selectedDocuments,
 					tiny_url: download_request_body.tiny_url,
-					searchFields: download_request_body.searchFields,
 					edaSearchSettings: download_request_body.edaSearchSettings,
 					sort: download_request_body.sort,
 					order: download_request_body.order,
@@ -1860,7 +1836,7 @@ const GCUserDashboard = (props) => {
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
 								<span style={{ fontWeight: 'bold' }}>
-									Organization Filters:
+									Organization Filter:
 								</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>
@@ -2131,7 +2107,6 @@ const GCUserDashboard = (props) => {
 								isClone = {true}
 								cloneData = {state.cloneData}
 								searchType={state.searchSettings.searchType}
-								searchFields={state.searchSettings.searchFields}
 								edaSearchSettings={state.edaSearchSettings}
 								sort={state.currentSort}
 								order={state.currentOrder}
@@ -2175,6 +2150,37 @@ const GCUserDashboard = (props) => {
 		);
 	}
 
+	const tabList = [];
+	const favoritesTabMeta = {
+		title: 'userFavorites',
+		onClick: () => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch),
+		children: <StyledBadge
+			badgeContent={
+				userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
+			}
+		>
+			<Typography variant="h6" display="inline" title="cardView">
+				FAVORITES
+			</Typography>
+		</StyledBadge>,
+		panel: renderFavorites()
+	}
+	const historyTabMeta = {
+		title: 'userHistory',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">HISTORY</Typography>,
+		panel: renderHistory()
+	}
+	const groupTabMeta = {
+		title: 'userGroups',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>,
+		panel: renderGroups()
+	}
+	if(cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
+	tabList.push(historyTabMeta);
+	
+
 	return (
 		<div style={styles.tabContainer} id='gc-user-dash'>
 			<Tabs
@@ -2184,43 +2190,23 @@ const GCUserDashboard = (props) => {
 			>
 				<div style={styles.tabButtonContainer}>
 					<TabList style={styles.tabsList}>
-						<Tab
-							style={{
-								...styles.tabStyle,
-								...(tabIndex === 0 ? styles.tabSelectedStyle : {}),
-								borderRadius: `5px 0 0 0`,
-							}}
-							title="userFavorites"
-							onClick={() => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch)}
-						>
-							<StyledBadge
-								badgeContent={
-									userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
-								}
-							>
-								<Typography variant="h6" display="inline" title="cardView">
-									FAVORITES
-								</Typography>
-							</StyledBadge>
-						</Tab>
-						<Tab
-							style={{
-								...styles.tabStyle,
-								...(tabIndex === 1 ? styles.tabSelectedStyle : {}),
-								borderRadius: ` 0 5px 0 0`,
-							}}
-							title="userHistory"
-						>
-							<Typography variant="h6" display="inline" title="cardView">
-								HISTORY
-							</Typography>
-						</Tab>
-						<Tab style={{...styles.tabStyle,
-							...(tabIndex=== 2 ? styles.tabSelectedStyle : {}),
-							borderRadius: ` 0 5px 0 0`
-						}} title="userGroups">
-							<Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>
-						</Tab>
+						{tabList.map((tab, index) => {
+							const tl = index === 0 ? '5px' : '0';
+							const tr = index === tabList.length - 1 ? '5px' : '0';
+							return (
+								<Tab
+									style={{
+										...styles.tabStyle,
+										...(tabIndex === index ? styles.tabSelectedStyle : {}),
+										borderRadius: `${tl} ${tr} 0 0`,
+									}}
+									title={tab.title}
+									onClick={tab.onClick}
+								>
+									{tab.children}
+								</Tab>
+							)
+						})}
 					</TabList>
 
 					<div style={styles.spacer} />
@@ -2301,15 +2287,7 @@ const GCUserDashboard = (props) => {
 				</div>
 
 				<div style={styles.panelContainer}>
-					<TabPanel>
-						{ renderFavorites() }
-					</TabPanel>
-					<TabPanel>
-						{ renderHistory() }
-					</TabPanel>
-					<TabPanel>
-						{ renderGroups() }
-					</TabPanel>
+					{tabList.map(tab => <TabPanel> {tab.panel} </TabPanel>)}
 				</div>
 			</Tabs>
 		</div>
