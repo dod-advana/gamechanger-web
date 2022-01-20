@@ -1365,7 +1365,7 @@ class SearchUtility {
 
 	}
 
-	async getSearchCount(daysBack=14, maxSearches=10, esClientName='gamechanger', userId= "unknown"){
+	async getSearchCount(daysBack, userId, esClientName='gamechanger', maxSearches=10){
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let searchCounts = []

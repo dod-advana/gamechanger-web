@@ -440,7 +440,7 @@ const PolicyMainViewHandler = {
 								}
 							>
 								<div
-									style={{ display: 'flex', justifyContent: 'space-between', wordSpacing: 3, letterSpacing: 2}}
+									style={{ display: 'flex', justifyContent: 'space-between', wordSpacing: 3, letterSpacing: 2, marginTop: 2}}
 								>
 									<Typography style={styles.containerText}>									
 										<i

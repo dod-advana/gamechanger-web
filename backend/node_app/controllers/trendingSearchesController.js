@@ -147,10 +147,10 @@ class TrendingSearchesController {
 	}
 	async getWeeklySearchCount(req, res) {
 		let userId = 'Unknown';
-
+		const daysBack = 14;
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			let results = await this.searchUtility.getSearchCount(userId=userId)
+			let results = await this.searchUtility.getSearchCount(daysBack, userId)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, 'RZ18OVI', userId);
