@@ -1,27 +1,94 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
-import testLogo from '../../../images/logos/TestLogo.png';
-import Hermes from '../../../images/logos/Hermes-logo.png';
+import Hermes from '../../../images/logos/Hermes.png';
+import NFR from '../../../images/logos/NFRLogo.png';
+import NGA from '../../../images/logos/NGALogo.png';
+import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
+import Covid19 from '../../../images/logos/Covid19Logo.png';
+
+//import ICONS from '../../../images/logos';
+//src={`../../../images/logos/${cloneData.display_name}.png`}
 
 const DefaultTitleBarHandler = {
 	getTitleBar: (props) => {
 		const { onTitleClick, componentStepNumbers, cloneData } = props;
-		console.log(cloneData.display_name);
-		return (
-			<div
+		console.log(cloneData);
+		if (cloneData.display_name==='NGA'){
+			return (
+				<div
 				className={`tutorial-step-${
 					componentStepNumbers[`${cloneData.display_name} Title`]
 				}`}
 				onClick={onTitleClick}
-			>
+				>	
 				<img
-					src={'cloneData.display_name'}
+					src={NGA}
 					style={styles.title}
 					id={'titleButton'}
 				/>
-				
 			</div>
-		);
+			);
+		} else if(cloneData.display_name==='Hermes'){
+			return (
+				<div
+				className={`tutorial-step-${
+					componentStepNumbers[`${cloneData.display_name} Title`]
+				}`}
+				onClick={onTitleClick}
+				>	
+				<img
+					src={Hermes}
+					style={styles.title}
+					id={'titleButton'}
+				/>
+			</div>
+			);
+		} else if(cloneData.display_name==='NFR'){
+			return (
+				<div
+				className={`tutorial-step-${
+					componentStepNumbers[`${cloneData.display_name} Title`]
+				}`}
+				onClick={onTitleClick}
+				>	
+				<img
+					src={NFR}
+					style={styles.title}
+					id={'titleButton'}
+				/>
+			</div>
+			);
+		} else if(cloneData.display_name==='Space Force'){
+			return (
+				<div
+				className={`tutorial-step-${
+					componentStepNumbers[`${cloneData.display_name} Title`]
+				}`}
+				onClick={onTitleClick}
+				>	
+				<img
+					src={SpaceForce}
+					style={styles.title}
+					id={'titleButton'}
+				/>
+			</div>
+			);
+		} else if(cloneData.display_name==='Covid-19'){
+			return (
+				<div
+				className={`tutorial-step-${
+					componentStepNumbers[`${cloneData.display_name} Title`]
+				}`}
+				onClick={onTitleClick}
+				>	
+				<img
+					src={Covid19}
+					style={styles.title}
+					id={'titleButton'}
+				/>
+			</div>
+			);
+		} 
+		
 	},
 
 	getCategoryTabs(props) {
