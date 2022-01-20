@@ -338,11 +338,25 @@ const GCDocumentsComparisonTool = (props) => {
 
 	useEffect(() => {
 		if(state.ignoredDocs.length){
-			const filteredDocs = viewableDocs.filter(doc => !state.ignoredDocs.includes(doc.filename));
-			setViewableDocs(filteredDocs);
+			const { item, index } = state.ignoredDocs[0];
+			const searchedParagraph = paragraphs[item.paragraphs[index].paragraphIdBeingMatched]
+			const matchedParagraphId = item.paragraphs[index].id;
+
+			gameChangerAPI.compareFeedbackPOST({
+				searchedParagraph,
+				matchedParagraphId,
+				docId: item.id,
+				positiveFeedback: false
+			});
 			setState( dispatch, {ignoredDocs: []})
+
+			const newViewableDocs = viewableDocs;
+			const docIndex = viewableDocs.findIndex((doc) => item.filename === doc.filename);
+			newViewableDocs[docIndex].paragraphs.splice(index, 1);
+			if(!newViewableDocs[docIndex].paragraphs.length) newViewableDocs.splice(docIndex, 1);
+			setViewableDocs(newViewableDocs);
 		}
-	}, [state.ignoredDocs, viewableDocs, dispatch])
+	}, [state.ignoredDocs, viewableDocs, dispatch, paragraphs])
 	
 	const measuredRef = useCallback(
 		(node) => {
@@ -353,17 +367,21 @@ const GCDocumentsComparisonTool = (props) => {
 				});
 
 				if (compareDocument && matchingPars.length > 0) {
-					gameChangerAPI
-						.dataStorageDownloadGET(
-							encode(compareDocument.filename || ''),
-							`"${highlightList[highlightIndex].par_raw_text_t}"`,
-							matchingPars[0].page_num_i + 1,
-							true,
-							state.cloneData
-						)
-						.then((url) => {
-							node.src = url;
-						});
+					console.log('highlightList: ', highlightList)
+					console.log('highlightList[highlightIndex]: ', highlightList[highlightIndex])
+					console.log('highlightIndex: ', highlightIndex)
+					console.log('highlightList[highlightIndex].par_raw_text_t: ', highlightList?.[highlightIndex]?.par_raw_text_t)
+					// gameChangerAPI
+					// 	.dataStorageDownloadGET(
+					// 		encode(compareDocument.filename || ''),
+					// 		`"${highlightList[highlightIndex].par_raw_text_t}"`,
+					// 		matchingPars[0].page_num_i + 1,
+					// 		true,
+					// 		state.cloneData
+					// 	)
+					// 	.then((url) => {
+					// 		node.src = url;
+					// 	});
 				}
 			}
 		},

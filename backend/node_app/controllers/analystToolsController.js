@@ -1,4 +1,5 @@
 const LOGGER = require('../lib/logger');
+const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
@@ -8,17 +9,20 @@ class AnalystToolsController {
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
+			compareFeedbackModel = COMPARE_FEEDBACK,
 			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
 		} = opts;
 
 		this.logger = logger;
+		this.compareFeedbackModel = compareFeedbackModel;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
 
 		this.compareDocument = this.compareDocument.bind(this)
+		this.compareFeedback = this.compareFeedback.bind(this)
 	}
 
 
@@ -64,6 +68,34 @@ class AnalystToolsController {
 			res.status(200).send(returnData);
 		} catch(e) {
 			this.logger.error(e, '60OOE62', userId);
+			res.status(500).send(e);
+		}
+	}
+
+	async compareFeedback(req,res) {
+		let userId = 'webapp_unknown';
+		try{
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { 
+				searchedParagraph,
+				matchedParagraphId,
+				docId,
+				positiveFeedback 
+			} = req.body;
+
+			await this.compareFeedbackModel.findOrCreate({
+				where: { searchedParagraph, matchedParagraphId },
+				defaults: {
+					searchedParagraph,
+					matchedParagraphId,
+					docId,
+					positiveFeedback 
+				}
+			})
+			
+			res.status(200);
+		}catch(e){
+			this.logger.error(e, '60OOE63', userId);
 			res.status(500).send(e);
 		}
 	}
