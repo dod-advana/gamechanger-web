@@ -74,6 +74,7 @@ const endpoints = {
 	trainModel: '/api/gamechanger/admin/trainModel',
 	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
 	getS3List: '/api/gamechanger/admin/getS3List',
+	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
@@ -665,6 +666,11 @@ export default class GameChangerAPI {
 
 	getS3List = async () => {
 		const url = endpoints.getS3List;
+		return axiosGET(this.axios, url);
+	};
+
+	getS3DataList = async () => {
+		const url = endpoints.getS3DataList;
 		return axiosGET(this.axios, url);
 	};
 

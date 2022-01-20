@@ -21,6 +21,7 @@ class TransformerController {
 		this.registry = {
 			'getAPIInformation': this.mlApi.getAPIInformation,
 			'getS3List': this.mlApi.getS3List,
+			'getS3DataList':this.mlApi.getS3DataList,
 			'downloadDependencies': this.mlApi.downloadDependencies,
 			'downloadS3File': this.mlApi.downloadS3File,
 			'deleteLocalModel': this.mlApi.deleteLocalModel,
@@ -39,6 +40,7 @@ class TransformerController {
 		// Get methods
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
 		this.getDataList = this.getData.bind(this,'getDataList')
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Select, MenuItem, Input, Checkbox, Button } from '@material-ui/core';
+import { Select, MenuItem, Input, Checkbox, Typography } from '@material-ui/core';
 import ReactTable from 'react-table';
+import Modal from 'react-modal';
 import { BorderDiv, TableRow } from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
+import GCButton from '../../common/GCButton';
+
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
 import './index.scss';
@@ -49,7 +52,11 @@ export default (props) => {
 		sentence: {},
 		qexp: {}
 	});
-
+	const [deleteModal,setDeleteModal] = useState({
+		show:false,
+		model:'',
+		type:''
+	})
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([])
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
@@ -138,7 +145,11 @@ export default (props) => {
 
 
 	const deleteLocalModels = async (model,type) =>{
-
+		setDeleteModal({
+			show:false,
+			model:'',
+			type:''
+		})
 		await gameChangerAPI.deleteLocalModel({
 			'model':model,
 			'type':type
@@ -185,7 +196,6 @@ export default (props) => {
 
 	const getLocalData = async () => {
 		const dataList =  await gameChangerAPI.getDataList();
-		console.log('data',dataList)
 		setDataTable(dataList.data.dirs)
 	}
 	/**
@@ -376,6 +386,50 @@ export default (props) => {
 
 	return (
 		<div>
+			<Modal
+				isOpen={deleteModal.show}
+				onRequestClose={() => setDeleteModal({
+					show:false,
+					model:'',
+					type:''
+				})}
+				style={styles.esIndexModal}
+			>
+				<div>
+					<Typography>
+							Are you sure you want to delete {deleteModal.model}
+					</Typography>
+				</div>
+				<div
+					style={{
+						position:'absolute',
+						bottom: 0,
+						justifyContent: 'flex-end',
+					}}
+				>
+					<GCButton
+						id={'modelDeleteConfirm'}
+						onClick={() => deleteLocalModels(deleteModal.model,deleteModal.type)}
+						style={{ margin: '25px' }}
+						buttonColor={'#8091A5'}
+					>
+						Yes
+					</GCButton>
+					<GCButton
+						id={'modelModalClose'}
+						onClick={() => setDeleteModal({
+							show:false,
+							model:'',
+							type:''
+						})}
+						style={{ margin: '25px' }}
+						buttonColor={'#8091A5'}
+					>
+						No
+					</GCButton>
+		
+				</div>
+			</Modal>
 			<div
 				style={{
 					display: 'flex',
@@ -472,7 +526,12 @@ export default (props) => {
 											</pre>
 											<GCPrimaryButton
 												onClick={() => {
-													deleteLocalModels(row.original.model,row.original.type);
+													setDeleteModal({
+														show:true,
+														model:row.original.model,
+														type:row.original.type
+													})
+													
 												}}
 												style={{ float: 'left', minWidth: 'unset' }}
 											>
@@ -840,23 +899,21 @@ export default (props) => {
 								columns={dataColumns}
 								className="striped -highlight"
 								defaultPageSize={10}
-								// SubComponent={(row) => {
-								// 	return (
-								// 		<div className="code-container">
-								// 			<pre className="code-block">
-								// 				<code>{row.original.config}</code>
-								// 			</pre>
-								// 			<GCPrimaryButton
-								// 				onClick={() => {
-								// 					deleteLocalModels(row.original.model,row.original.type);
-								// 				}}
-								// 				style={{ float: 'left', minWidth: 'unset' }}
-								// 			>
-								// 				Delete
-								// 			</GCPrimaryButton>
-								// 		</div>
-								// 	);
-								// }}
+								SubComponent={(row) => {
+									return (
+										<div className="code-container" style={{padding:'15px'}}>
+											Files
+											<ul>
+												{row.original.files.map((d) => <li key={d}>{d}</li>)}
+											</ul>
+											Directories
+											<ul>
+												{row.original.subdirectories.map((d) => <li key={d}>{d}</li>)}
+											</ul>
+										</div>
+											
+									);
+								}}
 							/>
 						</div>
 					</fieldset>
