@@ -793,7 +793,7 @@ describe('SearchUtility', function () {
 		});
 
 	});
-	describe('#getWeeklySearchCount', () => {
+	describe('#getSearchCount', () => {
 		it('should get search count query', () => {
 			const tmpOpts = {
 				...opts,
@@ -805,7 +805,8 @@ describe('SearchUtility', function () {
 			const daysBack = 14;
 			let target = new SearchUtility(tmpOpts);
 			let actual = target.getSearchCountQuery(daysBack);
-			const expected = {"aggs": {"searchTerms": {"aggs": {"user": {"terms": {"field": "user_id", "size": 2}}}, "terms": {"field": "search_query", "size": 1000}}}, "query": {"range": {"run_time": {"gte": "now-14d/d", "lt": "now/d"}}}, "size": 1};
+			const expected = {"aggs": {"searchTerms": {"aggs": {"user": {"terms": {"field": "user_id", "size": 2}}}, "terms": {"field": "search_query", "size": 1000}}}, "query": {"bool": {"must": [{"range": {"run_time": {"gte": "now-14d/d", "lt": "now/d"}}}], "must_not": [{"terms": {"search_query": undefined}}]}}, "size": 1}
+
 
 			assert.deepStrictEqual(actual, expected);
 		});

@@ -1393,7 +1393,7 @@ class SearchUtility {
 			  "searchTerms": {
 				"terms": {
 				  "field": "search_query",
-				  "size": 5000
+				  "size": 1000
 				},
 				"aggs": {
 				  "user": {

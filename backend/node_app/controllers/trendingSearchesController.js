@@ -32,6 +32,7 @@ class TrendingSearchesController {
 
 	async trendingSearchesPOST(req, res) {
 		let userId = 'Unknown';
+		let trending = [];
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -39,25 +40,29 @@ class TrendingSearchesController {
 				cloneData = {},
 				daysBack,
 			} = req.body;
-			let trending = [];
 			const blacklist = [];
-			const blacklistItems = await this.gcTrendingBlacklist.findAll({
-				attributes: [
-					sequelize.literal('search_text, added_by, \"updatedAt\"')
-				],
-				order: [
-					[sequelize.literal('\"updatedAt\"'), 'DESC']
-				],
-				raw: true
-			});
-			for (let items of blacklistItems) {
-				blacklist.push(items['search_text'])
-			 }
+			try{
+				const blacklistItems = await this.gcTrendingBlacklist.findAll({
+					attributes: [
+						sequelize.literal('search_text, added_by, \"updatedAt\"')
+					],
+					order: [
+						[sequelize.literal('\"updatedAt\"'), 'DESC']
+					],
+					raw: true
+				});
+				for (let items of blacklistItems) {
+					blacklist.push(items['search_text'])
+				 }
+			} catch (err) {
+				this.logger.error(err, '5ED1092')
+			}
+
 			trending = await this.searchUtility.getSearchCount(daysBack, blacklist, userId)
 			res.status(200).send(trending);
 		} catch (err) {
 			this.logger.error(err, '5ED9CQB', userId);
-			res.status(500).send(err);
+			res.status(500).send(trending);
 			return err;
 		}
 	}
