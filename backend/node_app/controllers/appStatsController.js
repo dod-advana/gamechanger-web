@@ -164,7 +164,8 @@ class AppStatsController {
 				cloneData = {},
 				daysAgo = 3,
 				internalUsers = [],
-				blacklist = []
+				blacklist = [],
+				doGetAvgSearches = true
 			} = req.body;
 
 			const results = {
@@ -180,7 +181,9 @@ class AppStatsController {
 					blacklist: blacklist
 				}
 			};
-			results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(3, connection);
+			if(doGetAvgSearches){
+				results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(3, connection);
+			}
 			results.data.topSearches.data = await this.getTopSearches(cloneData, daysAgo, internalUsers, blacklist, 10, connection);
 			let cleanedTopSearches = [];
 			results.data.topSearches.data.forEach((d) => {
