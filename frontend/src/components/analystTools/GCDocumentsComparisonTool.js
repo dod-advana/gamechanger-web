@@ -332,6 +332,8 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 			
 			setCompareParagraphIndex(tmpCompareIdx);
+			const highlights = doc.paragraphs.filter(p => p.paragraphIdBeingMatched === tmpCompareIdx);
+			setHighlightList(highlights);
 			setCompareDocument(doc);
 		}
 	}, [returnedDocs, state.compareModalOpen, state.compareFilename]);
@@ -367,21 +369,17 @@ const GCDocumentsComparisonTool = (props) => {
 				});
 
 				if (compareDocument && matchingPars.length > 0) {
-					console.log('highlightList: ', highlightList)
-					console.log('highlightList[highlightIndex]: ', highlightList[highlightIndex])
-					console.log('highlightIndex: ', highlightIndex)
-					console.log('highlightList[highlightIndex].par_raw_text_t: ', highlightList?.[highlightIndex]?.par_raw_text_t)
-					// gameChangerAPI
-					// 	.dataStorageDownloadGET(
-					// 		encode(compareDocument.filename || ''),
-					// 		`"${highlightList[highlightIndex].par_raw_text_t}"`,
-					// 		matchingPars[0].page_num_i + 1,
-					// 		true,
-					// 		state.cloneData
-					// 	)
-					// 	.then((url) => {
-					// 		node.src = url;
-					// 	});
+					gameChangerAPI
+						.dataStorageDownloadGET(
+							encode(compareDocument.filename || ''),
+							`"${highlightList[highlightIndex].par_raw_text_t}"`,
+							matchingPars[0].page_num_i + 1,
+							true,
+							state.cloneData
+						)
+						.then((url) => {
+							node.src = url;
+						});
 				}
 			}
 		},
@@ -398,7 +396,7 @@ const GCDocumentsComparisonTool = (props) => {
 		const parCount = getMatchingParsCount(idx);
 		if (parCount > 0){
 			setCompareParagraphIndex(idx);
-			const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === compareParagraphIndex);
+			const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === idx);
 			setHighlightList(highlights);
 			setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
 		}
