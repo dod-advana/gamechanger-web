@@ -301,10 +301,11 @@ const PolicyMainViewHandler = {
 		} catch (e) {
 			// Do nothing
 		}
-		let trendingES = await gameChangerAPI.getWeeklySearchCount();
+		//let trendingES = await gameChangerAPI.getWeeklySearchCount();
+		//let trendingES = await gameChangerAPI.trendingSearchesPOST();
 
 		setState(dispatch, { adminTopics: topics });
-		setState(dispatch, { trending: trendingES });
+		//setState(dispatch, { trending: trendingES });
 
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
