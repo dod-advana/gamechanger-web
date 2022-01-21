@@ -143,15 +143,17 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		if (searchBarHandler) {
-			searchBarHandler.debouncedFetchSearchSuggestions(
-				debouncedSearchTerm,
-				state.cloneData,
-				setAutocorrect,
-				setPresearchTitle,
-				setPresearchTopic,
-				setPresearchOrg,
-				setPredictions
-			);
+			if(debouncedSearchTerm.length > 3){
+				searchBarHandler.debouncedFetchSearchSuggestions(
+					debouncedSearchTerm,
+					state.cloneData,
+					setAutocorrect,
+					setPresearchTitle,
+					setPresearchTopic,
+					setPresearchOrg,
+					setPredictions
+				);
+			}
 		}
 	}, [state.cloneData, debouncedSearchTerm, searchBarHandler]); // run when debounce value changes;
 
