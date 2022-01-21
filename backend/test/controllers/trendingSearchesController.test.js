@@ -27,7 +27,7 @@ describe('TrendingSearchesController', function () {
 				}
 			};
 
-			const mockRes = ['artificial intelligence', 'cyber', 'jaic'];
+			const mockRes = [];
 
 			const gcHistory = {
 				findAll: async (data) => {
@@ -101,7 +101,7 @@ describe('TrendingSearchesController', function () {
 				}
 			};
 
-			const mockRes = ['artificial intelligence', 'cyber', 'jaic'];
+			const mockRes = [];
 
 			const gcHistory = {
 				findAll: async (data) => {
