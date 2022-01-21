@@ -143,7 +143,7 @@ const getTrendingSearches = (cloneData) => {
 					});
 
 					gameChangerAPI
-						.getAppStats({ cloneData, daysAgo, internalUsers, blacklist })
+						.getAppStats({ cloneData, daysAgo, internalUsers, blacklist, doGetAvgSearches: false })
 						.then(({ data }) => {
 							localStorage.setItem(
 								`trending${cloneData.clone_name}Searches`,
