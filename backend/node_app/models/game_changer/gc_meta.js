@@ -64,12 +64,6 @@ module.exports = (sequelize, DataTypes) => {
 			s3_bucket: {
 				type: DataTypes.STRING
 			},
-			data_source_name: {
-				type: DataTypes.STRING
-			},
-			source_agency_name: {
-				type: DataTypes.STRING
-			},
 			metadata_creation_group: {
 				type: DataTypes.STRING
 			},
