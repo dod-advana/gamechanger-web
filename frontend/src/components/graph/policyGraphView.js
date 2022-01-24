@@ -1667,7 +1667,10 @@ export default function PolicyGraphView(props) {
 
 		if (
 			orgTypesSelected.length !== 0 &&
-			(!orgTypesSelected.includes(start.orgType) || !orgTypesSelected.includes(end.orgType))
+			(
+				!orgTypesSelected.includes(start.orgType || start.label) ||
+				!orgTypesSelected.includes(end.orgType || end.label)
+			)
 		) {
 			return getLinkColor(link, HIDDEN_NODE_ALPHA);
 		} else {
