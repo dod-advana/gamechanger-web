@@ -11,6 +11,11 @@ describe('AnalystToolsController', function () {
 				allow_daterange: true
 			}
 		},
+		compareFeedbackModel: {
+			findOrCreate: async () => {
+				return Promise.resolve([{}, true])
+			}
+		},
 		mlApi: {
 			getSentenceTransformerResultsForCompare() {
 				return {'0':{'score':0.9682086706161499,'id':'AFH 36-2235V12.pdf_279','text':'a valid test measures what it s supposed to measure a reliable test yields consistent results'},'1':{'score':0.9666107296943665,'id':'CJCSI 6723.01B.pdf_272','text':'d testable is the requirement testable would an independent testing party be able to determine how if the requirement has been satisfied'},'2':{'score':0.9502548575401306,'id':'AOP 21.pdf_605','text':'for the evaluation of the test data one of two different evaluation methods can be selected'},'3':{'score':0.9430625438690186,'id':'AECTP 400.pdf_4161','text':'a examine the test item and carry out any required performance checks'},'4':{'score':0.847284734249115,'id':'DoDI 1304.12E.pdf_52','text':'the purposes of the do d student testing program are to'},'paragraphIdBeingMatched':0};
@@ -54,6 +59,42 @@ describe('AnalystToolsController', function () {
 
 
 			assert.deepStrictEqual(resMsg, expected);
+			done();
+		});
+
+	});
+
+	describe('#compareFeedback', () => {
+		it('should create a row in the compare_feedback table', async (done) => {
+			const req = {
+				...reqMock,
+				body: {
+					searchedParagraph: 'This is a test',
+					matchedParagraphId: 'test.pdf_0',
+					docId: 'test.pdf',
+					positiveFeedback: false 
+				}
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				}
+			};
+
+			await controller.compareFeedback(req, res);
+			
+			const expected = 200;
+
+			assert.equal(resCode, expected);
 			done();
 		});
 
