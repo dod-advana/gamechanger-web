@@ -1374,28 +1374,38 @@ export default function PolicyGraphView(props) {
 	 * Graph Legend Functions
 	 */
 
+	const handleLegendAllDocsClick = (_, legendKey) => {
+		setOrgTypesSelected(
+			orgTypesSelected.includes(legendKey) ?
+				orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity') :
+				[
+					...orgTypesSelected,
+					...Object.keys(legendData).filter(type =>
+						type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
+					), legendKey
+				]
+		);
+
+		setNodeGroupMenuOpen(false);
+		setNodeGroupMenuTarget(null);
+		setNodeGroupMenuLabel('');
+	};
+
 	const renderNodeLegendItems = () => {
-		return (!runningSearch && Object.keys(legendData).sort().map((key) => {
-			return (
-				<GCTooltip
-					key={key}
-					title={`${docOrgNumbers[key]} node${
-						docOrgNumbers[key] > 1 ? 's' : ''
-					} associated`}
-					arrow
-					enterDelay={30}
-				>
+		return (!runningSearch &&
+			<>
+				{(Object.keys(legendData).includes('Topic') || Object.keys(legendData).includes('Entity')) && // Don't display All Documents filter if filters are only documents
 					<StyledLegendClickable
-						key={legendData[key].name}
+						key={'All Documents'}
 						onClick={(event) =>
-							handleLegendNodeClick(event.target, key)
+							handleLegendAllDocsClick(event.target, 'All Documents')
 						}
 						typesSelected={orgTypesSelected}
-						type={key}
+						type={'All Documents'}
 					>
 						<div
 							style={{
-								backgroundColor: legendData[key].color,
+								backgroundColor: '#6eb8cc',
 								width: '1em',
 								height: '1em',
 								borderRadius: '50%',
@@ -1403,12 +1413,46 @@ export default function PolicyGraphView(props) {
 							}}
 						></div>
 						<div style={{ marginLeft: '2em', width: '80%' }}>
-							{legendData[key].name}
+							All Documents
 						</div>
 					</StyledLegendClickable>
-				</GCTooltip>
-			);
-		}));
+				}
+				{Object.keys(legendData).sort((x, y) => x === 'All Documents' ? -1 : y === 'All Documents' ? 1 : 0).map((key) => {
+					return (
+						<GCTooltip
+							key={key}
+							title={`${docOrgNumbers[key]} node${
+								docOrgNumbers[key] > 1 ? 's' : ''
+							} associated`}
+							arrow
+							enterDelay={30}
+						>
+							<StyledLegendClickable
+								key={legendData[key].name}
+								onClick={(event) =>
+									handleLegendNodeClick(event.target, key)
+								}
+								typesSelected={orgTypesSelected}
+								type={key}
+							>
+								<div
+									style={{
+										backgroundColor: legendData[key].color,
+										width: '1em',
+										height: '1em',
+										borderRadius: '50%',
+										marginTop: '4px',
+									}}
+								></div>
+								<div style={{ marginLeft: '2em', width: '80%' }}>
+									{legendData[key].name}
+								</div>
+							</StyledLegendClickable>
+						</GCTooltip>
+					);
+				})}
+			</>
+		);
 	};
 
 	const handleLegendNodeClick = (target, legendKey) => {
@@ -1419,10 +1463,18 @@ export default function PolicyGraphView(props) {
 			!orgTypesSelected.includes(legendKey)
 		);
 
+		const newOrgTypesSelected = orgTypesSelected.includes(legendKey) ?
+			orgTypesSelected.filter(type => type !== legendKey) :
+			[...orgTypesSelected, legendKey];
+
+		const allOrgTypesExceptTopicAndEntity =
+			Object.keys(legendData).filter(type => type !== 'Topic' && type !== 'Entity');
+		const allCurrentOrgTypesExceptTopicAndEntity =
+			newOrgTypesSelected.filter(type => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents');
+
 		setOrgTypesSelected(
-			orgTypesSelected.includes(legendKey) ?
-				orgTypesSelected.filter(type => type !== legendKey) :
-				[...orgTypesSelected, legendKey]
+			_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort()) ?
+				[...newOrgTypesSelected, 'All Documents'] : newOrgTypesSelected.filter(type => type !== 'All Documents')
 		);
 
 		if (orgTypesSelected.includes(legendKey)) {
