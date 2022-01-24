@@ -1437,7 +1437,7 @@ class SearchUtility {
 			}
 			return searchCounts;
 		} catch (err) {
-			this.logger.error(err.message, 'ALS01AZ', userId);
+			this.logger.error(err.message, 'LAO1TT', userId);
 		}
 
 		return searchCounts
