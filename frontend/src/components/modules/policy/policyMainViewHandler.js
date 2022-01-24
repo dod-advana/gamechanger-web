@@ -18,6 +18,7 @@ import Pagination from 'react-js-pagination';
 import GCTooltip from '../../common/GCToolTip';
 import GetQAResults from '../default/qaResults';
 import {
+	getQueryVariable,
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
@@ -302,7 +303,12 @@ const PolicyMainViewHandler = {
 			// Do nothing
 		}
 
-		setState(dispatch, { adminTopics: topics });
+		setState(
+			dispatch,
+			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
+				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
+				{ adminTopics: topics }
+		);
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
