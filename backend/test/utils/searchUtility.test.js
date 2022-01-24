@@ -1531,7 +1531,7 @@ describe('SearchUtility', function () {
 				}
 			);
 			
-			const expected = {'_source':{'includes':['pagerank_r','kw_doc_score_r']},'stored_fields':['filename','title','page_count','doc_type','doc_num','ref_list','id','summary_30','keyw_5','p_text','type','p_page','display_title_s','display_org_s','display_doc_type_s','is_revoked_b','access_timestamp_dt','publication_date_dt','crawler_used_s','topics_s'],'query':{'bool':{"filter": [{"terms": {"display_org_s": ["Coast Guard",],},},{"terms": {"display_doc_type_s": ["CFR Index",],},},],"must":[],'should':[{'nested':{'path':'paragraphs','inner_hits':{'_source':true,'highlight':{'fields':{'paragraphs.filename.search':{'number_of_fragments':0},'paragraphs.par_raw_text_t':{'fragment_size':200,'number_of_fragments':1}},'fragmenter':'span'}},'query':{'bool':{'must':[{'terms':{'paragraphs.id':[0,1,2,3]}}]}}}}]}}};
+			const expected = {from: 0, size: 100, '_source':{'includes':['pagerank_r','kw_doc_score_r']},'stored_fields':['filename','title','page_count','doc_type','doc_num','ref_list','id','summary_30','keyw_5','p_text','type','p_page','display_title_s','display_org_s','display_doc_type_s','is_revoked_b','access_timestamp_dt','publication_date_dt','crawler_used_s','topics_s'],'query':{'bool':{"filter": [{"terms": {"display_org_s": ["Coast Guard",],},},{"terms": {"display_doc_type_s": ["CFR Index",],},},],"must":[],'should':[{'nested':{'path':'paragraphs','inner_hits':{'_source':true,'highlight':{'fields':{'paragraphs.filename.search':{'number_of_fragments':0},'paragraphs.par_raw_text_t':{'fragment_size':200,'number_of_fragments':1}},'fragmenter':'span'}},'query':{'bool':{'must':[{'terms':{'paragraphs.id':[0,1,2,3]}}]}}}}]}}};
 			
 			assert.deepStrictEqual(actual, expected);
 		});
