@@ -174,21 +174,28 @@ const ViewHeader = (props) => {
 
 	const handleChangeView = (event) => {
 		const {target: { value }} = event;
+		const params = new URLSearchParams(window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, ''));
 		switch(value) {
 			case 'List':
 				setState(dispatch, {currentViewName: 'Card', listView: true});
+				params.delete('view');
 				break;
 			case 'Grid':
 				setState(dispatch, {currentViewName: 'Card', listView: false});
+				params.delete('view');
 				break;
 			case 'Graph':
 				setState(dispatch, {currentViewName: value, runGraphSearch: true});
+				params.set('view', 'graph');
 				break;
 			case 'Explorer':
 			default:
 				setState(dispatch, {currentViewName: value});
+				params.delete('view');
 		}
-		setDropdownValue(value)
+		setDropdownValue(value);
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+		window.history.pushState(null, document.title, linkString);
 	}
 
 	return (
