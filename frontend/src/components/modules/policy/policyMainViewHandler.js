@@ -280,7 +280,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
-		// let pubs = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		try {
@@ -289,9 +288,7 @@ const PolicyMainViewHandler = {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
 				}
-				// else if(obj.key === 'homepage_major_pubs') {
-				// 	pubs = JSON.parse(obj.value);
-				// }
+
 				else if (obj.key === 'homepage_popular_docs_inactive') {
 					pop_pubs_inactive = JSON.parse(obj.value);
 				} else if (obj.key === 'popular_docs') {
@@ -300,14 +297,11 @@ const PolicyMainViewHandler = {
 			});
 		} catch (e) {
 			// Do nothing
+			console.log(e)
 		}
-		//let trendingES = await gameChangerAPI.getWeeklySearchCount();
-		//let trendingES = await gameChangerAPI.trendingSearchesPOST();
 
 		setState(dispatch, { adminTopics: topics });
-		//setState(dispatch, { trending: trendingES });
 
-		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
 	},
