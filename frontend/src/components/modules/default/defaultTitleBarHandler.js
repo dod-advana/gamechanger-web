@@ -1,17 +1,14 @@
 import React from 'react';
-import Hermes from '../../../images/logos/Hermes.png';
+import Hermes from '../../../images/logos/HermesLogo.png';
 import NFR from '../../../images/logos/NFRLogo.png';
 import NGA from '../../../images/logos/NGALogo.png';
 import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
 import Covid19 from '../../../images/logos/Covid19Logo.png';
 
-//import ICONS from '../../../images/logos';
-//src={`../../../images/logos/${cloneData.display_name}.png`}
 
 const DefaultTitleBarHandler = {
 	getTitleBar: (props) => {
 		const { onTitleClick, componentStepNumbers, cloneData } = props;
-		console.log(cloneData);
 		if (cloneData.display_name==='NGA'){
 			return (
 				<div
@@ -124,12 +121,3 @@ const styles = {
 		width: '100%',
 	},
 };
-/*
-<Typography variant="h1" style={styles.wording} display="inline">
-					{cloneData.display_name}
-				</Typography>
-				<Typography variant="h6" style={styles.wording} display="inline">
-					Powered by GAMECHANGER
-				</Typography>(/
-					)
-*/
