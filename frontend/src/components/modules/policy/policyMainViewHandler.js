@@ -190,8 +190,6 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		}));
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 
-		const cd = new Date();
-		console.log('DOWNLOADING PUBS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
 				.thumbnailStorageDownloadPOST(
@@ -210,7 +208,9 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 						}
 					});
 					setState(dispatch, { searchMajorPubs: filteredPubs });
-				}).catch(e => console.log(e));
+				}).catch(e => {
+					//Do nothing
+				});
 		}
 	} catch (e) {
 		//Do nothing
@@ -231,8 +231,6 @@ const handleSources = async (state, dispatch, cancelToken) => {
 			let filename = item.image_link.split('/').pop();
 			return { img_filename: filename };
 		});
-		const cd = new Date();
-		console.log('DOWNLOADING SOURCES: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 		for (let i = 0; i < thumbnailList.length; i++) {
 			gameChangerAPI
 				.thumbnailStorageDownloadPOST(
@@ -259,7 +257,9 @@ const handleSources = async (state, dispatch, cancelToken) => {
 						}
 					});
 					setState(dispatch, { crawlerSources });
-				}).catch(e => console.log(e));
+				}).catch(e => {
+					//Do nothing
+				});
 		}
 	} catch (e) {
 		//Do nothing
