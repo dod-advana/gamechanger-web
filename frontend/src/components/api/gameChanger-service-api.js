@@ -376,14 +376,22 @@ export default class GameChangerAPI {
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData, cancelToken) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 		const url = endpoints.thumbnailStorageDownloadPOST;
+		if(cancelToken){
+			return axiosPOST(
+				this.axios,
+				url,
+				{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
+				{ 
+					timeout: 0,
+					cancelToken: cancelToken?.token ? cancelToken.token : {}
+				}
+			);
+		}
 		return axiosPOST(
 			this.axios,
 			url,
 			{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
-			{ 
-				timeout: 0,
-				cancelToken: cancelToken?.token ? cancelToken.token : {}
-			}
+			{ timeout: 0 }
 		);
 	};
 
