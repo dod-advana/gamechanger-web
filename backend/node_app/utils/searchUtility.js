@@ -54,6 +54,7 @@ class SearchUtility {
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
+		this.getSearchCount = this.getSearchCount.bind(this)
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -372,7 +373,9 @@ class SearchUtility {
 			includeHighlights = true,
 			docIds = {},
 			selectedDocuments,
-			ltr = false
+			ltr = false,
+			paragraphLimit = 5, 
+			hasHighlights = true
 		 }, 
 		 user) {
 
@@ -428,8 +431,8 @@ class SearchUtility {
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
-										size: 5,
-										highlight: {
+										size: paragraphLimit,
+										highlight: hasHighlights ? {
 											fields: {
 												'paragraphs.par_raw_text_t': {
 													fragment_size: 3 * charsPadding,
@@ -446,7 +449,8 @@ class SearchUtility {
 												},
 											},
 											fragmenter: 'span'
-										}
+										} :
+										{}
 									},
 									query: {
 										bool: {
@@ -526,7 +530,7 @@ class SearchUtility {
 						
 					}
 				},
-				highlight: {
+				highlight: hasHighlights ? {
 					require_field_match: false,
 					fields: {
 						'display_title_s.search': {},
@@ -541,7 +545,8 @@ class SearchUtility {
 					type: 'unified',
 					boundary_scanner: 'word'
 
-				}
+				} :
+				{}
 			};
 
 			switch(sort){
@@ -1363,7 +1368,84 @@ class SearchUtility {
 		return query
 
 	}
+	getSearchCountQuery(daysBack, filterWords){
+		const query = 
+		{
+			"size": 1,
+			"query": {
+			  "bool": {
+				"must_not": [
+				  {
+					"terms": {
+					  "search_query": filterWords
+					}
+				  }
+				],
+				"must": [
+				  {
+					"range": {
+					  "run_time": {
+						"gte": `now-${daysBack}d/d`,
+						"lt": "now/d"
+					  }
+					}
+				  }
+				]
+			  }
+			},
+			"aggs": {
+			  "searchTerms": {
+				"terms": {
+				  "field": "search_query",
+				  "size": 1000
+				},
+				"aggs": {
+				  "user": {
+					"terms": {
+					  "field": "user_id",
+					  "size": 2
+					}
+				  }
+				}
+			  }
+			}
+		  }
+		  return query;
+	}
+	async getSearchCount(daysBack, filterWords, userId, esClientName='gamechanger', maxSearches=10){
+		// need to caps all search text for ID and Title since it's stored like that in ES
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
+		let searchCounts = []
+		let searches = []
+		try {
 
+			const query = this.getSearchCountQuery(daysBack, filterWords)
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			let aggs = results.body.aggregations.searchTerms.buckets;
+			let maxCount = 0;
+			if (aggs.length > 0) {
+				aggs.forEach(term => {
+					let searchCount = {}
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					searchCount['search'] = word;
+					searchCount['count'] = term.doc_count;
+					if (term.user.buckets.length > 1){
+						word = word.replace(/\s{2,}/g," ");
+						if (!searches.includes(word) && maxCount < maxSearches){
+							searchCounts.push(searchCount)
+							searches.push(word)
+							maxCount += 1;
+						}
+					}
+				});
+			}
+			return searchCounts;
+		} catch (err) {
+			this.logger.error(err.message, 'LAO1TT', userId);
+		}
+
+		return searchCounts
+	}
 	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 

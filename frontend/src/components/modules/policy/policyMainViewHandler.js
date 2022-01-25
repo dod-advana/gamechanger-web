@@ -18,6 +18,7 @@ import Pagination from 'react-js-pagination';
 import GCTooltip from '../../common/GCToolTip';
 import GetQAResults from '../default/qaResults';
 import {
+	getQueryVariable,
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
@@ -280,7 +281,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
-		// let pubs = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		try {
@@ -289,9 +289,7 @@ const PolicyMainViewHandler = {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
 				}
-				// else if(obj.key === 'homepage_major_pubs') {
-				// 	pubs = JSON.parse(obj.value);
-				// }
+
 				else if (obj.key === 'homepage_popular_docs_inactive') {
 					pop_pubs_inactive = JSON.parse(obj.value);
 				} else if (obj.key === 'popular_docs') {
@@ -300,9 +298,15 @@ const PolicyMainViewHandler = {
 			});
 		} catch (e) {
 			// Do nothing
+			console.log(e)
 		}
 
-		setState(dispatch, { adminTopics: topics });
+		setState(
+			dispatch,
+			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
+				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
+				{ adminTopics: topics }
+		);
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
@@ -329,12 +333,10 @@ const PolicyMainViewHandler = {
 			loading,
 			userData,
 			recentSearches,
+			trending
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage =
-			localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-
 		if (prevSearchText) {
 			if (!resetSettingsSwitch) {
 				dispatch({ type: 'RESET_SEARCH_SETTINGS' });
@@ -352,8 +354,9 @@ const PolicyMainViewHandler = {
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
 		let trendingLinks = [];
-		if (trendingStorage) {
-			JSON.parse(trendingStorage).forEach((search) => {
+
+		if (trending) {
+			trending.data.forEach((search) => {
 				if (search.search) {
 					trendingLinks.push({
 						search: search.search.replaceAll('&#039;', '"'),
@@ -438,21 +441,22 @@ const PolicyMainViewHandler = {
 								}
 							>
 								<div
-									style={{ display: 'flex', justifyContent: 'space-between' }}
+									style={{ display: 'flex', justifyContent: 'space-between', wordSpacing: 3, letterSpacing: 2, marginTop: 8}}
 								>
-									<Typography style={styles.containerText}>{`#${idx + 1} ${
-										search.length < 20
-											? search
-											: search.substring(0, 22) + '...'
-									}`}</Typography>
+									<Typography style={styles.containerText}>									
+										<i
+											className="fa fa-search"
+											style= {{marginRight: 12}}
+											
+										/>
+										{`   ${idx + 1}. ${
+											search.length < 18
+												? search
+												: search.substring(0, 20) + '...'
+										}`}
+									</Typography>
 								</div>
-								<Typography style={styles.subtext}>
-									<i
-										className="fa fa-search"
-										style={{ width: 16, height: 15 }}
-									/>
-									{`${count} searches this week`}
-								</Typography>
+
 							</TrendingSearchContainer>
 						))}
 					</GameChangerThumbnailRow>
