@@ -382,7 +382,7 @@ export default class GameChangerAPI {
 			{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
 			{ 
 				timeout: 0,
-				cancelToken: cancelToken.token ? cancelToken.token : {}
+				cancelToken: cancelToken?.token ? cancelToken.token : {}
 			}
 		);
 	};
