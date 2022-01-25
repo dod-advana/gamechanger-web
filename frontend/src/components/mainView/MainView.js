@@ -39,17 +39,13 @@ const MainView = (props) => {
 
 	useEffect(() => {
 		return function cleanUp(){
-			console.log('running clean up')
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
 		}
 	},[])
 
 	useEffect(() => {
-		console.log('state.runSearch: ', state.runningSearch);
 		if(state.runningSearch && cancelToken) {
-			const cd = new Date();
-			console.log('CANCELING AXIOS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
 		};

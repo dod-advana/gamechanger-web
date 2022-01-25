@@ -123,44 +123,6 @@ const checkForTinyURL = async (location) => {
 	}
 };
 
-const getTrendingSearches = (cloneData) => {
-	const daysAgo = 7;
-	let internalUsers = [];
-	let blacklist = [];
-
-	gameChangerAPI
-		.getInternalUsers()
-		.then(({ data }) => {
-			data.forEach((d) => {
-				internalUsers.push(d.username);
-			});
-
-			gameChangerAPI
-				.getTrendingBlacklist()
-				.then(({ data }) => {
-					data.forEach((d) => {
-						blacklist.push(d.search_text);
-					});
-
-					gameChangerAPI
-						.getAppStats({ cloneData, daysAgo, internalUsers, blacklist, doGetAvgSearches: false })
-						.then(({ data }) => {
-							localStorage.setItem(
-								`trending${cloneData.clone_name}Searches`,
-								JSON.stringify(data.data.topSearches.data)
-							);
-						})
-						.catch((e) => {
-							console.log('error with getting trending: ' + e);
-						});
-				})
-				.catch((e) => console.log('error with getting blacklist: ' + e));
-		})
-		.catch((e) => {
-			console.log('error getting internal users: ' + e);
-		});
-};
-
 const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
 	trackEvent(
 		getTrackingNameForFactory(state.cloneData.clone_name),
