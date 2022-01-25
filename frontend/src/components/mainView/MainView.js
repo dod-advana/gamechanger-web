@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import {
 	getTrackingNameForFactory,
@@ -25,6 +26,8 @@ import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 const gameChangerAPI = new GameChangerAPI();
+let cancelToken = axios.CancelToken.source();
+cancelToken.test = new Date();
 
 const MainView = (props) => {
 	const { context } = props;
@@ -34,6 +37,24 @@ const MainView = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
 	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		return function cleanUp(){
+			console.log('running clean up')
+			cancelToken.cancel('canceled axios with cleanup');
+			cancelToken = axios.CancelToken.source();
+		}
+	},[])
+
+	useEffect(() => {
+		console.log('state.runSearch: ', state.runningSearch);
+		if(state.runningSearch && cancelToken) {
+			const cd = new Date();
+			console.log('CANCELING AXIOS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()} --- ${cancelToken.test.getMilliseconds()}`);
+			cancelToken.cancel('canceled axios request from search run');
+			cancelToken = axios.CancelToken.source();
+		};
+	},[state.runningSearch])
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
@@ -59,6 +80,7 @@ const MainView = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler,
+				cancelToken
 			});
 
 			setState(dispatch, { viewNames });

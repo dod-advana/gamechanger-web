@@ -178,7 +178,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 	);
 };
 
-const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
+const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken) => {
 	let filteredPubs = _.filter(pop_pubs, (item) => {
 		return !_.includes(pop_pubs_inactive, item.id);
 	});
@@ -189,12 +189,15 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 		}));
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 
+		const cd = new Date();
+		console.log('DOWNLOADING PUBS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
 				.thumbnailStorageDownloadPOST(
 					[filteredPubs[i]],
 					'thumbnails',
-					state.cloneData
+					state.cloneData,
+					cancelToken
 				)
 				.then((pngs) => {
 					const buffers = pngs.data;
@@ -206,7 +209,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 						}
 					});
 					setState(dispatch, { searchMajorPubs: filteredPubs });
-				});
+				}).catch(e => console.log(e));
 		}
 	} catch (e) {
 		//Do nothing
@@ -214,7 +217,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
-const handleSources = async (state, dispatch) => {
+const handleSources = async (state, dispatch, cancelToken) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
 		...item,
@@ -227,13 +230,15 @@ const handleSources = async (state, dispatch) => {
 			let filename = item.image_link.split('/').pop();
 			return { img_filename: filename };
 		});
-
+		const cd = new Date();
+		console.log('DOWNLOADING SOURCES: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 		for (let i = 0; i < thumbnailList.length; i++) {
 			gameChangerAPI
 				.thumbnailStorageDownloadPOST(
 					[thumbnailList[i]],
 					folder,
-					state.cloneData
+					state.cloneData,
+					cancelToken
 				)
 				.then((pngs) => {
 					const buffers = pngs.data;
@@ -253,7 +258,7 @@ const handleSources = async (state, dispatch) => {
 						}
 					});
 					setState(dispatch, { crawlerSources });
-				});
+				}).catch(e => console.log(e));
 		}
 	} catch (e) {
 		//Do nothing
@@ -304,8 +309,8 @@ const PolicyMainViewHandler = {
 
 		setState(dispatch, { adminTopics: topics });
 		// handlePubs(pubs, state, dispatch);
-		handleSources(state, dispatch);
-		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
+		handleSources(state, dispatch, props.cancelToken);
+		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {

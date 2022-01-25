@@ -373,15 +373,17 @@ export default class GameChangerAPI {
 		});
 	};
 
-	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
+	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData, cancelToken) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
-		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
 		return axiosPOST(
 			this.axios,
 			url,
 			{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
-			{ timeout: 0 }
+			{ 
+				timeout: 0,
+				cancelToken: cancelToken.token
+			}
 		);
 	};
 
