@@ -27,7 +27,6 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 const gameChangerAPI = new GameChangerAPI();
 let cancelToken = axios.CancelToken.source();
-cancelToken.test = new Date();
 
 const MainView = (props) => {
 	const { context } = props;
@@ -50,7 +49,7 @@ const MainView = (props) => {
 		console.log('state.runSearch: ', state.runningSearch);
 		if(state.runningSearch && cancelToken) {
 			const cd = new Date();
-			console.log('CANCELING AXIOS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()} --- ${cancelToken.test.getMilliseconds()}`);
+			console.log('CANCELING AXIOS: ', `${cd.getMinutes()}.${cd.getSeconds()}.${cd.getMilliseconds()}`);
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
 		};
