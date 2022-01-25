@@ -196,9 +196,14 @@ const DefaultMainViewHandler = {
 		}
 
 		try {
-			getTrendingSearches(state.cloneData);
+			//getTrendingSearches(state.cloneData);
+			const daysBack=14
+			let trendingES = await gameChangerAPI.trendingSearches({daysBack});
+			
+			setState(dispatch, { trending: trendingES});
+
 		} catch (e) {
-			// Do nothing
+			console.log(e)
 		}
 
 		try {
