@@ -24,20 +24,15 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
-//import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
-//import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
-//import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
+import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
+import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
+import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
+import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
-const styles = {
-	wording: {
-		color: 'white',
-		marginRight: 15,
-	},
-};
 
 const getToolTheme = (cloneData) => {
 	let toolStyles = {
@@ -54,11 +49,35 @@ const getToolTheme = (cloneData) => {
 		return {
 			...toolStyles,
 			toolLogo: (
-				<img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />
+				<img src={GamechangerNGALogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'Hermes') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'NFR') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerNFRLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'Space Force') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerSFLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'CDO') {
 		return {
 			...toolStyles,
 			toolLogo: (
