@@ -10,125 +10,101 @@ import CDO from '../../../images/logos/CDOLogo.png';
 const DefaultTitleBarHandler = {
 	getTitleBar: (props) => {
 		const { onTitleClick, componentStepNumbers, cloneData } = props;
-		if (cloneData.display_name==='NGA'){
+		if (cloneData.display_name === 'NGA') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={NGA}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger NGA"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={NGA}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger NGA"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
-		} else if(cloneData.display_name==='Hermes'){
+		} else if (cloneData.display_name === 'Hermes') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={Hermes}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger hermes"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={Hermes}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger hermes"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
-		} else if(cloneData.display_name==='NFR'){
+		} else if (cloneData.display_name === 'NFR') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={NFR}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger NFR"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={NFR}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger NFR"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
-		} else if(cloneData.display_name==='Space Force'){
+		} else if (cloneData.display_name === 'Space Force') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={SpaceForce}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger space force"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={SpaceForce}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger space force"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
-		} else if(cloneData.display_name==='Covid-19'){
+		} else if (cloneData.display_name === 'Covid-19') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={Covid19}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger Covid19"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={Covid19}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger Covid19"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
-		} else if(cloneData.display_name==='CDO'){
+		} else if (cloneData.display_name === 'CDO') {
 			return (
 				<div
-				className={`tutorial-step-${
-					componentStepNumbers[`${cloneData.display_name} Title`]
-				}`}
-				onClick={onTitleClick}
-				>	
-				<img
-					src={CDO}
-					style={styles.title}
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
-					alt="gamechanger CDO"
-					id={'titleButton'}
-					className={`tutorial-step-${
-						componentStepNumbers[`${cloneData.display_name} Title`]
-					}`}
-				/>
-			</div>
+				>
+					<img
+						src={CDO}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger CDO"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
 			);
 		}
 	},
