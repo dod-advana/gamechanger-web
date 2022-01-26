@@ -24,9 +24,9 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
-import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
-import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
-import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
+//import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
+//import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
+//import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -62,7 +62,7 @@ const getToolTheme = (cloneData) => {
 		return {
 			...toolStyles,
 			toolLogo: (
-				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
+				<img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		}
@@ -111,38 +111,33 @@ const DefaultNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-						<GCTooltip
-							title="How-to, features, and tips"
-							placement="right"
-							arrow
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+						<HoverNavItem
+							centered
+							onClick={() => {
+								setState(dispatch, {
+									showTutorial: true,
+									clickedTutorial: true,
+								});
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'SidebarInteraction',
+									'ShowTutorial'
+								);
+							}}
+							toolTheme={toolTheme}
 						>
-							<HoverNavItem
-								centered
-								onClick={() => {
-									setState(dispatch, {
-										showTutorial: true,
-										clickedTutorial: true,
-									});
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										'SidebarInteraction',
-										'ShowTutorial'
-									);
-								}}
-								toolTheme={toolTheme}
+							<StyledBadgeSmall
+								color="secondary"
+								badgeContent=" "
+								invisible={!state.newUser || state.clickedTutorial}
 							>
-								<StyledBadgeSmall
-									color="secondary"
-									badgeContent=" "
-									invisible={!state.newUser || state.clickedTutorial}
-								>
-									<ConstrainedIcon src={AppTutorialsIcon} />
-								</StyledBadgeSmall>
-							</HoverNavItem>
-						</GCTooltip>
-					)}
+								<ConstrainedIcon src={AppTutorialsIcon} />
+							</StyledBadgeSmall>
+						</HoverNavItem>
+					</GCTooltip>
+				)}
 				<GCTooltip title="User Feedback" placement="right" arrow>
 					<HoverNavItem
 						centered
