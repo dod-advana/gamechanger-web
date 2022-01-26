@@ -24,6 +24,9 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
+import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
+import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
+import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -55,6 +58,14 @@ const getToolTheme = (cloneData) => {
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
+	} else if (cloneData.display_name === 'Hermes') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
 	};
 }
 
