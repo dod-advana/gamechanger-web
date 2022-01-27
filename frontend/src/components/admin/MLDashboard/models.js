@@ -59,7 +59,7 @@ export default (props) => {
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
 	const [warmupSteps, setWarmupSteps] = useState(100);
-	const [epochs, setEpochs] = useState(3);
+	const [epochs, setEpochs] = useState(10);
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
