@@ -26,7 +26,10 @@ const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
 const useStyles = makeStyles({
 	root: {
-		width: '100%'
+		width: '100%',
+		'&[class*="MuiAutocomplete-root"] [class*="MuiOutlinedInput-root"]': {
+		  paddingRight: '45px !important'
+		}
 	}
 })
 
@@ -471,6 +474,7 @@ export default function ResponsibilityDocumentExplorer({
 			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
+				id='re-document-col'
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
@@ -521,7 +525,7 @@ export default function ResponsibilityDocumentExplorer({
 									renderInput={(params) => (
 										<TextField
 											{...params}
-											classes={{ root: classes.root }}
+											classes={{ classes }}
 											variant="outlined"
 											label="Document Titles"
 										/>

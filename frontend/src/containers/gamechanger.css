@@ -98,3 +98,11 @@
 #gc-user-dash .row > * { 
     width: auto; 
 }
+
+#re-document-col [class*="MuiAccordionSummary-root"] {
+    height: auto !important;
+}
+
+#re-document-col [class*="MuiAccordion-root"] [class*="MuiAccordionSummary-content"] {
+    margin: 0 !important;
+}
