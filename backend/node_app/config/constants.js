@@ -115,6 +115,7 @@ module.exports = Object.freeze({
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
 		legislation_index: 'gamechanger_legislation',
+		assist_index: 'gamechanger-assist-20220105',
 		history_index: 'search_history',
 		requestTimeout: 60000
 	},
