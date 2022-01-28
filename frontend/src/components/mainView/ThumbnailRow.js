@@ -50,7 +50,7 @@ const GameChangerThumbnailRow = (props) => {
 					overflow: 'auto',
 				}}
 			>
-				<Typography variant="h3" style={{ fontSize: 12, fontWeight: 800 }}>
+				<Typography variant="h3" style={{ fontSize: 18, fontWeight: 800 }}>
 					{title}
 				</Typography>
 			</div>

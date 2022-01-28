@@ -8,9 +8,13 @@ const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const MLRoutes = {
 	'getCurrentTransformer':`${transformerBaseUrl}/getCurrentTransformer`,
 	'getS3List':`${transformerBaseUrl}/s3?function=models`,
-	'downloadDependencies':`${transformerBaseUrl}/getCurrentTransformer`,
+	'getS3DataList':`${transformerBaseUrl}/s3?function=data`,
+	'downloadS3File':`${transformerBaseUrl}/downloadS3File`,
+	'deleteLocalModel':`${transformerBaseUrl}/deleteLocalModel`,
+	'downloadDependencies':`${transformerBaseUrl}/download`,
 	'getAPIInformation':`${transformerBaseUrl}/`,
 	'getModelsList': `${transformerBaseUrl}/getModelsList`,
+	'getDataList': `${transformerBaseUrl}/getDataList`,
 	'getFilesInCorpus':`${transformerBaseUrl}/getFilesInCorpus`,
 	'getProcessStatus':`${transformerBaseUrl}/getProcessStatus`,
 
@@ -46,8 +50,10 @@ class MLApiClient {
 		
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
@@ -58,6 +64,8 @@ class MLApiClient {
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
+		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
+		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {

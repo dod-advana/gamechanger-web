@@ -793,7 +793,25 @@ describe('SearchUtility', function () {
 		});
 
 	});
+	describe('#getSearchCount', () => {
+		it('should get search count query', () => {
+			const tmpOpts = {
+				...opts,
+				constants: { GAME_CHANGER_OPTS: {index: 'gamechanger',
+					historyIndex: 'search_history',
+					entityIndex: 'entities'}
+				}
+			};
+			const daysBack = 14;
+			let target = new SearchUtility(tmpOpts);
+			let actual = target.getSearchCountQuery(daysBack);
+			const expected = {"aggs": {"searchTerms": {"aggs": {"user": {"terms": {"field": "user_id", "size": 2}}}, "terms": {"field": "search_query", "size": 1000}}}, "query": {"bool": {"must": [{"range": {"run_time": {"gte": "now-14d/d", "lt": "now/d"}}}], "must_not": [{"terms": {"search_query": undefined}}]}}, "size": 1}
 
+
+			assert.deepStrictEqual(actual, expected);
+		});
+
+	});
 	describe('#getEsSearchTerms()', function () {
 
 		it('should get ES search terms from searchText', () => {
