@@ -2662,8 +2662,10 @@ class SearchUtility {
 		}
 	}
 
-	getDocumentParagraphsByParIDs(ids = [], filters = {}) {
+	getDocumentParagraphsByParIDs(ids = [], filters = {}, offset = 0) {
 		const query = {
+			from: offset,
+			size: 100,
 			_source: {
 				includes: ['pagerank_r', 'kw_doc_score_r']
 			},
