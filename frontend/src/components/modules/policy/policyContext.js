@@ -211,6 +211,7 @@ const initState = {
 	
 	compareModalOpen: false,
 	compareFilename: null,
+	ignoredDocs: [],
 
 	// Presearch Filters
 	presearchSources: {},

@@ -130,6 +130,7 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 
@@ -1021,6 +1022,11 @@ export default class GameChangerAPI {
 	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
+	};
+
+	compareFeedbackPOST = async (data) => {
+		const url = endpoints.compareFeedbackPOST;
+		return axiosPOST(this.axios, url, data);
 	};
 
 	getFAQ = async () => {
