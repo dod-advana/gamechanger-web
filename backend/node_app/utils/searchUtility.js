@@ -1446,15 +1446,15 @@ class SearchUtility {
 
 		return searchCounts
 	}
-	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
+	getESpresearchMultiQuery({ searchText, index, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
-
+		console.log(index)
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
 			let query = []
 			let titleQuery = [
 				{
-					index: this.constants.GAME_CHANGER_OPTS.index
+					index: index
 				},
 				{
 					size: 4,
@@ -1464,7 +1464,7 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s': {
+										'display_title_s.search': {
 											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
@@ -1483,7 +1483,7 @@ class SearchUtility {
 					}
 				}
 			];
-			if (title !== 'display_title_s.search'){
+			if (title !== 'display_title_s'){
 				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search']
 				titleQuery[1]['query']['bool']['must'][0]['wildcard'][title] = {
 					value: `*${plainQuery}*`,
@@ -1549,6 +1549,7 @@ class SearchUtility {
 			if (queryTypes.includes('entities')){
 				query = query.concat(entitiesQuery)
 			}
+			console.log(JSON.stringify(query,0,5))
 			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
