@@ -27,6 +27,7 @@ const MLRoutes = {
 	'trainModel':`${transformerBaseUrl}/trainModel`,
 	'initializeLTR':`${transformerBaseUrl}/LTR/initLTR`,
 	'createModelLTR':`${transformerBaseUrl}/LTR/createModel`,
+	'recommender':`${transformerBaseUrl}/recommender`
 	
 }
 /**
@@ -46,7 +47,8 @@ class MLApiClient {
 		this.transformResults = this.transformResults.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
-		
+		this.recommender = this.recommender.bind(this);
+
 		
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
@@ -66,6 +68,7 @@ class MLApiClient {
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
@@ -95,7 +98,7 @@ class MLApiClient {
 		return await this.postData('transformResults', userId, data);
 	}
 
-	async reccomendations(doc, userId = 'unknown') {
+	async recommender(doc, userId = 'unknown') {
 		const data = { filename: doc}
 		return await this.postData('recommender', userId, data);
 	}
@@ -137,6 +140,7 @@ class MLApiClient {
 		};
 		try {
 			let url = MLRoutes[key];
+			
 			if(queryString) url += queryString;
 			const { data } = await this.axios({
 				url,

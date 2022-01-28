@@ -564,7 +564,7 @@ const PolicyMainViewHandler = {
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
-						links={favorite_documents}
+						links={searchMajorPubs}
 						title="Popular Publications"
 						width="215px"
 					>
