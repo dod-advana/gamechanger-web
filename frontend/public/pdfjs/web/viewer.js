@@ -8810,6 +8810,32 @@
 							},
 						},
 						{
+							key: '_arrayQuery',
+							value: function _arrayQuery() {
+								if(!this._isArrayQuery()) return [this._query];
+								this._rawQuery = this._state.query;
+								this._normalizedQuery = [];
+								for(let i=0; i<this._state.query.length; i++) {
+									this._normalizedQuery.push(normalize(this._state.query[i]))
+								}
+								return this._normalizedQuery;
+							},
+						},
+						{
+							
+							key: '_isArrayQuery',
+							value: function _isArrayQuery() {
+								return Array.isArray(this._state.query);
+							},
+						},
+						{
+							key: '_isEmptyQuery',
+							value: function _isEmptyQuery() {
+								if(this._isArrayQuery()) return this._state.query.length == 0;
+								return this._query === '';
+							}
+						},
+						{
 							key: '_shouldDirtyMatch',
 							value: function _shouldDirtyMatch(cmd, state) {
 								if (state.query !== this._state.query) {
@@ -9017,38 +9043,94 @@
 							},
 						},
 						{
+							key: '_calculateArrayMatch',
+							value: function _calculateArrayMatch(queryArray, pageIndex, pageContent, entireWord) {
+								const matchesWithLength = [];
+							
+								for (var i = 0, len = queryArray.length; i < len; i++) {
+									var subquery = queryArray[i];
+									var subqueryLen = subquery.length;
+									var matchIdx = -subqueryLen;
+
+									while (true) {
+										matchIdx = pageContent.indexOf(
+											subquery,
+											matchIdx + subqueryLen
+										);
+
+										if (matchIdx === -1) {
+											break;
+										}
+
+										if (
+											entireWord &&
+											!this._isEntireWord(pageContent, matchIdx, subqueryLen)
+										) {
+											continue;
+										}
+
+										matchesWithLength.push({
+											match: matchIdx,
+											matchLength: subqueryLen,
+											skipped: false,
+										});
+									}
+								}
+
+								this._pageMatchesLength[pageIndex] = [];
+								this._pageMatches[pageIndex] = [];
+
+								this._prepareMatches(
+									matchesWithLength,
+									this._pageMatches[pageIndex],
+									this._pageMatchesLength[pageIndex]
+								);
+							}
+						},
+						{
 							key: '_calculateMatch',
 							value: function _calculateMatch(pageIndex) {
 								var pageContent = this._pageContents[pageIndex];
-								var query = this._query;
+								let query;
 								var _this$_state = this._state,
 									caseSensitive = _this$_state.caseSensitive,
 									entireWord = _this$_state.entireWord,
 									phraseSearch = _this$_state.phraseSearch;
 
-								if (query.length === 0) {
+								if (this._isEmptyQuery()) {
 									return;
 								}
+								if(this._isArrayQuery()) {
+									query = this._arrayQuery();
+									if (!caseSensitive) {
+										pageContent = pageContent.toLowerCase();
+										for(let i=0; i<query.length; i++) {
+											query[i] = query[i].toLowerCase();
+										}
+									}
+									this._calculateArrayMatch(query, pageIndex, pageContent, entireWord);
+								} else{
+									query = this._query;
+									if (!caseSensitive) {
+										pageContent = pageContent.toLowerCase();
+										query = query.toLowerCase();
+									}
 
-								if (!caseSensitive) {
-									pageContent = pageContent.toLowerCase();
-									query = query.toLowerCase();
-								}
-
-								if (phraseSearch) {
-									this._calculatePhraseMatch(
-										query,
-										pageIndex,
-										pageContent,
-										entireWord
-									);
-								} else {
-									this._calculateWordMatch(
-										query,
-										pageIndex,
-										pageContent,
-										entireWord
-									);
+									if (phraseSearch) {
+										this._calculatePhraseMatch(
+											query,
+											pageIndex,
+											pageContent,
+											entireWord
+										);
+									} else {
+										this._calculateWordMatch(
+											query,
+											pageIndex,
+											pageContent,
+											entireWord
+										);
+									}
 								}
 
 								if (this._state.highlightAll) {
@@ -9189,7 +9271,7 @@
 									}
 								}
 
-								if (this._query === '') {
+								if (this._isEmptyQuery()) {
 									this._updateUIState(FindState.FOUND);
 
 									return;
@@ -10602,12 +10684,20 @@
 
 								if (hash.includes('=')) {
 									var params = (0, _ui_utils.parseQueryString)(hash);
-
+									//NOTE: where query paramater are polled
 									if ('search' in params) {
 										this.eventBus.dispatch('findfromurlhash', {
 											source: this,
 											query: params['search'].replace(/"/g, ''),
 											phraseSearch: params['phrase'] === 'true',
+										});
+									}
+
+									if ('searcharray' in params) {
+										this.eventBus.dispatch('findfromurlhash', {
+										  source: this,
+										  query: JSON.parse(params['search']),
+										  phraseSearch: true, // This does not matter
 										});
 									}
 
