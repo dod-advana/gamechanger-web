@@ -1,6 +1,7 @@
 const GC_HISTORY = require('../models').gc_history;
 const GC_TRENDING_BLACKLIST = require('../models').gc_trending_blacklist;
 const LOGGER = require('../lib/logger');
+const SearchUtility = require('../utils/searchUtility');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
 
@@ -10,61 +11,62 @@ class TrendingSearchesController {
 		const {
 			logger = LOGGER,
 			gcHistory = GC_HISTORY,
-			gcTrendingBlacklist = GC_TRENDING_BLACKLIST
+			gcTrendingBlacklist = GC_TRENDING_BLACKLIST,
+			searchUtility = new SearchUtility(opts),
+
+
 		} = opts;
 
 		this.logger = logger;
 		this.gcHistory = gcHistory;
 		this.gcTrendingBlacklist = gcTrendingBlacklist;
+		this.searchUtility = searchUtility;
 
 		this.trendingSearchesPOST = this.trendingSearchesPOST.bind(this);
-		this.getTrendingBlacklist = this.getTrendingBlacklist.bind(this);
+		this.getTrendingBlacklist = this.getTrendingBlacklist.bind(this); 
 		this.setTrendingBlacklist = this.setTrendingBlacklist.bind(this);
 		this.deleteTrendingBlacklist = this.deleteTrendingBlacklist.bind(this);
 		this.getWeeklySearchCount = this.getWeeklySearchCount.bind(this);
+		
 	}
 
 	async trendingSearchesPOST(req, res) {
 		let userId = 'Unknown';
+		let trending = [];
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {
 				cloneData = {},
+				daysBack,
 			} = req.body;
+			const blacklist = [];
+			try{
+				const blacklistItems = await this.gcTrendingBlacklist.findAll({
+					attributes: [
+						sequelize.literal('search_text, added_by, \"updatedAt\"')
+					],
+					order: [
+						[sequelize.literal('\"updatedAt\"'), 'DESC']
+					],
+					raw: true
+				});
+				for (let items of blacklistItems) {
+					blacklist.push(items['search_text'])
+				 }
+			} catch (err) {
+				this.logger.error(err, '5ED1092')
+			}
 
-			let cloneNameSql = {clone_name: cloneData.clone_name};
-
-			let exclusionSql = {search: {$and: [
-				{$notLike: '%artificial intelligence%'},
-				{$notLike: '%pizza%'},
-				{$notLike: '%cyber%'},
-				{$notLike: '%military intelligence program%'},
-				{$notLike: '%"artificial intelligence" and president%'},
-				{$notLike: '%machine learning%'},
-			]}, run_at: {
-				$gte: sequelize.literal('NOW() - INTERVAL \'7d\''),
-			} };
-
-			const trending = await this.gcHistory.findAll({
-				attributes: [
-					sequelize.literal('trim(lower(search)) as cleaned_search, count(*) as val')
-				],
-				where: exclusionSql, cloneNameSql,
-				group: ['cleaned_search'],
-				order: [
-					[sequelize.literal('val'), 'DESC']
-				],
-				limit: 10,
-				raw: true
-			});
+			trending = await this.searchUtility.getSearchCount(daysBack, blacklist, userId)
 			res.status(200).send(trending);
 		} catch (err) {
 			this.logger.error(err, '5ED9CQB', userId);
-			res.status(500).send(err);
+			res.status(500).send(trending);
 			return err;
 		}
 	}
+
 
 	async getTrendingBlacklist(req, res) {
 		let userId = 'Unknown';
@@ -138,38 +140,20 @@ class TrendingSearchesController {
 			return err;
 		}
 	}
-
 	async getWeeklySearchCount(req, res) {
 		let userId = 'Unknown';
-
+		const daysBack = 14;
+		let results = []
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			
-			const { trendingLinks=[] } = req.body;
-			const results = await new Promise((resolve, reject) => {
-				const counts = [];
-				trendingLinks.forEach(async ({search}) => {
-					counts.push(this.gcHistory.count({
-						where:{
-							search,
-							run_at: {
-								[Op.gte]: sequelize.literal('NOW() - INTERVAL \'7d\''),
-							}
-						}
-					}));
-				})
-				Promise.all(counts).then(values => {
-					const trendingLinksWithCount = trendingLinks.map((trending,idx) => {return {...trending, count:values[idx]}})
-					resolve(trendingLinksWithCount);
-				}).catch(e=>reject(e));
-			});
-			
+			results = await this.searchUtility.getSearchCount(daysBack, userId)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, 'RZ18OVI', userId);
-			res.status(500).send(err);
+			res.status(500).send(results);
 		}
 	}
+	
 }
 
 module.exports.TrendingSearchesController = TrendingSearchesController;
