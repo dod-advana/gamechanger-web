@@ -343,7 +343,6 @@ const ModularSearchBarHandler = (props) => {
 					) {
 						// if current item is not in textArray
 						rows.push(o);
-						console.log(o.text)
 						textArray.push(o.text.toLowerCase());
 					}
 				});

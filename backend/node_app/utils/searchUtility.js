@@ -1448,7 +1448,6 @@ class SearchUtility {
 	}
 	getESpresearchMultiQuery({ searchText, index, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
-		console.log(index)
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
 			let query = []
