@@ -2163,13 +2163,15 @@ class SearchUtility {
 				}
 	}
 	async getRecDocs(doc="Title 10"){
-			let recDocs = [];
-			try {
-				recDocs = await this.mlApi.reccomendations(doc, userId);
-			} catch (e) {
-				this.logger.error(e, 'LLLZ12P', userId);
-			};
-			return recDocs
+		let userId = "";
+		let recDocs = [];
+		try {
+			recDocs = await this.mlApi.recommender(doc, userId);
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', userId);
+		};
+		console.log(recDocs)
+		return recDocs
 	}
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
@@ -2214,6 +2216,8 @@ class SearchUtility {
 					popDocs.push(doc);
 				});
 			};
+			let docs = await this.getRecDocs()
+
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
