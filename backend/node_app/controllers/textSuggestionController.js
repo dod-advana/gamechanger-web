@@ -50,7 +50,6 @@ class TextSuggestionController {
 				}
 				if (suggestionsFlag === true){
 					const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
-					console.log(data_presearch.responses[0].hits.hits)
 					try {
 						presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
 					} catch (err) {
@@ -120,7 +119,6 @@ class TextSuggestionController {
 			
 			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
 
 			const results = await this.dataApi.mulitqueryElasticSearch(esClientName, this.constants.GAME_CHANGER_OPTS.textSuggestIndex, esQueryArray, userId);
 			return results.body;
@@ -171,7 +169,6 @@ class TextSuggestionController {
 	getPreTitleCorrected(suggesterArray) {
 		const presearch = [];
 		suggesterArray.forEach(suggestion => {
-			console.log(suggestion)
 			presearch.push(suggestion['_source']['display_title_s']);
 		}
 		);

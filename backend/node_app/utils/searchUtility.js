@@ -1549,7 +1549,6 @@ class SearchUtility {
 			if (queryTypes.includes('entities')){
 				query = query.concat(entitiesQuery)
 			}
-			console.log(JSON.stringify(query,0,5))
 			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
