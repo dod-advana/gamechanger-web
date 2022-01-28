@@ -33,26 +33,40 @@ const useStyles = makeStyles({
 	}
 })
 
+const cleanHighlightText = (text) => {
+	if(text){
+		text = text.replace(/&/g, '%26');
+		//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
+		const textArray = text.split(' ');
+		if(textArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) textArray[0] += ' ';
+		text = textArray.join(' ');
+		return text;
+	} else{
+		return '';
+	}
+}
+
 const getIframePreviewLinkInferred = (
 	filename,
 	responsibilityText,
+	entityText,
 	pageNumber,
 	isClone = false,
 	cloneData = {}
 ) => {
-	let highlightText = responsibilityText;
-	highlightText = highlightText.replace(/&/g, '%26');
-	//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
-	if(highlightText){
-		const textArray = highlightText.split(' ');
-		if(textArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) textArray[0] += ' ';
-		highlightText = textArray.join(' ');
+	responsibilityText = cleanHighlightText(responsibilityText);
+	entityText = cleanHighlightText(entityText);
+	let highlight;
+	if(entityText){
+		highlight = [entityText, responsibilityText]
+	}else{
+		highlight = `"${responsibilityText}"`;
 	}
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				`"${highlightText}"`,
+				highlight,
 				pageNumber,
 				isClone,
 				cloneData
@@ -184,6 +198,7 @@ export default function ResponsibilityDocumentExplorer({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
+							selectedResponsibility.organizationPersonnel,
 							pageNumber,
 							isClone,
 							cloneData
@@ -525,7 +540,7 @@ export default function ResponsibilityDocumentExplorer({
 									renderInput={(params) => (
 										<TextField
 											{...params}
-											classes={{ classes }}
+											classes={{ root: classes.root }}
 											variant="outlined"
 											label="Document Titles"
 										/>
