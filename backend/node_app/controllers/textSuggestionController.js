@@ -28,8 +28,9 @@ class TextSuggestionController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-
-			const index = req.body.index ? req.body.index : this.constants.GAME_CHANGER_OPTS.index;
+			console.log(req.body.index)
+			const index = req.body.index ? req.body.index : [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, 
+				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
 			let corrected;
 			let presearchTitle;
@@ -49,7 +50,7 @@ class TextSuggestionController {
 				}
 				if (suggestionsFlag === true){
 					const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
-				
+					console.log(data_presearch.responses[0].hits.hits)
 					try {
 						presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
 					} catch (err) {
@@ -114,9 +115,10 @@ class TextSuggestionController {
 		}
 	}
 
-	async getPresearchSuggestion(body, userId) {
+	async getPresearchSuggestion(body, index, userId) {
 		try {
-			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body);
+			
+			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
 
@@ -169,7 +171,8 @@ class TextSuggestionController {
 	getPreTitleCorrected(suggesterArray) {
 		const presearch = [];
 		suggesterArray.forEach(suggestion => {
-			presearch.push(suggestion['_source'].display_title_s);
+			console.log(suggestion)
+			presearch.push(suggestion['_source']['display_title_s']);
 		}
 		);
 		return presearch;
