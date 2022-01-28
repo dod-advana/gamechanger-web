@@ -28,7 +28,6 @@ class TextSuggestionController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			console.log(req.body.index)
 			const index = req.body.index ? req.body.index : [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, 
 				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
