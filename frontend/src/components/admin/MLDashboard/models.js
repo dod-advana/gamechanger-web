@@ -78,9 +78,8 @@ export default (props) => {
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
-	const [batchSize, setBatchSize] = useState(32);
 	const [warmupSteps, setWarmupSteps] = useState(100);
-	const [epochs, setEpochs] = useState(3);
+	const [epochs, setEpochs] = useState(10);
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
@@ -267,7 +266,6 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'sent_finetune',
 				epochs: epochs,
-				batch_size: batchSize,
 				warmup_steps: warmupSteps
 			});
 			props.updateLogs('Started training', 0);
@@ -722,17 +720,6 @@ export default (props) => {
 							Train
 						</GCPrimaryButton>
 					
-						<div>
-							<div style={{ width: '60x', display: 'inline-block' }}>
-								Batch Size:
-							</div>
-							<Input
-								value={batchSize}
-								onChange={(e) => setBatchSize(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
-							/>
-						</div>
 						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Warmup Steps:
