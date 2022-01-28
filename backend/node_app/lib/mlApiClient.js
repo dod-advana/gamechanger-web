@@ -94,6 +94,11 @@ class MLApiClient {
 		const data = { query: searchText, documents: docs}
 		return await this.postData('transformResults', userId, data);
 	}
+
+	async reccomendations(doc, userId = 'unknown') {
+		const data = { filename: doc}
+		return await this.postData('recommender', userId, data);
+	}
 	/**
 	 * A generic get method to query the ML API. 
 	 * @method getData

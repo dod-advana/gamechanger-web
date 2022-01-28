@@ -2162,7 +2162,15 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-
+	async getRecDocs(doc="Title 10"){
+			let recDocs = [];
+			try {
+				recDocs = await this.mlApi.reccomendations(doc, userId);
+			} catch (e) {
+				this.logger.error(e, 'LLLZ12P', userId);
+			};
+			return recDocs
+	}
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
