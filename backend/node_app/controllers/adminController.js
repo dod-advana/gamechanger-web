@@ -97,7 +97,10 @@ class AdminController {
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
 		let esIndex = "gamechanger";
-
+		const {
+			favorite_documents
+		} = req;
+		console.log(req)
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const results = await this.appSettings.findAll({
@@ -105,19 +108,23 @@ class AdminController {
 					key: [
 						'homepage_topics',
 						'homepage_major_pubs',
-						'homepage_popular_docs_inactive'
-					]
+						'homepage_popular_docs_inactive'					]
 				}
 			});
-			let docs = {}
+			let docs = {};
+			let recDocs = {};
 			docs.key = "popular_docs";
+			recDocs.key = "rec_docs"
 			try {
 				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
+				recDocs.value =  await this.searchUtility.getRecDocs("Title 10", userId);
+
 			} catch (err) {
 				this.logger.error(err, 'FL1LLDU', userId);
 				res.status(500).send(err);
 				docs.value = []
 			}
+			//console.log(results)
 			results.push(docs);
 			res.status(200).send(results);
 		} catch (err) {

@@ -198,7 +198,7 @@ const DefaultMainViewHandler = {
 		}
 
 		try {
-			getUserData(dispatch);
+			await getUserData(dispatch);
 		} catch (e) {
 			console.log(e);
 		}
@@ -210,6 +210,7 @@ const DefaultMainViewHandler = {
 
 			searchHandler.setSearchURL(newState);
 		}
+		
 	},
 
 	renderHideTabs(props) {

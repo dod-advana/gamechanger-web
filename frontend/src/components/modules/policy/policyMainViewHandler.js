@@ -7,7 +7,7 @@ import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Typography } from '@material-ui/core';
-import { setState, handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
+import { setState, handleSaveFavoriteTopic ,	getUserData} from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -36,10 +36,12 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import '../../mainView/main-view.css';
 import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
+import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 const fullWidthCentered = {
 	width: '100%',
@@ -267,6 +269,48 @@ const handleSources = async (state, dispatch, cancelToken) => {
 		setState(dispatch, { crawlerSources });
 	}
 };
+const handleHomepage = async (state, dispatch, cancelToken) => {
+	let topics = [];
+	let pop_pubs = [];
+	let pop_pubs_inactive = [];
+	let rec_docs = [];
+	const {userData} = state
+	const user = await gcUserManagementAPI.getUserData()
+	const { favorite_documents } = user.data
+	console.log(favorite_documents)
+
+	try {
+		const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
+		data.forEach((obj) => {
+			if (obj.key === 'homepage_topics') {
+				topics = JSON.parse(obj.value);
+			}
+			else if (obj.key === 'homepage_popular_docs_inactive') {
+				pop_pubs_inactive = JSON.parse(obj.value);
+			} 
+			else if (obj.key === 'popular_docs') {
+				pop_pubs = obj.value;
+			}
+			else if (obj.key == 'rec_docs') {
+				rec_docs = obj.value;
+			}
+		});
+	} catch (e) {
+		// Do nothing
+		console.log(e)
+	}
+	setState(
+		dispatch,
+		getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
+			{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
+			{ adminTopics: topics }
+	);
+	// handlePubs(pubs, state, dispatch);
+	handleSources(state, dispatch, cancelToken);
+	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken);
+
+}
+
 const formatString = (text) => {
 	let titleCase = text
 		.split(' ')
@@ -281,40 +325,12 @@ const formatString = (text) => {
 	return _.truncate(titleCase, { length: 60, separator: /,?\.* +/ });
 };
 
+
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
-		let topics = [];
-		let pop_pubs = [];
-		let pop_pubs_inactive = [];
-		try {
-			const { data } = await gameChangerAPI.getHomepageEditorData();
-			data.forEach((obj) => {
-				if (obj.key === 'homepage_topics') {
-					topics = JSON.parse(obj.value);
-				}
-
-				else if (obj.key === 'homepage_popular_docs_inactive') {
-					pop_pubs_inactive = JSON.parse(obj.value);
-				} else if (obj.key === 'popular_docs') {
-					pop_pubs = obj.value;
-				}
-			});
-		} catch (e) {
-			// Do nothing
-			console.log(e)
-		}
-
-		setState(
-			dispatch,
-			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
-				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
-				{ adminTopics: topics }
-		);
-		// handlePubs(pubs, state, dispatch);
-		handleSources(state, dispatch, props.cancelToken);
-		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
+		await handleHomepage(state, dispatch, props)
 	},
 
 	getMainView(props) {
@@ -354,7 +370,8 @@ const PolicyMainViewHandler = {
 			}
 		}
 
-		const { favorite_topics = [], favorite_searches = [], favorite_documents = []} = userData;
+		const { favorite_topics = [], favorite_searches = [] } = userData;
+		
 
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 

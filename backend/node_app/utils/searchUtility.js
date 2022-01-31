@@ -2162,15 +2162,13 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-	async getRecDocs(doc="Title 10"){
-		let userId = "";
+	async getRecDocs(doc="Title 10", userId=""){
 		let recDocs = [];
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		console.log(recDocs)
 		return recDocs
 	}
 	getPopularDocsQuery(offset = 0, limit = 10) {
