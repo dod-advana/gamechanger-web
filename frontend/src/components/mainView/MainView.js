@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import {
 	getTrackingNameForFactory,
@@ -26,6 +27,7 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import UserProfilePage from '../user/UserProfilePage';
 
 const gameChangerAPI = new GameChangerAPI();
+let cancelToken = axios.CancelToken.source();
 
 const MainView = (props) => {
 	const { context } = props;
@@ -35,6 +37,20 @@ const MainView = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
 	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		return function cleanUp(){
+			cancelToken.cancel('canceled axios with cleanup');
+			cancelToken = axios.CancelToken.source();
+		}
+	},[])
+
+	useEffect(() => {
+		if(state.runningSearch && cancelToken) {
+			cancelToken.cancel('canceled axios request from search run');
+			cancelToken = axios.CancelToken.source();
+		};
+	},[state.runningSearch])
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
@@ -47,7 +63,7 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			const viewNames = handler.getViewNames();
+			const viewNames = handler.getViewNames({cloneData: state.cloneData});
 
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
@@ -60,6 +76,7 @@ const MainView = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler,
+				cancelToken
 			});
 
 			setState(dispatch, { viewNames });
@@ -109,13 +126,24 @@ const MainView = (props) => {
 			if (state.databasesPagination && searchHandler) {
 				searchHandler.handleDatabasesPagination(state, dispatch);
 			}
+		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo') {
+			if (state.docsPagination && searchHandler) {
+				setState(dispatch, {
+					docsPagination: false,
+				});
+				searchHandler.handleSearch(
+					state,
+					dispatch,
+					state.replaceResults
+				);
+			}
 		}
 	}, [state, dispatch, searchHandler]);
 
 	useBottomScrollListener(
 		() => {
 			if (
-				state.activeCategoryTab !== 'all' &&
+				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
 				!state.docsPagination
 			) {

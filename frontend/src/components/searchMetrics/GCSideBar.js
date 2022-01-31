@@ -433,6 +433,8 @@ export default function SideBar(props) {
 									orgSources[idx].imgSrc = DefaultSeal;
 								}
 							});
+						}).catch(e => {
+							//Do nothing
 						});
 				}
 				setOrgSources(orgSources);

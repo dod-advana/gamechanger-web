@@ -55,7 +55,7 @@ class Reports {
 			const header = ['Filename', 'Title', 'Document Number', 'Document Type', 'Match Count', 'Publishing Organization', 'Publication Date', 'Verified On', 'Cancelled', 'Keywords', 'Topics', 'Reference List'];
 			stringifier.write(header);
 
-			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_rs, doc.ref_list];
+			data.docs.forEach((doc) => {const item = [doc.filename, doc.title, doc.doc_num, doc.doc_type, doc.pageHitCount, doc.display_org_s, doc.publication_date_dt, doc.access_timestamp_dt, doc.is_revoked_b ? 'Yes':'No', doc.keyw_5, doc.topics_s, doc.ref_list];
 				stringifier.write(item);
 			});
 		}
@@ -111,13 +111,14 @@ class Reports {
 		const dataContent = data.docs.map(function (doc) {
 
 			const snippets = doc.pageHits ? doc.pageHits.map(function (snip) {
-				const splitReplace = snip.snippet.replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
+				const splitReplace = snip.snippet.toString().replace(/<em>/g, '').replace(new RegExp('</em>', 'g'), '');
+				
 				return {
 					stack: [
 						{ text: ' '},
 						{ text: 'Snippets: ', fontSize:13},
 						{ text: ' ' },
-						{ text: 'Page ' + snip.pageNumber },
+						{ text: 'Page ' + snip.pageNumber ? snip.pageNumber : 'N/A'  },
 						{ text: ' ' },
 						{ text: splitReplace },
 						{ text: ' ' },

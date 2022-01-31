@@ -9,6 +9,7 @@ import NotificationsManagement from '../components/notifications/NotificationsMa
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
 import CloneList from '../components/admin/CloneList';
+import ResponsibilityUpdates from '../components/admin/ResponsibilityUpdates';
 import UserList from '../components/admin/UserList';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
@@ -37,6 +38,7 @@ const PAGES = {
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
+	responsibilityUpdates: 'Responsibility Updates'
 };
 /**
  *
@@ -46,12 +48,7 @@ const GamechangerAdminPage = (props) => {
 	const { jupiter } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
-	const [loginModalOpen, setLoginModalOpen] = useState(false);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
-
-	const setLoginModal = (open) => {
-		setLoginModalOpen(open);
-	};
 
 	const renderSwitch = (page) => {
 		trackEvent(
@@ -82,6 +79,8 @@ const GamechangerAdminPage = (props) => {
 				return <APIRequests />;
 			case PAGES.homepageEditor:
 				return <HomepageEditor />;
+			case PAGES.responsibilityUpdates:
+				return <ResponsibilityUpdates />;
 			default:
 				return <GeneralAdminButtons />;
 		}
@@ -121,8 +120,6 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-				loginModalOpen={loginModalOpen}
-				setLoginModal={setLoginModal}
 			></SearchBanner>
 
 			{renderSwitch(pageToView)}

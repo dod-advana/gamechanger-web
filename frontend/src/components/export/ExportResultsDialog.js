@@ -182,7 +182,6 @@ const ExportResultsDialog = ({
 						? Array.from(selectedDocuments.keys())
 						: [],
 					tiny_url: tiny_url_send,
-					searchFields,
 					edaSearchSettings,
 					sort,
 					order,

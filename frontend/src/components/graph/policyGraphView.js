@@ -357,7 +357,7 @@ export default function PolicyGraphView(props) {
 		nodes: [],
 	});
 	const [docOrgNumbers, setDocOrgNumbers] = React.useState({});
-	const [orgTypeSelected, setOrgTypeSelected] = React.useState(null);
+	const [orgTypesSelected, setOrgTypesSelected] = React.useState([]);
 	const [mouseXY, setMouseXY] = React.useState({ x: 0, y: 0 });
 	const [selectedID, setSelectedID] = React.useState(null);
 	const [shouldCenter, setShouldCenter] = React.useState(true);
@@ -1374,46 +1374,83 @@ export default function PolicyGraphView(props) {
 	 * Graph Legend Functions
 	 */
 
+	const handleLegendAllDocsClick = (_, legendKey) => {
+		setOrgTypesSelected(
+			orgTypesSelected.includes(legendKey) ?
+				orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity') :
+				[
+					...orgTypesSelected,
+					...Object.keys(legendData).filter(type =>
+						type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
+					), legendKey
+				]
+		);
+
+		setNodeGroupMenuOpen(false);
+		setNodeGroupMenuTarget(null);
+		setNodeGroupMenuLabel('');
+	};
+
 	const renderNodeLegendItems = () => {
-		return (
+		return (!runningSearch &&
 			<>
-				{!runningSearch &&
-					Object.keys(legendData)
-						.sort()
-						.map((key) => {
-							return (
-								<GCTooltip
-									key={key}
-									title={`${docOrgNumbers[key]} node${
-										docOrgNumbers[key] > 1 ? 's' : ''
-									} associated`}
-									arrow
-									enterDelay={30}
-								>
-									<StyledLegendClickable
-										key={legendData[key].name}
-										onClick={(event) =>
-											handleLegendNodeClick(event.target, key)
-										}
-										typeSelected={orgTypeSelected}
-										type={key}
-									>
-										<div
-											style={{
-												backgroundColor: legendData[key].color,
-												width: '1em',
-												height: '1em',
-												borderRadius: '50%',
-												marginTop: '4px',
-											}}
-										></div>
-										<div style={{ marginLeft: '2em', width: '80%' }}>
-											{legendData[key].name}
-										</div>
-									</StyledLegendClickable>
-								</GCTooltip>
-							);
-						})}
+				{(Object.keys(legendData).includes('Topic') || Object.keys(legendData).includes('Entity')) && // Don't display All Documents filter if filters are only documents
+					<StyledLegendClickable
+						key={'All Documents'}
+						onClick={(event) =>
+							handleLegendAllDocsClick(event.target, 'All Documents')
+						}
+						typesSelected={orgTypesSelected}
+						type={'All Documents'}
+					>
+						<div
+							style={{
+								backgroundColor: '#6eb8cc',
+								width: '1em',
+								height: '1em',
+								borderRadius: '50%',
+								marginTop: '4px',
+							}}
+						></div>
+						<div style={{ marginLeft: '2em', width: '80%' }}>
+							All Documents
+						</div>
+					</StyledLegendClickable>
+				}
+				{Object.keys(legendData).sort((x, y) => x === 'All Documents' ? -1 : y === 'All Documents' ? 1 : 0).map((key) => {
+					return (
+						<GCTooltip
+							key={key}
+							title={`${docOrgNumbers[key]} node${
+								docOrgNumbers[key] > 1 ? 's' : ''
+							} associated`}
+							arrow
+							enterDelay={30}
+						>
+							<StyledLegendClickable
+								key={legendData[key].name}
+								onClick={(event) =>
+									handleLegendNodeClick(event.target, key)
+								}
+								typesSelected={orgTypesSelected}
+								type={key}
+							>
+								<div
+									style={{
+										backgroundColor: legendData[key].color,
+										width: '1em',
+										height: '1em',
+										borderRadius: '50%',
+										marginTop: '4px',
+									}}
+								></div>
+								<div style={{ marginLeft: '2em', width: '80%' }}>
+									{legendData[key].name}
+								</div>
+							</StyledLegendClickable>
+						</GCTooltip>
+					);
+				})}
 			</>
 		);
 	};
@@ -1423,10 +1460,24 @@ export default function PolicyGraphView(props) {
 			getTrackingNameForFactory(cloneData.clone_name),
 			'GraphLegendClicked',
 			legendKey,
-			legendKey !== orgTypeSelected
+			!orgTypesSelected.includes(legendKey)
 		);
-		setOrgTypeSelected(legendKey === orgTypeSelected ? null : legendKey);
-		if (nodeGroupMenuOpen) {
+
+		const newOrgTypesSelected = orgTypesSelected.includes(legendKey) ?
+			orgTypesSelected.filter(type => type !== legendKey) :
+			[...orgTypesSelected, legendKey];
+
+		const allOrgTypesExceptTopicAndEntity =
+			Object.keys(legendData).filter(type => type !== 'Topic' && type !== 'Entity');
+		const allCurrentOrgTypesExceptTopicAndEntity =
+			newOrgTypesSelected.filter(type => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents');
+
+		setOrgTypesSelected(
+			_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort()) ?
+				[...newOrgTypesSelected, 'All Documents'] : newOrgTypesSelected.filter(type => type !== 'All Documents')
+		);
+
+		if (orgTypesSelected.includes(legendKey)) {
 			setNodeGroupMenuOpen(false);
 			setNodeGroupMenuTarget(null);
 			setNodeGroupMenuLabel('');
@@ -1441,7 +1492,7 @@ export default function PolicyGraphView(props) {
 		setNodeGroupMenuOpen(false);
 		setNodeGroupMenuTarget(null);
 		setNodeGroupMenuLabel('');
-		setOrgTypeSelected(null);
+		setOrgTypesSelected([]);
 	};
 
 	/**
@@ -1483,11 +1534,11 @@ export default function PolicyGraphView(props) {
 				: node.orgType;
 
 		const nodeColor =
-			orgTypeSelected !== null && orgTypeSelected !== nodeType
+			orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
 				? convertHexToRgbA(node.color, HIDDEN_NODE_ALPHA)
 				: convertHexToRgbA(node.color, NODE_ALPHA);
 		const outlineColor =
-			orgTypeSelected !== null && orgTypeSelected !== nodeType
+			orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
 				? getNodeOutlineColors(
 					node,
 					HIDDEN_NODE_ALPHA,
@@ -1525,7 +1576,7 @@ export default function PolicyGraphView(props) {
 		) {
 			ctx.strokeStyle = convertHexToRgbA(
 				'#6ac6ff',
-				orgTypeSelected !== null && orgTypeSelected !== nodeType
+				orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
 					? HIDDEN_NODE_ALPHA
 					: NODE_ALPHA
 			);
@@ -1615,8 +1666,11 @@ export default function PolicyGraphView(props) {
 		const end = link.target;
 
 		if (
-			orgTypeSelected !== null &&
-			(start.orgType !== orgTypeSelected || end.orgType !== orgTypeSelected)
+			orgTypesSelected.length !== 0 &&
+			(
+				!orgTypesSelected.includes(start.orgType || start.label) ||
+				!orgTypesSelected.includes(end.orgType || end.label)
+			)
 		) {
 			return getLinkColor(link, HIDDEN_NODE_ALPHA);
 		} else {

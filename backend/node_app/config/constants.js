@@ -152,6 +152,11 @@ module.exports = Object.freeze({
 		auxSearchFields: [''],
 		auxRetrieveFields: ['']
 	},
+	CDO_ELASTIC_SEARCH_OPTS: {
+		index: process.env.CDO_ELASTICSEARCH_INDEX,
+		auxSearchFields: [''],
+		auxRetrieveFields: ['']
+	},
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
@@ -223,6 +228,7 @@ module.exports = Object.freeze({
 		domain: process.env.JIRA_DOMAIN,
 		project_key: process.env.JIRA_PROJECT_KEY,
 		rating_id: process.env.JIRA_RATING_ID,
+		advana_product: process.env.JIRA_ADVANA_PRODUCT,
 		feedbackType: process.env.JIRA_FEEDBACK_TYPE
 	},
 });

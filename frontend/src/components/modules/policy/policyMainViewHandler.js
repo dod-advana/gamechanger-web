@@ -18,6 +18,7 @@ import Pagination from 'react-js-pagination';
 import GCTooltip from '../../common/GCToolTip';
 import GetQAResults from '../default/qaResults';
 import {
+	getQueryVariable,
 	getTrackingNameForFactory,
 	RESULTS_PER_PAGE,
 	StyledCenterContainer,
@@ -119,7 +120,6 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 const renderRecentSearches = (search, state, dispatch) => {
 	const {
 		searchText,
-		favorite,
 		orgFilterString,
 		publicationDateAllTime,
 		publicationDateFilter,
@@ -158,39 +158,28 @@ const renderRecentSearches = (search, state, dispatch) => {
 		>
 			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 				<Typography style={styles.containerText}>{searchText}</Typography>
-				<i
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						cursor: 'pointer',
-						fontSize: 20,
-					}}
-				/>
 			</div>
 			<Typography style={styles.subtext}>
-				Organization Filter:
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
+				<strong>Organization Filter: </strong>{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Type Filter:
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
+				<strong>Type Filter: </strong>{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Publication Date:
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				<strong>Publication Date: </strong>{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Include Canceled: {includeRevoked ? 'Yes' : 'No'}
+				<strong>Include Canceled: </strong>{includeRevoked ? 'Yes' : 'No'}
 			</Typography>
 			<Typography style={styles.subtext}>
-				Search Time:{' '}
+				<strong>Search Time:{' '}</strong>
 				{moment(Date.parse(run_at)).utc().format('YYYY-MM-DD HH:mm UTC')}
 			</Typography>
 		</RecentSearchContainer>
 	);
 };
 
-const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
+const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken) => {
 	let filteredPubs = _.filter(pop_pubs, (item) => {
 		return !_.includes(pop_pubs_inactive, item.id);
 	});
@@ -206,7 +195,8 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 				.thumbnailStorageDownloadPOST(
 					[filteredPubs[i]],
 					'thumbnails',
-					state.cloneData
+					state.cloneData,
+					cancelToken
 				)
 				.then((pngs) => {
 					const buffers = pngs.data;
@@ -218,6 +208,8 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 						}
 					});
 					setState(dispatch, { searchMajorPubs: filteredPubs });
+				}).catch(e => {
+					//Do nothing
 				});
 		}
 	} catch (e) {
@@ -226,7 +218,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch) => {
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
-const handleSources = async (state, dispatch) => {
+const handleSources = async (state, dispatch, cancelToken) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
 		...item,
@@ -239,13 +231,13 @@ const handleSources = async (state, dispatch) => {
 			let filename = item.image_link.split('/').pop();
 			return { img_filename: filename };
 		});
-
 		for (let i = 0; i < thumbnailList.length; i++) {
 			gameChangerAPI
 				.thumbnailStorageDownloadPOST(
 					[thumbnailList[i]],
 					folder,
-					state.cloneData
+					state.cloneData,
+					cancelToken
 				)
 				.then((pngs) => {
 					const buffers = pngs.data;
@@ -265,6 +257,8 @@ const handleSources = async (state, dispatch) => {
 						}
 					});
 					setState(dispatch, { crawlerSources });
+				}).catch(e => {
+					//Do nothing
 				});
 		}
 	} catch (e) {
@@ -292,7 +286,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		let topics = [];
-		// let pubs = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		try {
@@ -301,9 +294,7 @@ const PolicyMainViewHandler = {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
 				}
-				// else if(obj.key === 'homepage_major_pubs') {
-				// 	pubs = JSON.parse(obj.value);
-				// }
+
 				else if (obj.key === 'homepage_popular_docs_inactive') {
 					pop_pubs_inactive = JSON.parse(obj.value);
 				} else if (obj.key === 'popular_docs') {
@@ -312,12 +303,18 @@ const PolicyMainViewHandler = {
 			});
 		} catch (e) {
 			// Do nothing
+			console.log(e)
 		}
 
-		setState(dispatch, { adminTopics: topics });
+		setState(
+			dispatch,
+			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
+				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
+				{ adminTopics: topics }
+		);
 		// handlePubs(pubs, state, dispatch);
-		handleSources(state, dispatch);
-		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch);
+		handleSources(state, dispatch, props.cancelToken);
+		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {
@@ -341,12 +338,10 @@ const PolicyMainViewHandler = {
 			loading,
 			userData,
 			recentSearches,
+			trending
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
-		const trendingStorage =
-			localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-
 		if (prevSearchText) {
 			if (!resetSettingsSwitch) {
 				dispatch({ type: 'RESET_SEARCH_SETTINGS' });
@@ -364,8 +359,9 @@ const PolicyMainViewHandler = {
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
 		let trendingLinks = [];
-		if (trendingStorage) {
-			JSON.parse(trendingStorage).forEach((search) => {
+
+		if (trending) {
+			trending.data.forEach((search) => {
 				if (search.search) {
 					trendingLinks.push({
 						search: search.search.replaceAll('&#039;', '"'),
@@ -450,29 +446,22 @@ const PolicyMainViewHandler = {
 								}
 							>
 								<div
-									style={{ display: 'flex', justifyContent: 'space-between' }}
+									style={{ display: 'flex', justifyContent: 'space-between', wordSpacing: 3, letterSpacing: 2, marginTop: 8}}
 								>
-									<Typography style={styles.containerText}>{`#${idx + 1} ${
-										search.length < 20
-											? search
-											: search.substring(0, 22) + '...'
-									}`}</Typography>
-									<i
-										className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-										style={{
-											color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-											cursor: 'pointer',
-											fontSize: 20,
-										}}
-									/>
+									<Typography style={styles.containerText}>									
+										<i
+											className="fa fa-search"
+											style= {{marginRight: 12}}
+											
+										/>
+										{`   ${idx + 1}. ${
+											search.length < 18
+												? search
+												: search.substring(0, 20) + '...'
+										}`}
+									</Typography>
 								</div>
-								<Typography style={styles.subtext}>
-									<i
-										className="fa fa-search"
-										style={{ width: 16, height: 15 }}
-									/>
-									{`${count} searches this week`}
-								</Typography>
+
 							</TrendingSearchContainer>
 						))}
 					</GameChangerThumbnailRow>

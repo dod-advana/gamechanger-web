@@ -553,7 +553,7 @@ function GCCard(props) {
 	const quickCompareToggleComponent = () => {
 		return (
 			<GCTooltip title={`Quickly compare the matched paragraphs to the input document`} placement='top' arrow>
-				<div style={{marginTop: 2, paddingRight: 5}}>
+				<div style={{marginTop: 2, paddingRight: 5, minWidth: 178}}>
 					<FormControlLabel
 						value="compare"
 						control={<OrangeSwitch checked={showQuickCompare} onChange={handleQuickCompareToggle}/>}
@@ -575,6 +575,11 @@ function GCCard(props) {
 	
 	const handleCompareDocument = (filename) => {
 		setState(dispatch, {compareModalOpen: true, compareFilename: filename});
+	}
+
+	const handleIgnore = (item, index) => {
+		setCompareIndex(0)
+		setState(dispatch, {ignoredDocs: [{item, index}]});
 	}
 	
 	const intelligentFeedbackComponent = () => (
@@ -656,7 +661,7 @@ function GCCard(props) {
 			selected={selected}
 			allowScroll={allowScroll}
 			showSideFilters={state.showSideFilters}
-			ntelligentSearch={intelligentSearch}
+			intelligentSearch={intelligentSearch}
 			graphView={graphView}
 		>
 			<Popover
@@ -876,7 +881,10 @@ function GCCard(props) {
 												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
 											},
 											state,
-											handleCompareDocument
+											handleCompareDocument,
+											handleIgnore,
+											showQuickCompare,
+											compareIndex
 										})}
 									</div>
 								</div>

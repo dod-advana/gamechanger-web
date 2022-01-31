@@ -123,44 +123,6 @@ const checkForTinyURL = async (location) => {
 	}
 };
 
-const getTrendingSearches = (cloneData) => {
-	const daysAgo = 7;
-	let internalUsers = [];
-	let blacklist = [];
-
-	gameChangerAPI
-		.getInternalUsers()
-		.then(({ data }) => {
-			data.forEach((d) => {
-				internalUsers.push(d.username);
-			});
-
-			gameChangerAPI
-				.getTrendingBlacklist()
-				.then(({ data }) => {
-					data.forEach((d) => {
-						blacklist.push(d.search_text);
-					});
-
-					gameChangerAPI
-						.getAppStats({ cloneData, daysAgo, internalUsers, blacklist })
-						.then(({ data }) => {
-							localStorage.setItem(
-								`trending${cloneData.clone_name}Searches`,
-								JSON.stringify(data.data.topSearches.data)
-							);
-						})
-						.catch((e) => {
-							console.log('error with getting trending: ' + e);
-						});
-				})
-				.catch((e) => console.log('error with getting blacklist: ' + e));
-		})
-		.catch((e) => {
-			console.log('error getting internal users: ' + e);
-		});
-};
-
 const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
 	trackEvent(
 		getTrackingNameForFactory(state.cloneData.clone_name),
@@ -196,9 +158,14 @@ const DefaultMainViewHandler = {
 		}
 
 		try {
-			getTrendingSearches(state.cloneData);
+			//getTrendingSearches(state.cloneData);
+			const daysBack=14
+			let trendingES = await gameChangerAPI.trendingSearches({daysBack});
+			
+			setState(dispatch, { trending: trendingES});
+
 		} catch (e) {
-			// Do nothing
+			console.log(e)
 		}
 
 		try {
@@ -423,13 +390,8 @@ const DefaultMainViewHandler = {
 						order={currentOrder}
 					/>
 				)}
-				{loading && currentViewName !== 'Explorer' && (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
-				)}
 				{hideSearchResults && renderHideTabs(props)}
-				{!hideSearchResults && pageLoaded && (
+				{((!hideSearchResults && pageLoaded) || !state.replaceResults) && (
 					<div style={styles.tabButtonContainer}>
 						<ResultView
 							context={{ state, dispatch }}
@@ -437,6 +399,11 @@ const DefaultMainViewHandler = {
 							viewPanels={getViewPanels()}
 						/>
 						<div style={styles.spacer} />
+					</div>
+				)}
+				{loading && currentViewName !== 'Explorer' && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcOrange} />
 					</div>
 				)}
 				{state.showEsQueryDialog && (
@@ -507,10 +474,14 @@ const DefaultMainViewHandler = {
 	},
 
 	getViewNames(props) {
-		return [
-			{ name: 'Card', title: 'Card View', id: 'gcCardView' },
-			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' },
-		];
+		const { cloneData } = props;
+		const views = [
+			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
+		]
+		if(cloneData.document_view) views.push(
+			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
+		)
+		return views;
 	},
 
 	getExtraViewPanels(props) {
@@ -642,7 +613,7 @@ const DefaultMainViewHandler = {
 				<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 					<div>
 						<div id="game-changer-content-top" />
-						{!loading && (
+						{(!loading || !state.replaceResults) && (
 							<StyledCenterContainer showSideFilters={showSideFilters}>
 								{showSideFilters && (
 									<div className={'left-container'}>
@@ -666,7 +637,7 @@ const DefaultMainViewHandler = {
 									</div>
 								)}
 								<div className={'right-container'}>
-									{!hideTabs && <ViewHeader {...props} />}
+									{(!hideTabs || !state.replaceResults) && <ViewHeader {...props} />}
 									<div
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 									>
@@ -684,14 +655,14 @@ const DefaultMainViewHandler = {
 												className="row"
 												style={{ marginLeft: 0, marginRight: 0 }}
 											>
-												{!loading && getSearchResults(rawSearchResults)}
+												{(!loading || !state.replaceResults) && getSearchResults(rawSearchResults)}
 											</div>
 										</div>
 									</div>
 								</div>
 							</StyledCenterContainer>
 						)}
-						{!iframePreviewLink && (
+						{!iframePreviewLink && state.cloneData?.clone_name.toLowerCase() !== 'cdo' && (
 							<div style={styles.paginationWrapper} className={'gcPagination'}>
 								<Pagination
 									activePage={resultsPage}

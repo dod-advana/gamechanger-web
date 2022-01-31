@@ -165,7 +165,7 @@ class AppStatsController {
 				cloneData = {},
 				daysAgo = 3,
 				internalUsers = [],
-				blacklist = []
+				blacklist = [],
 			} = req.body;
 
 			const results = {

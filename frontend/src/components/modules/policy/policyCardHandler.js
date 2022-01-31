@@ -413,7 +413,6 @@ const StyledFrontCardContent = styled.div`
 				> blockquote {
 					font-size: ${CARD_FONT_SIZE}px;
 					line-height: 20px;
-
 					background: #dde1e0;
 					margin-bottom: 0;
 					height: 165px;
@@ -537,6 +536,7 @@ const addFavoriteTopicToMetadata = (
 		favorites = favorite_topics.map(({ topic_name }) => topic_name);
 	}
 	const temp = _.cloneDeep(data);
+
 	temp.map((metaData) => {
 		if (metaData.Key === 'Topics') {
 			metaData.Key = (
@@ -546,7 +546,7 @@ const addFavoriteTopicToMetadata = (
 					<b style={{ color: 'red' }}>(Beta)</b>
 				</div>
 			);
-			const topics = metaData.Value;
+			var topics = metaData.Value;
 			metaData.Value = (
 				<div>
 					{topics.map((topic, index) => {
@@ -1387,7 +1387,10 @@ const PolicyCardHandler = {
 				item,
 				searchText,
 				state,
-				handleCompareDocument
+				handleCompareDocument,
+				handleIgnore,
+				showQuickCompare,
+				compareIndex
 			} = props;
 			return (
 				<>
@@ -1449,16 +1452,18 @@ const PolicyCardHandler = {
 					}
 					{(state.listView && item.isCompare) &&
 						<>
-							<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
-								<GCButton
-									id={'ignore'}
-									onClick={() => { console.log('Ignored') }}
-									isSecondaryBtn={true}
-									style={{height: 36}}
-								>
-									Ignore
-								</GCButton>
-							</GCTooltip>
+							{showQuickCompare && 
+								<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
+									<GCButton
+										id={'ignore'}
+										onClick={() => { handleIgnore(item, compareIndex) }}
+										isSecondaryBtn={true}
+										style={{height: 36}}
+									>
+										Ignore
+									</GCButton>
+								</GCTooltip>
+							}
 							<GCButton
 								id={'compare'}
 								onClick={() => { handleCompareDocument(item.filename) }}
@@ -1805,7 +1810,7 @@ const PolicyCardHandler = {
 								);
 							}}
 						>
-							Open
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton
@@ -2055,7 +2060,7 @@ const PolicyCardHandler = {
 								);
 							}}
 						>
-							Open
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton

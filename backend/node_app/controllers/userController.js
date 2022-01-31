@@ -913,6 +913,7 @@ class UserController {
 
 			const [count, rows] = await this.gcUser.update({ 'api_requests': 3 }, {where: {id: id_values}});
 			this.logger.info(`Finished resetting; ${count} rows affected.`)
+			return count;
 		} catch(e) {
 			this.logger.error(e, '4X1IB7M', 'api-request-reset-cron');
 		}

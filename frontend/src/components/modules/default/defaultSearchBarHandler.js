@@ -18,29 +18,16 @@ const DefaultSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(
 		value,
 		cloneData,
-		setAutocorrect,
-		setPresearchTitle,
-		setPresearchTopic,
-		setPresearchOrg,
-		setPredictions
+		setAutocorrect
 	) {
 		try {
 			const index = cloneData?.clone_data?.esCluster ?? '';
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
+				suggestions: false
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
-			setPresearchTitle(
-				data?.presearchTitle?.map((item) => ({ text: item })) ?? []
-			);
-			setPresearchTopic(
-				data?.presearchTopic?.map((item) => ({ text: item })) ?? []
-			);
-			setPresearchOrg(
-				data?.presearchOrg?.map((item) => ({ text: item })) ?? []
-			);
-			setPredictions(data?.predictions?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
 			console.log('default debouncedFetchSearchSuggestions err', e);
 		}

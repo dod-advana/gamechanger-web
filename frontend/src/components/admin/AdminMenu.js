@@ -10,6 +10,7 @@ import AdminIcon from '../../images/icon/AdminIcon.png';
 import CloneIcon from '../../images/icon/CloneIcon.png';
 import AuthIcon from '../../images/icon/Authority.png';
 import AnalystToolsIcon from '../../images/icon/analyticswht.png';
+import DocumumentIcon from '../../images/icon/Document.png'
 import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
 import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
 import { HoverNavItem } from '../navigation/NavItems';
@@ -160,6 +161,20 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 					</HoverNavItem>
 				</Tooltip>
 			)}
+
+			{Permissions.isGameChangerAdmin() && (
+				<Tooltip title="Responsibility Updates" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setPageToView(PAGES.responsibilityUpdates);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={DocumumentIcon} />
+					</HoverNavItem>
+				</Tooltip>
+			)}
 		</div>
 	);
 };
@@ -297,6 +312,20 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					>
 						<CreateIcon style={{ fontSize: 30 }} />
 						<span style={{ marginLeft: '5px' }}>Homepage Editor</span>
+					</HoverNavItem>
+				</Tooltip>
+			)}
+
+			{Permissions.isGameChangerAdmin() && (
+				<Tooltip title="Responsibility Updates" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							setPageToView(PAGES.responsibilityUpdates);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={DocumumentIcon} />
+						<span style={{ marginLeft: '5px' }}>Responsibility Updates</span>
 					</HoverNavItem>
 				</Tooltip>
 			)}

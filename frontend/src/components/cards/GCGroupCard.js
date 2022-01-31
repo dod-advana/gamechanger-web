@@ -41,14 +41,16 @@ const styles = {
 		textOverflow: 'ellipsis',
 		fontSize: 18,
 		marginRight: 60,
-		overflow: 'scroll',
+		overflow: 'hidden',
+		whiteSpace: 'nowrap',
 		maxHeight: 30
 	},
 	groupDescription: {
 		textOverflow: 'ellipsis',
 		fontSize: 14,
 		marginRight: 60,
-		overflow: 'scroll',
+		overflow: 'hidden',
+		whiteSpace: 'nowrap',
 		maxHeight: 40
 	},
 	details: {

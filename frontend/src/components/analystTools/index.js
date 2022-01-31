@@ -5,9 +5,9 @@ import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import propTypes from 'prop-types';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../utils/gamechangerUtils';
-import GCResponsibilityTracker from './GCResponsibilityTracker';
 import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
 import {setState} from '../../utils/sharedFunctions';
+import GCResponsibilityExplorer from './GCResponsibilityExplorer';
 
 const AnalystTools = (props) => {
 	
@@ -59,7 +59,7 @@ const AnalystTools = (props) => {
 						
 						<div style={styles.panelContainer}>
 							<TabPanel>
-								<GCResponsibilityTracker state={state} dispatch={dispatch}/>
+								<GCResponsibilityExplorer state={state} dispatch={dispatch}/>
 							</TabPanel>
 							<TabPanel>
 								<GCDocumentsComparisonTool context={context}/>
