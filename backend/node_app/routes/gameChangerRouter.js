@@ -65,7 +65,7 @@ router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
-router.get('/getHomepageEditorData', admin.getHomepageEditorData);
+router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
