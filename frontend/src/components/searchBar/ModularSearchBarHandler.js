@@ -143,21 +143,23 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		if (searchBarHandler) {
-			searchBarHandler.debouncedFetchSearchSuggestions(
-				debouncedSearchTerm,
-				state.cloneData,
-				setAutocorrect,
-				setPresearchTitle,
-				setPresearchTopic,
-				setPresearchOrg,
-				setPredictions
-			);
+			if(debouncedSearchTerm.length > 3){
+				searchBarHandler.debouncedFetchSearchSuggestions(
+					debouncedSearchTerm,
+					state.cloneData,
+					setAutocorrect,
+					setPresearchTitle,
+					setPresearchTopic,
+					setPresearchOrg,
+					setPredictions
+				);
+			}
 		}
 	}, [state.cloneData, debouncedSearchTerm, searchBarHandler]); // run when debounce value changes;
 
 	useEffect(() => {
 		function onKeyDown(e) {
-			if (e.key === 'Enter' && state.inputActive !== 'compareInput') {
+			if (e.key === 'Enter' && state.inputActive !== 'compareInput' && cursor) {
 				setState(dispatch, {
 					searchText: searchText,
 					resultsPage: 1,
@@ -170,7 +172,7 @@ const ModularSearchBarHandler = (props) => {
 		}
 		window.addEventListener('keydown', onKeyDown);
 		return () => window.removeEventListener('keydown', onKeyDown);
-	}, [dispatch, searchText, state.inputActive]);
+	}, [dispatch, searchText, state.inputActive, cursor]);
 
 	useEffect(() => {
 		// if clicked outside of searchbar, close dropdown

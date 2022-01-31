@@ -73,8 +73,31 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const gT1 = new Date().getTime();
 
+			const PULL_NODES_FROM_NEO4J_MAX_LIMIT = 500;
+
 			// const { docIds, pubIds, searchTerms } = searchResults;
-			const { docs, searchTerms } = searchResults;
+			const { docs, searchTerms, totalCount } = searchResults;
+
+			let results = {};
+			let query = '';
+			let params = [];
+
+			if (totalCount <= PULL_NODES_FROM_NEO4J_MAX_LIMIT) {
+				// pull nodes from neo4j (this is slow, hence the limit)
+				const docIds = searchResults.docs.map((doc) => doc.doc_id);
+				[results, query, params] = await this.getGraphData(
+					`MATCH (d:Document) WHERE d.doc_id in $ids
+					OPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)
+					WHERE NOT d = d2 AND d2.doc_id in $ids
+					RETURN d, pt;`,
+					{ids: docIds}, isTest, userId
+				);
+			} else {
+				// mock nodes from elastic results
+				results = this.createMockGraphReturnFromEsResults(docs, userId);
+				query = 'Mocked from ES';
+				params = [];
+			}
 
 			// const [results, query, params] = await this.getGraphData(
 			// 	`MATCH (d:Document) WHERE d.doc_id in $ids
@@ -83,10 +106,6 @@ class PolicyGraphHandler extends GraphHandler {
 			// 	RETURN d, pt;`,
 			// 	{ids: docIds, pub_ids: pubIds}, isTest, userId
 			// );
-
-			const results = this.createMockGraphReturnFromEsResults(docs, userId);
-			const query = 'Mocked from ES';
-			const params = [];
 
 			// console.log(`Time for ES Search = ${(gT1 - gT0) / 1000}`);
 			// const gT2 = new Date().getTime();
@@ -514,7 +533,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const searchBody = {
 				searchText: searchText,
-				limit: this.constants.GAME_CHANGER_OPTS.downloadLimit,
+				limit: 200,
 				index: index || this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
 				getIdList: true,
 				expandTerms,
@@ -526,7 +545,9 @@ class PolicyGraphHandler extends GraphHandler {
 				publicationDateFilter,
 				storedFields: ['id'],
 				orgFilter,
-				includeRevoked
+				includeRevoked,
+				paragraphLimit: 1,
+				hasHighlights: false
 			};
 
 			// const gT0 = new Date().getTime();
@@ -541,7 +562,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
+			if (esResults?.body?.hits?.total?.value > 0) {
 
 				const {docIds} = this.searchUtility.cleanUpIdEsResults(esResults, searchTerms, userId, []);
 

@@ -75,7 +75,6 @@ const initState = {
 	showFeedbackModal: false,
 	showAssistModal: false,
 	assistVoluntary: true,
-	loginModalOpen: false,
 	showSnackbar: false,
 	exportDialogVisible: false,
 	showEsQueryDialog: false,
@@ -184,6 +183,9 @@ const initState = {
 	topicPage: 1,
 	topicPagination: false,
 	topicsLoading: false,
+
+	replaceResults: true,
+	infiniteScrollPage: 1,
 
 	currentSort: 'Relevance',
 	currentOrder: 'desc',

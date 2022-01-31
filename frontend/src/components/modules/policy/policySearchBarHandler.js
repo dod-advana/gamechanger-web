@@ -31,6 +31,7 @@ const PolicySearchBarHandler = {
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
+				suggestions: true,
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
 			setPresearchTitle(

@@ -13,6 +13,7 @@ const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
 const testing = false;
+const { performance } = require('perf_hooks');
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -57,9 +58,14 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/["]+/g,'');
 		}
 		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
+		var startTime = performance.now()
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		var startTimeInt = performance.now()
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
+		var endTimeInt = performance.now()
+		var endTime = performance.now()
+		this.logger.info(`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${endTimeInt - startTimeInt}`)
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		}
@@ -77,8 +83,6 @@ class PolicySearchHandler extends SearchHandler {
 		switch (functionName) {
 			case 'getSingleDocumentFromES':
 				return await this.getSingleDocumentFromESHelper(req, userId);
-			case 'getDocumentsForDetailsPageFromES':
-				return await this.getDocumentsForDetailsPageFromESHelper(req, userId);
 			case 'getDocumentsBySourceFromESHelper':
 				return await this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
@@ -174,6 +178,7 @@ class PolicySearchHandler extends SearchHandler {
 			cloneName,
 		} = body;
 		try {
+
 			// try to get search expansion
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
@@ -287,8 +292,9 @@ class PolicySearchHandler extends SearchHandler {
 			offset,
 		} = req.body;
 		try {
+			let sentenceResults = {}
+
 			let enrichedResults = searchResults;
-			let sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
 			//set empty values
 			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
 			enrichedResults.intelligentSearch = {};
@@ -296,23 +302,28 @@ class PolicySearchHandler extends SearchHandler {
 			enrichedResults.totalEntities = 0;
 			enrichedResults.topics = [];
 			enrichedResults.totalTopics = 0;
-			enrichedResults.sentenceResults = sentenceResults;
-
-			// QA data
-			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
-			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
-			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
-			if(intelligentAnswersOn){
-				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
-				enrichedResults.qaResults = QA
-			}
+			enrichedResults.sentenceResults = [];
 
 			// intelligent search data
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
+			if (intelligentSearchOn){
+				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
+				enrichedResults.sentenceResults = sentenceResults;
+
+			}
+
 			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
 				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
 				enrichedResults.intelligentSearch = intelligentSearchResult;
+			}
+			// QA data
+			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
+			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
+			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
+			if(intelligentAnswersOn && intelligentSearchOn){
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
+				enrichedResults.qaResults = QA
 			}
 
 			// add entities
@@ -342,7 +353,6 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.qaResponses = enrichedResults.qaResults;
 				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
 			}
-
 			return enrichedResults;
 		} catch (e) {
 			this.logger.error(e.message, 'I9D42WM');
@@ -486,10 +496,8 @@ class PolicySearchHandler extends SearchHandler {
 
 			const { cloneName } = req.body;
 
-			const esQuery = this.getElasticsearchDocDataFromId(req.body, userId);
-
+			const esQuery = this.searchUtility.getElasticsearchDocDataFromId(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
-
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
@@ -508,37 +516,8 @@ class PolicySearchHandler extends SearchHandler {
 			return { totalCount: 0, docs: [] };
 		}
 	}
+	
 
-	async getDocumentsForDetailsPageFromESHelper(req, userId) {
-		let esQuery = '';
-		try {
-			const permissions = req.permissions ? req.permissions : [];
-
-			const { cloneName } = req.body;
-
-			esQuery = this.getElasticsearchDocDataFromId(req.body, userId);
-
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
-
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
-				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
-				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-				// insert crawler dates into search results
-				return {...searchResults, esQuery};
-			} else {
-				this.logger.error('Error with Elasticsearch results', 'IH0JGPR', userId);
-				return { totalCount: 0, docs: [], esQuery };
-			}
-
-		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
-			this.logger.error(msg, 'Z9DWH7K', userId);
-			throw msg;
-		}
-	}
 
 	async getDocumentsBySourceFromESHelper(req, userId) {
 		let esQuery = '';
@@ -547,17 +526,19 @@ class PolicySearchHandler extends SearchHandler {
 			const { searchText, offset = 0, limit = 18, cloneName } = req.body;
 
 			esQuery = this.searchUtility.getSourceQuery(searchText, offset, limit);
+
 			const clientObj = this.searchUtility.getESClient(cloneName, permissions)
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
-
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
 				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
+
 				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results
 				return {...searchResults, esQuery};
 			} else {
 				this.logger.error('Error with Elasticsearch results', '54TP85I', userId);
+				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+
 				return { totalCount: 0, docs: [], esQuery };
 			}
 
@@ -568,45 +549,6 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	getElasticsearchDocDataFromId({ docIds }, user) {
-		try {
-			return {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_rs']
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'type',
-					'pagerank_r',
-					'display_title_s',
-					'display_org_s',
-					'display_doc_type_s',
-					'access_timestamp_dt',
-					'publication_date_dt',
-					'crawler_used_s',
-				],
-				track_total_hits: true,
-				size: 100,
-				query: {
-					bool: {
-						must: {
-							terms: {id: docIds}
-						}
-					}
-				}
-			};
-		} catch (err) {
-			this.logger.error(err, 'MEJL7W8', user);
-		}
-	}
 
 	// uses searchtext to get entity + parent, return entitySearch object
 	async entitySearch(searchText, offset, limit = 6, userId) {

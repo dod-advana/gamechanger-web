@@ -6,6 +6,7 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
+const { performance } = require('perf_hooks');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -52,6 +53,8 @@ class SearchUtility {
 		this.getTypeQuery = this.getTypeQuery.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
+		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
+		this.getSearchCount = this.getSearchCount.bind(this)
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -171,7 +174,6 @@ class SearchUtility {
 			let orig = key.replace(/[^\w\s]|_/g, "").trim()
 			currList.push(orig)
 			toReturn[key].forEach((y) => {
-					//y.phrase = this.removeOriginalTermFromExpansion(key, y.phrase);
 					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
 					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
@@ -359,7 +361,9 @@ class SearchUtility {
 				'crawler_used_s',
 				'download_url_s',
 				'source_page_url_s',
-				'source_fqdn_s'
+				'source_fqdn_s',
+				'topics_s',
+				'top_entities_t'
 			], 
 			extStoredFields = [], 
 			extSearchFields = [], 
@@ -368,7 +372,10 @@ class SearchUtility {
 			order = 'desc',
 			includeHighlights = true,
 			docIds = {},
-			selectedDocuments
+			selectedDocuments,
+			ltr = false,
+			paragraphLimit = 5, 
+			hasHighlights = true
 		 }, 
 		 user) {
 
@@ -385,12 +392,12 @@ class SearchUtility {
 				}
 			}
 			storedFields = [...storedFields, ...extStoredFields];
-			const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
-			const default_field = (verbatimSearch ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
-			const analyzer = (verbatimSearch ? 'standard' :  'gc_english');
+			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
+			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
+			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
 				},
 				stored_fields: storedFields,
 				from: offset,
@@ -424,8 +431,8 @@ class SearchUtility {
 											'paragraphs.par_raw_text_t'
 										],
 										from: 0,
-										size: 5,
-										highlight: {
+										size: paragraphLimit,
+										highlight: hasHighlights ? {
 											fields: {
 												'paragraphs.par_raw_text_t': {
 													fragment_size: 3 * charsPadding,
@@ -442,7 +449,8 @@ class SearchUtility {
 												},
 											},
 											fragmenter: 'span'
-										}
+										} :
+										{}
 									},
 									query: {
 										bool: {
@@ -465,7 +473,15 @@ class SearchUtility {
 							{
 								wildcard: {
 									'keyw_5': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
+									'display_source': {
+										value: `*${plainQuery}*`,
 										boost: 2
 									}
 								}
@@ -473,7 +489,7 @@ class SearchUtility {
 							{
 								wildcard: {
 									'display_title_s.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 8
 									}
 								}
@@ -481,14 +497,30 @@ class SearchUtility {
 							{
 								wildcard: {
 									'filename.search': {
-										value: `*${parsedQuery}*`,
+										value: `*${plainQuery}*`,
 										boost: 4
 									}
 								}
 							},
 							{
+								wildcard: {
+									'display_source_s.search': {
+										value: `*${plainQuery}*`,
+										boost: 2
+									}
+								}
+							},
+							{
+								wildcard: {
+									'top_entities_t.search': {
+										value: `*${plainQuery}*`,
+										boost: 2
+									}
+								}
+							},								
+							{
 								match: {
-									"display_title_s.search": parsedQuery
+									"display_title_s.search": plainQuery
 								}
 							}
 						],
@@ -498,19 +530,23 @@ class SearchUtility {
 						
 					}
 				},
-				highlight: {
+				highlight: hasHighlights ? {
 					require_field_match: false,
 					fields: {
 						'display_title_s.search': {},
 						'keyw_5': {},
-						'filename.search': {}
+						'filename.search': {},
+						'display_source_s.search': {},
+						'top_entities_t': {},
+						'topics_s': {}
 					},
 					fragment_size: 10,
 					fragmenter: 'simple',
 					type: 'unified',
 					boundary_scanner: 'word'
 
-				}
+				} :
+				{}
 			};
 
 			switch(sort){
@@ -610,12 +646,39 @@ class SearchUtility {
 					)
 
 			}
+
+			if (ltr) {
+				query.rescore = {
+					query: {
+						rescore_query: {
+							sltr: {
+								params: { keywords: `${parsedQuery}` },
+								model: 'ltr_model'
+							}
+						}
+					}					
+				}
+			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
 		}
 	}
-
+	isVerbatim(searchText){
+		let verbatim = false;
+		if( (searchText.startsWith('"') && searchText.endsWith('"')) || (searchText.startsWith(`'`) && searchText.endsWith(`'`))){
+			verbatim = true;
+		}
+		return verbatim;
+	}
+	isVerbatimSuggest(searchText){
+		let verbatim = false;
+		if( (searchText.startsWith('"') || (searchText.startsWith(`'`)))){
+			verbatim = true;
+		}
+		return verbatim;
+	}
 	async getTitle (parsedQuery, clientObj, userId) {
 	// get contents of single document searching by doc display title
 		try {
@@ -636,7 +699,6 @@ class SearchUtility {
 				}
 			}
             results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-			console.log(JSON.stringify(results));
             return results
         } catch (err) {
             this.logger.error(err, 'TJKBNOF', userId);
@@ -652,7 +714,7 @@ class SearchUtility {
 						'pagerank_r',
 						'kw_doc_score_r',
 						'pagerank',
-						'topics_rs'
+						'topics_s'
 					]
 				},
 				stored_fields: [
@@ -674,7 +736,9 @@ class SearchUtility {
 					'is_revoked_b',
 					'access_timestamp_dt',
 					'publication_date_dt',
-					'crawler_used_s'
+					'crawler_used_s',
+					'topics_s'
+
 				],
 				track_total_hits: true,
 				size: limit,
@@ -1286,11 +1350,13 @@ class SearchUtility {
 	}
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
-		// multi search in ES if text is more than 3
+		// multi search in ES
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+
 		let query = {
 				suggest: {
 					suggester: {
-						text: searchText,
+						text: plainQuery,
 						term: {
 							field: field,
 							sort: sort,
@@ -1302,13 +1368,91 @@ class SearchUtility {
 		return query
 
 	}
-
-	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases' }) {
+	getSearchCountQuery(daysBack, filterWords){
+		const query = 
+		{
+			"size": 1,
+			"query": {
+			  "bool": {
+				"must_not": [
+				  {
+					"terms": {
+					  "search_query": filterWords
+					}
+				  }
+				],
+				"must": [
+				  {
+					"range": {
+					  "run_time": {
+						"gte": `now-${daysBack}d/d`,
+						"lt": "now/d"
+					  }
+					}
+				  }
+				]
+			  }
+			},
+			"aggs": {
+			  "searchTerms": {
+				"terms": {
+				  "field": "search_query",
+				  "size": 1000
+				},
+				"aggs": {
+				  "user": {
+					"terms": {
+					  "field": "user_id",
+					  "size": 2
+					}
+				  }
+				}
+			  }
+			}
+		  }
+		  return query;
+	}
+	async getSearchCount(daysBack, filterWords, userId, esClientName='gamechanger', maxSearches=10){
 		// need to caps all search text for ID and Title since it's stored like that in ES
-		const searchTextCaps = searchText.toUpperCase();
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
+		let searchCounts = []
+		let searches = []
+		try {
+
+			const query = this.getSearchCountQuery(daysBack, filterWords)
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			let aggs = results.body.aggregations.searchTerms.buckets;
+			let maxCount = 0;
+			if (aggs.length > 0) {
+				aggs.forEach(term => {
+					let searchCount = {}
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					searchCount['search'] = word;
+					searchCount['count'] = term.doc_count;
+					if (term.user.buckets.length > 1){
+						word = word.replace(/\s{2,}/g," ");
+						if (!searches.includes(word) && maxCount < maxSearches){
+							searchCounts.push(searchCount)
+							searches.push(word)
+							maxCount += 1;
+						}
+					}
+				});
+			}
+			return searchCounts;
+		} catch (err) {
+			this.logger.error(err.message, 'LAO1TT', userId);
+		}
+
+		return searchCounts
+	}
+	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
-			let query = [
+			let query = []
+			let titleQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.index
 				},
@@ -1320,8 +1464,8 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s.search': {
-											value: `*${searchTextCaps}*`,
+										'display_title_s': {
+											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
 										}
@@ -1337,7 +1481,18 @@ class SearchUtility {
 							]
 						}
 					}
-				},
+				}
+			];
+			if (title !== 'display_title_s.search'){
+				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search']
+				titleQuery[1]['query']['bool']['must'][0]['wildcard'][title] = {
+					value: `*${plainQuery}*`,
+					boost: 1.0,
+					rewrite: 'constant_score'
+				}
+			}
+
+			let searchHistoryQuery = [ 
 				{
 					index: this.constants.GAME_CHANGER_OPTS.historyIndex
 				},
@@ -1346,7 +1501,7 @@ class SearchUtility {
 					query: {
 						prefix: {
 							search_query: {
-								value: `${searchText}`
+								value: `${plainQuery}`
 							}
 
 						}
@@ -1364,7 +1519,9 @@ class SearchUtility {
 							}
 						}
 					}
-				},
+				}
+			];
+			let entitiesQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.entityIndex
 				},
@@ -1376,13 +1533,22 @@ class SearchUtility {
 					query: {
 						prefix: {
 							name: {
-								value: `${searchText}`
+								value: `${plainQuery}`
 							}
 
 						}
 					},
 				}
 			];
+			if (queryTypes.includes('title')) {
+				query = query.concat(titleQuery);
+			}
+			if (queryTypes.includes('searchhistory')){
+				query = query.concat(searchHistoryQuery);
+			}
+			if (queryTypes.includes('entities')){
+				query = query.concat(entitiesQuery)
+			}
 			return query;
 		} else {
 			throw new Error('searchText required to construct query or not long enough');
@@ -1392,13 +1558,30 @@ class SearchUtility {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
 		let relatedSearches = []
-
+		let simWordList = []
 		try {
-			let similarWords = expansionDict['wordsim']
-			let simWordList = Object.keys(expansionDict['wordsim'])
-			for (var key in similarWords) {
-				simWordList = simWordList.concat(similarWords[key])
+			if (expansionDict['wordsim']){
+				let similarWords = expansionDict['wordsim']
+				simWordList = Object.keys(expansionDict['wordsim'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
 			}
+			if (expansionDict['qexp']){
+				let similarWords = expansionDict['qexp']
+				simWordList = Object.keys(expansionDict['qexp'])
+				for (var key in similarWords) {
+					simWordList = simWordList.concat(similarWords[key])
+				}
+			}			
+			if (simWordList.length <1) {
+				simWordList = [searchText]
+			}
+			for (var key in simWordList){
+				simWordList[key] = simWordList[key].replace(/["']/g, "")
+				
+			}
+
 			let similarWordsQuery = simWordList.join("* OR *")
 			const query = 
 				{
@@ -1505,9 +1688,6 @@ class SearchUtility {
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
-				const { _source = {} } = r;
-				const { topics_rs = {} } = _source;
-				result.topics_rs = Object.keys(topics_rs);
 
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
@@ -1545,10 +1725,22 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									result.pageHits.push({title: 'Keywords', snippet: new_highlights});
 								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
+								if (r.highlight['display_source_s.search']) {
+									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
+								}
+								if (r.highlight.top_entities_t) {
+									var new_highlights =  this.highlight_keywords(result.top_entities_t, r.highlight.top_entities_t);
+									result.pageHits.push({title: 'Entities', snippet: new_highlights});
+								}
+								if (r.highlight.topics_s) {
+									var new_highlights =  this.highlight_keywords(result.topics_s, r.highlight.topics_s);
+									result.pageHits.push({title: 'Topics', snippet: new_highlights});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1604,10 +1796,21 @@ class SearchUtility {
 									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
 								}
 								if(r.highlight.keyw_5){
-									result.pageHits.push({title: 'Keywords', snippet: r.highlight.keyw_5[0]});
-								}
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									result.pageHits.push({title: 'Keywords', snippet: new_highlights});								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
+								}
+								if (r.highlight['display_source_s.search']) {
+									result.pageHits.push({title: 'Source', snippet: r.highlight['display_source_s.search'][0]});
+								}
+								if (r.highlight.top_entities_t) {
+									var new_highlights =  this.highlight_keywords(result.top_entities_t, r.highlight.top_entities_t);
+									result.pageHits.push({title: 'Entities', snippet: new_highlights});
+								}
+								if (r.highlight.topics_s) {
+									var new_highlights =  this.highlight_keywords(result.topics_s, r.highlight.topics_s);
+									result.pageHits.push({title: 'Topics', snippet: new_highlights});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1621,6 +1824,7 @@ class SearchUtility {
 					} else {
 						result['keyw_5'] = '';
 					}
+
 					if (!result.ref_list) {
 						result.ref_list = [];
 					}
@@ -1634,13 +1838,28 @@ class SearchUtility {
 			if (isCompareReturn) {
 				results.docs.sort((a, b) => b.score - a.score);
 			}
-
 			return results;
 		} catch (err) {
 			this.logger.error(err.message, 'GL7EDI3', user);
 		}
 	}
-	
+	highlight_keywords(all_words, highlights) {
+		// purpose is to highlight words from the entire list.
+		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '');});
+		if (all_words instanceof Array){
+			var all_words_str = all_words.join(", ")
+		}
+		else {
+			var all_words_str = all_words
+		}
+		for (let ind in resultHighlights) {
+			var word = resultHighlights[ind]
+			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`)
+		}
+		let complete_words = all_words_str.split(', ')
+
+		return complete_words;
+	}
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
 		try {
 			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
@@ -1713,7 +1932,7 @@ class SearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
+		const arrayFields = ['keyw_5', 'topics_s', 'top_entities_t',  'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
 		const edaArrayFields = ['pds_header_items_eda_ext_n','pds_line_items_eda_ext_n','syn_header_items_eda_ext_n','syn_line_items_eda_ext_n']
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
@@ -1752,6 +1971,7 @@ class SearchUtility {
 	async getSentResults(searchText, userId) {
 		let sentResults = [];
 		try {
+			searchText = searchText.replace(/\?/g, '');
 			sentResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		} catch (e) {
 			this.logger.error(e, 'PQKLW5XN', userId);
@@ -1763,7 +1983,7 @@ class SearchUtility {
 		let filename;
 		let result;
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.60){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, clientObj, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
@@ -1822,6 +2042,7 @@ class SearchUtility {
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
+
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
@@ -1836,6 +2057,7 @@ class SearchUtility {
 				} else {
 					return this.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
 				}
+				
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
@@ -1994,9 +2216,9 @@ class SearchUtility {
 		try {
 			let query = {
 				_source: {
-					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_rs"]
+					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs"]
 				},
-				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
+				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "topics_s","ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
 				from: 0,
 				size: 18,
 				track_total_hits: true,
@@ -2005,7 +2227,7 @@ class SearchUtility {
 						must: [],
 						should: [{
 							  query_string: {
-								  query: "marine_pubs",
+								  query: searchText,
 								  default_field: "crawler_used_s"
 							   }
 						  }],
@@ -2103,7 +2325,14 @@ class SearchUtility {
 
 	getESClient(cloneName, permissions){
 		let esClientName = 'gamechanger';
-		let esIndex = 'gamechanger';
+		let esIndex = '';
+		try {
+			esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
+		}catch (err) {
+			this.logger.error(err, 'GE2ALRF','');
+			esIndex = 'gamechanger';
+
+		}
 
 		switch (cloneName) {
 			case 'eda':
@@ -2391,11 +2620,54 @@ class SearchUtility {
 		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
 	return question;
 	}
-	
-	getDocumentParagraphsByParIDs(ids = []) {
-		return {
+	getElasticsearchDocDataFromId({ docIds }, user) {
+		try {
+			return {
+				_source: {
+					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank']
+				},
+				stored_fields: [
+					'filename',
+					'title',
+					'page_count',
+					'doc_type',
+					'doc_num',
+					'ref_list',
+					'id',
+					'summary_30',
+					'keyw_5',
+					'type',
+					'pagerank_r',
+					'display_title_s',
+					'display_org_s',
+					'display_doc_type_s',
+					'access_timestamp_dt',
+					'publication_date_dt',
+					'crawler_used_s',
+					'topics_s',
+					'top_entities_t'
+				],
+				track_total_hits: true,
+				size: 100,
+				query: {
+					bool: {
+						must: {
+							terms: {id: docIds}
+						}
+					}
+				}
+			};
+		} catch (err) {
+			this.logger.error(err, 'MEJL7W8', user);
+		}
+	}
+
+	getDocumentParagraphsByParIDs(ids = [], filters = {}, offset = 0) {
+		const query = {
+			from: offset,
+			size: 100,
 			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r', 'topics_rs']
+				includes: ['pagerank_r', 'kw_doc_score_r']
 			},
 			'stored_fields': [
 				'filename',
@@ -2417,10 +2689,12 @@ class SearchUtility {
 				'access_timestamp_dt',
 				'publication_date_dt',
 				'crawler_used_s',
-				'topics_rs'
+				'topics_s'
 			],
 			'query': {
 				'bool': {
+					'must': [],
+					'filter': [],
 					'should': [
 						{
 							'nested': {
@@ -2457,6 +2731,46 @@ class SearchUtility {
 				}
 			}
 		}
+
+		if (filters?.orgFilters?.length > 0) {
+			query.query.bool.filter.push(
+				{
+					terms: {
+						display_org_s: filters.orgFilters
+					}
+				}
+			);
+		}
+		if (filters?.typeFilters?.length > 0) {
+			query.query.bool.filter.push(
+				{
+					terms: {
+						display_doc_type_s: filters.typeFilters
+					}
+				}
+			);
+		}
+		if (this.constants.GAME_CHANGER_OPTS.allow_daterange && filters?.dateFilter?.[0] && filters?.dateFilter?.[1]){
+			if (filters.dateFilter[0] && filters.dateFilter[1]) {
+				query.query.bool.must.push({
+					range: {
+						publication_date_dt: {
+							gte: filters.dateFilter[0].split('.')[0],
+							lte: filters.dateFilter[1].split('.')[0]
+						}
+					}
+				});
+			}
+		}
+		if (!filters?.canceledDocs) {
+			query.query.bool.filter.push({
+				term: {
+					is_revoked_b: 'false'
+				}
+			});
+		}
+		
+		return query;
 	}
 
 }

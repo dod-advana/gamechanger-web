@@ -222,6 +222,9 @@ const PolicySearchHandler = {
 			let combinedSearch = await gameChangerAPI.getCombinedSearchMode();
 			combinedSearch = combinedSearch.data.value === 'true';
 
+			let ltr = await gameChangerAPI.getLTRMode();
+			ltr = ltr.data.value === 'true';
+
 			const resp = await gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
 				searchText: searchObject.search,
@@ -240,7 +243,8 @@ const PolicySearchHandler = {
 					publicationDateFilter,
 					publicationDateAllTime,
 					includeRevoked,
-					archivedCongressSelected
+					archivedCongressSelected,
+					ltr
 				},
 				limit: 18,
 			});
@@ -807,6 +811,9 @@ const PolicySearchHandler = {
 			  ).join('_')
 			: undefined;
 
+		const currentParams =
+			new URLSearchParams(window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, ''));
+
 		const params = new URLSearchParams();
 		if (searchText) params.append('q', searchText);
 		if (offset) params.append('offset', String(offset)); // 0 is default
@@ -819,6 +826,7 @@ const PolicySearchHandler = {
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
 		if (categoriesText !== undefined)
 			params.append('categories', categoriesText); // '' is different than undefined
+		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

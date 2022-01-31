@@ -78,22 +78,32 @@ router.get('/getOrgImageOverrideURLs', document.getOrgImageOverrideURLs);
 router.post('/saveOrgImageOverrideURL', document.saveOrgImageOverrideURL);
 
 router.post('/responsibilities/get', responsibility.getResponsibilityData);
+router.post('/responsibilities/getDocTitles', responsibility.getResponsibilityDocTitles);
 router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
+router.post('/responsibilities/getDocLink', responsibility.getFileLink);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
+router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport)
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
+router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);
 
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);
 router.get('/admin/getS3List', transformer.getS3List);
+router.get('/admin/getS3DataList', transformer.getS3DataList);
 router.get('/admin/getModelsList', transformer.getModelsList);
+router.get('/admin/getDataList', transformer.getDataList);
 router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/initializeLTR', transformer.initializeLTR);
+router.get('/admin/createModelLTR', transformer.createModelLTR);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
+router.post('/admin/downloadS3File', transformer.downloadS3File);
+router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
@@ -179,6 +189,8 @@ router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
 router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
+router.get('/appSettings/ltr', appSettings.getLTRMode);
+router.post('/appSettings/ltr', appSettings.toggleLTRMode);
 router.post('/sendFrontendError', appSettings.logFrontendError);
 
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
@@ -189,5 +201,6 @@ router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
+router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 
 module.exports = router;

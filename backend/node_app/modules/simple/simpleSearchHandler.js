@@ -315,7 +315,7 @@ function getElasticsearchQuery(
 
 		let query = {
 			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs']
+				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
 			},
 			stored_fields: storedFields,
 			from: offset,

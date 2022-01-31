@@ -148,3 +148,8 @@
         margin-bottom: 10px;
     }
 }
+
+.Highlight--scrolledTo .Highlight__part {
+    background: #ff8741;
+    z-index: 1;
+}
