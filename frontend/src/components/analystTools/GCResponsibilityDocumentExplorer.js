@@ -239,21 +239,6 @@ export default function ResponsibilityDocumentExplorer({
 	}
 
 	function handleQuoteLinkClick(e, respKey, entKey, key) {
-		// if (Object.keys(selectedResponsibility).length) {
-		// 	const fileName = selectedResponsibility.filename;
-		// 	trackEvent(
-		// 		getTrackingNameForFactory(cloneData.clone_name),
-		// 		'ResponsibilityExplorerInteraction',
-		// 		'PDFOpen'
-		// 	);
-		// 	trackEvent(
-		// 		getTrackingNameForFactory(cloneData.clone_name),
-		// 		'ResponsibilityExplorerInteraction',
-		// 		'filename',
-		// 		fileName
-		// 	);
-		// 	setPdfLoaded(false);
-		// }
 		e.preventDefault();
 		setIframePreviewLink({
 			responsibilityIdx: respKey,
@@ -714,23 +699,7 @@ export default function ResponsibilityDocumentExplorer({
 											<Collapse isOpened={entOpen && docOpen}>
 												<div>
 													{responsibilityData[doc][entity].map((responsibility, respKey) => {
-														let isHighlighted = false;
-														const dataObj = responsibilityData[doc];
-														if (dataObj) {
-															const pageObj =
-																responsibilityData[doc][entity][
-																	iframePreviewLink.entityIdx
-																];
-															if (pageObj) {
-																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx]
-																const selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
-																isHighlighted =
-																	selectedDoc === responsibility.documentTitle &&
-																	selectedEntity === responsibility.organizationPersonnel &&
-																	respKey === iframePreviewLink.responsibilityIdx;
-															}
-														}
-
+														let isHighlighted = selectedResponsibility.responsibilityText === responsibility.responsibilityText;
 														let blockquoteClass = 'searchdemo-blockquote-sm';
 
 														if (isHighlighted)
