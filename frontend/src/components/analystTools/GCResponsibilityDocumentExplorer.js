@@ -103,11 +103,6 @@ export default function ResponsibilityDocumentExplorer({
 
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState({});
-	const [iframePreviewLink, setIframePreviewLink] = useState({
-		dataIdx: 0,
-		entityIdx: 0,
-		responsibilityIdx: 0
-	});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -131,20 +126,6 @@ export default function ResponsibilityDocumentExplorer({
 		setAlertMessage(message);
 		setAlertActive(true);
 	};
-
-	useEffect(() => {
-		if(Object.keys(responsibilityData).length){
-			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
-			const doc = Object.keys(responsibilityData)[dataIdx];
-			if(!doc) return;
-			const entity = Object.keys(responsibilityData[doc])[entityIdx];
-			if(!entity) return;
-			const resp = responsibilityData[doc][entity][responsibilityIdx];
-			if (resp) {
-				setSelectedResponsibility(resp);
-			}
-		}
-	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
 		if(!iframeLoading){
@@ -171,12 +152,13 @@ export default function ResponsibilityDocumentExplorer({
 				})
 			})
 			setCollapseKeys(initialCollapseKeys);
+			const doc = Object.keys(responsibilityData)[0];
+			const entity = Object.keys(responsibilityData[doc])[0];
+
+			setSelectedResponsibility(responsibilityData[doc][entity][0])
+		}else {
+			setSelectedResponsibility({})
 		}
-		setIframePreviewLink({
-			dataIdx: 0,
-			entityIdx: 0,
-			responsibilityIdx: 0
-		})
 	}, [responsibilityData]);
 
 	useEffect(() => {
@@ -238,13 +220,9 @@ export default function ResponsibilityDocumentExplorer({
 		setLeftPanelOpen(!leftPanelOpen);
 	}
 
-	function handleQuoteLinkClick(e, respKey, entKey, key) {
+	function handleQuoteLinkClick(e, resp) {
 		e.preventDefault();
-		setIframePreviewLink({
-			responsibilityIdx: respKey,
-			entityIdx: entKey,
-			dataIdx: key,
-		});
+		setSelectedResponsibility(resp)
 	}
 
 	function handlePdfOnLoadStart() {
@@ -305,11 +283,6 @@ export default function ResponsibilityDocumentExplorer({
 	}
 
 	const getMetadataForTable = () => {
-		if(!Object.keys(responsibilityData).length) return [];
-		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-		if(!doc) return [];
-		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
-		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -318,7 +291,7 @@ export default function ResponsibilityDocumentExplorer({
 			documentsReferenced: 'Documents Referenced'
 		}
 		const metaData = [];
-		Object.keys(responsibility).forEach(key => {
+		Object.keys(selectedResponsibility).forEach(key => {
 			if(keyMap[key]){
 				const editButtons = key === 'responsibilityText' || key === 'organizationPersonnel'
 					? 
@@ -349,7 +322,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingResp && key === 'responsibilityText' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo(responsibility.responsibilityText);
+								getResponsibilityPageInfo(selectedResponsibility.responsibilityText);
 								setIsEditingResp(true);
 							}}
 							style={{
@@ -366,7 +339,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingEntity && key === 'organizationPersonnel' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo(responsibility.organizationPersonnel || responsibility.responsibilityText);
+								getResponsibilityPageInfo(selectedResponsibility.organizationPersonnel || selectedResponsibility.responsibilityText);
 								setIsEditingEntity(true);
 							}}
 							style={{
@@ -387,7 +360,7 @@ export default function ResponsibilityDocumentExplorer({
 				metaData.push({
 					Key: keyMap[key],
 					Value: <div style={{wordBreak: 'break-word'}}>
-						{responsibility[key]}
+						{selectedResponsibility[key]}
 						{editButtons}
 					</div>
 				})
@@ -599,11 +572,6 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 							<GCButton 
 								onClick={() => {
-									setIframePreviewLink({
-										dataIdx: 0,
-										entityIdx: 0,
-										responsibilityIdx: 0
-									})
 									setResponsibilityText({});
 									setOrganization([]);
 									setDocTitle([]);
@@ -619,11 +587,6 @@ export default function ResponsibilityDocumentExplorer({
 							</GCButton>
 							<GCButton 
 								onClick={() => {
-									setIframePreviewLink({
-										dataIdx: 0,
-										entityIdx: 0,
-										responsibilityIdx: 0
-									})
 									const filters = [];
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
 									if(organization.length) {
@@ -713,7 +676,7 @@ export default function ResponsibilityDocumentExplorer({
 																<div
 																	className="searchdemo-quote-link"
 																	onClick={(e) => {
-																		handleQuoteLinkClick(e, respKey, entKey, key);
+																		handleQuoteLinkClick(e, responsibility);
 																	}}
 																>
 																	<div className={blockquoteClass} style={{marginLeft: 40}}>
