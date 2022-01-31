@@ -99,8 +99,8 @@ class AdminController {
 		let esIndex = "gamechanger";
 		const {
 			favorite_documents
-		} = req;
-		console.log(req)
+		} = req.body;
+		console.log(favorite_documents)
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const results = await this.appSettings.findAll({
@@ -117,7 +117,7 @@ class AdminController {
 			recDocs.key = "rec_docs"
 			try {
 				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
-				recDocs.value =  await this.searchUtility.getRecDocs("Title 10", userId);
+				recDocs.value =  await this.searchUtility.getRecDocs(favorite_documents[0], userId);
 
 			} catch (err) {
 				this.logger.error(err, 'FL1LLDU', userId);

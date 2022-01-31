@@ -277,7 +277,6 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 	const {userData} = state
 	const user = await gcUserManagementAPI.getUserData()
 	const { favorite_documents } = user.data
-	console.log(favorite_documents)
 
 	try {
 		const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
