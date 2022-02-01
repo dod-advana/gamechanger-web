@@ -100,8 +100,12 @@ class AdminController {
 		const {
 			favorite_documents
 		} = req.body;
-		const fav_doc = favorite_documents[0].filename.split('.pdf')[0];
-		console.log(fav_doc)
+		
+		let favDocList = [];
+		for (let doc of favorite_documents){
+			favDocList.push(doc.filename.split('.pdf')[0])
+		}
+		console.log(favDocList)
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -120,9 +124,8 @@ class AdminController {
 			try {
 				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
 				if (favorite_documents){
-					const rec_results =  await this.searchUtility.getRecDocs(fav_doc, userId);
+					const rec_results =  await this.searchUtility.getRecDocs(favDocList, userId);
 					recDocs.value = rec_results.results;
-					console.log(recDocs.value)
 				}
 
 			} catch (err) {

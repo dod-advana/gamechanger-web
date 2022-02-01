@@ -7,7 +7,7 @@ import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Typography } from '@material-ui/core';
-import { setState, handleSaveFavoriteTopic ,	getUserData} from '../../../utils/sharedFunctions';
+import { setState, handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -220,7 +220,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
-const handleRecDocs = async (rec_docs, pop_pubs_inactive,state, dispatch, cancelToken) => {
+const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
 		filteredPubs = rec_docs.map((name) => ({
@@ -313,7 +313,6 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 	let pop_pubs = [];
 	let pop_pubs_inactive = [];
 	let rec_docs = [];
-	const {userData} = state
 	const user = await gcUserManagementAPI.getUserData()
 	const { favorite_documents = [] } = user.data
 
@@ -329,9 +328,8 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 			else if (obj.key === 'popular_docs') {
 				pop_pubs = obj.value;
 			}
-			else if (obj.key == 'rec_docs') {
+			else if (obj.key === 'rec_docs') {
 				rec_docs = obj.value;
-				console.log(rec_docs)
 			}
 		});
 	} catch (e) {
@@ -347,7 +345,7 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 	// handlePubs(pubs, state, dispatch);
 	handleSources(state, dispatch, cancelToken);
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken);
-	handleRecDocs(rec_docs, pop_pubs_inactive, state, dispatch, cancelToken);
+	handleRecDocs(rec_docs, state, dispatch, cancelToken);
 }
 
 const formatString = (text) => {

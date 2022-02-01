@@ -2162,7 +2162,7 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-	async getRecDocs(doc="Title 10", userId=""){
+	async getRecDocs(doc=["Title 10"], userId=""){
 		let recDocs = [];
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
