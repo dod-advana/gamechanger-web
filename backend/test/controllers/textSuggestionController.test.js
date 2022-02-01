@@ -626,7 +626,7 @@ describe('TextSuggestionController', function () {
 				],
 				presearchTopic: [],
 				presearchOrg: [ 'Navy Personnel Command', 'United States Navy' ],
-				predictions: [ 'navy', 'navy OR "dark blue"' ]
+				predictions: [ 'navy OR "dark blue"','navy OR us' ]
 			};
 
 			assert.deepStrictEqual(resMsg, expected);
