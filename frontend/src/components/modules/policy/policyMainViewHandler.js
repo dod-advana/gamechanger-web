@@ -220,6 +220,45 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
+const handleRecDocs = async (rec_docs, pop_pubs_inactive,state, dispatch, cancelToken) => {
+	let filteredPubs = [];
+	try {
+		filteredPubs = rec_docs.map((name) => ({
+			name,
+			imgSrc: DefaultPub,
+		}));
+		setState(dispatch, { recDocs: filteredPubs });
+
+		for (let i = 0; i < filteredPubs.length; i++) {
+			gameChangerAPI
+				.thumbnailStorageDownloadPOST(
+					[filteredPubs[i]],
+					'thumbnails',
+					state.cloneData,
+					cancelToken
+				)
+				.then((pngs) => {
+					const buffers = pngs.data;
+					buffers.forEach((buf, idx) => {
+						if (buf.status === 'fulfilled') {
+							filteredPubs[i].imgSrc = 'data:image/png;base64,' + buf.value;
+						} else {
+							filteredPubs[i].imgSrc = DefaultPub;
+						}
+					});
+					setState(dispatch, { recDocs: filteredPubs });
+				}).catch(e => {
+					//Do nothing
+				});
+		}
+		console.log(filteredPubs)
+
+	} catch (e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, { recDocs: filteredPubs });
+	}
+};
 const handleSources = async (state, dispatch, cancelToken) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
@@ -276,7 +315,7 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 	let rec_docs = [];
 	const {userData} = state
 	const user = await gcUserManagementAPI.getUserData()
-	const { favorite_documents } = user.data
+	const { favorite_documents = [] } = user.data
 
 	try {
 		const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
@@ -292,6 +331,7 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 			}
 			else if (obj.key == 'rec_docs') {
 				rec_docs = obj.value;
+				console.log(rec_docs)
 			}
 		});
 	} catch (e) {
@@ -307,7 +347,7 @@ const handleHomepage = async (state, dispatch, cancelToken) => {
 	// handlePubs(pubs, state, dispatch);
 	handleSources(state, dispatch, cancelToken);
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken);
-
+	handleRecDocs(rec_docs, pop_pubs_inactive, state, dispatch, cancelToken);
 }
 
 const formatString = (text) => {
@@ -345,6 +385,7 @@ const PolicyMainViewHandler = {
 		const {
 			adminTopics,
 			searchMajorPubs,
+			recDocs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -633,13 +674,13 @@ const PolicyMainViewHandler = {
 						)}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
-						links={searchMajorPubs}
-						title="For You"
+						links={recDocs}
+						title="Recommended For You"
 						width="215px"
 					>
-						{searchMajorPubs.length > 0 &&
-							searchMajorPubs[0].imgSrc &&
-							searchMajorPubs.map((pub) => (
+						{recDocs.length > 0 &&
+							recDocs[0].imgSrc &&
+							recDocs.map((pub) => (
 								<div className="topPublication">
 									{pub.imgSrc !== 'error' ? (
 										<img
@@ -670,7 +711,7 @@ const PolicyMainViewHandler = {
 									</div>
 								</div>
 							))}
-						{searchMajorPubs.length === 0 && (
+						{recDocs.length === 0 && (
 							<div className="col-xs-12">
 								<LoadingIndicator
 									customColor={gcOrange}

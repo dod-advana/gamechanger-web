@@ -62,6 +62,7 @@ const initState = {
 	adminTopics: [],
 	adminMajorPubs: [],
 	searchMajorPubs: [],
+	recDocs: [],
 	trendingLinks: [],
 
 	// Tutorial
