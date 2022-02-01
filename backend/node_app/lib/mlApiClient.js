@@ -99,7 +99,7 @@ class MLApiClient {
 	}
 
 	async recommender(doc, userId = 'unknown') {
-		const data = { filename: doc}
+		const data = { filenames: doc}
 		return await this.postData('recommender', userId, data);
 	}
 	/**
