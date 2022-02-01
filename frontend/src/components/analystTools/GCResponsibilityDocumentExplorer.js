@@ -84,6 +84,7 @@ export default function ResponsibilityDocumentExplorer({
 	loading,
 	totalCount,
 	setResultsPage,
+	infiniteCount,
 	isClone = true,
 	setReloadResponsibilities,
 	docTitle, 
@@ -143,7 +144,7 @@ export default function ResponsibilityDocumentExplorer({
 	},[iframeLoading])
 
 	useEffect(() => {
-		if (Object.keys(responsibilityData).length) {
+		if (Object.keys(responsibilityData).length && infiniteCount === 1) {
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach(doc => {
 				initialCollapseKeys[doc] = false;
@@ -156,10 +157,10 @@ export default function ResponsibilityDocumentExplorer({
 			const entity = Object.keys(responsibilityData[doc])[0];
 
 			setSelectedResponsibility(responsibilityData[doc][entity][0])
-		}else {
+		}else if(!Object.keys(responsibilityData).length){
 			setSelectedResponsibility({})
 		}
-	}, [responsibilityData]);
+	}, [responsibilityData, infiniteCount]);
 
 	useEffect(() => {
 		setIsEditingEntity(false);
@@ -222,7 +223,7 @@ export default function ResponsibilityDocumentExplorer({
 
 	function handleQuoteLinkClick(e, resp) {
 		e.preventDefault();
-		setSelectedResponsibility(resp)
+		setSelectedResponsibility(resp);
 	}
 
 	function handlePdfOnLoadStart() {
