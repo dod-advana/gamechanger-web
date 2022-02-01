@@ -171,8 +171,7 @@ export default function ResponsibilityDocumentExplorer({
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null) {
-				const rec = Object.keys(responsibilityData).length;
-				if (rec) {
+				if (Object.keys(selectedResponsibility).length) {
 					const pageNumber = 1;
 					if (
 						selectedResponsibility.filename
@@ -196,8 +195,7 @@ export default function ResponsibilityDocumentExplorer({
 		[
 			selectedResponsibility,
 			isClone,
-			cloneData,
-			responsibilityData,
+			cloneData
 		]
 	);
 
