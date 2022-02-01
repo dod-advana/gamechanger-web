@@ -230,4 +230,8 @@ module.exports = Object.freeze({
 		advana_product: process.env.JIRA_ADVANA_PRODUCT,
 		feedbackType: process.env.JIRA_FEEDBACK_TYPE
 	},
+	GRAPH_CONFIG: {
+		PULL_NODES_FROM_NEO4J_MAX_LIMIT: process.env.PULL_NODES_FROM_NEO4J_MAX_LIMIT,
+		MAX_GRAPH_VIEW_NODES_DISPLAYED: process.env.MAX_GRAPH_VIEW_NODES_DISPLAYED,
+	},
 });
