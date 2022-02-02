@@ -31,7 +31,7 @@ class AdminController {
 		this.deleteGCAdminData = this.deleteGCAdminData.bind(this);
 		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
 		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
-
+		this.getHomepageUserData = this.getHomepageUserData.bind(this);
 	}
 
 	async getGCAdminData(req, res) {
@@ -94,22 +94,58 @@ class AdminController {
 			res.status(500).send(err);
 		}
 	}
-	async getHomepageEditorData(req, res) {
-		let userId = 'webapp_unknown';
-		let esIndex = "gamechanger";
+	async getHomepageUserData(req, esIndex, userId){
+		let results = []
 		const {
 			favorite_documents
 		} = req.body;
-		
 		let favDocList = [];
 		for (let doc of favorite_documents){
 			favDocList.push(doc.filename.split('.pdf')[0])
 		}
 		console.log(favDocList)
+		let docs = {};
+		let recDocs = {};
+		docs.key = "popular_docs";
+		recDocs.key = "rec_docs"
+		try {
+			docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
+
+		} catch (err) {
+			this.logger.error(err, 'FL1LLDU', userId);
+			docs.value = []
+		}
+		try {
+			if (favDocList.length > 0){
+				const rec_results =  await this.searchUtility.getRecDocs(favDocList, userId);
+				recDocs.value = rec_results.results;
+			} else {
+				recDocs.value = [];
+			}
+		} catch (err) {
+			this.logger.error(err, 'FL2LLDU', userId);
+			recDocs.value = []
+		}
+		//console.log(results)
+		results.push(docs);
+		results.push(recDocs)
+		return results;
+	}
+	async getHomepageEditorData(req, res) {
+		let userId = 'webapp_unknown';
+		let esIndex = "gamechanger";
+		let userResults = [];
+		try {
+			userResults = await this.getHomepageUserData(req, esIndex, userId)
+
+		} catch (err){
+			this.logger.error(err, 'PP1QOA3', userId);
+		}
+
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const results = await this.appSettings.findAll({
+			let results = await this.appSettings.findAll({
 				where: {
 					key: [
 						'homepage_topics',
@@ -117,31 +153,15 @@ class AdminController {
 						'homepage_popular_docs_inactive'					]
 				}
 			});
-			let docs = {};
-			let recDocs = {};
-			docs.key = "popular_docs";
-			recDocs.key = "rec_docs"
-			try {
-				docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
-				if (favorite_documents){
-					const rec_results =  await this.searchUtility.getRecDocs(favDocList, userId);
-					recDocs.value = rec_results.results;
-				}
-
-			} catch (err) {
-				this.logger.error(err, 'FL1LLDU', userId);
-				res.status(500).send(err);
-				docs.value = []
-			}
-			//console.log(results)
-			results.push(docs);
-			results.push(recDocs)
+			results = results.concat(userResults)
+			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
 			res.status(500).send(err);
 		}
 	}
+	
 
 	async setHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown'
