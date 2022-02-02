@@ -228,6 +228,7 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 			imgSrc: DefaultPub,
 		}));
 		setState(dispatch, { recDocs: filteredPubs });
+		setState(dispatch, { loadingrecDocs: false });
 
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
@@ -367,7 +368,9 @@ const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
+		setState(dispatch, { loadingrecDocs: true });
 		await handleHomepage(state, dispatch, props)
+
 	},
 
 	getMainView(props) {
@@ -384,6 +387,7 @@ const PolicyMainViewHandler = {
 			adminTopics,
 			searchMajorPubs,
 			recDocs,
+			loadingrecDocs,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -565,6 +569,65 @@ const PolicyMainViewHandler = {
 						))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
+						links={recDocs}
+						title="Recommended For You"
+						width="215px"
+					>
+						{recDocs.length > 0 &&
+							recDocs[0].imgSrc &&
+							recDocs.map((pub) => (
+								<div className="topPublication">
+									{pub.imgSrc !== 'error' ? (
+										<img
+											className="image"
+											src={pub.imgSrc}
+											alt="thumbnail"
+											title={pub.name}
+										/>
+									) : (
+										<div className="image">{pub.name}</div>
+									)}
+
+									<div
+										className="hover-overlay"
+										onClick={() => {
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'PublicationOpened',
+												pub.name
+											);
+											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
+											window.open(
+												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
+											);
+										}}
+									>
+										<div className="hover-text">{formatString(pub.name)}</div>
+									</div>
+								</div>
+							))}
+						{loadingrecDocs && recDocs.length === 0 && (
+							<div className="col-xs-12">
+								<LoadingIndicator
+									customColor={gcOrange}
+									inline={true}
+									containerStyle={{
+										height: '300px',
+										textAlign: 'center',
+										paddingTop: '75px',
+										paddingBottom: '75px',
+									}}
+								/>
+							</div>
+						)}
+						{!loadingrecDocs && recDocs.length === 0 && (
+							<div className="col-xs-12" style={{ height: '140px' }}>
+								<Typography style={styles.containerText}>Try favoriting more documents to see your personalized recommendations.</Typography>
+
+							</div>
+						)}
+					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
 						links={crawlerSources}
 						title="Sources"
 						width="300px"
@@ -671,59 +734,7 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={recDocs}
-						title="Recommended For You"
-						width="215px"
-					>
-						{recDocs.length > 0 &&
-							recDocs[0].imgSrc &&
-							recDocs.map((pub) => (
-								<div className="topPublication">
-									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
-									) : (
-										<div className="image">{pub.name}</div>
-									)}
-
-									<div
-										className="hover-overlay"
-										onClick={() => {
-											trackEvent(
-												getTrackingNameForFactory(cloneData.clone_name),
-												'PublicationOpened',
-												pub.name
-											);
-											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-											window.open(
-												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
-											);
-										}}
-									>
-										<div className="hover-text">{formatString(pub.name)}</div>
-									</div>
-								</div>
-							))}
-						{recDocs.length === 0 && (
-							<div className="col-xs-12">
-								<LoadingIndicator
-									customColor={gcOrange}
-									inline={true}
-									containerStyle={{
-										height: '300px',
-										textAlign: 'center',
-										paddingTop: '75px',
-										paddingBottom: '75px',
-									}}
-								/>
-							</div>
-						)}
-					</GameChangerThumbnailRow>
+					
 				</div>
 			</div>
 		);
