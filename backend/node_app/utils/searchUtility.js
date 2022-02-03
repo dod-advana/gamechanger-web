@@ -54,7 +54,8 @@ class SearchUtility {
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
-		this.getSearchCount = this.getSearchCount.bind(this)
+		this.getSearchCount = this.getSearchCount.bind(this);
+		this.getRecDocs = this.getRecDocs.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -2214,7 +2215,6 @@ class SearchUtility {
 					popDocs.push(doc);
 				});
 			};
-			let docs = await this.getRecDocs()
 
 			return popDocs;
 		} catch (e) {
