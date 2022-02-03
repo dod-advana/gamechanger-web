@@ -313,9 +313,7 @@ const handleSources = async (state, dispatch, cancelToken) => {
 		setState(dispatch, { crawlerSources });
 	}
 };
-const handleHomepage = async (state, dispatch, cancelToken) => {
 
-}
 
 const formatString = (text) => {
 	let titleCase = text
@@ -337,7 +335,6 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		setState(dispatch, { loadingrecDocs: true });
-		//await handleHomepage(state, dispatch, props)
 		let topics = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
