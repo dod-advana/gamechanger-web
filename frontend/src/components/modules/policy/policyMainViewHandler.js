@@ -252,7 +252,6 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 					//Do nothing
 				});
 		}
-		console.log(filteredPubs)
 
 	} catch (e) {
 		//Do nothing
