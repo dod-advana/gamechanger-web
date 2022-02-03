@@ -62,7 +62,7 @@ const styles = {
 	},
 };
 
-const StyledListViewFrontCardContent = styled.div`
+export const StyledListViewFrontCardContent = styled.div`
 	.list-view-button {
 		width: 100%;
 		height: fit-content;
@@ -158,7 +158,7 @@ const StyledListViewFrontCardContent = styled.div`
 	}
 `;
 
-const StyledFrontCardHeader = styled.div`
+export const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
 	display: inline-block;
 	color: black;
@@ -218,7 +218,7 @@ const StyledFrontCardHeader = styled.div`
 	}
 `;
 
-const StyledEntityFrontCardContent = styled.div`
+export const StyledEntityFrontCardContent = styled.div`
 	display: flex;
 	height: 100%;
 	flex-direction: column;
@@ -241,7 +241,7 @@ const StyledEntityFrontCardContent = styled.div`
 	}
 `;
 
-const StyledFrontCardSubHeader = styled.div`
+export const StyledFrontCardSubHeader = styled.div`
 	display: flex;
 	position: relative;
 
@@ -285,7 +285,7 @@ const StyledFrontCardSubHeader = styled.div`
 	}
 `;
 
-const StyledFrontCardContent = styled.div`
+export const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
 	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
