@@ -225,9 +225,13 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	try {
 		filteredPubs = rec_docs.map((name) => ({
 			name,
+			doc_filename: name,
 			img_filename: name + '.png',
+			id: name + '.pdf_0',
+
 			imgSrc: DefaultPub,
 		}));
+		console.log(filteredPubs)
 		setState(dispatch, { recDocs: filteredPubs });
 		setState(dispatch, { loadingrecDocs: false });
 
