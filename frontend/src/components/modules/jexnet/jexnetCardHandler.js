@@ -911,7 +911,7 @@ const DefaultCardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								window.open(config.JEXNET_LINK);
+								window.open(`${config.JEXNET_LINK}view?attachmentName=${filename}`);
 							}}
 						>
 							Go to Jexnet
