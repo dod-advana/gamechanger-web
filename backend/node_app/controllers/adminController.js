@@ -118,7 +118,7 @@ class AdminController {
 		try {
 			if (favDocList.length > 0){
 				const rec_results =  await this.searchUtility.getRecDocs(favDocList, userId);
-				recDocs.value = rec_results.results;
+				recDocs.value = rec_results.results ? rec_results.results: [];
 			} else {
 				recDocs.value = [];
 			}
@@ -154,7 +154,6 @@ class AdminController {
 				}
 			});
 			results = results.concat(userResults)
-			console.log(results)
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
