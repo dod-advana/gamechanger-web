@@ -103,6 +103,7 @@ class AdminController {
 		for (let doc of favorite_documents){
 			favDocList.push(doc.filename.split('.pdf')[0])
 		}
+		console.log(favDocList)
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
@@ -125,6 +126,7 @@ class AdminController {
 			this.logger.error(err, 'FL2LLDU', userId);
 			recDocs.value = []
 		}
+		//console.log(results)
 		results.push(docs);
 		results.push(recDocs)
 		return results;

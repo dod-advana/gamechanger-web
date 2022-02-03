@@ -225,6 +225,7 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	try {
 		filteredPubs = rec_docs.map((name) => ({
 			name,
+			img_filename: name + '.png',
 			imgSrc: DefaultPub,
 		}));
 		setState(dispatch, { recDocs: filteredPubs });
