@@ -104,6 +104,7 @@ router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
 router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
+router.post('/admin/stopProcess', transformer.stopProcess);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
@@ -198,5 +199,6 @@ router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
+router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 
 module.exports = router;

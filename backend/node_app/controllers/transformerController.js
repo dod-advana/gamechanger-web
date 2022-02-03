@@ -34,7 +34,8 @@ class TransformerController {
 			'downloadCorpus': this.mlApi.downloadCorpus,
 			'trainModel': this.mlApi.trainModel,
 			'initializeLTR': this.mlApi.initializeLTR,
-			'createModelLTR': this.mlApi.createModelLTR
+			'createModelLTR': this.mlApi.createModelLTR,
+			'stopProcess': this.mlApi.stopProcess
 		}
 
 		// Get methods
@@ -56,6 +57,7 @@ class TransformerController {
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.stopProcess = this.postData.bind(this, 'stopProcess');
 
 
 	}
