@@ -309,43 +309,7 @@ const handleSources = async (state, dispatch, cancelToken) => {
 	}
 };
 const handleHomepage = async (state, dispatch, cancelToken) => {
-	let topics = [];
-	let pop_pubs = [];
-	let pop_pubs_inactive = [];
-	let rec_docs = [];
-	const user = await gcUserManagementAPI.getUserData()
-	const { favorite_documents = [] } = user.data
 
-	try {
-		const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
-		data.forEach((obj) => {
-			if (obj.key === 'homepage_topics') {
-				topics = JSON.parse(obj.value);
-			}
-			else if (obj.key === 'homepage_popular_docs_inactive') {
-				pop_pubs_inactive = JSON.parse(obj.value);
-			} 
-			else if (obj.key === 'popular_docs') {
-				pop_pubs = obj.value;
-			}
-			else if (obj.key === 'rec_docs') {
-				rec_docs = obj.value;
-			}
-		});
-	} catch (e) {
-		// Do nothing
-		console.log(e)
-	}
-	setState(
-		dispatch,
-		getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
-			{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
-			{ adminTopics: topics }
-	);
-	// handlePubs(pubs, state, dispatch);
-	handleSources(state, dispatch, cancelToken);
-	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken);
-	handleRecDocs(rec_docs, state, dispatch, cancelToken);
 }
 
 const formatString = (text) => {
@@ -368,8 +332,44 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		setState(dispatch, { loadingrecDocs: true });
-		await handleHomepage(state, dispatch, props)
-
+		//await handleHomepage(state, dispatch, props)
+		let topics = [];
+		let pop_pubs = [];
+		let pop_pubs_inactive = [];
+		let rec_docs = [];
+		const user = await gcUserManagementAPI.getUserData()
+		const { favorite_documents = [] } = user.data
+	
+		try {
+			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
+			data.forEach((obj) => {
+				if (obj.key === 'homepage_topics') {
+					topics = JSON.parse(obj.value);
+				}
+				else if (obj.key === 'homepage_popular_docs_inactive') {
+					pop_pubs_inactive = JSON.parse(obj.value);
+				} 
+				else if (obj.key === 'popular_docs') {
+					pop_pubs = obj.value;
+				}
+				else if (obj.key === 'rec_docs') {
+					rec_docs = obj.value;
+				}
+			});
+		} catch (e) {
+			// Do nothing
+			console.log(e)
+		}
+		setState(
+			dispatch,
+			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
+				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
+				{ adminTopics: topics }
+		);
+		// handlePubs(pubs, state, dispatch);
+		handleSources(state, dispatch, props.cancelToken);
+		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
+		handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {
