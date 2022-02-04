@@ -167,6 +167,21 @@ const GCDocumentsComparisonTool = (props) => {
 	const [filterChange, setFilterChange] = useState(false);
 	const [highlightList, setHighlightList] = useState([]);
 	const [highlightIndex, setHighlightindex] = useState(0);
+	const [inputError, setInputError] = useState(false);
+
+	const handleSetParagraphs = useCallback(() => {
+		const paragraphs = paragraphText.split('\n').map(paragraph => {
+			return paragraph.trim();
+		}).filter(paragraph => paragraph.length > 0);
+
+		if(paragraphs.length > 5){
+			setInputError(true);
+		}else{
+			setInputError(false);
+		}
+		
+		setParagraphs(paragraphs);
+	}, [paragraphText])
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -186,12 +201,6 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
-			
-			const paragraphs = paragraphText.split('\n').map(paragraph => {
-				return paragraph.trim();
-			}).filter(paragraph => paragraph.length > 0);
-			
-			setParagraphs(paragraphs);
 
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
@@ -213,7 +222,7 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 		}
 		
-	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked]);
+	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked, paragraphs]);
 	
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
@@ -286,6 +295,10 @@ const GCDocumentsComparisonTool = (props) => {
 		},
 		[compareDocument, state.cloneData, compareParagraphIndex, highlightList, highlightIndex]
 	);
+
+	useEffect(() => {
+		handleSetParagraphs();
+	}, [paragraphText, handleSetParagraphs])
 	
 	const getMatchingParsCount = (compareIdx) => {
 		return compareDocument.paragraphs.filter(par => {
@@ -305,6 +318,7 @@ const GCDocumentsComparisonTool = (props) => {
 	
 	const reset = () => {
 		setParagraphText('');
+		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
 	}
@@ -357,7 +371,6 @@ const GCDocumentsComparisonTool = (props) => {
 													multiline
 													rows={1000}
 													variant="outlined"
-													className={classes.inputBoxRoot}
 													value={paragraphText}
 													onChange={(event) => {
 														setParagraphText(event.target.value);
@@ -372,6 +385,18 @@ const GCDocumentsComparisonTool = (props) => {
 													}}
 													placeholder={'Text Content Here'}
 													fullWidth={true}
+													helperText={
+														inputError
+															? 'Input currently limited to five paragraphs'
+															: ''
+													}
+													FormHelperTextProps={{
+														style: {
+															color: 'red',
+															fontSize: 12,
+															backgroundColor: 'rgba(0,0,0,0)'
+														}
+													}}
 												/>
 											</div>
 										</Grid>
@@ -386,6 +411,7 @@ const GCDocumentsComparisonTool = (props) => {
 							>
 								<GCButton
 									style={{ marginTop: 20 }}
+									disabled={inputError}
 									onClick={() => {
 										setNoResults(false);
 										setFilterChange(false);
@@ -412,6 +438,23 @@ const GCDocumentsComparisonTool = (props) => {
 					}
 					{(!loading && returnedDocs.length > 0) &&
 					<>
+						<div className={'relevant-document'}>
+							<iframe
+								title={'PDFViewer'}
+								className="aref"
+								id={'pdfViewer'}
+								ref={measuredRef}
+								onLoad={() =>
+									handlePdfOnLoad(
+										'pdfViewer',
+										'viewerContainer',
+										compareDocument.filename,
+										'PDF Viewer'
+									)
+								}
+								style={{width: '100%', height: '100%'}}
+							/>
+						</div>
 					</>
 					}
 				</Grid>
@@ -426,11 +469,9 @@ GCDocumentsComparisonTool.propTypes = {
 };
 
 const useStyles = makeStyles((theme) => ({
-	inputBoxRoot: {
-		backgroundColor: '#FFFFFF'
-	},
 	outlinedInput: {
 		color: '#0000008A',
+		backgroundColor: '#FFFFFF',
 		fontFamily: 'Montserrat',
 		fontSize: 14,
 		height: 247,
