@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import propTypes from 'prop-types';
+import { Collapse } from 'react-collapse';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -168,6 +169,11 @@ const GCDocumentsComparisonTool = (props) => {
 	const [highlightList, setHighlightList] = useState([]);
 	const [highlightIndex, setHighlightindex] = useState(0);
 	const [inputError, setInputError] = useState(false);
+	const [collapseKeys, setCollapseKeys] = useState([]);
+
+	useEffect(()=>{
+		console.log(viewableDocs)
+	}, [viewableDocs])
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map(paragraph => {
@@ -455,6 +461,62 @@ const GCDocumentsComparisonTool = (props) => {
 								style={{width: '100%', height: '100%'}}
 							/>
 						</div>
+						{viewableDocs.map((doc, key) => {
+							const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
+							const displayTitle = doc.title;
+							return (
+								<div key={key}>
+									<div
+										className="searchdemo-modal-result-header"
+										onClick={(e) => {
+											e.preventDefault();
+											setCollapseKeys({ ...collapseKeys, [doc.filename]: !docOpen });
+										}}
+									>
+										<i
+											style={{
+												marginRight: docOpen ? 10 : 14,
+												fontSize: 20,
+												cursor: 'pointer',
+											}}
+											className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+										/>
+										<span className="gc-document-explorer-result-header-text">
+											{displayTitle}
+										</span>
+									</div>
+									<Collapse isOpened={docOpen}>
+										{doc.paragraphs.map((paragraph) =>{
+											const pOpen = collapseKeys[(doc.filename + paragraph.id)] ? collapseKeys[(doc.filename + paragraph.id)] : false;
+											return <div key={paragraph.id}>
+												<div
+													className="searchdemo-modal-result-header"
+													onClick={(e) => {
+														e.preventDefault();
+														setCollapseKeys({ ...collapseKeys, [doc.filename + paragraph.id]: !pOpen });
+													}}
+													style={{marginLeft: 20, backgroundColor: '#eceff1'}}
+												>
+													<i
+														style={{
+															marginRight: pOpen ? 10 : 14,
+															fontSize: 20,
+															cursor: 'pointer',
+														}}
+														className={`fa fa-caret-${pOpen ? 'down' : 'right'}`}
+													/>
+													<span className="gc-document-explorer-result-header-text">
+														{paragraph}
+													</span>
+												</div>
+												<Collapse isOpened={pOpen && docOpen}>
+												</Collapse>
+											</div>
+										})}
+									</Collapse>
+								</div>
+							);
+						})}
 					</>
 					}
 				</Grid>
