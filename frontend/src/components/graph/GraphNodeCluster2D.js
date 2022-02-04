@@ -714,7 +714,9 @@ export default function GraphNodeCluster2D(props) {
 	const renderNodeGroupMenu = () => {
 		const nodesInGroup = graphData.nodes.filter((node) => {
 			return (
-				node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel
+				node.display_org_s ?
+					node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel :
+					node.label === nodeGroupMenuLabelProp || nodeGroupMenuLabel
 			);
 		});
 		return (
@@ -752,9 +754,10 @@ export default function GraphNodeCluster2D(props) {
 								}}
 							>
 								{nodesInGroup.map((node) => {
+									let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
 									return (
 										<GCTooltip
-											title={node.display_title_s}
+											title={(isTopicOrEntityNode || node.label === 'UKN_Document') ? '' : node.display_title_s}
 											arrow
 											style={{ zIndex: 99999 }}
 										>
@@ -772,7 +775,7 @@ export default function GraphNodeCluster2D(props) {
 													handleNodeHover(null);
 												}}
 											>
-												{`${node.doc_type} ${node.doc_num}`}
+												{isTopicOrEntityNode ? node.name : `${node.doc_type} ${node.doc_num}`}
 											</StyledNodeGroupNode>
 										</GCTooltip>
 									);

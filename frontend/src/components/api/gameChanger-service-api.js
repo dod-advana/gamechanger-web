@@ -77,6 +77,7 @@ const endpoints = {
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getDataList: '/api/gameChanger/admin/getDataList',
@@ -130,6 +131,7 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 
@@ -689,11 +691,15 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	stopProcess = async (opts) => {
+		const url = endpoints.stopProcess;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	deleteLocalModel = async (opts) => {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
-
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
@@ -1021,6 +1027,11 @@ export default class GameChangerAPI {
 	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
+	};
+
+	compareFeedbackPOST = async (data) => {
+		const url = endpoints.compareFeedbackPOST;
+		return axiosPOST(this.axios, url, data);
 	};
 
 	getFAQ = async () => {
