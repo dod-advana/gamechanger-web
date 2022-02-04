@@ -4,7 +4,7 @@ import { Collapse } from 'react-collapse';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { Grid } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
@@ -307,19 +307,19 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [paragraphText, handleSetParagraphs])
 	
 	const getMatchingParsCount = (compareIdx) => {
-		return compareDocument.paragraphs.filter(par => {
-			return par.paragraphIdBeingMatched === compareIdx;
-		}).length;
+		// return compareDocument.paragraphs.filter(par => {
+		// 	return par.paragraphIdBeingMatched === compareIdx;
+		// }).length;
 	}
 	
 	const handleSetCompareIndex = (idx) => {
-		const parCount = getMatchingParsCount(idx);
-		if (parCount > 0){
-			setCompareParagraphIndex(idx);
-			const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === idx);
-			setHighlightList(highlights);
-			setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
-		}
+		// const parCount = getMatchingParsCount(idx);
+		// if (parCount > 0){
+		// 	setCompareParagraphIndex(idx);
+		// 	const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === idx);
+		// 	setHighlightList(highlights);
+		// 	setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
+		// }
 	}
 	
 	const reset = () => {
@@ -357,6 +357,7 @@ const GCDocumentsComparisonTool = (props) => {
 						Apply filters
 					</GCButton>}
 				</Grid>
+				{!(returnedDocs.length > 0) &&
 				<Grid item xs={9}>
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'} style={{margin: 0}}>
@@ -442,9 +443,13 @@ const GCDocumentsComparisonTool = (props) => {
                         	</div>
                         </div>
 					}
-					{(!loading && returnedDocs.length > 0) &&
-					<>
-						<div className={'relevant-document'}>
+					
+				</Grid>
+				}
+				{(!loading && returnedDocs.length > 0) &&
+				<>
+					<Grid item xs={6} style={{marginTop: 20}}>
+						<div style={{margin: '0px 20px'}}>
 							<iframe
 								title={'PDFViewer'}
 								className="aref"
@@ -460,6 +465,35 @@ const GCDocumentsComparisonTool = (props) => {
 								}
 								style={{width: '100%', height: '100%'}}
 							/>
+						</div>
+					</Grid>
+					<Grid item xs={3} style={{marginTop: 20}}>
+						<div 
+							style={{
+								padding: 20,
+								background: '#F6F8FA 0% 0% no-repeat padding-box',
+								border: '1px dashed #707070'
+							}}
+						>
+							<Typography variant="body">
+								Paragraph Input
+							</Typography>
+							{paragraphs.map((paragraph, idx) => (
+								<>
+									<div
+										style={{
+											border: idx === compareParagraphIndex ? `2px solid ${'#386f94'}` : '',
+											padding: idx === compareParagraphIndex ? `5px` : '',
+											borderRadius: 6,
+											cursor: getMatchingParsCount(idx) > 0 ? 'pointer' : ''
+										}}
+										onClick={() => handleSetCompareIndex(idx)}
+									>
+										{paragraph}
+									</div>
+									<br/>
+								</>
+							))}
 						</div>
 						{viewableDocs.map((doc, key) => {
 							const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
@@ -506,7 +540,7 @@ const GCDocumentsComparisonTool = (props) => {
 														className={`fa fa-caret-${pOpen ? 'down' : 'right'}`}
 													/>
 													<span className="gc-document-explorer-result-header-text">
-														{paragraph}
+														{paragraph.par_raw_text_t}
 													</span>
 												</div>
 												<Collapse isOpened={pOpen && docOpen}>
@@ -517,9 +551,9 @@ const GCDocumentsComparisonTool = (props) => {
 								</div>
 							);
 						})}
-					</>
-					}
-				</Grid>
+					</Grid>
+				</>
+				}
 			</Grid>
 		</>
 		
