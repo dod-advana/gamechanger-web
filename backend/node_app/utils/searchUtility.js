@@ -54,7 +54,8 @@ class SearchUtility {
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
-		this.getSearchCount = this.getSearchCount.bind(this)
+		this.getSearchCount = this.getSearchCount.bind(this);
+		this.getRecDocs = this.getRecDocs.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -2161,7 +2162,15 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-
+	async getRecDocs(doc=["Title 10"], userId=""){
+		let recDocs = [];
+		try {
+			recDocs = await this.mlApi.recommender(doc, userId);
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', userId);
+		};
+		return recDocs
+	}
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
@@ -2205,6 +2214,7 @@ class SearchUtility {
 					popDocs.push(doc);
 				});
 			};
+
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
