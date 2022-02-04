@@ -13,7 +13,7 @@ import {
 	StyledBadgeSmall
 } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
-import {setState} from '../../../utils/sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
 import CrowdSourcingAppIcon from '../../../images/icon/NewCrowdSourcingIcon.png';
@@ -22,22 +22,20 @@ import AnalystToolsIcon from '../../../images/icon/analyticswht.png';
 import CloneRequest from '../../../images/icon/CloneRequest.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
-import {Typography} from '@material-ui/core';
-import {getNotifications} from '../../notifications/Notifications';
+import { getNotifications } from '../../notifications/Notifications';
+import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
+import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
+import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
+import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
+import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
-const styles = {
-	wording: {
-		color: 'white',
-		marginRight: 15,
-	},
-};
 
 const getToolTheme = (cloneData) => {
-	return {
+	let toolStyles = {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
 		openCloseButtonBackgroundColor: '#000000',
@@ -46,29 +44,49 @@ const getToolTheme = (cloneData) => {
 		sectionSeparatorColor: '#323E4A',
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
-		toolLogo: (
-			<div>
-				<Typography
-					variant="h1"
-					style={{ ...styles.wording, margin: '0 15px 0 0' }}
-				>
-					{getCloneTitleForFactory(cloneData, false)}
-				</Typography>
-				<Typography
-					variant="h6"
-					style={{
-						...styles.wording,
-						textAlign: 'center',
-						margin: '0 15px 0 0',
-					}}
-				>
-					Powered by GAMECHANGER
-				</Typography>
-			</div>
-		),
-		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 	};
-};
+	if (cloneData.display_name === 'NGA') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerNGALogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		};
+	} else if (cloneData.display_name === 'Hermes') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'NFR') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerNFRLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'Space Force') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerSFLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	} else if (cloneData.display_name === 'CDO') {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	};
+}
 
 const DefaultNavigationHandler = {
 	getToolState: (state) => {
@@ -112,13 +130,8 @@ const DefaultNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							centered
 							onClick={() => {
@@ -288,13 +301,8 @@ const DefaultNavigationHandler = {
 				<NavItem style={{ justifyContent: 'space-between' }}>
 					<span>{getCloneTitleForFactory(state.cloneData, true)} MENU</span>
 				</NavItem>
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							onClick={() => {
 								setState(dispatch, {
