@@ -999,9 +999,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getHomepageEditorData = async () => {
+	getHomepageEditorData = async (body) => {
 		const url = endpoints.getHomepageEditorData;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, body);
 	};
 
 	setHomepageEditorData = async (body) => {
