@@ -103,7 +103,6 @@ class AdminController {
 		for (let doc of favorite_documents){
 			favDocList.push(doc.filename.split('.pdf')[0])
 		}
-		console.log(favDocList)
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
