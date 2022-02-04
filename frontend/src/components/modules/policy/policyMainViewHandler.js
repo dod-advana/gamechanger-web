@@ -706,6 +706,7 @@ const PolicyMainViewHandler = {
 			sidebarDocTypes,
 			timeSinceCache,
 			searchSettings,
+			rawSearchResults
 		} = state;
 
 		let sideScroll = {
@@ -723,7 +724,7 @@ const PolicyMainViewHandler = {
 				<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 					<div>
 						<div id="game-changer-content-top" />
-						{!loading && docSearchResults.length > 0 && (
+						{!loading && !Boolean(rawSearchResults?.length === 0) && (
 							<StyledCenterContainer showSideFilters={showSideFilters}>
 								{showSideFilters && (
 									<div className={'left-container'}>
@@ -952,7 +953,7 @@ const PolicyMainViewHandler = {
 								</GCTooltip>
 							</div>
 						)}
-						{Permissions.isGameChangerAdmin() && !loading && docSearchResults.length > 0 && (
+						{Permissions.isGameChangerAdmin() && !loading && !Boolean(rawSearchResults?.length === 0) && (
 							<div style={styles.cachedResultIcon}>
 								<i
 									style={{ cursor: 'pointer' }}
