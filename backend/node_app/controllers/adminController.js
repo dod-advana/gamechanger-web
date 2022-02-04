@@ -125,7 +125,6 @@ class AdminController {
 			this.logger.error(err, 'FL2LLDU', userId);
 			recDocs.value = []
 		}
-		//console.log(results)
 		results.push(docs);
 		results.push(recDocs)
 		return results;
