@@ -1,20 +1,22 @@
 import React from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
-import styled from 'styled-components';
 import {
-	capitalizeFirst,
 	CARD_FONT_SIZE,
 	getDocTypeStyles,
 	getTrackingNameForFactory,
 	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
-	orgAlias,
 	getMetadataForPropertyTable,
 	encode,
 } from '../../../utils/gamechangerUtils';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import {
+	StyledFrontCardContent,
+	StyledFrontCardHeader,
+	StyledFrontCardSubHeader,
+	StyledListViewFrontCardContent
+} from '../default/defaultCardHandler';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
@@ -22,6 +24,7 @@ import { primary } from '../../../components/common/gc-colors';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import sanitizeHtml from 'sanitize-html';
+import config from '../../../config/config';
 
 const colWidth = {
 	maxWidth: '900px',
@@ -61,307 +64,6 @@ const styles = {
 		fontSize: '14px',
 	},
 };
-
-export const StyledListViewFrontCardContent = styled.div`
-	.list-view-button {
-		width: 100%;
-		height: fit-content;
-		margin-top: 10px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-
-		i {
-			font-size: ${CARD_FONT_SIZE}px;
-			color: rgb(0, 131, 143);
-			font-weight: normal;
-			margin-left: 5px;
-			margin-right: 20px;
-		}
-	}
-
-	.expanded-hits {
-		display: flex;
-		height: 100%;
-
-		.page-hits {
-			min-width: 100px;
-			height: 100%;
-			border: 1px solid rgb(189, 189, 189);
-			border-top: 0px;
-
-			.page-hit {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				padding-right: 5px;
-				padding-left: 5px;
-				border-top: 1px solid rgb(189, 189, 189);
-				cursor: pointer;
-				color: #386f94;
-
-				span {
-					font-size: ${CARD_FONT_SIZE}px;
-				}
-
-				i {
-					font-size: ${CARD_FONT_SIZE}px;
-					margin-left: 10px;
-				}
-			}
-		}
-
-		> .expanded-metadata {
-			border: 1px solid rgb(189, 189, 189);
-			border-left: 0px;
-			min-height: 126px;
-			width: 100%;
-
-			> blockquote {
-				font-size: ${CARD_FONT_SIZE}px;
-				line-height: 20px;
-
-				background: #dde1e0;
-				margin-bottom: 0;
-				height: 165px;
-				border-left: 0;
-				overflow: hidden;
-				font-family: Noto Sans, Arial, Helvetica, sans-serif;
-				padding: 0.5em 10px;
-				margin-left: 0;
-				quotes: '\\201C''\\201D''\\2018''\\2019';
-
-				> em {
-					color: white;
-					background-color: #e9691d;
-					margin-right: 5px;
-					padding: 4px;
-					font-style: normal;
-				}
-			}
-		}
-	}
-
-	.metadata {
-		display: flex;
-		height: 100%;
-		flex-direction: column;
-		border-radius: 5px;
-		overflow: auto;
-
-		.inner-scroll-container {
-			background-color: rgb(238, 241, 242);
-			display: block;
-			overflow: auto;
-			height: 100%;
-		}
-	}
-`;
-
-export const StyledFrontCardHeader = styled.div`
-	font-size: 1.2em;
-	display: inline-block;
-	color: black;
-	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
-	font-weight: bold;
-	font-family: Montserrat;
-	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
-	padding: ${({ listView }) => (listView ? '0px' : '5px')};
-	margin-left: ${({ listView }) => (listView ? '10px' : '0px')};
-	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
-
-	.title-text-selected-favorite-div {
-		max-height: ${({ listView }) => (listView ? '' : '50px')};
-		height: ${({ listView }) => (listView ? '35px' : '')};
-		overflow: hidden;
-		display: flex;
-		justify-content: space-between;
-
-		.title-text {
-			cursor: pointer;
-			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
-			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-
-			.text {
-				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
-			}
-
-			.list-view-arrow {
-				display: inline-block;
-				margin-top: 7px;
-			}
-		}
-
-		.selected-favorite {
-			display: inline-block;
-			font-family: 'Noto Sans';
-			font-weight: 400;
-			font-size: ${CARD_FONT_SIZE}px;
-			margin-top: ${({ listView }) => (listView ? '2px' : '0px')};
-		}
-	}
-
-	.list-view-sub-header {
-		font-size: 0.8em;
-		display: flex;
-		color: black;
-		margin-bottom: 0px;
-		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
-		font-family: Montserrat;
-		height: 24px;
-		justify-content: space-between;
-	}
-`;
-
-export const StyledEntityFrontCardContent = styled.div`
-	display: flex;
-	height: 100%;
-	flex-direction: column;
-	align-items: center;
-	background-color: ${({ listView }) =>
-		listView ? 'transparent' : 'rgb(238, 241, 242)'};
-
-	> img {
-		width: 75px;
-		margin: 10px;
-	}
-
-	> p {
-		margin: 10px;
-		font-size: 14px;
-	}
-
-	> div {
-		margin-top: -90px;
-	}
-`;
-
-export const StyledFrontCardSubHeader = styled.div`
-	display: flex;
-	position: relative;
-
-	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
-		width: 50%;
-		padding: 8px;
-		display: flex;
-		align-items: center;
-
-		img {
-			width: 25px;
-			margin: 0px 10px 0px 0px;
-		}
-	}
-
-	.sub-header-two {
-		width: 50%;
-		color: white;
-		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
-	}
-
-	.sub-header-full {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
-		padding: 8px;
-		display: flex;
-		align-items: center;
-		width: 100%;
-		img {
-			width: 25px;
-			margin: 0px 10px 0px 0px;
-		}
-	}
-`;
-
-export const StyledFrontCardContent = styled.div`
-	font-family: 'Noto Sans';
-	overflow: auto;
-	font-size: ${CARD_FONT_SIZE}px;
-
-	.current-as-of-div {
-		display: flex;
-		justify-content: space-between;
-
-		.current-text {
-			margin: 10px 0;
-		}
-	}
-
-	.hits-container {
-		display: flex;
-		height: 100%;
-
-		.page-hits {
-			min-width: 100px;
-			height: 100%;
-			border: 1px solid rgb(189, 189, 189);
-			border-top: 0px;
-
-			.page-hit {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				padding-right: 5px;
-				padding-left: 5px;
-				border-top: 1px solid rgb(189, 189, 189);
-				cursor: pointer;
-				color: #386f94;
-
-				span {
-					font-size: ${CARD_FONT_SIZE}px;
-				}
-
-				i {
-					font-size: ${CARD_FONT_SIZE}px;
-					margin-left: 10px;
-				}
-			}
-
-			> .expanded-metadata {
-				border: 1px solid rgb(189, 189, 189);
-				border-left: 0px;
-				min-height: 126px;
-				width: 100%;
-				max-width: ${({ isWideCard }) => (isWideCard ? '' : '280px')};
-
-				> blockquote {
-					font-size: ${CARD_FONT_SIZE}px;
-					line-height: 20px;
-
-					background: #dde1e0;
-					margin-bottom: 0;
-					height: 165px;
-					border-left: 0;
-					overflow: hidden;
-					font-family: Noto Sans, Arial, Helvetica, sans-serif;
-					padding: 0.5em 10px;
-					margin-left: 0;
-					quotes: '\\201C''\\201D''\\2018''\\2019';
-
-					> em {
-						color: white;
-						background-color: #e9691d;
-						margin-right: 5px;
-						padding: 4px;
-						font-style: normal;
-					}
-				}
-			}
-		}
-	}
-`;
 
 const getCardHeaderHandler = ({
 	item,
@@ -561,7 +263,7 @@ const makeRows = (
 	return rows;
 };
 
-const DefaultCardHandler = {
+const JexnetCardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
 			return getDisplayTitle(item);
@@ -890,7 +592,6 @@ const DefaultCardHandler = {
 				showEsDoc,
 				searchText,
 			} = props;
-
 			return (
 				<>
 					<>
@@ -904,6 +605,17 @@ const DefaultCardHandler = {
 							}}
 						>
 							Open
+						</CardButton>
+						<CardButton
+							target={'_blank'}
+							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+							href={'#'}
+							onClick={(e) => {
+								e.preventDefault();
+								window.open(`${config.JEXNET_LINK}view?attachmentName=${filename}`);
+							}}
+						>
+							Go to Jexnet
 						</CardButton>
 						{graphView && (
 							<CardButton
@@ -999,54 +711,7 @@ const DefaultCardHandler = {
 
 	entity: {
 		getCardHeader: (props) => {
-			const { item, state } = props;
-
-			const displayTitle = item.name;
-
-			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					docListView={state.listView}
-					intelligentSearch={false}
-				>
-					<div className={'title-text-selected-favorite-div'}>
-						<GCTooltip title={displayTitle} placement="top" arrow>
-							<div
-								className={'title-text'}
-								onClick={
-									state.listView
-										? () =>
-											window.open(
-												`#/gamechanger-details?type=entity&entityName=${item.name}&cloneName=${state.cloneData.clone_name}`
-											)
-										: () => {}
-								}
-							>
-								<div className={'text'}>{displayTitle}</div>
-								{state.listView && (
-									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight
-											style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-										/>
-									</div>
-								)}
-							</div>
-						</GCTooltip>
-						{/*<div className={'selected-favorite'}>*/}
-						{/*	<div style={{display: "flex"}}>*/}
-						{/*		{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}*/}
-						{/*		{checkboxComponent(item.filename, `${type} ${num}`, idx)}*/}
-						{/*		{favoriteComponent()}*/}
-						{/*	</div>*/}
-						{/*</div>*/}
-					</div>
-					{state.listView && (
-						<div className={'list-view-sub-header'}>
-							<p> {displayTitle} </p>
-						</div>
-					)}
-				</StyledFrontCardHeader>
-			);
+			return <></>;
 		},
 
 		getCardSubHeader: (props) => {
@@ -1054,151 +719,15 @@ const DefaultCardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item, state } = props;
-
-			if (state.listView) {
-				if (item.description?.length > 300) {
-					item.description = item?.description?.slice(0, 280) + '...';
-				}
-			} else if (item.description?.length > 180) {
-				item.description = item?.description?.slice(0, 160) + '...';
-			}
-
-			return (
-				<StyledEntityFrontCardContent listView={state.listView}>
-					{!state.listView && <img alt="Office Img" src={item.image} />}
-					{!item.done ? (
-						<div>
-							<LoadingIndicator customColor={'#E9691D'} />
-						</div>
-					) : (
-						<p>{item.description}</p>
-					)}
-				</StyledEntityFrontCardContent>
-			);
+			return <></>;
 		},
 
 		getCardBack: (props) => {
-			const { item } = props;
-
-			const metadata = [];
-
-			metadata.push({
-				Key: 'Name',
-				Value: item.name,
-			});
-			metadata.push({
-				Key: 'Alias',
-				Value: item.alias,
-			});
-			metadata.push({
-				Key: 'Type',
-				Value: capitalizeFirst(item.type),
-			});
-			metadata.push({
-				Key: 'Category',
-				Value: orgAlias[item.category] ?? item.category,
-			});
-			metadata.push({
-				Key: 'Key People',
-				Value: item.key_people,
-			});
-			metadata.push({
-				Key: 'Website',
-				Value: (
-					<a href={item.resource_url} target="_blank" rel="noopener noreferrer">
-						{item.resource_url}
-					</a>
-				),
-			});
-
-			return (
-				<SimpleTable
-					tableClass={'magellan-table'}
-					zoom={1}
-					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-					rows={metadata}
-					height={'auto'}
-					dontScroll={true}
-					colWidth={colWidth}
-					disableWrap={true}
-					title={'Organization Info'}
-					hideHeader={false}
-				/>
-			);
+			return <></>;
 		},
 
 		getFooter: (props) => {
-			const {
-				name,
-				cloneName,
-				graphView,
-				toggledMore,
-				setToggledMore,
-				closeGraphCard,
-			} = props;
-
-			return (
-				<>
-					<>
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-							href={'#'}
-							onClick={(e) => {
-								trackEvent(
-									getTrackingNameForFactory(cloneName),
-									'GraphCardInteraction',
-									'Open',
-									`${name}DetailsPage`
-								);
-								e.preventDefault();
-								window.open(
-									`#/gamechanger-details?type=entity&entityName=${name}&cloneName=${cloneName}`
-								);
-							}}
-						>
-							Open
-						</CardButton>
-						{graphView && (
-							<CardButton
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								onClick={(e) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'Close Graph Card'
-									);
-									e.preventDefault();
-									closeGraphCard();
-								}}
-							>
-								Close
-							</CardButton>
-						)}
-					</>
-					<div
-						style={{ ...styles.viewMoreButton }}
-						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
-							setToggledMore(!toggledMore);
-						}}
-					>
-						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
-					</div>
-				</>
-			);
+			return <></>;
 		},
 
 		getCardExtras: (props) => {
@@ -1241,4 +770,4 @@ const DefaultCardHandler = {
 	},
 };
 
-export default DefaultCardHandler;
+export default JexnetCardHandler;
