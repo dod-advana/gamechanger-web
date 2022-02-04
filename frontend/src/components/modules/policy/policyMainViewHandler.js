@@ -590,17 +590,15 @@ const PolicyMainViewHandler = {
 									)}
 
 									<div
-										className="hover-overlay"
+										className="hover-overlay" 
 										onClick={() => {
 											trackEvent(
 												getTrackingNameForFactory(cloneData.clone_name),
 												'PublicationOpened',
 												pub.name
 											);
-											// window.open(`/#/pdfviewer/gamechanger?filename=${name}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}`)
-											window.open(
-												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
-											);
+											pub.imgSrc !== DefaultPub ? (
+												window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`)) : (setState(dispatch, { searchText: pub.name, runSearch: true }));
 										}}
 									>
 										<div className="hover-text">{formatString(pub.name)}</div>
