@@ -28,11 +28,18 @@ import GamechangerHermesLogo from '../../../images/logos/Hermes-Sidemenu.png';
 import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
 import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
 import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
+import {Typography} from '@material-ui/core';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
 
+const styles = {
+	wording: {
+		color: 'white',
+		marginRight: 15,
+	},
+};
 
 const getToolTheme = (cloneData) => {
 	let toolStyles = {
@@ -85,7 +92,32 @@ const getToolTheme = (cloneData) => {
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		}
-	};
+	} else {
+		return {
+			...toolStyles,
+			toolLogo: (
+				<div>
+					<Typography
+						variant="h1"
+						style={{ ...styles.wording, margin: '0 15px 0 0' }}
+					>
+						{getCloneTitleForFactory(cloneData, false)}
+					</Typography>
+					<Typography
+						variant="h6"
+						style={{
+							...styles.wording,
+							textAlign: 'center',
+							margin: '0 15px 0 0',
+						}}
+					>
+						Powered by GAMECHANGER
+					</Typography>
+				</div>
+			),
+			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
+		}
+	}
 }
 
 const DefaultNavigationHandler = {
