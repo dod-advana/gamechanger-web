@@ -2525,7 +2525,7 @@ class SearchUtility {
 			});
 
 			rtnNodes.forEach(node => {
-				node.pageRank = idToPRMap[node.id] || 1;
+				node.pageRank = idToPRMap[node.id] || 0;
 			});
 
 			return { nodes: Object.values(nodes), edges: Object.values(edges), labels, relationships, nodeProperties, relProperties };
