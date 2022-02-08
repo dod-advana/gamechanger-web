@@ -18,6 +18,7 @@ import {
 } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
+import { GCCheckbox } from '../admin/util/GCAdminStyles';
 
 const _ = require('lodash');
 
@@ -31,6 +32,9 @@ const styles = {
 		height: 30,
 		color: '#939395',
 	},
+	checkbox: {
+		padding: '9px'
+	}
 }
 
 const DocumentInputContainer = styled.div`
@@ -173,12 +177,10 @@ const GCDocumentsComparisonTool = (props) => {
 	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
-	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
+	const [combineItems, setCombineItems] = useState({});
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
 	const [filterChange, setFilterChange] = useState(false);
-	const [highlightList, setHighlightList] = useState([]);
-	const [highlightIndex, setHighlightindex] = useState(0);
 	const [inputError, setInputError] = useState(false);
 	const [collapseKeys, setCollapseKeys] = useState([]);
 
@@ -244,26 +246,6 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
-	
-	useEffect(() => {
-		if (state.compareModalOpen) {
-			const doc = returnedDocs.filter(document => {
-				return document.filename === state.compareFilename;
-			})[0];
-			
-			let tmpCompareIdx;
-			doc.paragraphs.forEach(par => {
-				if (tmpCompareIdx === undefined) {
-					tmpCompareIdx = par.paragraphIdBeingMatched;
-				}
-			});
-			
-			setCompareParagraphIndex(tmpCompareIdx);
-			const highlights = doc.paragraphs.filter(p => p.paragraphIdBeingMatched === tmpCompareIdx);
-			setHighlightList(highlights);
-			setCompareDocument(doc);
-		}
-	}, [returnedDocs, state.compareModalOpen, state.compareFilename]);
 
 	useEffect(() => {
 		if(state.ignoredDocs.length){
@@ -499,6 +481,13 @@ const GCDocumentsComparisonTool = (props) => {
 									}}
 									onClick={() => handleSetCompareIndex(idx)}
 								>
+									{/* <GCCheckbox
+										checked={editCloneData[field.key]}
+										onChange={handleCheck}
+										name={field.key}
+										color="primary"
+										style={styles.checkbox}
+									/> */}
 									<div>
 										{paragraph}
 									</div>
