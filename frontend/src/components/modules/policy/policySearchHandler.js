@@ -811,6 +811,9 @@ const PolicySearchHandler = {
 			  ).join('_')
 			: undefined;
 
+		const currentParams =
+			new URLSearchParams(window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, ''));
+
 		const params = new URLSearchParams();
 		if (searchText) params.append('q', searchText);
 		if (offset) params.append('offset', String(offset)); // 0 is default
@@ -823,6 +826,7 @@ const PolicySearchHandler = {
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
 		if (categoriesText !== undefined)
 			params.append('categories', categoriesText); // '' is different than undefined
+		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

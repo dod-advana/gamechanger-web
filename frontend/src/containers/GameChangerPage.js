@@ -76,7 +76,7 @@ const GameChangerPage = (props) => {
 							setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
 							handleSubmit={sendJiraFeedback}
 						/> :
-						<UserFeedback context={context} className="feedback-modal" />
+						<UserFeedback context={context} />
 					}
 					{/* Crowd Sourcing */}
 					{ cloneData.show_crowd_source && (

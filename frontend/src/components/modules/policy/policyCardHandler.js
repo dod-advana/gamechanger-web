@@ -1387,7 +1387,10 @@ const PolicyCardHandler = {
 				item,
 				searchText,
 				state,
-				handleCompareDocument
+				handleCompareDocument,
+				handleIgnore,
+				showQuickCompare,
+				compareIndex
 			} = props;
 			return (
 				<>
@@ -1449,16 +1452,18 @@ const PolicyCardHandler = {
 					}
 					{(state.listView && item.isCompare) &&
 						<>
-							<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
-								<GCButton
-									id={'ignore'}
-									onClick={() => { console.log('Ignored') }}
-									isSecondaryBtn={true}
-									style={{height: 36}}
-								>
-									Ignore
-								</GCButton>
-							</GCTooltip>
+							{showQuickCompare && 
+								<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
+									<GCButton
+										id={'ignore'}
+										onClick={() => { handleIgnore(item, compareIndex) }}
+										isSecondaryBtn={true}
+										style={{height: 36}}
+									>
+										Ignore
+									</GCButton>
+								</GCTooltip>
+							}
 							<GCButton
 								id={'compare'}
 								onClick={() => { handleCompareDocument(item.filename) }}
