@@ -29,8 +29,10 @@ const styles = {
 		display: 'flex',
 		justifyContent: 'center',
 		margin: 'auto',
+		marginLeft: '10px',
 		height: 30,
 		color: '#939395',
+		cursor: 'pointer'
 	},
 	checkbox: {
 		padding: '9px'
@@ -177,16 +179,13 @@ const GCDocumentsComparisonTool = (props) => {
 	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
-	const [combineItems, setCombineItems] = useState({});
+	const [itemsToCombine, setItemsToCombine] = useState({});
+	const [combineDisabled, setCombineDisabled] = useState(true);
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
 	const [filterChange, setFilterChange] = useState(false);
 	const [inputError, setInputError] = useState(false);
 	const [collapseKeys, setCollapseKeys] = useState([]);
-
-	useEffect(()=>{
-		console.log(viewableDocs)
-	}, [viewableDocs])
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map(paragraph => {
@@ -201,6 +200,14 @@ const GCDocumentsComparisonTool = (props) => {
 		
 		setParagraphs(paragraphs);
 	}, [paragraphText])
+
+	useEffect(() => {
+		let disable = true;
+		Object.keys(itemsToCombine).forEach(par => {
+			if(itemsToCombine[par]) disable = false;
+		})
+		setCombineDisabled(disable)
+	}, [itemsToCombine])
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -316,6 +323,21 @@ const GCDocumentsComparisonTool = (props) => {
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
+	}
+
+	const handleCheck = (event) => {
+		setItemsToCombine({
+			...itemsToCombine,
+			[event.target.name]: event.target.checked,
+		});
+	}
+
+	const removeParagraph = (idx) => {
+		//need something to use other than index
+		const newParagraphs = paragraphs.filter((par,index) => index !== idx);
+		const newItemsToCombine = itemsToCombine;
+		delete newItemsToCombine[`paragraph${idx}`]
+		setParagraphs(newParagraphs);
 	}
 	
 	return (
@@ -481,32 +503,44 @@ const GCDocumentsComparisonTool = (props) => {
 									}}
 									onClick={() => handleSetCompareIndex(idx)}
 								>
-									{/* <GCCheckbox
-										checked={editCloneData[field.key]}
+									<GCCheckbox
+										checked={itemsToCombine[`paragraph${idx}`]}
 										onChange={handleCheck}
-										name={field.key}
-										color="primary"
+										name={`paragraph${idx}`}
+										color="secondary"
 										style={styles.checkbox}
-									/> */}
-									<div>
+									/>
+									<div style={{margin: 'auto 0'}}>
 										{paragraph}
 									</div>
 									<div style={{margin: 'auto 0 auto auto'}}>
-										<i style={styles.image} className="fa fa-trash fa-2x" />
+										<i style={styles.image} onClick={() => removeParagraph(idx)} className="fa fa-trash fa-2x" />
 									</div>
 								</div>
 							))}
-							<GCButton
-								style={{ marginTop: 20, width: 'fit-content', marginLeft: 'auto' }}
-								isSecondaryBtn
-								onClick={() => {
-									setNoResults(false);
-									setFilterChange(false);
-									return reset();
-								}}
-							>
-								Reset
-							</GCButton>
+							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
+								<GCButton
+									style={{ marginTop: 20, width: 'fit-content'}}
+									isSecondaryBtn
+									disabled={combineDisabled}
+									onClick={() => {
+										
+									}}
+								>
+									Combine
+								</GCButton>
+								<GCButton
+									style={{ marginTop: 20, width: 'fit-content'}}
+									isSecondaryBtn
+									onClick={() => {
+										setNoResults(false);
+										setFilterChange(false);
+										return reset();
+									}}
+								>
+									Reset
+								</GCButton>
+							</div>
 						</div>
 						<div style={{ marginTop: 20 }}>
 							{viewableDocs.map((doc, key) => {
