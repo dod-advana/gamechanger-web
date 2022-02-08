@@ -23,6 +23,16 @@ const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
+const styles = {
+	image: {
+		display: 'flex',
+		justifyContent: 'center',
+		margin: 'auto',
+		height: 30,
+		color: '#939395',
+	},
+}
+
 const DocumentInputContainer = styled.div`
 	border: 5px ${'#FFFFFF'};
 	border-radius: 5px;
@@ -162,6 +172,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
+	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
 	const [compareParagraphIndex, setCompareParagraphIndex] = useState(0);
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
@@ -279,17 +290,13 @@ const GCDocumentsComparisonTool = (props) => {
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null && compareDocument) {
-				
-				const matchingPars = compareDocument.paragraphs.filter(par => {
-					return par.paragraphIdBeingMatched === compareParagraphIndex;
-				});
 
-				if (compareDocument && matchingPars.length > 0) {
+				if (compareDocument && selectedParagraph) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
 							encode(compareDocument.filename || ''),
-							`"${highlightList[highlightIndex].par_raw_text_t}"`,
-							matchingPars[0].page_num_i + 1,
+							`"${selectedParagraph.par_raw_text_t}"`,
+							selectedParagraph.page_num_i + 1,
 							true,
 							state.cloneData
 						)
@@ -299,7 +306,7 @@ const GCDocumentsComparisonTool = (props) => {
 				}
 			}
 		},
-		[compareDocument, state.cloneData, compareParagraphIndex, highlightList, highlightIndex]
+		[compareDocument, state.cloneData, selectedParagraph]
 	);
 
 	useEffect(() => {
@@ -337,7 +344,7 @@ const GCDocumentsComparisonTool = (props) => {
 					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.
 					</div>
 				</Grid>
-				<Grid item xs={3} style={{marginTop: 20}}>
+				<Grid item xs={2} style={{marginTop: 20}}>
 					<GCAnalystToolsSideBar context={context} />
 					<GCButton 
 						isSecondaryBtn 
@@ -358,7 +365,7 @@ const GCDocumentsComparisonTool = (props) => {
 					</GCButton>}
 				</Grid>
 				{!(returnedDocs.length > 0) &&
-				<Grid item xs={9}>
+				<Grid item xs={10}>
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'} style={{margin: 0}}>
 							<Grid item xs={12}>
@@ -422,11 +429,10 @@ const GCDocumentsComparisonTool = (props) => {
 									onClick={() => {
 										setNoResults(false);
 										setFilterChange(false);
-										if(!loading && returnedDocs.length > 0) return reset();
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
 								>
-									{!loading && returnedDocs.length > 0 ? 'Reset' : 'Submit'}
+									Submit
 								</GCButton>
 							</GCTooltip>
 						</Grid>
@@ -449,7 +455,7 @@ const GCDocumentsComparisonTool = (props) => {
 				{(!loading && returnedDocs.length > 0) &&
 				<>
 					<Grid item xs={6} style={{marginTop: 20}}>
-						<div style={{margin: '0px 20px'}}>
+						<div style={{margin: '0px 20px', height: '800px'}}>
 							<iframe
 								title={'PDFViewer'}
 								className="aref"
@@ -467,90 +473,153 @@ const GCDocumentsComparisonTool = (props) => {
 							/>
 						</div>
 					</Grid>
-					<Grid item xs={3} style={{marginTop: 20}}>
+					<Grid item xs={4} style={{marginTop: 20, height: '800px', overflowY: 'scroll', maxWidth: 'calc(33.333333% + 20px)', flexBasis: 'calc((33.333333% + 20px)', paddingLeft: '20px', marginLeft: '-20px'}}>
 						<div 
 							style={{
 								padding: 20,
 								background: '#F6F8FA 0% 0% no-repeat padding-box',
-								border: '1px dashed #707070'
+								border: '1px dashed #707070',
+								display: 'flex',
+								flexDirection: 'column'
 							}}
 						>
-							<Typography variant="body">
+							<Typography variant="body" style={{marginBottom: 5}}>
 								Paragraph Input
 							</Typography>
 							{paragraphs.map((paragraph, idx) => (
-								<>
-									<div
-										style={{
-											border: idx === compareParagraphIndex ? `2px solid ${'#386f94'}` : '',
-											padding: idx === compareParagraphIndex ? `5px` : '',
-											borderRadius: 6,
-											cursor: getMatchingParsCount(idx) > 0 ? 'pointer' : ''
-										}}
-										onClick={() => handleSetCompareIndex(idx)}
-									>
+								<div
+									style={{
+										border: `2px solid ${'#386f94'}`,
+										padding: 10,
+										borderRadius: 6,
+										display: 'flex',
+										lineHeight: '20px',
+										marginBottom: 5,
+										cursor: getMatchingParsCount(idx) > 0 ? 'pointer' : ''
+									}}
+									onClick={() => handleSetCompareIndex(idx)}
+								>
+									<div>
 										{paragraph}
 									</div>
-									<br/>
-								</>
-							))}
-						</div>
-						{viewableDocs.map((doc, key) => {
-							const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
-							const displayTitle = doc.title;
-							return (
-								<div key={key}>
-									<div
-										className="searchdemo-modal-result-header"
-										onClick={(e) => {
-											e.preventDefault();
-											setCollapseKeys({ ...collapseKeys, [doc.filename]: !docOpen });
-										}}
-									>
-										<i
-											style={{
-												marginRight: docOpen ? 10 : 14,
-												fontSize: 20,
-												cursor: 'pointer',
-											}}
-											className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
-										/>
-										<span className="gc-document-explorer-result-header-text">
-											{displayTitle}
-										</span>
+									<div style={{margin: 'auto 0 auto auto'}}>
+										<i style={styles.image} className="fa fa-trash fa-2x" />
 									</div>
-									<Collapse isOpened={docOpen}>
-										{doc.paragraphs.map((paragraph) =>{
-											const pOpen = collapseKeys[(doc.filename + paragraph.id)] ? collapseKeys[(doc.filename + paragraph.id)] : false;
-											return <div key={paragraph.id}>
-												<div
-													className="searchdemo-modal-result-header"
-													onClick={(e) => {
-														e.preventDefault();
-														setCollapseKeys({ ...collapseKeys, [doc.filename + paragraph.id]: !pOpen });
-													}}
-													style={{marginLeft: 20, backgroundColor: '#eceff1'}}
-												>
-													<i
-														style={{
-															marginRight: pOpen ? 10 : 14,
-															fontSize: 20,
-															cursor: 'pointer',
-														}}
-														className={`fa fa-caret-${pOpen ? 'down' : 'right'}`}
-													/>
-													<span className="gc-document-explorer-result-header-text">
-														{paragraph.par_raw_text_t}
-													</span>
-												</div>
-												<Collapse isOpened={pOpen && docOpen}>
-												</Collapse>
-											</div>
-										})}
-									</Collapse>
 								</div>
-							);
-						})}
+							))}
+							<GCButton
+								style={{ marginTop: 20, width: 'fit-content', marginLeft: 'auto' }}
+								isSecondaryBtn
+								onClick={() => {
+									setNoResults(false);
+									setFilterChange(false);
+									return reset();
+								}}
+							>
+								Reset
+							</GCButton>
+						</div>
+						<div style={{ marginTop: 20 }}>
+							{viewableDocs.map((doc, key) => {
+								const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
+								const displayTitle = doc.title;
+								return (
+									<div key={key}>
+										<div
+											className="searchdemo-modal-result-header"
+											style={{ marginTop: 0 }}
+											onClick={(e) => {
+												e.preventDefault();
+												setCollapseKeys({ ...collapseKeys, [doc.filename]: !docOpen });
+											}}
+										>
+											<i
+												style={{
+													marginRight: docOpen ? 10 : 14,
+													fontSize: 20,
+													cursor: 'pointer',
+												}}
+												className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+											/>
+											<span className="gc-document-explorer-result-header-text">
+												{displayTitle}
+											</span>
+										</div>
+										<Collapse isOpened={docOpen}>
+											{doc.paragraphs.map((paragraph) =>{
+												let blockquoteClass = 'searchdemo-blockquote-sm';
+												const pOpen = selectedParagraph?.id === paragraph.id;
+												const isHighlighted = pOpen && docOpen;
+												if (isHighlighted)
+													blockquoteClass +=
+													' searchdemo-blockquote-sm-active';
+												return <div key={paragraph.id} style={{position: 'relative'}}>
+													{isHighlighted && (
+														<span className="searchdemo-arrow-left-sm"></span>
+													)}
+													<div
+														className={blockquoteClass}
+														onClick={(e) => {
+															e.preventDefault();
+															setCompareDocument(doc);
+															setSelectedParagraph(paragraph);
+														}}
+														style={{ 
+															marginLeft: isHighlighted ? 0 : 20, 
+															marginRight: 0,
+															border: isHighlighted ? 'none' : '1px solid #DCDCDC', 
+															padding: '3px',
+															cursor: 'pointer'
+														}}
+													>
+														<span className="gc-document-explorer-result-header-text" style={{color: isHighlighted ? 'white' : '#131E43' }}>
+															{paragraph.par_raw_text_t}
+														</span>
+													</div>
+													<Collapse isOpened={pOpen && docOpen}>
+														<div
+															className='searchdemo-blockquote-sm'
+															style={{ 
+																marginLeft: 20, 
+																marginRight: 0,
+																border: '1px solid #DCDCDC', 
+																padding: '10px',
+																whiteSpace: 'normal'
+															}}
+														>
+															<span className="gc-document-explorer-result-header-text" style={{fontWeight: 'normal'}}>
+																{paragraph.par_raw_text_t}
+															</span>
+															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
+																<GCButton
+																	onClick={() => console.log('export')}
+																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																>
+																	Export
+																</GCButton>
+																<GCButton 
+																	onClick={() => console.log('Favorite')}
+																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																>
+																	Save to Favorites
+																</GCButton>
+																<GCButton 
+																	isSecondaryBtn 
+																	onClick={() => console.log('Ignore')}
+																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																>
+																	Ignore
+																</GCButton>
+															</div>
+														</div>
+													</Collapse>
+												</div>
+											})}
+										</Collapse>
+									</div>
+								);
+							})}
+						</div>
 					</Grid>
 				</>
 				}
