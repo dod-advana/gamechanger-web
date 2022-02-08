@@ -3,17 +3,16 @@ import propTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography} from '@material-ui/core';
+import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography, Collapse} from '@material-ui/core';
+import { TransitionGroup } from 'react-transition-group';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcOrange} from '../common/gc-colors';
-import Pagination from 'react-js-pagination';
 import {
 	encode, 
-	handlePdfOnLoad, 
-	RESULTS_PER_PAGE,
+	handlePdfOnLoad,
 	getOrgToOrgQuery,
 	getTypeQuery
 } from '../../utils/gamechangerUtils';
@@ -265,6 +264,8 @@ const GCDocumentsComparisonTool = (props) => {
 	const [filtersLoaded, setFiltersLoaded] = useState(false);
 	const [noResults, setNoResults] = useState(false);
 	const [filterChange, setFilterChange] = useState(false);
+	const [highlightList, setHighlightList] = useState([]);
+	const [highlightIndex, setHighlightindex] = useState(0);
 	
 	useEffect(() => {
 		if(!filtersLoaded){
@@ -331,9 +332,33 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 			
 			setCompareParagraphIndex(tmpCompareIdx);
+			const highlights = doc.paragraphs.filter(p => p.paragraphIdBeingMatched === tmpCompareIdx);
+			setHighlightList(highlights);
 			setCompareDocument(doc);
 		}
 	}, [returnedDocs, state.compareModalOpen, state.compareFilename]);
+
+	useEffect(() => {
+		if(state.ignoredDocs.length){
+			const { item, index } = state.ignoredDocs[0];
+			const searchedParagraph = paragraphs[item.paragraphs[index].paragraphIdBeingMatched]
+			const matchedParagraphId = item.paragraphs[index].id;
+
+			gameChangerAPI.compareFeedbackPOST({
+				searchedParagraph,
+				matchedParagraphId,
+				docId: item.id,
+				positiveFeedback: false
+			});
+			setState( dispatch, {ignoredDocs: []})
+
+			const newViewableDocs = viewableDocs;
+			const docIndex = viewableDocs.findIndex((doc) => item.filename === doc.filename);
+			newViewableDocs[docIndex].paragraphs.splice(index, 1);
+			if(!newViewableDocs[docIndex].paragraphs.length) newViewableDocs.splice(docIndex, 1);
+			setViewableDocs(newViewableDocs);
+		}
+	}, [state.ignoredDocs, viewableDocs, dispatch, paragraphs])
 	
 	const measuredRef = useCallback(
 		(node) => {
@@ -342,12 +367,12 @@ const GCDocumentsComparisonTool = (props) => {
 				const matchingPars = compareDocument.paragraphs.filter(par => {
 					return par.paragraphIdBeingMatched === compareParagraphIndex;
 				});
-				
+
 				if (compareDocument && matchingPars.length > 0) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
 							encode(compareDocument.filename || ''),
-							`"${paragraphs[compareParagraphIndex]}"`,
+							`"${highlightList[highlightIndex].par_raw_text_t}"`,
 							matchingPars[0].page_num_i + 1,
 							true,
 							state.cloneData
@@ -358,7 +383,7 @@ const GCDocumentsComparisonTool = (props) => {
 				}
 			}
 		},
-		[paragraphs, compareDocument, state.cloneData, compareParagraphIndex]
+		[compareDocument, state.cloneData, compareParagraphIndex, highlightList, highlightIndex]
 	);
 	
 	const getMatchingParsCount = (compareIdx) => {
@@ -368,8 +393,12 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const handleSetCompareIndex = (idx) => {
-		if (getMatchingParsCount(idx) > 0){
+		const parCount = getMatchingParsCount(idx);
+		if (parCount > 0){
 			setCompareParagraphIndex(idx);
+			const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === idx);
+			setHighlightList(highlights);
+			setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
 		}
 	}
 	
@@ -381,27 +410,27 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 	
 	const buildCards = (docs) => {
-		return _.map(docs, (item, idx) => {
-			item.type = 'document';
-			item.isCompare = true;
-			item.dataToQuickCompareTo = paragraphs;
-			item.pageHits = [];
-			return (
-				<Card key={idx}
-					item={item}
-					idx={idx}
-					state={{
-						...state,
-						selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false
-					}}
-					dispatch={dispatch}
-				/>
-			);
-		});
-	}
-	
-	const handleChangePage = (page) => {
-	
+		return <TransitionGroup>
+			{_.map(docs, (item, idx) => {
+				item.type = 'document';
+				item.isCompare = true;
+				item.dataToQuickCompareTo = paragraphs;
+				item.pageHits = [];
+				return (
+					<Collapse key={item.filename} timeout={1000}>
+						<Card key={idx}
+							item={item}
+							idx={idx}
+							state={{
+								...state,
+								selectedDocuments: new Map(), componentStepNumbers: {}, listView: true, showSideFilters: false
+							}}
+							dispatch={dispatch}
+						/>
+					</Collapse>
+				);
+			})}
+		</TransitionGroup>
 	}
 	
 	return (
@@ -593,18 +622,6 @@ const GCDocumentsComparisonTool = (props) => {
 								<div className={'text'}>
 									Showing results {(page - 1) * PAGE_SIZE + 1} - {returnedDocs.length} of: <span>Possibly Relevant Documents</span>
 								</div>
-								<div className='gcPagination text-center'>
-									<Pagination
-										activePage={page}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={viewableDocs.length}
-										pageRangeDisplayed={8}
-										onChange={async page => {
-											handleChangePage(page);
-										}}
-									/>
-								</div>
-
 							</div>
 							
 							<div className={'results-container'}>

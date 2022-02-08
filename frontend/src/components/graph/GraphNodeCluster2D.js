@@ -192,8 +192,8 @@ export const StyledLegendClickable = styled.div`
 	transition: opacity 0.3s ease-in-out;
 	border-radius: 6px;
 	padding: 5px;
-	opacity: ${({ type, typeSelected }) =>
-		typeSelected ? (type === typeSelected ? 1 : 0.2) : 1};
+	opacity: ${({ type, typesSelected }) => 
+		typesSelected.length === 0 || typesSelected.includes(type) ? 1 : 0.2};
 
 	&:hover {
 		background: rgba(222, 235, 255, 0.5);
@@ -573,7 +573,7 @@ export default function GraphNodeCluster2D(props) {
 												onClick={(event) =>
 													handleLegendNodeClick(key, event.target)
 												}
-												typeSelected={nodeLabelSelected}
+												typesSelected={nodeLabelSelected ? [nodeLabelSelected] : []}
 												type={key}
 											>
 												<div
@@ -714,7 +714,9 @@ export default function GraphNodeCluster2D(props) {
 	const renderNodeGroupMenu = () => {
 		const nodesInGroup = graphData.nodes.filter((node) => {
 			return (
-				node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel
+				node.display_org_s ?
+					node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel :
+					node.label === nodeGroupMenuLabelProp || nodeGroupMenuLabel
 			);
 		});
 		return (
@@ -752,9 +754,10 @@ export default function GraphNodeCluster2D(props) {
 								}}
 							>
 								{nodesInGroup.map((node) => {
+									let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
 									return (
 										<GCTooltip
-											title={node.display_title_s}
+											title={(isTopicOrEntityNode || node.label === 'UKN_Document') ? '' : node.display_title_s}
 											arrow
 											style={{ zIndex: 99999 }}
 										>
@@ -772,7 +775,7 @@ export default function GraphNodeCluster2D(props) {
 													handleNodeHover(null);
 												}}
 											>
-												{`${node.doc_type} ${node.doc_num}`}
+												{isTopicOrEntityNode ? node.name : `${node.doc_type} ${node.doc_num}`}
 											</StyledNodeGroupNode>
 										</GCTooltip>
 									);

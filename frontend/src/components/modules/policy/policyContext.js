@@ -62,6 +62,7 @@ const initState = {
 	adminTopics: [],
 	adminMajorPubs: [],
 	searchMajorPubs: [],
+	recDocs: [],
 	trendingLinks: [],
 
 	// Tutorial
@@ -211,6 +212,7 @@ const initState = {
 	
 	compareModalOpen: false,
 	compareFilename: null,
+	ignoredDocs: [],
 
 	// Presearch Filters
 	presearchSources: {},

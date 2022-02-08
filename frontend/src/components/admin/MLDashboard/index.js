@@ -7,7 +7,6 @@ import { styles } from '../util/GCAdminStyles';
 import Info from './info';
 import S3 from './s3';
 import Models from './models';
-import Processes from './processes';
 
 const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
@@ -119,7 +118,7 @@ export default () => {
 								INFORMATION
 							</Typography>
 						</Tab>
-						<Tab
+						{/* <Tab
 							style={{
 								...TabStyles.tabStyle,
 								...(tabIndex === 'processes' ? TabStyles.tabSelectedStyle : {}),
@@ -131,7 +130,7 @@ export default () => {
 							<Typography variant="h6" display="inline">
 								PROCESSES
 							</Typography>
-						</Tab>
+						</Tab> */}
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
@@ -142,7 +141,7 @@ export default () => {
 							onClick={() => setTabIndex('s3')}
 						>
 							<Typography variant="h6" display="inline">
-								S3
+								DATA CONTROL
 							</Typography>
 						</Tab>
 						<Tab
@@ -155,7 +154,7 @@ export default () => {
 							onClick={() => setTabIndex('models')}
 						>
 							<Typography variant="h6" display="inline">
-								MODELS
+								MODEL CONTROL
 							</Typography>
 						</Tab>
 					</TabList>
@@ -166,13 +165,6 @@ export default () => {
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>
 						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
-					</TabPanel>
-					<TabPanel>
-						<Processes
-							processes={processes}
-							getProcesses={getProcesses}
-							updateLogs={updateLogs}
-						/>
 					</TabPanel>
 					<TabPanel>
 						<S3

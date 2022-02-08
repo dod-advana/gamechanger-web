@@ -74,8 +74,13 @@ const endpoints = {
 	trainModel: '/api/gamechanger/admin/trainModel',
 	downloadDependencies: '/api/gamechanger/admin/downloadDependencies',
 	getS3List: '/api/gamechanger/admin/getS3List',
+	getS3DataList: '/api/gamechanger/admin/getS3DataList',
+	downloadS3File: '/api/gamechanger/admin/downloadS3File',
+	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
+	getDataList: '/api/gameChanger/admin/getDataList',
 	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
@@ -126,6 +131,7 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 
@@ -373,10 +379,20 @@ export default class GameChangerAPI {
 		});
 	};
 
-	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData) => {
+	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData, cancelToken) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
-		//const s3Bucket = 'advana-raw-zone';
 		const url = endpoints.thumbnailStorageDownloadPOST;
+		if(cancelToken){
+			return axiosPOST(
+				this.axios,
+				url,
+				{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
+				{ 
+					timeout: 0,
+					cancelToken: cancelToken?.token ? cancelToken.token : {}
+				}
+			);
+		}
 		return axiosPOST(
 			this.axios,
 			url,
@@ -665,8 +681,32 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
+	getS3DataList = async () => {
+		const url = endpoints.getS3DataList;
+		return axiosGET(this.axios, url);
+	};
+
+	downloadS3File = async (opts) => {
+		const url = endpoints.downloadS3File;
+		return axiosPOST(this.axios, url, opts);
+	};
+
+	stopProcess = async (opts) => {
+		const url = endpoints.stopProcess;
+		return axiosPOST(this.axios, url, opts);
+	};
+
+	deleteLocalModel = async (opts) => {
+		const url = endpoints.deleteLocalModel;
+		return axiosPOST(this.axios, url, opts);
+	};
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
+		return axiosGET(this.axios, url);
+	};
+
+	getDataList = async () => {
+		const url = endpoints.getDataList;
 		return axiosGET(this.axios, url);
 	};
 
@@ -959,9 +999,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getHomepageEditorData = async () => {
+	getHomepageEditorData = async (body) => {
 		const url = endpoints.getHomepageEditorData;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, body);
 	};
 
 	setHomepageEditorData = async (body) => {
@@ -987,6 +1027,11 @@ export default class GameChangerAPI {
 	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
+	};
+
+	compareFeedbackPOST = async (data) => {
+		const url = endpoints.compareFeedbackPOST;
+		return axiosPOST(this.axios, url, data);
 	};
 
 	getFAQ = async () => {

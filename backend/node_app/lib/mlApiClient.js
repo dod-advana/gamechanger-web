@@ -8,9 +8,13 @@ const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const MLRoutes = {
 	'getCurrentTransformer':`${transformerBaseUrl}/getCurrentTransformer`,
 	'getS3List':`${transformerBaseUrl}/s3?function=models`,
-	'downloadDependencies':`${transformerBaseUrl}/getCurrentTransformer`,
+	'getS3DataList':`${transformerBaseUrl}/s3?function=data`,
+	'downloadS3File':`${transformerBaseUrl}/downloadS3File`,
+	'deleteLocalModel':`${transformerBaseUrl}/deleteLocalModel`,
+	'downloadDependencies':`${transformerBaseUrl}/download`,
 	'getAPIInformation':`${transformerBaseUrl}/`,
 	'getModelsList': `${transformerBaseUrl}/getModelsList`,
+	'getDataList': `${transformerBaseUrl}/getDataList`,
 	'getFilesInCorpus':`${transformerBaseUrl}/getFilesInCorpus`,
 	'getProcessStatus':`${transformerBaseUrl}/getProcessStatus`,
 
@@ -23,6 +27,8 @@ const MLRoutes = {
 	'trainModel':`${transformerBaseUrl}/trainModel`,
 	'initializeLTR':`${transformerBaseUrl}/LTR/initLTR`,
 	'createModelLTR':`${transformerBaseUrl}/LTR/createModel`,
+	'recommender':`${transformerBaseUrl}/recommender`,
+	'stopProcess':`${transformerBaseUrl}/stopProcess`
 	
 }
 /**
@@ -42,12 +48,15 @@ class MLApiClient {
 		this.transformResults = this.transformResults.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
-		
+		this.recommender = this.recommender.bind(this);
+
 		
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
+		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
@@ -58,6 +67,9 @@ class MLApiClient {
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
+		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
+		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.stopProcess = this.postData.bind(this, 'stopProcess');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
@@ -85,6 +97,11 @@ class MLApiClient {
 	async transformResults(searchText, docs, userId = 'unknown') {
 		const data = { query: searchText, documents: docs}
 		return await this.postData('transformResults', userId, data);
+	}
+
+	async recommender(doc, userId = 'unknown') {
+		const data = { filenames: doc}
+		return await this.postData('recommender', userId, data);
 	}
 	/**
 	 * A generic get method to query the ML API. 
@@ -124,6 +141,7 @@ class MLApiClient {
 		};
 		try {
 			let url = MLRoutes[key];
+			
 			if(queryString) url += queryString;
 			const { data } = await this.axios({
 				url,

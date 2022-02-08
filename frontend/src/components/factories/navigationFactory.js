@@ -3,7 +3,7 @@ const policyNavigationHandler = require(`../modules/policy/policyNavigationHandl
 const edaNavigationHandler = require(`../modules/eda/edaNavigationHandler`);
 const policyTestNavigationHandler = require(`../modules/policy/policyTestNavigationHandler`);
 const globalSearchNavigationHandler = require(`../modules/globalSearch/globalSearchNavigationHandler`);
-const cdoNavigationHandler = require(`../modules/cdo/cdoNavigationHandler`);
+
 class NavigationFactory {
 	constructor(module) {
 		try {
@@ -16,9 +16,6 @@ class NavigationFactory {
 					break;
 				case 'globalSearch/globalSearchNavigationHandler':
 					this.handler = globalSearchNavigationHandler;
-					break;
-				case 'cdo/cdoNavigationHandler':
-					this.handler = cdoNavigationHandler;
 					break;
 				case 'eda/edaNavigationHandler':
 					this.handler = edaNavigationHandler;

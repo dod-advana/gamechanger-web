@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Select, MenuItem, Input, Checkbox } from '@material-ui/core';
+import { Select, MenuItem, Input, Checkbox, Typography } from '@material-ui/core';
 import ReactTable from 'react-table';
+import Modal from 'react-modal';
 import { BorderDiv, TableRow } from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
+import GCButton from '../../common/GCButton';
+
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
 import './index.scss';
+import Processes from './processes';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -24,7 +28,18 @@ const modelColumns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
-
+const dataColumns = [
+	{
+		Header: 'Path',
+		accessor: 'path',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Name',
+		accessor: 'name',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+];
 /**
  * This class provides controls to veiw and control the
  * resouces loaded locally to the ml api.
@@ -37,8 +52,13 @@ export default (props) => {
 		sentence: {},
 		qexp: {}
 	});
-
+	const [deleteModal,setDeleteModal] = useState({
+		show:false,
+		model:'',
+		type:''
+	})
 	const [modelTable, setModelTable] = useState([]);
+	const [dataTable, setDataTable] = useState([])
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
@@ -58,13 +78,11 @@ export default (props) => {
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
-	const [batchSize, setBatchSize] = useState(32);
 	const [warmupSteps, setWarmupSteps] = useState(100);
-	const [epochs, setEpochs] = useState(3);
+	const [epochs, setEpochs] = useState(10);
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
-
 	/**
 	 * Load all the initial data on transformers and s3
 	 * @method onload
@@ -73,6 +91,7 @@ export default (props) => {
 		getCurrentTransformer();
 		getModelsList();
 		getCorpusCount();
+		getLocalData();
 	};
 	/**
 	 * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
@@ -123,6 +142,61 @@ export default (props) => {
 		}
 	};
 
+
+	const deleteLocalModels = async (model,type) =>{
+		setDeleteModal({
+			show:false,
+			model:'',
+			type:''
+		})
+		await gameChangerAPI.deleteLocalModel({
+			'model':model,
+			'type':type
+		});
+		props.getProcesses();
+		getModelsList()
+	}
+	/**
+	 * Get a list of all the proccesses running and completed
+	 * @method getAllProcessData
+	 */
+	const getAllProcessData = () => {
+		const processList = [];
+		if (props.processes.process_status) {
+			for (const key in props.processes.process_status) {
+				if (key !== 'flags') {
+					const status = key.split(': ');
+					if (['models', 'training'].includes(status[0])){
+						processList.push({
+							...props.processes.process_status[key],
+							process: status[1],
+							category: status[0],
+							date:'Currently Running'
+						});
+					}
+				}
+			}
+		}
+		if (props.processes && props.processes.completed_process) {
+			for (const completed of props.processes.completed_process) {
+				const completed_process = completed.process.split(': ');
+				if (['models', 'training'].includes(completed_process[0])){
+					processList.push({
+						...completed,
+						process: completed_process[1],
+						category: completed_process[0],
+						progress: completed.total
+					});
+				}
+			}
+		}
+		return processList;
+	};
+
+	const getLocalData = async () => {
+		const dataList =  await gameChangerAPI.getDataList();
+		setDataTable(dataList.data.dirs)
+	}
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getModelsList
@@ -192,7 +266,6 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'sent_finetune',
 				epochs: epochs,
-				batch_size: batchSize,
 				warmup_steps: warmupSteps
 			});
 			props.updateLogs('Started training', 0);
@@ -305,11 +378,56 @@ export default (props) => {
 
 	useEffect(() => {
 		onload();
+		props.getProcesses();
 		// eslint-disable-next-line
 	}, []);
 
 	return (
 		<div>
+			<Modal
+				isOpen={deleteModal.show}
+				onRequestClose={() => setDeleteModal({
+					show:false,
+					model:'',
+					type:''
+				})}
+				style={styles.esIndexModal}
+			>
+				<div>
+					<Typography>
+							Are you sure you want to delete {deleteModal.model}
+					</Typography>
+				</div>
+				<div
+					style={{
+						position:'absolute',
+						bottom: 0,
+						justifyContent: 'flex-end',
+					}}
+				>
+					<GCButton
+						id={'modelDeleteConfirm'}
+						onClick={() => deleteLocalModels(deleteModal.model,deleteModal.type)}
+						style={{ margin: '25px' }}
+						buttonColor={'#8091A5'}
+					>
+						Yes
+					</GCButton>
+					<GCButton
+						id={'modelModalClose'}
+						onClick={() => setDeleteModal({
+							show:false,
+							model:'',
+							type:''
+						})}
+						style={{ margin: '25px' }}
+						buttonColor={'#8091A5'}
+					>
+						No
+					</GCButton>
+		
+				</div>
+			</Modal>
 			<div
 				style={{
 					display: 'flex',
@@ -329,6 +447,11 @@ export default (props) => {
 				>
 					Refresh
 				</GCPrimaryButton>
+			</div>
+			<div>
+				<Processes
+					processData={getAllProcessData()}
+				/>
 			</div>
 			<div className="info">
 				<BorderDiv className="half">
@@ -399,6 +522,19 @@ export default (props) => {
 											<pre className="code-block">
 												<code>{row.original.config}</code>
 											</pre>
+											<GCPrimaryButton
+												onClick={() => {
+													setDeleteModal({
+														show:true,
+														model:row.original.model,
+														type:row.original.type
+													})
+													
+												}}
+												style={{ float: 'left', minWidth: 'unset' }}
+											>
+												Delete
+											</GCPrimaryButton>
 										</div>
 									);
 								}}
@@ -585,17 +721,6 @@ export default (props) => {
 						</GCPrimaryButton>
 					
 						<div>
-							<div style={{ width: '60x', display: 'inline-block' }}>
-								Batch Size:
-							</div>
-							<Input
-								value={batchSize}
-								onChange={(e) => setBatchSize(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
-							/>
-						</div>
-						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Warmup Steps:
 							</div>
@@ -743,6 +868,42 @@ export default (props) => {
 							</div>
 						}
 					</div>
+				</BorderDiv>
+				<BorderDiv className="half" style={{ float: 'right' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block' }}>Local Data:</div>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<ReactTable
+								data={dataTable}
+								columns={dataColumns}
+								className="striped -highlight"
+								defaultPageSize={10}
+								SubComponent={(row) => {
+									return (
+										<div className="code-container" style={{padding:'15px'}}>
+											Files
+											<ul>
+												{row.original.files.map((d) => <li key={d}>{d}</li>)}
+											</ul>
+											Directories
+											<ul>
+												{row.original.subdirectories.map((d) => <li key={d}>{d}</li>)}
+											</ul>
+										</div>
+											
+									);
+								}}
+							/>
+						</div>
+					</fieldset>
 				</BorderDiv>
 			</div>
 		</div>
