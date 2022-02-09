@@ -302,22 +302,6 @@ const GCDocumentsComparisonTool = (props) => {
 		handleSetParagraphs();
 	}, [paragraphText, handleSetParagraphs])
 	
-	const getMatchingParsCount = (compareIdx) => {
-		// return compareDocument.paragraphs.filter(par => {
-		// 	return par.paragraphIdBeingMatched === compareIdx;
-		// }).length;
-	}
-	
-	const handleSetCompareIndex = (idx) => {
-		// const parCount = getMatchingParsCount(idx);
-		// if (parCount > 0){
-		// 	setCompareParagraphIndex(idx);
-		// 	const highlights = compareDocument.paragraphs.filter(p => p.paragraphIdBeingMatched === idx);
-		// 	setHighlightList(highlights);
-		// 	setHighlightindex(highlightIndex >= parCount -1 ? 0 : highlightIndex + 1);
-		// }
-	}
-	
 	const reset = () => {
 		setParagraphText('');
 		setInputError(false);
@@ -332,11 +316,10 @@ const GCDocumentsComparisonTool = (props) => {
 		});
 	}
 
-	const removeParagraph = (idx) => {
-		//need something to use other than index
-		const newParagraphs = paragraphs.filter((par,index) => index !== idx);
+	const removeParagraph = (text) => {
+		const newParagraphs = paragraphs.filter((par) => par !== text);
 		const newItemsToCombine = itemsToCombine;
-		delete newItemsToCombine[`paragraph${idx}`]
+		delete newItemsToCombine[text]
 		setParagraphs(newParagraphs);
 	}
 	
@@ -490,7 +473,7 @@ const GCDocumentsComparisonTool = (props) => {
 							<Typography variant="body" style={{marginBottom: 5}}>
 								Paragraph Input
 							</Typography>
-							{paragraphs.map((paragraph, idx) => (
+							{paragraphs.map((paragraph) => (
 								<div
 									style={{
 										border: `2px solid ${'#386f94'}`,
@@ -499,14 +482,14 @@ const GCDocumentsComparisonTool = (props) => {
 										display: 'flex',
 										lineHeight: '20px',
 										marginBottom: 5,
-										cursor: getMatchingParsCount(idx) > 0 ? 'pointer' : ''
+										cursor: 'pointer'
 									}}
-									onClick={() => handleSetCompareIndex(idx)}
+									onClick={() => {}}
 								>
 									<GCCheckbox
-										checked={itemsToCombine[`paragraph${idx}`]}
+										checked={itemsToCombine[paragraph] ? true : false}
 										onChange={handleCheck}
-										name={`paragraph${idx}`}
+										name={paragraph}
 										color="secondary"
 										style={styles.checkbox}
 									/>
@@ -514,7 +497,7 @@ const GCDocumentsComparisonTool = (props) => {
 										{paragraph}
 									</div>
 									<div style={{margin: 'auto 0 auto auto'}}>
-										<i style={styles.image} onClick={() => removeParagraph(idx)} className="fa fa-trash fa-2x" />
+										<i style={styles.image} onClick={() => removeParagraph(paragraph)} className="fa fa-trash fa-2x" />
 									</div>
 								</div>
 							))}
