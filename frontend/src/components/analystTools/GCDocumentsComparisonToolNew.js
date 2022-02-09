@@ -318,10 +318,9 @@ const GCDocumentsComparisonTool = (props) => {
 		});
 	}
 
-	const removeParagraph = (text) => {
-		const newParagraphs = paragraphs.filter((par) => par.text !== text);
-		const newItemsToCombine = itemsToCombine;
-		delete newItemsToCombine[text]
+	const removeParagraph = (id) => {
+		const newParagraphs = paragraphs.filter((par) => par.id !== id);
+		if(id === selectedInput) setSelectedInput(newParagraphs[0].id)
 		setParagraphs(newParagraphs);
 	}
 	
@@ -419,6 +418,7 @@ const GCDocumentsComparisonTool = (props) => {
 										setNoResults(false);
 										setFilterChange(false);
 										setSelectedInput(paragraphs?.[0].id);
+										setItemsToCombine({});
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
 								>
@@ -490,46 +490,50 @@ const GCDocumentsComparisonTool = (props) => {
 										cursor: 'pointer',
 										backgroundColor: paragraph.id === selectedInput ? '#DFE6EE' : '#FFFFFF'
 									}}
-									onClick={(event) => {
+									onClick={() => {
 										setSelectedInput(paragraph.id);
 									}}
 								>
-									<div 
-										onClick={(event) => {
-											event.stopPropagation();
-											handleCheck(paragraph.id);
-										}}
-										style={{margin: 'auto 0px'}}
-									>
-										<Checkbox
-											checked={itemsToCombine[paragraph.id] ? true : false}
-											classes={{ root: classes.filterBox }}
-											icon={
-												<CheckBoxOutlineBlankIcon
-													style={{ visibility: 'hidden' }}
-												/>
-											}
-											checkedIcon={
-												<i
-													style={{ color: '#E9691D' }}
-													className="fa fa-check"
-												/>
-											}
-										/>
-									</div>
+									{paragraphs.length > 1 &&
+										<div 
+											onClick={(event) => {
+												event.stopPropagation();
+												handleCheck(paragraph.id);
+											}}
+											style={{margin: 'auto 0px'}}
+										>
+											<Checkbox
+												checked={itemsToCombine[paragraph.id] ? true : false}
+												classes={{ root: classes.filterBox }}
+												icon={
+													<CheckBoxOutlineBlankIcon
+														style={{ visibility: 'hidden' }}
+													/>
+												}
+												checkedIcon={
+													<i
+														style={{ color: '#E9691D' }}
+														className="fa fa-check"
+													/>
+												}
+											/>
+										</div>
+									}
 									<div style={{margin: 'auto 0'}}>
 										{paragraph.text}
 									</div>
-									<div style={{margin: 'auto 0 auto auto'}}>
-										<i 
-											style={styles.image}
-											onClick={(event) => {
-												event.stopPropagation();
-												removeParagraph(paragraph.text);
-											}} 
-											className="fa fa-trash fa-2x" 
-										/>
-									</div>
+									{paragraphs.length > 1 &&
+										<div style={{margin: 'auto 0 auto auto'}}>
+											<i 
+												style={styles.image}
+												onClick={(event) => {
+													event.stopPropagation();
+													removeParagraph(paragraph.id);
+												}} 
+												className="fa fa-trash fa-2x" 
+											/>
+										</div>
+									}
 								</div>
 							))}
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
