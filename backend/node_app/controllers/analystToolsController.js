@@ -35,7 +35,7 @@ class AnalystToolsController {
 			const permissions = req.permissions ? req.permissions : [];
 			
 			// ML API Call Goes Here
-			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
+			const paragraphSearches = paragraphs.map((paragraph) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, userId, paragraph.id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
 			const resultsObject = {};
