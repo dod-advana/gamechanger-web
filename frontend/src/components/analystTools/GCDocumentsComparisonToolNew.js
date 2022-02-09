@@ -4,7 +4,8 @@ import { Collapse } from 'react-collapse';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { Grid, Typography } from '@material-ui/core';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import { Grid, Typography, Checkbox } from '@material-ui/core';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import {setState} from '../../utils/sharedFunctions';
@@ -18,7 +19,6 @@ import {
 } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
-import { GCCheckbox } from '../admin/util/GCAdminStyles';
 
 const _ = require('lodash');
 
@@ -311,11 +311,10 @@ const GCDocumentsComparisonTool = (props) => {
 		setViewableDocs([]);
 	}
 
-	const handleCheck = (event) => {
-		event.stopPropagation();
+	const handleCheck = (id) => {
 		setItemsToCombine({
 			...itemsToCombine,
-			[event.target.name]: event.target.checked,
+			[id]: !itemsToCombine?.[id],
 		});
 	}
 
@@ -474,7 +473,7 @@ const GCDocumentsComparisonTool = (props) => {
 								flexDirection: 'column'
 							}}
 						>
-							<Typography variant="body" style={{marginBottom: 10}}>
+							<Typography variant="body1" style={{marginBottom: 10}}>
 								Paragraph Input
 							</Typography>
 							{paragraphs.map((paragraph) => (
@@ -491,20 +490,45 @@ const GCDocumentsComparisonTool = (props) => {
 										cursor: 'pointer',
 										backgroundColor: paragraph.id === selectedInput ? '#DFE6EE' : '#FFFFFF'
 									}}
-									onClick={() => {setSelectedInput(paragraph.id)}}
+									onClick={(event) => {
+										setSelectedInput(paragraph.id);
+									}}
 								>
-									<GCCheckbox
-										checked={itemsToCombine[paragraph.id] ? true : false}
-										onChange={handleCheck}
-										name={paragraph.id}
-										color="secondary"
-										style={styles.checkbox}
-									/>
+									<div 
+										onClick={(event) => {
+											event.stopPropagation();
+											handleCheck(paragraph.id);
+										}}
+										style={{margin: 'auto 0px'}}
+									>
+										<Checkbox
+											checked={itemsToCombine[paragraph.id] ? true : false}
+											classes={{ root: classes.filterBox }}
+											icon={
+												<CheckBoxOutlineBlankIcon
+													style={{ visibility: 'hidden' }}
+												/>
+											}
+											checkedIcon={
+												<i
+													style={{ color: '#E9691D' }}
+													className="fa fa-check"
+												/>
+											}
+										/>
+									</div>
 									<div style={{margin: 'auto 0'}}>
 										{paragraph.text}
 									</div>
 									<div style={{margin: 'auto 0 auto auto'}}>
-										<i style={styles.image} onClick={() => removeParagraph(paragraph.text)} className="fa fa-trash fa-2x" />
+										<i 
+											style={styles.image}
+											onClick={(event) => {
+												event.stopPropagation();
+												removeParagraph(paragraph.text);
+											}} 
+											className="fa fa-trash fa-2x" 
+										/>
 									</div>
 								</div>
 							))}
@@ -675,6 +699,16 @@ const useStyles = makeStyles((theme) => ({
 		minWidth: '1500px',
 		backgroundColor: '#EFF1F6',
 		height: 850
+	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		margin: 'auto 5px auto 0px',
+		height: 19,
+		width: 19
 	},
 }));
 
