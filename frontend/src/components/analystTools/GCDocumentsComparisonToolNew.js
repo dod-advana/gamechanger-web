@@ -174,6 +174,7 @@ const GCDocumentsComparisonTool = (props) => {
 	
 	const [paragraphText, setParagraphText] = useState('');
 	const [paragraphs, setParagraphs] = useState([]);
+	const [selectedInput, setSelectedInput] = useState(undefined);
 	const [returnedDocs, setReturnedDocs] = useState([]);
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -188,9 +189,9 @@ const GCDocumentsComparisonTool = (props) => {
 	const [collapseKeys, setCollapseKeys] = useState([]);
 
 	const handleSetParagraphs = useCallback(() => {
-		const paragraphs = paragraphText.split('\n').map(paragraph => {
-			return paragraph.trim();
-		}).filter(paragraph => paragraph.length > 0);
+		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
+			return {text: paragraph.trim(), id: idx};
+		}).filter(paragraph => paragraph.text.length > 0);
 
 		if(paragraphs.length > 5){
 			setInputError(true);
@@ -227,6 +228,7 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
+			setCollapseKeys([]);
 
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
@@ -255,25 +257,25 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [returnedDocs]);
 
 	useEffect(() => {
-		if(state.ignoredDocs.length){
-			const { item, index } = state.ignoredDocs[0];
-			const searchedParagraph = paragraphs[item.paragraphs[index].paragraphIdBeingMatched]
-			const matchedParagraphId = item.paragraphs[index].id;
+		// if(state.ignoredDocs.length){
+		// 	const { item, index } = state.ignoredDocs[0];
+		// 	const searchedParagraph = paragraphs[item.paragraphs[index].paragraphIdBeingMatched]
+		// 	const matchedParagraphId = item.paragraphs[index].id;
 
-			gameChangerAPI.compareFeedbackPOST({
-				searchedParagraph,
-				matchedParagraphId,
-				docId: item.id,
-				positiveFeedback: false
-			});
-			setState( dispatch, {ignoredDocs: []})
+		// 	gameChangerAPI.compareFeedbackPOST({
+		// 		searchedParagraph,
+		// 		matchedParagraphId,
+		// 		docId: item.id,
+		// 		positiveFeedback: false
+		// 	});
+		// 	setState( dispatch, {ignoredDocs: []})
 
-			const newViewableDocs = viewableDocs;
-			const docIndex = viewableDocs.findIndex((doc) => item.filename === doc.filename);
-			newViewableDocs[docIndex].paragraphs.splice(index, 1);
-			if(!newViewableDocs[docIndex].paragraphs.length) newViewableDocs.splice(docIndex, 1);
-			setViewableDocs(newViewableDocs);
-		}
+		// 	const newViewableDocs = viewableDocs;
+		// 	const docIndex = viewableDocs.findIndex((doc) => item.filename === doc.filename);
+		// 	newViewableDocs[docIndex].paragraphs.splice(index, 1);
+		// 	if(!newViewableDocs[docIndex].paragraphs.length) newViewableDocs.splice(docIndex, 1);
+		// 	setViewableDocs(newViewableDocs);
+		// }
 	}, [state.ignoredDocs, viewableDocs, dispatch, paragraphs])
 	
 	const measuredRef = useCallback(
@@ -310,6 +312,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 
 	const handleCheck = (event) => {
+		event.stopPropagation();
 		setItemsToCombine({
 			...itemsToCombine,
 			[event.target.name]: event.target.checked,
@@ -317,7 +320,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 
 	const removeParagraph = (text) => {
-		const newParagraphs = paragraphs.filter((par) => par !== text);
+		const newParagraphs = paragraphs.filter((par) => par.text !== text);
 		const newItemsToCombine = itemsToCombine;
 		delete newItemsToCombine[text]
 		setParagraphs(newParagraphs);
@@ -416,6 +419,7 @@ const GCDocumentsComparisonTool = (props) => {
 									onClick={() => {
 										setNoResults(false);
 										setFilterChange(false);
+										setSelectedInput(paragraphs?.[0].id);
 										setState(dispatch, { runDocumentComparisonSearch: true });
 									}}
 								>
@@ -470,40 +474,43 @@ const GCDocumentsComparisonTool = (props) => {
 								flexDirection: 'column'
 							}}
 						>
-							<Typography variant="body" style={{marginBottom: 5}}>
+							<Typography variant="body" style={{marginBottom: 10}}>
 								Paragraph Input
 							</Typography>
 							{paragraphs.map((paragraph) => (
 								<div
+									key={paragraph.id}
 									style={{
-										border: `2px solid ${'#386f94'}`,
+										border: paragraph.id === selectedInput ? 'none' :`2px solid #B6C6D8`,
+										boxShadow: paragraph.id === selectedInput ? '0px 3px 6px #00000029' : 'none',
 										padding: 10,
 										borderRadius: 6,
 										display: 'flex',
 										lineHeight: '20px',
-										marginBottom: 5,
-										cursor: 'pointer'
+										marginBottom: 10,
+										cursor: 'pointer',
+										backgroundColor: paragraph.id === selectedInput ? '#DFE6EE' : '#FFFFFF'
 									}}
-									onClick={() => {}}
+									onClick={() => {setSelectedInput(paragraph.id)}}
 								>
 									<GCCheckbox
-										checked={itemsToCombine[paragraph] ? true : false}
+										checked={itemsToCombine[paragraph.id] ? true : false}
 										onChange={handleCheck}
-										name={paragraph}
+										name={paragraph.id}
 										color="secondary"
 										style={styles.checkbox}
 									/>
 									<div style={{margin: 'auto 0'}}>
-										{paragraph}
+										{paragraph.text}
 									</div>
 									<div style={{margin: 'auto 0 auto auto'}}>
-										<i style={styles.image} onClick={() => removeParagraph(paragraph)} className="fa fa-trash fa-2x" />
+										<i style={styles.image} onClick={() => removeParagraph(paragraph.text)} className="fa fa-trash fa-2x" />
 									</div>
 								</div>
 							))}
 							<div style={{display: 'flex', justifyContent: 'flex-end'}}>
 								<GCButton
-									style={{ marginTop: 20, width: 'fit-content'}}
+									style={{ marginTop: 0, width: 'fit-content'}}
 									isSecondaryBtn
 									disabled={combineDisabled}
 									onClick={() => {
@@ -513,7 +520,7 @@ const GCDocumentsComparisonTool = (props) => {
 									Combine
 								</GCButton>
 								<GCButton
-									style={{ marginTop: 20, width: 'fit-content'}}
+									style={{ marginTop: 0, width: 'fit-content'}}
 									isSecondaryBtn
 									onClick={() => {
 										setNoResults(false);
@@ -526,11 +533,13 @@ const GCDocumentsComparisonTool = (props) => {
 							</div>
 						</div>
 						<div style={{ marginTop: 20 }}>
-							{viewableDocs.map((doc, key) => {
+							{viewableDocs.filter(doc => {
+								return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
+							}).map((doc) => {
 								const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
 								const displayTitle = doc.title;
 								return (
-									<div key={key}>
+									<div key={doc.id}>
 										<div
 											className="searchdemo-modal-result-header"
 											style={{ marginTop: 0 }}
@@ -552,7 +561,7 @@ const GCDocumentsComparisonTool = (props) => {
 											</span>
 										</div>
 										<Collapse isOpened={docOpen}>
-											{doc.paragraphs.map((paragraph) =>{
+											{doc.paragraphs.filter(paragraph => paragraph.paragraphIdBeingMatched === selectedInput).map((paragraph) =>{
 												let blockquoteClass = 'searchdemo-blockquote-sm';
 												const pOpen = selectedParagraph?.id === paragraph.id;
 												const isHighlighted = pOpen && docOpen;
