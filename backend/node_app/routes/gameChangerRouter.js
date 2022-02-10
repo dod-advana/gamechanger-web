@@ -172,9 +172,9 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
   router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
   router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
   router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+  router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 
 }
-router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
 router.post('/appSettings/combinedSearch', appSettings.setCombinedSearchMode);
