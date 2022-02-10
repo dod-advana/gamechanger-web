@@ -8,7 +8,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { Grid, Typography, Checkbox } from '@material-ui/core';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import {setState} from '../../utils/sharedFunctions';
+import { setState, handleSaveFavoriteDocument } from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {gcOrange} from '../common/gc-colors';
 import {
@@ -257,7 +257,6 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [returnedDocs]);
 
 	const handleIgnore = (doc, paragraph) => {
-		console.log('my doc: ', doc)
 		const searchedParagraph = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
 		const matchedParagraphId = paragraph.id;
 
@@ -347,6 +346,11 @@ const GCDocumentsComparisonTool = (props) => {
 		setSelectedInput(paragraphs?.[0].id);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
+	}
+
+	const saveDocToFavorites = (filename, paragraph) => {
+		const text = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
+		handleSaveFavoriteDocument({filename, is_favorite: true, search_text: text, favorite_summary: `Document Comparison result of "${text}"`}, state, dispatch)
 	}
 	
 	return (
@@ -660,7 +664,7 @@ const GCDocumentsComparisonTool = (props) => {
 																	Export
 																</GCButton>
 																<GCButton 
-																	onClick={() => console.log('Favorite')}
+																	onClick={() => saveDocToFavorites(doc.filename, paragraph)}
 																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
 																>
 																	Save to Favorites
