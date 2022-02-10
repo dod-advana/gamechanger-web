@@ -227,7 +227,6 @@ const GCDocumentsComparisonTool = (props) => {
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
-			console.log('paragraphs: ', paragraphs);
 			setLoading(true);
 			setCollapseKeys([]);
 
@@ -257,27 +256,25 @@ const GCDocumentsComparisonTool = (props) => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
 
-	useEffect(() => {
-		// if(state.ignoredDocs.length){
-		// 	const { item, index } = state.ignoredDocs[0];
-		// 	const searchedParagraph = paragraphs[item.paragraphs[index].paragraphIdBeingMatched]
-		// 	const matchedParagraphId = item.paragraphs[index].id;
+	const handleIgnore = (doc, paragraph) => {
+		console.log('my doc: ', doc)
+		const searchedParagraph = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
+		const matchedParagraphId = paragraph.id;
 
-		// 	gameChangerAPI.compareFeedbackPOST({
-		// 		searchedParagraph,
-		// 		matchedParagraphId,
-		// 		docId: item.id,
-		// 		positiveFeedback: false
-		// 	});
-		// 	setState( dispatch, {ignoredDocs: []})
+		gameChangerAPI.compareFeedbackPOST({
+			searchedParagraph,
+			matchedParagraphId,
+			docId: doc.id,
+			positiveFeedback: false
+		});
 
-		// 	const newViewableDocs = viewableDocs;
-		// 	const docIndex = viewableDocs.findIndex((doc) => item.filename === doc.filename);
-		// 	newViewableDocs[docIndex].paragraphs.splice(index, 1);
-		// 	if(!newViewableDocs[docIndex].paragraphs.length) newViewableDocs.splice(docIndex, 1);
-		// 	setViewableDocs(newViewableDocs);
-		// }
-	}, [state.ignoredDocs, viewableDocs, dispatch, paragraphs])
+		const docIndex = viewableDocs.findIndex(vDoc => vDoc.id === doc.id);
+		const parIndex = viewableDocs[docIndex].paragraphs.findIndex(vPar => vPar.id === paragraph.id);
+		const newViewableDocs = viewableDocs;
+		newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
+		setViewableDocs(newViewableDocs);
+		if(viewableDocs.length) setSelectedParagraph(viewableDocs[0].paragraphs[0]);
+	}
 	
 	const measuredRef = useCallback(
 		(node) => {
@@ -670,7 +667,7 @@ const GCDocumentsComparisonTool = (props) => {
 																</GCButton>
 																<GCButton 
 																	isSecondaryBtn 
-																	onClick={() => console.log('Ignore')}
+																	onClick={() => handleIgnore(doc, paragraph)}
 																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
 																>
 																	Ignore
