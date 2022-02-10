@@ -27,6 +27,8 @@ const MLRoutes = {
 	'trainModel':`${transformerBaseUrl}/trainModel`,
 	'initializeLTR':`${transformerBaseUrl}/LTR/initLTR`,
 	'createModelLTR':`${transformerBaseUrl}/LTR/createModel`,
+	'recommender':`${transformerBaseUrl}/recommender`,
+	'stopProcess':`${transformerBaseUrl}/stopProcess`
 	
 }
 /**
@@ -46,7 +48,8 @@ class MLApiClient {
 		this.transformResults = this.transformResults.bind(this);
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
-		
+		this.recommender = this.recommender.bind(this);
+
 		
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
@@ -66,6 +69,7 @@ class MLApiClient {
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.stopProcess = this.postData.bind(this, 'stopProcess');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
@@ -93,6 +97,11 @@ class MLApiClient {
 	async transformResults(searchText, docs, userId = 'unknown') {
 		const data = { query: searchText, documents: docs}
 		return await this.postData('transformResults', userId, data);
+	}
+
+	async recommender(doc, userId = 'unknown') {
+		const data = { filenames: doc}
+		return await this.postData('recommender', userId, data);
 	}
 	/**
 	 * A generic get method to query the ML API. 
@@ -132,6 +141,7 @@ class MLApiClient {
 		};
 		try {
 			let url = MLRoutes[key];
+			
 			if(queryString) url += queryString;
 			const { data } = await this.axios({
 				url,

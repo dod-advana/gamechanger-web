@@ -65,7 +65,7 @@ router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
 router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
-router.get('/getHomepageEditorData', admin.getHomepageEditorData);
+router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
@@ -104,6 +104,7 @@ router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
 router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
+router.post('/admin/stopProcess', transformer.stopProcess);
 
 router.get('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
