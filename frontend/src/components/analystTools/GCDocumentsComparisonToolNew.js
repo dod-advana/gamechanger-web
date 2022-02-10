@@ -227,6 +227,7 @@ const GCDocumentsComparisonTool = (props) => {
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
+			console.log('paragraphs: ', paragraphs);
 			setLoading(true);
 			setCollapseKeys([]);
 
@@ -323,6 +324,33 @@ const GCDocumentsComparisonTool = (props) => {
 		if(id === selectedInput) setSelectedInput(newParagraphs[0].id)
 		setParagraphs(newParagraphs);
 	}
+
+	const handleCombine = () => {
+		const oldParagraphs = [];
+		const paragraphsToCombine = [];
+		paragraphs.forEach(par => {
+			if(itemsToCombine[par.id]){ 
+				paragraphsToCombine.push(par.text)
+			}else{
+				oldParagraphs.push(par.text)
+			}
+		});
+		const combinedParagraphs = paragraphsToCombine.join(' ');
+		oldParagraphs.push(combinedParagraphs);
+		const newParagraphs = oldParagraphs.map((text, idx) => {
+			return {text, id: idx};
+		})
+		setParagraphs(newParagraphs);
+		handleCompare();
+	}
+
+	const handleCompare = () => {
+		setNoResults(false);
+		setFilterChange(false);
+		setSelectedInput(paragraphs?.[0].id);
+		setItemsToCombine({});
+		setState(dispatch, { runDocumentComparisonSearch: true });
+	}
 	
 	return (
 		<>
@@ -414,13 +442,7 @@ const GCDocumentsComparisonTool = (props) => {
 								<GCButton
 									style={{ marginTop: 20 }}
 									disabled={inputError}
-									onClick={() => {
-										setNoResults(false);
-										setFilterChange(false);
-										setSelectedInput(paragraphs?.[0].id);
-										setItemsToCombine({});
-										setState(dispatch, { runDocumentComparisonSearch: true });
-									}}
+									onClick={handleCompare}
 								>
 									Submit
 								</GCButton>
@@ -542,7 +564,7 @@ const GCDocumentsComparisonTool = (props) => {
 									isSecondaryBtn
 									disabled={combineDisabled}
 									onClick={() => {
-										
+										handleCombine();
 									}}
 								>
 									Combine
