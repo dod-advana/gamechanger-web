@@ -103,7 +103,7 @@ export const handleSaveFavoriteSearch = async (
 export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	const { rawSearchResults, cloneData } = state;
 
-	document.search_text = state.searchText;
+	if(!document.search_text) document.search_text = state.searchText;
 	document.is_clone = true;
 	document.clone_index = cloneData?.clone_data?.project_name;
 
