@@ -5,6 +5,7 @@ import NGA from '../../../images/logos/NGALogo.png';
 import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
 import Covid19 from '../../../images/logos/Covid19Logo.png';
 import CDO from '../../../images/logos/CDOLogo.png';
+import {Typography} from "@material-ui/core";
 
 
 const DefaultTitleBarHandler = {
@@ -104,6 +105,20 @@ const DefaultTitleBarHandler = {
 						id={'titleButton'}
 						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					/>
+				</div>
+			);
+		} else {
+			 return (
+				<div
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					onClick={onTitleClick}
+				>
+					<Typography variant="h1" style={styles.wording} display="inline">
+						{cloneData.display_name}
+					</Typography>
+					<Typography variant="h6" style={styles.wording} display="inline">
+						Powered by GAMECHANGER
+					</Typography>
 				</div>
 			);
 		}

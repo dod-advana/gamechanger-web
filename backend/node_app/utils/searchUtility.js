@@ -54,7 +54,8 @@ class SearchUtility {
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
-		this.getSearchCount = this.getSearchCount.bind(this)
+		this.getSearchCount = this.getSearchCount.bind(this);
+		this.getRecDocs = this.getRecDocs.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -1446,15 +1447,14 @@ class SearchUtility {
 
 		return searchCounts
 	}
-	getESpresearchMultiQuery({ searchText, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
+	getESpresearchMultiQuery({ searchText, index, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
-
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
 			let query = []
 			let titleQuery = [
 				{
-					index: this.constants.GAME_CHANGER_OPTS.index
+					index: index
 				},
 				{
 					size: 4,
@@ -1464,7 +1464,7 @@ class SearchUtility {
 							must: [
 								{
 									wildcard: {
-										'display_title_s': {
+										'display_title_s.search': {
 											value: `*${plainQuery}*`,
 											boost: 1.0,
 											rewrite: 'constant_score'
@@ -1483,7 +1483,7 @@ class SearchUtility {
 					}
 				}
 			];
-			if (title !== 'display_title_s.search'){
+			if (title !== 'display_title_s'){
 				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search']
 				titleQuery[1]['query']['bool']['must'][0]['wildcard'][title] = {
 					value: `*${plainQuery}*`,
@@ -2162,7 +2162,15 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-
+	async getRecDocs(doc=["Title 10"], userId=""){
+		let recDocs = [];
+		try {
+			recDocs = await this.mlApi.recommender(doc, userId);
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', userId);
+		};
+		return recDocs
+	}
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
@@ -2206,6 +2214,7 @@ class SearchUtility {
 					popDocs.push(doc);
 				});
 			};
+
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
@@ -2516,7 +2525,7 @@ class SearchUtility {
 			});
 
 			rtnNodes.forEach(node => {
-				node.pageRank = idToPRMap[node.id] || 1;
+				node.pageRank = idToPRMap[node.id] || 0;
 			});
 
 			return { nodes: Object.values(nodes), edges: Object.values(edges), labels, relationships, nodeProperties, relProperties };

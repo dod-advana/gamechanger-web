@@ -213,28 +213,10 @@ export default (props) => {
 			accessor: '',
 			Cell: (row) => <TableRow><IconButton onClick={() => {
 				downloadS3File(row,'models')
-			}} style={{ color: "white" }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
+			}} style={{ color: 'white' }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
 		},
 	];
-	const s3DataColumns = [
-		{
-			Header: 'Tar File',
-			accessor: 'file',
-			Cell: (row) => <TableRow>{row.value}</TableRow>,
-		},
-		{
-			Header: 'Upload Time',
-			accessor: 'upload',
-			Cell: (row) => <TableRow>{row.value}</TableRow>,
-		},
-		{
-			Header: 'Download',
-			accessor: '',
-			Cell: (row) => <TableRow><IconButton onClick={() => {
-				downloadS3File(row,'ml-data')
-			}} style={{ color: "white" }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
-		},
-	];
+
 	return (
 		<div>
 			<div
@@ -259,11 +241,11 @@ export default (props) => {
 				</GCPrimaryButton>
 			</div>
 			<div>
-			<div>
-				<Processes
-					processData={getAllProcessData()}
-				/>
-			</div>
+				<div>
+					<Processes
+						processData={getAllProcessData()}
+					/>
+				</div>
 			</div>
 			<div className="info">
 				<BorderDiv className="half">

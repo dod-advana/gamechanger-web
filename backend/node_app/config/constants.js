@@ -115,7 +115,8 @@ module.exports = Object.freeze({
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
-		legislation_index: 'gamechanger_legislation',
+		legislation_index: process.env.GAMECHANGER_LEGISLATION ? process.env.GAMECHANGER_LEGISLATION : 'gamechanger_legislation',
+		assist_index: process.env.GAMECHANGER_ASSIST ? process.env.GAMECHANGER_ASSIST : 'gamechanger_assist',
 		history_index: 'search_history',
 		requestTimeout: 60000
 	},
@@ -230,5 +231,10 @@ module.exports = Object.freeze({
 		rating_id: process.env.JIRA_RATING_ID,
 		advana_product: process.env.JIRA_ADVANA_PRODUCT,
 		feedbackType: process.env.JIRA_FEEDBACK_TYPE
+	},
+	GRAPH_CONFIG: {
+		PULL_NODES_FROM_NEO4J_MAX_LIMIT: process.env.PULL_NODES_FROM_NEO4J_MAX_LIMIT,
+		GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT: process.env.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT,
+		MAX_GRAPH_VIEW_NODES_DISPLAYED: process.env.MAX_GRAPH_VIEW_NODES_DISPLAYED,
 	},
 });
