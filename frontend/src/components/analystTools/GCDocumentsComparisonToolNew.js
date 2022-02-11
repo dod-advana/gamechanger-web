@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { Grid, Typography, Checkbox } from '@material-ui/core';
+import {trackEvent} from '../telemetry/Matomo';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { setState, handleSaveFavoriteDocument } from '../../utils/sharedFunctions';
@@ -15,7 +16,10 @@ import {
 	encode, 
 	handlePdfOnLoad,
 	getOrgToOrgQuery,
-	getTypeQuery
+	getTypeQuery,
+	getTrackingNameForFactory,
+	exportToCsv,
+	convertDCTScoreToText
 } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
@@ -352,6 +356,38 @@ const GCDocumentsComparisonTool = (props) => {
 		const text = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
 		handleSaveFavoriteDocument({filename, is_favorite: true, search_text: text, favorite_summary: `Document Comparison result of "${text}"`}, state, dispatch)
 	}
+
+	const exportCSV = (document) => {
+		const exportList = [];
+		console.log('doc: ', document)
+		document.paragraphs.forEach(paragraph => {
+			const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
+			exportList.push({
+				filename: document.filename,
+				title: document.title,
+				page: paragraph.page_num_i + 1,
+				textInput,
+				textMatch: paragraph.par_raw_text_t,
+				score: convertDCTScoreToText(paragraph.score)
+			})
+		})
+		try{
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name), 
+				'DocumentComparisonTool', 
+				'ExportCSV', 
+				exportList.length
+			);
+			exportToCsv(
+				'ResponsibilityData.csv', 
+				exportList, 
+				true
+			);
+		} catch (e) {
+			console.error(e);
+			return [];
+		}
+	};
 	
 	return (
 		<>
@@ -658,7 +694,7 @@ const GCDocumentsComparisonTool = (props) => {
 															</span>
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
 																<GCButton
-																	onClick={() => console.log('export')}
+																	onClick={() => exportCSV(doc)}
 																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
 																>
 																	Export
