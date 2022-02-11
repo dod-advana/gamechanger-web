@@ -541,8 +541,6 @@ describe('UserController', function () {
 				}, findOne(data) {
 					let user;
 
-					console.log(data)
-
 					users.forEach(tmpUser => {
 						if (tmpUser.user_id === data.where.user_id) {
 							user = tmpUser;
@@ -830,74 +828,6 @@ describe('UserController', function () {
 			const expected = 1;
 
 			assert.equal(actual, expected);
-		});
-	});
-
-	describe('#populateNewUserId', () => {
-		it('should update user ids in the tables', async () => {
-			const user = {
-				dataValues: {
-					user_id: 1,
-					new_user_id: 2
-				}
-			};
-
-			const gcHistoryTable = {
-				findAll() {
-					return [user];
-				},
-				update(data, where) {
-					if (data.new_user_id === 2 && where.where.user_id === 1) {
-						return Promise.resolve();
-					} else {
-						return Promise.resolve('Fail');
-					}
-				}
-			};
-
-			const table = {
-				findAll() {
-					return [];
-				}
-			};
-
-			const opts = {
-				...constructorOptionsMock,
-				gcHistory: gcHistoryTable,
-				exportHistory: table,
-				favoriteDocument: table,
-				favoriteSearch: table,
-				favoriteTopic: table
-			};
-
-			const target = new UserController(opts);
-
-			const req = {
-				...reqMock,
-				body: {}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			try {
-				await target.populateNewUserId(req, res);
-			} catch (e) {
-				assert.fail();
-			}
-
-			assert.equal(resCode, 200);
 		});
 	});
 
