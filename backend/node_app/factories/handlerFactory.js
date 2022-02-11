@@ -11,6 +11,7 @@ class HandlerFactory {
 		this.searchHandlerMap = {};
 		this.exportHandlerMap = {};
 		this.graphHandlerMap = {};
+		this.dataHandlerMap = {};
 		CLONE_META.findAll().then((meta) => {
 			if (meta.filter(clone => clone.clone_name === 'gamechanger').length <= 0) {
 				meta.push({
@@ -21,19 +22,23 @@ class HandlerFactory {
 					navigation_module: 'policy/policyNavigationHandler',
 					card_module: 'policy/policyCardHandler',
 					graph_module: 'policy/policyGraphHandler',
-					search_bar_module: 'policy/policySearchBarHandler'
+					search_bar_module: 'policy/policySearchBarHandler',
+					data_module: 'simple/simpleDataHandler',
 				});
 			}
 			meta.forEach((m) => {
+				let dataModule = m.clone_name === 'budgetSearch' ? 'budgetSearch/budgetSearchDataHandler' : 'simple/simpleDataHandler';
 				this.cloneMetaMap[m.clone_name] = {
 					searchModule: m.search_module,
 					exportModule: m.export_module,
 					graphModule: m.graph_module,
+					dataModule: dataModule
 				};
 				try {
 					this.searchHandlerMap[m.search_module] = require(`../modules/${m.search_module}`);
 					this.exportHandlerMap[m.export_module] = require(`../modules/${m.export_module}`);
 					this.graphHandlerMap[m.graph_module] = require(`../modules/${m.graph_module}`);
+					this.dataHandlerMap[dataModule] = require(`../modules/${dataModule}`);
 				} catch (err) {
 					console.log(err);
 				}
@@ -57,8 +62,11 @@ class HandlerFactory {
 				handlerMap = this.graphHandlerMap;
 				moduleName = 'graphModule';
 				break;
+			case 'data':
+				handlerMap = this.dataHandlerMap;
+				moduleName = 'dataModule';
+				break;
 		}
-
 		if (handlerMap && moduleName &&
 			this.cloneMetaMap[cloneName] &&
 			this.cloneMetaMap[cloneName][moduleName] &&

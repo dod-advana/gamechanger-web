@@ -2,197 +2,176 @@ import _ from 'lodash';
 
 import {
 	getQueryVariable,
-	getTrackingNameForFactory,
-	NO_RESULTS_MESSAGE,
+	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
 	RECENT_SEARCH_LIMIT,
-	RESULTS_PER_PAGE,
+	RESULTS_PER_PAGE
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
 import {
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
+	// createTinyUrl,
+	// getSearchObjectFromString,
+	// getUserData,
 	setState,
 } from '../../../utils/sharedFunctions';
-import GameChangerAPI from '../../api/gameChanger-service-api';
+import JBookAPI from '../../api/jbook-service-api';
+import { scrollListViewTop } from './budgetSearchMainViewHandler';
 
-const gameChangerAPI = new GameChangerAPI();
+const jbookAPI = new JBookAPI();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
-	gameChangerAPI
-		.getTextSuggestion({ index, searchText })
-		.then(({ data }) => {
-			setState(dispatch, { idYouMean: data?.autocorrect?.[0] });
-		})
-		.catch((_) => {
-			//do nothing
-		});
-};
+	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
+	// 	setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
+	// }).catch(_ => {
+	// 	//do nothing
+	// })
+}
 
 const BudgetSearchSearchHandler = {
-	async handleSearch(state, dispatch) {
-		setState(dispatch, { runSearch: false });
 
-		const {
-			searchText = '',
-			resultsPage,
-			listView,
-			showTutorial,
-			searchSettings,
-			tabName,
-			cloneData,
-			runGetData,
-		} = state;
-
-		if (runGetData) {
-			setState(dispatch, { loading: true });
-			const mainData = await gameChangerAPI.callSearchFunction({
-				functionName: 'getMainPageData',
-				cloneName: state.cloneData.clone_name,
-				options: {
-					resultsPage,
-				},
-			});
-			setState(dispatch, {
-				mainPageData: mainData.data,
-				runGetData: false,
-				loading: false,
-			});
-			return;
-		}
-
-		this.setSearchURL(state);
-
-		// let url = window.location.hash.toString();
-		// url = url.replace("#/", "");
-
-		setState(dispatch, {
-			runningSearch: true,
-		});
-
-		const trimmed = searchText.trim();
-		if (_.isEmpty(trimmed)) return;
-
-		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+	updateRecentSearches(searchText) {
+		const recentSearches = localStorage.getItem(`recentbudgetSearchSearches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recentbudgetSearchSearches`, JSON.stringify(recentSearchesParsed));
 		}
+	},
 
-		const t0 = new Date().getTime();
-
-		setState(dispatch, {
-			loading: true,
-			noResultsMessage: null,
-			count: 0,
-			timeFound: 0.0,
-			iframePreviewLink: null,
-			runningSearch: true,
-		});
-
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
-
-		const charsPadding = listView ? 750 : 90;
-
-		const tiny_url = await createTinyUrl(cloneData);
-
+	async exportSearch(state, dispatch) {
 		try {
-			const combinedSearch = 'false';
+			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+			const offset = 0;
+
+			const {
+				searchText = '',
+			} = state;
+
+			// regular search with no limit
+			const resp = await jbookAPI.modularSearch({
+				cloneName: 'budgetSearch',
+				searchText,
+				offset,
+				options: {
+					searchVersion: 1,
+					budgetSearchSettings: cleanSearchSettings,
+					exportSearch: true
+				}
+			});
+
+			if (resp) {
+				return resp.data;
+			}
+			else {
+				return null
+			}
+
+		} catch (e) {
+			console.log(e);
+		}
+	},
+
+	async performQuery(state, searchText, resultsPage, dispatch) {
+		try {
+
+			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+
+			const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
 
 			// regular search
-			gameChangerAPI
-				.modularSearch({
-					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
-					offset,
-					options: {
-						charsPadding,
-						showTutorial,
-						tiny_url,
-						combinedSearch,
-					},
-				})
-				.then((resp) => {
-					const t1 = new Date().getTime();
+			const resp = await jbookAPI.modularSearch({
+				cloneName: 'budgetSearch',
+				searchText,
+				offset,
+				options: {
+					searchVersion: 1,
+					budgetSearchSettings: cleanSearchSettings
+				}
+			});
 
-					let getUserDataFlag = true;
+			if (_.isObject(resp.data)) {
+				return resp.data;
+			} else {
+				return null;
+			}
+		} catch (err) {
+			console.error(err);
+			throw err;
+		}
+	},
 
-					if (_.isObject(resp.data)) {
-						let { docs, totalCount } = resp.data;
+	async handleSearch(state, dispatch) {
 
-						if (docs && Array.isArray(docs)) {
-							if (!offset) {
-								trackSearch(
-									searchText,
-									`${getTrackingNameForFactory(cloneData.clone_name)}`,
-									totalCount,
-									false
-								);
-							}
+		const {
+			searchText = '',
+			resultsPage,
+			urlSearch
+		} = state;
 
-							setState(dispatch, {
-								timeFound: ((t1 - t0) / 1000).toFixed(2),
-								prevSearchText: searchText,
-								loading: false,
-								loadingTinyUrl: false,
-								query: resp.data.query,
-								mainPageData: resp.data,
-							});
-						} else {
-							if (!offset) {
-								trackSearch(
-									searchText,
-									`${getTrackingNameForFactory(cloneData.clone_name)}`,
-									0,
-									false
-								);
-							}
+		scrollListViewTop();
 
-							setState(dispatch, {
-								loading: false,
-								count: 0,
-								runningSearch: false,
-								prevSearchText: searchText,
-								loadingTinyUrl: false,
-								mainPageData: {},
-							});
-						}
-					} else {
-						setState(dispatch, {
-							prevSearchText: null,
-							loading: false,
-							noResultsMessage: NO_RESULTS_MESSAGE,
-							runningSearch: false,
-							loadingTinyUrl: false,
-						});
-					}
+		if (!urlSearch) {
+			this.setSearchURL(state);
+		}
 
-					this.setSearchURL({
-						...state,
-						searchText,
-						resultsPage,
-						tabName,
-						cloneData,
-						searchSettings,
-					});
+		this.updateRecentSearches(searchText);
 
-					if (getUserDataFlag) {
-						getUserData(dispatch);
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-					throw err;
+		setState(dispatch,
+			{
+				runSearch: false,
+				budgetTypeDropdown: false,
+				serviceAgencyDropdown: false,
+				serviceReviewStatusDropdown: false,
+				reviewStatusDropdown: false,
+				budgetYearDropdown: false,
+				primaryReviewerDropdown: false,
+				serviceReviewerDropdown: false,
+				primaryClassLabelDropdown: false,
+				sourceTagDropdown: false,
+				hasKeywordsDropdown: false,
+				noResultsMessage: null,
+				count: 0,
+				timeFound: 0.0,
+				iframePreviewLink: null,
+				runningSearch: true,
+				urlSearch: false,
+				initial: false
+			});
+
+		try {
+			const t0 = new Date().getTime();
+			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
+			const t1 = new Date().getTime();
+			console.log(results);
+			if (!results) {
+				setState(dispatch, {
+					prevSearchText: null,
+					loading: false,
+					noResultsMessage: NO_RESULTS_MESSAGE,
+					runningSearch: false,
+					loadingTinyUrl: false
 				});
+			} else {
+				setState(dispatch, {
+					timeFound: ((t1 - t0) / 1000).toFixed(2),
+					prevSearchText: searchText,
+					loading: false,
+					loadingTinyUrl: false,
+					query: results.query,
+					mainPageData: results
+				});
+			}
+
+			if (resultsPage < 2) {
+				trackSearch(
+					searchText,
+					`${getTrackingNameForFactory('budgetSearch')}`,
+					results.totalCount,
+					false
+				);
+			}
+			// this.setSearchURL({...state, searchText, resultsPage, tabName});
 		} catch (e) {
 			console.log(e);
 			setState(dispatch, {
@@ -201,8 +180,7 @@ const BudgetSearchSearchHandler = {
 				loading: false,
 				autocompleteItems: [],
 				runningSearch: false,
-				loadingTinyUrl: false,
-				hasExpansionTerms: false,
+				hasExpansionTerms: false
 			});
 		}
 
@@ -214,13 +192,12 @@ const BudgetSearchSearchHandler = {
 		if (!url) url = window.location.href;
 
 		const parsed = {};
-		const newSearchSettings = {};
+		// const newSearchSettings = {};
 
 		const searchText = getQueryVariable('q', url);
 		const offsetURL = getQueryVariable('offset', url);
 
-		const isNullish = (param) =>
-			!param || param === 'null' || param === 'undefined';
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
 
 		if (searchText) {
 			parsed.searchText = searchText;
@@ -228,14 +205,10 @@ const BudgetSearchSearchHandler = {
 
 		if (!isNullish(offsetURL)) {
 			const offset = parseInt(offsetURL);
-			if (!isNaN(offset)) parsed.offset = offset;
+			if (!isNaN(offset))
+				parsed.offset = offset;
 			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
 		}
-
-		parsed.edaSearchSettings = _.defaults(
-			newSearchSettings,
-			_.cloneDeep(defaultState.edaSearchSettings)
-		);
 
 		return parsed;
 	},
@@ -243,19 +216,46 @@ const BudgetSearchSearchHandler = {
 	setSearchURL(state) {
 		const { searchText, resultsPage } = state;
 
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
 
 		const params = new URLSearchParams();
+		let linkString = `/`;
 
 		if (searchText) params.append('q', searchText);
-		if (offset) params.append('offset', String(offset));
+		if (searchText && offset) params.append('offset', String(offset));
 
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+		const hash = window.location.hash;
+
+		const paramIndex = hash.indexOf('?');
+
+		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${searchText && searchText !== '' ? '?' : ''}${params}`
 
 		window.history.pushState(null, document.title, linkString);
 	},
 
-	getPresearchData(state) {},
-};
+	getPresearchData(state) {
+
+	},
+
+	processSearchSettings(state, dispatch) {
+		const searchSettings = _.cloneDeep(state.budgetSearchSettings);
+
+		for (const optionType in state.defaultOptions) {
+			// if (optionType === 'reviewStatus') continue;
+
+			if (state.defaultOptions[optionType] && searchSettings[optionType] && state.defaultOptions[optionType].length === searchSettings[optionType].length) {
+				delete searchSettings[optionType];
+			}
+		}
+
+		for (const setting in searchSettings) {
+			if (!searchSettings[setting]) {
+				delete searchSettings[setting];
+			}
+		}
+
+		return searchSettings;
+	}
+}
 
 export default BudgetSearchSearchHandler;

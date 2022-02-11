@@ -18,6 +18,7 @@ const SearchBar = (props) => {
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
+			console.log(state.cloneData.search_module);
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
 			);
@@ -46,6 +47,8 @@ const SearchBar = (props) => {
 	const handleCategoryTabChange = (tabName) => {
 		mainViewHandler.handleCategoryTabChange({ tabName, state, dispatch });
 	};
+
+	console.log(state.cloneData);
 
 	return (
 		<>

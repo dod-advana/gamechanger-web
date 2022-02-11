@@ -38,22 +38,22 @@ const MainView = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
-		return function cleanUp(){
+		return function cleanUp() {
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
 		}
-	},[])
+	}, [])
 
 	useEffect(() => {
-		if(state.runningSearch && cancelToken) {
+		if (state.runningSearch && cancelToken) {
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
 		};
-	},[state.runningSearch])
+	}, [state.runningSearch])
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
-		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]})
+		setState(dispatch, { pageDisplayed: urlArray[urlArray.length - 1] })
 	}, [dispatch])
 
 	useEffect(() => {
@@ -62,14 +62,13 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			const viewNames = handler.getViewNames({cloneData: state.cloneData});
+			const viewNames = handler.getViewNames({ cloneData: state.cloneData });
 
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
 			);
 			const searchHandler = searchFactory.createHandler();
 			setSearchHandler(searchHandler);
-
 			handler.handlePageLoad({
 				state,
 				dispatch,
@@ -173,16 +172,16 @@ const MainView = (props) => {
 			<AnalystTools context={context} />
 		);
 	}
-	
+
 	const getDataTracker = () => {
 		return <GCDataStatusTracker state={state} />;
 	};
 
 	const getUserDashboard = () => {
 		return (
-			<GCUserDashboard 
-				state={state} 
-				userData={state.userData} 
+			<GCUserDashboard
+				state={state}
+				userData={state.userData}
 				updateUserData={() => getUserData(dispatch)}
 				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
@@ -344,8 +343,8 @@ const MainView = (props) => {
 							style={{
 								backgroundColor:
 									state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
-									state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-									state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+										state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
+										state.pageDisplayed === PAGE_DISPLAYED.aboutUs
 										? '#ffffff'
 										: '#DFE6EE',
 							}}

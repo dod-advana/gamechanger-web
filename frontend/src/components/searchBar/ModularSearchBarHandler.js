@@ -130,7 +130,7 @@ const ModularSearchBarHandler = (props) => {
 		if (!loaded) {
 			const userSearchHistory = JSON.parse(
 				localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) ||
-					'[]'
+				'[]'
 			);
 			const historyWithIds = userSearchHistory.map((item, index) => ({
 				id: String(index),
@@ -143,7 +143,7 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		if (searchBarHandler) {
-			if(debouncedSearchTerm.length > 3){
+			if (debouncedSearchTerm.length > 3) {
 				searchBarHandler.debouncedFetchSearchSuggestions(
 					debouncedSearchTerm,
 					state.cloneData,
