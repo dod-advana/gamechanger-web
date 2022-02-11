@@ -20,10 +20,11 @@
   "author": "",
   "license": "ISC",
   "resolutions": {
-		"node-forge": "^1.2.1"
-	},
+    "node-forge": "^1.2.1"
+  },
   "dependencies": {
     "@dod-advana/advana-api-auth": "^0.0.23",
+    "@dod-advana/advana-logger": "^0.0.3",
     "@elastic/elasticsearch": "7.13.0",
     "async": "^2.6.0",
     "async-redis": "^2.0.0",

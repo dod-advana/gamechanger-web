@@ -19,3 +19,32 @@
     background-color: #1C2D64 !important;
     border-color: #1C2D64 !important;
 }
+
+.MuiFormControlLabel-label {
+    line-height: 15px !important;
+}
+
+.additionalTerms {
+    color: blue;
+}
+
+.additionalTerms ul {
+  color: purple;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+#related-terms {
+    top: 140px;
+    left: 90px;
+    width: 146px;
+    height: 24px;
+    /* UI Properties */
+    letter-spacing: var(--unnamed-character-spacing-0);
+    text-align: left;
+    letter-spacing: 0px;
+    color: #313541;
+    opacity: 1;
+}

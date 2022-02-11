@@ -96,6 +96,43 @@ const styles = {
 	},
 };
 
+const jbookData = {
+	'id': 21,
+	'clone_name': 'budgetSearch',
+	'display_name': 'JBOOK Search',
+	'is_live': true,
+	'url': '',
+	'permissions_required': true,
+	'clone_to_advana': true,
+	'clone_to_gamechanger': true,
+	'clone_to_sipr': false,
+	'clone_to_jupiter': false,
+	'show_tutorial': false,
+	'show_graph': false,
+	'show_crowd_source': false,
+	'show_feedback': false,
+	'search_module': 'budgetSearch/budgetSearchSearchHandler',
+	'export_module': 'simple/simpleExportHandler',
+	'title_bar_module': 'budgetSearch/budgetSearchTitleBarHandler',
+	'navigation_module': 'budgetSearch/budgetSearchNavigationHandler',
+	'card_module': 'budgetSearch/budgetSearchCardHandler',
+	'main_view_module': 'budgetSearch/budgetSearchMainViewHandler',
+	'graph_module': 'simple/simpleGraphHandler',
+	'search_bar_module': 'budgetSearch/budgetSearchSearchBarHandler',
+	'data_module': 'budgetSearch/budgetSearchDataHandler',
+	's3_bucket': null,
+	'data_source_name': null,
+	'source_agency_name': null,
+	'metadata_creation_group': null,
+	'source_s3_bucket': null,
+	'source_s3_prefix': null,
+	'elasticsearch_index': null,
+	'needs_ingest': false,
+	'createdAt': null,
+	'updatedAt': null,
+	'can_edit': true
+};
+
 const PrivateTrackedRoute = ({
 	allowFunction,
 	component: Component,
@@ -169,6 +206,7 @@ const App = () => {
 	const getGamechangerClones = async (tutorialData) => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
+			console.log(data);
 			const cloneRoutes = [];
 			_.forEach(data.data, (clone, idx) => {
 				if (clone.is_live) {
@@ -176,7 +214,7 @@ const App = () => {
 					const GamechangerProvider = getProvider(name);
 
 					const url = new URL(window.location.href).hostname;
-					if(clone.available_at === null){
+					if (clone.available_at === null) {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
@@ -248,10 +286,10 @@ const App = () => {
 
 		return (
 			<PrivateTrackedRoute
-				path={`/budgetsearch-profile`}
+				path={`/budgetsearch/profile`}
 				render={(props) => (
 					<BudgetSearchProvider>
-						<BudgetSearchProfilePage {...props} />
+						<BudgetSearchProfilePage {...props} cloneData={jbookData} />
 					</BudgetSearchProvider>
 				)}
 				pageName={'BudgetSearchProfilePage'}

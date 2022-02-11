@@ -1,47 +1,38 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
-import JAICLogo from '../../../images/logos/JAIC_wht.png';
+import JAICLogo from '../../../images/logos/JBooks Logo_wht.svg';
 
 const BudgetSearchTitleBarHandler = {
 	getTitleBar: (props) => {
-		const { onTitleClick, cloneData } = props;
+		const {
+			onTitleClick,
+		} = props;
 		return (
-			<div
-				style={{ display: 'flex', alignItems: 'center' }}
+			<img
+				src={JAICLogo}
+				style={styles.title}
 				onClick={onTitleClick}
-			>
-				<img
-					src={JAICLogo}
-					style={styles.title}
-					alt="JAIC"
-					id={'titleButton'}
-				/>
-				<Typography variant="h3" style={styles.wording} display="inline">
-					{cloneData.display_name}
-				</Typography>
-				{/* <Typography variant="h6" style={styles.wording} display="inline">
-					Powered by GAMECHANGER
-				</Typography> */}
-			</div>
+				alt="jbook-title"
+				id={'titleButton'}
+			/>
 		);
 	},
-
+	
 	getCategoryTabs(props) {
-		return <></>;
+		return <></>
 	},
-
+	
 	getTitleBarStyle(props) {
-		const { rawSearchResults, pageDisplayed } = props;
+		const {
+			rawSearchResults,
+			pageDisplayed
+		} = props;
 		return {
 			...styles.titleBar,
-			borderBottom:
-				rawSearchResults.length > 0 && pageDisplayed === 'main'
-					? '2px solid rgb(176, 186, 197)'
-					: '',
-			backgroundColor: '#1C2D64',
+			borderBottom: (rawSearchResults.length > 0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : '',
+			backgroundColor: '#1C2D64'
 		};
-	},
-};
+	}
+}
 
 export default BudgetSearchTitleBarHandler;
 
@@ -49,7 +40,7 @@ const styles = {
 	wording: {
 		color: 'white',
 		marginRight: 15,
-		fontWeight: 700,
+		fontWeight: 700
 	},
 	titleBar: {
 		padding: '0 1em',
@@ -58,11 +49,11 @@ const styles = {
 		alignItems: 'center',
 		flex: 1,
 		minHeight: 80,
-		width: '100%',
+		width: '100%'
 	},
 	title: {
-		margin: '0 5px',
+		margin: '0px 24px 0px 12px',
 		cursor: 'pointer',
-		width: '100px',
+		width: '400px',
 	},
 };
