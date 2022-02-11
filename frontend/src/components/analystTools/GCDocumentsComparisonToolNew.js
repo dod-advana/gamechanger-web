@@ -422,7 +422,7 @@ const GCDocumentsComparisonTool = (props) => {
 						Apply filters
 					</GCButton>}
 				</Grid>
-				{!(returnedDocs.length > 0) &&
+				{!(returnedDocs.length > 0) && !loading &&
 				<Grid item xs={10}>
 					<DocumentInputContainer>
 						<Grid container className={'input-container-grid'} style={{margin: 0}}>
@@ -491,11 +491,6 @@ const GCDocumentsComparisonTool = (props) => {
 							</GCTooltip>
 						</Grid>
 					</DocumentInputContainer>
-					{loading &&
-					<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
-						<LoadingIndicator customColor={gcOrange}/>
-					</div>
-					}
 					{noResults && !loading && 
                         <div className={'displaying-results-text'}>
                         	<div className={'text'}>
@@ -505,6 +500,13 @@ const GCDocumentsComparisonTool = (props) => {
 					}
 					
 				</Grid>
+				}
+				{loading &&
+					<Grid item xs={10}>
+						<div style={{display:'flex', justifyContent:'center', flexDirection:'column'}}>
+							<LoadingIndicator customColor={gcOrange}/>
+						</div>
+					</Grid>
 				}
 				{(!loading && returnedDocs.length > 0) &&
 				<>
