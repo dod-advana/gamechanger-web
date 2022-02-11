@@ -92,19 +92,19 @@ export default (props) => {
 	 * @method onload
 	 */
 	const onload = async () => {
-		getCurrentTransformer();
+		getLoadedModels();
 		getModelsList();
 		getCorpusCount();
 		getLocalData();
 	};
 	/**
-	 * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
-	 * @method getCurrentTransformer
+	 * Retrieves the current transformer from gameChangerAPI.getLoadedModels()
+	 * @method getLoadedModels
 	 */
-	const getCurrentTransformer = async () => {
+	const getLoadedModels = async () => {
 		try {
 			// set currentTransformer
-			const current = await gameChangerAPI.getCurrentTransformer();
+			const current = await gameChangerAPI.getLoadedModels();
 			// current.data is of the form {sentence_models:{encoder, sim}}
 			//setCurrentTransformer(
 			//	current.data.sentence_models
