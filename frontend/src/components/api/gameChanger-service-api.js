@@ -111,7 +111,6 @@ const endpoints = {
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
 	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
 	combinedSearchMode: '/api/gamechanger/appSettings/combinedSearch',
-	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
@@ -951,11 +950,6 @@ export default class GameChangerAPI {
 			searchText,
 			sentenceResults,
 		});
-	};
-
-	populateNewUserId = async () => {
-		const url = endpoints.populateNewUserId;
-		return axiosGET(this.axios, url);
 	};
 
 	callGraphFunction = async (body) => {

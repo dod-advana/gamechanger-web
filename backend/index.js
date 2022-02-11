@@ -14,7 +14,7 @@ const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const constants = require('./node_app/config/constants');
 const models = require('./node_app/models');
-const User = models.gc_user
+const User = models.user
 const Admin = models.admin;
 const LOGGER = require('@dod-advana/advana-logger');
 const path = require('path');
@@ -206,8 +206,8 @@ app.post('/api/auth/token', async function (req, res) {
 		}
 
 		if (user) {
-			if (user.is_beta) perms.push('Gamechanger Beta');
-			if (user.is_admin) perms.push('Gamechanger Admin');
+			if (user.is_super_admin) perms.push('Gamechanger Admin');
+			if (user.is_admin) perms.push('Gamechanger Admin Lite');
 		}
 
 		sessUser.id = getUserIdFromSAMLUserId(req);

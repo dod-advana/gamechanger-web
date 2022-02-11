@@ -11,6 +11,7 @@ const _ = require('lodash');
 const dcUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;
 
@@ -35,7 +36,7 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			searchText: '',
 			startTime: new Date().toISOString(),
 			numResults: -1,
