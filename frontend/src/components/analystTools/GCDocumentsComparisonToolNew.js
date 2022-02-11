@@ -359,7 +359,6 @@ const GCDocumentsComparisonTool = (props) => {
 
 	const exportCSV = (document) => {
 		const exportList = [];
-		console.log('doc: ', document)
 		document.paragraphs.forEach(paragraph => {
 			const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
 			exportList.push({
@@ -667,7 +666,7 @@ const GCDocumentsComparisonTool = (props) => {
 															setSelectedParagraph(paragraph);
 														}}
 														style={{ 
-															marginLeft: isHighlighted ? 0 : 20, 
+															marginLeft: 20, 
 															marginRight: 0,
 															border: isHighlighted ? 'none' : '1px solid #DCDCDC', 
 															padding: '3px',
@@ -675,7 +674,7 @@ const GCDocumentsComparisonTool = (props) => {
 														}}
 													>
 														<span className="gc-document-explorer-result-header-text" style={{color: isHighlighted ? 'white' : '#131E43' }}>
-															{paragraph.par_raw_text_t}
+															{isHighlighted ? `Page: ${paragraph.page_num_i + 1}, Par: ${paragraph.id.split('_')[1]}, Score: ${convertDCTScoreToText(paragraph.score)}` : paragraph.par_raw_text_t}
 														</span>
 													</div>
 													<Collapse isOpened={pOpen && docOpen}>
