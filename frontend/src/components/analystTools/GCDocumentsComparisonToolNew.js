@@ -242,7 +242,12 @@ const GCDocumentsComparisonTool = (props) => {
 			}
 			
 			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs, filters}).then(resp => {
-				if(resp.data.docs.length <= 0) setNoResults(true);
+				if(resp.data.docs.length <= 0) {
+					setNoResults(true)
+				}else{
+					setSelectedParagraph(resp.data.docs[0].paragraphs[0]);
+					setCompareDocument(resp.data.docs[0]);
+				}
 				setReturnedDocs(resp.data.docs);
 				setState(dispatch, {runDocumentComparisonSearch: false});
 				setLoading(false);
@@ -276,7 +281,8 @@ const GCDocumentsComparisonTool = (props) => {
 		const newViewableDocs = viewableDocs;
 		newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
 		setViewableDocs(newViewableDocs);
-		if(viewableDocs.length) setSelectedParagraph(viewableDocs[0].paragraphs[0]);
+		if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[0].paragraphs[0]);
+		if(viewableDocs.length && newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[docIndex].paragraphs[0]);
 	}
 	
 	const measuredRef = useCallback(
@@ -472,7 +478,7 @@ const GCDocumentsComparisonTool = (props) => {
 						</Grid>
 						<Grid container style={{justifyContent:'flex-end'}}>
 							<GCTooltip 
-								title={returnedDocs.length > 0 ? 'Click to start over' : 'Compare Documents'} 
+								title={'Compare Documents'} 
 								placement="top" arrow
 							>
 								<GCButton
@@ -692,25 +698,31 @@ const GCDocumentsComparisonTool = (props) => {
 																{paragraph.par_raw_text_t}
 															</span>
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
-																<GCButton
-																	onClick={() => exportCSV(doc)}
-																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																>
-																	Export
-																</GCButton>
-																<GCButton 
-																	onClick={() => saveDocToFavorites(doc.filename, paragraph)}
-																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																>
-																	Save to Favorites
-																</GCButton>
-																<GCButton 
-																	isSecondaryBtn 
-																	onClick={() => handleIgnore(doc, paragraph)}
-																	style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																>
-																	Ignore
-																</GCButton>
+																<GCTooltip title={'Export document mathces to CSV'} placement="bottom" arrow>
+																	<GCButton
+																		onClick={() => exportCSV(doc)}
+																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																	>
+																		Export
+																	</GCButton>
+																</GCTooltip>
+																<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
+																	<GCButton 
+																		onClick={() => saveDocToFavorites(doc.filename, paragraph)}
+																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																	>
+																		Save to Favorites
+																	</GCButton>
+																</GCTooltip>
+																<GCTooltip title={'Click to remove from matches'} placement="bottom" arrow>
+																	<GCButton 
+																		isSecondaryBtn 
+																		onClick={() => handleIgnore(doc, paragraph)}
+																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																	>
+																		Ignore
+																	</GCButton>
+																</GCTooltip>
 															</div>
 														</div>
 													</Collapse>
