@@ -126,32 +126,6 @@ export default ({showCreateEditUserModal, setShowCreateEditUserModal, userData, 
 
 						<Grid item xs>
 							<FormControlLabel
-								key={'is_beta'}
-								control={
-									<GCCheckbox
-										checked={editUserData['is_beta']}
-										onChange={handleCheck}
-										name={'is_beta'}
-										color="primary"
-										style={styles.checkbox}
-									/>
-								}
-								label={'Beta User'}
-							/>
-							<FormControlLabel
-								key={'is_internal'}
-								control={
-									<GCCheckbox
-										checked={editUserData['is_internal']}
-										onChange={handleCheck}
-										name={'is_internal'}
-										color="primary"
-										style={styles.checkbox}
-									/>
-								}
-								label={'Internal User'}
-							/>
-							<FormControlLabel
 								key={'is_admin'}
 								control={
 									<GCCheckbox
@@ -162,7 +136,20 @@ export default ({showCreateEditUserModal, setShowCreateEditUserModal, userData, 
 										style={styles.checkbox}
 									/>
 								}
-								label={'Admin'}
+								label={'Admin User'}
+							/>
+							<FormControlLabel
+								key={'is_super_admin'}
+								control={
+									<GCCheckbox
+										checked={editUserData['is_super_admin']}
+										onChange={handleCheck}
+										name={'is_super_admin'}
+										color="primary"
+										style={styles.checkbox}
+									/>
+								}
+								label={'Super Admin User'}
 							/>
 						</Grid>
 					</Grid>

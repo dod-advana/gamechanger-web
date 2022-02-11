@@ -48,14 +48,14 @@ export default () => {
 			Header: 'First',
 			accessor: 'first_name',
 			Cell: row => (
-				<TableRow>{row.value}</TableRow>
+				<TableRow>{row.value && row.value !== null ? row.value : 'Unknown First'}</TableRow>
 			)
 		},
 		{
 			Header: 'Last',
 			accessor: 'last_name',
 			Cell: row => (
-				<TableRow>{row.value}</TableRow>
+				<TableRow>{row.value && row.value !== null ? row.value : 'Unknown Last'}</TableRow>
 			)
 		},
 		{
@@ -63,38 +63,6 @@ export default () => {
 			accessor: 'organization',
 			Cell: row => (
 				<TableRow>{row.value}</TableRow>
-			)
-		},
-		{
-			Header: 'Beta User',
-			accessor: 'is_beta',
-			width: 100,
-			Cell: row => (
-				<TableRow>
-					<GCCheckbox
-						checked={row.value}
-						onChange={() => {}}
-						name={'beta'}
-						color="inherit"
-						style={{...styles.checkbox, color: '#1C2D64'}}
-					/>
-				</TableRow>
-			)
-		},
-		{
-			Header: 'Internal User',
-			accessor: 'is_internal',
-			width: 100,
-			Cell: row => (
-				<TableRow>
-					<GCCheckbox
-						checked={row.value}
-						onChange={() => {}}
-						name={'internal'}
-						color="inherit"
-						style={{...styles.checkbox, color: '#1C2D64'}}
-					/>
-				</TableRow>
 			)
 		},
 		{
@@ -114,9 +82,26 @@ export default () => {
 			)
 		},
 		{
+			Header: 'Super Admin',
+			accessor: 'is_super_admin',
+			width: 100,
+			Cell: row => (
+				<TableRow>
+					<GCCheckbox
+						checked={row.value}
+						onChange={() => {}}
+						name={'super_admin'}
+						color="inherit"
+						style={{...styles.checkbox, color: '#1C2D64'}}
+					/>
+				</TableRow>
+			)
+		},
+		{
 			Header: ' ',
 			accessor: 'id',
 			width: 120,
+			filterable: false,
 			Cell: row => (
 				<TableRow>
 					<GCButton
@@ -134,6 +119,7 @@ export default () => {
 			Header: ' ',
 			accessor: 'id',
 			width: 120,
+			filterable: false,
 			Cell: row => (
 				<TableRow>
 					<GCButton
@@ -162,7 +148,15 @@ export default () => {
 					data={gcUserTableData}
 					columns={columns}
 					style={{margin: '0 80px 20px 80px', height: 700}}
-					pageSize={10}
+					defaultPageSize={10}
+					filterable={true}
+					defaultFilterMethod={(filter, row) =>
+						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
+					}
+					defaultSorted={[{
+						id   : 'last_name',
+						desc : false,
+					}]}
 				/>
 			</div>
 			<UserModal showCreateEditUserModal={showCreateEditUserModal} setShowCreateEditUserModal={setShowCreateEditUserModal} userData={editUserData} getUserData={getUserData} />

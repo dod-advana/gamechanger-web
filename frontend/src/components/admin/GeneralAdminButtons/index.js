@@ -177,24 +177,6 @@ export default () => {
 			createAlert(title, 'error', 'Cache clearing failed');
 		}
 	};
-	const populateNewUserId = async () => {
-		try {
-			await gameChangerAPI.populateNewUserId().then(() => {
-				createAlert(
-					'Populating New User IDs',
-					'success',
-					'Updated new_user_id column'
-				);
-			});
-		} catch (e) {
-			console.log(e);
-			createAlert(
-				'Populating New User IDs',
-				'error',
-				'Failed updating Postgres table'
-			);
-		}
-	};
 
 	const reloadHandlerMap = async () => {
 		const title = 'Reloading Handler Map: ';
@@ -493,22 +475,6 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Edit Trending Blacklist
-									</span>
-								</h2>
-							</Link>
-						</Paper>
-					</div>
-					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={populateNewUserId}
-								style={{ textDecoration: 'none' }}
-							>
-								<i style={styles.image} className="fa fa-users fa-2x" />
-								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Populate New User ID Column
 									</span>
 								</h2>
 							</Link>

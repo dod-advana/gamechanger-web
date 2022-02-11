@@ -15,18 +15,6 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				unique: false,
 			},
-			first_name: {
-				type: DataTypes.TEXT
-			},
-			last_name: {
-				type: DataTypes.TEXT
-			},
-			email: {
-				type: DataTypes.TEXT
-			},
-			organization: {
-				type: DataTypes.TEXT
-			},
 			is_beta: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false

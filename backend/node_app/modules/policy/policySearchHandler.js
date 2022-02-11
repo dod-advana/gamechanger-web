@@ -67,7 +67,7 @@ class PolicySearchHandler extends SearchHandler {
 		var endTime = performance.now()
 		this.logger.info(`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${endTimeInt - startTimeInt}`)
 		if (storeHistory) {
-			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
+			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId);
 		}
 		return enrichedResults;
 	}
