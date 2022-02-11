@@ -57,6 +57,7 @@ export default (props) => {
 		model:'',
 		type:''
 	})
+	const date = new Date();
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([])
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
@@ -76,6 +77,9 @@ export default (props) => {
 	const [validationData, setValidationData] = useState('latest');
 	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
+	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
+	const [qexpupload, setQexpUpload] = useState(false);
+
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
 	const [warmupSteps, setWarmupSteps] = useState(100);
@@ -274,7 +278,24 @@ export default (props) => {
 			props.updateLogs('Error training model: ' + e.toString(), 2);
 		}
 	};
-
+	/**
+	 * @method triggerTrainQexp
+	 */
+	 const triggerTrainQexp = async () => {
+		try {
+			await gameChangerAPI.trainModel({
+				model_id: '02102022',
+				validate: false,
+				build_type: 'qexp',
+				version: qexpversion,
+				upload: qexpupload
+			});
+			props.updateLogs('Started training', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error training model: ' + e.toString(), 2);
+		}
+	};
 	/**
 	 * @method triggerEvaluateModel
 	 */
@@ -550,7 +571,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>API Controls:</div>
+						<div style={{ display: 'inline-block' }}><b>API Controls:</b></div>
 					</div>
 					<div
 						style={{
@@ -563,7 +584,7 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Reload Index</b>
+						<b>Reload Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
@@ -636,7 +657,7 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Re-Build Index</b>
+						<b>Sentence Embedding Model</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
@@ -645,7 +666,7 @@ export default (props) => {
 							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
-							Build
+							Train
 						</GCPrimaryButton>
 
 						<div>
@@ -696,7 +717,6 @@ export default (props) => {
 							/>
 						</div>
 					</div>
-					
 					<div
 						style={{
 							width: '100%',
@@ -708,7 +728,54 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Finetune Encoder</b>
+						<b>Query Expansion Model</b>
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerTrainQexp();
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Train
+						</GCPrimaryButton>
+					
+						<div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
+							Version:
+							</div>
+							<Input
+								value={qexpversion}
+								onChange={(e) => setQexpVersion(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Upload:
+							</div>
+							<Checkbox
+								checked={qexpupload}
+								onChange={(e) => setQexpUpload(e.target.checked)}
+							/>
+						</div>
+					</div>					
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Finetune Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
@@ -752,13 +819,12 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Evaluate Model</b>
+						<b>Evaluate Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerEvaluateModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Evaluate
@@ -820,14 +886,14 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>LTR</b>
+						<b>Learn to Rank Model</b>
 						<br />
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerInitializeLTR();
 							}}
-							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
+							style={{ margin: '0 10px 10px 0', minWidth: 'unset'}}
 						>
 							Initialize
 						</GCPrimaryButton>
@@ -849,7 +915,6 @@ export default (props) => {
 							onClick={() => {
 								triggerCreateModelLTR();
 							}}
-							disabled={checkReloading()}
 							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
 						>
 							Create Model
