@@ -27,7 +27,7 @@ class TransformerController {
 			'deleteLocalModel': this.mlApi.deleteLocalModel,
 			'getModelsList': this.mlApi.getModelsList,
 			'getDataList': this.mlApi.getDataList,
-			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
+			'getLoadedModels': this.mlApi.getLoadedModels,
 			'getFilesInCorpus': this.mlApi.getFilesInCorpus,
 			'getProcessStatus': this.mlApi.getProcessStatus,
 			'reloadModels': this.mlApi.reloadModels,
@@ -44,7 +44,7 @@ class TransformerController {
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
 		this.getDataList = this.getData.bind(this,'getDataList')
-		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
+		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
