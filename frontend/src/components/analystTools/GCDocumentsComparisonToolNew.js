@@ -409,7 +409,7 @@ const GCDocumentsComparisonTool = (props) => {
 						onClick={() => resetAdvancedSettings(dispatch)}
 						style={{margin: 0, width: '100%'}}
 					>
-						Clear filters
+						Clear Filters
 					</GCButton>
 					{!loading && returnedDocs.length > 0 && <GCButton 
 						onClick={() => { 

@@ -44,7 +44,7 @@ export default function GCAnalystToolsSideBar(props) {
 	}
 	
 	return (
-		<div style={styles.cardBody}>
+		<div style={styles.cardBody} class='analyst-tools-filters'>
 			<div style={styles.innerContainer} ref={sideBarFilterRef}>
 				{loaded && analystToolsSideBarHandler.getSideBarItems({
 					state,
