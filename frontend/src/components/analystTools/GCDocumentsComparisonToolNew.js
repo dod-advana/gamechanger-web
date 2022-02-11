@@ -245,8 +245,18 @@ const GCDocumentsComparisonTool = (props) => {
 				if(resp.data.docs.length <= 0) {
 					setNoResults(true)
 				}else{
-					setSelectedParagraph(resp.data.docs[0].paragraphs[0]);
-					setCompareDocument(resp.data.docs[0]);
+					let paragraph;
+					const document = resp.data.docs.find(doc => {
+						const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === selectedInput)
+						if(foundPar){
+							paragraph = foundPar;
+							return true;
+						}else {
+							return false;
+						}
+					})
+					setCompareDocument(document);
+					setSelectedParagraph(paragraph);
 				}
 				setReturnedDocs(resp.data.docs);
 				setState(dispatch, {runDocumentComparisonSearch: false});
@@ -393,6 +403,26 @@ const GCDocumentsComparisonTool = (props) => {
 			return [];
 		}
 	};
+
+	const handleSetToFirstResultofInput = (id) => {
+		let paragraph;
+		const document = viewableDocs.find(doc => {
+			const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === id)
+			if(foundPar){
+				paragraph = foundPar;
+				return true;
+			}else {
+				return false;
+			}
+		})
+		setCompareDocument(document);
+		setSelectedParagraph(paragraph);
+	}
+
+	const handleSelectInput = (id) => {
+		handleSetToFirstResultofInput(id);
+		setSelectedInput(id);
+	}
 	
 	return (
 		<>
@@ -557,7 +587,7 @@ const GCDocumentsComparisonTool = (props) => {
 										backgroundColor: paragraph.id === selectedInput ? '#DFE6EE' : '#FFFFFF'
 									}}
 									onClick={() => {
-										setSelectedInput(paragraph.id);
+										handleSelectInput(paragraph.id);
 									}}
 								>
 									{paragraphs.length > 1 &&
