@@ -5,7 +5,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCButton from '../../common/GCButton';
 import { trackEvent } from '../../telemetry/Matomo';
 import {GCCheckbox, styles, TableRow} from '../util/GCAdminStyles';
-import UserModal from './UserModal';
+import UserModal from './EditUserModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -13,7 +13,7 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class UserList
  */
-export default () => {
+const UserList = React.memo((props) => {
 	// Component Properties
 	const [gcUserTableData, setGCUserTableData] = useState([]);
 	const [showCreateEditUserModal, setShowCreateEditUserModal] = useState(false);
@@ -25,8 +25,6 @@ export default () => {
     
 		const data = await gameChangerAPI.getUserData();
 
-		console.log(data)
-    
 		_.forEach(data.data.users, result => {
 			tableData.push(result);
 		});
@@ -159,7 +157,9 @@ export default () => {
 					}]}
 				/>
 			</div>
-			<UserModal showCreateEditUserModal={showCreateEditUserModal} setShowCreateEditUserModal={setShowCreateEditUserModal} userData={editUserData} getUserData={getUserData} />
+			<UserModal showCreateEditUserModal={showCreateEditUserModal} setShowCreateEditUserModal={setShowCreateEditUserModal} userData={{...editUserData}} getUserData={getUserData} />
 		</>
 	)
-}
+});
+
+export default UserList;

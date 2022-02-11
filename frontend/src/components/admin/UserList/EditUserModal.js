@@ -13,7 +13,7 @@ const gameChangerAPI = new GameChangerAPI();
  * 
  * @class UserModal
  */
-export default ({showCreateEditUserModal, setShowCreateEditUserModal, userData, getUserData}) => {
+const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUserModal, userData, getUserData}) => {
 	const [editUserData, setEditUserData] = useState({});
     
 
@@ -60,7 +60,7 @@ export default ({showCreateEditUserModal, setShowCreateEditUserModal, userData, 
 		<Dialog
 			open={showCreateEditUserModal}
 			scroll={'paper'}
-			maxWidth="sm"
+			maxWidth="md"
 			disableEscapeKeyDown
 			disableBackdropClick
 			classes={{
@@ -175,4 +175,6 @@ export default ({showCreateEditUserModal, setShowCreateEditUserModal, userData, 
 			
 		</Dialog>
 	)
-}
+});
+
+export default EditUserModal;
