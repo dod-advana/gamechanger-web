@@ -149,6 +149,8 @@ router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);
 
 router.get('/user/getUserData', user.getUserData);
+router.get('/user/getUserProfileData', user.getUserProfileData);
+router.post('/user/updateUserProfileData', user.updateUserProfileData);
 router.get('/getUserSettings', user.getUserSettings);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);

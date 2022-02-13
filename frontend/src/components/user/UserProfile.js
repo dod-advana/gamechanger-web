@@ -18,7 +18,7 @@ import {convertHexToRgbA} from '../../utils/gamechangerUtils';
 
 const StyledTopDescription = styled.div`
 	font-family: Montserrat;
-	background: ${'#E0E0E0'};
+	background: ${'#FFFFFF'};
 	width: 100%;
 	border-radius: 6px;
 	
@@ -30,7 +30,7 @@ const StyledTopDescription = styled.div`
 	}
 	
 	& .description-text {
-		color: ${'#505050'};
+		color: ${'#212121'};
 		font-size: 14px;
 		padding: 0 10px 10px 10px;
 	}
@@ -127,10 +127,10 @@ const useStyles = makeStyles((theme) => ({
 const UserProfile = React.memo((props) => {
 
 	const {
-		getUserData = async () => {return {}},
+		getUserData = async () => {},
 		updateUserData = async () => {},
-		getAppRelatedUserData = () => {return {}},
-		updateAppRelatedUserData = () => {},
+		// getAppRelatedUserData = () => {return {}},
+		// updateAppRelatedUserData = () => {},
 		displayCustomAppContent = () => {return (<></>)},
 		style = {},
 		primaryColor = '#E9691D',
@@ -265,15 +265,15 @@ const UserProfile = React.memo((props) => {
 
 	return (
 		<div style={style}>
-			<Grid container spacing={6}>
-				<Grid container item xs={12}>
+			<Grid container spacing={3}>
+				<Grid container item xs={12} style={{paddingRight: 15}}>
 					<StyledTopDescription>
 						<Typography className={'description-header'}>User Profile</Typography>
 						<Typography className={'description-text'}>This is the user profile page, use this page to edit your information and view app specific items or tasks.</Typography>
 					</StyledTopDescription>
 				</Grid>
 				<Grid container item xs={12} spacing={3}>
-					<Grid continer item xs={3} justify="center" alignItems="center">
+					<Grid container item xs={3} justify="center" alignItems="center" >
 						<StyledUserProfileDataDiv>
 							<Grid direction={'column'} container justify="center" alignItems="center" className={'user-picture'}>
 								<Avatar src={ProfileDefaultImg} alt="profile-pic" className={classes.bigAvatar}/>
@@ -297,7 +297,7 @@ const UserProfile = React.memo((props) => {
 							</Grid>
 						</StyledUserProfileDataDiv>
 					</Grid>
-					<Grid item xs={9}>
+					<Grid container item xs={9} style={{paddingRight: 0}}>
 						<StyledCustomAppDataDiv>
 							{displayCustomAppContent()}
 						</StyledCustomAppDataDiv>

@@ -14,7 +14,7 @@ const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const constants = require('./node_app/config/constants');
 const models = require('./node_app/models');
-const User = models.user
+const User = require('./node_app/models').user;
 const Admin = models.admin;
 const LOGGER = require('@dod-advana/advana-logger');
 const path = require('path');
@@ -196,9 +196,16 @@ app.post('/api/auth/token', async function (req, res) {
 	try {
 		cn = sessUser.cn;
 
-		await userController.updateOrCreateUserHelper(sessUser, cn);
 
-		const user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+
+		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+
+		if (!user || user === null) {
+			await userController.updateOrCreateUserHelper(sessUser, cn);
+			user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+		}
+
+		// Remove once we feel like most admins have used the new system
 		const admin = await Admin.findOne({ where: { username: cn } });
 
 		if (admin) {
@@ -207,7 +214,19 @@ app.post('/api/auth/token', async function (req, res) {
 
 		if (user) {
 			if (user.is_super_admin) perms.push('Gamechanger Admin');
-			if (user.is_admin) perms.push('Gamechanger Admin Lite');
+
+			let isAdminLite = false;
+
+			Object.keys(user.extra_fields).forEach(extraKey => {
+				if (user.extra_fields[extraKey].hasOwnProperty('is_admin')) {
+					if (user.extra_fields[extraKey].is_admin) {
+						perms.push(`${extraKey} Admin`);
+						isAdminLite = true;
+					}
+				}
+			});
+
+			if (isAdminLite) perms.push('Gamechanger Admin Lite');
 		}
 
 		sessUser.id = getUserIdFromSAMLUserId(req);
@@ -225,6 +244,8 @@ app.post('/api/auth/token', async function (req, res) {
 		}
 
 		sessUser.perms = sessUser.perms.concat(perms);
+
+		console.log(sessUser.perms)
 
 		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
 

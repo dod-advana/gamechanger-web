@@ -8,6 +8,8 @@ const endpoints = {
 	postUserAppVersion: '/api/userAppVersion',
 	getUserData: '/api/gamechanger/user/getUserData',
 	submitUserInfo: '/api/gameChanger/user/submitUserInfo',
+	getUserProfileDataGET: '/api/gamechanger/user/getUserProfileData',
+	updateUserProfileDataPOST: '/api/gamechanger/user/updateUserProfileData',
 };
 
 export default class GamechangerUserManagementAPI {
@@ -35,4 +37,14 @@ export default class GamechangerUserManagementAPI {
 		const url = endpoints.submitUserInfo;
 		return axiosPOST(this.axios, url, data);
 	};
+
+	getUserProfileData = async () => {
+		const url = endpoints.getUserProfileDataGET;
+		return axiosGET(this.axios, url);
+	}
+
+	updateUserProfileData = async (data) => {
+		const url = endpoints.updateUserProfileDataPOST;
+		return axiosPOST(this.axios, url, data);
+	}
 }

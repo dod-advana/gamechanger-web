@@ -10,22 +10,13 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
 import AnalystTools from '../analystTools';
-import GCUserDashboard from '../user/GCUserDashboard';
 import GCAboutUs from '../aboutUs/GCAboutUs';
-import {
-	checkUserInfo,
-	getUserData,
-	handleSaveFavoriteDocument,
-	handleSaveFavoriteTopic,
-	handleSaveFavoriteOrganization,
-	setState,
-} from '../../utils/sharedFunctions';
-import GameChangerAPI from '../api/gameChanger-service-api';
+import { setState } from '../../utils/sharedFunctions';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
+import UserProfileHandlerFactory from '../factories/userProfileFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
-const gameChangerAPI = new GameChangerAPI();
 let cancelToken = axios.CancelToken.source();
 
 const MainView = (props) => {
@@ -36,6 +27,7 @@ const MainView = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
 	const [searchHandler, setSearchHandler] = useState();
+	const [userProfileHandler, setUserProfileHandler] = useState();
 
 	useEffect(() => {
 		return function cleanUp(){
@@ -69,6 +61,13 @@ const MainView = (props) => {
 			);
 			const searchHandler = searchFactory.createHandler();
 			setSearchHandler(searchHandler);
+
+			const profileFactory = new UserProfileHandlerFactory(
+				state.cloneData.main_view_module
+			);
+
+			const profileHandler = profileFactory.createHandler();
+			setUserProfileHandler(profileHandler);
 
 			handler.handlePageLoad({
 				state,
@@ -179,89 +178,14 @@ const MainView = (props) => {
 	};
 
 	const getUserDashboard = () => {
-		return (
-			<GCUserDashboard
-				state={state}
-				userData={state.userData}
-				updateUserData={() => getUserData(dispatch)}
-				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
-				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
-				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
-				saveFavoriteSearch={(
-					favoriteName,
-					favoriteSummary,
-					favorite,
-					tinyUrl,
-					searchText,
-					count
-				) =>
-					handleSaveFavoriteSearchHistory(
-						favoriteName,
-						favoriteSummary,
-						favorite,
-						tinyUrl,
-						searchText,
-						count
-					)
-				}
-				handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
-					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
-				}
-				handleFavoriteOrganization={({
-					organization_name,
-					organization_summary,
-					favorite,
-				}) =>
-					handleSaveFavoriteOrganization(
-						organization_name,
-						organization_summary,
-						favorite,
-						dispatch
-					)
-				}
-				cloneData={state.cloneData}
-				checkUserInfo={() => {
-					return checkUserInfo(state, dispatch);
-				}}
-				dispatch={dispatch}
-			/>
-		);
+		return userProfileHandler.getUserProfilePage({state, dispatch});
 	};
 
 	const getAboutUs = () => {
 		return <GCAboutUs state={state} />;
 	};
 
-	const handleDeleteFavoriteSearch = async (search) => {
-		await gameChangerAPI.favoriteSearch(search);
-		await getUserData(dispatch);
-	};
 
-	const handleClearFavoriteSearchNotification = async (search) => {
-		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
-		await getUserData(dispatch);
-	};
-
-	const handleSaveFavoriteSearchHistory = async (
-		favoriteName,
-		favoriteSummary,
-		favorite,
-		tinyUrl,
-		searchText,
-		count
-	) => {
-		const searchData = {
-			search_name: favoriteName,
-			search_summary: favoriteSummary,
-			search_text: searchText,
-			tiny_url: tinyUrl,
-			document_count: count,
-			is_favorite: favorite,
-		};
-
-		await gameChangerAPI.favoriteSearch(searchData);
-		await getUserData(dispatch);
-	};
 
 	const getNonMainPageOuterContainer = (getInnerChildren) => {
 		return (
@@ -269,7 +193,7 @@ const MainView = (props) => {
 				<div
 					style={{
 						backgroundColor: 'rgba(223, 230, 238, 0.5)',
-						marginBottom: 10,
+						minHeight: 'calc(100vh - 200px)'
 					}}
 				>
 					{state.pageDisplayed !== 'aboutUs' && (

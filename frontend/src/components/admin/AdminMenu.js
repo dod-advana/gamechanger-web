@@ -246,7 +246,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 						toolTheme={toolTheme}
 					>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
-						<span style={{ marginLeft: '5px' }}>Manage Internal Users</span>
+						<span style={{ marginLeft: '5px' }}>Manage Users</span>
 					</HoverNavItem>
 				</Tooltip>
 			)}
