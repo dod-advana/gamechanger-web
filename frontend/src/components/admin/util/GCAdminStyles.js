@@ -192,6 +192,18 @@ const useStyles = makeStyles((theme) => ({
 		backgroundColor: styles.backgroundGreyLight,
 		borderRadius: 0,
 	},
+	inputBox: {
+		fontFamily: 'Montserrat',
+		fontSize: '20px',
+		color: '#000000DD !important',
+
+		'&&&:before': {
+			borderBottom: 'none'
+		},
+		'&&:after': {
+			borderBottom: 'none'
+		}
+	}
 }));
 
 const GCCheckbox = withStyles({

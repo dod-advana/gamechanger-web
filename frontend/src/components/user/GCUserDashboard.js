@@ -320,7 +320,7 @@ const useStyles = makeStyles((theme) => ({
 
 const RESULTS_PER_PAGE = 12;
 
-const GCUserDashboard = (props) => {
+const GCUserDashboard = React.memo((props) => {
 	const {
 		userData,
 		updateUserData,
@@ -2317,7 +2317,7 @@ const GCUserDashboard = (props) => {
 			</Tabs>
 		</TabContainer>
 	);
-};
+});
 
 const styles = {
 	menuItem: {
@@ -2406,7 +2406,7 @@ const styles = {
 	modalError: {
 		color: '#f44336'
 	}
-}
+};
 
 GCUserDashboard.propTypes = {
 	userData: PropTypes.shape({
