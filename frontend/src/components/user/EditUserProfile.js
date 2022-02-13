@@ -14,7 +14,7 @@ import {
 	Box, TextField, Stack, Badge
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+// import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
 import {convertHexToRgbA} from '../../utils/gamechangerUtils';
 
@@ -103,14 +103,14 @@ const StyledTextField = muiStyled(TextField)(
 	}
 );
 
-const SmallAvatar = styled(Avatar)(({ theme }) => (
-	props => ({
-		width: props.size,
-		height: props.size,
-		border: `2px solid ${theme.palette.background.paper}`,
-		background: '#ffffff'
-	})
-));
+// const SmallAvatar = styled(Avatar)(({ theme }) => (
+// 	props => ({
+// 		width: props.size,
+// 		height: props.size,
+// 		border: `2px solid ${theme.palette.background.paper}`,
+// 		background: '#ffffff'
+// 	})
+// ));
 
 const REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'organization', 'country'];
 

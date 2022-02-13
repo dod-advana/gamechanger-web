@@ -137,6 +137,38 @@ export const handleSaveFavoriteTopic = async (
 	await getUserData(dispatch);
 }
 
+export const handleDeleteFavoriteSearch = async (search, dispatch) => {
+	await gameChangerAPI.favoriteSearch(search);
+	await getUserData(dispatch);
+};
+
+export const handleClearFavoriteSearchNotification = async (search, dispatch) => {
+	await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
+	await getUserData(dispatch);
+};
+
+export const handleSaveFavoriteSearchHistory = async (
+	favoriteName,
+	favoriteSummary,
+	favorite,
+	tinyUrl,
+	searchText,
+	count,
+	dispatch
+) => {
+	const searchData = {
+		search_name: favoriteName,
+		search_summary: favoriteSummary,
+		search_text: searchText,
+		tiny_url: tinyUrl,
+		document_count: count,
+		is_favorite: favorite,
+	};
+
+	await gameChangerAPI.favoriteSearch(searchData);
+	await getUserData(dispatch);
+};
+
 export const handleGenerateGroup = async ( group, state, dispatch ) => {
 	const { cloneData } = state;
 	const clone_index = cloneData?.clone_data?.project_name;
