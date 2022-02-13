@@ -93,6 +93,9 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			updatedAt: {
 				type: DataTypes.DATE
+			},
+			permissions: {
+				type: DataTypes.ARRAY(DataTypes.STRING)
 			}
 		},
 		{
