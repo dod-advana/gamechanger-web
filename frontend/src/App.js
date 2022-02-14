@@ -366,7 +366,7 @@ const App = () => {
 														pageName={'GamechangerAdminPage'}
 														component={GamechangerAdminPage}
 														allowFunction={() => {
-															return Permissions.isGameChangerAdmin();
+															return Permissions.permissionValidator('Gamechanger Super Admin', true);
 														}}
 													/>
 													<PrivateTrackedRoute
