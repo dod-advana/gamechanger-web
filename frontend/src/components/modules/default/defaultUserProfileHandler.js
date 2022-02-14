@@ -7,11 +7,6 @@ const gameChangerUserAPI = new GamechangerUserManagementAPI();
 const DefaultUserProfileHandler = {
 	getUserProfilePage: (props) => {
 
-		const {
-			state,
-			dispatch
-		} = props;
-
 		return (
 			<UserProfile
 				getUserData={gameChangerUserAPI.getUserProfileData}

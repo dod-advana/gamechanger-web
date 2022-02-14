@@ -36,7 +36,7 @@ const endpoints = {
 	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
-	notificationsGET: '/api/gameChanger/getNotifications',
+	notificationsPOST: '/api/gameChanger/getNotifications',
 	notificationCreatePOST: '/api/gameChanger/admin/createNotification',
 	notificationEditActivePOST: '/api/gameChanger/admin/editNotificationActive',
 	notificationDeletePOST: '/api/gameChanger/admin/deleteNotification',
@@ -129,6 +129,7 @@ const endpoints = {
 	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
+	updateClonesVisitedPOST: '/api/gameChanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
@@ -540,9 +541,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { index });
 	};
 
-	getNotifications = async () => {
-		const url = endpoints.notificationsGET;
-		return axiosGET(this.axios, url);
+	getNotifications = async (cloneName) => {
+		const url = endpoints.notificationsPOST;
+		return axiosPOST(this.axios, url, {project_name: cloneName});
 	};
 
 	createNotification = async (body) => {
@@ -1056,5 +1057,10 @@ export default class GameChangerAPI {
 	syncUserTable = async () => {
 		const url = endpoints.syncUserTableGET;
 		return axiosGET(this.axios, url);
+	};
+
+	updateClonesVisited = async (clone) => {
+		const url = endpoints.updateClonesVisitedPOST;
+		return axiosPOST(this.axios, url, {clone});
 	};
 }

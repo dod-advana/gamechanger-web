@@ -77,6 +77,8 @@ const MainView = (props) => {
 				cancelToken
 			});
 
+
+
 			setState(dispatch, { viewNames });
 		}
 	}, [state, dispatch, pageLoaded]);

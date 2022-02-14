@@ -196,8 +196,6 @@ app.post('/api/auth/token', async function (req, res) {
 	try {
 		cn = sessUser.cn;
 
-
-
 		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 
 		if (!user || user === null) {
@@ -217,8 +215,11 @@ app.post('/api/auth/token', async function (req, res) {
 
 			let isAdminLite = false;
 
+			// Other attributes in extra_fields other than clone specific
+			const fieldsToIgnore = ['clones_visited'];
+
 			Object.keys(user.extra_fields).forEach(extraKey => {
-				if (user.extra_fields[extraKey].hasOwnProperty('is_admin')) {
+				if (!fieldsToIgnore.includes(extraKey) && user.extra_fields[extraKey].hasOwnProperty('is_admin')) {
 					if (user.extra_fields[extraKey].is_admin) {
 						perms.push(`${extraKey} Admin`);
 						isAdminLite = true;
@@ -249,7 +250,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
 
-		const jwtClaims = { ...sessUser, perms };
+		const jwtClaims = { ...sessUser };
 
 		jwtClaims['csrf-token'] = csrfHash;
 
@@ -292,10 +293,18 @@ app.use(async function (req, res, next) {
 });
 
 app.all('/api/*/admin/*', async function (req, res, next) {
-	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
+	if (req.permissions.includes('Gamechanger Super Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		res.sendStatus(403);
+		const match = req.permissions.find(perm => {
+			return perm.includes('Admin');
+		});
+
+		if (match) {
+			next();
+		} else {
+			res.sendStatus(403);
+		}
 	}
 });
 

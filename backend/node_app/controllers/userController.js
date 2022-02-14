@@ -105,6 +105,7 @@ class UserController {
 		this.getUserProfileData = this.getUserProfileData.bind(this);
 		this.updateUserProfileData = this.updateUserProfileData.bind(this);
 		this.syncUserHelper = this.syncUserHelper.bind(this);
+		this.updateClonesVisited = this.updateClonesVisited.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -192,6 +193,36 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, 'RQ0WSQP', userId);
 			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
+	async updateClonesVisited(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+			const { clone } = req.body;
+
+			const user = await this.user.findOne({where: { user_id: user_id }, raw: true});
+
+			if (user && user!== null) {
+				if (user.extra_fields.hasOwnProperty('clones_visited')) {
+					if (!user.extra_fields.clones_visited.includes(clone)) {
+						user.extra_fields.clones_visited.push(clone)
+						await this.updateOrCreateUserHelper(user, user_id, true);
+					}
+				} else {
+					user.extra_fields['clones_visited'] = [clone];
+					await this.updateOrCreateUserHelper(user, user_id, true);
+				}
+			}
+
+			res.sendStatus(200);
+
+		} catch (err) {
+			this.logger.error(err, 'CFHGJJ4', userId);
+			res.status(500).send(`Error updating clones visited: ${err.message}`);
 		}
 	}
 

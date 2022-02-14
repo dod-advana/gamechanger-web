@@ -120,7 +120,8 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-			></SearchBanner>
+				cloneData={{clone_name: 'gamechanger'}}
+			/>
 
 			{renderSwitch(pageToView)}
 		</div>

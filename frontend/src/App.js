@@ -12,6 +12,7 @@ import { getProvider } from './components/factories/contextFactory';
 import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement';
 import GamechangerPage from './containers/GameChangerPage';
 import GamechangerAdminPage from './containers/GamechangerAdminPage';
+import GamechangerLiteAdminPage from './containers/GamechangerLiteAdminPage';
 import GamechangerEsPage from './containers/GamechangerEsPage';
 import GameChangerDetailsPage from './containers/GameChangerDetailsPage';
 import GamechangerPdfViewer from './components/documentViewer/PDFViewer';
@@ -166,6 +167,25 @@ const App = () => {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
+						cloneRoutes.push(
+							<PrivateTrackedRoute
+								key={idx}
+								path={`/${clone.url}/admin`}
+								render={(props) => (
+									<GamechangerProvider>
+										<GamechangerLiteAdminPage
+											{...props}
+											cloneData={clone}
+											jupiter={false}
+										/>
+									</GamechangerProvider>
+								)}
+								pageName={clone.display_name}
+								allowFunction={() => {
+									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+								}}
+							/>
+						);
 						if (clone.permissions_required) {
 							cloneRoutes.push(
 								<PrivateTrackedRoute

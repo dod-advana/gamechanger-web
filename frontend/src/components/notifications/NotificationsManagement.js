@@ -57,12 +57,17 @@ const LabelStack = styled.div`
 
 const gameChangerAPI = new GameChangerAPI();
 
-export default () => {
+export default (props) => {
+
+	const {
+		cloneName
+	} = props;
+
 	const [notifications, setNotifications] = useState([]);
 
 	const getNotifications = async () => {
 		try {
-			const { data = [] } = await gameChangerAPI.getNotifications();
+			const { data = [] } = await gameChangerAPI.getNotifications(cloneName);
 			const active = data.reduce((acc, { id, active }) => {
 				acc[id] = active;
 				return acc;
@@ -77,6 +82,7 @@ export default () => {
 
 	useEffect(() => {
 		getNotifications();
+		// eslint-disable-next-line
 	}, []);
 
 	const [active, setActive] = React.useState({});
@@ -111,6 +117,7 @@ export default () => {
 				active: createActive,
 				message: createMessage,
 				level: createLevel,
+				project_name: cloneName
 			});
 			getNotifications();
 			resetState();
