@@ -70,7 +70,6 @@ const BudgetSearchServiceReviewForm = React.memo((props) => {
 					dropdownData={dropdownData}
 					servicePlannedTransitionPartner={reviewData.servicePlannedTransitionPartner}
 					primaryPlannedTransitionPartner={reviewData.primaryPlannedTransitionPartner}
-					servicePTPAgreeLabel={reviewData.servicePTPAgreeLabel}
 					serviceValidated={serviceValidated}
 					serviceValidation={serviceValidation}
 				/>

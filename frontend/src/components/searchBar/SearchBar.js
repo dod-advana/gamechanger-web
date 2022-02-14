@@ -18,7 +18,6 @@ const SearchBar = (props) => {
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
-			console.log(state.cloneData.search_module);
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
 			);
@@ -47,8 +46,6 @@ const SearchBar = (props) => {
 	const handleCategoryTabChange = (tabName) => {
 		mainViewHandler.handleCategoryTabChange({ tabName, state, dispatch });
 	};
-
-	console.log(state.cloneData);
 
 	return (
 		<>
@@ -97,7 +94,7 @@ SearchBar.propTypes = {
 			menuOpen: PropTypes.bool,
 			pageDisplayed: PropTypes.string,
 			searchText: PropTypes.string,
-			componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+			componentStepNumbers: PropTypes.arrayOf(PropTypes.number),
 			searchSettings: PropTypes.shape({
 				searchType: PropTypes.string,
 				publicationDateFilter: PropTypes.arrayOf(PropTypes.string),

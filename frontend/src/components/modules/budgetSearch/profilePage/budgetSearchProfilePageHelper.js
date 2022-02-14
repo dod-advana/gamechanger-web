@@ -12,7 +12,6 @@ import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
 import { BudgetSearchContext } from '../../../modules/budgetSearch/budgetSearchContext'
-const _ = require('lodash');
 
 const firstColWidth = {
 	maxWidth: 100,
@@ -154,7 +153,7 @@ const ProjectDescription = (props) => {
 							{projectDescriptions.map((pd) => {
 								return (
 									<>
-										<Typography variant="1" style={{ fontWeight: 'bold', width: '100%' }}>
+										<Typography key={pd.title} variant="h3" style={{ fontWeight: 'bold', width: '100%' }}>
 											{pd.title}
 										</Typography>
 										<blockquote style={{ borderLeft: 'none' }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(pd.value, { allowedAttributes: { span: ['style'] } }) }} />
@@ -339,6 +338,7 @@ const NavButtons = (props) => {
 	buttonNames.forEach((name, index) => {
 		navButtons.push(
 			<StyledNavButton
+				key={name + index}
 				first={index === 0}
 				last={index === navButtons.length - 1}
 				selected={currentNav === name}

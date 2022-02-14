@@ -4,7 +4,7 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 
 import GCPrimaryButton from '../../common/GCButton';
 
-import { Typography, Grid, CircularProgress, Snackbar, Alert } from '@material-ui/core';
+import { Typography, Grid, CircularProgress, Snackbar } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
 import {
 	getTrackingNameForFactory, scrollToContentTop, getQueryVariable
@@ -20,13 +20,12 @@ import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import LandingImage from '../../../images/JAIC_banner.png'
 import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
-import ExportIcon from '../../../images/icon/Export.svg';
 import FeedbackModal from './budgetFeedbackModal';
 
 
 import JBookAPI from '../../api/jbook-service-api';
 import QueryExp from './QueryExp.js'
-import { Link } from "@mui/material";
+import { Link } from '@mui/material';
 
 const jbookAPI = new JBookAPI();
 
@@ -453,9 +452,9 @@ const BudgetSearchMainViewHandler = {
 		} = props;
 		console.log('handle page load');
 
-		const interval = setInterval(() => {
-			populateDropDowns(state, dispatch);
-		}, 1000 * 60);
+		// const interval = setInterval(() => {
+		// 	populateDropDowns(state, dispatch);
+		// }, 1000 * 60);
 
 		const { budgetSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
@@ -694,7 +693,7 @@ const BudgetSearchMainViewHandler = {
 					width: 100,
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
-							{row.value ? <i style={{ color: 'green' }} className="fa fa-check" /> : <i style={{ color: 'red' }} className="fa fa-times" />}
+							{row.value ? <i style={{ color: 'green' }} className='fa fa-check' /> : <i style={{ color: 'red' }} className='fa fa-times' />}
 						</div>
 					),
 					sortable: false,
@@ -827,7 +826,7 @@ const BudgetSearchMainViewHandler = {
 							<Pagination
 								activePage={resultsPage}
 								itemsCountPerPage={18}
-								totalItemsCount={mainPageData.totalCount}
+								totalItemsCount={mainPageData.totalCount.toInt()}
 								pageRangeDisplayed={8}
 								onChange={page => {
 									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
@@ -1021,7 +1020,7 @@ const BudgetSearchMainViewHandler = {
 						{renderCheckboxes()}
 					</StyledFilterBar> */}
 					<StyledMainContainer>
-						<QueryExp searchText={state.searchText ? state.searchText : ""} />
+						<QueryExp searchText={state.searchText ? state.searchText : ''} />
 						<Tabs selectedIndex={mainTabSelected ?? 0}>
 							<div style={styles.tabButtonContainer}>
 								<TabList style={styles.tabsList}>
