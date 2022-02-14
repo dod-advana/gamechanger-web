@@ -3,26 +3,26 @@ import SearchBar from '../components/searchBar/SearchBar';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import BudgetSearchJAICReviewForm from '../components/modules/jbook/budgetSearchJAICReviewForm';
-import BudgetSearchServiceReviewForm from '../components/modules/jbook/budgetSearchServiceReviewForm';
-import BudgetSearchPOCReviewForm from '../components/modules/jbook/budgetSearchPOCReviewForm';
+import BudgetSearchJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
+import BudgetSearchServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
+import BudgetSearchPOCReviewForm from '../components/modules/jbook/jbookPOCReviewForm';
 import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import { getQueryVariable } from '../utils/gamechangerUtils';
 import JBookAPI from '../components/api/jbook-service-api';
-import './budgetsearch.css';
+import './jbook.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
-import { BudgetSearchContext } from '../components/modules/jbook/budgetSearchContext';
+import { BudgetSearchContext } from '../components/modules/jbook/jbookContext';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import jca_data from '../components/modules/jbook/JCA.json';
 import {
 	Accomplishments, aggregateProjectDescriptions, Contracts, formatNum,
 	BasicData, Metadata, ProjectDescription, SideNav
-} from '../components/modules/jbook/profilePage/budgetSearchProfilePageHelper';
+} from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
 	CloseButton, StyledContainer, StyledReviewContainer, StyledReviewLeftContainer,
 	StyledReviewRightContainer, StyledAccordionContainer, StyledAccordionHeader

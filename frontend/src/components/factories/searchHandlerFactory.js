@@ -4,7 +4,7 @@ const globalSearchHandler = require(`../modules/globalSearch/globalSearchHandler
 const edaSearchHandler = require(`../modules/eda/edaSearchHandler`);
 const hermesSearchHandler = require(`../modules/hermes/hermesSearchHandler`);
 const cdoSearchHandler = require(`../modules/cdo/cdoSearchHandler`);
-const budgetSearchSearchHandler = require(`../modules/jbook/budgetSearchSearchHandler`);
+const budgetSearchSearchHandler = require(`../modules/jbook/jbookSearchHandler`);
 class SearchHandlerFactory {
 	constructor(module) {
 		try {

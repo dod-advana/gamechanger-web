@@ -3,10 +3,10 @@ import { CircularProgress } from '@material-ui/core';
 import SimpleTable from '../../common/SimpleTable';
 import GCPrimaryButton from '../../common/GCButton';
 import { StyledTableContainer, StyledFooterDiv } from './profilePage/profilePageStyles';
-import { BudgetSearchContext } from './budgetSearchContext';
-import './budgetsearch.css';
+import { BudgetSearchContext } from './jbookContext';
+import './jbook.css';
 import { setState } from '../../../utils/sharedFunctions';
-import { boldKeys, firstColWidth } from './profilePage/budgetSearchProfilePageHelper';
+import { boldKeys, firstColWidth } from './profilePage/jbookProfilePageHelper';
 import {
 	AltAIPOCKey,
 	AltAIPOCValue,
@@ -25,7 +25,7 @@ import {
 	SliderKey,
 	SliderValue,
 	FooterValue
-} from './budgetSearchPOCHelper';
+} from './jbookPOCHelper';
 
 
 

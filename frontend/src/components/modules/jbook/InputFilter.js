@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { setState } from '../../../utils/sharedFunctions';
-import { BudgetSearchContext } from './budgetSearchContext';
+import { BudgetSearchContext } from './jbookContext';
 
 const StyledInput = styled.input`
     width: 100%;

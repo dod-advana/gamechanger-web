@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import SimpleTable from '../../common/SimpleTable';
-import { BudgetSearchContext } from './budgetSearchContext';
+import { BudgetSearchContext } from './jbookContext';
 import {
 	ReviewersValue,
 	CoreAIAnalysisKey,
@@ -12,7 +12,7 @@ import {
 	CurrentMissionPartnersValue,
 	ReviewStatus,
 	ButtonFooter
-} from './budgetSearchJAICHelper';
+} from './jbookJAICHelper';
 
 
 

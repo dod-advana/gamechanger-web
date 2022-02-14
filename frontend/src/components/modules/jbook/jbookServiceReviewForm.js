@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import SimpleTable from '../../common/SimpleTable';
 import { StyledTableContainer } from './profilePage/profilePageStyles';
-import { BudgetSearchContext } from './budgetSearchContext';
+import { BudgetSearchContext } from './jbookContext';
 import {
 	SecondaryReviewerKey, SecondaryReviewerValue,
 	LabelingValidationKey, LabelingValidationValue,
@@ -13,7 +13,7 @@ import {
 	boldKeys, firstColWidth,
 	ReviewStatus,
 	ButtonFooter
-} from './budgetSearchServiceHelper';
+} from './jbookServiceHelper';
 
 
 const BudgetSearchServiceReviewForm = React.memo((props) => {

@@ -2,7 +2,7 @@ const defaultMainViewHandler = require(`../modules/default/defaultMainViewHandle
 const edaMainViewHandler = require(`../modules/eda/edaMainViewHandler`);
 const policyMainViewHandler = require(`../modules/policy/policyMainViewHandler`);
 const globalSearchMainViewHandler = require(`../modules/globalSearch/globalSearchMainViewHandler`);
-const budgetSearchMainViewHandler = require(`../modules/jbook/budgetSearchMainViewHandler`);
+const budgetSearchMainViewHandler = require(`../modules/jbook/jbookMainViewHandler`);
 
 const policyTestMainViewHandler = require(`../modules/policy/policyTestMainViewHandler`);
 

@@ -11,7 +11,7 @@ import { EDAContext, EDAProvider } from '../modules/eda/edaContext';
 import {
 	BudgetSearchContext,
 	BudgetSearchProvider,
-} from '../modules/jbook/budgetSearchContext';
+} from '../modules/jbook/jbookContext';
 
 const getContext = (cloneName) => {
 	switch (cloneName) {

@@ -13,7 +13,7 @@ import {
 // } from "@material-ui/core";
 
 // import GCAccordion from "../../common/GCAccordion";
-import { primary } from '../../../components/common/gc-colors';
+import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 // import SimpleTable from "../../common/SimpleTable";

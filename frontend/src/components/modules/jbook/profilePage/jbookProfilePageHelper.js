@@ -11,7 +11,7 @@ import {
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
-import { BudgetSearchContext } from '../../../modules/jbook/budgetSearchContext'
+import { BudgetSearchContext } from '../jbookContext'
 
 const firstColWidth = {
 	maxWidth: 100,
