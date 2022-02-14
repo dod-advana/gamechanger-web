@@ -136,6 +136,7 @@ const styles = {
 	},
 	checkbox: {
 		padding: 9,
+		marginLeft: 8
 	},
 	backgroundGreyLight: backgroundGreyLight,
 };

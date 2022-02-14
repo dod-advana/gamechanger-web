@@ -9,6 +9,27 @@ import UserModal from './EditUserModal';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const getClonePermissions = async () => {
+	const { data } = await gameChangerAPI.getCloneData();
+
+	const permissionsInfo = {};
+	data.forEach(clone => {
+		let permissions = [];
+
+		if (clone.permissions && clone.permissions !== null) {
+			permissions = clone.permissions;
+		}
+
+		if (!permissions.includes('is_admin')) {
+			permissions.push('is_admin');
+		}
+
+		permissionsInfo[clone.clone_name] = permissions;
+	});
+
+	return permissionsInfo;
+};
+
 /**
  * 
  * @class UserList
@@ -18,6 +39,7 @@ const UserList = React.memo((props) => {
 	const [gcUserTableData, setGCUserTableData] = useState([]);
 	const [showCreateEditUserModal, setShowCreateEditUserModal] = useState(false);
 	const [editUserData, setEditUserData] = useState({});
+	const [permissionsInfo, setPermissionInfo] = useState({});
 	// Component Methods
 
 	const getUserData = async () => {
@@ -31,11 +53,16 @@ const UserList = React.memo((props) => {
     
 		setGCUserTableData(tableData);
 	}
+
+
 	const deleteUserData = async (userRowId) => {
 		await gameChangerAPI.deleteUserData(userRowId);
 	}
 
 	useEffect(()=>{
+		getClonePermissions().then(data => {
+			setPermissionInfo(data);
+		});
 		getUserData();
 		// eslint-disable-next-line
     },[])
@@ -157,7 +184,13 @@ const UserList = React.memo((props) => {
 					}]}
 				/>
 			</div>
-			<UserModal showCreateEditUserModal={showCreateEditUserModal} setShowCreateEditUserModal={setShowCreateEditUserModal} userData={{...editUserData}} getUserData={getUserData} />
+			<UserModal
+				showCreateEditUserModal={showCreateEditUserModal}
+				setShowCreateEditUserModal={setShowCreateEditUserModal}
+				userData={{...editUserData}}
+				getUserData={getUserData}
+				permissionsInfo={permissionsInfo}
+			/>
 		</>
 	)
 });
