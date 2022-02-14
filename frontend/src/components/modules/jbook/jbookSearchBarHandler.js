@@ -6,7 +6,7 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import UserButton from '../../searchBar/UserButton';
 
-const BudgetSearchSearchBarHandler = {
+const jbookSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(value, cloneData, setAutocorrect, setPresearchTitle, setPresearchTopic, setPresearchOrg, setPredictions) {
 		try {
 			// do nothing
@@ -120,4 +120,4 @@ const BudgetSearchSearchBarHandler = {
 	},
 }
 
-export default BudgetSearchSearchBarHandler;
+export default jbookSearchBarHandler;

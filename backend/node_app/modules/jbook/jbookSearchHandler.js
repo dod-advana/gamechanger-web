@@ -4,7 +4,7 @@ const CONSTANTS = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
-const BudgetSearchSearchUtility = require('./budgetSearchSearchUtility');
+const JBookSearchUtility = require('./jbookSearchUtility');
 
 const SearchHandler = require('../base/searchHandler');
 
@@ -22,14 +22,14 @@ const { Reports } = require('../../lib/reports');
 
 
 
-class BudgetSearchSearchHandler extends SearchHandler {
+class JBookSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
 		const {
 			dataLibrary = new DataLibrary(opts),
 			constants = CONSTANTS,
 			mlApi = new MLApiClient(opts),
 			searchUtility = new SearchUtility(opts),
-			budgetSearchSearchUtility = new BudgetSearchSearchUtility(opts),
+			jbookSearchUtility = new JBookSearchUtility(opts),
 			pdoc = PDOC,
 			rdoc = RDOC,
 			om = OM,
@@ -44,7 +44,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 		this.constants = constants;
 		this.mlApi = mlApi;
 		this.searchUtility = searchUtility;
-		this.budgetSearchSearchUtility = budgetSearchSearchUtility;
+		this.jbookSearchUtility = jbookSearchUtility;
 
 		this.pdocs = pdoc;
 		this.rdocs = rdoc;
@@ -78,7 +78,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			offset,
 			showTutorial = false,
 			tiny_url,
-			budgetSearchSettings = {}
+			jbookSearchSettings = {}
 		} = req.body;
 
 		try {
@@ -251,7 +251,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			const {
 				offset,
 				searchText,
-				budgetSearchSettings,
+				jbookSearchSettings,
 				exportSearch
 			} = req.body;
 
@@ -271,10 +271,10 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map(i => Number(i)) : [0];
 
-			const keywordIdsParam = budgetSearchSettings.hasKeywords !== undefined && budgetSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
+			const keywordIdsParam = jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
 
-			const [pSelect, rSelect, oSelect] = this.budgetSearchSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.budgetSearchSearchUtility.buildWhereQuery(budgetSearchSettings, hasSearchText, keywordIdsParam, perms, userId);
+			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, hasSearchText, keywordIdsParam, perms, userId);
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
@@ -282,17 +282,17 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			let giantQuery = ``;
 
 			// setting up promise.all
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('Procurement') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
 				giantQuery = pQuery;
 			}
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
 				if (giantQuery.length === 0) {
 					giantQuery = rQuery;
 				} else {
 					giantQuery += ` UNION ALL ` + rQuery;
 				}
 			}
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('O&M') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
 				if (giantQuery.length === 0) {
 					giantQuery = oQuery;
 				} else {
@@ -307,7 +307,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			let totalCount = await this.db.jbook.query(totalCountQuery, { replacements: { searchText: structuredSearchText, offset, limit } });
 			totalCount = totalCount[0][0].count;
 
-			const queryEnd = this.budgetSearchSearchUtility.buildEndQuery(budgetSearchSettings.sort);
+			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
 			giantQuery += queryEnd;
 
 			if (!exportSearch) {
@@ -360,7 +360,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 					return await this.getDataForFilters(req, userId);
 				default:
 					this.logger.error(
-						`There is no function called ${functionName} defined in the budgetSearchSearchHandler`,
+						`There is no function called ${functionName} defined in the JBookSearchHandler`,
 						'71739D8',
 						userId
 					);
@@ -438,4 +438,4 @@ class BudgetSearchSearchHandler extends SearchHandler {
 
 }
 
-module.exports = BudgetSearchSearchHandler;
+module.exports = JBookSearchHandler;

@@ -11,7 +11,7 @@ import {
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
-import { BudgetSearchContext } from '../jbookContext'
+import { JBookContext } from '../jbookContext'
 
 const firstColWidth = {
 	maxWidth: 100,
@@ -66,7 +66,7 @@ const SideNav = (props) => {
 const BasicData = (props) => {
 	const { budgetType } = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData } = state;
 
@@ -113,7 +113,7 @@ const BasicData = (props) => {
 const Metadata = (props) => {
 	const { budgetType, projectNum, keywordCheckboxes, setKeywordCheck } = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
 

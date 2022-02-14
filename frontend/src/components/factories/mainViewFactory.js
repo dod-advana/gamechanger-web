@@ -2,8 +2,7 @@ const defaultMainViewHandler = require(`../modules/default/defaultMainViewHandle
 const edaMainViewHandler = require(`../modules/eda/edaMainViewHandler`);
 const policyMainViewHandler = require(`../modules/policy/policyMainViewHandler`);
 const globalSearchMainViewHandler = require(`../modules/globalSearch/globalSearchMainViewHandler`);
-const budgetSearchMainViewHandler = require(`../modules/jbook/jbookMainViewHandler`);
-
+const jbookMainViewHandler = require(`../modules/jbook/jbookMainViewHandler`);
 const policyTestMainViewHandler = require(`../modules/policy/policyTestMainViewHandler`);
 
 class MainViewFactory {
@@ -13,7 +12,7 @@ class MainViewFactory {
 				case 'policy/policyMainViewHandler':
 					this.handler = policyMainViewHandler;
 					break;
-					// TODO Remove this once the homepage is used for main GC page.
+				// TODO Remove this once the homepage is used for main GC page.
 				case 'policy/policyTestMainViewHandler':
 					this.handler = policyTestMainViewHandler;
 					break;
@@ -23,8 +22,8 @@ class MainViewFactory {
 				case 'globalSearch/globalSearchMainViewHandler':
 					this.handler = globalSearchMainViewHandler;
 					break;
-				case 'jbook/budgetSearchMainViewHandler':
-					this.handler = budgetSearchMainViewHandler;
+				case 'jbook/jbookMainViewHandler':
+					this.handler = jbookMainViewHandler;
 					break;
 				default:
 					this.handler = defaultMainViewHandler;

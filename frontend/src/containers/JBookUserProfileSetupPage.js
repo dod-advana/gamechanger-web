@@ -1,9 +1,9 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './jbook.css';
-import {setState} from '../sharedFunctions';
+import { setState } from '../sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
-import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
-import {getQueryVariable} from '../gamechangerUtils';
+import { JBookContext } from '../components/modules/jbook/JBookContext';
+import { getQueryVariable } from '../gamechangerUtils';
 import JBookAPI from '../components/api/jbook-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
@@ -19,24 +19,24 @@ export const scrollToContentTop = () => {
 }
 
 const JBookUserProfileSetupPage = (props) => {
-	
+
 	const {
 		cloneData,
 		history
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
-	const {state, dispatch} = context;
+	const context = useContext(JBookContext);
+	const { state, dispatch } = context;
 
 	const [profileLoading, setProfileLoading] = useState(true);
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
-			setState(dispatch, {cloneData: cloneData, cloneDataSet: true});
+			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
 		}
-		
+
 		if (!state.historySet) {
-			setState(dispatch, {history: history, historySet: true});
+			setState(dispatch, { history: history, historySet: true });
 		}
 
 	}, [cloneData, state, dispatch, history]);
@@ -46,26 +46,26 @@ const JBookUserProfileSetupPage = (props) => {
 		const email = getQueryVariable('email', url);
 		const permissions = getQueryVariable('permissions', url).split(',');
 
-		jbookAPI.setupUserProfile({email, permissions}).then(data => {
+		jbookAPI.setupUserProfile({ email, permissions }).then(data => {
 			setProfileLoading(false);
 			history.push('/summary');
 		});
 
 	}, []);
-	
+
 	return (
 		<div className="main-container">
 			{state.cloneDataSet &&
 				<>
 					{/* Side Navigation */}
 					<SideNavigation context={context} />
-					
+
 					{profileLoading && <LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />}
 				</>
 			}
 		</div>
 	);
-	
+
 };
 
 export default JBookUserProfileSetupPage;

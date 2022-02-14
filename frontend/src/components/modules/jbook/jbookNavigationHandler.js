@@ -33,7 +33,7 @@ const getToolTheme = (cloneData) => {
 	};
 };
 
-const BudgetSearchNavigationHandler = {
+const JBookNavigationHandler = {
 
 	getToolState: (state) => {
 		return {
@@ -141,4 +141,4 @@ const BudgetSearchNavigationHandler = {
 	}
 }
 
-export default BudgetSearchNavigationHandler;
+export default JBookNavigationHandler;

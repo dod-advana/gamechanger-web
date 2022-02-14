@@ -5,7 +5,7 @@ import { FormControlLabel, Checkbox, TextField } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 
 
 const StyledButtonDiv = styled.div`
@@ -53,7 +53,7 @@ const DropdownFilter = (props) => {
 		options = [],
 		clearText = false,
 		type,
-		setBudgetSearchSetting,
+		setJBookSetting,
 		openDropdown,
 		setOpenDropdown,
 		right,
@@ -61,9 +61,9 @@ const DropdownFilter = (props) => {
 		secondaryTitle
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { budgetSearchSettings } = state;
+	const { jbookSearchSettings } = state;
 
 	const [textBoxActive, setTextBoxActive] = useState(false);
 	const [enterPressed, setEnterPressed] = useState(false);
@@ -94,7 +94,7 @@ const DropdownFilter = (props) => {
 
 	useEffect(() => {
 		if (enterPressed) {
-			setBudgetSearchSetting(type, [...filteredOptions, ...filteredSecondaryOptions], state, dispatch, true);
+			setJBookSetting(type, [...filteredOptions, ...filteredSecondaryOptions], state, dispatch, true);
 			setEnterPressed(false);
 			setTextBoxActive(false);
 			setFilteredSearch('');
@@ -136,9 +136,9 @@ const DropdownFilter = (props) => {
 							pointerEvents: 'none',
 							margin: '2px 5px 0px'
 						}}
-						onClick={() => setBudgetSearchSetting(type, 'all', state, dispatch)}
+						onClick={() => setJBookSetting(type, 'all', state, dispatch)}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={budgetSearchSettings && budgetSearchSettings[type] && budgetSearchSettings[type].length === options.length}
+						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].length === options.length}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 						name={'All'}
 					/>}
@@ -157,9 +157,9 @@ const DropdownFilter = (props) => {
 							pointerEvents: 'none',
 							margin: '2px 5px 0px'
 						}}
-						onClick={() => setBudgetSearchSetting(type, 'none', state, dispatch)}
+						onClick={() => setJBookSetting(type, 'none', state, dispatch)}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={budgetSearchSettings && budgetSearchSettings[type] && budgetSearchSettings[type].length === 0}
+						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].length === 0}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 						name={'None'}
 					/>}
@@ -191,13 +191,13 @@ const DropdownFilter = (props) => {
 							margin: '2px 5px 0px'
 						}}
 						onClick={() => {
-							if (budgetSearchSettings.clearText === true) {
-								setBudgetSearchSetting('clearText', false, state, dispatch);
+							if (jbookSearchSettings.clearText === true) {
+								setJBookSetting('clearText', false, state, dispatch);
 							}
-							setBudgetSearchSetting(type, option, state, dispatch)
+							setJBookSetting(type, option, state, dispatch)
 						}}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={budgetSearchSettings && budgetSearchSettings[type] && budgetSearchSettings[type].indexOf(option) !== -1}
+						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 						name={options}
 					/>}
@@ -224,13 +224,13 @@ const DropdownFilter = (props) => {
 							margin: '2px 5px 0px'
 						}}
 						onClick={() => {
-							if (budgetSearchSettings.clearText === true) {
-								setBudgetSearchSetting('clearText', false, state, dispatch);
+							if (jbookSearchSettings.clearText === true) {
+								setJBookSetting('clearText', false, state, dispatch);
 							}
-							setBudgetSearchSetting(type, option, state, dispatch)
+							setJBookSetting(type, option, state, dispatch)
 						}}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={budgetSearchSettings && budgetSearchSettings[type] && budgetSearchSettings[type].indexOf(option) !== -1}
+						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 						name={options}
 					/>}
@@ -264,8 +264,8 @@ const DropdownFilter = (props) => {
 				style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
 				onBlur={(event) => {
 					setFilteredSearch(event.target.value)
-					if (budgetSearchSettings.clearText === true) {
-						setBudgetSearchSetting('clearText', false, state, dispatch);
+					if (jbookSearchSettings.clearText === true) {
+						setJBookSetting('clearText', false, state, dispatch);
 					}
 				}}
 				onChange={(event) => {

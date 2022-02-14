@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import SimpleTable from '../../common/SimpleTable';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 import {
 	ReviewersValue,
 	CoreAIAnalysisKey,
@@ -38,7 +38,7 @@ const boldKeys = (data) => {
 	});
 }
 
-const BudgetSearchJAICReviewForm = React.memo((props) => {
+const JBookJAICReviewForm = React.memo((props) => {
 
 	const {
 		submitReviewForm,
@@ -50,7 +50,7 @@ const BudgetSearchJAICReviewForm = React.memo((props) => {
 		roleDisabled
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { reviewData, primaryReviewLoading } = state;
 
@@ -152,4 +152,4 @@ const BudgetSearchJAICReviewForm = React.memo((props) => {
 });
 
 
-export default BudgetSearchJAICReviewForm;
+export default JBookJAICReviewForm;

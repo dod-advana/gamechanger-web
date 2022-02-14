@@ -1,7 +1,7 @@
 import React from 'react';
 import JAICLogo from '../../../images/logos/JBooks Logo_wht.svg';
 
-const BudgetSearchTitleBarHandler = {
+const jbookTitleBarHandler = {
 	getTitleBar: (props) => {
 		const {
 			onTitleClick,
@@ -16,11 +16,11 @@ const BudgetSearchTitleBarHandler = {
 			/>
 		);
 	},
-	
+
 	getCategoryTabs(props) {
 		return <></>
 	},
-	
+
 	getTitleBarStyle(props) {
 		const {
 			rawSearchResults,
@@ -34,7 +34,7 @@ const BudgetSearchTitleBarHandler = {
 	}
 }
 
-export default BudgetSearchTitleBarHandler;
+export default jbookTitleBarHandler;
 
 const styles = {
 	wording: {

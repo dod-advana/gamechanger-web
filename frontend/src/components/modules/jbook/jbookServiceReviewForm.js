@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import SimpleTable from '../../common/SimpleTable';
 import { StyledTableContainer } from './profilePage/profilePageStyles';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 import {
 	SecondaryReviewerKey, SecondaryReviewerValue,
 	LabelingValidationKey, LabelingValidationValue,
@@ -16,7 +16,7 @@ import {
 } from './jbookServiceHelper';
 
 
-const BudgetSearchServiceReviewForm = React.memo((props) => {
+const JBookServiceReviewForm = React.memo((props) => {
 
 	const {
 		setReviewData,
@@ -30,7 +30,7 @@ const BudgetSearchServiceReviewForm = React.memo((props) => {
 	} = props;
 
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { serviceValidated, serviceValidation, reviewData, primaryReviewLoading } = state;
 
@@ -154,4 +154,4 @@ const BudgetSearchServiceReviewForm = React.memo((props) => {
 });
 
 
-export default BudgetSearchServiceReviewForm;
+export default JBookServiceReviewForm;

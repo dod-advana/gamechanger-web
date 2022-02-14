@@ -9,8 +9,8 @@ import {
 } from '../modules/globalSearch/globalSearchContext';
 import { EDAContext, EDAProvider } from '../modules/eda/edaContext';
 import {
-	BudgetSearchContext,
-	BudgetSearchProvider,
+	JBookContext,
+	JBookProvider,
 } from '../modules/jbook/jbookContext';
 
 const getContext = (cloneName) => {
@@ -23,7 +23,7 @@ const getContext = (cloneName) => {
 		case 'eda':
 			return EDAContext;
 		case 'jbook':
-			return BudgetSearchContext;
+			return JBookContext;
 		default:
 			return DefaultContext;
 	}
@@ -39,7 +39,7 @@ const getProvider = (cloneName) => {
 		case 'eda':
 			return EDAProvider;
 		case 'jbook':
-			return BudgetSearchProvider;
+			return JBookProvider;
 		default:
 			return DefaultProvider;
 	}

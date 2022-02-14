@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { setState } from '../../../utils/sharedFunctions';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 
 const StyledInput = styled.input`
     width: 100%;
@@ -9,14 +9,14 @@ const StyledInput = styled.input`
 
 const InputFilter = (props) => {
 	const {
-		setBudgetSearchSetting,
+		setJBookSetting,
 		field
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 
-	const [searchText, setSearchText] = useState(state.budgetSearchSettings[field]);
+	const [searchText, setSearchText] = useState(state.jbookSearchSettings[field]);
 
 	const useDebounce = (value, delay) => {
 		const [debouncedValue, setDebouncedValue] = useState(value);
@@ -30,18 +30,18 @@ const InputFilter = (props) => {
 
 	useEffect(() => {
 		if (!state.initial) {
-			setBudgetSearchSetting(field, debouncedSearchTerm.trim(), state, dispatch);
+			setJBookSetting(field, debouncedSearchTerm.trim(), state, dispatch);
 			setState(dispatch, { runSearch: true, loading: true });
 		}
-		 // eslint-disable-next-line
+		// eslint-disable-next-line
 	}, [debouncedSearchTerm]);
 
 
 	useEffect(() => {
-		if (state.budgetSearchSettings[field] === '') {
-			setSearchText(state.budgetSearchSettings[field]);
+		if (state.jbookSearchSettings[field] === '') {
+			setSearchText(state.jbookSearchSettings[field]);
 		} // eslint-disable-next-line
-	}, [state.budgetSearchSettings[field]]);
+	}, [state.jbookSearchSettings[field]]);
 
 
 
