@@ -47,6 +47,15 @@ const styles = {
 		WebkitLineClamp: 3,
 		webkitBoxOrient: 'vertical',
 		overflow: 'hidden',
+	},
+	resultsText:{
+		fontSize: 24,
+		fontFamily: 'Montserrat',
+		borderBottom: '2px solid #BCCBDB',
+		display: 'flex',
+		placeContent: 'space-between',
+		marginTop: 20,
+		marginLeft: 20
 	}
 }
 
@@ -532,7 +541,7 @@ const GCDocumentsComparisonTool = (props) => {
 						</Grid>
 					</DocumentInputContainer>
 					{noResults && !loading && 
-                        <div className={'displaying-results-text'}>
+                        <div style={styles.resultsText}>
                         	<div className={'text'}>
                                 No results found
                         	</div>
@@ -673,9 +682,9 @@ const GCDocumentsComparisonTool = (props) => {
 								}).length ? 
 									<></> 
 									: 
-									<div className={'displaying-results-text'}>
+									<div style={{...styles.resultsText, marginLeft: 0}}>
 										<div className={'text'}>
-											No results found
+											No results for paragraph found
 										</div>
 									</div>
 							}
