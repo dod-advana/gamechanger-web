@@ -144,7 +144,6 @@ export function trackEvent(category, action, name, value, customDimensions) {
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
-
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
 
@@ -152,6 +151,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
 		// Nothing
+		console.error('matomo error',error)
 	}
 }
 
