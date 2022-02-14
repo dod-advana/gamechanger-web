@@ -27,18 +27,17 @@ class HandlerFactory {
 				});
 			}
 			meta.forEach((m) => {
-				let dataModule = m.clone_name === 'budgetSearch' ? 'budgetSearch/budgetSearchDataHandler' : 'simple/simpleDataHandler';
 				this.cloneMetaMap[m.clone_name] = {
 					searchModule: m.search_module,
 					exportModule: m.export_module,
 					graphModule: m.graph_module,
-					dataModule: dataModule
+					dataModule: m.data_module
 				};
 				try {
 					this.searchHandlerMap[m.search_module] = require(`../modules/${m.search_module}`);
 					this.exportHandlerMap[m.export_module] = require(`../modules/${m.export_module}`);
 					this.graphHandlerMap[m.graph_module] = require(`../modules/${m.graph_module}`);
-					this.dataHandlerMap[dataModule] = require(`../modules/${dataModule}`);
+					this.dataHandlerMap[m.data_module] = require(`../modules/${m.data_module}`);
 				} catch (err) {
 					console.log(err);
 				}
