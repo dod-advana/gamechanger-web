@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import {gcOrange} from '../../common/gc-colors';
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import { Dialog, Grid } from '@mui/material';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -55,7 +56,7 @@ const tabList = [
  * 
  * @class UserModal
  */
-const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUserModal, userData, getUserData, permissionsInfo}) => {
+const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUserModal, userData, getUserData, permissionsInfo, cloneName}) => {
 
 	const [editUserData, setEditUserData] = useState({});
 	const [tabIndex, setTabIndex] = useState(0);
@@ -193,28 +194,61 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 	const renderPermissions = () => {
 		return (
 			<>
-				{Object.keys(permissionsInfo).map(permissionKey => (
-					<>
-						<Typography variant="h4" style={styles.modalHeaders}>{permissionKey.toUpperCase()}</Typography>
-						<Grid container spacing={2} style={{marginLeft: 8}}>
-							{permissionsInfo[permissionKey].map(permission => (
-								<FormControlLabel
-									key={`${permissionKey}|${permission}`}
-									control={
-										<GCCheckbox
-											checked={editUserData['extra_fields'] && editUserData['extra_fields'][permissionKey] && editUserData['extra_fields'][permissionKey][permission] ? editUserData['extra_fields'][permissionKey][permission] : false }
-											onChange={handlePermissionsCheck}
-											name={`${permissionKey}|${permission}`}
-											color="primary"
-											style={{...styles.checkbox}}
+				{Object.keys(permissionsInfo).map(permissionKey => {
+
+					if (Permissions.permissionValidator(`${cloneName} Admin`, true) && permissionKey === cloneName) {
+						return (
+							<>
+								<Typography variant="h4"
+									style={styles.modalHeaders}>{permissionKey.toUpperCase()}</Typography>
+								<Grid container spacing={2} style={{marginLeft: 8}}>
+									{permissionsInfo[permissionKey].map(permission => (
+										<FormControlLabel
+											key={`${permissionKey}|${permission}`}
+											control={
+												<GCCheckbox
+													checked={editUserData['extra_fields'] && editUserData['extra_fields'][permissionKey] && editUserData['extra_fields'][permissionKey][permission] ? editUserData['extra_fields'][permissionKey][permission] : false}
+													onChange={handlePermissionsCheck}
+													name={`${permissionKey}|${permission}`}
+													color="primary"
+													style={{...styles.checkbox}}
+												/>
+											}
+											label={permission}
 										/>
-									}
-									label={permission}
-								/>
-							))}
-						</Grid>
-					</>
-				))}
+									))}
+								</Grid>
+							</>
+						);
+					} else if (Permissions.permissionValidator(`Gamechanger Super Admin`, true)) {
+						return (
+							<>
+								<Typography variant="h4"
+									style={styles.modalHeaders}>{permissionKey.toUpperCase()}</Typography>
+								<Grid container spacing={2} style={{marginLeft: 8}}>
+									{permissionsInfo[permissionKey].map(permission => (
+										<FormControlLabel
+											key={`${permissionKey}|${permission}`}
+											control={
+												<GCCheckbox
+													checked={editUserData['extra_fields'] && editUserData['extra_fields'][permissionKey] && editUserData['extra_fields'][permissionKey][permission] ? editUserData['extra_fields'][permissionKey][permission] : false}
+													onChange={handlePermissionsCheck}
+													name={`${permissionKey}|${permission}`}
+													color="primary"
+													style={{...styles.checkbox}}
+												/>
+											}
+											label={permission}
+										/>
+									))}
+								</Grid>
+							</>
+						);
+					}
+					else {
+						return null;
+					}
+				})}
 			</>
 		);
 	};

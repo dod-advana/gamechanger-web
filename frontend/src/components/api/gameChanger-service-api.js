@@ -1039,9 +1039,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	getUserData = async () => {
+	getUserData = async (cloneName) => {
 		const url = endpoints.gcUserDataGET;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, {cloneName});
 	}
 
 	storeUserData = async (userData) => {

@@ -35,6 +35,11 @@ const getClonePermissions = async () => {
  * @class UserList
  */
 const UserList = React.memo((props) => {
+
+	const {
+		cloneName
+	} = props;
+
 	// Component Properties
 	const [gcUserTableData, setGCUserTableData] = useState([]);
 	const [showCreateEditUserModal, setShowCreateEditUserModal] = useState(false);
@@ -45,7 +50,7 @@ const UserList = React.memo((props) => {
 	const getUserData = async () => {
 		const tableData = [];
     
-		const data = await gameChangerAPI.getUserData();
+		const data = await gameChangerAPI.getUserData(cloneName);
 
 		_.forEach(data.data.users, result => {
 			tableData.push(result);
@@ -167,7 +172,7 @@ const UserList = React.memo((props) => {
 		<>   
 			<div>
 				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>GAMECHANGER Users</p>
+					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>{`${cloneName ? cloneName.toUpperCase() : 'GAMECHANGER'} Users`}</p>
 				</div>
 				<ReactTable
 					data={gcUserTableData}
@@ -190,6 +195,7 @@ const UserList = React.memo((props) => {
 				userData={{...editUserData}}
 				getUserData={getUserData}
 				permissionsInfo={permissionsInfo}
+				cloneName={cloneName}
 			/>
 		</>
 	)
