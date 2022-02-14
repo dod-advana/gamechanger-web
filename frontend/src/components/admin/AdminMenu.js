@@ -33,7 +33,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 		<div
 			style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
 		>
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -48,7 +48,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && isDecoupled && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -86,7 +86,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage Users" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -134,7 +134,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -148,7 +148,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -162,7 +162,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Responsibility Updates" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -186,7 +186,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -201,7 +201,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && isDecoupled && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -239,7 +239,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage Users" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => setPageToView(PAGES.userList)}
@@ -288,7 +288,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -302,7 +302,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -316,7 +316,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Responsibility Updates" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {

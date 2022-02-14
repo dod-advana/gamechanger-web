@@ -239,7 +239,7 @@ const PolicyNavigationHandler = {
 						<ConstrainedIcon src={AboutUsIcon} />
 					</HoverNavItem>
 				</GCTooltip>
-				{Permissions.isGameChangerAdmin() && (
+				{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
 							href="#/gamechanger-admin"
@@ -415,7 +415,7 @@ const PolicyNavigationHandler = {
 						<span style={{ marginLeft: '10px' }}>About Us</span>
 					</HoverNavItem>
 				</GCTooltip>
-				{Permissions.isGameChangerAdmin() && (
+				{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink href="#/gamechanger-admin">
 							<HoverNavItem toolTheme={toolTheme}>

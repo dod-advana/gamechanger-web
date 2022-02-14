@@ -209,11 +209,11 @@ app.post('/api/auth/token', async function (req, res) {
 		const admin = await Admin.findOne({ where: { username: cn } });
 
 		if (admin) {
-			perms.push('Gamechanger Admin');
+			perms.push('Gamechanger Super Admin');
 		}
 
 		if (user) {
-			if (user.is_super_admin) perms.push('Gamechanger Admin');
+			if (user.is_super_admin) perms.push('Gamechanger Super Admin');
 
 			let isAdminLite = false;
 

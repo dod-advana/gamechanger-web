@@ -858,7 +858,7 @@ export const exactMatch = (phrase, word, split) => {
 
 export const displayBackendError = (resp, dispatch = () => {}) => {
 	if (resp?.data?.error) {
-		const errorMessage = Permissions.isGameChangerAdmin()
+		const errorMessage = Permissions.permissionValidator('Gamechanger Super Admin', true)
 			? `An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}`
 			: `An error has occurred in the application, but we are working to fix it!`;
 		setState(dispatch, {
