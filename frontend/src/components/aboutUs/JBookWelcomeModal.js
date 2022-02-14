@@ -13,7 +13,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import MainLogo from '../../images/logos/JBooks Logo_wht.svg';
 import JAICLogo from '../../images/logos/JAIC_wht.png';
 import CONFIG from '../../config/config';
-import { setState } from "../../utils/sharedFunctions";
+import { setState } from '../../utils/sharedFunctions';
 
 const CloseButton = styled.div`
 	padding: 6px;
@@ -96,7 +96,7 @@ const JBookWelcome = (props) => {
 		} else {
 			setState(dispatch, { welcomeModalClosed: true });
 		}
-
+		// eslint-disable-next-line
 	}, [])
 
 	const handleClose = () => {

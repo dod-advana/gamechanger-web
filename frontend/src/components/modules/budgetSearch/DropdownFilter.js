@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import FilterIcon from './FilterIcon.png';
 import { FormControlLabel, Checkbox, TextField } from '@material-ui/core';
@@ -99,6 +99,7 @@ const DropdownFilter = (props) => {
 			setTextBoxActive(false);
 			setFilteredSearch('');
 		}
+		// eslint-disable-next-line
 	}, [enterPressed]);
 
 	useEffect(() => {
@@ -179,6 +180,7 @@ const DropdownFilter = (props) => {
 					name={option}
 					value={option}
 					style={{ margin: '0 20px 0 0' }}
+					key={option}
 					control={<Checkbox
 						style={{
 							backgroundColor: '#ffffff',
@@ -211,6 +213,7 @@ const DropdownFilter = (props) => {
 					name={option}
 					value={option}
 					style={{ margin: '0 20px 0 0' }}
+					key={option}
 					control={<Checkbox
 						style={{
 							backgroundColor: '#ffffff',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledFooterDiv, StyledTableContainer } from './profilePage/profilePageStyles';
+import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledFooterDiv } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist'
@@ -204,34 +204,38 @@ const TransitionPartnersKey = React.memo(() => {
 	const classes = useStyles();
 
 	return (
-		<StyledTableKeyContainer><strong>Transition Partners<Tooltip
-			classes={{ tooltip: classes.customWidth }}
-			placement="right"
-			arrow
-			title={
-				<div style={{ width: '1000px', paddingLeft: '15px' }}>
-					Transition Is Defined As:
-					<ul>
-						<li>
-							The process of applying critical technology in military systems to provide an effective weapons or support system—in the quantity and quality needed by the operators to carry out assigned missions and at the “best value” as measured by the technology sponsor and customer.
-						</li>
-						<hr />
-						<li>
-							The process by which technology deemed to be of significant use to the operational military community is transitioned from the science and technology environment to a military operational field unit for evaluation and then:
-							<ul>
-								<li>
-									Incorporated into an existing acquisition program or
-								</li>
-								<li>
-									Identified as the subject matter for a new acquisition program.
-								</li>
-							</ul>
-						</li>
-					</ul>
-					The transition partner is defined as the DoD Entity responsible for executing the transition processes described above
-				</div>
-			}
-		><InfoOutlinedIcon style={{ margin: '-2px 5px' }} /></Tooltip></strong>
+		<StyledTableKeyContainer>
+			<strong> Transition Partners <Tooltip
+				classes={{ tooltip: classes.customWidth }}
+				placement="right"
+				arrow
+				title={
+					<div style={{ width: '1000px', paddingLeft: '15px' }}>
+						Transition Is Defined As:
+						<ul>
+							<li>
+								The process of applying critical technology in military systems to provide an effective weapons or support system—in the quantity and quality needed by the operators to carry out assigned missions and at the “best value” as measured by the technology sponsor and customer.
+							</li>
+							<hr />
+							<li>
+								The process by which technology deemed to be of significant use to the operational military community is transitioned from the science and technology environment to a military operational field unit for evaluation and then:
+								<ul>
+									<li>
+										Incorporated into an existing acquisition program or
+									</li>
+									<li>
+										Identified as the subject matter for a new acquisition program.
+									</li>
+								</ul>
+							</li>
+						</ul>
+						The transition partner is defined as the DoD Entity responsible for executing the transition processes described above
+					</div>
+				}
+			>
+				<InfoOutlinedIcon style={{ margin: '-2px 5px' }} />
+			</Tooltip>
+			</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>Select whether you agree or disagree with the JAIC’s determination of the transition partner from the Transition Partner dropdown. If you disagree with the JAIC’s selection of transition partner, simply select No from the Agree/Disagree dropdown and enter your assessment of the correct transition partner based on the definitions above in the “If not, add them here” dropdown.</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -345,7 +349,7 @@ const MissionPartnersValue = React.memo((props) => {
 				freeSolo
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						<StyledChip variant={'filled'} label={option} {...getTagProps({ index })} />
+						<StyledChip variant={'default'} label={option} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (

@@ -206,7 +206,6 @@ const App = () => {
 	const getGamechangerClones = async (tutorialData) => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
-			console.log(data);
 			const cloneRoutes = [];
 			_.forEach(data.data, (clone, idx) => {
 				if (clone.is_live) {
@@ -244,7 +243,7 @@ const App = () => {
 									}}
 								/>
 							);
-						} else {
+						} else { // if clone name is jbook, then push budgetSearchProfile route + cloneData
 							cloneRoutes.push(
 								<PrivateTrackedRoute
 									key={idx}
@@ -394,6 +393,7 @@ const App = () => {
 													/>
 												)}
 												<Switch>
+													{getBudgetSearchProfileRoute()}
 													{tokenLoaded &&
 														gameChangerCloneRoutes.map((route) => {
 															return route;
@@ -414,7 +414,6 @@ const App = () => {
 														component={GameChangerDetailsPage}
 														location={location}
 													/>
-													{getBudgetSearchProfileRoute()}
 													<PrivateTrackedRoute
 														path="/gamechanger-admin"
 														pageName={'GamechangerAdminPage'}
