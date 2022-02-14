@@ -50,7 +50,7 @@ const BudgetSearchSearchHandler = {
 
 			// regular search with no limit
 			const resp = await jbookAPI.modularSearch({
-				cloneName: 'budgetSearch',
+				cloneName: 'jbook',
 				searchText,
 				offset,
 				options: {
@@ -81,7 +81,7 @@ const BudgetSearchSearchHandler = {
 
 			// regular search
 			const resp = await jbookAPI.modularSearch({
-				cloneName: 'budgetSearch',
+				cloneName: 'jbook',
 				searchText,
 				offset,
 				options: {

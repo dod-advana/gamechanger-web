@@ -3,9 +3,9 @@ import SearchBar from '../components/searchBar/SearchBar';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import BudgetSearchJAICReviewForm from '../components/modules/budgetSearch/budgetSearchJAICReviewForm';
-import BudgetSearchServiceReviewForm from '../components/modules/budgetSearch/budgetSearchServiceReviewForm';
-import BudgetSearchPOCReviewForm from '../components/modules/budgetSearch/budgetSearchPOCReviewForm';
+import BudgetSearchJAICReviewForm from '../components/modules/jbook/budgetSearchJAICReviewForm';
+import BudgetSearchServiceReviewForm from '../components/modules/jbook/budgetSearchServiceReviewForm';
+import BudgetSearchPOCReviewForm from '../components/modules/jbook/budgetSearchPOCReviewForm';
 import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
@@ -16,17 +16,17 @@ import './budgetsearch.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
-import { BudgetSearchContext } from '../components/modules/budgetSearch/budgetSearchContext';
+import { BudgetSearchContext } from '../components/modules/jbook/budgetSearchContext';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
-import jca_data from '../components/modules/budgetSearch/JCA.json';
+import jca_data from '../components/modules/jbook/JCA.json';
 import {
 	Accomplishments, aggregateProjectDescriptions, Contracts, formatNum,
 	BasicData, Metadata, ProjectDescription, SideNav
-} from '../components/modules/budgetSearch/profilePage/budgetSearchProfilePageHelper';
+} from '../components/modules/jbook/profilePage/budgetSearchProfilePageHelper';
 import {
 	CloseButton, StyledContainer, StyledReviewContainer, StyledReviewLeftContainer,
 	StyledReviewRightContainer, StyledAccordionContainer, StyledAccordionHeader
-} from '../components/modules/budgetSearch/profilePage/profilePageStyles';
+} from '../components/modules/jbook/profilePage/profilePageStyles';
 const _ = require('lodash');
 
 const jbookAPI = new JBookAPI();

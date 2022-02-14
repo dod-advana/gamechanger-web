@@ -253,7 +253,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 						if (validateForm()) {
 							const res = await jbookAPI.callDataFunction({
 								functionName: 'submitFeedbackForm',
-								cloneName: 'budgetSearch',
+								cloneName: 'jbook',
 								options: {
 									feedbackForm
 								}

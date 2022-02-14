@@ -31,9 +31,10 @@ const InputFilter = (props) => {
 	useEffect(() => {
 		if (!state.initial) {
 			setBudgetSearchSetting(field, debouncedSearchTerm.trim(), state, dispatch);
-			setState(dispatch, { runSearch: true, loading: true }); // eslint-disable-next-line
+			setState(dispatch, { runSearch: true, loading: true });
 		}
-	}, [debouncedSearchTerm, dispatch, field, setBudgetSearchSetting, state]);
+		 // eslint-disable-next-line
+	}, [debouncedSearchTerm]);
 
 
 	useEffect(() => {

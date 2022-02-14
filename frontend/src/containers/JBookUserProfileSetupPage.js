@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import './jbook.css';
 import {setState} from '../sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
-import {BudgetSearchContext} from '../components/modules/budgetSearch/budgetSearchContext';
+import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
 import {getQueryVariable} from '../gamechangerUtils';
 import JBookAPI from '../components/api/jbook-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';

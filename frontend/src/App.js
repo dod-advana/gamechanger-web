@@ -206,8 +206,8 @@ const App = () => {
 									}}
 								/>
 							);
-						} else { // if clone name is jbook, then push budgetSearchProfile route + cloneData
-							if (clone.clone_name === 'budgetSearch') {
+						} else { // if clone name is jbook, then push jbook route + cloneData
+							if (clone.clone_name === 'jbook') {
 								cloneRoutes.push(
 									getBudgetSearchProfileRoute(clone)
 								)
@@ -241,6 +241,7 @@ const App = () => {
 					}
 				}
 			});
+			console.log(cloneRoutes);
 			setGameChangerCloneRoutes(cloneRoutes);
 		} catch (err) {
 			console.log(err);
@@ -249,11 +250,11 @@ const App = () => {
 	};
 
 	const getBudgetSearchProfileRoute = (cloneData) => {
-		const BudgetSearchProvider = getProvider('budgetSearch');
+		const BudgetSearchProvider = getProvider('jbook');
 
 		return (
 			<PrivateTrackedRoute
-				path={`/budgetsearch/profile`}
+				path={`/jbook/profile`}
 				render={(props) => (
 					<BudgetSearchProvider>
 						<BudgetSearchProfilePage {...props} cloneData={cloneData} />

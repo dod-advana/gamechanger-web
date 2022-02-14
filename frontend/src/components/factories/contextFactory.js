@@ -11,7 +11,7 @@ import { EDAContext, EDAProvider } from '../modules/eda/edaContext';
 import {
 	BudgetSearchContext,
 	BudgetSearchProvider,
-} from '../modules/budgetSearch/budgetSearchContext';
+} from '../modules/jbook/budgetSearchContext';
 
 const getContext = (cloneName) => {
 	switch (cloneName) {
@@ -22,7 +22,7 @@ const getContext = (cloneName) => {
 			return GlobalSearchContext;
 		case 'eda':
 			return EDAContext;
-		case 'budgetSearch':
+		case 'jbook':
 			return BudgetSearchContext;
 		default:
 			return DefaultContext;
@@ -38,7 +38,7 @@ const getProvider = (cloneName) => {
 			return GlobalSearchProvider;
 		case 'eda':
 			return EDAProvider;
-		case 'budgetSearch':
+		case 'jbook':
 			return BudgetSearchProvider;
 		default:
 			return DefaultProvider;

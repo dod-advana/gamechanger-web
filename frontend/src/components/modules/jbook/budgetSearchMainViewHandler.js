@@ -339,7 +339,7 @@ const handleTabClicked = (dispatch, state, tab) => {
 		setState(dispatch, { queryParams: params });
 	}
 
-	window.history.replaceState(undefined, undefined, `#/budgetsearch/${tabs[tab]}${isSummary ? '' : params}`);
+	window.history.replaceState(undefined, undefined, `#/jbook/${tabs[tab]}${isSummary ? '' : params}`);
 }
 
 export const scrollListViewTop = () => {
@@ -389,7 +389,7 @@ const populateDropDowns = async (state, dispatch) => {
 	try {
 		dropdownData = await jbookAPI.callDataFunction({
 			functionName: 'getBudgetDropdownData',
-			cloneName: 'budgetSearch',
+			cloneName: 'jbook',
 			options: {}
 		});
 
@@ -463,7 +463,7 @@ const BudgetSearchMainViewHandler = {
 
 
 		let mainTabSelected = 0;
-		if (window.location.hash.indexOf('#/budgetsearch/checklist') !== -1) {
+		if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
 			mainTabSelected = 1;
 		}
 
@@ -826,7 +826,7 @@ const BudgetSearchMainViewHandler = {
 							<Pagination
 								activePage={resultsPage}
 								itemsCountPerPage={18}
-								totalItemsCount={mainPageData.totalCount.toInt()}
+								totalItemsCount={mainPageData.totalCount}
 								pageRangeDisplayed={8}
 								onChange={page => {
 									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
@@ -912,7 +912,7 @@ const BudgetSearchMainViewHandler = {
 										} = row;
 										// I do not understand why row changes programElement into BLI
 										const programElement = rowInfo.original.programElement;
-										let url = `#/budgetsearch/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(budgetType)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
+										let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(budgetType)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
 										if (keywords && keywords.length) {
 											url += `&keywords=${keywords}`;
 										}
