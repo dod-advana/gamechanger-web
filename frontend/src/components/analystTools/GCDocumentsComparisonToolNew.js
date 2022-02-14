@@ -667,6 +667,18 @@ const GCDocumentsComparisonTool = (props) => {
 							</div>
 						</div>
 						<div style={{ marginTop: 20 }}>
+							{
+								viewableDocs.filter(doc => {
+									return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
+								}).length ? 
+									<></> 
+									: 
+									<div className={'displaying-results-text'}>
+										<div className={'text'}>
+											No results found
+										</div>
+									</div>
+							}
 							{viewableDocs.filter(doc => {
 								return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
 							}).map((doc) => {
