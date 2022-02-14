@@ -112,7 +112,6 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		const cn = req.get('x-env-ssl_client_certificate');
 		if (!cn) {
 			if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
-				req.permissions = ['Gamechanger Admin'];
 				next();
 			}
 			else{
