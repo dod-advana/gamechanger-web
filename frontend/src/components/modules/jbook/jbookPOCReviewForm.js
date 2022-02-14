@@ -3,7 +3,7 @@ import { CircularProgress } from '@material-ui/core';
 import SimpleTable from '../../common/SimpleTable';
 import GCPrimaryButton from '../../common/GCButton';
 import { StyledTableContainer, StyledFooterDiv } from './profilePage/profilePageStyles';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 import './jbook.css';
 import { setState } from '../../../utils/sharedFunctions';
 import { boldKeys, firstColWidth } from './profilePage/jbookProfilePageHelper';
@@ -31,7 +31,7 @@ import {
 
 const errorColor = '#F44336';
 
-const BudgetSearchPOCReviewForm = React.memo((props) => {
+const JBookPOCReviewForm = React.memo((props) => {
 
 	const {
 		submitReviewForm,
@@ -44,7 +44,7 @@ const BudgetSearchPOCReviewForm = React.memo((props) => {
 		totalBudget
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, primaryReviewLoading, reviewData, domainTasks } = state;
 
@@ -172,4 +172,4 @@ const BudgetSearchPOCReviewForm = React.memo((props) => {
 });
 
 
-export default BudgetSearchPOCReviewForm;
+export default JBookPOCReviewForm;

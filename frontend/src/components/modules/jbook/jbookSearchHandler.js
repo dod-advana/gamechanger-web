@@ -26,16 +26,16 @@ const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	// })
 }
 
-const BudgetSearchSearchHandler = {
+const JBookSearchHandler = {
 
 	updateRecentSearches(searchText) {
-		const recentSearches = localStorage.getItem(`recentbudgetSearchSearches`) || '[]';
+		const recentSearches = localStorage.getItem(`recentjbookSearches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
 			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
-			localStorage.setItem(`recentbudgetSearchSearches`, JSON.stringify(recentSearchesParsed));
+			localStorage.setItem(`recentjbookSearches`, JSON.stringify(recentSearchesParsed));
 		}
 	},
 
@@ -55,7 +55,7 @@ const BudgetSearchSearchHandler = {
 				offset,
 				options: {
 					searchVersion: 1,
-					budgetSearchSettings: cleanSearchSettings,
+					jbookSearchSettings: cleanSearchSettings,
 					exportSearch: true
 				}
 			});
@@ -86,7 +86,7 @@ const BudgetSearchSearchHandler = {
 				offset,
 				options: {
 					searchVersion: 1,
-					budgetSearchSettings: cleanSearchSettings
+					jbookSearchSettings: cleanSearchSettings
 				}
 			});
 
@@ -166,7 +166,7 @@ const BudgetSearchSearchHandler = {
 			if (resultsPage < 2) {
 				trackSearch(
 					searchText,
-					`${getTrackingNameForFactory('budgetSearch')}`,
+					`${getTrackingNameForFactory('jbook')}`,
 					results.totalCount,
 					false
 				);
@@ -238,7 +238,7 @@ const BudgetSearchSearchHandler = {
 	},
 
 	processSearchSettings(state, dispatch) {
-		const searchSettings = _.cloneDeep(state.budgetSearchSettings);
+		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
 
 		for (const optionType in state.defaultOptions) {
 			// if (optionType === 'reviewStatus') continue;
@@ -258,4 +258,4 @@ const BudgetSearchSearchHandler = {
 	}
 }
 
-export default BudgetSearchSearchHandler;
+export default JBookSearchHandler;

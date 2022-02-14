@@ -18,7 +18,7 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
-import { BudgetSearchContext } from './jbookContext';
+import { JBookContext } from './jbookContext';
 import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledAccordionDiv } from './profilePage/profilePageStyles';
 import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist'
 import GCPrimaryButton from '../../common/GCButton';
@@ -392,7 +392,7 @@ const AltAIPOCKey = React.memo(() => {
 const AltAIPOCValue = React.memo((props) => {
 	const { setReviewData } = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review'
@@ -575,7 +575,7 @@ const LabelingValidationValue = React.memo((props) => {
 
 	const classes = useStyles();
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review'
@@ -671,7 +671,7 @@ const TransitionPartnerKey = React.memo(() => {
 const TransitionPartnerValue = React.memo((props) => {
 	const { setReviewData, dropdownData } = props;
 	const classes = useStyles();
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review'
@@ -722,7 +722,7 @@ const MissionPartnersKey = React.memo(() => {
 const MissionPartnersValue = React.memo((props) => {
 	const { setReviewData, vendorData } = props;
 	const classes = useStyles();
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
@@ -828,7 +828,7 @@ const JCAKey = React.memo(() => {
 
 const JCAValue = React.memo((props) => {
 	const { setReviewData } = props;
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
@@ -889,7 +889,7 @@ const AIDomainKey = React.memo(() => {
 
 const AIDomainValue = React.memo((props) => {
 	const { setReviewData, domainTasks } = props;
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
@@ -1029,7 +1029,7 @@ const DataTypeKey = React.memo(() => {
 
 const DataTypeValue = React.memo((props) => {
 	const { setReviewData } = props;
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
@@ -1140,7 +1140,7 @@ const SliderKey = React.memo(() => {
 const SliderValue = React.memo((props) => {
 
 	const { setReviewData, totalBudget } = props;
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';

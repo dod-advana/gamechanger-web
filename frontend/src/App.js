@@ -47,7 +47,7 @@ import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoun
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
-import BudgetSearchProfilePage from './containers/BudgetSearchProfilePage';
+import JBookProfilePage from './containers/JBookProfilePage';
 import GCFooter from './components/navigation/GCFooter';
 require('typeface-noto-sans');
 require('typeface-montserrat');
@@ -209,7 +209,7 @@ const App = () => {
 						} else { // if clone name is jbook, then push jbook route + cloneData
 							if (clone.clone_name === 'jbook') {
 								cloneRoutes.push(
-									getBudgetSearchProfileRoute(clone)
+									getJBookProfileRoute(clone)
 								)
 							}
 							cloneRoutes.push(
@@ -249,18 +249,18 @@ const App = () => {
 		}
 	};
 
-	const getBudgetSearchProfileRoute = (cloneData) => {
-		const BudgetSearchProvider = getProvider('jbook');
+	const getJBookProfileRoute = (cloneData) => {
+		const JBookProvider = getProvider('jbook');
 
 		return (
 			<PrivateTrackedRoute
 				path={`/jbook/profile`}
 				render={(props) => (
-					<BudgetSearchProvider>
-						<BudgetSearchProfilePage {...props} cloneData={cloneData} />
-					</BudgetSearchProvider>
+					<JBookProvider>
+						<JBookProfilePage {...props} cloneData={cloneData} />
+					</JBookProvider>
 				)}
-				pageName={'BudgetSearchProfilePage'}
+				pageName={'JBookProfilePage'}
 				allowFunction={() => {
 					return true;
 				}}

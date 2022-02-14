@@ -28,7 +28,7 @@ const initState = {
 	queryParams: '',
 	urlSearch: false,
 	initial: true,
-	budgetSearchSettings: {
+	jbookSearchSettings: {
 		clearText: true,
 		budgetType: ['RDT&E', 'Procurement', 'O&M'],
 		reviewStatus: ['Needs Review', 'Partial Review (Primary)', 'Partial Review (Service)', 'Partial Review (POC)', 'Finished Review'],
@@ -182,13 +182,13 @@ const initState = {
 	dataSources: [],
 	cloneData: {
 		clone_name: 'jbook',
-		search_module: 'jbook/budgetSearchSearchHandler',
+		search_module: 'jbook/jbookSearchHandler',
 		export_module: 'simple/simpleExportHandler',
-		title_bar_module: 'jbook/budgetSearchTitleBarHandler',
+		title_bar_module: 'jbook/jbookTitleBarHandler',
 		navigation_module: 'default/defaultNavigationHandler',
-		card_module: 'jbook/budgetSearchCardHandler',
-		main_view_module: 'jbook/budgetSearchMainViewHandler',
-		search_bar_module: 'jbook/budgetSearchSearchBarHandler',
+		card_module: 'jbook/jbookCardHandler',
+		main_view_module: 'jbook/jbookMainViewHandler',
+		search_bar_module: 'jbook/jbookSearchBarHandler',
 		display_name: 'AI Inventory Portfolio Tool',
 		is_live: true,
 		url: 'jbook',
@@ -264,16 +264,16 @@ function reducer(state, action) {
 	}
 }
 
-const BudgetSearchContext = React.createContext(initState);
+const JBookContext = React.createContext(initState);
 
-const BudgetSearchProvider = React.memo((props) => {
+const JBookProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
 	return (
-		<BudgetSearchContext.Provider value={{ state, dispatch }}>
+		<JBookContext.Provider value={{ state, dispatch }}>
 			{props.children}
-		</BudgetSearchContext.Provider>
+		</JBookContext.Provider>
 	);
 });
 
-export { BudgetSearchContext, BudgetSearchProvider };
+export { JBookContext, JBookProvider };

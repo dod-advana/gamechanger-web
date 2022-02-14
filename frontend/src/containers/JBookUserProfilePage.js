@@ -1,14 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Notifications from '../components/notifications/Notifications';
 import SearchBar from '../components/searchBar/SearchBar';
-import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
+import { JBookContext } from '../components/modules/jbook/JBookContext';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
-import {setState} from '../sharedFunctions';
+import { setState } from '../sharedFunctions';
 import UserProfile from '../components/user/UserProfile';
 import JBookAPI from '../components/api/jbook-service-api';
 import GCAccordion from '../components/common/GCAccordion';
-import {Typography} from '@mui/material';
+import { Typography } from '@mui/material';
 import ReactTable from "react-table";
 import DropdownFilter from "../components/modules/jbook/DropdownFilter";
 import InputFilter from "../components/modules/jbook/InputFilter";
@@ -305,21 +305,21 @@ const columns = [
 ];
 
 const JBookUserProfilePage = (props) => {
-	
+
 	const {
 		cloneData
 	} = props;
-	
-	const context = useContext(BudgetSearchContext);
-	const {state, dispatch} = context;
+
+	const context = useContext(JBookContext);
+	const { state, dispatch } = context;
 
 	const [toDoList, setToDoList] = useState([]);
 	const [completedList, setCompletedList] = useState([]);
-	const [permissions, setPermissions] = useState({primary: false, service: false, poc: false});
+	const [permissions, setPermissions] = useState({ primary: false, service: false, poc: false });
 	const [email, setEmail] = useState(undefined);
 
 	useEffect(() => {
-		const tmpPermissions = {primary: false, service: false, poc: false};
+		const tmpPermissions = { primary: false, service: false, poc: false };
 
 		jbookAPI.getUserProfileData().then(data => {
 			tmpPermissions['primary'] = data.data.is_primary_reviewer;
@@ -336,20 +336,20 @@ const JBookUserProfilePage = (props) => {
 			jbookAPI.callDataFunction({
 				functionName: 'getUserSpecificReviews',
 				cloneName: 'jbook',
-				options: {permissions, email}
+				options: { permissions, email }
 			}).then(data => {
 				const docs = data.data.docs;
 				const toDo = docs.filter(doc => {
 					let returnBool = false;
-					if (permissions.primary){
+					if (permissions.primary) {
 						returnBool = doc.primaryReviewStatus !== 'Finished Review';
 					}
 
-					if (permissions.service){
+					if (permissions.service) {
 						returnBool = doc.serviceReviewStatus !== 'Finished Review';
 					}
 
-					if (permissions.poc){
+					if (permissions.poc) {
 						returnBool = doc.pocReviewStatus !== 'Finished Review';
 					}
 
@@ -358,15 +358,15 @@ const JBookUserProfilePage = (props) => {
 
 				const finished = docs.filter(doc => {
 					let returnBool = false;
-					if (permissions.primary){
+					if (permissions.primary) {
 						returnBool = doc.primaryReviewStatus === 'Finished Review';
 					}
 
-					if (permissions.service){
+					if (permissions.service) {
 						returnBool = doc.serviceReviewStatus === 'Finished Review';
 					}
 
-					if (permissions.poc){
+					if (permissions.poc) {
 						returnBool = doc.pocReviewStatus === 'Finished Review';
 					}
 
@@ -381,7 +381,7 @@ const JBookUserProfilePage = (props) => {
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
-			setState(dispatch, {cloneData: cloneData, cloneDataSet: true});
+			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
 		}
 	}, [cloneData, state, dispatch]);
 
@@ -391,7 +391,7 @@ const JBookUserProfilePage = (props) => {
 				<ReactTable
 					data={toDoList}
 					columns={columns}
-					style={{width: '100%', height: 500}}
+					style={{ width: '100%', height: 500 }}
 					filterable={true}
 					defaultPageSize={5}
 					defaultFilterMethod={(filter, row) =>
@@ -454,7 +454,7 @@ const JBookUserProfilePage = (props) => {
 				<ReactTable
 					data={completedList}
 					columns={columns}
-					style={{width: '100%', height: 500}}
+					style={{ width: '100%', height: 500 }}
 					filterable={true}
 					defaultPageSize={5}
 					defaultFilterMethod={(filter, row) =>
@@ -518,20 +518,20 @@ const JBookUserProfilePage = (props) => {
 					expanded={toDoList.length > 0}
 					header={`MY TO DO LIST`}
 					itemCount={toDoList.length}
-				 >
+				>
 					{renderToDoList()}
 				</GCAccordion>
 				<GCAccordion
 					expanded={completedList.length > 0}
 					header={`FINISHED ITEMS`}
 					itemCount={completedList.length}
-				 >
+				>
 					{renderCompletedList()}
 				</GCAccordion>
 			</div>
 		);
 	}
-    
+
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
 			{/* Side Navigation */}
@@ -550,15 +550,15 @@ const JBookUserProfilePage = (props) => {
 			<UserProfile
 				getUserData={jbookAPI.getUserProfileData}
 				updateUserData={jbookAPI.updateUserProfileData}
-				getAppRelatedUserData={() => {}}
-				updateAppRelatedUserData={() => {}}
+				getAppRelatedUserData={() => { }}
+				updateAppRelatedUserData={() => { }}
 				displayCustomAppContent={displayUserRelatedItems}
-				style={{margin: '20px 40px'}}
+				style={{ margin: '20px 40px' }}
 				primaryColor={'#1C2D65'}
 				secondaryColor={'#8091A5'}
 			/>
 
-		</div>  
+		</div>
 	);
 }
 

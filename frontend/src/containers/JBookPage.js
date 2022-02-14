@@ -1,15 +1,15 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './jbook.css';
 import MainView from '../components/mainView/MainView';
-import {setState} from '../sharedFunctions';
+import { setState } from '../sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
 import Notifications from '../components/notifications/Notifications';
 import GCErrorSnackbar from '../components/common/GCErrorSnackbar';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
-import {Snackbar} from '@material-ui/core';
-import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
+import { Snackbar } from '@material-ui/core';
+import { JBookContext } from '../components/modules/jbook/JBookContext';
 import 'react-table/react-table.css';
 import EditUserProfile from '../components/user/EditUserProfile';
 import JBookAPI from '../components/api/jbook-service-api';
@@ -43,41 +43,41 @@ const getConsentIsOpen = () => {
 };
 
 const JBookPage = (props) => {
-	
+
 	const {
 		cloneData,
 		history,
 		jupiter
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
-	const {state, dispatch} = context;
+	const context = useContext(JBookContext);
+	const { state, dispatch } = context;
 
 	const [showEditUserModal, setShowEditUserModal] = useState(false);
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
-			setState(dispatch, {cloneData: cloneData, cloneDataSet: true});
+			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
 		}
-		
+
 		if (!state.historySet) {
-			setState(dispatch, {history: history, historySet: true});
+			setState(dispatch, { history: history, historySet: true });
 		}
 
 		if (getConsentIsOpen()) {
 			const timer = setInterval(() => {
 				if (!getConsentIsOpen()) {
-					setState(dispatch, {welcomeModalClosed: true, consentModalClosed: true});
+					setState(dispatch, { welcomeModalClosed: true, consentModalClosed: true });
 					clearInterval(timer);
 				}
 			}, 2000)
 		} else if (!getConsentIsOpen() !== state.consentModalClosed) {
-			setState(dispatch, {consentModalClosed: true});
+			setState(dispatch, { consentModalClosed: true });
 		}
 
 		if (!state.userDataSet) {
 			jbookAPI.getUserProfileData().then(data => {
-				setState(dispatch, {userData: data.data, userDataSet: true});
+				setState(dispatch, { userData: data.data, userDataSet: true });
 			})
 		}
 
@@ -90,40 +90,40 @@ const JBookPage = (props) => {
 	}, [cloneData, state, dispatch, history]);
 
 	const saveUserData = async (data) => {
-		await jbookAPI.updateUserProfileData({userData: data});
+		await jbookAPI.updateUserProfileData({ userData: data });
 		setShowEditUserModal(false);
 	}
-	
+
 	return (
 		<div className="main-container">
 			{state.cloneDataSet &&
 				<>
 					{/* Side Navigation */}
 					<SideNavigation context={context} />
-					
+
 					{/* Alerts */}
 					<Alerts context={context} />
-					
+
 					{/* Notifications */}
 					<Notifications context={context} />
-					
+
 					{/* Tutorial Overlay */}
-					{ cloneData.show_tutorial && <Tutorial context={context} /> }
-					
+					{cloneData.show_tutorial && <Tutorial context={context} />}
+
 					{/* Search Banner */}
-					{ state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} /> }
-					
+					{state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} />}
+
 					{/* Main View */}
 					{state.historySet && <MainView context={context} />}
-					
+
 					{/* Snack BAr Messages */}
 					<div>
 						<Snackbar
-							style={{marginTop: 20}}
+							style={{ marginTop: 20 }}
 							anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
 							open={state.showSnackbar}
 							autoHideDuration={3000}
-							onClose={() => setState(dispatch, {showSnackbar: false})}
+							onClose={() => setState(dispatch, { showSnackbar: false })}
 							message={state.snackBarMsg}
 						/>
 					</div>
@@ -131,7 +131,7 @@ const JBookPage = (props) => {
 					<GCErrorSnackbar
 						open={state.showBackendError}
 						message={state.backendErrorMsg}
-						onClose={() => setState(dispatch, {showBackendError: false})}
+						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
 				</>
 			}
@@ -147,7 +147,7 @@ const JBookPage = (props) => {
 			/>
 		</div>
 	);
-	
+
 };
 
 export default JBookPage;

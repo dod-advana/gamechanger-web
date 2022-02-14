@@ -3,9 +3,9 @@ import SearchBar from '../components/searchBar/SearchBar';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import BudgetSearchJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
-import BudgetSearchServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
-import BudgetSearchPOCReviewForm from '../components/modules/jbook/jbookPOCReviewForm';
+import JBookJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
+import JBookServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
+import JBookPOCReviewForm from '../components/modules/jbook/jbookPOCReviewForm';
 import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
@@ -16,7 +16,7 @@ import './jbook.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
-import { BudgetSearchContext } from '../components/modules/jbook/jbookContext';
+import { JBookContext } from '../components/modules/jbook/jbookContext';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import jca_data from '../components/modules/jbook/JCA.json';
 import {
@@ -31,12 +31,12 @@ const _ = require('lodash');
 
 const jbookAPI = new JBookAPI();
 
-const BudgetSearchProfilePage = (props) => {
+const JBookProfilePage = (props) => {
 	const {
 		cloneData,
 	} = props;
 
-	const context = useContext(BudgetSearchContext);
+	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
 
@@ -794,7 +794,7 @@ const BudgetSearchProfilePage = (props) => {
 								<FiberManualRecordIcon style={{ color: reviewData.primaryReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
 							</StyledAccordionHeader>
 						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-							<BudgetSearchJAICReviewForm
+							<JBookJAICReviewForm
 								renderReenableModal={renderReenableModal}
 								reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
 								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK Primary Reviewer') && Auth.getTokenPayload().email === reviewData.primaryReviewerEmail)}
@@ -814,7 +814,7 @@ const BudgetSearchProfilePage = (props) => {
 								<FiberManualRecordIcon style={{ color: reviewData.serviceReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
 							</StyledAccordionHeader>
 						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-							<BudgetSearchServiceReviewForm
+							<JBookServiceReviewForm
 								renderReenableModal={renderReenableModal}
 								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK Service Reviewer') &&
 									(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
@@ -836,7 +836,7 @@ const BudgetSearchProfilePage = (props) => {
 								<FiberManualRecordIcon style={{ color: reviewData.pocReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
 							</StyledAccordionHeader>
 						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
-							<BudgetSearchPOCReviewForm
+							<JBookPOCReviewForm
 								renderReenableModal={renderReenableModal}
 								finished={reviewData.pocReviewStatus === 'Finished Review'}
 								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK POC Reviewer') && (Auth.getTokenPayload().email === reviewData.servicePOCEmail || Auth.getTokenPayload().email === reviewData.alternate_poc_email))}
@@ -858,4 +858,4 @@ const BudgetSearchProfilePage = (props) => {
 	)
 }
 
-export default BudgetSearchProfilePage;
+export default JBookProfilePage;

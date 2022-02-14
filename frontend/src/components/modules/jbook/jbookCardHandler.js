@@ -331,7 +331,7 @@ const StyledFrontCardContent = styled.div`
 // 	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 // };
 
-const BudgetSearchCardHandler = {
+const jbookCardHandler = {
 	document: {
 		getCardHeader: (props) => {
 			const {
@@ -832,4 +832,4 @@ const BudgetSearchCardHandler = {
 	}
 }
 
-export default BudgetSearchCardHandler;
+export default jbookCardHandler;

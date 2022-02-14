@@ -224,8 +224,8 @@ const StyledSummaryFAQContainer = styled.div`
 	}
 `;
 
-const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = false) => {
-	let budgetSearchSettings = _.cloneDeep(state.budgetSearchSettings);
+const setJBookSetting = (field, value, state, dispatch, filteredList = false) => {
+	let jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	let dataSources = _.cloneDeep(state.dataSources);
 	let runSearch = false;
 	let resultsPage = state.resultsPage;
@@ -233,7 +233,7 @@ const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = fa
 
 	switch (field) {
 		case 'sort':
-			budgetSearchSettings.sort = value;
+			jbookSearchSettings.sort = value;
 			runSearch = true;
 			resultsPage = 1;
 			break;
@@ -247,11 +247,11 @@ const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = fa
 			}
 			break;
 		case 'clearText':
-			budgetSearchSettings[field] = value;
+			jbookSearchSettings[field] = value;
 			break;
 		case 'clearDataSources':
 			dataSources = [];
-			budgetSearchSettings = _.cloneDeep(state.defaultOptions);
+			jbookSearchSettings = _.cloneDeep(state.defaultOptions);
 			runSearch = true;
 			resultsPage = 1;
 			searchText = '';
@@ -259,23 +259,23 @@ const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = fa
 		case 'serviceAgency':
 		case 'reviewStatus':
 			if (value === 'all') {
-				budgetSearchSettings[field] = state.defaultOptions[field];
+				jbookSearchSettings[field] = state.defaultOptions[field];
 			}
 			else if (value === 'none') {
-				budgetSearchSettings[field] = [];
+				jbookSearchSettings[field] = [];
 			}
 			else if (filteredList) {
-				budgetSearchSettings[field] = value;
+				jbookSearchSettings[field] = value;
 				runSearch = true;
 				resultsPage = 1;
 			}
 			else {
-				const typeIndex = budgetSearchSettings[field].indexOf(value);
+				const typeIndex = jbookSearchSettings[field].indexOf(value);
 				if (typeIndex !== -1) {
-					budgetSearchSettings[field].splice(typeIndex, 1);
+					jbookSearchSettings[field].splice(typeIndex, 1);
 				}
 				else {
-					budgetSearchSettings[field].push(value);
+					jbookSearchSettings[field].push(value);
 				}
 			}
 			break;
@@ -287,23 +287,23 @@ const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = fa
 		case 'primaryClassLabel':
 		case 'sourceTag':
 			if (value === 'all') {
-				budgetSearchSettings[field] = state.defaultOptions[field];
+				jbookSearchSettings[field] = state.defaultOptions[field];
 			}
 			else if (value === 'none') {
-				budgetSearchSettings[field] = [];
+				jbookSearchSettings[field] = [];
 			}
 			else if (filteredList) {
-				budgetSearchSettings[field] = value;
+				jbookSearchSettings[field] = value;
 				runSearch = true;
 				resultsPage = 1;
 			}
 			else {
-				const typeIndex = budgetSearchSettings[field].indexOf(value);
+				const typeIndex = jbookSearchSettings[field].indexOf(value);
 				if (typeIndex !== -1) {
-					budgetSearchSettings[field].splice(typeIndex, 1);
+					jbookSearchSettings[field].splice(typeIndex, 1);
 				}
 				else {
-					budgetSearchSettings[field].push(value);
+					jbookSearchSettings[field].push(value);
 				}
 			}
 			break;
@@ -311,13 +311,13 @@ const setBudgetSearchSetting = (field, value, state, dispatch, filteredList = fa
 		case 'projectNum':
 		case 'projectTitle':
 		case 'pocReviewer':
-			budgetSearchSettings[field] = value;
+			jbookSearchSettings[field] = value;
 			resultsPage = 1;
 			break;
 		default:
 			break;
 	}
-	setState(dispatch, { budgetSearchSettings, dataSources, runSearch, searchText, resultsPage, loading: runSearch });
+	setState(dispatch, { jbookSearchSettings, dataSources, runSearch, searchText, resultsPage, loading: runSearch });
 }
 
 const handleTabClicked = (dispatch, state, tab) => {
@@ -370,7 +370,7 @@ const filterSortFunction = (a, b) => {
 }
 
 const populateDropDowns = async (state, dispatch) => {
-	const budgetSearchSettings = _.cloneDeep(state.budgetSearchSettings);
+	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	const defaultOptions = _.cloneDeep(state.defaultOptions);
 
 	const { data } = await jbookAPI.callSearchFunction({
@@ -379,11 +379,11 @@ const populateDropDowns = async (state, dispatch) => {
 		options: {},
 	});
 
-	budgetSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear.map(year => year !== null ? year : 'Blank').sort(filterSortFunction);
-	budgetSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus.map(status => status !== null ? status : 'Blank').sort(filterSortFunction);
-	budgetSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency.map(agency => agency !== null ? agency : 'Blank').sort(filterSortFunction);
-	budgetSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel.map(label => label !== null ? label : 'Blank').sort(filterSortFunction);
-	budgetSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag.map(tag => tag !== null ? tag : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear.map(year => year !== null ? year : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus.map(status => status !== null ? status : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency.map(agency => agency !== null ? agency : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel.map(label => label !== null ? label : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag.map(tag => tag !== null ? tag : 'Blank').sort(filterSortFunction);
 
 	let dropdownData;
 	try {
@@ -398,29 +398,29 @@ const populateDropDowns = async (state, dispatch) => {
 			dropdownData = dropdownData.data;
 			dropdownData.serviceReviewers.push({ name: 'Blank' });
 
-			budgetSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = dropdownData.reviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').sort(filterSortFunction);
-			budgetSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = dropdownData.serviceReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').concat(dropdownData.secondaryReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank')).sort(filterSortFunction);
+			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = dropdownData.reviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').sort(filterSortFunction);
+			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = dropdownData.serviceReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').concat(dropdownData.secondaryReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank')).sort(filterSortFunction);
 
-			budgetSearchSettings.primaryReviewer.push('Unknown');
-			budgetSearchSettings.primaryReviewer.push('Blank');
+			jbookSearchSettings.primaryReviewer.push('Unknown');
+			jbookSearchSettings.primaryReviewer.push('Blank');
 
-			budgetSearchSettings.serviceReviewer.push('Blank');
+			jbookSearchSettings.serviceReviewer.push('Blank');
 			defaultOptions.serviceReviewer.push('Blank');
 
 		}
 		else {
-			budgetSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = data.primaryreviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
-			budgetSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = data.servicereviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
+			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = data.primaryreviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
+			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = data.servicereviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
 		}
 	} catch (err) {
 		console.log('Error fetching dropdown data');
 		console.log(err);
 	}
 
-	return { defaultOptions, budgetSearchSettings, dropdownData };
+	return { defaultOptions, jbookSearchSettings, dropdownData };
 
 	// if (initial) {
-	// 	setState(dispatch, {loading: true, runSearch: true, defaultOptions, budgetSearchSettings, dropdownData });
+	// 	setState(dispatch, {loading: true, runSearch: true, defaultOptions, jbookSearchSettings, dropdownData });
 	// } else {
 	// 	setState(dispatch, {defaultOptions, dropdownData });
 	// }
@@ -444,7 +444,7 @@ const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => 
 	document.body.removeChild(a)
 }
 
-const BudgetSearchMainViewHandler = {
+const jbookMainViewHandler = {
 	async handlePageLoad(props) {
 		const {
 			dispatch,
@@ -456,7 +456,7 @@ const BudgetSearchMainViewHandler = {
 		// 	populateDropDowns(state, dispatch);
 		// }, 1000 * 60);
 
-		const { budgetSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
+		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url) ?? '';
@@ -468,7 +468,7 @@ const BudgetSearchMainViewHandler = {
 		}
 
 		// the main setstate that triggers the initial search
-		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, budgetSearchSettings, defaultOptions, dropdownData });
+		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions, dropdownData });
 
 	},
 
@@ -530,8 +530,8 @@ const BudgetSearchMainViewHandler = {
 					show: false
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>BUDGET TYPE <span style={styles.orangeText}>{state.budgetSearchSettings.budgetType.length === state.defaultOptions.budgetType.length ? '' : `(${state.budgetSearchSettings.budgetType.length})`}</span></p>,
-					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.budgetTypeDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'budgetType'} options={state.defaultOptions.budgetType} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>BUDGET TYPE <span style={styles.orangeText}>{state.jbookSearchSettings.budgetType.length === state.defaultOptions.budgetType.length ? '' : `(${state.jbookSearchSettings.budgetType.length})`}</span></p>,
+					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.budgetTypeDropdown} setJBookSetting={setJBookSetting} type={'budgetType'} options={state.defaultOptions.budgetType} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'type',
 					width: 130,
 					Cell: row => (
@@ -546,8 +546,8 @@ const BudgetSearchMainViewHandler = {
 					sortable: false
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>BUDGET YEAR (FY) <span style={styles.orangeText}>{state.budgetSearchSettings.budgetYear.length === state.defaultOptions.budgetYear.length ? '' : `(${state.budgetSearchSettings.budgetYear.length})`}</span></p>,
-					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.budgetYearDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'budgetYear'} options={state.defaultOptions.budgetYear} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>BUDGET YEAR (FY) <span style={styles.orangeText}>{state.jbookSearchSettings.budgetYear.length === state.defaultOptions.budgetYear.length ? '' : `(${state.jbookSearchSettings.budgetYear.length})`}</span></p>,
+					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.budgetYearDropdown} setJBookSetting={setJBookSetting} type={'budgetYear'} options={state.defaultOptions.budgetYear} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'budgetYear',
 					width: 130,
 					Cell: row => (
@@ -562,7 +562,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROGRAM ELEMENT / BUDGET LINE ITEM</p>,
-					Filter: () => <InputFilter setBudgetSearchSetting={setBudgetSearchSetting} field={'programElement'} />,
+					Filter: () => <InputFilter setJBookSetting={setJBookSetting} field={'programElement'} />,
 					accessor: row => row.budgetLineItem && row.budgetLineItem !== '-' ? row.budgetLineItem : row.programElement,
 					width: 180,
 					Cell: row => (
@@ -574,7 +574,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
-					Filter: () => <InputFilter setBudgetSearchSetting={setBudgetSearchSetting} field={'projectNum'} />,
+					Filter: () => <InputFilter setJBookSetting={setJBookSetting} field={'projectNum'} />,
 					accessor: 'projectNum',
 					width: 155,
 					Cell: row => (
@@ -586,7 +586,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
-					Filter: () => <InputFilter setBudgetSearchSetting={setBudgetSearchSetting} field={'projectTitle'} />,
+					Filter: () => <InputFilter setJBookSetting={setJBookSetting} field={'projectTitle'} />,
 					accessor: 'projectTitle',
 					width: 190,
 					Cell: row => (
@@ -597,8 +597,8 @@ const BudgetSearchMainViewHandler = {
 					id: 'projectTitle'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>SERVICE / AGENCY <span style={styles.orangeText}>{state.budgetSearchSettings.serviceAgency.length === state.defaultOptions.serviceAgency.length ? '' : `(${state.budgetSearchSettings.serviceAgency.length})`}</span></p>,
-					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.serviceAgencyDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'serviceAgency'} options={state.defaultOptions.serviceAgency} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>SERVICE / AGENCY <span style={styles.orangeText}>{state.jbookSearchSettings.serviceAgency.length === state.defaultOptions.serviceAgency.length ? '' : `(${state.jbookSearchSettings.serviceAgency.length})`}</span></p>,
+					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.serviceAgencyDropdown} setJBookSetting={setJBookSetting} type={'serviceAgency'} options={state.defaultOptions.serviceAgency} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'serviceAgency',
 					width: 150,
 					headerStyle: {
@@ -612,8 +612,8 @@ const BudgetSearchMainViewHandler = {
 					id: 'serviceAgency'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER <span style={styles.orangeText}>{state.budgetSearchSettings.primaryReviewer.length === state.defaultOptions.primaryReviewer.length ? '' : `(${state.budgetSearchSettings.primaryReviewer.length})`}</span></p>,
-					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.primaryReviewerDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'primaryReviewer'} options={state.defaultOptions.primaryReviewer} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER <span style={styles.orangeText}>{state.jbookSearchSettings.primaryReviewer.length === state.defaultOptions.primaryReviewer.length ? '' : `(${state.jbookSearchSettings.primaryReviewer.length})`}</span></p>,
+					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.primaryReviewerDropdown} setJBookSetting={setJBookSetting} type={'primaryReviewer'} options={state.defaultOptions.primaryReviewer} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'primaryReviewer',
 					width: 130,
 					Cell: row => (
@@ -627,8 +627,8 @@ const BudgetSearchMainViewHandler = {
 					id: 'primaryReviewer',
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>SERVICE REVIEWER <span style={styles.orangeText}>{state.budgetSearchSettings.serviceReviewer.length === state.defaultOptions.serviceReviewer.length ? '' : `(${state.budgetSearchSettings.serviceReviewer.length})`}</span></p>,
-					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.serviceReviewerDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'serviceReviewer'} options={state.dropdownData && state.dropdownData.serviceReviewers ? state.dropdownData.serviceReviewers.map(r => `${r.name}${r.organization ? ` (${r.organization})` : ''}`) ?? [] : []} secondaryOptions={state.dropdownData && state.dropdownData.secondaryReviewers ? state.dropdownData.secondaryReviewers.map(r => `${r.name}${r.organization ? ` (${r.organization})` : ''}`) : []} secondaryTitle={'Secondary'} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>SERVICE REVIEWER <span style={styles.orangeText}>{state.jbookSearchSettings.serviceReviewer.length === state.defaultOptions.serviceReviewer.length ? '' : `(${state.jbookSearchSettings.serviceReviewer.length})`}</span></p>,
+					Filter: () => <DropdownFilter setOpenDropdown={setDropdown} openDropdown={state.serviceReviewerDropdown} setJBookSetting={setJBookSetting} type={'serviceReviewer'} options={state.dropdownData && state.dropdownData.serviceReviewers ? state.dropdownData.serviceReviewers.map(r => `${r.name}${r.organization ? ` (${r.organization})` : ''}`) ?? [] : []} secondaryOptions={state.dropdownData && state.dropdownData.secondaryReviewers ? state.dropdownData.secondaryReviewers.map(r => `${r.name}${r.organization ? ` (${r.organization})` : ''}`) : []} secondaryTitle={'Secondary'} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: row => row.serviceSecondaryReviewer && row.serviceSecondaryReviewer !== '' ? row.serviceSecondaryReviewer : row.serviceReviewer,
 					width: 130,
 					Cell: row => (
@@ -643,7 +643,7 @@ const BudgetSearchMainViewHandler = {
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>POC REVIEWER</p>,
-					Filter: () => <InputFilter setBudgetSearchSetting={setBudgetSearchSetting} field={'pocReviewer'} />,
+					Filter: () => <InputFilter setJBookSetting={setJBookSetting} field={'pocReviewer'} />,
 					accessor: row => row.altPOCName && row.altPOCName !== '' ? row.altPOCOrg ? `${row.altPOCName} (${row.altPOCOrg})` : row.altPOCName : row.servicePOCOrg ? `${row.servicePOCName} (${row.servicePOCOrg})` : row.servicePOCName,
 					width: 120,
 					Cell: row => (
@@ -669,11 +669,11 @@ const BudgetSearchMainViewHandler = {
 					id: 'keywords'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>REVIEW STATUS <span style={styles.orangeText}>{state.budgetSearchSettings.reviewStatus.length === state.defaultOptions.reviewStatus.length ? '' : `(${state.budgetSearchSettings.reviewStatus.length})`}</span></p>,
+					Header: () => <p style={styles.tableColumn}>REVIEW STATUS <span style={styles.orangeText}>{state.jbookSearchSettings.reviewStatus.length === state.defaultOptions.reviewStatus.length ? '' : `(${state.jbookSearchSettings.reviewStatus.length})`}</span></p>,
 					accessor: 'reviewStatus',
 					width: 140,
 					sortable: false,
-					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.reviewStatusDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'reviewStatus'} options={state.defaultOptions.reviewStatus} clearText={state.budgetSearchSettings.clearText} />,
+					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.reviewStatusDropdown} setJBookSetting={setJBookSetting} type={'reviewStatus'} options={state.defaultOptions.reviewStatus} clearText={state.jbookSearchSettings.clearText} />,
 					Cell: row => {
 						return (
 							<div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
@@ -687,8 +687,8 @@ const BudgetSearchMainViewHandler = {
 					id: 'serviceReviewStatus'
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>HAS KEYWORDS <span style={styles.orangeText}>{state.budgetSearchSettings.hasKeywords.length === 2 ? '' : `(${state.budgetSearchSettings.hasKeywords.length})`}</span></p>,
-					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.hasKeywordsDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'hasKeywords'} options={['Yes', 'No']} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>HAS KEYWORDS <span style={styles.orangeText}>{state.jbookSearchSettings.hasKeywords.length === 2 ? '' : `(${state.jbookSearchSettings.hasKeywords.length})`}</span></p>,
+					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.hasKeywordsDropdown} setJBookSetting={setJBookSetting} type={'hasKeywords'} options={['Yes', 'No']} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'hasKeywords',
 					width: 100,
 					Cell: row => (
@@ -704,9 +704,9 @@ const BudgetSearchMainViewHandler = {
 					show: true
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>LABEL(S) <span style={styles.orangeText}>{state.budgetSearchSettings.primaryClassLabel.length === state.defaultOptions.primaryClassLabel.length ? '' : `(${state.budgetSearchSettings.primaryClassLabel.length})`}</span></p>,
+					Header: () => <p style={styles.tableColumn}>LABEL(S) <span style={styles.orangeText}>{state.jbookSearchSettings.primaryClassLabel.length === state.defaultOptions.primaryClassLabel.length ? '' : `(${state.jbookSearchSettings.primaryClassLabel.length})`}</span></p>,
 					accessor: 'reviewStatus',
-					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.primaryClassLabelDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'primaryClassLabel'} options={state.defaultOptions.primaryClassLabel} clearText={state.budgetSearchSettings.clearText} />,
+					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.primaryClassLabelDropdown} setJBookSetting={setJBookSetting} type={'primaryClassLabel'} options={state.defaultOptions.primaryClassLabel} clearText={state.jbookSearchSettings.clearText} />,
 					width: 150,
 					sortable: false,
 					Cell: row => (
@@ -720,8 +720,8 @@ const BudgetSearchMainViewHandler = {
 					id: 'primaryClassLabel',
 				},
 				{
-					Header: () => <p style={styles.tableColumn}>SOURCE <span style={styles.orangeText}>{state.budgetSearchSettings.sourceTag.length === state.defaultOptions.sourceTag.length ? '' : `(${state.budgetSearchSettings.sourceTag.length})`}</span></p>,
-					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.sourceTagDropdown} setBudgetSearchSetting={setBudgetSearchSetting} type={'sourceTag'} options={state.defaultOptions.sourceTag} clearText={state.budgetSearchSettings.clearText} />,
+					Header: () => <p style={styles.tableColumn}>SOURCE <span style={styles.orangeText}>{state.jbookSearchSettings.sourceTag.length === state.defaultOptions.sourceTag.length ? '' : `(${state.jbookSearchSettings.sourceTag.length})`}</span></p>,
+					Filter: () => <DropdownFilter right={'5px'} setOpenDropdown={setDropdown} openDropdown={state.sourceTagDropdown} setJBookSetting={setJBookSetting} type={'sourceTag'} options={state.defaultOptions.sourceTag} clearText={state.jbookSearchSettings.clearText} />,
 					accessor: 'sourceTag',
 					Cell: row => (
 						<div style={{ textAlign: 'center' }}>
@@ -819,7 +819,7 @@ const BudgetSearchMainViewHandler = {
 							</GCPrimaryButton>
 							<GCPrimaryButton
 								style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '45px', marginRight: '20px' }}
-								onClick={() => { setBudgetSearchSetting('clearDataSources', '', state, dispatch); }}
+								onClick={() => { setJBookSetting('clearDataSources', '', state, dispatch); }}
 							>
 								Clear Filters
 							</GCPrimaryButton>
@@ -839,9 +839,9 @@ const BudgetSearchMainViewHandler = {
 					<StyledMainBottomContainer>
 						<ReactTable
 							manual
-							sorted={state.budgetSearchSettings.sort}
+							sorted={state.jbookSearchSettings.sort}
 							onSortedChange={(newSorted) => {
-								setBudgetSearchSetting('sort', newSorted, state, dispatch);
+								setJBookSetting('sort', newSorted, state, dispatch);
 							}}
 							filterable={true}
 							data={mainPageData ? mainPageData.docs : []}
@@ -1119,4 +1119,4 @@ const BudgetSearchMainViewHandler = {
 	}
 };
 
-export default BudgetSearchMainViewHandler;
+export default jbookMainViewHandler;

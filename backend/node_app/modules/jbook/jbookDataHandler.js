@@ -20,13 +20,13 @@ const Op = Sequelize.Op;
 const EmailUtility = require('../../utils/emailUtility');
 
 const DataHandler = require('../base/dataHandler');
-const BudgetSearchUtility = require('./budgetSearchSearchUtility');
+const JBookSearchUtility = require('./jbookSearchUtility');
 const types = {
 	'RDT&E': 'rdoc',
 	'Procurement': 'pdoc',
 	'O&M': 'odoc'
 };
-class BudgetSearchDataHandler extends DataHandler {
+class JBookDataHandler extends DataHandler {
 	constructor(opts = {}) {
 		const {
 			pdoc = PDOC,
@@ -34,7 +34,7 @@ class BudgetSearchDataHandler extends DataHandler {
 			om = OM,
 			accomp = ACCOMP,
 			review = REVIEW,
-			budgetSearchUtility = new BudgetSearchUtility,
+			jbookSearchUtility = new JBookSearchUtility,
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
 			keyword = KEYWORD,
@@ -55,7 +55,7 @@ class BudgetSearchDataHandler extends DataHandler {
 		this.om = om;
 		this.accomp = accomp;
 		this.rev = review;
-		this.budgetSearchUtility = budgetSearchUtility;
+		this.jbookSearchUtility = jbookSearchUtility;
 		this.constants = constants;
 		this.gl = gl;
 		this.keyword_assoc = keyword_assoc;
@@ -123,7 +123,7 @@ class BudgetSearchDataHandler extends DataHandler {
 			docType = types[docType];
 
 			if (data && data.dataValues) {
-				data = this.budgetSearchUtility.parseFields(data.dataValues, false, docType);
+				data = this.jbookSearchUtility.parseFields(data.dataValues, false, docType);
 
 				if (!data.currentYearAmount) {
 					let maxVal = null;
@@ -193,7 +193,7 @@ class BudgetSearchDataHandler extends DataHandler {
 
 					const parsedContracts = [];
 					for (let contract of contracts) {
-						parsedContracts.push(this.budgetSearchUtility.parseFields(contract.dataValues, false, 'glContract'));
+						parsedContracts.push(this.jbookSearchUtility.parseFields(contract.dataValues, false, 'glContract'));
 					}
 
 					data.contracts = parsedContracts;
@@ -235,7 +235,7 @@ class BudgetSearchDataHandler extends DataHandler {
 
 					const parsedObligations = [];
 					for (let obligation of obligations) {
-						parsedObligations.push(this.budgetSearchUtility.parseFields(obligation.dataValues, false, 'obligation'));
+						parsedObligations.push(this.jbookSearchUtility.parseFields(obligation.dataValues, false, 'obligation'));
 					}
 					data.obligations = parsedObligations;
 
@@ -256,7 +256,7 @@ class BudgetSearchDataHandler extends DataHandler {
 					});
 					if (accomplishments && accomplishments.length && accomplishments.length > 0) {
 						for (let accomp in accomplishments) {
-							accomp = this.budgetSearchUtility.parseFields(accomp, false, 'accomplishment');
+							accomp = this.jbookSearchUtility.parseFields(accomp, false, 'accomplishment');
 						}
 						data.accomplishments = accomplishments;
 					}
@@ -336,7 +336,7 @@ class BudgetSearchDataHandler extends DataHandler {
 							review.service_mp_list = review.service_mp_list.replace(/\[|\]|\\/g, '').split(';').join('|');
 						}
 
-						data.review = this.budgetSearchUtility.parseFields(review.dataValues, false, 'review');
+						data.review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
 						data.review.totalBudget = totalBudget;
 					}
 
@@ -601,7 +601,7 @@ class BudgetSearchDataHandler extends DataHandler {
 			}
 			frontendReviewData["reviewStatus"] = status;
 
-			const reviewData = this.budgetSearchUtility.parseFields(frontendReviewData, true, 'review');
+			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
 			const query = {
 				budget_type: types[reviewData.budget_type],
@@ -754,7 +754,7 @@ class BudgetSearchDataHandler extends DataHandler {
 			let serviceReviewer;
 			let secondaryReviewer;
 
-			const budgetSearchSettings = {};
+			const jbookSearchSettings = {};
 
 			if (permissions.primary) {
 				primaryReviewer = await this.reviewer.findOne({
@@ -795,33 +795,33 @@ class BudgetSearchDataHandler extends DataHandler {
 			}
 
 			if (primaryReviewer && primaryReviewer !== null) {
-				budgetSearchSettings['primaryReviewerForUserDash'] = primaryReviewer;
+				jbookSearchSettings['primaryReviewerForUserDash'] = primaryReviewer;
 			}
 
 			if (serviceReviewer && serviceReviewer !== null) {
-				budgetSearchSettings['serviceReviewerForUserDash'] = [serviceReviewer];
+				jbookSearchSettings['serviceReviewerForUserDash'] = [serviceReviewer];
 			}
 
 			if (secondaryReviewer && secondaryReviewer !== null) {
-				if (budgetSearchSettings.hasOwnProperty(serviceReviewer))
-					budgetSearchSettings['serviceReviewerForUserDash'].push(secondaryReviewer);
+				if (jbookSearchSettings.hasOwnProperty(serviceReviewer))
+					jbookSearchSettings['serviceReviewerForUserDash'].push(secondaryReviewer);
 				else
-					budgetSearchSettings['serviceReviewerForUserDash'] = [secondaryReviewer];
+					jbookSearchSettings['serviceReviewerForUserDash'] = [secondaryReviewer];
 			}
 
 			if (permissions.poc) {
-				budgetSearchSettings['pocReviewerEmailForUserDash'] = email;
+				jbookSearchSettings['pocReviewerEmailForUserDash'] = email;
 			}
 
-			const [pSelect, rSelect, oSelect] = this.budgetSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.budgetSearchUtility.buildWhereQueryForUserDash(budgetSearchSettings);
+			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQueryForUserDash(jbookSearchSettings);
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
 
 			let giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
 
-			const queryEnd = this.budgetSearchUtility.buildEndQuery(budgetSearchSettings.sort);
+			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
 			giantQuery += queryEnd;
 
 			let data2 = await this.db.jbook.query(giantQuery, {});
@@ -864,7 +864,7 @@ class BudgetSearchDataHandler extends DataHandler {
 					return await this.getUserSpecificReviews(req, userId);
 				default:
 					this.logger.error(
-						`There is no function called ${functionName} defined in the budgetSearchDataHandler`,
+						`There is no function called ${functionName} defined in the JBookDataHandler`,
 						'5YIUXOA',
 						userId
 					);
@@ -987,4 +987,4 @@ class BudgetSearchDataHandler extends DataHandler {
 	}
 }
 
-module.exports = BudgetSearchDataHandler;
+module.exports = JBookDataHandler;
