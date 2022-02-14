@@ -66,6 +66,9 @@ export default (props) => {
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
 	const [currentQexp, setCurrentQexp] = useState('');
 	const [currentQa, setCurrentQa] = useState('');
+	const [currentJbook, setCurrentJbook] = useState('');
+	const [currentWordSim, setCurrentWordSim] = useState('');
+
 	const [corpusCount, setCorpusCount] = useState(0);
 
 	const [selectedSentence, setSelectedSentence] = useState('');
@@ -134,6 +137,16 @@ export default (props) => {
 			setCurrentQa(
 				current.data.qa_model
 					? current.data.qa_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			setCurrentJbook(
+				current.data.jbook_model
+					? current.data.jbook_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			setCurrentWordSim(
+				current.data.wordsim_model
+					? current.data.wordsim_model.replace(/^.*[\\/]/, '')
 					: ''
 			);
 			props.updateLogs('Successfully queried current transformer', 0);
@@ -284,7 +297,6 @@ export default (props) => {
 	 const triggerTrainQexp = async () => {
 		try {
 			await gameChangerAPI.trainModel({
-				model_id: '02102022',
 				validate: false,
 				build_type: 'qexp',
 				version: qexpversion,
@@ -483,7 +495,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local State:</div>
+						<div style={{ display: 'inline-block' }}> <b>Local State:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -500,6 +512,8 @@ export default (props) => {
 								<div style={{ paddingLeft: '15px' }}>Sentence Index:</div>
 								<div style={{ paddingLeft: '15px' }}>Query Expansion:</div>
 								<div style={{ paddingLeft: '15px' }}>Question Answer:</div>
+								<div style={{ paddingLeft: '15px' }}>Jbook Qexp:</div>
+								<div style={{ paddingLeft: '15px' }}>Word Similarity:</div>
 								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
 								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
 								<div style={{ paddingLeft: '30px' }}>Sim:</div>
@@ -512,6 +526,9 @@ export default (props) => {
 								{currentSentenceIndex} <br />
 								{currentQexp} <br />
 								{currentQa} <br />
+								{currentJbook} <br />
+								{currentWordSim} <br />
+
 								<br />
 								{currentEncoder.replace(/^.*[\\/]/, '')}
 								<br />
@@ -528,7 +545,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local Models:</div>
+						<div style={{ display: 'inline-block' }}><b>Local Models:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -942,7 +959,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local Data:</div>
+						<div style={{ display: 'inline-block' }}><b>Local Data:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
