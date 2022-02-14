@@ -8,15 +8,13 @@ import {
 	DialogContent,
 	DialogActions,
 	TextField,
-	Typography, InputAdornment, Input,
+	Typography, Input,
 } from '@material-ui/core';
-
 import GCButton from '../../common/GCButton';
 import { styles, GCCheckbox, useStyles } from '../util/GCAdminStyles';
 import styled from 'styled-components';
 import {gcOrange} from '../../common/gc-colors';
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
-import PersonIcon from "@mui/icons-material/Person";
 
 const DEFAULT_VALUES = {
 	clone_name: '',
@@ -62,6 +60,19 @@ const TabContainer = styled.div`
 		margin: 10px;
 	}
 `;
+
+const tabList = [
+	{
+		title: 'cloneMeta',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">Clone Meta</Typography>
+	},
+	{
+		title: 'clonePermissions',
+		onClick: () => {},
+		children: <Typography variant="h6" display="inline" title="cardView">Clone Permissions</Typography>
+	}
+];
 
 /**
  *
@@ -250,19 +261,6 @@ export default ({
 			</div>
 		)
 	};
-
-	const tabList = [
-		{
-			title: 'cloneMeta',
-			onClick: () => {},
-			children: <Typography variant="h6" display="inline" title="cardView">Clone Meta</Typography>
-		},
-		{
-			title: 'clonePermissions',
-			onClick: () => {},
-			children: <Typography variant="h6" display="inline" title="cardView">Clone Permissions</Typography>
-		}
-	];
 
 	return (
 		<Dialog

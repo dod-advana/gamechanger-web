@@ -108,13 +108,13 @@ module.exports = Object.freeze({
 		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
-	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
-	ADVANA_NOREPLY_EMAIL_ADDRESS: 'no-reply@boozallencsn.com',
+	ADVANA_EMAIL_CONTACT_NAME: process.env.EMAIL_FROM_NAME || 'Advana Do Not Reply',
+	ADVANA_NOREPLY_EMAIL_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
-		sendmail: true,
-		newline: 'unix',
-		secure: true
+		host: process.env.EMAIL_HOST,
+		port: process.env.EMAIL_PORT
 	},
+	BASE_URL_FOR_EMAIL: process.env.BASE_URL_FOR_EMAIL || `https://${process.env.REACT_APP_ROOT_CLONE}.advana.data.mil`,
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
 		protocol: process.env.GAMECHANGER_ELASTICSEARCH_PROTOCOL,

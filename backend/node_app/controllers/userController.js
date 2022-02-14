@@ -467,7 +467,7 @@ class UserController {
 					// Migrate the users data from the old GC table
 					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn})
 
-					const tmpExtraFields = {policy: oldGCUserInfo.policy || {} };
+					const tmpExtraFields = {gamechanger: oldGCUserInfo.policy || {} };
 
 					// Bring in jbook user info we want into extra fields and update the main user info with jbook info if available
 					tmpExtraFields['jbook'] = {
