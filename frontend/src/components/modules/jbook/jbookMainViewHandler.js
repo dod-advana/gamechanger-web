@@ -15,12 +15,12 @@ import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ReactTable from 'react-table';
 import DropdownFilter from './DropdownFilter.js';
 import InputFilter from './InputFilter.js';
-import './budgetsearch.css';
+import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import LandingImage from '../../../images/JAIC_banner.png'
 import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
-import FeedbackModal from './budgetFeedbackModal';
+import FeedbackModal from './jbookFeedbackModal';
 
 
 import JBookAPI from '../../api/jbook-service-api';

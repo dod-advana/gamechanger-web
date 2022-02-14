@@ -18,13 +18,13 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
-import { BudgetSearchContext } from './budgetSearchContext';
+import { BudgetSearchContext } from './jbookContext';
 import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledAccordionDiv } from './profilePage/profilePageStyles';
 import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist'
 import GCPrimaryButton from '../../common/GCButton';
 import GCAccordion from '../../common/GCAccordion';
 import JCAdata from './JCA.json';
-import './budgetsearch.css';
+import './jbook.css';
 
 const errorColor = '#F44336';
 const useStyles = makeStyles((theme) => ({

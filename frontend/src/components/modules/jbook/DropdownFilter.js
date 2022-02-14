@@ -5,7 +5,7 @@ import { FormControlLabel, Checkbox, TextField } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
-import { BudgetSearchContext } from './budgetSearchContext';
+import { BudgetSearchContext } from './jbookContext';
 
 
 const StyledButtonDiv = styled.div`

@@ -14,7 +14,7 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import JBookAPI from '../../api/jbook-service-api';
-import { scrollListViewTop } from './budgetSearchMainViewHandler';
+import { scrollListViewTop } from './jbookMainViewHandler';
 
 const jbookAPI = new JBookAPI();
 

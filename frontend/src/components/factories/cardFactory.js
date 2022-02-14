@@ -4,7 +4,7 @@ const cdoCardHandler = require('../modules/cdo/cdoCardHandler');
 const globalSearchCardHandler = require('../modules/globalSearch/globalSearchCardHandler');
 const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
-const budgetSearchCardHandler = require('../modules/jbook/budgetSearchCardHandler');
+const budgetSearchCardHandler = require('../modules/jbook/jbookCardHandler');
 const jexnetCardHandler = require('../modules/jexnet/jexnetCardHandler');
 
 class CardFactory {

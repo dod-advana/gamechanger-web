@@ -2,7 +2,7 @@ const defaultSearchBarHandler = require(`../modules/default/defaultSearchBarHand
 const edaSearchBarHandler = require(`../modules/eda/edaSearchBarHandler`);
 const policySearchBarHandler = require(`../modules/policy/policySearchBarHandler`);
 const globalSearchSearchBarHandler = require(`../modules/globalSearch/globalSearchSearchBarHandler`);
-const budgetSearchSearchBarHandler = require(`../modules/jbook/budgetSearchSearchBarHandler`);
+const budgetSearchSearchBarHandler = require(`../modules/jbook/jbookSearchBarHandler`);
 
 class SearchBarFactory {
 	constructor(module) {
