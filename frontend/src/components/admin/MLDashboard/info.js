@@ -52,10 +52,7 @@ const initTransformer = {
 export default (props) => {
 	// Set state variables
 	const [APIData, setAPIData] = useState({});
-	const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
-	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
-	const [currentQexp, setCurrentQexp] = useState('');
-	const [currentQa, setCurrentQa] = useState('');
+
 
 	/**
 	 * Load all the initial data on transformers and s3
