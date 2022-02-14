@@ -7,8 +7,6 @@ export const getSignature = (options, url) => {
 		CryptoJS.HmacSHA256(url, Auth.getToken() || 'NoToken')
 	);
 	options.headers = { 'X-UA-SIGNATURE': signature };
-	console.log(signature)
-	console.log(Auth.getTokenPayload() || 'NoToken')
 };
 
 export const axiosPOST = async (axios, url, data, options = {}) => {

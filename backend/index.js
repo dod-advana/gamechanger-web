@@ -111,7 +111,6 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const cn = req.get('x-env-ssl_client_certificate');
 		if (!cn) {
-			logger.info(req.get('SSL_CLIENT_S_DN_CN'))
 			if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
 				req.permissions = ['Gamechanger Admin'];
 				next();
@@ -266,7 +265,6 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		}
 		const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
 		if (signatureFromApp === calculatedSignature) {
-			logger.info('cleared')
 			next();
 		} else {
 			if (req.url.includes('getThumbnail')) {
@@ -283,7 +281,14 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		res.sendStatus(403);
+		const signatureFromApp = req.get('x-ua-signature');
+		const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api' &&  signatureFromApp=== userToken){
+			next();
+		}
+		else{
+			res.sendStatus(403);
+		}
 	}
 });
 
