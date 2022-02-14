@@ -50,7 +50,9 @@ export default (props) => {
 	const [downloadedModelsList, setDownloadedModelsList] = useState({
 		transformers: {},
 		sentence: {},
-		qexp: {}
+		qexp: {},
+		topic_models: {},
+		jbook_qexp: {}
 	});
 	const [deleteModal,setDeleteModal] = useState({
 		show:false,
@@ -68,11 +70,14 @@ export default (props) => {
 	const [currentQa, setCurrentQa] = useState('');
 	const [currentJbook, setCurrentJbook] = useState('');
 	const [currentWordSim, setCurrentWordSim] = useState('');
+	const [currentTopicModel, setCurrentTopicModel] = useState('');
 
 	const [corpusCount, setCorpusCount] = useState(0);
 
 	const [selectedSentence, setSelectedSentence] = useState('');
 	const [selectedQEXP, setSelectedQEXP] = useState('');
+	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
+	const [selectedTopicModel, setSelectedTopicModel] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
@@ -149,10 +154,15 @@ export default (props) => {
 					? current.data.wordsim_model.replace(/^.*[\\/]/, '')
 					: ''
 			);
-			props.updateLogs('Successfully queried current transformer', 0);
+			setCurrentTopicModel(
+				current.data.topic_model
+					? current.data.topic_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			props.updateLogs('Successfully queried current loaded models.', 0);
 		} catch (e) {
 			props.updateLogs(
-				'Error querying current transformer: ' + e.toString(),
+				'Error querying current loaded models: ' + e.toString(),
 				2
 			);
 			throw e;
@@ -341,6 +351,12 @@ export default (props) => {
 			if (selectedQEXP) {
 				params['qexp'] = selectedQEXP;
 			}
+			if (selectedTopicModel) {
+				params['topic_models'] = selectedTopicModel;
+			}
+			if (selectedJbookQEXP) {
+				params['jbook_qexp'] = selectedJbookQEXP;
+			}
 			await gameChangerAPI.reloadModels(params);
 			props.updateLogs('Reloaded Models', 0);
 			props.getProcesses();
@@ -510,10 +526,12 @@ export default (props) => {
 								Loaded Models:
 								<br />
 								<div style={{ paddingLeft: '15px' }}>Sentence Index:</div>
-								<div style={{ paddingLeft: '15px' }}>Query Expansion:</div>
+								<div style={{ paddingLeft: '15px' }}>Policy QExp:</div>
 								<div style={{ paddingLeft: '15px' }}>Question Answer:</div>
-								<div style={{ paddingLeft: '15px' }}>Jbook Qexp:</div>
+								<div style={{ paddingLeft: '15px' }}>Jbook QExp:</div>
 								<div style={{ paddingLeft: '15px' }}>Word Similarity:</div>
+								<div style={{ paddingLeft: '15px' }}>Topic Model:</div>
+
 								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
 								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
 								<div style={{ paddingLeft: '30px' }}>Sim:</div>
@@ -528,6 +546,7 @@ export default (props) => {
 								{currentQa} <br />
 								{currentJbook} <br />
 								{currentWordSim} <br />
+								{currentTopicModel} <br />
 
 								<br />
 								{currentEncoder.replace(/^.*[\\/]/, '')}
@@ -615,7 +634,7 @@ export default (props) => {
 						<div>
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									Sentence Index:
+									SENTENCE EMBEDDINGS:
 								</div>
 								<Select
 									value={selectedSentence}
@@ -639,7 +658,7 @@ export default (props) => {
 
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									QEXP Index:
+									QEXP MODEL:
 								</div>
 								<Select
 									value={selectedQEXP}
@@ -652,6 +671,52 @@ export default (props) => {
 									}}
 								>
 									{Object.keys(downloadedModelsList.qexp).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									JBOOK QEXP MODEL:
+								</div>
+								<Select
+									value={selectedJbookQEXP}
+									onChange={(e) => setSelectedJbookQEXP(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									TOPIC MODEL:
+								</div>
+								<Select
+									value={selectedTopicModel}
+									onChange={(e) => setSelectedTopicModel(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.topic_models).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}
