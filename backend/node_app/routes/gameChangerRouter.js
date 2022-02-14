@@ -106,7 +106,7 @@ router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/stopProcess', transformer.stopProcess);
 
-router.get('/getNotifications', notification.getNotifications);
+router.post('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
 router.post('/admin/deleteNotification', notification.deleteNotification);
 router.post('/admin/editNotificationActive', notification.editNotificationActive);
@@ -147,7 +147,7 @@ router.get('/admin/getAllUserData', user.getUserDataForUserList);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);
-
+router.post('/user/updateClonesVisited', user.updateClonesVisited);
 router.get('/user/getUserData', user.getUserData);
 router.get('/user/getUserProfileData', user.getUserProfileData);
 router.post('/user/updateUserProfileData', user.updateUserProfileData);
