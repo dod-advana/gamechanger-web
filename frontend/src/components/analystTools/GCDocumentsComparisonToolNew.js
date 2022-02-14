@@ -40,6 +40,13 @@ const styles = {
 	},
 	checkbox: {
 		padding: '9px'
+	},
+	collapsedInput: {
+		margin: 'auto 0',
+		display: '-webkit-box',
+		WebkitLineClamp: 3,
+		webkitBoxOrient: 'vertical',
+		overflow: 'hidden',
 	}
 }
 
@@ -618,7 +625,7 @@ const GCDocumentsComparisonTool = (props) => {
 											/>
 										</div>
 									}
-									<div style={{margin: 'auto 0'}}>
+									<div style={paragraph.id === selectedInput ? {margin: 'auto 0'} : styles.collapsedInput}>
 										{paragraph.text}
 									</div>
 									{paragraphs.length > 1 &&
