@@ -9,7 +9,7 @@ import GCErrorSnackbar from '../components/common/GCErrorSnackbar';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import {Snackbar} from '@material-ui/core';
-import {BudgetSearchContext} from '../components/modules/budgetSearch/budgetSearchContext';
+import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
 import 'react-table/react-table.css';
 import EditUserProfile from '../components/user/EditUserProfile';
 import JBookAPI from '../components/api/jbook-service-api';

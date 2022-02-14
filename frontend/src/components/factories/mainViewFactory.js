@@ -2,7 +2,7 @@ const defaultMainViewHandler = require(`../modules/default/defaultMainViewHandle
 const edaMainViewHandler = require(`../modules/eda/edaMainViewHandler`);
 const policyMainViewHandler = require(`../modules/policy/policyMainViewHandler`);
 const globalSearchMainViewHandler = require(`../modules/globalSearch/globalSearchMainViewHandler`);
-const budgetSearchMainViewHandler = require(`../modules/budgetSearch/budgetSearchMainViewHandler`);
+const budgetSearchMainViewHandler = require(`../modules/jbook/budgetSearchMainViewHandler`);
 
 const policyTestMainViewHandler = require(`../modules/policy/policyTestMainViewHandler`);
 
@@ -23,7 +23,7 @@ class MainViewFactory {
 				case 'globalSearch/globalSearchMainViewHandler':
 					this.handler = globalSearchMainViewHandler;
 					break;
-				case 'budgetSearch/budgetSearchMainViewHandler':
+				case 'jbook/budgetSearchMainViewHandler':
 					this.handler = budgetSearchMainViewHandler;
 					break;
 				default:

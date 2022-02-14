@@ -20,7 +20,7 @@ const QueryExp = (props) => {
 				const clean_values = values.map(values => values.replaceAll('"', ''));
 				const tempList = clean_values.map((clean_values) => <Link
 					style={{ margin: '0px 6px', textDecoration: 'underline' }}
-					to={`budgetSearch/checklist?q=${clean_values}`}> {clean_values} </Link>);
+					to={`jbook/checklist?q=${clean_values}`}> {clean_values} </Link>);
 				setlistItems(tempList);
 			} else {
 				setlistItems([]);

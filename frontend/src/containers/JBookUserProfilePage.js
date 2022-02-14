@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Notifications from '../components/notifications/Notifications';
 import SearchBar from '../components/searchBar/SearchBar';
-import {BudgetSearchContext} from '../components/modules/budgetSearch/budgetSearchContext';
+import {BudgetSearchContext} from '../components/modules/jbook/budgetSearchContext';
 import SideNavigation from '../components/navigation/SideNavigation';
 import Alerts from '../components/notifications/Alerts';
 import {setState} from '../sharedFunctions';
@@ -10,8 +10,8 @@ import JBookAPI from '../components/api/jbook-service-api';
 import GCAccordion from '../components/common/GCAccordion';
 import {Typography} from '@mui/material';
 import ReactTable from "react-table";
-import DropdownFilter from "../components/modules/budgetSearch/DropdownFilter";
-import InputFilter from "../components/modules/budgetSearch/InputFilter";
+import DropdownFilter from "../components/modules/jbook/DropdownFilter";
+import InputFilter from "../components/modules/jbook/InputFilter";
 
 const jbookAPI = new JBookAPI();
 
@@ -335,7 +335,7 @@ const JBookUserProfilePage = (props) => {
 		if (permissions && email) {
 			jbookAPI.callDataFunction({
 				functionName: 'getUserSpecificReviews',
-				cloneName: 'budgetSearch',
+				cloneName: 'jbook',
 				options: {permissions, email}
 			}).then(data => {
 				const docs = data.data.docs;

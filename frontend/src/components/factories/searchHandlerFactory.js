@@ -4,7 +4,7 @@ const globalSearchHandler = require(`../modules/globalSearch/globalSearchHandler
 const edaSearchHandler = require(`../modules/eda/edaSearchHandler`);
 const hermesSearchHandler = require(`../modules/hermes/hermesSearchHandler`);
 const cdoSearchHandler = require(`../modules/cdo/cdoSearchHandler`);
-const budgetSearchSearchHandler = require(`../modules/budgetSearch/budgetSearchSearchHandler`);
+const budgetSearchSearchHandler = require(`../modules/jbook/budgetSearchSearchHandler`);
 class SearchHandlerFactory {
 	constructor(module) {
 		try {
@@ -24,7 +24,7 @@ class SearchHandlerFactory {
 				case 'cdo/cdoSearchHandler':
 					this.handler = cdoSearchHandler;
 					break;
-				case 'budgetSearch/budgetSearchSearchHandler':
+				case 'jbook/budgetSearchSearchHandler':
 					this.handler = budgetSearchSearchHandler;
 					break;
 				default:
