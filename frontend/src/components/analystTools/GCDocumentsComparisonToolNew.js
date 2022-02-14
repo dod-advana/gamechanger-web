@@ -269,7 +269,7 @@ const GCDocumentsComparisonTool = (props) => {
 			});
 		}
 		
-	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked, paragraphs]);
+	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked, paragraphs, selectedInput]);
 	
 	useEffect(() => {
 		setViewableDocs(returnedDocs)
@@ -291,7 +291,7 @@ const GCDocumentsComparisonTool = (props) => {
 		const newViewableDocs = viewableDocs;
 		newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
 		setViewableDocs(newViewableDocs);
-		if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[0].paragraphs[0]);
+		if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setToFirstResultofInput(selectedInput);
 		if(viewableDocs.length && newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[docIndex].paragraphs[0]);
 	}
 	
@@ -337,7 +337,10 @@ const GCDocumentsComparisonTool = (props) => {
 
 	const removeParagraph = (id) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
-		if(id === selectedInput) setSelectedInput(newParagraphs[0].id)
+		if(id === selectedInput) {
+			setSelectedInput(newParagraphs[0].id);
+			setToFirstResultofInput(newParagraphs[0].id);
+		}
 		setParagraphs(newParagraphs);
 	}
 
@@ -404,10 +407,10 @@ const GCDocumentsComparisonTool = (props) => {
 		}
 	};
 
-	const handleSetToFirstResultofInput = (id) => {
+	const setToFirstResultofInput = (inputId) => {
 		let paragraph;
 		const document = viewableDocs.find(doc => {
-			const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === id)
+			const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === inputId)
 			if(foundPar){
 				paragraph = foundPar;
 				return true;
@@ -420,7 +423,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 
 	const handleSelectInput = (id) => {
-		handleSetToFirstResultofInput(id);
+		setToFirstResultofInput(id);
 		setSelectedInput(id);
 	}
 	
