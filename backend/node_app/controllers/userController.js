@@ -177,19 +177,39 @@ class UserController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			this.user.findAll({ attributes: [
-				'id',
-				'first_name',
-				'last_name',
-				'email',
-				'organization',
-				'phone_number',
-				'extra_fields',
-				'is_admin',
-				'is_super_admin'
-			], raw: true }).then(results => {
-				res.status(200).send({ users: results, timeStamp: new Date().toISOString() });
-			});
+
+			const {cloneName} = req.body;
+
+			const results = await this.user.findAll(
+				{
+					attributes: [
+						'id',
+						'first_name',
+						'last_name',
+						'email',
+						'organization',
+						'phone_number',
+						'extra_fields',
+						'is_admin',
+						'is_super_admin'
+					],
+					raw: true
+				}
+			);
+
+			let filteredResults = results;
+
+			if (cloneName) {
+				filteredResults = results.filter(result => {
+					if (result.extra_fields.clones_visited) {
+						return result.extra_fields.clones_visited.includes(cloneName);
+					} else {
+						return false;
+					}
+				});
+			}
+
+			res.status(200).send({ users: filteredResults, timeStamp: new Date().toISOString() });
 		} catch (err) {
 			this.logger.error(err, 'RQ0WSQP', userId);
 			res.status(500).send(`Error getting users: ${err.message}`);

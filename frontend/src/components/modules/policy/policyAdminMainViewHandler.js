@@ -5,10 +5,12 @@ import {Tooltip} from '@material-ui/core';
 import {HoverNavItem} from '../../navigation/NavItems';
 import {toolTheme} from '../../admin/util/GCAdminStyles';
 import AdminIcon from '../../../images/icon/AdminIcon.png';
+import NewAdminIcon from '../../../images/icon/NewAdminIcon.png';
 import {AddAlert, SupervisedUserCircle} from '@material-ui/icons';
-import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import { ConstrainedIcon, PageLink } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler';
+import GCTooltip from "../../common/GCToolTip";
 
 const PAGES = {
 	general: 'General',
@@ -32,7 +34,7 @@ const PolicyAdminMainViewHandler = {
 			case PAGES.notifications:
 				return <NotificationsManagement cloneName={cloneName} />;
 			case PAGES.userList:
-				return <UserList />;
+				return <UserList cloneName={cloneName} />;
 			default:
 				return renderGeneralAdminButtons();
 		}
@@ -82,6 +84,20 @@ const PolicyAdminMainViewHandler = {
 					</Tooltip>
 				)}
 
+				{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
+					<GCTooltip title="Admin Page" placement="right" arrow>
+						<PageLink
+							href={`#/gamechanger-admin`}
+							centered
+							style={{ width: '100%' }}
+						>
+							<HoverNavItem centered toolTheme={toolTheme}>
+								<ConstrainedIcon src={NewAdminIcon} />
+							</HoverNavItem>
+						</PageLink>
+					</GCTooltip>
+				)}
+
 			</div>
 		);
 	},
@@ -126,6 +142,17 @@ const PolicyAdminMainViewHandler = {
 							<span style={{ marginLeft: '5px' }}>Manage Users</span>
 						</HoverNavItem>
 					</Tooltip>
+				)}
+
+				{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
+					<GCTooltip title="Admin Page" placement="right" arrow>
+						<PageLink href={`#/gamechanger-admin`}>
+							<HoverNavItem toolTheme={toolTheme}>
+								<ConstrainedIcon src={NewAdminIcon} />
+								<span style={{ marginLeft: '10px' }}>Admin Page</span>
+							</HoverNavItem>
+						</PageLink>
+					</GCTooltip>
 				)}
 			</div>
 		);

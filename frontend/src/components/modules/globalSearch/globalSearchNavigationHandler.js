@@ -133,10 +133,10 @@ const GlobalSearchNavigationHandler = {
 						<ConstrainedIcon src={UserFeedbackIcon} />
 					</HoverNavItem>
 				</GCTooltip>
-				{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
+				{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
-							href="#/gamechanger-admin"
+							href={`#/${state.cloneData.url}/admin`}
 							centered
 							style={{ width: '100%' }}
 						>
@@ -191,9 +191,9 @@ const GlobalSearchNavigationHandler = {
 						<span style={{ marginLeft: '10px' }}>User Feedback</span>
 					</HoverNavItem>
 				</GCTooltip>
-				{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
+				{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin">
+						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 								<span style={{ marginLeft: '10px' }}>Admin Page</span>

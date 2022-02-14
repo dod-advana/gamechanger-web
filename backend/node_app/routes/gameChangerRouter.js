@@ -143,7 +143,7 @@ router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklis
 router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
-router.get('/admin/getAllUserData', user.getUserDataForUserList);
+router.post('/admin/getAllUserData', user.getUserDataForUserList);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);
