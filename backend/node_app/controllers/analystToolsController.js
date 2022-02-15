@@ -1,4 +1,4 @@
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
@@ -55,7 +55,7 @@ class AnalystToolsController {
 			const ids = Object.keys(resultsObject);
 			// Query ES
 			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
+			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
 
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
@@ -76,11 +76,11 @@ class AnalystToolsController {
 		let userId = 'webapp_unknown';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { 
+			const {
 				searchedParagraph,
 				matchedParagraphId,
 				docId,
-				positiveFeedback 
+				positiveFeedback
 			} = req.body;
 
 			await this.compareFeedbackModel.findOrCreate({
@@ -89,10 +89,10 @@ class AnalystToolsController {
 					searchedParagraph,
 					matchedParagraphId,
 					docId,
-					positiveFeedback 
+					positiveFeedback
 				}
 			})
-			
+
 			res.status(200);
 		}catch(e){
 			this.logger.error(e, '60OOE63', userId);

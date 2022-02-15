@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('user',
+	return sequelize.define('jbook_user',
 		{
 			id: {
 				type: DataTypes.INTEGER,

@@ -159,7 +159,7 @@ describe('PolicySearchHandler', function () {
 				searchUtility: {}
 			};
 			const target = new PolicySearchHandler(opts);
-			target.createRecObject(req, 'test', true).then(actual => {
+			target.createRecObject(req, 'test', true, 'test').then(actual => {
 				actual.historyRec.startTime = null;
 				const expected = {'clientObj': {'esClientName': 'gamechanger', 'esIndex': 'Test'}, 'cloneSpecificObject': {'includeRevoked': undefined, 'orgFilterString': [], 'searchFields': []}, 'historyRec': {'cachedResult': false, 'clone_name': 'gamechanger', 'endTime': null, 'hadError': false, 'numResults': -1, 'orgFilters': '[]', 'request_body': {'cloneName': 'gamechanger', 'offset': 0, 'options': {'accessDateFilter': [null, null], 'charsPadding': 90, 'includeRevoked': false, 'limit': 6, 'orgFilterString': [], 'publicationDateAllTime': true, 'publicationDateFilter': [null, null], 'searchFields': {'initial': {'field': null, 'input': ''}}, 'searchType': 'Keyword', 'searchVersion': 1, 'showTutorial': false, 'tiny_url': 'gamechanger?tiny=282', 'transformResults': false, 'typeFilterString': [], 'useGCCache': false}, 'searchText': 'shark'}, 'search': '', 'searchText': 'shark', 'searchType': undefined, 'search_version': undefined, 'showTutorial': false, 'startTime': null, 'tiny_url': undefined, 'user_id': 'test'}};
 				assert.deepStrictEqual(actual, expected);

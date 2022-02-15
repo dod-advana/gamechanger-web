@@ -4,7 +4,7 @@ const pdfMakeLib = require('pdfmake');
 const csvStringifyLib = require('csv-stringify');
 const moment = require('moment-timezone');
 const path = require('path');
-const loggerLib = require('../lib/logger');
+const loggerLib = require('@dod-advana/advana-logger');
 
 class Reports {
 	constructor(opts = {}) {

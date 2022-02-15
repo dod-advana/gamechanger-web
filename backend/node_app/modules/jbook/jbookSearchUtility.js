@@ -451,7 +451,14 @@ class JBookSearchUtility {
 	buildEndQuery(sort) {
 		let newQuery = '';
 		if (sort && sort.length) {
-			newQuery += ` ORDER BY "${sort[0].id}" ${sort[0].desc ? 'DESC' : 'ASC'}`;
+			if (sort[0].id === 'serviceReviewer') {
+				newQuery += ` ORDER BY "serviceSecondaryReviewer" ${sort[0].desc ? 'DESC' : 'ASC'}, "serviceReviewer" ${sort[0].desc ? 'DESC' : 'ASC'}`;
+			} if (sort[0].id === 'pocReviewer') {
+				newQuery += ` ORDER BY "altPOCName" ${sort[0].desc ? 'DESC' : 'ASC'}, "servicePOCName" ${sort[0].desc ? 'DESC' : 'ASC'}`;
+			} else {
+				newQuery += ` ORDER BY "${sort[0].id}" ${sort[0].desc ? 'DESC' : 'ASC'}`;
+			}
+
 		}
 		return newQuery;
 	}

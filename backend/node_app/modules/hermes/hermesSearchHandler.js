@@ -7,6 +7,7 @@ const constants = require('../../config/constants');
 const SearchHandler = require('../base/searchHandler');
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const sparkMD5 = require('spark-md5');
+const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
 
 const redisAsyncClientDB = 7;
 
@@ -17,7 +18,7 @@ class HermesSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			searchText: '',
 			startTime: new Date().toISOString(),
 			numResults: -1,
@@ -146,7 +147,7 @@ class HermesSearchHandler extends SearchHandler {
 					const { totalCount } = searchResults;
 					historyRec.endTime = new Date().toISOString();
 					historyRec.numResults = totalCount;
-					await this.storeRecordOfSearchInPg(historyRec, userId);
+					await this.storeRecordOfSearchInPg(historyRec, getUserIdFromSAMLUserId(req));
 				} catch (e) {
 					this.logger.error(e.message, 'CWDCQLF', userId);
 				}

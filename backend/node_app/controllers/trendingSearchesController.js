@@ -1,6 +1,6 @@
 const GC_HISTORY = require('../models').gc_history;
 const GC_TRENDING_BLACKLIST = require('../models').gc_trending_blacklist;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../utils/searchUtility');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
@@ -23,11 +23,11 @@ class TrendingSearchesController {
 		this.searchUtility = searchUtility;
 
 		this.trendingSearchesPOST = this.trendingSearchesPOST.bind(this);
-		this.getTrendingBlacklist = this.getTrendingBlacklist.bind(this); 
+		this.getTrendingBlacklist = this.getTrendingBlacklist.bind(this);
 		this.setTrendingBlacklist = this.setTrendingBlacklist.bind(this);
 		this.deleteTrendingBlacklist = this.deleteTrendingBlacklist.bind(this);
 		this.getWeeklySearchCount = this.getWeeklySearchCount.bind(this);
-		
+
 	}
 
 	async trendingSearchesPOST(req, res) {
@@ -153,7 +153,7 @@ class TrendingSearchesController {
 			res.status(500).send(results);
 		}
 	}
-	
+
 }
 
 module.exports.TrendingSearchesController = TrendingSearchesController;

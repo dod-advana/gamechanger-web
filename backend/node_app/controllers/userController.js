@@ -1,5 +1,7 @@
 const INTERNAL_USER_TRACKING = require('../models').internal_user_tracking;
 const GC_USER = require('../models').gc_user;
+const USER = require('../models').user;
+const JBOOK_USER = require('../models').jbook_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
@@ -8,7 +10,7 @@ const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
 const GC_HISTORY = require('../models').gc_history;
 const EXPORT_HISTORY = require('../models').export_history;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility');
 const { SearchController } = require('./searchController');
@@ -17,7 +19,12 @@ const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const Op = Sequelize.Op;
+const ApiKeyRequests = require('../models').api_key_request;
+const ApiKey = require('../models').api_key;
+const FEEDBACK = require('../models').feedback;
+const GC_ASSISTS = require('../models').gc_assists;
 
 class UserController {
 
@@ -46,6 +53,12 @@ class UserController {
 				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
 			}),
 			dataApi = new DataLibrary(opts),
+			apiKeyRequests = ApiKeyRequests,
+			apiKey = ApiKey,
+			feedback = FEEDBACK,
+			gcAssists = GC_ASSISTS,
+			user = USER,
+			jbook_user = JBOOK_USER
 		} = opts;
 
 		this.logger = logger;
@@ -67,21 +80,182 @@ class UserController {
 		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
+		this.apiKeyRequests = apiKeyRequests;
+		this.apiKey = apiKey;
+		this.feedback = feedback;
+		this.gcAssists = gcAssists;
+		this.user = user;
+		this.jbookUser = jbook_user;
 
 		this.deleteInternalUser = this.deleteInternalUser.bind(this);
-		this.addInternalUser = this.addInternalUser.bind(this);
+		this.syncUserTable = this.syncUserTable.bind(this);
 		this.getInternalUsers = this.getInternalUsers.bind(this);
-		this.setUserBetaStatus = this.setUserBetaStatus.bind(this);
 		this.submitUserInfo = this.submitUserInfo.bind(this);
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
+		this.getUserDataForUserList = this.getUserDataForUserList.bind(this);
+		this.updateOrCreateUser = this.updateOrCreateUser.bind(this);
+		this.updateOrCreateUserHelper = this.updateOrCreateUserHelper.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
 		this.sendClassificationAlert = this.sendClassificationAlert.bind(this);
 		this.clearDashboardNotification = this.clearDashboardNotification.bind(this);
 		this.updateUserAPIRequestLimit = this.updateUserAPIRequestLimit.bind(this);
 		this.resetAPIRequestLimit = this.resetAPIRequestLimit.bind(this);
-		this.populateNewUserId = this.populateNewUserId.bind(this);
 		this.getRecentSearches = this.getRecentSearches.bind(this);
+		this.getUserProfileData = this.getUserProfileData.bind(this);
+		this.updateUserProfileData = this.updateUserProfileData.bind(this);
+		this.syncUserHelper = this.syncUserHelper.bind(this);
+		this.updateClonesVisited = this.updateClonesVisited.bind(this);
+	}
+
+	async getUserProfileData(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+
+			const user = await this.user.findOne({attributes: [
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'organization',
+				'phone_number',
+				'preferred_name',
+				'sub_office',
+				'country',
+				'state',
+				'city',
+				'job_title',
+				'extra_fields'
+			], where: { user_id: user_id }, raw: true});
+			return res.status(200).send(user);
+		} catch (err) {
+			this.logger.error(err, 'BGNU8KA', userId);
+			res.status(500).send(`Error getting user profile data: ${err.message}`);
+		}
+	}
+
+	async updateUserProfileData(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+			const { userData } = req.body;
+
+			const user = await this.user.findOne({where: { user_id: user_id }});
+
+			if (user) {
+				user.first_name = userData.first_name;
+				user.last_name = userData.last_name;
+				user.organization = userData.organization;
+				user.sub_office = userData.sub_office;
+				user.email = userData.email;
+				user.phone_number = userData.phone_number;
+				user.preferred_name = userData.preferred_name;
+				user.country = userData.country;
+				user.state = userData.state;
+				user.city = userData.city;
+				user.job_title = userData.job_title;
+				user.extra_fields = userData.extra_fields;
+				await user.save();
+
+				return res.sendStatus(200);
+			} else {
+				return res.status(404).send('User not found');
+			}
+		} catch (err) {
+			this.logger.error(err, '6LFTX8V', userId);
+			res.status(500).send(`Error updating user profile data: ${err.message}`);
+		}
+	}
+
+	async getUserDataForUserList(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+
+			const {cloneName} = req.body;
+
+			const results = await this.user.findAll(
+				{
+					attributes: [
+						'id',
+						'first_name',
+						'last_name',
+						'email',
+						'organization',
+						'phone_number',
+						'extra_fields',
+						'is_super_admin'
+					],
+					raw: true
+				}
+			);
+
+			const fieldsToIgnore = ['clones_visited'];
+
+			let filteredResults = results.map(result => {
+				let is_admin = false;
+				Object.keys(result.extra_fields).forEach(extraKey => {
+					if (!fieldsToIgnore.includes(extraKey) && result.extra_fields[extraKey].hasOwnProperty('is_admin')) {
+						if (result.extra_fields[extraKey].is_admin) {
+							is_admin = true;
+						}
+					}
+				});
+
+				return {...result, is_admin};
+			});
+
+			if (cloneName) {
+				filteredResults = filteredResults.filter(result => {
+					if (result.extra_fields.clones_visited) {
+						return result.extra_fields.clones_visited.includes(cloneName);
+					} else {
+						return false;
+					}
+				});
+			}
+
+			res.status(200).send({ users: filteredResults, timeStamp: new Date().toISOString() });
+		} catch (err) {
+			this.logger.error(err, 'RQ0WSQP', userId);
+			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
+	async updateClonesVisited(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+			const { clone } = req.body;
+
+			const user = await this.user.findOne({where: { user_id: user_id }, raw: true});
+
+			if (user && user!== null) {
+				if (user.extra_fields.hasOwnProperty('clones_visited')) {
+					if (!user.extra_fields.clones_visited.includes(clone)) {
+						user.extra_fields.clones_visited.push(clone)
+						await this.updateOrCreateUserHelper(user, user_id, true);
+					}
+				} else {
+					user.extra_fields['clones_visited'] = [clone];
+					await this.updateOrCreateUserHelper(user, user_id, true);
+				}
+			}
+
+			res.sendStatus(200);
+
+		} catch (err) {
+			this.logger.error(err, 'CFHGJJ4', userId);
+			res.status(500).send(`Error updating clones visited: ${err.message}`);
+		}
 	}
 
 	async getUserData(req, res) {
@@ -89,20 +263,20 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
-			const [user, created] = await this.gcUser.findOrCreate(
+			let user = await this.gcUser.findOne(
 				{
-					where: { user_id: hashed_user },
+					where: { user_id: user_id },
 					defaults: {
-						user_id: hashed_user,
+						user_id: user_id,
 						notifications: {}
 					},
 					raw: true,
 				}
 			);
 
-			if (!created) {
+			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
 					where: {user_id: user.user_id},
 					raw: true
@@ -293,7 +467,7 @@ class UserController {
 					user.search_history = [];
 				}
 
-				const api_key = await this.externalAPI.getAPIKey(userId);
+				const api_key = await this.externalAPI.getAPIKey(user_id);
 				user.api_key = api_key;
 
 				if (export_history) {
@@ -303,6 +477,10 @@ class UserController {
 				}
 
 			} else {
+				user = {
+					user_id: user_id,
+					notifications: {}
+				};
 				user.favorite_documents = [];
 				user.favorite_searches = [];
 				user.search_history = [];
@@ -319,53 +497,415 @@ class UserController {
 		}
 	}
 
+	async updateOrCreateUser(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { userData, fromApp } = req.body;
+			res.status(200).send(await this.updateOrCreateUserHelper(userData, userId, fromApp));
+		} catch (err) {
+			this.logger.error(err, 'VFA1YU7', userId);
+			res.status(500).send(`Error adding or updating user: ${err.message}`);
+		}
+	}
+
+	async updateOrCreateUserHelper(userData, userId, fromApp = false) {
+		try {
+			let foundItem;
+
+			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id, false) : userId;
+
+			if (fromApp) {
+				foundItem = await this.user.findOne({ where: {id: userData.id}, raw: true});
+			} else {
+				foundItem = await this.user.findOne({where: {user_id: user_id}, raw: true});
+			}
+
+			if (!foundItem) {
+				if (fromApp){
+					await this.user.create(userData);
+				} else {
+
+					// Migrate the users data from the old GC table
+					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn})
+
+					const tmpExtraFields = {gamechanger: oldGCUserInfo.policy || {} };
+
+					// Bring in jbook user info we want into extra fields and update the main user info with jbook info if available
+					tmpExtraFields['jbook'] = {
+						is_primary_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_primary_reviewer : false,
+						is_service_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_service_reviewer : false,
+						is_poc_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_poc_reviewer : false,
+						is_admin: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_admin : false
+					};
+
+					const newUser = {
+						user_id: user_id,
+						first_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.first_name && oldGCUserInfo.jbook.first_name !== null && oldGCUserInfo.jbook.first_name !== '') ? oldGCUserInfo.jbook.first_name : userData.firstName : userData.firstName,
+						last_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.last_name && oldGCUserInfo.jbook.last_name !== null && oldGCUserInfo.jbook.last_name !== '') ? oldGCUserInfo.jbook.last_name : userData.lastName : userData.lastName,
+						organization: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.organization && oldGCUserInfo.jbook.organization !== null && oldGCUserInfo.jbook.organization !== '') ? oldGCUserInfo.jbook.organization : null : null,
+						email: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.email && oldGCUserInfo.jbook.email !== null && oldGCUserInfo.jbook.email !== '') ? oldGCUserInfo.jbook.email : null : null,
+						phone_number: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.phone_number && oldGCUserInfo.jbook.phone_number !== null && oldGCUserInfo.jbook.phone_number !== '') ? oldGCUserInfo.jbook.phone_number : null : null,
+						sub_office: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.sub_office && oldGCUserInfo.jbook.sub_office !== null && oldGCUserInfo.jbook.sub_office !== '') ? oldGCUserInfo.jbook.sub_office : null : null,
+						country: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.country && oldGCUserInfo.jbook.country !== null && oldGCUserInfo.jbook.country !== '') ? oldGCUserInfo.jbook.country : null : null,
+						state: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.state && oldGCUserInfo.jbook.state !== null && oldGCUserInfo.jbook.state !== '') ? oldGCUserInfo.jbook.state : null : null,
+						city: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.city && oldGCUserInfo.jbook.city !== null && oldGCUserInfo.jbook.city !== '') ? oldGCUserInfo.jbook.city : null : null,
+						job_title: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.job_title && oldGCUserInfo.jbook.job_title !== null && oldGCUserInfo.jbook.job_title !== '') ? oldGCUserInfo.jbook.job_title : null : null,
+						preferred_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.preferred_name && oldGCUserInfo.jbook.preferred_name !== null && oldGCUserInfo.jbook.preferred_name !== '') ? oldGCUserInfo.jbook.preferred_name : null : null,
+						cn: userData.cn,
+						extra_fields: tmpExtraFields
+					};
+
+					await this.user.create(newUser);
+				}
+				return true;
+			} else {
+				if (fromApp) {
+					await this.user.update(userData, {where: {id: userData.id}});
+				} else {
+					const tempUser = {...foundItem};
+
+					if ((!tempUser.first_name || tempUser.first_name === null || tempUser.first_name === '') && userData.firstName) tempUser.first_name = userData.firstName;
+					if ((!tempUser.last_name || tempUser.last_name === null || tempUser.last_name === '') && userData.lastName) tempUser.last_name = userData.lastName;
+					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn) tempUser.cn = userData.cn;
+
+					await this.user.update(tempUser, {where: {user_id: user_id}});
+				}
+			}
+
+			return true;
+		} catch (err) {
+			this.logger.error(err, '2XY95Z7', userId);
+			return false;
+		}
+	}
+
+	async deleteUserData(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { userRowId } = req.body;
+			const user = await this.user.findOne({ where: { id: userRowId } });
+			await user.destroy();
+
+			res.status(200).send({ deleted: true });
+		} catch (err) {
+			this.logger.error(err, 'HZSJ075', userId);
+			res.status(500).send(`Error delete user: ${err.message}`);
+		}
+	}
+
+	async syncUserTable(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+
+			// First pull all the users that have a CN as that means they are using new system
+			const newUsers = await this.user.findAll({
+				where: {
+					cn: {
+						[Op.not]: null
+					}
+				},
+				raw: true
+			});
+
+			console.log(newUsers)
+
+			// Loop through new users
+			for (const user of newUsers) {
+				await this.syncUserHelper(user, userId);
+			}
+
+			res.status(200).send({ syncd: true });
+		} catch (err) {
+			this.logger.error(err, 'K4822BB', userId);
+			res.status(500).send(`Error delete user: ${err.message}`);
+		}
+	}
+
+	async syncUserHelper(user, userId) {
+		try {
+			const decoupledUserIdHashed = this.sparkMD5.hash(user.cn);
+			const coupledUserIDWithAtMilHashed = this.sparkMD5.hash(`${user.user_id}@mil`);
+			const coupledUserIDHashed = this.sparkMD5.hash(user.user_id);
+
+			const hashedIds = [decoupledUserIdHashed, coupledUserIDWithAtMilHashed, coupledUserIDHashed];
+
+			// Pull any users that match these ids
+			let finalOldUser = {};
+
+			let oldUsers = await this.gcUser.findAll({
+				where: {
+					user_id: {
+						[Op.in]: hashedIds
+					}
+				},
+				raw: true
+			});
+
+			if (oldUsers.length > 0) {
+
+				// Combine basic user data and delete the old user
+				for (const oldUser of oldUsers) {
+
+					const nonHashedIds = [user.cn, `${user.user_id}@mil`];
+					const allIds = hashedIds.concat(nonHashedIds);
+
+					// API Key Requests
+					let foundRecords = await this.apiKeyRequests.findAll({
+						where: {
+							username: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const apiKeyRequest of foundRecords) {
+						apiKeyRequest.username = user.user_id;
+						await this.apiKeyRequests.update(apiKeyRequest, {where: {id: apiKeyRequest.id}});
+					}
+
+					// API Keys
+					foundRecords = await this.apiKey.findAll({
+						where: {
+							username: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const apiKey of foundRecords) {
+						apiKey.username = user.user_id;
+						await this.apiKey.update(apiKey, {where: {id: apiKey.id}});
+					}
+
+					// Export History
+					foundRecords = await this.exportHistory.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const history of foundRecords) {
+						history.user_id = user.user_id;
+						await this.exportHistory.update(history, {where: {id: history.id}});
+					}
+
+					// Favorite Documents
+					foundRecords = await this.favoriteDocument.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteDocument.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Documents Group
+					foundRecords = await this.favoriteDocumentsGroup.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteDocumentsGroup.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Groups
+					foundRecords = await this.favoriteGroup.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteGroup.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Organizations
+					foundRecords = await this.favoriteOrganization.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteOrganization.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Searches
+					foundRecords = await this.favoriteSearch.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteSearch.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Favorite Topics
+					foundRecords = await this.favoriteTopic.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const favorite of foundRecords) {
+						favorite.user_id = user.user_id;
+						await this.favoriteTopic.update(favorite, {where: {id: favorite.id}});
+					}
+
+					// Feedback
+					foundRecords = await this.feedback.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const feedback of foundRecords) {
+						feedback.user_id = user.user_id;
+						await this.feedback.update(feedback, {where: {id: feedback.id}});
+					}
+
+					// GC Assists
+					foundRecords = await this.gcAssists.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const assist of foundRecords) {
+						assist.user_id = user.user_id;
+						await this.gcAssists.update(assist, {where: {id: assist.id}});
+					}
+
+					// GC History
+					foundRecords = await this.gcHistory.findAll({
+						where: {
+							user_id: {
+								[Op.in]: allIds
+							}
+						},
+						raw: true
+					});
+
+					for (const history of foundRecords) {
+						history.user_id = user.user_id;
+						await this.gcHistory.update(history, {where: {id: history.id}});
+					}
+
+					// Update old user id
+					if (!finalOldUser['policy']) {
+						finalOldUser['policy'] = {
+							is_beta: oldUser.is_beta,
+							notifications: oldUser.notifications,
+							api_requests: oldUser.api_requests,
+							submitted_info: oldUser.submitted_info,
+							is_internal: oldUser.is_internal,
+							is_admin: oldUser.is_admin
+						};
+						finalOldUser.user_id = user.user_id;
+						delete finalOldUser.id;
+					} else {
+						if (oldUser.is_beta != null) finalOldUser['policy'].is_beta = oldUser.is_beta;
+						if (oldUser.notifications != null) finalOldUser['policy'].notifications = oldUser.notifications;
+						if (oldUser.api_requests != null) finalOldUser['policy'].api_requests = oldUser.api_requests;
+						if (oldUser.submitted_info != null) finalOldUser['policy'].submitted_info = oldUser.submitted_info;
+						if (oldUser.is_internal != null) finalOldUser['policy'].is_internal = oldUser.is_internal;
+						if (oldUser.is_admin != null) finalOldUser['policy'].is_admin = oldUser.is_admin;
+					}
+
+					await this.gcUser.destroy({
+						where: {
+							id: oldUser.id
+						}
+					});
+				}
+
+			}
+
+			oldUsers = await this.jbookUser.findOne({
+				where: {
+					user_id: user.user_id
+				},
+				raw: true
+			});
+
+			if (oldUsers && oldUsers !== null) {
+				finalOldUser['jbook'] = {
+					...oldUsers
+				};
+			}
+
+			return finalOldUser || {};
+		}
+		 catch (err) {
+			this.logger.error(err, 'Z70XSYL', userId);
+			return {};
+		}
+	}
+
 	async getUserSettings(req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
-			const [user] = await this.gcUser.findOrCreate(
+			const user = await this.gcUser.findOne(
 				{
-					where: { user_id: hashed_user },
-					defaults: {
-						user_id: hashed_user,
-						is_beta: false,
-						notifications: {}
-					},
+					where: { user_id: user_id },
 					raw: true
 				}
 			);
-			user.submitted_info = true;
+
+			if (user) {
+				user.submitted_info = true;
+			}
+
 			res.status(200).send(user);
 		} catch (err) {
 			this.logger.error(err.message, 'ZX1SWBU', userId);
-			res.status(500).send(err);
-		}
-	}
-
-	async setUserBetaStatus(req, res) {
-		let userId = 'webapp_unknown';
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
-			const { status } = req.body;
-
-			await this.gcUser.update(
-				{
-					is_beta: status
-				},
-				{
-					where: {
-						user_id: hashed_user
-					}
-				}
-			);
-			res.status(200).send(status);
-		} catch (err) {
-			this.logger.error(err.message, 'NGED0R4', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -374,8 +914,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.gcUser.update(
 				{
@@ -384,7 +923,7 @@ class UserController {
 				},
 				{
 					where: {
-						user_id: hashed_user
+						user_id: user_id
 					}
 				}
 			);
@@ -406,33 +945,6 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, '8QJXVTA', userId);
 			res.status(500).send(`Error getting internal users list: ${err.message}`);
-		}
-	}
-
-	async addInternalUser(req, res) {
-		let userId = 'webapp_unknown';
-
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { trackByRequest = false } = req.body;
-			let username;
-			if (trackByRequest){
-				username = userId;
-			} else {
-				username = req.body.username || '';
-			}
-			username = this.sparkMD5.hash(username);
-			const exists = await this.internalUserTracking.findOne({ where: { username } });
-			if (exists) {
-				const { id, username } = exists;
-				res.status(500).send(`This user is already being tracked. Table ID # ${id} - hash: ${username}`);
-			} else {
-				const created = await this.internalUserTracking.create({ username });
-				res.status(200).send(created);
-			}
-		} catch (err) {
-			this.logger.error(err, 'VEUUDWQ', userId);
-			res.status(500).send(`Error adding internal user: ${err.message}`);
 		}
 	}
 
@@ -464,8 +976,8 @@ class UserController {
 			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
 			res.status(200).send({status: 'good'});
 			// }).catch(error => {
-				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				// res.status(500).send(error);
+			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+			// res.status(500).send(error);
 			// });
 
 			// const axios = require('axios');
@@ -518,10 +1030,10 @@ class UserController {
 			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
 			this.logger.info(`Classification alert: ${emailBody}`);
 			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
-				res.status(200).send({status: 'good'});
+			res.status(200).send({status: 'good'});
 			// }).catch(error => {
-				// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-				// res.status(500).send(error);
+			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
+			// res.status(500).send(error);
 			// });
 		} catch (err) {
 			const { message } = err;
@@ -534,12 +1046,12 @@ class UserController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.sequelize.transaction(async (t) => {
 				const userData = await this.gcUser.findOne({
 					where: {
-						user_id: hashed_user
+						user_id: user_id
 					},
 					transaction: t,
 					// there is a race condition between this select and the notification json modification
@@ -555,7 +1067,7 @@ class UserController {
 					await this.gcUser.update({ notifications: userData.notifications },
 						{
 							where: {
-								user_id: hashed_user
+								user_id: user_id
 							},
 							transaction: t,
 						});
@@ -575,9 +1087,9 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 
-			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: hashed_user } });
+			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: user_id } });
 			
 			res.status(200).send();
 		} catch(err) {
@@ -608,54 +1120,13 @@ class UserController {
 		}
 	}
 
-	async populateNewUserId(req, res) {
-		let userId = 'unknown_webapp'
-		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const tableArr = [this.gcHistory, this.exportHistory, this.favoriteDocument, this.favoriteSearch, this.favoriteTopic];
-			tableArr.forEach(async (table, index) => {
-				const users = await table.findAll({
-					attributes: ['user_id','new_user_id'],
-					group: ['user_id','new_user_id'],
-					where: {
-						'new_user_id': {
-							[Op.ne]: null
-						}
-					}
-				});
-				users.forEach(async (combo) => {
-					const old_id = combo.dataValues.user_id;
-					const new_id = combo.dataValues.new_user_id;
-					
-					await table.update(
-						{
-							new_user_id : new_id
-						},
-						{
-							where : {
-								user_id : old_id,
-								new_user_id: {
-									$eq: null
-								}
-							}
-						}
-					);
-				});
-			});;
-			res.status(200).send({});
-		} catch(e) {
-			this.logger.error(e, 'LTKT9WZ', userId);
-			res.status(500).send(e)
-		}
-	}
-
 	async getRecentSearches(req, res) {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
 			
-			const hashed_user = this.sparkMD5.hash(userId);
+			const user_id = getUserIdFromSAMLUserId(req);
 			
 			let ids = await this.gcHistory.findAll({
 				attributes: [
@@ -664,7 +1135,7 @@ class UserController {
 				where: {
 					clone_name,
 					had_error: 'f',
-					user_id: hashed_user
+					user_id: user_id
 				},
 				group: ['search'],
 				order: [[Sequelize.col('id'), 'DESC']],

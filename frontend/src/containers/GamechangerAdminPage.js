@@ -5,11 +5,12 @@ import SearchBanner from '../components/searchBar/GCSearchBanner';
 import MLDashboard from '../components/admin/MLDashboard';
 import GeneralAdminButtons from '../components/admin/GeneralAdminButtons';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
-import InternalUsersManagement from '../components/user/InternalUserManagement';
+// import InternalUsersManagement from '../components/user/InternalUserManagement';
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
 import CloneList from '../components/admin/CloneList';
 import ResponsibilityUpdates from '../components/admin/ResponsibilityUpdates';
+import UserList from '../components/admin/UserList';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
@@ -33,7 +34,7 @@ const PAGES = {
 	adminList: 'AdminList',
 	mlDashboard: 'mlDashboard',
 	notifications: 'Notifications',
-	internalUsers: 'Internal Users',
+	userList: 'Users',
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
@@ -70,8 +71,8 @@ const GamechangerAdminPage = (props) => {
 				return <AdminList />;
 			case PAGES.notifications:
 				return <NotificationsManagement />;
-			case PAGES.internalUsers:
-				return <InternalUsersManagement />;
+			case PAGES.userList:
+				return <UserList />;
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
@@ -119,7 +120,8 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-			></SearchBanner>
+				cloneData={{clone_name: 'gamechanger'}}
+			/>
 
 			{renderSwitch(pageToView)}
 		</div>
