@@ -40,10 +40,7 @@ const apiColumns = [
 		),
 	},
 ];
-const initTransformer = {
-	encoder: '',
-	sim: '',
-};
+
 
 /**
  * This class queries the ml api information

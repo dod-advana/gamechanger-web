@@ -59,7 +59,6 @@ export default (props) => {
 		model:'',
 		type:''
 	})
-	const date = new Date();
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([])
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
@@ -87,6 +86,9 @@ export default (props) => {
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
 	const [qexpupload, setQexpUpload] = useState(false);
+	const [topicsUpload, setTopicsUpload] = useState(false);
+	const [topicsSampling, setTopicsSampling] = useState(1);
+	const [topicsVersion, setTopicsVersion] = useState(DEFAULT_VERSION);
 
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
@@ -311,6 +313,23 @@ export default (props) => {
 				build_type: 'qexp',
 				version: qexpversion,
 				upload: qexpupload
+			});
+			props.updateLogs('Started training', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error training model: ' + e.toString(), 2);
+		}
+	};
+	/**
+	 * @method triggerTrainTopics
+	 */
+	const triggerTrainTopics = async () => {
+		try {
+			await gameChangerAPI.trainModel({
+				build_type: 'topics',
+				sample_rate: topicsSampling,
+				upload: qexpupload,
+				version: topicsVersion
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -745,7 +764,6 @@ export default (props) => {
 							onClick={() => {
 								triggerTrainModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
@@ -845,7 +863,69 @@ export default (props) => {
 								onChange={(e) => setQexpUpload(e.target.checked)}
 							/>
 						</div>
-					</div>					
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Topic Model</b>
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerTrainTopics();
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Train
+						</GCPrimaryButton>
+					
+						<div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
+							Version:
+							</div>
+							<Input
+								value={qexpversion}
+								onChange={(e) => setTopicsVersion(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+							Sampling:
+							</div>
+							<Input
+								value={topicsSampling}
+								onChange={(e) => setTopicsSampling(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Upload:
+							</div>
+							<Checkbox
+								checked={topicsUpload}
+								onChange={(e) => setTopicsUpload(e.target.checked)}
+							/>
+						</div>
+					</div>							
 					<div
 						style={{
 							width: '100%',
@@ -863,7 +943,6 @@ export default (props) => {
 							onClick={() => {
 								triggerFinetuneModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
