@@ -179,6 +179,10 @@ const useStyles = makeStyles((theme) => ({
 			fontSize: 12,
 		},
 	},
+	dialogSm: {
+		maxWidth: '800px',
+		minWidth: '800px'
+	},
 	dialogLg: {
 		maxWidth: '1200px',
 		minWidth: '1200px',

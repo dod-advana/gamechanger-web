@@ -95,7 +95,10 @@ const UserList = React.memo((props) => {
 
 	const {
 		cloneName,
-		columns
+		columns,
+		title,
+		titleAdditions,
+		descriptionAdditions
 	} = props;
 
 	// Component Properties
@@ -114,7 +117,6 @@ const UserList = React.memo((props) => {
 		_.forEach(data.data.users, result => {
 			tableData.push(result);
 		});
-    
 		setGCUserTableData(tableData);
 	}
 
@@ -132,62 +134,67 @@ const UserList = React.memo((props) => {
 
 	useEffect(() => {
 		let tmpColumns = [];
-		if (columns.length > 0) {
-			tmpColumns = [...columns];
-		} else {
-			tmpColumns = [...DEFAULT_COLUMNS];
-		}
 
-		tmpColumns.push({
-			Header: ' ',
-			accessor: 'id',
-			width: 120,
-			filterable: false,
-			Cell: row => (
-				<TableRow>
-					<GCButton
-						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', 'EditUser', 'onClick', row.value);
-							setEditUserData(gcUserTableData.filter(user => user.id === row.value)[0]);
-							setShowCreateEditUserModal(true);
-						}}
-						style={{minWidth: 'unset', backgroundColor: '#1C2D64', borderColor: '#1C2D64'}}
-					>Edit</GCButton>
-				</TableRow>
-			)
-		});
-		tmpColumns.push({
-			Header: ' ',
-			accessor: 'id',
-			width: 120,
-			filterable: false,
-			Cell: row => (
-				<TableRow>
-					<GCButton
-						onClick={() => {
-							trackEvent('GAMECHANGER_Admin', 'DeleteUser', 'onClick', row.value);
-							deleteUserData(row.value).then(() => {
-								getUserData().then(() => {
-									setShowCreateEditUserModal(false);
+		if (columns && gcUserTableData) {
+			if (columns.length > 0) {
+				tmpColumns = [...columns];
+			} else {
+				tmpColumns = [...DEFAULT_COLUMNS];
+			}
+
+			tmpColumns.push({
+				Header: ' ',
+				accessor: 'id',
+				width: 120,
+				filterable: false,
+				Cell: row => (
+					<TableRow>
+						<GCButton
+							onClick={() => {
+								trackEvent('GAMECHANGER_Admin', 'EditUser', 'onClick', row.value);
+								setEditUserData(gcUserTableData.filter(user => user.id === row.value)[0]);
+								setShowCreateEditUserModal(true);
+							}}
+							style={{minWidth: 'unset', backgroundColor: '#1C2D64', borderColor: '#1C2D64'}}
+						>Edit</GCButton>
+					</TableRow>
+				)
+			});
+			tmpColumns.push({
+				Header: ' ',
+				accessor: 'id',
+				width: 120,
+				filterable: false,
+				Cell: row => (
+					<TableRow>
+						<GCButton
+							onClick={() => {
+								trackEvent('GAMECHANGER_Admin', 'DeleteUser', 'onClick', row.value);
+								deleteUserData(row.value).then(() => {
+									getUserData().then(() => {
+										setShowCreateEditUserModal(false);
+									});
 								});
-							});
-						}}
-						style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red'}}
-					>Delete</GCButton>
-				</TableRow>
-			)
-		});
+							}}
+							style={{minWidth: 'unset', backgroundColor: 'red', borderColor: 'red'}}
+						>Delete</GCButton>
+					</TableRow>
+				)
+			});
+		}
 
 		setTableColumns(tmpColumns)
 		// eslint-disable-next-line
-	}, [columns])
+	}, [columns, gcUserTableData])
 
 	return ( 
 		<>   
 			<div>
 				<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>{`${cloneName ? cloneName.toUpperCase() : 'GAMECHANGER'} Users`}</p>
+					<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>{title ? title : `${cloneName ? cloneName.toUpperCase() : 'GAMECHANGER'} Users`}</p>
+					{titleAdditions && titleAdditions()}
 				</div>
+				{descriptionAdditions && descriptionAdditions()}
 				<ReactTable
 					data={gcUserTableData}
 					columns={tableColumns}

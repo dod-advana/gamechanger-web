@@ -10,7 +10,7 @@ const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
 const Excel = require('exceljs');
 const EmailUtility = require('../utils/emailUtility');
-const BudgetSearchSearchUtility = require('../modules/jbook/jbookSearchUtility');
+const JBookSearchUtility = require('../modules/jbook/jbookSearchUtility');
 const DB = require('../models/index');
 
 class ReviewController {
@@ -20,7 +20,7 @@ class ReviewController {
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
-			budgetSearchSearchUtility = new BudgetSearchSearchUtility(opts),
+			jbookSearchUtility = new JBookSearchUtility(opts),
 			constants = constantsFile,
 			review = REVIEW,
 			pdoc = PDOC,
@@ -38,7 +38,7 @@ class ReviewController {
 		this.pdoc = pdoc;
 		this.rdoc = rdoc;
 		this.odoc = odoc;
-		this.budgetSearchSearchUtility = budgetSearchSearchUtility;
+		this.jbookSearchUtility = jbookSearchUtility;
 		this.db = db;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
@@ -70,8 +70,8 @@ class ReviewController {
 			const { emails = [] } = req.body;
 
 			// Gather all the reviews that have not been completed and that have primary reviewer
-			const [pSelect, rSelect, oSelect] = this.budgetSearchSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.budgetSearchSearchUtility.buildStatusUpdateWhereQuery();
+			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildStatusUpdateWhereQuery();
 
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
