@@ -24,6 +24,8 @@ const { AppSettingsController } = require('../controllers/appSettingsController'
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
 const { AnalystToolsController } = require('../controllers/analystToolsController');
+const { ReviewController } = require('../controllers/reviewController');
+const { ReviewerController } = require('../controllers/reviewerController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -46,12 +48,16 @@ const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
 const analyticsTools = new AnalystToolsController();
+const reviewController = new ReviewController();
+const reviewer = new ReviewerController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
 router.get('/getElasticSearchIndex', search.getElasticSearchIndex);
 router.post('/admin/setElasticSearchIndex', search.setElasticSearchIndex);
 router.post('/admin/queryEs', search.queryEs);
+
+router.post('/expandTerms', search.expandTerms);
 
 router.post('/dataTracker/getTrackedData', dataTracker.getTrackedData);
 router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
@@ -67,6 +73,8 @@ router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
 router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
+
+router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
@@ -160,6 +168,10 @@ router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.post('/getRecentSearches', user.getRecentSearches);
+
+router.get('/admin/getReviewerData', reviewer.getReviewerData);
+router.post('/admin/createUpdateReviewer', reviewer.updateOrCreateReviewer);
+router.post('/admin/deleteReviewerData', reviewer.deleteReviewerData);
 
 router.post('/textSuggestion', textSuggest.getTextSuggestion);
 // router.post('/presearchSuggestion', presearchSuggest.getpresearchSuggestion);

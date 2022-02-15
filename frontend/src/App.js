@@ -247,7 +247,6 @@ const App = () => {
 					}
 				}
 			});
-			console.log(cloneRoutes);
 			setGameChangerCloneRoutes(cloneRoutes);
 		} catch (err) {
 			console.log(err);

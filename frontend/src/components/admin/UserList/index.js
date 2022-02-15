@@ -30,6 +30,63 @@ const getClonePermissions = async () => {
 	return permissionsInfo;
 };
 
+// The table columns
+const DEFAULT_COLUMNS = [
+	{
+		Header: 'First',
+		accessor: 'first_name',
+		Cell: row => (
+			<TableRow>{row.value && row.value !== null ? row.value : 'Unknown First'}</TableRow>
+		)
+	},
+	{
+		Header: 'Last',
+		accessor: 'last_name',
+		Cell: row => (
+			<TableRow>{row.value && row.value !== null ? row.value : 'Unknown Last'}</TableRow>
+		)
+	},
+	{
+		Header: 'Organization',
+		accessor: 'organization',
+		Cell: row => (
+			<TableRow>{row.value}</TableRow>
+		)
+	},
+	{
+		Header: 'Admin',
+		accessor: 'is_admin',
+		width: 100,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'admin'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	},
+	{
+		Header: 'Super Admin',
+		accessor: 'is_super_admin',
+		width: 100,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'super_admin'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	}
+];
+
 /**
  * 
  * @class UserList
@@ -37,7 +94,8 @@ const getClonePermissions = async () => {
 const UserList = React.memo((props) => {
 
 	const {
-		cloneName
+		cloneName,
+		columns
 	} = props;
 
 	// Component Properties
@@ -45,6 +103,7 @@ const UserList = React.memo((props) => {
 	const [showCreateEditUserModal, setShowCreateEditUserModal] = useState(false);
 	const [editUserData, setEditUserData] = useState({});
 	const [permissionsInfo, setPermissionInfo] = useState({});
+	const [tableColumns, setTableColumns] = useState([]);
 	// Component Methods
 
 	const getUserData = async () => {
@@ -59,7 +118,6 @@ const UserList = React.memo((props) => {
 		setGCUserTableData(tableData);
 	}
 
-
 	const deleteUserData = async (userRowId) => {
 		await gameChangerAPI.deleteUserData(userRowId);
 	}
@@ -72,62 +130,15 @@ const UserList = React.memo((props) => {
 		// eslint-disable-next-line
     },[])
 
-	// The table columns
-	const columns = [
-		{
-			Header: 'First',
-			accessor: 'first_name',
-			Cell: row => (
-				<TableRow>{row.value && row.value !== null ? row.value : 'Unknown First'}</TableRow>
-			)
-		},
-		{
-			Header: 'Last',
-			accessor: 'last_name',
-			Cell: row => (
-				<TableRow>{row.value && row.value !== null ? row.value : 'Unknown Last'}</TableRow>
-			)
-		},
-		{
-			Header: 'Organization',
-			accessor: 'organization',
-			Cell: row => (
-				<TableRow>{row.value}</TableRow>
-			)
-		},
-		{
-			Header: 'Admin',
-			accessor: 'is_admin',
-			width: 100,
-			Cell: row => (
-				<TableRow>
-					<GCCheckbox
-						checked={row.value}
-						onChange={() => {}}
-						name={'admin'}
-						color="inherit"
-						style={{...styles.checkbox, color: '#1C2D64'}}
-					/>
-				</TableRow>
-			)
-		},
-		{
-			Header: 'Super Admin',
-			accessor: 'is_super_admin',
-			width: 100,
-			Cell: row => (
-				<TableRow>
-					<GCCheckbox
-						checked={row.value}
-						onChange={() => {}}
-						name={'super_admin'}
-						color="inherit"
-						style={{...styles.checkbox, color: '#1C2D64'}}
-					/>
-				</TableRow>
-			)
-		},
-		{
+	useEffect(() => {
+		let tmpColumns = [];
+		if (columns.length > 0) {
+			tmpColumns = [...columns];
+		} else {
+			tmpColumns = [...DEFAULT_COLUMNS];
+		}
+
+		tmpColumns.push({
 			Header: ' ',
 			accessor: 'id',
 			width: 120,
@@ -144,8 +155,8 @@ const UserList = React.memo((props) => {
 					>Edit</GCButton>
 				</TableRow>
 			)
-		},
-		{
+		});
+		tmpColumns.push({
 			Header: ' ',
 			accessor: 'id',
 			width: 120,
@@ -165,8 +176,11 @@ const UserList = React.memo((props) => {
 					>Delete</GCButton>
 				</TableRow>
 			)
-		}
-	];
+		});
+
+		setTableColumns(tmpColumns)
+		// eslint-disable-next-line
+	}, [columns])
 
 	return ( 
 		<>   
@@ -176,7 +190,7 @@ const UserList = React.memo((props) => {
 				</div>
 				<ReactTable
 					data={gcUserTableData}
-					columns={columns}
+					columns={tableColumns}
 					style={{margin: '0 80px 20px 80px', height: 700}}
 					defaultPageSize={10}
 					filterable={true}
