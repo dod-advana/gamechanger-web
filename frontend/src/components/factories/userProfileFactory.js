@@ -1,5 +1,6 @@
 const defaultUserProfileHandler = require(`../modules/default/defaultUserProfileHandler`);
 const policyUserProfileHandler = require(`../modules/policy/policyUserProfileHandler`);
+const jbookUserProfileHandler = require(`../modules/jbook/jbookUserProfileHandler`);
 
 class UserProfileFactory {
 	constructor(module) {
@@ -7,6 +8,9 @@ class UserProfileFactory {
 			switch (module) {
 				case 'policy/policyMainViewHandler':
 					this.handler = policyUserProfileHandler;
+					break;
+				case 'jbook/jbookMainViewHandler':
+					this.handler = jbookUserProfileHandler;
 					break;
 				default:
 					this.handler = defaultUserProfileHandler;

@@ -21,7 +21,7 @@ const GamechangerLiteAdminPage = (props) => {
 	}, [cloneData, state, dispatch]);
 
 	return (
-		<div className="main-container">
+		<div className="main-container" style={{minHeight: 'calc(100vh - 120px'}}>
 			{state.cloneDataSet && (
 				<AdminMainView context={context} jupiter={jupiter} />
 			)}

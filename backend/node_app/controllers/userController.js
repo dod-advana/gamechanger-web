@@ -172,6 +172,41 @@ class UserController {
 		}
 	}
 
+	async updateUserVisited(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+			const { userData } = req.body;
+
+			const user = await this.user.findOne({where: { user_id: user_id }});
+
+			if (user) {
+				user.first_name = userData.first_name;
+				user.last_name = userData.last_name;
+				user.organization = userData.organization;
+				user.sub_office = userData.sub_office;
+				user.email = userData.email;
+				user.phone_number = userData.phone_number;
+				user.preferred_name = userData.preferred_name;
+				user.country = userData.country;
+				user.state = userData.state;
+				user.city = userData.city;
+				user.job_title = userData.job_title;
+				user.extra_fields = userData.extra_fields;
+				await user.save();
+
+				return res.sendStatus(200);
+			} else {
+				return res.status(404).send('User not found');
+			}
+		} catch (err) {
+			this.logger.error(err, '6LFTX8V', userId);
+			res.status(500).send(`Error updating user profile data: ${err.message}`);
+		}
+	}
+
 	async getUserDataForUserList(req, res) {
 		let userId = 'webapp_unknown';
 

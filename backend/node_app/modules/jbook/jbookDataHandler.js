@@ -34,7 +34,7 @@ class JBookDataHandler extends DataHandler {
 			om = OM,
 			accomp = ACCOMP,
 			review = REVIEW,
-			jbookSearchUtility = new JBookSearchUtility,
+			jbookSearchUtility = new JBookSearchUtility(),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
 			keyword = KEYWORD,
@@ -73,9 +73,9 @@ class JBookDataHandler extends DataHandler {
 		//apply TLS configs to smtp transport as appropriate from env vars
 		if (process.env.EMAIL_REQUIRE_TLS?.toUpperCase() === 'TRUE') {
 			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS,
-				transportOptions.tls = {
-					servername: process.env.EMAIL_TLS_SERVERNAME || ''
-				}
+			transportOptions.tls = {
+				servername: process.env.EMAIL_TLS_SERVERNAME || ''
+			}
 		}
 
 		this.emailUtility = new EmailUtility({
@@ -576,10 +576,10 @@ class JBookDataHandler extends DataHandler {
 			}
 
 			if (!isSubmit) {
-				frontendReviewData[reviewType + "ReviewStatus"] = "Partial Review";
+				frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
 			}
 			else {
-				frontendReviewData[reviewType + "ReviewStatus"] = "Finished Review";
+				frontendReviewData[reviewType + 'ReviewStatus'] = 'Finished Review';
 			}
 			// Review Status Update logic
 			const { primaryReviewStatus, serviceReviewStatus, pocReviewStatus } = frontendReviewData;
@@ -599,7 +599,7 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				status = 'Needs Review'
 			}
-			frontendReviewData["reviewStatus"] = status;
+			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
@@ -667,12 +667,12 @@ class JBookDataHandler extends DataHandler {
 					...reviewData,
 					budget_type: types[reviewData.budget_type]
 				},
-					{
-						where: query
-					}).catch(err => {
-						console.log('Error updating review row')
-						console.log(err);
-					});
+				{
+					where: query
+				}).catch(err => {
+					console.log('Error updating review row')
+					console.log(err);
+				});
 
 				return { created: result && result.length && result[0] === 1 };
 			}
@@ -708,18 +708,18 @@ class JBookDataHandler extends DataHandler {
 
 			if (reviewType === 'jaic') {
 				update = {
-					['primary_review_status']: 'Partial Review',
-					['review_status']: 'Partial Review (Primary)'
+					'primary_review_status': 'Partial Review',
+					'review_status': 'Partial Review (Primary)'
 				}
 			} else if (reviewType === 'service') {
 				update = {
-					['service_review_status']: 'Partial Review',
-					['review_status']: 'Partial Review (Service)'
+					'service_review_status': 'Partial Review',
+					'review_status': 'Partial Review (Service)'
 				}
 			} else {
 				update = {
-					['poc_review_status']: 'Partial Review',
-					['review_status']: 'Partial Review (POC)'
+					'poc_review_status': 'Partial Review',
+					'review_status': 'Partial Review (POC)'
 				}
 			}
 
@@ -926,7 +926,7 @@ class JBookDataHandler extends DataHandler {
 					cid: 'jbook-newsletter-footer'
 				}
 			]
-			await this.emailUtility.sendEmail(emailBody, "JBOOK Search POC Reviewer: Application Access", email, null, attachment, userId)
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search POC Reviewer: Application Access', email, null, attachment, userId)
 		} catch (err) {
 			this.logger.error(err, 'DNZEUJD', userId);
 		}
@@ -980,7 +980,7 @@ class JBookDataHandler extends DataHandler {
 					cid: 'jbook-newsletter-footer'
 				}
 			]
-			await this.emailUtility.sendEmail(emailBody, "JBOOK Search Service Reviewer: Application Access", email, null, attachment, userId)
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search Service Reviewer: Application Access', email, null, attachment, userId)
 		} catch (err) {
 			this.logger.error(err, 'B4E39XB', userId);
 		}
