@@ -21,13 +21,13 @@ import LandingImage from '../../../images/JAIC_banner.png'
 import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
-
-
 import JBookAPI from '../../api/jbook-service-api';
 import QueryExp from './QueryExp.js'
 import { Link } from '@mui/material';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 const _ = require('lodash');
 
@@ -450,11 +450,12 @@ const jbookMainViewHandler = {
 			dispatch,
 			state,
 		} = props;
-		console.log('handle page load');
 
 		// const interval = setInterval(() => {
 		// 	populateDropDowns(state, dispatch);
 		// }, 1000 * 60);
+
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 

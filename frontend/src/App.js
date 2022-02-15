@@ -323,7 +323,7 @@ const App = () => {
 			setInitialized(true);
 			initialize();
 		}
-
+		// eslint-disable-next-line
 	}, [initialized]);
 
 	if (!initialized || !tokenLoaded) {
