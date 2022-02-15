@@ -82,7 +82,6 @@ class MatomoController {
 
 	async getUserMatomoStatus(req, res) {
 		const userID = req.get('SSL_CLIENT_S_DN_CN');
-
 		try {
 			const data = await this.matomoStatus.findOne({
 				where: {
