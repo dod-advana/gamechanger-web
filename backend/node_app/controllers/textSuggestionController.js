@@ -57,7 +57,7 @@ class TextSuggestionController {
 					}
 		
 					try {
-						presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[1].aggregations.search_query.buckets,req.body.searchText);
+						presearchHistory = this.getPreHistoryCorrected(data_presearch.responses[1].aggregations.search_query.buckets);
 					} catch (err) {
 						const { message } = err;
 						this.logger.error(message, 'JBVZKTG', userId);
@@ -128,13 +128,13 @@ class TextSuggestionController {
 			throw message;
 		}
 	}
-	getPreHistoryCorrected(suggesterArray,query) {
+	getPreHistoryCorrected(suggesterArray) {
 		const presearch = [];
 		// amount of users need to be more than 1 (max shown = 3 for efficiency)
 		if (suggesterArray.length > 0) {
 			suggesterArray.forEach(term => {
 				let usercount = term.user.buckets
-				if ((usercount.length > 1) && (usercount[0].doc_count > 2) && (term['key']!=query)) {
+				if ((usercount.length > 1) && (usercount[0].doc_count > 2)) {
 					presearch.push(term['key']);
 				}
 			 });
