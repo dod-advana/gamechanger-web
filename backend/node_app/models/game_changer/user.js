@@ -50,10 +50,6 @@ module.exports = (sequelize, DataTypes) => {
 			extra_fields: {
 				type: DataTypes.JSONB
 			},
-			is_admin: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: false
-			},
 			is_super_admin: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false

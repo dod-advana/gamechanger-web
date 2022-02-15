@@ -160,32 +160,21 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 				</Grid>
 
 				<Grid item xs>
-					<FormControlLabel
-						key={'is_admin'}
-						control={
-							<GCCheckbox
-								checked={editUserData['is_admin']}
-								onChange={handleCheck}
-								name={'is_admin'}
-								color="primary"
-								style={styles.checkbox}
-							/>
-						}
-						label={'Admin User'}
-					/>
-					<FormControlLabel
-						key={'is_super_admin'}
-						control={
-							<GCCheckbox
-								checked={editUserData['is_super_admin']}
-								onChange={handleCheck}
-								name={'is_super_admin'}
-								color="primary"
-								style={styles.checkbox}
-							/>
-						}
-						label={'Super Admin User'}
-					/>
+					{Permissions.permissionValidator(`Gamechanger Super Admin`, true) &&
+						<FormControlLabel
+							key={'is_super_admin'}
+							control={
+								<GCCheckbox
+									checked={editUserData['is_super_admin']}
+									onChange={handleCheck}
+									name={'is_super_admin'}
+									color="primary"
+									style={styles.checkbox}
+								/>
+							}
+							label={'Super Admin User'}
+						/>
+					}
 				</Grid>
 			</Grid>
 		)
