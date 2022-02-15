@@ -12,10 +12,14 @@ router.get('/admin/reloadHandlerMap', controller.reloadHandlerMap);
 router.get('/getAllCloneMeta', controller.getAllCloneMeta);
 router.post('/search', controller.search);
 router.post('/callSearchFunction', controller.callSearchFunction);
+router.post('/callDataFunction', controller.callDataFunction);
 router.post('/export', (req, res) => {
 	req.setTimeout(720000);
 	controller.export(req, res);
 });
+router.post('/exportReview', controller.exportReview);
+router.post('/exportUsers', controller.exportUsers);
+router.post('/exportChecklist', controller.exportChecklist);
 router.post('/graphSearch', controller.graphSearch);
 //router.post('/graphQuery', controller.graphQuery);
 router.post('/callGraphFunction', controller.callGraphFunction);

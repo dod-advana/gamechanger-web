@@ -26,7 +26,7 @@ module.exports = Object.freeze({
 	TLS_KEY: getCert('TLS_KEY', 'TLS_KEY_FILEPATH'),
 	EXPRESS_TRUST_PROXY: function () {
 		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : ''
-		if (['true','false'].includes(str_var.toLowerCase())) {
+		if (['true', 'false'].includes(str_var.toLowerCase())) {
 			return str_var.toLowerCase() === 'true'
 		}
 		return str_var
@@ -137,8 +137,8 @@ module.exports = Object.freeze({
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD,
 		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.EDA_ELASTICSEARCH_INDEX,
-		extSearchFields:['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
-		extRetrieveFields:['*_eda_ext'],
+		extSearchFields: ['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
+		extRetrieveFields: ['*_eda_ext'],
 		// index: 'eda'
 		requestTimeout: 60000
 	},
@@ -149,7 +149,7 @@ module.exports = Object.freeze({
 	GRAPH_DB_CONFIG: {
 		url: process.env.NEO4J_URL,
 		user: process.env.NEO4J_USER,
-		password:  process.env.NEO4J_PASSWORD
+		password: process.env.NEO4J_PASSWORD
 	},
 	MATOMO_DB_CONFIG: {
 		host: process.env.MYSQL_HOST_MATOMO,
@@ -171,8 +171,8 @@ module.exports = Object.freeze({
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
 		CA: process.env.QLIK_CERT_CA ? process.env.QLIK_CERT_CA.replace(/\\n/g, '\n') : '',
-		KEY:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
-		CERT:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
+		KEY: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
+		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN
 	},
@@ -232,7 +232,7 @@ module.exports = Object.freeze({
 		ENVIRONMENT: process.env.SERVICE_ACCOUNT_ENV,
 	},
 	REQUEST_TYPE_ID: 113,
-	JIRA_CONFIG:{
+	JIRA_CONFIG: {
 		username: process.env.JIRA_USERNAME,
 		password: process.env.JIRA_PASSWORD,
 		domain: process.env.JIRA_DOMAIN,

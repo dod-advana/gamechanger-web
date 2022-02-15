@@ -40,7 +40,7 @@ import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoun
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
-import BudgetSearchProfilePage from './containers/BudgetSearchProfilePage';
+import JBookProfilePage from './containers/JBookProfilePage';
 import GCFooter from './components/navigation/GCFooter';
 require('typeface-noto-sans');
 require('typeface-montserrat');
@@ -163,7 +163,7 @@ const App = () => {
 					const GamechangerProvider = getProvider(name);
 
 					const url = new URL(window.location.href).hostname;
-					if(clone.available_at === null){
+					if (clone.available_at === null) {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
@@ -212,7 +212,12 @@ const App = () => {
 									}}
 								/>
 							);
-						} else {
+						} else { // if clone name is jbook, then push jbook route + cloneData
+							if (clone.clone_name === 'jbook') {
+								cloneRoutes.push(
+									getJBookProfileRoute(clone)
+								)
+							}
 							cloneRoutes.push(
 								<PrivateTrackedRoute
 									key={idx}
@@ -242,6 +247,7 @@ const App = () => {
 					}
 				}
 			});
+			console.log(cloneRoutes);
 			setGameChangerCloneRoutes(cloneRoutes);
 		} catch (err) {
 			console.log(err);
@@ -249,18 +255,18 @@ const App = () => {
 		}
 	};
 
-	const getBudgetSearchProfileRoute = () => {
-		const BudgetSearchProvider = getProvider('budgetSearch');
+	const getJBookProfileRoute = (cloneData) => {
+		const JBookProvider = getProvider('jbook');
 
 		return (
 			<PrivateTrackedRoute
-				path={`/budgetsearch-profile`}
+				path={`/jbook/profile`}
 				render={(props) => (
-					<BudgetSearchProvider>
-						<BudgetSearchProfilePage {...props} />
-					</BudgetSearchProvider>
+					<JBookProvider>
+						<JBookProfilePage {...props} cloneData={cloneData} />
+					</JBookProvider>
 				)}
-				pageName={'BudgetSearchProfilePage'}
+				pageName={'JBookProfilePage'}
 				allowFunction={() => {
 					return true;
 				}}
@@ -380,7 +386,6 @@ const App = () => {
 														component={GameChangerDetailsPage}
 														location={location}
 													/>
-													{getBudgetSearchProfileRoute()}
 													<PrivateTrackedRoute
 														path="/gamechanger-admin"
 														pageName={'GamechangerAdminPage'}

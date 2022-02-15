@@ -94,7 +94,7 @@ SearchBar.propTypes = {
 			menuOpen: PropTypes.bool,
 			pageDisplayed: PropTypes.string,
 			searchText: PropTypes.string,
-			componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+			componentStepNumbers: PropTypes.arrayOf(PropTypes.number),
 			searchSettings: PropTypes.shape({
 				searchType: PropTypes.string,
 				publicationDateFilter: PropTypes.arrayOf(PropTypes.string),
