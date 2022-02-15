@@ -16,8 +16,9 @@ import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
 import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
 import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
+import JAICLogo from '../../../images/logos/JBooks_wht.svg';
 import {getCloneTitleForFactory} from '../../../utils/gamechangerUtils';
-import GCTooltip from "../../common/GCToolTip";
+import GCTooltip from '../../common/GCToolTip';
 
 const PAGES = {
 	general: 'General',
@@ -244,7 +245,17 @@ const DefaultAdminMainViewHandler = {
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
 			}
-		} else {
+		} else if (cloneData.clone_name === 'jbook') {
+			return {
+				...toolTheme,
+				toolLogo: (
+					<PageLink href={`#/${cloneData.url}`}>
+						<img src={JAICLogo} alt="tool logo" />
+					</PageLink>
+				),
+				toolIconHref: `#/${cloneData?.url || ''}`,
+			}
+		}else {
 			return {
 				...toolTheme,
 				toolLogo: (

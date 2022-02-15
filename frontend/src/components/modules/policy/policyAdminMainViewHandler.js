@@ -10,7 +10,7 @@ import {AddAlert, SupervisedUserCircle} from '@material-ui/icons';
 import { ConstrainedIcon, PageLink } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler';
-import GCTooltip from "../../common/GCToolTip";
+import GCTooltip from '../../common/GCToolTip';
 
 const PAGES = {
 	general: 'General',

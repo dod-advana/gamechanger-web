@@ -8,8 +8,9 @@ import NFR from '../../../images/logos/NFRLogo.png';
 import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
 import Covid19 from '../../../images/logos/Covid19Logo.png';
 import CDO from '../../../images/logos/CDOLogo.png';
+import JAICLogo from '../../../images/logos/JBooks Logo_blk.svg';
 
-const PolicyTitleBar = {
+const AdminTitleBar = {
 	getTitleBar: (props) => {
 		const { onTitleClick, cloneData } = props;
 		if (cloneData.clone_name === 'gamechanger') {
@@ -134,6 +135,24 @@ const PolicyTitleBar = {
 					</Typography>
 				</div>
 			);
+		} else if (cloneData.clone_name === 'jbook') {
+			return (
+				<div
+					onClick={onTitleClick}
+					style={{ display: 'flex' }}
+				>
+					<img
+						src={JAICLogo}
+						style={styles.adminTitle}
+						onClick={onTitleClick}
+						alt="gamechanger JBOOK"
+						id={'titleButton'}
+					/>
+					<Typography variant="h2" style={styles.adminWording} display="inline">
+						Admin
+					</Typography>
+				</div>
+			);
 		} else {
 			 return (
 				<div
@@ -163,7 +182,7 @@ const PolicyTitleBar = {
 	},
 };
 
-export default PolicyTitleBar;
+export default AdminTitleBar;
 
 const styles = {
 	adminWording: {
