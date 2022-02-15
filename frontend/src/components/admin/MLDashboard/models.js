@@ -328,7 +328,7 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'topics',
 				sample_rate: topicsSampling,
-				upload: qexpupload,
+				upload: topicsUpload,
 				version: topicsVersion
 			});
 			props.updateLogs('Started training', 0);
@@ -891,7 +891,7 @@ export default (props) => {
 							Version:
 							</div>
 							<Input
-								value={qexpversion}
+								value={topicsVersion}
 								onChange={(e) => setTopicsVersion(e.target.value)}
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
@@ -969,6 +969,7 @@ export default (props) => {
 							/>
 						</div>
 					</div>
+					
 					<div
 						style={{
 							width: '100%',
