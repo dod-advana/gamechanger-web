@@ -52,10 +52,6 @@ module.exports = {
 		extra_fields: {
 			type: Sequelize.JSONB
 		},
-		is_admin: {
-			type: Sequelize.BOOLEAN,
-			defaultValue: false
-		},
 		is_super_admin: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false

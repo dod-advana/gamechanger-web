@@ -190,17 +190,29 @@ class UserController {
 						'organization',
 						'phone_number',
 						'extra_fields',
-						'is_admin',
 						'is_super_admin'
 					],
 					raw: true
 				}
 			);
 
-			let filteredResults = results;
+			const fieldsToIgnore = ['clones_visited'];
+
+			let filteredResults = results.map(result => {
+				let is_admin = false;
+				Object.keys(result.extra_fields).forEach(extraKey => {
+					if (!fieldsToIgnore.includes(extraKey) && result.extra_fields[extraKey].hasOwnProperty('is_admin')) {
+						if (result.extra_fields[extraKey].is_admin) {
+							is_admin = true;
+						}
+					}
+				});
+
+				return {...result, is_admin};
+			});
 
 			if (cloneName) {
-				filteredResults = results.filter(result => {
+				filteredResults = filteredResults.filter(result => {
 					if (result.extra_fields.clones_visited) {
 						return result.extra_fields.clones_visited.includes(cloneName);
 					} else {
