@@ -78,6 +78,7 @@ class SearchController {
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.combinedSearch = this.combinedSearch.bind(this);
 		this.queryEs = this.queryEs.bind(this);
+		this.expandTerms = this.expandTerms.bind(this);
 	}
 
 	async combinedSearch(searchText, userId, req, expansionDict, index, operator, offset) {
@@ -457,6 +458,18 @@ class SearchController {
 		}
 
 		return { esClientName, esIndex };
+	}
+
+	async expandTerms(req,res) {
+		const {searchText} = req.body;
+		let expansionDict = {};
+		try {
+			expansionDict = await this.mlApi.queryExpansion(searchText);
+		} catch (e) {
+			// log error and move on, expansions are not required
+			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38');
+		}
+		res.status(200).send(expansionDict);
 	}
 }
 

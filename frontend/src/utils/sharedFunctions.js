@@ -27,7 +27,7 @@ export const clearDashboardNotification = (cloneName, type, state, dispatch) => 
 	let userData = state.userData;
 
 	// only update if the notification exists and is non-zero
-	if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+	if (userData && userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
 		/* await */ gameChangerAPI.clearDashboardNotification(cloneName, type);
 		userData = _.cloneDeep(userData);
 		userData.notifications[cloneName][type] = 0;
