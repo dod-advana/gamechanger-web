@@ -2164,13 +2164,56 @@ class SearchUtility {
 	}
 	async getRecDocs(doc=["Title 10"], userId=""){
 		let recDocs = [];
+		let graphDocs = [];
 		try {
-			recDocs = await this.mlApi.recommender(doc, userId);
+			//recDocs = await this.mlApi.recommender(doc, userId);
+			if (recDocs.length < 100) {
+				graphDocs = this.getGraphRecs(doc, userId);
+				console.log("GRAPH RESULTS:", graphDocs);
+			}
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
 		return recDocs
 	}
+
+	/// START
+	async getGraphRecs(doc, userId) {
+		let graphRecs = [];
+		let filename;
+		let louvain_community = 102785
+		let label_prop_community = 155004
+		let name = "Title 10 - Armed Forces.pdf"
+		try {
+			const comm_resp = await this.dataLibrary.queryGraph(`
+				MATCH (d:Document {filename: $filename})
+				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
+			);
+			console.log(comm_resp.result.records[0]);
+			//[filename, louvain_community, label_prop_community] = comm_resp.result.records[0];
+
+			const louv_resp = await this.dataLibrary.queryGraph(`
+			MATCH "MATCH (n:Document {louvain_community: $louv}) 
+			RETURN count(n);`, {louv: louvain_community}, userId
+			);
+			console.log("LOUVAIN", louv_resp.result.records[0]);
+			//[filename, louvain_community, label_prop_community] = louv_resp.result.records[0];
+
+			const lp_resp = await this.dataLibrary.queryGraph(`
+			MATCH "MATCH (n:Document {lp_community: $lp}) 
+			RETURN count(n);`, {lp: label_prop_community}, userId
+			);
+			console.log("LABEL PROP", lp_resp.result.records[0]);
+			//[filename, louvain_community, label_prop_community] = louv_resp.result.records[0];
+		
+
+		} catch (e) {
+			this.logger.error(e, 'WQPX84H', userId)
+		};
+		return graphRecs
+	}
+	/// END
+
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
