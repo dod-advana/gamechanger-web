@@ -293,7 +293,6 @@ describe('AdminController', function () {
 
 			let resCode;
 			let resMsg;
-			console.log(req)
 
 			let results =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
 			let actual =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]

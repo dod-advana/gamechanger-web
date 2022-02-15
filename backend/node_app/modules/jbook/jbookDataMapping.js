@@ -475,7 +475,6 @@ module.exports = {
             defaultValue: '',
             processValue: (value) => {
                 if (Array.isArray(value)) {
-                    console.log(value)
                     value = value.filter(partner => {
                         return partner !== null && partner !== 'null';
                     })

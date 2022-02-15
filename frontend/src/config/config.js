@@ -3,6 +3,9 @@ export default {
 	API_URL: window?.__env__?.REACT_APP_BACKEND_URL
 		? window?.__env__?.REACT_APP_BACKEND_URL
 		: process.env.REACT_APP_BACKEND_URL,
+	ROOT_CLONE: window?.__env__?.REACT_APP_ROOT_CLONE
+		? window?.__env__?.REACT_APP_OOT_CLONE
+		: process.env.REACT_APP_ROOT_CLONE,
 	GLUU_SSO_ENABLED:
 		window?.__env__?.REACT_APP_GLUU_SSO !== 'disabled' &&
 		process.env.REACT_APP_GLUU_SSO !== 'disabled',

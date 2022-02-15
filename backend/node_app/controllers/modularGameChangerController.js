@@ -1,6 +1,6 @@
 const { HandlerFactory } = require('../factories/handlerFactory');
 const CLONE_META = require('../models').clone_meta;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class ModularGameChangerController {
 	constructor(opts = {}) {
@@ -169,7 +169,7 @@ class ModularGameChangerController {
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const storeHistory = true;
 			if (offset === null) offset = 0;
-			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory);
+			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory, req.session);
 			const error = handler.getError();
 			if (error.code) results.error = error;
 			res.status(200).send(results);
@@ -184,7 +184,7 @@ class ModularGameChangerController {
 		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res, req.session);
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
@@ -197,7 +197,7 @@ class ModularGameChangerController {
 		const { cloneName, searchText, format, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
-			await handler.export(res, searchText, format, options, cloneName, req.permissions, userId);
+			await handler.export(res, searchText, format, options, cloneName, req.permissions, userId, req.session);
 		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, '812U6Q2', userId);

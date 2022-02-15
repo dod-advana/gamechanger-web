@@ -1,5 +1,5 @@
 const eventHistory = require('../models').eventHistory;
-const logger = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 const actions = {
 	create: 'create',

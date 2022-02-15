@@ -2,9 +2,6 @@ import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
-// import util from '../advana/api/util';
-
-// import { getPdfViewerUrl } from '../advana/api/storage-service-api'
 
 const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
@@ -39,7 +36,7 @@ const endpoints = {
 	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
-	notificationsGET: '/api/gameChanger/getNotifications',
+	notificationsPOST: '/api/gameChanger/getNotifications',
 	notificationCreatePOST: '/api/gameChanger/admin/createNotification',
 	notificationEditActivePOST: '/api/gameChanger/admin/editNotificationActive',
 	notificationDeletePOST: '/api/gameChanger/admin/deleteNotification',
@@ -85,7 +82,6 @@ const endpoints = {
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
-	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
@@ -115,7 +111,6 @@ const endpoints = {
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
 	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
 	combinedSearchMode: '/api/gamechanger/appSettings/combinedSearch',
-	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
@@ -134,6 +129,11 @@ const endpoints = {
 	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
+	updateClonesVisitedPOST: '/api/gameChanger/user/updateClonesVisited',
+	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
+	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
+	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -387,7 +387,7 @@ export default class GameChangerAPI {
 				this.axios,
 				url,
 				{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
-				{ 
+				{
 					timeout: 0,
 					cancelToken: cancelToken?.token ? cancelToken.token : {}
 				}
@@ -490,7 +490,7 @@ export default class GameChangerAPI {
 		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
 	}
-	
+
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
@@ -541,9 +541,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { index });
 	};
 
-	getNotifications = async () => {
-		const url = endpoints.notificationsGET;
-		return axiosGET(this.axios, url);
+	getNotifications = async (cloneName) => {
+		const url = endpoints.notificationsPOST;
+		return axiosPOST(this.axios, url, {project_name: cloneName});
 	};
 
 	createNotification = async (body) => {
@@ -728,11 +728,6 @@ export default class GameChangerAPI {
 	queryEs = async (opts) => {
 		const url = endpoints.queryEs;
 		return axiosPOST(this.axios, url, opts);
-	};
-
-	setUserBetaStatus = async (checked) => {
-		const url = endpoints.setUserBetaStatus;
-		return axiosPOST(this.axios, url, { status: checked });
 	};
 
 	getInternalUsers = async () => {
@@ -958,11 +953,6 @@ export default class GameChangerAPI {
 		});
 	};
 
-	populateNewUserId = async () => {
-		const url = endpoints.populateNewUserId;
-		return axiosGET(this.axios, url);
-	};
-
 	callGraphFunction = async (body) => {
 		const url = endpoints.callGraphFunctionPOST;
 		return axiosPOST(this.axios, url, body);
@@ -1047,5 +1037,30 @@ export default class GameChangerAPI {
 	createModelLTR = async () => {
 		const url = endpoints.createModelLTR;
 		return axiosGET(this.axios, url);
+	};
+
+	getUserData = async (cloneName) => {
+		const url = endpoints.gcUserDataGET;
+		return axiosPOST(this.axios, url, {cloneName});
+	}
+
+	storeUserData = async (userData) => {
+		const url = endpoints.gcUserDataPOST;
+		return axiosPOST(this.axios, url, { userData, fromApp: true });
+	}
+
+	deleteUserData = async (userRowId) => {
+		const url = endpoints.gcUserDataDeletePOST;
+		return axiosPOST(this.axios, url, { userRowId });
+	}
+
+	syncUserTable = async () => {
+		const url = endpoints.syncUserTableGET;
+		return axiosGET(this.axios, url);
+	};
+
+	updateClonesVisited = async (clone) => {
+		const url = endpoints.updateClonesVisitedPOST;
+		return axiosPOST(this.axios, url, {clone});
 	};
 }

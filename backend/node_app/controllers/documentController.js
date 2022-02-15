@@ -1,5 +1,5 @@
 const constantsFile = require('../config/constants');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const GC_ASSISTS = require('../models').gc_assists;
 const ORGANIZATION_URLS = require('../models').organization_urls;
 const { DataLibrary } = require('../lib/dataLibrary');
@@ -9,6 +9,7 @@ const axios = require('axios');
 const https = require('https');
 const url = require('url');
 const { Op } = require('sequelize');
+const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
 const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
@@ -193,11 +194,9 @@ class DocumentController {
 		try {
 			const { annotationData } = req.body;
 
-			const hashed_user = this.sparkMD5.hash(userId);
-
 			annotationData.forEach(answer => {
 				if (answer.incorrect_reason === '') answer.incorrect_reason = 0;
-				answer.user_id = hashed_user;
+				answer.user_id = getUserIdFromSAMLUserId(req);
 				this.gcCrowdAssist.create(answer);
 			});
 

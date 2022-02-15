@@ -1,9 +1,10 @@
 const FEEDBACK = require('../models').feedback;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const constants = require('../config/constants');
 const https = require('https');
 const fs = require('fs');
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const { JIRA_CONFIG } = constants;
 const axios = require('axios').default;
 
@@ -29,7 +30,7 @@ class FeedbackController {
 		try {
 			const feedback = await this.feedback.create({ 
 				event_name: eventName, 
-				user_id: userId, 
+				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'search_text: ' + searchText,
 				value_2: 'title_returned: ' + intelligentSearchTitle,
 				value_5: 'sentence_results ' + JSON.stringify(sentenceResults)
@@ -47,7 +48,7 @@ class FeedbackController {
 		try {
 			const feedback = await this.feedback.create({ 
 				event_name: eventName, 
-				user_id: userId, 
+				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'question: ' + question, 
 				value_2: 'QA answer: ' + answer.answer,
 				value_3: 'QA filename: ' + answer.filename,

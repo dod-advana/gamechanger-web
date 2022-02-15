@@ -73,13 +73,13 @@ module.exports = Object.freeze({
 			jbook: {
 				username: process.env.POSTGRES_USER_JBOOK,
 				password: process.env.POSTGRES_PASSWORD_JBOOK,
-				database: 'jbook',
+				database: process.env.POSTGRES_DB_JBOOK?.trim() || 'jbook',
 				host: process.env.POSTGRES_HOST_JBOOK,
 				port: 5432,
 				dialect: 'postgres',
 				logging: false
-			},
-
+			}
+			
 		}
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
@@ -92,6 +92,7 @@ module.exports = Object.freeze({
 		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || "007",
 		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === "true",
 		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
+		rootClone: process.env.REACT_APP_ROOT_CLONE,
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
 		protocol: 'http',
@@ -107,13 +108,13 @@ module.exports = Object.freeze({
 		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
-	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
-	ADVANA_NOREPLY_EMAIL_ADDRESS: 'no-reply@boozallencsn.com',
+	ADVANA_EMAIL_CONTACT_NAME: process.env.EMAIL_FROM_NAME || 'Advana Do Not Reply',
+	ADVANA_NOREPLY_EMAIL_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
-		sendmail: true,
-		newline: 'unix',
-		secure: true
+		host: process.env.EMAIL_HOST,
+		port: process.env.EMAIL_PORT
 	},
+	BASE_URL_FOR_EMAIL: process.env.BASE_URL_FOR_EMAIL || `https://${process.env.REACT_APP_ROOT_CLONE}.advana.data.mil`,
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
 		protocol: process.env.GAMECHANGER_ELASTICSEARCH_PROTOCOL,

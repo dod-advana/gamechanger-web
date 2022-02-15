@@ -57,14 +57,16 @@ fs
 		const model = require(path.join(__dirname + '/uot', file))(db['uot'], DataTypes);
 		db[model.name] = model;
 	});
+
 // Add models from jbook folder
 fs
 	.readdirSync(__dirname + '/jbook')
 	.filter(file =>
 		(file.indexOf('.') !== 0) &&
-		(file !== basename) &&
-		(file.slice(-3) === '.js'))
+        (file !== basename) &&
+        (file.slice(-3) === '.js'))
 	.forEach(file => {
+		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
 		const model = require(path.join(__dirname + '/jbook', file))(db['jbook'], DataTypes);
 		db[model.name] = model;
 	});

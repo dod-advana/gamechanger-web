@@ -12,6 +12,7 @@ import { getProvider } from './components/factories/contextFactory';
 import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement';
 import GamechangerPage from './containers/GameChangerPage';
 import GamechangerAdminPage from './containers/GamechangerAdminPage';
+import GamechangerLiteAdminPage from './containers/GamechangerLiteAdminPage';
 import GamechangerEsPage from './containers/GamechangerEsPage';
 import GameChangerDetailsPage from './containers/GameChangerDetailsPage';
 import GamechangerPdfViewer from './components/documentViewer/PDFViewer';
@@ -24,11 +25,9 @@ import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from 'spark-md5';
 import _ from 'lodash';
-import GCAuth from './components/common/GCAuth';
 import './styles.css';
 import 'font-awesome/css/font-awesome.css';
 import 'flexboxgrid/css/flexboxgrid.css';
-// import ThemeDefault from './components/advana/theme-default';
 import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -36,13 +35,7 @@ import Config from './config/config';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-
 import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
-// import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
-// import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
-
-// import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-
 import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoundPage';
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -54,13 +47,9 @@ require('typeface-montserrat');
 
 require('./favicon.ico');
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
-
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
-	siteId: isDecoupled ? 2 : 1,
+	siteId: 1,
 });
 
 const history = createBrowserHistory();
@@ -141,9 +130,7 @@ const TrackedPDFView = ({
 	const RenderComponent = Component || Render;
 	useEffect(() => {
 		// On route load we want to log this to matomo, that is all this use effect does
-		const userId = isDecoupled
-			? GCAuth.getTokenPayload().cn
-			: Auth.getUserId() || ' ';
+		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
@@ -180,6 +167,25 @@ const App = () => {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
+						cloneRoutes.push(
+							<PrivateTrackedRoute
+								key={idx}
+								path={`/${clone.url}/admin`}
+								render={(props) => (
+									<GamechangerProvider>
+										<GamechangerLiteAdminPage
+											{...props}
+											cloneData={clone}
+											jupiter={false}
+										/>
+									</GamechangerProvider>
+								)}
+								pageName={clone.display_name}
+								allowFunction={() => {
+									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+								}}
+							/>
+						);
 						if (clone.permissions_required) {
 							cloneRoutes.push(
 								<PrivateTrackedRoute
@@ -241,7 +247,6 @@ const App = () => {
 					}
 				}
 			});
-			console.log(cloneRoutes);
 			setGameChangerCloneRoutes(cloneRoutes);
 		} catch (err) {
 			console.log(err);
@@ -286,19 +291,7 @@ const App = () => {
 	};
 
 	useEffect(() => {
-		const initialize = async () => {
-			if (isDecoupled) {
-				GCAuth.refreshUserToken(
-					() => setTokenLoaded(true),
-					() => setTokenLoaded(true)
-				);
-			} else {
-				Auth.refreshUserToken(
-					() => setTokenLoaded(true),
-					() => setTokenLoaded(true)
-				);
-			}
-
+		const getTutorialAndClones = async () => {
 			// fetch tutorial overlay data
 			let tutorialData = [];
 			const doTutorial =
@@ -313,9 +306,19 @@ const App = () => {
 					console.log('Failed to retrieve Tutorial Overlay data');
 				}
 			}
+			await getGamechangerClones(tutorialData);
+		}
 
-			getGamechangerClones(tutorialData);
+		const initialize = async () => {
+			Auth.refreshUserToken(
+				async () => {
+					await getTutorialAndClones();
+					setTokenLoaded(true);
+				},
+				() => setTokenLoaded(true)
+			);
 		};
+
 		if (!initialized) {
 			setInitialized(true);
 			initialize();
@@ -369,7 +372,7 @@ const App = () => {
 													<Route
 														exact
 														path="/"
-														render={() => <Redirect to="/gamechanger" />}
+														render={() => <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />}
 													/>
 													<Route
 														exact
@@ -387,7 +390,7 @@ const App = () => {
 														pageName={'GamechangerAdminPage'}
 														component={GamechangerAdminPage}
 														allowFunction={() => {
-															return Permissions.isGameChangerAdmin();
+															return Permissions.permissionValidator('Gamechanger Super Admin', true);
 														}}
 													/>
 													<PrivateTrackedRoute

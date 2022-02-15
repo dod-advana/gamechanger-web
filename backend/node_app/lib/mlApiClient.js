@@ -1,5 +1,5 @@
 const constants = require('../config/constants');
-const loggerLib = require('../lib/logger');
+const loggerLib = require('@dod-advana/advana-logger');
 const axiosLib = require('axios');
 
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
@@ -49,6 +49,7 @@ class MLApiClient {
 		this.getSentenceTransformerResults = this.getSentenceTransformerResults.bind(this);
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
 		this.recommender = this.recommender.bind(this);
+		this.queryExpansion = this.queryExpansion.bind(this);
 
 		
 		// Get methods
@@ -74,6 +75,11 @@ class MLApiClient {
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
 		const data = { termsList, docIdsOnly: true }
+		return await this.postData('expandTerms', userId, data);
+	}
+
+	async queryExpansion(searchText, userId = 'unknown') {
+	    const data = {termsList: [searchText], qe_model: 'jbook'};
 		return await this.postData('expandTerms', userId, data);
 	}
 

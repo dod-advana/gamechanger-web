@@ -220,6 +220,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
+
 const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
@@ -231,7 +232,6 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 
 			imgSrc: DefaultPub,
 		}));
-		console.log(filteredPubs)
 		setState(dispatch, { recDocs: filteredPubs });
 		setState(dispatch, { loadingrecDocs: false });
 
@@ -264,6 +264,7 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 		setState(dispatch, { recDocs: filteredPubs });
 	}
 };
+
 const handleSources = async (state, dispatch, cancelToken) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
@@ -314,7 +315,6 @@ const handleSources = async (state, dispatch, cancelToken) => {
 	}
 };
 
-
 const formatString = (text) => {
 	let titleCase = text
 		.split(' ')
@@ -329,7 +329,6 @@ const formatString = (text) => {
 	return _.truncate(titleCase, { length: 60, separator: /,?\.* +/ });
 };
 
-
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
 		const { state, dispatch } = props;
@@ -341,6 +340,8 @@ const PolicyMainViewHandler = {
 		let rec_docs = [];
 		const user = await gcUserManagementAPI.getUserData()
 		const { favorite_documents = [] } = user.data
+
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 	
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});

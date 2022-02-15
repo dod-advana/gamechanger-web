@@ -367,7 +367,7 @@ describe('FavoritesController', function () {
 		it('should clear a favorite search update flag', (done) => {
 			const expectedReturn = [
 				{
-					user_id: '27d1ca9e10b731476b7641eae2710ac0',
+					user_id: 'testsuite',
 					tiny_url: 'Test',
 					updated_results: false
 				}
@@ -383,7 +383,7 @@ describe('FavoritesController', function () {
 
 			const favorites = [
 				{
-					user_id: '27d1ca9e10b731476b7641eae2710ac0',
+					user_id: 'testsuite',
 					tiny_url: 'Test',
 					updated_results: true
 				}
