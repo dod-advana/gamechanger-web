@@ -330,7 +330,8 @@ export default class GameChangerAPI {
 		highlightText,
 		pageNumber,
 		isClone = false,
-		cloneData = { clone_name: 'gamechanger' }
+		cloneData = { clone_name: 'gamechanger' },
+		isDLA = false
 	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
@@ -340,7 +341,7 @@ export default class GameChangerAPI {
 					cloneData.clone_name !== 'gamechanger'
 						? `/projects/${cloneData.clone_name}`
 						: ''
-				}/pdf/${fileName}`
+				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
 			if (cloneData.clone_name === 'eda') {
