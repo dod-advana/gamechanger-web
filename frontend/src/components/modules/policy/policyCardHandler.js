@@ -645,7 +645,8 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 										item.filename,
 										state.cloneData.clone_name,
 										state.searchText,
-										0
+										0,
+										item.download_url_s
 									)
 								: () => {}
 						}
@@ -945,7 +946,7 @@ const PolicyCardHandler = {
 												onMouseEnter={() => setHoveredHit(key) }
 												onClick={e => {
 													e.preventDefault();
-													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
+													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber, item.download_url_s);
 												}}
 												>
 													<span>
@@ -1032,7 +1033,8 @@ const PolicyCardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
-														page.pageNumber
+														page.pageNumber,
+														item.download_url_s
 													);
 												}}
 											>
@@ -1145,7 +1147,8 @@ const PolicyCardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
-														page.pageNumber
+														page.pageNumber,
+														item.download_url_s
 													);
 												}}
 											>
