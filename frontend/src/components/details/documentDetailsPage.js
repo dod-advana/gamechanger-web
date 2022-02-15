@@ -350,13 +350,14 @@ const DocumentDetailsPage = (props) => {
 							<GCButton
 								onClick={(e) => {
 									e.preventDefault();
+									const isDLA = document.display_org_s === 'Defense Logistics Agency';
 									trackEvent(
 										getTrackingNameForFactory(cloneData?.clone_name),
 										'CardInteraction',
 										'PDFOpen'
 									);
 									window.open(
-										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}`
+										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}${isDLA ? '&sourceUrl=dla' : ''}`
 									);
 								}}
 								style={{
