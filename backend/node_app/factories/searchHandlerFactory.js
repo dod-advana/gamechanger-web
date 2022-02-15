@@ -20,9 +20,9 @@ class SearchHandlerFactory {
 	}
 
 	createSearchHandler(cloneName) {
-		if(this.cloneMetaMap[cloneName] &&
-		this.cloneMetaMap[cloneName].searchModule &&
-		this.searchHandlerMap[this.cloneMetaMap[cloneName].searchModule]) {
+		if (this.cloneMetaMap[cloneName] &&
+			this.cloneMetaMap[cloneName].searchModule &&
+			this.searchHandlerMap[this.cloneMetaMap[cloneName].searchModule]) {
 			return this.searchHandlerMap[this.cloneMetaMap[cloneName].searchModule];
 		} else {
 			throw 'Invalid clone or handler provided';

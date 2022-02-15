@@ -1,0 +1,28 @@
+.PrivateValueLabel-label-21 {
+    font-size: 12px;
+}
+
+.MuiSlider-root {
+    color: #1C2D64 !important;
+}
+
+.MuiInput-underline:after {
+    border-bottom: 2px solid #1C2D64 !important;
+}
+
+.PrivateValueLabel-label-24 {
+    font-size: 12px;
+}
+
+span > .PrivateValueLabel-circle-23 {
+    width: 40px;
+    height: 40px;
+}
+
+span > .PrivateValueLabel-thumb-20.PrivateValueLabel-open-21 .PrivateValueLabel-offset-22 {
+    transform: scale(1) translateY(-16px);
+}
+
+span > .MuiSlider-valueLabel {
+    left: calc(-50% - 8px);
+}
