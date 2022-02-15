@@ -2336,7 +2336,7 @@ class SearchUtility {
 		let esClientName = 'gamechanger';
 		let esIndex = '';
 		try {
-			esIndex = this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index;
+			esIndex = [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
 		}catch (err) {
 			this.logger.error(err, 'GE2ALRF','');
 			esIndex = 'gamechanger';
