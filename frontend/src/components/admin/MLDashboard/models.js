@@ -87,7 +87,7 @@ export default (props) => {
 	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
 	const [qexpupload, setQexpUpload] = useState(false);
 	const [topicsUpload, setTopicsUpload] = useState(false);
-	const [topicsSampling, setTopicsSampling] = useState(1);
+	const [topicsSampling, setTopicsSampling] = useState(0.1);
 	const [topicsVersion, setTopicsVersion] = useState(DEFAULT_VERSION);
 
 	const [gpu, setgpu] = useState(true);
