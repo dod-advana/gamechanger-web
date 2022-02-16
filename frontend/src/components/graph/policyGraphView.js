@@ -1823,7 +1823,7 @@ export default function PolicyGraphView(props) {
 					runSimulationProp={runSimulation}
 					runningSearch={runningSearch}
 					nodeRelativeSizeProp={nodeRelSize}
-					graphWidth={width}
+					graphWidth={document.getElementById('graph2dContainer')?.offsetWidth || width}
 					graphHeight={height}
 					nodeHoverIDProp={nodeHoverID}
 					shouldCenterProp={shouldCenter}
