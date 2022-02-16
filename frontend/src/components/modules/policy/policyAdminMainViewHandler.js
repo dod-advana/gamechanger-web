@@ -3,7 +3,7 @@ import NotificationsManagement from '../../notifications/NotificationsManagement
 import UserList from '../../admin/UserList';
 import {Tooltip} from '@material-ui/core';
 import {HoverNavItem} from '../../navigation/NavItems';
-import {toolTheme} from '../../admin/util/GCAdminStyles';
+import {GCCheckbox, styles, TableRow, toolTheme} from '../../admin/util/GCAdminStyles';
 import AdminIcon from '../../../images/icon/AdminIcon.png';
 import NewAdminIcon from '../../../images/icon/NewAdminIcon.png';
 import {AddAlert, SupervisedUserCircle} from '@material-ui/icons';
@@ -22,6 +22,57 @@ const renderGeneralAdminButtons = () => {
 	return (<></>);
 }
 
+const userListTableAdditions = [
+	{
+		Header: 'Internal User',
+		accessor: 'extra_fields.gamechanger.is_internal',
+		width: 160,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'is_internal'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	},
+	{
+		Header: 'Beta User',
+		accessor: 'extra_fields.gamechanger.is_beta',
+		width: 160,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'beta_user'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	},
+	{
+		Header: 'Admin',
+		accessor: 'extra_fields.gamechanger.is_admin',
+		width: 100,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'admin'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	}
+];
+
 const PolicyAdminMainViewHandler = {
 	getPages: () => {
 		return PAGES;
@@ -34,7 +85,7 @@ const PolicyAdminMainViewHandler = {
 			case PAGES.notifications:
 				return <NotificationsManagement cloneName={cloneName} />;
 			case PAGES.userList:
-				return <UserList cloneName={cloneName} />;
+				return <UserList cloneName={cloneName} columns={userListTableAdditions} />;
 			default:
 				return renderGeneralAdminButtons();
 		}

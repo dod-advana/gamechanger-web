@@ -156,6 +156,7 @@ router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);
 router.post('/user/updateClonesVisited', user.updateClonesVisited);
+router.post('/user/setupUserProfile', user.setupUserProfile);
 router.get('/user/getUserData', user.getUserData);
 router.get('/user/getUserProfileData', user.getUserProfileData);
 router.post('/user/updateUserProfileData', user.updateUserProfileData);

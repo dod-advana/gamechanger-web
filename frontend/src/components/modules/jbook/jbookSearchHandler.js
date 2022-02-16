@@ -13,10 +13,10 @@ import {
 	// getUserData,
 	setState,
 } from '../../../utils/sharedFunctions';
-import JBookAPI from '../../api/jbook-service-api';
+import GamechangerAPI from '../../api/gameChanger-service-api';
 import { scrollListViewTop } from './jbookMainViewHandler';
 
-const jbookAPI = new JBookAPI();
+const gamechangerAPI = new GamechangerAPI();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
@@ -49,7 +49,7 @@ const JBookSearchHandler = {
 			} = state;
 
 			// regular search with no limit
-			const resp = await jbookAPI.modularSearch({
+			const resp = await gamechangerAPI.modularSearch({
 				cloneName: 'jbook',
 				searchText,
 				offset,
@@ -80,7 +80,7 @@ const JBookSearchHandler = {
 			const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
 
 			// regular search
-			const resp = await jbookAPI.modularSearch({
+			const resp = await gamechangerAPI.modularSearch({
 				cloneName: 'jbook',
 				searchText,
 				offset,

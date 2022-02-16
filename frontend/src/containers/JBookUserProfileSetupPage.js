@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './jbook.css';
-import { setState } from '../sharedFunctions';
+import { setState } from '../utils/sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
 import { JBookContext } from '../components/modules/jbook/JBookContext';
-import { getQueryVariable } from '../gamechangerUtils';
-import JBookAPI from '../components/api/jbook-service-api';
+import { getQueryVariable } from '../utils/gamechangerUtils';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 
-const jbookAPI = new JBookAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 export const gcColors = {
 	buttonColor1: '#131E43',
@@ -46,7 +46,7 @@ const JBookUserProfileSetupPage = (props) => {
 		const email = getQueryVariable('email', url);
 		const permissions = getQueryVariable('permissions', url).split(',');
 
-		jbookAPI.setupUserProfile({ email, permissions }).then(data => {
+		gameChangerUserAPI.setupUserProfile({ email, permissions }).then(data => {
 			setProfileLoading(false);
 			history.push('/summary');
 		});
