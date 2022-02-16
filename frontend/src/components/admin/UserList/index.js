@@ -4,7 +4,7 @@ import _ from 'underscore';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCButton from '../../common/GCButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import {GCCheckbox, styles, TableRow} from '../util/GCAdminStyles';
+import {styles, TableRow} from '../util/GCAdminStyles';
 import UserModal from './EditUserModal';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -51,38 +51,6 @@ const DEFAULT_COLUMNS = [
 		accessor: 'organization',
 		Cell: row => (
 			<TableRow>{row.value}</TableRow>
-		)
-	},
-	{
-		Header: 'Admin',
-		accessor: 'is_admin',
-		width: 100,
-		Cell: row => (
-			<TableRow>
-				<GCCheckbox
-					checked={row.value}
-					onChange={() => {}}
-					name={'admin'}
-					color="inherit"
-					style={{...styles.checkbox, color: '#1C2D64'}}
-				/>
-			</TableRow>
-		)
-	},
-	{
-		Header: 'Super Admin',
-		accessor: 'is_super_admin',
-		width: 100,
-		Cell: row => (
-			<TableRow>
-				<GCCheckbox
-					checked={row.value}
-					onChange={() => {}}
-					name={'super_admin'}
-					color="inherit"
-					style={{...styles.checkbox, color: '#1C2D64'}}
-				/>
-			</TableRow>
 		)
 	}
 ];
@@ -133,13 +101,11 @@ const UserList = React.memo((props) => {
     },[])
 
 	useEffect(() => {
-		let tmpColumns = [];
+		let tmpColumns = [...DEFAULT_COLUMNS];
 
 		if (columns && gcUserTableData) {
 			if (columns.length > 0) {
-				tmpColumns = [...columns];
-			} else {
-				tmpColumns = [...DEFAULT_COLUMNS];
+				columns.forEach(column => tmpColumns.push(column));
 			}
 
 			tmpColumns.push({

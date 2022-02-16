@@ -1,7 +1,6 @@
 const defaultNavigationHandler = require(`../modules/default/defaultNavigationHandler`);
 const policyNavigationHandler = require(`../modules/policy/policyNavigationHandler`);
 const edaNavigationHandler = require(`../modules/eda/edaNavigationHandler`);
-const policyTestNavigationHandler = require(`../modules/policy/policyTestNavigationHandler`);
 const globalSearchNavigationHandler = require(`../modules/globalSearch/globalSearchNavigationHandler`);
 
 class NavigationFactory {
@@ -10,9 +9,6 @@ class NavigationFactory {
 			switch (module) {
 				case 'policy/policyNavigationHandler':
 					this.handler = policyNavigationHandler;
-					break;
-				case 'policy/policyTestNavigationHandler':
-					this.handler = policyTestNavigationHandler;
 					break;
 				case 'globalSearch/globalSearchNavigationHandler':
 					this.handler = globalSearchNavigationHandler;

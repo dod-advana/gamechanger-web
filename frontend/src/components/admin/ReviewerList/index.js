@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import ReactTable from 'react-table';
 import _ from 'underscore';
-import JBookAPI from '../../api/jbook-service-api';
 import GCButton from '../../common/GCButton';
 import {styles, TableRow} from '../util/GCAdminStyles';
 import ReviewerModal from './ReviewerModal';
 import {Typography} from '@material-ui/core';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 /**
  * 
@@ -23,7 +23,7 @@ export default () => {
 	const getReviewerData = async () => {
 		const tableData = [];
     
-		const data = await jbookAPI.getReviewerData();
+		const data = await gameChangerAPI.getReviewerData();
 
 		_.forEach(data.data, result => {
 			tableData.push(result);
@@ -32,7 +32,7 @@ export default () => {
 		setReviewerTableData(tableData);
 	}
 	const deleteReviewerData = async (reviewerRowId) => {
-		await jbookAPI.deleteReviewerData(reviewerRowId);
+		await gameChangerAPI.deleteReviewerData(reviewerRowId);
 	}
 
 	useEffect(()=>{

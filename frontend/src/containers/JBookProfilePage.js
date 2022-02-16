@@ -11,7 +11,6 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import { getQueryVariable } from '../utils/gamechangerUtils';
-import JBookAPI from '../components/api/jbook-service-api';
 import './jbook.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
@@ -27,10 +26,11 @@ import {
 	StyledReviewRightContainer, StyledAccordionContainer, StyledAccordionHeader
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+import GameChangerAPI from '../components/api/gameChanger-service-api';
 
 const _ = require('lodash');
 
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 const JBookProfilePage = (props) => {
 	const {
@@ -74,7 +74,7 @@ const JBookProfilePage = (props) => {
 
 		let projectData;
 		try {
-			projectData = await jbookAPI.callDataFunction({
+			projectData = await gameChangerAPI.callDataFunction({
 				functionName: 'getProjectData',
 				cloneName: cloneData.clone_name,
 				options: {
@@ -115,7 +115,7 @@ const JBookProfilePage = (props) => {
 
 		let dropdownData;
 		try {
-			dropdownData = await jbookAPI.callDataFunction({
+			dropdownData = await gameChangerAPI.callDataFunction({
 				functionName: 'getBudgetDropdownData',
 				cloneName: cloneData.clone_name,
 				options: {}
@@ -695,7 +695,7 @@ const JBookProfilePage = (props) => {
 		if (getClassLabel(reviewData) === 'Not AI' || !isSubmit || reviewType === 'primary' || validateForm(reviewType)) {
 			setState(dispatch, { [loading]: true });
 			console.log(reviewData)
-			await jbookAPI.callDataFunction({
+			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
 				cloneName: cloneData.clone_name,
 				options: {
@@ -722,7 +722,7 @@ const JBookProfilePage = (props) => {
 
 	const reenableForm = async (loading, reviewType) => {
 		setState(dispatch, { [loading]: true });
-		await jbookAPI.callDataFunction({
+		await gameChangerAPI.callDataFunction({
 			functionName: 'reenableForm',
 			cloneName: cloneData.clone_name,
 			options: {

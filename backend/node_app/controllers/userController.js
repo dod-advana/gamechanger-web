@@ -106,6 +106,7 @@ class UserController {
 		this.updateUserProfileData = this.updateUserProfileData.bind(this);
 		this.syncUserHelper = this.syncUserHelper.bind(this);
 		this.updateClonesVisited = this.updateClonesVisited.bind(this);
+		this.setupUserProfile = this.setupUserProfile.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -632,6 +633,55 @@ class UserController {
 		}
 	}
 
+	async setupUserProfile(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(req);
+			const { email, permissions } = req.body;
+			const userRequest = await this.userRequest.findOne({ where: { email: email }, raw: true });
+
+			if (userRequest && !userRequest.is_activated) {
+				const user = await this.user.findOne({where: { user_id: user_id }, raw: true});
+
+				if (user) {
+					user.organization = userRequest.organization;
+					user.email = email;
+					user.phone_number = userRequest.phone_number;
+
+					permissions.forEach(permission => {
+						switch (permission) {
+							case 'PrimaryReviewer':
+								user.is_primary_reviewer = true;
+								break;
+							case 'ServiceReviewer':
+								user.is_service_reviewer = true;
+								break;
+							case 'POCReviewer':
+								user.is_poc_reviewer = true;
+								break;
+							default:
+								break;
+						}
+					});
+
+					userRequest.is_activated = true;
+
+					await this.userRequest.update(userRequest, {where: {id: userRequest.id}});
+					await this.user.update(user, {where: {id: user.id}});
+
+					return res.status(200).send({ setup: true });
+				}
+			}
+
+			res.status(200).send({ setup: false });
+		} catch (err) {
+			this.logger.error(err, 'AXJ1YXX', userId);
+			res.status(500).send(`Error setting up user: ${err.message}`);
+		}
+	}
+
 	async syncUserTable(req, res) {
 		let userId = 'webapp_unknown';
 
@@ -870,8 +920,8 @@ class UserController {
 					}
 
 					// Update old user id
-					if (!finalOldUser['policy']) {
-						finalOldUser['policy'] = {
+					if (!finalOldUser['gamechanger']) {
+						finalOldUser['gamechanger'] = {
 							is_beta: oldUser.is_beta,
 							notifications: oldUser.notifications,
 							api_requests: oldUser.api_requests,
@@ -882,12 +932,12 @@ class UserController {
 						finalOldUser.user_id = user.user_id;
 						delete finalOldUser.id;
 					} else {
-						if (oldUser.is_beta != null) finalOldUser['policy'].is_beta = oldUser.is_beta;
-						if (oldUser.notifications != null) finalOldUser['policy'].notifications = oldUser.notifications;
-						if (oldUser.api_requests != null) finalOldUser['policy'].api_requests = oldUser.api_requests;
-						if (oldUser.submitted_info != null) finalOldUser['policy'].submitted_info = oldUser.submitted_info;
-						if (oldUser.is_internal != null) finalOldUser['policy'].is_internal = oldUser.is_internal;
-						if (oldUser.is_admin != null) finalOldUser['policy'].is_admin = oldUser.is_admin;
+						if (oldUser.is_beta != null) finalOldUser['gamechanger'].is_beta = oldUser.is_beta;
+						if (oldUser.notifications != null) finalOldUser['gamechanger'].notifications = oldUser.notifications;
+						if (oldUser.api_requests != null) finalOldUser['gamechanger'].api_requests = oldUser.api_requests;
+						if (oldUser.submitted_info != null) finalOldUser['gamechanger'].submitted_info = oldUser.submitted_info;
+						if (oldUser.is_internal != null) finalOldUser['gamechanger'].is_internal = oldUser.is_internal;
+						if (oldUser.is_admin != null) finalOldUser['gamechanger'].is_admin = oldUser.is_admin;
 					}
 
 					await this.gcUser.destroy({

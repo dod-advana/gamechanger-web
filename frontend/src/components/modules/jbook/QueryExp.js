@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import JBookAPI from '../../api/jbook-service-api';
 import './jbook.css';
 import { Link } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 const QueryExp = (props) => {
 	const { searchText } = props;
@@ -13,7 +13,7 @@ const QueryExp = (props) => {
 	useEffect(() => {
 
 		const fetchData = async () => {
-			const { data } = await jbookAPI.queryExp(searchText);
+			const { data } = await gameChangerAPI.queryExp(searchText);
 			if (data['qexp']) {
 				const qexp = data['qexp'];
 				const values = Object.values(qexp).flat();

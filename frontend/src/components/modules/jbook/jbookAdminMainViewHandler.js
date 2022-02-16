@@ -15,11 +15,11 @@ import ReviewerList from '../../admin/ReviewerList';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import GeneralAdminButtons from './jbookGeneralButtons'
-import JBookAPI from '../../api/jbook-service-api';
+import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCButton from '../../common/GCButton';
 import {Typography} from '@mui/material';
 
-const jbookAPI = new JBookAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 const PAGES = {
 	general: 'General',
@@ -28,28 +28,7 @@ const PAGES = {
 	notifications: 'Notifications',
 };
 
-const userListColumns = [
-	{
-		Header: 'First',
-		accessor: 'first_name',
-		Cell: row => (
-			<TableRow>{row.value}</TableRow>
-		)
-	},
-	{
-		Header: 'Last',
-		accessor: 'last_name',
-		Cell: row => (
-			<TableRow>{row.value}</TableRow>
-		)
-	},
-	{
-		Header: 'Organization',
-		accessor: 'organization',
-		Cell: row => (
-			<TableRow>{row.value}</TableRow>
-		)
-	},
+const userListTableAdditions = [
 	{
 		Header: 'Primary Reviewer',
 		accessor: 'extra_fields.jbook.is_primary_reviewer',
@@ -139,7 +118,7 @@ const renderManageUsersTitleAdditions = () => {
 	return (
 		<GCButton
 			onClick={async () => {
-				const data = await jbookAPI.exportUsers({
+				const data = await gameChangerUserAPI.exportUsers({
 					cloneName: 'jbook',
 				});
 				const blob = new Blob([data.data], { type: 'text/csv;charset=utf-8' });
@@ -173,7 +152,7 @@ const JBookAdminMainViewHandler = {
 			case PAGES.userList:
 				return <UserList
 					cloneName={cloneName}
-					columns={userListColumns}
+					columns={userListTableAdditions}
 					title={'User Permissions'}
 					titleAdditions={renderManageUsersTitleAdditions}
 					descripitionAdditions={renderDescriptionAdditions}
