@@ -77,6 +77,7 @@ const endpoints = {
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getDataList: '/api/gameChanger/admin/getDataList',
@@ -91,6 +92,7 @@ const endpoints = {
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
+	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -329,7 +331,8 @@ export default class GameChangerAPI {
 		highlightText,
 		pageNumber,
 		isClone = false,
-		cloneData = { clone_name: 'gamechanger' }
+		cloneData = { clone_name: 'gamechanger' },
+		isDLA = false
 	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
@@ -339,7 +342,7 @@ export default class GameChangerAPI {
 					cloneData.clone_name !== 'gamechanger'
 						? `/projects/${cloneData.clone_name}`
 						: ''
-				}/pdf/${fileName}`
+				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
 			if (cloneData.clone_name === 'eda') {
@@ -690,11 +693,15 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	stopProcess = async (opts) => {
+		const url = endpoints.stopProcess;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	deleteLocalModel = async (opts) => {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
-
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
@@ -757,6 +764,11 @@ export default class GameChangerAPI {
 
 	getDocumentUsage = async (body) => {
 		const url = endpoints.getDocumentUsage;
+		return axiosGET(this.axios, url, {params:body});
+	}
+
+	getUserAggregations = async (body) => {
+		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, {params:body});
 	}
 
@@ -994,9 +1006,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getHomepageEditorData = async () => {
+	getHomepageEditorData = async (body) => {
 		const url = endpoints.getHomepageEditorData;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, body);
 	};
 
 	setHomepageEditorData = async (body) => {

@@ -787,8 +787,7 @@ describe('SearchUtility', function () {
 			const body = { searchText: 'mission', index: 'gamechanger' };
 			let target = new SearchUtility(tmpOpts);
 			let actual = target.getESpresearchMultiQuery(body);
-			const expected = [{'index':'gamechanger'},{'size':4,'_source':['display_title_s'],'query':{'bool':{'must':[{'wildcard':{'display_title_s':{'value':'*mission*','boost':1,'rewrite':'constant_score'}}}],'filter':[{'term':{'is_revoked_b':false}}]}}},{'index':'search_history'},{'size':1,'query':{'prefix':{'search_query':{'value':'mission'}}},'aggs':{'search_query':{'terms':{'field':'search_query','min_doc_count':5},'aggs':{'user':{'terms':{'field':'user_id','size':3}}}}}},{'index':'entities'},{'size':2,'_source':{'includes':['name','aliases','entity_type']},'query':{'prefix':{'name':{'value':'mission'}}}}]
-
+			const expected = [{"index": "gamechanger"}, {"_source": ["display_title_s"], "query": {"bool": {"filter": [{"term": {"is_revoked_b": false}}], "must": [{"wildcard": {"display_title_s.search": {"boost": 1, "rewrite": "constant_score", "value": "*mission*"}}}]}}, "size": 4}, {"index": "search_history"}, {"aggs": {"search_query": {"aggs": {"user": {"terms": {"field": "user_id", "size": 3}}}, "terms": {"field": "search_query", "min_doc_count": 5}}}, "query": {"prefix": {"search_query": {"value": "mission"}}}, "size": 1}, {"index": "entities"}, {"_source": {"includes": ["name", "aliases", "entity_type"]}, "query": {"prefix": {"name": {"value": "mission"}}}, "size": 2}]
 			assert.deepStrictEqual(actual, expected);
 		});
 
@@ -1602,6 +1601,48 @@ describe('SearchUtility', function () {
 				'space <em>acquisition</em>'
  			]
 			
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+	describe('#recommend', () => {
+		it('given one filename it should recommend docs', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					recommender: (filenames, userId) => { return Promise.resolve({
+						"filenames": [
+							"Title 10"
+						],
+						"results": [
+							"Title 50",
+							"AACP 02.1",
+							"NDAA 2017 Conference Report",
+							"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+							"DoD Dictionary"
+						]
+					}); }
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = ["Title 10"]
+			const actual = await target.getRecDocs(filenames, "test");
+			const expected = {
+				"filenames": [
+					"Title 10"
+				],
+				"results": [
+					"Title 50",
+					"AACP 02.1",
+					"NDAA 2017 Conference Report",
+					"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+					"DoD Dictionary"
+				]
+			}
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
