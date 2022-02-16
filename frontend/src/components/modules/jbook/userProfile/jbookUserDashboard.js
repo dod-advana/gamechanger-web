@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import GCAccordion from '../../../common/GCAccordion';
 import ReactTable from 'react-table';
-import JBookAPI from '../../../api/jbook-service-api';
 import GamechangerUserManagementAPI from '../../../api/GamechangerUserManagement';
+import GameChangerAPI from '../../../api/gameChanger-service-api';
 
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 const styles = {
 	leftContainerSummary: {
@@ -318,7 +318,7 @@ const JBookUserDashboard = (props) => {
 
 	useEffect(() => {
 		if (permissions && email) {
-			jbookAPI.callDataFunction({
+			gameChangerAPI.callDataFunction({
 				functionName: 'getUserSpecificReviews',
 				cloneName: 'jbook',
 				options: { permissions, email }

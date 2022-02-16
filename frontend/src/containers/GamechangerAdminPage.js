@@ -21,7 +21,7 @@ import {
 
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import { toolTheme } from '../components/admin/util/GCAdminStyles';
+import {GCCheckbox, styles, TableRow, toolTheme} from '../components/admin/util/GCAdminStyles';
 
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
@@ -40,6 +40,42 @@ const PAGES = {
 	homepageEditor: 'Homepage Editor',
 	responsibilityUpdates: 'Responsibility Updates'
 };
+
+const userListTableAdditions = [
+	{
+		Header: 'Admin',
+		accessor: 'is_admin',
+		width: 100,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'admin'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	},
+	{
+		Header: 'Super Admin',
+		accessor: 'is_super_admin',
+		width: 100,
+		Cell: row => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'super_admin'}
+					color="inherit"
+					style={{...styles.checkbox, color: '#1C2D64'}}
+				/>
+			</TableRow>
+		)
+	}
+];
+
 /**
  *
  * @class GamechangerAdminPage
@@ -72,7 +108,7 @@ const GamechangerAdminPage = (props) => {
 			case PAGES.notifications:
 				return <NotificationsManagement />;
 			case PAGES.userList:
-				return <UserList />;
+				return <UserList columns={userListTableAdditions}/>;
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:

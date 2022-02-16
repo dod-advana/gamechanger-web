@@ -5,8 +5,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { Typography, Grid, Dialog, DialogTitle, DialogContent, DialogActions, TextField, makeStyles } from '@material-ui/core';
 import GCPrimaryButton from '../../common/GCButton';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import JBookAPI from '../../api/jbook-service-api';
-const jbookAPI = new JBookAPI();
+import GameChangerAPI from '../../api/gameChanger-service-api';
+const gameChangerAPI = new GameChangerAPI();
 
 const _ = require('lodash');
 
@@ -251,7 +251,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 					id={'editUserSubmit'}
 					onClick={async () => {
 						if (validateForm()) {
-							const res = await jbookAPI.callDataFunction({
+							const res = await gameChangerAPI.callDataFunction({
 								functionName: 'submitFeedbackForm',
 								cloneName: 'jbook',
 								options: {

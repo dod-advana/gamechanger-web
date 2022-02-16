@@ -134,6 +134,14 @@ const endpoints = {
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
 	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
+	callDataFunctionPOST: '/api/gameChanger/modular/callDataFunction',
+	queryExp: '/api/gameChanger/expandTerms',
+	reviewerDataGET: '/api/gameChanger/admin/getReviewerData',
+	reviewerDataDeletePOST: '/api/gameChanger/admin/deleteReviewerData',
+	reviewerDataPOST: '/api/gameChanger/admin/createUpdateReviewer',
+	exportReview: '/api/gameChanger/modular/exportReview',
+	exportChecklist: '/api/gameChanger/modular/exportChecklist',
+	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -1062,5 +1070,48 @@ export default class GameChangerAPI {
 	updateClonesVisited = async (clone) => {
 		const url = endpoints.updateClonesVisitedPOST;
 		return axiosPOST(this.axios, url, {clone});
+	};
+
+	callDataFunction = async (body) => {
+		const url = endpoints.callDataFunctionPOST;
+		return axiosPOST(this.axios, url, body);
+	};
+
+	queryExp = async (data) => {
+		const querydata = { 'searchText': data }
+		const url = endpoints.queryExp;
+		return axiosPOST(this.axios, url, data = querydata);
+	};
+
+	getReviewerData = async () => {
+		const url = endpoints.reviewerDataGET;
+		return axiosGET(this.axios, url);
+	};
+
+	deleteReviewerData = async (reviewerRowId) => {
+		const url = endpoints.reviewerDataDeletePOST;
+		return axiosPOST(this.axios, url, { reviewerRowId });
+	};
+
+	storeReviewerData = async (reviewerData) => {
+		const url = endpoints.reviewerDataPOST;
+		return axiosPOST(this.axios, url, { reviewerData, fromApp: true });
+	};
+
+	exportReview = async (body) => {
+		const url = endpoints.exportReview;
+		const options = { responseType: 'blob' };
+		return axiosPOST(this.axios, url, body, options);
+	};
+
+	exportChecklist = async (body) => {
+		const url = endpoints.exportChecklist;
+		const options = { responseType: 'blob' };
+		return axiosPOST(this.axios, url, body, options);
+	};
+
+	sendReviewStatusUpdates = async (data) => {
+		const url = endpoints.sendReviewStatusUpdates;
+		return axiosPOST(this.axios, url, data);
 	};
 }
