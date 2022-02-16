@@ -419,7 +419,6 @@ export default function PolicyGraphView(props) {
 	const [communityView, setCommunityView] = React.useState(false);
 
 	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('');
-	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(null);
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
 
 	useEffect(() => {
@@ -432,6 +431,14 @@ export default function PolicyGraphView(props) {
 		setRunSimulation(true);
 		setReloadGraph(true);
 	}, [graphData]);
+
+	useEffect(() => {
+		if (orgTypesSelected.length > 0) {
+			setNodeGroupMenuOpen(true);
+		} else {
+			setNodeGroupMenuOpen(false);
+		}
+	}, [orgTypesSelected]);
 
 	useEffect(() => {
 		if (runningSearch !== runningSearchProp) {
@@ -1417,20 +1424,20 @@ export default function PolicyGraphView(props) {
 	 */
 
 	const handleLegendAllDocsClick = (_, legendKey) => {
-		setOrgTypesSelected(
-			orgTypesSelected.includes(legendKey) ?
-				orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity') :
-				[
-					...orgTypesSelected,
-					...Object.keys(legendData).filter(type =>
-						type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
-					), legendKey
-				]
-		);
-
-		setNodeGroupMenuOpen(false);
-		setNodeGroupMenuTarget(null);
-		setNodeGroupMenuLabel('');
+		if (orgTypesSelected.includes(legendKey)) {
+			const allNonDocOrgTypes = orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity');
+			setOrgTypesSelected(allNonDocOrgTypes);
+			setNodeGroupMenuLabel(allNonDocOrgTypes.length > 0 ? allNonDocOrgTypes[0] : '');
+		} else {
+			setOrgTypesSelected([
+				legendKey,
+				...orgTypesSelected,
+				...Object.keys(legendData).filter(type =>
+					type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
+				)
+			]);
+			setNodeGroupMenuLabel('All Documents');
+		}		
 	};
 
 	const renderNodeLegendItems = () => {
@@ -1519,20 +1526,14 @@ export default function PolicyGraphView(props) {
 				[...newOrgTypesSelected, 'All Documents'] : newOrgTypesSelected.filter(type => type !== 'All Documents')
 		);
 
-		if (orgTypesSelected.includes(legendKey)) {
-			setNodeGroupMenuOpen(false);
-			setNodeGroupMenuTarget(null);
-			setNodeGroupMenuLabel('');
-		} else {
-			setNodeGroupMenuOpen(true);
-			setNodeGroupMenuTarget(target);
+		if (newOrgTypesSelected.includes(legendKey)) {
 			setNodeGroupMenuLabel(legendKey);
+		} else {
+			setNodeGroupMenuLabel(newOrgTypesSelected.length > 0 ? newOrgTypesSelected[0] : '');
 		}
 	};
 
 	const closeGroupNodeMenu = () => {
-		setNodeGroupMenuOpen(false);
-		setNodeGroupMenuTarget(null);
 		setNodeGroupMenuLabel('');
 		setOrgTypesSelected([]);
 	};
@@ -1834,9 +1835,10 @@ export default function PolicyGraphView(props) {
 					zoom={zoom}
 					closeGroupNodeMenu={closeGroupNodeMenu}
 					nodeGroupMenuOpenProp={nodeGroupMenuOpen}
-					nodeGroupMenuTargetProp={nodeGroupMenuTarget}
 					nodeGroupMenuLabelProp={nodeGroupMenuLabel}
+					setNodeGroupMenuLabelProp={setNodeGroupMenuLabel}
 					setNodeHoverIDProp={setNodeHoverID}
+					orgTypesSelected={orgTypesSelected}
 				/>
 			)}
 			{showGraphCard && (
