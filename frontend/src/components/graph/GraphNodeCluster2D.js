@@ -816,9 +816,9 @@ export default function GraphNodeCluster2D(props) {
 						</CloseButton>
 					</div>
 					<div style={{ width: 290 }}>
-						<div style={{ margin: '16px 0px 0' }}>
+						<div style={{ margin: '16px 0px 0px' }}>
 							<span style={{ fontWeight: 'bold', marginLeft: 10 }}>Nodes in Group</span>
-							<div style={{ margin: '10px 0px', borderBottom: '1px solid lightgray', borderTop: '1px solid lightgray' }}>
+							<div style={{ margin: '14px 0px', borderBottom: '1px solid lightgray', borderTop: '1px solid lightgray' }}>
 								{filterTab2dArray.map(row => (
 									<div style={legendStyles.tabsContainer}>
 										{
