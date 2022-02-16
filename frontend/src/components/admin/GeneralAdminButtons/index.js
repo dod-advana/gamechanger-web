@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Paper } from '@material-ui/core';
-
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';
 import { styles } from '../util/GCAdminStyles';
 import UOTAlert from '../../common/GCAlert';
-
 import TrendingBlackListModal from './TrendingBlackListModal';
 import EditEsIndexModal from './EditEsIndexModal';
 
@@ -194,6 +192,7 @@ export default () => {
 			);
 		}
 	};
+
 	const toggleUserFeedback = async () => {
 		const title = 'Requst User Feedback: ';
 		createAlert(title, 'info', 'Started');
@@ -289,6 +288,7 @@ export default () => {
 			console.error('Error getting entity search mode', e);
 		}
 	};
+
 	const getUserFeedback = async () => {
 		try {
 			const { data } = await gameChangerAPI.getUserFeedbackMode();
@@ -298,6 +298,7 @@ export default () => {
 			console.error('Error getting user feedback mode', e);
 		}
 	};
+
 	const getJiraFeedback = async () => {
 		try {
 			const { data } = await gameChangerAPI.getJiraFeedbackMode();

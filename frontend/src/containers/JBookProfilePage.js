@@ -17,7 +17,6 @@ import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
-import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import jca_data from '../components/modules/jbook/JCA.json';
 import {
 	Accomplishments, aggregateProjectDescriptions, Contracts, formatNum,
@@ -27,6 +26,8 @@ import {
 	CloseButton, StyledContainer, StyledReviewContainer, StyledReviewLeftContainer,
 	StyledReviewRightContainer, StyledAccordionContainer, StyledAccordionHeader
 } from '../components/modules/jbook/profilePage/profilePageStyles';
+import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
+
 const _ = require('lodash');
 
 const jbookAPI = new JBookAPI();
@@ -39,6 +40,7 @@ const JBookProfilePage = (props) => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
+	const [permissions, setPermissions] = useState({is_primary_reviewer: false, is_service_reviewer: false, is_poc_reviewer: false});
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
@@ -186,6 +188,19 @@ const JBookProfilePage = (props) => {
 			console.log(err);
 			console.log('Error retrieving budget profile page data');
 			setProfileLoading(false);
+		}
+
+		const userData = Auth.getTokenPayload();
+
+		if (userData.extra_fields && userData.extra_fields.jbook) {
+			const tmpPermissions = {
+				is_admin: userData.extra_fields.jbook.is_admin,
+				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
+				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
+				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+			};
+
+			setPermissions(tmpPermissions);
 		}
 
 		// eslint-disable-next-line
@@ -797,7 +812,7 @@ const JBookProfilePage = (props) => {
 							<JBookJAICReviewForm
 								renderReenableModal={renderReenableModal}
 								reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK Primary Reviewer') && Auth.getTokenPayload().email === reviewData.primaryReviewerEmail)}
+								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_primary_reviewer && Auth.getTokenPayload().email === reviewData.primaryReviewerEmail)}
 								finished={reviewData.primaryReviewStatus === 'Finished Review'}
 								submitReviewForm={submitReviewForm}
 								setReviewData={setReviewData}
@@ -816,7 +831,7 @@ const JBookProfilePage = (props) => {
 						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
 							<JBookServiceReviewForm
 								renderReenableModal={renderReenableModal}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK Service Reviewer') &&
+								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_service_reviewer  &&
 									(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
 										Auth.getTokenPayload().email === reviewData.serviceSecondaryReviewerEmail))}
 								reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
@@ -839,7 +854,7 @@ const JBookProfilePage = (props) => {
 							<JBookPOCReviewForm
 								renderReenableModal={renderReenableModal}
 								finished={reviewData.pocReviewStatus === 'Finished Review'}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK POC Reviewer') && (Auth.getTokenPayload().email === reviewData.servicePOCEmail || Auth.getTokenPayload().email === reviewData.alternate_poc_email))}
+								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_poc_reviewer  && (Auth.getTokenPayload().email === reviewData.servicePOCEmail || Auth.getTokenPayload().email === reviewData.alternate_poc_email))}
 								reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 								dropdownData={dropdownData}
 								vendorData={projectData.vendors}

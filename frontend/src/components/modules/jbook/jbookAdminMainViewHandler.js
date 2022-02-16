@@ -14,6 +14,12 @@ import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import GeneralAdminButtons from './jbookGeneralButtons'
+import JBookAPI from '../../api/jbook-service-api';
+import GCButton from '../../common/GCButton';
+import {Typography} from '@mui/material';
+
+const jbookAPI = new JBookAPI();
 
 const PAGES = {
 	general: 'General',
@@ -110,11 +116,50 @@ const userListColumns = [
 	}
 ];
 
-const renderGeneralAdminButtons = () => {
-	return (<></>);
+const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
+	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
+	console.log('autodownload file')
+
+	const a = document.createElement('a');
+	a.style = 'display: none';
+	document.body.appendChild(a);
+	//Create a DOMString representing the blob
+	//and point the link element towards it
+	const url = window.URL.createObjectURL(data);
+	a.href = url;
+	a.download = `${filename}.${extension}`;
+	//programatically click the link to trigger the download
+	a.click();
+	//release the reference to the file by revoking the Object URL
+	window.URL.revokeObjectURL(url);
+	document.body.removeChild(a)
 }
 
-const PolicyAdminMainViewHandler = {
+const renderManageUsersTitleAdditions = () => {
+	return (
+		<GCButton
+			onClick={async () => {
+				const data = await jbookAPI.exportUsers({
+					cloneName: 'jbook',
+				});
+				const blob = new Blob([data.data], { type: 'text/csv;charset=utf-8' });
+				const d = new Date();
+				await autoDownloadFile({data: blob, extension: 'csv', filename: 'user-data-' + d.toISOString()});
+			}}
+			style={{minWidth: 'unset', backgroundColor: '#1C2D64', borderColor: '#1C2D64'}}
+		>Download</GCButton>
+	)
+}
+
+const renderDescriptionAdditions = () => {
+	return (
+		<div style={{ background: '#f2f2f2', borderRadius: 6, margin: '0 80px 20px 80px', padding: 10 }}>
+			<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>The table below lists all users that have visited JBOOK Search to date. Permissions and basic user information can be edited here.</Typography>
+		</div>
+	);
+}
+
+const JBookAdminMainViewHandler = {
 	getPages: () => {
 		return PAGES;
 	},
@@ -122,15 +167,21 @@ const PolicyAdminMainViewHandler = {
 	renderSwitch: (page, cloneName) => {
 		switch (page) {
 			case PAGES.general:
-				return renderGeneralAdminButtons();
+				return <GeneralAdminButtons />;
 			case PAGES.notifications:
 				return <NotificationsManagement cloneName={cloneName} />;
 			case PAGES.userList:
-				return <UserList cloneName={cloneName} columns={userListColumns} />;
+				return <UserList
+					cloneName={cloneName}
+					columns={userListColumns}
+					title={'User Permissions'}
+					titleAdditions={renderManageUsersTitleAdditions}
+					descripitionAdditions={renderDescriptionAdditions}
+				/>;
 			case PAGES.reviewerList:
 				return <ReviewerList cloneName={cloneName} />;
 			default:
-				return renderGeneralAdminButtons();
+				return <GeneralAdminButtons />;
 		}
 	},
 	
@@ -281,4 +332,4 @@ const PolicyAdminMainViewHandler = {
 	}
 };
 
-export default PolicyAdminMainViewHandler;
+export default JBookAdminMainViewHandler;

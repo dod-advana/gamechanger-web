@@ -35,6 +35,45 @@ class ExportHandler {
 		return req.body;
 	}
 
+	async exportReview(res, permissions, options, userId) {
+		try {
+			const body = options;
+			return await this.exportReviewHelper({body, permissions}, res, userId);
+		} catch (e) {
+			this.logger.error(e.message, 'UB0D05C')
+		}
+	}
+
+	async exportReviewHelper(req, res, userId) {
+		return req.body;
+	}
+
+	async exportUsers(res, permissions, options, userId) {
+		try {
+			const body = options;
+			return await this.exportUsersHelper({body, permissions}, res, userId);
+		} catch (e) {
+			this.logger.error(e.message, 'UB0D051');
+		}
+	}
+
+	async exportUsersHelper(req, res, userId) {
+		return req.body;
+	}
+
+	async exportChecklist(res, permissions, options, userId) {
+		try {
+			const body = options;
+			return await this.exportChecklistHelper({body, permissions}, res, userId);
+		} catch (e) {
+			this.logger.error(e.message, 'UB0D053')
+		}
+	}
+
+	async exportChecklistHelper(req, res, userId) {
+		return req.body;
+	}
+
 }
 
 module.exports = ExportHandler;
