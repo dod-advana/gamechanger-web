@@ -207,6 +207,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [filterChange, setFilterChange] = useState(false);
 	const [inputError, setInputError] = useState(false);
 	const [collapseKeys, setCollapseKeys] = useState([]);
+	const [feedbackList, setFeedbackList] = useState([]);
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -291,7 +292,8 @@ const GCDocumentsComparisonTool = (props) => {
 		setViewableDocs(returnedDocs)
 	}, [returnedDocs]);
 
-	const handleIgnore = (doc, paragraph) => {
+	const handleFeedback = (doc, paragraph, positiveFeedback) => {
+		if(feedbackList.includes(paragraph.id)) return;
 		const searchedParagraph = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
 		const matchedParagraphId = paragraph.id;
 
@@ -299,16 +301,20 @@ const GCDocumentsComparisonTool = (props) => {
 			searchedParagraph,
 			matchedParagraphId,
 			docId: doc.id,
-			positiveFeedback: false
+			positiveFeedback
 		});
-
-		const docIndex = viewableDocs.findIndex(vDoc => vDoc.id === doc.id);
-		const parIndex = viewableDocs[docIndex].paragraphs.findIndex(vPar => vPar.id === paragraph.id);
-		const newViewableDocs = viewableDocs;
-		newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
-		setViewableDocs(newViewableDocs);
-		if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setToFirstResultofInput(selectedInput);
-		if(viewableDocs.length && newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[docIndex].paragraphs[0]);
+		
+		if(!positiveFeedback){
+			const docIndex = viewableDocs.findIndex(vDoc => vDoc.id === doc.id);
+			const parIndex = viewableDocs[docIndex].paragraphs.findIndex(vPar => vPar.id === paragraph.id);
+			const newViewableDocs = viewableDocs;
+			newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
+			setViewableDocs(newViewableDocs);
+			if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setToFirstResultofInput(selectedInput);
+			if(viewableDocs.length && newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[docIndex].paragraphs[0]);
+		}else{
+			setFeedbackList([...feedbackList, paragraph.id]);
+		}
 	}
 	
 	const measuredRef = useCallback(
@@ -761,7 +767,7 @@ const GCDocumentsComparisonTool = (props) => {
 																{paragraph.par_raw_text_t}
 															</span>
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
-																<GCTooltip title={'Export document mathces to CSV'} placement="bottom" arrow>
+																<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
 																	<GCButton
 																		onClick={() => exportCSV(doc)}
 																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
@@ -777,14 +783,19 @@ const GCDocumentsComparisonTool = (props) => {
 																		Save to Favorites
 																	</GCButton>
 																</GCTooltip>
-																<GCTooltip title={'Click to remove from matches'} placement="bottom" arrow>
-																	<GCButton 
-																		isSecondaryBtn 
-																		onClick={() => handleIgnore(doc, paragraph)}
-																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																	>
-																		Ignore
-																	</GCButton>
+																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
+																	<i
+																		className={classes.feedback + ' fa fa-thumbs-up'}
+																		style={feedbackList.includes(paragraph.id) ? {cursor: 'default', color: '#E0E0E0', '-webkit-text-stroke': '1px black'} : {}}
+																		onClick={() => handleFeedback(doc, paragraph, true)}
+																	/>
+																</GCTooltip>
+																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
+																	<i
+																		className={classes.feedback + ' fa fa-thumbs-down'}
+																		style={feedbackList.includes(paragraph.id) ? {cursor: 'default', '-webkit-text-stroke': '1px #808080'} : {}}
+																		onClick={() => handleFeedback(doc, paragraph, false)}
+																	/>
 																</GCTooltip>
 															</div>
 														</div>
@@ -846,6 +857,17 @@ const useStyles = makeStyles((theme) => ({
 		margin: 'auto 5px auto 0px',
 		height: 19,
 		width: 19
+	},
+	feedback: {
+		fontSize: 25,
+		margin: 'auto 0 auto 10px',
+		justifyContent: 'center',
+		color: 'white',
+		'-webkit-text-stroke': '1px #808080',
+		'&:hover': {
+			cursor: 'pointer',
+			'-webkit-text-stroke': '1px black',
+		},
 	},
 }));
 
