@@ -14,7 +14,7 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import GamechangerAPI from '../../api/gameChanger-service-api';
-import { scrollListViewTop } from './jbookMainViewHandler';
+import { scrollListViewTop } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
 
