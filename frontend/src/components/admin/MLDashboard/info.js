@@ -172,6 +172,8 @@ export default (props) => {
 								Version: <br />
 								Connection Status: <br />
 								Last Queried: <br />
+								Elasticsearch Host: <br />
+								Elasticsearch Status: <br />
 
 							</div>
 							<div style={{ width: '65%' }} className="half">
@@ -179,6 +181,9 @@ export default (props) => {
 								{APIData.Version} <br />
 								{status[getConnectionStatus()].toUpperCase()} <br />
 								{getLastQueried()} <br />
+								{APIData.Elasticsearch_Host} <br />
+								{APIData.Elasticsearch_Status} <br />
+
 								<br />
 
 							</div>
