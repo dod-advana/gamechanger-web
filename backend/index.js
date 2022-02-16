@@ -280,10 +280,14 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		const signatureFromApp = req.get('x-ua-signature');
-		const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
-		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api' &&  signatureFromApp=== userToken){
-			next();
+		
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			
+			const signatureFromApp = req.get('x-ua-signature');
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			if (signatureFromApp === userToken){
+				next();
+			}
 		}
 		else{
 			res.sendStatus(403);
