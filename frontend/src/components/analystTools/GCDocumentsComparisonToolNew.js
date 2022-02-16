@@ -224,11 +224,11 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [paragraphText])
 
 	useEffect(() => {
-		let disable = true;
+		let disable = 0;
 		Object.keys(itemsToCombine).forEach(par => {
-			if(itemsToCombine[par]) disable = false;
+			if(itemsToCombine[par]) disable++;
 		})
-		setCombineDisabled(disable)
+		setCombineDisabled(disable < 2)
 	}, [itemsToCombine])
 	
 	useEffect(() => {
@@ -382,6 +382,8 @@ const GCDocumentsComparisonTool = (props) => {
 			return {text, id: idx};
 		})
 		setParagraphs(newParagraphs);
+		const newParagraphText = newParagraphs.map(paragraph => paragraph.text).join('\n');
+		setParagraphText(newParagraphText);
 		handleCompare();
 	}
 
