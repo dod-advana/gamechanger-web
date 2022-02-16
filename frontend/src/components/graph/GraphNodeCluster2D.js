@@ -313,9 +313,9 @@ export default function GraphNodeCluster2D(props) {
 	const [graphRendered1stTime, setGraphRendered1stTime] = React.useState(false);
 
 	const [edgeThickness, setEdgeThickness] = React.useState(2);
-	const [chargeStrength, setChargeStrength] = React.useState(-5);
-	const [linkDistance, setLinkDistance] = React.useState(20);
-	const [linkIterations, setLinkIterations] = React.useState(4);
+	const [chargeStrength, setChargeStrength] = React.useState(-30);
+	const [linkDistance, setLinkDistance] = React.useState(30);
+	const [linkIterations, setLinkIterations] = React.useState(1);
 	const [nodeRelativeSize, setNodeRelativeSize] = React.useState(1);
 	const [zoomFactor, setZoomFactor] = React.useState(0.5);
 	const [nodeLabelColors, setNodeLabelColors] = React.useState({});
@@ -516,7 +516,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const zoomInOut = (zoomIn) => {
 		const ref = graphRefProp ? graphRefProp : graphRef;
-		const newZoom = zoom + (zoomIn ? 1 : -1) * zoomFactor;
+		const newZoom = zoom + (zoomIn ? 1 : -1) * Number(zoomFactor);
 		if (newZoom > zoomLimit) {
 			ref.current.zoom(zoomLimit);
 		} else {
@@ -1245,11 +1245,10 @@ export default function GraphNodeCluster2D(props) {
 			}
 		  };
 
-	const handleUpdateNodeSize = updateNodeSize
-		? updateNodeSize
-		: (size) => {
-			setNodeRelativeSize(size);
-		  };
+	const handleUpdateNodeSize = (size) => {
+		updateNodeSize(size);
+		setNodeRelativeSize(size);
+	};
 
 	const getNodesWithNEdges = (numEdges) => {
 		const edgeCount = {};
@@ -1321,7 +1320,7 @@ export default function GraphNodeCluster2D(props) {
 		return (
 			<StyledMenu open={settingsOpen}>
 				<div>
-					<i>Force Settings</i>
+					<i>Hierarchy Settings</i>
 					<form noValidate autoComplete="off">
 						<div className={'settings-item'} style={styles.settingsMenuFormDiv}>
 							<div>Hierarchy Mode</div>
@@ -1361,10 +1360,11 @@ export default function GraphNodeCluster2D(props) {
 											getTrackingNameForFactory(cloneData.clone_name),
 											'GraphSettingsMenu',
 											'zoomFactor',
-											Number(event.target.value)
+											event.target.value
 										);
-										setZoomFactor(Number(event.target.value));
+										setZoomFactor(event.target.value);
 									}}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
 								/>
 							</FormControl>
 						</div>
@@ -1413,6 +1413,7 @@ export default function GraphNodeCluster2D(props) {
 										handleUpdateNodeSize(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
 								/>
 							</FormControl>
 						</div>
@@ -1437,6 +1438,7 @@ export default function GraphNodeCluster2D(props) {
 										setEdgeThickness(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
 								/>
 							</FormControl>
 						</div>
@@ -1521,9 +1523,8 @@ export default function GraphNodeCluster2D(props) {
 			? graphRefProp.current
 			: graphRef.current;
 		if (forceGraphRef) {
-			// forceGraphRef.d3Force('charge').strength(chargeStrength);
-			// forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
-			forceGraphRef.d3Force('charge').distanceMin(20);
+			forceGraphRef.d3Force('charge').strength(chargeStrength).distanceMin(20);
+			forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
 		}
 
 		return (
