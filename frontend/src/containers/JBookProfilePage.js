@@ -192,7 +192,16 @@ const JBookProfilePage = (props) => {
 
 		const userData = Auth.getTokenPayload();
 
-		console.log(userData)
+		if (userData.extra_fields && userData.extra_fields.jbook) {
+			const tmpPermissions = {
+				is_admin: userData.extra_fields.jbook.is_admin,
+				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
+				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
+				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+			};
+
+			setPermissions(tmpPermissions);
+		}
 
 		// eslint-disable-next-line
 	}, []);
