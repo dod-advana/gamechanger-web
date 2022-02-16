@@ -645,7 +645,6 @@ export default (props) => {
 							onClick={() => {
 								triggerReloadModels();
 							}}
-							disabled={checkReloading()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Reload
