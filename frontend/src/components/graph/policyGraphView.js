@@ -24,6 +24,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 
 import { Card } from '../cards/GCCard';
 import { backgroundWhite } from '../common/gc-colors';
+import { Warning } from '@material-ui/icons';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -104,6 +105,45 @@ const StyledCircularMenu = styled.nav`
 		-moz-transform: scale(1);
 		transform: scale(1);
 	}
+`;
+
+export const NotificationWrapper = styled.div`
+	margin-top: 1px;
+	margin-bottom: 20px;
+	width: 100%;
+	height: 50px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-width: 1px;
+	border-style: solid;
+	font-weight: bold;
+	border-radius: 4px;
+	box-sizing: border-box;
+
+	border-color: #F5A622;
+	background-color: #FFE8AF;
+`;
+
+const IconWrapper = styled.div`
+	width: 60px;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: #ffffff;
+
+	background-color: #F5A622;
+`;
+
+const LoadAllButton = styled.button`
+	background-color: #E9691D;
+	color: #fff;
+	height: 100%;
+	width: 150px;
+	border-width: 0;
+	border-top-right-radius: inherit;
+	border-bottom-right-radius: inherit;
 `;
 
 const setFixedCoordsBasedOnView = (is2D, nodes) => {
@@ -338,6 +378,8 @@ export default function PolicyGraphView(props) {
 		hierarchyView = false,
 		detailsView = false,
 		selectedDocuments = [],
+		loadAll,
+		nodeLimit,
 	} = props;
 
 	const graph2DRef = useRef();
@@ -747,7 +789,7 @@ export default function PolicyGraphView(props) {
 								).toFixed(4) + '%';
 							const topBack =
 								(
-									28 +
+									50 +
 									31 *
 										Math.sin(
 											-0.5 * Math.PI -
@@ -1737,6 +1779,26 @@ export default function PolicyGraphView(props) {
 
 	return (
 		<div>
+			{(nodeLimit?.warningLimit || (graph.nodes.length >= nodeLimit?.maxLimit)) &&
+				<NotificationWrapper>
+					<IconWrapper>
+						<Warning fontSize="large" />
+					</IconWrapper>
+
+					{nodeLimit.warningLimit &&
+						<>
+							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
+							<LoadAllButton onClick={() => loadAll()}>Load All</LoadAllButton>
+						</>
+					}
+					{nodeLimit.maxLimit &&
+						<>
+							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
+							<span></span>
+						</>
+					}
+				</NotificationWrapper>
+			}
 			{show2DView && (
 				<MemoizedNodeCluster2D
 					renderContextMenu={showNodeContextMenu}
@@ -1760,7 +1822,7 @@ export default function PolicyGraphView(props) {
 					runSimulationProp={runSimulation}
 					runningSearch={runningSearch}
 					nodeRelativeSizeProp={nodeRelSize}
-					graphWidth={width}
+					graphWidth={document.getElementById('graph2dContainer')?.offsetWidth || width}
 					graphHeight={height}
 					nodeHoverIDProp={nodeHoverID}
 					shouldCenterProp={shouldCenter}

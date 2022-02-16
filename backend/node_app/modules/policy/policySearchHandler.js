@@ -142,8 +142,8 @@ class PolicySearchHandler extends SearchHandler {
 		const clientObj = {
 			esClientName: 'gamechanger',
 			esIndex: body.archivedCongressSelected ?
-				[this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index] :
-				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index
+				[this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index] :
+				[this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index]
 		};
 
 		try {

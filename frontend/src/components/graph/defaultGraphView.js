@@ -10,6 +10,7 @@ import { getSearchObjectFromString, setState } from '../../utils/sharedFunctions
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedPolicyGraphView } from './policyGraphView';
 import ViewHeader from '../mainView/ViewHeader';
+import _ from 'lodash';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -19,6 +20,7 @@ const getGraphData = async (
 	graphResultsFound,
 	setGraph,
 	setNoSearches,
+	setNodeLimit,
 	state,
 	dispatch
 ) => {
@@ -38,6 +40,7 @@ const getGraphData = async (
 		includeRevoked,
 		allTypesSelected,
 		typeFilter,
+		loadAll,
 	} = searchSettings;
 
 	const searchObject = getSearchObjectFromString(searchText);
@@ -68,6 +71,7 @@ const getGraphData = async (
 				publicationDateFilter,
 				publicationDateAllTime,
 				includeRevoked,
+				loadAll,
 			},
 		});
 		if (graphResultsFound) return;
@@ -87,6 +91,7 @@ const getGraphData = async (
 			setGraphResultsFound(true);
 			setNoSearches(true);
 		}
+		setNodeLimit(graphResp?.data?.query?.limit);
 	} catch (err) {
 		console.log(err);
 	}
@@ -103,6 +108,7 @@ const DefaultGraphView = (props) => {
 	const [documentsFound, setDocumentsFound] = React.useState(0);
 	const [timeFound, setTimeFound] = React.useState('0');
 	const [numOfEdges, setNumOfEdges] = React.useState(0);
+	const [nodeLimit, setNodeLimit] = useState();
 
 	const [width, setWidth] = React.useState(
 		window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100)
@@ -124,9 +130,13 @@ const DefaultGraphView = (props) => {
 				graphResultsFound,
 				setGraph,
 				setNoSearches,
+				setNodeLimit,
 				state,
 				dispatch
 			);
+			const newSearchSettings = _.cloneDeep(state.searchSettings);
+			newSearchSettings.loadAll = false;
+			setState(dispatch, { searchSettings: newSearchSettings });
 		}
 	}, [state, graphResultsFound, dispatch]);
 
@@ -161,6 +171,13 @@ const DefaultGraphView = (props) => {
 				showSideFilters={state.showSideFilters}
 				searchText={state.searchText}
 				selectedDocuments={state.selectedDocumentsForGraph}
+				loadAll={() => {
+					const newSearchSettings = _.cloneDeep(state.searchSettings);
+					newSearchSettings.loadAll = true;
+					setState(dispatch, { searchSettings: newSearchSettings, runGraphSearch: true });
+					setGraphResultsFound(false);
+				}}
+				nodeLimit={nodeLimit}
 			/>
 		</div>
 	);
