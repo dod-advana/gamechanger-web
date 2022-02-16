@@ -1,8 +1,8 @@
 import { setState } from '../../../utils/sharedFunctions';
-import JBookAPI from '../../api/jbook-service-api';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 const _ = require('lodash');
 
-const jbookAPI = new JBookAPI();
+const gamechangerAPI = new GameChangerAPI();
 
 
 export const setJBookSetting = (field, value, state, dispatch, filteredList = false) => {
@@ -152,7 +152,7 @@ export const populateDropDowns = async (state, dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	const defaultOptions = _.cloneDeep(state.defaultOptions);
 
-	const { data } = await jbookAPI.callSearchFunction({
+	const { data } = await gamechangerAPI.callSearchFunction({
 		functionName: 'getDataForFilters',
 		cloneName: state.cloneData.clone_name,
 		options: {},
@@ -166,7 +166,7 @@ export const populateDropDowns = async (state, dispatch) => {
 
 	let dropdownData;
 	try {
-		dropdownData = await jbookAPI.callDataFunction({
+		dropdownData = await gamechangerAPI.callDataFunction({
 			functionName: 'getBudgetDropdownData',
 			cloneName: 'jbook',
 			options: {}
