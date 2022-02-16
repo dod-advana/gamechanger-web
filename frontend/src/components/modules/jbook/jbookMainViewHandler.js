@@ -21,12 +21,10 @@ import LandingImage from '../../../images/JAIC_banner.png'
 import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
-import JBookAPI from '../../api/jbook-service-api';
 import QueryExp from './QueryExp.js'
 import { Link } from '@mui/material';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
-const jbookAPI = new JBookAPI();
 const gameChangerAPI = new GameChangerAPI();
 
 const _ = require('lodash');
@@ -373,7 +371,7 @@ const populateDropDowns = async (state, dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	const defaultOptions = _.cloneDeep(state.defaultOptions);
 
-	const { data } = await jbookAPI.callSearchFunction({
+	const { data } = await gameChangerAPI.callSearchFunction({
 		functionName: 'getDataForFilters',
 		cloneName: state.cloneData.clone_name,
 		options: {},
@@ -387,7 +385,7 @@ const populateDropDowns = async (state, dispatch) => {
 
 	let dropdownData;
 	try {
-		dropdownData = await jbookAPI.callDataFunction({
+		dropdownData = await gameChangerAPI.callDataFunction({
 			functionName: 'getBudgetDropdownData',
 			cloneName: 'jbook',
 			options: {}

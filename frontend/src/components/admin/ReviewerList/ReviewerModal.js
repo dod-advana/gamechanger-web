@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from '@material-ui/core';
-import JBookAPI from '../../api/jbook-service-api';
 import GCButton from '../../common/GCButton';
 import {styles, useStyles} from '../util/GCAdminStyles';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 /**
  * 
@@ -38,7 +38,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 			reviewerToEdit = editReviewerData;
 		}
 
-		jbookAPI.storeReviewerData(reviewerToEdit).then(data => {
+		gameChangerAPI.storeReviewerData(reviewerToEdit).then(data => {
 			if (data.status === 200) {
 				closeReviewerModal();
 				getReviewerData();

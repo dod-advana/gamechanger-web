@@ -4,9 +4,9 @@ import {styles} from '../../admin/util/GCAdminStyles';
 import UOTAlert from '../../common/GCAlert';
 import EditEsIndexModal from '../../admin/GeneralAdminButtons/EditEsIndexModal';
 import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
-import JBookAPI from '../../api/jbook-service-api';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
-const jbookAPI = new JBookAPI();
+const gameChangerAPI = new GameChangerAPI();
 /**
  * 
  * @class GeneralAdminButtons
@@ -57,7 +57,7 @@ const JBOOKGeneralAdminButtons = () => {
 		const title = 'Sending Review Status: ';
 		createAlert(title, 'info', 'Started');
 		try {
-			await jbookAPI.sendReviewStatusUpdates({emails: reviewStatusEmails}).then(res => {
+			await gameChangerAPI.sendReviewStatusUpdates({emails: reviewStatusEmails}).then(res => {
 				createAlert('Sending Review Status', 'success', 'Review Status Sent')
 			})
 		} catch (e){
@@ -76,7 +76,7 @@ const JBOOKGeneralAdminButtons = () => {
 							<Link to='#' onClick={async () => {
 								try {
 									createAlert('Downloading Review Data', 'info', '');
-									const data = await jbookAPI.exportReview({
+									const data = await gameChangerAPI.exportReview({
 										cloneName: 'jbook',
 									});
 									const blob = new Blob([data.data], { type: 'text/csv;charset=utf-8' });
