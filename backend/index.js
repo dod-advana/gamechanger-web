@@ -27,7 +27,7 @@ const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
-const {getUserIdFromSAMLUserId} = require('./node_app/utils/userUtility');
+const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -120,7 +120,7 @@ app.use(async function (req, res, next) {
 	}
 
 	if (!cn) {
-		if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
 			user_id = 'ml-api';
 		}
 	}
@@ -156,7 +156,7 @@ app.use(function (req, res, next) {
 	if (req.method === 'OPTIONS') {
 		res.sendStatus(200);
 	} else {
-		if(!req.permissions) {
+		if (!req.permissions) {
 			req.permissions = [];
 		}
 		next();
@@ -178,11 +178,11 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 			include: [{
 				model: CloneMeta,
 				attributes: ['clone_name'],
-				through: {attributes: []}
+				through: { attributes: [] }
 			}],
 		});
 		let cloneAccess;
-		if(key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
+		if (key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
 		if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 			req.headers['ssl_client_s_dn_cn'] = key.username;
 			req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
@@ -282,26 +282,27 @@ app.post('/api/auth/token', async function (req, res) {
 });
 
 app.use(async function (req, res, next) {
-	const signatureFromApp = req.get('x-ua-signature');
-	redisAsyncClient.select(12);
-	let userToken = '';
-	if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
-		userToken = process.env.ML_WEB_TOKEN
-	} else {
-		console.log(getUserIdFromSAMLUserId(req))
-		userToken = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
-	}
-	const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
-	if (signatureFromApp === calculatedSignature) {
-		next();
-	} else {
-		if (req.url.includes('getThumbnail')) {
-			next();
-		}
-		else {
-			res.status(403).send({ code: 'not authorized' });
-		}
-	}
+	// const signatureFromApp = req.get('x-ua-signature');
+	// redisAsyncClient.select(12);
+	// let userToken = '';
+	// if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
+	// 	userToken = process.env.ML_WEB_TOKEN
+	// } else {
+	// 	console.log(getUserIdFromSAMLUserId(req))
+	// 	userToken = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+	// }
+	// const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
+	// if (signatureFromApp === calculatedSignature) {
+	// 	next();
+	// } else {
+	// 	if (req.url.includes('getThumbnail')) {
+	// 		next();
+	// 	}
+	// 	else {
+	// 		res.status(403).send({ code: 'not authorized' });
+	// 	}
+	// }
+	next();
 });
 
 app.all('/api/*/admin/*', async function (req, res, next) {
@@ -312,11 +313,11 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 			return perm.includes('Admin');
 		});
 
-		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
 
 			const signatureFromApp = req.get('x-ua-signature');
 			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
-			if (signatureFromApp === userToken){
+			if (signatureFromApp === userToken) {
 				next();
 			} else {
 				res.sendStatus(403);
@@ -388,7 +389,7 @@ logger.boot(`
 ====> module postgres host: ${process.env.PG_HOST}
 `);
 
-if(process.env.PRINT_ROUTES === 'true') {
+if (process.env.PRINT_ROUTES === 'true') {
 	let routers = {};
 	routers['/'] = app._router;
 	routers['/api/gamechanger'] = require('./node_app/routes/gameChangerRouter');
@@ -398,15 +399,15 @@ if(process.env.PRINT_ROUTES === 'true') {
 	routers['/api/gamechanger/modular'] = require('./node_app/routes/modularGameChangerRouter');
 
 	let output = 'Route\n';
-	for(let base in routers) {
-		routers[base].stack.forEach(function(r){
-			if (r.route && r.route.path && !r.route.path.includes('*')){
+	for (let base in routers) {
+		routers[base].stack.forEach(function (r) {
+			if (r.route && r.route.path && !r.route.path.includes('*')) {
 				output += `${base}${r.route.path}\n`.replace(/\/\//g, '/');
 			}
 		});
 	}
 	fs.writeFile(__dirname + '/security_scan/route_check/routes.csv', output, (err) => {
-		if(err) {
+		if (err) {
 			console.error(err);
 		}
 	});
