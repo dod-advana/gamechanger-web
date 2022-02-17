@@ -368,6 +368,8 @@ const GCDocumentsComparisonTool = (props) => {
 					return par.paragraphIdBeingMatched === compareParagraphIndex;
 				});
 
+				const isDLA = compareDocument.display_org_s === 'Defense Logistics Agency';
+
 				if (compareDocument && matchingPars.length > 0) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
@@ -375,7 +377,8 @@ const GCDocumentsComparisonTool = (props) => {
 							`"${highlightList[highlightIndex].par_raw_text_t}"`,
 							matchingPars[0].page_num_i + 1,
 							true,
-							state.cloneData
+							state.cloneData,
+							isDLA
 						)
 						.then((url) => {
 							node.src = url;

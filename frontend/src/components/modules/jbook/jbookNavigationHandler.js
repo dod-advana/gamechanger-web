@@ -8,11 +8,13 @@ import { HoverNavItem } from '../../navigation/NavItems';
 import GCTooltip from '../../common/GCToolTip';
 import { getNotifications } from '../../notifications/Notifications';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import {getTrackingNameForFactory, PAGE_DISPLAYED} from '../../../utils/gamechangerUtils';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
+import {setState} from '../../../utils/sharedFunctions';
+import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 
 const getToolTheme = (cloneData) => {
 	return {
@@ -70,10 +72,28 @@ const JBookNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showAboutUs'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AboutUsIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
-							href="#/admin"
+							href={`#/${state.cloneData.url}/admin`}
 							centered
 							style={{ width: '100%' }}
 						>
@@ -118,9 +138,27 @@ const JBookNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
+				<GCTooltip title="About Us" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showAboutUs'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={AboutUsIcon} />
+						<span style={{ marginLeft: '10px' }}>About Us</span>
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/admin">
+						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 								<span style={{ marginLeft: '10px' }}>Admin Page</span>
