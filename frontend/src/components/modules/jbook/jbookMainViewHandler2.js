@@ -43,7 +43,10 @@ import ResultView from '../../mainView/ResultView';
 const _ = require('lodash');
 
 const getSearchResults = (searchResultData, state, dispatch) => {
+	console.log(searchResultData);
+	console.log(state);
 	return _.map(searchResultData, (item, idx) => {
+		item.type = 'document';
 		return (
 			<Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />
 		);
@@ -740,7 +743,8 @@ const jbookMainViewHandler = {
 			searchSettings,
 			rawSearchResults,
 
-			mainTabSelected
+			mainTabSelected,
+			mainPageData
 		} = state;
 
 		let sideScroll = {
@@ -821,7 +825,7 @@ const jbookMainViewHandler = {
 
 													<div style={styles.panelContainer}>
 														<TabPanel>
-															{'jbook search'}
+															{getSearchResults(mainPageData ? mainPageData.docs : [], state, dispatch)}
 														</TabPanel>
 														<TabPanel>
 															{'contract search'}
