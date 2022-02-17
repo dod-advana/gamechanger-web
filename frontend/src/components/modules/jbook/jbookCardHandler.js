@@ -16,7 +16,10 @@ import {
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-// import SimpleTable from "../../common/SimpleTable";
+import SimpleTable from "../../common/SimpleTable";
+import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import _ from 'lodash';
@@ -27,6 +30,12 @@ import _ from 'lodash';
 import sanitizeHtml from 'sanitize-html';
 // const jbookAPI = new JBookAPI();
 
+const colWidth = {
+	maxWidth: '900px',
+	whiteSpace: 'nowrap',
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+};
 
 const styles = {
 	footerButtonBack: {
@@ -173,7 +182,7 @@ const StyledListViewFrontCardContent = styled.div`
 		height: 100%;
 		
 		.page-hits {
-			min-width: 100px;
+			min-width: 150px;
 			height: 100%;
 			border: 1px solid rgb(189, 189, 189);
     		border-top: 0px;
@@ -265,7 +274,7 @@ const StyledFrontCardContent = styled.div`
     	height: 100%;
     	
     	.page-hits {
-    		min-width: 100px;
+    		min-width: 150px;
     		height: 100%;
     		border: 1px solid rgb(189, 189, 189);
     		border-top: 0px;
@@ -342,8 +351,9 @@ const jbookCardHandler = {
 
 			const displayTitle = item.budgetLineItem + ' - ' + item.projectTitle;
 			const isRevoked = item.is_revoked_b;
-			const subType = '';
-			const displayOrg = '';
+
+			const cardType = item.revBudgetType.toUpperCase();
+			const agency = item.serviceAgency;
 
 			const docListView = state.listView && !graphView;
 
@@ -375,7 +385,7 @@ const jbookCardHandler = {
 					</div>
 					{docListView &&
 						<div className={'list-view-sub-header'}>
-							<p> {subType} | {displayOrg} </p>
+							<p> {cardType} | {agency} </p>
 						</div>
 					}
 				</StyledFrontCardHeader >
@@ -385,10 +395,10 @@ const jbookCardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			const cardType = item.type;
-			const iconSrc = getTypeIcon(cardType);
-			const subType = 'PDF';
-			const typeTextColor = getTypeTextColor(cardType);
+			const cardType = item.revBudgetType.toUpperCase();
+			const agency = item.serviceAgency;
+			const iconSrc = getTypeIcon('PDF');
+			const typeTextColor = getTypeTextColor('PDF');
 
 			return (
 				<>
@@ -396,10 +406,10 @@ const jbookCardHandler = {
 						<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={'#439E86'} docOrgColor={'#20009E'}>
 							<div className={'sub-header-one'}>
 								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
-								{subType}
+								{cardType}
 							</div>
 							<div className={'sub-header-two'}>
-								{/* EDA */}
+								{agency}
 							</div>
 						</StyledFrontCardSubHeader>
 					}
@@ -422,6 +432,27 @@ const jbookCardHandler = {
 				intelligentFeedbackComponent
 			} = props;
 
+			item.pageHits = [
+				{
+					title: 'Project Description',
+					snippet: 'Description text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+				},
+				{
+					title: 'Contracts',
+					snippet: 'Contracts text: Description text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+
+				},
+				{
+					title: 'Accomplishments',
+					snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+				},
+				{
+					title: 'Section',
+					snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+				}
+			];
+
+
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
@@ -429,7 +460,7 @@ const jbookCardHandler = {
 			const contextHtml = hoveredSnippet;
 			const isWideCard = true;
 
-			const currentAsOfText = `Page Count: ${item.page_count}`;
+			const currentAsOfText = `Published on: MM-DD-YY`;
 
 			if (state.listView && !intelligentSearch) {
 				return (
@@ -441,7 +472,7 @@ const jbookCardHandler = {
 									setHitsExpanded(!hitsExpanded);
 								}}
 							>
-								<span className="buttonText">Page Hits</span>
+								<span className="buttonText">Details</span>
 								<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
 							</button>
 						}
@@ -461,7 +492,7 @@ const jbookCardHandler = {
 												}}
 											>
 												<span>
-													{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+													{page.title && <span>{page.title}</span>}
 												</span>
 												<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 											</div>
@@ -511,7 +542,7 @@ const jbookCardHandler = {
 											}}
 										>
 											<span>
-												{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
+												{page.title && <span>{page.title}</span>}
 											</span>
 											<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 										</div>
@@ -547,10 +578,65 @@ const jbookCardHandler = {
 					<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
 						<div className={'currents-as-of-div'}>
 							<div className={'current-text'}>
-								{'current as of text'}
+								{currentAsOfText}
 							</div>
 						</div>
-						<div>front content</div>
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(item.pageHits)
+									.map((page, key) => {
+										return (
+											<div
+												className={'page-hit'}
+												key={key}
+												style={{
+													...(hoveredHit === key && {
+														backgroundColor: '#E9691D',
+														color: 'white',
+													}),
+												}}
+												onMouseEnter={() => setHoveredHit(key)}
+												onClick={(e) => {
+													e.preventDefault();
+													// clickFn(
+													// 	item.filename,
+													// 	state.cloneData.clone_name,
+													// 	state.searchText,
+													// 	page.pageNumber
+													// );
+												}}
+											>
+												{page.title && <span>{page.title}</span>}
+												{page.pageNumber && (
+													<span>
+														{page.pageNumber === 0
+															? 'ID'
+															: `Page ${page.pageNumber}`}
+													</span>
+												)}
+												<i
+													className="fa fa-chevron-right"
+													style={{
+														color:
+															hoveredHit === key
+																? 'white'
+																: 'rgb(189, 189, 189)',
+													}}
+												/>
+											</div>
+										);
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
+						</div>
 					</StyledFrontCardContent>
 				);
 			}
@@ -558,29 +644,119 @@ const jbookCardHandler = {
 
 		getCardBack: (props) => {
 
-			// const {
-			// 	item,
-			// 	state, 
-			// 	dispatch,
-			// 	detailPage = false
-			// } = props;
+			const {
+				item,
+				state,
+				dispatch,
+				detailPage = false
+			} = props;
 
+			const projectData = {};
+			const budgetType = item.revBudgetType.toUpperCase();
+			const keywordCheckboxes = null;
+			const projectNum = null;
+			const formatNum = null;
+			const getTotalCost = () => 0;
+
+			const metadata = [
+				{
+					Key: 'Project',
+					Value: projectData.projectTitle || 'N/A',
+				},
+				{
+					Key: 'Program Element',
+					Value: projectData.programElement || 'N/A',
+				},
+				{
+					Key: 'Service Agency Name',
+					Value: projectData.serviceAgency || 'N/A',
+				},
+				{
+					Key: 'Project Number',
+					Value: projectNum || 'N/A',
+				},
+				{
+					Key: 'All Prior Years Amount',
+					Value: projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined ? `${formatNum(projectData.allPriorYearsAmount)}` : 'N/A',
+				},
+				{
+					Key: 'Prior Year Amount',
+					Value: projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined ? `${formatNum(projectData.priorYearAmount)}` : 'N/A',
+				},
+				{
+					Key: 'Current Year Amount',
+					Value: projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined ? `${formatNum(projectData.currentYearAmount)}` : 'N/A',
+				},
+				{
+					Key: 'Fiscal Year',
+					Value: projectData.budgetYear || 'N/A',
+				},
+				{
+					Key: 'To Complete',
+					Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
+				},
+				{
+					Key: 'Total Cost',
+					Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+				},
+				{
+					Key: 'Budget Year (FY)',
+					Value: projectData.budgetYear || 'N/A',
+				},
+				{
+					Key: 'Budget Cycle',
+					Value: projectData.budgetCycle || 'N/A',
+				},
+				{
+					Key: 'Appropriation',
+					Value: projectData.appropriationNumber || 'N/A',
+				},
+				{
+					Key: 'Appropriation Title',
+					Value: projectData.appropriationTitle || 'N/A',
+				},
+				{
+					Key: 'Budget Activity',
+					Value: projectData.budgetActivityNumber || 'N/A',
+				},
+				{
+					Key: 'Budget Activity Title',
+					Value: projectData.budgetActivityTitle || 'N/A',
+				},
+				{
+					Key: 'Category',
+					Value: 'category'
+				},
+				{
+					Key: 'Keywords',
+					Value: <div>
+						{keywordCheckboxes && keywordCheckboxes.length > 0 ? 'none' : 'None'}
+					</div>,
+				},
+				{
+					Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
+					Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
+				},
+				{
+					Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Expenditures<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
+					Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M` : 'N/A'
+				},
+			];
 
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
-					Back
-					{/* <SimpleTable tableClass={'magellan-table'}
-                        zoom={1}
-                        headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-                        rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, fields, item)}
-                        height={'auto'}
-                        dontScroll={true}
-                        colWidth={colWidth}
-                        disableWrap={true}
-                        title={'Metadata'}
-                        hideHeader={true}
-                        margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage ? '-10px 0 0 0' : ''}
-                    /> */}
+					<SimpleTable tableClass={'magellan-table'}
+						zoom={1}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={metadata}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidth}
+						disableWrap={true}
+						title={'Metadata'}
+						hideHeader={false}
+						margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage ? '-10px 0 0 0' : ''}
+					/>
 				</div>
 			);
 		},
@@ -623,7 +799,7 @@ const jbookCardHandler = {
 								href={'#'}
 								disabled={true}
 							>
-								Contract
+								Preview
 							</CardButton>
 						</GCTooltip>
 					</>
