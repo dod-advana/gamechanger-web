@@ -1,20 +1,9 @@
 import React from 'react';
-import JAICLogo from '../../../images/logos/JBooks Logo_wht.svg';
+import DefaultTitleBarHandler from '../default/defaultTitleBarHandler';
 
 const jbookTitleBarHandler = {
 	getTitleBar: (props) => {
-		const {
-			onTitleClick,
-		} = props;
-		return (
-			<img
-				src={JAICLogo}
-				style={styles.title}
-				onClick={onTitleClick}
-				alt="jbook-title"
-				id={'titleButton'}
-			/>
-		);
+		return DefaultTitleBarHandler.getTitleBar(props);
 	},
 
 	getCategoryTabs(props) {
@@ -37,11 +26,6 @@ const jbookTitleBarHandler = {
 export default jbookTitleBarHandler;
 
 const styles = {
-	wording: {
-		color: 'white',
-		marginRight: 15,
-		fontWeight: 700
-	},
 	titleBar: {
 		padding: '0 1em',
 		display: 'flex',
@@ -50,10 +34,5 @@ const styles = {
 		flex: 1,
 		minHeight: 80,
 		width: '100%'
-	},
-	title: {
-		margin: '0px 24px 0px 12px',
-		cursor: 'pointer',
-		width: '400px',
-	},
+	}
 };

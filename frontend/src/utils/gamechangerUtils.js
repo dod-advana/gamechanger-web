@@ -160,9 +160,9 @@ export const StyledCenterContainer = styled.div`
     }
     
     .right-container {
-    	margin-left: ${({ showSideFilters }) => (showSideFilters ? '22.5%' : '0%')};
+    	margin-left: ${({ showSideFilters }) => (showSideFilters ? '22%' : '0%')};
 		margin-top: 0px;
-		width: ${({ showSideFilters }) => (showSideFilters ? '75.7%' : '100%')};
+		width: ${({ showSideFilters }) => (showSideFilters ? '78%' : '100%')};
 		padding: 0px;
 		box-shadow: none;
 		

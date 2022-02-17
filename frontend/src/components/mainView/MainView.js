@@ -202,7 +202,7 @@ const MainView = (props) => {
 						<div
 							style={{
 								borderTop: '1px solid #B0BAC5',
-								width: '91.2%',
+								width: '96.5%',
 								marginLeft: 'auto',
 								marginRight: 'auto',
 							}}
