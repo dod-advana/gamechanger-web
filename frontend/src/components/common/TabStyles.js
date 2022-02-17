@@ -7,7 +7,7 @@ const TabStyles = {
 		display: 'flex',
 		alignItems: 'center',
 		flex: 9,
-		margin: '10px 0 10px 50px',
+		margin: '10px 30px',
 	},
 	tabStyle: {
 		width: '140px',
@@ -42,8 +42,6 @@ const TabStyles = {
 		backgroundColor: '#ffffff',
 		width: '100%',
 		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
 		paddingBottom: '5px',
 		alignItems: 'center',
 	},

@@ -37,6 +37,7 @@ import '../../mainView/main-view.css';
 import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
+import GCAboutUs from '../../aboutUs/GCAboutUs';
 
 const _ = require('lodash');
 
@@ -1088,6 +1089,11 @@ const PolicyMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		const {state} = props;
+		return <GCAboutUs state={state} />;
+	}
 };
 
 export default PolicyMainViewHandler;

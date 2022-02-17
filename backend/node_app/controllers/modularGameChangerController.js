@@ -30,6 +30,7 @@ class ModularGameChangerController {
 		this.exportReview = this.exportReview.bind(this);
 		this.exportChecklist = this.exportChecklist.bind(this);
 		this.exportUsers = this.exportUsers.bind(this);
+		this.exportProfilePage = this.exportProfilePage.bind(this);
 	}
 
 	async getCloneTableStructure(req, res) {
@@ -237,6 +238,18 @@ class ModularGameChangerController {
 		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, 'V3BNX33', userId);
+		}
+	}
+
+	async exportProfilePage(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const {cloneName, options} = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('export', cloneName);
+			await handler.exportProfilePage(res, req.permissions, options, userId);
+		} catch(error) {
+			res.status(500).send(error);
+			this.logger.error(error, 'V3BNX34', userId);
 		}
 	}
 

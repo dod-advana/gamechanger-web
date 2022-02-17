@@ -291,7 +291,12 @@ const App = () => {
 	};
 
 	useEffect(() => {
-		const getTutorialAndClones = async () => {
+		const initialize = async () => {
+			Auth.refreshUserToken(
+				() => setTokenLoaded(true),
+				() => setTokenLoaded(true)
+			);
+
 			// fetch tutorial overlay data
 			let tutorialData = [];
 			const doTutorial =
@@ -307,18 +312,7 @@ const App = () => {
 				}
 			}
 			await getGamechangerClones(tutorialData);
-		}
-
-		const initialize = async () => {
-			Auth.refreshUserToken(
-				async () => {
-					await getTutorialAndClones();
-					setTokenLoaded(true);
-				},
-				() => setTokenLoaded(true)
-			);
 		};
-
 		if (!initialized) {
 			setInitialized(true);
 			initialize();

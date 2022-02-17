@@ -110,15 +110,23 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 
 app.use(async function (req, res, next) {
 	let cn;
+	let user_id;
 	if (req.session.user) {
 		cn = req.session.user.cn;
+		user_id = getUserIdFromSAMLUserId(req);
 		req.headers['ssl_client_s_dn_cn'] = cn;
 		req.headers['SSL_CLIENT_S_DN_CN'] = cn;
 		req.permissions = req.session.user.perms;
 	}
 
+	if (!cn) {
+		if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			user_id = 'ml-api';
+		}
+	}
+
 	redisAsyncClient.select(12);
-	const perms = await redisAsyncClient.get(`${cn}-perms`);
+	const perms = await redisAsyncClient.get(`${user_id}-perms`);
 
 	if (perms) {
 		req.permissions = req.permissions.concat(JSON.parse(perms));
@@ -260,8 +268,8 @@ app.post('/api/auth/token', async function (req, res) {
 		});
 
 		redisAsyncClient.select(12);
-		await redisAsyncClient.set(`${cn}-token`, token);
-		await redisAsyncClient.set(`${cn}-perms`, JSON.stringify(perms));
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, token);
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
 
 		res.json({
 			token: token
@@ -276,9 +284,14 @@ app.post('/api/auth/token', async function (req, res) {
 app.use(async function (req, res, next) {
 	const signatureFromApp = req.get('x-ua-signature');
 	redisAsyncClient.select(12);
-	const sessUser = req.session.user;
-	const userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
-	const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+	let userToken = '';
+	if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
+		userToken = process.env.ML_WEB_TOKEN
+	} else {
+		console.log(getUserIdFromSAMLUserId(req))
+		userToken = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+	}
+	const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
 	if (signatureFromApp === calculatedSignature) {
 		next();
 	} else {
@@ -299,7 +312,16 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 			return perm.includes('Admin');
 		});
 
-		if (match) {
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+
+			const signatureFromApp = req.get('x-ua-signature');
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			if (signatureFromApp === userToken){
+				next();
+			} else {
+				res.sendStatus(403);
+			}
+		} else if (match) {
 			next();
 		} else {
 			res.sendStatus(403);

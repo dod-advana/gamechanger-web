@@ -1,15 +1,20 @@
 const { MLApiClient } = require('../../lib/mlApiClient');
 const ExportHandler = require('../base/exportHandler');
-const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
+const REVIEW = require('../../models').review;
+const USER = require('../../models').user;
 
 class SimpleExportHandler extends ExportHandler {
 	constructor(opts={}) {
 		const {
 			mlApi = new MLApiClient(opts),
+			review = REVIEW,
+			user = USER
 		} = opts;
-    super();
-
+    	super();
 		this.mlApi = mlApi;
+		this.review = review;
+		this.user = user;
 	}
 
 	async exportHelper(req, res, userId) {
@@ -83,6 +88,71 @@ class SimpleExportHandler extends ExportHandler {
 		}
 	}
 
+	async exportReviewHelper(req, res, userId) {
+		try {
+			const reviews = await this.review.findAll();
+			const reviewData = { docs: reviews };
+			const csvStream = await this.reports.createCsvStream(reviewData, userId);
+			csvStream.pipe(res);
+		} catch (e) {
+			this.logger.error(e.message, '2ZO73KD', userId);
+		}
+	}
+
+	async exportUsersHelper(req, res, userId) {
+		try {
+			const users = await this.user.findAll({ attributes: [
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'organization',
+				'is_primary_reviewer',
+				'is_service_reviewer',
+				'is_poc_reviewer',
+				'is_admin'
+			], raw: true });
+			const userData = { docs: users };
+			const csvStream = await this.reports.createCsvStream(userData, userId);
+			csvStream.pipe(res);
+		} catch (e) {
+			this.logger.error(e.message, '2ZO73XD', userId);
+		}
+	}
+
+	async exportChecklistHelper(req, res, userId) {
+		try {
+			const { data } = req.body;
+			const checklistData = { docs: data };
+			const csvStream = await this.reports.createCsvStream(checklistData, userId);
+			csvStream.pipe(res);
+		} catch (e) {
+			this.logger.error(e.message, '2ZO73K3', userId);
+		}
+	}
+
+	async exportProfilePageHelper(req, res, userId) {
+		try {
+			const { data } = req.body;
+
+			if (req.permissions.includes('JBOOK Admin') || req.permissions.includes('Webapp Super Admin')) {
+				const sendDataCallback = (buffer) => {
+					const pdfBase64String = buffer.toString('base64');
+					res.contentType('application/pdf');
+					res.status(200);
+					res.send(pdfBase64String);
+				};
+
+				this.reports.createProfilePagePDFBuffer(data, userId, sendDataCallback);
+			}
+			else {
+				res.status(403).send('Need admin access to export profile page');
+			}
+
+		} catch (e) {
+			this.logger.error(e.message, '2ZO73KA', userId);
+		}
+	}
 }
 
 module.exports = SimpleExportHandler;
