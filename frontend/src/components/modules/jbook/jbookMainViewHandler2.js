@@ -1,25 +1,24 @@
 import React from 'react';
-import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
+import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
+
 
 // ===== gc look and feel ======
 import GCPrimaryButton from '../../common/GCButton';
-import GameChangerSideBar from '../../searchMetrics/GCSideBar';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
-import SearchSection from '../globalSearch/SearchSection';
-import DocumentIcon from '../../../images/icon/Document.png';
+import {Card} from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { Card } from '../../cards/GCCard';
-import { gcOrange } from '../../common/gc-colors';
 // ==============================
-
-import { Typography, Grid, CircularProgress, Snackbar } from '@material-ui/core';
+import {CircularProgress, Grid, Snackbar, Typography} from '@material-ui/core';
 import Pagination from 'react-js-pagination';
 import {
-	getTrackingNameForFactory, scrollToContentTop, getQueryVariable, RESULTS_PER_PAGE, StyledCenterContainer,
+	getQueryVariable,
+	getTrackingNameForFactory,
+	scrollToContentTop,
+	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
-import { trackEvent } from '../../telemetry/Matomo';
-import { setState } from '../../../utils/sharedFunctions';
+import {trackEvent} from '../../telemetry/Matomo';
+import {setState} from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ReactTable from 'react-table';
 import DropdownFilter from './DropdownFilter.js';
@@ -30,17 +29,27 @@ import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
 import {
-	styles, StyledContainer, StyledMainContainer,
-	StyledMainTopBar, StyledMainBottomContainer, StyledSummaryFAQContainer
+	StyledContainer,
+	StyledMainBottomContainer,
+	StyledMainContainer,
+	StyledMainTopBar,
+	StyledSummaryFAQContainer,
+	styles
 } from './jbookMainViewStyles';
-import {
-	setJBookSetting, handleTabClicked, scrollListViewTop, filterSortFunction, populateDropDowns, autoDownloadFile
-} from './jbookMainViewHelper';
+import {autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting} from './jbookMainViewHelper';
 import QueryExp from './QueryExp.js'
-import { Link } from '@mui/material';
+import {Link} from '@mui/material';
 import ResultView from '../../mainView/ResultView';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const _ = require('lodash');
+
+const gameChangerAPI = new GameChangerAPI();
+
+export const gcColors = {
+	primary: '#131E43',
+	secondary: '#E9691D'
+};
 
 const getSearchResults = (searchResultData, state, dispatch) => {
 	console.log(searchResultData);
@@ -61,25 +70,97 @@ const jbookMainViewHandler = {
 		} = props;
 		console.log('handle page load');
 
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
+
 		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url) ?? '';
 		let mainTabSelected = 0;
-		if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
-			mainTabSelected = 1;
-		}
+		// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
+		// 	mainTabSelected = 1;
+		// }
 		// the main setstate that triggers the initial search
-		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions, dropdownData });
+		//setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions, dropdownData });
 	},
 
+	renderHideTabs(props) {
+		return (
+			<StyledSummaryFAQContainer>
+				<Grid container className={'summarySection'}>
+					<Grid item xs={12} className={'summaryTextSectionContainer'}>
+						<Typography className={'summarySectionHeader'}>Congressionally-Mandated Inventory of DoD AI Programs | Summary and FAQ</Typography>
+					</Grid>
+				</Grid>
+				<Grid container>
+					<Grid item xs={12}>
+						<Grid container className={'summaryTextSection'}>
+							<Grid item xs={8}>
+								<Typography className={'summarySectionSubHeader'}>Welcome to the Phase II DoD AI Inventory!</Typography>
+								<Typography className={'summarySectionText'}>Click <a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources">here</a> to view our User Guide.</Typography>
+								<Typography className={'summarySectionText'}>As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the DoD Joint AI Center to provide the congressional defense committees an inventory of all DoD artificial intelligence activities, to include each:</Typography>
+								<ul className={'summarySectionList'}>
+									<li>program’s appropriation, project, and (budget) line number</li>
+									<li>the current and future years defense program funding (FY21-FY25)</li>
+									<li>the identification of academic or industry mission partners, if applicable</li>
+									<li>any planned transition partners, if applicable</li>
+								</ul>
+								<Typography className={'summarySectionText'}>
+										Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services, and other DoD Component representatives of the DoD AI Working Group in scoping and executing this task. We delivered the Phase I Inventory of DoD AI Programs in April 2021.
+								</Typography>
+								<Typography className={'summarySectionText'}>
+										In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the Advana Platform, which the Deputy Secretary of Defense has officially designated “as the single enterprise authoritative data management and analytics platform.”
+								</Typography>
+							</Grid>
+							<Grid item xs={4} className={'summaryLogoSectionContainer'}>
+								<div className={'summaryLogoSection'}>
+									<img
+										src={JAICLogo}
+										alt="jaic-title"
+										id={'titleButton'}
+										className={'jaic-image'}
+									/>
+								</div>
+							</Grid>
+
+						</Grid>
+						<div className={'summaryTextSection'}>
+							<Typography className={'summarySectionText'}>
+									Using the Advana Gamechanger platform, you will be able to easily review key budget and contracting data about AI-related programs and projects and input additional information needed to complete this congressionally mandated tasking.
+							</Typography>
+							<Typography className={'summarySectionText'}>
+									Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in a tool that addresses limitations of Phase I deliverable and includes an inventory of classified programs. The Phase II inventory will be conducted via a three-part data coordination and review process: at the JAIC-level, Service-level, and program POC-level.
+							</Typography>
+							<Typography className={'summarySectionText'}>
+									JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review the inventory data to initially classify projects and programs as either AI-core, AI-enabled, or AI-enabling.
+							</Typography>
+							<Typography className={'summarySectionText'}>
+									Service-Level Review: After initial classification and tool refinement, the Services will confirm classification of the projects and programs, which will be followed by detailed analysis of each project or program at the POC-level.
+							</Typography>
+							<Typography className={'summarySectionText'}>
+									Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
+							</Typography>
+							<Typography className={'summarySectionText'}>
+									After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
+							</Typography>
+						</div>
+					</Grid>
+				</Grid>
+				<div className={'faqSection'}>
+					<JBookFAQ />
+				</div>
+			</StyledSummaryFAQContainer>
+		);
+	},
 
 	getMainView(props) {
 		const {
 			state,
 			dispatch,
 			searchHandler,
-			getViewPanels
+			getViewPanels,
+			pageLoaded,
+			renderHideTabs
 		} = props;
 
 		const {
@@ -90,8 +171,14 @@ const jbookMainViewHandler = {
 			exportLoading,
 			feedbackSubmitted,
 			feedbackText,
-			viewNames
+			viewNames,
+			currentViewName,
 		} = state;
+
+		console.log(mainPageData)
+
+		const noResults = Boolean(!mainPageData.docs || mainPageData?.docs?.length === 0);
+		const hideSearchResults = noResults && !loading;
 
 		const setDropdown = (name, value) => {
 			if (name === 'all') {
@@ -544,157 +631,35 @@ const jbookMainViewHandler = {
 			)
 		}
 
-		const renderSummaryAndFAQ = () => {
-			return (
-				<StyledSummaryFAQContainer>
-					<Grid container className={'summarySection'}>
-						<Grid item xs={12} className={'summaryTextSectionContainer'}>
-							<Typography className={'summarySectionHeader'}>Congressionally-Mandated Inventory of DoD AI Programs | Summary and FAQ</Typography>
-						</Grid>
-					</Grid>
-					<Grid container>
-						<Grid item xs={12}>
-							<Grid container className={'summaryTextSection'}>
-								<Grid item xs={8}>
-									<Typography className={'summarySectionSubHeader'}>Welcome to the Phase II DoD AI Inventory!</Typography>
-									<Typography className={'summarySectionText'}>Click <a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources">here</a> to view our User Guide.</Typography>
-									<Typography className={'summarySectionText'}>As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the DoD Joint AI Center to provide the congressional defense committees an inventory of all DoD artificial intelligence activities, to include each:</Typography>
-									<ul className={'summarySectionList'}>
-										<li>program’s appropriation, project, and (budget) line number</li>
-										<li>the current and future years defense program funding (FY21-FY25)</li>
-										<li>the identification of academic or industry mission partners, if applicable</li>
-										<li>any planned transition partners, if applicable</li>
-									</ul>
-									<Typography className={'summarySectionText'}>
-										Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services, and other DoD Component representatives of the DoD AI Working Group in scoping and executing this task. We delivered the Phase I Inventory of DoD AI Programs in April 2021.
-									</Typography>
-									<Typography className={'summarySectionText'}>
-										In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the Advana Platform, which the Deputy Secretary of Defense has officially designated “as the single enterprise authoritative data management and analytics platform.”
-									</Typography>
-								</Grid>
-								<Grid item xs={4} className={'summaryLogoSectionContainer'}>
-									<div className={'summaryLogoSection'}>
-										<img
-											src={JAICLogo}
-											alt="jaic-title"
-											id={'titleButton'}
-											className={'jaic-image'}
-										/>
-									</div>
-								</Grid>
-
-							</Grid>
-							<div className={'summaryTextSection'}>
-								<Typography className={'summarySectionText'}>
-									Using the Advana Gamechanger platform, you will be able to easily review key budget and contracting data about AI-related programs and projects and input additional information needed to complete this congressionally mandated tasking.
-								</Typography>
-								<Typography className={'summarySectionText'}>
-									Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in a tool that addresses limitations of Phase I deliverable and includes an inventory of classified programs. The Phase II inventory will be conducted via a three-part data coordination and review process: at the JAIC-level, Service-level, and program POC-level.
-								</Typography>
-								<Typography className={'summarySectionText'}>
-									JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review the inventory data to initially classify projects and programs as either AI-core, AI-enabled, or AI-enabling.
-								</Typography>
-								<Typography className={'summarySectionText'}>
-									Service-Level Review: After initial classification and tool refinement, the Services will confirm classification of the projects and programs, which will be followed by detailed analysis of each project or program at the POC-level.
-								</Typography>
-								<Typography className={'summarySectionText'}>
-									Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
-								</Typography>
-								<Typography className={'summarySectionText'}>
-									After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
-								</Typography>
-							</div>
-						</Grid>
-					</Grid>
-					<div className={'faqSection'}>
-						<JBookFAQ />
-					</div>
-				</StyledSummaryFAQContainer>
-			)
-		}
-
-
 		return (
 			<>
 				<FeedbackModal state={state} dispatch={dispatch} />
 				<JBookWelcome dispatch={dispatch} state={state} />
-				<StyledContainer className={'cool-class'}>
-					{/* <StyledFilterBar>
-						{renderCheckboxes()}
-					</StyledFilterBar> */}
-					<StyledMainContainer>
-						<QueryExp searchText={state.searchText ? state.searchText : ''} />
-						<div style={styles.tabButtonContainer}>
-							<ResultView
-								context={{ state, dispatch }}
-								viewNames={viewNames}
-								viewPanels={getViewPanels()}
-							/>
-							<div style={styles.spacer} />
-						</div>
-						{/*
-            <Tabs selectedIndex={mainTabSelected ?? 0}>
-              <div style={styles.tabButtonContainer}>
-                <TabList style={styles.tabsList}>
-                  <div style={{ flex: 1, display: 'flex' }}>
-                    <Tab style={{
-                      ...styles.tabStyle,
-                      ...(mainTabSelected === 0 ? styles.tabSelectedStyle : {}),
-                      borderRadius: `5px 5px 0 0`
-                    }} title="summaryFAQ" onClick={() => handleTabClicked(dispatch, state, 0)}
-                    >
-                      <Typography variant="h6" display="inline" title="summaryFAQ">SUMMARY AND FAQ</Typography>
-
-                    </Tab>
-                    <Tab style={{
-                      ...styles.tabStyle,
-                      ...(mainTabSelected === 1 ? styles.tabSelectedStyle : {}),
-                      borderRadius: `5px 5px 0 0`
-                    }} title="reviewerChecklist" onClick={() => handleTabClicked(dispatch, state, 1)}
-                    >
-                      <Typography variant="h6" display="inline" title="reviewerChecklist">REVIEWER CHECKLIST</Typography>
-                    </Tab>
-                  </div>
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'end', paddingBottom: '2px' }}>
-                    <GCPrimaryButton
-                      style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '45px', marginRight: '20px' }}
-                      onClick={() => setState(dispatch, { feedbackModalOpen: true })}
-                    >
-                      User Feedback
-                    </GCPrimaryButton>
-                  </div>
-                </TabList>
-
-                <div style={styles.panelContainer}>
-                  <TabPanel>
-                    {renderSummaryAndFAQ()}
-                  </TabPanel>
-                  <TabPanel>
-                    {renderMainContainer({ state })}
-                  </TabPanel>
-                </div>
-              </div>
-            </Tabs>
-            */}
-
-					</StyledMainContainer>
-				</StyledContainer>
+				{hideSearchResults && renderHideTabs(props)}
+				{(!hideSearchResults && pageLoaded) && (
+					<div style={styles.tabButtonContainer}>
+						<ResultView
+							context={{ state, dispatch }}
+							viewNames={viewNames}
+							viewPanels={getViewPanels()}
+						/>
+						<div style={styles.spacer} />
+					</div>
+				)}
 			</>
 		)
 	},
 
-	renderHideTabs(props) {
-		return defaultMainViewHandler.renderHideTabs(props);
-	},
+
 
 	handleCategoryTabChange(props) {
 		defaultMainViewHandler.handleCategoryTabChange(props);
 	},
 
 	getViewNames(props) {
-		const viewNames = defaultMainViewHandler.getViewNames(props);
-
-		return viewNames;
+		return [
+			{name: 'Card', title: 'Card View', id: 'gcCardView'}
+		];
 	},
 
 	getExtraViewPanels(props) {
@@ -782,6 +747,7 @@ const jbookMainViewHandler = {
 											style={{ marginLeft: 0, marginRight: 0, padding: 0 }}
 										>
 											{false && !loading && <GetQAResults context={context} />}
+											{!loading && <QueryExp searchText={state.searchText ? state.searchText : ''} />}
 										</div>
 										<div
 											className={'col-xs-12'}

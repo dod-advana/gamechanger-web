@@ -125,7 +125,7 @@ export const StyledMainBottomContainer = styled.div`
 `;
 
 export const StyledSummaryFAQContainer = styled.div`
-	margin-top: 30px;
+	margin: 20px 40px;
 	
 	.summarySection {
 		background-image: url(${LandingImage});

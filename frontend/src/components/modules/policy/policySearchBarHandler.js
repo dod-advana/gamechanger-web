@@ -183,7 +183,7 @@ const PolicySearchBarHandler = {
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<UserButton context={context}></UserButton>
+				<UserButton context={context} />
 
 				<Popover
 					onClose={() => {
