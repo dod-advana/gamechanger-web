@@ -61,7 +61,15 @@ const PolicyTitleBarHandler = {
 	},
 
 	getTitleBarStyle(props) {
-		return defaultTitleBarHandler.getTitleBarStyle(props);
+		const { rawSearchResults, pageDisplayed, backgroundColor } = props;
+		return {
+			...styles.titleBar,
+			borderBottom:
+				rawSearchResults.length > 0 && pageDisplayed === 'main'
+					? '2px solid rgb(176, 186, 197)'
+					: '',
+			backgroundColor: `${backgroundColor || null}`
+		};
 	},
 };
 
@@ -69,9 +77,18 @@ export default PolicyTitleBarHandler;
 
 const styles = {
 	title: {
-		margin: '0 50px 0 55px',
+		margin: '0 50px 0 15px',
 		cursor: 'pointer',
 		width: '190px',
 		height: '50x',
+	},
+	titleBar: {
+		padding: '0 1em',
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		flex: 1,
+		minHeight: 80,
+		width: '100%',
 	},
 };
