@@ -22,7 +22,7 @@ const JBookUserProfileHandler = {
 				getAppRelatedUserData={() => {}}
 				updateAppRelatedUserData={() => {}}
 				displayCustomAppContent={displayUserRelatedItems}
-				style={{width: '100%', padding: '15px 5em', minHeight: 'calc(100vh - 245px)'}}
+				style={{width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)'}}
 				primaryColor={'#1C2D65'}
 				secondaryColor={'#8091A5'}
 			/>

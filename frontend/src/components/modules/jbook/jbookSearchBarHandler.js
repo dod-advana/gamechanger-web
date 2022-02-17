@@ -41,7 +41,7 @@ const jbookSearchBarHandler = {
 		} = props;
 
 		return (
-			<div style={{ display: 'flex', justifyContent: 'center', width: '90%', position: 'relative' }} ref={ref}>
+			<div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 0 25px', position: 'relative' }} ref={ref}>
 				<SearchBarForm
 					id="GamechangerSearchBarForm"
 					className={state.componentStepNumbers ? `tutorial-step-${state.componentStepNumbers['Search Input']}` : null}
@@ -64,7 +64,7 @@ const jbookSearchBarHandler = {
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<UserButton context={context}></UserButton>
+				<UserButton context={context} backgroundColor={'#9E9E9E'} />
 
 				<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
 					open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
