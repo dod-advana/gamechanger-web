@@ -108,7 +108,6 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	});
 }
 
-<<<<<<< HEAD
 app.use(async function (req, res, next) {
 	let cn;
 	if (req.session.user) {
@@ -117,22 +116,12 @@ app.use(async function (req, res, next) {
 		req.headers['SSL_CLIENT_S_DN_CN'] = cn;
 		req.permissions = req.session.user.perms;
 	}
-=======
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	app.use(async function (req, res, next) {
-		const cn = req.get('x-env-ssl_client_certificate');
-		if (!cn) {
-			if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
-				next();
-			}
-			else{
-				res.sendStatus(401);
-			}
-		} else {
-			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
-			req.headers['ssl_client_s_dn_cn'] = cn;
-			req.headers['SSL_CLIENT_S_DN_CN'] = cn;
->>>>>>> 5a746f2ad938e7028f67674a18611d2c8e5b2c0d
+
+	if (!cn) {
+		if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			cn = 'ml-api';
+		}
+	}
 
 	redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${cn}-perms`);
@@ -290,32 +279,21 @@ app.post('/api/auth/token', async function (req, res) {
 	}
 });
 
-<<<<<<< HEAD
 app.use(async function (req, res, next) {
 	const signatureFromApp = req.get('x-ua-signature');
 	redisAsyncClient.select(12);
-	const sessUser = req.session.user;
-	const userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
-	const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+	let userToken = '';
+	if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
+		userToken = process.env.ML_WEB_TOKEN
+	} else {
+		const sessUser = req.session.user;
+		userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
+	}
+	const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
 	if (signatureFromApp === calculatedSignature) {
 		next();
 	} else {
 		if (req.url.includes('getThumbnail')) {
-=======
-if (constants.GAME_CHANGER_OPTS.isDecoupled) {
-	app.use(async function (req, res, next) {
-		const signatureFromApp = req.get('x-ua-signature');
-		let userToken = ''
-		if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
-			userToken = process.env.ML_WEB_TOKEN
-		}
-		else{
-			redisAsyncClient.select(12);
-			userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		}
-		const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
-		if (signatureFromApp === calculatedSignature) {
->>>>>>> 5a746f2ad938e7028f67674a18611d2c8e5b2c0d
 			next();
 		}
 		else {
@@ -328,26 +306,22 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Super Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-<<<<<<< HEAD
 		const match = req.permissions.find(perm => {
 			return perm.includes('Admin');
 		});
 
-		if (match) {
-			next();
-		} else {
-=======
-		
 		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
-			
+
 			const signatureFromApp = req.get('x-ua-signature');
 			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
 			if (signatureFromApp === userToken){
 				next();
+			} else {
+				res.sendStatus(403);
 			}
-		}
-		else{
->>>>>>> 5a746f2ad938e7028f67674a18611d2c8e5b2c0d
+		} else if (match) {
+			next();
+		} else {
 			res.sendStatus(403);
 		}
 	}
