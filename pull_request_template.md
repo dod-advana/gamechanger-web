@@ -30,3 +30,4 @@
 - [ ] Smoke testing relevant to authentication needed
 - [ ] Clones involved and accounted for
 - [ ] RDS migrations or other data manipulation necessary
+- [ ] Dev tools or other infrastructure changed
