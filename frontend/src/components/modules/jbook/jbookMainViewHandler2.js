@@ -1,25 +1,23 @@
 import React from 'react';
-import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
+import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
+
 
 // ===== gc look and feel ======
 import GCPrimaryButton from '../../common/GCButton';
-import GameChangerSideBar from '../../searchMetrics/GCSideBar';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
-import SearchSection from '../globalSearch/SearchSection';
-import DocumentIcon from '../../../images/icon/Document.png';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { Card } from '../../cards/GCCard';
-import { gcOrange } from '../../common/gc-colors';
+import {Card} from '../../cards/GCCard';
 // ==============================
-
-import { Typography, Grid, CircularProgress, Snackbar } from '@material-ui/core';
+import {CircularProgress, Grid, Snackbar, Typography} from '@material-ui/core';
 import Pagination from 'react-js-pagination';
 import {
-	getTrackingNameForFactory, scrollToContentTop, getQueryVariable, RESULTS_PER_PAGE, StyledCenterContainer,
+	getQueryVariable,
+	getTrackingNameForFactory,
+	scrollToContentTop,
+	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
-import { trackEvent } from '../../telemetry/Matomo';
-import { setState } from '../../../utils/sharedFunctions';
+import {trackEvent} from '../../telemetry/Matomo';
+import {setState} from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ReactTable from 'react-table';
 import DropdownFilter from './DropdownFilter.js';
@@ -30,17 +28,22 @@ import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
 import {
-	styles, StyledContainer, StyledMainContainer,
-	StyledMainTopBar, StyledMainBottomContainer, StyledSummaryFAQContainer
+	StyledContainer,
+	StyledMainBottomContainer,
+	StyledMainContainer,
+	StyledMainTopBar,
+	StyledSummaryFAQContainer,
+	styles
 } from './jbookMainViewStyles';
-import {
-	setJBookSetting, handleTabClicked, scrollListViewTop, filterSortFunction, populateDropDowns, autoDownloadFile
-} from './jbookMainViewHelper';
+import {autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting} from './jbookMainViewHelper';
 import QueryExp from './QueryExp.js'
-import { Link } from '@mui/material';
+import {Link} from '@mui/material';
 import ResultView from '../../mainView/ResultView';
+import GameChangerAPI from "../../api/gameChanger-service-api";
 
 const _ = require('lodash');
+
+const gameChangerAPI = new GameChangerAPI();
 
 const getSearchResults = (searchResultData, state, dispatch) => {
 	return _.map(searchResultData, (item, idx) => {
@@ -57,6 +60,8 @@ const jbookMainViewHandler = {
 			state,
 		} = props;
 		console.log('handle page load');
+
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
@@ -689,9 +694,9 @@ const jbookMainViewHandler = {
 	},
 
 	getViewNames(props) {
-		const viewNames = defaultMainViewHandler.getViewNames(props);
-
-		return viewNames;
+		return [
+			{name: 'Card', title: 'Card View', id: 'gcCardView'}
+		];
 	},
 
 	getExtraViewPanels(props) {
