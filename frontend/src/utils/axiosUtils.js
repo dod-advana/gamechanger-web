@@ -3,8 +3,9 @@ const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 
 export const getSignature = (options, url) => {
+	console.log(Auth.getToken())
 	const signature = Base64.stringify(
-		CryptoJS.HmacSHA256(url, Auth.getToken() || 'NoToken')
+		CryptoJS.HmacSHA256(url, Auth.getToken())
 	);
 	options.headers = { 'X-UA-SIGNATURE': signature };
 };

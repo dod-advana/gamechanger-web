@@ -74,6 +74,19 @@ class ExportHandler {
 		return req.body;
 	}
 
+	async exportProfilePage(res, permissions, options, userId) {
+		try {
+			const body = options;
+			return await this.exportProfilePageHelper({ body, permissions }, res, userId);
+		} catch(e) {
+			this.logger.error(e.message, 'UB0D054');
+		}
+	}
+
+	async exportProfilePageHelper(req, res, userId) {
+		return req.body;
+	}
+
 }
 
 module.exports = ExportHandler;

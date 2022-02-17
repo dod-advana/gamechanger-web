@@ -27,7 +27,6 @@ import {
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
-
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();

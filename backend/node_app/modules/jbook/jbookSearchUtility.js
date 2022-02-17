@@ -7,6 +7,7 @@ const { reviewMapping } = require('./jbookDataMapping');
 
 class JBookSearchUtility {
 	constructor(opts = {}) {
+
 		const {
 			logger = LOGGER,
 			constants = constantsFile,
@@ -16,6 +17,7 @@ class JBookSearchUtility {
 		this.logger = logger;
 		this.constants = constants;
 		this.searchUtility = searchUtility;
+
 	}
 
 	// parse list of key : value to their frontend/db counterpart
