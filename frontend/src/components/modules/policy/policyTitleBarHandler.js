@@ -2,7 +2,6 @@ import GamechangerLogo from '../../../images/logos/GAMECHANGER-NoPentagon.png';
 import React from 'react';
 import { SearchContext } from '../globalSearch/SearchContext';
 import SearchTabBar from '../globalSearch/SearchTabBar';
-import defaultTitleBarHandler from '../default/defaultTitleBarHandler';
 
 const PolicyTitleBarHandler = {
 	getTitleBar: (props) => {

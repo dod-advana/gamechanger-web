@@ -10,7 +10,6 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
 import AnalystTools from '../analystTools';
-import GCAboutUs from '../aboutUs/GCAboutUs';
 import { setState } from '../../utils/sharedFunctions';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
@@ -184,7 +183,7 @@ const MainView = (props) => {
 	};
 
 	const getAboutUs = () => {
-		return <GCAboutUs state={state} />;
+		return mainViewHandler.getAboutUs({state});
 	};
 
 
