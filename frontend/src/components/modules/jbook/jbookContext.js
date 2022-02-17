@@ -204,7 +204,7 @@ const initState = {
 		config: { esIndex: 'gc_budgetsearch' }
 	},
 
-	loading: false,
+	loading: true,
 	profileLoading: false,
 	primaryReviewLoading: false,
 	resultsPage: 1,
