@@ -117,6 +117,12 @@ app.use(async function (req, res, next) {
 		req.permissions = req.session.user.perms;
 	}
 
+	if (!cn) {
+		if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			cn = 'ml-api';
+		}
+	}
+
 	redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${cn}-perms`);
 
@@ -276,9 +282,14 @@ app.post('/api/auth/token', async function (req, res) {
 app.use(async function (req, res, next) {
 	const signatureFromApp = req.get('x-ua-signature');
 	redisAsyncClient.select(12);
-	const sessUser = req.session.user;
-	const userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
-	const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+	let userToken = '';
+	if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
+		userToken = process.env.ML_WEB_TOKEN
+	} else {
+		const sessUser = req.session.user;
+		userToken = await redisAsyncClient.get(`${sessUser.cn}-token`);
+	}
+	const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
 	if (signatureFromApp === calculatedSignature) {
 		next();
 	} else {
@@ -299,7 +310,16 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 			return perm.includes('Admin');
 		});
 
-		if (match) {
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+
+			const signatureFromApp = req.get('x-ua-signature');
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			if (signatureFromApp === userToken){
+				next();
+			} else {
+				res.sendStatus(403);
+			}
+		} else if (match) {
 			next();
 		} else {
 			res.sendStatus(403);

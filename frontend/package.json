@@ -20,7 +20,7 @@
 		"@date-io/date-fns": "1.3.13",
 		"@dod-advana/advana-jira-feedback": "0.4.15",
 		"@dod-advana/advana-platform-ui": "1.0.7",
-		"@dod-advana/advana-side-nav": "0.0.15",
+		"@dod-advana/advana-side-nav": "0.0.16",
 		"@dod-advana/advana-tutorial-overlay": "0.0.5",
 		"@emotion/react": "11.7.1",
 		"@emotion/styled": "11.6.0",
