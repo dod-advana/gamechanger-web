@@ -29,9 +29,7 @@ import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
 import {
-	StyledContainer,
 	StyledMainBottomContainer,
-	StyledMainContainer,
 	StyledMainTopBar,
 	StyledSummaryFAQContainer,
 	styles
@@ -41,13 +39,13 @@ import QueryExp from './QueryExp.js'
 import {Link} from '@mui/material';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import {gcOrange} from "../../common/gc-colors";
+import JBookAboutUs from '../../aboutUs/JBookAboutUs';
 
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
-export const gcColors = {
+export const GC_COLORS = {
 	primary: '#131E43',
 	secondary: '#E9691D'
 };
@@ -161,22 +159,18 @@ const jbookMainViewHandler = {
 			searchHandler,
 			getViewPanels,
 			pageLoaded,
-			renderHideTabs
 		} = props;
 
 		const {
 			loading,
 			mainPageData,
 			resultsPage,
-			mainTabSelected,
 			exportLoading,
 			feedbackSubmitted,
 			feedbackText,
 			viewNames,
 			currentViewName,
 		} = state;
-
-		console.log(mainPageData)
 
 		const noResults = Boolean(!mainPageData.docs || mainPageData?.docs?.length === 0);
 		const hideSearchResults = noResults && loading;
@@ -638,7 +632,7 @@ const jbookMainViewHandler = {
 				<JBookWelcome dispatch={dispatch} state={state} />
 				{loading && currentViewName !== 'Explorer' && (
 					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcColors.primary} />
+						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
 				{(!hideSearchResults && pageLoaded) && (
@@ -819,6 +813,10 @@ const jbookMainViewHandler = {
 				</div>
 			</div>
 		);
+	},
+
+	getAboutUs(props) {
+		return <JBookAboutUs />;
 	}
 };
 

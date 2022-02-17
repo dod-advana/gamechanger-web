@@ -708,6 +708,10 @@ const DefaultMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		return (<></>);
+	}
 };
 
 export default DefaultMainViewHandler;

@@ -293,6 +293,10 @@ const EdaMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		return defaultMainViewHandler.getAboutUs(props);
+	}
 };
 
 export default EdaMainViewHandler;
