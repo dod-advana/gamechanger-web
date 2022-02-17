@@ -72,10 +72,10 @@ class JBookDataHandler extends DataHandler {
 
 		//apply TLS configs to smtp transport as appropriate from env vars
 		if (process.env.EMAIL_REQUIRE_TLS?.toUpperCase() === 'TRUE') {
-			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS,
+			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS;
 			transportOptions.tls = {
 				servername: process.env.EMAIL_TLS_SERVERNAME || ''
-			}
+			};
 		}
 
 		this.emailUtility = new EmailUtility({
