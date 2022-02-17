@@ -142,6 +142,7 @@ const endpoints = {
 	reviewerDataPOST: '/api/gameChanger/admin/createUpdateReviewer',
 	exportReview: '/api/gameChanger/modular/exportReview',
 	exportChecklist: '/api/gameChanger/modular/exportChecklist',
+	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 
 	exportHistoryDELETE: function (id) {
@@ -1120,5 +1121,11 @@ export default class GameChangerAPI {
 	sendReviewStatusUpdates = async (data) => {
 		const url = endpoints.sendReviewStatusUpdates;
 		return axiosPOST(this.axios, url, data);
+	};
+
+	exportProfilePage = async(body) => {
+		const url = endpoints.exportProfilePage;
+		const options = {}; //{responseType: 'blob'};
+		return axiosPOST(this.axios, url, body, options);
 	};
 }
