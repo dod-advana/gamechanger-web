@@ -397,7 +397,7 @@ class DataLibrary {
 		}
 	}
 
- async close(driver, session) {
+	async close(driver, session) {
 		await session.close();
 		await driver.close();
 	}
