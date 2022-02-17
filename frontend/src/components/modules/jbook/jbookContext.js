@@ -228,9 +228,12 @@ const initState = {
 	userData: undefined,
 	notificationIds: [],
 	componentStepNumbers: [],
-	selectedDocuments: [],
 	totalObligatedAmount: 0,
 	sidebarDocTypes: [],
+
+	// gc card view context
+	selectedDocuments: new Map(),
+	listView: false
 
 }
 
