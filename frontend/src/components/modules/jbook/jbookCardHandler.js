@@ -340,7 +340,7 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			const displayTitle = 'budget display title here'
+			const displayTitle = item.budgetLineItem + ' - ' + item.projectTitle;
 			const isRevoked = item.is_revoked_b;
 			const subType = '';
 			const displayOrg = '';
@@ -349,7 +349,7 @@ const jbookCardHandler = {
 
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} >
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitle} placement='top' arrow>
 							<div className={'title-text'}
@@ -378,7 +378,7 @@ const jbookCardHandler = {
 							<p> {subType} | {displayOrg} </p>
 						</div>
 					}
-				</StyledFrontCardHeader>
+				</StyledFrontCardHeader >
 			);
 		},
 
@@ -544,45 +544,13 @@ const jbookCardHandler = {
 				);
 			} else {
 				return (
-					<StyledFrontCardContent className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`} isWideCard={isWideCard}>
+					<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
 						<div className={'currents-as-of-div'}>
 							<div className={'current-text'}>
-								{currentAsOfText}
+								{'current as of text'}
 							</div>
-							{item.isRevoked &&
-								<GCTooltip title={'This version of the document is no longer in effect'} placement='top' arrow>
-									<RevokedTag>Canceled</RevokedTag>
-								</GCTooltip>
-							}
 						</div>
-						{item.pageHits.length > 0 &&
-							<div className={'hits-container'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits).map((page, key) => {
-										return (
-											<div
-												className={'page-hit'}
-												key={key}
-												style={{ ...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }), }}
-												onMouseEnter={() => setHoveredHit(key)}
-												onClick={e => {
-													e.preventDefault();
-													//  clickFn(item.filename, page.pageNumber);
-												}}
-											>
-												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
-												<i className="fa fa-chevron-right"
-													style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
-											</div>
-										)
-									}).value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote className="searchdemo-blockquote"
-										dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
-						}
+						<div>front content</div>
 					</StyledFrontCardContent>
 				);
 			}
