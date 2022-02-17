@@ -1,15 +1,18 @@
 import React from 'react';
-import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 
 
 // ===== gc look and feel ======
 import GCPrimaryButton from '../../common/GCButton';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
-import {Card} from '../../cards/GCCard';
+import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import SearchSection from '../globalSearch/SearchSection';
+import DocumentIcon from '../../../images/icon/Document.png';
+
 // ==============================
-import {CircularProgress, Grid, Snackbar, Typography} from '@material-ui/core';
+import { CircularProgress, Grid, Snackbar, Typography } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
 import {
 	getQueryVariable,
@@ -17,8 +20,8 @@ import {
 	scrollToContentTop,
 	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
-import {trackEvent} from '../../telemetry/Matomo';
-import {setState} from '../../../utils/sharedFunctions';
+import { trackEvent } from '../../telemetry/Matomo';
+import { setState } from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
 import ReactTable from 'react-table';
 import DropdownFilter from './DropdownFilter.js';
@@ -34,12 +37,13 @@ import {
 	StyledSummaryFAQContainer,
 	styles
 } from './jbookMainViewStyles';
-import {autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting} from './jbookMainViewHelper';
+import { autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting } from './jbookMainViewHelper';
 import QueryExp from './QueryExp.js'
-import {Link} from '@mui/material';
+import { Link } from '@mui/material';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';
+import { gcOrange } from "../../common/gc-colors";
 
 const _ = require('lodash');
 
@@ -105,10 +109,10 @@ const jbookMainViewHandler = {
 									<li>any planned transition partners, if applicable</li>
 								</ul>
 								<Typography className={'summarySectionText'}>
-										Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services, and other DoD Component representatives of the DoD AI Working Group in scoping and executing this task. We delivered the Phase I Inventory of DoD AI Programs in April 2021.
+									Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services, and other DoD Component representatives of the DoD AI Working Group in scoping and executing this task. We delivered the Phase I Inventory of DoD AI Programs in April 2021.
 								</Typography>
 								<Typography className={'summarySectionText'}>
-										In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the Advana Platform, which the Deputy Secretary of Defense has officially designated “as the single enterprise authoritative data management and analytics platform.”
+									In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the Advana Platform, which the Deputy Secretary of Defense has officially designated “as the single enterprise authoritative data management and analytics platform.”
 								</Typography>
 							</Grid>
 							<Grid item xs={4} className={'summaryLogoSectionContainer'}>
@@ -125,22 +129,22 @@ const jbookMainViewHandler = {
 						</Grid>
 						<div className={'summaryTextSection'}>
 							<Typography className={'summarySectionText'}>
-									Using the Advana Gamechanger platform, you will be able to easily review key budget and contracting data about AI-related programs and projects and input additional information needed to complete this congressionally mandated tasking.
+								Using the Advana Gamechanger platform, you will be able to easily review key budget and contracting data about AI-related programs and projects and input additional information needed to complete this congressionally mandated tasking.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in a tool that addresses limitations of Phase I deliverable and includes an inventory of classified programs. The Phase II inventory will be conducted via a three-part data coordination and review process: at the JAIC-level, Service-level, and program POC-level.
+								Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in a tool that addresses limitations of Phase I deliverable and includes an inventory of classified programs. The Phase II inventory will be conducted via a three-part data coordination and review process: at the JAIC-level, Service-level, and program POC-level.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review the inventory data to initially classify projects and programs as either AI-core, AI-enabled, or AI-enabling.
+								JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review the inventory data to initially classify projects and programs as either AI-core, AI-enabled, or AI-enabling.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Service-Level Review: After initial classification and tool refinement, the Services will confirm classification of the projects and programs, which will be followed by detailed analysis of each project or program at the POC-level.
+								Service-Level Review: After initial classification and tool refinement, the Services will confirm classification of the projects and programs, which will be followed by detailed analysis of each project or program at the POC-level.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
+								Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
+								After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
 							</Typography>
 						</div>
 					</Grid>
@@ -657,7 +661,7 @@ const jbookMainViewHandler = {
 
 	getViewNames(props) {
 		return [
-			{name: 'Card', title: 'Card View', id: 'gcCardView'}
+			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
 		];
 	},
 
@@ -790,7 +794,9 @@ const jbookMainViewHandler = {
 
 													<div style={styles.panelContainer}>
 														<TabPanel>
-															{getSearchResults(mainPageData ? mainPageData.docs : [], state, dispatch)}
+															<div className="row" style={{ padding: 0 }}>
+																{getSearchResults(mainPageData ? mainPageData.docs : [], state, dispatch)}
+															</div>
 														</TabPanel>
 														<TabPanel>
 															{'contract search'}
@@ -809,9 +815,9 @@ const jbookMainViewHandler = {
 								</div>
 							</div>
 						</StyledCenterContainer>
-					</div>
-				</div>
-			</div>
+					</div >
+				</div >
+			</div >
 		);
 	},
 
