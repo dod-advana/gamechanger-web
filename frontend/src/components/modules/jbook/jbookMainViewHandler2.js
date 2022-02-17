@@ -41,6 +41,7 @@ import QueryExp from './QueryExp.js'
 import {Link} from '@mui/material';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import {gcOrange} from "../../common/gc-colors";
 
 const _ = require('lodash');
 
@@ -81,7 +82,7 @@ const jbookMainViewHandler = {
 		// 	mainTabSelected = 1;
 		// }
 		// the main setstate that triggers the initial search
-		//setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions, dropdownData });
+		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions, dropdownData });
 	},
 
 	renderHideTabs(props) {
@@ -178,7 +179,7 @@ const jbookMainViewHandler = {
 		console.log(mainPageData)
 
 		const noResults = Boolean(!mainPageData.docs || mainPageData?.docs?.length === 0);
-		const hideSearchResults = noResults && !loading;
+		const hideSearchResults = noResults && loading;
 
 		const setDropdown = (name, value) => {
 			if (name === 'all') {
@@ -635,7 +636,11 @@ const jbookMainViewHandler = {
 			<>
 				<FeedbackModal state={state} dispatch={dispatch} />
 				<JBookWelcome dispatch={dispatch} state={state} />
-				{hideSearchResults && renderHideTabs(props)}
+				{loading && currentViewName !== 'Explorer' && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcColors.primary} />
+					</div>
+				)}
 				{(!hideSearchResults && pageLoaded) && (
 					<div style={styles.tabButtonContainer}>
 						<ResultView
