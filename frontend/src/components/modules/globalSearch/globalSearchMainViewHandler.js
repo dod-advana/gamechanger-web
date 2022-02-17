@@ -493,6 +493,10 @@ const GlobalSearchMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		return defaultMainViewHandler.getAboutUs(props);
+	}
 };
 
 export default GlobalSearchMainViewHandler;

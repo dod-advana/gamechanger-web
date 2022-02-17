@@ -88,6 +88,7 @@ const endpoints = {
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
+	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -141,6 +142,7 @@ const endpoints = {
 	reviewerDataPOST: '/api/gameChanger/admin/createUpdateReviewer',
 	exportReview: '/api/gameChanger/modular/exportReview',
 	exportChecklist: '/api/gameChanger/modular/exportChecklist',
+	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 
 	exportHistoryDELETE: function (id) {
@@ -338,7 +340,8 @@ export default class GameChangerAPI {
 		highlightText,
 		pageNumber,
 		isClone = false,
-		cloneData = { clone_name: 'gamechanger' }
+		cloneData = { clone_name: 'gamechanger' },
+		isDLA = false
 	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
@@ -348,7 +351,7 @@ export default class GameChangerAPI {
 					cloneData.clone_name !== 'gamechanger'
 						? `/projects/${cloneData.clone_name}`
 						: ''
-				}/pdf/${fileName}`
+				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
 			if (cloneData.clone_name === 'eda') {
@@ -768,6 +771,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, {params:body});
 	}
 
+	getUserAggregations = async (body) => {
+		const url = endpoints.getUserAggregations;
+		return axiosGET(this.axios, url, {params:body});
+	}
+
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
 		return axiosPOST(this.axios, url, body);
@@ -1113,5 +1121,11 @@ export default class GameChangerAPI {
 	sendReviewStatusUpdates = async (data) => {
 		const url = endpoints.sendReviewStatusUpdates;
 		return axiosPOST(this.axios, url, data);
+	};
+
+	exportProfilePage = async(body) => {
+		const url = endpoints.exportProfilePage;
+		const options = {}; //{responseType: 'blob'};
+		return axiosPOST(this.axios, url, body, options);
 	};
 }
