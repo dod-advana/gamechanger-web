@@ -776,8 +776,9 @@ const jbookCardHandler = {
 		},
 
 		getFooter: (props) => {
-
 			const {
+				item,
+				state,
 				toggledMore,
 				graphView,
 				cloneName,
@@ -785,13 +786,34 @@ const jbookCardHandler = {
 				closeGraphCard = () => { },
 			} = props
 
+			const { searchText } = state;
+
+			const {
+				projectTitle,
+				programElement,
+				projectNum,
+				budgetLineItem,
+				revBudgetType,
+				keywords, // do we need keywords for gc clone jbook? 
+				budgetYear,
+				id,
+				appropriationNumber
+			} = item;
+
+			const types = {
+				pdoc: 'Procurement',
+				rdoc: 'RDT&E',
+				om: 'O&M',
+			}
+
 			return (
 				<>
 					<>
 						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								// clickFn(filename, cloneName);
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[revBudgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								window.open(url);
 							}}
 						>
 							Open
