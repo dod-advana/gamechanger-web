@@ -351,7 +351,7 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			const displayTitle = item.budgetLineItem + ' - ' + item.projectTitle;
+			const displayTitle = item.budgetYear + ' | BLI: ' + item.budgetLineItem;
 			const isRevoked = item.is_revoked_b;
 
 			const cardType = item.revBudgetType.toUpperCase();
@@ -369,7 +369,7 @@ const jbookCardHandler = {
 								style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '0 5px 0 0' }}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitle}
+									{displayTitle} <br /> {item.projectTitle}
 								</div>
 								{docListView &&
 									<div className={'list-view-arrow'}>
