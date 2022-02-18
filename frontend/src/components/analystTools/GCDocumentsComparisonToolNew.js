@@ -23,6 +23,7 @@ import {
 } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
+import ExportIcon from '../../images/icon/Export.svg';
 
 const _ = require('lodash');
 
@@ -391,7 +392,7 @@ const GCDocumentsComparisonTool = (props) => {
 		handleSaveFavoriteDocument({filename, is_favorite: true, search_text: text, favorite_summary: `Document Comparison result of "${text}"`}, state, dispatch)
 	}
 
-	const exportCSV = (document) => {
+	const exportSingleDoc = (document) => {
 		const exportList = [];
 		document.paragraphs.forEach(paragraph => {
 			const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
@@ -404,15 +405,37 @@ const GCDocumentsComparisonTool = (props) => {
 				score: convertDCTScoreToText(paragraph.score)
 			})
 		})
+		heandleExport(exportList, 'ExportSindleDocCSV');
+	};
+
+	const exportAll = () => {
+		const exportList = [];
+		viewableDocs.forEach(document => {
+			document.paragraphs.forEach(paragraph => {
+				const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
+				exportList.push({
+					filename: document.filename,
+					title: document.title,
+					page: paragraph.page_num_i + 1,
+					textInput,
+					textMatch: paragraph.par_raw_text_t,
+					score: convertDCTScoreToText(paragraph.score)
+				})
+			})
+		})
+		heandleExport(exportList, 'ExportSindleDocCSV');
+	};
+
+	const heandleExport = (exportList, type) => {
 		try{
 			trackEvent(
 				getTrackingNameForFactory(state.cloneData.clone_name), 
 				'DocumentComparisonTool', 
-				'ExportCSV', 
+				type, 
 				exportList.length
 			);
 			exportToCsv(
-				'ResponsibilityData.csv', 
+				'DocumentComparisonData.csv', 
 				exportList, 
 				true
 			);
@@ -420,7 +443,7 @@ const GCDocumentsComparisonTool = (props) => {
 			console.error(e);
 			return [];
 		}
-	};
+	}
 
 	const setToFirstResultofInput = (inputId) => {
 		let paragraph;
@@ -446,8 +469,31 @@ const GCDocumentsComparisonTool = (props) => {
 		<>
 			<Grid container style={{marginTop: 20}}>
 				<Grid item xs={12}>
-					<div style={{fontWeight:'bold', alignItems: 'center', fontFamily: 'Noto Sans',}}>
+					<div  style={{display: 'flex'}}>
+						<div style={{fontWeight:'bold', alignItems: 'center', fontFamily: 'Noto Sans',}}>
 					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.
+						</div>
+						{(!loading && returnedDocs.length > 0) &&
+							<GCTooltip title="Export all results" placement="bottom" arrow>
+								<GCButton
+									onClick={exportAll}
+									style={{
+										minWidth: 50,
+										padding: '0px 7px',
+										height: 50,
+									}}
+								>
+									<img
+										src={ExportIcon}
+										style={{
+											margin: '0 0 3px 3px',
+											width: 15,
+										}}
+										alt="export"
+									/>
+								</GCButton>
+							</GCTooltip>
+						}
 					</div>
 				</Grid>
 				<Grid item xs={2} style={{marginTop: 20}}>
@@ -762,7 +808,7 @@ const GCDocumentsComparisonTool = (props) => {
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
 																<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
 																	<GCButton
-																		onClick={() => exportCSV(doc)}
+																		onClick={() => exportSingleDoc(doc)}
 																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
 																	>
 																		Export
