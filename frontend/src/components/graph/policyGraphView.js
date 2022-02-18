@@ -1521,10 +1521,14 @@ export default function PolicyGraphView(props) {
 		const allCurrentOrgTypesExceptTopicAndEntity =
 			newOrgTypesSelected.filter(type => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents');
 
-		setOrgTypesSelected(
-			_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort()) ?
-				[...newOrgTypesSelected, 'All Documents'] : newOrgTypesSelected.filter(type => type !== 'All Documents')
-		);
+
+		if (_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort())) {
+			setOrgTypesSelected(newOrgTypesSelected.includes('All Documents') ?
+				[...newOrgTypesSelected] :
+				['All Documents', ...newOrgTypesSelected]);
+		} else {
+			setOrgTypesSelected(newOrgTypesSelected.filter(type => type !== 'All Documents'));
+		}
 
 		if (newOrgTypesSelected.includes(legendKey)) {
 			setNodeGroupMenuLabel(legendKey);
