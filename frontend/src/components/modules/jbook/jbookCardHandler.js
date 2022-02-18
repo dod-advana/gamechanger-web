@@ -19,6 +19,7 @@ import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from "../../common/SimpleTable";
 import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { getClassLabel, getTotalCost } from '../../../utils/jbookUtilities';
 
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
@@ -340,6 +341,7 @@ const StyledFrontCardContent = styled.div`
 // 	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`);
 // };
 
+
 const jbookCardHandler = {
 	document: {
 		getCardHeader: (props) => {
@@ -349,7 +351,7 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			const displayTitle = item.budgetLineItem + ' - ' + item.projectTitle;
+			const displayTitle = item.budgetYear + ' | BLI: ' + item.budgetLineItem;
 			const isRevoked = item.is_revoked_b;
 
 			const cardType = item.revBudgetType.toUpperCase();
@@ -367,7 +369,7 @@ const jbookCardHandler = {
 								style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '0 5px 0 0' }}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitle}
+									{displayTitle} <br /> {item.projectTitle}
 								</div>
 								{docListView &&
 									<div className={'list-view-arrow'}>
@@ -435,11 +437,11 @@ const jbookCardHandler = {
 			item.pageHits = [
 				{
 					title: 'Project Description',
-					snippet: 'Description text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					snippet: _.truncate(item.projectMissionDescription, { 'length': 150 })
 				},
 				{
 					title: 'Contracts',
-					snippet: 'Contracts text: Description text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 
 				},
 				{
@@ -651,12 +653,22 @@ const jbookCardHandler = {
 				detailPage = false
 			} = props;
 
-			const projectData = {};
+			const projectData = { ...item };
 			const budgetType = item.revBudgetType.toUpperCase();
 			const keywordCheckboxes = null;
 			const projectNum = null;
-			const formatNum = null;
-			const getTotalCost = () => 0;
+
+			const formatNum = (num) => {
+				const parsed = parseInt(num);
+				if (parsed > 999) {
+					return `${(parsed / 1000).toFixed(2)} $B`;
+				}
+
+				if (parsed > 999999) {
+					return `${(parsed / 1000000).toFixed(2)} $T`;
+				}
+				return `${parsed} $M`;
+			}
 
 			const metadata = [
 				{
@@ -666,14 +678,16 @@ const jbookCardHandler = {
 				{
 					Key: 'Program Element',
 					Value: projectData.programElement || 'N/A',
-				},
-				{
-					Key: 'Service Agency Name',
-					Value: projectData.serviceAgency || 'N/A',
+					Hidden: budgetType === 'PDOC'
 				},
 				{
 					Key: 'Project Number',
 					Value: projectNum || 'N/A',
+					Hidden: budgetType === 'PDOC'
+				},
+				{
+					Key: 'Service Agency Name',
+					Value: projectData.serviceAgency || 'N/A',
 				},
 				{
 					Key: 'All Prior Years Amount',
@@ -693,7 +707,7 @@ const jbookCardHandler = {
 				},
 				{
 					Key: 'To Complete',
-					Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
+					Value: `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A',
 				},
 				{
 					Key: 'Total Cost',
@@ -725,22 +739,22 @@ const jbookCardHandler = {
 				},
 				{
 					Key: 'Category',
-					Value: 'category'
+					Value: getClassLabel(projectData)
 				},
-				{
-					Key: 'Keywords',
-					Value: <div>
-						{keywordCheckboxes && keywordCheckboxes.length > 0 ? 'none' : 'None'}
-					</div>,
-				},
-				{
-					Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
-					Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
-				},
-				{
-					Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Expenditures<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
-					Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M` : 'N/A'
-				},
+				// {
+				// 	Key: 'Keywords',
+				// 	Value: <div>
+				// 		{keywordCheckboxes && keywordCheckboxes.length > 0 ? 'none' : 'None'}
+				// 	</div>,
+				// },
+				// {
+				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
+				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
+				// },
+				// {
+				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Expenditures<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
+				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M` : 'N/A'
+				// },
 			];
 
 			return (
@@ -762,8 +776,9 @@ const jbookCardHandler = {
 		},
 
 		getFooter: (props) => {
-
 			const {
+				item,
+				state,
 				toggledMore,
 				graphView,
 				cloneName,
@@ -771,13 +786,34 @@ const jbookCardHandler = {
 				closeGraphCard = () => { },
 			} = props
 
+			const { searchText } = state;
+
+			const {
+				projectTitle,
+				programElement,
+				projectNum,
+				budgetLineItem,
+				revBudgetType,
+				keywords, // do we need keywords for gc clone jbook? 
+				budgetYear,
+				id,
+				appropriationNumber
+			} = item;
+
+			const types = {
+				pdoc: 'Procurement',
+				rdoc: 'RDT&E',
+				om: 'O&M',
+			}
+
 			return (
 				<>
 					<>
 						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								// clickFn(filename, cloneName);
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[revBudgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								window.open(url);
 							}}
 						>
 							Open
