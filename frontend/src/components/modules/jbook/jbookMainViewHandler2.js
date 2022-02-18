@@ -56,7 +56,6 @@ export const GC_COLORS = {
 
 const getSearchResults = (searchResultData, state, dispatch) => {
 	console.log(searchResultData);
-	console.log(state);
 	return _.map(searchResultData, (item, idx) => {
 		item.type = 'document';
 		return (
