@@ -28,6 +28,7 @@ const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/ex
 const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
+const moment = require("moment");
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -200,6 +201,7 @@ app.post('/api/auth/token', async function (req, res) {
 	let cn = 'unknown user';
 	let perms = ['View gamechanger'];
 	const sessUser = req.session.user;
+	redisAsyncClient.select(12);
 
 	try {
 		cn = sessUser.cn;
@@ -255,21 +257,35 @@ app.post('/api/auth/token', async function (req, res) {
 		sessUser.perms = sessUser.perms.concat(perms);
 		sessUser.extra_fields = user.extra_fields;
 
-		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
+		let csrfHash
+
+		if (userTokenOld && tokenTimeoutOld) {
+			tokenTimeoutOld = moment(tokenTimeoutOld);
+			if (tokenTimeoutOld <= moment()) {
+				csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+				const tokenTimeout = moment().add(2, 'days').format();
+				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+			} else {
+				csrfHash = userTokenOld;
+			}
+		} else {
+			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+			const tokenTimeout = moment().add(2, 'days').format();
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+		}
+
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
 
 		const jwtClaims = { ...sessUser };
-
 		jwtClaims['csrf-token'] = csrfHash;
-
 		let token = '';
-
 		token = jwt.sign(jwtClaims, private_key, {
 			algorithm: 'RS256'
 		});
-
-		redisAsyncClient.select(12);
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, token);
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
 
 		res.json({
 			token: token
@@ -282,27 +298,30 @@ app.post('/api/auth/token', async function (req, res) {
 });
 
 app.use(async function (req, res, next) {
-	// const signatureFromApp = req.get('x-ua-signature');
-	// redisAsyncClient.select(12);
-	// let userToken = '';
-	// if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
-	// 	userToken = process.env.ML_WEB_TOKEN
-	// } else {
-	// 	console.log(getUserIdFromSAMLUserId(req))
-	// 	userToken = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
-	// }
-	// const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
-	// if (signatureFromApp === calculatedSignature) {
-	// 	next();
-	// } else {
-	// 	if (req.url.includes('getThumbnail')) {
-	// 		next();
-	// 	}
-	// 	else {
-	// 		res.status(403).send({ code: 'not authorized' });
-	// 	}
-	// }
-	next();
+	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta'];
+
+	if (routesAllowedWithoutToken.includes(req.path)) {
+		next();
+	} else {
+		const signatureFromApp = req.get('x-ua-signature');
+		redisAsyncClient.select(12);
+		let csrfHash = '';
+		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
+			csrfHash = process.env.ML_WEB_TOKEN
+		} else {
+			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+		}
+		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
+		if (signatureFromApp === calculatedSignature) {
+			next();
+		} else {
+			if (req.url.includes('getThumbnail')) {
+				next();
+			} else {
+				res.status(403).send({code: 'not authorized'});
+			}
+		}
+	}
 });
 
 app.all('/api/*/admin/*', async function (req, res, next) {

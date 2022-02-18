@@ -294,7 +294,10 @@ const App = () => {
 		const initialize = async () => {
 			Auth.refreshUserToken(
 				() => setTokenLoaded(true),
-				() => setTokenLoaded(true)
+				() => {
+					console.log('Error getting token');
+					setTokenLoaded(false);
+				}
 			);
 
 			// fetch tutorial overlay data
