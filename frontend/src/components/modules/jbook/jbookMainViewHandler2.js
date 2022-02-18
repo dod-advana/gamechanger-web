@@ -628,12 +628,11 @@ const jbookMainViewHandler = {
 				</>
 			)
 		}
-
 		return (
 			<>
 				<FeedbackModal state={state} dispatch={dispatch} />
 				<JBookWelcome dispatch={dispatch} state={state} />
-				{loading && currentViewName !== 'Explorer' && (
+				{loading && currentViewName === undefined && ( // initial loading indicator when site has not populated yet
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
@@ -793,9 +792,31 @@ const jbookMainViewHandler = {
 
 													<div style={styles.panelContainer}>
 														<TabPanel>
-															<div className="row" style={{ padding: 0 }}>
-																{getSearchResults(mainPageData ? mainPageData.docs : [], state, dispatch)}
-															</div>
+															{
+																loading && (
+																	<div style={{ margin: '0 auto' }}>
+																		<LoadingIndicator customColor={GC_COLORS.primary} />
+																	</div>
+																)
+															}
+															{
+																!loading && (
+																	<div className="row" style={{ padding: 0 }}>
+																		{getSearchResults(mainPageData ? mainPageData.docs : [], state, dispatch)}
+																		<Pagination
+																			activePage={resultsPage}
+																			itemsCountPerPage={18}
+																			totalItemsCount={mainPageData.totalCount}
+																			pageRangeDisplayed={8}
+																			onChange={page => {
+																				trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
+																				setState(dispatch, { resultsPage: page, runSearch: true, loading: true });
+																				scrollToContentTop();
+																			}}
+																		/>
+																	</div>
+																)
+															}
 														</TabPanel>
 														<TabPanel>
 															{'contract search'}
