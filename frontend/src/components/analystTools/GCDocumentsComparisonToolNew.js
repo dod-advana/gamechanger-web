@@ -5,7 +5,15 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Grid, Typography, Checkbox } from '@material-ui/core';
+import { 
+	Grid, 
+	Typography, 
+	Checkbox,
+	FormControl,
+	InputLabel,
+	MenuItem,  
+	Select
+} from '@material-ui/core';
 import {trackEvent} from '../telemetry/Matomo';
 import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -46,7 +54,7 @@ const styles = {
 		margin: 'auto 0',
 		display: '-webkit-box',
 		WebkitLineClamp: 3,
-		webkitBoxOrient: 'vertical',
+		WebkitBoxOrient: 'vertical',
 		overflow: 'hidden',
 	},
 	resultsText:{
@@ -209,6 +217,8 @@ const GCDocumentsComparisonTool = (props) => {
 	const [inputError, setInputError] = useState(false);
 	const [collapseKeys, setCollapseKeys] = useState([]);
 	const [feedbackList, setFeedbackList] = useState({});
+	const [sortType, setSortType] = useState('Similarity Score');
+	const [needsSort, setNeedsSort] = useState(true);
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -290,8 +300,10 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked, paragraphs, selectedInput]);
 	
 	useEffect(() => {
-		setViewableDocs(returnedDocs)
-	}, [returnedDocs]);
+		setViewableDocs(returnedDocs.filter(doc => {
+			return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
+		}))
+	}, [returnedDocs, selectedInput]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		if(positiveFeedback === feedbackList[paragraph.id]) return;
@@ -334,6 +346,38 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		handleSetParagraphs();
 	}, [paragraphText, handleSetParagraphs])
+
+	useEffect(() => {
+		if(needsSort && viewableDocs.length){
+			let sortFunc = () => {};
+			switch(sortType){
+				case 'Alphabetically':
+					sortFunc = (docA, docB) => {
+						if(docA.title > docB.title) return 1;
+						if(docA.title < docB.title) return -1;
+						return 0;
+					}
+					break;
+				case 'Date Published':
+					sortFunc = (docA, docB) => {
+						if(docA.publication_date_dt > docB.publication_date_dt) return -1;
+						if(docA.publication_date_dt < docB.publication_date_dt) return 1;
+						return 0;
+					}
+					break;
+				default: 
+					sortFunc = (docA, docB) => {
+						if(docA.score > docB.score) return -1;
+						if(docA.score < docB.score) return 1;
+						return 0;
+					}
+					break;
+			}
+			const sortedDocs = viewableDocs;
+			setViewableDocs(sortedDocs.sort(sortFunc));
+			setNeedsSort(false);
+		}
+	}, [sortType, viewableDocs, needsSort])
 	
 	const reset = () => {
 		setParagraphText('');
@@ -353,6 +397,7 @@ const GCDocumentsComparisonTool = (props) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
 		if(id === selectedInput) {
 			setSelectedInput(newParagraphs[0].id);
+			setNeedsSort(true);
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
@@ -383,6 +428,7 @@ const GCDocumentsComparisonTool = (props) => {
 		setNoResults(false);
 		setFilterChange(false);
 		setSelectedInput(paragraphs?.[0].id);
+		setNeedsSort(true);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
 	}
@@ -410,7 +456,7 @@ const GCDocumentsComparisonTool = (props) => {
 
 	const exportAll = () => {
 		const exportList = [];
-		viewableDocs.forEach(document => {
+		returnedDocs.forEach(document => {
 			document.paragraphs.forEach(paragraph => {
 				const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
 				exportList.push({
@@ -463,6 +509,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const handleSelectInput = (id) => {
 		setToFirstResultofInput(id);
 		setSelectedInput(id);
+		setNeedsSort(true);
 	}
 	
 	return (
@@ -474,25 +521,48 @@ const GCDocumentsComparisonTool = (props) => {
 					The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.
 						</div>
 						{(!loading && returnedDocs.length > 0) &&
-							<GCTooltip title="Export all results" placement="bottom" arrow>
-								<GCButton
-									onClick={exportAll}
-									style={{
-										minWidth: 50,
-										padding: '0px 7px',
-										height: 50,
-									}}
-								>
-									<img
-										src={ExportIcon}
-										style={{
-											margin: '0 0 3px 3px',
-											width: 15,
+							<div style={{display: 'flex', marginLeft: 20}}>
+								<FormControl variant="outlined" classes={{root:classes.root}} style={{marginLeft: 'auto', margin: '-10px 0px 0px 0px', minWidth: 195}}>
+									<InputLabel classes={{root: classes.formlabel}} id="view-name-select">Sort</InputLabel>
+									<Select
+										className={`MuiInputBase-root`}
+										labelId="re-view-name"
+										label="View"
+										id="re-view-name-select"
+										value={sortType}
+										onChange={(event) => {
+											setSortType(event.target.value);
+											setNeedsSort(true);
 										}}
-										alt="export"
-									/>
-								</GCButton>
-							</GCTooltip>
+										classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+										autoWidthd
+									>
+										<MenuItem key={`Similarity Score`} value={'Similarity Score'}>Similarity Score</MenuItem>
+										<MenuItem key={`Alphabetically`} value={'Alphabetically'}>Alphabetically</MenuItem>
+										<MenuItem key={`Date Published`} value={'Date Published'}>Date Published</MenuItem>
+									</Select>
+								</FormControl>
+								<GCTooltip title="Export all results" placement="bottom" arrow>
+									<GCButton
+										onClick={exportAll}
+										style={{
+											minWidth: 50,
+											padding: '0px 7px',
+											height: 50,
+											marginTop: 6
+										}}
+									>
+										<img
+											src={ExportIcon}
+											style={{
+												margin: '0 0 3px 3px',
+												width: 15,
+											}}
+											alt="export"
+										/>
+									</GCButton>
+								</GCTooltip>
+							</div>
 						}
 					</div>
 				</Grid>
@@ -722,9 +792,7 @@ const GCDocumentsComparisonTool = (props) => {
 						</div>
 						<div style={{ marginTop: 20 }}>
 							{
-								viewableDocs.filter(doc => {
-									return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
-								}).length ? 
+								viewableDocs.length ? 
 									<></> 
 									: 
 									<div style={{...styles.resultsText, marginLeft: 0}}>
@@ -733,9 +801,7 @@ const GCDocumentsComparisonTool = (props) => {
 										</div>
 									</div>
 							}
-							{viewableDocs.filter(doc => {
-								return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
-							}).map((doc) => {
+							{viewableDocs.map((doc) => {
 								const docOpen = collapseKeys[doc.filename] ? collapseKeys[doc.filename] : false;
 								const displayTitle = doc.title;
 								return (
@@ -875,6 +941,30 @@ const useStyles = makeStyles((theme) => ({
 			height: '100%'
 		}
 	},
+	root: {
+		paddingTop: '16px',
+		marginRight: '10px',
+		'& .MuiInputBase-root':{
+			height: '50px',
+			fontSize: 20
+		},
+		'& .MuiFormLabel-root': {
+			fontSize: 20
+		},
+		'&:hover .MuiInput-underline:before':{
+			borderBottom: `3px solid ${gcOrange}`
+		},
+		'& .MuiInput-underline:before':{
+			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`
+		},
+		'& .MuiInput-underline:after':{
+			borderBottom: `3px solid ${gcOrange}`
+		},
+		'& .Mui-focused':{
+			borderColor: `${gcOrange}`,
+			color:`${gcOrange}`
+		}
+	},
 	focused: {},
 	notchedOutline: {
 		border: `2px solid ${'#B6C6D8'} !important`,
@@ -908,6 +998,12 @@ const useStyles = makeStyles((theme) => ({
 			'-webkit-text-stroke': '1px black',
 		},
 	},
+	selectIcon: {
+		marginTop: '4px'
+	},
+	formlabel: {
+		paddingTop: '16px'
+	}
 }));
 
 export default GCDocumentsComparisonTool;
