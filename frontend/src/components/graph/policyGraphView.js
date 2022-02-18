@@ -380,6 +380,7 @@ export default function PolicyGraphView(props) {
 		selectedDocuments = [],
 		loadAll,
 		nodeLimit,
+		mockedFromES,
 	} = props;
 
 	const graph2DRef = useRef();
@@ -1220,6 +1221,19 @@ export default function PolicyGraphView(props) {
 		});
 
 		const graphData = resp.data;
+
+		if (mockedFromES) {
+			// when results are mocked from ES, node ids are changed which causes a mismatch with the neo4j query above
+			// this matches based on doc_id and sets the mocked node's id to the id from neo4j
+			graph.nodes.forEach(mockedNode => {
+				graphData.nodes.forEach(node => {
+					if (mockedNode.doc_id === node.doc_id) {
+						mockedNode.id = node.id;
+					}
+				});
+			});
+		}
+
 		const nodeIds = graph.nodes.map((node) => {
 			return node.id;
 		});
