@@ -21,6 +21,7 @@ const getGraphData = async (
 	setGraph,
 	setNoSearches,
 	setNodeLimit,
+	setMockedFromES,
 	state,
 	dispatch
 ) => {
@@ -92,6 +93,7 @@ const getGraphData = async (
 			setNoSearches(true);
 		}
 		setNodeLimit(graphResp?.data?.query?.limit);
+		setMockedFromES(graphResp?.data?.query.query === 'Mocked from ES');
 	} catch (err) {
 		console.log(err);
 	}
@@ -109,6 +111,7 @@ const DefaultGraphView = (props) => {
 	const [timeFound, setTimeFound] = React.useState('0');
 	const [numOfEdges, setNumOfEdges] = React.useState(0);
 	const [nodeLimit, setNodeLimit] = useState();
+	const [mockedFromES, setMockedFromES] = useState(false);
 
 	const [width, setWidth] = React.useState(
 		window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100)
@@ -131,6 +134,7 @@ const DefaultGraphView = (props) => {
 				setGraph,
 				setNoSearches,
 				setNodeLimit,
+				setMockedFromES,
 				state,
 				dispatch
 			);
@@ -178,6 +182,7 @@ const DefaultGraphView = (props) => {
 					setGraphResultsFound(false);
 				}}
 				nodeLimit={nodeLimit}
+				mockedFromES={mockedFromES}
 			/>
 		</div>
 	);
