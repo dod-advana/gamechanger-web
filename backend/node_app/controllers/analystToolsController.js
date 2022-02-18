@@ -3,6 +3,7 @@ const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
+const sparkMD5Lib = require('spark-md5');
 const { result } = require('underscore');
 
 class AnalystToolsController {
@@ -13,6 +14,7 @@ class AnalystToolsController {
 			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
+			sparkMD5 = sparkMD5Lib,
 		} = opts;
 
 		this.logger = logger;
@@ -20,6 +22,7 @@ class AnalystToolsController {
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
+		this.sparkMD5 = sparkMD5;
 
 		this.compareDocument = this.compareDocument.bind(this)
 		this.compareFeedback = this.compareFeedback.bind(this)
@@ -76,6 +79,8 @@ class AnalystToolsController {
 		let userId = 'webapp_unknown';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const hashed_user = this.sparkMD5.hash(userId);
+
 			const { 
 				searchedParagraph,
 				matchedParagraphId,
@@ -83,15 +88,20 @@ class AnalystToolsController {
 				positiveFeedback 
 			} = req.body;
 
-			await this.compareFeedbackModel.findOrCreate({
+			const [record, created] = await this.compareFeedbackModel.findOrCreate({
 				where: { searchedParagraph, matchedParagraphId },
 				defaults: {
 					searchedParagraph,
 					matchedParagraphId,
 					docId,
-					positiveFeedback 
+					positiveFeedback,
+					userId: hashed_user
 				}
 			})
+			if(!created && record.positiveFeedback !== positiveFeedback) {
+				record.set({positiveFeedback})
+				await record.save();
+			}
 			
 			res.status(200);
 		}catch(e){

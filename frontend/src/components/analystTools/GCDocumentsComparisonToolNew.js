@@ -207,7 +207,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [filterChange, setFilterChange] = useState(false);
 	const [inputError, setInputError] = useState(false);
 	const [collapseKeys, setCollapseKeys] = useState([]);
-	const [feedbackList, setFeedbackList] = useState([]);
+	const [feedbackList, setFeedbackList] = useState({});
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -293,7 +293,8 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [returnedDocs]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
-		if(feedbackList.includes(paragraph.id)) return;
+		if(positiveFeedback === feedbackList[paragraph.id]) return;
+
 		const searchedParagraph = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
 		const matchedParagraphId = paragraph.id;
 
@@ -304,17 +305,7 @@ const GCDocumentsComparisonTool = (props) => {
 			positiveFeedback
 		});
 		
-		if(!positiveFeedback){
-			const docIndex = viewableDocs.findIndex(vDoc => vDoc.id === doc.id);
-			const parIndex = viewableDocs[docIndex].paragraphs.findIndex(vPar => vPar.id === paragraph.id);
-			const newViewableDocs = viewableDocs;
-			newViewableDocs[docIndex].paragraphs.splice(parIndex, 1);
-			setViewableDocs(newViewableDocs);
-			if(viewableDocs.length && !newViewableDocs[docIndex].paragraphs.length) setToFirstResultofInput(selectedInput);
-			if(viewableDocs.length && newViewableDocs[docIndex].paragraphs.length) setSelectedParagraph(viewableDocs[docIndex].paragraphs[0]);
-		}else{
-			setFeedbackList([...feedbackList, paragraph.id]);
-		}
+		setFeedbackList({...feedbackList, [paragraph.id]: positiveFeedback});
 	}
 	
 	const measuredRef = useCallback(
@@ -751,7 +742,7 @@ const GCDocumentsComparisonTool = (props) => {
 														}}
 													>
 														<span className="gc-document-explorer-result-header-text" style={{color: isHighlighted ? 'white' : '#131E43' }}>
-															{isHighlighted ? `Page: ${paragraph.page_num_i + 1}, Par: ${paragraph.id.split('_')[1]}, Score: ${convertDCTScoreToText(paragraph.score)}` : paragraph.par_raw_text_t}
+															{isHighlighted ? `Page: ${paragraph.page_num_i + 1}, Par: ${paragraph.id.split('_')[1]}, Similarity Score: ${convertDCTScoreToText(paragraph.score)}` : paragraph.par_raw_text_t}
 														</span>
 													</div>
 													<Collapse isOpened={pOpen && docOpen}>
@@ -788,14 +779,14 @@ const GCDocumentsComparisonTool = (props) => {
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
 																		className={classes.feedback + ' fa fa-thumbs-up'}
-																		style={feedbackList.includes(paragraph.id) ? {cursor: 'default', color: '#E0E0E0', '-webkit-text-stroke': '1px black'} : {}}
+																		style={feedbackList[paragraph.id] ? {cursor: 'default', color: '#E0E0E0', WebkitTextStroke: '1px black'} : {}}
 																		onClick={() => handleFeedback(doc, paragraph, true)}
 																	/>
 																</GCTooltip>
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
 																		className={classes.feedback + ' fa fa-thumbs-down'}
-																		style={feedbackList.includes(paragraph.id) ? {cursor: 'default', '-webkit-text-stroke': '1px #808080'} : {}}
+																		style={feedbackList[paragraph.id] === false ? {cursor: 'default', color: '#E0E0E0', WebkitTextStroke: '1px black'} : {}}
 																		onClick={() => handleFeedback(doc, paragraph, false)}
 																	/>
 																</GCTooltip>
