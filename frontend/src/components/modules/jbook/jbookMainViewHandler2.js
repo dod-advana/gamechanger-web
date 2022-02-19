@@ -12,6 +12,7 @@ import SearchSection from '../globalSearch/SearchSection';
 import DocumentIcon from '../../../images/icon/Document.png';
 
 // ==============================
+import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { CircularProgress, Grid, Snackbar, Typography } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
 import {
@@ -55,8 +56,8 @@ export const GC_COLORS = {
 };
 
 const getSearchResults = (searchResultData, state, dispatch) => {
-	console.log(searchResultData);
-	console.log(state);
+	// console.log(searchResultData);
+	// console.log(state);
 	return _.map(searchResultData, (item, idx) => {
 		item.type = 'document';
 		return (
@@ -71,7 +72,6 @@ const jbookMainViewHandler = {
 			dispatch,
 			state,
 		} = props;
-		console.log('handle page load');
 
 		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
@@ -473,7 +473,7 @@ const jbookMainViewHandler = {
 								href={'https://forms.osi.apps.mil/Pages/ResponsePage.aspx?id=kQEtEK7uYUexyxqD6G70ReEn65mxjY9GoAbY9R1q21tURUw2OERBOU41R1RROTJVMkZWNUNIM01ZSi4u'}
 								target="_blank"
 							>
-								<Typography style={{ fontSize: 20, fontWeight: 500 }} color={'inherit'}>O&M Form ></Typography>
+								<Typography style={{ fontSize: 20, fontWeight: 500 }} color={'inherit'}>O&M Form</Typography>
 							</Link>
 						</Grid>
 					</Grid>
@@ -730,7 +730,10 @@ const jbookMainViewHandler = {
 							{showSideFilters && (
 								<div className={'left-container'}>
 									<div className={'side-bar-container'}>
-										side bar
+										<div className={'filters-container sidebar-section-title'}>
+											FILTERS
+										</div>
+										<GameChangerSearchMatrix context={context} />
 									</div>
 								</div>
 							)}

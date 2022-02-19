@@ -352,7 +352,7 @@ const jbookCardHandler = {
 			const displayTitle = item.budgetLineItem + ' - ' + item.projectTitle;
 			const isRevoked = item.is_revoked_b;
 
-			const cardType = item.revBudgetType.toUpperCase();
+			const cardType = item.revBudgetType ? item.revBudgetType.toUpperCase() : '';
 			const agency = item.serviceAgency;
 
 			const docListView = state.listView && !graphView;
