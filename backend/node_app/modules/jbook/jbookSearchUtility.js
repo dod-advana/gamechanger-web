@@ -112,7 +112,26 @@ class JBookSearchUtility {
 			'altPOCOrg',
 			'altPOCPhoneNumber',
 			'serviceClassLabel',
-			'pocClassLabel',]
+			'pocClassLabel',
+			// gc cards
+			'projectMissionDescription',
+
+			'allPriorYearsAmount',
+			'priorYearAmount',
+			'currentYearAmount',
+
+			'budgetCycle',
+			'appropriationTitle',
+			'budgetActivityNumber',
+			'budgetActivityTitle',
+
+			// for class label
+			'pocAgreeLabel',
+			'pocClassLabel',
+			'serviceAgreeLabel',
+			'serviceClassLabel',
+			'primaryClassLabel'
+		]
 
 		const typeMap = {
 			'rdoc': 'rd',
@@ -123,13 +142,21 @@ class JBookSearchUtility {
 		for (const field of requiredCols) {
 			if (mapping[field]) {
 				// console.log(field + ' : ' + mapping[field].newName);
-				fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`)
+				if (docType === 'odoc' && field === 'priorYearAmount') {
+					fields.push(`cast(replace(${typeMap[docType]}."${mapping[field].newName}", ',', '') as double precision) AS "${field}"`)
+				} else {
+					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`)
+				}
 			} else if (reviewMapping[field]) {
 				// console.log(field + ' : ' + mapping[field].newName)
 				fields.push(`r."${reviewMapping[field].newName}" AS "${field}"`);
 			}
 			else {
-				fields.push(`'' AS "${field}"`);
+				if (['allPriorYearsAmount', 'priorYearAmount', 'currentYearAmount'].includes(field)) {
+					fields.push(`cast(NULL AS DOUBLE PRECISION) AS "${field}"`);
+				} else {
+					fields.push(`'' AS "${field}"`);
+				}
 			}
 		}
 

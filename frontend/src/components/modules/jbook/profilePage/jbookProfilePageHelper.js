@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
+import {Checkbox, CircularProgress, FormControlLabel, Tooltip, Typography} from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator'
 import {
 	StyledTableContainer, StyledNavButton, StyledNavBar, StyledNavContainer, StyledSideNavContainer,
@@ -12,6 +12,12 @@ import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext'
+import GCPrimaryButton from '../../../common/GCButton';
+import GamechangerAPI from '../../../api/gameChanger-service-api';
+import { autoDownloadFile, b64toBlob } from '../../../export/ExportResultsDialog';
+
+const _ = require('lodash');
+const gamechangerAPI = new GamechangerAPI();
 
 const firstColWidth = {
 	maxWidth: 100,
@@ -64,11 +70,12 @@ const SideNav = (props) => {
 }
 
 const BasicData = (props) => {
-	const { budgetType } = props;
+	const { budgetType, admin, loading } = props;
 
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData } = state;
+	const [exportLoading, setExportLoading] = useState(false);
 
 	return (
 		<StyledLeftContainer>
@@ -106,6 +113,34 @@ const BasicData = (props) => {
 				hideSubheader={true}
 				firstColWidth={firstColWidth}
 			/>
+			{admin &&
+				<GCPrimaryButton
+					style={{ minWidth: 'unset', color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '45px', marginRight: '10px' }} // padding: '0px', width: '49px',
+					onClick={async () => {
+						try {
+							setExportLoading(true);
+							const { data } = await gamechangerAPI.exportProfilePage({ cloneName: 'jbook', options: { data: projectData } });
+							const blob = b64toBlob(data, 'application/pdf');
+							const d = new Date();
+							await autoDownloadFile({ data: blob, extension: 'pdf', filename: 'project-data-' + d.toISOString() });
+							setExportLoading(false);
+
+						} catch (e) {
+							setExportLoading(false);
+							console.log(e);
+						}
+					}}
+					disabled={exportLoading || loading}
+				>
+					{!exportLoading && !loading ?
+						'Export'
+						:
+						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
+					}
+					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
+				</GCPrimaryButton>
+			}
+
 		</StyledLeftContainer>
 	);
 }
