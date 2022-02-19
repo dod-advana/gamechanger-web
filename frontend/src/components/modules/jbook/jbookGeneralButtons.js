@@ -5,6 +5,7 @@ import UOTAlert from '../../common/GCAlert';
 import EditEsIndexModal from '../../admin/GeneralAdminButtons/EditEsIndexModal';
 import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import fileDownload from 'js-file-download';
 
 const gameChangerAPI = new GameChangerAPI();
 /**
@@ -84,6 +85,7 @@ const JBOOKGeneralAdminButtons = () => {
 									await autoDownloadFile({data: blob, extension: 'csv', filename: 'review-data-' + d.toISOString()});
 									createAlert('Download Complete', 'success', '');
 								} catch(e) {
+									createAlert('Download Failed', 'error', '')
 									console.log(e);
 								}
 							}} style={{ textDecoration: 'none' }}>
@@ -97,6 +99,29 @@ const JBOOKGeneralAdminButtons = () => {
 							<Link to='#' onClick={() => setShowEditReviewStatusEmailModal(true)} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className='fa fa-mail-reply-all fa-2x'/>
 								<h2 style={styles.featureName}><span style={styles.featureNameLink}>Send Review Status</span></h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper style={styles.paper} zDepth={2} circle>
+							<Link to='#' onClick={async () => {
+								try {
+									createAlert('Downloading Review Status Data', 'info', '');
+									const d = new Date();
+									const data = await gameChangerAPI.callSearchFunction({
+										functionName: 'getDataForReviewStatus',
+										cloneName: 'jbook',
+										options: {},
+									}, { responseType: 'blob' });
+									fileDownload(data.data, `review-status-${d.toISOString()}.xls`);
+									createAlert('Download Complete', 'success', '');
+								} catch(e) {
+									createAlert('Download Failed', 'error', '')
+									console.log(e);
+								}
+							}} style={{ textDecoration: 'none' }}>
+								<i style={styles.image} className='fa fa fa-file-excel-o fa-2x'/>
+								<h2 style={styles.featureName}><span style={styles.featureNameLink}>EXPORT REVIEW STATUS</span></h2>
 							</Link>
 						</Paper>
 					</div>
