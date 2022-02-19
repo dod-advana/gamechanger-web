@@ -20,7 +20,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 
 const gameChangerAPI = new GameChangerAPI();
-const autoDownloadFile = ({
+export const autoDownloadFile = ({
 	data,
 	filename = 'results',
 	extension = 'txt',
@@ -42,7 +42,7 @@ const autoDownloadFile = ({
 	document.body.removeChild(a);
 };
 
-const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 	const byteCharacters = atob(b64Data);
 	const byteArrays = [];
 

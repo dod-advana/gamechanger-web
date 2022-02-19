@@ -974,9 +974,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	callSearchFunction = async (body) => {
+	callSearchFunction = async (body, config) => {
 		const url = endpoints.callSearchFunctionPOST;
-		return axiosPOST(this.axios, url, body);
+		return axiosPOST(this.axios, url, body, config);
 	};
 
 	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {

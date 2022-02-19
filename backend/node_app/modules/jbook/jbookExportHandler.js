@@ -151,6 +151,31 @@ class SimpleExportHandler extends ExportHandler {
 		}
 	}
 
+	async exportProfilePageHelper(req, res, userId) {
+		try {
+			const { data } = req.body;
+
+			if (req.permissions.includes('jbook Admin') || req.permissions.includes('Webapp Super Admin') || req.permissions.includes('Gamechanger Super Admin')) {
+				const sendDataCallback = (buffer) => {
+					const pdfBase64String = buffer.toString('base64');
+					res.contentType('application/pdf');
+					res.status(200);
+					res.send(pdfBase64String);
+				};
+
+				this.reports.createProfilePagePDFBuffer(data, userId, sendDataCallback);
+			}
+			else {
+				this.logger.error('403 Need Admin Permissions', '2ZO73KB', userId);
+				res.status(403).send({ message: '403 Need Admin Permissions to export' });
+			}
+
+		} catch (e) {
+			this.logger.error(e.message, '2ZO73KA', userId);
+			res.status(500).send(e);
+		}
+	}
+
 }
 
 module.exports = SimpleExportHandler;
