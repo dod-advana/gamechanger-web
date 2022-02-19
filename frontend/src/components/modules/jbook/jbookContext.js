@@ -44,6 +44,34 @@ const initState = {
 		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
 		sourceTag: ['Unknown', 'JAIC 2021 Review', 'JAIC Ontology', 'NSCAI', 'JAIC Ontology|OSD CIO', 'JAIC Ontology|NSCAI', 'JAIC Ontology|OSD CIO|NSCAI', 'OSD CIO|NSCAI', 'OSD CIO'],
 		hasKeywords: ['Yes', 'No'],
+
+		// v --- all and selected --- v
+		budgetTypeSpecificSelected: false,
+		budgetTypeAllSelected: true,
+
+		budgetYearSpecificSelected: false,
+		budgetYearAllSelected: true,
+
+		serviceAgencySpecificSelected: false,
+		serviceAgencyAllSelected: true,
+
+		primaryReviewerSpecificSelected: false,
+		primaryReviewerAllSelected: true,
+
+		serviceReviewerSpecificSelected: false,
+		serviceReviewerAllSelected: true,
+
+		hasKeywordsSpecificSelected: false,
+		hasKeywordsAllSelected: true,
+
+		primaryClassLabelSpecificSelected: false,
+		primaryClassLabelAllSelected: true,
+
+		sourceTagSpecificSelected: false,
+		sourceTagAllSelected: true,
+
+		reviewStatusSpecificSelected: false,
+		reviewStatusAllSelected: true
 	},
 	defaultOptions: {
 		clearText: true,
