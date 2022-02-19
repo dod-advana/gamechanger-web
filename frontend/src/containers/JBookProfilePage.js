@@ -45,7 +45,6 @@ const JBookProfilePage = (props) => {
 		if (!state.cloneDataSet) {
 			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
 		}
-
 	}, [cloneData, state, dispatch]);
 
 	const [profileLoading, setProfileLoading] = useState(false);
@@ -767,7 +766,7 @@ const JBookProfilePage = (props) => {
 				budgetYear={budgetYear}
 			/>
 			<StyledContainer>
-				<BasicData budgetType={budgetType} />
+				<BasicData budgetType={budgetType} admin={Permissions.hasPermission('JBOOK Admin')} loading={profileLoading}/>
 				<ProjectDescription
 					profileLoading={profileLoading}
 					projectData={projectData}

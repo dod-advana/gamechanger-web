@@ -345,6 +345,29 @@ class Reports {
 			}
 		}
 
+		let totalCost = null;
+		if (reviewData.allPriorYearsAmount) {
+			totalCost += reviewData.allPriorYearsAmount;
+		}
+		if (reviewData.priorYearAmount) {
+			totalCost += reviewData.priorYearAmount;
+		}
+		if (reviewData.currentYearAmount) {
+			totalCost += reviewData.currentYearAmount;
+		}
+
+		const formatNum = (num) => {
+			const parsed = parseInt(num);
+			if (parsed > 999) {
+				return `${(parsed / 1000).toFixed(2)} $B`;
+			}
+
+			if (parsed > 999999) {
+				return `${(parsed / 1000000).toFixed(2)} $T`;
+			}
+			return `${parsed} $M`;
+		}
+
 		let doc = {
 			pageMargins: [50, 50],
 			footer: function (currentPage) {
@@ -389,17 +412,19 @@ class Reports {
 					table: {
 						widths: ['*', '*', '*', '*'],
 						body: [
-							['Project Title:', data.projectTitle ?? '', 'AI Labeling:', label ?? ''],
-							['Project:', data.projectNum ?? '', 'Service Agency Name:', data.serviceAgency ?? ''],
-							['Appropriation:', data.appropriationNumber ?? '', 'Appropriation Title:', data.appropriationTitle ?? ''],
-							['Budget:', data.budgetActivityNumber ?? '', 'Budget Activity Title:', data.budgetActivityTitle],
+							['Project Title:', data.projectTitle ?? 'N/A', 'AI Labeling:', label ?? 'N/A'],
+							['Project:', data.projectNum ?? 'N/A', 'Service Agency Name:', data.serviceAgency ?? 'N/A'],
+							['Appropriation:', data.appropriationNumber ?? 'N/A', 'Appropriation Title:', data.appropriationTitle ?? 'N/A'],
+							['Budget:', data.budgetActivityNumber ?? 'N/A', 'Budget Activity Title:', data.budgetActivityTitle],
 							['', '', '', ''],
-							['Source Tags:', data.sourceTag ?? '', '', ''],
-							['# of Keywords:', data.keywords ? data.keywords.length : '', 'Included Keywords:', data.keywords ?? ''],
+							['Source Tags:', data.sourceTag ?? 'N/A', '', ''],
+							['# of Keywords:', data.keywords ? data.keywords.length : 'N/A', 'Included Keywords:', data.keywords ?? 'N/A'],
 							['', '', '', ''],
-							['Program Element:', data.programElement ?? '', 'Planned Transition Partner (if known):', reviewData ? reviewData.pocPlannedTransitionPartner ?? reviewData.servicePlannedTransitionPartner ?? reviewData.primaryPlannedTransitionPartner ?? '' : '' ],
-							['AI Domain: ', reviewData.domainTask ?? '', '', '' ],
-							['Joint Capability Area: ', reviewData.pocJointCapabilityArea ?? '', reviewData.pocJointCapabilityArea2 ?? '', reviewData.pocJointCapabilityArea3 ?? ''],
+							['Program Element:', data.programElement ?? 'N/A', 'Planned Transition Partner (if known):', reviewData ? reviewData.pocPlannedTransitionPartner ?? reviewData.servicePlannedTransitionPartner ?? reviewData.primaryPlannedTransitionPartner ?? 'N/A' : 'N/A' ],
+							['AI Domain: ', reviewData.domainTask ?? 'N/A', '', '' ],
+							['Joint Capability Area: ', reviewData.pocJointCapabilityArea ?? 'N/A', reviewData.pocJointCapabilityArea2 ?? 'N/A', reviewData.pocJointCapabilityArea3 ?? 'N/A'],
+							['Prior Year Amount: ', data.priorYearAmount !== null && data.priorYearAmount !== undefined ? `${formatNum(data.priorYearAmount)}` : 'N/A', 'Current Year Amount: ', data.currentYearAmount !== null && data.currentYearAmount !== undefined ? `${formatNum(data.currentYearAmount)}` : 'N/A'],
+							['To Complete: ', `${parseInt(data.budgetYear) + (data.budgetType === 'Procurement' ? 3 : 2)}` || 'N/A', 'Total Cost: ', totalCost ? `${formatNum(totalCost)}` : 'N/A']
 						]
 					},
 					layout: {
@@ -463,25 +488,25 @@ class Reports {
 			},
 		};
 
-		doc.content.push(
-			{
-				style: 'table',
-				table: {
-					widths:['*', '*'],
-					body: [
-						[{text: 'FY21-FY25 Total Program Element Cost', colSpan: 2, style: 'title'}, {}],
-						['FY20:', ''],
-						['FY21:', ''],
-						['FY22:', ''],
-						['FY23:', ''],
-						['FY24:', ''],
-						['FY25:', ''],
-						['To Complete:', ''],
-						['Total Cost:', ''],
-					],
-				},
-			},
-		);
+		// doc.content.push(
+		// 	{
+		// 		style: 'table',
+		// 		table: {
+		// 			widths:['*', '*'],
+		// 			body: [
+		// 				[{text: 'FY21-FY25 Total Program Element Cost', colSpan: 2, style: 'title'}, {}],
+		// 				['FY20:', ''],
+		// 				['FY21:', ''],
+		// 				['FY22:', ''],
+		// 				['FY23:', ''],
+		// 				['FY24:', ''],
+		// 				['FY25:', ''],
+		// 				['To Complete:', ''],
+		// 				['Total Cost:', ''],
+		// 			],
+		// 		},
+		// 	},
+		// );
 
 		if (reviewData && reviewData.serviceMissionPartnersList && reviewData.serviceMissionPartnersList.length > 0) {
 			doc.content.push(
