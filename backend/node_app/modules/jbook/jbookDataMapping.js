@@ -1447,4 +1447,232 @@ module.exports = {
 	odocSearchMapping: [
 		'sag_budget_line_item_title_search',
 	],
+
+	elasticSearchMapping: {
+		'accountTitle_s': {
+			newName: 'accountTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'allPriorYearsAmount_d': {
+			newName: 'allPriorYearsAmount',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'appropriationNumber_s': {
+			newName: 'appropriationNumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'appropriationTitle_t': {
+			newName: 'appropriationTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetActivityNumber_s': {
+			newName: 'budgetActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetActivityTitle_s': {
+			newName: 'budgetActivityTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetCycle_s': {
+			newName: 'budgetCycle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetLineItem_s': {
+			newName: 'budgetLineItem',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetLineItemTitle_s': {
+			newName: 'budgetLineItemTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetYear_year_only': {
+			newName: 'budgetYear',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'by1BaseYear_d': {
+			newName: 'by1BaseYear',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'currentYearAmount_d': {
+			newName: 'currentYearAmount',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'missionDescBudgetJustification_t': {
+			newName: 'missionDescBudgetJustification',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'otherProgramFundSummaryRemarks_t': {
+			newName: 'otherProgramFundSummaryRemarks',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p1LineNumber_s': {
+			newName: 'p1LineNumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_contract_data_n.P3a-16_Title_t': {
+			newName: 'P3a-16_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_contract_data_n.programElementTitle_t': {
+			newName: 'programElementTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_dev_milestones_n.P3a-20_Milestone_Desc_t': {
+			newName: 'P3a-20_Milestone_Desc',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_dev_milestones_n.projectTitle2_t': {
+			newName: 'projectTitle2',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_dev_milestones.toComplete_year_month_only': {
+			newName: 'toComplete',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p3a_rdte_n.P3a-19_ModItem_Title_t': {
+			newName: 'P3a-19_ModItem_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p40_p3a_rdte.P3a-20_ModItem_PENumber_s': {
+			newName: 'P3a-20_ModItem_PENumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P3a-20_ModItem_PENumber': {
+			newName: 'p1LineNumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P40-13_BSA_Title_t': {
+			newName: 'P40-13_BSA_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P40-15_Justification_t': {
+			newName: 'P40-15_Justification',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P40-52_NetP1_APY_d': {
+			newName: 'allPriorYearsAmount',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P40-76_TOA_APY_d': {
+			newName: 'P40-76_TOA_APY',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'P40-77_TOA_PY_d': {
+			newName: 'P40-77_TOA_PY',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p40a_aggregated_items_n.P40a-16_Title_t': {
+			newName: 'P40a-16_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p40a_aggregated_items_n.P40a-73_TotCost_APY_d': {
+			newName: 'P40a-73_TotCost_APY',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p40a_secondary_distribution_n.P40a-14_Title_t': {
+			newName: 'P40a-14_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'p5_res_sum_optional_rows_n.P5-16_Item_Title_t': {
+			newName: 'P5-16_Item_Title',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'priorYearAmount_d': {
+			newName: 'priorYearAmount',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'programElement_s': {
+			newName: 'programElement',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'programElementTitle_t': {
+			newName: 'programElementTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'Proj_Fund_PY_d': {
+			newName: 'Proj_Fund_PY',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectAquisitionStrategy_t': {
+			newName: 'projectAquisitionStrategy',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectMissionDescription_t': {
+			newName: 'projectMissionDescription',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectNotes_t': {
+			newName: 'projectNotes',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectNum_s': {
+			newName: 'projectNum',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectPerformanceMetrics_t': {
+			newName: 'projectPerformanceMetrics',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'projectTitle_t': {
+			newName: 'projectTitle',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'serviceAgency_s': {
+			newName: 'serviceAgency',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'totalCost_s': {
+			newName: 'totalCost',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'type_s': {
+			newName: 'budgetType',
+			defaultValue: '',
+			processValue: (value) => value
+		}
+	}
 }

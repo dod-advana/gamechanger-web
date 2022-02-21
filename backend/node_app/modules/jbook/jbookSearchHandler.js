@@ -5,7 +5,6 @@ const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
-
 const SearchHandler = require('../base/searchHandler');
 
 const PDOC = require('../../models').pdoc;
@@ -21,6 +20,7 @@ const { Sequelize } = require('sequelize');
 const { Reports } = require('../../lib/reports');
 const ExcelJS = require('exceljs');
 const moment = require("moment");
+const constants = require("../../config/constants");
 
 const excelStyles = {
 	middleAlignment: { vertical: 'middle', horizontal: 'center' },
@@ -284,6 +284,94 @@ class JBookSearchHandler extends SearchHandler {
 				exportSearch
 			} = req.body;
 
+			return this.postgresDocumentSearch(req, userId, res, statusExport);
+			//return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
+
+		} catch (e) {
+			console.log(e);
+			const { message } = e;
+			this.logger.error(message, 'IDD6Y19', userId);
+			throw e;
+		}
+	}
+
+	async elasticSearchDocumentSearch(req, userId, res, statusExport = false) {
+		try {
+			const {
+				offset,
+				searchText,
+				jbookSearchSettings,
+				exportSearch
+			} = req.body;
+
+			let searchResults = {totalCount: 0, docs: []};
+			const operator = 'and';
+
+			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
+			req.body.searchTerms = searchTerms;
+			req.body.parsedQuery = parsedQuery;
+			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId);
+
+			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
+			const { body = {} } = esResults;
+			const { hits: esHits = {} } = body;
+			const { hits = [], total: { value } } = esHits;
+
+			searchResults.totalCount = value;
+			searchResults.docs = this.cleanESResults(hits, userId);
+
+			//console.log(searchResults);
+
+			return searchResults;
+
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'G4W6UNW', userId);
+			throw e;
+		}
+	}
+
+	cleanESResults(hits, userId) {
+		const results = [];
+		try {
+			hits.forEach(hit => {
+				const result = this.jbookSearchUtility.parseFields(hit['_source'], false, 'elasticSearch');
+
+				switch (result.budgetType) {
+					case 'rdte':
+						result.type = 'RDT&E';
+						break;
+					case 'om':
+						result.type = 'O&M';
+						break;
+					case 'procurement':
+						result.type = 'Procurement';
+						break;
+					default:
+						break;
+				}
+
+				results.push(result);
+			});
+
+			return results;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '8V1IZLH', userId);
+			return results;
+		}
+	}
+
+	async postgresDocumentSearch(req, userId, res, statusExport = false)  {
+		try {
+			const {
+				offset,
+				searchText,
+				jbookSearchSettings,
+				exportSearch
+			} = req.body;
+
 			const perms = req.permissions;
 
 			const hasSearchText = searchText && searchText !== '';
@@ -291,10 +379,10 @@ class JBookSearchHandler extends SearchHandler {
 
 			let keywordIds = undefined;
 
-			keywordIds = { pdoc: [], rdoc: [], om: [] };
+			keywordIds = {pdoc: [], rdoc: [], om: []};
 			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
-								ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
-								ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
+							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
+							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
 			const assoc_results = await KEYWORD_ASSOC.sequelize.query(assoc_query);
 			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
@@ -333,7 +421,13 @@ class JBookSearchHandler extends SearchHandler {
 
 			// grab counts, can be optimized with promise.all
 			const totalCountQuery = `SELECT COUNT(*) FROM (` + giantQuery + `) as combinedRows;`;
-			let totalCount = await this.db.jbook.query(totalCountQuery, { replacements: { searchText: structuredSearchText, offset, limit } });
+			let totalCount = await this.db.jbook.query(totalCountQuery, {
+				replacements: {
+					searchText: structuredSearchText,
+					offset,
+					limit
+				}
+			});
 			totalCount = totalCount[0][0].count;
 
 			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
@@ -344,9 +438,15 @@ class JBookSearchHandler extends SearchHandler {
 			}
 			giantQuery += ' OFFSET :offset;';
 
-			let data2 = await this.db.jbook.query(giantQuery, { replacements: { searchText: structuredSearchText, offset, limit } });
+			let data2 = await this.db.jbook.query(giantQuery, {
+				replacements: {
+					searchText: structuredSearchText,
+					offset,
+					limit
+				}
+			});
 
-			// new data combined: no need to parse because we renamed the column names in the query to match the frontend 
+			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
 			let returnData = data2[0];
 
 			// set the keywords
@@ -361,21 +461,18 @@ class JBookSearchHandler extends SearchHandler {
 			});
 
 			if (exportSearch) {
-				const csvStream = await this.reports.createCsvStream({ docs: returnData }, userId);
+				const csvStream = await this.reports.createCsvStream({docs: returnData}, userId);
 				csvStream.pipe(res);
 				res.status(200);
-			}
-			else {
+			} else {
 				return {
 					totalCount,
 					docs: returnData
 				}
 			}
-
 		} catch (e) {
-			console.log(e);
 			const { message } = e;
-			this.logger.error(message, 'IDD6Y19', userId);
+			this.logger.error(message, 'O1U2WBP', userId);
 			throw e;
 		}
 	}
