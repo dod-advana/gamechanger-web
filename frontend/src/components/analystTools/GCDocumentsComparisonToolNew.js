@@ -300,10 +300,38 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [state.runDocumentComparisonSearch, paragraphText, state.cloneData.cloneName, dispatch, allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked, paragraphs, selectedInput]);
 	
 	useEffect(() => {
-		setViewableDocs(returnedDocs.filter(doc => {
-			return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
-		}))
-	}, [returnedDocs, selectedInput]);
+		if(needsSort && returnedDocs.length){
+			const newViewableDocs = returnedDocs.filter(doc => {
+				return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
+			})
+			let sortFunc = () => {};
+			switch(sortType){
+				case 'Alphabetically':
+					sortFunc = (docA, docB) => {
+						if(docA.title > docB.title) return 1;
+						if(docA.title < docB.title) return -1;
+						return 0;
+					}
+					break;
+				case 'Date Published':
+					sortFunc = (docA, docB) => {
+						if(docA.publication_date_dt > docB.publication_date_dt) return -1;
+						if(docA.publication_date_dt < docB.publication_date_dt) return 1;
+						return 0;
+					}
+					break;
+				default: 
+					sortFunc = (docA, docB) => {
+						if(docA.score > docB.score) return -1;
+						if(docA.score < docB.score) return 1;
+						return 0;
+					}
+					break;
+			}
+			setViewableDocs(newViewableDocs.sort(sortFunc));
+			setNeedsSort(false);
+		}
+	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		if(positiveFeedback === feedbackList[paragraph.id]) return;
@@ -346,38 +374,6 @@ const GCDocumentsComparisonTool = (props) => {
 	useEffect(() => {
 		handleSetParagraphs();
 	}, [paragraphText, handleSetParagraphs])
-
-	useEffect(() => {
-		if(needsSort && viewableDocs.length){
-			let sortFunc = () => {};
-			switch(sortType){
-				case 'Alphabetically':
-					sortFunc = (docA, docB) => {
-						if(docA.title > docB.title) return 1;
-						if(docA.title < docB.title) return -1;
-						return 0;
-					}
-					break;
-				case 'Date Published':
-					sortFunc = (docA, docB) => {
-						if(docA.publication_date_dt > docB.publication_date_dt) return -1;
-						if(docA.publication_date_dt < docB.publication_date_dt) return 1;
-						return 0;
-					}
-					break;
-				default: 
-					sortFunc = (docA, docB) => {
-						if(docA.score > docB.score) return -1;
-						if(docA.score < docB.score) return 1;
-						return 0;
-					}
-					break;
-			}
-			const sortedDocs = viewableDocs;
-			setViewableDocs(sortedDocs.sort(sortFunc));
-			setNeedsSort(false);
-		}
-	}, [sortType, viewableDocs, needsSort])
 	
 	const reset = () => {
 		setParagraphText('');
