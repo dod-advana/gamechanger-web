@@ -421,6 +421,7 @@ const GCDocumentsComparisonTool = (props) => {
 		setParagraphs(newParagraphs);
 		const newParagraphText = newParagraphs.map(paragraph => paragraph.text).join('\n');
 		setParagraphText(newParagraphText);
+		setReturnedDocs([]);
 		handleCompare();
 	}
 
@@ -597,6 +598,8 @@ const GCDocumentsComparisonTool = (props) => {
 					{!loading && returnedDocs.length > 0 && <GCButton 
 						onClick={() => { 
 							setNoResults(false);
+							setReturnedDocs([]);
+							setNeedsSort(true);
 							setState(dispatch, { runDocumentComparisonSearch: true });
 						}}
 						style={{margin: '10px 0 0 0', width: '100%'}}
