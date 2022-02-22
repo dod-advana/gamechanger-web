@@ -219,6 +219,7 @@ const GCDocumentsComparisonTool = (props) => {
 	const [feedbackList, setFeedbackList] = useState({});
 	const [sortType, setSortType] = useState('Similarity Score');
 	const [needsSort, setNeedsSort] = useState(true);
+	const [sortOrder, setSortOrder] = useState('desc');
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -304,26 +305,29 @@ const GCDocumentsComparisonTool = (props) => {
 			const newViewableDocs = returnedDocs.filter(doc => {
 				return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
 			})
+			const order = sortOrder === 'desc' ? 1 : -1;
 			let sortFunc = () => {};
 			switch(sortType){
 				case 'Alphabetically':
 					sortFunc = (docA, docB) => {
-						if(docA.title > docB.title) return 1;
-						if(docA.title < docB.title) return -1;
+						if(docA.title > docB.title) return order;
+						if(docA.title < docB.title) return -order;
 						return 0;
 					}
 					break;
 				case 'Date Published':
 					sortFunc = (docA, docB) => {
-						if(docA.publication_date_dt > docB.publication_date_dt) return -1;
-						if(docA.publication_date_dt < docB.publication_date_dt) return 1;
+						if(docA.publication_date_dt > docB.publication_date_dt) return -order;
+						if(docA.publication_date_dt < docB.publication_date_dt) return order;
+						if(!docA.publication_date_dt) return 1;
+						if(!docB.publication_date_dt) return -1;
 						return 0;
 					}
 					break;
 				default: 
 					sortFunc = (docA, docB) => {
-						if(docA.score > docB.score) return -1;
-						if(docA.score < docB.score) return 1;
+						if(docA.score > docB.score) return -order;
+						if(docA.score < docB.score) return order;
 						return 0;
 					}
 					break;
@@ -331,7 +335,7 @@ const GCDocumentsComparisonTool = (props) => {
 			setViewableDocs(newViewableDocs.sort(sortFunc));
 			setNeedsSort(false);
 		}
-	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs]);
+	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		if(positiveFeedback === feedbackList[paragraph.id]) return;
@@ -507,6 +511,11 @@ const GCDocumentsComparisonTool = (props) => {
 		setSelectedInput(id);
 		setNeedsSort(true);
 	}
+
+	const handleChangeOrder = (order) => {
+		setSortOrder(order);
+		setNeedsSort(true);
+	}
 	
 	return (
 		<>
@@ -538,6 +547,20 @@ const GCDocumentsComparisonTool = (props) => {
 										<MenuItem key={`Date Published`} value={'Date Published'}>Date Published</MenuItem>
 									</Select>
 								</FormControl>
+								<div style={{width: '40px', marginLeft: '10px', display: 'flex'}}>
+									<i 
+										className="fa fa-sort-amount-desc"
+										style={{marginTop: '50%', marginRight: '5px', cursor: 'pointer', color: sortOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+										aria-hidden="true"
+										onClick={() => {handleChangeOrder('desc')}	}
+									></i>
+									<i 
+										className="fa fa-sort-amount-asc"
+										style={{marginTop: '50%', cursor: 'pointer', color: sortOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
+										aria-hidden="true"
+										onClick={() => {handleChangeOrder('asc')}	}
+									></i>
+								</div>
 								<GCTooltip title="Export all results" placement="bottom" arrow>
 									<GCButton
 										onClick={exportAll}
