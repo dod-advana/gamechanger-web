@@ -25,8 +25,8 @@ class JBookSearchUtility {
 		const newData = {};
 		const mapping = this.getMapping(docType, fromFrontend);
 
-		for (const field in mapping) {
-			if (data[field] != null || data[field] != undefined) {
+		for (const field in data) {
+			if (Object.keys(mapping).includes(field)) {
 				const newKey = mapping[field].newName;
 				newData[newKey] = mapping[field].processValue(data[field]);
 			}
@@ -355,28 +355,6 @@ class JBookSearchUtility {
 		}
 
 		return [pQuery, rQuery, oQuery];
-
-		/*if (perms.includes('JBOOK Admin') || perms.includes('JBOOK Primary Reviewer')) {
-			return [pQuery, rQuery, oQuery];
-		} else {
-			// 0 = Last, 1 = First, 2 = MI, 3 = DODID (Do not Use unless Hashed)
-			const nameArray = userId.split('.');
-			
-			if (perms.includes('JBOOK Service Reviewer') || perms.includes('JBOOK POC Reviewer')) {
-				pQuery = `${pQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				rQuery = `${rQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				oQuery = `${oQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-			} else if (perms.includes('JBOOK POC Reviewer')) {
-				pQuery = `${pQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				rQuery = `${rQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				oQuery = `${oQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-			} else {
-				pQuery = `${pQuery} AND r."poc_reviewer" = 'BLAH'`
-				rQuery = `${rQuery} AND r."poc_reviewer" = 'BLAH'`
-				oQuery = `${oQuery} AND r."poc_reviewer" = 'BLAH'`
-			}
-			return [pQuery, rQuery, oQuery];
-		}*/
 	}
 
 	buildWhereQueryForUserDash(jbookSearchSettings) {

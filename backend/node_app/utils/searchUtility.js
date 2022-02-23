@@ -2801,6 +2801,68 @@ class SearchUtility {
 		return query;
 	}
 
+	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings}, userId) {
+
+		console.log(jbookSearchSettings)
+
+		const isVerbatimSearch = this.isVerbatim(searchText);
+		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
+
+		let query = {
+			from: offset,
+			size: limit,
+			aggregations: {
+				service_agency_aggs: {
+					terms: {
+						field: 'serviceAgency_s',
+						size: 10000
+					}
+				}
+			},
+			query: {
+				bool: {
+					must: []
+				}
+			}
+		};
+
+		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
+			query.query.bool.must.push({
+				terms: {
+					budgetYear_year_only: jbookSearchSettings.budgetYear
+				}
+			});
+		}
+
+		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
+			const budgetTypesTemp = [];
+
+			jbookSearchSettings.budgetType.forEach(budgetType => {
+				switch (budgetType) {
+					case 'RDT&E':
+						budgetTypesTemp.push('rdte');
+						break;
+					case 'O&M':
+						budgetTypesTemp.push('om');
+						break;
+					case 'Procurement':
+						budgetTypesTemp.push('procurement');
+						break;
+					default:
+						break;
+				}
+			});
+
+			query.query.bool.must.push({
+				terms: {
+					type_s: budgetTypesTemp
+				}
+			});
+		}
+
+		return query;
+	}
+
 }
 
 module.exports = SearchUtility;

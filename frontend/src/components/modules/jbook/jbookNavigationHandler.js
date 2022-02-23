@@ -15,6 +15,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import {setState} from '../../../utils/sharedFunctions';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
+import UserFeedbackIcon from "../../../images/icon/userfeedback.png";
 
 const getToolTheme = (cloneData) => {
 	return {
@@ -90,6 +91,22 @@ const JBookNavigationHandler = {
 						<ConstrainedIcon src={AboutUsIcon} />
 					</HoverNavItem>
 				</GCTooltip>
+				<GCTooltip title="User Feedback" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setState(dispatch, { feedbackModalOpen: true });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserFeedback'
+							);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserFeedbackIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
@@ -154,6 +171,22 @@ const JBookNavigationHandler = {
 					>
 						<ConstrainedIcon src={AboutUsIcon} />
 						<span style={{ marginLeft: '10px' }}>About Us</span>
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="Tell us what you think!" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							setState(dispatch, { feedbackModalOpen: true });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserFeedbackSelected'
+							);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserFeedbackIcon} />
+						<span style={{ marginLeft: '10px' }}>User Feedback</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
