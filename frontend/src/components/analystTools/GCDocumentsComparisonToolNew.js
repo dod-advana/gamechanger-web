@@ -302,6 +302,7 @@ const GCDocumentsComparisonTool = (props) => {
 	
 	useEffect(() => {
 		if(needsSort && returnedDocs.length){
+			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter(doc => {
 				return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
 			})
@@ -332,10 +333,14 @@ const GCDocumentsComparisonTool = (props) => {
 					}
 					break;
 			}
-			setViewableDocs(newViewableDocs.sort(sortFunc));
-			setNeedsSort(false);
+			const sortedDocs = newViewableDocs.sort(sortFunc);
+			if(!selectedParagraph) {
+				setSelectedParagraph(sortedDocs[0].paragraphs[0]);
+				setCompareDocument(sortedDocs[0]);
+			}
+			setViewableDocs(sortedDocs);
 		}
-	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder]);
+	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder, selectedParagraph]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		let undo = false;
@@ -515,7 +520,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}
 
 	const handleSelectInput = (id) => {
-		setToFirstResultofInput(id);
+		setSelectedParagraph(undefined);
 		setSelectedInput(id);
 		setNeedsSort(true);
 	}
