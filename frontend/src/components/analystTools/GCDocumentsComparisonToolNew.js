@@ -338,7 +338,15 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder]);
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
-		if(positiveFeedback === feedbackList[paragraph.id]) return;
+		let undo = false;
+		if(positiveFeedback === feedbackList[paragraph.id]) {
+			undo = true;
+			const newList = {...feedbackList};
+			delete newList[paragraph.id];
+			setFeedbackList(newList);
+		} else {
+			setFeedbackList({...feedbackList, [paragraph.id]: positiveFeedback});
+		};
 
 		const searchedParagraph = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
 		const matchedParagraphId = paragraph.id;
@@ -347,10 +355,9 @@ const GCDocumentsComparisonTool = (props) => {
 			searchedParagraph,
 			matchedParagraphId,
 			docId: doc.id,
-			positiveFeedback
-		});
-		
-		setFeedbackList({...feedbackList, [paragraph.id]: positiveFeedback});
+			positiveFeedback,
+			undo
+		})
 	}
 	
 	const measuredRef = useCallback(
@@ -913,14 +920,14 @@ const GCDocumentsComparisonTool = (props) => {
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
 																		className={classes.feedback + ' fa fa-thumbs-up'}
-																		style={feedbackList[paragraph.id] ? {cursor: 'default', color: '#E0E0E0', WebkitTextStroke: '1px black'} : {}}
+																		style={feedbackList[paragraph.id] ? {color: '#939395', WebkitTextStroke: '1px black'} : {}}
 																		onClick={() => handleFeedback(doc, paragraph, true)}
 																	/>
 																</GCTooltip>
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
 																		className={classes.feedback + ' fa fa-thumbs-down'}
-																		style={feedbackList[paragraph.id] === false ? {cursor: 'default', color: '#E0E0E0', WebkitTextStroke: '1px black'} : {}}
+																		style={feedbackList[paragraph.id] === false ? {color: '#939395', WebkitTextStroke: '1px black'} : {}}
 																		onClick={() => handleFeedback(doc, paragraph, false)}
 																	/>
 																</GCTooltip>

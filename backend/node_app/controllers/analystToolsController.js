@@ -85,11 +85,19 @@ class AnalystToolsController {
 				searchedParagraph,
 				matchedParagraphId,
 				docId,
-				positiveFeedback 
+				positiveFeedback,
+				undo = false 
 			} = req.body;
 
+			if(undo){
+				await this.compareFeedbackModel.destroy({
+					where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+				})
+				return res.status(200).send();
+			}
+
 			const [record, created] = await this.compareFeedbackModel.findOrCreate({
-				where: { searchedParagraph, matchedParagraphId },
+				where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
 				defaults: {
 					searchedParagraph,
 					matchedParagraphId,
@@ -98,12 +106,13 @@ class AnalystToolsController {
 					userId: hashed_user
 				}
 			})
+			
 			if(!created && record.positiveFeedback !== positiveFeedback) {
 				record.set({positiveFeedback})
 				await record.save();
 			}
 			
-			res.status(200);
+			res.status(200).send();
 		}catch(e){
 			this.logger.error(e, '60OOE63', userId);
 			res.status(500).send(e);
