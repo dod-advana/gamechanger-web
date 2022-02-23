@@ -144,6 +144,25 @@ export const StyledCenterContainer = styled.div`
 		padding-left:10px;
     }
     
+    .top-container {
+    	display: flex;
+    	justify-content: space-between;
+    	margin: 0 0 0 15px;
+    }
+    
+    .results-count-view-buttons-container {
+		display: flex;
+		justify-content: right;
+		margin: 20px 0;
+			
+		 & .view-buttons-container {
+			margin-top: -14px;
+			display: flex;
+		}
+	}
+    
+   
+    
     .left-container {
     	width: ${({ showSideFilters }) => (showSideFilters ? '20%' : '0%')};
 		margin-top: 0px;
@@ -165,18 +184,7 @@ export const StyledCenterContainer = styled.div`
 		width: ${({ showSideFilters }) => (showSideFilters ? '78%' : '100%')};
 		padding: 0px;
 		box-shadow: none;
-		
-		.results-count-view-buttons-container {
-			display: flex;
-			justify-content: right;
-			margin: 20px 0
-    		
-    		.view-buttons-container {
-    			margin-top: -14px;
-    			display: flex;
-    		}
-		}
-		
+
 		.card-container {
 			height: 100%;
 			overflow: hidden;

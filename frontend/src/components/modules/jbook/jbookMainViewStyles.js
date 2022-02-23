@@ -58,6 +58,7 @@ export const styles = {
 		display: 'flex',
 		alignItems: 'center',
 		flex: 9,
+		marginRight: 15
 	},
 	tabStyle: {
 		border: `1px solid ${'#DCDCDC'}`,

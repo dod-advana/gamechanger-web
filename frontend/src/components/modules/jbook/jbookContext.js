@@ -241,8 +241,22 @@ const initState = {
 	resultsText: '',
 	resetSettingsSwitch: false,
 	categorySorting: {
-		Documents: ['Relevance', 'Publishing Date', 'Alphabetical', 'References']
+		jbook: [
+			'Budget Year',
+			'Program Element',
+			'Budget Line Item',
+			'Project #',
+			'Project Title',
+			'Service / Agency',
+			'Primary Reviewer',
+			'Service Reviewer',
+			'POC Reviewer',
+			'Source',
+		],
 	},
+	currentSort: 'Budget Year',
+	currentOrder: 'asc',
+	activeCategoryTab: 'jbook',
 
 	//
 	notifications: [],
@@ -285,11 +299,11 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
-		// case 'RESET_SEARCH_SETTINGS':
-		//     return {
-		//         ...state,
-		//         searchSettings: initState.searchSettings
-		//     };
+		case 'RESET_SEARCH_SETTINGS':
+		    return {
+		        ...state,
+		        jbookSearchSettings: {...state.defaultOptions}
+		    };
 		default:
 			return state;
 	}

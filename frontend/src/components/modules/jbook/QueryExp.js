@@ -7,7 +7,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
 const QueryExp = (props) => {
-	const { searchText } = props;
+	const { searchText, runningSearch } = props;
 	const [listItems, setlistItems] = useState([]);
 
 	useEffect(() => {
@@ -32,13 +32,15 @@ const QueryExp = (props) => {
 
 	return (
 		<>
-			{listItems && listItems.length > 0 &&
+			{!runningSearch && listItems && listItems.length > 0 ?
 				<div className="additionalTerms" style={{ display: 'flex', margin: '15px 0 0' }}>
 					<Typography style={{ fontSize: '22px', fontWeight: 500, color: 'rgb(19, 30, 67)', minWidth: '180px', fontFamily: 'Montserrat' }}>Related Terms</Typography>
 					<div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
 						{listItems}
 					</div>
 				</div>
+				:
+				<div />
 			}
 		</>
 	);

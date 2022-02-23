@@ -19,7 +19,13 @@ import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from "../../common/SimpleTable";
 import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { getClassLabel, getTotalCost } from '../../../utils/jbookUtilities';
+import {
+	getClassLabel,
+	getConvertedName,
+	getConvertedType,
+	getDocTypeStyles,
+	getTotalCost
+} from '../../../utils/jbookUtilities';
 
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
@@ -183,7 +189,7 @@ const StyledListViewFrontCardContent = styled.div`
 		height: 100%;
 		
 		.page-hits {
-			min-width: 150px;
+			min-width: 160px;
 			height: 100%;
 			border: 1px solid rgb(189, 189, 189);
     		border-top: 0px;
@@ -275,7 +281,7 @@ const StyledFrontCardContent = styled.div`
     	height: 100%;
     	
     	.page-hits {
-    		min-width: 150px;
+    		min-width: 160px;
     		height: 100%;
     		border: 1px solid rgb(189, 189, 189);
     		border-top: 0px;
@@ -397,21 +403,23 @@ const jbookCardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			const cardType = item.revBudgetType.toUpperCase();
+			const cardType = item.revBudgetType ? getConvertedType(item.revBudgetType) : '';
 			const agency = item.serviceAgency;
 			const iconSrc = getTypeIcon('PDF');
 			const typeTextColor = getTypeTextColor('PDF');
 
+			let {docOrgColor} = getDocTypeStyles(agency);
+
 			return (
 				<>
 					{!state.listView && !toggledMore &&
-						<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={'#439E86'} docOrgColor={'#20009E'}>
+						<StyledFrontCardSubHeader typeTextColor={typeTextColor} docTypeColor={'#386F94'} docOrgColor={docOrgColor}>
 							<div className={'sub-header-one'}>
 								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
 								{cardType}
 							</div>
 							<div className={'sub-header-two'}>
-								{agency}
+								{getConvertedName(agency)}
 							</div>
 						</StyledFrontCardSubHeader>
 					}
@@ -462,7 +470,7 @@ const jbookCardHandler = {
 			const contextHtml = hoveredSnippet;
 			const isWideCard = true;
 
-			const currentAsOfText = `Published on: MM-DD-YY`;
+			const currentAsOfText = `Budget Year: ${item.budgetYear}`;
 
 			if (state.listView && !intelligentSearch) {
 				return (
@@ -654,7 +662,7 @@ const jbookCardHandler = {
 			} = props;
 
 			const projectData = { ...item };
-			const budgetType = item.revBudgetType.toUpperCase();
+			const budgetType = item.revBudgetType?.toUpperCase() || '';
 			const keywordCheckboxes = null;
 			const projectNum = null;
 
