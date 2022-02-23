@@ -238,7 +238,7 @@ class SearchUtility {
 		// const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchText.replace('\//g', '');
+		let cleanSearch = searchText.replace(/\//g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
