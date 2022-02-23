@@ -277,16 +277,8 @@ class JBookSearchHandler extends SearchHandler {
 	async documentSearch(req, userId, res, statusExport = false) {
 
 		try {
-			const {
-				offset,
-				searchText,
-				jbookSearchSettings,
-				exportSearch
-			} = req.body;
-
 			return this.postgresDocumentSearch(req, userId, res, statusExport);
 			//return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
-
 		} catch (e) {
 			console.log(e);
 			const { message } = e;

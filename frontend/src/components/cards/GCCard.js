@@ -55,7 +55,7 @@ const OrangeSwitch = withStyles({
 
 const StyledCardContainer = styled.div`
 	width: ${({ listView, showSideFilters, graphView }) =>
-		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33% !important' : '25% !important'};
+		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.33% !important' : '25% !important'};
 	min-width: ${({ listView }) => (listView ? '' : '351px')};
 
 	.styled-card-container {

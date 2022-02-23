@@ -1,3 +1,5 @@
+import {orgColorMap, typeColorMap} from "./gamechangerUtils";
+
 export const getClassLabel = (reviewData) => {
 	if (reviewData) {
 		if (reviewData.pocAgreeLabel && reviewData.pocAgreeLabel === 'No' && reviewData.pocClassLabel) {
@@ -81,5 +83,74 @@ const convertPhraseToSequence = (phrase) => {
 	// and then read back
 	return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
 }
+
+export const getDocTypeStyles = (docType) => {
+	if (!docType) {
+		return { docTypeColor: '', docOrg: '', docOrgColor: '' };
+	}
+
+	const docTypeColor = typeColorMap['document'];
+
+	switch (docType) {
+		case 'Air Force (AF)':
+			docType = 'Dept. of the Air Force';
+			break;
+		case 'Army':
+			docType = 'US Army';
+			break;
+		case 'Navy':
+			docType = 'US Navy';
+			break;
+		case 'The Joint Staff (TJS)':
+			docType = 'Joint Chiefs of Staff';
+			break;
+		case 'United States Special Operations Command (SOCOM)':
+			docType = 'US Army';
+			break;
+		case 'US Marine Corp (USMC)':
+			docType = 'US Marine Corps';
+			break;
+		default:
+			//console.log(docType)
+			docType = 'Dept. of Defense';
+			break;
+	}
+
+	const docOrgColor = orgColorMap[docType] ?? '#964B00'; // brown
+
+	return { docTypeColor, docOrgColor };
+};
+
+export const getConvertedName = (orgName) => {
+
+	switch (orgName) {
+		case 'United States Special Operations Command (SOCOM)':
+			orgName = 'USSOCOM';
+			break;
+		default:
+			break;
+	}
+
+	return orgName
+};
+
+export const getConvertedType = (budgetType) => {
+
+	switch (budgetType) {
+		case 'pdoc':
+			budgetType = 'Procurement';
+			break;
+		case 'odoc':
+			budgetType = 'O&M';
+			break;
+		case 'rdoc':
+			budgetType = 'RDT&E';
+			break;
+		default:
+			break;
+	}
+
+	return budgetType
+};
 
 
