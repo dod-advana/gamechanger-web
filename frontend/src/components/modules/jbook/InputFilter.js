@@ -10,7 +10,8 @@ const StyledInput = styled.input`
 const InputFilter = (props) => {
 	const {
 		setJBookSetting,
-		field
+		field,
+		name
 	} = props;
 
 	const context = useContext(JBookContext);

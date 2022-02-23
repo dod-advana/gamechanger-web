@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import {
+	displayBackendError,
 	getQueryVariable,
 	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
 	RECENT_SEARCH_LIMIT,
@@ -91,6 +92,7 @@ const JBookSearchHandler = {
 			});
 
 			if (_.isObject(resp.data)) {
+				displayBackendError(resp, dispatch);
 				return resp.data;
 			} else {
 				return null;
@@ -144,22 +146,30 @@ const JBookSearchHandler = {
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
 			const t1 = new Date().getTime();
 			console.log(results);
-			if (!results) {
+			if (results === null || (!results.docs || results.docs.length <= 0)) {
 				setState(dispatch, {
 					prevSearchText: null,
 					loading: false,
+					searchResultsCount: 0,
 					noResultsMessage: NO_RESULTS_MESSAGE,
 					runningSearch: false,
-					loadingTinyUrl: false
+					loadingTinyUrl: false,
+					rawSearchResults: []
 				});
 			} else {
+				let {docs, totalCount, query} = results;
 				setState(dispatch, {
 					timeFound: ((t1 - t0) / 1000).toFixed(2),
+					activeCategoryTab: 'jbook',
 					prevSearchText: searchText,
 					loading: false,
 					loadingTinyUrl: false,
-					query: results.query,
-					mainPageData: results
+					count: totalCount,
+					query: query,
+					rawSearchResults: docs,
+					hideTabs: false,
+					resetSettingsSwitch: false,
+					runningSearch: false
 				});
 			}
 
@@ -179,7 +189,9 @@ const JBookSearchHandler = {
 				unauthorizedError: true,
 				loading: false,
 				autocompleteItems: [],
+				searchResultsCount: 0,
 				runningSearch: false,
+				loadingTinyUrl: false,
 				hasExpansionTerms: false
 			});
 		}
@@ -239,6 +251,42 @@ const JBookSearchHandler = {
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+		const sortDesc = state.currentOrder === 'desc';
+
+		switch (state.currentSort) {
+			case 'Program Element':
+				searchSettings.sort = [{id: 'programElement', desc: sortDesc}];
+				break;
+			case 'Budget Line Item':
+				searchSettings.sort = [{id: 'programElement', desc: sortDesc}];
+				break;
+			case 'Project #':
+				searchSettings.sort = [{id: 'projectNum', desc: sortDesc}];
+				break;
+			case 'Project Title':
+				searchSettings.sort = [{id: 'projectTitle', desc: sortDesc}];
+				break;
+			case 'Service / Agency':
+				searchSettings.sort = [{id: 'serviceAgency', desc: sortDesc}];
+				break;
+			case 'Primary Reviewer':
+				searchSettings.sort = [{id: 'primaryReviewer', desc: sortDesc}];
+				break;
+			case 'Service Reviewer':
+				searchSettings.sort = [{id: 'serviceReviewer', desc: sortDesc}];
+				break;
+			case 'POC Reviewer':
+				searchSettings.sort = [{id: 'pocReviewer', desc: sortDesc}];
+				break;
+			case 'Source':
+				searchSettings.sort = [{id: 'sourceTag', desc: sortDesc}];
+				break;
+			case 'Budget Year':
+			default:
+				searchSettings.sort = [{id: 'budgetYear', desc: sortDesc}];
+				break;
+
+		}
 
 		for (const optionType in state.defaultOptions) {
 			// if (optionType === 'reviewStatus') continue;

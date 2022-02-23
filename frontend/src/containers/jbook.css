@@ -1,23 +1,23 @@
-.gcPagination > .pagination > .active > a {
-    background-color: #E9691D !important;
-    border-color: #E9691D !important;
+.jbookPagination > .pagination > .active > a {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
     color: white !important;
     padding: 11px 19px;
 }
 
-.gcPagination > .pagination > li > a {
+.jbookPagination > .pagination > li > a {
     color: black !important;
     padding: 11px 19px;
 }
 
-.gcPagination > .pagination > .active > a:hover {
-    background-color: #E9691D !important;
-    border-color: #E9691D !important;
+.jbookPagination > .pagination > .active > a:hover {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
 }
 
-.gcPagination > .pagination > .active > a:focus {
-    background-color: #E9691D !important;
-    border-color: #E9691D !important;
+.jbookPagination > .pagination > .active > a:focus {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
 }
 
 .docExplorerPag > .pagination {

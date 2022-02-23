@@ -125,7 +125,7 @@ const MainView = (props) => {
 			if (state.databasesPagination && searchHandler) {
 				searchHandler.handleDatabasesPagination(state, dispatch);
 			}
-		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo') {
+		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo' || state.cloneData.clone_name.toLowerCase() === 'jbook') {
 			if (state.docsPagination && searchHandler) {
 				setState(dispatch, {
 					docsPagination: false,
@@ -185,8 +185,6 @@ const MainView = (props) => {
 	const getAboutUs = () => {
 		return mainViewHandler.getAboutUs({state});
 	};
-
-
 
 	const getNonMainPageOuterContainer = (getInnerChildren) => {
 		return (

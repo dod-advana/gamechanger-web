@@ -13,6 +13,8 @@ import { setState } from '../../../utils/sharedFunctions';
 
 import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import {TextField} from "@mui/material";
+import InputFilter from "./InputFilter";
 
 const handleSelectSpecific = (state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -35,17 +37,9 @@ const handleSelectAll = (state, dispatch, type) => {
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 		newSearchSettings[specific] = false;
 		newSearchSettings[all] = true;
-		let runSearch = false;
+		let runSearch = true;
 		let runGraphSearch = false;
-		Object.keys(state.jbookSearchSettings[filter]).forEach((option) => {
-			if (newSearchSettings[filter][option]) {
-				newSearchSettings.isFilterUpdate = true;
-				newSearchSettings[update] = true;
-				runSearch = true;
-				runGraphSearch = true;
-			}
-			newSearchSettings[filter][option] = false;
-		});
+		newSearchSettings[type] = state.defaultOptions[type];
 		setState(dispatch, {
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
@@ -98,7 +92,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 	const options = state.defaultOptions[type];
 
 	return (
-	<FormControl
+		<FormControl
 			style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
 		>
 			{
@@ -193,21 +187,15 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 	);
 };
 
-const renderFilterInput = (state, dispatch, type) => {
+const handleFilterInputChange = (field, value, state, dispatch) => {
+	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 
-	return (
-		// <TextField
-		// 	placeholder=""
-		// 	variant="outlined"
-		// 	value={state.jbookSearchSettings[type]}
-		// 	style={{ backgroundColor: 'white', width: '100%' }}
-		// 	// onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
-		// 	onChange={(event, value) => setDomainTaskOther(value)}
-		// 	disabled={finished} //|| roleDisabled}
-		// />
-		''
-	);
-}
+	newSearchSettings[field] =value;
+
+	setState(dispatch, {
+		jbookSearchSettings: newSearchSettings
+	});
+};
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
@@ -224,7 +212,7 @@ const PolicySearchMatrixHandler = {
 
 
 		return (
-			<>
+			<div style={{marginLeft: 15}}>
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.budgetTypeSpecificSelected}
@@ -257,7 +245,7 @@ const PolicySearchMatrixHandler = {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterInput(state, dispatch, 'programElement')}
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'} />
 					</GCAccordion>
 				</div>
 
@@ -269,7 +257,7 @@ const PolicySearchMatrixHandler = {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterInput(state, dispatch, 'projectNum')}
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'} />
 					</GCAccordion>
 				</div>
 
@@ -281,7 +269,7 @@ const PolicySearchMatrixHandler = {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterInput(state, dispatch, 'projectTitle')}
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'} />
 					</GCAccordion>
 				</div>
 
@@ -329,7 +317,7 @@ const PolicySearchMatrixHandler = {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterInput(state, dispatch, 'pocReviewer')}
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'pocReviewer'} name={'POC Reviewer'} />
 					</GCAccordion>
 				</div>
 
@@ -391,6 +379,7 @@ const PolicySearchMatrixHandler = {
 						height: 50,
 						alignItems: 'center',
 						borderRadius: 5,
+						width: '100%'
 					}}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
@@ -410,7 +399,7 @@ const PolicySearchMatrixHandler = {
 						Clear Filters
 					</span>
 				</button>
-			</>
+			</div>
 		);
 	},
 
