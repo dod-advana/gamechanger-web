@@ -81,7 +81,7 @@ const endpoints = {
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getDataList: '/api/gameChanger/admin/getDataList',
-	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
+	getLoadedModels: '/api/gameChanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
@@ -712,8 +712,8 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	getCurrentTransformer = async () => {
-		const url = endpoints.getCurrentTransformer;
+	getLoadedModels = async () => {
+		const url = endpoints.getLoadedModels;
 		return axiosGET(this.axios, url);
 	};
 
