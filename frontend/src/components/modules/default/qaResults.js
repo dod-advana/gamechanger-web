@@ -569,8 +569,9 @@ const GetQAResults = (props) => {
 					}}
 				>
 					{_.truncate(intelligentSearchResult.pageHits[0].snippet, {
-						length: 300,
+						length: 500,
 					})}
+
 				</p>
 				<Link
 					href={'#'}
