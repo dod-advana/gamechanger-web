@@ -16,7 +16,6 @@ import GCPrimaryButton from '../../../common/GCButton';
 import GamechangerAPI from '../../../api/gameChanger-service-api';
 import { autoDownloadFile, b64toBlob } from '../../../export/ExportResultsDialog';
 
-const _ = require('lodash');
 const gamechangerAPI = new GamechangerAPI();
 
 const firstColWidth = {
@@ -289,7 +288,7 @@ const aggregateProjectDescriptions = (projectData) => {
 	};
 
 
-	if (projectData.review && projectData.review.revBudgetType === 'rdoc') {
+	if (projectData.review && projectData.review.budgetType === 'rdoc') {
 		titleMapping['missionDescBudgetJustification'] = { title: 'Program Mission Description' }
 		titleMapping['projectMissionDescription'] = { title: 'Project Mission Description' };
 		titleMapping['projectNotes'] = { title: 'Project Notes' };

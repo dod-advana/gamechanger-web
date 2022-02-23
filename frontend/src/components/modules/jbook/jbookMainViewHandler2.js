@@ -1,26 +1,11 @@
 import React from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
-
-
-// ===== gc look and feel ======
-import GCPrimaryButton from '../../common/GCButton';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
 import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import SearchSection from '../globalSearch/SearchSection';
-import DocumentIcon from '../../../images/icon/Document.png';
-
-// ==============================
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import {
-	CircularProgress,
-	FormControl,
-	Grid,
-	InputLabel,
-	MenuItem,
-	Select,
-	Snackbar,
 	Typography
 } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
@@ -33,27 +18,17 @@ import {
 import { trackEvent } from '../../telemetry/Matomo';
 import { setState } from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
-import ReactTable from 'react-table';
-import DropdownFilter from './DropdownFilter.js';
-import InputFilter from './InputFilter.js';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
-import JAICLogo from '../../../images/logos/JAIC_logo.png';
-import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
 import {
-	StyledMainBottomContainer,
-	StyledMainTopBar,
-	StyledSummaryFAQContainer,
 	styles
 } from './jbookMainViewStyles';
-import { autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting } from './jbookMainViewHelper';
+import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import QueryExp from './QueryExp.js'
-import { Link } from '@mui/material';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';
-import { gcOrange } from "../../common/gc-colors";
 
 const _ = require('lodash');
 
