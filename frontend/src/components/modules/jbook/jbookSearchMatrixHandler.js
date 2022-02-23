@@ -1,6 +1,5 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-import GCButton from '../../common/GCButton';
 import _ from 'lodash';
 import {
 	FormControl,
@@ -13,8 +12,7 @@ import { setState } from '../../../utils/sharedFunctions';
 
 import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
-import {TextField} from "@mui/material";
-import InputFilter from "./InputFilter";
+import InputFilter from './InputFilter';
 
 const handleSelectSpecific = (state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -30,8 +28,6 @@ const handleSelectAll = (state, dispatch, type) => {
 
 	const specific = `${type}SpecificSelected`;
 	const all = `${type}AllSelected`;
-	const filter = `${type}Filter`;
-	const update = `${type}Update`;
 
 	if (state.jbookSearchSettings[specific]) {
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -52,9 +48,6 @@ const handleSelectAll = (state, dispatch, type) => {
 const handleFilterChange = (event, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	let optionName = event.target.name;
-
-	console.log(optionName);
-	console.log(event.target.value);
 
 	const index = newSearchSettings[type].indexOf(optionName);
 
@@ -404,9 +397,6 @@ const PolicySearchMatrixHandler = {
 	},
 
 	getAdvancedOptions(props) {
-		const {
-
-		} = props;
 
 		return (
 			<>

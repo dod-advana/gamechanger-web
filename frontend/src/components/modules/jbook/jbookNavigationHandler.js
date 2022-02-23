@@ -15,7 +15,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import {setState} from '../../../utils/sharedFunctions';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
-import UserFeedbackIcon from "../../../images/icon/userfeedback.png";
+import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 
 const getToolTheme = (cloneData) => {
 	return {

@@ -277,8 +277,8 @@ class JBookSearchHandler extends SearchHandler {
 	async documentSearch(req, userId, res, statusExport = false) {
 
 		try {
-			return this.postgresDocumentSearch(req, userId, res, statusExport);
-			//return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
+			//return this.postgresDocumentSearch(req, userId, res, statusExport);
+			return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
 		} catch (e) {
 			console.log(e);
 			const { message } = e;
@@ -332,13 +332,13 @@ class JBookSearchHandler extends SearchHandler {
 
 				switch (result.budgetType) {
 					case 'rdte':
-						result.type = 'RDT&E';
+						result.budgetType = 'rdoc';
 						break;
 					case 'om':
-						result.type = 'O&M';
+						result.budgetType = 'odoc';
 						break;
 					case 'procurement':
-						result.type = 'Procurement';
+						result.budgetType = 'pdoc';
 						break;
 					default:
 						break;
@@ -446,9 +446,10 @@ class JBookSearchHandler extends SearchHandler {
 				const typeMap = {
 					'Procurement': 'pdoc',
 					'RDT&E': 'rdoc',
-					'O&M': 'om'
+					'O&M': 'odoc'
 				};
-				doc.hasKeywords = keywordIds[typeMap[doc.type]].indexOf(doc.id) !== -1;
+				doc.budgetType = typeMap[doc.type];
+				doc.hasKeywords = keywordIds[typeMap[doc.type]]?.indexOf(doc.id) !== -1;
 				return doc;
 			});
 

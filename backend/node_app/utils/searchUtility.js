@@ -2801,7 +2801,7 @@ class SearchUtility {
 		return query;
 	}
 
-	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings}, userId) {
+	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and',}, userId) {
 
 		console.log(jbookSearchSettings)
 
@@ -2809,6 +2809,7 @@ class SearchUtility {
 		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
 
 		let query = {
+			track_total_hits: true,
 			from: offset,
 			size: limit,
 			aggregations: {
@@ -2821,10 +2822,25 @@ class SearchUtility {
 			},
 			query: {
 				bool: {
-					must: []
+					must: [],
+					should: []
 				}
 			}
 		};
+
+		const wildcardList = ['type_s', 'key_s', 'projectTitle_t', 'programElementTitle_t', 'serviceAgency_s', 'appropriationTitle_t', 'budgetActivityTitle_t', 'programElement_s', 'accountTitle_s', 'budgetLineItemTitle_s'];
+		const wildcardBoostList = [2, 2, 4, 4, 4, 4, 4, 6, 6, 6];
+
+		wildcardList.forEach((wildCard, i) => {
+			query.query.bool.should.push({
+				wildcard: {
+					[wildCard]: {
+						value: `*${plainQuery}*`,
+						boost: wildcardBoostList[i]
+					}
+				}
+			});
+		})
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
 			query.query.bool.must.push({
@@ -2833,6 +2849,8 @@ class SearchUtility {
 				}
 			});
 		}
+
+		// FILTERS
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
 			const budgetTypesTemp = [];
@@ -2858,6 +2876,27 @@ class SearchUtility {
 					type_s: budgetTypesTemp
 				}
 			});
+		}
+
+		// SORT
+		switch (jbookSearchSettings.sort[0].id) {
+			case 'budgetYear':
+				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'programElement':
+				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'projectNum':
+				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'projectTitle':
+				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'serviceAgency':
+				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			default:
+				break;
 		}
 
 		return query;

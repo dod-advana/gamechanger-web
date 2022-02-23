@@ -221,7 +221,7 @@ class ReviewController {
 
 	async getProfilePageLinkForReview(review) {
 		const budgetYear = review.budgetYear;
-		let type = review.revBudgetType;
+		let type = review.budgetType;
 		const programElement = review.programElement;
 		const projectNum = review.projectNum;
 		const budgetLineItem = review.budgetLineItem;

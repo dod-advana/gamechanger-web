@@ -4,21 +4,10 @@ import {
 	CARD_FONT_SIZE,
 	getTrackingNameForFactory, getTypeIcon, getTypeTextColor
 } from '../../../utils/gamechangerUtils';
-// import {
-// 	List,
-// 	ListItem,
-// 	ListItemIcon,
-// 	ListItemText,
-// 	Divider
-// } from "@material-ui/core";
-
-// import GCAccordion from "../../common/GCAccordion";
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-import SimpleTable from "../../common/SimpleTable";
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import SimpleTable from '../../common/SimpleTable';
 import {
 	getClassLabel,
 	getConvertedName,
@@ -26,16 +15,10 @@ import {
 	getDocTypeStyles,
 	getTotalCost
 } from '../../../utils/jbookUtilities';
-
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import _ from 'lodash';
-// import {setState} from "../../../utils/sharedFunctions";
-// import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-// import {gcOrange} from "../../common/gc-colors";
-// import jbookAPI from "../../api/jbook-service-api";
 import sanitizeHtml from 'sanitize-html';
-// const jbookAPI = new JBookAPI();
 
 const colWidth = {
 	maxWidth: '900px',
@@ -360,7 +343,7 @@ const jbookCardHandler = {
 			const displayTitle = item.budgetYear + ' | BLI: ' + item.budgetLineItem;
 			const isRevoked = item.is_revoked_b;
 
-			const cardType = item.revBudgetType ? item.revBudgetType.toUpperCase() : '';
+			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
 			const agency = item.serviceAgency;
 
 			const docListView = state.listView && !graphView;
@@ -403,7 +386,7 @@ const jbookCardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			const cardType = item.revBudgetType ? getConvertedType(item.revBudgetType) : '';
+			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
 			const agency = item.serviceAgency;
 			const iconSrc = getTypeIcon('PDF');
 			const typeTextColor = getTypeTextColor('PDF');
@@ -656,14 +639,11 @@ const jbookCardHandler = {
 
 			const {
 				item,
-				state,
-				dispatch,
 				detailPage = false
 			} = props;
 
 			const projectData = { ...item };
-			const budgetType = item.revBudgetType?.toUpperCase() || '';
-			const keywordCheckboxes = null;
+			const budgetType = item.budgetType?.toUpperCase() || '';
 			const projectNum = null;
 
 			const formatNum = (num) => {
@@ -777,7 +757,7 @@ const jbookCardHandler = {
 						disableWrap={true}
 						title={'Metadata'}
 						hideHeader={false}
-						margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage ? '-10px 0 0 0' : ''}
+						margin={item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage ? '-10px 0 0 0' : ''}
 					/>
 				</div>
 			);
@@ -801,8 +781,7 @@ const jbookCardHandler = {
 				programElement,
 				projectNum,
 				budgetLineItem,
-				revBudgetType,
-				keywords, // do we need keywords for gc clone jbook? 
+				budgetType,
 				budgetYear,
 				id,
 				appropriationNumber
@@ -820,7 +799,7 @@ const jbookCardHandler = {
 						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[revBudgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[budgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
 								window.open(url);
 							}}
 						>
