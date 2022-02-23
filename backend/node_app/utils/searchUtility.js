@@ -233,19 +233,22 @@ class SearchUtility {
 
 	getQueryAndSearchTerms (searchText) {
 
-		// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
-		const searchTextLower = searchText.toLowerCase();
+		// change all text to lower case, need upper case AND/OR for search so easier if everything is lower
+		// this might not matter anymore
+		// const searchTextLower = searchText.toLowerCase();
 
+		//replace forward slashes will break ES query
+		let cleanSearch = searchText.replace('\//g', '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-		const rawSequences = this.findQuoted(searchTextLower);
+		const rawSequences = this.findQuoted(cleanSearch);
 
-		let searchTextWithPlaceholders = searchTextLower;
+		let searchTextWithPlaceholders = cleanSearch;
 		// replace phrases with __#__ placeholder
 		rawSequences.forEach((phrase, index) => {
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(phrase, `__${index}__`);
 		});
 
-		// replace and/or with ' AND ' ' OR ' as required for solr search, one space is required
+		// replace and/or with ' AND ' ' OR ' as required for search, one space is required
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)and(\s+)/g, ` AND `);
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)or(\s+)/g, ` OR `);
 
@@ -253,17 +256,17 @@ class SearchUtility {
 		// combine all terms to return for snippet highlighting
 		const termsArray = this.findLowerCaseWordsOrAcronyms(searchTextWithPlaceholders);
 
-		// fill back in double quoted phrases for solr search
+		// fill back in double quoted phrases for  search
 		rawSequences.forEach((phrase, index) => {
 			const replacementSequence = this.convertPhraseToSequence(phrase);
 			termsArray.push(replacementSequence);
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(`__${index}__`, `${replacementSequence}`);
 		});
 
-		const solrSearchText = searchTextWithPlaceholders;
+		const SearchText = searchTextWithPlaceholders;
 
-		// return solr query and list of search terms after parsing
-		return [solrSearchText, termsArray];
+		// return  query and list of search terms after parsing
+		return [SearchText, termsArray];
 	}
 
 	findQuoted (searchText) {
@@ -673,6 +676,7 @@ class SearchUtility {
 		}
 		return verbatim;
 	}
+
 	isVerbatimSuggest(searchText){
 		let verbatim = false;
 		if( (searchText.startsWith('"') || (searchText.startsWith(`'`)))){
@@ -2037,13 +2041,15 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQueryForGraphCache(body, userId);
 				} else {
 					esQuery = this.getElasticsearchQuery(body, userId);
+					console.log(JSON.stringify(esQuery,null,4))
 				}
 			}
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
 
-			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
+			console.log(results)
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);
