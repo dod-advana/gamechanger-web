@@ -617,11 +617,9 @@ function GCCard(props) {
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
-									'CardInteraction',
-									'IntelligentSearchThumbsUp',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									'thumbsUp',
+									cardHandler.getDisplayTitle(item)
+									`search : ${searchText}`
 								);
 							}
 						}}
@@ -639,11 +637,9 @@ function GCCard(props) {
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
-									'CardInteraction',
-									'IntelligentSearchThumbsDown',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									'thumbsDown',
+									cardHandler.getDisplayTitle(item)
+									`search : ${searchText}`
 								);
 							}
 						}}
