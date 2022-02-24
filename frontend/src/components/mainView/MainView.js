@@ -142,7 +142,7 @@ const MainView = (props) => {
 	useBottomScrollListener(
 		() => {
 			if (
-				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
+				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo' || state.cloneData.clone_name.toLowerCase() === 'jbook') &&
 				!state.docsLoading &&
 				!state.docsPagination
 			) {

@@ -340,7 +340,21 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			const displayTitle = item.budgetYear + ' | BLI: ' + item.budgetLineItem;
+			let displayTitle = ''
+			switch (item.budgetType) {
+				case 'pdoc':
+					displayTitle = `BA Num: ${item.budgetActivityNumber} BA Title: ${item.budgetActivityTitle}`;
+					break;
+				case 'rdoc':
+					displayTitle = `PE Num: ${item.programElement} Proj Num: ${item.projectNum}`;
+					break;
+				case 'odoc':
+					displayTitle = `BLI: ${item.budgetLineItem} App Num: ${item.appropriationNumber} BA Num: ${item.budgetActivityNumber}`;
+					break;
+				default:
+					break;
+			}
+
 			const isRevoked = item.is_revoked_b;
 
 			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
@@ -425,26 +439,27 @@ const jbookCardHandler = {
 				intelligentFeedbackComponent
 			} = props;
 
-			item.pageHits = [
-				{
-					title: 'Project Description',
-					snippet: _.truncate(item.projectMissionDescription, { 'length': 150 })
-				},
-				{
-					title: 'Contracts',
-					snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+			if (!state.searchText || state.searchText === null || state.searchText === '' || !item.pageHits || item.pageHits.length <= 0) {
+				item.pageHits = [
+					{
+						title: 'Project Description',
+						snippet: _.truncate(item.projectMissionDescription, { 'length': 150 })
+					},
+					{
+						title: 'Contracts',
+						snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 
-				},
-				{
-					title: 'Accomplishments',
-					snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-				},
-				{
-					title: 'Section',
-					snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-				}
-			];
-
+					},
+					{
+						title: 'Accomplishments',
+						snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					},
+					{
+						title: 'Section',
+						snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					}
+				];
+			}
 
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
@@ -816,15 +831,15 @@ const jbookCardHandler = {
 						>
 							Close
 						</CardButton>}
-						<GCTooltip title={'Click here to view the contract award details page'}>
-							<CardButton
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								disabled={true}
-							>
-								Preview
-							</CardButton>
-						</GCTooltip>
+						{/*<GCTooltip title={'Click here to view the contract award details page'}>*/}
+						{/*	<CardButton*/}
+						{/*		style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}*/}
+						{/*		href={'#'}*/}
+						{/*		disabled={true}*/}
+						{/*	>*/}
+						{/*		Preview*/}
+						{/*	</CardButton>*/}
+						{/*</GCTooltip>*/}
 					</>
 					<div style={{ ...styles.viewMoreButton }} onClick={() => {
 						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');

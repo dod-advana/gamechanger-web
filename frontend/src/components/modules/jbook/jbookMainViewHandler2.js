@@ -25,10 +25,12 @@ import {
 	styles
 } from './jbookMainViewStyles';
 import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
-import QueryExp from './QueryExp.js'
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';
+import JBookSideBar from './jbookSideBar';
+import GCToggle from '../../common/GCToggleSwitch';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 
 const _ = require('lodash');
 
@@ -176,13 +178,35 @@ const jbookMainViewHandler = {
 
 						<StyledCenterContainer showSideFilters={showSideFilters}>
 							<div className={'top-container'}>
-								<QueryExp searchText={state.searchText ? state.searchText : ''} runningSearch={runningSearch} />
+								<div style={{padding: 10, zIndex: 99}}>
+									{Permissions.permissionValidator(`Gamechanger Super Admin`, true) &&
+										<GCToggle
+											onClick={() => {
+												setState(dispatch, {useElasticSearch: !state.useElasticSearch, runSearch: true});
+											}}
+											rightActive={state.useElasticSearch}
+											leftLabel={'Use PG'}
+											rightLabel={'Use ES'}
+											customColor={GC_COLORS.primary}
+										/>
+									}
+								</div>
+
 								{!hideTabs && <ViewHeader {...props} extraStyle={{marginRight: -15, marginTop: 5}}/>}
 							</div>
 							{showSideFilters && (
 								<div className={'left-container'} style={{marginTop: -65}}>
 									<div className={'side-bar-container'}>
 										<GameChangerSearchMatrix context={context} />
+										{ (state.expansionDict && Object.keys(state.expansionDict).length > 0) && (
+											<>
+												<div className={'sidebar-section-title'} style={{marginLeft: 5}}>RELATED</div>
+												<JBookSideBar
+													context={context}
+													cloneData={state.cloneData}
+												/>
+											</>
+										)}
 									</div>
 								</div>
 							)}
