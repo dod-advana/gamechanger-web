@@ -165,20 +165,15 @@ const DefaultGraphView = (props) => {
 				height={height}
 				graphData={graph}
 				runningSearchProp={runningSearch}
-				notificationCountProp={state.notifications.length}
 				setDocumentsFound={setDocumentsFound}
 				setTimeFound={setTimeFound}
 				cloneData={state.cloneData}
-				expansionTerms={state.hasExpansionTerms}
 				setNumOfEdges={setNumOfEdges}
 				dispatch={dispatch}
-				showSideFilters={state.showSideFilters}
 				searchText={state.searchText}
 				selectedDocuments={state.selectedDocumentsForGraph}
 				loadAll={() => {
-					const newSearchSettings = _.cloneDeep(state.searchSettings);
-					newSearchSettings.loadAll = true;
-					setState(dispatch, { searchSettings: newSearchSettings, runGraphSearch: true });
+					setState(dispatch, { searchSettings: { ...state.searchSettings, loadAll: true }, runGraphSearch: true });
 					setGraphResultsFound(false);
 				}}
 				nodeLimit={nodeLimit}

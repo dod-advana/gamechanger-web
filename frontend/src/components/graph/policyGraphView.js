@@ -365,14 +365,11 @@ export default function PolicyGraphView(props) {
 		height,
 		graphData,
 		runningSearchProp,
-		notificationCountProp = 0,
 		setDocumentsFound = (docs) => {},
 		setTimeFound = (time) => {},
-		expansionTerms = false,
 		cloneData,
 		setNumOfEdges = (num) => {},
 		dispatch = () => {},
-		showSideFilters = false,
 		searchText = '',
 		showBasic = false,
 		hierarchyView = false,
@@ -385,7 +382,6 @@ export default function PolicyGraphView(props) {
 
 	const graph2DRef = useRef();
 
-	const [notificationCount, setNotificationCount] = React.useState(0);
 	const [show2DView, setShow2DView] = React.useState(true);
 	const [contextOpen, setContextOpen] = React.useState(false);
 	const [shouldRender, setShouldRender] = React.useState(true);
@@ -401,7 +397,6 @@ export default function PolicyGraphView(props) {
 	});
 	const [docOrgNumbers, setDocOrgNumbers] = React.useState({});
 	const [orgTypesSelected, setOrgTypesSelected] = React.useState([]);
-	const [mouseXY, setMouseXY] = React.useState({ x: 0, y: 0 });
 	const [selectedID, setSelectedID] = React.useState(null);
 	const [shouldCenter, setShouldCenter] = React.useState(true);
 	const [showGraphCard, setShowGraphCard] = React.useState(false);
@@ -448,10 +443,6 @@ export default function PolicyGraphView(props) {
 			//setRunSimulation(true);
 		}
 	}, [runningSearchProp, runningSearch]);
-
-	useEffect(() => {
-		setNotificationCount(notificationCountProp);
-	}, [notificationCountProp]);
 
 	useEffect(() => {
 		if (!graph || !graph.nodes) return;
@@ -636,11 +627,7 @@ export default function PolicyGraphView(props) {
 		graph2DRef.current.zoom(ZOOM_LIMIT, 500);
 		setZoom(ZOOM_LIMIT);
 
-		sleep(500).then(() => {
-			const { x, y } = graph2DRef.current.graph2ScreenCoords(node.x, node.y);
-			setMouseXY({ x: x, y: y });
-			setContextOpen(true);
-		});
+		sleep(500).then(() => setContextOpen(true));
 
 		lockNodeInPlace(node, true);
 	};
@@ -648,16 +635,8 @@ export default function PolicyGraphView(props) {
 	const showNodeContextMenu = () => {
 		const myStyle = {
 			position: 'absolute',
-			top: `${
-				mouseXY.y +
-				154 +
-				notificationCount * 50 +
-				(expansionTerms ? 41 : 0) +
-				(detailsView ? -175 : 0)
-			}px`,
-			left: `${
-				mouseXY.x - 20 + (showSideFilters ? 372 : detailsView ? -100 : 0)
-			}px`,
+			top: 'calc(50% - 130px)',
+			left: 'calc(50% - 130px)',
 			zIndex: 99,
 		};
 
