@@ -383,14 +383,18 @@ class UserController {
 						doc.favorited = countData[0].favorited_count;
 					}
 
-					const index = this.constants.GAME_CHANGER_OPTS.index;
+					const index = [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
 
 					const filenames = favorite_documents.map(doc => {
 						return doc.filename;
 					});
 
 					const esQuery = {
-						_source: false,
+						_source: {
+							'includes': [
+								'download_url_s',
+							]
+						},
 						stored_fields: [ 'filename', 'title', 'id', 'summary_30', 'doc_type', 'doc_num'],
 						size: favorite_documents.length,
 						query: {
@@ -410,7 +414,8 @@ class UserController {
 							title: hit.fields.title[0],
 							doc_type: hit.fields.doc_type[0],
 							doc_num: hit.fields.doc_num[0],
-							id: hit.fields.id[0]
+							id: hit.fields.id[0],
+							download_url_s: hit._source.download_url_s
 						});
 					});
 
@@ -424,6 +429,7 @@ class UserController {
 							doc.doc_num = docData.doc_num;
 							doc.id = docData.id;
 							doc.summary = docData.summary;
+							doc.download_url_s = docData.download_url_s
 							returnDocs.push(doc);
 						}
 					});
