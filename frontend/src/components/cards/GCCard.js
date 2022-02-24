@@ -705,7 +705,20 @@ function GCCard(props) {
 									No
 								</GCButton>
 								<GCButton
-									onClick={() => handleSaveFavorite(false)}
+									onClick={() => {
+										handleSaveFavorite(false)
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_cancel_favorite_document',
+											cardHandler.getDisplayTitle(item),
+											searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'CancelFavorite',
+											cardHandler.getDisplayTitle(item),
+											`search : ${searchText}`
+										)
+									}}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -751,7 +764,20 @@ function GCCard(props) {
 									Cancel
 								</GCButton>
 								<GCButton
-									onClick={() => handleSaveFavorite(true)}
+									onClick={() =>{
+										handleSaveFavorite(true)
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_favorite_document',
+											cardHandler.getDisplayTitle(item),
+											searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'Favorite',
+											cardHandler.getDisplayTitle(item),
+											`search : ${searchText}`
+										)
+									}}
 									style={{
 										height: 40,
 										minWidth: 40,
