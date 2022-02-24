@@ -256,7 +256,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>API Controls:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold'}}>API Controls:</div>
 					</div>
 					<div
 						style={{
@@ -321,7 +321,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>S3 Models:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>S3 Models:</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -340,7 +340,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>S3 Data:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>S3 Data:</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">

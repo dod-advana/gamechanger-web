@@ -288,7 +288,7 @@ describe('UserController', function () {
 			let returnExportHistory = [];
 			const new_opts = {
 				...opts,
-				constants: {env: {GAME_CHANGER_OPTS: {index: 'Test'}}},
+				constants: {GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test', legislation_index: 'Test', assist_index: 'Test'}},
 				externalAPI : {
 					getAPIKey(user) {
 						return api_key;
@@ -301,6 +301,7 @@ describe('UserController', function () {
 								hits: {
 									hits: [
 										{
+											_source: {download_url_s: 'Test'},
 											fields: {
 												filename: ['Test'],
 												summary_30: ['Test'],
@@ -474,7 +475,6 @@ describe('UserController', function () {
 						return Promise.resolve(returnExportHistory);
 					}
 				},
-				constants: { GAME_CHANGER_OPTS: {index: 'gamechanger'}}
 			};
 
 			const target = new UserController(new_opts);
