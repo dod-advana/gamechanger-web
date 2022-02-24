@@ -146,7 +146,6 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		if (!useMatomo) return;
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
