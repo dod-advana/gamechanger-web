@@ -1,6 +1,7 @@
 import React, { useReducer } from 'react';
 
 const initState = {
+	useElasticSearch: false,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
 	feedbackText: '',

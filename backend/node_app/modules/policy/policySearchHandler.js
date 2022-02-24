@@ -296,7 +296,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			let enrichedResults = searchResults;
 			//set empty values
-			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}},
+			enrichedResults.qaResults = {question: '', answers: [], qaContext: [], params: {}};
 			enrichedResults.intelligentSearch = {};
 			enrichedResults.entities = [];
 			enrichedResults.totalEntities = 0;

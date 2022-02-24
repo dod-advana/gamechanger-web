@@ -230,41 +230,47 @@ const PolicySearchMatrixHandler = {
 					</GCAccordion>
 				</div>
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
-						header={'PROGRAM ELEMENT / BLI'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'} />
-					</GCAccordion>
-				</div>
+				{!state.useElasticSearch &&
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion
+							expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
+							header={'PROGRAM ELEMENT / BLI'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'}/>
+						</GCAccordion>
+					</div>
+				}
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
-						header={'PROJECT #'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'} />
-					</GCAccordion>
-				</div>
+				{!state.useElasticSearch &&
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion
+							expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
+							header={'PROJECT #'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'}/>
+						</GCAccordion>
+					</div>
+				}
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''}
-						header={'PROJECT TITLE'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'} />
-					</GCAccordion>
-				</div>
+				{!state.useElasticSearch &&
+					<div style={{width: '100%', marginBottom: 10}}>
+						<GCAccordion
+							expanded={state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''}
+							header={'PROJECT TITLE'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'}/>
+						</GCAccordion>
+					</div>
+				}
 
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
