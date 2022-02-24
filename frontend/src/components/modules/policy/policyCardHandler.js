@@ -120,6 +120,7 @@ const StyledFrontCardHeader = styled.div`
 			alignItems:  ${({docListView}) => docListView ? 'top': ''};
 			height:  ${({docListView}) => docListView ? 'fit-content': ''};
 			max-width: ${({listView}) => listView ? '60%': ''};
+			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
 			
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -645,7 +646,8 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 										item.filename,
 										state.cloneData.clone_name,
 										state.searchText,
-										0
+										0,
+										item.download_url_s
 									)
 								: () => {}
 						}
@@ -945,7 +947,7 @@ const PolicyCardHandler = {
 												onMouseEnter={() => setHoveredHit(key) }
 												onClick={e => {
 													e.preventDefault();
-													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
+													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber, item.download_url_s);
 												}}
 												>
 													<span>
@@ -1032,7 +1034,8 @@ const PolicyCardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
-														page.pageNumber
+														page.pageNumber,
+														item.download_url_s
 													);
 												}}
 											>
@@ -1145,7 +1148,8 @@ const PolicyCardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
-														page.pageNumber
+														page.pageNumber,
+														item.download_url_s
 													);
 												}}
 											>

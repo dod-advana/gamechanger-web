@@ -81,7 +81,7 @@ const endpoints = {
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getDataList: '/api/gameChanger/admin/getDataList',
-	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
+	getLoadedModels: '/api/gameChanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
@@ -92,6 +92,7 @@ const endpoints = {
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
+	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -330,7 +331,8 @@ export default class GameChangerAPI {
 		highlightText,
 		pageNumber,
 		isClone = false,
-		cloneData = { clone_name: 'gamechanger' }
+		cloneData = { clone_name: 'gamechanger' },
+		isDLA = false
 	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
@@ -340,7 +342,7 @@ export default class GameChangerAPI {
 					cloneData.clone_name !== 'gamechanger'
 						? `/projects/${cloneData.clone_name}`
 						: ''
-				}/pdf/${fileName}`
+				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
 			if (cloneData.clone_name === 'eda') {
@@ -710,8 +712,8 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	getCurrentTransformer = async () => {
-		const url = endpoints.getCurrentTransformer;
+	getLoadedModels = async () => {
+		const url = endpoints.getLoadedModels;
 		return axiosGET(this.axios, url);
 	};
 
@@ -762,6 +764,11 @@ export default class GameChangerAPI {
 
 	getDocumentUsage = async (body) => {
 		const url = endpoints.getDocumentUsage;
+		return axiosGET(this.axios, url, {params:body});
+	}
+
+	getUserAggregations = async (body) => {
+		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, {params:body});
 	}
 

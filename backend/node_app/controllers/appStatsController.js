@@ -31,6 +31,7 @@ class AppStatsController {
 		this.getTopSearches = this.getTopSearches.bind(this);
 		this.getDateNDaysAgo = this.getDateNDaysAgo.bind(this);
 		this.getDocumentUsageData = this.getDocumentUsageData.bind(this);
+		this.getUserAggregations = this.getUserAggregations.bind(this);
 	}
 	/**
 	 *
@@ -289,7 +290,8 @@ class AppStatsController {
 					idaction_name,
 					a.search_cat,
 					b.name as search,
-					a.server_time as searchtime
+					a.server_time as searchtime,
+					hex(a.idvisitor) as idvisitor
 				from
 					matomo_log_link_visit_action a,
 					matomo_log_action b
@@ -316,6 +318,7 @@ class AppStatsController {
 	 * @returns an array of data from Matomo.
 	 */
 	async querySearchPdfMapping(opts, connection) {
+		const {userId} = opts;
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
 		const searches = await this.querySearches(startDate, connection);
 		const documents = await this.queryPdfOpend(startDate, connection);
@@ -327,6 +330,7 @@ class AppStatsController {
 			if (!searchMap[search.idvisit]) {
 				searchMap[search.idvisit] = [];
 			}
+			search = {...search, search: this.htmlDecode(search.search)}
 			searchMap[search.idvisit].push(search);
 		}
 		for (let document of documents) {
@@ -346,6 +350,30 @@ class AppStatsController {
 				if(search.visited === undefined){
 					searchPdfMapping.push(search);
 				}
+			}
+		}
+
+		// filename mapping to titles; pulled from ES
+		let filenames = searchPdfMapping.filter(item => item.document !== undefined && item.document !== 'null')
+		filenames = filenames.map(item => item.document);
+		const esQuery = this.searchUtility.getDocMetadataQuery('all',filenames);
+		const esClientName = 'gamechanger';
+		const esIndex = 'gamechanger';
+		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+		esResults = esResults.body.hits.hits;
+		const filenameMap = {};
+		for(const doc of esResults){
+			const item = doc._source;
+			filenameMap[item.filename] = item;
+		}
+		for(let i = 0; i < searchPdfMapping.length; i++){
+			const doc = searchPdfMapping[i];
+			const item = filenameMap[doc.document];
+			if(item !== undefined){
+				if(Array.isArray(item.keyw_5)){
+					item.keyw_5 = item.keyw_5.join(', ');
+				}
+				searchPdfMapping[i] = {...doc, ...item};
 			}
 		}
 		return searchPdfMapping;
@@ -372,8 +400,9 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getSearchPdfMapping(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { daysBack, offset, filters, sorting, pageSize };
+		const opts = { daysBack, offset, filters, sorting, pageSize, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -570,7 +599,7 @@ class AppStatsController {
 
 			// filename mapping to titles; pulled from ES
 			let filenames = docData.map(item => item.document);
-			const esQuery = this.searchUtility.getDocTitleQuery(filenames);
+			const esQuery = this.searchUtility.getDocMetadataQuery('filenames',filenames);
 			const esClientName = 'gamechanger';
 			const esIndex = 'gamechanger';
 			let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
@@ -595,6 +624,70 @@ class AppStatsController {
 			connection.end();
 		}
 	}
+
+
+
+	/**
+	 * This method takes gets user aggregated data
+	 * @returns an array of data from Matomo.
+	 */
+	async getUserAggregationsQuery(startDate, connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				select
+					hex(a.idvisitor) as idvisitor,
+					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
+					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made
+				from 
+					matomo_log_link_visit_action a,
+					matomo_log_action b
+				where 
+					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger'))
+					AND b.idaction = a.idaction_name
+					AND server_time > ?
+				group by
+					a.idvisitor;`,
+				[`${startDate}`],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});	
+	}
+
+		/**
+	 * This method is called by an endpoint to query matomo to find the most recently opened documents
+	 * by a user
+	 * @param {*} req
+	 * @param {*} res
+	 */
+		 async getUserAggregations(req, res) {
+			const userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
+			const opts = { daysBack, offset, filters, sorting, pageSize };
+			const startDate = this.getDateNDaysAgo(opts.daysBack);
+			let connection;
+			try {
+				connection = this.mysql.createConnection({
+					host: this.constants.MATOMO_DB_CONFIG.host,
+					user: this.constants.MATOMO_DB_CONFIG.user,
+					password: this.constants.MATOMO_DB_CONFIG.password,
+					database: this.constants.MATOMO_DB_CONFIG.database
+				});
+				connection.connect();
+				const results = await this.getUserAggregationsQuery(startDate, connection);
+				res.status(200).send(results);
+			} catch (err) {
+				this.logger.error(err, '1CZPASK', userId)
+				res.status(500).send(err)
+			} finally {
+				connection.end();
+			}
+		}
 
 }
 module.exports.AppStatsController = AppStatsController;

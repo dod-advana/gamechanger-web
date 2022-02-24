@@ -22,6 +22,8 @@ export default function PDFViewer({ location }) {
 		(node) => {
 			if (node !== null && filename) {
 				gameChangerAPI.getCloneMeta({ cloneName: cloneIndex }).then((data) => {
+					let isDLA = false;
+					if(fileUrl?.split('.').includes('dla')) isDLA = true;
 					if (filename) {
 						const encoded = encode(filename);
 						gameChangerAPI
@@ -30,7 +32,8 @@ export default function PDFViewer({ location }) {
 								prevSearchText,
 								pageNumber,
 								isClone,
-								data.data
+								data.data,
+								isDLA
 							)
 							.then((url) => {
 								node.src = url;
@@ -41,7 +44,7 @@ export default function PDFViewer({ location }) {
 				});
 			}
 		},
-		[filename, prevSearchText, isClone, cloneIndex, pageNumber]
+		[filename, prevSearchText, isClone, cloneIndex, pageNumber, fileUrl]
 	);
 
 	useEffect(() => {
