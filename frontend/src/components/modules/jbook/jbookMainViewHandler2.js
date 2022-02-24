@@ -1,26 +1,11 @@
 import React from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
-
-
-// ===== gc look and feel ======
-import GCPrimaryButton from '../../common/GCButton';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
 import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import SearchSection from '../globalSearch/SearchSection';
-import DocumentIcon from '../../../images/icon/Document.png';
-
-// ==============================
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import {
-	CircularProgress,
-	FormControl,
-	Grid,
-	InputLabel,
-	MenuItem,
-	Select,
-	Snackbar,
 	Typography
 } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
@@ -33,27 +18,19 @@ import {
 import { trackEvent } from '../../telemetry/Matomo';
 import { setState } from '../../../utils/sharedFunctions';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
-import ReactTable from 'react-table';
-import DropdownFilter from './DropdownFilter.js';
-import InputFilter from './InputFilter.js';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
-import JAICLogo from '../../../images/logos/JAIC_logo.png';
-import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
 import {
-	StyledMainBottomContainer,
-	StyledMainTopBar,
-	StyledSummaryFAQContainer,
 	styles
 } from './jbookMainViewStyles';
-import { autoDownloadFile, handleTabClicked, populateDropDowns, setJBookSetting } from './jbookMainViewHelper';
-import QueryExp from './QueryExp.js'
-import { Link } from '@mui/material';
+import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';
-import { gcOrange } from "../../common/gc-colors";
+import JBookSideBar from './jbookSideBar';
+import GCToggle from '../../common/GCToggleSwitch';
+import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 
 const _ = require('lodash');
 
@@ -201,13 +178,35 @@ const jbookMainViewHandler = {
 
 						<StyledCenterContainer showSideFilters={showSideFilters}>
 							<div className={'top-container'}>
-								<QueryExp searchText={state.searchText ? state.searchText : ''} runningSearch={runningSearch} />
+								<div style={{padding: 10, zIndex: 99}}>
+									{Permissions.permissionValidator(`Gamechanger Super Admin`, true) &&
+										<GCToggle
+											onClick={() => {
+												setState(dispatch, {useElasticSearch: !state.useElasticSearch, runSearch: true});
+											}}
+											rightActive={state.useElasticSearch}
+											leftLabel={'Use PG'}
+											rightLabel={'Use ES'}
+											customColor={GC_COLORS.primary}
+										/>
+									}
+								</div>
+
 								{!hideTabs && <ViewHeader {...props} extraStyle={{marginRight: -15, marginTop: 5}}/>}
 							</div>
 							{showSideFilters && (
 								<div className={'left-container'} style={{marginTop: -65}}>
 									<div className={'side-bar-container'}>
 										<GameChangerSearchMatrix context={context} />
+										{ (state.expansionDict && Object.keys(state.expansionDict).length > 0) && (
+											<>
+												<div className={'sidebar-section-title'} style={{marginLeft: 5}}>RELATED</div>
+												<JBookSideBar
+													context={context}
+													cloneData={state.cloneData}
+												/>
+											</>
+										)}
 									</div>
 								</div>
 							)}

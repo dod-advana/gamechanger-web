@@ -1,4 +1,4 @@
-import {orgColorMap, typeColorMap} from "./gamechangerUtils";
+import {orgColorMap, typeColorMap} from './gamechangerUtils';
 
 export const getClassLabel = (reviewData) => {
 	if (reviewData) {

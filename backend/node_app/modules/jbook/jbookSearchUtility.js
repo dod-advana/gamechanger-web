@@ -26,7 +26,7 @@ class JBookSearchUtility {
 		const mapping = this.getMapping(docType, fromFrontend);
 
 		for (const field in data) {
-			if (Object.keys(mapping).includes(field)) {
+			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
 				const newKey = mapping[field].newName;
 				newData[newKey] = mapping[field].processValue(data[field]);
 			}
@@ -84,7 +84,7 @@ class JBookSearchUtility {
 
 
 		const requiredCols = [
-			'revBudgetType',
+			'budgetType',
 			'budgetYear',
 			'programElement',
 			'projectNum',

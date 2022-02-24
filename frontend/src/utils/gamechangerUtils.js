@@ -146,7 +146,7 @@ export const StyledCenterContainer = styled.div`
     
     .top-container {
     	display: flex;
-    	justify-content: space-between;
+    	justify-content: flex-end;
     	margin: 0 0 0 15px;
     }
     

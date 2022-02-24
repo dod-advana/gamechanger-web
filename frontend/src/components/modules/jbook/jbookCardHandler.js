@@ -4,21 +4,10 @@ import {
 	CARD_FONT_SIZE,
 	getTrackingNameForFactory, getTypeIcon, getTypeTextColor
 } from '../../../utils/gamechangerUtils';
-// import {
-// 	List,
-// 	ListItem,
-// 	ListItemIcon,
-// 	ListItemText,
-// 	Divider
-// } from "@material-ui/core";
-
-// import GCAccordion from "../../common/GCAccordion";
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-import SimpleTable from "../../common/SimpleTable";
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import SimpleTable from '../../common/SimpleTable';
 import {
 	getClassLabel,
 	getConvertedName,
@@ -26,16 +15,10 @@ import {
 	getDocTypeStyles,
 	getTotalCost
 } from '../../../utils/jbookUtilities';
-
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import _ from 'lodash';
-// import {setState} from "../../../utils/sharedFunctions";
-// import LoadingIndicator from "@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator";
-// import {gcOrange} from "../../common/gc-colors";
-// import jbookAPI from "../../api/jbook-service-api";
 import sanitizeHtml from 'sanitize-html';
-// const jbookAPI = new JBookAPI();
 
 const colWidth = {
 	maxWidth: '900px',
@@ -357,10 +340,24 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			const displayTitle = item.budgetYear + ' | BLI: ' + item.budgetLineItem;
+			let displayTitle = ''
+			switch (item.budgetType) {
+				case 'pdoc':
+					displayTitle = `BA Num: ${item.budgetActivityNumber} BA Title: ${item.budgetActivityTitle}`;
+					break;
+				case 'rdoc':
+					displayTitle = `PE Num: ${item.programElement} Proj Num: ${item.projectNum}`;
+					break;
+				case 'odoc':
+					displayTitle = `BLI: ${item.budgetLineItem} App Num: ${item.appropriationNumber} BA Num: ${item.budgetActivityNumber}`;
+					break;
+				default:
+					break;
+			}
+
 			const isRevoked = item.is_revoked_b;
 
-			const cardType = item.revBudgetType ? item.revBudgetType.toUpperCase() : '';
+			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
 			const agency = item.serviceAgency;
 
 			const docListView = state.listView && !graphView;
@@ -403,7 +400,7 @@ const jbookCardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			const cardType = item.revBudgetType ? getConvertedType(item.revBudgetType) : '';
+			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
 			const agency = item.serviceAgency;
 			const iconSrc = getTypeIcon('PDF');
 			const typeTextColor = getTypeTextColor('PDF');
@@ -442,26 +439,27 @@ const jbookCardHandler = {
 				intelligentFeedbackComponent
 			} = props;
 
-			item.pageHits = [
-				{
-					title: 'Project Description',
-					snippet: _.truncate(item.projectMissionDescription, { 'length': 150 })
-				},
-				{
-					title: 'Contracts',
-					snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+			if (!state.searchText || state.searchText === null || state.searchText === '' || !item.pageHits || item.pageHits.length <= 0) {
+				item.pageHits = [
+					{
+						title: 'Project Description',
+						snippet: _.truncate(item.projectMissionDescription, { 'length': 150 })
+					},
+					{
+						title: 'Contracts',
+						snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 
-				},
-				{
-					title: 'Accomplishments',
-					snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-				},
-				{
-					title: 'Section',
-					snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-				}
-			];
-
+					},
+					{
+						title: 'Accomplishments',
+						snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					},
+					{
+						title: 'Section',
+						snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+					}
+				];
+			}
 
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
@@ -656,14 +654,11 @@ const jbookCardHandler = {
 
 			const {
 				item,
-				state,
-				dispatch,
 				detailPage = false
 			} = props;
 
 			const projectData = { ...item };
-			const budgetType = item.revBudgetType?.toUpperCase() || '';
-			const keywordCheckboxes = null;
+			const budgetType = item.budgetType?.toUpperCase() || '';
 			const projectNum = null;
 
 			const formatNum = (num) => {
@@ -777,7 +772,7 @@ const jbookCardHandler = {
 						disableWrap={true}
 						title={'Metadata'}
 						hideHeader={false}
-						margin={item.award_id_eda_ext && item.award_id_eda_ext !== "empty" && !detailPage ? '-10px 0 0 0' : ''}
+						margin={item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage ? '-10px 0 0 0' : ''}
 					/>
 				</div>
 			);
@@ -801,8 +796,7 @@ const jbookCardHandler = {
 				programElement,
 				projectNum,
 				budgetLineItem,
-				revBudgetType,
-				keywords, // do we need keywords for gc clone jbook? 
+				budgetType,
 				budgetYear,
 				id,
 				appropriationNumber
@@ -820,7 +814,7 @@ const jbookCardHandler = {
 						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[revBudgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(types[budgetType])}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}`;
 								window.open(url);
 							}}
 						>
@@ -837,15 +831,15 @@ const jbookCardHandler = {
 						>
 							Close
 						</CardButton>}
-						<GCTooltip title={'Click here to view the contract award details page'}>
-							<CardButton
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-								href={'#'}
-								disabled={true}
-							>
-								Preview
-							</CardButton>
-						</GCTooltip>
+						{/*<GCTooltip title={'Click here to view the contract award details page'}>*/}
+						{/*	<CardButton*/}
+						{/*		style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}*/}
+						{/*		href={'#'}*/}
+						{/*		disabled={true}*/}
+						{/*	>*/}
+						{/*		Preview*/}
+						{/*	</CardButton>*/}
+						{/*</GCTooltip>*/}
 					</>
 					<div style={{ ...styles.viewMoreButton }} onClick={() => {
 						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');

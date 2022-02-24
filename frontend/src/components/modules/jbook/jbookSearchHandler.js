@@ -87,7 +87,8 @@ const JBookSearchHandler = {
 				offset,
 				options: {
 					searchVersion: 1,
-					jbookSearchSettings: cleanSearchSettings
+					jbookSearchSettings: cleanSearchSettings,
+					useElasticSearch: state.useElasticSearch
 				}
 			});
 
@@ -138,7 +139,8 @@ const JBookSearchHandler = {
 				iframePreviewLink: null,
 				runningSearch: true,
 				urlSearch: false,
-				initial: false
+				initial: false,
+				expansionDict: {},
 			});
 
 		try {
@@ -154,10 +156,19 @@ const JBookSearchHandler = {
 					noResultsMessage: NO_RESULTS_MESSAGE,
 					runningSearch: false,
 					loadingTinyUrl: false,
-					rawSearchResults: []
+					rawSearchResults: [],
+					hasExpansionTerms: false,
 				});
 			} else {
-				let {docs, totalCount, query} = results;
+				let {docs, totalCount, query, expansionDict,} = results;
+
+				let hasExpansionTerms = false;
+				if (expansionDict) {
+					Object.keys(expansionDict).forEach((key) => {
+						if (expansionDict[key].length > 0) hasExpansionTerms = true;
+					});
+				}
+
 				setState(dispatch, {
 					timeFound: ((t1 - t0) / 1000).toFixed(2),
 					activeCategoryTab: 'jbook',
@@ -169,7 +180,9 @@ const JBookSearchHandler = {
 					rawSearchResults: docs,
 					hideTabs: false,
 					resetSettingsSwitch: false,
-					runningSearch: false
+					runningSearch: false,
+					expansionDict,
+					hasExpansionTerms
 				});
 			}
 

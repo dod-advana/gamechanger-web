@@ -797,11 +797,6 @@ html {
   }
   @media all and (max-width: 575px) {}
   
-  .react-select-menu-top .Select-menu-outer {
-	top: auto;
-	bottom: 100%;
-  }
-  
   .review-level-select .Select-menu-outer {
 	font-size: 13px !important;
   }

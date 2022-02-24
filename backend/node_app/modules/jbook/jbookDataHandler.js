@@ -336,6 +336,8 @@ class JBookDataHandler extends DataHandler {
 							review.service_mp_list = review.service_mp_list.replace(/\[|\]|\\/g, '').split(';').join('|');
 						}
 
+
+
 						data.review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
 						data.review.totalBudget = totalBudget;
 					}
@@ -415,7 +417,7 @@ class JBookDataHandler extends DataHandler {
 						});
 					}
 					data.vendors = vendorData ? vendorData.map(vendor => { return vendor.vendor_name }) : undefined;
-				} catch {
+				} catch (err) {
 					console.log('Error fetching for vendor data');
 					console.log(err);
 				}
