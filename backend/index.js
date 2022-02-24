@@ -254,6 +254,7 @@ app.post('/api/auth/token', async function (req, res) {
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
+
 		let userToken = ''
 		if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
 			userToken = process.env.ML_WEB_TOKEN
@@ -263,6 +264,7 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 			userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
 		}
 		const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
+
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {
