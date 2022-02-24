@@ -431,14 +431,11 @@ const DocumentDetailsPage = (props) => {
 								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
 								runningSearchProp={runningQuery}
-								notificationCountProp={0}
 								setDocumentsFound={() => {}}
 								setTimeFound={() => {}}
 								cloneData={cloneData}
-								expansionTerms={false}
 								setNumOfEdges={() => {}}
 								dispatch={{}}
-								showSideFilters={false}
 								showBasic={false}
 								searchText={''}
 								detailsView={true}

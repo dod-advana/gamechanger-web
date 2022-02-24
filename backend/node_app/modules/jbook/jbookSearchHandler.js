@@ -1,12 +1,10 @@
 const _ = require('lodash');
 const SearchUtility = require('../../utils/searchUtility');
 const CONSTANTS = require('../../config/constants');
-const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
-const {Thesaurus} = require('../../lib/thesaurus');
 const PDOC = require('../../models').pdoc;
 const RDOC = require('../../models').rdoc;
 const OM = require('../../models').om;
@@ -20,9 +18,6 @@ const { Sequelize } = require('sequelize');
 const { Reports } = require('../../lib/reports');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
-const constants = require('../../config/constants');
-const {esInnerHitFields, esTopLevelFieldsNameMapping} = require('./jbookDataMapping');
-const abbreviationRedisAsyncClientDB = 9;
 
 const excelStyles = {
 	middleAlignment: { vertical: 'middle', horizontal: 'center' },
@@ -52,13 +47,11 @@ const excelStyles = {
 	}
 };
 
-
 class JBookSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
 		const {
 			dataLibrary = new DataLibrary(opts),
 			constants = CONSTANTS,
-			mlApi = new MLApiClient(opts),
 			searchUtility = new SearchUtility(opts),
 			jbookSearchUtility = new JBookSearchUtility(opts),
 			pdoc = PDOC,
@@ -68,13 +61,12 @@ class JBookSearchHandler extends SearchHandler {
 			review = REVIEW,
 			db = DB,
 			reports = Reports,
-			thesaurus = new Thesaurus()
+
 		} = opts;
 
 		super({ ...opts });
 		this.dataLibrary = dataLibrary;
 		this.constants = constants;
-		this.mlApi = mlApi;
 		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 
@@ -85,7 +77,7 @@ class JBookSearchHandler extends SearchHandler {
 		this.review = review;
 		this.db = db;
 		this.reports = new Reports();
-		this.thesaurus = thesaurus;
+
 
 	}
 
@@ -301,17 +293,16 @@ class JBookSearchHandler extends SearchHandler {
 	async elasticSearchDocumentSearch(req, userId, res, statusExport = false) {
 		try {
 
-
-
 			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId);
-			let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
-			const searchResults = this.cleanESResults(esResults, userId);
+			const searchResults = this.jbookSearchUtility.cleanESResults(esResults, userId);
 			searchResults.expansionDict = expansionDict;
 
 			//console.log(searchResults);
@@ -325,201 +316,6 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	async gatherExpansionTerms(body, userId) {
-		const {
-			searchText
-		} = body;
-
-		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
-			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
-			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, [], termsArray[0], cleanedAbbreviations, userId);
-			return expansionDict;
-		} catch (e) {
-			this.logger.error(e.message, 'IEPGRAZ');
-			return {};
-		}
-	}
-	
-	async abbreviationCleaner(termsArray){
-		// get expanded abbreviations
-		await this.redisDB.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
-			if (expandedTerm) {
-				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-				}
-			}
-			if (compressedTerm) {
-				if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-				}
-			}
-		}
-
-		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-		let cleanedAbbreviations = [];
-		abbreviationExpansions.forEach(abb => {
-			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
-			let found = false;
-			termsArray.forEach((term) => {
-				if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
-					found = true;
-				}
-			});
-			if (!found) {
-				cleanedAbbreviations.push(abb);
-			}
-		});
-		return cleanedAbbreviations;
-	}
-
-	thesaurusExpansion(searchText, termsArray){
-		let lookUpTerm = searchText.replace(/\"/g, '');
-		let useText = true;
-		let synList = []
-		if (termsArray && termsArray.length && termsArray[0]) {
-			useText = false;
-			for(var term in termsArray){
-				lookUpTerm = termsArray[term].replace(/\"/g, '');
-				const synonyms = this.thesaurus.lookUp(lookUpTerm);
-				if (synonyms && synonyms.length > 1){
-					synList = synList.concat(synonyms.slice(0,2))
-				}
-			}
-		}
-		//const synonyms = thesaurus.lookUp(lookUpTerm);
-		let text = searchText;
-		if (!useText && termsArray && termsArray.length && termsArray[0]) {
-			text = termsArray[0];
-		}
-		return [synList, text];
-	}
-
-	async mlApiExpansion(termsArray, forCacheReload, userId){
-		let expansionDict = {};
-		try {
-			expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId, 'jbook');
-		} catch (e) {
-			// log error and move on, expansions are not required
-			if (forCacheReload){
-				throw Error('Cannot get expanded search terms in cache reload');
-			}
-			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', 'LH48NHI', userId);
-		}
-		return expansionDict;
-	}
-
-	cleanESResults(esResults, userId) {
-
-		const results = [];
-
-		try {
-			let searchResults = {totalCount: 0, docs: []};
-
-			const { body = {} } = esResults;
-			const { aggregations = {} } = body;
-			const { service_agency_aggs = {} } = aggregations;
-			const service_buckets = service_agency_aggs.buckets ? service_agency_aggs.buckets : [];
-			const { hits: esHits = {} } = body;
-			const { hits = [], total: { value } } = esHits;
-
-			searchResults.totalCount = value;
-			searchResults.serviceAgencyCounts = service_buckets;
-
-			hits.forEach(hit => {
-				let result = this.transformEsFields(hit._source);
-				result.pageHits = [];
-
-				if (hit.inner_hits) {
-					Object.keys(hit.inner_hits).forEach(hitKey => {
-						hit.inner_hits[hitKey].hits.hits.forEach(innerHit => {
-							Object.keys(innerHit.highlight).forEach(highlightKey => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0]
-								});
-							});
-						});
-					});
-				}
-
-				if (hit.highlight) {
-					Object.keys(hit.highlight).forEach(hitKey => {
-						result.pageHits.push({
-							title: esTopLevelFieldsNameMapping[hitKey],
-							snippet: hit.highlight[hitKey][0]
-						})
-					});
-				}
-
-				switch (result.budgetType) {
-					case 'rdte':
-						result.budgetType = 'rdoc';
-						break;
-					case 'om':
-						result.budgetType = 'odoc';
-						break;
-					case 'procurement':
-						result.budgetType = 'pdoc';
-						break;
-					default:
-						break;
-				}
-
-				results.push(result);
-			});
-
-			searchResults.docs = results;
-
-			return searchResults;
-		} catch (e) {
-			const { message } = e;
-			this.logger.error(message, '8V1IZLH', userId);
-			return results;
-		}
-	}
-
-	transformEsFields(raw) {
-		let result = {};
-		const arrayFields = [];
-
-		esInnerHitFields.forEach(innerField => {
-			arrayFields.push(innerField.path);
-		});
-
-		const mapping = this.jbookSearchUtility.getMapping('elasticSearch', false);
-
-		for (let key in raw) {
-			let newKey = key;
-			if (Object.keys(mapping).includes(key)){
-				newKey = mapping[key].newName;
-			}
-
-			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
-				if (arrayFields.includes(key)) {
-					result[newKey] = raw[key];
-				} else if (Array.isArray(raw[key])) {
-					result[newKey] = raw[key][0];
-				} else {
-					result[newKey] = raw[key];
-				}
-			} else {
-				result[newKey] = null;
-			}
-		}
-		return result;
-	}
-
 	async postgresDocumentSearch(req, userId, res, statusExport = false)  {
 		try {
 			const {
@@ -529,11 +325,11 @@ class JBookSearchHandler extends SearchHandler {
 				exportSearch
 			} = req.body;
 
-			console.log(req.body)
-
 			const perms = req.permissions;
 
-			let expansionDict = await this.gatherExpansionTerms(req.body, userId);
+			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+
+			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
 			const hasSearchText = searchText && searchText !== '';
 			let limit = 18;
