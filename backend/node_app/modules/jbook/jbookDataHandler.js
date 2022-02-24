@@ -87,6 +87,78 @@ class JBookDataHandler extends DataHandler {
 
 	// budget line item : pdoc and project num : rdoc
 	async getProjectData(req, userId) {
+
+		const {useElasticSearch  = false} = req.body
+
+		if (useElasticSearch) {
+			return this.getESProjectData(req, userId);
+		} else {
+			return this.getPGProjectData(req, userId);
+		}
+
+	}
+
+	async getESProjectData(req, userId) {
+		try {
+			const {
+				id
+			} = req.body;
+
+			const keys = id.split('#');
+
+			console.log(keys)
+
+			const budgetYear = keys[1];
+			const budgetType = keys[0];
+			let budgetCycle;
+			let budgetActivityNumber;
+			let budgetLineItem;
+			let programElement;
+			let serviceAgency;
+			let projectNum;
+			let appropriationNumber;
+			let p1LineNumber;
+			let budgetSubActivityTitle;
+
+			switch (budgetType) {
+				case 'pdoc':
+					budgetCycle = keys[2];
+					budgetActivityNumber = keys[3];
+					budgetLineItem = keys[4];
+					serviceAgency = keys[5];
+					p1LineNumber = keys[6];
+					budgetSubActivityTitle = keys[7];
+					appropriationNumber = keys[8];
+					break;
+				case 'rdoc':
+					budgetCycle = keys[2];
+					budgetActivityNumber = keys[3];
+					budgetLineItem = keys[4];
+					serviceAgency = keys[5];
+					projectNum = keys[6];
+					appropriationNumber = keys[7];
+					break;
+				case 'om':
+					appropriationNumber = keys[2];
+					programElement = keys[3];
+					budgetLineItem = keys[4];
+					budgetActivityNumber = keys[5];
+					projectNum = keys[6];
+					break;
+				default:
+					break;
+			}
+
+			console.log(keys);
+
+			return [];
+		} catch (err) {
+			this.logger.error(err, '6T0ILGP', userId);
+			return [];
+		}
+	}
+
+	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
 			const { programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber } = req.body;
@@ -94,6 +166,8 @@ class JBookDataHandler extends DataHandler {
 			let data;
 			let totalBudget = 0;
 			let query;
+
+			console.log(req.body)
 
 			switch (docType) {
 				case 'Procurement':
@@ -187,7 +261,7 @@ class JBookDataHandler extends DataHandler {
 
 						// 	contracts = await this.gl_contracts.findAll({
 						// 		where: query
-						// 	});	
+						// 	});
 						// }
 					}
 

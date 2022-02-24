@@ -67,7 +67,7 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const getProjectData = async (programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber) => {
+	const getProjectData = async (programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber, useElasticSearch) => {
 		setProfileLoading(true);
 
 		let projectData;
@@ -82,7 +82,8 @@ const JBookProfilePage = (props) => {
 					budgetYear,
 					budgetLineItem,
 					id,
-					appropriationNumber
+					appropriationNumber,
+					useElasticSearch
 				}
 			});
 
@@ -166,6 +167,7 @@ const JBookProfilePage = (props) => {
 			const searchText = getQueryVariable('searchText', url);
 			const id = getQueryVariable('id', url);
 			const appropriationNumber = getQueryVariable('appropriationNumber', url);
+			const useElasticSearch = getQueryVariable('useElasticSearch', url) === 'true';
 
 			setProgramElement(programElement);
 			setProjectNum(projectNum);
@@ -176,7 +178,7 @@ const JBookProfilePage = (props) => {
 			setID(id);
 			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber);
+			getProjectData(programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber, useElasticSearch);
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
