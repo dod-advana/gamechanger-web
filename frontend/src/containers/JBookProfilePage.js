@@ -699,7 +699,7 @@ const JBookProfilePage = (props) => {
 				options: {
 					frontendReviewData: {
 						...reviewData,
-						revBudgetType: budgetType,
+						budgetType: budgetType,
 						revProgramElement: programElement,
 						id: undefined,
 						revBudgetLineItems: budgetLineItem,

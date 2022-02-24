@@ -436,7 +436,7 @@ module.exports = {
 			processValue: (value) => value
 		},
 		budget_type: {
-			newName: 'revBudgetType',
+			newName: 'budgetType',
 			defaultValue: '',
 			processValue: (value) => value
 		},
@@ -1494,7 +1494,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value
 		},
-		'budgetYear_year_only': {
+		'budgetYear_s': {
 			newName: 'budgetYear',
 			defaultValue: '',
 			processValue: (value) => value
@@ -1654,7 +1654,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value
 		},
-		'projectTitle_t': {
+		'projectTitle_s': {
 			newName: 'projectTitle',
 			defaultValue: '',
 			processValue: (value) => value
@@ -1673,6 +1673,119 @@ module.exports = {
 			newName: 'budgetType',
 			defaultValue: '',
 			processValue: (value) => value
+		},
+		'key_s': {
+			newName: 'id',
+			defaultValue: '',
+			processValue: (value) => value
 		}
-	}
+	},
+	
+	esTopLevelFields: [
+		'programElementTitle_t',
+		'projectMissionDescription_t',
+		'appropriationTitle_t',
+		'budgetActivityTitle_t',
+		'missionDescBudgetJustification_t',
+		'projectNotes_t',
+		'projectAquisitionStrategy_t',
+		'projectPerformanceMetrics_t',
+		'otherProgramFundSummaryRemarks_t',
+		'P40-13_BSA_Title_t',
+		'P40-15_Justification_t',
+		'projectTitle_s',
+		'budgetActivityTitle_s'
+	],
+
+	esTopLevelFieldsNameMapping: {
+		'programElementTitle_t': 'PE Title',
+		'projectMissionDescription_t': 'Project Description',
+		'appropriationTitle_t': 'Appropriation Title',
+		'budgetActivityTitle_t': 'Budget Activity Title',
+		'missionDescBudgetJustification_t': 'Justification',
+		'projectNotes_t': 'Project Notes',
+		'projectAquisitionStrategy_t': 'Acquisition Strat.',
+		'projectPerformanceMetrics_t': 'Metrics',
+		'otherProgramFundSummaryRemarks_t': 'Other Summary Remarks',
+		'P40-13_BSA_Title_t': 'P40-13_BSA_Title',
+		'P40-15_Justification_t': 'P40-15_Justification',
+		'projectTitle_s': 'Project Title',
+		'r_2a_accomp_pp_n': 'Accomplishments',
+		'p3a_contract_data_n': 'Contracts',
+		'r4a_schedule_details_n': 'Schedule Details',
+		'p3a_dev_milestones_n': 'Milestones',
+		'budgetActivityTitle_s': 'Activity Title'
+	},
+
+	esInnerHitFields: [
+		{
+			path: 'r_2a_accomp_pp_n',
+			fields: [
+				'r_2a_accomp_pp_n.Accomp_Fund_PY_Text_t',
+				'r_2a_accomp_pp_n.PlanPrgrm_Fund_CY_Text_t',
+				'r_2a_accomp_pp_n.PlanPrgrm_Fund_BY1Base_Text_t',
+				'r_2a_accomp_pp_n.PlanPrgrm_Fund_BY1OCO_Text_t',
+				'r_2a_accomp_pp_n.PlanPrgrm_Fund_BY1_Text_t',
+				'r_2a_accomp_pp_n.Accomp_Title_text_t',
+				'r_2a_accomp_pp_n.Accomp_Desc_text_t'
+			]
+		},
+		{
+			path: 'p3a_contract_data_n',
+			fields: [
+				'p3a_contract_data_n.programElementTitle_t',
+				'p3a_contract_data_n.P3a-16_Title_t',
+			]
+		},
+		{
+			path: 'r4a_schedule_details_n',
+			fields: [
+				'r4a_schedule_details_n.Event_Title_t',
+				'r4a_schedule_details_n.SubProj_Title_t',
+			]
+		},
+		{
+			path: 'p3a_dev_milestones_n',
+			fields: [
+				'p3a_dev_milestones_n.P3a-20_Milestone_Desc_t',
+				'p3a_dev_milestones_n.projectTitle2_t'
+			]
+		},
+		{
+			path: 'r2_adjustments_n',
+			fields: ['r2_adjustments_n.Adj_OtherAdj_Title_t']
+		},
+		{
+			path: 'r2a_cong_adds_n',
+			fields: ['r2a_cong_adds_n.CongAdds_Title_t']
+		},
+		{
+			path: 'r2a_joint_funding_n',
+			fields: ['r2a_joint_funding_n.JointFund_Title_t']
+		},
+		{
+			path: 'r2a_other_program_funding_n',
+			fields: ['r2a_other_program_funding_n.OthProgFund_Title_t']
+		},
+		{
+			path: 'p40a_secondary_distribution_n',
+			fields: ['p40a_secondary_distribution_n.P40a-14_Title_t']
+		},
+		{
+			path: 'p40a_aggregated_items_n',
+			fields: ['p40a_aggregated_items_n.P40a-16_Title_t']
+		},
+		{
+			path: 'p3a_rdte_n',
+			fields: ['p3a_rdte_n.P3a-19_ModItem_Title_t']
+		},
+		{
+			path: 'p5_cost_elements_n',
+			fields: ['p5_cost_elements_n.P5-14_Item_Title_t']
+		},
+		{
+			path: 'p5_res_sum_optional_rows_n',
+			fields: ['p5_res_sum_optional_rows_n.P5-16_Item_Title_t']
+		}
+	]
 }

@@ -7,6 +7,7 @@ const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
 const { include } = require('underscore');
 const { performance } = require('perf_hooks');
+const {esTopLevelFields, esInnerHitFields} = require("../modules/jbook/jbookDataMapping");
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -56,6 +57,7 @@ class SearchUtility {
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
+		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -172,15 +174,15 @@ class SearchUtility {
 		if (toReturn && toReturn[key] && toReturn[key].length) {
 			var ordered =[];
 			var currList = [];
-			let orig = key.replace(/[^\w\s]|_/g, "").trim()
+			let orig = key.replace(/[^\w\s]|_/g, '').trim()
 			currList.push(orig)
 			toReturn[key].forEach((y) => {
-					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
-					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
-							ordered.push(y);
-							currList.push(y.phrase.toLowerCase())
-					}
-				});
+				y.phrase = y.phrase.replace(/[^\w\s]|_/g, '').trim();
+				if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
+					ordered.push(y);
+					currList.push(y.phrase.toLowerCase())
+				}
+			});
 			cleaned[key] = ordered
 		}
 
@@ -209,17 +211,17 @@ class SearchUtility {
 	}
 
 	remove_stopwords = (str) => {
-		const stopwords = ["a", "about", "above", "after", "again", "against", "ain", "all", "am", "an", "and", "any", "are", "aren", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can", "couldn", "couldn't", "d", "did", "didn", "didn't", "do", "does", "doesn", "doesn't", "doing", "don", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn", "hadn't", "has", "hasn", "hasn't", "have", "haven", "haven't", "having", "he", "her", "here", "hers", "herself", "him", "himself", "his", "how", "i", "if", "in", "into", "is", "isn", "isn't", "it", "it's", "its", "itself", "just", "ll", "m", "ma", "me", "mightn", "mightn't", "more", "most", "mustn", "mustn't", "my", "myself", "needn", "needn't", "no", "nor", "not", "now", "o", "of", "off", "on", "once", "only", "or", "other", "our", "ours", "ourselves", "out", "over", "own", "re", "s", "same", "shan", "shan't", "she", "she's", "should", "should've", "shouldn", "shouldn't", "so", "some", "such", "t", "than", "that", "that'll", "the", "their", "theirs", "them", "themselves", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", "up", "ve", "very", "was", "wasn", "wasn't", "we", "were", "weren", "weren't", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "won", "won't", "wouldn", "wouldn't", "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "could", "he'd", "he'll", "he's", "here's", "how's", "i'd", "i'll", "i'm", "i've", "let's", "ought", "she'd", "she'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "we'd", "we'll", "we're", "we've", "what's", "when's", "where's", "who's", "why's", "would"];
-    let res = [];
-    const words = str.toLowerCase().split(' ');
-    for(let i=0;i<words.length;i++) {
-       const word_clean = words[i].split(".").join("")
-       if(!stopwords.includes(word_clean)) {
-           res.push(word_clean);
-       }
-    }
-    return(res.join(' '));
-} 
+		const stopwords = ['a', 'about', 'above', 'after', 'again', 'against', 'ain', 'all', 'am', 'an', 'and', 'any', 'are', 'aren', 'aren\'t', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'couldn', 'couldn\'t', 'd', 'did', 'didn', 'didn\'t', 'do', 'does', 'doesn', 'doesn\'t', 'doing', 'don', 'don\'t', 'down', 'during', 'each', 'few', 'for', 'from', 'further', 'had', 'hadn', 'hadn\'t', 'has', 'hasn', 'hasn\'t', 'have', 'haven', 'haven\'t', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'i', 'if', 'in', 'into', 'is', 'isn', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'just', 'll', 'm', 'ma', 'me', 'mightn', 'mightn\'t', 'more', 'most', 'mustn', 'mustn\'t', 'my', 'myself', 'needn', 'needn\'t', 'no', 'nor', 'not', 'now', 'o', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 're', 's', 'same', 'shan', 'shan\'t', 'she', 'she\'s', 'should', 'should\'ve', 'shouldn', 'shouldn\'t', 'so', 'some', 'such', 't', 'than', 'that', 'that\'ll', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 've', 'very', 'was', 'wasn', 'wasn\'t', 'we', 'were', 'weren', 'weren\'t', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'will', 'with', 'won', 'won\'t', 'wouldn', 'wouldn\'t', 'y', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves', 'could', 'he\'d', 'he\'ll', 'he\'s', 'here\'s', 'how\'s', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'let\'s', 'ought', 'she\'d', 'she\'ll', 'that\'s', 'there\'s', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'what\'s', 'when\'s', 'where\'s', 'who\'s', 'why\'s', 'would'];
+		let res = [];
+		const words = str.toLowerCase().split(' ');
+		for(let i=0;i<words.length;i++) {
+			const word_clean = words[i].split('.').join('')
+			if(!stopwords.includes(word_clean)) {
+				res.push(word_clean);
+			}
+		}
+		return(res.join(' '));
+	} 
 
 	getEsSearchTerms({ searchText, questionFlag }) {
 		let terms = searchText;
@@ -264,6 +266,37 @@ class SearchUtility {
 
 		// return solr query and list of search terms after parsing
 		return [solrSearchText, termsArray];
+	}
+
+	getJBookPGQueryAndSearchTerms (searchText) {
+
+		// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
+		const searchTextLower = searchText.toLowerCase();
+
+		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
+		let rawSequences = this.findQuoted(searchTextLower);
+
+		let searchTextWithPlaceholders = searchTextLower;
+		// replace phrases with __#__ placeholder
+		rawSequences.forEach((phrase, index) => {
+			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(phrase, `__${index}__`);
+		});
+
+		// replace and/or with ' AND ' ' OR ' as required for solr search, one space is required
+		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)and(\s+)/g, ` AND `);
+		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)or(\s+)/g, ` OR `);
+
+		// find unquoted words after replacing and/or
+		// combine all terms to return for snippet highlighting
+		const termsArray = this.findLowerCaseWordsOrAcronyms(searchTextWithPlaceholders);
+
+		let queryText = '';
+		rawSequences = rawSequences.map(phrase => '(' + phrase.replace(/\"/g, '').split(' ').join(' & ') + ')').join(' | ')
+
+		queryText = [rawSequences].concat(termsArray).filter(term => term !== '');
+		queryText = queryText.join(' | ');
+
+		return queryText;
 	}
 
 	findQuoted (searchText) {
@@ -395,7 +428,7 @@ class SearchUtility {
 			storedFields = [...storedFields, ...extStoredFields];
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
-			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
+			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -451,7 +484,7 @@ class SearchUtility {
 											},
 											fragmenter: 'span'
 										} :
-										{}
+											{}
 									},
 									query: {
 										bool: {
@@ -521,7 +554,7 @@ class SearchUtility {
 							},								
 							{
 								match: {
-									"display_title_s.search": plainQuery
+									'display_title_s.search': plainQuery
 								}
 							}
 						],
@@ -547,27 +580,27 @@ class SearchUtility {
 					boundary_scanner: 'word'
 
 				} :
-				{}
+					{}
 			};
 
 			switch(sort){
 				case 'Relevance':
-					query.sort = [ {"_score": {"order" : order}} ]
+					query.sort = [ {'_score': {'order' : order}} ]
 					break;
 				case 'Publishing Date':
-					query.sort = [ {"publication_date_dt": {"order" : order}} ]
+					query.sort = [ {'publication_date_dt': {'order' : order}} ]
 					break;
 				case 'Alphabetical':
-					query.sort = [ {"display_title_s": {"order" : order}} ]
+					query.sort = [ {'display_title_s': {'order' : order}} ]
 					break;
 				case 'Popular':
-					query.sort = [ {"pop_score": {"order" : order}} ]
+					query.sort = [ {'pop_score': {'order' : order}} ]
 					break;
 				case 'References':
-					query.sort = [{"_script": {
-						"type": "number",
-						"script": "doc.ref_list.size()",
-						"order": order
+					query.sort = [{'_script': {
+						'type': 'number',
+						'script': 'doc.ref_list.size()',
+						'order': order
 					}}]
 				default: 
 					break;
@@ -644,7 +677,7 @@ class SearchUtility {
 			if (Object.keys(docIds).length !== 0){
 				query.query.bool.must.push(
 					{terms: {id: docIds}}
-					)
+				)
 
 			}
 
@@ -699,12 +732,12 @@ class SearchUtility {
 					}
 				}
 			}
-            results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-            return results
-        } catch (err) {
-            this.logger.error(err, 'TJKBNOF', userId);
-            }
-        }
+			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
+			return results
+		} catch (err) {
+			this.logger.error(err, 'TJKBNOF', userId);
+		}
+	}
 
 
 	getESQueryUsingOneID(id, user, limit = 100, maxLength=200) {
@@ -759,13 +792,13 @@ class SearchUtility {
 									size: 5,
 									highlight: {
 									  fields: {
-										'paragraphs.filename.search': {
+											'paragraphs.filename.search': {
 										  number_of_fragments: 0
-										},
-										'paragraphs.par_raw_text_t': {
+											},
+											'paragraphs.par_raw_text_t': {
 										  fragment_size: maxLength,
 										  number_of_fragments: 1
-										}
+											}
 									  },
 									  fragmenter: 'span'
 									}
@@ -815,8 +848,8 @@ class SearchUtility {
 			}
 		} catch (err) {
 			this.logger.error(err, 'TJKFH5F', userId);
-			}
 		}
+	}
 
 	// makes phrases to add to ES queries for entities or gamechanger indices
 	makeBigramQueries (searchTextList, alias) {
@@ -845,10 +878,10 @@ class SearchUtility {
 						multi_match: {
 							query: searchText,
 							fields: [
-							'keyw_5^2',
-							'id^2',
-							'summary_30',
-							'paragraphs.par_raw_text_t'
+								'keyw_5^2',
+								'id^2',
+								'summary_30',
+								'paragraphs.par_raw_text_t'
 							],
 							operator: 'or'
 						}
@@ -872,21 +905,21 @@ class SearchUtility {
 
 				const qs = {
 					query_string: {
-					query: element,
-					default_field: 'paragraphs.par_raw_text_t',
-					default_operator: 'AND',
-					fuzzy_max_expansions: 100,
-					fuzziness: 'AUTO'
+						query: element,
+						default_field: 'paragraphs.par_raw_text_t',
+						default_operator: 'AND',
+						fuzzy_max_expansions: 100,
+						fuzziness: 'AUTO'
 					}
 				}
 				bigramQueries.docMustQueries.push(qs);
 
 				const mm = {
 					multi_match: {
-					query: element,
-					fields: ["summary_30", "keyw_5"],
-					type: "phrase",
-					boost: 3
+						query: element,
+						fields: ['summary_30', 'keyw_5'],
+						type: 'phrase',
+						boost: 3
 					}
 				}
 				bigramQueries.docShouldQueries.push(mm);
@@ -928,22 +961,22 @@ class SearchUtility {
 				query = {
 					from: 0,
 					size: entityLimit,
-						query: {
-							bool: {
-								should: bigramQueries.aliasQuery
-							}
+					query: {
+						bool: {
+							should: bigramQueries.aliasQuery
 						}
-					};
+					}
+				};
 			} else if (queryType === 'entities') {
 				query = {
 					from: 0,
 					size: entityLimit,
-						query: {
-							bool: {
-								should: bigramQueries.entityShouldQueries
-							}
+					query: {
+						bool: {
+							should: bigramQueries.entityShouldQueries
 						}
-					};
+					}
+				};
 			} else if (queryType === 'documents') {
 				query = {
 					query: {
@@ -989,7 +1022,7 @@ class SearchUtility {
 			};
 			return query;
 		} catch (e) {
-		this.logger.error(e, 'TJDDKH5F', user);
+			this.logger.error(e, 'TJDDKH5F', user);
 		}
 	}
 
@@ -1008,7 +1041,7 @@ class SearchUtility {
 
 			const aliasQuery = {
 				nested: {
-					path: "aliases",
+					path: 'aliases',
 					query: {
 						bool: {
 							should: mustQueries
@@ -1017,14 +1050,14 @@ class SearchUtility {
 				}
 			};
 			return {
-					from: 0,
-					size: entityLimit,
-						query: {
-							bool: {
-								should: aliasQuery
-							}
-						}
-					};
+				from: 0,
+				size: entityLimit,
+				query: {
+					bool: {
+						should: aliasQuery
+					}
+				}
+			};
 		} catch (e) {
 			this.logger.error(e, 'LQPRYTUOF', '');
 		}
@@ -1048,7 +1081,7 @@ class SearchUtility {
 			};
 			return matchingAlias
 		} catch (e) {
-		this.logger.error(e, 'MBWYH5F', user);
+			this.logger.error(e, 'MBWYH5F', user);
 		}
 	}
 
@@ -1058,7 +1091,7 @@ class SearchUtility {
 			let filteredResults = [];
 			for (let i = 0; i < docs.length; i++) {
 				let paragraphs = docs[i]._source.paragraphs;
-				let parText = paragraphs.map(item => item.par_raw_text_t).join(" ");
+				let parText = paragraphs.map(item => item.par_raw_text_t).join(' ');
 				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
 					filteredResults.push(docs[i])
 				} else { // pass
@@ -1183,8 +1216,8 @@ class SearchUtility {
 					resultType: context[ix].resultType,
 					cac_only: context[ix].cac_only,
 					pub_date: context[ix].pubDate,
-					displaySource: "Source: " + context[ix].filename.toUpperCase() + " (" + context[ix].resultType.toUpperCase() + ')'
-					}
+					displaySource: 'Source: ' + context[ix].filename.toUpperCase() + ' (' + context[ix].resultType.toUpperCase() + ')'
+				}
 				matchedResults.push(matchedAnswer);
 			};
 			QA.answers = matchedResults;
@@ -1223,7 +1256,7 @@ class SearchUtility {
 				docId = entity._source.name;
 				resultType = 'entity';
 			}
-			let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType, source: "entity search", text: entity._source.information};
+			let entityObj = {filename: entity._source.name, docId: docId, docScore: entity._score, retrievedDate: entity._source.information_retrieved, type: entity._source.entity_type, resultType: resultType, source: 'entity search', text: entity._source.information};
 			context.unshift(entityObj);
 			return context;
 		} catch (e) {
@@ -1338,7 +1371,7 @@ class SearchUtility {
 					recursive: true
 				});
 			}
-			let filedir = dir  + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
+			let filedir = dir  + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, '_') + '_search_reports.txt'
 			let report = {query: query, userId: userId, date: today, params: params, saveResults: saveResults};
 			fs.writeFile(filedir, JSON.stringify(report), (err) => { 
 				if (err) { 
@@ -1352,62 +1385,62 @@ class SearchUtility {
 
 	getESSuggesterQuery({ searchText, field = 'paragraphs.par_raw_text_t', sort = 'frequency', suggest_mode = 'popular' }) {
 		// multi search in ES
-		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText);
 
 		let query = {
-				suggest: {
-					suggester: {
-						text: plainQuery,
-						term: {
-							field: field,
-							sort: sort,
-							suggest_mode: suggest_mode
-						}
+			suggest: {
+				suggester: {
+					text: plainQuery,
+					term: {
+						field: field,
+						sort: sort,
+						suggest_mode: suggest_mode
 					}
 				}
-			};
+			}
+		};
 		return query
 
 	}
 	getSearchCountQuery(daysBack, filterWords){
 		const query = 
 		{
-			"size": 1,
-			"query": {
-			  "bool": {
-				"must_not": [
+			'size': 1,
+			'query': {
+			  'bool': {
+					'must_not': [
 				  {
-					"terms": {
-					  "search_query": filterWords
-					}
+							'terms': {
+					  'search_query': filterWords
+							}
 				  }
-				],
-				"must": [
+					],
+					'must': [
 				  {
-					"range": {
-					  "run_time": {
-						"gte": `now-${daysBack}d/d`,
-						"lt": "now/d"
+							'range': {
+					  'run_time': {
+									'gte': `now-${daysBack}d/d`,
+									'lt': 'now/d'
 					  }
-					}
+							}
 				  }
-				]
+					]
 			  }
 			},
-			"aggs": {
-			  "searchTerms": {
-				"terms": {
-				  "field": "search_query",
-				  "size": 1000
-				},
-				"aggs": {
-				  "user": {
-					"terms": {
-					  "field": "user_id",
-					  "size": 2
-					}
+			'aggs': {
+			  'searchTerms': {
+					'terms': {
+				  'field': 'search_query',
+				  'size': 1000
+					},
+					'aggs': {
+				  'user': {
+							'terms': {
+					  'field': 'user_id',
+					  'size': 2
+							}
 				  }
-				}
+					}
 			  }
 			}
 		  }
@@ -1427,11 +1460,11 @@ class SearchUtility {
 			if (aggs.length > 0) {
 				aggs.forEach(term => {
 					let searchCount = {}
-					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,'');
 					searchCount['search'] = word;
 					searchCount['count'] = term.doc_count;
 					if (term.user.buckets.length > 1){
-						word = word.replace(/\s{2,}/g," ");
+						word = word.replace(/\s{2,}/g,' ');
 						if (!searches.includes(word) && maxCount < maxSearches){
 							searchCounts.push(searchCount)
 							searches.push(word)
@@ -1448,7 +1481,7 @@ class SearchUtility {
 		return searchCounts
 	}
 	getESpresearchMultiQuery({ searchText, index, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
-		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
+		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText);
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
 			let query = []
@@ -1578,11 +1611,11 @@ class SearchUtility {
 				simWordList = [searchText]
 			}
 			for (var key in simWordList){
-				simWordList[key] = simWordList[key].replace(/["']/g, "")
+				simWordList[key] = simWordList[key].replace(/["']/g, '')
 				
 			}
 
-			let similarWordsQuery = simWordList.join("* OR *")
+			let similarWordsQuery = simWordList.join('* OR *')
 			const query = 
 				{
 					size: 1,
@@ -1610,9 +1643,9 @@ class SearchUtility {
 			let maxCount = 0;
 			if (aggs.length > 0) {
 				aggs.forEach(term => {
-					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,'');
 					if (word !== searchText && term.user.buckets.length > 1){
-						word = word.replace(/\s{2,}/g," ");
+						word = word.replace(/\s{2,}/g,' ');
 						if (!relatedSearches.includes(word) && maxCount < maxSearches){
 							relatedSearches.push(word);
 							maxCount += 1;
@@ -1847,7 +1880,7 @@ class SearchUtility {
 		// purpose is to highlight words from the entire list.
 		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '');});
 		if (all_words instanceof Array){
-			var all_words_str = all_words.join(", ")
+			var all_words_str = all_words.join(', ')
 		}
 		else {
 			var all_words_str = all_words
@@ -2007,7 +2040,7 @@ class SearchUtility {
 				return this.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, esIndex);
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
-				if (this.checkESResultsEmpty(esResults)) { this.logger.warn("Search has no hits") }
+				if (this.checkESResultsEmpty(esResults)) { this.logger.warn('Search has no hits') }
 				return { totalCount: 0, docs: [] };
 			}
 	
@@ -2039,7 +2072,7 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-            const titleResults = await this.getTitle(body.searchText, clientObj, userId);
+			const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
 
@@ -2060,7 +2093,7 @@ class SearchUtility {
 				
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
-				if (this.checkESResultsEmpty(results)) { this.logger.warn("Search has no hits") }
+				if (this.checkESResultsEmpty(results)) { this.logger.warn('Search has no hits') }
 
 				return { totalCount: 0, docs: [], expansionDict: expansionDict ? expansionDict : {} };
 			}
@@ -2106,10 +2139,10 @@ class SearchUtility {
 			let query = {
 				from: offset,
 				size: limit,
-					query: {
-						bool: {
-							should: [
-								{
+				query: {
+					bool: {
+						should: [
+							{
 								match_phrase: {
 									'name': {
 										query: searchText,
@@ -2133,36 +2166,36 @@ class SearchUtility {
 									query: searchText,
 									type: 'phrase_prefix'
 								}
-						}
+							}
 						],
-						must_not: [ {term: {"entity_type.keyword": "topic"}} ]
-						}
+						must_not: [ {term: {'entity_type.keyword': 'topic'}} ]
 					}
-				};
+				}
+			};
 			return query;
-			} catch (err) {
-				this.logger.error(err, 'JAEIWMF', '');
-			}
+		} catch (err) {
+			this.logger.error(err, 'JAEIWMF', '');
+		}
 	}
 
 	getTopicQuery(searchText, offset = 0, limit = 6) {
-			try {
-				let query = {
-					from: offset,
-					size: limit,
-						query: {
-							bool: {
-								must: [ { match_phrase: { 'name': searchText } } ],
-								filter: [ { term: { 'entity_type.keyword': 'topic'}}]
-							}
-						}
-					};
-				return query;
-				} catch (err) {
-					this.logger.error(err, 'YTP3YF0', '');
+		try {
+			let query = {
+				from: offset,
+				size: limit,
+				query: {
+					bool: {
+						must: [ { match_phrase: { 'name': searchText } } ],
+						filter: [ { term: { 'entity_type.keyword': 'topic'}}]
+					}
 				}
+			};
+			return query;
+		} catch (err) {
+			this.logger.error(err, 'YTP3YF0', '');
+		}
 	}
-	async getRecDocs(doc=["Title 10"], userId=""){
+	async getRecDocs(doc=['Title 10'], userId=''){
 		let recDocs = [];
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
@@ -2174,7 +2207,7 @@ class SearchUtility {
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
-				_source: ["title", "filename", "pop_score", "id"],
+				_source: ['title', 'filename', 'pop_score', 'id'],
 				from: offset,
 				size: limit,
 				query: {
@@ -2187,22 +2220,22 @@ class SearchUtility {
 				sort: [
 					{
 						'pop_score': {
-							order: "desc"
+							order: 'desc'
 						}
 					}
 				]
 			};
 			return query;
-			} catch (err) {
-				this.logger.error(err, 'PTF390A', '');
-			}
+		} catch (err) {
+			this.logger.error(err, 'PTF390A', '');
+		}
 	}	
 	async getPopularDocs(userId, esIndex) {
 		let popDocs = [];
 
 		try {
 			let popDocsQuery = this.getPopularDocsQuery();
-			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
+			let esResults = await this.dataLibrary.queryElasticSearch('gamechanger', esIndex, popDocsQuery, userId);
 			if (esResults) {
 				esResults.body.hits.hits.forEach((r) => {
 					let doc = {}
@@ -2225,9 +2258,9 @@ class SearchUtility {
 		try {
 			let query = {
 				_source: {
-					includes: ["pagerank_r", "kw_doc_score_r", "orgs_rs"]
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs']
 				},
-				stored_fields: ["filename", "title", "page_count", "doc_type", "doc_num", "topics_s","ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s"],
+				stored_fields: ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'topics_s','ref_list', 'id', 'summary_30', 'keyw_5', 'p_text', 'type', 'p_page', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'is_revoked_b', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s', 'download_url_s', 'source_page_url_s', 'source_fqdn_s'],
 				from: 0,
 				size: 18,
 				track_total_hits: true,
@@ -2237,7 +2270,7 @@ class SearchUtility {
 						should: [{
 							  query_string: {
 								  query: searchText,
-								  default_field: "crawler_used_s"
+								  default_field: 'crawler_used_s'
 							   }
 						  }],
 						minimum_should_match: 1
@@ -2246,19 +2279,19 @@ class SearchUtility {
 				highlight: {
 					require_field_match: false,
 					fields: {
-						"title.search": {},
-						"keyw_5": {},
-						"id": {},
-						"filename.search": {}
+						'title.search': {},
+						'keyw_5': {},
+						'id': {},
+						'filename.search': {}
 					},
 					fragment_size: 10,
-					fragmenter: "simple",
-					type: "unified",
-					boundary_scanner: "word"
+					fragmenter: 'simple',
+					type: 'unified',
+					boundary_scanner: 'word'
 				},
 				sort: [{
 					_score: {
-						order: "desc"
+						order: 'desc'
 					}
 				}]
 			}
@@ -2269,16 +2302,16 @@ class SearchUtility {
 	}
 	getOrgQuery() {
 		return {
-			"size": 0,
-			"aggs": {
-				"display_org": {
-					"composite": {
-						"size": 100,
-						"sources": [
+			'size': 0,
+			'aggs': {
+				'display_org': {
+					'composite': {
+						'size': 100,
+						'sources': [
 							{
-								"type": {
-									"terms": {
-										"field": "display_org_s"
+								'type': {
+									'terms': {
+										'field': 'display_org_s'
 									}
 								}
 							}
@@ -2291,16 +2324,16 @@ class SearchUtility {
 
 	getTypeQuery() {
 		return {
-			"size": 0,
-			"aggs": {
-				"display_type": {
-					"composite": {
-						"size": 100,
-						"sources": [
+			'size': 0,
+			'aggs': {
+				'display_type': {
+					'composite': {
+						'size': 100,
+						'sources': [
 							{
-								"type": {
-									"terms": {
-										"field": "display_doc_type_s"
+								'type': {
+									'terms': {
+										'field': 'display_doc_type_s'
 									}
 								}
 							}
@@ -2316,14 +2349,14 @@ class SearchUtility {
 		switch(meta){
 			case 'filenames':
 				source = [
-					"filename",
-					"display_title_s"
+					'filename',
+					'display_title_s'
 				]
 				break;
 			case 'all':
 				source = [
-					"filename",
-					"display_title_s",
+					'filename',
+					'display_title_s',
 					'doc_type',
 					'display_org_s',
 					'display_doc_type_s',
@@ -2335,14 +2368,14 @@ class SearchUtility {
 				source = []
 		}
 		return {
-			"_source": source,
-			"size": filenames.length,
-			"query": {
-				"bool": {
-					"must": [
+			'_source': source,
+			'size': filenames.length,
+			'query': {
+				'bool': {
+					'must': [
 						{
-							"terms": {
-								"filename.search": filenames
+							'terms': {
+								'filename.search': filenames
 							}
 						}
 					]
@@ -2646,7 +2679,7 @@ class SearchUtility {
 		const questionWords = ['who', 'what', 'where', 'when', 'how', 'why', 'can', 'may', 'will', 'won\'t', 'does', 'doesn\'t'];
 		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
 		const question = questionWords.find(item => item === searchTextList[0]) !== undefined || searchTextList[searchTextList.length - 1] === '?';
-	return question;
+		return question;
 	}
 	getElasticsearchDocDataFromId({ docIds }, user) {
 		try {
@@ -2801,14 +2834,13 @@ class SearchUtility {
 		return query;
 	}
 
-	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings}, userId) {
-
-		console.log(jbookSearchSettings)
+	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and'}, userId) {
 
 		const isVerbatimSearch = this.isVerbatim(searchText);
 		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
 
 		let query = {
+			track_total_hits: true,
 			from: offset,
 			size: limit,
 			aggregations: {
@@ -2821,10 +2853,90 @@ class SearchUtility {
 			},
 			query: {
 				bool: {
-					must: []
+					must: [],
+					should: [
+						{
+							multi_match: {
+								query: `${parsedQuery}`,
+								fields: esTopLevelFields,
+								type: 'best_fields',
+								operator: `${operator}`
+							}
+						}
+					]
 				}
+			},
+			highlight: {
+				fields: {}
 			}
 		};
+
+		esTopLevelFields.forEach(field => {
+			query.highlight.fields[field] = {};
+		});
+
+		esInnerHitFields.forEach(innerField => {
+			const nested = {
+				nested: {
+					path: innerField.path,
+					inner_hits: {
+						_source: false,
+						highlight: {
+							fields: {}
+						}
+					},
+					query: {
+						bool: {
+							should: [
+								{
+									multi_match: {
+										query: `${parsedQuery}`,
+										fields: innerField.fields,
+										type: 'best_fields',
+										operator: `${operator}`
+									}
+								}
+							]
+						}
+					}
+				}
+			};
+
+			innerField.fields.forEach(field => {
+				nested.nested.inner_hits.highlight.fields[field] = {};
+			});
+			query.query.bool.should.push(nested);
+		});
+
+
+
+		const wildcardList = {
+			'type_s': 1,
+			'key_s': 1,
+			'projectTitle_t': 1,
+			'projectNum_s': 6,
+			'programElementTitle_t': 1,
+			'serviceAgency_s': 2,
+			'appropriationTitle_t': 1,
+			'appropriationNumber_s': 6,
+			'budgetActivityTitle_t': 6,
+			'budgetActivityTitle_s': 6,
+			'programElement_s': 6,
+			'accountTitle_s': 1,
+			'budgetLineItemTitle_s': 1,
+			'budgetLineItem_s': 6
+		};
+
+		Object.keys(wildcardList).forEach((wildCardKey) => {
+			query.query.bool.should.push({
+				wildcard: {
+					[wildCardKey]: {
+						value: `*${plainQuery}*`,
+						boost: wildcardList[wildCardKey]
+					}
+				}
+			});
+		})
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
 			query.query.bool.must.push({
@@ -2833,6 +2945,8 @@ class SearchUtility {
 				}
 			});
 		}
+
+		// FILTERS
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
 			const budgetTypesTemp = [];
@@ -2858,6 +2972,27 @@ class SearchUtility {
 					type_s: budgetTypesTemp
 				}
 			});
+		}
+
+		// SORT
+		switch (jbookSearchSettings.sort[0].id) {
+			case 'budgetYear':
+				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'programElement':
+				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'projectNum':
+				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'projectTitle':
+				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			case 'serviceAgency':
+				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				break;
+			default:
+				break;
 		}
 
 		return query;
