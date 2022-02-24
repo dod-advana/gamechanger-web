@@ -399,6 +399,10 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
+			const mainMaxkeywords = 4;
+			let mainKeywords = plainQuery.split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			console.log(mainKeywords)
+
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -478,15 +482,7 @@ class SearchUtility {
 								wildcard: {
 									'keyw_5': {
 										value: `*${plainQuery}*`,
-										boost: 2
-									}
-								}
-							},
-							{
-								wildcard: {
-									'display_source': {
-										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 3
 									}
 								}
 							},
@@ -494,7 +490,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 8
+										boost: 10
 									}
 								}
 							},
@@ -502,7 +498,7 @@ class SearchUtility {
 								wildcard: {
 									'filename.search': {
 										value: `*${plainQuery}*`,
-										boost: 4
+										boost: 5
 									}
 								}
 							},
@@ -510,7 +506,7 @@ class SearchUtility {
 								wildcard: {
 									'display_source_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 3
 									}
 								}
 							},
@@ -518,15 +514,21 @@ class SearchUtility {
 								wildcard: {
 									'top_entities_t.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 3
 									}
 								}
 							},								
 							{
-								match: {
-									"display_title_s.search": plainQuery
-								}
+								query_string: {
+									fields: ['display_title_s.search'],
+									//default_field: 'display_title_s.search',
+									query: `*${mainKeywords}*`,
+									type: "best_fields",
+									boost: 4
+
+								}							
 							}
+							
 						],
 						minimum_should_match: 1,
 
@@ -652,7 +654,8 @@ class SearchUtility {
 			}
 
 			if (ltr) {
-				query.rescore = {
+				query.rescore = [{
+					window_size: 50,
 					query: {
 						rescore_query: {
 							sltr: {
@@ -661,7 +664,26 @@ class SearchUtility {
 							}
 						}
 					}					
-				}
+				},
+				{				
+					window_size: 100,
+					query: {
+					  rescore_query: {
+							bool:{
+								must: [{
+									rank_feature: {
+										field: "pagerank_r",
+										boost: 10
+									}}
+								]
+							}						
+						},
+						query_weight : 0.7,
+						rescore_query_weight : 5
+					  }
+					
+				  }
+			]
 			}
 
 			return query;
@@ -2041,7 +2063,6 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQueryForGraphCache(body, userId);
 				} else {
 					esQuery = this.getElasticsearchQuery(body, userId);
-					console.log(JSON.stringify(esQuery,null,4))
 				}
 			}
             const titleResults = await this.getTitle(body.searchText, clientObj, userId);
@@ -2049,7 +2070,6 @@ class SearchUtility {
 			let results;
 
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
-			console.log(results)
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);
