@@ -37,13 +37,13 @@ const styles = {
 	},
 	viewMoreChevron: {
 		fontSize: 14,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'normal',
 		marginLeft: 5,
 	},
 	viewMoreButton: {
 		fontSize: 16,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'bold',
 		cursor: 'pointer',
 		minWidth: 60,
