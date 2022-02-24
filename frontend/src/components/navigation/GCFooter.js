@@ -8,7 +8,6 @@ import DecoupledFooter from './DecoupledFooter';
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
-
 const FooterDiv = styled.div`
 	width: 100%;
 	-webkit-align-items: center;

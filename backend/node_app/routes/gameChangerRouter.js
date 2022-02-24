@@ -94,7 +94,7 @@ router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getS3DataList', transformer.getS3DataList);
 router.get('/admin/getModelsList', transformer.getModelsList);
 router.get('/admin/getDataList', transformer.getDataList);
-router.get('/admin/getCurrentTransformer', transformer.getCurrentTransformer);
+router.get('/admin/getLoadedModels', transformer.getLoadedModels);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
 router.get('/admin/initializeLTR', transformer.initializeLTR);
@@ -172,6 +172,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
   router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
   router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
   router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+  router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 
 }
 
