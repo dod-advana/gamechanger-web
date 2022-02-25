@@ -399,7 +399,7 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			const mainMaxkeywords = 4;
+			const mainMaxkeywords = 2;
 			let mainKeywords = plainQuery.split(' ').slice(0,mainMaxkeywords).join("* OR *")
 			console.log(mainKeywords)
 
@@ -522,9 +522,10 @@ class SearchUtility {
 								query_string: {
 									fields: ['display_title_s.search'],
 									//default_field: 'display_title_s.search',
-									query: `*${mainKeywords}*`,
+									query: `${mainKeywords}*`,
 									type: "best_fields",
-									boost: 4
+									boost: 6,
+									analyzer
 
 								}							
 							}
@@ -673,13 +674,13 @@ class SearchUtility {
 								must: [{
 									rank_feature: {
 										field: "pagerank_r",
-										boost: 10
+										boost: 5
 									}}
 								]
 							}						
 						},
 						query_weight : 0.7,
-						rescore_query_weight : 5
+						rescore_query_weight : 2
 					  }
 					
 				  }
