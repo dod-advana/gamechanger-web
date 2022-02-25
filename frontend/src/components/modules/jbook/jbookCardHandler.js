@@ -586,7 +586,7 @@ const jbookCardHandler = {
 					<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
 						<div className={'currents-as-of-div'}>
 							<div className={'current-text'}>
-								{currentAsOfText}
+								{/*currentAsOfText*/}
 							</div>
 						</div>
 						<div className={'hits-container'}>
