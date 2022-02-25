@@ -298,7 +298,12 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId);
-			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			let expansionDict = {}
+
+			if (req.body.searchText && req.body.searchText !== ''){
+				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			}
+
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
@@ -327,7 +332,11 @@ class JBookSearchHandler extends SearchHandler {
 
 			const perms = req.permissions;
 
-			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			let expansionDict = {}
+
+			if (searchText && searchText !== ''){
+				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
