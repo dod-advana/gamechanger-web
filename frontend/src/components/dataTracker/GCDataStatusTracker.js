@@ -16,6 +16,11 @@ import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 
+const GoalIcon = styled.div`
+	height: 20px;
+	width: 75px;
+`;
+
 const TableRow = styled.div`
 	text-align: left;
 	height: fit-content;
@@ -24,12 +29,16 @@ const CenterRow = styled.div`
 	text-align: center;
 	height: 20px;
 `;
-const GoalsLabel = styled.div`
-	margin: 0px 0px 20px 80px;
+const SectionHeader = styled.div`
+	display: flex;
+	margin-bottom: 20px;
+	background-color: #F7F7F7;
+	border-radius: 12px;
+	padding: 20px;
 `;
 
 const StyledNeo4jTable = styled.div`
-	margin: -10px 80px 20px 80px;
+	margin: 0px 0px 20px 0px;
 	height: 690px;
 
 	> .details-paragraph {
@@ -59,6 +68,24 @@ const StyledNeo4jTable = styled.div`
 		}
 	}
 `;
+
+const styles = {
+	tableHeader: {
+		fontSize: 14, 
+		fontWeight: 'bold', 
+		textAlign: 'center', 
+		textTransform: 'uppercase'
+	},
+	legendItem: {
+		margin: '0px 5px',
+		textAlign: 'center'
+	},
+	legendText: {
+		fontSize: '14px',
+		textTransform: 'uppercase',
+		fontWeight: 'bold'
+	}
+}
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -532,7 +559,7 @@ const GCDataStatusTracker = (props) => {
 			<ReactTable
 				data={dataTableData}
 				columns={dataColumns}
-				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 700 }}
+				style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={true}
@@ -556,7 +583,7 @@ const GCDataStatusTracker = (props) => {
 					};
 				}}
 				getTheadThProps={() => {
-					return { style: { fontSize: 15, fontWeight: 'bold' } };
+					return { style: styles.tableHeader };
 				}}
 			/>
 		);
@@ -650,7 +677,7 @@ const GCDataStatusTracker = (props) => {
 			<ReactTable
 				data={crawlerTableData}
 				columns={crawlerColumns}
-				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 1000 }}
+				style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
 				pageSize={PAGE_SIZE}
 				showPageSizeOptions={false}
 				filterable={false}
@@ -668,7 +695,7 @@ const GCDataStatusTracker = (props) => {
 					};
 				}}
 				getTheadThProps={() => {
-					return { style: { fontSize: 15, fontWeight: 'bold' } };
+					return { style: styles.tableHeader };
 				}}
 			/>
 		);
@@ -718,41 +745,48 @@ const GCDataStatusTracker = (props) => {
 
 		return (
 			<div>
-				<GoalsLabel>
-					<Typography variant="body1"> Data Update Goals:</Typography>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Updates Overview</Typography>
+						<div>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application Overview for detailed metric description.</div>
+					</div>
 					<div
 						style={{
 							display: 'flex',
 							alignItems: 'center',
-							flexWrap: 'wrap',
+							marginLeft: '10px'
 						}}
-					>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: green[500], margin: '0px 0px 0px 5px' }}
-						/>
-						<span>{'<'} 7 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: yellow[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'<'} 14 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: orange[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'<'} 30 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: red[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'>'} 30 Days </span>
+					>	
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>{'<'} 7 Days </span>
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
+							/>
+						</div>
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>{'<'} 14 Days </span>
+							<GoalIcon
+								style={{ backgroundColor: yellow[500] }}
+							/>
+						</div>
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>{'<'} 30 Days </span>
+							<GoalIcon
+								style={{ backgroundColor: orange[500] }}
+							/>
+						</div>
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>{'>'} 30 Days </span>
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
+							/>
+						</div>
 					</div>
-				</GoalsLabel>
+				</SectionHeader>
 				<ReactTable
 					data={crawlerTableUpdate}
 					columns={crawlerColumns}
-					style={{ margin: '0 80px 20px 80px', height: 1000 }}
+					style={{ margin: '0 0 20px 0', height: 1000 }}
 					pageSize={20}
 					showPageSizeOptions={false}
 					filterable={false}
@@ -771,7 +805,7 @@ const GCDataStatusTracker = (props) => {
 						};
 					}}
 					getTheadThProps={() => {
-						return { style: { fontSize: 15, fontWeight: 'bold' } };
+						return { style: styles.tableHeader };
 					}}
 				/>
 			</div>
@@ -784,19 +818,19 @@ const GCDataStatusTracker = (props) => {
 
 		return (
 			<StyledNeo4jTable>
-				<div className={'details-paragraph'}>
-					<Typography variant="body2">
-						The following tables and chart describe the schema in the Knowledge
-						Graph. The table on the left lists the Nodes and Relationships by
-						"Label" along with the property names and the types of those
-						properties.
-					</Typography>
-					<Typography variant="body2">
-						The table in the bottom right lists the different Nodes and
-						Relationships and the counts. The chart graphically describes the
-						schema of the Knowledge Graph.
-					</Typography>
-				</div>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Knowledge Overview</Typography>
+						<Typography variant="body2">
+							The following tables and chart describe the schema in the Knowledge
+							Graph. The table on the left lists the Nodes and Relationships by
+							"Label" along with the property names and the types of those
+							properties. The table in the bottom right lists the different Nodes and
+							Relationships and the counts. The chart graphically describes the
+							schema of the Knowledge Graph.
+						</Typography>
+					</div>
+				</SectionHeader>
 				<div className={'columns'}>
 					<div className={'left-column'}>
 						<div className={'properties-schema'}>
@@ -820,7 +854,7 @@ const GCDataStatusTracker = (props) => {
 									};
 								}}
 								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
+									return { style: styles.tableHeader };
 								}}
 							/>
 						</div>
@@ -862,7 +896,7 @@ const GCDataStatusTracker = (props) => {
 									};
 								}}
 								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
+									return { style: styles.tableHeader };
 								}}
 							/>
 						</div>
@@ -880,21 +914,8 @@ const GCDataStatusTracker = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: `5px 0 0 0`,
-							}}
-							title="userHistory"
-							onClick={() => handleTabClicked('documents')}
-						>
-							<Typography variant="h6" display="inline" title="cardView">
-								DOCUMENTS
-							</Typography>
-						</Tab>
-						<Tab
-							style={{
-								...TabStyles.tabStyle,
 								...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: '0 0 0 0',
+								borderRadius: `5px 0 0 0`,
 							}}
 							title="crawlerTable"
 							onClick={() => handleTabClicked('crawler')}
@@ -919,6 +940,19 @@ const GCDataStatusTracker = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
+								...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
+								borderRadius: '0 0 0 0',
+							}}
+							title="userHistory"
+							onClick={() => handleTabClicked('documents')}
+						>
+							<Typography variant="h6" display="inline" title="cardView">
+								DOCUMENTS
+							</Typography>
+						</Tab>
+						<Tab
+							style={{
+								...TabStyles.tabStyle,
 								...(tabIndex === 'neo4j' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 5px 0 0`,
 							}}
@@ -935,9 +969,9 @@ const GCDataStatusTracker = (props) => {
 				</div>
 
 				<div style={TabStyles.panelContainer}>
-					<TabPanel>{renderDataTable()}</TabPanel>
 					<TabPanel>{renderCrawlerData()}</TabPanel>
 					<TabPanel>{renderVersionTable()}</TabPanel>
+					<TabPanel>{renderDataTable()}</TabPanel>
 					<TabPanel>{renderNeo4jTable()}</TabPanel>
 				</div>
 			</Tabs>
