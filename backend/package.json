@@ -20,8 +20,8 @@
   "author": "",
   "license": "ISC",
   "resolutions": {
-		"node-forge": "^1.2.1"
-	},
+    "node-forge": "^1.2.1"
+  },
   "dependencies": {
     "@dod-advana/advana-api-auth": "^0.0.23",
     "@elastic/elasticsearch": "7.13.0",
@@ -42,6 +42,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "lunr": "^2.3.9",
+    "moment": "2.29.1",
     "mysql": "^2.18.1",
     "neo4j-driver": "^4.2.2",
     "npm-force-resolutions": "0.0.10",
