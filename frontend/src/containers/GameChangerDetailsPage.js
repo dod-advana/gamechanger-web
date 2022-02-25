@@ -862,14 +862,11 @@ const GameChangerDetailsPage = (props) => {
 										height={670}
 										graphData={graph}
 										runningSearchProp={runningQuery}
-										notificationCountProp={0}
 										setDocumentsFound={() => {}}
 										setTimeFound={() => {}}
 										cloneData={cloneData}
-										expansionTerms={false}
 										setNumOfEdges={() => {}}
 										dispatch={{}}
-										showSideFilters={false}
 										showBasic={false}
 										searchText={''}
 										hierarchyView={hierarchyView}

@@ -27,6 +27,7 @@ import { SvgIcon } from '@material-ui/core';
 import { trackEvent } from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';
+import Typography from '@material-ui/core/Typography';
 
 const NODE_ALPHA = 1;
 const HIDDEN_NODE_ALPHA = 0.08;
@@ -40,11 +41,11 @@ const edgePatterns = [[], ...shuffleArray(EDGE_PATTERNS)];
 
 const styles = {
 	loading: {
-		position: 'absolute',
+		position: 'fixed',
 		zIndex: '99',
 		left: '50%',
 		top: '50%',
-		transform: 'translate(-50%, -50%)',
+		transform: 'translate(50%, -30%)',
 	},
 	legendKey: {
 		margin: '8px',
@@ -290,7 +291,9 @@ export default function GraphNodeCluster2D(props) {
 		nodeGroupMenuOpenProp = undefined,
 		nodeGroupMenuTargetProp = undefined,
 		nodeGroupMenuLabelProp = undefined,
+		setNodeGroupMenuLabelProp = () => {},
 		closeGroupNodeMenu = undefined,
+		orgTypesSelected = [],
 	} = props;
 
 	const graphRef = useRef();
@@ -329,6 +332,8 @@ export default function GraphNodeCluster2D(props) {
 	const [dagMode, setDagMode] = React.useState(false);
 	
 	const [resetGraphClicked, setResetGraphClicked] = React.useState(false);
+
+	const legendRef = React.useRef();
 
 	const { nodes, edges } = graph;
 	const graphData = { nodes, links: edges };
@@ -627,7 +632,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleRenderLegend = () => {
 		return (
-			<div style={{ ...styles.legendKey, maxHeight: `calc(${graphHeight}px - 15px)` }}>
+			<div ref={legendRef} style={{ ...styles.legendKey, maxHeight: `calc(${graphHeight}px - 15px)` }}>
 				<div style={styles.legendRow} key="legendKeys">
 					<div style={{ fontWeight: 'bold' }}>Icon</div>
 					<div style={{ fontWeight: 'bold', marginLeft: '1em', width: '80%' }}>
@@ -711,27 +716,95 @@ export default function GraphNodeCluster2D(props) {
 		}
 	};
 
-	const renderNodeGroupMenu = () => {
-		const nodesInGroup = graphData.nodes.filter((node) => {
-			return (
-				node.display_org_s ?
-					node.display_org_s === nodeGroupMenuLabelProp || nodeGroupMenuLabel :
-					node.label === nodeGroupMenuLabelProp || nodeGroupMenuLabel
-			);
+	const ACTIVE_TAB_COLOR = 'rgb(68,111,145)';
+
+	const legendStyles = {
+		container: {
+			display: 'flex',
+			alignItems: 'center',
+			height: '100%',
+		},
+		left: {
+			width: 440,
+			padding: '0 10px',
+			height: '100%',
+			display: 'flex',
+			alignItems: 'center',
+		},
+		tabsContainer: {
+			height: '100%',
+			width: '100%',
+	
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'flex-start',
+		},
+		activeTab: {
+			borderBottom: `4px solid ${ACTIVE_TAB_COLOR}`,
+			color: ACTIVE_TAB_COLOR,
+		},
+		tab: {
+			cursor: 'pointer',
+			borderBottom: '4px solid transparent',
+			fontWeight: '500',
+			fontSize: 15,
+			textTransform: 'capitalize',
+			margin: '0px 5px',
+			overflow: 'hidden',
+			whiteSpace: 'nowrap',
+			minWidth: 62,
+			textOverflow: 'ellipsis',
+		},
+	};
+
+	// construct 2d array from a 1d array of filters to match structure of filter tab table
+	const make2dArray = (filters) => {
+		const TABS_PER_ROW = 4;
+		const array2d = [];
+		let row = [];
+
+		filters.forEach((type) => {
+			if (row.length < TABS_PER_ROW) {
+				row.push(type);
+			} else {
+				array2d.push(row);
+				row = [type];
+			}
 		});
+		
+		if (row.length > 0) array2d.push(row);
+
+		return array2d;
+	};
+
+	const setActiveTab = (tab) => {
+		setNodeGroupMenuLabelProp(tab);
+	};
+
+	const renderNodeGroupMenu = () => {
+		const activeFilterTab = nodeGroupMenuLabel || nodeGroupMenuLabelProp ||
+			(orgTypesSelected.length > 0 ? orgTypesSelected[0] : undefined);
+		const filterTab2dArray = make2dArray(orgTypesSelected);
+		const nodesInGroup = graphData.nodes.filter((node) => {
+			if (activeFilterTab === 'All Documents') {
+				return (node.label === 'Document' || node.label === 'UKN_Document');
+			}
+			return (node.display_org_s ? node.display_org_s === activeFilterTab : node.label === activeFilterTab);
+		});
+
 		return (
 			<Popper
 				onClose={() => handleCloseGroupNodeMenu()}
 				id={'graph-legend-node-group'}
 				open={nodeGroupMenuOpenProp || nodeGroupMenuOpen}
-				anchorEl={nodeGroupMenuTargetProp || nodeGroupMenuTarget}
+				anchorEl={legendRef.current || nodeGroupMenuTargetProp || nodeGroupMenuTarget}
 				placement={'right-start'}
-				modifiers={{ offset: { offset: '-20, 30' } }}
+				modifiers={{ offset: { offset: '0, 10' } }}
 				style={{ zIndex: 1000 }}
 			>
 				<div
 					style={{
-						padding: '0px 15px 10px',
+						padding: '0px 0px 10px',
 						border: '1px solid lightgray',
 						borderRadius: '6px',
 						backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -742,13 +815,38 @@ export default function GraphNodeCluster2D(props) {
 							<CloseIcon fontSize="small" />
 						</CloseButton>
 					</div>
-					<div style={{ width: 250, margin: 5 }}>
-						<div style={{ margin: '16px 15px 0' }}>
-							<span style={{ fontWeight: 'bold' }}>Nodes in Group</span>
+					<div style={{ width: 290 }}>
+						<div style={{ margin: '16px 0px 0px' }}>
+							<span style={{ fontWeight: 'bold', marginLeft: 10 }}>Nodes in Group</span>
+							<div style={{ margin: '14px 0px', borderBottom: '1px solid lightgray', borderTop: '1px solid lightgray' }}>
+								{filterTab2dArray.map(row => (
+									<div style={legendStyles.tabsContainer}>
+										{
+											row.map(tab => (
+												<GCTooltip title={tab} enterDelay={30}>
+													<Typography
+														key={tab}
+														style={
+															activeFilterTab === tab ?
+																{ ...legendStyles.tab, ...legendStyles.activeTab } :
+																{ ...legendStyles.tab }
+														}
+														variant="body1"
+														onClick={() => setActiveTab(tab)}
+													>
+														{tab}
+													</Typography>
+												</GCTooltip>
+											))
+										}
+									</div>
+								))}
+							</div>
 							<div
 								style={{
 									marginTop: 2,
 									marginRight: 10,
+									marginLeft: 10,
 									maxHeight: 400,
 									overflow: 'auto',
 								}}
@@ -1457,7 +1555,7 @@ export default function GraphNodeCluster2D(props) {
 	};
 
 	return (
-		<div id={'graph2dContainer'} style={{ ...style, textAlign: 'left' }}>
+		<div id={'graph2dContainer'} style={{ ...style, textAlign: 'left', position: 'relative' }}>
 			{showSettingsMenu && (
 				<div
 					style={{

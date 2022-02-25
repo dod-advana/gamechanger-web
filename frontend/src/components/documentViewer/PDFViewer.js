@@ -22,8 +22,8 @@ export default function PDFViewer({ location }) {
 		(node) => {
 			if (node !== null && filename) {
 				gameChangerAPI.getCloneMeta({ cloneName: cloneIndex }).then((data) => {
-					let isDLA;
-					if(fileUrl.split('.').includes('dla')) isDLA = true;
+					let isDLA = false;
+					if(fileUrl?.split('.').includes('dla')) isDLA = true;
 					if (filename) {
 						const encoded = encode(filename);
 						gameChangerAPI
