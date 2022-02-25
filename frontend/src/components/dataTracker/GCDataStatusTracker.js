@@ -74,7 +74,8 @@ const styles = {
 		fontSize: 14, 
 		fontWeight: 'bold', 
 		textAlign: 'center', 
-		textTransform: 'uppercase'
+		textTransform: 'uppercase',
+		borderBottom: '1px solid rgba(0,0,0,0.05)'
 	},
 	legendItem: {
 		margin: '0px 5px',
@@ -556,36 +557,51 @@ const GCDataStatusTracker = (props) => {
 		];
 
 		return (
-			<ReactTable
-				data={dataTableData}
-				columns={dataColumns}
-				style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
-				pageSize={PAGE_SIZE}
-				showPageSizeOptions={false}
-				filterable={true}
-				loading={loading}
-				manual={true}
-				pages={numPages}
-				onFetchData={handleFetchData}
-				defaultSorted={[
-					{
-						id: 'pub_type',
-						desc: false,
-					},
-				]}
-				getTheadTrProps={() => {
-					return {
-						style: {
-							height: 'fit-content',
-							textAlign: 'left',
-							fontWeight: 'bold',
+			<>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Document Overview</Typography>
+						<Typography variant="body2">
+							The following tables and chart describe the schema in the Knowledge
+							Graph. The table on the left lists the Nodes and Relationships by
+							"Label" along with the property names and the types of those
+							properties. The table in the bottom right lists the different Nodes and
+							Relationships and the counts. The chart graphically describes the
+							schema of the Knowledge Graph.
+						</Typography>
+					</div>
+				</SectionHeader>
+				<ReactTable
+					data={dataTableData}
+					columns={dataColumns}
+					style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
+					pageSize={PAGE_SIZE}
+					showPageSizeOptions={false}
+					filterable={true}
+					loading={loading}
+					manual={true}
+					pages={numPages}
+					onFetchData={handleFetchData}
+					defaultSorted={[
+						{
+							id: 'pub_type',
+							desc: false,
 						},
-					};
-				}}
-				getTheadThProps={() => {
-					return { style: styles.tableHeader };
-				}}
-			/>
+					]}
+					getTheadTrProps={() => {
+						return {
+							style: {
+								height: 'fit-content',
+								textAlign: 'left',
+								fontWeight: 'bold',
+							},
+						};
+					}}
+					getTheadThProps={() => {
+						return { style: styles.tableHeader };
+					}}
+				/>
+			</>
 		);
 	};
 
@@ -674,30 +690,45 @@ const GCDataStatusTracker = (props) => {
 		];
 
 		return (
-			<ReactTable
-				data={crawlerTableData}
-				columns={crawlerColumns}
-				style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
-				pageSize={PAGE_SIZE}
-				showPageSizeOptions={false}
-				filterable={false}
-				loading={loading}
-				manual={true}
-				pages={numPages}
-				onFetchData={handleFetchCrawlerData}
-				getTheadTrProps={() => {
-					return {
-						style: {
-							height: 'fit-content',
-							textAlign: 'left',
-							fontWeight: 'bold',
-						},
-					};
-				}}
-				getTheadThProps={() => {
-					return { style: styles.tableHeader };
-				}}
-			/>
+			<>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Progress Overview</Typography>
+						<Typography variant="body2">
+							The following tables and chart describe the schema in the Knowledge
+							Graph. The table on the left lists the Nodes and Relationships by
+							"Label" along with the property names and the types of those
+							properties. The table in the bottom right lists the different Nodes and
+							Relationships and the counts. The chart graphically describes the
+							schema of the Knowledge Graph.
+						</Typography>
+					</div>
+				</SectionHeader>
+				<ReactTable
+					data={crawlerTableData}
+					columns={crawlerColumns}
+					style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
+					pageSize={PAGE_SIZE}
+					showPageSizeOptions={false}
+					filterable={false}
+					loading={loading}
+					manual={true}
+					pages={numPages}
+					onFetchData={handleFetchCrawlerData}
+					getTheadTrProps={() => {
+						return {
+							style: {
+								height: 'fit-content',
+								textAlign: 'left',
+								fontWeight: 'bold',
+							},
+						};
+					}}
+					getTheadThProps={() => {
+						return { style: styles.tableHeader };
+					}}
+				/>
+			</>
 		);
 	};
 
