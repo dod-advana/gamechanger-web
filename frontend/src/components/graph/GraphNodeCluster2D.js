@@ -41,11 +41,11 @@ const edgePatterns = [[], ...shuffleArray(EDGE_PATTERNS)];
 
 const styles = {
 	loading: {
-		position: 'absolute',
+		position: 'fixed',
 		zIndex: '99',
 		left: '50%',
 		top: '50%',
-		transform: 'translate(-50%, -50%)',
+		transform: 'translate(50%, -30%)',
 	},
 	legendKey: {
 		margin: '8px',
@@ -1555,7 +1555,7 @@ export default function GraphNodeCluster2D(props) {
 	};
 
 	return (
-		<div id={'graph2dContainer'} style={{ ...style, textAlign: 'left' }}>
+		<div id={'graph2dContainer'} style={{ ...style, textAlign: 'left', position: 'relative' }}>
 			{showSettingsMenu && (
 				<div
 					style={{
