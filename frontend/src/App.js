@@ -6,7 +6,6 @@ import {
 	Switch,
 } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
-import 'react-select/dist/react-select.css';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
 import { getProvider } from './components/factories/contextFactory';
 import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement';
