@@ -207,6 +207,7 @@ const JBookProfilePage = (props) => {
 	}, []);
 
 	useEffect(() => {
+		console.log(projectData)
 		if (projectData.id) {
 			if (!isCheckboxSet) {
 				setIsCheckboxSet(true);

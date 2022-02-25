@@ -58,6 +58,7 @@ class SearchUtility {
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
 		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
+		this.getElasticSearchJBookDataFromId = this.getElasticSearchJBookDataFromId.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -2996,6 +2997,24 @@ class SearchUtility {
 		}
 
 		return query;
+	}
+
+	getElasticSearchJBookDataFromId({docIds}, userId) {
+		try {
+			return {
+				track_total_hits: true,
+				size: 100,
+				query: {
+					bool: {
+						must: {
+							terms: {key_s: docIds}
+						}
+					}
+				}
+			};
+		} catch (err) {
+			this.logger.error(err, '1F07MYM', userId);
+		}
 	}
 
 }
