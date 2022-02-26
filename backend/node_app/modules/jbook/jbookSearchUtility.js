@@ -3,10 +3,10 @@ const constantsFile = require('../../config/constants');
 const SearchUtility = require('../../utils/searchUtility');
 const Mappings = require('./jbookDataMapping');
 const _ = require('underscore');
-const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping} = require('./jbookDataMapping');
-const {MLApiClient} = require('../../lib/mlApiClient');
+const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping } = require('./jbookDataMapping');
+const { MLApiClient } = require('../../lib/mlApiClient');
 const asyncRedisLib = require('async-redis');
-const {Thesaurus} = require('../../lib/thesaurus');
+const { Thesaurus } = require('../../lib/thesaurus');
 const abbreviationRedisAsyncClientDB = 9;
 
 class JBookSearchUtility {
@@ -86,7 +86,7 @@ class JBookSearchUtility {
 		return mapping;
 	}
 
-	getDocCols(docType) {
+	getDocCols(docType, totals = false) {
 		let fields = [];
 		let mapping = this.getMapping(docType, true);
 		let reviewMapping = this.getMapping('review', true);
@@ -156,13 +156,15 @@ class JBookSearchUtility {
 				} else {
 					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`)
 				}
-			} else if (reviewMapping[field]) {
+			} else if (reviewMapping[field] && !totals) {
 				// console.log(field + ' : ' + mapping[field].newName)
 				fields.push(`r."${reviewMapping[field].newName}" AS "${field}"`);
 			}
 			else {
 				if (['allPriorYearsAmount', 'priorYearAmount', 'currentYearAmount'].includes(field)) {
 					fields.push(`cast(NULL AS DOUBLE PRECISION) AS "${field}"`);
+				} else if (totals) {
+					// skip any field not pertaining to doc type
 				} else {
 					fields.push(`'' AS "${field}"`);
 				}
@@ -366,6 +368,88 @@ class JBookSearchUtility {
 		return [pQuery, rQuery, oQuery];
 	}
 
+	buildSelectQueryForTotals() {
+		// console.log(this.getDocCols('pdoc').join(', '));
+		// console.log(this.getDocCols('rdoc').join(', '));
+		// console.log(this.getDocCols('odoc').join(', '));
+
+		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', true).join(', ')}, p.id as id FROM pdoc p`;
+		let rQuery = `SELECT DISTINCT ${this.getDocCols('rdoc', true).join(', ')}, rd.id as id FROM rdoc rd`;
+		let oQuery = `SELECT DISTINCT ${this.getDocCols('odoc', true).join(', ')}, o.id as id FROM om o`;
+
+		return [pQuery, rQuery, oQuery];
+	}
+
+	buildWhereQueryForTotals(jbookSearchSettings, hasSearchText, keywordIds, perms, userId) {
+		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
+		let rQueryFilter = `"PE_Num" is not null AND "PE_Num" != '' AND "Proj_Number" is not null AND "Proj_Number" != '' AND "Proj_Title" is not null AND "Proj_Title" != ''`;
+		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
+
+		const pDocSearchQueryArray = Mappings['pdocSearchMapping'].map(pdocSearchText => { return `"${pdocSearchText}" @@ to_tsquery('english', :searchText)`; });
+		const rDocSearchQueryArray = Mappings['rdocSearchMapping'].map(rdocSearchText => { return `"${rdocSearchText}" @@ to_tsquery('english', :searchText)`; });
+		const oDocSearchQueryArray = Mappings['odocSearchMapping'].map(odocSearchText => { return `"${odocSearchText}" @@ to_tsquery('english', :searchText)`; });
+
+		let pQuery = hasSearchText ? ` WHERE ( ${pDocSearchQueryArray.join(' OR ')} AND ${pQueryFilter} )` : ` WHERE ${pQueryFilter}`;
+		let rQuery = hasSearchText ? ` WHERE ( ${rDocSearchQueryArray.join(' OR ')} AND ${rQueryFilter} )` : ` WHERE ${rQueryFilter}`;
+		let oQuery = hasSearchText ? ` WHERE ( ${oDocSearchQueryArray.join(' OR ')} AND ${oQueryFilter} )` : ` WHERE ${oQueryFilter}`;
+
+
+		for (const setting in jbookSearchSettings) {
+			switch (setting) {
+				case 'reviewStatus':
+					break;
+				case 'primaryClassLabel':
+					break;
+				case 'serviceReviewer':
+					break;
+				case 'pocReviewer':
+					break;
+				case 'sourceTag':
+					break;
+				case 'serviceAgency':
+					break;
+				case 'budgetYear':
+					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
+						const yearString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const hasNull = jbookSearchSettings[setting].includes('Blank');
+						if (hasNull) {
+							pQuery += ` AND (p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString} OR p."${this.mapFieldName('pdoc', setting, true)}" = '' OR p."${this.mapFieldName('pdoc', setting, true)}" IS NULL )`;
+							rQuery += ` AND (rd."${this.mapFieldName('rdoc', setting, true)}" IN ${yearString} OR rd."${this.mapFieldName('rdoc', setting, true)}" = '' OR rd."${this.mapFieldName('rdoc', setting, true)}" IS NULL)`;
+							oQuery += ` AND (o."${this.mapFieldName('odoc', setting, true)}" IN ${yearString} OR o."${this.mapFieldName('odoc', setting, true)}" = '' OR o."${this.mapFieldName('odoc', setting, true)}" IS NULL)`;
+						} else {
+							pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString}`;
+							rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" IN ${yearString}`;
+							oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" IN ${yearString}`;
+						}
+					} else if (typeof jbookSearchSettings[setting] === 'string') {
+						pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+						rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+						oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					}
+					break;
+				case 'programElement':
+					// pQuery += ` AND p."P40-01_LI_Number" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					// oQuery += ` AND (o."${this.mapFieldName('odoc', 'programElement', true)}" ILIKE '%${jbookSearchSettings[setting]}%' OR o."${this.mapFieldName('odoc', 'budgetLineItem', true)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
+					break;
+				case 'projectNum':
+					// pQuery += ` AND p."P40-01_LI_Number" ILIKE 'THIS IS HERE TO MAKE SURE YOU DONT GET RESULTS'`;
+					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					// oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					break;
+				case 'projectTitle':
+					// pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					// oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
+					break;
+				default:
+					break;
+			}
+		}
+
+		return [pQuery, rQuery, oQuery];
+	}
+
 	buildWhereQueryForUserDash(jbookSearchSettings) {
 		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
 		let rQueryFilter = `"PE_Num" is not null AND "PE_Num" != '' AND "Proj_Number" is not null AND "Proj_Number" != '' AND "Proj_Title" is not null AND "Proj_Title" != ''`;
@@ -485,7 +569,7 @@ class JBookSearchUtility {
 		} = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
+			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
@@ -497,13 +581,13 @@ class JBookSearchUtility {
 		}
 	}
 
-	async mlApiExpansion(termsArray, forCacheReload, userId){
+	async mlApiExpansion(termsArray, forCacheReload, userId) {
 		let expansionDict = {};
 		try {
 			expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId, 'jbook');
 		} catch (e) {
 			// log error and move on, expansions are not required
-			if (forCacheReload){
+			if (forCacheReload) {
 				throw Error('Cannot get expanded search terms in cache reload');
 			}
 			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', 'LH48NHI', userId);
@@ -511,7 +595,7 @@ class JBookSearchUtility {
 		return expansionDict;
 	}
 
-	async abbreviationCleaner(termsArray){
+	async abbreviationCleaner(termsArray) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
@@ -551,17 +635,17 @@ class JBookSearchUtility {
 		return cleanedAbbreviations;
 	}
 
-	thesaurusExpansion(searchText, termsArray){
+	thesaurusExpansion(searchText, termsArray) {
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
 		let synList = []
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for(var term in termsArray){
+			for (var term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
-				if (synonyms && synonyms.length > 1){
-					synList = synList.concat(synonyms.slice(0,2))
+				if (synonyms && synonyms.length > 1) {
+					synList = synList.concat(synonyms.slice(0, 2))
 				}
 			}
 		}
@@ -579,7 +663,7 @@ class JBookSearchUtility {
 		const results = [];
 
 		try {
-			let searchResults = {totalCount: 0, docs: []};
+			let searchResults = { totalCount: 0, docs: [] };
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
@@ -656,7 +740,7 @@ class JBookSearchUtility {
 
 		for (let key in raw) {
 			let newKey = key;
-			if (Object.keys(mapping).includes(key)){
+			if (Object.keys(mapping).includes(key)) {
 				newKey = mapping[key].newName;
 			}
 

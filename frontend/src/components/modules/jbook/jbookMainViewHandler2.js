@@ -24,7 +24,7 @@ import FeedbackModal from './jbookFeedbackModal';
 import {
 	styles
 } from './jbookMainViewStyles';
-import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
+import { handleTabClicked, populateDropDowns, getContractTotals } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';
@@ -61,6 +61,8 @@ const jbookMainViewHandler = {
 
 		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
+		// const { contractTotals } = await getContractTotals(state, dispatch);
+
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url) ?? '';
 		let mainTabSelected = 0;
@@ -68,7 +70,7 @@ const jbookMainViewHandler = {
 		// 	mainTabSelected = 1;
 		// }
 		// the main setstate that triggers the initial search
-		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions: {...state.defaultOptions, ...defaultOptions}, dropdownData });
+		setState(dispatch, { searchText, loading: true, runSearch: true, mainTabSelected, urlSearch: true, jbookSearchSettings, defaultOptions: { ...state.defaultOptions, ...defaultOptions }, dropdownData });
 	},
 
 	renderHideTabs(props) {
@@ -178,11 +180,11 @@ const jbookMainViewHandler = {
 
 						<StyledCenterContainer showSideFilters={showSideFilters}>
 							<div className={'top-container'}>
-								<div style={{padding: 10, zIndex: 99}}>
+								<div style={{ padding: 10, zIndex: 99 }}>
 									{Permissions.permissionValidator(`Gamechanger Super Admin`, true) &&
 										<GCToggle
 											onClick={() => {
-												setState(dispatch, {useElasticSearch: !state.useElasticSearch, runSearch: true});
+												setState(dispatch, { useElasticSearch: !state.useElasticSearch, runSearch: true });
 											}}
 											rightActive={state.useElasticSearch}
 											leftLabel={'Use PG'}
@@ -192,15 +194,15 @@ const jbookMainViewHandler = {
 									}
 								</div>
 
-								{!hideTabs && <ViewHeader {...props} extraStyle={{marginRight: -15, marginTop: 5}}/>}
+								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
 							{showSideFilters && (
-								<div className={'left-container'} style={{marginTop: -65}}>
+								<div className={'left-container'} style={{ marginTop: -65 }}>
 									<div className={'side-bar-container'}>
 										<GameChangerSearchMatrix context={context} />
-										{ (state.expansionDict && Object.keys(state.expansionDict).length > 0) && (
+										{(state.expansionDict && Object.keys(state.expansionDict).length > 0) && (
 											<>
-												<div className={'sidebar-section-title'} style={{marginLeft: 5}}>RELATED</div>
+												<div className={'sidebar-section-title'} style={{ marginLeft: 5 }}>RELATED</div>
 												<JBookSideBar
 													context={context}
 													cloneData={state.cloneData}
@@ -211,7 +213,7 @@ const jbookMainViewHandler = {
 								</div>
 							)}
 
-							<div className={'right-container'} style={{marginTop: -75}}>
+							<div className={'right-container'} style={{ marginTop: -75 }}>
 								<div
 									className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 									style={{ padding: 0 }}
@@ -231,7 +233,7 @@ const jbookMainViewHandler = {
 											style={{ ...sideScroll, padding: 0 }}
 										>
 											<Tabs selectedIndex={mainTabSelected ?? 0}>
-												<div style={{...styles.tabButtonContainer, background: 'transparent'}}>
+												<div style={{ ...styles.tabButtonContainer, background: 'transparent' }}>
 													<TabList style={styles.tabsList}>
 														<div style={{ flex: 1, display: 'flex' }}>
 															<Tab style={{

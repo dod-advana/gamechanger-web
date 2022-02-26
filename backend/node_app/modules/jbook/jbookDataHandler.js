@@ -88,7 +88,7 @@ class JBookDataHandler extends DataHandler {
 	// budget line item : pdoc and project num : rdoc
 	async getProjectData(req, userId) {
 
-		const {useElasticSearch  = false} = req.body
+		const { useElasticSearch = false } = req.body
 
 		if (useElasticSearch) {
 			return this.getESProjectData(req, userId);
@@ -743,12 +743,12 @@ class JBookDataHandler extends DataHandler {
 					...reviewData,
 					budget_type: types[reviewData.budget_type]
 				},
-				{
-					where: query
-				}).catch(err => {
-					console.log('Error updating review row')
-					console.log(err);
-				});
+					{
+						where: query
+					}).catch(err => {
+						console.log('Error updating review row')
+						console.log(err);
+					});
 
 				return { created: result && result.length && result[0] === 1 };
 			}
@@ -919,6 +919,54 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getContractTotals(req, userId) {
+
+		const { searchText, jbookSearchSettings } = req.body;
+		const perms = req.permissions;
+
+		const hasSearchText = searchText && searchText !== '';
+
+		const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQueryForTotals();
+		const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQueryForTotals(jbookSearchSettings, hasSearchText, null, perms, perms, userId)
+
+		const pdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + pSelect + pWhere + `) as searchQuery GROUP BY "serviceAgency";`;
+		const rdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + rSelect + rWhere + `) as searchQuery GROUP BY "serviceAgency";`;
+
+		let pdata = await this.db.jbook.query(pdocQuery, {});
+		let rdata = await this.db.jbook.query(rdocQuery, {});
+		// let odata = await this.db.jbook.query(omQuery, {});
+
+		const totals = {};
+		pdata[0].forEach(count => {
+			if (totals[count.serviceAgency] === undefined) {
+				totals[count.serviceAgency] = 0;
+			}
+			totals[count.serviceAgency] += count.sum;
+		})
+
+		rdata[0].forEach(count => {
+			if (totals[count.serviceAgency] === undefined) {
+				totals[count.serviceAgency] = 0;
+			}
+			totals[count.serviceAgency] += count.sum;
+		})
+
+		// odata[0].forEach(count => {
+		// 	if (totals[count.serviceagency] === undefined) {
+		// 		totals[count.serviceagency] = 0;
+		// 	}
+		// 	totals[count.serviceagency] += parseFloat(count.sum);
+		// })
+
+
+		const pdocSum = await this.pdocs.sum('P40-79_TOA_BY1Base');
+		const rdocSum = await this.rdocs.sum('Proj_Fund_BY1');
+		// const omSum = await this.om.sum()
+		totals['Total Obligated Amt.'] = parseFloat(pdocSum) + parseFloat(rdocSum)
+
+		return { contractTotals: totals }
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -938,6 +986,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.submitFeedbackForm(req, userId);
 				case 'getUserSpecificReviews':
 					return await this.getUserSpecificReviews(req, userId);
+				case 'getContractTotals':
+					return await this.getContractTotals(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,

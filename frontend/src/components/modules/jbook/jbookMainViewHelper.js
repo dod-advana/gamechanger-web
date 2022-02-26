@@ -205,6 +205,17 @@ export const populateDropDowns = async (state, dispatch) => {
 	// }
 }
 
+export const getContractTotals = async (state, dispatch) => {
+	const { data } = await gamechangerAPI.callDataFunction({
+		functionName: 'getContractTotals',
+		cloneName: 'jbook',
+		options: {
+			jbookSearchSettings: state.jbookSearchSettings
+		}
+	});
+	return data;
+}
+
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
 

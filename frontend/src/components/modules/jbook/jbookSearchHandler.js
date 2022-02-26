@@ -15,7 +15,7 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import GamechangerAPI from '../../api/gameChanger-service-api';
-import { scrollListViewTop } from './jbookMainViewHelper';
+import { scrollListViewTop, getContractTotals } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
 
@@ -146,6 +146,8 @@ const JBookSearchHandler = {
 		try {
 			const t0 = new Date().getTime();
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
+			const { contractTotals } = await getContractTotals(state, dispatch);
+			console.log('contract totals');
 			const t1 = new Date().getTime();
 			console.log(results);
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
@@ -181,6 +183,7 @@ const JBookSearchHandler = {
 					hideTabs: false,
 					resetSettingsSwitch: false,
 					runningSearch: false,
+					contractTotals: contractTotals,
 					expansionDict,
 					hasExpansionTerms
 				});
