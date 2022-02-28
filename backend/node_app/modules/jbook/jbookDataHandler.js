@@ -20,6 +20,7 @@ const Op = Sequelize.Op;
 const EmailUtility = require('../../utils/emailUtility');
 
 const DataHandler = require('../base/dataHandler');
+const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const types = {
 	'RDT&E': 'rdoc',
@@ -34,6 +35,7 @@ class JBookDataHandler extends DataHandler {
 			om = OM,
 			accomp = ACCOMP,
 			review = REVIEW,
+			searchUtility = new SearchUtility(opts),
 			jbookSearchUtility = new JBookSearchUtility(),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
@@ -55,6 +57,7 @@ class JBookDataHandler extends DataHandler {
 		this.om = om;
 		this.accomp = accomp;
 		this.rev = review;
+		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 		this.constants = constants;
 		this.gl = gl;
@@ -932,8 +935,18 @@ class JBookDataHandler extends DataHandler {
 		const pdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + pSelect + pWhere + `) as searchQuery GROUP BY "serviceAgency";`;
 		const rdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + rSelect + rWhere + `) as searchQuery GROUP BY "serviceAgency";`;
 
-		let pdata = await this.db.jbook.query(pdocQuery, {});
-		let rdata = await this.db.jbook.query(rdocQuery, {});
+		const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
+
+		let pdata = await this.db.jbook.query(pdocQuery, {
+			replacements: {
+				searchText: structuredSearchText
+			}
+		});
+		let rdata = await this.db.jbook.query(rdocQuery, {
+			replacements: {
+				searchText: structuredSearchText
+			}
+		});
 		// let odata = await this.db.jbook.query(omQuery, {});
 
 		const totals = {};
