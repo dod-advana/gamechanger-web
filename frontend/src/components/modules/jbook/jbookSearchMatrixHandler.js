@@ -197,8 +197,7 @@ const resetAdvancedSettings = (dispatch) => {
 };
 
 
-const renderStats = (state) => {
-	const { contractTotals } = state;
+const renderStats = (contractTotals) => {
 	let data = Object.keys(contractTotals).map(key => {
 		return {
 			Key: key,
@@ -240,6 +239,8 @@ const PolicySearchMatrixHandler = {
 			dispatch,
 			classes,
 		} = props;
+
+		const { contractTotals } = state;
 
 
 		return (
@@ -451,7 +452,7 @@ const PolicySearchMatrixHandler = {
 							loading
 						</div>
 					)}
-					{!state.statsLoading && <div style={{ textAlign: 'left' }}>{renderStats(state)}</div>}
+					{!state.statsLoading && <div style={{ textAlign: 'left' }}>{renderStats(contractTotals)}</div>}
 				</GCAccordion>
 
 			</div>

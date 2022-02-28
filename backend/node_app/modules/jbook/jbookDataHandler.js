@@ -937,19 +937,23 @@ class JBookDataHandler extends DataHandler {
 		// let odata = await this.db.jbook.query(omQuery, {});
 
 		const totals = {};
-		pdata[0].forEach(count => {
-			if (totals[count.serviceAgency] === undefined) {
-				totals[count.serviceAgency] = 0;
-			}
-			totals[count.serviceAgency] += count.sum;
-		})
+		if (jbookSearchSettings.budgetType.includes('Procurement')) {
+			pdata[0].forEach(count => {
+				if (totals[count.serviceAgency] === undefined) {
+					totals[count.serviceAgency] = 0;
+				}
+				totals[count.serviceAgency] += count.sum;
+			})
+		}
 
-		rdata[0].forEach(count => {
-			if (totals[count.serviceAgency] === undefined) {
-				totals[count.serviceAgency] = 0;
-			}
-			totals[count.serviceAgency] += count.sum;
-		})
+		if (jbookSearchSettings.budgetType.includes('RDT&E')) {
+			rdata[0].forEach(count => {
+				if (totals[count.serviceAgency] === undefined) {
+					totals[count.serviceAgency] = 0;
+				}
+				totals[count.serviceAgency] += count.sum;
+			})
+		}
 
 		// odata[0].forEach(count => {
 		// 	if (totals[count.serviceagency] === undefined) {
@@ -958,11 +962,11 @@ class JBookDataHandler extends DataHandler {
 		// 	totals[count.serviceagency] += parseFloat(count.sum);
 		// })
 
-
-		const pdocSum = await this.pdocs.sum('P40-79_TOA_BY1Base');
-		const rdocSum = await this.rdocs.sum('Proj_Fund_BY1');
 		// const omSum = await this.om.sum()
-		totals['Total Obligated Amt.'] = parseFloat(pdocSum) + parseFloat(rdocSum)
+		totals['Total Obligated Amt.'] = 0;
+		Object.keys(totals).forEach(key => {
+			totals['Total Obligated Amt.'] += totals[key];
+		})
 
 		return { contractTotals: totals }
 	}
