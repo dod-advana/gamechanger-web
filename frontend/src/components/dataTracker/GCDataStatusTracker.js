@@ -8,7 +8,6 @@ import { Typography } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
 import Link from '@material-ui/core/Link';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import { green, red, yellow, orange } from '@material-ui/core/colors';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -23,12 +22,13 @@ const GoalIcon = styled.div`
 `;
 
 const TableRow = styled.div`
-	text-align: left;
-	height: fit-content;
+	height: 100%;
+	display: flex;
+	align-items: center;
 `;
 const CenterRow = styled.div`
-	text-align: center;
-	height: 20px;
+	display: flex;
+	height: 100%;
 `;
 const SectionHeader = styled.div`
 	display: flex;
