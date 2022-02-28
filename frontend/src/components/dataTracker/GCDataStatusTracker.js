@@ -621,6 +621,32 @@ const GCDataStatusTracker = (props) => {
 		);
 	};
 
+	const renderIngestprogress = (status) => {
+		let percent;
+		switch(status){
+			case 'Crawl and Download Complete':
+				percent = '33%';
+				break;
+			case 'Ingest In Progress':
+				percent = '66%';
+				break;
+			case 'Ingest Complete':
+				percent = '100%'
+				break;
+			default:
+				percent = '0%';
+		}
+
+		return (<>
+			<div style={{fontSize: '12px'}}>
+				{percent}
+			</div>
+			<div style={{width: 150, height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
+				<div style={{width: percent, height: 8, background: '#969696', borderRadius: '24px', position: 'absolute'}}/>
+			</div>
+		</>)
+	}
+
 	const renderCrawlerData = () => {
 		const crawlerColumns = [
 			{
@@ -630,11 +656,11 @@ const GCDataStatusTracker = (props) => {
 				style: { 'whiteSpace': 'unset' },
 			},
 			{
-				Header: 'Status',
+				Header: '% Ingested',
 				accessor: 'status',
 				Cell: (row) => 
-					<TableRow>
-						{row.value}
+					<TableRow style={{display: 'flex', flexDirection: 'column', paddingBottom: '5px', justifyContent: 'center'}}>
+						{renderIngestprogress(row.value)}
 					</TableRow>,
 			},
 			{
