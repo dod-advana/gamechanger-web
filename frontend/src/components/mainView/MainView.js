@@ -142,9 +142,10 @@ const MainView = (props) => {
 	useBottomScrollListener(
 		() => {
 			if (
-				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo' || state.cloneData.clone_name.toLowerCase() === 'jbook') &&
+				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
-				!state.docsPagination
+				!state.docsPagination &&
+				state.cloneData.clone_name.toLowerCase() !== 'jbook' // disabling infinite scroll for jbook
 			) {
 				setState(dispatch, {
 					docsLoading: true,
@@ -179,11 +180,11 @@ const MainView = (props) => {
 	};
 
 	const getUserDashboard = () => {
-		return userProfileHandler.getUserProfilePage({state, dispatch});
+		return userProfileHandler.getUserProfilePage({ state, dispatch });
 	};
 
 	const getAboutUs = () => {
-		return mainViewHandler.getAboutUs({state});
+		return mainViewHandler.getAboutUs({ state });
 	};
 
 	const getNonMainPageOuterContainer = (getInnerChildren) => {
