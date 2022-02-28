@@ -73,6 +73,7 @@ const StyledNeo4jTable = styled.div`
 const TableStyle = styled.div`
 	> .ReactTable {
 		border-right: none;
+		font-family: 'Noto Sans';
 
 		> .rt-table {
 
@@ -80,8 +81,7 @@ const TableStyle = styled.div`
 				border-bottom: 1px solid #0000001F;
 
 				> .rt-tr {
-					font-size: 14px; 
-					font-weight: bold;
+					font-size: 14px;
 					text-align: center; 
 					text-transform: uppercase;
 				}
@@ -89,6 +89,9 @@ const TableStyle = styled.div`
 			.rt-th,
 			.rt-td {
 				border-right: 1px solid #0000001F !important;
+			}
+			.rt-th {
+				font-weight: bold;
 			}
 			.rt-tr-group:nth-of-type(even){
 				background: #F3F3F3;
@@ -629,7 +632,10 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Status',
 				accessor: 'status',
-				Cell: (row) => <TableRow>{row.value}</TableRow>,
+				Cell: (row) => 
+					<TableRow>
+						{row.value}
+					</TableRow>,
 			},
 			{
 				Header: 'Crawl and Download Complete',
