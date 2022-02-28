@@ -18,7 +18,8 @@ import { trackEvent } from '../telemetry/Matomo';
 
 const GoalIcon = styled.div`
 	height: 20px;
-	width: 75px;
+	width: 150px;
+	margin: auto
 `;
 
 const TableRow = styled.div`
@@ -69,14 +70,34 @@ const StyledNeo4jTable = styled.div`
 	}
 `;
 
+const TableStyle = styled.div`
+	> .ReactTable {
+		border-right: none;
+
+		> .rt-table {
+
+			> .rt-thead{
+				border-bottom: 1px solid #0000001F;
+
+				> .rt-tr {
+					font-size: 14px; 
+					font-weight: bold;
+					text-align: center; 
+					text-transform: uppercase;
+				}
+			}
+			.rt-th,
+			.rt-td {
+				border-right: 1px solid #0000001F !important;
+			}
+			.rt-tr-group:nth-of-type(even){
+				background: #F3F3F3;
+			}
+		}
+	}
+`
+
 const styles = {
-	tableHeader: {
-		fontSize: 14, 
-		fontWeight: 'bold', 
-		textAlign: 'center', 
-		textTransform: 'uppercase',
-		borderBottom: '1px solid rgba(0,0,0,0.05)'
-	},
 	legendItem: {
 		margin: '0px 5px',
 		textAlign: 'center'
@@ -220,7 +241,7 @@ const GCDataStatusTracker = (props) => {
 	const [loadingNeo4jGraphData, setLoadingNeo4jGraphData] = useState(true);
 	const [loadingNeo4jCounts, setLoadingNeo4jCounts] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [tabIndex, setTabIndex] = useState('documents');
+	const [tabIndex, setTabIndex] = useState('crawler');
 	
 	
 	const handleFetchData = async ({ page, sorted, filtered }) => {
@@ -412,25 +433,27 @@ const GCDataStatusTracker = (props) => {
 	const goal_difference = (days) => {
 		if (days > 30) {
 			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: red[500] }} />
+				<GoalIcon
+					style={{ backgroundColor: red[500] }}
+				/>
 			);
 		} else if (days > 14) {
 			return (
-				<FiberManualRecordIcon
-					fontSize="large"
-					style={{ color: orange[500] }}
+				<GoalIcon
+					style={{ backgroundColor: orange[500] }}
 				/>
 			);
 		} else if (days > 7) {
 			return (
-				<FiberManualRecordIcon
-					fontSize="large"
-					style={{ color: yellow[500] }}
+				<GoalIcon
+					style={{ backgroundColor: yellow[500] }}
 				/>
 			);
 		} else {
 			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: green[500] }} />
+				<GoalIcon
+					style={{ backgroundColor: green[500] }}
+				/>
 			);
 		}
 	};
@@ -571,36 +594,26 @@ const GCDataStatusTracker = (props) => {
 						</Typography>
 					</div>
 				</SectionHeader>
-				<ReactTable
-					data={dataTableData}
-					columns={dataColumns}
-					style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
-					pageSize={PAGE_SIZE}
-					showPageSizeOptions={false}
-					filterable={true}
-					loading={loading}
-					manual={true}
-					pages={numPages}
-					onFetchData={handleFetchData}
-					defaultSorted={[
-						{
-							id: 'pub_type',
-							desc: false,
-						},
-					]}
-					getTheadTrProps={() => {
-						return {
-							style: {
-								height: 'fit-content',
-								textAlign: 'left',
-								fontWeight: 'bold',
+				<TableStyle>
+					<ReactTable
+						data={dataTableData}
+						columns={dataColumns}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
+						pageSize={PAGE_SIZE}
+						showPageSizeOptions={false}
+						filterable={true}
+						loading={loading}
+						manual={true}
+						pages={numPages}
+						onFetchData={handleFetchData}
+						defaultSorted={[
+							{
+								id: 'pub_type',
+								desc: false,
 							},
-						};
-					}}
-					getTheadThProps={() => {
-						return { style: styles.tableHeader };
-					}}
-				/>
+						]}
+					/>
+				</TableStyle>
 			</>
 		);
 	};
@@ -624,14 +637,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -643,14 +654,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -662,14 +671,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -704,30 +711,20 @@ const GCDataStatusTracker = (props) => {
 						</Typography>
 					</div>
 				</SectionHeader>
-				<ReactTable
-					data={crawlerTableData}
-					columns={crawlerColumns}
-					style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
-					pageSize={PAGE_SIZE}
-					showPageSizeOptions={false}
-					filterable={false}
-					loading={loading}
-					manual={true}
-					pages={numPages}
-					onFetchData={handleFetchCrawlerData}
-					getTheadTrProps={() => {
-						return {
-							style: {
-								height: 'fit-content',
-								textAlign: 'left',
-								fontWeight: 'bold',
-							},
-						};
-					}}
-					getTheadThProps={() => {
-						return { style: styles.tableHeader };
-					}}
-				/>
+				<TableStyle>
+					<ReactTable
+						data={crawlerTableData}
+						columns={crawlerColumns}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
+						pageSize={PAGE_SIZE}
+						showPageSizeOptions={false}
+						filterable={false}
+						loading={loading}
+						manual={true}
+						pages={numPages}
+						onFetchData={handleFetchCrawlerData}
+					/>
+				</TableStyle>
 			</>
 		);
 	};
@@ -779,7 +776,11 @@ const GCDataStatusTracker = (props) => {
 				<SectionHeader>
 					<div>
 						<Typography variant="h3" style={{fontSize: '18px'}}>Updates Overview</Typography>
-						<div>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application Overview for detailed metric description.</div>
+						<Typography variant="body2">
+							Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+							tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application 
+							Overview for detailed metric description.
+						</Typography>
 					</div>
 					<div
 						style={{
@@ -791,54 +792,43 @@ const GCDataStatusTracker = (props) => {
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>{'<'} 7 Days </span>
 							<GoalIcon
-								style={{ backgroundColor: green[500] }}
+								style={{ backgroundColor: green[500], width: 75 }}
 							/>
 						</div>
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>{'<'} 14 Days </span>
 							<GoalIcon
-								style={{ backgroundColor: yellow[500] }}
+								style={{ backgroundColor: yellow[500], width: 75 }}
 							/>
 						</div>
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>{'<'} 30 Days </span>
 							<GoalIcon
-								style={{ backgroundColor: orange[500] }}
+								style={{ backgroundColor: orange[500], width: 75 }}
 							/>
 						</div>
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>{'>'} 30 Days </span>
 							<GoalIcon
-								style={{ backgroundColor: red[500] }}
+								style={{ backgroundColor: red[500], width: 75 }}
 							/>
 						</div>
 					</div>
 				</SectionHeader>
-				<ReactTable
-					data={crawlerTableUpdate}
-					columns={crawlerColumns}
-					style={{ margin: '0 0 20px 0', height: 1000 }}
-					pageSize={20}
-					showPageSizeOptions={false}
-					filterable={false}
-					loading={loading}
-					manual={true}
-					pages={numPages}
-					onFetchData={handleFetchCrawlerUpdate}
-					getTheadTrProps={() => {
-						return {
-							style: {
-								whiteSpace: 'unset',
-								height: 'fit-content',
-								textAlign: 'left',
-								fontWeight: 'bold',
-							},
-						};
-					}}
-					getTheadThProps={() => {
-						return { style: styles.tableHeader };
-					}}
-				/>
+				<TableStyle>
+					<ReactTable
+						data={crawlerTableUpdate}
+						columns={crawlerColumns}
+						style={{ margin: '0 0 20px 0', height: 1000 }}
+						pageSize={20}
+						showPageSizeOptions={false}
+						filterable={false}
+						loading={loading}
+						manual={true}
+						pages={numPages}
+						onFetchData={handleFetchCrawlerUpdate}
+					/>
+				</TableStyle>
 			</div>
 		);
 	};
@@ -865,29 +855,19 @@ const GCDataStatusTracker = (props) => {
 				<div className={'columns'}>
 					<div className={'left-column'}>
 						<div className={'properties-schema'}>
-							<ReactTable
-								data={neo4jPropertiesData}
-								style={{ height: 670 }}
-								columns={neo4jPropertiesColumns}
-								showPageSizeOptions={false}
-								showPagination={false}
-								filterable={false}
-								loading={loadingNeo4jPropertiesData}
-								manual={true}
-								pages={numPages}
-								getTheadTrProps={() => {
-									return {
-										style: {
-											height: 'fit-content',
-											textAlign: 'left',
-											fontWeight: 'bold',
-										},
-									};
-								}}
-								getTheadThProps={() => {
-									return { style: styles.tableHeader };
-								}}
-							/>
+							<TableStyle>
+								<ReactTable
+									data={neo4jPropertiesData}
+									style={{ height: 670 }}
+									columns={neo4jPropertiesColumns}
+									showPageSizeOptions={false}
+									showPagination={false}
+									filterable={false}
+									loading={loadingNeo4jPropertiesData}
+									manual={true}
+									pages={numPages}
+								/>
+							</TableStyle>
 						</div>
 					</div>
 					<div className={'right-column'}>
@@ -907,29 +887,19 @@ const GCDataStatusTracker = (props) => {
 							/>
 						</div>
 						<div className={'node-rel-counts'}>
-							<ReactTable
-								data={neo4jCountsData}
-								style={{ height: 251 }}
-								columns={neo4jCountsColumns}
-								showPageSizeOptions={false}
-								showPagination={false}
-								filterable={false}
-								loading={loadingNeo4jCounts}
-								manual={true}
-								minRows={0}
-								getTheadTrProps={() => {
-									return {
-										style: {
-											height: 'fit-content',
-											textAlign: 'left',
-											fontWeight: 'bold',
-										},
-									};
-								}}
-								getTheadThProps={() => {
-									return { style: styles.tableHeader };
-								}}
-							/>
+							<TableStyle>
+								<ReactTable
+									data={neo4jCountsData}
+									style={{ height: 251 }}
+									columns={neo4jCountsColumns}
+									showPageSizeOptions={false}
+									showPagination={false}
+									filterable={false}
+									loading={loadingNeo4jCounts}
+									manual={true}
+									minRows={0}
+								/>
+							</TableStyle>
 						</div>
 					</div>
 				</div>
@@ -1003,7 +973,7 @@ const GCDataStatusTracker = (props) => {
 					<TabPanel>{renderCrawlerData()}</TabPanel>
 					<TabPanel>{renderVersionTable()}</TabPanel>
 					<TabPanel>{renderDataTable()}</TabPanel>
-					<TabPanel>{renderNeo4jTable()}</TabPanel>
+					<TabPanel style={{marginBottom: 100}}>{renderNeo4jTable()}</TabPanel>
 				</div>
 			</Tabs>
 		</div>
