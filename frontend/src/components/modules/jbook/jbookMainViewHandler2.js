@@ -61,8 +61,6 @@ const jbookMainViewHandler = {
 
 		const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
-		// const { contractTotals } = await getContractTotals(state, dispatch);
-
 		const url = window.location.href;
 		const searchText = getQueryVariable('q', url) ?? '';
 		let mainTabSelected = 0;

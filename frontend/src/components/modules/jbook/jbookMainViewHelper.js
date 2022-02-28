@@ -210,6 +210,7 @@ export const getContractTotals = async (state, dispatch) => {
 		functionName: 'getContractTotals',
 		cloneName: 'jbook',
 		options: {
+			searchText: state.searchText ?? '',
 			jbookSearchSettings: state.jbookSearchSettings
 		}
 	});
