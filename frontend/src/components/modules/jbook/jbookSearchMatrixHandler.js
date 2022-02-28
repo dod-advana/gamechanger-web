@@ -452,7 +452,7 @@ const PolicySearchMatrixHandler = {
 							loading
 						</div>
 					)}
-					{!state.statsLoading && <div style={{ textAlign: 'left' }}>{renderStats(contractTotals)}</div>}
+					{!state.statsLoading && <div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>}
 				</GCAccordion>
 
 			</div>
