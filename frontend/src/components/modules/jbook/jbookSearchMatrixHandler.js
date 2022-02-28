@@ -1,5 +1,7 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
+import SimpleTable from '../../common/SimpleTable';
+
 import _ from 'lodash';
 import {
 	FormControl,
@@ -183,7 +185,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 const handleFilterInputChange = (field, value, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 
-	newSearchSettings[field] =value;
+	newSearchSettings[field] = value;
 
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings
@@ -194,18 +196,55 @@ const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
+
+const renderStats = (contractTotals) => {
+	let data = Object.keys(contractTotals).map(key => {
+		return {
+			Key: key,
+			Value: contractTotals[key] > 1000 ? (contractTotals[key] / 1000).toFixed(2) + ' B' : (parseFloat(contractTotals[key])).toFixed(2) + ' M'
+		}
+	});
+	data = data.filter(row => row.Key !== '');
+	data.sort((a, b) => {
+		if (a.Key === 'Total Obligated Amt.') {
+			return 1;
+		} else {
+			return a.Key > b.Key ? 1 : -1
+		}
+	});
+
+	return (
+		<SimpleTable
+			tableClass={'magellan-table'}
+			zoom={1}
+			// headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+			rows={data}
+			height={'auto'}
+			dontScroll={true}
+			colWidth={{
+				whiteSpace: 'nowrap',
+				maxWidth: '200px'
+			}}
+			disableWrap={true}
+			hideHeader={true}
+		/>
+	);
+};
+
 const PolicySearchMatrixHandler = {
 	getSearchMatrixItems(props) {
-		
+
 		const {
 			state,
 			dispatch,
 			classes,
 		} = props;
 
+		const { contractTotals } = state;
+
 
 		return (
-			<div style={{marginLeft: 15}}>
+			<div style={{ marginLeft: 15 }}>
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.budgetTypeSpecificSelected}
@@ -231,7 +270,7 @@ const PolicySearchMatrixHandler = {
 				</div>
 
 				{!state.useElasticSearch &&
-					<div style={{width: '100%', marginBottom: 10}}>
+					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
 							header={'PROGRAM ELEMENT / BLI'}
@@ -239,13 +278,13 @@ const PolicySearchMatrixHandler = {
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
-							<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'}/>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'} />
 						</GCAccordion>
 					</div>
 				}
 
 				{!state.useElasticSearch &&
-					<div style={{width: '100%', marginBottom: 10}}>
+					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
 							header={'PROJECT #'}
@@ -253,13 +292,13 @@ const PolicySearchMatrixHandler = {
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
-							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'}/>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'} />
 						</GCAccordion>
 					</div>
 				}
 
 				{!state.useElasticSearch &&
-					<div style={{width: '100%', marginBottom: 10}}>
+					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''}
 							header={'PROJECT TITLE'}
@@ -267,7 +306,7 @@ const PolicySearchMatrixHandler = {
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
-							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'}/>
+							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'} />
 						</GCAccordion>
 					</div>
 				}
@@ -322,7 +361,7 @@ const PolicySearchMatrixHandler = {
 
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
-						expanded={state.jbookSearchSettings.reviewStatusSpecificSelected }
+						expanded={state.jbookSearchSettings.reviewStatusSpecificSelected}
 						header={'REVIEW STATUS'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -378,7 +417,8 @@ const PolicySearchMatrixHandler = {
 						height: 50,
 						alignItems: 'center',
 						borderRadius: 5,
-						width: '100%'
+						width: '100%',
+						marginBottom: 10
 					}}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
@@ -398,6 +438,23 @@ const PolicySearchMatrixHandler = {
 						Clear Filters
 					</span>
 				</button>
+
+				<GCAccordion
+					contentPadding={0}
+					expanded={true}
+					header={'CONTRACT TOTALS'}
+					headerBackground={'rgb(28, 45, 101)'}
+					headerTextColor={'white'}
+					headerTextWeight={'normal'}
+				>
+					{state.statsLoading && (
+						<div style={{ margin: '0 auto' }}>
+							loading
+						</div>
+					)}
+					{!state.statsLoading && <div style={{ textAlign: 'left' }}>{renderStats(contractTotals)}</div>}
+				</GCAccordion>
+
 			</div>
 		);
 	},
@@ -406,7 +463,7 @@ const PolicySearchMatrixHandler = {
 
 		return (
 			<>
-			
+
 			</>
 		);
 	},

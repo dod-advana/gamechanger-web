@@ -172,6 +172,7 @@ export default class SimpleTable extends React.Component {
 				backgroundColor: 'white',
 				position: 'relative',
 				// borderCollapse: 'separate' 
+				marginBottom: 0
 			},
 			container: {
 				width: '100%',

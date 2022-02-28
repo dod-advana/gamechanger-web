@@ -15,7 +15,7 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import GamechangerAPI from '../../api/gameChanger-service-api';
-import { scrollListViewTop } from './jbookMainViewHelper';
+import { scrollListViewTop, getContractTotals } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
 
@@ -146,6 +146,8 @@ const JBookSearchHandler = {
 		try {
 			const t0 = new Date().getTime();
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
+			const { contractTotals } = await getContractTotals(state, dispatch);
+			console.log('contract totals');
 			const t1 = new Date().getTime();
 			console.log(results);
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
@@ -160,7 +162,7 @@ const JBookSearchHandler = {
 					hasExpansionTerms: false,
 				});
 			} else {
-				let {docs, totalCount, query, expansionDict,} = results;
+				let { docs, totalCount, query, expansionDict, } = results;
 
 				let hasExpansionTerms = false;
 				if (expansionDict) {
@@ -181,6 +183,7 @@ const JBookSearchHandler = {
 					hideTabs: false,
 					resetSettingsSwitch: false,
 					runningSearch: false,
+					contractTotals: contractTotals,
 					expansionDict,
 					hasExpansionTerms
 				});
@@ -268,35 +271,35 @@ const JBookSearchHandler = {
 
 		switch (state.currentSort) {
 			case 'Program Element':
-				searchSettings.sort = [{id: 'programElement', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
 			case 'Budget Line Item':
-				searchSettings.sort = [{id: 'programElement', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
 			case 'Project #':
-				searchSettings.sort = [{id: 'projectNum', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'projectNum', desc: sortDesc }];
 				break;
 			case 'Project Title':
-				searchSettings.sort = [{id: 'projectTitle', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'projectTitle', desc: sortDesc }];
 				break;
 			case 'Service / Agency':
-				searchSettings.sort = [{id: 'serviceAgency', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'serviceAgency', desc: sortDesc }];
 				break;
 			case 'Primary Reviewer':
-				searchSettings.sort = [{id: 'primaryReviewer', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'primaryReviewer', desc: sortDesc }];
 				break;
 			case 'Service Reviewer':
-				searchSettings.sort = [{id: 'serviceReviewer', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'serviceReviewer', desc: sortDesc }];
 				break;
 			case 'POC Reviewer':
-				searchSettings.sort = [{id: 'pocReviewer', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'pocReviewer', desc: sortDesc }];
 				break;
 			case 'Source':
-				searchSettings.sort = [{id: 'sourceTag', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'sourceTag', desc: sortDesc }];
 				break;
 			case 'Budget Year':
 			default:
-				searchSettings.sort = [{id: 'budgetYear', desc: sortDesc}];
+				searchSettings.sort = [{ id: 'budgetYear', desc: sortDesc }];
 				break;
 
 		}
