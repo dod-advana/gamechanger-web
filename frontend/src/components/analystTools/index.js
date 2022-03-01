@@ -5,7 +5,7 @@ import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import propTypes from 'prop-types';
 import {trackEvent} from '../telemetry/Matomo';
 import {getTrackingNameForFactory} from '../../utils/gamechangerUtils';
-import GCDocumentsComparisonTool from './GCDocumentsComparisonToolNew';
+import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
 import {setState} from '../../utils/sharedFunctions';
 import GCResponsibilityExplorer from './GCResponsibilityExplorer';
 
