@@ -364,7 +364,6 @@ class AppStatsController {
 
 		const searchMap = {};
 		const eventMap = {};
-		const map = {}
 		const searchPdfMapping = [];
 
 		for (let search of searches) {
