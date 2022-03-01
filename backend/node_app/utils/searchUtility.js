@@ -400,7 +400,8 @@ class SearchUtility {
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
 			const mainMaxkeywords = 2;
-			let mainKeywords = plainQuery.split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			
 			console.log(mainKeywords)
 
 			let query = {
