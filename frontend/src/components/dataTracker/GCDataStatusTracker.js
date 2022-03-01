@@ -71,6 +71,10 @@ const StyledNeo4jTable = styled.div`
 `;
 
 const TableStyle = styled.div`
+	> .updates-table
+		.rt-td {
+			padding: 10px 5px;
+		}
 	> .ReactTable {
 		border-right: none;
 		font-family: 'Noto Sans';
@@ -114,7 +118,7 @@ const styles = {
 
 const gameChangerAPI = new GameChangerAPI();
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 const nextFriday = new Date();
 nextFriday.setDate(
@@ -601,7 +605,7 @@ const GCDataStatusTracker = (props) => {
 					<ReactTable
 						data={dataTableData}
 						columns={dataColumns}
-						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 700 }}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 						pageSize={PAGE_SIZE}
 						showPageSizeOptions={false}
 						filterable={true}
@@ -742,12 +746,32 @@ const GCDataStatusTracker = (props) => {
 							schema of the Knowledge Graph.
 						</Typography>
 					</div>
+					<div
+						style={{
+							display: 'flex',
+							alignItems: 'center',
+							marginLeft: '10px'
+						}}
+					>	
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>Complete </span>
+							<GoalIcon
+								style={{ backgroundColor: green[500], width: 100 }}
+							/>
+						</div>
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>Incomplete </span>
+							<GoalIcon
+								style={{ backgroundColor: red[500], width: 100 }}
+							/>
+						</div>
+					</div>
 				</SectionHeader>
 				<TableStyle>
 					<ReactTable
 						data={crawlerTableData}
 						columns={crawlerColumns}
-						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 1000 }}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 						pageSize={PAGE_SIZE}
 						showPageSizeOptions={false}
 						filterable={false}
@@ -849,10 +873,11 @@ const GCDataStatusTracker = (props) => {
 				</SectionHeader>
 				<TableStyle>
 					<ReactTable
+						className='updates-table'
 						data={crawlerTableUpdate}
 						columns={crawlerColumns}
-						style={{ margin: '0 0 20px 0', height: 1000 }}
-						pageSize={20}
+						style={{ margin: '0 0 20px 0', height: 'auto' }}
+						pageSize={PAGE_SIZE}
 						showPageSizeOptions={false}
 						filterable={false}
 						loading={loading}
