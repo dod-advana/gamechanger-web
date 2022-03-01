@@ -57,8 +57,15 @@ const columns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Search',
-		accessor: 'search',
+		Header: 'Action',
+		accessor: 'action',
+		width: 200,
+		style: { 'whiteSpace': 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Value',
+		accessor: 'value',
 		width: 200,
 		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
