@@ -234,11 +234,10 @@ class SearchUtility {
 	getQueryAndSearchTerms (searchText) {
 
 		// change all text to lower case, need upper case AND/OR for search so easier if everything is lower
-		// this might not matter anymore
-		// const searchTextLower = searchText.toLowerCase();
+		const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchText.replace(/\//g, '');
+		let cleanSearch = searchTextLower.replace(/\//g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -264,7 +263,6 @@ class SearchUtility {
 		});
 
 		const SearchText = searchTextWithPlaceholders;
-
 		// return  query and list of search terms after parsing
 		return [SearchText, termsArray];
 	}
@@ -340,6 +338,7 @@ class SearchUtility {
 			charsPadding = 90, 
 			operator = 'and', 
 			searchFields = {}, 
+			mainMaxkeywords = 2,
 			accessDateFilter = [], 
 			publicationDateFilter = [], 
 			publicationDateAllTime = true, 
@@ -399,11 +398,8 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			const mainMaxkeywords = 2;
 			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *")
 			
-			console.log(mainKeywords)
-
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -522,7 +518,6 @@ class SearchUtility {
 							{
 								query_string: {
 									fields: ['display_title_s.search'],
-									//default_field: 'display_title_s.search',
 									query: `${mainKeywords}*`,
 									type: "best_fields",
 									boost: 6,
