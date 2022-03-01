@@ -682,7 +682,6 @@ class SearchUtility {
 				  }
 			]
 			}
-
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
