@@ -612,7 +612,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {id, issue_description, updatedColumn, updatedText, textPosition} = req.body;
-			if(id == null || !issue_description) return res.status(400).sned();
+			if(id == null || !issue_description) return res.status(400).send();
 
 			const hashed_user = sparkMD5Lib.hash(userId);
 			const report = await this.responsibility_reports.create({
