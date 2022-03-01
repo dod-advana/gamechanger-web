@@ -329,7 +329,6 @@ class AppStatsController {
 					llva.idaction_name,
 					llva.server_time as searchtime,
 					hex(llva.idvisitor) as idvisitor,
-					la_names.name as value,
 					la_names.name as document,
 					la.name as action
 				FROM matomo_log_link_visit_action llva
@@ -364,16 +363,36 @@ class AppStatsController {
 		const events = await this.queryEvents(startDate,connection)
 		const table = searches.concat(events)
 
-		const searchMap = {};
+		let searchMap = {};
+		const eventMap = {};
 		const searchPdfMapping = [];
 
-		for (let search of table) {
+		for (let search of searches) {
 			if (!searchMap[search.idvisit]) {
 				searchMap[search.idvisit] = [];
 			}
 			search = {...search, value: this.htmlDecode(search.value)}
 			searchMap[search.idvisit].push(search);
 		}
+		for (let event of events) {
+			if (!eventMap[event.idvisit]) {
+				eventMap[event.idvisit] = [];
+			}
+			if (searchMap[event.idvisit]){
+				let i = 0
+				let search = ''
+				let tempSearchList = [...searchMap[event.idvisit]].reverse()
+				while(i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime){
+					search = tempSearchList[i].value
+					i++
+				}
+				event = {...event, value:  search}
+			}
+			eventMap[event.idvisit].push(event);
+		}
+		
+		searchMap = {...searchMap,...eventMap}
+
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
@@ -415,6 +434,9 @@ class AppStatsController {
 					item.keyw_5 = item.keyw_5.join(', ');
 				}
 				searchPdfMapping[i] = {...doc, ...item};
+			}
+			else{
+				searchPdfMapping[i] = {...doc,display_title_s:doc.document}
 			}
 		}
 		return searchPdfMapping;

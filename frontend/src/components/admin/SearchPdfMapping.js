@@ -64,7 +64,7 @@ const columns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Value',
+		Header: 'Search',
 		accessor: 'value',
 		width: 200,
 		style: { 'whiteSpace': 'unset' },
