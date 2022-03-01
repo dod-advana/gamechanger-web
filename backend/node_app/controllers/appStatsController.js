@@ -361,7 +361,6 @@ class AppStatsController {
 		const searches = await this.querySearches(startDate, connection);
 		const documents = await this.queryPdfOpend(startDate, connection);
 		const events = await this.queryEvents(startDate,connection)
-		const table = searches.concat(events)
 
 		const searchMap = {};
 		const eventMap = {};
