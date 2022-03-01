@@ -11,7 +11,6 @@ const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK = require('../../models').feedback;
-
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -21,7 +20,6 @@ const EmailUtility = require('../../utils/emailUtility');
 const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
-const SearchUtility = require('../../utils/searchUtility');
 const {DataLibrary} = require('../../lib/dataLibrary');
 
 const types = {
@@ -51,7 +49,6 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK,
-			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
 

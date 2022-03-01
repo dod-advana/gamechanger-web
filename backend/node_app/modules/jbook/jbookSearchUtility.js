@@ -675,8 +675,14 @@ class JBookSearchUtility {
 			searchResults.totalCount = value;
 			searchResults.serviceAgencyCounts = service_buckets;
 
+			const agencyMapping = this.getMapping('esServiceAgency', false);
+
 			hits.forEach(hit => {
 				let result = this.transformEsFields(hit._source);
+
+				result.hasKeywords = (result.keywords && result.keywords.length > 0);
+				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
+
 				result.pageHits = [];
 
 				if (hit.inner_hits) {
@@ -730,7 +736,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = [];
+		const arrayFields = ['keyword_n'];
 
 		esInnerHitFields.forEach(innerField => {
 			arrayFields.push(innerField.path);
