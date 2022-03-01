@@ -363,8 +363,9 @@ class AppStatsController {
 		const events = await this.queryEvents(startDate,connection)
 		const table = searches.concat(events)
 
-		let searchMap = {};
+		const searchMap = {};
 		const eventMap = {};
+		const map = {}
 		const searchPdfMapping = [];
 
 		for (let search of searches) {
@@ -374,25 +375,25 @@ class AppStatsController {
 			search = {...search, value: this.htmlDecode(search.value)}
 			searchMap[search.idvisit].push(search);
 		}
+		const tempSearch = {...searchMap}
+
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
-			if (searchMap[event.idvisit]){
+			if (tempSearch[event.idvisit]){
 				let i = 0
 				let search = ''
-				let tempSearchList = [...searchMap[event.idvisit]].reverse()
+				let tempSearchList = [...tempSearch[event.idvisit]].reverse()
 				while(i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime){
 					search = tempSearchList[i].value
 					i++
 				}
 				event = {...event, value:  search}
 			}
-			eventMap[event.idvisit].push(event);
+			searchMap[event.idvisit].push(event);
 		}
 		
-		searchMap = {...searchMap,...eventMap}
-
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
