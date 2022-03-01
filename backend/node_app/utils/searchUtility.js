@@ -262,9 +262,9 @@ class SearchUtility {
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(`__${index}__`, `${replacementSequence}`);
 		});
 
-		const SearchText = searchTextWithPlaceholders;
+		const modSearchText = searchTextWithPlaceholders;
 		// return  query and list of search terms after parsing
-		return [SearchText, termsArray];
+		return [modSearchText, termsArray];
 	}
 
 	findQuoted (searchText) {
