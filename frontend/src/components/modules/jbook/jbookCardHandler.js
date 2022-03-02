@@ -744,12 +744,12 @@ const jbookCardHandler = {
 					Key: 'Category',
 					Value: getClassLabel(projectData)
 				},
-				// {
-				// 	Key: 'Keywords',
-				// 	Value: <div>
-				// 		{keywordCheckboxes && keywordCheckboxes.length > 0 ? 'none' : 'None'}
-				// 	</div>,
-				// },
+				{
+					Key: 'Keywords',
+					Value: <div>
+						{projectData.keywords && projectData.keywords.length > 0 ? projectData.keywords.map(keyword => <p>{keyword}</p>) : 'None'}
+					</div>,
+				},
 				// {
 				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
 				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
