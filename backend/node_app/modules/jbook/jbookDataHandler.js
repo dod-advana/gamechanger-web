@@ -20,6 +20,7 @@ const Op = Sequelize.Op;
 const EmailUtility = require('../../utils/emailUtility');
 
 const DataHandler = require('../base/dataHandler');
+const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const types = {
 	'RDT&E': 'rdoc',
@@ -34,6 +35,7 @@ class JBookDataHandler extends DataHandler {
 			om = OM,
 			accomp = ACCOMP,
 			review = REVIEW,
+			searchUtility = new SearchUtility(opts),
 			jbookSearchUtility = new JBookSearchUtility(),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
@@ -55,6 +57,7 @@ class JBookDataHandler extends DataHandler {
 		this.om = om;
 		this.accomp = accomp;
 		this.rev = review;
+		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 		this.constants = constants;
 		this.gl = gl;
@@ -88,7 +91,7 @@ class JBookDataHandler extends DataHandler {
 	// budget line item : pdoc and project num : rdoc
 	async getProjectData(req, userId) {
 
-		const {useElasticSearch  = false} = req.body
+		const { useElasticSearch = false } = req.body
 
 		if (useElasticSearch) {
 			return this.getESProjectData(req, userId);
@@ -743,12 +746,12 @@ class JBookDataHandler extends DataHandler {
 					...reviewData,
 					budget_type: types[reviewData.budget_type]
 				},
-				{
-					where: query
-				}).catch(err => {
-					console.log('Error updating review row')
-					console.log(err);
-				});
+					{
+						where: query
+					}).catch(err => {
+						console.log('Error updating review row')
+						console.log(err);
+					});
 
 				return { created: result && result.length && result[0] === 1 };
 			}
@@ -919,6 +922,69 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getContractTotals(req, userId) {
+		const { searchText, jbookSearchSettings } = req.body;
+		const perms = req.permissions;
+
+		const hasSearchText = searchText && searchText !== '';
+
+		const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
+		const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, hasSearchText, null, perms, userId);
+
+		const pQuery = pSelect + pWhere;
+		const rQuery = rSelect + rWhere;
+		const oQuery = oSelect + oWhere;
+
+		let giantQuery = ``;
+
+		// setting up promise.all
+		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
+			giantQuery = pQuery;
+		}
+		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
+			if (giantQuery.length === 0) {
+				giantQuery = rQuery;
+			} else {
+				giantQuery += ` UNION ALL ` + rQuery;
+			}
+		}
+		// if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
+		// 	if (giantQuery.length === 0) {
+		// 		giantQuery = oQuery;
+		// 	} else {
+		// 		giantQuery += ` UNION ALL ` + oQuery;
+		// 	}
+		// }
+
+		if (giantQuery.length === 0) {
+			return { contractTotals: { 'Total Obligated Amt.': 0 } }
+		}
+
+		const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
+
+		// grab counts, can be optimized with promise.all
+		const cTotals = `select "serviceAgency", SUM("currentYearAmount") FROM (` + giantQuery + `) as searchQuery GROUP BY "serviceAgency";`;
+		let contractTotals = await this.db.jbook.query(cTotals, {
+			replacements: {
+				searchText: structuredSearchText
+			}
+		});
+
+		const totals = {};
+		contractTotals[0].forEach(count => {
+			if (totals[count.serviceAgency] === undefined) {
+				totals[count.serviceAgency] = 0;
+			}
+			totals[count.serviceAgency] += count.sum;
+		})
+
+		totals['Total Obligated Amt.'] = 0;
+		Object.keys(totals).forEach(key => {
+			totals['Total Obligated Amt.'] += totals[key];
+		})
+		return { contractTotals: totals }
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -938,6 +1004,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.submitFeedbackForm(req, userId);
 				case 'getUserSpecificReviews':
 					return await this.getUserSpecificReviews(req, userId);
+				case 'getContractTotals':
+					return await this.getContractTotals(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,

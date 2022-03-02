@@ -372,7 +372,7 @@ const jbookCardHandler = {
 								style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '0 5px 0 0' }}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitle} <br /> {item.projectTitle}
+									{item.budgetYear} | {displayTitle} <br /> {item.projectTitle}
 								</div>
 								{docListView &&
 									<div className={'list-view-arrow'}>
@@ -405,7 +405,7 @@ const jbookCardHandler = {
 			const iconSrc = getTypeIcon('PDF');
 			const typeTextColor = getTypeTextColor('PDF');
 
-			let {docOrgColor} = getDocTypeStyles(agency);
+			let { docOrgColor } = getDocTypeStyles(agency);
 
 			return (
 				<>
@@ -586,7 +586,7 @@ const jbookCardHandler = {
 					<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
 						<div className={'currents-as-of-div'}>
 							<div className={'current-text'}>
-								{currentAsOfText}
+								{/*currentAsOfText*/}
 							</div>
 						</div>
 						<div className={'hits-container'}>
