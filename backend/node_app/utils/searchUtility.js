@@ -479,7 +479,7 @@ class SearchUtility {
 								wildcard: {
 									'keyw_5': {
 										value: `*${plainQuery}*`,
-										boost: 3
+										boost: 4
 									}
 								}
 							},
@@ -503,7 +503,7 @@ class SearchUtility {
 								wildcard: {
 									'display_source_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 3
+										boost: 4
 									}
 								}
 							},
@@ -511,7 +511,7 @@ class SearchUtility {
 								wildcard: {
 									'top_entities_t.search': {
 										value: `*${plainQuery}*`,
-										boost: 3
+										boost: 4
 									}
 								}
 							},								
@@ -663,14 +663,14 @@ class SearchUtility {
 					}					
 				},
 				{				
-					window_size: 100,
+					window_size: 500,
 					query: {
 					  rescore_query: {
 							bool:{
 								must: [{
 									rank_feature: {
 										field: "pagerank_r",
-										boost: 5
+										boost: 10
 									}}
 								]
 							}						
