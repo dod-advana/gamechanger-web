@@ -147,7 +147,7 @@ const JBookSearchHandler = {
 			const t0 = new Date().getTime();
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
 			const t1 = new Date().getTime();
-			console.log(results);
+
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
 				setState(dispatch, {
 					prevSearchText: null,

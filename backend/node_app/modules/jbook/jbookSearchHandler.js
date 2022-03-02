@@ -403,6 +403,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
+		
 			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
 			let returnData = data2[0];
 
@@ -415,6 +416,17 @@ class JBookSearchHandler extends SearchHandler {
 				};
 				doc.budgetType = typeMap[doc.type];
 				doc.hasKeywords = keywordIds[typeMap[doc.type]]?.indexOf(doc.id) !== -1;
+				if (doc.keywords) {
+					try {
+						let keywords = doc.keywords.replace(/[\(\)\"]\s*/g, '');
+						keywords = keywords.split(',').slice(1);
+						doc.keywords = keywords;
+					}
+					catch(e) {
+						console.log('Error adding keywords to doc')
+						console.log(e);
+					}
+				}
 				return doc;
 			});
 
