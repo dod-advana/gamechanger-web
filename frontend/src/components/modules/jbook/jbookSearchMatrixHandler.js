@@ -442,7 +442,7 @@ const PolicySearchMatrixHandler = {
 				<GCAccordion
 					contentPadding={0}
 					expanded={true}
-					header={'CONTRACT TOTALS'}
+					header={'ESTIMATED BUDGET TOTALS'}
 					headerBackground={'rgb(28, 45, 101)'}
 					headerTextColor={'white'}
 					headerTextWeight={'normal'}

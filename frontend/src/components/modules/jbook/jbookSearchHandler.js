@@ -112,7 +112,8 @@ const JBookSearchHandler = {
 			cloneName: 'jbook',
 			options: {
 				searchText: state.searchText ?? '',
-				jbookSearchSettings: cleanSearchSettings
+				jbookSearchSettings: cleanSearchSettings,
+				useElasticSearch: state.useElasticSearch
 			}
 		});
 		return data;
@@ -162,6 +163,8 @@ const JBookSearchHandler = {
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
 			const { contractTotals } = await this.getContractTotals(state, dispatch);
 			const t1 = new Date().getTime();
+
+			//console.log(results);
 
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
 				setState(dispatch, {
