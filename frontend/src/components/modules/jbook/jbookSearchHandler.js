@@ -15,7 +15,7 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import GamechangerAPI from '../../api/gameChanger-service-api';
-import { scrollListViewTop, getContractTotals } from './jbookMainViewHelper';
+import { scrollListViewTop } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
 
@@ -104,6 +104,20 @@ const JBookSearchHandler = {
 		}
 	},
 
+	async getContractTotals(state, dispatch) {
+		const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+
+		const { data } = await gamechangerAPI.callDataFunction({
+			functionName: 'getContractTotals',
+			cloneName: 'jbook',
+			options: {
+				searchText: state.searchText ?? '',
+				jbookSearchSettings: cleanSearchSettings
+			}
+		});
+		return data;
+	},
+
 	async handleSearch(state, dispatch) {
 
 		const {
@@ -146,10 +160,9 @@ const JBookSearchHandler = {
 		try {
 			const t0 = new Date().getTime();
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
-			const { contractTotals } = await getContractTotals(state, dispatch);
-			console.log('contract totals');
+			const { contractTotals } = await this.getContractTotals(state, dispatch);
 			const t1 = new Date().getTime();
-			console.log(results);
+
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
 				setState(dispatch, {
 					prevSearchText: null,
