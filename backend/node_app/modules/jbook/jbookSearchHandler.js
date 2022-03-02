@@ -520,8 +520,8 @@ class JBookSearchHandler extends SearchHandler {
 
 		if (agencyYearData[0].length > 0) {
 			agencyYearData[0].forEach(data => {
-				returnData.budgetYear = [...new Set([...returnData.budgetYear, ...data.budgetyear])];
-				returnData.serviceAgency = [...new Set([...returnData.serviceAgency, ...data.serviceagency])];
+				returnData.budgetYear = [...new Set([...returnData.budgetYear, ...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : [])])];
+				returnData.serviceAgency = [...new Set([...returnData.serviceAgency, ...(data.serviceagency && data.serviceagency !== null ? data.serviceagency : [])])];
 			})
 		}
 
