@@ -769,7 +769,17 @@ const JBookProfilePage = (props) => {
 				budgetYear={budgetYear}
 			/>
 			<StyledContainer>
-				<BasicData budgetType={budgetType} admin={Permissions.hasPermission('JBOOK Admin')} loading={profileLoading}/>
+				<BasicData
+					budgetType={budgetType}
+					admin={Permissions.hasPermission('JBOOK Admin')}
+					loading={profileLoading}
+					programElement={programElement}
+					projectNum={projectNum}
+					budgetYear={budgetYear}
+					budgetLineItem={budgetLineItem}
+					id={id}
+					appropriationNumber={appropriationNumber}
+				/>
 				<ProjectDescription
 					profileLoading={profileLoading}
 					projectData={projectData}
@@ -798,7 +808,7 @@ const JBookProfilePage = (props) => {
 					}
 					{contracts.length > 0 &&
 						<StyledAccordionContainer id={'Contracts'}>
-							<GCAccordion contentPadding={0} expanded={false} header={`CONTRACTS ${contracts ? `(${contracts.length})` : ''}`} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+							<GCAccordion contentPadding={0} expanded={false} header={`CONTRACT DATA (FROM GENERAL LEDGER AND FPDS-NG) ${contracts ? `(${contracts.length})` : ''}`} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
 								<Contracts contracts={contracts} />
 							</GCAccordion>
 						</StyledAccordionContainer>
