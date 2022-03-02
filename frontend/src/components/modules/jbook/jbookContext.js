@@ -276,7 +276,10 @@ const initState = {
 
 	// gc card view context
 	selectedDocuments: new Map(),
-	listView: false
+	listView: false,
+
+	// contract totals
+	contractTotals: {}
 
 }
 
@@ -301,10 +304,10 @@ function reducer(state, action) {
 				...initState,
 			};
 		case 'RESET_SEARCH_SETTINGS':
-		    return {
-		        ...state,
-		        jbookSearchSettings: {...state.defaultOptions}
-		    };
+			return {
+				...state,
+				jbookSearchSettings: { ...state.defaultOptions }
+			};
 		default:
 			return state;
 	}

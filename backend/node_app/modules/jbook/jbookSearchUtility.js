@@ -3,10 +3,10 @@ const constantsFile = require('../../config/constants');
 const SearchUtility = require('../../utils/searchUtility');
 const Mappings = require('./jbookDataMapping');
 const _ = require('underscore');
-const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping} = require('./jbookDataMapping');
-const {MLApiClient} = require('../../lib/mlApiClient');
+const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping } = require('./jbookDataMapping');
+const { MLApiClient } = require('../../lib/mlApiClient');
 const asyncRedisLib = require('async-redis');
-const {Thesaurus} = require('../../lib/thesaurus');
+const { Thesaurus } = require('../../lib/thesaurus');
 const abbreviationRedisAsyncClientDB = 9;
 
 class JBookSearchUtility {
@@ -86,7 +86,7 @@ class JBookSearchUtility {
 		return mapping;
 	}
 
-	getDocCols(docType) {
+	getDocCols(docType, totals = false) {
 		let fields = [];
 		let mapping = this.getMapping(docType, true);
 		let reviewMapping = this.getMapping('review', true);
@@ -156,7 +156,7 @@ class JBookSearchUtility {
 				} else {
 					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`)
 				}
-			} else if (reviewMapping[field]) {
+			} else if (reviewMapping[field] && !totals) {
 				// console.log(field + ' : ' + mapping[field].newName)
 				fields.push(`r."${reviewMapping[field].newName}" AS "${field}"`);
 			}
@@ -304,6 +304,7 @@ class JBookSearchUtility {
 					}
 					break;
 				case 'sourceTag':
+					break;
 				case 'primaryReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
 						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
@@ -485,7 +486,7 @@ class JBookSearchUtility {
 		} = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
+			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
@@ -497,13 +498,13 @@ class JBookSearchUtility {
 		}
 	}
 
-	async mlApiExpansion(termsArray, forCacheReload, userId){
+	async mlApiExpansion(termsArray, forCacheReload, userId) {
 		let expansionDict = {};
 		try {
 			expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId, 'jbook');
 		} catch (e) {
 			// log error and move on, expansions are not required
-			if (forCacheReload){
+			if (forCacheReload) {
 				throw Error('Cannot get expanded search terms in cache reload');
 			}
 			this.logger.error('DETECTED ERROR: Cannot get expanded search terms, continuing with search', 'LH48NHI', userId);
@@ -511,7 +512,7 @@ class JBookSearchUtility {
 		return expansionDict;
 	}
 
-	async abbreviationCleaner(termsArray){
+	async abbreviationCleaner(termsArray) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
@@ -551,17 +552,17 @@ class JBookSearchUtility {
 		return cleanedAbbreviations;
 	}
 
-	thesaurusExpansion(searchText, termsArray){
+	thesaurusExpansion(searchText, termsArray) {
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
 		let synList = []
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for(var term in termsArray){
+			for (var term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
-				if (synonyms && synonyms.length > 1){
-					synList = synList.concat(synonyms.slice(0,2))
+				if (synonyms && synonyms.length > 1) {
+					synList = synList.concat(synonyms.slice(0, 2))
 				}
 			}
 		}
@@ -579,7 +580,7 @@ class JBookSearchUtility {
 		const results = [];
 
 		try {
-			let searchResults = {totalCount: 0, docs: []};
+			let searchResults = { totalCount: 0, docs: [] };
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
@@ -656,7 +657,7 @@ class JBookSearchUtility {
 
 		for (let key in raw) {
 			let newKey = key;
-			if (Object.keys(mapping).includes(key)){
+			if (Object.keys(mapping).includes(key)) {
 				newKey = mapping[key].newName;
 			}
 
