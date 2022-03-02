@@ -300,7 +300,7 @@ class JBookSearchHandler extends SearchHandler {
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {}
 
-			console.log(JSON.stringify(esQuery))
+			//console.log(JSON.stringify(esQuery))
 
 			if (req.body.searchText && req.body.searchText !== ''){
 				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
@@ -309,12 +309,10 @@ class JBookSearchHandler extends SearchHandler {
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
-			const searchResults = this.jbookSearchUtility.cleanESResults(esResults, userId);
-			searchResults.expansionDict = expansionDict;
+			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+			returnData.expansionDict = expansionDict;
 
-			//console.log(searchResults);
-
-			return searchResults;
+			return returnData;
 
 		} catch (e) {
 			const { message } = e;

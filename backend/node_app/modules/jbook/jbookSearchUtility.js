@@ -598,6 +598,11 @@ class JBookSearchUtility {
 				let result = this.transformEsFields(hit._source);
 
 				result.hasKeywords = (result.keywords && result.keywords.length > 0);
+				if (result.hasKeywords) {
+					result.keywords = result.keywords.map(keyword => {
+						return keyword.keyword_s;
+					});
+				}
 				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
 
 				result.pageHits = [];
