@@ -24,7 +24,7 @@ import FeedbackModal from './jbookFeedbackModal';
 import {
 	styles
 } from './jbookMainViewStyles';
-import { handleTabClicked, populateDropDowns, getContractTotals } from './jbookMainViewHelper';
+import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import JBookAboutUs from '../../aboutUs/JBookAboutUs';

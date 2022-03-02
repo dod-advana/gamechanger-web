@@ -163,8 +163,6 @@ class JBookSearchUtility {
 			else {
 				if (['allPriorYearsAmount', 'priorYearAmount', 'currentYearAmount'].includes(field)) {
 					fields.push(`cast(NULL AS DOUBLE PRECISION) AS "${field}"`);
-				} else if (totals) {
-					// skip any field not pertaining to doc type
 				} else {
 					fields.push(`'' AS "${field}"`);
 				}
@@ -306,6 +304,7 @@ class JBookSearchUtility {
 					}
 					break;
 				case 'sourceTag':
+					break;
 				case 'primaryReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
 						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
@@ -359,88 +358,6 @@ class JBookSearchUtility {
 					pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
 					rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
 					oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					break;
-				default:
-					break;
-			}
-		}
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildSelectQueryForTotals() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
-		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', true).join(', ')}, p.id as id FROM pdoc p`;
-		let rQuery = `SELECT DISTINCT ${this.getDocCols('rdoc', true).join(', ')}, rd.id as id FROM rdoc rd`;
-		let oQuery = `SELECT DISTINCT ${this.getDocCols('odoc', true).join(', ')}, o.id as id FROM om o`;
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildWhereQueryForTotals(jbookSearchSettings, hasSearchText, keywordIds, perms, userId) {
-		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
-		let rQueryFilter = `"PE_Num" is not null AND "PE_Num" != '' AND "Proj_Number" is not null AND "Proj_Number" != '' AND "Proj_Title" is not null AND "Proj_Title" != ''`;
-		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
-
-		const pDocSearchQueryArray = Mappings['pdocSearchMapping'].map(pdocSearchText => { return `"${pdocSearchText}" @@ to_tsquery('english', :searchText)`; });
-		const rDocSearchQueryArray = Mappings['rdocSearchMapping'].map(rdocSearchText => { return `"${rdocSearchText}" @@ to_tsquery('english', :searchText)`; });
-		const oDocSearchQueryArray = Mappings['odocSearchMapping'].map(odocSearchText => { return `"${odocSearchText}" @@ to_tsquery('english', :searchText)`; });
-
-		let pQuery = hasSearchText ? ` WHERE ( ${pDocSearchQueryArray.join(' OR ')} AND ${pQueryFilter} )` : ` WHERE ${pQueryFilter}`;
-		let rQuery = hasSearchText ? ` WHERE ( ${rDocSearchQueryArray.join(' OR ')} AND ${rQueryFilter} )` : ` WHERE ${rQueryFilter}`;
-		let oQuery = hasSearchText ? ` WHERE ( ${oDocSearchQueryArray.join(' OR ')} AND ${oQueryFilter} )` : ` WHERE ${oQueryFilter}`;
-
-
-		for (const setting in jbookSearchSettings) {
-			switch (setting) {
-				case 'reviewStatus':
-					break;
-				case 'primaryClassLabel':
-					break;
-				case 'serviceReviewer':
-					break;
-				case 'pocReviewer':
-					break;
-				case 'sourceTag':
-					break;
-				case 'serviceAgency':
-					break;
-				case 'budgetYear':
-					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const yearString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString} OR p."${this.mapFieldName('pdoc', setting, true)}" = '' OR p."${this.mapFieldName('pdoc', setting, true)}" IS NULL )`;
-							rQuery += ` AND (rd."${this.mapFieldName('rdoc', setting, true)}" IN ${yearString} OR rd."${this.mapFieldName('rdoc', setting, true)}" = '' OR rd."${this.mapFieldName('rdoc', setting, true)}" IS NULL)`;
-							oQuery += ` AND (o."${this.mapFieldName('odoc', setting, true)}" IN ${yearString} OR o."${this.mapFieldName('odoc', setting, true)}" = '' OR o."${this.mapFieldName('odoc', setting, true)}" IS NULL)`;
-						} else {
-							pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString}`;
-							rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" IN ${yearString}`;
-							oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" IN ${yearString}`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					}
-					break;
-				case 'programElement':
-					// pQuery += ` AND p."P40-01_LI_Number" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					// oQuery += ` AND (o."${this.mapFieldName('odoc', 'programElement', true)}" ILIKE '%${jbookSearchSettings[setting]}%' OR o."${this.mapFieldName('odoc', 'budgetLineItem', true)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-					break;
-				case 'projectNum':
-					// pQuery += ` AND p."P40-01_LI_Number" ILIKE 'THIS IS HERE TO MAKE SURE YOU DONT GET RESULTS'`;
-					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					// oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					break;
-				case 'projectTitle':
-					// pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					// rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					// oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
 					break;
 				default:
 					break;
