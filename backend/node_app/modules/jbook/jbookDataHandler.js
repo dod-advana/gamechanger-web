@@ -922,64 +922,65 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async getContractTotals(req, userId) {
-
 		const { searchText, jbookSearchSettings } = req.body;
 		const perms = req.permissions;
 
 		const hasSearchText = searchText && searchText !== '';
 
-		const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQueryForTotals();
-		const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQueryForTotals(jbookSearchSettings, hasSearchText, null, perms, perms, userId)
+		const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
+		const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, hasSearchText, null, perms, userId);
 
-		const pdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + pSelect + pWhere + `) as searchQuery GROUP BY "serviceAgency";`;
-		const rdocQuery = `select "serviceAgency", SUM("currentYearAmount") FROM (` + rSelect + rWhere + `) as searchQuery GROUP BY "serviceAgency";`;
+		const pQuery = pSelect + pWhere;
+		const rQuery = rSelect + rWhere;
+		const oQuery = oSelect + oWhere;
+
+		let giantQuery = ``;
+
+		// setting up promise.all
+		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
+			giantQuery = pQuery;
+		}
+		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
+			if (giantQuery.length === 0) {
+				giantQuery = rQuery;
+			} else {
+				giantQuery += ` UNION ALL ` + rQuery;
+			}
+		}
+		// if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
+		// 	if (giantQuery.length === 0) {
+		// 		giantQuery = oQuery;
+		// 	} else {
+		// 		giantQuery += ` UNION ALL ` + oQuery;
+		// 	}
+		// }
+
+		if (giantQuery.length === 0) {
+			return { contractTotals: { 'Total Obligated Amt.': 0 } }
+		}
 
 		const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
 
-		let pdata = await this.db.jbook.query(pdocQuery, {
+		// grab counts, can be optimized with promise.all
+		const cTotals = `select "serviceAgency", SUM("currentYearAmount") FROM (` + giantQuery + `) as searchQuery GROUP BY "serviceAgency";`;
+		let contractTotals = await this.db.jbook.query(cTotals, {
 			replacements: {
 				searchText: structuredSearchText
 			}
 		});
-		let rdata = await this.db.jbook.query(rdocQuery, {
-			replacements: {
-				searchText: structuredSearchText
-			}
-		});
-		// let odata = await this.db.jbook.query(omQuery, {});
 
 		const totals = {};
-		if (jbookSearchSettings.budgetType.includes('Procurement')) {
-			pdata[0].forEach(count => {
-				if (totals[count.serviceAgency] === undefined) {
-					totals[count.serviceAgency] = 0;
-				}
-				totals[count.serviceAgency] += count.sum;
-			})
-		}
+		contractTotals[0].forEach(count => {
+			if (totals[count.serviceAgency] === undefined) {
+				totals[count.serviceAgency] = 0;
+			}
+			totals[count.serviceAgency] += count.sum;
+		})
 
-		if (jbookSearchSettings.budgetType.includes('RDT&E')) {
-			rdata[0].forEach(count => {
-				if (totals[count.serviceAgency] === undefined) {
-					totals[count.serviceAgency] = 0;
-				}
-				totals[count.serviceAgency] += count.sum;
-			})
-		}
-
-		// odata[0].forEach(count => {
-		// 	if (totals[count.serviceagency] === undefined) {
-		// 		totals[count.serviceagency] = 0;
-		// 	}
-		// 	totals[count.serviceagency] += parseFloat(count.sum);
-		// })
-
-		// const omSum = await this.om.sum()
 		totals['Total Obligated Amt.'] = 0;
 		Object.keys(totals).forEach(key => {
 			totals['Total Obligated Amt.'] += totals[key];
 		})
-
 		return { contractTotals: totals }
 	}
 
