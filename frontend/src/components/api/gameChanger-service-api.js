@@ -28,6 +28,7 @@ const endpoints = {
 	gcCloneDataPOST: '/api/gameChanger/modular/admin/storeCloneMeta',
 	gcCloneDataDeletePOST: '/api/gameChanger/modular/admin/deleteCloneMeta',
 	gcDataTrackerDataPOST: '/api/gameChanger/dataTracker/getTrackedData',
+	getDocIngestionStats: '/api/gameChanger/getDocIngestionStats',
 	gcBrowsingLibraryPOST: '/api/gameChanger/dataTracker/getBrowsingLibrary',
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
@@ -430,6 +431,11 @@ export default class GameChangerAPI {
 
 	getDataTrackerData = async (options) => {
 		const url = endpoints.gcDataTrackerDataPOST;
+		return axiosPOST(this.axios, url, options);
+	};
+
+	getDocIngestionStats = async (options) => {
+		const url = endpoints.getDocIngestionStats;
 		return axiosPOST(this.axios, url, options);
 	};
 

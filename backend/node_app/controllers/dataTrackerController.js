@@ -5,6 +5,7 @@ const ORGANIZATION_INFO = require('../models').organization_info;
 const VERSIONED_DOCS = require('../models').versioned_docs;
 const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
+const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
 
 class DataTrackerController {
@@ -17,6 +18,7 @@ class DataTrackerController {
 			crawlerInfo = CRAWLER_INFO,
 			organizationInfo = ORGANIZATION_INFO,
 			versioned_docs = VERSIONED_DOCS,
+			sequelizeGCOrchestration = new Sequelize(constantsFile.POSTGRES_CONFIG.databases['gc-orchestration'])
 		} = opts;
 
 		this.logger = logger;
@@ -25,6 +27,7 @@ class DataTrackerController {
 		this.crawlerInfo = crawlerInfo;
 		this.organizationInfo = organizationInfo;
 		this.versioned_docs = versioned_docs;
+		this.sequelizeGCOrchestration = sequelizeGCOrchestration;
 
 		this.getTrackedData = this.getTrackedData.bind(this);
 		this.getBrowsingLibrary = this.getBrowsingLibrary.bind(this);
@@ -33,6 +36,7 @@ class DataTrackerController {
 		this.getCrawlerMetadata = this.getCrawlerMetadata.bind(this);
 		this.getCrawlerInfoData = this.getCrawlerInfoData.bind(this);
 		this.getOrgSealData = this.getOrgSealData.bind(this);
+		this.getDocIngestionStats = this.getDocIngestionStats.bind(this);
 	}
 
 	async getBrowsingLibrary(req, res) {
@@ -231,6 +235,55 @@ class DataTrackerController {
 		} catch (e) {
 			this.logger.error(e.message, 'VMHW263', userId);
 			res.status(500).send({ error: e.message, message: 'Error retrieving organization seals' });
+		}
+	}
+
+	async getDocIngestionStats(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.get('SSL_CLIENT_S_DN_CN');
+			
+			const numberOfSources = await this.crawlerInfo.count({});
+			const numDocResp = await this.sequelizeGCOrchestration.query('select count (*) from publications where is_revoked is false;');
+			const numberOfDocuments = Number(numDocResp[0][0].count);
+
+			const yearAgo = new Date()
+			yearAgo.setMonth(yearAgo.getMonth() - 11);
+			yearAgo.setDate(1);
+			yearAgo.setHours(0);
+			yearAgo.setMinutes(0);
+			yearAgo.setSeconds(0);
+			yearAgo.setMilliseconds(0);
+
+			const docsByMonthRaw = await this.documentCorpus.findAll({
+				where: {
+					upload_date: {
+						[Op.gt]: yearAgo
+					}
+				},
+				attributes: [
+					[Sequelize.fn('date_trunc', 'month', Sequelize.col('upload_date')), 'month'],
+					[Sequelize.fn('count', '*'), 'count']
+				],
+				group: 'month'
+			})
+			
+			const docsByMonth = [];
+			docsByMonthRaw.forEach(data => {
+				const month = data.dataValues.month.toLocaleString('default', { month: 'short' });
+				docsByMonth.push({[month]: Number(data.dataValues.count)});
+			})
+
+			const docIngestionStats = {
+				docsByMonth,
+				numberOfSources,    
+				numberOfDocuments
+			}
+
+			res.status(200).send(docIngestionStats);
+		} catch (e) {
+			this.logger.error(e.message, 'VMHW336', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving ingestion stats' });
 		}
 	}
 }

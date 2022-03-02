@@ -289,4 +289,76 @@ describe('DataTrackerController', function () {
 			done();
 		});
 	});
+
+	describe('#getDocIngestionStats', () => {
+		it('should get doc ingestion stats', async (done) => {	
+			const crawlers = ['crawler1', 'crawler2', 'crawler3']
+
+			const crawlerInfo = {
+				count() {
+					return Promise.resolve(
+						crawlers.length
+					);
+				}
+			};
+
+			const sequelizeGCOrchestration = {
+				query() {
+					return Promise.resolve(
+						[[{count: '111263'}]]
+					);
+				}
+			};
+
+			const documentCorpus = {
+				findAll() {
+					return Promise.resolve(
+						[
+							{dataValues: {
+								month: new Date(Date.UTC(122, 2)),
+								count: '17598'
+							}}
+						]
+					);
+				}
+			};
+
+			const opts = {
+				...constructorOptionsMock,
+				crawlerInfo,
+				sequelizeGCOrchestration,
+				documentCorpus
+			};
+
+			const target = new DataTrackerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {}
+			};
+
+			let resData;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(data) {
+					resData = data;
+					return data;
+				}
+			};
+
+			await target.getDocIngestionStats(req, res);
+
+			const expected = {
+				docsByMonth: [{Feb: 17598}],
+				numberOfSources: 3,    
+				numberOfDocuments: 111263
+			};
+			assert.deepStrictEqual(resData, expected);
+
+			done();
+		});
+	});
 });
