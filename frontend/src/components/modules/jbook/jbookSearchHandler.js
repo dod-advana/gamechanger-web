@@ -162,6 +162,7 @@ const JBookSearchHandler = {
 			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
 			const { contractTotals } = await this.getContractTotals(state, dispatch);
 			const t1 = new Date().getTime();
+
 			if (results === null || (!results.docs || results.docs.length <= 0)) {
 				setState(dispatch, {
 					prevSearchText: null,
