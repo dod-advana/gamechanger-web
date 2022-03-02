@@ -114,6 +114,7 @@ module.exports = Object.freeze({
 		host: process.env.EMAIL_HOST,
 		port: process.env.EMAIL_PORT
 	},
+	ADVANA_EMAIL_CC: process.env.EMAIL_CC || '',
 	BASE_URL_FOR_EMAIL: process.env.BASE_URL_FOR_EMAIL || `https://${process.env.REACT_APP_ROOT_CLONE}.advana.data.mil`,
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
