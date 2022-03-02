@@ -11,22 +11,23 @@ const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK = require('../../models').feedback;
-
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
 const DB = require('../../models/index');
 const Op = Sequelize.Op;
 const EmailUtility = require('../../utils/emailUtility');
-
 const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
+const {DataLibrary} = require('../../lib/dataLibrary');
+
 const types = {
 	'RDT&E': 'rdoc',
 	'Procurement': 'pdoc',
 	'O&M': 'odoc'
 };
+
 class JBookDataHandler extends DataHandler {
 	constructor(opts = {}) {
 		const {
@@ -48,6 +49,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK,
+			dataLibrary = new DataLibrary(opts),
 		} = opts;
 
 		super({ ...opts });
@@ -70,6 +72,8 @@ class JBookDataHandler extends DataHandler {
 		this.obligations = obligations;
 		this.reviewer = reviewer;
 		this.feedback = feedback;
+		this.searchUtility = searchUtility;
+		this.dataLibrary = dataLibrary;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -109,8 +113,6 @@ class JBookDataHandler extends DataHandler {
 
 			const keys = id.split('#');
 
-			console.log(keys)
-
 			const budgetYear = keys[1];
 			const budgetType = keys[0];
 			let budgetCycle;
@@ -120,25 +122,14 @@ class JBookDataHandler extends DataHandler {
 			let serviceAgency;
 			let projectNum;
 			let appropriationNumber;
-			let p1LineNumber;
-			let budgetSubActivityTitle;
 
 			switch (budgetType) {
 				case 'pdoc':
-					budgetCycle = keys[2];
-					budgetActivityNumber = keys[3];
-					budgetLineItem = keys[4];
-					serviceAgency = keys[5];
-					p1LineNumber = keys[6];
-					budgetSubActivityTitle = keys[7];
-					appropriationNumber = keys[8];
-					break;
 				case 'rdoc':
 					budgetCycle = keys[2];
 					budgetActivityNumber = keys[3];
 					budgetLineItem = keys[4];
-					serviceAgency = keys[5];
-					projectNum = keys[6];
+					serviceAgency = keys[6];
 					appropriationNumber = keys[7];
 					break;
 				case 'om':
@@ -147,14 +138,24 @@ class JBookDataHandler extends DataHandler {
 					budgetLineItem = keys[4];
 					budgetActivityNumber = keys[5];
 					projectNum = keys[6];
+					serviceAgency = keys[7];
 					break;
 				default:
 					break;
 			}
 
-			console.log(keys);
+			// Get ES Data
+			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
+			const esQuery = this.searchUtility.getElasticSearchJBookDataFromId({docIds: [id]}, userId);
+			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
+			const {docs} = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
-			return [];
+			const data = docs[0];
+			if (!data.currentYearAmount) {
+
+			}
+
+			return data;
 		} catch (err) {
 			this.logger.error(err, '6T0ILGP', userId);
 			return [];
@@ -169,8 +170,6 @@ class JBookDataHandler extends DataHandler {
 			let data;
 			let totalBudget = 0;
 			let query;
-
-			console.log(req.body)
 
 			switch (docType) {
 				case 'Procurement':

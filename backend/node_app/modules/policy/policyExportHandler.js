@@ -68,7 +68,7 @@ class PolicyExportHandler extends ExportHandler {
 				searchResults.classificationMarking = req.body.classificationMarking;
 			} catch (e) {
 				this.logger.error(`Error sentence transforming document search results ${e.message}`, 'L0V3LYT', userId);
-				res.status(500).send(err);
+				res.status(500).send(e);
 			}
 
 			try {

@@ -58,6 +58,7 @@ class SearchUtility {
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
 		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
+		this.getElasticSearchJBookDataFromId = this.getElasticSearchJBookDataFromId.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }){
@@ -2834,7 +2835,7 @@ class SearchUtility {
 		return query;
 	}
 
-	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and'}, userId) {
+	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and'}, userId, serviceAgencyMappings) {
 
 		const isVerbatimSearch = this.isVerbatim(searchText);
 		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
@@ -2908,8 +2909,6 @@ class SearchUtility {
 			query.query.bool.should.push(nested);
 		});
 
-
-
 		const wildcardList = {
 			'type_s': 1,
 			'key_s': 1,
@@ -2938,15 +2937,34 @@ class SearchUtility {
 			});
 		})
 
+		// FILTERS
+
+		console.log(jbookSearchSettings)
+
 		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
 			query.query.bool.must.push({
 				terms: {
-					budgetYear_year_only: jbookSearchSettings.budgetYear
+					budgetYear_s: jbookSearchSettings.budgetYear
 				}
 			});
 		}
 
-		// FILTERS
+		if (jbookSearchSettings && jbookSearchSettings.serviceAgency) {
+			const convertedAgencies = [];
+
+			jbookSearchSettings.serviceAgency.forEach(agency => {
+				Object.keys(serviceAgencyMappings).forEach(agencyKey => {
+					if (serviceAgencyMappings[agencyKey] === agency) {
+						convertedAgencies.push(agencyKey)
+					}
+				});
+			});
+			query.query.bool.must.push({
+				terms: {
+					serviceAgency_s: convertedAgencies
+				}
+			})
+		}
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
 			const budgetTypesTemp = [];
@@ -2996,6 +3014,24 @@ class SearchUtility {
 		}
 
 		return query;
+	}
+
+	getElasticSearchJBookDataFromId({docIds}, userId) {
+		try {
+			return {
+				track_total_hits: true,
+				size: 100,
+				query: {
+					bool: {
+						must: {
+							terms: {key_s: docIds}
+						}
+					}
+				}
+			};
+		} catch (err) {
+			this.logger.error(err, '1F07MYM', userId);
+		}
 	}
 
 }
