@@ -107,6 +107,12 @@ class Reports {
 					italics: path.join(__dirname, '../../static/fonts/Roboto/Roboto-Italic.ttf'),
 					bolditalics: path.join(__dirname, '../../static/fonts/Roboto/Roboto-BoldItalic.ttf')
 				},
+				Times: {
+					normal: path.join(__dirname, '../../static/fonts/Times/times-new-roman.ttf'),
+					bold: path.join(__dirname, '../../static/fonts/Times/times-new-roman-bold.ttf'),
+					italics: path.join(__dirname, '../../static/fonts/Times/times-new-roman-bold.ttf'),
+					bolditalics: path.join(__dirname, '../../static/fonts/Times/times-new-roman-bold-italic.ttf')
+				}
 			};
 
 			const printer = new this.pdfMake(fonts);
@@ -325,12 +331,7 @@ class Reports {
 		const dateString = `${date.format('MM/DD/YYYY')}`;
 		const img = path.resolve(__dirname, './ProfilePagePDFImages/JAIC_blk.png');
 
-		// console.log(data)
-
 		let reviewData = data.review;
-
-		// console.log(reviewData.serviceMissionPartnersList.split('|'));
-		// console.log(reviewData.serviceMissionPartnersList);
 
 		let label = '';
 		if (reviewData) {
@@ -369,7 +370,7 @@ class Reports {
 		}
 
 		let doc = {
-			pageMargins: [50, 50],
+			pageMargins: [50, 25, 50, 50],
 			footer: function (currentPage) {
 				const pageNumOffset = 8;
 				return {
@@ -394,70 +395,48 @@ class Reports {
 			},
 			content: [
 				{ text: 'Joint Artificial Intelligence Center', alignment: 'center', style: 'header' },
-				// { text: 'Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ' + data.budgetYear, alignment: 'center', style: 'header', marginBottom: 5 },
+				{ text: 'Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ' + data.budgetYear, alignment: 'center', style: 'header', marginBottom: 5 },
 				{
 					canvas: [{
 						type: 'line',
-						x1: 0, y1: 15,
-						x2: 513, y2: 15,
+						x1: 0, y1: 4,
+						x2: 513, y2: 4,
 						linewidth: 1.5,
 						lineColor: '#404040',
-						marginBottom: 10,
+						// marginBottom: 10,
 					}]
 				},
-				// { text: 'Research & Development Funded AI Activities', alignment: 'center', style: 'header' },
+				{ text: 'Research & Development Funded AI Activities', alignment: 'center', style: 'bottomheader' },
 				{
 					style: 'table',
 					margin: [ 0, 50, 0, 50 ],
 					table: {
 						widths: ['*', '*', '*', '*'],
 						body: [
-							['Project Title:', data.projectTitle ?? 'N/A', 'AI Labeling:', label ?? 'N/A'],
-							['Project:', data.projectNum ?? 'N/A', 'Service Agency Name:', data.serviceAgency ?? 'N/A'],
-							['Appropriation:', data.appropriationNumber ?? 'N/A', 'Appropriation Title:', data.appropriationTitle ?? 'N/A'],
-							['Budget:', data.budgetActivityNumber ?? 'N/A', 'Budget Activity Title:', data.budgetActivityTitle],
+							[{text: 'Project Title:', style: 'subheader'}, data.projectTitle ?? 'N/A', {text: 'AI Labeling:', style: 'subheader'}, label ?? 'N/A'],
+							[{text: 'Project:', style: 'subheader'}, data.projectNum ?? 'N/A', {text: 'Service Agency Name:', style: 'subheader'}, data.serviceAgency ?? 'N/A'],
+							[{text: 'Appropriation:', style: 'subheader'}, data.appropriationNumber ?? 'N/A', {text: 'Appropriation Title:', style: 'subheader'}, data.appropriationTitle ?? 'N/A'],
+							[{text: 'Budget Activity:', style: 'subheader'}, data.budgetActivityNumber ?? 'N/A', {text: 'Budget Activity Title:', style: 'subheader'}, data.budgetActivityTitle],
 							['', '', '', ''],
-							['Source Tags:', data.sourceTag ?? 'N/A', '', ''],
-							['# of Keywords:', data.keywords ? data.keywords.length : 'N/A', 'Included Keywords:', data.keywords ?? 'N/A'],
+							[{text: 'Source Tags:', style: 'subheader'}, data.sourceTag ?? 'N/A', '', ''],
+							[{text: '# of Keywords:', style: 'subheader'}, data.keywords ? data.keywords.length : 'N/A', {text: 'Included Keywords:', style: 'subheader'}, data.keywords ?? 'N/A'],
 							['', '', '', ''],
-							['Program Element:', data.programElement ?? 'N/A', 'Planned Transition Partner (if known):', reviewData ? reviewData.pocPlannedTransitionPartner ?? reviewData.servicePlannedTransitionPartner ?? reviewData.primaryPlannedTransitionPartner ?? 'N/A' : 'N/A' ],
-							['AI Domain: ', reviewData.domainTask ?? 'N/A', '', '' ],
-							['Joint Capability Area: ', reviewData.pocJointCapabilityArea ?? 'N/A', reviewData.pocJointCapabilityArea2 ?? 'N/A', reviewData.pocJointCapabilityArea3 ?? 'N/A'],
-							['Prior Year Amount: ', data.priorYearAmount !== null && data.priorYearAmount !== undefined ? `${formatNum(data.priorYearAmount)}` : 'N/A', 'Current Year Amount: ', data.currentYearAmount !== null && data.currentYearAmount !== undefined ? `${formatNum(data.currentYearAmount)}` : 'N/A'],
-							['To Complete: ', `${parseInt(data.budgetYear) + (data.budgetType === 'Procurement' ? 3 : 2)}` || 'N/A', 'Total Cost: ', totalCost ? `${formatNum(totalCost)}` : 'N/A']
+							[{text: 'Program Element:', style: 'subheader'}, data.programElement ?? 'N/A', {text: 'Planned Transition Partner (if known):', style: 'subheader'}, reviewData ? reviewData.pocPlannedTransitionPartner ?? reviewData.servicePlannedTransitionPartner ?? reviewData.primaryPlannedTransitionPartner ?? 'N/A' : 'N/A' ],
+							[{text: 'AI Domain: ', style: 'subheader'}, reviewData.domainTask ?? 'N/A', '', '' ],
+							[{text: 'Joint Capability Area: ', style: 'subheader'}, reviewData.pocJointCapabilityArea ?? 'N/A', reviewData.pocJointCapabilityArea2 ?? 'N/A', reviewData.pocJointCapabilityArea3 ?? 'N/A'],
+							[{text: 'Prior Year Amount: ', style: 'subheader'}, data.priorYearAmount !== null && data.priorYearAmount !== undefined ? `${formatNum(data.priorYearAmount)}` : 'N/A', {text: 'Current Year Amount: ', style: 'subheader'}, data.currentYearAmount !== null && data.currentYearAmount !== undefined ? `${formatNum(data.currentYearAmount)}` : 'N/A'],
+							[{text: 'To Complete: ', style: 'subheader'}, `${parseInt(data.budgetYear) + (data.budgetType === 'Procurement' ? 3 : 2)}` || 'N/A', {text: 'Total Cost: ', style: 'subheader'}, totalCost ? `${formatNum(totalCost)}` : 'N/A']
 						]
 					},
 					layout: {
 						defaultBorder: false
 					},
 					fontSize: 10,
-				},
-				{
-					style: 'table',
-					table: {
-						widths: ['*'],
-						heights:[10, 100],
-						body: 
-						[
-							[{text: 'Data Type', style: 'title'}],
-							[{text: 'How does the project fit this data type?'}],
-						]
-					}
-				},
-				{
-					style: 'table',
-					table: {
-						widths: ['*'],
-						heights:[10, 100],
-						body: 
-						[
-							[{text: 'Joint Capability Area', style: 'title'}],
-							[{text: 'Role of AI in this project?'}],
-						]
-					}
 				}
-	
 			],
+			defaultStyle: {
+				font: 'Times'
+			},
 			styles: {
 				title: {
 					fontSize: 15,
@@ -485,28 +464,67 @@ class Reports {
 				table: {
 					margin: [0, 15, 0, 15]
 				},
+				subheader: {
+					bold: true
+				},
+				bottomheader: {
+					marginTop: 5
+				},
+				header: {
+					marginBottom: 3
+				}
 			},
 		};
 
-		// doc.content.push(
-		// 	{
-		// 		style: 'table',
-		// 		table: {
-		// 			widths:['*', '*'],
-		// 			body: [
-		// 				[{text: 'FY21-FY25 Total Program Element Cost', colSpan: 2, style: 'title'}, {}],
-		// 				['FY20:', ''],
-		// 				['FY21:', ''],
-		// 				['FY22:', ''],
-		// 				['FY23:', ''],
-		// 				['FY24:', ''],
-		// 				['FY25:', ''],
-		// 				['To Complete:', ''],
-		// 				['Total Cost:', ''],
-		// 			],
-		// 		},
-		// 	},
-		// );
+		doc.content.push(
+			{
+				style: 'table',
+				table: {
+					widths: ['*', '*', '*'],
+					body: [
+						[{text: 'FY21-FY25 Total Program Element Cost', style: 'subheader'}, {text: 'Data Type', style: 'subheader'}, {text: 'Joint Capability Area', style: 'subheader'}],
+						[
+							{
+								stack: [
+									{text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5},
+									{text: 'FY21 (previous year):', marginBottom: 5},
+									{text: 'FY22:', marginBottom: 5},
+									{text: 'FY23:', marginBottom: 5},
+									{text: 'FY24:', marginBottom: 5},
+									{text: 'FY25:', marginBottom: 5},
+									{text: 'To Complete:', marginBottom: 5},
+									{text: 'Total Cost:', marginBottom: 5},
+								]
+							},
+							{
+								stack: [
+									'How does the project fit this data type?',
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+								]
+							},
+							{
+								stack: [
+									'Role of AI in this project?',
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+								]
+							},
+						],
+					]
+				}
+			}
+		)
 
 		if (reviewData && reviewData.serviceMissionPartnersList && reviewData.serviceMissionPartnersList.length > 0) {
 			doc.content.push(
@@ -516,9 +534,15 @@ class Reports {
 						widths:['*'],
 						body: [
 							[{text: 'Mission Partners', style: 'title'}],
-							...reviewData.serviceMissionPartnersList.split('|').map(mp => {
-								return [mp ?? '']
-							})
+							[
+								{
+									stack: [
+										...reviewData.serviceMissionPartnersList.split('|').map(mp => {
+											return {text: mp ?? '', margin: [2, 5, 0, 5]}
+										})
+									]
+								}
+							]
 						],
 					},
 				},

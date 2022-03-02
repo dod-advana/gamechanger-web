@@ -69,7 +69,17 @@ const SideNav = (props) => {
 }
 
 const BasicData = (props) => {
-	const { budgetType, admin, loading } = props;
+	const {
+		budgetType,
+		admin,
+		loading,
+		programElement,
+		projectNum,
+		budgetYear,
+		budgetLineItem,
+		id,
+		appropriationNumber
+	} = props;
 
 	const context = useContext(JBookContext);
 	const { state } = context;
@@ -118,7 +128,16 @@ const BasicData = (props) => {
 					onClick={async () => {
 						try {
 							setExportLoading(true);
-							const { data } = await gamechangerAPI.exportProfilePage({ cloneName: 'jbook', options: { data: projectData } });
+							const { data } = await gamechangerAPI.exportProfilePage({ cloneName: 'jbook',
+								options: { 
+									programElement,
+									projectNum,
+									type: budgetType,
+									budgetYear,
+									budgetLineItem,
+									id,
+									appropriationNumber
+								} });
 							const blob = b64toBlob(data, 'application/pdf');
 							const d = new Date();
 							await autoDownloadFile({ data: blob, extension: 'pdf', filename: 'project-data-' + d.toISOString() });

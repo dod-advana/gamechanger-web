@@ -1098,7 +1098,7 @@ class JBookDataHandler extends DataHandler {
 					cid: 'jbook-newsletter-footer'
 				}
 			]
-			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search POC Reviewer: Application Access', email, null, attachment, userId)
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search POC Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId)
 		} catch (err) {
 			this.logger.error(err, 'DNZEUJD', userId);
 		}
@@ -1152,7 +1152,7 @@ class JBookDataHandler extends DataHandler {
 					cid: 'jbook-newsletter-footer'
 				}
 			]
-			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search Service Reviewer: Application Access', email, null, attachment, userId)
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search Service Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId)
 		} catch (err) {
 			this.logger.error(err, 'B4E39XB', userId);
 		}
