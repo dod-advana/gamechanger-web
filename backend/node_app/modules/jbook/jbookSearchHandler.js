@@ -297,8 +297,15 @@ class JBookSearchHandler extends SearchHandler {
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId);
-			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			let expansionDict = {}
+
+			console.log(JSON.stringify(esQuery))
+
+			if (req.body.searchText && req.body.searchText !== ''){
+				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			}
+
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
@@ -327,7 +334,11 @@ class JBookSearchHandler extends SearchHandler {
 
 			const perms = req.permissions;
 
-			let expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			let expansionDict = {}
+
+			if (searchText && searchText !== ''){
+				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
@@ -509,8 +520,8 @@ class JBookSearchHandler extends SearchHandler {
 
 		if (agencyYearData[0].length > 0) {
 			agencyYearData[0].forEach(data => {
-				returnData.budgetYear = [...new Set([...returnData.budgetYear, ...data.budgetyear])];
-				returnData.serviceAgency = [...new Set([...returnData.serviceAgency, ...data.serviceagency])];
+				returnData.budgetYear = [...new Set([...returnData.budgetYear, ...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : [])])];
+				returnData.serviceAgency = [...new Set([...returnData.serviceAgency, ...(data.serviceagency && data.serviceagency !== null ? data.serviceagency : [])])];
 			})
 		}
 

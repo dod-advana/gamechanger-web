@@ -303,6 +303,8 @@ const aggregateProjectDescriptions = (projectData) => {
 		}
 	});
 
+	console.log(tmpProjectDescriptions)
+
 	return tmpProjectDescriptions;
 }
 

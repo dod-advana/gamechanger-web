@@ -1678,6 +1678,11 @@ module.exports = {
 			newName: 'id',
 			defaultValue: '',
 			processValue: (value) => value
+		},
+		'keyword_n': {
+			newName: 'keywords',
+			defaultValue: '',
+			processValue: (value) => value
 		}
 	},
 	
@@ -1787,5 +1792,44 @@ module.exports = {
 			path: 'p5_res_sum_optional_rows_n',
 			fields: ['p5_res_sum_optional_rows_n.P5-16_Item_Title_t']
 		}
-	]
+	],
+
+	esServiceAgencyMapping: {
+		'DEPARTMENT OF THE ARMY': 'Army',
+		'DEPARTMENT OF THE NAVY': 'Navy',
+		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'ARMY': 'Army',
+		'NAVY': 'Navy',
+		'AF': 'Air Force (AF)',
+		'DHA': 'Defense Health Agency (DHA)',
+		'SOCOM': 'United States Special Operations Command (SOCOM)',
+		'DEFW': 'Defense Defense Worldwide (DEFW)',
+		'DTRA': 'Defense Threat Reduction Agency (DTRA)',
+		'IG': 'Office of the Inspector General (IG)',
+		'TJS': 'The Joint Staff (TJS)',
+		'DCAA': 'Defense Contract Audit Agency (DCAA)',
+		'DEPS': 'DoD Enterprise Portal Service (DEPS)',
+		'DISA': 'Defense Information Systems Agency (DISA)',
+		'DAU': 'Defense Acquisition University (DAU)',
+		'DCMA': 'Defense Contract Management Agency (DCMA)',
+		'DCSA': 'Defense Counterintelligence and Security Agency (DCSA)',
+		'DHRA': 'DoD Human Resources Activity (DHRA)',
+		'DODEA': 'Department of Defense Education Activity (DODEA)',
+		'DSCA': 'Defense Security Cooperation Agency (DSCA)',
+		'DTSA': 'Defense Technology Security Administration (DTSA)',
+		'OSD': 'Office of the Secretary of Defense (OSD)',
+		'CAAF': 'Court of Appeals for the Armed Forces (CAAF)',
+		'CMP': 'Civil Military Programs (CMP)',
+		'DEPSDDR': 'DEPSDDR',
+		'DLA': 'Defense Logistics Agency (DLA)',
+		'DLSA': 'Defense Legal Services Agency (DLSA)',
+		'DMACT': 'Defense Media Activity (DMACT)',
+		'DPAA': 'Defense POW MIA Accounting Agency (DPAA)',
+		'DTIC': 'Defense Technical Information Center (DTIC)',
+		'MDA': 'Missile Defense Agency (MDA)',
+		'OEA': 'Office of Economic Adjustment (OEA)',
+		'OLDCC': 'Office of the Local Defense Community Cooperation (OLDCC)',
+		'SDA': 'Space Development Agency (SDA)',
+		'WHS': 'Washington Headquarters Services (WHS)',
+	}
 }
