@@ -315,11 +315,11 @@ describe('DataTrackerController', function () {
 					return Promise.resolve(
 						[
 							{dataValues: {
-								month: new Date(Date.UTC(122, 1)),
+								month: new Date(Date.UTC(2022, 0)),
 								count: '17598'
 							}}, 
 							{dataValues: {
-								month: new Date(Date.UTC(122, 2)),
+								month: new Date(Date.UTC(2022, 1)),
 								count: '10888'
 							}}
 						]

@@ -275,7 +275,7 @@ class DataTrackerController {
 				'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 			];
 			docsByMonthRaw.forEach(data => {
-				const month = monthNames[data.dataValues.month.getMonth()];
+				const month = monthNames[data.dataValues.month.getUTCMonth()];
 				docsByMonth.push({[month]: Number(data.dataValues.count)});
 			})
 
