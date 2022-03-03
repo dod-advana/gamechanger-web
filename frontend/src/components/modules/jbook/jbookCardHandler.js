@@ -262,6 +262,10 @@ const StyledFrontCardContent = styled.div`
     .hits-container {
     	display: flex;
     	height: 100%;
+
+			.expanded-metadata {
+				width: 100%;
+			}
     	
     	.page-hits {
     		min-width: 160px;
@@ -439,6 +443,28 @@ const jbookCardHandler = {
 				intelligentFeedbackComponent
 			} = props;
 
+			const renderContracts = (contracts) => {
+				let contractElements = `<b>Contracts: ${contracts.length}</b>`;
+
+				for (let i = 0; i < contracts.length && i < 5; i++) {
+					const contract = contracts[i];
+					contractElements += `<br/><p>- ${contract}</p>`;
+				}
+
+				return contractElements;
+			}
+
+			const renderAccomplishments = (accomplishments) => {
+				let accomplishmentElements = `<b>Accomplishments: ${accomplishments.length}</b>`;
+
+				for (let i = 0; i < accomplishments.length && i < 5; i++) {
+					const accomplishment = accomplishments[i];
+					accomplishmentElements += `<br/><p>- ${accomplishment}</p>`;
+				}
+
+				return accomplishmentElements;
+			}
+
 			if (!state.searchText || state.searchText === null || state.searchText === '' || !item.pageHits || item.pageHits.length <= 0) {
 				item.pageHits = [
 					{
@@ -447,12 +473,11 @@ const jbookCardHandler = {
 					},
 					{
 						title: 'Contracts',
-						snippet: 'Contracts text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-
+						snippet: _.truncate(item.contracts ? renderContracts(item.contracts) : 'No Contracts', {'length': 180})
 					},
 					{
 						title: 'Accomplishments',
-						snippet: 'Accomplishments text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+						snippet: _.truncate(item.accomplishments ? renderAccomplishments(item.accomplishments) : 'No Accomplishments', {'length': 200})
 					},
 					{
 						title: 'Section',
@@ -749,7 +774,7 @@ const jbookCardHandler = {
 					Value: <div>
 						{projectData.keywords && projectData.keywords.length > 0 ? projectData.keywords.map(keyword => <p>{keyword}</p>) : 'None'}
 					</div>,
-				},
+				}
 				// {
 				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
 				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
