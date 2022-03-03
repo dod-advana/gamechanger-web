@@ -233,19 +233,21 @@ class SearchUtility {
 
 	getQueryAndSearchTerms (searchText) {
 
-		// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
+		// change all text to lower case, need upper case AND/OR for search so easier if everything is lower
 		const searchTextLower = searchText.toLowerCase();
 
+		//replace forward slashes will break ES query
+		let cleanSearch = searchTextLower.replace(/\//g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-		const rawSequences = this.findQuoted(searchTextLower);
+		const rawSequences = this.findQuoted(cleanSearch);
 
-		let searchTextWithPlaceholders = searchTextLower;
+		let searchTextWithPlaceholders = cleanSearch;
 		// replace phrases with __#__ placeholder
 		rawSequences.forEach((phrase, index) => {
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(phrase, `__${index}__`);
 		});
 
-		// replace and/or with ' AND ' ' OR ' as required for solr search, one space is required
+		// replace and/or with ' AND ' ' OR ' as required for search, one space is required
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)and(\s+)/g, ` AND `);
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)or(\s+)/g, ` OR `);
 
@@ -253,17 +255,16 @@ class SearchUtility {
 		// combine all terms to return for snippet highlighting
 		const termsArray = this.findLowerCaseWordsOrAcronyms(searchTextWithPlaceholders);
 
-		// fill back in double quoted phrases for solr search
+		// fill back in double quoted phrases for  search
 		rawSequences.forEach((phrase, index) => {
 			const replacementSequence = this.convertPhraseToSequence(phrase);
 			termsArray.push(replacementSequence);
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(`__${index}__`, `${replacementSequence}`);
 		});
 
-		const solrSearchText = searchTextWithPlaceholders;
-
-		// return solr query and list of search terms after parsing
-		return [solrSearchText, termsArray];
+		const modSearchText = searchTextWithPlaceholders;
+		// return  query and list of search terms after parsing
+		return [modSearchText, termsArray];
 	}
 
 	findQuoted (searchText) {
@@ -337,6 +338,7 @@ class SearchUtility {
 			charsPadding = 90, 
 			operator = 'and', 
 			searchFields = {}, 
+			mainMaxkeywords = 2,
 			accessDateFilter = [], 
 			publicationDateFilter = [], 
 			publicationDateAllTime = true, 
@@ -396,6 +398,8 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
+			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -475,15 +479,7 @@ class SearchUtility {
 								wildcard: {
 									'keyw_5': {
 										value: `*${plainQuery}*`,
-										boost: 2
-									}
-								}
-							},
-							{
-								wildcard: {
-									'display_source': {
-										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},
@@ -491,7 +487,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 8
+										boost: 10
 									}
 								}
 							},
@@ -499,7 +495,7 @@ class SearchUtility {
 								wildcard: {
 									'filename.search': {
 										value: `*${plainQuery}*`,
-										boost: 4
+										boost: 5
 									}
 								}
 							},
@@ -507,7 +503,7 @@ class SearchUtility {
 								wildcard: {
 									'display_source_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},
@@ -515,15 +511,21 @@ class SearchUtility {
 								wildcard: {
 									'top_entities_t.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},								
 							{
-								match: {
-									"display_title_s.search": plainQuery
-								}
+								query_string: {
+									fields: ['display_title_s.search'],
+									query: `${mainKeywords}*`,
+									type: "best_fields",
+									boost: 6,
+									analyzer
+
+								}							
 							}
+							
 						],
 						minimum_should_match: 1,
 
@@ -649,7 +651,8 @@ class SearchUtility {
 			}
 
 			if (ltr) {
-				query.rescore = {
+				query.rescore = [{
+					window_size: 50,
 					query: {
 						rescore_query: {
 							sltr: {
@@ -658,9 +661,27 @@ class SearchUtility {
 							}
 						}
 					}					
-				}
+				},
+				{				
+					window_size: 500,
+					query: {
+					  rescore_query: {
+							bool:{
+								must: [{
+									rank_feature: {
+										field: "pagerank_r",
+										boost: 10
+									}}
+								]
+							}						
+						},
+						query_weight : 0.7,
+						rescore_query_weight : 2
+					  }
+					
+				  }
+			]
 			}
-
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
@@ -673,6 +694,7 @@ class SearchUtility {
 		}
 		return verbatim;
 	}
+
 	isVerbatimSuggest(searchText){
 		let verbatim = false;
 		if( (searchText.startsWith('"') || (searchText.startsWith(`'`)))){
@@ -2043,7 +2065,7 @@ class SearchUtility {
 
 			let results;
 
-			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);
