@@ -2197,36 +2197,49 @@ class SearchUtility {
 		return graphRecs
 	}
 
-	async getGraphRecs(doc, userId, community="louvain") {
+	async getGraphRecs(doc, userId, cluster="similar_to") {
 		let suggested = [];
 		let name = doc + ".pdf"
+		let comm_resp = {};
+		let resp = {};
 		try {
-			const comm_resp = await this.dataLibrary.queryGraph(`
+
+			if (cluster == "similar_to") {
+				comm_resp = await this.dataLibrary.queryGraph(`
+					MATCH (d:Document {filename: $file})-[:SIMILAR_TO]-(n) 
+					RETURN n 
+					ORDER BY n.betweenness 
+					LIMIT 5;`, {file: name}, userId
+				);
+				resp = comm_resp
+			} else { 
+				comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
 				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
-			);
-			const singleRecord = comm_resp.result.records[0]
-			let louvain = singleRecord._fields[1]["low"]
-			let label = singleRecord._fields[2]["low"]
-			let resp = {};
-			
-			if (community === "label_prop") {
-				resp = await this.dataLibrary.queryGraph(`
-					MATCH (d:Document)
-					WHERE d.lp_community = $lp
-					RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
-					ORDER BY d.betweenness DESC
-					LIMIT 5;`, {lp: label}, userId
 				);
-			} else if (community == "louvain") {
-				resp = await this.dataLibrary.queryGraph(`
-					MATCH (d:Document)
-					WHERE d.louvain_community = $louv
-					RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
-					ORDER BY d.betweenness DESC
-					LIMIT 5;`, {louv: louvain}, userId
-				);
-			}
+				const singleRecord = comm_resp.result.records[0]
+				let louvain = singleRecord._fields[1]["low"]
+				let label = singleRecord._fields[2]["low"]
+				
+				if (cluster === "label_prop") {
+					resp = await this.dataLibrary.queryGraph(`
+						MATCH (d:Document)
+						WHERE d.lp_community = $lp
+						RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+						ORDER BY d.betweenness DESC
+						LIMIT 5;`, {lp: label}, userId
+					);
+				} else if (cluster == "louvain") {
+					resp = await this.dataLibrary.queryGraph(`
+						MATCH (d:Document)
+						WHERE d.louvain_community = $louv
+						RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+						ORDER BY d.betweenness DESC
+						LIMIT 5;`, {louv: louvain}, userId
+					);
+				}
+			};
+
 			if (resp!=={}) {
 					resp.result.records.forEach((r) => {
 					let doc = {}
