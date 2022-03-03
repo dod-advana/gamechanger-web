@@ -2207,11 +2207,12 @@ class SearchUtility {
 			if (cluster == "similar_to") {
 				comm_resp = await this.dataLibrary.queryGraph(`
 					MATCH (d:Document {filename: $file})-[:SIMILAR_TO]-(n) 
-					RETURN n 
+					RETURN n.filename, n.louvain_community, n.lp_community, n.betweenness 
 					ORDER BY n.betweenness 
 					LIMIT 5;`, {file: name}, userId
 				);
 				resp = comm_resp
+				console.log("SIMILAR TO:", JSON.stringify(resp))
 			} else { 
 				comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
@@ -2239,7 +2240,6 @@ class SearchUtility {
 					);
 				}
 			};
-
 			if (resp!=={}) {
 					resp.result.records.forEach((r) => {
 					let doc = {}
