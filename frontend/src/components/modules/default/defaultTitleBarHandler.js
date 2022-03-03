@@ -5,7 +5,7 @@ import NGA from '../../../images/logos/NGALogo.png';
 import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
 import Covid19 from '../../../images/logos/Covid19Logo.png';
 import CDO from '../../../images/logos/CDOLogo.png';
-import {Typography} from "@material-ui/core";
+import {Typography} from '@material-ui/core';
 
 
 const DefaultTitleBarHandler = {

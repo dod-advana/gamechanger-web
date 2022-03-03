@@ -92,8 +92,8 @@ class GCAuth {
 		}
 	}
 
-	static refreshUserToken(callback, errCallback) {
-		axios
+	static async refreshUserToken(callback, errCallback) {
+		await axios
 			.post(USER_TOKEN_ENDPOINT)
 			.then((response) => {
 				this.saveUser(response.data.token);

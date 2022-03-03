@@ -111,7 +111,12 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const cn = req.get('x-env-ssl_client_certificate');
 		if (!cn) {
-			res.sendStatus(401);
+			if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+				next();
+			}
+			else{
+				res.sendStatus(401);
+			}
 		} else {
 			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
 			req.headers['ssl_client_s_dn_cn'] = cn;
@@ -245,12 +250,19 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
+
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const signatureFromApp = req.get('x-ua-signature');
-		redisAsyncClient.select(12);
-		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
+		let userToken = ''
+		if(req.get('SSL_CLIENT_S_DN_CN') === 'ml-api'){
+			userToken = process.env.ML_WEB_TOKEN
+		}
+		else{
+			redisAsyncClient.select(12);
+			userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
+		}
+		const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, userToken));
 		if (signatureFromApp === calculatedSignature) {
 			next();
 		} else {
@@ -268,7 +280,18 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		res.sendStatus(403);
+		
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			
+			const signatureFromApp = req.get('x-ua-signature');
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			if (signatureFromApp === userToken){
+				next();
+			}
+		}
+		else{
+			res.sendStatus(403);
+		}
 	}
 });
 

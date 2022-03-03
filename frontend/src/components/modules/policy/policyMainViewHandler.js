@@ -231,7 +231,6 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 
 			imgSrc: DefaultPub,
 		}));
-		console.log(filteredPubs)
 		setState(dispatch, { recDocs: filteredPubs });
 		setState(dispatch, { loadingrecDocs: false });
 

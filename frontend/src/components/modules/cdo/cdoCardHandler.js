@@ -118,6 +118,7 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
 			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
+			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};

@@ -43,13 +43,13 @@ describe('DocumentController', function () {
 		});
 	});
 
-	describe('#getCurrentTransformer', () => {
+	describe('#getLoadedModels', () => {
 		it('should return a fake transformer', async (done) => {
 
 			const opts = {
 				...constructorOptionsMock,
 				mlApi: {
-					getCurrentTransformer() {
+					getLoadedModels() {
 						return Promise.resolve('Test');
 					}
 				}
@@ -75,7 +75,7 @@ describe('DocumentController', function () {
 
 			const target = new TransformerController(opts);
 
-			await target.getCurrentTransformer(req, res);
+			await target.getLoadedModels(req, res);
 
 			assert.strictEqual(resMsg, 'Test');
 			done();
