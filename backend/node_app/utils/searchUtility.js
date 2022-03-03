@@ -2164,28 +2164,42 @@ class SearchUtility {
 	}
 	async getRecDocs(doc=["Title 10"], userId=""){
 		let recDocs = [];
-		let graphDocs = [];
+		let recommendations = {};
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
 			console.log("MLAPI REC DOCS:", recDocs)
-			if (recDocs && recDocs.length < 100) {
-				graphDocs = await this.getGraphRecs(doc, userId);
-				console.log("GRAPH RESULTS:", graphDocs);
-			} else {
+			if (recDocs.results && recDocs.results.length > 4) {
+				recommendations = recDocs
 				console.log("No need to get graph results")
+			} else {
+				recommendations = await this.getAllGraphRecs(doc, userId)
+				console.log("GRAPH RESULTS:", JSON.stringify(recommendations));
 			}
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		return recDocs
+		return recommendations
 	}
 
-	/// START
+	async getAllGraphRecs(doc_list, userId) {
+		let graphRecs = {}
+		let graphResults = []
+		try {
+			await Promise.all(doc_list.map(async (doc) => {
+				const results = await this.getGraphRecs(doc, userId)
+				results.forEach((d) => graphResults.push(d));
+			  }));
+			graphRecs.filenames = doc_list
+			graphRecs.results = graphResults
+		} catch (e) {
+			this.logger.error(e, 'ADFAD90', userId)
+		};
+		return graphRecs
+	}
+
 	async getGraphRecs(doc, userId, community="louvain") {
-		let graphRecs = [];
+		let suggested = [];
 		let name = doc + ".pdf"
-		//let name = "Title 10 - Armed Forces.pdf"
-		console.log(name)
 		try {
 			const comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
@@ -2213,7 +2227,6 @@ class SearchUtility {
 					LIMIT 5;`, {louv: louvain}, userId
 				);
 			}
-			let suggested = []
 			if (resp!=={}) {
 					resp.result.records.forEach((r) => {
 					let doc = {}
@@ -2224,15 +2237,12 @@ class SearchUtility {
 					suggested.push(doc);
 				});
 			};
-			console.log("Community: ", community);
-			console.log("Suggested: ", JSON.stringify(suggested))
-			
+			return suggested.map(item => item.filename.split('.pdf')[0])
 		} catch (e) {
 			this.logger.error(e, 'WQPX84H', userId)
+			return []
 		};
-		return graphRecs
 	}
-	/// END
 
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
