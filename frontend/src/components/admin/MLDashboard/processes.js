@@ -28,7 +28,6 @@ const Process = (props) => {
 	 * @method downloadS3File
 	 */
 	 const  killProcess = async (row) => {
-		console.log(row)
 		await gameChangerAPI.stopProcess({
 			'thread_id':row.original.thread_id,
 			'process': `${row.original.category}: ${row.original.process}`
@@ -87,10 +86,10 @@ const Process = (props) => {
 						width: '100%',
 						display: 'inline-block',
 						paddingBottom: '5px',
-						marginTop: '10px',
+						marginTop: '10px'
 					}}
 				>
-					<div style={{ display: 'inline-block' }}>
+					<div style={{ display: 'inline-block', fontWeight: 'bold' }}>
 						Processes:
 					</div>
 					<fieldset className={'field'}>

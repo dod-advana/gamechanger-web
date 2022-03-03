@@ -282,7 +282,7 @@ const App = () => {
 	useEffect(() => {
 		const initialize = async () => {
 			if (isDecoupled) {
-				GCAuth.refreshUserToken(
+				await GCAuth.refreshUserToken(
 					() => setTokenLoaded(true),
 					() => setTokenLoaded(true)
 				);

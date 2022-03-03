@@ -40,10 +40,7 @@ const apiColumns = [
 		),
 	},
 ];
-const initTransformer = {
-	encoder: '',
-	sim: '',
-};
+
 
 /**
  * This class queries the ml api information
@@ -52,10 +49,7 @@ const initTransformer = {
 export default (props) => {
 	// Set state variables
 	const [APIData, setAPIData] = useState({});
-	const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
-	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
-	const [currentQexp, setCurrentQexp] = useState('');
-	const [currentQa, setCurrentQa] = useState('');
+
 
 	/**
 	 * Load all the initial data on transformers and s3
@@ -63,46 +57,8 @@ export default (props) => {
 	 */
 	const onload = async () => {
 		getAPIInformation();
-		getCurrentTransformer();
 	};
-	/**
-	 * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
-	 * @method getCurrentTransformer
-	 */
-	const getCurrentTransformer = async () => {
-		try {
-			// set currentTransformer
-			const current = await gameChangerAPI.getCurrentTransformer();
-			// current.data is of the form {sentence_models:{encoder, sim}}
-			setCurrentTransformer(
-				current.data.sentence_models
-					? current.data.sentence_models
-					: initTransformer
-			);
-			setCurrentSentenceIndex(
-				current.data.sentence_index
-					? current.data.sentence_index.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentQexp(
-				current.data.qexp_model
-					? current.data.qexp_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentQa(
-				current.data.qa_model
-					? current.data.qa_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			props.updateLogs('Successfully queried current transformer', 0);
-		} catch (e) {
-			props.updateLogs(
-				'Error querying current transformer: ' + e.toString(),
-				2
-			);
-			throw e;
-		}
-	};
+
 	/**
 	 * Get the general information for the API
 	 * @method getAPIInformation
@@ -195,7 +151,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Current State:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Current State:</div>
 						<Tooltip
 							title={
 								'Connection ' + status[getConnectionStatus()].toUpperCase()
@@ -216,28 +172,20 @@ export default (props) => {
 								Version: <br />
 								Connection Status: <br />
 								Last Queried: <br />
-								Loaded Models:
-								<br />
-								<div style={{ paddingLeft: '15px' }}>Sentence Index:</div>
-								<div style={{ paddingLeft: '15px' }}>Query Expansion:</div>
-								<div style={{ paddingLeft: '15px' }}>Question Answer:</div>
-								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
-								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
-								<div style={{ paddingLeft: '30px' }}>Sim:</div>
+								Elasticsearch Host: <br />
+								Elasticsearch Status: <br />
+
 							</div>
 							<div style={{ width: '65%' }} className="half">
 								{APIData.API_Name} <br />
 								{APIData.Version} <br />
 								{status[getConnectionStatus()].toUpperCase()} <br />
 								{getLastQueried()} <br />
+								{APIData.Elasticsearch_Host} <br />
+								{APIData.Elasticsearch_Status} <br />
+
 								<br />
-								{currentSentenceIndex} <br />
-								{currentQexp} <br />
-								{currentQa} <br />
-								<br />
-								{currentTransformer.encoder.replace(/^.*[\\/]/, '')}
-								<br />
-								{currentTransformer.sim.replace(/^.*[\\/]/, '')}
+
 							</div>
 						</div>
 					</fieldset>
@@ -251,7 +199,7 @@ export default (props) => {
 							marginTop: '10px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>API Response:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>API Response:</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">

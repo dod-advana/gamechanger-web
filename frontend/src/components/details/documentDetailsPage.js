@@ -350,13 +350,14 @@ const DocumentDetailsPage = (props) => {
 							<GCButton
 								onClick={(e) => {
 									e.preventDefault();
+									const isDLA = document.display_org_s === 'Defense Logistics Agency';
 									trackEvent(
 										getTrackingNameForFactory(cloneData?.clone_name),
 										'CardInteraction',
 										'PDFOpen'
 									);
 									window.open(
-										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}`
+										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}${isDLA ? '&sourceUrl=dla' : ''}`
 									);
 								}}
 								style={{
@@ -430,14 +431,11 @@ const DocumentDetailsPage = (props) => {
 								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
 								runningSearchProp={runningQuery}
-								notificationCountProp={0}
 								setDocumentsFound={() => {}}
 								setTimeFound={() => {}}
 								cloneData={cloneData}
-								expansionTerms={false}
 								setNumOfEdges={() => {}}
 								dispatch={{}}
-								showSideFilters={false}
 								showBasic={false}
 								searchText={''}
 								detailsView={true}
