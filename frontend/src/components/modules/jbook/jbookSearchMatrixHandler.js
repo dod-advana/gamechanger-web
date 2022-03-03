@@ -20,6 +20,7 @@ const handleSelectSpecific = (state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	newSearchSettings[`${type}SpecificSelected`] = true;
 	newSearchSettings[`${type}AllSelected`] = false;
+	newSearchSettings[type] = [];
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -248,7 +249,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.budgetTypeSpecificSelected}
-						header={'BUDGET TYPE'}
+						header={<b>BUDGET TYPE</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -260,7 +261,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.budgetYearSpecificSelected}
-						header={'BUDGET YEAR (FY)'}
+						header={<b>BUDGET YEAR (FY)</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -273,7 +274,7 @@ const PolicySearchMatrixHandler = {
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
-							header={'PROGRAM ELEMENT / BLI'}
+							header={<b>PROGRAM ELEMENT / BLI</b>}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
@@ -287,7 +288,7 @@ const PolicySearchMatrixHandler = {
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
-							header={'PROJECT #'}
+							header={<b>PROJECT #</b>}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
@@ -301,7 +302,7 @@ const PolicySearchMatrixHandler = {
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
 							expanded={state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''}
-							header={'PROJECT TITLE'}
+							header={<b>PROJECT TITLE</b>}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
@@ -314,7 +315,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.serviceAgencySpecificSelected}
-						header={'SERVICE / AGENCY'}
+						header={<b>SERVICE / AGENCY</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -326,7 +327,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.primaryReviewerSpecificSelected}
-						header={'PRIMARY REVIEWER'}
+						header={<b>PRIMARY REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -338,7 +339,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.serviceReviewerSpecificSelected}
-						header={'SERVICE REVIEWER'}
+						header={<b>SERVICE REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -350,7 +351,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.pocReviewer && state.jbookSearchSettings.pocReviewer !== ''}
-						header={'POC REVIEWER'}
+						header={<b>POC REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -362,7 +363,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.reviewStatusSpecificSelected}
-						header={'REVIEW STATUS'}
+						header={<b>REVIEW STATUS</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -374,7 +375,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.hasKeywordsSpecificSelected}
-						header={'HAS KEYWORDS'}
+						header={<b>HAS KEYWORDS</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -386,7 +387,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.primaryClassLabelSpecificSelected}
-						header={'LABELS'}
+						header={<b>LABELS</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -398,7 +399,7 @@ const PolicySearchMatrixHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={state.jbookSearchSettings.sourceSpecificSelected}
-						header={'SOURCE'}
+						header={<b>SOURCE</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
@@ -442,7 +443,7 @@ const PolicySearchMatrixHandler = {
 				<GCAccordion
 					contentPadding={0}
 					expanded={true}
-					header={'ESTIMATED BUDGET TOTALS'}
+					header={<b>ESTIMATED BUDGET TOTALS</b>}
 					headerBackground={'rgb(28, 45, 101)'}
 					headerTextColor={'white'}
 					headerTextWeight={'normal'}
