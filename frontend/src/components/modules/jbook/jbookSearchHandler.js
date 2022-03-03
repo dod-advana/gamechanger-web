@@ -223,16 +223,20 @@ const JBookSearchHandler = {
 			// this.setSearchURL({...state, searchText, resultsPage, tabName});
 		} catch (e) {
 			console.log(e);
-			setState(dispatch, {
-				prevSearchText: null,
-				unauthorizedError: true,
-				loading: false,
-				autocompleteItems: [],
-				searchResultsCount: 0,
-				runningSearch: false,
-				loadingTinyUrl: false,
-				hasExpansionTerms: false
-			});
+			// if it's a consecutive call triggered by a filter update, don't reset state, 
+			// the error is taken care of; there's another call later in the stack working the updated search
+			if (e.message !== 'cancelled axios with consecutive call') {
+				setState(dispatch, {
+					prevSearchText: null,
+					unauthorizedError: true,
+					loading: false,
+					autocompleteItems: [],
+					searchResultsCount: 0,
+					runningSearch: false,
+					loadingTinyUrl: false,
+					hasExpansionTerms: false
+				});
+			}
 		}
 
 		const index = 'gamechanger';
