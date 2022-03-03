@@ -7,6 +7,7 @@ const LOGGER = require('../lib/logger');
 const Sequelize = require('sequelize');
 const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
+const moment = require('moment');
 
 class DataTrackerController {
 
@@ -269,8 +270,12 @@ class DataTrackerController {
 			})
 			
 			const docsByMonth = [];
+			const monthNames = [
+				'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+				'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+			];
 			docsByMonthRaw.forEach(data => {
-				const month = data.dataValues.month.toLocaleString('default', { month: 'short' });
+				const month = monthNames[data.dataValues.month.getMonth()];
 				docsByMonth.push({[month]: Number(data.dataValues.count)});
 			})
 
