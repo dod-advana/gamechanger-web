@@ -83,6 +83,7 @@
 .* /api/gamechanger/sendFrontendError .*
 .*/api/gamechanger/getCrawlerSeals .*
 .*/api/gamechanger/getOrgSeals .*
+.* /api/gamechanger/getDocIngestionStats .*
 .*/api/gamechanger/getOrgImageOverrideURLs .*
 .*/api/gamechanger/saveOrgImageOverrideURL .*
 .* /api/gamechanger/aboutGC/getFAQ .*
