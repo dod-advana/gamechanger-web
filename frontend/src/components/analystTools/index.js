@@ -82,7 +82,7 @@ const styles = {
 		display: 'flex',
 		alignItems: 'center',
 		flex: 9,
-		margin: '10px 0 10px 50px'
+		margin: '10px 0 10px 0px'
 	},
 	tabStyle: {
 		//width: '180px',
@@ -115,17 +115,11 @@ const styles = {
 	},
 	tabButtonContainer: {
 		backgroundColor: '#ffffff',
-		width: '100%',
-		// display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		// paddingBottom: '5px',
-		// alignItems: 'center',
-		paddingTop: 4
+		paddingTop: 4,
+		margin: '0px 30px'
 	},
 	panelContainer: {
 		alignItems: 'center',
-		marginLeft: 50,
 		minHeight: 'calc(100vh - 600px)',
 		paddingBottom: 20
 	},
