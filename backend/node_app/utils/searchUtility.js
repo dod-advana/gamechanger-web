@@ -2166,10 +2166,13 @@ class SearchUtility {
 		let recDocs = [];
 		let graphDocs = [];
 		try {
-			//recDocs = await this.mlApi.recommender(doc, userId);
-			if (recDocs.length < 100) {
-				graphDocs = this.getGraphRecs(doc, userId);
+			recDocs = await this.mlApi.recommender(doc, userId);
+			console.log("MLAPI REC DOCS:", recDocs)
+			if (recDocs && recDocs.length < 100) {
+				graphDocs = await this.getGraphRecs(doc, userId);
 				console.log("GRAPH RESULTS:", graphDocs);
+			} else {
+				console.log("No need to get graph results")
 			}
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
@@ -2178,35 +2181,52 @@ class SearchUtility {
 	}
 
 	/// START
-	async getGraphRecs(doc, userId) {
+	async getGraphRecs(doc, userId, community="louvain") {
 		let graphRecs = [];
-		let filename;
-		let louvain_community = 102785
-		let label_prop_community = 155004
-		let name = "Title 10 - Armed Forces.pdf"
+		let name = doc + ".pdf"
+		//let name = "Title 10 - Armed Forces.pdf"
+		console.log(name)
 		try {
 			const comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
 				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
 			);
-			console.log(comm_resp.result.records[0]);
-			//[filename, louvain_community, label_prop_community] = comm_resp.result.records[0];
-
-			const louv_resp = await this.dataLibrary.queryGraph(`
-			MATCH "MATCH (n:Document {louvain_community: $louv}) 
-			RETURN count(n);`, {louv: louvain_community}, userId
-			);
-			console.log("LOUVAIN", louv_resp.result.records[0]);
-			//[filename, louvain_community, label_prop_community] = louv_resp.result.records[0];
-
-			const lp_resp = await this.dataLibrary.queryGraph(`
-			MATCH "MATCH (n:Document {lp_community: $lp}) 
-			RETURN count(n);`, {lp: label_prop_community}, userId
-			);
-			console.log("LABEL PROP", lp_resp.result.records[0]);
-			//[filename, louvain_community, label_prop_community] = louv_resp.result.records[0];
-		
-
+			const singleRecord = comm_resp.result.records[0]
+			let louvain = singleRecord._fields[1]["low"]
+			let label = singleRecord._fields[2]["low"]
+			let resp = {};
+			
+			if (community === "label_prop") {
+				resp = await this.dataLibrary.queryGraph(`
+					MATCH (d:Document)
+					WHERE d.lp_community = $lp
+					RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+					ORDER BY d.betweenness DESC
+					LIMIT 5;`, {lp: label}, userId
+				);
+			} else if (community == "louvain") {
+				resp = await this.dataLibrary.queryGraph(`
+					MATCH (d:Document)
+					WHERE d.louvain_community = $louv
+					RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+					ORDER BY d.betweenness DESC
+					LIMIT 5;`, {louv: louvain}, userId
+				);
+			}
+			let suggested = []
+			if (resp!=={}) {
+					resp.result.records.forEach((r) => {
+					let doc = {}
+					doc.filename = r._fields[0]
+					doc.louvain = r._fields[1]["low"]
+					doc.label_prop = r._fields[2]["low"]
+					doc.betweenness = r._fields[3]
+					suggested.push(doc);
+				});
+			};
+			console.log("Community: ", community);
+			console.log("Suggested: ", JSON.stringify(suggested))
+			
 		} catch (e) {
 			this.logger.error(e, 'WQPX84H', userId)
 		};
