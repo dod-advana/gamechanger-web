@@ -8,7 +8,7 @@ import { Typography } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
 import Link from '@material-ui/core/Link';
-import { green, red, yellow, orange } from '@material-ui/core/colors';
+import { green, red } from '@material-ui/core/colors';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
@@ -96,6 +96,14 @@ const TableStyle = styled.div`
 			}
 			.rt-th {
 				font-weight: bold;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+				white-space: initial;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 			}
 			.rt-tr-group:nth-of-type(even){
 				background: #F3F3F3;
@@ -235,7 +243,6 @@ const GCDataStatusTracker = (props) => {
 	const [dataTableData, setDataTableData] = useState([]);
 	const [crawlerMapping, setCrawlerMapping] = useState([]);
 	const [crawlerTableData, setCrawlerTableData] = useState([]);
-	const [crawlerTableUpdate, setCrawlerTableUpdate] = useState([]);
 	const [neo4jPropertiesData, setNeo4jPropertiesData] = useState([]);
 	const [neo4jCountsData, setNeo4jCountsData] = useState([]);
 	const [neo4jGraphData, setNeo4jGraphData] = useState({
@@ -290,31 +297,6 @@ const GCDataStatusTracker = (props) => {
 			setCrawlerTableData([]);
 			setNumPages(0);
 			setCrawlerMapping([]);
-			console.error(e);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const handleFetchCrawlerUpdate = async ({ page, sorted, filtered }) => {
-		try {
-			setLoading(true);
-			const { totalCount, docs = [] } = await getData({
-				offset: page * PAGE_SIZE,
-				sorted,
-				filtered,
-				tabIndex: 'crawler',
-				option: 'last',
-			});
-			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
-			const crawlerInfoPostgresTable = await gameChangerAPI.gcCrawlerSealData();
-			setCrawlerMapping(crawlerInfoPostgresTable);
-			setNumPages(pageCount);
-			setCrawlerTableUpdate(docs);
-		} catch (e) {
-			setCrawlerTableData([]);
-			setCrawlerTableUpdate([]);
-			setNumPages(0);
 			console.error(e);
 		} finally {
 			setLoading(false);
@@ -435,34 +417,6 @@ const GCDataStatusTracker = (props) => {
 	const date_difference = (date) => {
 		const diffTime = Math.abs(Date.now() - date);
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-	};
-
-	const goal_difference = (days) => {
-		if (days > 30) {
-			return (
-				<GoalIcon
-					style={{ backgroundColor: red[500] }}
-				/>
-			);
-		} else if (days > 14) {
-			return (
-				<GoalIcon
-					style={{ backgroundColor: orange[500] }}
-				/>
-			);
-		} else if (days > 7) {
-			return (
-				<GoalIcon
-					style={{ backgroundColor: yellow[500] }}
-				/>
-			);
-		} else {
-			return (
-				<GoalIcon
-					style={{ backgroundColor: green[500] }}
-				/>
-			);
-		}
 	};
 	
 	const matchCrawlerName = (crawler_name) => {
@@ -592,12 +546,7 @@ const GCDataStatusTracker = (props) => {
 					<div>
 						<Typography variant="h3" style={{fontSize: '18px'}}>Document Overview</Typography>
 						<Typography variant="body2">
-							The following tables and chart describe the schema in the Knowledge
-							Graph. The table on the left lists the Nodes and Relationships by
-							"Label" along with the property names and the types of those
-							properties. The table in the bottom right lists the different Nodes and
-							Relationships and the counts. The chart graphically describes the
-							schema of the Knowledge Graph.
+							Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application Overview for detailed metric description.
 						</Typography>
 					</div>
 				</SectionHeader>
@@ -730,6 +679,14 @@ const GCDataStatusTracker = (props) => {
 					);
 				},
 			},
+			{
+				Header: 'Days Since Last Ingest',
+				accessor: 'datetime',
+				width: 200,
+				Cell: (row) => {
+					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
+				},
+			},
 		];
 
 		return (
@@ -738,12 +695,10 @@ const GCDataStatusTracker = (props) => {
 					<div>
 						<Typography variant="h3" style={{fontSize: '18px'}}>Progress Overview</Typography>
 						<Typography variant="body2">
-							The following tables and chart describe the schema in the Knowledge
-							Graph. The table on the left lists the Nodes and Relationships by
-							"Label" along with the property names and the types of those
-							properties. The table in the bottom right lists the different Nodes and
-							Relationships and the counts. The chart graphically describes the
-							schema of the Knowledge Graph.
+							The following table and chart provide a real-time status update of each data 
+							source within the GAMECHANGER corpus. Data pipelines update automatically, 
+							typically every 7 days. Any issues or delays will be indicated directly in 
+							the table.
 						</Typography>
 					</div>
 					<div
@@ -782,111 +737,6 @@ const GCDataStatusTracker = (props) => {
 					/>
 				</TableStyle>
 			</>
-		);
-	};
-
-	const renderVersionTable = () => {
-		const crawlerColumns = [
-			{
-				Header: 'Source',
-				accessor: 'crawler_name',
-				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
-				style: { 'whiteSpace': 'unset' },
-			},
-			{
-				Header: 'Last Successful Ingest',
-				accessor: 'datetime',
-				width: 200,
-				Cell: (row) => {
-					return (
-						<TableRow>
-							{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-						</TableRow>
-					);
-				},
-			},
-			{
-				Header: 'Days Since Last Ingest',
-				accessor: 'datetime',
-				width: 200,
-				Cell: (row) => {
-					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
-				},
-			},
-			{
-				Header: 'Goal',
-				accessor: 'datetime',
-				width: 200,
-				Cell: (row) => {
-					return (
-						<TableRow>
-							{goal_difference(date_difference(Date.parse(row.value)))}
-						</TableRow>
-					);
-				},
-			},
-		];
-
-		return (
-			<div>
-				<SectionHeader>
-					<div>
-						<Typography variant="h3" style={{fontSize: '18px'}}>Updates Overview</Typography>
-						<Typography variant="body2">
-							Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-							tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application 
-							Overview for detailed metric description.
-						</Typography>
-					</div>
-					<div
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							marginLeft: '10px'
-						}}
-					>	
-						<div style={styles.legendItem}>
-							<span style={styles.legendText}>{'<'} 7 Days </span>
-							<GoalIcon
-								style={{ backgroundColor: green[500], width: 75 }}
-							/>
-						</div>
-						<div style={styles.legendItem}>
-							<span style={styles.legendText}>{'<'} 14 Days </span>
-							<GoalIcon
-								style={{ backgroundColor: yellow[500], width: 75 }}
-							/>
-						</div>
-						<div style={styles.legendItem}>
-							<span style={styles.legendText}>{'<'} 30 Days </span>
-							<GoalIcon
-								style={{ backgroundColor: orange[500], width: 75 }}
-							/>
-						</div>
-						<div style={styles.legendItem}>
-							<span style={styles.legendText}>{'>'} 30 Days </span>
-							<GoalIcon
-								style={{ backgroundColor: red[500], width: 75 }}
-							/>
-						</div>
-					</div>
-				</SectionHeader>
-				<TableStyle>
-					<ReactTable
-						className='updates-table'
-						data={crawlerTableUpdate}
-						columns={crawlerColumns}
-						style={{ margin: '0 0 20px 0', height: 'auto' }}
-						pageSize={PAGE_SIZE}
-						showPageSizeOptions={false}
-						filterable={false}
-						loading={loading}
-						manual={true}
-						pages={numPages}
-						onFetchData={handleFetchCrawlerUpdate}
-					/>
-				</TableStyle>
-			</div>
 		);
 	};
 
@@ -985,19 +835,6 @@ const GCDataStatusTracker = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: `0 0 0 0`,
-							}}
-							title="versionDocs"
-							onClick={() => handleTabClicked('version')}
-						>
-							<Typography variant="h6" display="inline" title="cardView">
-								UPDATES
-							</Typography>
-						</Tab>
-						<Tab
-							style={{
-								...TabStyles.tabStyle,
 								...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: '0 0 0 0',
 							}}
@@ -1028,7 +865,6 @@ const GCDataStatusTracker = (props) => {
 
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>{renderCrawlerData()}</TabPanel>
-					<TabPanel>{renderVersionTable()}</TabPanel>
 					<TabPanel>{renderDataTable()}</TabPanel>
 					<TabPanel style={{marginBottom: 100}}>{renderNeo4jTable()}</TabPanel>
 				</div>
