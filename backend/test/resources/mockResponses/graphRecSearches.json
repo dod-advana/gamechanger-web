@@ -1,0 +1,202 @@
+{
+    "result": {
+        "records": [
+            {
+                "keys": [
+                    "n.filename",
+                    "n.louvain_community",
+                    "n.lp_community",
+                    "n.betweenness"
+                ],
+                "length": 4,
+                "_fields": [
+                    "EO 13384.pdf",
+                    {
+                        "low": 102785,
+                        "high": 0
+                    },
+                    {
+                        "low": 155004,
+                        "high": 0
+                    },
+                    2451.98326617393
+                ],
+                "_fieldLookup": {
+                    "n.filename": 0,
+                    "n.louvain_community": 1,
+                    "n.lp_community": 2,
+                    "n.betweenness": 3
+                }
+            },
+            {
+                "keys": [
+                    "n.filename",
+                    "n.louvain_community",
+                    "n.lp_community",
+                    "n.betweenness"
+                ],
+                "length": 4,
+                "_fields": [
+                    "EO 13384.pdf",
+                    {
+                        "low": 102785,
+                        "high": 0
+                    },
+                    {
+                        "low": 155004,
+                        "high": 0
+                    },
+                    2451.98326617393
+                ],
+                "_fieldLookup": {
+                    "n.filename": 0,
+                    "n.louvain_community": 1,
+                    "n.lp_community": 2,
+                    "n.betweenness": 3
+                }
+            },
+            {
+                "keys": [
+                    "n.filename",
+                    "n.louvain_community",
+                    "n.lp_community",
+                    "n.betweenness"
+                ],
+                "length": 4,
+                "_fields": [
+                    "H.R. 2494 EH 117th.pdf",
+                    {
+                        "low": 102957,
+                        "high": 0
+                    },
+                    {
+                        "low": 155187,
+                        "high": 0
+                    },
+                    18544.1132693302
+                ],
+                "_fieldLookup": {
+                    "n.filename": 0,
+                    "n.louvain_community": 1,
+                    "n.lp_community": 2,
+                    "n.betweenness": 3
+                }
+            },
+            {
+                "keys": [
+                    "n.filename",
+                    "n.louvain_community",
+                    "n.lp_community",
+                    "n.betweenness"
+                ],
+                "length": 4,
+                "_fields": [
+                    "DoDI 1241.06.pdf",
+                    {
+                        "low": 102785,
+                        "high": 0
+                    },
+                    {
+                        "low": 155004,
+                        "high": 0
+                    },
+                    31857.292426587625
+                ],
+                "_fieldLookup": {
+                    "n.filename": 0,
+                    "n.louvain_community": 1,
+                    "n.lp_community": 2,
+                    "n.betweenness": 3
+                }
+            },
+            {
+                "keys": [
+                    "n.filename",
+                    "n.louvain_community",
+                    "n.lp_community",
+                    "n.betweenness"
+                ],
+                "length": 4,
+                "_fields": [
+                    "DoDD 5515.06.pdf",
+                    {
+                        "low": 102785,
+                        "high": 0
+                    },
+                    {
+                        "low": 155004,
+                        "high": 0
+                    },
+                    46581.840327738195
+                ],
+                "_fieldLookup": {
+                    "n.filename": 0,
+                    "n.louvain_community": 1,
+                    "n.lp_community": 2,
+                    "n.betweenness": 3
+                }
+            }
+        ],
+        "summary": {
+            "query": {
+                "text": "\n\t\t\t\tMATCH (d:Document {filename: $file})-[:SIMILAR_TO]-(n) \n\t\t\t\tRETURN n.filename, n.louvain_community, n.lp_community, n.betweenness \n\t\t\t\tORDER BY n.betweenness \n\t\t\t\tLIMIT 5;",
+                "parameters": {
+                    "file": "Title 10 - Armed Forces.pdf"
+                }
+            },
+            "queryType": "r",
+            "counters": {
+                "_stats": {
+                    "nodesCreated": 0,
+                    "nodesDeleted": 0,
+                    "relationshipsCreated": 0,
+                    "relationshipsDeleted": 0,
+                    "propertiesSet": 0,
+                    "labelsAdded": 0,
+                    "labelsRemoved": 0,
+                    "indexesAdded": 0,
+                    "indexesRemoved": 0,
+                    "constraintsAdded": 0,
+                    "constraintsRemoved": 0
+                },
+                "_systemUpdates": 0
+            },
+            "updateStatistics": {
+                "_stats": {
+                    "nodesCreated": 0,
+                    "nodesDeleted": 0,
+                    "relationshipsCreated": 0,
+                    "relationshipsDeleted": 0,
+                    "propertiesSet": 0,
+                    "labelsAdded": 0,
+                    "labelsRemoved": 0,
+                    "indexesAdded": 0,
+                    "indexesRemoved": 0,
+                    "constraintsAdded": 0,
+                    "constraintsRemoved": 0
+                },
+                "_systemUpdates": 0
+            },
+            "plan": false,
+            "profile": false,
+            "notifications": [],
+            "server": {
+                "address": "10.194.9.69:7687",
+                "version": "Neo4j/4.2.3",
+                "agent": "Neo4j/4.2.3",
+                "protocolVersion": 4.2
+            },
+            "resultConsumedAfter": {
+                "low": 644,
+                "high": 0
+            },
+            "resultAvailableAfter": {
+                "low": 0,
+                "high": 0
+            },
+            "database": {
+                "name": "neo4j"
+            }
+        }
+    }
+}
