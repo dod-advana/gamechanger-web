@@ -568,7 +568,7 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsUp',
-									cardHandler.getDisplayTitle(item)
+									cardHandler.getFilename(item)
 									`search : ${searchText}`
 								);
 							}
@@ -588,7 +588,7 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsDown',
-									cardHandler.getDisplayTitle(item)
+									cardHandler.getFilename(item)
 									`search : ${searchText}`
 								);
 							}
@@ -661,7 +661,7 @@ function GCCard(props) {
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'CancelFavorite',
-											cardHandler.getDisplayTitle(item),
+											cardHandler.getFilename(item),
 											`search : ${searchText}`
 										)
 									}}
@@ -720,7 +720,7 @@ function GCCard(props) {
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'Favorite',
-											cardHandler.getDisplayTitle(item),
+											cardHandler.getFilename(item),
 											`search : ${searchText}`
 										)
 									}}
