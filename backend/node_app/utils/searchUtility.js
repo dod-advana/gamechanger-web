@@ -2166,30 +2166,47 @@ class SearchUtility {
 		let recDocs = [];
 		let recommendations = {};
 		try {
-			//recDocs = await this.mlApi.recommender(doc, userId);
-			if (recDocs.results && recDocs.results.length > 4) {
+			recDocs = await this.mlApi.recommender(doc, userId);
+			if (recDocs.results && recDocs.results.length > 0) {
 				recommendations = recDocs
 				recommendations.method = "MLAPI search history"
 			} else {
 				recommendations = await this.getAllGraphRecs(doc, userId)
 				recommendations.method = "Neo4j graph"
 			}
+			recommendations.results = this.filterRecommendations(recommendations.results, doc)
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		console.log(JSON.stringify(recommendations))
 		return recommendations
 	}
 
-	async getAllGraphRecs(doc_list, userId, max_results=10) {
+	filterRecommendations(docList, originalDocs) {
+		try {
+			var unique = new Set(docList);
+			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
+			return filtered
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', '');
+			return docList
+		}
+	}
+
+	async getAllGraphRecs(docList, userId, max_results=10) {
 		let graphRecs = {}
 		let graphResults = []
+		let usedDocs = []
 		try {
-			await Promise.all(doc_list.map(async (doc) => {
-				const results = await this.getGraphRecs(doc, userId)
-				results.forEach((d) => graphResults.push(d));
-			  }));
-			graphRecs.filenames = doc_list
+			for (let i = 0; i < docList.length; i++) {
+				if (graphResults.length >= max_results) {
+					break
+				} else {
+					const results = await this.getGraphRecs(docList[i], userId)
+                	results.forEach((d) => graphResults.push(d));
+					usedDocs.push(docList[i]);
+				}
+			}
+			graphRecs.filenames = usedDocs
 			graphRecs.results = graphResults
 		} catch (e) {
 			this.logger.error(e, 'ADFAD90', userId)
