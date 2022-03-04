@@ -2227,30 +2227,32 @@ class SearchUtility {
 				LIMIT 5;`, {file: name}, userId
 			);
 			if (resp.result.records.length == 0) { // if no results, try group algo
+				console.log("no similar docs")
 				comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
 				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
 				);
-				const singleRecord = comm_resp.result.records[0]
-				let louvain = singleRecord._fields[1]["low"]
-				let label = singleRecord._fields[2]["low"]
-
-				if (label && algo === "label_propagation") {
-					resp = await this.dataLibrary.queryGraph(`
-						MATCH (d:Document)
-						WHERE d.lp_community = $lp
-						RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
-						ORDER BY d.betweenness DESC
-						LIMIT 5;`, {lp: label}, userId
-					);
-				} else if (louvain && algo == "louvain") {
-					resp = await this.dataLibrary.queryGraph(`
-						MATCH (d:Document)
-						WHERE d.louvain_community = $louv
-						RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
-						ORDER BY d.betweenness DESC
-						LIMIT 5;`, {louv: louvain}, userId
-					);
+				if (comm_resp.result.records.length > 0) {
+					const singleRecord = comm_resp.result.records[0]
+					let louvain = singleRecord._fields[1]["low"]
+					let label = singleRecord._fields[2]["low"]
+					if (label && algo === "label_propagation") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.lp_community = $lp
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {lp: label}, userId
+						);
+					} else if (louvain && algo == "louvain") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.louvain_community = $louv
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {louv: louvain}, userId
+						);
+					}
 				}
 			}
 			if (resp!=={}) {
