@@ -1641,7 +1641,56 @@ describe('SearchUtility', function () {
 					"NDAA 2017 Conference Report",
 					"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
 					"DoD Dictionary"
-				]
+				],
+				"method": "MLAPI search history"
+			}
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+	describe('#recommendNeo4j', () => {
+		it('given a list of docs with no search history (no recs from mlapi), return similar docs from Neo4j', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					recommender: (filenames, userId) => { return Promise.resolve({
+						"filenames": [
+							"Title 10 - Armed Forces",
+							"ARMY DIR 2018-18",
+							"Title 5 - Government Organization and Employees"
+						],
+						"results": []
+					}); }
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = [
+				"Title 10 - Armed Forces",
+				"ARMY DIR 2018-18",
+				"Title 5 - Government Organization and Employees"
+			]
+			const actual = await target.getRecDocs(filenames, "test");
+			const expected = {
+				"filenames": [
+					"Title 10 - Armed Forces",
+				    "ARMY DIR 2018-18"
+				],
+				"results": [
+					"EO 13384",
+					"H.R. 2494 EH 117th",
+					"DoDI 1241.06",
+					"DoDD 5515.06",
+					"CFETP 64PXC1",
+					"NAVMC 1553.2",
+					"TM 5-623",
+					"AGO 2001-05",
+					"AGO 1956-09"
+				],
+				"method":"Neo4j graph"
 			}
 			assert.deepStrictEqual(actual, expected);
 		});
