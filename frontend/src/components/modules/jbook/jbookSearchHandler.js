@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import axios from 'axios';
 
 import {
 	displayBackendError,
@@ -18,6 +19,7 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 import { scrollListViewTop } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
+let cancelToken = axios.CancelToken.source();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
@@ -73,12 +75,16 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async performQuery(state, searchText, resultsPage, dispatch) {
+	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
 
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
-
 			const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+			if (runningSearch) {
+				cancelToken.cancel('cancelled axios with consecutive call');
+				cancelToken = axios.CancelToken.source();
+			}
 
 			// regular search
 			const resp = await gamechangerAPI.modularSearch({
@@ -90,7 +96,7 @@ const JBookSearchHandler = {
 					jbookSearchSettings: cleanSearchSettings,
 					useElasticSearch: state.useElasticSearch
 				}
-			});
+			}, cancelToken);
 
 			if (_.isObject(resp.data)) {
 				displayBackendError(resp, dispatch);
@@ -126,7 +132,8 @@ const JBookSearchHandler = {
 			resultsPage,
 			urlSearch,
 			paginationSearch,
-			edaPaginationSearch
+			edaPaginationSearch,
+			runningSearch
 		} = state;
 
 		
@@ -172,7 +179,7 @@ const JBookSearchHandler = {
 					this.handleEDASearch(state, dispatch);
 				}
 	
-				const results = await this.performQuery(state, searchText, resultsPage, dispatch);
+				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
 				const { contractTotals } = await this.getContractTotals(state, dispatch);
 				const t1 = new Date().getTime();
 	
@@ -303,6 +310,20 @@ const JBookSearchHandler = {
 		} catch (e) {
 			console.log('Error running EDA search in JBOOK');
 			console.log(e);
+			// if it's a consecutive call triggered by a filter update, don't reset state, 
+			// the error is taken care of; there's another call later in the stack working the updated search
+			if (e.message !== 'cancelled axios with consecutive call') {
+				setState(dispatch, {
+					prevSearchText: null,
+					unauthorizedError: true,
+					loading: false,
+					autocompleteItems: [],
+					searchResultsCount: 0,
+					runningSearch: false,
+					loadingTinyUrl: false,
+					hasExpansionTerms: false
+				});
+			}
 		}
 	},
 
