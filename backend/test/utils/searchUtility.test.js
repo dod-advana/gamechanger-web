@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const qaESReturn = require('../resources/mockResponses/qaESReturn');
 const qaEntitiesReturn = require('../resources/mockResponses/qaEntitiesReturn');
 const documentSearchES = require('../resources/mockResponses/documentSearchES');
+const graphRecSearches = require('../resources/mockResponses/graphRecSearches')
 
 const fake_ref_list = ['Title 50', 'Title 3', 'Title 8', 'Title 31', 'Title 18', 'Title 28', 'Title28', 'Title 10', 'Title 2', 'Title 12', 'Title 15', 'Title 30'];
 const RAW_ES_BODY_SEARCH_RESPONSE = {
@@ -1640,7 +1641,74 @@ describe('SearchUtility', function () {
 					"NDAA 2017 Conference Report",
 					"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
 					"DoD Dictionary"
-				]
+				],
+				"method": "MLAPI search history"
+			}
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+
+	describe('#getGraphRecs', () => {
+		it('given a doc, return similar docs from Neo4j', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				dataApi: {
+					queryGraph() {
+						return Promise.resolve(graphRecSearches);
+					}
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = ["Title 10 - Armed Forces"]
+			const actual = await target.getGraphRecs(filenames, "test");
+			const expected = [
+				"EO 13384",
+				"EO 13384", 
+				"H.R. 2494 EH 117th",
+				"DoDI 1241.06",
+				"DoDD 5515.06"
+			]
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+	describe('#recommendGraph', () => {
+		it('given no results from mlapi for recommendations, query Neo4j', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					recommender: (filenames, userId) => { return Promise.resolve({
+						"filenames": ["Title 10 - Armed Forces"],
+						"results": []
+					}); }
+				},
+				dataApi: {
+					queryGraph() {
+						return Promise.resolve(graphRecSearches);
+					}
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = ["Title 10 - Armed Forces"]
+			const actual = await target.getRecDocs(filenames, "test");
+			const expected = {
+				"filenames": ["Title 10 - Armed Forces"],
+				"results": [
+					"EO 13384",
+					"H.R. 2494 EH 117th",
+					"DoDI 1241.06",
+					"DoDD 5515.06"
+				],
+				"method":"Neo4j graph"
 			}
 			assert.deepStrictEqual(actual, expected);
 		});
