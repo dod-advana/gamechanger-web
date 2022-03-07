@@ -233,19 +233,21 @@ class SearchUtility {
 
 	getQueryAndSearchTerms (searchText) {
 
-		// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
+		// change all text to lower case, need upper case AND/OR for search so easier if everything is lower
 		const searchTextLower = searchText.toLowerCase();
 
+		//replace forward slashes will break ES query
+		let cleanSearch = searchTextLower.replace(/\//g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-		const rawSequences = this.findQuoted(searchTextLower);
+		const rawSequences = this.findQuoted(cleanSearch);
 
-		let searchTextWithPlaceholders = searchTextLower;
+		let searchTextWithPlaceholders = cleanSearch;
 		// replace phrases with __#__ placeholder
 		rawSequences.forEach((phrase, index) => {
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(phrase, `__${index}__`);
 		});
 
-		// replace and/or with ' AND ' ' OR ' as required for solr search, one space is required
+		// replace and/or with ' AND ' ' OR ' as required for search, one space is required
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)and(\s+)/g, ` AND `);
 		searchTextWithPlaceholders = searchTextWithPlaceholders.replace(/(\s+)or(\s+)/g, ` OR `);
 
@@ -253,17 +255,16 @@ class SearchUtility {
 		// combine all terms to return for snippet highlighting
 		const termsArray = this.findLowerCaseWordsOrAcronyms(searchTextWithPlaceholders);
 
-		// fill back in double quoted phrases for solr search
+		// fill back in double quoted phrases for  search
 		rawSequences.forEach((phrase, index) => {
 			const replacementSequence = this.convertPhraseToSequence(phrase);
 			termsArray.push(replacementSequence);
 			searchTextWithPlaceholders = searchTextWithPlaceholders.replace(`__${index}__`, `${replacementSequence}`);
 		});
 
-		const solrSearchText = searchTextWithPlaceholders;
-
-		// return solr query and list of search terms after parsing
-		return [solrSearchText, termsArray];
+		const modSearchText = searchTextWithPlaceholders;
+		// return  query and list of search terms after parsing
+		return [modSearchText, termsArray];
 	}
 
 	findQuoted (searchText) {
@@ -337,6 +338,7 @@ class SearchUtility {
 			charsPadding = 90, 
 			operator = 'and', 
 			searchFields = {}, 
+			mainMaxkeywords = 2,
 			accessDateFilter = [], 
 			publicationDateFilter = [], 
 			publicationDateAllTime = true, 
@@ -396,6 +398,8 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
+			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -475,15 +479,7 @@ class SearchUtility {
 								wildcard: {
 									'keyw_5': {
 										value: `*${plainQuery}*`,
-										boost: 2
-									}
-								}
-							},
-							{
-								wildcard: {
-									'display_source': {
-										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},
@@ -491,7 +487,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 8
+										boost: 10
 									}
 								}
 							},
@@ -499,7 +495,7 @@ class SearchUtility {
 								wildcard: {
 									'filename.search': {
 										value: `*${plainQuery}*`,
-										boost: 4
+										boost: 5
 									}
 								}
 							},
@@ -507,7 +503,7 @@ class SearchUtility {
 								wildcard: {
 									'display_source_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},
@@ -515,15 +511,21 @@ class SearchUtility {
 								wildcard: {
 									'top_entities_t.search': {
 										value: `*${plainQuery}*`,
-										boost: 2
+										boost: 4
 									}
 								}
 							},								
 							{
-								match: {
-									"display_title_s.search": plainQuery
-								}
+								query_string: {
+									fields: ['display_title_s.search'],
+									query: `${mainKeywords}*`,
+									type: "best_fields",
+									boost: 6,
+									analyzer
+
+								}							
 							}
+							
 						],
 						minimum_should_match: 1,
 
@@ -649,7 +651,8 @@ class SearchUtility {
 			}
 
 			if (ltr) {
-				query.rescore = {
+				query.rescore = [{
+					window_size: 50,
 					query: {
 						rescore_query: {
 							sltr: {
@@ -658,9 +661,27 @@ class SearchUtility {
 							}
 						}
 					}					
-				}
+				},
+				{				
+					window_size: 500,
+					query: {
+					  rescore_query: {
+							bool:{
+								must: [{
+									rank_feature: {
+										field: "pagerank_r",
+										boost: 10
+									}}
+								]
+							}						
+						},
+						query_weight : 0.7,
+						rescore_query_weight : 2
+					  }
+					
+				  }
+			]
 			}
-
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
@@ -673,6 +694,7 @@ class SearchUtility {
 		}
 		return verbatim;
 	}
+
 	isVerbatimSuggest(searchText){
 		let verbatim = false;
 		if( (searchText.startsWith('"') || (searchText.startsWith(`'`)))){
@@ -2043,7 +2065,7 @@ class SearchUtility {
 
 			let results;
 
-			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
 			if (this.checkValidResults(results)) {
 				if (this.checkValidResults(titleResults)) {
 					results = this.reorderFirst(results, titleResults);
@@ -2164,13 +2186,114 @@ class SearchUtility {
 	}
 	async getRecDocs(doc=["Title 10"], userId=""){
 		let recDocs = [];
+		let recommendations = {};
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
+			if (recDocs.results && recDocs.results.length > 0) {
+				recommendations = recDocs
+				recommendations.method = "MLAPI search history"
+			} else {
+				recommendations = await this.getAllGraphRecs(doc, userId)
+				recommendations.method = "Neo4j graph"
+			}
+			recommendations.results = this.filterRecommendations(recommendations.results, doc)
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		return recDocs
+		return recommendations
 	}
+
+	filterRecommendations(docList, originalDocs) {
+		try {
+			var unique = new Set(docList);
+			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
+			return filtered
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', '');
+			return docList
+		}
+	}
+
+	async getAllGraphRecs(docList, userId, max_results=10) {
+		let graphRecs = {}
+		let graphResults = []
+		let usedDocs = []
+		try {
+			for (let i = 0; i < docList.length; i++) {
+				if (graphResults.length >= max_results) {
+					break
+				} else {
+					const results = await this.getGraphRecs(docList[i], userId)
+                	results.forEach((d) => graphResults.push(d));
+					usedDocs.push(docList[i]);
+				}
+			}
+			graphRecs.filenames = usedDocs
+			graphRecs.results = graphResults
+		} catch (e) {
+			this.logger.error(e, 'ADFAD90', userId)
+		};
+		return graphRecs
+	}
+
+	async getGraphRecs(doc, userId, algo="louvain") {
+		let suggested = [];
+		let name = doc + ".pdf"
+		let comm_resp = {};
+		let resp = {};
+		try { // first try getting docs by similarity
+			resp = await this.dataLibrary.queryGraph(`
+				MATCH (d:Document {filename: $file})-[:SIMILAR_TO]-(n) 
+				RETURN n.filename, n.louvain_community, n.lp_community, n.betweenness 
+				ORDER BY n.betweenness 
+				LIMIT 5;`, {file: name}, userId
+			);
+			if (resp.result.records.length == 0) { // if no results, try group algo
+				console.log("no similar docs")
+				comm_resp = await this.dataLibrary.queryGraph(`
+				MATCH (d:Document {filename: $filename})
+				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
+				);
+				if (comm_resp.result.records.length > 0) {
+					const singleRecord = comm_resp.result.records[0]
+					let louvain = singleRecord._fields[1]["low"]
+					let label = singleRecord._fields[2]["low"]
+					if (label && algo === "label_propagation") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.lp_community = $lp
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {lp: label}, userId
+						);
+					} else if (louvain && algo == "louvain") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.louvain_community = $louv
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {louv: louvain}, userId
+						);
+					}
+				}
+			}
+			if (resp!=={}) {
+				resp.result.records.forEach((r) => {
+				let doc = {}
+				doc.filename = r._fields[0]
+				doc.louvain = r._fields[1]["low"]
+				doc.label_prop = r._fields[2]["low"]
+				doc.betweenness = r._fields[3]
+				suggested.push(doc);
+				});
+				suggested = suggested.map(item => item.filename.split('.pdf')[0])
+			}
+		} catch (e) {
+			this.logger.error(e, 'WQPX84H', userId)
+		};
+		return suggested
+	}
+
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {

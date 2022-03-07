@@ -415,12 +415,12 @@ export default (props) => {
 		let downloading = checkFlag('corpus:');
 		return ('' + downloading).toUpperCase();
 	};
-	const checkTraining = () => {
-		return checkFlag('training:') || checkFlag('corpus:');
-	};
-	const checkReloading = () => {
-		return checkFlag('models:');
-	};
+	// const checkTraining = () => {
+	// 	return checkFlag('training:') || checkFlag('corpus:');
+	// };
+	// const checkReloading = () => {
+	// 	return checkFlag('models:');
+	// };
 	/**
 	 * Takes a String and checks if it is in any of the flag keys and checks
 	 * those values. If any of them are true it returns true

@@ -313,7 +313,7 @@ export default function GraphNodeCluster2D(props) {
 	const [graphRendered1stTime, setGraphRendered1stTime] = React.useState(false);
 
 	const [edgeThickness, setEdgeThickness] = React.useState(2);
-	const [chargeStrength, setChargeStrength] = React.useState(-30);
+	const [chargeStrength, setChargeStrength] = React.useState(-50);
 	const [linkDistance, setLinkDistance] = React.useState(30);
 	const [linkIterations, setLinkIterations] = React.useState(1);
 	const [nodeRelativeSize, setNodeRelativeSize] = React.useState(1);
@@ -410,7 +410,7 @@ export default function GraphNodeCluster2D(props) {
 	useEffect(() => {
 		setReloadGraph(reloadGraphProp);
 		setShouldRunSimulation(true);
-		//setGraphRendered1stTime(false);
+		setGraphRendered1stTime(false);
 	}, [reloadGraphProp, runSimulationProp]);
 
 	/**
@@ -1240,6 +1240,8 @@ export default function GraphNodeCluster2D(props) {
 			}
 
 			if (resetGraphClicked) {
+				setReloadGraph(!reloadGraph);
+				setShouldRunSimulation(!shouldRunSimulation);
 				recenterGraph();
 				setResetGraphClicked(false);
 			}
@@ -1523,7 +1525,7 @@ export default function GraphNodeCluster2D(props) {
 			? graphRefProp.current
 			: graphRef.current;
 		if (forceGraphRef) {
-			forceGraphRef.d3Force('charge').strength(chargeStrength).distanceMin(20);
+			forceGraphRef.d3Force('charge').strength(chargeStrength).distanceMin(20).distanceMax(700);
 			forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
 		}
 
