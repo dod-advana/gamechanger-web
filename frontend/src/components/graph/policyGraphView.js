@@ -1786,7 +1786,14 @@ export default function PolicyGraphView(props) {
 					{nodeLimit.warningLimit &&
 						<>
 							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
-							<LoadAllButton onClick={() => loadAll()}>Load All</LoadAllButton>
+							<LoadAllButton
+								onClick={() => {
+									loadAll();
+									resetGraph();
+								}}
+							>
+								Load All
+							</LoadAllButton>
 						</>
 					}
 					{nodeLimit.maxLimit &&
