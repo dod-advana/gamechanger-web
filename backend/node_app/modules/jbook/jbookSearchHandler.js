@@ -473,8 +473,6 @@ class JBookSearchHandler extends SearchHandler {
 
 						let titles = accomps[0].replace(/[\"]\s*/g, '').split('; ');
 
-						console.log(titles);
-
 						doc.accomplishments = titles;
 
 					} catch(e) {

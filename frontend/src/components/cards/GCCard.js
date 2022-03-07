@@ -332,6 +332,7 @@ function GCCard(props) {
 		closeGraphCard = () => {},
 		collection = [],
 		detailPage = false,
+		card_module = null,
 	} = props;
 
 	const cardType = item.type;
@@ -399,7 +400,8 @@ function GCCard(props) {
 	useEffect(() => {
 		// Create the factory
 		if (cardType && !loaded) {
-			const factory = new CardFactory(state.cloneData.card_module);
+			let module_name = card_module ?? state.cloneData.card_module;
+			const factory = new CardFactory(module_name);
 			const handler = factory.createHandler();
 			setCardHandler(handler[cardType]);
 			setCompareIndex(0);
