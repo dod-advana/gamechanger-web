@@ -232,6 +232,25 @@ const initState = {
 		show_feedback: false,
 		config: { esIndex: 'gc_budgetsearch' }
 	},
+	edaCloneData: {
+		clone_name: 'eda',
+		search_module: 'eda/edaSearchHandler',
+		export_module: 'eda/edaExportHandler',
+		title_bar_module: 'eda/edaTitleBarHandler',
+		navigation_module: 'eda/edaNavigationHandler',
+		card_module: 'eda/edaCardHandler',
+		main_view_module: 'eda/edaMainViewHandler',
+		search_bar_module: 'eda/edaSearchBarHandler',
+		display_name: 'ContractSearch',
+		is_live: true,
+		url: 'contractsearch',
+		permissions_required: true,
+		clone_to_sipr: false,
+		show_tutorial: false,
+		show_graph: false,
+		show_crowd_source: false,
+		show_feedback: true
+	},
 
 	loading: true,
 	profileLoading: false,
@@ -279,8 +298,16 @@ const initState = {
 	listView: false,
 
 	// contract totals
-	contractTotals: {}
+	contractTotals: {},
 
+	paginationSearch: false,
+
+	// v --- EDA VARIABLES --- v
+	edaSearchResults: [],
+	edaCount: 0,
+	edaLoading: false,
+	edaResultsPage: 1,
+	edaPaginationSearch: false,
 }
 
 const init = (initialState) => {
