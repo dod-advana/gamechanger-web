@@ -2186,13 +2186,114 @@ class SearchUtility {
 	}
 	async getRecDocs(doc=["Title 10"], userId=""){
 		let recDocs = [];
+		let recommendations = {};
 		try {
 			recDocs = await this.mlApi.recommender(doc, userId);
+			if (recDocs.results && recDocs.results.length > 0) {
+				recommendations = recDocs
+				recommendations.method = "MLAPI search history"
+			} else {
+				recommendations = await this.getAllGraphRecs(doc, userId)
+				recommendations.method = "Neo4j graph"
+			}
+			recommendations.results = this.filterRecommendations(recommendations.results, doc)
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		return recDocs
+		return recommendations
 	}
+
+	filterRecommendations(docList, originalDocs) {
+		try {
+			var unique = new Set(docList);
+			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
+			return filtered
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', '');
+			return docList
+		}
+	}
+
+	async getAllGraphRecs(docList, userId, max_results=10) {
+		let graphRecs = {}
+		let graphResults = []
+		let usedDocs = []
+		try {
+			for (let i = 0; i < docList.length; i++) {
+				if (graphResults.length >= max_results) {
+					break
+				} else {
+					const results = await this.getGraphRecs(docList[i], userId)
+                	results.forEach((d) => graphResults.push(d));
+					usedDocs.push(docList[i]);
+				}
+			}
+			graphRecs.filenames = usedDocs
+			graphRecs.results = graphResults
+		} catch (e) {
+			this.logger.error(e, 'ADFAD90', userId)
+		};
+		return graphRecs
+	}
+
+	async getGraphRecs(doc, userId, algo="louvain") {
+		let suggested = [];
+		let name = doc + ".pdf"
+		let comm_resp = {};
+		let resp = {};
+		try { // first try getting docs by similarity
+			resp = await this.dataLibrary.queryGraph(`
+				MATCH (d:Document {filename: $file})-[:SIMILAR_TO]-(n) 
+				RETURN n.filename, n.louvain_community, n.lp_community, n.betweenness 
+				ORDER BY n.betweenness 
+				LIMIT 5;`, {file: name}, userId
+			);
+			if (resp.result.records.length == 0) { // if no results, try group algo
+				console.log("no similar docs")
+				comm_resp = await this.dataLibrary.queryGraph(`
+				MATCH (d:Document {filename: $filename})
+				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
+				);
+				if (comm_resp.result.records.length > 0) {
+					const singleRecord = comm_resp.result.records[0]
+					let louvain = singleRecord._fields[1]["low"]
+					let label = singleRecord._fields[2]["low"]
+					if (label && algo === "label_propagation") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.lp_community = $lp
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {lp: label}, userId
+						);
+					} else if (louvain && algo == "louvain") {
+						resp = await this.dataLibrary.queryGraph(`
+							MATCH (d:Document)
+							WHERE d.louvain_community = $louv
+							RETURN d.filename, d.louvain_community, d.lp_community, d.betweenness
+							ORDER BY d.betweenness DESC
+							LIMIT 5;`, {louv: louvain}, userId
+						);
+					}
+				}
+			}
+			if (resp!=={}) {
+				resp.result.records.forEach((r) => {
+				let doc = {}
+				doc.filename = r._fields[0]
+				doc.louvain = r._fields[1]["low"]
+				doc.label_prop = r._fields[2]["low"]
+				doc.betweenness = r._fields[3]
+				suggested.push(doc);
+				});
+				suggested = suggested.map(item => item.filename.split('.pdf')[0])
+			}
+		} catch (e) {
+			this.logger.error(e, 'WQPX84H', userId)
+		};
+		return suggested
+	}
+
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
 			let query = {
