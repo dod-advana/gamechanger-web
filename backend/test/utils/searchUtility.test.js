@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const qaESReturn = require('../resources/mockResponses/qaESReturn');
 const qaEntitiesReturn = require('../resources/mockResponses/qaEntitiesReturn');
 const documentSearchES = require('../resources/mockResponses/documentSearchES');
+const graphRecSearches = require('../resources/mockResponses/graphRecSearches')
 
 const fake_ref_list = ['Title 50', 'Title 3', 'Title 8', 'Title 31', 'Title 18', 'Title 28', 'Title28', 'Title 10', 'Title 2', 'Title 12', 'Title 15', 'Title 30'];
 const RAW_ES_BODY_SEARCH_RESPONSE = {
@@ -851,8 +852,7 @@ describe('SearchUtility', function () {
 				orgFilterString: [],
 				typeFilterString: []
 			});
-
-			const expected = {"_source": {"includes": ["pagerank_r", "kw_doc_score_r", "orgs_rs", "topics_s"]}, "aggregations": {"doc_org_aggs": {"terms": {"field": "display_org_s", "size": 10000}}, "doc_type_aggs": {"terms": {"field": "display_doc_type_s", "size": 10000}}}, "from": 0, "highlight": {"boundary_scanner": "word", "fields": {"display_source_s.search": {}, "display_title_s.search": {}, "filename.search": {}, "keyw_5": {}, "top_entities_t": {}, "topics_s": {}}, "fragment_size": 10, "fragmenter": "simple", "require_field_match": false, "type": "unified"}, "query": {"bool": {"filter": [{"term": {"is_revoked_b": "false"}}], "minimum_should_match": 1, "must": [], "should": [{"nested": {"inner_hits": {"_source": false, "from": 0, "highlight": {"fields": {"paragraphs.par_raw_text_t": {"fragment_size": 270, "number_of_fragments": 1, "type": "plain"}, "paragraphs.par_raw_text_t.gc_english": {"fragment_size": 270, "number_of_fragments": 1, "type": "plain"}}, "fragmenter": "span"}, "size": 5, "stored_fields": ["paragraphs.page_num_i", "paragraphs.par_raw_text_t"]}, "path": "paragraphs", "query": {"bool": {"should": [{"query_string": {"query": "artificial intelligence", "default_field": "paragraphs.par_raw_text_t.gc_english", "default_operator": "and", "fuzzy_max_expansions": 100,"fuzziness": "AUTO","analyzer": "gc_english"},},]}}}}, {"wildcard": {"keyw_5": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_source": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_title_s.search": {"boost": 8, "value": "*artificial intelligence*"}}}, {"wildcard": {"filename.search": {"boost": 4, "value": "*artificial intelligence*"}}}, {"wildcard": {"display_source_s.search": {"boost": 2, "value": "*artificial intelligence*"}}}, {"wildcard": {"top_entities_t.search": {"boost": 2, "value": "*artificial intelligence*"}}}, {"match": {"display_title_s.search": "artificial intelligence"}}]}}, "size": 20, "sort": [{"_score": {"order": "desc"}}], "stored_fields": ["filename", "title", "page_count", "doc_type", "doc_num", "ref_list", "id", "summary_30", "keyw_5", "p_text", "type", "p_page", "display_title_s", "display_org_s", "display_doc_type_s", "is_revoked_b", "access_timestamp_dt", "publication_date_dt", "crawler_used_s", "download_url_s", "source_page_url_s", "source_fqdn_s", "topics_s", "top_entities_t"], "track_total_hits": true}
+			const expected = {"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","topics_s"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","is_revoked_b","access_timestamp_dt","publication_date_dt","crawler_used_s","download_url_s","source_page_url_s","source_fqdn_s","topics_s","top_entities_t"],"from":0,"size":20,"aggregations":{"doc_type_aggs":{"terms":{"field":"display_doc_type_s","size":10000}},"doc_org_aggs":{"terms":{"field":"display_org_s","size":10000}}},"track_total_hits":true,"query":{"bool":{"must":[],"should":[{"nested":{"path":"paragraphs","inner_hits":{"_source":false,"stored_fields":["paragraphs.page_num_i","paragraphs.par_raw_text_t"],"from":0,"size":5,"highlight":{"fields":{"paragraphs.par_raw_text_t":{"fragment_size":270,"number_of_fragments":1,"type":"plain"},"paragraphs.par_raw_text_t.gc_english":{"fragment_size":270,"number_of_fragments":1,"type":"plain"}},"fragmenter":"span"}},"query":{"bool":{"should":[{"query_string":{"query":"artificial intelligence","default_field":"paragraphs.par_raw_text_t.gc_english","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO","analyzer":"gc_english"}}]}}}},{"wildcard":{"keyw_5":{"value":"*artificial intelligence*","boost":4}}},{"wildcard":{"display_title_s.search":{"value":"*artificial intelligence*","boost":10}}},{"wildcard":{"filename.search":{"value":"*artificial intelligence*","boost":5}}},{"wildcard":{"display_source_s.search":{"value":"*artificial intelligence*","boost":4}}},{"wildcard":{"top_entities_t.search":{"value":"*artificial intelligence*","boost":4}}},{"query_string":{"fields":["display_title_s.search"],"query":"artificial* OR *intelligence*","type":"best_fields","boost":6,"analyzer":"gc_english"}}],"minimum_should_match":1,"filter":[{"term":{"is_revoked_b":"false"}}]}},"highlight":{"require_field_match":false,"fields":{"display_title_s.search":{},"keyw_5":{},"filename.search":{},"display_source_s.search":{},"top_entities_t":{},"topics_s":{}},"fragment_size":10,"fragmenter":"simple","type":"unified","boundary_scanner":"word"},"sort":[{"_score":{"order":"desc"}}]}
 			assert.deepStrictEqual(actual, expected);
 		});
 
@@ -1641,7 +1641,74 @@ describe('SearchUtility', function () {
 					"NDAA 2017 Conference Report",
 					"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
 					"DoD Dictionary"
-				]
+				],
+				"method": "MLAPI search history"
+			}
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+
+	describe('#getGraphRecs', () => {
+		it('given a doc, return similar docs from Neo4j', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				dataApi: {
+					queryGraph() {
+						return Promise.resolve(graphRecSearches);
+					}
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = ["Title 10 - Armed Forces"]
+			const actual = await target.getGraphRecs(filenames, "test");
+			const expected = [
+				"EO 13384",
+				"EO 13384", 
+				"H.R. 2494 EH 117th",
+				"DoDI 1241.06",
+				"DoDD 5515.06"
+			]
+			assert.deepStrictEqual(actual, expected);
+		});
+	});
+	describe('#recommendGraph', () => {
+		it('given no results from mlapi for recommendations, query Neo4j', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					recommender: (filenames, userId) => { return Promise.resolve({
+						"filenames": ["Title 10 - Armed Forces"],
+						"results": []
+					}); }
+				},
+				dataApi: {
+					queryGraph() {
+						return Promise.resolve(graphRecSearches);
+					}
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = ["Title 10 - Armed Forces"]
+			const actual = await target.getRecDocs(filenames, "test");
+			const expected = {
+				"filenames": ["Title 10 - Armed Forces"],
+				"results": [
+					"EO 13384",
+					"H.R. 2494 EH 117th",
+					"DoDI 1241.06",
+					"DoDD 5515.06"
+				],
+				"method":"Neo4j graph"
 			}
 			assert.deepStrictEqual(actual, expected);
 		});
