@@ -546,7 +546,9 @@ const GCDataStatusTracker = (props) => {
 					<div>
 						<Typography variant="h3" style={{fontSize: '18px'}}>Document Overview</Typography>
 						<Typography variant="body2">
-							Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Go to Application Overview for detailed metric description.
+						The following table lists all documents within the GAMECHANGER corpus. Use the 
+						filtering capabilities for the TYPE, NUMBER, and TITLE columns to locate specific 
+						documents of interest.
 						</Typography>
 					</div>
 				</SectionHeader>
@@ -594,7 +596,7 @@ const GCDataStatusTracker = (props) => {
 			<div style={{fontSize: '12px'}}>
 				{percent}
 			</div>
-			<div style={{width: 150, height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
+			<div style={{maxWidth: 150, width: '80%', height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
 				<div style={{width: percent, height: 8, background: '#969696', borderRadius: '24px', position: 'absolute'}}/>
 			</div>
 		</>)
