@@ -83,9 +83,16 @@
   },
   "eslintConfig": {
     "rules": {
+      "semi": [
+				"error",
+				"always",
+				{
+					"omitLastInOneLineBlock": true
+				}
+			],
       "max-len": 0,
       "indent": [
-        1,
+        "warn",
         "tab",
         {
           "SwitchCase": 1
@@ -97,7 +104,7 @@
       "strict": 0,
       "no-throw-literal": 0,
       "quotes": [
-        "error",
+        "warn",
         "single",
         {
           "allowTemplateLiterals": true
