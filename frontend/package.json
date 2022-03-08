@@ -153,6 +153,13 @@
 			"react-app"
 		],
 		"rules": {
+			"semi": [
+				"error",
+				"always",
+				{
+					"omitLastInOneLineBlock": true
+				}
+			],
 			"max-len": 0,
 			"indent": [
 				"warn",
