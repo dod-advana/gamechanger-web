@@ -434,9 +434,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, options);
 	};
 
-	getDocIngestionStats = async (options) => {
+	getDocIngestionStats = async () => {
 		const url = endpoints.getDocIngestionStats;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url);
 	};
 
 	getBrowsingLibrary = async (options) => {
