@@ -300,49 +300,50 @@ class JBookSearchHandler extends SearchHandler {
 			// check if there are PG filters
 			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
-			// let pgQueryWhere = ``
-			// const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer'];
-			// const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
-			// pgFilters.forEach(filter => {
-			// 	if (jbookSearchSettings[filter] !== undefined) {
-			// 		console.log(filter);
-			// 		console.log(jbookSearchSettings[filter]);
+			let pgQueryWhere = ``
+			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer'];
+			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
+			pgFilters.forEach(filter => {
+				if (jbookSearchSettings[filter] !== undefined) {
+					// console.log(filter);
+					// console.log(jbookSearchSettings[filter]);
 
-			// 		if (pgQueryWhere.length > 0) {
-			// 			pgQueryWhere += ` AND ( `
-			// 		} else {
-			// 			pgQueryWhere += `(`
+					if (pgQueryWhere.length > 0) {
+						pgQueryWhere += ` AND ( `
+					} else {
+						pgQueryWhere += `(`
 
-			// 		}
-			// 		for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
-			// 			if (i > 0) {
-			// 				pgQueryWhere += ` OR `
-			// 			}
-			// 			if (filter === 'pocReviewer') {
-			// 				pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `
-			// 			} else {
-			// 				pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `
-			// 			}
-			// 		}
-			// 		pgQueryWhere += ` ) `;
-			// 	}
-			// });
-			// const keys = [];
-			// if (pgQueryWhere.length > 0) {
-			// 	let pgQuery = `SELECT * FROM REVIEW WHERE ` + pgQueryWhere + `;`;
-			// 	const pgResults = await this.db.jbook.query(pgQuery, {});
-			// 	pgResults[0].forEach(review => {
-			// 		let key;
-			// 		console.log(review.budget_type);
-			// 		if (review.budget_type === 'rdoc') {
-			// 			key = `rdoc#${review.budget_year}`
-			// 		} else if (review.budget_type === 'pdoc') {
-
-			// 		} else if (review.budget_type === 'odoc') {
-
-			// 		}
-			// 	})
-			// }
+					}
+					for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
+						if (i > 0) {
+							pgQueryWhere += ` OR `
+						}
+						if (filter === 'pocReviewer') {
+							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `
+						} else {
+							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `
+						}
+					}
+					pgQueryWhere += ` ) `;
+				}
+			});
+			const keys = [];
+			if (pgQueryWhere.length > 0) {
+				let pgQuery = `SELECT * FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				const pgResults = await this.db.jbook.query(pgQuery, {});
+				pgResults[0].forEach(review => {
+					let key;
+					if (review.budget_type === 'pdoc') {
+						key = `pdoc#${review.budget_year}#${review.budget_line_item}`
+					} else if (review.budget_type === 'rdoc') {
+						key = `rdoc#${review.budget_year}#${review.budget_line_item}#${review.program_element}`
+					} else if (review.budget_type === 'odoc') {
+						key = `odoc#${review.budget_year}#${review.budget_line_item}#${review.program_element}#${review.budget_activity}`
+					}
+					keys.push(key);
+				});
+				console.log(keys);
+			}
 
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {}
@@ -358,9 +359,6 @@ class JBookSearchHandler extends SearchHandler {
 
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
 			returnData.expansionDict = expansionDict;
-
-			console.log(JSON.stringify(esQuery));
-			console.log(returnData);
 
 			return returnData;
 
