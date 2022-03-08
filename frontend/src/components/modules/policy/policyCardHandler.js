@@ -681,21 +681,12 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						</StyledFrontCardSubHeader>
 					)}
 					<div className={'selected-favorite'}>
-						{!item.isCompare ?
-							<div style={{display: 'flex'}}>
-								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(item.filename, item.display_title_s, item.id)}
-								{favoriteComponent()}
-							</div>
-							:
-							<div style={{marginTop: 10, marginLeft: 5}}>
-								{favoriteComponent()}
-							</div>
-						}
+						<div style={{display: 'flex'}}>
+							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+							{checkboxComponent(item.filename, item.display_title_s, item.id)}
+							{favoriteComponent()}
+						</div>
 					</div>
-					{item.isCompare &&
-						quickCompareToggleComponent()
-					}
 				</div>
 			</div>
 			{docListView && (
@@ -1391,10 +1382,6 @@ const PolicyCardHandler = {
 				item,
 				searchText,
 				state,
-				handleCompareDocument,
-				handleIgnore,
-				showQuickCompare,
-				compareIndex
 			} = props;
 			return (
 				<>
@@ -1452,30 +1439,6 @@ const PolicyCardHandler = {
 								{toggledMore ? 'Overview' : 'More'}
 								<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 							</div>
-						</>
-					}
-					{(state.listView && item.isCompare) &&
-						<>
-							{showQuickCompare && 
-								<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
-									<GCButton
-										id={'ignore'}
-										onClick={() => { handleIgnore(item, compareIndex) }}
-										isSecondaryBtn={true}
-										style={{height: 36}}
-									>
-										Ignore
-									</GCButton>
-								</GCTooltip>
-							}
-							<GCButton
-								id={'compare'}
-								onClick={() => { handleCompareDocument(item.filename) }}
-								isSecondaryBtn={false}
-								style={{height: 36}}
-							>
-								Compare
-							</GCButton>
 						</>
 					}
 				</>

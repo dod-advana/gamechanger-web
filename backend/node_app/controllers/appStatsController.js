@@ -289,9 +289,10 @@ class AppStatsController {
 					a.idvisit as idvisit,
 					idaction_name,
 					a.search_cat,
-					b.name as search,
+					b.name as value,
 					a.server_time as searchtime,
-					hex(a.idvisitor) as idvisitor
+					hex(a.idvisitor) as idvisitor,
+					'Search' as action
 				from
 					matomo_log_link_visit_action a,
 					matomo_log_action b
@@ -312,6 +313,43 @@ class AppStatsController {
 			});
 		});
 	}
+
+	/**
+	 * This method gets an array of events made with a timestamp and idvisit
+	 * depending on how many days back
+	 * @method queryEvents
+	 * @param {Date} startDate
+	 * @returns
+	 */
+	 async queryEvents(startDate, connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				SELECT 
+					llva.idvisit,
+					llva.idaction_name,
+					llva.server_time as searchtime,
+					hex(llva.idvisitor) as idvisitor,
+					la_names.name as document,
+					la.name as action
+				FROM matomo_log_link_visit_action llva
+				JOIN matomo_log_action as la
+				JOIN matomo_log_action as la_names
+				WHERE llva.idaction_event_action = la.idaction
+				AND llva.idaction_name = la_names.idaction
+				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument')
+				AND server_time >= ?
+			`,
+			[`${startDate}`],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
+				}
+				resolve(results);
+			});
+		});
+	}
+
 	/**
 	 * This method takes in options from the endpoint and queries matomo with those parameters.
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
@@ -322,17 +360,38 @@ class AppStatsController {
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
 		const searches = await this.querySearches(startDate, connection);
 		const documents = await this.queryPdfOpend(startDate, connection);
+		const events = await this.queryEvents(startDate,connection)
 
 		const searchMap = {};
+		const eventMap = {};
 		const searchPdfMapping = [];
 
 		for (let search of searches) {
 			if (!searchMap[search.idvisit]) {
 				searchMap[search.idvisit] = [];
 			}
-			search = {...search, search: this.htmlDecode(search.search)}
+			search = {...search, value: this.htmlDecode(search.value)}
 			searchMap[search.idvisit].push(search);
 		}
+		const tempSearch = {...searchMap}
+
+		for (let event of events) {
+			if (!eventMap[event.idvisit]) {
+				eventMap[event.idvisit] = [];
+			}
+			if (tempSearch[event.idvisit]){
+				let i = 0
+				let search = ''
+				let tempSearchList = [...tempSearch[event.idvisit]].reverse()
+				while(i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime){
+					search = tempSearchList[i].value
+					i++
+				}
+				event = {...event, value:  search}
+			}
+			searchMap[event.idvisit].push(event);
+		}
+		
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
@@ -374,6 +433,9 @@ class AppStatsController {
 					item.keyw_5 = item.keyw_5.join(', ');
 				}
 				searchPdfMapping[i] = {...doc, ...item};
+			}
+			else{
+				searchPdfMapping[i] = {...doc,display_title_s:doc.document}
 			}
 		}
 		return searchPdfMapping;
