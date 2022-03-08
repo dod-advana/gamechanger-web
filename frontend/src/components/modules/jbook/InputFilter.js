@@ -26,7 +26,7 @@ const InputFilter = (props) => {
 		}, [value, delay]);
 		return debouncedValue;
 	};
-	const debouncedSearchTerm = useDebounce(searchText, 300);
+	const debouncedSearchTerm = useDebounce(searchText, 500);
 
 	useEffect(() => {
 		if (!state.initial) {

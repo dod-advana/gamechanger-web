@@ -222,9 +222,19 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	};
 
-	modularSearch = async (data) => {
+	modularSearch = async (data, cancelToken) => {
 		const url = endpoints.modularSearch;
 		data.options.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
+		if (cancelToken) {
+			return axiosPOST(
+				this.axios,
+				url,
+				data,
+				{
+					cancelToken: cancelToken?.token ? cancelToken.token : {}
+				}
+			);
+		}
 		return axiosPOST(this.axios, url, data);
 	};
 
@@ -347,10 +357,9 @@ export default class GameChangerAPI {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 
 			let filename = encodeURIComponent(
-				`gamechanger${
-					cloneData.clone_name !== 'gamechanger'
-						? `/projects/${cloneData.clone_name}`
-						: ''
+				`gamechanger${cloneData.clone_name !== 'gamechanger'
+					? `/projects/${cloneData.clone_name}`
+					: ''
 				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
@@ -362,8 +371,7 @@ export default class GameChangerAPI {
 				this.axios,
 				`${endpoints.dataStorageDownloadGET}?path=${encodeURIComponent(
 					fileName
-				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${
-					cloneData.clone_name
+				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${cloneData.clone_name
 				}`,
 				{
 					responseType: 'blob',
@@ -393,7 +401,7 @@ export default class GameChangerAPI {
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData, cancelToken) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		if(cancelToken){
+		if (cancelToken) {
 			return axiosPOST(
 				this.axios,
 				url,
@@ -554,7 +562,7 @@ export default class GameChangerAPI {
 
 	getNotifications = async (cloneName) => {
 		const url = endpoints.notificationsPOST;
-		return axiosPOST(this.axios, url, {project_name: cloneName});
+		return axiosPOST(this.axios, url, { project_name: cloneName });
 	};
 
 	createNotification = async (body) => {
@@ -768,12 +776,12 @@ export default class GameChangerAPI {
 
 	getDocumentUsage = async (body) => {
 		const url = endpoints.getDocumentUsage;
-		return axiosGET(this.axios, url, {params:body});
+		return axiosGET(this.axios, url, { params: body });
 	}
 
 	getUserAggregations = async (body) => {
 		const url = endpoints.getUserAggregations;
-		return axiosGET(this.axios, url, {params:body});
+		return axiosGET(this.axios, url, { params: body });
 	}
 
 	addInternalUser = async (body) => {
@@ -855,12 +863,12 @@ export default class GameChangerAPI {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
 		return axiosPOST(this.axios, url, { description, key })
 	}
-	
+
 	approveRejectAPIKeyRequest = async (id, approve) => {
 		const url = endpoints.approveRejectAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id, approve });
 	}
-	
+
 	createAPIKeyRequest = async (name, email, reason, clones) => {
 		const url = endpoints.createAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { name, email, reason, clones });
@@ -923,7 +931,7 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, {});
 	};
 
-	sendJiraFeedback= async (body) => {
+	sendJiraFeedback = async (body) => {
 		const url = endpoints.sendJiraFeedback;
 		return axiosPOST(this.axios, url, body)
 	}
@@ -1029,7 +1037,7 @@ export default class GameChangerAPI {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
 	};
-	
+
 	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
@@ -1057,7 +1065,7 @@ export default class GameChangerAPI {
 
 	getUserData = async (cloneName) => {
 		const url = endpoints.gcUserDataGET;
-		return axiosPOST(this.axios, url, {cloneName});
+		return axiosPOST(this.axios, url, { cloneName });
 	}
 
 	storeUserData = async (userData) => {
@@ -1077,7 +1085,7 @@ export default class GameChangerAPI {
 
 	updateClonesVisited = async (clone) => {
 		const url = endpoints.updateClonesVisitedPOST;
-		return axiosPOST(this.axios, url, {clone});
+		return axiosPOST(this.axios, url, { clone });
 	};
 
 	callDataFunction = async (body) => {
@@ -1123,7 +1131,7 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	};
 
-	exportProfilePage = async(body) => {
+	exportProfilePage = async (body) => {
 		const url = endpoints.exportProfilePage;
 		const options = {}; //{responseType: 'blob'};
 		return axiosPOST(this.axios, url, body, options);

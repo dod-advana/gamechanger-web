@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import axios from 'axios';
 
 import {
 	displayBackendError,
@@ -18,6 +19,7 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 import { scrollListViewTop } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
+let cancelToken = axios.CancelToken.source();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
@@ -73,12 +75,16 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async performQuery(state, searchText, resultsPage, dispatch) {
+	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
 
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
-
 			const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+
+			if (runningSearch) {
+				cancelToken.cancel('cancelled axios with consecutive call');
+				cancelToken = axios.CancelToken.source();
+			}
 
 			// regular search
 			const resp = await gamechangerAPI.modularSearch({
@@ -90,7 +96,7 @@ const JBookSearchHandler = {
 					jbookSearchSettings: cleanSearchSettings,
 					useElasticSearch: state.useElasticSearch
 				}
-			});
+			}, cancelToken);
 
 			if (_.isObject(resp.data)) {
 				displayBackendError(resp, dispatch);
@@ -124,112 +130,201 @@ const JBookSearchHandler = {
 		const {
 			searchText = '',
 			resultsPage,
-			urlSearch
+			urlSearch,
+			paginationSearch,
+			edaPaginationSearch,
+			runningSearch
 		} = state;
 
-		scrollListViewTop();
-
-		if (!urlSearch) {
-			this.setSearchURL(state);
+		
+		if (edaPaginationSearch) {
+			this.handleEDASearch(state, dispatch);
 		}
+		else {
 
-		this.updateRecentSearches(searchText);
-
-		setState(dispatch,
-			{
-				runSearch: false,
-				budgetTypeDropdown: false,
-				serviceAgencyDropdown: false,
-				serviceReviewStatusDropdown: false,
-				reviewStatusDropdown: false,
-				budgetYearDropdown: false,
-				primaryReviewerDropdown: false,
-				serviceReviewerDropdown: false,
-				primaryClassLabelDropdown: false,
-				sourceTagDropdown: false,
-				hasKeywordsDropdown: false,
-				noResultsMessage: null,
-				count: 0,
-				timeFound: 0.0,
-				iframePreviewLink: null,
-				runningSearch: true,
-				urlSearch: false,
-				initial: false,
-				expansionDict: {},
-			});
-
-		try {
-			const t0 = new Date().getTime();
-			const results = await this.performQuery(state, searchText, resultsPage, dispatch);
-			const { contractTotals } = await this.getContractTotals(state, dispatch);
-			const t1 = new Date().getTime();
-
-			//console.log(results);
-
-			if (results === null || (!results.docs || results.docs.length <= 0)) {
-				setState(dispatch, {
-					prevSearchText: null,
-					loading: false,
-					searchResultsCount: 0,
-					noResultsMessage: NO_RESULTS_MESSAGE,
-					runningSearch: false,
-					loadingTinyUrl: false,
-					rawSearchResults: [],
-					hasExpansionTerms: false,
+			if (!urlSearch) {
+				this.setSearchURL(state);
+			}
+	
+			this.updateRecentSearches(searchText);
+	
+			setState(dispatch,
+				{
+					runSearch: false,
+					budgetTypeDropdown: false,
+					serviceAgencyDropdown: false,
+					serviceReviewStatusDropdown: false,
+					reviewStatusDropdown: false,
+					budgetYearDropdown: false,
+					primaryReviewerDropdown: false,
+					serviceReviewerDropdown: false,
+					primaryClassLabelDropdown: false,
+					sourceTagDropdown: false,
+					hasKeywordsDropdown: false,
+					noResultsMessage: null,
+					count: 0,
+					timeFound: 0.0,
+					iframePreviewLink: null,
+					runningSearch: true,
+					urlSearch: false,
+					initial: false,
+					expansionDict: {},
 				});
-			} else {
-				let { docs, totalCount, query, expansionDict, } = results;
-
-				let hasExpansionTerms = false;
-				if (expansionDict) {
-					Object.keys(expansionDict).forEach((key) => {
-						if (expansionDict[key].length > 0) hasExpansionTerms = true;
+	
+			try {
+				const t0 = new Date().getTime();
+	
+				// run these simultaneously
+				if (!paginationSearch) {
+					this.handleEDASearch(state, dispatch);
+				}
+	
+				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
+				const { contractTotals } = await this.getContractTotals(state, dispatch);
+				const t1 = new Date().getTime();
+	
+	
+				if (results === null || (!results.docs || results.docs.length <= 0)) {
+					setState(dispatch, {
+						prevSearchText: null,
+						loading: false,
+						searchResultsCount: 0,
+						noResultsMessage: NO_RESULTS_MESSAGE,
+						runningSearch: false,
+						loadingTinyUrl: false,
+						rawSearchResults: [],
+						hasExpansionTerms: false,
+						paginationSearch: false,
+					});
+				} else {
+					let { docs, totalCount, query, expansionDict, } = results;
+	
+					let hasExpansionTerms = false;
+					if (expansionDict) {
+						Object.keys(expansionDict).forEach((key) => {
+							if (expansionDict[key].length > 0) hasExpansionTerms = true;
+						});
+					}
+	
+					setState(dispatch, {
+						timeFound: ((t1 - t0) / 1000).toFixed(2),
+						activeCategoryTab: 'jbook',
+						prevSearchText: searchText,
+						loading: false,
+						loadingTinyUrl: false,
+						count: totalCount,
+						query: query,
+						rawSearchResults: docs,
+						hideTabs: false,
+						resetSettingsSwitch: false,
+						runningSearch: false,
+						contractTotals: contractTotals,
+						expansionDict,
+						hasExpansionTerms,
+						paginationSearch: false,
 					});
 				}
-
+	
+				if (resultsPage < 2) {
+					trackSearch(
+						searchText,
+						`${getTrackingNameForFactory('jbook')}`,
+						results.totalCount,
+						false
+					);
+				}
+				// this.setSearchURL({...state, searchText, resultsPage, tabName});
+			} catch (e) {
+				console.log(e);
 				setState(dispatch, {
-					timeFound: ((t1 - t0) / 1000).toFixed(2),
-					activeCategoryTab: 'jbook',
-					prevSearchText: searchText,
+					prevSearchText: null,
+					unauthorizedError: true,
 					loading: false,
-					loadingTinyUrl: false,
-					count: totalCount,
-					query: query,
-					rawSearchResults: docs,
-					hideTabs: false,
-					resetSettingsSwitch: false,
+					autocompleteItems: [],
+					searchResultsCount: 0,
 					runningSearch: false,
-					contractTotals: contractTotals,
-					expansionDict,
-					hasExpansionTerms
+					loadingTinyUrl: false,
+					hasExpansionTerms: false,
+					paginationSearch: false,
 				});
 			}
-
-			if (resultsPage < 2) {
-				trackSearch(
-					searchText,
-					`${getTrackingNameForFactory('jbook')}`,
-					results.totalCount,
-					false
-				);
-			}
-			// this.setSearchURL({...state, searchText, resultsPage, tabName});
-		} catch (e) {
-			console.log(e);
-			setState(dispatch, {
-				prevSearchText: null,
-				unauthorizedError: true,
-				loading: false,
-				autocompleteItems: [],
-				searchResultsCount: 0,
-				runningSearch: false,
-				loadingTinyUrl: false,
-				hasExpansionTerms: false
-			});
+	
+			const index = 'gamechanger';
+			getAndSetDidYouMean(index, searchText, dispatch);
 		}
 
-		const index = 'gamechanger';
-		getAndSetDidYouMean(index, searchText, dispatch);
+		
+	},
+
+	async handleEDASearch(state, dispatch) {
+		const {
+			searchText = '',
+			edaResultsPage,
+			edaCloneData
+		} = state;
+
+		// let searchResults = [];
+		setState(dispatch, {
+			edaCount: 0,
+			edaSearchResults: [],
+			edaLoading: true,
+			edaPaginationSearch: false,
+			runSearch: false
+		});
+
+		const offset = (edaResultsPage - 1) * RESULTS_PER_PAGE;
+		const charsPadding = 90;
+
+		try {
+			// run EDA Search
+			// const t0 = new Date().getTime();
+			const results = await gamechangerAPI.modularSearch({
+				cloneName: edaCloneData.clone_name, 
+				searchText,
+				offset,
+				storeHistory: false,
+				options: {
+					charsPadding
+				}
+			});
+
+			// const t1 = new Date().getTime();
+
+			if (_.isObject(results.data)) {
+				let { docs, totalCount} = results.data;
+
+				// set EDA search results
+				if (docs && Array.isArray(docs)) {
+					setState(dispatch, {
+						edaLoading: false,
+						edaCount: totalCount,
+						edaSearchResults: docs
+					});
+				}
+			}
+			else {
+				setState(dispatch, {
+					edaLoading: false,
+				})
+			}
+		} catch (e) {
+			console.log('Error running EDA search in JBOOK');
+			console.log(e);
+			// if it's a consecutive call triggered by a filter update, don't reset state, 
+			// the error is taken care of; there's another call later in the stack working the updated search
+			if (e.message !== 'cancelled axios with consecutive call') {
+				setState(dispatch, {
+					prevSearchText: null,
+					unauthorizedError: true,
+					loading: false,
+					autocompleteItems: [],
+					searchResultsCount: 0,
+					runningSearch: false,
+					loadingTinyUrl: false,
+					hasExpansionTerms: false
+				});
+			}
+		}
 	},
 
 	parseSearchURL(defaultState, url) {
