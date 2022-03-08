@@ -57,8 +57,15 @@ const columns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
+		Header: 'Action',
+		accessor: 'action',
+		width: 200,
+		style: { 'whiteSpace': 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
 		Header: 'Search',
-		accessor: 'search',
+		accessor: 'value',
 		width: 200,
 		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
@@ -105,7 +112,7 @@ const columns = [
 			if(row.value !== undefined){
 				finalString = Object.keys(row.value).join(', ')
 			}
-		return(<TableRow>{finalString}</TableRow>)},
+			return(<TableRow>{finalString}</TableRow>)},
 	},
 	{
 		Header: 'Keywords',
@@ -264,7 +271,7 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
- const getUserAggData = async (daysBack, setUserAggData) => {
+const getUserAggData = async (daysBack, setUserAggData) => {
 	try {
 		const params = { daysBack };
 		const {data = {} } = await gameChangerAPI.getUserAggregations(params);
