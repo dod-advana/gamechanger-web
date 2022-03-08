@@ -343,9 +343,9 @@ class DataLibrary {
 		const key = `${clone_name}/${folder}/${filename}`;
 		let filetype = filename.split('.').pop();
 		if (filetype === '.png'){
-			filetype = 'image/png'
+			filetype = 'image/png';
 		} else if(filetype === 'svg'){
-			filetype = 'image/svg+xml'
+			filetype = 'image/svg+xml';
 		}
 
 		const params = {
@@ -368,14 +368,14 @@ class DataLibrary {
 						reject(err, err.stack);
 					} else {
 						try {
-							const result = data.Body.toString('base64')
+							const result = data.Body.toString('base64');
 							await this.redisDB.set(key, result);
 							resolve(result);
 						} catch (e) {
-							reject(e)
+							reject(e);
 						}
 					}
-				})
+				});
 			}
 
 		});

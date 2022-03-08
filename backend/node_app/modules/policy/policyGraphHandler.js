@@ -46,7 +46,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const { isTest = false, expandTerms = false, searchText } = req.body;
 
 			const gT0 = new Date().getTime();
-			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
+			req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -60,7 +60,7 @@ class PolicyGraphHandler extends GraphHandler {
 				'display_title_s',
 				'ref_list',
 				'pagerank_r'
-			]
+			];
 			req.body.includeHighlights = false;
 
 			//const esQuery = this.getElasticsearchQueryForGraph(req.body, userId);
@@ -103,7 +103,7 @@ class PolicyGraphHandler extends GraphHandler {
 					results = this.createMockGraphReturnFromEsResults(docs.filter(doc => docIDsSortedByPageRank.includes(doc.doc_id)), userId);
 					limit = loadAll ?
 						{ maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED } :
-						{ warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT }
+						{ warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
 				} else {
 					results = this.createMockGraphReturnFromEsResults(docs, userId);
 				}
@@ -401,7 +401,7 @@ class PolicyGraphHandler extends GraphHandler {
 			'RETURN distinct pt LIMIT 1000;', {name: topicName}, isTest, userId
 			);
 			
-			data.graph = graphData
+			data.graph = graphData;
 			
 			return data;
 		} catch (err) {
@@ -429,7 +429,7 @@ class PolicyGraphHandler extends GraphHandler {
 				'RETURN distinct pc limit 1000;', {name: entityName}, isTest, userId
 			);
 			
-			data.graph = graphData
+			data.graph = graphData;
 			
 			return data;
 		} catch (err) {
@@ -487,7 +487,7 @@ class PolicyGraphHandler extends GraphHandler {
 					if (!graph.labels.includes(label)) {
 						graph.labels.push(label);
 					}
-				})
+				});
 				resp[0].nodes.forEach(node => {
 					if (!nodeIds.includes(node.id)) {
 						graph.nodes.push(node);
@@ -511,7 +511,7 @@ class PolicyGraphHandler extends GraphHandler {
 						// edge.source = source;
 						// edge.target = target;
 						graph.edges.push(edge);
-						edgeIds.push(edge.id)
+						edgeIds.push(edge.id);
 					}
 				});
 			});
@@ -563,7 +563,7 @@ class PolicyGraphHandler extends GraphHandler {
 			};
 
 			// const gT0 = new Date().getTime();
-			searchBody.questionFlag = this.searchUtility.isQuestion(searchText)
+			searchBody.questionFlag = this.searchUtility.isQuestion(searchText);
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;

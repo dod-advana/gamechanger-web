@@ -150,7 +150,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
 		// Nothing
-		console.error('matomo error',error)
+		console.error('matomo error',error);
 	}
 }
 

@@ -28,7 +28,7 @@ class UoTLogger {
 			try {
 				fs.mkdirSync(directory);
 			} catch(e) {
-				console.log('----------------- FAILED TO MAKE LOGGER DIRECTORY', directory)
+				console.log('----------------- FAILED TO MAKE LOGGER DIRECTORY', directory);
 			}
 		}
 	}
@@ -119,7 +119,7 @@ try {
 logger.error = (error, code, user) => {
 	let message = '';
 	if (error instanceof Error) {
-		message = error.message
+		message = error.message;
 	}
 	message += (user) ? `[${user}]` : '';
 	message += (code) ? `[${code}] ` : '';
@@ -142,7 +142,7 @@ logger.metrics = (event = 'NOEVENTPASSED', info) => {
 logger.tracing = (function() {
 	let components = {};
 	let exact = false;
-	const resp = (res, msg) => { res.status(200).send(`${msg}<br>Process ${process.env.pm_id || 0}<br>HOST_ID ${process.env.HOST_ID}<br>hostname ${os.hostname()}`); };
+	const resp = (res, msg) => { res.status(200).send(`${msg}<br>Process ${process.env.pm_id || 0}<br>HOST_ID ${process.env.HOST_ID}<br>hostname ${os.hostname()}`) };
 
 	return {
 		add: (req, res) => {
@@ -159,7 +159,7 @@ logger.tracing = (function() {
 			components[component].levels.forEach(v => { if (level === v) exists = true; });
 			if (exists) return resp(res, `Level ${level} already exists for component "${component}"`);
 			components[component].levels.push(level);
-			components[component].levels.sort((a, b) => { return a - b; });
+			components[component].levels.sort((a, b) => { return a - b });
 			return resp(res, `Added level ${level} for component "${component}"`);
 		},
 		clear: (req, res) => {
@@ -198,7 +198,7 @@ logger.tracing = (function() {
 			}
 			level = parseInt(level);
 			let len = components[component].levels.length;
-			components[component].levels = components[component].levels.filter(v => { return v !== level; });
+			components[component].levels = components[component].levels.filter(v => { return v !== level });
 			if (components[component].levels.length === len) return resp(res, `Level ${level} for component "${component}" doesn't exist`);
 			return resp(res, `Deleted level ${level} for component "${component}"`);
 		},

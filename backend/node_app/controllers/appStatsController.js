@@ -273,7 +273,7 @@ class AppStatsController {
 				}
 				resolve(self.cleanFilePath(results));
 			});
-		})
+		});
 	}
 	/**
 	 * This method gets an array of searches made with a timestamp and idvisit
@@ -360,7 +360,7 @@ class AppStatsController {
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
 		const searches = await this.querySearches(startDate, connection);
 		const documents = await this.queryPdfOpend(startDate, connection);
-		const events = await this.queryEvents(startDate,connection)
+		const events = await this.queryEvents(startDate,connection);
 
 		const searchMap = {};
 		const eventMap = {};
@@ -370,24 +370,24 @@ class AppStatsController {
 			if (!searchMap[search.idvisit]) {
 				searchMap[search.idvisit] = [];
 			}
-			search = {...search, value: this.htmlDecode(search.value)}
+			search = {...search, value: this.htmlDecode(search.value)};
 			searchMap[search.idvisit].push(search);
 		}
-		const tempSearch = {...searchMap}
+		const tempSearch = {...searchMap};
 
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
 			if (tempSearch[event.idvisit]){
-				let i = 0
-				let search = ''
-				let tempSearchList = [...tempSearch[event.idvisit]].reverse()
+				let i = 0;
+				let search = '';
+				let tempSearchList = [...tempSearch[event.idvisit]].reverse();
 				while(i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime){
-					search = tempSearchList[i].value
-					i++
+					search = tempSearchList[i].value;
+					i++;
 				}
-				event = {...event, value:  search}
+				event = {...event, value:  search};
 			}
 			searchMap[event.idvisit].push(event);
 		}
@@ -413,7 +413,7 @@ class AppStatsController {
 		}
 
 		// filename mapping to titles; pulled from ES
-		let filenames = searchPdfMapping.filter(item => item.document !== undefined && item.document !== 'null')
+		let filenames = searchPdfMapping.filter(item => item.document !== undefined && item.document !== 'null');
 		filenames = filenames.map(item => item.document);
 		const esQuery = this.searchUtility.getDocMetadataQuery('all',filenames);
 		const esClientName = 'gamechanger';
@@ -435,7 +435,7 @@ class AppStatsController {
 				searchPdfMapping[i] = {...doc, ...item};
 			}
 			else{
-				searchPdfMapping[i] = {...doc,display_title_s:doc.document}
+				searchPdfMapping[i] = {...doc,display_title_s:doc.document};
 			}
 		}
 		return searchPdfMapping;
@@ -498,7 +498,7 @@ class AppStatsController {
 		let userId = 'Unknown';
 		let connection;
 		try {
-			const { clone_name } = req.body
+			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -510,8 +510,8 @@ class AppStatsController {
 			const results = await this.queryPDFOpenedByUserId(userId, clone_name, connection);
 			res.status(200).send(results);
 		} catch (err) {
-			this.logger.error(err, '1CZPASK', userId)
-			res.status(500).send(err)
+			this.logger.error(err, '1CZPASK', userId);
+			res.status(500).send(err);
 		} finally {
 			connection.end();
 		}
@@ -623,7 +623,7 @@ class AppStatsController {
 			}
 
 			// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
-			const docMap = {}
+			const docMap = {};
 			for(const [visitID, arr] of  Object.entries(searchMap)){
 				let currentSearch = '';
 				for(const search_doc of arr){
@@ -648,10 +648,10 @@ class AppStatsController {
 				if(searches !== undefined){
 					const sortSearches = Object
 						.keys(searches)
-						.sort(function (a, b) { return searches[b] - searches[a]; })
+						.sort(function (a, b) { return searches[b] - searches[a] })
 						.map(item => item + ' (' + searches[item] + ')')
 						.slice(0, 5);
-					const strSearches = sortSearches.join(', ')
+					const strSearches = sortSearches.join(', ');
 					doc.searches = strSearches;
 				} else {
 					doc.searches = '';
@@ -744,8 +744,8 @@ class AppStatsController {
 				const results = await this.getUserAggregationsQuery(startDate, connection);
 				res.status(200).send(results);
 			} catch (err) {
-				this.logger.error(err, '1CZPASK', userId)
-				res.status(500).send(err)
+				this.logger.error(err, '1CZPASK', userId);
+				res.status(500).send(err);
 			} finally {
 				connection.end();
 			}

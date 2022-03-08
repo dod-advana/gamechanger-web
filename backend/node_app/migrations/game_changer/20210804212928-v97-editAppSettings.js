@@ -1,5 +1,5 @@
 'use strict';
-const tablename = 'app_settings'
+const tablename = 'app_settings';
 module.exports = {
 	up: (queryInterface, Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {

@@ -42,10 +42,10 @@ class DataTrackerController {
 		try {
 			switch(level){
 				case 1:
-					level_value = await this.crawlerStatus.aggregate('crawler_name', 'DISTINCT', { plain: false })
+					level_value = await this.crawlerStatus.aggregate('crawler_name', 'DISTINCT', { plain: false });
 					break;
 				default:
-					level_value = []
+					level_value = [];
 					break;
 			}
 			res.status(200).send({totalCount: level_value.length, docs:level_value});
@@ -59,10 +59,10 @@ class DataTrackerController {
 	async getTrackedData(req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { limit = 10, offset = 0, order = [], where = {} } = req.body;
-		const new_where = {}
+		const new_where = {};
 		where.forEach((object,idx) => {
-			const col = Object.keys(object)[0]
-			new_where[col] = {[Sequelize.Op.iLike]: where[idx][col]['$iLike']}
+			const col = Object.keys(object)[0];
+			new_where[col] = {[Sequelize.Op.iLike]: where[idx][col]['$iLike']};
 		});
 		try {
 			const totalCount = await this.documentCorpus.count({ where: new_where });
@@ -162,18 +162,18 @@ class DataTrackerController {
 					data.map(item =>{
 						if (crawlerData[item.crawler_name] ){
 							if (crawlerData[item.crawler_name].datetime <item.datetime){
-								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status};
 							}
 						}else{
-							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status};
 						}
-					})
-					return crawlerData
-				})
-				let resp = []
+					});
+					return crawlerData;
+				});
+				let resp = [];
 				Object.keys(level_value).slice(offset, offset + limit).map(data =>{
-					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
-				})
+					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime});
+				});
 				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
 			}else if (option === 'last'){
 				let level_value;
@@ -187,18 +187,18 @@ class DataTrackerController {
 					data.map(item =>{
 						if (crawlerData[item.crawler_name] ){
 							if (crawlerData[item.crawler_name].datetime <item.datetime){
-								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+								crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status};
 							}
 						}else{
-							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status}
+							crawlerData[item.crawler_name] = {'datetime':item.datetime, 'status':item.status};
 						}
-					})
-					return crawlerData
-				})
-				let resp = []
+					});
+					return crawlerData;
+				});
+				let resp = [];
 				Object.keys(level_value).slice(offset, offset + limit).map(data =>{
-					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime})
-				})
+					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime});
+				});
 				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
 			}
 		} catch (e) {

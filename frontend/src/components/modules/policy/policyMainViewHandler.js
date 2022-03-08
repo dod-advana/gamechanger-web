@@ -338,8 +338,8 @@ const PolicyMainViewHandler = {
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
-		const user = await gcUserManagementAPI.getUserData()
-		const { favorite_documents = [] } = user.data
+		const user = await gcUserManagementAPI.getUserData();
+		const { favorite_documents = [] } = user.data;
 	
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents});
@@ -359,7 +359,7 @@ const PolicyMainViewHandler = {
 			});
 		} catch (e) {
 			// Do nothing
-			console.log(e)
+			console.log(e);
 		}
 		setState(
 			dispatch,

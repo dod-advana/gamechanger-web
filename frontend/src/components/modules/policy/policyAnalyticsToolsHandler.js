@@ -27,7 +27,7 @@ const handleSelectSpecificOrgs = (state, dispatch) => {
 	newSearchSettings.specificOrgsSelected = true;
 	newSearchSettings.allOrgsSelected = false;
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const handleSelectAllOrgs = (state, dispatch) => {
 	if(state.analystToolsSearchSettings.specificOrgsSelected){
@@ -43,7 +43,7 @@ const handleSelectAllOrgs = (state, dispatch) => {
 		});
 		setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false});
 	}
-}
+};
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
@@ -54,7 +54,7 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	};
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
-}
+};
 
 const renderSources = (state, dispatch, classes) => {
 	const { originalOrgFilters, orgFilter } = state.analystToolsSearchSettings;
@@ -115,7 +115,7 @@ const renderSources = (state, dispatch, classes) => {
 									label={`${org}`}
 									labelPlacement="end"
 								/>
-							)
+							);
 						} else {
 							return null;
 						}
@@ -128,14 +128,14 @@ const renderSources = (state, dispatch, classes) => {
 			</>
 		</FormControl>
 	);
-}
+};
 	
 const handleSelectSpecificTypes = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	newSearchSettings.specificTypesSelected = true;
 	newSearchSettings.allTypesSelected = false;
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const handleSelectAllTypes = (state, dispatch) => {
 	if(state.analystToolsSearchSettings.specificTypesSelected){
@@ -151,7 +151,7 @@ const handleSelectAllTypes = (state, dispatch) => {
 		});
 		setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false});
 	}
-}
+};
 
 const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
@@ -172,7 +172,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	}
 	
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TypeFilterToggle', event.target.name, event.target.value ? 1 : 0);
-}
+};
 
 
 const renderTypes = (state, dispatch, classes) => {
@@ -233,7 +233,7 @@ const renderTypes = (state, dispatch, classes) => {
 									label={`${type}`}
 									labelPlacement="end"
 								/>
-							)
+							);
 						} else {
 							return null;
 						}
@@ -246,50 +246,50 @@ const renderTypes = (state, dispatch, classes) => {
 			</>
 		</FormControl>
 	);
-}
+};
 
 const handleSelectPublicationDateAllTime = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	newSearchSettings.publicationDateAllTime = true;
 	newSearchSettings.publicationDateFilter = [null, null];
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const handleSelectPublicationDateSpecificDates = (state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	newSearchSettings.publicationDateAllTime = false;
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	const { publicationDateFilter, accessDateFilter } = newSearchSettings;
 	
 	if(Object.prototype.toString.call(date) === '[object Date]'){
-		date.setHours(0)
-		date.setMinutes(0)
-		date.setSeconds(0)
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
 		if(!isStartDate) {
-			date.setDate(date.getDate()+1)
+			date.setDate(date.getDate()+1);
 		}
 	}
 	
 	let temp;
 	switch(filterType){
 		case 'publication':
-			temp = publicationDateFilter
+			temp = publicationDateFilter;
 			break;
 		case 'timestamp':
-			temp = accessDateFilter
+			temp = accessDateFilter;
 			break;
 		default:
 			break;
 	}
 	
 	if (isStartDate){
-		temp[0] = date
+		temp[0] = date;
 	} else {
-		temp[1] = date
+		temp[1] = date;
 	}
 	if(!isNaN(temp[0]?.getTime()) && !isNaN(temp[1]?.getTime())) {
 		newSearchSettings.isFilterUpdate = true;
@@ -301,7 +301,7 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 		newSearchSettings.accessDateFilter = temp;
 	}
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
 	const pubAllTime = state.analystToolsSearchSettings.publicationDateAllTime === undefined ? true : state.analystToolsSearchSettings.publicationDateAllTime;
@@ -421,14 +421,14 @@ const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerC
 			</div>
 		</MuiPickersUtilsProvider>
 	);
-}
+};
 
 const handleRevokedChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 	newSearchSettings.includeRevoked = event.target.checked;
 	newSearchSettings.isFilterUpdate = true;
 	setState(dispatch, { analystToolsSearchSettings: newSearchSettings, metricsCounted: false });
-}
+};
 
 const renderStatus = (state, dispatch, classes) => {
 	return (
@@ -455,7 +455,7 @@ const renderStatus = (state, dispatch, classes) => {
 			</FormControl>
 		</div>
 	);
-}
+};
 
 const PolicyAnalyticsToolsHandler = {
 	getSideBarItems(props) {
@@ -509,7 +509,7 @@ const PolicyAnalyticsToolsHandler = {
 			</>
 		);
 	},
-}
+};
 
 const styles = {
 	filterCount: {

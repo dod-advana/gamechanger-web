@@ -35,7 +35,7 @@ export const filterCaseInsensitiveIncludes = (filter, row) =>{
 			:
 			false
 	);
-}
+};
 
 const columns = [
 	{
@@ -108,11 +108,11 @@ const columns = [
 		style: { 'whiteSpace': 'unset' },
 		width: 250,
 		Cell: (row) => {
-			let finalString = ''
+			let finalString = '';
 			if(row.value !== undefined){
-				finalString = Object.keys(row.value).join(', ')
+				finalString = Object.keys(row.value).join(', ');
 			}
-			return(<TableRow>{finalString}</TableRow>)},
+			return(<TableRow>{finalString}</TableRow>);},
 	},
 	{
 		Header: 'Keywords',
@@ -264,7 +264,7 @@ const getDocumentData = async (daysBack, setDocumentData) => {
 	} catch (e) {
 		console.error(e);
 	}
-}
+};
 
 /**
  * This method queries postgres for feedback data.
@@ -280,7 +280,7 @@ const getUserAggData = async (daysBack, setUserAggData) => {
 	} catch (e) {
 		console.error(e);
 	}
-}
+};
 
 /**
  * This class queries a search to pdf mapping from matomo
