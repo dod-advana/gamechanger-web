@@ -1,4 +1,6 @@
 import React from 'react';
+import { SearchContext } from '../globalSearch/SearchContext';
+import SearchTabBar from '../globalSearch/SearchTabBar';
 import Hermes from '../../../images/logos/HermesLogo.png';
 import NFR from '../../../images/logos/NFRLogo.png';
 import NGA from '../../../images/logos/NGALogo.png';
@@ -141,7 +143,40 @@ const DefaultTitleBarHandler = {
 	},
 
 	getCategoryTabs(props) {
-		return <></>;
+		const {
+			rawSearchResults = [],
+			pageDisplayed,
+			selectedCategories,
+			activeCategoryTab,
+			setActiveCategoryTab,
+			categoryMetadata,
+			cloneData,
+			dispatch,
+			loading,
+		} = props;
+
+		return (
+			<>
+				{rawSearchResults?.length !== 0 &&
+					!loading &&
+					pageDisplayed === 'main' && (
+					<SearchContext.Provider
+						value={{
+							searchTypes: selectedCategories,
+							activeTab: activeCategoryTab,
+							setActiveTab: setActiveCategoryTab,
+							resultMetaData: categoryMetadata,
+							returnHome: () => {
+								window.location.href = `/#/${cloneData.clone_name}`;
+								dispatch({ type: 'RESET_STATE' });
+							},
+						}}
+					>
+						<SearchTabBar containerStyles={{ width: '100%' }} />
+					</SearchContext.Provider>
+				)}
+			</>
+		);
 	},
 
 	getTitleBarStyle(props) {

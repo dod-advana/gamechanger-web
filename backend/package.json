@@ -23,13 +23,13 @@
     "node-forge": "1.2.1"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.34",
+    "@dod-advana/advana-api-auth": "0.0.30",
     "@dod-advana/advana-logger": "0.0.3",
     "@elastic/elasticsearch": "7.10.0",
     "async": "2.6.3",
     "async-redis": "2.0.0",
     "aws-sdk": "2.948.0",
-    "axios": "0.24.0",
+    "axios": "0.21.4",
     "body-parser": "1.19.0",
     "chai": "4.3.4",
     "cors": "2.8.5",

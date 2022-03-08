@@ -394,26 +394,26 @@ const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerC
 								)}
 							</FormControl>
 						</div>
-						{!pubAllTime && <div style={{display: 'flex'}}>
+						{!pubAllTime && <div style={{display: 'flex', flexWrap: 'wrap', margin: '-5px'}}>
 							<KeyboardDatePicker
 								margin="normal"
-								label="Start Date"
 								format="MM/dd/yyyy"
-								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px', marginRight: '15px' } }}
+								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
 								value={state.analystToolsSearchSettings.publicationDateFilter[0]}
 								onChange={date => handleDateRangeChange(date, true, 'publication', state, dispatch)}
 								onOpen={setDatePickerOpen}
 								onClose={setDatePickerClosed}
+								style={{flex: '110px', margin: '5px'}}
 							/>
 							<KeyboardDatePicker
 								margin="normal"
-								label="End Date"
 								format="MM/dd/yyyy"
 								InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
 								value={state.analystToolsSearchSettings.publicationDateFilter[1]}
 								onChange={date => handleDateRangeChange(date, false, 'publication', state, dispatch)}
 								onOpen={setDatePickerOpen}
 								onClose={setDatePickerClosed}
+								style={{flex: '110px', margin: '5px'}}
 							/>
 						</div>}
 					</div>
