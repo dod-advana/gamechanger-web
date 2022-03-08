@@ -290,7 +290,7 @@ const FavoriteCard = (props) => {
 
 	const handleClearNotification = () => {
 		handleClearFavoriteSearchNotification(idx);
-	}
+	};
 
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>

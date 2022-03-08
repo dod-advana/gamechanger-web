@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			classMethods: {
 				associate: (models) => {
-					User.hasMany(models.user_app_versions, { foreignKey: 'username' })
+					User.hasMany(models.user_app_versions, { foreignKey: 'username' });
 					User.hasMany(models.userrole, { foreignKey: 'userid' });
 					User.belongsToMany(models.role, { through: models.userrole, foreignKey: 'userid' });
 					User.hasMany(models.darq_group_user, { foreignKey: 'user_id' });

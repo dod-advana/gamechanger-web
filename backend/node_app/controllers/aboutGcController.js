@@ -11,7 +11,7 @@ class AboutGcController {
 		this.logger = logger;
 		this.faq = faq;
 
-		this.getFAQ = this.getFAQ.bind(this)
+		this.getFAQ = this.getFAQ.bind(this);
 	}
 
 
@@ -19,7 +19,7 @@ class AboutGcController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const questions = await this.faq.findAll()
+			const questions = await this.faq.findAll();
 			res.status(200).send(questions);
 		} catch(e) {
 			this.logger.error(e, 'MQYVZD9', userId);

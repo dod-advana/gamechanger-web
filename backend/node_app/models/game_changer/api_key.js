@@ -34,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
 		API_KEY.belongsToMany(models.clone_meta, { 
 			through: 'api_key_clone', 
 			foreignKey: 'apiKeyId'
-		})
-	}
+		});
+	};
 
 	return API_KEY;
 };

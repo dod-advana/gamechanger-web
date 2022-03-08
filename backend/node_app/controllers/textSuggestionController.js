@@ -34,7 +34,7 @@ class TextSuggestionController {
 			let corrected;
 			let presearchTitle;
 			let presearchHistory;
-			let presearchEntity = { presearchTopic: [], presearchOrg: [] }
+			let presearchEntity = { presearchTopic: [], presearchOrg: [] };
 
 			if (req.body.searchText.length > 3){
 				const data = await this.textSuggestData({ ...req.body, index }, userId);
@@ -68,7 +68,7 @@ class TextSuggestionController {
 						presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
 					} catch (err) {
 						const { message } = err;
-						this.logger.error(message, 'JBVZKTF', userId)
+						this.logger.error(message, 'JBVZKTF', userId);
 				};
 				}
 				return res.send({
@@ -133,7 +133,7 @@ class TextSuggestionController {
 		// amount of users need to be more than 1 (max shown = 3 for efficiency)
 		if (suggesterArray.length > 0) {
 			suggesterArray.forEach(term => {
-				let usercount = term.user.buckets
+				let usercount = term.user.buckets;
 				if ((usercount.length > 1) && (usercount[0].doc_count > 2)) {
 					presearch.push(term['key']);
 				}

@@ -46,8 +46,8 @@ module.exports = (sequelize, DataTypes) => {
 	RESPONSIBILITIES.associate = (models) => {
 		RESPONSIBILITIES.hasMany(models.responsibility_report, { 
 			foreignKey: 'responsibility_id'
-		})
-	}
+		});
+	};
 
 	return RESPONSIBILITIES;
 };

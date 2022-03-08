@@ -293,7 +293,7 @@ function reducer(state, action) {
 			};
 			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
 			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
-			return newState
+			return newState;
 		case 'RESET_STATE':
 			window.location.href = `#/${state.cloneData.url}`;
 			return {

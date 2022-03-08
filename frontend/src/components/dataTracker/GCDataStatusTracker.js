@@ -420,7 +420,7 @@ const GCDataStatusTracker = (props) => {
 				}
 			}
 		}
-	}
+	};
 
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
