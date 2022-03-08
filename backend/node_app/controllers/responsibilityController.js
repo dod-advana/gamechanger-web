@@ -270,7 +270,7 @@ class ResponsibilityController {
 
 			res.status(200).send({fileLink, pageNumber});
 		} catch (err) {
-			res.status(500)
+			res.status(500).send();
 			this.logger.error(err, 'QRDSM32', userId);
 		}
 
@@ -612,7 +612,7 @@ class ResponsibilityController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const {id, issue_description, updatedColumn, updatedText, textPosition} = req.body;
-			if(id == null || !issue_description) return res.status(400)
+			if(id == null || !issue_description) return res.status(400).send();
 
 			const hashed_user = sparkMD5Lib.hash(userId);
 			const report = await this.responsibility_reports.create({
