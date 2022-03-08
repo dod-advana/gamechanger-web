@@ -102,24 +102,10 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 }
 
 export const handleTabClicked = (dispatch, state, tab) => {
-	const { tabs } = state;
-	const isSummary = tabs[tab] === 'summary';
 
-	const paramsIndex = window.location.hash.indexOf('?');
-	let params = '';
-	if (paramsIndex !== -1) {
-		params = window.location.hash.substring(paramsIndex);
-	}
-	else {
-		params = state.queryParams;
-	}
 
 	setState(dispatch, { mainTabSelected: tab });
-	if (isSummary) {
-		setState(dispatch, { queryParams: params });
-	}
 
-	window.history.replaceState(undefined, undefined, `#/jbook/${tabs[tab]}${isSummary ? '' : params}`);
 }
 
 export const scrollListViewTop = () => {

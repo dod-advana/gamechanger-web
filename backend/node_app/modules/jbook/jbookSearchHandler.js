@@ -387,14 +387,22 @@ class JBookSearchHandler extends SearchHandler {
 
 			// grab counts, can be optimized with promise.all
 			const totalCountQuery = `SELECT COUNT(*) FROM (` + giantQuery + `) as combinedRows;`;
-			let totalCount = await this.db.jbook.query(totalCountQuery, {
-				replacements: {
-					searchText: structuredSearchText,
-					offset,
-					limit
-				}
-			});
-			totalCount = totalCount[0][0].count;
+
+			let totalCount;
+			try {
+				totalCount = await this.db.jbook.query(totalCountQuery, {
+					replacements: {
+						searchText: structuredSearchText,
+						offset,
+						limit
+					}
+				});
+				totalCount = totalCount[0][0].count;
+			} catch(e) {
+				console.log('Error getting total count')
+				console.log(e);
+			}
+
 
 			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
 			giantQuery += queryEnd;
@@ -436,6 +444,44 @@ class JBookSearchHandler extends SearchHandler {
 						console.log(e);
 					}
 				}
+
+				if (doc.contracts) {
+					try {
+						let contracts = doc.contracts.replace(/[\(\)]\s*/g, '');
+						contracts = contracts.split('",');
+	
+						let titles = contracts[0].replace(/[\"]\s*/g, '').split('; ');
+						let piids = contracts[1].replace(/[\"]\s*/g, '').split('; ');
+						let fys = contracts[2].replace(/[\"]\s*/g, '').split('; ');
+	
+						let contractData = [];
+						for (let i = 0; i < titles.length; i++) {
+							contractData.push(`${titles[i]} ${piids[i]} ${fys[i]}`)
+						}
+	
+						doc.contracts = contractData;
+					} catch(e) {
+						console.log('Error adding contracts to doc');
+						console.log(e);
+					}
+				}
+
+				if (doc.accomplishments) {
+					try {
+						let accomps = doc.accomplishments.replace(/[\(\)]\s*/g, '');
+						accomps = accomps.split('",');
+
+						let titles = accomps[0].replace(/[\"]\s*/g, '').split('; ');
+
+						doc.accomplishments = titles;
+
+					} catch(e) {
+						console.log('Error adding accomplishments to doc');
+						console.log(e);
+					}
+				}
+
+
 				return doc;
 			});
 
