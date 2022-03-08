@@ -248,7 +248,7 @@ class DataTrackerController {
 			const numDocResp = await this.sequelizeGCOrchestration.query('select count (*) from publications where is_revoked is false;');
 			const numberOfDocuments = Number(numDocResp[0][0].count);
 
-			const yearAgo = new Date()
+			const yearAgo = new Date();
 			yearAgo.setMonth(yearAgo.getMonth() - 11);
 			yearAgo.setDate(1);
 			yearAgo.setHours(0);
@@ -268,16 +268,32 @@ class DataTrackerController {
 				],
 				group: 'month'
 			})
+			docsByMonthRaw.sort((a,b) => {
+				if(a.dataValues.month > b.dataValues.month) return 1;
+				return -1;
+			});
 			
-			const docsByMonth = [];
 			const monthNames = [
 				'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 				'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 			];
+
+			const monthsObject = {};
 			docsByMonthRaw.forEach(data => {
-				const month = monthNames[data.dataValues.month.getUTCMonth()];
-				docsByMonth.push({[month]: Number(data.dataValues.count)});
+				monthsObject[monthNames[data.dataValues.month.getUTCMonth()]] = data.dataValues.count;
 			})
+
+			const docsByMonth = [];
+			for(let i = 0; i < 12; i++){
+				let monthIndex = yearAgo.getMonth() + i;
+				if(monthIndex - 12 >= 0) monthIndex -= 12;
+				const month = monthNames[monthIndex];
+				if(monthsObject[month]){ 
+					docsByMonth.push({month, count: Number(monthsObject[month])});
+				}else{
+					docsByMonth.push({month, count: 0})
+				}
+			}
 
 			const docIngestionStats = {
 				docsByMonth,

@@ -292,7 +292,7 @@ describe('DataTrackerController', function () {
 
 	describe('#getDocIngestionStats', () => {
 		it('should get doc ingestion stats', async (done) => {	
-			const crawlers = ['crawler1', 'crawler2', 'crawler3']
+			const crawlers = ['crawler1', 'crawler2', 'crawler3'];
 
 			const crawlerInfo = {
 				count() {
@@ -309,17 +309,19 @@ describe('DataTrackerController', function () {
 					);
 				}
 			};
+			const jan = new Date(Date.UTC(2022, 0));
+			const feb = new Date(Date.UTC(2022, 1));
 
 			const documentCorpus = {
 				findAll() {
 					return Promise.resolve(
 						[
 							{dataValues: {
-								month: new Date(Date.UTC(2022, 0)),
+								month: jan,
 								count: '17598'
 							}}, 
 							{dataValues: {
-								month: new Date(Date.UTC(2022, 1)),
+								month: feb,
 								count: '10888'
 							}}
 						]
@@ -333,6 +335,11 @@ describe('DataTrackerController', function () {
 				sequelizeGCOrchestration,
 				documentCorpus
 			};
+
+			const mockDate = new Date('2022-03-08T15:16:45.036Z');
+			jest
+				.spyOn(global, 'Date')
+				.mockImplementationOnce(() => mockDate);
 
 			const target = new DataTrackerController(opts);
 
@@ -356,7 +363,7 @@ describe('DataTrackerController', function () {
 			await target.getDocIngestionStats(req, res);
 
 			const expected = {
-				docsByMonth: [{Jan: 17598}, {Feb: 10888}],
+				docsByMonth: [{count: 0, month: 'Apr'}, {count: 0, month: 'May'}, {count: 0, month: 'Jun'}, {count: 0, month: 'Jul'}, {count: 0, month: 'Aug'}, {count: 0, month: 'Sep'}, {count: 0, month: 'Oct'}, {count: 0, month: 'Nov'}, {count: 0, month: 'Dec'}, {count: 17598, month: 'Jan'}, {count: 10888, month: 'Feb'}, {count: 0, month: 'Mar'}],
 				numberOfSources: 3,    
 				numberOfDocuments: 111263
 			};
