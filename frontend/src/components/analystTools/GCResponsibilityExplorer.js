@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { 
 	FormControl,
@@ -54,7 +54,7 @@ const useStyles = makeStyles({
 	formlabel: {
 		paddingTop: '16px'
 	}
-})
+});
 
 export default function GCResponsibilityExplorer({
 	state,
@@ -88,9 +88,9 @@ export default function GCResponsibilityExplorer({
 		const fetchDocTitles = async() => {
 			const { data } = await gameChangerAPI.getResponsibilityDocTitles();
 			setDocumentList(data.results);
-		}
+		};
 		fetchDocTitles();
-	 },[])
+	 },[]);
 
 	 const scrollRef = useBottomScrollListener(
 		() => {
@@ -105,12 +105,12 @@ export default function GCResponsibilityExplorer({
 				trailing: false
 			}
 		}
-	)
+	);
 
 	const handleInfiniteScroll = () => {
 		handleFetchData({ page: infiniteCount +1, filtered: filters, scroll: true });
 		setInfiniteCount(infiniteCount + 1);
-	}
+	};
 
 	const handleFetchData = async ({ page, filtered, scroll }) => {
 		try {
@@ -146,16 +146,16 @@ export default function GCResponsibilityExplorer({
 			const doc = responsibility.documentTitle;
 			let entity = responsibility.organizationPersonnel;
 			if(!entity) entity = 'NO ENTITY';
-			if(!groupedData[doc]) groupedData[doc] = {}
+			if(!groupedData[doc]) groupedData[doc] = {};
 			if(!groupedData[doc][entity]) groupedData[doc][entity]= [];
 			groupedData[doc][entity].push(responsibility);
-		})
+		});
 		setDocResponsibilityData(groupedData);
-	}
+	};
 
 	useEffect(() => {
 		groupResponsibilities(responsibilityData);
-	}, [responsibilityData])
+	}, [responsibilityData]);
 
 	const getData = async ({
 		page = 1,
@@ -178,15 +178,15 @@ export default function GCResponsibilityExplorer({
 			return data;
 		} catch (err) {
 			this.logger.error(err.message, 'GEADAKS');
-			return []
+			return [];
 		}
 	};
 
 	const handleChangeView = (event) => {
 		const { value } = event.target;
 		setReView(value);
-		if(value === 'Document') setReloadResponsibilities(true)
-	}
+		if(value === 'Document') setReloadResponsibilities(true);
+	};
 
 	const exportCSV = async () => {
 		try {
@@ -284,5 +284,5 @@ export default function GCResponsibilityExplorer({
 				/>
 			}
 		</div>
-	)
+	);
 }

@@ -51,8 +51,8 @@ class ESSearchLib {
 			};
 
 			queryBodiesArray.forEach(query => {
-				multiquery.body.push(query)
-			})
+				multiquery.body.push(query);
+			});
 
 			return this._clients[clientName].msearch(multiquery);
 		} catch (e) {
@@ -63,9 +63,9 @@ class ESSearchLib {
 	}
 	async addDocument(clientName, index, document){
 		try {
-			this._clients[clientName].index({index: index, body: document})
+			this._clients[clientName].index({index: index, body: document});
 		} catch (e){
-			this.logger.error(e.message, 'NL2FDZA', user)
+			this.logger.error(e.message, 'NL2FDZA', user);
 		}
 	}
 }

@@ -25,6 +25,7 @@ const endpoints = {
 	gcCloneDataPOST: '/api/gameChanger/modular/admin/storeCloneMeta',
 	gcCloneDataDeletePOST: '/api/gameChanger/modular/admin/deleteCloneMeta',
 	gcDataTrackerDataPOST: '/api/gameChanger/dataTracker/getTrackedData',
+	getDocIngestionStats: '/api/gameChanger/getDocIngestionStats',
 	gcBrowsingLibraryPOST: '/api/gameChanger/dataTracker/getBrowsingLibrary',
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
@@ -450,6 +451,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, options);
 	};
 
+	getDocIngestionStats = async () => {
+		const url = endpoints.getDocIngestionStats;
+		return axiosGET(this.axios, url);
+	};
+
 	getBrowsingLibrary = async (options) => {
 		const url = endpoints.gcVersionedDocsPOST;
 		return axiosPOST(this.axios, url, options);
@@ -861,7 +867,7 @@ export default class GameChangerAPI {
 
 	updateAPIKeyDescription = async (description, key) => {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
-		return axiosPOST(this.axios, url, { description, key })
+		return axiosPOST(this.axios, url, { description, key });
 	}
 
 	approveRejectAPIKeyRequest = async (id, approve) => {
@@ -933,7 +939,7 @@ export default class GameChangerAPI {
 
 	sendJiraFeedback = async (body) => {
 		const url = endpoints.sendJiraFeedback;
-		return axiosPOST(this.axios, url, body)
+		return axiosPOST(this.axios, url, body);
 	}
 
 	getLTRMode = async () => {

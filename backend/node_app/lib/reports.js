@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const pdfMakeLib = require('pdfmake');
 const csvStringifyLib = require('csv-stringify');
@@ -12,7 +12,7 @@ class Reports {
 			logger = loggerLib,
 			csvStringify = csvStringifyLib,
 			pdfMake = pdfMakeLib
-		} = opts
+		} = opts;
 
 		this.logger = logger;
 		this.csvStringify = csvStringify;
@@ -27,7 +27,7 @@ class Reports {
 			stringifier.on('error', (err) => {
 				this.logger.error(err.message, 'NL71UTC', userId);
 				throw new Error(err);
-			})
+			});
 
 			this.writeCsvData(stringifier, data);
 
@@ -140,14 +140,14 @@ class Reports {
 	}
 
 	mp(relFontPath) {
-		return path.resolve(__dirname, relFontPath)
+		return path.resolve(__dirname, relFontPath);
 	};
 
 	constructCoverPage(data, settings) {
 
 		const filters = Object.keys(settings.orgFilter);
 		const orgFilter = filters.filter(function (key) {
-			return settings.orgFilter[key]
+			return settings.orgFilter[key];
 		});
 
 		const dataContent = data.docs.map(function (doc) {
@@ -191,13 +191,13 @@ class Reports {
 					{ text: ' ' },
 				],
 				pageBreak: 'after'
-			}
-		})
+			};
+		});
 
 		const sideMargin = 50;
-		const title = 'GAMECHANGER REPORT'
-		const footer = 'REPORT'
-		const timeZone = 'America/New_York'
+		const title = 'GAMECHANGER REPORT';
+		const footer = 'REPORT';
+		const timeZone = 'America/New_York';
 		const date = timeZone ? moment.tz(timeZone) : moment();
 		const dateString = `${date.format('MM/DD/YYYY')}`;
 		const displaySearchTerm = data.searchTerms.join(' ');
@@ -319,7 +319,7 @@ class Reports {
 		};
 
 
-		return doc
+		return doc;
 	}
 	
 	constructProfilePagePDF(data) {

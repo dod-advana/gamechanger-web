@@ -58,9 +58,9 @@ export default (props) => {
 		show:false,
 		model:'',
 		type:''
-	})
+	});
 	const [modelTable, setModelTable] = useState([]);
-	const [dataTable, setDataTable] = useState([])
+	const [dataTable, setDataTable] = useState([]);
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
@@ -177,14 +177,14 @@ export default (props) => {
 			show:false,
 			model:'',
 			type:''
-		})
+		});
 		await gameChangerAPI.deleteLocalModel({
 			'model':model,
 			'type':type
 		});
 		props.getProcesses();
-		getModelsList()
-	}
+		getModelsList();
+	};
 	/**
 	 * Get a list of all the proccesses running and completed
 	 * @method getAllProcessData
@@ -224,8 +224,8 @@ export default (props) => {
 
 	const getLocalData = async () => {
 		const dataList =  await gameChangerAPI.getDataList();
-		setDataTable(dataList.data.dirs)
-	}
+		setDataTable(dataList.data.dirs);
+	};
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getModelsList
@@ -352,8 +352,8 @@ export default (props) => {
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
 		} catch (e) {
-			console.log('\nERROR EVALUATING MODEL')
-			console.log(e)
+			console.log('\nERROR EVALUATING MODEL');
+			console.log(e);
 			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
 		}
 	};
@@ -604,7 +604,7 @@ export default (props) => {
 														show:true,
 														model:row.original.model,
 														type:row.original.type
-													})
+													});
 													
 												}}
 												style={{ float: 'left', minWidth: 'unset' }}

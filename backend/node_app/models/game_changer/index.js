@@ -13,7 +13,7 @@ let uot_sequelize = new Sequelize(
 	constants.POSTGRES_CONFIG.databases.uot.database, constants.POSTGRES_CONFIG.databases.uot.username, constants.POSTGRES_CONFIG.databases.uot.password, constants.POSTGRES_CONFIG.databases.uot
 );
 
-Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value); };
+Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value) };
 
 db.uot = uot_sequelize;
 db.gc = gc_sequelize;
