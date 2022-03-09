@@ -47,7 +47,7 @@ const defaultIframPreviewLink = {
 	dataIdx: 0,
 	entityIdx: 0,
 	responsibilityIdx: 0
-}
+};
 
 export default function ResponsibilityUpdates() {
 
@@ -66,7 +66,7 @@ export default function ResponsibilityUpdates() {
 	const [reloadResponsibilities, setReloadResponsibilities] = useState(true);
 	const [resultsPage, setResultsPage] = useState(1);
 	const [selectedUpdate, setSelectedUpdate] = useState({});
-	const [highlights, setHighlights] = useState([])
+	const [highlights, setHighlights] = useState([]);
 	const [scrollId, setScrollId] = useState('');
 	const [documentLink, setDocumentLink] = useState('');
 	const [refreshDocument, setRefreshDocument] = useState(false);
@@ -89,35 +89,35 @@ export default function ResponsibilityUpdates() {
 		if(selectedResponsibility?.responsibility_reports){
 			const newHighlights = [];
 			selectedResponsibility.responsibility_reports.forEach(report => {
-				if(report.textPosition) newHighlights.push({position: report.textPosition, id: report.id})
-			})
+				if(report.textPosition) newHighlights.push({position: report.textPosition, id: report.id});
+			});
 			setHighlights(newHighlights);
-			setSelectedUpdate(selectedResponsibility.responsibility_reports[0])
+			setSelectedUpdate(selectedResponsibility.responsibility_reports[0]);
 		}
-		setEditing(false)
-	}, [selectedResponsibility])
+		setEditing(false);
+	}, [selectedResponsibility]);
 
 	useEffect(() => {
 		if(refreshDocument){
 			setDocumentLink(refreshDocument);
 			setRefreshDocument(false);
 		}
-	}, [refreshDocument])
+	}, [refreshDocument]);
 
 	useEffect(() => {
 		if(editing){
 			setEditing(false);
 			const newHighlights = [];
 			selectedResponsibility.responsibility_reports.forEach(report => {
-				newHighlights.push({position: report.textPosition, id: report.id})
-			})
+				newHighlights.push({position: report.textPosition, id: report.id});
+			});
 			setHighlights(newHighlights);
 		}
 		setScrollId(`${selectedUpdate.id}`);
 		setRefreshDocument(documentLink);
-		setDocumentLink('')
+		setDocumentLink('');
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedUpdate])
+	}, [selectedUpdate]);
 
 	useEffect(() => {
 		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
@@ -126,8 +126,8 @@ export default function ResponsibilityUpdates() {
 				initialCollapseKeys[doc] = false;
 				Object.keys(responsibilityData[doc]).forEach(entity => {
 					initialCollapseKeys[doc + entity] = false;
-				})
-			})
+				});
+			});
 			setCollapseKeys(initialCollapseKeys);
 		}
 	}, [responsibilityData, collapseKeys]);
@@ -143,14 +143,14 @@ export default function ResponsibilityUpdates() {
 		const getFileName = async () => {
 			const payload = {
 				filename: selectedResponsibility.filename
-			}
+			};
 			if(payload.filename){
 				const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
 				setDocumentLink(data.fileLink);
 			}
-		}
+		};
 		getFileName();
-	}, [selectedResponsibility])
+	}, [selectedResponsibility]);
 
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -208,13 +208,13 @@ export default function ResponsibilityUpdates() {
 						newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] = 0;
 					}
 					newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] += resp;
-				})
+				});
 				setOffsets(newOffsets);
 			}
 			return data;
 		} catch (err) {
 			this.logger.error(err.message, 'GEADAKS');
-			return []
+			return [];
 		}
 	};
 
@@ -224,57 +224,57 @@ export default function ResponsibilityUpdates() {
 			const doc = responsibility.documentTitle;
 			let entity = responsibility.organizationPersonnel;
 			if(!entity) entity = 'NO ENTITY';
-			if(!groupedData[doc]) groupedData[doc] = {}
+			if(!groupedData[doc]) groupedData[doc] = {};
 			if(!groupedData[doc][entity]) groupedData[doc][entity]= [];
 			groupedData[doc][entity].push(responsibility);
-		})
+		});
 		setResponsibilityData(groupedData);
-	}
+	};
 
 	const onPaginationClick= (page) => {
 		setResultsPage(page);
 		setReloadResponsibilities(true);
-	}
+	};
 
 	const handleMoveSelectedResp = () => {
 		if(selectedResponsibility.responsibility_reports?.length > 1) {
-			return
+			return;
 		}
 		setIframePreviewLink(defaultIframPreviewLink);
-	}
+	};
 
 	const acceptUpdate = async (update) => {
 		const data = {
 			update, 
 			responsibility: selectedResponsibility, 
 			status: 'accepted'
-		}
-		await gameChangerAPI.updateResponsibility(data)
+		};
+		await gameChangerAPI.updateResponsibility(data);
 		handleMoveSelectedResp();
 		setReloadResponsibilities(true);
-	}
+	};
 
 	const rejectUpdate = async (update) => {
 		const data = {
 			update, 
 			responsibility: selectedResponsibility, 
 			status: 'rejected'
-		}
-		await gameChangerAPI.updateResponsibility(data)
+		};
+		await gameChangerAPI.updateResponsibility(data);
 		handleMoveSelectedResp();
 		setReloadResponsibilities(true);
-	}
+	};
 
 	const editUpdate = async (updatedResp, textPosition) => {
 		const data = {
 			id: selectedUpdate.id, 
 			updatedText: updatedResp,
 			textPosition: textPosition
-		}
-		await gameChangerAPI.updateResponsibilityReport(data)
+		};
+		await gameChangerAPI.updateResponsibilityReport(data);
 		setReloadResponsibilities(true);
-		setEditing(false)
-	}
+		setEditing(false);
+	};
 
 	function handleRightPanelToggle() {
 		setRightPanelOpen(!rightPanelOpen);
@@ -307,7 +307,7 @@ export default function ResponsibilityUpdates() {
 			documentTitle: 'Document Title',
 			organizationPersonnel: 'Organization/Personnel',
 			responsibilityText: 'Responsibility Text',
-		}
+		};
 		const metaData = [];
 		if(responsibility){
 			Object.keys(responsibility).forEach(key => {
@@ -315,12 +315,12 @@ export default function ResponsibilityUpdates() {
 					metaData.push({
 						Key: keyMap[key],
 						Value: responsibility[key]
-					})
+					});
 				}
-			})
+			});
 		}
-		return metaData
-	}
+		return metaData;
+	};
 
 	const getUpdateMetaData = () => {
 		if(!Object.keys(selectedResponsibility).length) return [];
@@ -329,7 +329,7 @@ export default function ResponsibilityUpdates() {
 			metaData.push({
 				Key: 'Update Type',
 				Value: update.updatedColumn
-			})
+			});
 			if(update.updatedColumn !== 'Reject') metaData.push({
 				Key: 'Updated Text',
 				Value: <UpdateMetaText 
@@ -343,7 +343,7 @@ export default function ResponsibilityUpdates() {
 				>
 					{update.updatedText}
 				</UpdateMetaText>
-			})
+			});
 			metaData.push({
 				Key: 'Actions',
 				Value: <div className='row' style={{justifyContent: 'right'}}>
@@ -353,10 +353,10 @@ export default function ResponsibilityUpdates() {
 									if(editing) {
 										const newHighlights = [];
 										selectedResponsibility.responsibility_reports.forEach(report => {
-											newHighlights.push({position: report.textPosition, id: report.id})
-										})
+											newHighlights.push({position: report.textPosition, id: report.id});
+										});
 										setHighlights(newHighlights);
-										return setEditing(false)
+										return setEditing(false);
 									};
 									setSelectedUpdate(update);
 									setEditing(`${update.id}`);
@@ -378,7 +378,7 @@ export default function ResponsibilityUpdates() {
 					}
 					<GCButton
 						onClick={() => {
-							rejectUpdate(update)
+							rejectUpdate(update);
 						}}
 						style={{
 							height: 40,
@@ -395,7 +395,7 @@ export default function ResponsibilityUpdates() {
 					</GCButton>
 					<GCButton
 						onClick={() => {
-							acceptUpdate(update)
+							acceptUpdate(update);
 						}}
 						style={{
 							height: 40,
@@ -410,10 +410,10 @@ export default function ResponsibilityUpdates() {
 						Accept
 					</GCButton>
 				</div>
-			})
-		})
-		return metaData
-	}
+			});
+		});
+		return metaData;
+	};
 
 	const iframePanelSize =
 		12 -
@@ -475,7 +475,7 @@ export default function ResponsibilityUpdates() {
 										dataIdx: 0,
 										entityIdx: 0,
 										responsibilityIdx: 0
-									})
+									});
 									setCollapseKeys({});
 									onPaginationClick(page);
 								}}
@@ -588,7 +588,7 @@ export default function ResponsibilityUpdates() {
 													}
 												</div>
 											</Collapse>
-										</>
+										</>;
 									})}
 								</Collapse>
 							</div>

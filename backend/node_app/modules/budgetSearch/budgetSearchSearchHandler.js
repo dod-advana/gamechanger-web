@@ -59,7 +59,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 			historyRec.showTutorial = showTutorial;
 
 			const operator = 'and';
-			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index}
+			let clientObj = { esClientName: 'gamechanger', esIndex: this.constants.BUDGETSEARCH_ELASTIC_SEARCH_OPTS.index};
 			// log query to ES
 			if (storeHistory) {
 				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
@@ -128,7 +128,7 @@ class BudgetSearchSearchHandler extends SearchHandler {
 	
 			const { esClientName, esIndex } = clientObj;
 
-			const esQuery = this.budgetSearchSearchUtility.getElasticsearchQuery(body, userId)
+			const esQuery = this.budgetSearchSearchUtility.getElasticsearchQuery(body, userId);
 	
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 

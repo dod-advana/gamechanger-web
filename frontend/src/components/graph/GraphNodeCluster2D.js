@@ -1366,7 +1366,7 @@ export default function GraphNodeCluster2D(props) {
 										);
 										setZoomFactor(event.target.value);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>
@@ -1415,7 +1415,7 @@ export default function GraphNodeCluster2D(props) {
 										handleUpdateNodeSize(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>
@@ -1440,7 +1440,7 @@ export default function GraphNodeCluster2D(props) {
 										setEdgeThickness(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>

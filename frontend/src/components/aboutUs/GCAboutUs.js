@@ -80,8 +80,8 @@ const GCAboutUs = (props) => {
 			'Data',
 			'Analyst Tools',
 			'Collaboration',
-		]
-	},[])
+		];
+	},[]);
 
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;

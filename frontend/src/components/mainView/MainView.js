@@ -41,20 +41,20 @@ const MainView = (props) => {
 		return function cleanUp(){
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
-		}
-	},[])
+		};
+	},[]);
 
 	useEffect(() => {
 		if(state.runningSearch && cancelToken) {
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
 		};
-	},[state.runningSearch])
+	},[state.runningSearch]);
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
-		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]})
-	}, [dispatch])
+		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]});
+	}, [dispatch]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
@@ -172,7 +172,7 @@ const MainView = (props) => {
 		return (
 			<AnalystTools context={context} />
 		);
-	}
+	};
 	
 	const getDataTracker = () => {
 		return <GCDataStatusTracker state={state} />;

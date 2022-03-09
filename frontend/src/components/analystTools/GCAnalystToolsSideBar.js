@@ -31,7 +31,7 @@ export default function GCAnalystToolsSideBar(props) {
 			const factory = new AnalystToolsFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
 			
-			setAnalystToolsSideBarHandler(handler)
+			setAnalystToolsSideBarHandler(handler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
@@ -41,7 +41,7 @@ export default function GCAnalystToolsSideBar(props) {
 			event.preventDefault();
 		}
 		setState(dispatch, { runDocumentComparisonSearch: true });
-	}
+	};
 	
 	return (
 		<div style={styles.cardBody} class='analyst-tools-filters'>

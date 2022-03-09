@@ -202,7 +202,7 @@ class GlobalSearchHandler extends SearchHandler {
 			this.field('link_label');
 			this.field('description');
 			// data to search
-			allApps.forEach(function (app) { this.add(app); }, this);
+			allApps.forEach(function (app) { this.add(app) }, this);
 		});
 
 		// perform search
@@ -232,7 +232,7 @@ class GlobalSearchHandler extends SearchHandler {
 		try {
 			let url = `${QLIK_URL}/qrs/app/full`;
 			let result = await axios.get(url, this.getRequestConfigs({filter: APP_PROD_FILTER, ...params}, userId));
-			return result
+			return result;
 		} catch (err) {
 			if (!userId) // most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
 				this.logger.error(err, 'O799J51', userId);
@@ -275,13 +275,13 @@ class GlobalSearchHandler extends SearchHandler {
 			this.field('stream', { extractor: ({ stream: { name } }) => name });
 
 			this.field('customProperties', { extractor: ({ customProperties }) => customProperties.reduce((prev, curr) => {
-				return prev.concat([ curr?.value, curr?.schemaPath, curr?.definition?.name ])
+				return prev.concat([ curr?.value, curr?.schemaPath, curr?.definition?.name ]);
 			}, []) });
 
 			this.field('tags', { extractor: ({ tags: { name } }) => name });
 
 			// data to search
-			allApps.forEach(function (app) { this.add(app); }, this);
+			allApps.forEach(function (app) { this.add(app) }, this);
 		});
 
 		// perform search

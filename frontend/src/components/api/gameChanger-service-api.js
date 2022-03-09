@@ -855,7 +855,7 @@ export default class GameChangerAPI {
 
 	updateAPIKeyDescription = async (description, key) => {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
-		return axiosPOST(this.axios, url, { description, key })
+		return axiosPOST(this.axios, url, { description, key });
 	}
 	
 	approveRejectAPIKeyRequest = async (id, approve) => {
@@ -927,7 +927,7 @@ export default class GameChangerAPI {
 
 	sendJiraFeedback= async (body) => {
 		const url = endpoints.sendJiraFeedback;
-		return axiosPOST(this.axios, url, body)
+		return axiosPOST(this.axios, url, body);
 	}
 
 	getLTRMode = async () => {

@@ -30,7 +30,7 @@ const MLRoutes = {
 	'recommender':`${transformerBaseUrl}/recommender`,
 	'stopProcess':`${transformerBaseUrl}/stopProcess`
 	
-}
+};
 /**
  * @class MLApiClient
  */
@@ -73,34 +73,34 @@ class MLApiClient {
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown') {
-		const data = { termsList, docIdsOnly: true }
+		const data = { termsList, docIdsOnly: true };
 		return await this.postData('expandTerms', userId, data);
 	}
 
 	async getIntelAnswer(searchQuery, searchContext, userId = 'unknown') {
-		const data = { query: searchQuery, search_context: searchContext }
+		const data = { query: searchQuery, search_context: searchContext };
 		return await this.postData('questionAnswer', userId, data);
 	}
 
 	async getSentenceTransformerResults(searchText, userId = 'unknown') {
-		const data = { text: searchText }
+		const data = { text: searchText };
 		return await this.postData('transSentenceSearch', userId, data);
 	}
 	
 	async getSentenceTransformerResultsForCompare(searchText, userId = 'unknown', paragraphIdBeingMatched) {
-		const data = { text: searchText }
+		const data = { text: searchText };
 		const returnData = await this.postData('transSentenceSearch', userId, data, '?num_results=15');
 		
 		return {...returnData, paragraphIdBeingMatched};
 	}
 
 	async transformResults(searchText, docs, userId = 'unknown') {
-		const data = { query: searchText, documents: docs}
+		const data = { query: searchText, documents: docs};
 		return await this.postData('transformResults', userId, data);
 	}
 
 	async recommender(doc, userId = 'unknown') {
-		const data = { filenames: doc}
+		const data = { filenames: doc};
 		return await this.postData('recommender', userId, data);
 	}
 	/**
