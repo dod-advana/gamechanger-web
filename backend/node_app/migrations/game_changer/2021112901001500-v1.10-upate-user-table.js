@@ -13,7 +13,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -24,7 +24,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'is_beta', Sequelize.BOOLEAN),
           queryInterface.removeColumn(tablename, 'is_internal', Sequelize.BOOLEAN),
           queryInterface.removeColumn(tablename, 'is_admin', Sequelize.BOOLEAN),
-        ])
+        ]);
     });
   }
 };

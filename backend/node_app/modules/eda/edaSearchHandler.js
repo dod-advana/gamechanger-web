@@ -144,7 +144,7 @@ class EdaSearchHandler extends SearchHandler {
 	
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin') || permissions.includes('eda Admin')) {
 				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
@@ -270,11 +270,11 @@ class EdaSearchHandler extends SearchHandler {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					const data = hits[0];
-					const metadata = data._source && data._source.extracted_data_eda_n ? this.edaSearchUtility.getExtractedFields(data._source, data) : {}
+					const metadata = data._source && data._source.extracted_data_eda_n ? this.edaSearchUtility.getExtractedFields(data._source, data) : {};
 					return { ...data._source, ...data.fields, ...metadata };
 				}
 				else { 
-					return {}
+					return {};
 				}
 			} else {
 				this.logger.error('Error with contract base award Elasticsearch results', '3ZCEAYJ', userId);
@@ -315,7 +315,7 @@ class EdaSearchHandler extends SearchHandler {
 					return data;
 				}
 				else { 
-					return {}
+					return {};
 				}
 			} else {
 				this.logger.error('Error with similar docs Elasticsearch results', 'P1TFZKQ', userId);

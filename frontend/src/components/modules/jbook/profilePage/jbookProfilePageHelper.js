@@ -3,7 +3,7 @@ import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import {Checkbox, CircularProgress, FormControlLabel, Tooltip, Typography} from '@material-ui/core';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator'
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {
 	StyledTableContainer, StyledNavButton, StyledNavBar, StyledNavContainer, StyledSideNavContainer,
 	StyledLeftContainer, StyledRightContainer, StyledMainContainer
@@ -11,7 +11,7 @@ import {
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
-import { JBookContext } from '../jbookContext'
+import { JBookContext } from '../jbookContext';
 import GCPrimaryButton from '../../../common/GCButton';
 import GamechangerAPI from '../../../api/gameChanger-service-api';
 import { autoDownloadFile, b64toBlob } from '../../../export/ExportResultsDialog';
@@ -23,14 +23,14 @@ const firstColWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-}
+};
 
 const boldKeys = (data) => {
 	return data.map(pair => {
 		pair.Key = <strong>{pair.Key}</strong>;
-		return pair
+		return pair;
 	});
-}
+};
 
 const formatNum = (num) => {
 	const parsed = parseInt(num);
@@ -42,7 +42,7 @@ const formatNum = (num) => {
 		return `${(parsed / 1000000).toFixed(2)} $T`;
 	}
 	return `${parsed} $M`;
-}
+};
 
 const SideNav = (props) => {
 	const { budgetType, budgetYear, context } = props;
@@ -66,7 +66,7 @@ const SideNav = (props) => {
 			<SideNavigation context={context} />
 		</>
 	);
-}
+};
 
 const BasicData = (props) => {
 	const {
@@ -101,6 +101,14 @@ const BasicData = (props) => {
 						Hidden: budgetType === 'RDT&E'
 					},
 					{
+						Key: 'Budget Activity Number',
+						Value: projectData.budgetActivityNumber
+					},
+					{
+						Key: 'Appropriations Number',
+						Value: projectData.appropriationNumber
+					},
+					{
 						Key: 'Program Element',
 						Value: projectData.programElement,
 						Hidden: budgetType === 'Procurement'
@@ -122,46 +130,9 @@ const BasicData = (props) => {
 				hideSubheader={true}
 				firstColWidth={firstColWidth}
 			/>
-			{admin &&
-				<GCPrimaryButton
-					style={{ minWidth: 'unset', color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '45px', marginRight: '10px' }} // padding: '0px', width: '49px',
-					onClick={async () => {
-						try {
-							setExportLoading(true);
-							const { data } = await gamechangerAPI.exportProfilePage({ cloneName: 'jbook',
-								options: { 
-									programElement,
-									projectNum,
-									type: budgetType,
-									budgetYear,
-									budgetLineItem,
-									id,
-									appropriationNumber
-								} });
-							const blob = b64toBlob(data, 'application/pdf');
-							const d = new Date();
-							await autoDownloadFile({ data: blob, extension: 'pdf', filename: 'project-data-' + d.toISOString() });
-							setExportLoading(false);
-
-						} catch (e) {
-							setExportLoading(false);
-							console.log(e);
-						}
-					}}
-					disabled={exportLoading || loading}
-				>
-					{!exportLoading && !loading ?
-						'Export'
-						:
-						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
-					}
-					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
-				</GCPrimaryButton>
-			}
-
 		</StyledLeftContainer>
 	);
-}
+};
 
 const Metadata = (props) => {
 	const { budgetType, projectNum, keywordCheckboxes, setKeywordCheck } = props;
@@ -188,7 +159,7 @@ const Metadata = (props) => {
 			/>
 		</StyledRightContainer>
 	);
-}
+};
 
 const ProjectDescription = (props) => {
 	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
@@ -210,7 +181,7 @@ const ProjectDescription = (props) => {
 											{pd.title}
 										</Typography>
 										<blockquote style={{ borderLeft: 'none' }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(pd.value, { allowedAttributes: { span: ['style'] } }) }} />
-									</>)
+									</>);
 							})}
 						</Typography>
 					</div>
@@ -218,7 +189,7 @@ const ProjectDescription = (props) => {
 			}
 		</StyledMainContainer>
 	);
-}
+};
 
 const Accomplishments = (props) => {
 	const { accomplishments } = props;
@@ -247,12 +218,12 @@ const Accomplishments = (props) => {
 						}}
 						useInnerHtml={true}
 					/>
-				)
+				);
 			})
 			}
 		</StyledTableContainer>
 	);
-}
+};
 
 const aggregateProjectDescriptions = (projectData) => {
 	let tmpProjectDescriptions = [];
@@ -308,7 +279,7 @@ const aggregateProjectDescriptions = (projectData) => {
 
 
 	if (projectData.review && projectData.review.budgetType === 'rdoc') {
-		titleMapping['missionDescBudgetJustification'] = { title: 'Program Mission Description' }
+		titleMapping['missionDescBudgetJustification'] = { title: 'Program Mission Description' };
 		titleMapping['projectMissionDescription'] = { title: 'Project Mission Description' };
 		titleMapping['projectNotes'] = { title: 'Project Notes' };
 		titleMapping['projectAquisitionStrategy'] = { title: 'Project Acquisition Strategy' };
@@ -322,10 +293,10 @@ const aggregateProjectDescriptions = (projectData) => {
 		}
 	});
 
-	console.log(tmpProjectDescriptions)
+	console.log(tmpProjectDescriptions);
 
 	return tmpProjectDescriptions;
-}
+};
 
 const Contracts = (props) => {
 	const { contracts } = props;
@@ -381,8 +352,8 @@ const Contracts = (props) => {
 		<StyledTableContainer>
 			{contractTables}
 		</StyledTableContainer>
-	)
-}
+	);
+};
 
 const NavButtons = (props) => {
 	const buttonNames = ['The Basics', 'Accomplishment', 'Contracts', 'Primary Reviewer Section', 'Service / DoD Component Reviewer Section', 'POC Reviewer Section'];
@@ -401,7 +372,7 @@ const NavButtons = (props) => {
 					setCurrentNav(name);
 					const element = document.getElementById(name);
 					if (element) {
-						element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+						element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
 					}
 				}
 				}
@@ -409,10 +380,10 @@ const NavButtons = (props) => {
 				{name}
 			</StyledNavButton>
 		);
-	})
+	});
 
 	return navButtons;
-}
+};
 
 const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordCheck) => {
 	const checkboxes = [];
@@ -444,7 +415,7 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	}
 
 	return checkboxes;
-}
+};
 
 const getMetadataTableData = (projectData, budgetType, projectNum, reviewData, keywordsChecked, keywordCheckboxes, setKeywordCheck) => {
 
@@ -536,13 +507,13 @@ const getMetadataTableData = (projectData, budgetType, projectNum, reviewData, k
 	];
 
 	return metadata;
-}
+};
 
 const renderTitle = (projectData, programElement, projectNum) => {
 	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
 	const service = projectData.serviceAgency;
-	return `${projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : ''} ${programElement && programElement !== 'undefined' ? `${programElement} ` : ''} ${service && service !== 'undefined' ? `${service}` : ''} ${projectNum && projectNum !== 'undefined' ? `${projectNum} ` : ''}`
-}
+	return `${projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : ''} ${programElement && programElement !== 'undefined' ? `${programElement} ` : ''} ${service && service !== 'undefined' ? `${service}` : ''} ${projectNum && projectNum !== 'undefined' ? `${projectNum} ` : ''}`;
+};
 
 
 export {
@@ -559,4 +530,4 @@ export {
 	Metadata,
 	ProjectDescription,
 	SideNav
-}
+};

@@ -10,7 +10,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -18,7 +18,7 @@ module.exports = {
     return queryInterface.sequelize.transaction(function () {
       Promise.all([
           queryInterface.changeColumn(tablename, 'phone_number', {type: Sequelize.TEXT, unique: true})
-        ])
+        ]);
     });
   }
 };

@@ -47,7 +47,7 @@ const TabStyles = {
 	},
 	panelContainer: {
 		alignItems: 'center',
-		marginTop: 10,
+		margin: '0px 80px',
 		minHeight: 'calc(100vh - 600px)',
 		paddingBottom: 20,
 	},

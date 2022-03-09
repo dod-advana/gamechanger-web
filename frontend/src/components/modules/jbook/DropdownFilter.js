@@ -168,7 +168,7 @@ const DropdownFilter = (props) => {
 				/>
 			</StyledAllNoneContainer>
 		);
-	}
+	};
 
 	const renderOptions = () => {
 		const checkboxes = [];
@@ -194,7 +194,7 @@ const DropdownFilter = (props) => {
 							if (jbookSearchSettings.clearText === true) {
 								setJBookSetting('clearText', false, state, dispatch);
 							}
-							setJBookSetting(type, option, state, dispatch)
+							setJBookSetting(type, option, state, dispatch);
 						}}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
@@ -204,7 +204,7 @@ const DropdownFilter = (props) => {
 					label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{option}</span>}
 					labelPlacement="end"
 				/>
-			)
+			);
 		}
 
 		for (const option of filteredSecondaryOptions) {
@@ -227,7 +227,7 @@ const DropdownFilter = (props) => {
 							if (jbookSearchSettings.clearText === true) {
 								setJBookSetting('clearText', false, state, dispatch);
 							}
-							setJBookSetting(type, option, state, dispatch)
+							setJBookSetting(type, option, state, dispatch);
 						}}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
@@ -237,7 +237,7 @@ const DropdownFilter = (props) => {
 					label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{option}</span>}
 					labelPlacement="end"
 				/>
-			)
+			);
 		}
 
 		return (
@@ -253,7 +253,7 @@ const DropdownFilter = (props) => {
 
 			</StyledCheckboxContainer>
 		);
-	}
+	};
 
 	const renderFilterSearch = () => {
 		return (
@@ -263,7 +263,7 @@ const DropdownFilter = (props) => {
 				value={filteredSearch}
 				style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
 				onBlur={(event) => {
-					setFilteredSearch(event.target.value)
+					setFilteredSearch(event.target.value);
 					if (jbookSearchSettings.clearText === true) {
 						setJBookSetting('clearText', false, state, dispatch);
 					}
@@ -278,8 +278,8 @@ const DropdownFilter = (props) => {
 					}
 				}}
 			/>
-		)
-	}
+		);
+	};
 
 	return (
 		<div style={{ width: '100%' }}>
@@ -303,6 +303,6 @@ const DropdownFilter = (props) => {
 			</StyledDropdownDiv>
 		</div>
 	);
-}
+};
 
 export default DropdownFilter;

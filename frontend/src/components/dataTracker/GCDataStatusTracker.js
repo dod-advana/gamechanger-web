@@ -8,28 +8,38 @@ import { Typography } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
 import Link from '@material-ui/core/Link';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import { green, red, yellow, orange } from '@material-ui/core/colors';
+import { green, red } from '@material-ui/core/colors';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 
+const GoalIcon = styled.div`
+	height: 20px;
+	width: 150px;
+	margin: auto
+`;
+
 const TableRow = styled.div`
-	text-align: left;
-	height: fit-content;
+	height: 100%;
+	display: flex;
+	align-items: center;
 `;
 const CenterRow = styled.div`
-	text-align: center;
-	height: 20px;
+	display: flex;
+	height: 100%;
 `;
-const GoalsLabel = styled.div`
-	margin: 0px 0px 20px 80px;
+const SectionHeader = styled.div`
+	display: flex;
+	margin-bottom: 20px;
+	background-color: #F7F7F7;
+	border-radius: 12px;
+	padding: 20px;
 `;
 
 const StyledNeo4jTable = styled.div`
-	margin: -10px 80px 20px 80px;
+	margin: 0px 0px 20px 0px;
 	height: 690px;
 
 	> .details-paragraph {
@@ -60,9 +70,63 @@ const StyledNeo4jTable = styled.div`
 	}
 `;
 
+const TableStyle = styled.div`
+	> .updates-table
+		.rt-td {
+			padding: 10px 5px;
+		}
+	> .ReactTable {
+		border-right: none;
+		font-family: 'Noto Sans';
+
+		> .rt-table {
+
+			> .rt-thead{
+				border-bottom: 1px solid #0000001F;
+
+				> .rt-tr {
+					font-size: 14px;
+					text-align: center; 
+					text-transform: uppercase;
+				}
+			}
+			.rt-th,
+			.rt-td {
+				border-right: 1px solid #0000001F !important;
+			}
+			.rt-th {
+				font-weight: bold;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+				white-space: initial;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.rt-tr-group:nth-of-type(even){
+				background: #F3F3F3;
+			}
+		}
+	}
+`;
+
+const styles = {
+	legendItem: {
+		margin: '0px 5px',
+		textAlign: 'center'
+	},
+	legendText: {
+		fontSize: '14px',
+		textTransform: 'uppercase',
+		fontWeight: 'bold'
+	}
+};
+
 const gameChangerAPI = new GameChangerAPI();
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 const nextFriday = new Date();
 nextFriday.setDate(
@@ -179,7 +243,6 @@ const GCDataStatusTracker = (props) => {
 	const [dataTableData, setDataTableData] = useState([]);
 	const [crawlerMapping, setCrawlerMapping] = useState([]);
 	const [crawlerTableData, setCrawlerTableData] = useState([]);
-	const [crawlerTableUpdate, setCrawlerTableUpdate] = useState([]);
 	const [neo4jPropertiesData, setNeo4jPropertiesData] = useState([]);
 	const [neo4jCountsData, setNeo4jCountsData] = useState([]);
 	const [neo4jGraphData, setNeo4jGraphData] = useState({
@@ -192,7 +255,7 @@ const GCDataStatusTracker = (props) => {
 	const [loadingNeo4jGraphData, setLoadingNeo4jGraphData] = useState(true);
 	const [loadingNeo4jCounts, setLoadingNeo4jCounts] = useState(true);
 	const [numPages, setNumPages] = useState(0);
-	const [tabIndex, setTabIndex] = useState('documents');
+	const [tabIndex, setTabIndex] = useState('crawler');
 	
 	
 	const handleFetchData = async ({ page, sorted, filtered }) => {
@@ -234,31 +297,6 @@ const GCDataStatusTracker = (props) => {
 			setCrawlerTableData([]);
 			setNumPages(0);
 			setCrawlerMapping([]);
-			console.error(e);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const handleFetchCrawlerUpdate = async ({ page, sorted, filtered }) => {
-		try {
-			setLoading(true);
-			const { totalCount, docs = [] } = await getData({
-				offset: page * PAGE_SIZE,
-				sorted,
-				filtered,
-				tabIndex: 'crawler',
-				option: 'last',
-			});
-			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
-			const crawlerInfoPostgresTable = await gameChangerAPI.gcCrawlerSealData();
-			setCrawlerMapping(crawlerInfoPostgresTable);
-			setNumPages(pageCount);
-			setCrawlerTableUpdate(docs);
-		} catch (e) {
-			setCrawlerTableData([]);
-			setCrawlerTableUpdate([]);
-			setNumPages(0);
 			console.error(e);
 		} finally {
 			setLoading(false);
@@ -380,32 +418,6 @@ const GCDataStatusTracker = (props) => {
 		const diffTime = Math.abs(Date.now() - date);
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
-
-	const goal_difference = (days) => {
-		if (days > 30) {
-			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: red[500] }} />
-			);
-		} else if (days > 14) {
-			return (
-				<FiberManualRecordIcon
-					fontSize="large"
-					style={{ color: orange[500] }}
-				/>
-			);
-		} else if (days > 7) {
-			return (
-				<FiberManualRecordIcon
-					fontSize="large"
-					style={{ color: yellow[500] }}
-				/>
-			);
-		} else {
-			return (
-				<FiberManualRecordIcon fontSize="large" style={{ color: green[500] }} />
-			);
-		}
-	};
 	
 	const matchCrawlerName = (crawler_name) => {
 		if (crawlerMapping && crawlerMapping.data) {
@@ -420,7 +432,7 @@ const GCDataStatusTracker = (props) => {
 				}
 			}
 		}
-	}
+	};
 
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
@@ -529,37 +541,65 @@ const GCDataStatusTracker = (props) => {
 		];
 
 		return (
-			<ReactTable
-				data={dataTableData}
-				columns={dataColumns}
-				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 700 }}
-				pageSize={PAGE_SIZE}
-				showPageSizeOptions={false}
-				filterable={true}
-				loading={loading}
-				manual={true}
-				pages={numPages}
-				onFetchData={handleFetchData}
-				defaultSorted={[
-					{
-						id: 'pub_type',
-						desc: false,
-					},
-				]}
-				getTheadTrProps={() => {
-					return {
-						style: {
-							height: 'fit-content',
-							textAlign: 'left',
-							fontWeight: 'bold',
-						},
-					};
-				}}
-				getTheadThProps={() => {
-					return { style: { fontSize: 15, fontWeight: 'bold' } };
-				}}
-			/>
+			<>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Document Overview</Typography>
+						<Typography variant="body2">
+						The following table lists all documents within the GAMECHANGER corpus. Use the 
+						filtering capabilities for the TYPE, NUMBER, and TITLE columns to locate specific 
+						documents of interest.
+						</Typography>
+					</div>
+				</SectionHeader>
+				<TableStyle>
+					<ReactTable
+						data={dataTableData}
+						columns={dataColumns}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+						pageSize={PAGE_SIZE}
+						showPageSizeOptions={false}
+						filterable={true}
+						loading={loading}
+						manual={true}
+						pages={numPages}
+						onFetchData={handleFetchData}
+						defaultSorted={[
+							{
+								id: 'pub_type',
+								desc: false,
+							},
+						]}
+					/>
+				</TableStyle>
+			</>
 		);
+	};
+
+	const renderIngestprogress = (status) => {
+		let percent;
+		switch(status){
+			case 'Crawl and Download Complete':
+				percent = '33%';
+				break;
+			case 'Ingest In Progress':
+				percent = '66%';
+				break;
+			case 'Ingest Complete':
+				percent = '100%';
+				break;
+			default:
+				percent = '0%';
+		}
+
+		return (<>
+			<div style={{fontSize: '12px'}}>
+				{percent}
+			</div>
+			<div style={{maxWidth: 150, width: '80%', height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
+				<div style={{width: percent, height: 8, background: '#969696', borderRadius: '24px', position: 'absolute'}}/>
+			</div>
+		</>);
 	};
 
 	const renderCrawlerData = () => {
@@ -571,9 +611,12 @@ const GCDataStatusTracker = (props) => {
 				style: { 'whiteSpace': 'unset' },
 			},
 			{
-				Header: 'Status',
+				Header: '% Ingested',
 				accessor: 'status',
-				Cell: (row) => <TableRow>{row.value}</TableRow>,
+				Cell: (row) => 
+					<TableRow style={{display: 'flex', flexDirection: 'column', paddingBottom: '5px', justifyContent: 'center'}}>
+						{renderIngestprogress(row.value)}
+					</TableRow>,
 			},
 			{
 				Header: 'Crawl and Download Complete',
@@ -581,14 +624,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -600,14 +641,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -619,14 +658,12 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: green[500] }}
+							<GoalIcon
+								style={{ backgroundColor: green[500] }}
 							/>
 						) : (
-							<FiberManualRecordIcon
-								fontSize="large"
-								style={{ color: red[500] }}
+							<GoalIcon
+								style={{ backgroundColor: red[500] }}
 							/>
 						)}
 					</CenterRow>
@@ -644,56 +681,6 @@ const GCDataStatusTracker = (props) => {
 					);
 				},
 			},
-		];
-
-		return (
-			<ReactTable
-				data={crawlerTableData}
-				columns={crawlerColumns}
-				style={{whiteSpace: 'unset', margin: '0 80px 20px 80px', height: 1000 }}
-				pageSize={PAGE_SIZE}
-				showPageSizeOptions={false}
-				filterable={false}
-				loading={loading}
-				manual={true}
-				pages={numPages}
-				onFetchData={handleFetchCrawlerData}
-				getTheadTrProps={() => {
-					return {
-						style: {
-							height: 'fit-content',
-							textAlign: 'left',
-							fontWeight: 'bold',
-						},
-					};
-				}}
-				getTheadThProps={() => {
-					return { style: { fontSize: 15, fontWeight: 'bold' } };
-				}}
-			/>
-		);
-	};
-
-	const renderVersionTable = () => {
-		const crawlerColumns = [
-			{
-				Header: 'Source',
-				accessor: 'crawler_name',
-				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
-				style: { 'whiteSpace': 'unset' },
-			},
-			{
-				Header: 'Last Successful Ingest',
-				accessor: 'datetime',
-				width: 200,
-				Cell: (row) => {
-					return (
-						<TableRow>
-							{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-						</TableRow>
-					);
-				},
-			},
 			{
 				Header: 'Days Since Last Ingest',
 				accessor: 'datetime',
@@ -702,79 +689,56 @@ const GCDataStatusTracker = (props) => {
 					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
 				},
 			},
-			{
-				Header: 'Goal',
-				accessor: 'datetime',
-				width: 200,
-				Cell: (row) => {
-					return (
-						<TableRow>
-							{goal_difference(date_difference(Date.parse(row.value)))}
-						</TableRow>
-					);
-				},
-			},
 		];
 
 		return (
-			<div>
-				<GoalsLabel>
-					<Typography variant="body1"> Data Update Goals:</Typography>
+			<>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Progress Overview</Typography>
+						<Typography variant="body2">
+							The following table and chart provide a real-time status update of each data 
+							source within the GAMECHANGER corpus. Data pipelines update automatically, 
+							typically every 7 days. Any issues or delays will be indicated directly in 
+							the table.
+						</Typography>
+					</div>
 					<div
 						style={{
 							display: 'flex',
 							alignItems: 'center',
-							flexWrap: 'wrap',
+							marginLeft: '10px'
 						}}
-					>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: green[500], margin: '0px 0px 0px 5px' }}
-						/>
-						<span>{'<'} 7 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: yellow[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'<'} 14 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: orange[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'<'} 30 Days </span>
-						<FiberManualRecordIcon
-							fontSize="large"
-							style={{ color: red[500], margin: '0px 0px 0px 15px' }}
-						/>
-						<span>{'>'} 30 Days </span>
+					>	
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>Complete </span>
+							<GoalIcon
+								style={{ backgroundColor: green[500], width: 100 }}
+							/>
+						</div>
+						<div style={styles.legendItem}>
+							<span style={styles.legendText}>Incomplete </span>
+							<GoalIcon
+								style={{ backgroundColor: red[500], width: 100 }}
+							/>
+						</div>
 					</div>
-				</GoalsLabel>
-				<ReactTable
-					data={crawlerTableUpdate}
-					columns={crawlerColumns}
-					style={{ margin: '0 80px 20px 80px', height: 1000 }}
-					pageSize={20}
-					showPageSizeOptions={false}
-					filterable={false}
-					loading={loading}
-					manual={true}
-					pages={numPages}
-					onFetchData={handleFetchCrawlerUpdate}
-					getTheadTrProps={() => {
-						return {
-							style: {
-								whiteSpace: 'unset',
-								height: 'fit-content',
-								textAlign: 'left',
-								fontWeight: 'bold',
-							},
-						};
-					}}
-					getTheadThProps={() => {
-						return { style: { fontSize: 15, fontWeight: 'bold' } };
-					}}
-				/>
-			</div>
+				</SectionHeader>
+				<TableStyle>
+					<ReactTable
+						data={crawlerTableData}
+						columns={crawlerColumns}
+						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+						pageSize={PAGE_SIZE}
+						showPageSizeOptions={false}
+						filterable={false}
+						loading={loading}
+						manual={true}
+						pages={numPages}
+						onFetchData={handleFetchCrawlerData}
+					/>
+				</TableStyle>
+			</>
 		);
 	};
 
@@ -784,45 +748,35 @@ const GCDataStatusTracker = (props) => {
 
 		return (
 			<StyledNeo4jTable>
-				<div className={'details-paragraph'}>
-					<Typography variant="body2">
-						The following tables and chart describe the schema in the Knowledge
-						Graph. The table on the left lists the Nodes and Relationships by
-						"Label" along with the property names and the types of those
-						properties.
-					</Typography>
-					<Typography variant="body2">
-						The table in the bottom right lists the different Nodes and
-						Relationships and the counts. The chart graphically describes the
-						schema of the Knowledge Graph.
-					</Typography>
-				</div>
+				<SectionHeader>
+					<div>
+						<Typography variant="h3" style={{fontSize: '18px'}}>Knowledge Overview</Typography>
+						<Typography variant="body2">
+							The following tables and chart describe the schema in the Knowledge
+							Graph. The table on the left lists the Nodes and Relationships by
+							"Label" along with the property names and the types of those
+							properties. The table in the bottom right lists the different Nodes and
+							Relationships and the counts. The chart graphically describes the
+							schema of the Knowledge Graph.
+						</Typography>
+					</div>
+				</SectionHeader>
 				<div className={'columns'}>
 					<div className={'left-column'}>
 						<div className={'properties-schema'}>
-							<ReactTable
-								data={neo4jPropertiesData}
-								style={{ height: 670 }}
-								columns={neo4jPropertiesColumns}
-								showPageSizeOptions={false}
-								showPagination={false}
-								filterable={false}
-								loading={loadingNeo4jPropertiesData}
-								manual={true}
-								pages={numPages}
-								getTheadTrProps={() => {
-									return {
-										style: {
-											height: 'fit-content',
-											textAlign: 'left',
-											fontWeight: 'bold',
-										},
-									};
-								}}
-								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
-								}}
-							/>
+							<TableStyle>
+								<ReactTable
+									data={neo4jPropertiesData}
+									style={{ height: 670 }}
+									columns={neo4jPropertiesColumns}
+									showPageSizeOptions={false}
+									showPagination={false}
+									filterable={false}
+									loading={loadingNeo4jPropertiesData}
+									manual={true}
+									pages={numPages}
+								/>
+							</TableStyle>
 						</div>
 					</div>
 					<div className={'right-column'}>
@@ -842,29 +796,19 @@ const GCDataStatusTracker = (props) => {
 							/>
 						</div>
 						<div className={'node-rel-counts'}>
-							<ReactTable
-								data={neo4jCountsData}
-								style={{ height: 251 }}
-								columns={neo4jCountsColumns}
-								showPageSizeOptions={false}
-								showPagination={false}
-								filterable={false}
-								loading={loadingNeo4jCounts}
-								manual={true}
-								minRows={0}
-								getTheadTrProps={() => {
-									return {
-										style: {
-											height: 'fit-content',
-											textAlign: 'left',
-											fontWeight: 'bold',
-										},
-									};
-								}}
-								getTheadThProps={() => {
-									return { style: { fontSize: 15, fontWeight: 'bold' } };
-								}}
-							/>
+							<TableStyle>
+								<ReactTable
+									data={neo4jCountsData}
+									style={{ height: 251 }}
+									columns={neo4jCountsColumns}
+									showPageSizeOptions={false}
+									showPagination={false}
+									filterable={false}
+									loading={loadingNeo4jCounts}
+									manual={true}
+									minRows={0}
+								/>
+							</TableStyle>
 						</div>
 					</div>
 				</div>
@@ -880,21 +824,8 @@ const GCDataStatusTracker = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: `5px 0 0 0`,
-							}}
-							title="userHistory"
-							onClick={() => handleTabClicked('documents')}
-						>
-							<Typography variant="h6" display="inline" title="cardView">
-								DOCUMENTS
-							</Typography>
-						</Tab>
-						<Tab
-							style={{
-								...TabStyles.tabStyle,
 								...(tabIndex === 'crawler' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: '0 0 0 0',
+								borderRadius: `5px 0 0 0`,
 							}}
 							title="crawlerTable"
 							onClick={() => handleTabClicked('crawler')}
@@ -906,14 +837,14 @@ const GCDataStatusTracker = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'version' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: `0 0 0 0`,
+								...(tabIndex === 'documents' ? TabStyles.tabSelectedStyle : {}),
+								borderRadius: '0 0 0 0',
 							}}
-							title="versionDocs"
-							onClick={() => handleTabClicked('version')}
+							title="userHistory"
+							onClick={() => handleTabClicked('documents')}
 						>
 							<Typography variant="h6" display="inline" title="cardView">
-								UPDATES
+								DOCUMENTS
 							</Typography>
 						</Tab>
 						<Tab
@@ -935,10 +866,9 @@ const GCDataStatusTracker = (props) => {
 				</div>
 
 				<div style={TabStyles.panelContainer}>
-					<TabPanel>{renderDataTable()}</TabPanel>
 					<TabPanel>{renderCrawlerData()}</TabPanel>
-					<TabPanel>{renderVersionTable()}</TabPanel>
-					<TabPanel>{renderNeo4jTable()}</TabPanel>
+					<TabPanel>{renderDataTable()}</TabPanel>
+					<TabPanel style={{marginBottom: 100}}>{renderNeo4jTable()}</TabPanel>
 				</div>
 			</Tabs>
 		</div>

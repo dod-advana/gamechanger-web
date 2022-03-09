@@ -65,13 +65,13 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 
 	useEffect(()=>{
 		setEditUserData(userData);
-	},[userData])
+	},[userData]);
 
 	const closeUserModal = () => {
 		setTabIndex(0);
 		setEditUserData({});
 		setShowCreateEditUserModal(false);
-	}
+	};
 	/**
      * 
      * @param {*} UserToEdit
@@ -89,10 +89,10 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 				getUserData();
 			}
 		});
-	}
+	};
 
 	const handleCheck = (event) => {
-		setEditUserData({ ...editUserData, [event.target.name]: event.target.checked })
+		setEditUserData({ ...editUserData, [event.target.name]: event.target.checked });
 	};
 
 	const handlePermissionsCheck = (event) => {
@@ -106,7 +106,7 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 			} else {
 				tmpData['extra_fields'][clone] = {
 					[permissions]: event.target.checked
-				}
+				};
 			}
 		}
 
@@ -177,8 +177,8 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 					}
 				</Grid>
 			</Grid>
-		)
-	}
+		);
+	};
 
 	const renderPermissions = () => {
 		return (
@@ -296,7 +296,7 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 											>
 												{tab.children}
 											</Tab>
-										)
+										);
 									})}
 								</TabList>
 							</div>
@@ -333,7 +333,7 @@ const EditUserModal =  React.memo(({showCreateEditUserModal, setShowCreateEditUs
 			</DialogActions>
 			
 		</Dialog>
-	)
+	);
 });
 
 export default EditUserModal;

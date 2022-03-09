@@ -20,7 +20,7 @@ const PAGES = {
 
 const renderGeneralAdminButtons = () => {
 	return (<></>);
-}
+};
 
 const userListTableAdditions = [
 	{

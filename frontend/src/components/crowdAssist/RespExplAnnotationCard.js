@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState} from 'react';
 import {FormControlLabel, Radio, RadioGroup, Typography} from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
 import GCAccordion from '../common/GCAccordion';
@@ -30,12 +30,12 @@ const StyledRadio = (props) => {
 		}}>
 			<Radio {...props} />
 		</div>
-	)
-}
+	);
+};
 
 export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTokens, componentStepNumbers, colorMap, moreTextClick, aboveDisabled, belowDisabled}) => {
-	const [tag, setTag] = useState(tags[0])
-	const [tagColorMap] = useState(colorMap)
+	const [tag, setTag] = useState(tags[0]);
+	const [tagColorMap] = useState(colorMap);
 
 
 	const options = tags.map((tagText) => (
@@ -56,7 +56,7 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 				margin: '0 25px 0 0'
 			 }}
 		/>
-	))
+	));
 
 	return (
 		<div className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`} >
@@ -117,13 +117,13 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 					}}
 					tokens={text.trim().split(' ')}
 					value={currentTokens || []}
-					onChange={updatedTokens => { setCurrentTokens(updatedTokens); }}
+					onChange={updatedTokens => { setCurrentTokens(updatedTokens) }}
 					getSpan={span => {
 						return {
 							...span,
 							tag: tag,
 							color: tagColorMap[tag] || 'red',
-						}
+						};
 					}}
 					renderMark={CustomMark}
 				/>				
@@ -139,5 +139,5 @@ export const RespExplAnnotationCard = ({ text, tags, currentTokens, setCurrentTo
 				More Context Below
 			</GCButton>
 		</div>
-	)
-}
+	);
+};

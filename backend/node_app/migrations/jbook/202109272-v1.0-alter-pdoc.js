@@ -307,7 +307,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'P5-85_TOA_BY1Base', Sequelize.DOUBLE),
 				queryInterface.addColumn(tablename, 'P5-86_TOA_BY1OCO', Sequelize.DOUBLE),
 				queryInterface.addColumn(tablename, 'P5-87_TOA_BY1', Sequelize.DOUBLE)
-			])
+			]);
 		});
 	}
 };

@@ -95,7 +95,7 @@ class JBookDataHandler extends DataHandler {
 	// budget line item : pdoc and project num : rdoc
 	async getProjectData(req, userId) {
 
-		const { useElasticSearch = false } = req.body
+		const { useElasticSearch = false } = req.body;
 
 		if (useElasticSearch) {
 			return this.getESProjectData(req, userId);
@@ -165,7 +165,7 @@ class JBookDataHandler extends DataHandler {
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
-			const { programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber } = req.body;
+			const { type, id } = req.body;
 			let docType = type;
 			let data;
 			let totalBudget = 0;
@@ -194,7 +194,7 @@ class JBookDataHandler extends DataHandler {
 					});
 					break;
 				default:
-					break
+					break;
 			}
 			docType = types[docType];
 
@@ -241,19 +241,24 @@ class JBookDataHandler extends DataHandler {
 					if (docType === 'pdoc') {
 						contracts = await this.gl_contracts.findAll({
 							where: {
-								bli: budgetLineItem,
+								bli: data.budgetLineItem,
+								ba_number: data.budgetActivityNumber,
+								appn_num: data.appropriationNumber,
+								service_agency: data.serviceAgency,
 								budget_type: 'pdoc'
 							}
 						});
 					}
 					else if (docType === 'rdoc') {
 						let query = {
-							bli: programElement,
+							bli: data.programElement,
+							ba_number: data.budgetActivityNumber,
+							appn_num: data.appropriationNumber,
+							service_agency: data.serviceAgency,
 							budget_type: 'rdoc',
 							// projnumber: projectNum
-						}
-
-
+						};
+						
 						contracts = await this.gl_contracts.findAll({
 							where: query
 						});
@@ -287,8 +292,10 @@ class JBookDataHandler extends DataHandler {
 						obligations = await this.obligations.findAll({
 							where: {
 								doc_type: 'pdoc',
-								bli: budgetLineItem,
-								begfy: budgetYear,
+								bli: data.budgetLineItem,
+								ba_num: data.budgetActivityNumber,
+								appn_num: data.appropriationNumber,
+								begfy: data.budgetYear,
 							},
 							order: [
 								['yearmonth', 'DESC']
@@ -300,8 +307,10 @@ class JBookDataHandler extends DataHandler {
 						obligations = await this.obligations.findAll({
 							where: {
 								doc_type: 'rdoc',
-								bli: programElement,
-								begfy: budgetYear,
+								bli: data.programElement,
+								ba_num: data.budgetActivityNumber.length < 2 ? data.budgetActivityNumber.padStart(2, '0') : data.budgetActivityNumber,
+								appn_num: data.appropriationNumber,
+								begfy: data.budgetYear,
 							},
 							order: [
 								['yearmonth', 'DESC']
@@ -325,9 +334,9 @@ class JBookDataHandler extends DataHandler {
 				try {
 					accomplishments = await this.accomp.findAll({
 						where: {
-							PE_Num: programElement,
-							Proj_Number: projectNum,
-							BudgetYear: budgetYear
+							PE_Num: data.programElement || '',
+							Proj_Number: data.projectNum || '',
+							BudgetYear: data.budgetYear
 						}
 					});
 					if (accomplishments && accomplishments.length && accomplishments.length > 0) {
@@ -356,7 +365,7 @@ class JBookDataHandler extends DataHandler {
 							keywordAssocWhere = 'om_id';
 							break;
 						default:
-							break
+							break;
 					}
 
 					const query = `SELECT ARRAY_AGG(distinct keyword_id) as keyword_ids FROM keyword_assoc WHERE ${keywordAssocWhere} = :keywordAssocId;`;
@@ -379,23 +388,25 @@ class JBookDataHandler extends DataHandler {
 				try {
 					const query = {
 						budget_type: types[type],
-						budget_year: budgetYear
-					}
+						budget_year: data.budgetYear,
+						appn_num: data.appropriationNumber,
+						budget_activity: data.budgetActivityNumber,
+						agency: data.serviceAgency
+					};
 
 					// in review table, budget_line_item is also projectNum
 
 					switch (type) {
 						case 'Procurement':
-							query.budget_line_item = budgetLineItem;
+							query.budget_line_item = data.budgetLineItem;
 							break;
 						case 'RDT&E':
-							query.program_element = programElement;
-							query.budget_line_item = projectNum;
+							query.program_element = data.programElement;
+							query.budget_line_item = data.projectNum;
 							break;
 						case 'O&M':
-							query.budget_line_item = budgetLineItem;
-							query.program_element = programElement;
-							query.budget_activity = appropriationNumber;
+							query.budget_line_item = data.budgetLineItem;
+							query.program_element = data.programElement;
 							break;
 						default:
 							break;
@@ -482,7 +493,7 @@ class JBookDataHandler extends DataHandler {
 					if (type === 'RDT&E') {
 						vendorData = await this.vendors.findAll({
 							attributes: [Sequelize.fn('DISTINCT', Sequelize.col('vendor_name')), 'vendor_name'],
-							where: { pe_num: programElement },
+							where: { pe_num: data.programElement },
 							raw: true
 						});
 					}
@@ -667,15 +678,15 @@ class JBookDataHandler extends DataHandler {
 					if (pocReviewStatus === 'Finished Review') {
 						status = 'Finished Review';
 					} else {
-						status = 'Partial Review (POC)'
+						status = 'Partial Review (POC)';
 					}
 				} else {
-					status = 'Partial Review (Service)'
+					status = 'Partial Review (Service)';
 				}
 			} else if (primaryReviewStatus === 'Partial Review') {
 				status = 'Partial Review (Primary)';
 			} else {
-				status = 'Needs Review'
+				status = 'Needs Review';
 			}
 			frontendReviewData['reviewStatus'] = status;
 
@@ -684,7 +695,7 @@ class JBookDataHandler extends DataHandler {
 			const query = {
 				budget_type: types[reviewData.budget_type],
 				budget_year: reviewData.budget_year
-			}
+			};
 
 			if (reviewData.budget_type === 'RDT&E') {
 				query.program_element = reviewData.program_element;
@@ -730,7 +741,7 @@ class JBookDataHandler extends DataHandler {
 					});
 
 					if (secondaryReviewer) {
-						const serviceInfo = await this.sendServiceEmail(userId, reviewData.service_secondary_reviewer, secondaryReviewer.email, secondaryReviewer.organization, secondaryReviewer.phone_number)
+						const serviceInfo = await this.sendServiceEmail(userId, reviewData.service_secondary_reviewer, secondaryReviewer.email, secondaryReviewer.organization, secondaryReviewer.phone_number);
 					}
 				}
 			}
@@ -745,12 +756,12 @@ class JBookDataHandler extends DataHandler {
 					...reviewData,
 					budget_type: types[reviewData.budget_type]
 				},
-					{
-						where: query
-					}).catch(err => {
-						console.log('Error updating review row')
-						console.log(err);
-					});
+				{
+					where: query
+				}).catch(err => {
+					console.log('Error updating review row');
+					console.log(err);
+				});
 
 				return { created: result && result.length && result[0] === 1 };
 			}
@@ -769,13 +780,13 @@ class JBookDataHandler extends DataHandler {
 
 			const query = {
 				budget_type: types[budgetType]
-			}
+			};
 
 			if (budgetType === 'RDT&E') {
 				query.program_element = programElement;
 				query.budget_line_item = projectNum;
 			} else if (budgetType === 'Procurement') {
-				query.budget_line_item = budgetLineItem
+				query.budget_line_item = budgetLineItem;
 			} else { // O&M
 				query.program_element = programElement;
 				query.budget_line_item = budgetLineItem;
@@ -788,17 +799,17 @@ class JBookDataHandler extends DataHandler {
 				update = {
 					'primary_review_status': 'Partial Review',
 					'review_status': 'Partial Review (Primary)'
-				}
+				};
 			} else if (reviewType === 'service') {
 				update = {
 					'service_review_status': 'Partial Review',
 					'review_status': 'Partial Review (Service)'
-				}
+				};
 			} else {
 				update = {
 					'poc_review_status': 'Partial Review',
 					'review_status': 'Partial Review (POC)'
-				}
+				};
 			}
 
 			const review = await this.rev.update(update, {
@@ -809,7 +820,7 @@ class JBookDataHandler extends DataHandler {
 
 		} catch (err) {
 			this.logger.error(err, 'S2CZ29P', userId);
-			return {}
+			return {};
 		}
 	}
 
@@ -980,7 +991,7 @@ class JBookDataHandler extends DataHandler {
 			// }
 
 			if (giantQuery.length === 0) {
-				return { contractTotals: { 'Total Obligated Amt.': 0 } }
+				return { contractTotals: { 'Total Obligated Amt.': 0 } };
 			}
 
 			const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
@@ -999,13 +1010,13 @@ class JBookDataHandler extends DataHandler {
 					totals[count.serviceAgency] = 0;
 				}
 				totals[count.serviceAgency] += count.sum;
-			})
+			});
 
 			totals['Total Obligated Amt.'] = 0;
 			Object.keys(totals).forEach(key => {
 				totals['Total Obligated Amt.'] += totals[key];
-			})
-			return { contractTotals: totals }
+			});
+			return { contractTotals: totals };
 		} catch (e){
 			const { message } = e;
 			this.logger.error(message, '6QJASKB', userId);
@@ -1085,7 +1096,7 @@ class JBookDataHandler extends DataHandler {
 			Sincerely,<br/>
 			The JBOOK Search Team
 			</p>
-			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`
+			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`;
 			const attachment = [
 				{
 					filename: 'jbook-newsletter-header.png',
@@ -1097,8 +1108,8 @@ class JBookDataHandler extends DataHandler {
 					path: __dirname + '/../../images/email/JBOOK Search Newsletter.png',
 					cid: 'jbook-newsletter-footer'
 				}
-			]
-			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search POC Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId)
+			];
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search POC Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId);
 		} catch (err) {
 			this.logger.error(err, 'DNZEUJD', userId);
 		}
@@ -1139,7 +1150,7 @@ class JBookDataHandler extends DataHandler {
 			Sincerely,<br/>
 			The JBOOK Search Team
 			</p>
-			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`
+			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`;
 			const attachment = [
 				{
 					filename: 'jbook-newsletter-header.png',
@@ -1151,8 +1162,8 @@ class JBookDataHandler extends DataHandler {
 					path: __dirname + '/../../images/email/JBOOK Search Newsletter.png',
 					cid: 'jbook-newsletter-footer'
 				}
-			]
-			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search Service Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId)
+			];
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Search Service Reviewer: Application Access', email, this.constants.ADVANA_EMAIL_CC, attachment, userId);
 		} catch (err) {
 			this.logger.error(err, 'B4E39XB', userId);
 		}

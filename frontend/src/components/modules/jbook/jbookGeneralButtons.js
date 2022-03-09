@@ -32,11 +32,11 @@ const JBOOKGeneralAdminButtons = () => {
 		setAlertType(type);
 		setAlertMessage(message);
 		setAlertActive(true);
-	}
+	};
 
 	const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 		//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
-		console.log('autodownload file')
+		console.log('autodownload file');
 
 		const a = document.createElement('a');
 		a.style = 'display: none';
@@ -50,8 +50,8 @@ const JBOOKGeneralAdminButtons = () => {
 		a.click();
 		//release the reference to the file by revoking the Object URL
 		window.URL.revokeObjectURL(url);
-		document.body.removeChild(a)
-	}
+		document.body.removeChild(a);
+	};
 
 	const sendReviewStatusUpdates = async () => {
 		setShowEditReviewStatusEmailModal(false);
@@ -59,13 +59,13 @@ const JBOOKGeneralAdminButtons = () => {
 		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.sendReviewStatusUpdates({emails: reviewStatusEmails}).then(res => {
-				createAlert('Sending Review Status', 'success', 'Review Status Sent')
-			})
+				createAlert('Sending Review Status', 'success', 'Review Status Sent');
+			});
 		} catch (e){
 			console.log(e);
-			createAlert('Sending Review Status', 'error', 'Review Status Failed')
+			createAlert('Sending Review Status', 'error', 'Review Status Failed');
 		}
-	}
+	};
 	
 	return (
 		<>
@@ -85,7 +85,7 @@ const JBOOKGeneralAdminButtons = () => {
 									await autoDownloadFile({data: blob, extension: 'csv', filename: 'review-data-' + d.toISOString()});
 									createAlert('Download Complete', 'success', '');
 								} catch(e) {
-									createAlert('Download Failed', 'error', '')
+									createAlert('Download Failed', 'error', '');
 									console.log(e);
 								}
 							}} style={{ textDecoration: 'none' }}>
@@ -116,7 +116,7 @@ const JBOOKGeneralAdminButtons = () => {
 									fileDownload(data.data, `review-status-${d.toISOString()}.xls`);
 									createAlert('Download Complete', 'success', '');
 								} catch(e) {
-									createAlert('Download Failed', 'error', '')
+									createAlert('Download Failed', 'error', '');
 									console.log(e);
 								}
 							}} style={{ textDecoration: 'none' }}>
@@ -148,7 +148,7 @@ const JBOOKGeneralAdminButtons = () => {
 				sendEmail={sendReviewStatusUpdates}
 			/>
 		</>
-	)
-}
+	);
+};
 
 export default JBOOKGeneralAdminButtons;

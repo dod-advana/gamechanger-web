@@ -95,4 +95,4 @@ module.exports = {
 	RedisKeyLockedError,
 	RedisLock, // exposed for tests
 	RedisLockManager,
-}
+};

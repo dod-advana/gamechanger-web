@@ -29,14 +29,14 @@ const firstColWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-}
+};
 
 const boldKeys = (data) => {
 	return data.map(pair => {
 		pair.Key = <strong>{pair.Key}</strong>;
-		return pair
+		return pair;
 	});
-}
+};
 
 const JBookJAICReviewForm = React.memo((props) => {
 
@@ -112,7 +112,7 @@ const JBookJAICReviewForm = React.memo((props) => {
 			}
 		];
 		return primaryReviewData;
-	}
+	};
 
 
 	return (

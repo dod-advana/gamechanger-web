@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { RespExplAnnotationCard } from './RespExplAnnotationCard'
+import { RespExplAnnotationCard } from './RespExplAnnotationCard';
 import styled from 'styled-components';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCButton from '../common/GCButton';
@@ -70,7 +70,7 @@ const initState = {
 	filename: '',
 	pageNumber: 0,
 	searchText: '',
-}
+};
 
 class ResponsibilityAssist extends Component {
 	state = {...initState};
@@ -87,7 +87,7 @@ class ResponsibilityAssist extends Component {
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		if (this.props.context.state.showResponsibilityAssistModal !== prevProps.context.state.showResponsibilityAssistModal) {
-			if ( this.props.context.state.showResponsibilityAssistModal) { this.getAnnotationData(); }
+			if ( this.props.context.state.showResponsibilityAssistModal) { this.getAnnotationData() }
 			this.setState({
 				isModalOpen: this.props.context.state.showResponsibilityAssistModal,
 				voluntary: this.props.context.state.assistVoluntary,
@@ -231,7 +231,7 @@ class ResponsibilityAssist extends Component {
 					token.end += addedWordAmount;
 					token.start += addedWordAmount;
 					return token;
-				})
+				});
 				this.setCurrentTokens(newTokens);
 			}
 		});
@@ -301,18 +301,18 @@ class ResponsibilityAssist extends Component {
 			if( annotation['tag'] === 'Entity'){
 				annotation['tokens'].forEach(t => {
 					annotatedEntity = annotatedEntity.concat(t, ' ');
-				})
+				});
 				
 			}else if( annotation['tag'] === 'Responsibility'){
 				annotation['tokens'].forEach(t => {
 					annotatedResponsibilityText = annotatedResponsibilityText.concat(t, ' ');
-				})
+				});
 			}
 		});
 		const updatedProps = {
 			organizationPersonnel: annotatedEntity,
 			responsibilityText: annotatedResponsibilityText,
-		}
+		};
 		gameChangerAPI.updateResponsibility({id: id, updatedProps}).then(() => {
 			setState(this.props.context.dispatch, {reloadResponsibilityTable: true});
 			this.handleClose(true);
@@ -355,11 +355,11 @@ class ResponsibilityAssist extends Component {
 			colorMap,
 			atStart,
 			atEnd
-		} = this.state
+		} = this.state;
 
 		let displayText = '\n\n';
 		textsList.slice(startPar, endPar + 1).forEach(p => {
-			displayText = displayText.concat(p, '\n\n')
+			displayText = displayText.concat(p, '\n\n');
 		});
 
 		return (
@@ -378,14 +378,14 @@ class ResponsibilityAssist extends Component {
 					
 				/>
 			</>
-		)
+		);
 	}
 
 	render() {
 		const {
 			loading,
 			componentStepNumbers,
-		} = this.state
+		} = this.state;
 
 		const classes = this.props.classes;
 
@@ -457,8 +457,8 @@ class ResponsibilityAssist extends Component {
 					</div>
 				</DialogActions>
 			</Dialog>
-		)
+		);
 	}
 }
 
-export default withStyles(useStyles)(ResponsibilityAssist)
+export default withStyles(useStyles)(ResponsibilityAssist);

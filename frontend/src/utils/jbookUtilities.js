@@ -1,4 +1,5 @@
 import {orgColorMap, typeColorMap} from './gamechangerUtils';
+import _ from 'lodash';
 
 export const getClassLabel = (reviewData) => {
 	if (reviewData) {
@@ -14,7 +15,7 @@ export const getClassLabel = (reviewData) => {
 	}
 
 	return 'Unknown';
-}
+};
 
 export const getTotalCost = (reviewData) => {
 	let returnValue = 0;
@@ -29,11 +30,11 @@ export const getTotalCost = (reviewData) => {
 		returnValue += reviewData.currentYearAmount;
 	}
 	return returnValue;
-}
+};
 
 export const getSearchTerms = (searchText) => {
 	return getQueryAndSearchTerms(searchText);
-}
+};
 
 const getQueryAndSearchTerms = (searchText) => {
 	// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
@@ -65,24 +66,24 @@ const getQueryAndSearchTerms = (searchText) => {
 
 	// return solr query and list of search terms after parsing
 	return termsArray;
-}
+};
 
 const findQuoted = (searchText) => {
 	// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 	return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>'|").*?\k<quote>)/g) || [];
-}
+};
 
 const findLowerCaseWordsOrAcronyms = (searchText) => {
 	// finds lower case words, acronyms with . and with digits eg c2 or a.i.
 	return searchText.match(/\b([a-z\d.])+(\b|)/g) || [];
-}
+};
 
 const convertPhraseToSequence = (phrase) => {
 	// force double quotes then
 	// let json parser escape nested quotes
 	// and then read back
 	return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
-}
+};
 
 export const getDocTypeStyles = (docType) => {
 	if (!docType) {
@@ -131,7 +132,7 @@ export const getConvertedName = (orgName) => {
 			break;
 	}
 
-	return orgName
+	return orgName;
 };
 
 export const getConvertedType = (budgetType) => {
@@ -150,7 +151,27 @@ export const getConvertedType = (budgetType) => {
 			break;
 	}
 
-	return budgetType
+	return budgetType;
+};
+
+export const processSearchSettings = (state, dispatch) => {
+	const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+	for (const optionType in state.defaultOptions) {
+		// if (optionType === 'reviewStatus') continue;
+
+		if (state.defaultOptions[optionType] && searchSettings[optionType] && state.defaultOptions[optionType].length === searchSettings[optionType].length) {
+			delete searchSettings[optionType];
+		}
+	}
+
+	for (const setting in searchSettings) {
+		if (!searchSettings[setting]) {
+			delete searchSettings[setting];
+		}
+	}
+
+	return searchSettings;
 };
 
 

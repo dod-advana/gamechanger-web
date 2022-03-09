@@ -103,3 +103,11 @@
 #gc-user-dash .row > * { 
     width: auto; 
 }
+
+.analyst-tools-filters [class*="MuiAccordionSummary-root"] {
+    height: auto !important;
+}
+
+.analyst-tools-filters [class*="MuiAccordion-root"] [class*="MuiAccordionSummary-content"] {
+    margin: 0 !important;
+}

@@ -79,13 +79,13 @@ const JBookPOCReviewForm = React.memo((props) => {
 				Key: <DataTypeKey />,
 				Value: <DataTypeValue setReviewData={setReviewData} />
 			}
-		]
+		];
 
 		let showSlider = true;
 
 		if (reviewData.pocClassLabel && reviewData.pocClassLabel === 'Not AI') showSlider = false;
-		else if (!reviewData.pocClassLabel && reviewData.serviceClassLabel && reviewData.serviceClassLabel === 'Not AI') showSlider = false
-		else if (!reviewData.pocClassLabel && !reviewData.serviceClassLabel && reviewData.primaryClassLabel === 'Not AI') showSlider = false
+		else if (!reviewData.pocClassLabel && reviewData.serviceClassLabel && reviewData.serviceClassLabel === 'Not AI') showSlider = false;
+		else if (!reviewData.pocClassLabel && !reviewData.serviceClassLabel && reviewData.primaryClassLabel === 'Not AI') showSlider = false;
 
 		if (showSlider) {
 			pocReviewerData.push({
@@ -102,7 +102,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 		);
 
 		return pocReviewerData;
-	}
+	};
 
 	return (
 		<StyledTableContainer>
