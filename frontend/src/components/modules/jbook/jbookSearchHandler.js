@@ -16,7 +16,6 @@ import {
 	setState,
 } from '../../../utils/sharedFunctions';
 import GamechangerAPI from '../../api/gameChanger-service-api';
-import { scrollListViewTop } from './jbookMainViewHelper';
 
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
@@ -27,7 +26,7 @@ const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	// }).catch(_ => {
 	// 	//do nothing
 	// })
-}
+};
 
 const JBookSearchHandler = {
 
@@ -67,7 +66,7 @@ const JBookSearchHandler = {
 				return resp.data;
 			}
 			else {
-				return null
+				return null;
 			}
 
 		} catch (e) {
@@ -305,7 +304,7 @@ const JBookSearchHandler = {
 			else {
 				setState(dispatch, {
 					edaLoading: false,
-				})
+				});
 			}
 		} catch (e) {
 			console.log('Error running EDA search in JBOOK');
@@ -367,7 +366,7 @@ const JBookSearchHandler = {
 
 		const paramIndex = hash.indexOf('?');
 
-		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${searchText && searchText !== '' ? '?' : ''}${params}`
+		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${searchText && searchText !== '' ? '?' : ''}${params}`;
 
 		window.history.pushState(null, document.title, linkString);
 	},
@@ -431,6 +430,6 @@ const JBookSearchHandler = {
 
 		return searchSettings;
 	}
-}
+};
 
 export default JBookSearchHandler;

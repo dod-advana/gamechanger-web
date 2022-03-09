@@ -1,6 +1,8 @@
 import React, { useReducer } from 'react';
 
 const initState = {
+	runSearch: false,
+	runningSearch: false,
 	useElasticSearch: false,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
@@ -308,18 +310,18 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
-}
+};
 
 const init = (initialState) => {
 	return initialState;
-}
+};
 
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
 		...action.payload
-	}
-}
+	};
+};
 
 
 function reducer(state, action) {

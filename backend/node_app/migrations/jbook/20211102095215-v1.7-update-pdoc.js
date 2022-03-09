@@ -21,7 +21,7 @@ module.exports = {
 			
 		    return queryInterface.sequelize.transaction(function () {
 			    Promise.all(queries);
-		    })
+		    });
 		});
 	},
 
@@ -41,7 +41,7 @@ module.exports = {
 			    queryInterface.removeColumn(tablename, 'P3a-22_Kit_Name', Sequelize.TEXT),
 			    queryInterface.removeColumn(tablename, 'P3a-23_KitQty_APY', Sequelize.TEXT),
 			    queryInterface.removeColumn(tablename, 'P3a-24_KitQty_PY', Sequelize.TEXT),
-      ])
-    })
+      ]);
+    });
   }
 };

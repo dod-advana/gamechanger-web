@@ -10,7 +10,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'P40-15_Justification', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'P40-14_Description_Search', Sequelize.TSVECTOR),
 				queryInterface.addColumn(tablename, 'P40-15_Justification_Search', Sequelize.TSVECTOR),
-			])
+			]);
 		});
 	},
 	

@@ -68,8 +68,8 @@ const JBookAboutUs = (props) => {
 	const categoryOrder = useMemo(() => {
 		return [
 			'General',
-		]
-	},[])
+		];
+	},[]);
 
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;

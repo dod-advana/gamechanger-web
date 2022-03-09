@@ -40,7 +40,7 @@ class ExportHandler {
 			const body = options;
 			return await this.exportReviewHelper({body, permissions}, res, userId);
 		} catch (e) {
-			this.logger.error(e.message, 'UB0D05C')
+			this.logger.error(e.message, 'UB0D05C');
 		}
 	}
 
@@ -66,7 +66,7 @@ class ExportHandler {
 			const body = options;
 			return await this.exportChecklistHelper({body, permissions}, res, userId);
 		} catch (e) {
-			this.logger.error(e.message, 'UB0D053')
+			this.logger.error(e.message, 'UB0D053');
 		}
 	}
 

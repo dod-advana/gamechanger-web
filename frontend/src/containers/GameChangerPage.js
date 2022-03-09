@@ -60,7 +60,7 @@ const GameChangerPage = (props) => {
 		if (!state.userDataSet) {
 			gameChangerUserAPI.getUserProfileData().then(data => {
 				setState(dispatch, { userData: data.data, userDataSet: true });
-			})
+			});
 		}
 	}, [cloneData, state, dispatch, history]);
 

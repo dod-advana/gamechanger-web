@@ -15,8 +15,8 @@ export const gcColors = {
 };
 
 export const scrollToContentTop = () => {
-	document.getElementById('game-changer-content-top').scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
-}
+	document.getElementById('game-changer-content-top').scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+};
 
 const JBookUserProfileSetupPage = (props) => {
 

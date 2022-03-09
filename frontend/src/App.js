@@ -215,7 +215,7 @@ const App = () => {
 							if (clone.clone_name === 'jbook') {
 								cloneRoutes.push(
 									getJBookProfileRoute(clone)
-								)
+								);
 							}
 							cloneRoutes.push(
 								<PrivateTrackedRoute

@@ -1100,7 +1100,7 @@ export default class GameChangerAPI {
 	};
 
 	queryExp = async (data) => {
-		const querydata = { 'searchText': data }
+		const querydata = { 'searchText': data };
 		const url = endpoints.queryExp;
 		return axiosPOST(this.axios, url, data = querydata);
 	};

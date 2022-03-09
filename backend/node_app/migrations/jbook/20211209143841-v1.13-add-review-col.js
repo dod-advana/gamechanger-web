@@ -15,7 +15,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -28,7 +28,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'poc_ptp_agree_label', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'poc_mp_list', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'poc_mp_agree_label', Sequelize.TEXT),
-        ])
+        ]);
     });
   }
 };

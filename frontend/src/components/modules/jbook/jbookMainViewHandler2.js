@@ -115,7 +115,7 @@ const jbookMainViewHandler = {
 					</div>
 				)}
 			</>
-		)
+		);
 	},
 
 	handleCategoryTabChange(props) {
@@ -249,14 +249,14 @@ const jbookMainViewHandler = {
 
 															</Tab>
 															{(Permissions.permissionValidator(`${edaCloneData.clone_name} Admin`, true) || Permissions.permissionValidator(`View ${edaCloneData.clone_name}`, true)) && (
-															<Tab style={{
-																...styles.tabStyle,
-																...(mainTabSelected === 1 ? styles.tabSelectedStyle : {}),
-																borderRadius: `5px 5px 0 0`
-															}} title="reviewerChecklist" onClick={() => handleTabClicked(dispatch, state, 1)}
-															>
-																<Typography variant="h6" display="inline" title="contractSearch">CONTRACT SEARCH</Typography>
-															</Tab>
+																<Tab style={{
+																	...styles.tabStyle,
+																	...(mainTabSelected === 1 ? styles.tabSelectedStyle : {}),
+																	borderRadius: `5px 5px 0 0`
+																}} title="reviewerChecklist" onClick={() => handleTabClicked(dispatch, state, 1)}
+																>
+																	<Typography variant="h6" display="inline" title="contractSearch">CONTRACT SEARCH</Typography>
+																</Tab>
 															)}
 														</div>
 													</TabList>
@@ -281,7 +281,7 @@ const jbookMainViewHandler = {
 																				totalItemsCount={count}
 																				pageRangeDisplayed={8}
 																				onChange={page => {
-																					console.log('jbook pagination search')
+																					console.log('jbook pagination search');
 																					trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'PaginationChanged', 'page', page);
 																					setState(dispatch, { resultsPage: page, runSearch: true, loading: true, paginationSearch: true });
 																					scrollToContentTop();
@@ -294,35 +294,35 @@ const jbookMainViewHandler = {
 														</TabPanel>
 														<TabPanel>
 															{(Permissions.permissionValidator(`${edaCloneData.clone_name} Admin`, true) || Permissions.permissionValidator(`View ${edaCloneData.clone_name}`, true)) && (
-															<>
-																{
-																	edaLoading && (
-																		<div style={{ margin: '0 auto' }}>
-																			<LoadingIndicator customColor={GC_COLORS.primary} />
-																		</div>
-																	)
-																}
-																{
-																	!edaLoading && (
-																		<div className="row" style={{ padding: 5 }}>
-																			{getSearchResults(edaSearchResults ? edaSearchResults : [], state, dispatch, edaCloneData.card_module)}
-																			<div className="jbookPagination col-xs-12 text-center">
-																				<Pagination
-																					activePage={edaResultsPage}
-																					itemsCountPerPage={18}
-																					totalItemsCount={edaCount}
-																					pageRangeDisplayed={8}
-																					onChange={page => {
-																						trackEvent(getTrackingNameForFactory(edaCloneData.clone_name), 'PaginationChanged', 'page', page);
-																						setState(dispatch, { edaResultsPage: page, runSearch: true, edaPaginationSearch: true });
-																						scrollToContentTop();
-																					}}
-																				/>
+																<>
+																	{
+																		edaLoading && (
+																			<div style={{ margin: '0 auto' }}>
+																				<LoadingIndicator customColor={GC_COLORS.primary} />
 																			</div>
-																		</div>
-																	)
-																}
-															</>
+																		)
+																	}
+																	{
+																		!edaLoading && (
+																			<div className="row" style={{ padding: 5 }}>
+																				{getSearchResults(edaSearchResults ? edaSearchResults : [], state, dispatch, edaCloneData.card_module)}
+																				<div className="jbookPagination col-xs-12 text-center">
+																					<Pagination
+																						activePage={edaResultsPage}
+																						itemsCountPerPage={18}
+																						totalItemsCount={edaCount}
+																						pageRangeDisplayed={8}
+																						onChange={page => {
+																							trackEvent(getTrackingNameForFactory(edaCloneData.clone_name), 'PaginationChanged', 'page', page);
+																							setState(dispatch, { edaResultsPage: page, runSearch: true, edaPaginationSearch: true });
+																							scrollToContentTop();
+																						}}
+																					/>
+																				</div>
+																			</div>
+																		)
+																	}
+																</>
 															)
 															}					
 														</TabPanel>

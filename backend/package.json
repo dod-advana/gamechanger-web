@@ -24,8 +24,8 @@
     "node-forge": "1.2.1"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.30",
-    "@dod-advana/advana-logger": "0.0.3",
+    "@dod-advana/advana-api-auth": "0.0.35",
+    "@dod-advana/advana-logger": "0.0.4",
     "@elastic/elasticsearch": "7.10.0",
     "async": "2.6.3",
     "async-redis": "2.0.0",
@@ -55,7 +55,7 @@
     "pagerank.js": "1.0.2",
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
-    "pdfmake": "0.1.72",
+    "pdfmake": "0.2.4",
     "redis": "3.1.2",
     "secure-random": "1.1.1",
     "sequelize": "6.6.5",

@@ -9,7 +9,7 @@ module.exports = {
       if (!tableDefinition['service_mp_checklist']) queries.push(queryInterface.addColumn(tablename, 'service_mp_checklist', Sequelize.TEXT));
       return queryInterface.sequelize.transaction(function () {
         Promise.all(queries);
-      })
+      });
     });
   },
 
@@ -18,7 +18,7 @@ module.exports = {
       Promise.all([
         queryInterface.removeColumn(tablename, 'poc_mp_checklist', Sequelize.TEXT),
         queryInterface.removeColumn(tablename, 'service_mp_checklist', Sequelize.TEXT),
-      ])
+      ]);
     });
   }
 };

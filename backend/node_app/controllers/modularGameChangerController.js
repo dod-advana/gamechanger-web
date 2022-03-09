@@ -245,8 +245,8 @@ class ModularGameChangerController {
 		const {cloneName, options} = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
-			const search_handler = this.handler_factory.createHandler('data', cloneName);
-			const data = await search_handler.callFunction('getProjectData', options, cloneName, req.permissions, userId, res);
+			const search_handler = this.handler_factory.createHandler('search', cloneName);
+			const data = await search_handler.callFunction('getDataForFullPDFExport', options, cloneName, req.permissions, userId);
 
 			await handler.exportProfilePage(res, req.permissions, {data}, userId);
 		} catch(error) {
