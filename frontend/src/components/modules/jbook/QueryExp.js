@@ -25,7 +25,7 @@ const QueryExp = (props) => {
 			} else {
 				setlistItems([]);
 			}
-		}
+		};
 		fetchData();
 
 	}, [searchText]);
@@ -44,7 +44,7 @@ const QueryExp = (props) => {
 			}
 		</>
 	);
-}
+};
 
 
 export default QueryExp;

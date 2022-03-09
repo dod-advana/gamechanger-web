@@ -7,7 +7,7 @@ module.exports = {
 			Promise.all([
 				queryInterface.addColumn(tablename, 'rev_stp', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'rev_trans_agree', Sequelize.TEXT),
-			])
+			]);
 		});
 	},
 

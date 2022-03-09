@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledFooterDiv } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist'
+import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -14,7 +14,7 @@ const errorColor = '#F44336';
 const boldKeys = (data) => {
 	return data.map(pair => {
 		pair.Key = <strong>{pair.Key}</strong>;
-		return pair
+		return pair;
 	});
 };
 
@@ -53,7 +53,7 @@ const firstColWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-}
+};
 
 const staticAIPartners = ['Alion Science and Technology Corporation', 'Austal USA LLC', 'General Dynamics Corporation', 'Innovative Professional Solutions Inc.', 'Johns Hopkins University', 'Raytheon Company', 'Saic Gemini Inc.', 'Technical Systems Integration Inc.', 'Textron Inc.', 'Unknown'];
 
@@ -84,7 +84,7 @@ const SecondaryReviewerKey = React.memo(() => {
 			<strong>Secondary Reviewer</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>Service Level Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu. Once selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer checklist tab and the review will be the responsibility of the Secondary Reviewer.</Typography>
 		</StyledTableKeyContainer>
-	)
+	);
 });
 
 const SecondaryReviewerValue = React.memo((props) => {
@@ -103,7 +103,7 @@ const SecondaryReviewerValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					options={dropdownData && dropdownData.secondaryReviewers ? dropdownData.secondaryReviewers.map(reviewer => {
-						return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`
+						return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`;
 					}).sort() : []}
 					style={{ width: 300, backgroundColor: 'white' }}
 					renderInput={(params) => <TextField {...params} label="Secondary" variant="outlined" />}
@@ -113,8 +113,8 @@ const SecondaryReviewerValue = React.memo((props) => {
 				/>
 			</StyledInlineContainer>
 		</StyledTableValueContainer>
-	)
-})
+	);
+});
 
 const LabelingValidationKey = React.memo(() => {
 
@@ -315,7 +315,7 @@ const MissionPartnersValue = React.memo((props) => {
 
 	useEffect(() => {
 		if (Array.isArray(serviceMissionPartners)) {
-			setMissionPartners(serviceMissionPartners)
+			setMissionPartners(serviceMissionPartners);
 		} else {
 			setMissionPartners(serviceMissionPartners ? serviceMissionPartners.split('|') : []);
 		}
@@ -360,7 +360,7 @@ const MissionPartnersValue = React.memo((props) => {
 					/>
 				)}
 				onChange={(event, value) => {
-					setReviewData('setMissionPartners', value)
+					setReviewData('setMissionPartners', value);
 				}}
 				value={missionPartners}
 				disabled={finished}
@@ -589,7 +589,7 @@ const ServiceDescriptionText = React.memo(() => {
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>Do not click "Submit (Finished Service Review)" until all fields in the Service Reviewer section have been filled in.</Typography>
 		</StyledTableValueContainer>
-	)
+	);
 });
 
 const ButtonFooter = React.memo((props) => {

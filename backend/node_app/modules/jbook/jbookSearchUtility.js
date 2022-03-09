@@ -59,7 +59,7 @@ class JBookSearchUtility {
 			mapping = _.clone(Mappings[`${docType}Mapping`]);
 		}
 		else {
-			console.log(`${docType} mapping not found`)
+			console.log(`${docType} mapping not found`);
 			return {};
 		}
 
@@ -74,19 +74,19 @@ class JBookSearchUtility {
 				}
 
 			}
-			return frontEndMapping
+			return frontEndMapping;
 		}
 		else if (docType !== 'review' || docType !== 'gl') {
 			mapping = {
 				...mapping,
 				...reviewMapping
-			}
+			};
 		}
 
 		return mapping;
 	}
 
-	getDocCols(docType, totals = false) {
+	getDocCols(docType, totals = false, fullPDFExport = false) {
 		let fields = [];
 		let mapping = this.getMapping(docType, true);
 		let reviewMapping = this.getMapping('review', true);
@@ -139,8 +139,35 @@ class JBookSearchUtility {
 			'pocClassLabel',
 			'serviceAgreeLabel',
 			'serviceClassLabel',
-			'primaryClassLabel'
-		]
+			'primaryClassLabel',
+		];
+		
+		if (fullPDFExport) {
+			requiredCols.push(
+				'budgetActivityNumber',
+				'budgetActivityTitle',
+				'servicePOCPhoneNumber',
+				'altPOCPhoneNumber',
+				'serviceMissionPartnersList',
+				'pocMissionPartnersList',
+				'pocMissionPartnersChecklist',
+				'serviceMissionPartnersChecklist',
+				'budgetCycle',
+				'pocPlannedTransitionPartner',
+				'servicePlannedTransitionPartner',
+				'primaryPlannedTransitionPartner',
+				'appropriationTitle',
+				'domainTask',
+				'pocJointCapabilityArea',
+				'pocJointCapabilityArea2',
+				'pocJointCapabilityArea3',
+				'domainTask',
+				'domainTaskSecondary',
+				'pocAIType',
+				'pocAITypeDescription',
+				'pocMPAgreeLabel'
+			);
+		}
 
 		const typeMap = {
 			'rdoc': 'rd',
@@ -152,9 +179,9 @@ class JBookSearchUtility {
 			if (mapping[field]) {
 				// console.log(field + ' : ' + mapping[field].newName);
 				if (docType === 'odoc' && field === 'priorYearAmount') {
-					fields.push(`cast(replace(${typeMap[docType]}."${mapping[field].newName}", ',', '') as double precision) AS "${field}"`)
+					fields.push(`cast(replace(${typeMap[docType]}."${mapping[field].newName}", ',', '') as double precision) AS "${field}"`);
 				} else {
-					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`)
+					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`);
 				}
 			} else if (reviewMapping[field] && !totals) {
 				// console.log(field + ' : ' + mapping[field].newName)
@@ -190,9 +217,21 @@ class JBookSearchUtility {
 		// console.log(this.getDocCols('rdoc').join(', '));
 		// console.log(this.getDocCols('odoc').join(', '));
 
-		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(', ')}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`; 
-		let rQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('rdoc').join(', ')}, rd.id as id FROM rdoc rd LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'rdoc' AND  rd."PE_Num" = r.program_element AND rd."Proj_Number" = r.budget_line_item AND rd."BudgetYear" = r."budget_year"  LEFT JOIN (SELECT rd.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN rdoc rd on rd.id = k_a.rdoc_id JOIN keyword k on k.id = k_a.keyword_id group by rd.id) keywords ON keywords.id = rd.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = rd."PE_Num" AND contracts.budget_type = 'rdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = rd."PE_Num" AND accomplishments."Proj_Number" = rd."Proj_Number" AND accomplishments."BudgetYear" = rd."BudgetYear"`; 
-		let oQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('odoc').join(', ')}, o.id as id FROM om o LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'odoc' AND o.line_number = r.budget_line_item AND o.account = r.program_element AND o."budget_activity" = r."budget_activity" AND o."budget_year" = r."budget_year"  AND o."line_number" is not null AND o."line_number" != ''  LEFT JOIN (SELECT o.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN om o on o.id = k_a.om_id JOIN keyword k on k.id = k_a.keyword_id group by o.id) keywords ON keywords.id = o.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = o."line_number" AND contracts.budget_type = 'om' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = o."account" AND accomplishments."Proj_Number" = o."sag_bli" AND accomplishments."BudgetYear" = o."budget_year"`;
+		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(', ')}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
+		let rQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('rdoc').join(', ')}, rd.id as id FROM rdoc rd LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'rdoc' AND rd."PE_Num" = r.program_element AND rd."Proj_Number" = r.budget_line_item AND rd."BudgetYear" = r."budget_year" AND rd."Appn_Num" = r."appn_num" AND rd."BA_Number" = r."budget_activity" AND rd."Organization" = r."agency"  LEFT JOIN (SELECT rd.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN rdoc rd on rd.id = k_a.rdoc_id JOIN keyword k on k.id = k_a.keyword_id group by rd.id) keywords ON keywords.id = rd.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = rd."PE_Num" AND contracts.budget_type = 'rdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = rd."PE_Num" AND accomplishments."Proj_Number" = rd."Proj_Number" AND accomplishments."BudgetYear" = rd."BudgetYear"`;
+		let oQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('odoc').join(', ')}, o.id as id FROM om o LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'odoc' AND o.line_number = r.budget_line_item AND o.sag_bli = r.program_element AND o."budget_year" = r."budget_year" AND o."line_number" is not null AND o."line_number" != '' AND o."account" = r."appn_num" AND o."budget_activity" = r."budget_activity" AND o."organization" = r."agency"  LEFT JOIN (SELECT o.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN om o on o.id = k_a.om_id JOIN keyword k on k.id = k_a.keyword_id group by o.id) keywords ON keywords.id = o.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = o."line_number" AND contracts.budget_type = 'om' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = o."account" AND accomplishments."Proj_Number" = o."sag_bli" AND accomplishments."BudgetYear" = o."budget_year"`;
+
+		return [pQuery, rQuery, oQuery];
+	}
+
+	buildSelectQueryForFullPDF() {
+		// console.log(this.getDocCols('pdoc').join(', '));
+		// console.log(this.getDocCols('rdoc').join(', '));
+		// console.log(this.getDocCols('odoc').join(', '));
+
+		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(', ')}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
+		let rQuery = `SELECT DISTINCT ${this.getDocCols('rdoc', false, true).join(', ')}, rd.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM rdoc rd LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'rdoc' AND  rd."PE_Num" = r.program_element AND rd."Proj_Number" = r.budget_line_item AND rd."BudgetYear" = r."budget_year" AND rd."Appn_Num" = r."appn_num" AND rd."BA_Number" = r."budget_activity" AND rd."Organization" = r."agency" LEFT JOIN (SELECT rd.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN rdoc rd ON rd.id = k_a.rdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY rd.id) keywords ON keywords.id = rd.id LEFT JOIN (SELECT rd.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN rdoc rd ON rd."PE_Num" = rda."PE_Num" AND rd."Proj_Number" = rda."Proj_Number" AND rd."BudgetYear" = rda."BudgetYear" GROUP BY rd.id) accomp ON accomp.id = rd.id`;
+		let oQuery = `SELECT DISTINCT ${this.getDocCols('odoc', false, true).join(', ')}, o.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM om o LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'odoc' AND o.line_number = r.budget_line_item AND o.sag_bli = r.program_element AND o."budget_year" = r."budget_year"  AND o."line_number" is not null AND o."line_number" != '' AND o."account" = r."appn_num" AND o."budget_activity" = r."budget_activity" AND o."organization" = r."agency" LEFT JOIN (SELECT o.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN om o ON o.id = k_a.om_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY o.id) keywords ON keywords.id = o.id LEFT JOIN (SELECT om.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN om om ON om."account" = rda."PE_Num" AND om."sag_bli" = rda."Proj_Number" AND om."budget_year" = rda."BudgetYear" GROUP BY om.id) accomp ON accomp.id = o.id`;
 
 		return [pQuery, rQuery, oQuery];
 	}
@@ -202,9 +241,9 @@ class JBookSearchUtility {
 		let rQueryFilter = `rd."PE_Num" is not null AND rd."PE_Num" != '' AND rd."Proj_Number" is not null AND rd."Proj_Number" != '' AND rd."Proj_Title" is not null AND rd."Proj_Title" != ''`;
 		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
 
-		const pDocSearchQueryArray = Mappings['pdocSearchMapping'].map(pdocSearchText => { return `"${pdocSearchText}" @@ to_tsquery('english', :searchText)`; });
-		const rDocSearchQueryArray = Mappings['rdocSearchMapping'].map(rdocSearchText => { return `"${rdocSearchText}" @@ to_tsquery('english', :searchText)`; });
-		const oDocSearchQueryArray = Mappings['odocSearchMapping'].map(odocSearchText => { return `"${odocSearchText}" @@ to_tsquery('english', :searchText)`; });
+		const pDocSearchQueryArray = Mappings['pdocSearchMapping'].map(pdocSearchText => { return `"${pdocSearchText}" @@ to_tsquery('english', :searchText)` });
+		const rDocSearchQueryArray = Mappings['rdocSearchMapping'].map(rdocSearchText => { return `"${rdocSearchText}" @@ to_tsquery('english', :searchText)` });
+		const oDocSearchQueryArray = Mappings['odocSearchMapping'].map(odocSearchText => { return `"${odocSearchText}" @@ to_tsquery('english', :searchText)` });
 
 		let pQuery = hasSearchText ? ` WHERE ( ${pDocSearchQueryArray.join(' OR ')} AND ${pQueryFilter} )` : ` WHERE ${pQueryFilter}`;
 		let rQuery = hasSearchText ? ` WHERE ( ${rDocSearchQueryArray.join(' OR ')} AND ${rQueryFilter} )` : ` WHERE ${rQueryFilter}`;
@@ -213,7 +252,7 @@ class JBookSearchUtility {
 
 		if (keywordIds) {
 			let queryText = 'IN';
-			if (jbookSearchSettings.hasKeywords.indexOf('No') !== -1) {
+			if (jbookSearchSettings.hasKeywords && jbookSearchSettings.hasKeywords.indexOf('No') !== -1) {
 				queryText = 'NOT ' + queryText;
 			}
 			pQuery += ` AND p."${this.mapFieldName('pdoc', 'id', true)}" ${queryText} (${keywordIds['pdoc'].join(', ')})`;
@@ -224,8 +263,8 @@ class JBookSearchUtility {
 		for (const setting in jbookSearchSettings) {
 			switch (setting) {
 				case 'reviewStatus':
-					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const reviewString = `('${jbookSearchSettings[setting].join("', '")}')`;
+					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 1) {
+						const reviewString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (r.review_status IN ${reviewString} OR r.review_status = '' OR r.review_status IS NULL)`;
@@ -236,6 +275,12 @@ class JBookSearchUtility {
 							rQuery += ` AND r.review_status IN ${reviewString}`;
 							oQuery += ` AND r.review_status IN ${reviewString}`;
 						}
+					} else if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length === 1) {
+						const searchString = jbookSearchSettings[setting][0];
+						const hasNull = searchString === 'Blank';
+						pQuery += ` AND ${hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`}`;
+						rQuery += ` AND ${hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`}`;
+						oQuery += ` AND ${hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`}`;
 					} else if (typeof jbookSearchSettings[setting] === 'string') {
 						pQuery += ` AND r.review_status = '${jbookSearchSettings[setting]}'`;
 						rQuery += ` AND r.review_status = '${jbookSearchSettings[setting]}'`;
@@ -245,7 +290,7 @@ class JBookSearchUtility {
 				// review-specific filters
 				case 'primaryClassLabel':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (r."search_label" IN ${fieldString} OR r."search_label" = '' OR r."search_label" IS NULL)`;
@@ -264,7 +309,7 @@ class JBookSearchUtility {
 					break;
 				case 'serviceReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (r."${this.mapFieldName('review', setting, true)}" IN ${fieldString} OR r."${this.mapFieldName('review', setting, true)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
@@ -287,7 +332,7 @@ class JBookSearchUtility {
 					break;
 				case 'pocReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (r."${this.mapFieldName('review', setting, true)}" IN ${fieldString} OR r."${this.mapFieldName('review', setting, true)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
@@ -308,7 +353,7 @@ class JBookSearchUtility {
 					break;
 				case 'primaryReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (r."${this.mapFieldName('review', setting, true)}" IN ${fieldString} OR r."${this.mapFieldName('review', setting, true)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
@@ -328,7 +373,7 @@ class JBookSearchUtility {
 				case 'serviceAgency':
 				case 'budgetYear':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const yearString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const yearString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						const hasNull = jbookSearchSettings[setting].includes('Blank');
 						if (hasNull) {
 							pQuery += ` AND (p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString} OR p."${this.mapFieldName('pdoc', setting, true)}" = '' OR p."${this.mapFieldName('pdoc', setting, true)}" IS NULL )`;
@@ -383,7 +428,7 @@ class JBookSearchUtility {
 			switch (setting) {
 				case 'primaryReviewerForUserDash':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						pQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}r."${this.mapFieldName('review', 'primaryReviewer', true)}" IN ${fieldString}`;
 						rQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}r."${this.mapFieldName('review', 'primaryReviewer', true)}" IN ${fieldString}`;
 						oQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}r."${this.mapFieldName('review', 'primaryReviewer', true)}" IN ${fieldString}`;
@@ -395,7 +440,7 @@ class JBookSearchUtility {
 					break;
 				case 'serviceReviewerForUserDash':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						pQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'serviceReviewer', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IN ${fieldString})`;
 						rQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'serviceReviewer', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IN ${fieldString})`;
 						oQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'serviceReviewer', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IN ${fieldString})`;
@@ -408,7 +453,7 @@ class JBookSearchUtility {
 					break;
 				case 'pocReviewerEmailForUserDash':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
+						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
 						pQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'servicePOCEmail', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'altPOCEmail', true)}" IN ${fieldString})`;
 						rQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'servicePOCEmail', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'altPOCEmail', true)}" IN ${fieldString})`;
 						oQuery += `${useAND ? i > 0 ? ' OR ' : '' : ' AND '}(r."${this.mapFieldName('review', 'servicePOCEmail', true)}" IN ${fieldString} OR r."${this.mapFieldName('review', 'altPOCEmail', true)}" IN ${fieldString})`;
@@ -431,27 +476,6 @@ class JBookSearchUtility {
 
 		return [pQuery, rQuery, oQuery];
 
-		/*if (perms.includes('JBOOK Admin') || perms.includes('JBOOK Primary Reviewer')) {
-			return [pQuery, rQuery, oQuery];
-		} else {
-			// 0 = Last, 1 = First, 2 = MI, 3 = DODID (Do not Use unless Hashed)
-			const nameArray = userId.split('.');
-
-			if (perms.includes('JBOOK Service Reviewer') || perms.includes('JBOOK POC Reviewer')) {
-				pQuery = `${pQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				rQuery = `${rQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				oQuery = `${oQuery} AND r."service_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-			} else if (perms.includes('JBOOK POC Reviewer')) {
-				pQuery = `${pQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				rQuery = `${rQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-				oQuery = `${oQuery} AND r."poc_reviewer" ILIKE '${nameArray[1]} ${nameArray[0]}%'`
-			} else {
-				pQuery = `${pQuery} AND r."poc_reviewer" = 'BLAH'`
-				rQuery = `${rQuery} AND r."poc_reviewer" = 'BLAH'`
-				oQuery = `${oQuery} AND r."poc_reviewer" = 'BLAH'`
-			}
-			return [pQuery, rQuery, oQuery];
-		}*/
 	}
 
 	buildStatusUpdateWhereQuery(year = '2022') {
@@ -556,14 +580,14 @@ class JBookSearchUtility {
 	thesaurusExpansion(searchText, termsArray) {
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
-		let synList = []
+		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
 			for (var term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1) {
-					synList = synList.concat(synonyms.slice(0, 2))
+					synList = synList.concat(synonyms.slice(0, 2));
 				}
 			}
 		}
@@ -626,7 +650,7 @@ class JBookSearchUtility {
 						result.pageHits.push({
 							title: esTopLevelFieldsNameMapping[hitKey],
 							snippet: hit.highlight[hitKey][0]
-						})
+						});
 					});
 				}
 
@@ -687,6 +711,74 @@ class JBookSearchUtility {
 		}
 		return result;
 	}
+	
+	getJCAData() {
+		return {
+			'Force Support  (FS)':
+				{
+					'Force Management': ['Global Force Management', 'Force Configuration', 'Global Defense Posture Extraction', 'Readiness Reporting', 'Human Capital Management'],
+					'Force Preparation': ['Training', 'Exercising', 'Education', 'Doctrine', 'Lessons Learned', 'Concepts', 'Experimentation'],
+					'Building Partnerships': ['Engage Partners', 'Manage Partnership Agreements', 'Conduct Security Cooperation Activities', 'Conduct Civil-Military Operations']
+				},
+			'Battlespace Awareness (aka INTEL)':
+				{
+					'Planning & Direction': ['Define & Prioritize Requirements', 'Develop Plans & Strategies', 'Task & Monitor Resources'],
+					'Collection': ['Signals Collection', 'Imagery Collection', 'Human-based Collection', 'Open Source Collection'],
+					'Processing & Exploitation': ['Processing', 'Exploitation', 'Report Generation'],
+					'Analysis, Estimation, & Production': ['Integration', 'Evaluation', 'Intepretation', 'Estimation', 'Product Generation'],
+					'BA Dissemination & Integration': ['BA Data Transmission', 'BA Data Access'],
+					'Counterintelligence (CI)': ['Offensive CI', 'Investigations']
+				},
+			'Force Application (FA)':
+				{
+					'Maneuver': ['Air', 'Space', 'Land', 'Maritime', 'Cyberspace', 'Cyberspace'],
+					'Fires': ['Kinetic', 'Electromagnetic', 'Information']
+				},
+			'Logistics (LOG)':
+				{
+					'Deployment & Distribution': ['Force Deployment', 'Force Sustainment'],
+					'Supply': ['Supplies & Equipment Management', 'Inventory Management', 'Global Supplier Networks Management'],
+					'Maintenance': ['Inspect', 'Test', 'Service', 'Repair', 'Rebuild', 'Calibrate', 'Reclaim'],
+					'Logistics Services': ['Food Services', 'Water & Ice Services', 'Contingency Base Services', 'Hygiene Services', 'Mortuary Affairs'],
+					'Operational Contract Support': ['Contract Support Integration', 'Contractor Management'],
+					'Engineering': ['General Engineering', 'Combat Engineering', 'Geospatial Engineering'],
+					'Base & Installation Support': ['Real Property Life Cycle Management', 'Installation Services'],
+					'Health Services': ['Operational Medicine', 'Health Services Delivery']
+				},
+			'Command & Control (C2)':
+				{
+					'Organize': ['Establish & Maintain Unity of Effort with Mission Partners', 'Structure Organization to Mission', 'Foster Organizational Collaboration'],
+					'Understand': ['Organize Information', 'Develop Knowledge & Situational Awareness', 'Share Knowledge & Situational Awareness'],
+					'Plan': ['Analyze Problem', 'Apply Situational Understanding', 'Develop Strategy', 'Develop Courses of Action', 'Analyze Courses of Action'],
+					'Decide': ['Manage Risk', 'Select Actions', 'Establish Rule Sets', 'Establish Intent & Guidance'],
+					'Direct': ['Communicate Intent & Guidance', 'Task', 'Establish Metrics'],
+					'Monitor': ['Assess Compliance with Guidance', 'Assess Effects', 'Assess Achievement of Objectives', 'Assess Guidance']
+				},
+			'Communications & Computers':
+				{
+					'Information Transport': ['Wired Transmission', 'Wireless Transmission', 'Switching & Routing'],
+					'Network Management': ['Optimized Network Functions & Resources', 'Deployable, Scalable, & Modular Networks', 'Spectrum Management'],
+					'Cybersecurity': ['Information Exchange Security', 'Networks Protection', 'Data Protection', 'Identity & Access Management', 'Application Security', 'Cyberspace Survivability'],
+					'Defensive Cyberspace Operations (Internal Defensive Measures)': ['Cyberspace Defense'],
+					'Enterprise Services': ['Information Sharing', 'Computing Services', 'Common Enterprises Services', 'Positioning, Navigation & Timing']
+				},
+			'Protection':
+				{
+					'Prevention': ['Concealment/Stealth', 'Countering Weapons of Mass Destruction', 'Counter Air & Missile', 'Physical Security'],
+					'Mitigation': ['Explosive', 'Projectile', 'Chemical', 'Biological', 'Radiological', 'Nuclear', 'Electromagnetic Effects', 'Directed Energy', 'Natural Hazards'],
+					'Recovery': ['CBRN Response', 'Maritime Counter-Mine']
+				},
+			'Corporate Management & Support':
+				{
+					'Advisory & Compliance': ['Legal Advice', 'Legislative Advice', 'Audit, Inspection, & Investigation', 'Personnel Security Investigations & Clearance Certification', 'Operational Test & Evaluation'],
+					'Strategic Management': ['Strategy Development', 'Capability Development', 'Performance Management', 'Enterprise Risk Management', 'Studies & Analyses', 'Enterprise Architecture'],
+					'Information Management': [],
+					'Acquisition & Technology': ['Research', 'Advanced Technology', 'Developmental Engineering', 'Acquisition Management'],
+					'Financial Management': ['Programming & Budgeting', 'Accounting & Finance']
+				}
+		};
+	}
+	
 }
 
 module.exports = JBookSearchUtility;

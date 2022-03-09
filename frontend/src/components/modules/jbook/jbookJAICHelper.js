@@ -6,7 +6,7 @@ import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
 import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const useStyles = makeStyles((theme) => ({
 	customWidth: {
@@ -31,7 +31,7 @@ const ReviewersValue = React.memo((props) => {
 	} = props;
 
 	const primaryReviewers = dropdownData && dropdownData.reviewers ? dropdownData.reviewers.map(reviewer => {
-		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`
+		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`;
 	}).sort() : [];
 
 	return (
@@ -111,7 +111,7 @@ const ServiceComponentReviewerValue = React.memo((props) => {
 	} = props;
 
 	const serviceReviewers = dropdownData && dropdownData.serviceReviewers ? dropdownData.serviceReviewers.map(reviewer => {
-		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`
+		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`;
 	}).sort() : [];
 
 	return (
@@ -319,4 +319,4 @@ export {
 	CurrentMissionPartnersValue,
 	ReviewStatus,
 	ButtonFooter
-}
+};

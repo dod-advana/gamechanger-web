@@ -277,7 +277,7 @@ class UserController {
 			if (user && user!== null) {
 				if (user.extra_fields.hasOwnProperty('clones_visited')) {
 					if (!user.extra_fields.clones_visited.includes(clone)) {
-						user.extra_fields.clones_visited.push(clone)
+						user.extra_fields.clones_visited.push(clone);
 						await this.updateOrCreateUserHelper(user, user_id, true);
 					}
 				} else {
@@ -570,7 +570,7 @@ class UserController {
 				} else {
 
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn})
+					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn});
 
 					const tmpExtraFields = {gamechanger: oldGCUserInfo.policy || {} };
 
@@ -703,7 +703,7 @@ class UserController {
 				raw: true
 			});
 
-			console.log(newUsers)
+			console.log(newUsers);
 
 			// Loop through new users
 			for (const user of newUsers) {

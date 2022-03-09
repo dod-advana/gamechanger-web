@@ -1,22 +1,27 @@
 'use strict';
-
 const pdfMakeLib = require('pdfmake');
 const csvStringifyLib = require('csv-stringify');
 const moment = require('moment-timezone');
 const path = require('path');
 const loggerLib = require('@dod-advana/advana-logger');
+const BudgetSearchUtility = require('../modules/jbook/jbookSearchUtility');
+const ACCOMP = require('../models').rdoc_accomp;
 
 class Reports {
 	constructor(opts = {}) {
 		const {
 			logger = loggerLib,
 			csvStringify = csvStringifyLib,
-			pdfMake = pdfMakeLib
+			pdfMake = pdfMakeLib,
+			budgetSearchUtility = new BudgetSearchUtility(),
+			accomp = ACCOMP,
 		} = opts;
 
 		this.logger = logger;
 		this.csvStringify = csvStringify;
 		this.pdfMake = pdfMake;
+		this.budgetSearchUtility = budgetSearchUtility;
+		this.accomp = accomp;
 	}
 
 
@@ -97,7 +102,7 @@ class Reports {
 
 	}
 	
-	createProfilePagePDFBuffer(data, userId, callback=()=>{}){
+	async createProfilePagePDFBuffer(data, userId, callback=()=>{}){
 		try {
 			const fonts = {
 				Roboto: {
@@ -116,7 +121,7 @@ class Reports {
 			};
 
 			const printer = new this.pdfMake(fonts);
-			const docDefinition = this.constructProfilePagePDF(data);
+			const docDefinition = await this.constructProfilePagePDF(data);
 			const doc = printer.createPdfKitDocument(docDefinition);
 
 			let chunks = [];
@@ -322,124 +327,118 @@ class Reports {
 		return doc;
 	}
 	
-	constructProfilePagePDF(data) {
+	async constructProfilePagePDF(fullData, userId, showPOC = true) {
 
 		const sideMargin = 50;
 
-		const timeZone = 'America/New_York'
+		const timeZone = 'America/New_York';
 		const date = timeZone ? moment.tz(timeZone) : moment();
 		const dateString = `${date.format('MM/DD/YYYY')}`;
 		const img = path.resolve(__dirname, './ProfilePagePDFImages/JAIC_blk.png');
 
-		let reviewData = data.review;
-
-		let label = '';
-		if (reviewData) {
-			if (reviewData.pocAgreeLabel && reviewData.pocAgreeLabel === 'No' && reviewData.pocClassLabel) {
-				label = reviewData.pocClassLabel;
-			} else if (reviewData.serviceAgreeLabel && reviewData.serviceAgreeLabel === 'No' && reviewData.serviceClassLabel) {
-				label = reviewData.serviceClassLabel;
-			} else if (reviewData.primaryClassLabel) {
-				label = reviewData.primaryClassLabel;
-			} else {
-				label = 'Unknown';
-			}
-		}
-
-		let totalCost = null;
-		if (reviewData.allPriorYearsAmount) {
-			totalCost += reviewData.allPriorYearsAmount;
-		}
-		if (reviewData.priorYearAmount) {
-			totalCost += reviewData.priorYearAmount;
-		}
-		if (reviewData.currentYearAmount) {
-			totalCost += reviewData.currentYearAmount;
-		}
-
-		const formatNum = (num) => {
-			const parsed = parseInt(num);
-			if (parsed > 999) {
-				return `${(parsed / 1000).toFixed(2)} $B`;
-			}
-
-			if (parsed > 999999) {
-				return `${(parsed / 1000000).toFixed(2)} $T`;
-			}
-			return `${parsed} $M`;
-		}
-
+		// Define base document
 		let doc = {
-			pageMargins: [50, 25, 50, 50],
-			footer: function (currentPage) {
-				const pageNumOffset = 8;
+			pageMargins: [30, 60, 30, 55],
+			header: function (currentPage, pageCount, pageSize) {
 				return {
 					stack: [
 						{
-							canvas: [{
-								type: 'line',
-								x1: 0, y1: 35,
-								x2: 513, y2: 35,
-								linewidth: 1.5,
-								lineColor: '#404040',
-								marginBottom: 10,
-							}]
+							image: img,
+							width: 50,
+							absolutePosition: {x: 30, y: 10}
 						},
 						{
-							image: img,
-							width: 50
+							text: 'Joint Artificial Intelligence Center',
+							alignment: 'center',
+							marginTop: 15,
+							marginBottom: 5,
+							fontSize: 11
 						},
-					],
-					margin: [sideMargin, 0, sideMargin - pageNumOffset, 0],
+						{
+							text: 'Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) 2022',
+							alignment: 'center',
+							marginBottom: 5,
+							fontSize: 11
+						},
+						{
+							table: {
+								headerRows: 1,
+								widths: ['450', '450'],
+								body: [
+									[{text: '', marginLeft: 50}, {text: '', marginRight: 50}],
+									[{text: '', marginLeft: 50, marginBottom: 5}, {text: '', marginRight: 50, marginBottom: 5}]
+								]
+							},
+							layout: 'headerLineOnly'
+						}
+					]
 				};
 			},
-			content: [
-				{ text: 'Joint Artificial Intelligence Center', alignment: 'center', style: 'header' },
-				{ text: 'Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ' + data.budgetYear, alignment: 'center', style: 'header', marginBottom: 5 },
-				{
-					canvas: [{
-						type: 'line',
-						x1: 0, y1: 4,
-						x2: 513, y2: 4,
-						linewidth: 1.5,
-						lineColor: '#404040',
-						// marginBottom: 10,
-					}]
-				},
-				{ text: 'Research & Development Funded AI Activities', alignment: 'center', style: 'bottomheader' },
-				{
-					style: 'table',
-					margin: [ 0, 50, 0, 50 ],
-					table: {
-						widths: ['*', '*', '*', '*'],
-						body: [
-							[{text: 'Project Title:', style: 'subheader'}, data.projectTitle ?? 'N/A', {text: 'AI Labeling:', style: 'subheader'}, label ?? 'N/A'],
-							[{text: 'Project:', style: 'subheader'}, data.projectNum ?? 'N/A', {text: 'Service Agency Name:', style: 'subheader'}, data.serviceAgency ?? 'N/A'],
-							[{text: 'Appropriation:', style: 'subheader'}, data.appropriationNumber ?? 'N/A', {text: 'Appropriation Title:', style: 'subheader'}, data.appropriationTitle ?? 'N/A'],
-							[{text: 'Budget Activity:', style: 'subheader'}, data.budgetActivityNumber ?? 'N/A', {text: 'Budget Activity Title:', style: 'subheader'}, data.budgetActivityTitle],
-							['', '', '', ''],
-							[{text: 'Source Tags:', style: 'subheader'}, data.sourceTag ?? 'N/A', '', ''],
-							[{text: '# of Keywords:', style: 'subheader'}, data.keywords ? data.keywords.length : 'N/A', {text: 'Included Keywords:', style: 'subheader'}, data.keywords ?? 'N/A'],
-							['', '', '', ''],
-							[{text: 'Program Element:', style: 'subheader'}, data.programElement ?? 'N/A', {text: 'Planned Transition Partner (if known):', style: 'subheader'}, reviewData ? reviewData.pocPlannedTransitionPartner ?? reviewData.servicePlannedTransitionPartner ?? reviewData.primaryPlannedTransitionPartner ?? 'N/A' : 'N/A' ],
-							[{text: 'AI Domain: ', style: 'subheader'}, reviewData.domainTask ?? 'N/A', '', '' ],
-							[{text: 'Joint Capability Area: ', style: 'subheader'}, reviewData.pocJointCapabilityArea ?? 'N/A', reviewData.pocJointCapabilityArea2 ?? 'N/A', reviewData.pocJointCapabilityArea3 ?? 'N/A'],
-							[{text: 'Prior Year Amount: ', style: 'subheader'}, data.priorYearAmount !== null && data.priorYearAmount !== undefined ? `${formatNum(data.priorYearAmount)}` : 'N/A', {text: 'Current Year Amount: ', style: 'subheader'}, data.currentYearAmount !== null && data.currentYearAmount !== undefined ? `${formatNum(data.currentYearAmount)}` : 'N/A'],
-							[{text: 'To Complete: ', style: 'subheader'}, `${parseInt(data.budgetYear) + (data.budgetType === 'Procurement' ? 3 : 2)}` || 'N/A', {text: 'Total Cost: ', style: 'subheader'}, totalCost ? `${formatNum(totalCost)}` : 'N/A']
-						]
-					},
-					layout: {
-						defaultBorder: false
-					},
-					fontSize: 10,
-				}
-			],
+			footer: function (currentPage, pageCount) {
+				return {
+					stack: [
+						{
+							table: {
+								headerRows: 1,
+								widths: ['450', '450'],
+								body: [
+									[{text: '', marginLeft: 30}, {text: '', marginRight: 30}],
+									[{text: '', marginLeft: 30}, {text: '', marginRight: 30}]
+								]
+							},
+							layout: 'headerLineOnly'
+						},
+						{
+							layout: 'noBorders',
+							table: {
+								widths: ['*', 120, '*', 120, 130],
+								body:
+									[
+										[
+											{
+												image: img,
+												width: 50,
+												marginLeft: 30
+											},
+											{
+												text: 'Go To: R&D Activities',
+												linkToDestination: 'rdActivities',
+												alignment: 'left',
+												marginTop: 12,
+												fontSize: 11,
+												marginLeft: 10
+											},
+											{text: 'CUI', alignment: 'center', marginTop: 12, fontSize: 11},
+											{
+												text: 'Go To: Proc Activities',
+												linkToDestination: 'procActivities',
+												alignment: 'right',
+												marginTop: 12,
+												fontSize: 11,
+												marginRight: 10
+											},
+											{
+												text: `Page: ${currentPage.toString()}/${pageCount}`,
+												alignment: 'right',
+												marginRight: 30,
+												marginTop: 12,
+												fontSize: 11
+											}
+										]
+									]
+							}
+						}
+					]
+				};
+			},
+			content: [],
 			defaultStyle: {
-				font: 'Times'
+				font: 'Times',
+				fontSize: 10
 			},
 			styles: {
 				title: {
-					fontSize: 15,
+					fontSize: 11,
 					color: '#404040',
 					marginTop: 15
 				},
@@ -471,74 +470,373 @@ class Reports {
 					marginTop: 5
 				},
 				header: {
-					marginBottom: 3
+					marginBottom: 3,
+					fontSize: 11
+				},
+				logo: {
+					width: 50
 				}
 			},
 		};
 
-		doc.content.push(
-			{
-				style: 'table',
-				table: {
-					widths: ['*', '*', '*'],
-					body: [
-						[{text: 'FY21-FY25 Total Program Element Cost', style: 'subheader'}, {text: 'Data Type', style: 'subheader'}, {text: 'Joint Capability Area', style: 'subheader'}],
-						[
-							{
-								stack: [
-									{text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5},
-									{text: 'FY21 (previous year):', marginBottom: 5},
-									{text: 'FY22:', marginBottom: 5},
-									{text: 'FY23:', marginBottom: 5},
-									{text: 'FY24:', marginBottom: 5},
-									{text: 'FY25:', marginBottom: 5},
-									{text: 'To Complete:', marginBottom: 5},
-									{text: 'Total Cost:', marginBottom: 5},
-								]
-							},
-							{
-								stack: [
-									'How does the project fit this data type?',
-									'',
-									'',
-									'',
-									'',
-									'',
-									'',
-									'',
-								]
-							},
-							{
-								stack: [
-									'Role of AI in this project?',
-									'',
-									'',
-									'',
-									'',
-									'',
-									'',
-									'',
-								]
-							},
-						],
-					]
+		try {
+
+			//  Create RD&E Toc
+			const rdToc = [
+				{
+					text: 'R&D Activities TOC', id: 'rdActivities', alignment: 'center', marginTop: 10, marginBottom: 10, fontSize: 11
+				},
+				{
+					pageBreak: 'after',
+					layout: 'noBorders',
+					table: {
+						headerRows: 1,
+						widths: [60, 60, 150, 130, 80, 30],
+						body: [
+							[
+								{text: 'PE', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Proj', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Project Title', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Service', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'AI Label', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Pg.', style: 'subheader', fontSize: 12, marginBottom: 5},
+							]
+						]
+					}
+				}
+			];
+			// Create PRoc Toc
+			const procToc = [
+				{
+					text: 'Procurement Activities TOC', id: 'procActivities', alignment: 'center', marginTop: 10, marginBottom: 10, fontSize: 11
+				},
+				{
+					pageBreak: 'after',
+					layout: 'noBorders',
+					table: {
+						headerRows: 1,
+						widths: [100, 170, 130, 80, 30],
+						body: [
+							[
+								{text: 'Budget Line Num', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Project Title', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Service', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'AI Label', style: 'subheader', fontSize: 12, marginBottom: 5},
+								{text: 'Pg.', style: 'subheader', fontSize: 12, marginBottom: 5},
+							]
+						]
+					}
+				}
+			];
+			// PDOC Content
+			const pdocContent = [];
+			// RDOC Content
+			const rdocContent = [];
+
+			for (const docData of fullData) {
+				switch (docData.revBudgetType) {
+					case 'pdoc':
+						procToc[1].table.body.push(await this.constructPdocContent(docData, pdocContent, userId, showPOC));
+						break;
+					case 'rdoc':
+						rdToc[1].table.body.push(await this.constructRdocContent(docData, rdocContent, userId, showPOC));
+						break;
+					default:
+						break;
 				}
 			}
-		)
 
-		if (reviewData && reviewData.serviceMissionPartnersList && reviewData.serviceMissionPartnersList.length > 0) {
-			doc.content.push(
-				{ 
+			// Add rdoc TOC
+			doc.content.push(rdToc);
+			// Add rdocs
+			doc.content.push(...rdocContent);
+			// Add pdoc TOC
+			doc.content.push(procToc);
+			// Add pdocs
+			doc.content.push(...pdocContent);
+
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '6T0ILGP', userId);
+		}
+
+		return doc;
+	}
+	
+	formatNum(num) {
+		const parsed = parseInt(num);
+		if (parsed > 999) {
+			return `${(parsed / 1000).toFixed(2)} $B`;
+		}
+
+		if (parsed > 999999) {
+			return `${(parsed / 1000000).toFixed(2)} $T`;
+		}
+		return `${parsed} $M`;
+	}
+
+	async constructRdocContent(docData, rdocContent, userId, showPOC) {
+		try {
+			let label = '';
+			if (docData) {
+				if (docData.pocAgreeLabel && docData.pocAgreeLabel === 'No' && docData.pocClassLabel) {
+					label = docData.pocClassLabel;
+				} else if (docData.serviceAgreeLabel && docData.serviceAgreeLabel === 'No' && docData.serviceClassLabel) {
+					label = docData.serviceClassLabel;
+				} else if (docData.primaryClassLabel) {
+					label = docData.primaryClassLabel;
+				} else {
+					label = 'Unknown';
+				}
+			}
+
+			let totalCost = null;
+			if (docData.allPriorYearsAmount) {
+				totalCost += docData.allPriorYearsAmount;
+			}
+			if (docData.priorYearAmount) {
+				totalCost += docData.priorYearAmount;
+			}
+			if (docData.currentYearAmount) {
+				totalCost += docData.currentYearAmount;
+			}
+
+			const pocReviewer = docData.altPOCName && docData.altPOCName !== null && docData.altPOCName !== '' ? docData.altPOCName :
+				docData.servicePOCName && docData.servicePOCName !== null && docData.servicePOCName !== '' ? docData.servicePOCName :
+					docData.serviceSecondaryReviewer && docData.serviceSecondaryReviewer !== null && docData.serviceSecondaryReviewer !== '' ? docData.serviceSecondaryReviewer :
+						docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '' ? docData.serviceReviewer :
+							docData.primaryReviewer && docData.primaryReviewer !== null && docData.primaryReviewer !== '' ? docData.primaryReviewer : 'N/A';
+
+			const pocOrganization = docData.altPOCOrg && docData.altPOCOrg !== null && docData.altPOCOrg !== '' ? docData.altPOCOrg :
+				docData.servicePOCOrg && docData.servicePOCOrg !== null && docData.servicePOCOrg !== '' ? docData.servicePOCOrg :
+					docData.serviceSecondaryReviewer && docData.serviceSecondaryReviewer !== null && docData.serviceSecondaryReviewer !== '' ? docData.serviceSecondaryReviewer.split('(')[1].replace(')', '') :
+						docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '' ? docData.serviceReviewer.split('(')[1].replace(')', '') : 'N/A';
+
+			const pocEmail = docData.altPOCEmail && docData.altPOCEmail !== null && docData.altPOCEmail !== '' ? docData.altPOCEmail :
+				docData.servicePOCEmail && docData.servicePOCEmail !== null && docData.servicePOCEmail !== '' ? docData.servicePOCEmail : 'N/A';
+
+			const pocPhone = docData.altPOCPhoneNumber && docData.altPOCPhoneNumber !== null && docData.altPOCPhoneNumber !== '' ? docData.altPOCPhoneNumber :
+				docData.servicePOCPhoneNumber && docData.servicePOCPhoneNumber !== null && docData.servicePOCPhoneNumber !== '' ? docData.servicePOCPhoneNumber : 'N/A';
+
+			const plannedTransitionPartner = docData.pocPlannedTransitionPartner && docData.pocPlannedTransitionPartner !== null && docData.pocPlannedTransitionPartner !== '' ? docData.pocPlannedTransitionPartner :
+				docData.servicePlannedTransitionPartner && docData.servicePlannedTransitionPartner !== null && docData.servicePlannedTransitionPartner !== '' ? docData.servicePlannedTransitionPartner :
+					docData.primaryPlannedTransitionPartner && docData.primaryPlannedTransitionPartner !== null && docData.primaryPlannedTransitionPartner !== '' ? docData.primaryPlannedTransitionPartner : 'N/A';
+
+			const domainTask = docData.domainTask && docData.domainTask !== null && docData.domainTask !== '' ?
+				`${docData.domainTask}${docData.domainTaskSecondary && docData.domainTaskSecondary !== null && docData.domainTaskSecondary != '' ? `: ${docData.domainTaskSecondary}` : ''}` : 'N/A';
+
+			const referenceName = `rdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.programElement}#${docData.serviceAgency}#${docData.appropriationNumber}#${docData.projectNum}`;
+
+			// General Data
+			rdocContent.push(
+				{
+					text: referenceName,
+					id: referenceName,
+					fontSize: 1,
+					color: 'white'
+				},
+				{
 					style: 'table',
 					table: {
-						widths:['*'],
+						widths: [70, '*', 100, '*'],
 						body: [
-							[{text: 'Mission Partners', style: 'title'}],
+							[{
+								text: 'Project Title:',
+								style: 'subheader'
+							}, docData.projectTitle ?? 'N/A', {
+								text: 'AI Category:',
+								style: 'subheader'
+							}, label ?? 'N/A'],
+							[{
+								text: 'Project:',
+								style: 'subheader'
+							}, docData.projectNum ?? 'N/A', {
+								text: 'Service Agency Name:',
+								style: 'subheader'
+							}, docData.serviceAgency ?? 'N/A'],
+							[{
+								text: showPOC ? 'Project POC:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocReviewer : ''}`, {
+								text: showPOC ? 'POC Organization:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocOrganization : ''}`],
+							[{
+								text: showPOC ? 'POC Email:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocEmail : ''}`, {
+								text: showPOC ? 'POC Phone:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocPhone : ''}`],
+							[{
+								text: 'Appropriation:',
+								style: 'subheader'
+							}, docData.appropriationNumber ?? 'N/A', {
+								text: 'Appropriation Title:',
+								style: 'subheader'
+							}, docData.appropriationTitle ?? 'N/A'],
+							[{
+								text: 'Budget Activity:',
+								style: 'subheader'
+							}, docData.budgetActivityNumber ?? 'N/A', {
+								text: 'Budget Activity Title:',
+								style: 'subheader'
+							}, docData.budgetActivityTitle],
+							[{text: 'Source Tags:', style: 'subheader'}, docData.sourceTag ?? 'N/A', '', ''],
+							[{
+								text: '# of Keywords:',
+								style: 'subheader'
+							}, docData.keywords ? docData.keywords.length : 'N/A', {
+								text: 'Included Keywords:',
+								style: 'subheader'
+							}, docData.keywords ?? 'N/A'],
+							[{
+								text: 'Program Element:',
+								style: 'subheader'
+							}, docData.programElement ?? 'N/A', {
+								text: 'Planned Transition Partner (if known):',
+								style: 'subheader'
+							}, plannedTransitionPartner],
+							[{text: 'AI Domain: ', style: 'subheader'}, domainTask, '', '']
+						]
+					},
+					layout: {
+						defaultBorder: false
+					},
+					fontSize: 10,
+				}
+			);
+
+			// Costs, data type, jca
+			const JCAData = this.budgetSearchUtility.getJCAData();
+			const tmpJCAData = [];
+			if (docData.pocJointCapabilityArea && docData.pocJointCapabilityArea !== null && docData.pocJointCapabilityArea !== '') {
+				tmpJCAData.push({text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5});
+				const areas2 = docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null ? docData.pocJointCapabilityArea2.split(', ') : [];
+				const areas3 = docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null ? docData.pocJointCapabilityArea3.split(', ') : [];
+				const areasCombined = {};
+				areas2.forEach(area2 => {
+					areasCombined[area2] = [];
+				});
+
+				areas3.forEach(area3 => {
+					areas2.forEach(area2 => {
+						if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
+							areasCombined[area2].push(area3);
+						}
+					});
+				});
+
+				areas2.forEach(area2 => {
+					tmpJCAData.push(
+						{text: `${area2}:`, marginLeft: 5},
+						{
+							ul: areasCombined[area2].map(area3 => {
+								return {text: area3};
+							}),
+							marginBottom: 5,
+							marginLeft: 10
+						}
+					);
+				});
+
+			} else {
+				tmpJCAData.push('N/A');
+			}
+			rdocContent.push(
+				{
+					pageBreak: 'after',
+					style: 'table',
+					table: {
+						widths: ['*', '*', '*'],
+						body: [
+							[{text: 'FY21-FY25 Total Program Element Cost', style: 'subheader'}, {
+								text: 'Data Type',
+								style: 'subheader'
+							}, {text: 'Joint Capability Area', style: 'subheader'}],
 							[
 								{
 									stack: [
-										...reviewData.serviceMissionPartnersList.split('|').map(mp => {
-											return {text: mp ?? '', margin: [2, 5, 0, 5]}
+										{text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5},
+										{text: 'FY21 (previous year):', marginBottom: 5},
+										{text: 'FY22:', marginBottom: 5},
+										{text: 'FY23:', marginBottom: 5},
+										{text: 'FY24:', marginBottom: 5},
+										{text: 'FY25:', marginBottom: 5},
+										{text: 'To Complete:', marginBottom: 5},
+										{text: 'Total Cost:', marginBottom: 5},
+									]
+								},
+								{
+									stack: [
+										{text: 'How does the project fit this data type?', marginBottom: 5},
+										{text: docData.pocAIType && (docData.pocAIType !== null && docData.pocAIType !== '') ? `${docData.pocAIType}:` : 'N/A', marginBottom: 5, bold: docData.pocAIType && (docData.pocAIType !== null && docData.pocAIType !== '')},
+										{text: docData.pocAITypeDescription && (docData.pocAITypeDescription !== null && docData.pocAITypeDescription !== '') ? docData.pocAITypeDescription : '', marginLeft: 5},
+									]
+								},
+								{
+									stack: [
+										{text: 'Role of AI in this project?', marginBottom: 5},
+										...tmpJCAData
+									]
+								},
+							],
+						]
+					}
+				}
+			);
+
+			// Mission partners acomplishments
+			let partnerList = !docData.pocMPAgreeLabel && docData.pocMissionPartnersList && docData.pocMissionPartnersList !== null && docData.pocMissionPartnersList !== '' ? docData.pocMissionPartnersList :
+				docData.serviceMissionPartnersList && docData.serviceMissionPartnersList !== null && docData.serviceMissionPartnersList !== '' ? docData.serviceMissionPartnersList : '';
+			let partnerChecklist = !docData.pocMPAgreeLabel && docData.pocMissionPartnersChecklist && docData.pocMissionPartnersChecklist !== null && docData.pocMissionPartnersChecklist !== '' ? docData.pocMissionPartnersChecklist :
+				docData.serviceMissionPartnersChecklist && docData.serviceMissionPartnersChecklist !== null && docData.serviceMissionPartnersChecklist !== '' ? docData.serviceMissionPartnersChecklist : '';
+
+			if (partnerList !== '') {
+				partnerList = partnerList.split('|');
+			} else {
+				partnerList = [];
+			}
+
+			if (partnerChecklist !== '') {
+				partnerChecklist = JSON.parse(partnerChecklist);
+				Object.keys(partnerChecklist).forEach(mpKey => {
+					if (partnerChecklist[mpKey]) {
+						partnerList.push(mpKey);
+					}
+				});
+			}
+
+			partnerList = [...new Set(partnerList)];
+
+			let accomplishments = [];
+			if (docData.accomp && docData.accomp !== null && docData.accomp.length > 0) {
+				accomplishments = docData.accomp;
+			}
+
+			rdocContent.push(
+				{
+					pageBreak: 'after',
+					style: 'table',
+					table: {
+						widths: ['*', '*'],
+						body: [
+							[{text: 'Mission Partners', style: 'subheader'}, {
+								text: 'Current FY Accomplishments',
+								style: 'subheader'
+							}],
+							[
+								{
+									stack: [
+										...partnerList.map(mp => {
+											return {text: mp ?? '', margin: [2, 5, 0, 5]};
+										})
+									]
+								},
+								{
+									stack: [
+										...accomplishments.map(accompText => {
+											return {text: accompText, margin: [2, 5, 0, 5]};
 										})
 									]
 								}
@@ -548,27 +846,287 @@ class Reports {
 				},
 			);
 
+			// Updating TOC
+			return [
+				{text: docData.programElement, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: docData.projectNum, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: docData.projectTitle, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: docData.serviceAgency, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: label, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{pageReference: referenceName, marginBottom: 5, marginTop: 5}
+			];
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '84GUNJR', userId);
+			return [''];
 		}
+	}
 
-		if (data.accomplishments && data.accomplishments.length) {
-			doc.content.push(
-				{ 
+	async constructPdocContent(docData, pdocContent, userId, showPOC) {
+		try {
+			let label = '';
+			if (docData) {
+				if (docData.pocAgreeLabel && docData.pocAgreeLabel === 'No' && docData.pocClassLabel) {
+					label = docData.pocClassLabel;
+				} else if (docData.serviceAgreeLabel && docData.serviceAgreeLabel === 'No' && docData.serviceClassLabel) {
+					label = docData.serviceClassLabel;
+				} else if (docData.primaryClassLabel) {
+					label = docData.primaryClassLabel;
+				} else {
+					label = 'Unknown';
+				}
+			}
+
+			let totalCost = null;
+			if (docData.allPriorYearsAmount) {
+				totalCost += docData.allPriorYearsAmount;
+			}
+			if (docData.priorYearAmount) {
+				totalCost += docData.priorYearAmount;
+			}
+			if (docData.currentYearAmount) {
+				totalCost += docData.currentYearAmount;
+			}
+
+			const pocReviewer = docData.altPOCName && docData.altPOCName !== null && docData.altPOCName !== '' ? docData.altPOCName :
+				docData.servicePOCName && docData.servicePOCName !== null && docData.servicePOCName !== '' ? docData.servicePOCName :
+					docData.serviceSecondaryReviewer && docData.serviceSecondaryReviewer !== null && docData.serviceSecondaryReviewer !== '' ? docData.serviceSecondaryReviewer :
+						docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '' ? docData.serviceReviewer :
+							docData.primaryReviewer && docData.primaryReviewer !== null && docData.primaryReviewer !== '' ? docData.primaryReviewer : 'N/A';
+
+			const pocOrganization = docData.altPOCOrg && docData.altPOCOrg !== null && docData.altPOCOrg !== '' ? docData.altPOCOrg :
+				docData.servicePOCOrg && docData.servicePOCOrg !== null && docData.servicePOCOrg !== '' ? docData.servicePOCOrg :
+					docData.serviceSecondaryReviewer && docData.serviceSecondaryReviewer !== null && docData.serviceSecondaryReviewer !== '' ? docData.serviceSecondaryReviewer.split('(')[1].replace(')', '') :
+						docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '' ? docData.serviceReviewer.split('(')[1].replace(')', '') : 'N/A';
+
+			const pocEmail = docData.altPOCEmail && docData.altPOCEmail !== null && docData.altPOCEmail !== '' ? docData.altPOCEmail :
+				docData.servicePOCEmail && docData.servicePOCEmail !== null && docData.servicePOCEmail !== '' ? docData.servicePOCEmail : 'N/A';
+
+			const pocPhone = docData.altPOCPhoneNumber && docData.altPOCPhoneNumber !== null && docData.altPOCPhoneNumber !== '' ? docData.altPOCPhoneNumber :
+				docData.servicePOCPhoneNumber && docData.servicePOCPhoneNumber !== null && docData.servicePOCPhoneNumber !== '' ? docData.servicePOCPhoneNumber : 'N/A';
+
+			const plannedTransitionPartner = docData.pocPlannedTransitionPartner && docData.pocPlannedTransitionPartner !== null && docData.pocPlannedTransitionPartner !== '' ? docData.pocPlannedTransitionPartner :
+				docData.servicePlannedTransitionPartner && docData.servicePlannedTransitionPartner !== null && docData.servicePlannedTransitionPartner !== '' ? docData.servicePlannedTransitionPartner :
+					docData.primaryPlannedTransitionPartner && docData.primaryPlannedTransitionPartner !== null && docData.primaryPlannedTransitionPartner !== '' ? docData.primaryPlannedTransitionPartner : 'N/A';
+
+			const domainTask = docData.domainTask && docData.domainTask !== null && docData.domainTask !== '' ?
+				`${docData.domainTask}${docData.domainTaskSecondary && docData.domainTaskSecondary !== null && docData.domainTaskSecondary != '' ? `: ${docData.domainTaskSecondary}` : ''}` : 'N/A';
+
+			const referenceName = `pdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.budgetLineItem}#${docData.serviceAgency}#${docData.appropriationNumber}`;
+
+			// General Data
+			pdocContent.push(
+				{
+					text: referenceName,
+					id: referenceName,
+					fontSize: 1,
+					color: 'white'
+				},
+				{
 					style: 'table',
 					table: {
-						widths:['*'],
+						widths: [70, '*', 100, '*'],
 						body: [
-							[{text: 'Accomplishments', style: 'title'}],
-							...data.accomplishments.map(accomp => {
-								return [accomp.Accomp_Title_text ?? '']
-							})
-						],
+							[{
+								text: 'Line Item Title:',
+								style: 'subheader'
+							}, docData.projectTitle ?? 'N/A', {
+								text: 'AI Category:',
+								style: 'subheader'
+							}, label ?? 'N/A'],
+							[{
+								text: 'Line Item:',
+								style: 'subheader'
+							}, docData.budgetLineItem ?? 'N/A', {
+								text: 'Service Agency Name:',
+								style: 'subheader'
+							}, docData.serviceAgency ?? 'N/A'],
+							[{
+								text: showPOC ? 'Project POC:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocReviewer : ''}`, {
+								text: showPOC ? 'POC Organization:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocOrganization : ''}`],
+							[{
+								text: showPOC ? 'POC Email:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocEmail : ''}`, {
+								text: showPOC ? 'POC Phone:' : '',
+								style: 'subheader'
+							}, `${showPOC ? pocPhone : ''}`],
+							[{
+								text: 'Appropriation:',
+								style: 'subheader'
+							}, docData.appropriationNumber ?? 'N/A', {
+								text: 'Appropriation Title:',
+								style: 'subheader'
+							}, docData.appropriationTitle ?? 'N/A'],
+							[{
+								text: 'Budget Activity:',
+								style: 'subheader'
+							}, docData.budgetActivityNumber ?? 'N/A', {
+								text: 'Budget Activity Title:',
+								style: 'subheader'
+							}, docData.budgetActivityTitle],
+							[{text: 'Source Tags:', style: 'subheader'}, docData.sourceTag ?? 'N/A', '', ''],
+							[{
+								text: '# of Keywords:',
+								style: 'subheader'
+							}, docData.keywords ? docData.keywords.length : 'N/A', {
+								text: 'Included Keywords:',
+								style: 'subheader'
+							}, docData.keywords ?? 'N/A'],
+							[{text: 'AI Domain: ', style: 'subheader'}, domainTask, {
+								text: 'Planned Transition Partner (if known):',
+								style: 'subheader'
+							}, plannedTransitionPartner],
+						]
 					},
+					layout: {
+						defaultBorder: false
+					},
+					fontSize: 10,
 				}
 			);
 
+			// Costs, data type, jca
+			const JCAData = this.budgetSearchUtility.getJCAData();
+			const tmpJCAData = [];
+			if (docData.pocJointCapabilityArea && docData.pocJointCapabilityArea !== null && docData.pocJointCapabilityArea !== '') {
+				tmpJCAData.push({text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5});
+				const areas2 = docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null ? docData.pocJointCapabilityArea2.split(', ') : [];
+				const areas3 = docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null ? docData.pocJointCapabilityArea3.split(', ') : [];
+				const areasCombined = {};
+				areas2.forEach(area2 => {
+					areasCombined[area2] = [];
+				});
+
+				areas3.forEach(area3 => {
+					areas2.forEach(area2 => {
+						if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
+							areasCombined[area2].push(area3);
+						}
+					});
+				});
+
+				areas2.forEach(area2 => {
+					tmpJCAData.push(
+						{text: `${area2}:`, marginLeft: 5},
+						{
+							ul: areasCombined[area2].map(area3 => {
+								return {text: area3};
+							}),
+							marginBottom: 5,
+							marginLeft: 10
+						}
+					);
+				});
+
+			} else {
+				tmpJCAData.push('N/A');
+			}
+			pdocContent.push(
+				{
+					pageBreak: 'after',
+					style: 'table',
+					table: {
+						widths: ['*', '*', '*'],
+						body: [
+							[{text: 'FY21-FY25 Total Program Element Cost', style: 'subheader'}, {
+								text: 'Data Type',
+								style: 'subheader'
+							}, {text: 'Joint Capability Area', style: 'subheader'}],
+							[
+								{
+									stack: [
+										{text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5},
+										{text: 'FY21 (previous year):', marginBottom: 5},
+										{text: 'FY22:', marginBottom: 5},
+										{text: 'FY23:', marginBottom: 5},
+										{text: 'FY24:', marginBottom: 5},
+										{text: 'FY25:', marginBottom: 5},
+										{text: 'To Complete:', marginBottom: 5},
+										{text: 'Total Cost:', marginBottom: 5},
+									]
+								},
+								{
+									stack: [
+										{text: 'How does the project fit this data type?', marginBottom: 5},
+										{text: docData.pocAIType && (docData.pocAIType !== null && docData.pocAIType !== '') ? `${docData.pocAIType}:` : 'N/A', marginBottom: 5, bold: docData.pocAIType && (docData.pocAIType !== null && docData.pocAIType !== '')},
+										{text: docData.pocAITypeDescription && (docData.pocAITypeDescription !== null && docData.pocAITypeDescription !== '') ? docData.pocAITypeDescription : '', marginLeft: 5},
+									]
+								},
+								{
+									stack: [
+										{text: 'Role of AI in this project?', marginBottom: 5},
+										...tmpJCAData
+									]
+								},
+							],
+						]
+					}
+				}
+			);
+
+			// Mission partners acomplishments
+			let partnerList = !docData.pocMPAgreeLabel && docData.pocMissionPartnersList && docData.pocMissionPartnersList !== null && docData.pocMissionPartnersList !== '' ? docData.pocMissionPartnersList :
+				docData.serviceMissionPartnersList && docData.serviceMissionPartnersList !== null && docData.serviceMissionPartnersList !== '' ? docData.serviceMissionPartnersList : '';
+			let partnerChecklist = !docData.pocMPAgreeLabel && docData.pocMissionPartnersChecklist && docData.pocMissionPartnersChecklist !== null && docData.pocMissionPartnersChecklist !== '' ? docData.pocMissionPartnersChecklist :
+				docData.serviceMissionPartnersChecklist && docData.serviceMissionPartnersChecklist !== null && docData.serviceMissionPartnersChecklist !== '' ? docData.serviceMissionPartnersChecklist : '';
+
+			if (partnerList !== '') {
+				partnerList = partnerList.split('|');
+			} else {
+				partnerList = [];
+			}
+
+			if (partnerChecklist !== '') {
+				partnerChecklist = JSON.parse(partnerChecklist);
+				Object.keys(partnerChecklist).forEach(mpKey => {
+					if (partnerChecklist[mpKey]) {
+						partnerList.push(mpKey);
+					}
+				});
+			}
+
+			partnerList = [...new Set(partnerList)];
+
+			pdocContent.push(
+				{
+					pageBreak: 'after',
+					style: 'table',
+					table: {
+						widths: ['*'],
+						body: [
+							[{text: 'Mission Partners', style: 'subheader'}],
+							[
+								{
+									stack: [
+										...partnerList.map(mp => {
+											return {text: mp ?? '', margin: [2, 5, 0, 5]};
+										})
+									]
+								}
+							]
+						],
+					},
+				},
+			);
+
+			// Updating TOC
+			return [
+				{text: docData.budgetLineItem, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: docData.projectTitle, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: docData.serviceAgency, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{text: label, linkToDestination: referenceName, marginBottom: 5, marginTop: 5},
+				{pageReference: referenceName, marginBottom: 5, marginTop: 5}
+			];
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'LZ6NDDJ', userId);
+			return [''];
 		}
-		
-		return doc;
 	}
 
 }

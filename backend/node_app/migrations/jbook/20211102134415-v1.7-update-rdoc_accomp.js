@@ -9,7 +9,7 @@ module.exports = {
 
             return queryInterface.sequelize.transaction(function () {
                 Promise.all(queries);
-            })
+            });
         });
     },
 
@@ -17,7 +17,7 @@ module.exports = {
     return queryInterface.sequelize.transaction(function () {
 			Promise.all([
                 queryInterface.renameColumn(tablename, 'Proj_Number', 'Project_Number')
-      ])
-    })
+      ]);
+    });
   }
 };

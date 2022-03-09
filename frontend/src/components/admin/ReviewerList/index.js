@@ -30,10 +30,10 @@ export default () => {
 		});
     
 		setReviewerTableData(tableData);
-	}
+	};
 	const deleteReviewerData = async (reviewerRowId) => {
 		await gameChangerAPI.deleteReviewerData(reviewerRowId);
-	}
+	};
 
 	useEffect(()=>{
 		getReviewerData();
@@ -160,5 +160,5 @@ export default () => {
 			</div>
 			<ReviewerModal showCreateEditReviewerModal={showCreateEditReviewerModal} setShowCreateEditReviewerModal={setShowCreateEditReviewerModal} reviewerData={editReviewerData} getReviewerData={getReviewerData} />
 		</>
-	)
-}
+	);
+};

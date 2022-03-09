@@ -176,7 +176,7 @@ class SearchUtility {
 			var ordered =[];
 			var currList = [];
 			let orig = key.replace(/[^\w\s]|_/g, '').trim();
-			currList.push(orig)
+			currList.push(orig);
 			toReturn[key].forEach((y) => {
 				y.phrase = y.phrase.replace(/[^\w\s]|_/g, '').trim();
 				if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
@@ -184,7 +184,7 @@ class SearchUtility {
 					currList.push(y.phrase.toLowerCase());
 				}
 			});
-			cleaned[key] = ordered;''
+			cleaned[key] = ordered;'';
 		}
 
 		return cleaned;
@@ -211,7 +211,7 @@ class SearchUtility {
 		return decodeURIComponent(results[2].replace(/\+/g, ' '));
 	}
 
-	remove_stopwords = (str) => {
+	remove_stopwords(str) {
 		const stopwords = ['a', 'about', 'above', 'after', 'again', 'against', 'ain', 'all', 'am', 'an', 'and', 'any', 'are', 'aren', 'aren\'t', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'couldn', 'couldn\'t', 'd', 'did', 'didn', 'didn\'t', 'do', 'does', 'doesn', 'doesn\'t', 'doing', 'don', 'don\'t', 'down', 'during', 'each', 'few', 'for', 'from', 'further', 'had', 'hadn', 'hadn\'t', 'has', 'hasn', 'hasn\'t', 'have', 'haven', 'haven\'t', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'i', 'if', 'in', 'into', 'is', 'isn', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'just', 'll', 'm', 'ma', 'me', 'mightn', 'mightn\'t', 'more', 'most', 'mustn', 'mustn\'t', 'my', 'myself', 'needn', 'needn\'t', 'no', 'nor', 'not', 'now', 'o', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 're', 's', 'same', 'shan', 'shan\'t', 'she', 'she\'s', 'should', 'should\'ve', 'shouldn', 'shouldn\'t', 'so', 'some', 'such', 't', 'than', 'that', 'that\'ll', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 've', 'very', 'was', 'wasn', 'wasn\'t', 'we', 'were', 'weren', 'weren\'t', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'will', 'with', 'won', 'won\'t', 'wouldn', 'wouldn\'t', 'y', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves', 'could', 'he\'d', 'he\'ll', 'he\'s', 'here\'s', 'how\'s', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'let\'s', 'ought', 'she\'d', 'she\'ll', 'that\'s', 'there\'s', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'what\'s', 'when\'s', 'where\'s', 'who\'s', 'why\'s', 'would'];
 		let res = [];
 		const words = str.toLowerCase().split(' ');
@@ -293,7 +293,7 @@ class SearchUtility {
 		const termsArray = this.findLowerCaseWordsOrAcronyms(searchTextWithPlaceholders);
 
 		let queryText = '';
-		rawSequences = rawSequences.map(phrase => '(' + phrase.replace(/\"/g, '').split(' ').join(' & ') + ')').join(' | ')
+		rawSequences = rawSequences.map(phrase => '(' + phrase.replace(/\"/g, '').split(' ').join(' & ') + ')').join(' | ');
 
 		queryText = [rawSequences].concat(termsArray).filter(term => term !== '');
 		queryText = queryText.join(' | ');
@@ -3058,11 +3058,11 @@ class SearchUtility {
 					}
 				}
 			});
-		})
+		});
 
 		// FILTERS
 
-		console.log(jbookSearchSettings)
+		console.log(jbookSearchSettings);
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
 			query.query.bool.must.push({
@@ -3078,7 +3078,7 @@ class SearchUtility {
 			jbookSearchSettings.serviceAgency.forEach(agency => {
 				Object.keys(serviceAgencyMappings).forEach(agencyKey => {
 					if (serviceAgencyMappings[agencyKey] === agency) {
-						convertedAgencies.push(agencyKey)
+						convertedAgencies.push(agencyKey);
 					}
 				});
 			});
@@ -3086,7 +3086,7 @@ class SearchUtility {
 				terms: {
 					serviceAgency_s: convertedAgencies
 				}
-			})
+			});
 		}
 
 		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
@@ -3118,19 +3118,19 @@ class SearchUtility {
 		// SORT
 		switch (jbookSearchSettings.sort[0].id) {
 			case 'budgetYear':
-				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
 				break;
 			case 'programElement':
-				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
 				break;
 			case 'projectNum':
-				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
 				break;
 			case 'projectTitle':
-				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
 				break;
 			case 'serviceAgency':
-				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}]
+				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
 				break;
 			default:
 				break;

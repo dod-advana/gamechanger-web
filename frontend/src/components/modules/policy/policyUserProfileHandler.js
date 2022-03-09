@@ -66,7 +66,7 @@ const getGCUserDashboard = (props) => {
 			dispatch={dispatch}
 		/>
 	);
-}
+};
 
 const PolicyUserProfileHandler = {
 	getUserProfilePage: (props) => {

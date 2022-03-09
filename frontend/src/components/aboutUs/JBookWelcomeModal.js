@@ -7,7 +7,7 @@ import {
 	Typography,
 	Checkbox,
 	FormControlLabel, Link, makeStyles, withStyles
-} from '@material-ui/core'
+} from '@material-ui/core';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/Close';
 import MainLogo from '../../images/logos/JBooks Logo_wht.svg';
@@ -103,7 +103,7 @@ const JBookWelcome = (props) => {
 		localStorage.setItem(AGREEMENT_KEY, hideWelcome.toString());
 		setIsOpen(false);
 		setState(dispatch, { welcomeModalClosed: true });
-	}
+	};
 
 	return (
 		<Dialog
@@ -205,7 +205,7 @@ const styles = {
 		fontSize: 14,
 		paddingTop: 12
 	}
-}
+};
 
 const useStyles = makeStyles((theme) => ({
 	dialogRoot: { zIndex: '1290 !important' },

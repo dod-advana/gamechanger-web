@@ -29,7 +29,7 @@ const AdminMainView = (props) => {
 			setPageToView(tmpPages.general);
 			setPages(tmpPages);
 		}
-	}, [state, pageLoaded])
+	}, [state, pageLoaded]);
 
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -76,7 +76,7 @@ const AdminMainView = (props) => {
 				</>
 			}
 		</div>
-	)
+	);
 };
 
 AdminMainView.propTypes = {

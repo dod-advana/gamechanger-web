@@ -14,7 +14,7 @@ import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RateReviewIcon from '@mui/icons-material/RateReview';
-import GeneralAdminButtons from './jbookGeneralButtons'
+import GeneralAdminButtons from './jbookGeneralButtons';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCButton from '../../common/GCButton';
 import {Typography} from '@mui/material';
@@ -97,7 +97,7 @@ const userListTableAdditions = [
 
 const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
-	console.log('autodownload file')
+	console.log('autodownload file');
 
 	const a = document.createElement('a');
 	a.style = 'display: none';
@@ -111,8 +111,8 @@ const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => 
 	a.click();
 	//release the reference to the file by revoking the Object URL
 	window.URL.revokeObjectURL(url);
-	document.body.removeChild(a)
-}
+	document.body.removeChild(a);
+};
 
 const renderManageUsersTitleAdditions = () => {
 	return (
@@ -127,8 +127,8 @@ const renderManageUsersTitleAdditions = () => {
 			}}
 			style={{minWidth: 'unset', backgroundColor: '#1C2D64', borderColor: '#1C2D64'}}
 		>Download</GCButton>
-	)
-}
+	);
+};
 
 const renderDescriptionAdditions = () => {
 	return (
@@ -136,7 +136,7 @@ const renderDescriptionAdditions = () => {
 			<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>The table below lists all users that have visited JBOOK Search to date. Permissions and basic user information can be edited here.</Typography>
 		</div>
 	);
-}
+};
 
 const JBookAdminMainViewHandler = {
 	getPages: () => {
