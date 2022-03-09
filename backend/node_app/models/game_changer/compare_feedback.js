@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.BOOLEAN,
 				allowNull: true
 			},
+			userId: {
+				type: DataTypes.TEXT,
+				allowNull: false
+			}
 		},
 		{
 			freezeTableName: true,

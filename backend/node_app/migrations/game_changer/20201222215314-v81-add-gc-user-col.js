@@ -1,5 +1,5 @@
 'use strict';
-const tablename = 'gc_users'
+const tablename = 'gc_users';
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

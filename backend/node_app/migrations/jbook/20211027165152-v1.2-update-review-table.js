@@ -59,7 +59,7 @@ module.exports = {
         queryInterface.removeColumn(tablename, 'secrev_notes'),
         queryInterface.removeColumn(tablename, 'secrev_review_stat'),
 
-			])
+			]);
 		});
   },
 
@@ -111,7 +111,7 @@ module.exports = {
         queryInterface.addColumn(tablename, 'secrev_notes', Sequelize.TEXT),
         queryInterface.addColumn(tablename, 'secrev_review_stat', Sequelize.TEXT),
 
-      ])
+      ]);
 		});
   }
 };

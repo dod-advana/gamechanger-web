@@ -208,7 +208,7 @@ export default ({
 
 		const handleAddPermissionFieldChange = (event) => {
 			setAddPermissionField(event.target.value);
-		}
+		};
 
 		return (
 			<div>
@@ -259,7 +259,7 @@ export default ({
 					)}
 				</div>
 			</div>
-		)
+		);
 	};
 
 	return (
@@ -323,7 +323,7 @@ export default ({
 										>
 											{tab.children}
 										</Tab>
-									)
+									);
 								})}
 							</TabList>
 						</div>

@@ -99,20 +99,20 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 			break;
 	}
 	setState(dispatch, { jbookSearchSettings, dataSources, runSearch, searchText, resultsPage, loading: runSearch });
-}
+};
 
 export const handleTabClicked = (dispatch, state, tab) => {
 
 
 	setState(dispatch, { mainTabSelected: tab });
 
-}
+};
 
 export const scrollListViewTop = () => {
 	if (document.getElementById('list-view-tbody')) {
 		document.getElementById('list-view-tbody').scrollTop = 0;
 	}
-}
+};
 
 export const filterSortFunction = (a, b) => {
 	if (a === 'Blank' && b === 'Unknown') {
@@ -132,7 +132,7 @@ export const filterSortFunction = (a, b) => {
 		}
 		return 0;
 	}
-}
+};
 
 export const populateDropDowns = async (state, dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -189,7 +189,7 @@ export const populateDropDowns = async (state, dispatch) => {
 	// } else {
 	// 	setState(dispatch, {defaultOptions, dropdownData });
 	// }
-}
+};
 
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
@@ -206,6 +206,6 @@ export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt'
 	a.click();
 	//release the reference to the file by revoking the Object URL
 	window.URL.revokeObjectURL(url);
-	document.body.removeChild(a)
-}
+	document.body.removeChild(a);
+};
 

@@ -52,13 +52,13 @@ class TrendingSearchesController {
 					raw: true
 				});
 				for (let items of blacklistItems) {
-					blacklist.push(items['search_text'])
+					blacklist.push(items['search_text']);
 				 }
 			} catch (err) {
-				this.logger.error(err, '5ED1092')
+				this.logger.error(err, '5ED1092');
 			}
 
-			trending = await this.searchUtility.getSearchCount(daysBack, blacklist, userId)
+			trending = await this.searchUtility.getSearchCount(daysBack, blacklist, userId);
 			res.status(200).send(trending);
 		} catch (err) {
 			this.logger.error(err, '5ED9CQB', userId);
@@ -143,10 +143,10 @@ class TrendingSearchesController {
 	async getWeeklySearchCount(req, res) {
 		let userId = 'Unknown';
 		const daysBack = 14;
-		let results = []
+		let results = [];
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			results = await this.searchUtility.getSearchCount(daysBack, userId)
+			results = await this.searchUtility.getSearchCount(daysBack, userId);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, 'RZ18OVI', userId);

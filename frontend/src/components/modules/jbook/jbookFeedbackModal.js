@@ -50,7 +50,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 				break;
 		}
 
-		let stateObject = { feedbackForm: newFeedbackForm }
+		let stateObject = { feedbackForm: newFeedbackForm };
 
 		if (field in feedbackFormValidation && value && value.length > 0) {
 			newFeedbackFormValidation = _.cloneDeep(feedbackFormValidation);
@@ -59,10 +59,10 @@ const FeedbackModal = ({ dispatch, state }) => {
 		}
 
 		setState(dispatch, stateObject);
-	}
+	};
 
 	const validateForm = () => {
-		const feedbackValidation = _.cloneDeep(feedbackFormValidation)
+		const feedbackValidation = _.cloneDeep(feedbackFormValidation);
 		let validated = true;
 
 		for (const field of Object.keys(feedbackValidation)) {
@@ -77,7 +77,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 
 		setState(dispatch, { feedbackFormValidation: feedbackValidation, feedbackValidated: validated });
 		return validated;
-	}
+	};
 
 	return (
 		<Dialog
@@ -262,7 +262,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 								setState(dispatch, { feedbackModalOpen: false, feedbackSubmitted: true, feedbackText: 'Successfully submitted' });
 							}
 							else {
-								setState(dispatch, { feedbackModalOpen: true, feedbackText: 'Error submitting feedback' })
+								setState(dispatch, { feedbackModalOpen: true, feedbackText: 'Error submitting feedback' });
 							}
 						}
 
@@ -274,6 +274,6 @@ const FeedbackModal = ({ dispatch, state }) => {
 			</DialogActions>
 		</Dialog>
 	);
-}
+};
 
 export default FeedbackModal;

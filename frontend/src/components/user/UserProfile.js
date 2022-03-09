@@ -155,13 +155,13 @@ const UserProfile = React.memo((props) => {
 	const refreshUserData = async () => {
 		const {data} = await getUserData();
 		setUserData(data);
-	}
+	};
 
 	const saveUserData = async (data) => {
 		await updateUserData({userData: data});
 		setShowEditUserModal(false);
 		refreshUserData();
-	}
+	};
 
 	const renderUserData = () => {
 		return (
@@ -261,7 +261,7 @@ const UserProfile = React.memo((props) => {
 				</FormControl>
 			</>
 		);
-	}
+	};
 
 	return (
 		<div style={style}>
@@ -327,6 +327,6 @@ UserProfile.propTypes = {
 	style: PropTypes.object,
 	primaryColor: PropTypes.string,
 	secondaryColor: PropTypes.string,
-}
+};
 
 export default UserProfile;

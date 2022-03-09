@@ -36,7 +36,7 @@ class SimpleExportHandler extends ExportHandler {
 				...rest
 			} = req.body;
 
-			const clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger'}
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger'};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -126,7 +126,7 @@ class SimpleExportHandler extends ExportHandler {
 								is_primary_reviewer: user.extra_fields?.jbook?.is_primary_reviewer || false,
 								is_service_reviewer: user.extra_fields?.jbook?.is_service_reviewer || false,
 								is_poc_reviewer: user.extra_fields?.jbook?.is_poc_reviewer || false,
-							})
+							});
 						}
 					}
 				});

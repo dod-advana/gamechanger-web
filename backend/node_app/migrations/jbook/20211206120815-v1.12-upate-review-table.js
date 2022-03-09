@@ -14,7 +14,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -26,7 +26,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'alternate_poc_email', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'alternate_poc_org', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'alternate_poc_phone_number', Sequelize.TEXT)
-        ])
+        ]);
     });
   }
 };

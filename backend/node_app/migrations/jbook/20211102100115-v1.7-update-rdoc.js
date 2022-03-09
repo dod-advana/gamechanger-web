@@ -30,7 +30,7 @@ module.exports = {
 			
 			return queryInterface.sequelize.transaction(function () {
 				Promise.all(queries);
-			})
+			});
 		});
 	},
 
@@ -58,7 +58,7 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'PlanPrgrm_Fund_CY_Text_Search', Sequelize.TSVECTOR),
 				queryInterface.removeColumn(tablename, 'Proj_Title_Search', Sequelize.TSVECTOR),
 				queryInterface.removeColumn(tablename, 'SubProj_Title_Search', Sequelize.TSVECTOR),
-      ])
-    })
+      ]);
+    });
   }
 };

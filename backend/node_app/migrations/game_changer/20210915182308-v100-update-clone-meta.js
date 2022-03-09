@@ -1,5 +1,5 @@
 'use strict';
-const tablename = 'clone_meta'
+const tablename = 'clone_meta';
 
 module.exports = {
 	up: async (queryInterface, Sequelize) => {

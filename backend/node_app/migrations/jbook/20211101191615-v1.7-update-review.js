@@ -11,8 +11,8 @@ module.exports = {
               queries.push(queryInterface.renameColumn(tablename, 'rev_stp', 'service_ptp_agree_label'));
           }
           return queryInterface.sequelize.transaction(function () {
-			    Promise.all(queries)
-            })
+			    Promise.all(queries);
+            });
       });
     
   },
@@ -22,7 +22,7 @@ module.exports = {
 			Promise.all([
         queryInterface.renameColumn(tablename, 'service_ptp_agree_label', 'rev_stp'),
         queryInterface.removeColumn(tablename, 'service_poc_phone_number')
-      ])
-    })
+      ]);
+    });
   }
 };

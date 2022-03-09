@@ -431,7 +431,7 @@ let privateMethods = {
 				logger.error(e);
 				reject(e);
 			});
-		})
+		});
 	},
 
 	updateAppVersion(username, app, currentVersion) {
@@ -468,7 +468,7 @@ let privateMethods = {
 			.catch(err => { 
 				reject(err);
 			});
-		})
+		});
 	}
 };
 
@@ -828,7 +828,7 @@ module.exports = {
 				})
 			});
 			return res.status(200).send('User role removed');
-		} catch (e)  { return ApiError.send400(req, res, e, '0166bf58'); }
+		} catch (e)  { return ApiError.send400(req, res, e, '0166bf58') }
 	},
 
 	updateUser(req, res) {
@@ -938,7 +938,7 @@ module.exports = {
 			try {
 				const results = await UserPrefs.getUserPref('system', 'darq_current_period');
 				currentPeriod = results.prefValue.label;
-			} catch (e) { return ApiError.send400(req, res, e, 'cb6d8a92'); }
+			} catch (e) { return ApiError.send400(req, res, e, 'cb6d8a92') }
 
 			options.where['$or'] = [
 				{
@@ -970,7 +970,7 @@ module.exports = {
 		try {
 			const results = await UserPrefs.getUserPref('system', 'darq_current_period');
 			currentPeriod = results.prefValue.label;
-		} catch (e) { return ApiError.send400(req, res, e, 'e24ac858'); }
+		} catch (e) { return ApiError.send400(req, res, e, 'e24ac858') }
 
 		user.findAll({
 			attributes: ['id', 'username', 'displayname', 'email', 'subAgency', 'extra_fields'],
@@ -1041,7 +1041,7 @@ module.exports = {
 							currentVersion: true,
 							message: 'New user app version updated'
 						}
-					)
+					);
 				}
 
 				// any user with outdated version
@@ -1067,7 +1067,7 @@ module.exports = {
 								{ 
 									message: 'failed to update'
 								}
-							)
+							);
 						}
 					})
 					.catch((err) => {
@@ -1108,6 +1108,6 @@ module.exports = {
 		.catch((err) => {
 			logger.error(err);
 			res.status(400).send(err);
-		})
+		});
 	}
 };

@@ -67,10 +67,10 @@ class EdaExportHandler extends ExportHandler {
 				
 				if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, [], expansionDict, clientObj.esIndex);
-					const filenames = searchResults.docs.map((a) => a.filename)
+					const filenames = searchResults.docs.map((a) => a.filename);
 					
-					const tables = ['"pds_parsed"."line_item_details"']
-					const columns = ['filename','prod_or_svc_des', 'buying_currency']
+					const tables = ['"pds_parsed"."line_item_details"'];
+					const columns = ['filename','prod_or_svc_des', 'buying_currency'];
 			
 					const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
 
@@ -138,7 +138,7 @@ class EdaExportHandler extends ExportHandler {
 			stringifier.on('error', (err) => {
 				this.logger.error(e.message, 'P9KP9BX', userId);
 				throw new Error(err);
-			})
+			});
 
 			this.writeCsvData(stringifier, data);
 
@@ -176,11 +176,11 @@ class EdaExportHandler extends ExportHandler {
 		}
 		else {
 			try {
-				const rootfile = item.filename.substr(item.filename.lastIndexOf("/")+1)
+				const rootfile = item.filename.substr(item.filename.lastIndexOf("/")+1);
 				const pieces = rootfile.split('-');
 				const first = pieces[7];
 				if (first === 'empty' || !first) {
-					throw new Error('parsing failed')
+					throw new Error('parsing failed');
 				}
 				const second = pieces[8] === 'empty' ? '' : `-${pieces[8]}`;
 				const mod = pieces[9] === 'empty' ? '' : `-${pieces[9]}`;
@@ -188,7 +188,7 @@ class EdaExportHandler extends ExportHandler {
 	
 				return `${first}${second}${mod}${mod2}`;
 			} catch (e) {
-				return `${item.filename.substr(item.filename.lastIndexOf("/")+1) ? 'Not Available' : ''}`
+				return `${item.filename.substr(item.filename.lastIndexOf("/")+1) ? 'Not Available' : ''}`;
 			}
 		}
 	};

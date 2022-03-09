@@ -213,6 +213,12 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			intelligent_systems_agree: {
 				type: DataTypes.TEXT
+			},
+			appn_num: {
+				type: DataTypes.TEXT
+			},
+			agency: {
+				type: DataTypes.TEXT
 			}
 		}, {
 		freezeTableName: true,

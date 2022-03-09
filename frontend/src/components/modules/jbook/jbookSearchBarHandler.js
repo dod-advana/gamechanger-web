@@ -66,7 +66,7 @@ const jbookSearchBarHandler = {
 
 				<UserButton context={context} backgroundColor={'#9E9E9E'} />
 
-				<Popover onClose={() => { handleFavoriteSearchClicked(null); }}
+				<Popover onClose={() => { handleFavoriteSearchClicked(null) }}
 					open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
 					anchorOrigin={{
 						vertical: 'bottom',
@@ -82,7 +82,7 @@ const jbookSearchBarHandler = {
 							<TextField
 								label={'Favorite Name'}
 								value={favoriteName}
-								onChange={(event) => { setFavoriteName(event.target.value); }}
+								onChange={(event) => { setFavoriteName(event.target.value) }}
 								className={classes.textField}
 								margin='none'
 								size='small'
@@ -118,6 +118,6 @@ const jbookSearchBarHandler = {
 			</div>
 		);
 	},
-}
+};
 
 export default jbookSearchBarHandler;

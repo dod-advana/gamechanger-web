@@ -155,7 +155,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'StartQuarter', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'StartYear', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'SubProj_Title', Sequelize.TEXT)
-			])
+			]);
 		});
 	}
 };

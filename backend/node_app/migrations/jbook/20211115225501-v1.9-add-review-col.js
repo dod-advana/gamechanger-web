@@ -11,7 +11,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -20,7 +20,7 @@ module.exports = {
       Promise.all([
           queryInterface.removeColumn(tablename, 'domain_task', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'domain_task_secondary', Sequelize.TEXT),
-        ])
+        ]);
     });
   }
 };
