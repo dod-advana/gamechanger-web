@@ -154,7 +154,7 @@ const JBookProfilePage = (props) => {
 
 			setState(dispatch, { reviewData: { ...projectData.data.review }, domainTasks });
 		}
-	}
+	};
 
 	useEffect(() => {
 		try {
@@ -207,7 +207,7 @@ const JBookProfilePage = (props) => {
 	}, []);
 
 	useEffect(() => {
-		console.log(projectData)
+		console.log(projectData);
 		if (projectData.id) {
 			if (!isCheckboxSet) {
 				setIsCheckboxSet(true);
@@ -253,10 +253,10 @@ const JBookProfilePage = (props) => {
 								accomp[i].data[y].Value = accomp[i].data[y].Value.replaceAll(`â`, `'`);
 
 							}
-						})
-					})
+						});
+					});
 
-					console.log(accomp)
+					console.log(accomp);
 				}
 
 				try {
@@ -425,7 +425,7 @@ const JBookProfilePage = (props) => {
 				</DialogActions>
 			</Dialog>
 		);
-	}
+	};
 
 	const setReviewData = (field, value) => {
 		let newReviewData = _.cloneDeep(reviewData);
@@ -448,7 +448,7 @@ const JBookProfilePage = (props) => {
 					primaryPlannedTransitionPartner: null,
 					serviceAdditionalMissionPartners: null,
 					primaryReviewNotes: null
-				}
+				};
 				break;
 			case 'serviceForm':
 				newReviewData = {
@@ -467,7 +467,7 @@ const JBookProfilePage = (props) => {
 					servicePOCPhoneNumber: null,
 					serviceReviewerNotes: null,
 					serviceSecondaryReviewer: '',
-				}
+				};
 
 				stateObject.serviceValidated = true;
 
@@ -513,7 +513,7 @@ const JBookProfilePage = (props) => {
 					'Human-Machine Interaction': [],
 					'Responsible AI': [],
 					'Other': []
-				}
+				};
 				break;
 			case 'domainTaskSecondary':
 				if (domainTasks[domainTask]) {
@@ -617,7 +617,7 @@ const JBookProfilePage = (props) => {
 					'Human-Machine Interaction': [],
 					'Responsible AI': [],
 					'Other': []
-				}
+				};
 				break;
 			case 'clearDataType':
 				newReviewData.pocAIType = '';
@@ -647,21 +647,29 @@ const JBookProfilePage = (props) => {
 		}
 
 		setState(dispatch, stateObject);
-	}
+	};
 
 	const validateForm = (form) => {
 		const { reviewData } = state;
-		const validationForm = state[form + 'Validation'];
+		const validationForm = _.cloneDeep(state[form + 'Validation']);
 		let validated = true;
 		for (const field of Object.keys(validationForm)) {
 			const fieldValue = reviewData[field];
 
 			if (field === 'amountAttributed') {
-				let dollarsAttributed = reviewData['pocDollarsAttributed'];
-				let percentageAttributed = reviewData['pocPercentageAttributed'];
+				if (getClassLabel(reviewData) !== 'Not AI') {
+					let dollarsAttributed = reviewData['pocDollarsAttributed'];
+					let percentageAttributed = reviewData['pocPercentageAttributed'];
 
-				validationForm['amountAttributed'] = (dollarsAttributed !== null && dollarsAttributed !== undefined && dollarsAttributed !== '') ||
-					(percentageAttributed !== null && percentageAttributed !== undefined && percentageAttributed !== '');
+					validationForm[field] = (dollarsAttributed !== undefined && dollarsAttributed !== null && dollarsAttributed !== '') ||
+						(percentageAttributed !== undefined && percentageAttributed !== null && percentageAttributed !== '');
+
+					if (validationForm[field] === false) {
+						validated = false;
+					}
+				} else {
+					validationForm[field] = true;
+				}
 			}
 			else if (field === 'servicePlannedTransitionPartner') {
 				validationForm[field] = (reviewData['servicePTPAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
@@ -678,24 +686,33 @@ const JBookProfilePage = (props) => {
 			else if (field === 'pocPlannedTransitionPartner') {
 				validationForm[field] = (reviewData['pocPTPAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
 			}
+			else if ((getClassLabel(reviewData) === 'AI Enabling' || getClassLabel(reviewData) === 'Not AI')) {
+				if (!(field === 'domainTask' || field === 'pocJointCapabilityArea' || field === 'roboticsSystemAgree' ||
+					field === 'intelligentSystemsAgree' || field === 'pocAIType' || field === 'pocAITypeDescription' ||
+					field === 'pocAIRoleDescription')) {
+					validationForm[field] = (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+					if (validationForm[field] === false) {
+						validated = false;
+					}
+				} else {
+					validationForm[field] = true;
+				}
+			}
 			else {
 				validationForm[field] = (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
 				if (validationForm[field] === false) {
 					validated = false;
 				}
 			}
-
 		}
-
 
 		setState(dispatch, { [form + 'Validation']: validationForm, [form + 'Validated']: validated });
 		return validated;
-	}
+	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		if (getClassLabel(reviewData) === 'Not AI' || !isSubmit || reviewType === 'primary' || validateForm(reviewType)) {
+		if (!isSubmit || reviewType === 'primary' || validateForm(reviewType) || getClassLabel(reviewData) === 'Not AI') {
 			setState(dispatch, { [loading]: true });
-			console.log(reviewData)
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
 				cloneName: cloneData.clone_name,
@@ -719,7 +736,7 @@ const JBookProfilePage = (props) => {
 			setState(dispatch, { [loading]: false });
 		}
 
-	}
+	};
 
 	const reenableForm = async (loading, reviewType) => {
 		setState(dispatch, { [loading]: true });
@@ -737,7 +754,7 @@ const JBookProfilePage = (props) => {
 		});
 		await getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
 		setState(dispatch, { [loading]: false });
-	}
+	};
 
 	const setKeywordCheck = (keyword, keywordsChecked) => {
 		let newKeywordsChecked = _.cloneDeep(keywordsChecked);
@@ -755,8 +772,8 @@ const JBookProfilePage = (props) => {
 			newKeywordsChecked = [keyword];
 		}
 
-		setState(dispatch, { keywordsChecked: newKeywordsChecked })
-	}
+		setState(dispatch, { keywordsChecked: newKeywordsChecked });
+	};
 
 
 	return (
@@ -865,7 +882,9 @@ const JBookProfilePage = (props) => {
 							<JBookPOCReviewForm
 								renderReenableModal={renderReenableModal}
 								finished={reviewData.pocReviewStatus === 'Finished Review'}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_poc_reviewer  && (Auth.getTokenPayload().email === reviewData.servicePOCEmail || Auth.getTokenPayload().email === reviewData.alternate_poc_email))}
+								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK POC Reviewer') &&
+									(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
+										Auth.getTokenPayload().email === reviewData.altPOCEmail))}
 								reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 								dropdownData={dropdownData}
 								vendorData={projectData.vendors}
@@ -881,7 +900,7 @@ const JBookProfilePage = (props) => {
 				</StyledReviewRightContainer>
 			</StyledReviewContainer>
 		</div>
-	)
-}
+	);
+};
 
 export default JBookProfilePage;

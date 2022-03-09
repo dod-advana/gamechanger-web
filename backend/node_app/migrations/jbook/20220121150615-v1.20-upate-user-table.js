@@ -15,7 +15,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -28,7 +28,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'state', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'city', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'job_title', Sequelize.TEXT),
-        ])
+        ]);
     });
   }
 };

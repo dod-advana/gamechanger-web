@@ -197,13 +197,13 @@ class ExternalAPIController {
 							return {
 								apiKeyId: key.dataValues.id,
 								cloneId: clone.id
-							}
-						})
+							};
+						});
 						
 						const joins = await this.apiKeyClones.bulkCreate(joinObjects, {
 							returning: true,
 							ignoreDuplicates: true
-						})	
+						});	
 
 						if (joins) {
 							await this.apiKeyRequests.update({ approved: true, rejected: false }, { where: { id } });
@@ -276,13 +276,13 @@ class ExternalAPIController {
 						return {
 							apiKeyRequestId: request.dataValues.id,
 							cloneId
-						}
-					})
+						};
+					});
 					
 					const joins = await this.apiKeyRequestClones.bulkCreate(joinObjects, {
 						returning: true,
 						ignoreDuplicates: true
-					})
+					});
 
 					if (joins) res.sendStatus(200);
 					else res.sendStatus(400);
@@ -306,10 +306,10 @@ class ExternalAPIController {
 			const { description, key } = req.body;
 			const update = await this.apiKeys.update({ description }, { where: { apiKey: key } });
 			if (update) {
-				res.status(200).send({status: update})
+				res.status(200).send({status: update});
 			} else { res.status(400) }
 		} catch(err) {
-			this.logger.error(err, "MJID22P", userId)
+			this.logger.error(err, "MJID22P", userId);
 		}
 	}
 
@@ -320,9 +320,9 @@ class ExternalAPIController {
 					username: userId,
 					active: true
 				}
-			})
+			});
 			if (active && 'apiKey' in active) {
-				return active.apiKey
+				return active.apiKey;
 			} else {
 				return '';
 			}
@@ -361,7 +361,7 @@ class ExternalAPIController {
 			Sincerely,<br/>
 			The GAMECHANGER team
 			</p>
-			<img src="cid:gc-footer" width="100%"/><br/>`
+			<img src="cid:gc-footer" width="100%"/><br/>`;
 			const attachment = [
 				{
 					filename: 'GC-api-access.png',
@@ -373,8 +373,8 @@ class ExternalAPIController {
 					path: __dirname + '/../../images/email/GC-footer.png',
 					cid: 'gc-footer'
 				}
-			]
-			await this.emailUtility.sendEmail(emailBody,"GAMECHANGER API Key",request.email, this.constants.GAME_CHANGER_OPTS.emailAddress, attachment, userId)
+			];
+			await this.emailUtility.sendEmail(emailBody,"GAMECHANGER API Key",request.email, this.constants.GAME_CHANGER_OPTS.emailAddress, attachment, userId);
 		} catch (err) {
 			this.logger.error(JSON.stringify(err), 'S6ED9GF', userId);
 		}

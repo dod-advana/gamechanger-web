@@ -362,7 +362,7 @@ class EDASearchUtility {
 						}
 					}
 				}
-			}
+			};
 
 			const majcomQuery = 
 			{ 
@@ -374,7 +374,7 @@ class EDASearchUtility {
 						}
 					}
 				}
-			}
+			};
 
 			const orgs = settings.organizations;
 			for (const org of orgs) {
@@ -481,7 +481,7 @@ class EDASearchUtility {
 						}
 					}
 				}
-			}
+			};
 
 			for (const year of settings.fiscalYears) {
 				const ceil = parseInt(year) + 1;
@@ -493,7 +493,7 @@ class EDASearchUtility {
 							format: 'yyyy'
 						}
 					}
-				})
+				});
 			}
 			filterQueries.push(nestedQuery);
 		}
@@ -504,7 +504,7 @@ class EDASearchUtility {
 				bool: {
 					should: []
 				}
-			}
+			};
 			let metadataText = '';
 
 			// set up query based on PDS, SYN, or PDF selected
@@ -517,7 +517,7 @@ class EDASearchUtility {
 									is_supplementary_data_included_eda_ext_b: false
 								}
 							}
-						)
+						);
 					}
 					else { // PDS or SYN
 						metadataText += contractType + ", ";
@@ -545,7 +545,7 @@ class EDASearchUtility {
 						}
 					}
 					
-				)
+				);
 			}
 
 			if (filterQuery.bool.should.length > 0) {
@@ -563,7 +563,7 @@ class EDASearchUtility {
 						}
 					}
 				}
-			}
+			};
 
 			let push = false;
 
@@ -587,7 +587,7 @@ class EDASearchUtility {
 				match: {
 					mod_identifier_eda_ext: "base_award"
 				}
-			}
+			};
 
 			const boolQuery = {
 				bool: {
@@ -599,10 +599,10 @@ class EDASearchUtility {
 						}
 					]
 				}
-			}
+			};
 
 			if (settings.contractsOrMods === "contracts") {
-				filterQueries.push(filterQuery)
+				filterQueries.push(filterQuery);
 			}
 			else if (settings.contractsOrMods === "mods") { 
 				filterQueries.push(boolQuery);
@@ -645,7 +645,7 @@ class EDASearchUtility {
 				let result = this.searchUtility.transformEsFields(r.fields);
 				const { _source = {}, fields = {} } = r;
 				const { topics_s = {} } = _source;
-				result.topics_s = topics_s
+				result.topics_s = topics_s;
 	
 				if (!selectedDocuments || selectedDocuments.length === 0 || (selectedDocuments.indexOf(result.filename) !== -1)) {
 					result.pageHits = [];
@@ -691,7 +691,7 @@ class EDASearchUtility {
 					}
 					catch(err) {
 						console.log(err);
-						console.log('Error parsing EDA fields')
+						console.log('Error parsing EDA fields');
 					}
 					
 					result.esIndex = index;
@@ -827,7 +827,7 @@ class EDASearchUtility {
 						]
 					}
 				}
-			}
+			};
 
 			if (idv !== "") {
 				query.query.bool.must.push(
@@ -849,7 +849,7 @@ class EDASearchUtility {
 						}
 					}
 				}
-				)
+				);
 			}
 
 			if (isAward) {
@@ -885,7 +885,7 @@ class EDASearchUtility {
 			}
 			return query;
 		} catch(err) {
-			this.logger.error(err, 'S5PJASQ', user)
+			this.logger.error(err, 'S5PJASQ', user);
 		}
 	}
 

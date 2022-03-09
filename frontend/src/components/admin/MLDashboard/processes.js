@@ -32,7 +32,7 @@ const Process = (props) => {
 			'thread_id':row.original.thread_id,
 			'process': `${row.original.category}: ${row.original.process}`
 		});
-	}
+	};
 
 	const allColumns = [
 		{
@@ -72,7 +72,7 @@ const Process = (props) => {
 			Cell: (row) => <TableRow>
 				{('message' in row.original) ? row.value : 
 					<IconButton onClick={() => {
-						killProcess(row)
+						killProcess(row);
 					}} style={{ color: 'white' }}><Stop fontSize="large"/></IconButton>}
 			</TableRow>,
 		},

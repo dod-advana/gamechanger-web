@@ -203,14 +203,14 @@ const renderStats = (contractTotals) => {
 		return {
 			Key: key,
 			Value: contractTotals[key] > 1000 ? (contractTotals[key] / 1000).toFixed(2) + ' B' : (parseFloat(contractTotals[key])).toFixed(2) + ' M'
-		}
+		};
 	});
 	data = data.filter(row => row.Key !== '');
 	data.sort((a, b) => {
 		if (a.Key === 'Total Obligated Amt.') {
 			return 1;
 		} else {
-			return a.Key > b.Key ? 1 : -1
+			return a.Key > b.Key ? 1 : -1;
 		}
 	});
 

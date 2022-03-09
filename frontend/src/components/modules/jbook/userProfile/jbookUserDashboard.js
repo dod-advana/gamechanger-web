@@ -77,7 +77,7 @@ const styles = {
 		fontWeight: 'bold',
 		color: '#E9691D'
 	}
-}
+};
 
 const columns = [
 	{
@@ -236,7 +236,7 @@ const columns = [
 				<div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
 					{row.value}
 				</div>
-			)
+			);
 		},
 		headerStyle: {
 			overflow: 'visible'
@@ -312,7 +312,7 @@ const JBookUserDashboard = (props) => {
 			tmpPermissions['poc'] = data.data.extra_fields?.jbook?.is_poc_reviewer || false;
 
 			setPermissions(tmpPermissions);
-			setEmail(data.data.email)
+			setEmail(data.data.email);
 		});
 	}, []);
 
@@ -339,7 +339,7 @@ const JBookUserDashboard = (props) => {
 					}
 
 					return returnBool;
-				})
+				});
 
 				const finished = docs.filter(doc => {
 					let returnBool = false;
@@ -356,7 +356,7 @@ const JBookUserDashboard = (props) => {
 					}
 
 					return returnBool;
-				})
+				});
 
 				setToDoList(toDo);
 				setCompletedList(finished);
@@ -420,12 +420,12 @@ const JBookUserDashboard = (props) => {
 								}
 								window.open(url);
 							},
-						}
+						};
 					}}
 				/>
 			</>
 		);
-	}
+	};
 
 	const renderCompletedList = () => {
 		return (
@@ -483,12 +483,12 @@ const JBookUserDashboard = (props) => {
 								}
 								window.open(url);
 							},
-						}
+						};
 					}}
 				/>
 			</>
 		);
-	}
+	};
     
 	return (
 		<div>

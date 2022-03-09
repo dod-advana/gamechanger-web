@@ -7,10 +7,10 @@ const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
-const { getTenDigitUserId } = require('../utils/userUtility')
+const { getTenDigitUserId } = require('../utils/userUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
-const SearchUtility = require('../utils/searchUtility')
+const SearchUtility = require('../utils/searchUtility');
 const constantsFile = require('../config/constants');
 const Sequelize = require('sequelize');
 const { HandlerFactory } = require('../factories/handlerFactory');
@@ -70,7 +70,6 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			
 			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
 
 			if (is_favorite) {
@@ -101,7 +100,7 @@ class FavoritesController {
 					where: {
 						favorite_document_id: favorite_id
 					}
-				})
+				});
 				res.status(200).send(deleted);
 			}
 		} catch (err) {
@@ -229,7 +228,7 @@ class FavoritesController {
 		let userId = 'Unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			
+
 			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids} = req.body;
 
 			if (create) {
@@ -257,7 +256,7 @@ class FavoritesController {
 					where: {
 						favorite_group_id: group_ids
 					}
-				})
+				});
 				res.status(200).send({deletedGroup, deletedFavs});
 			}
 		} catch (err) {
@@ -274,20 +273,20 @@ class FavoritesController {
 
 			const { groupId, documentIds } = req.body;
 			const docObjects = documentIds.map(docId => {
-				return {user_id: getUserIdFromSAMLUserId(req), favorite_group_id: groupId, favorite_document_id: docId}
-			})
+				return {user_id: getUserIdFromSAMLUserId(req), favorite_group_id: groupId, favorite_document_id: docId};
+			});
 			
 			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
 				where:{
 					favorite_group_id: groupId
 				}
-			})
+			});
 			let totalInGroup = documentIds.length + existingFavorites.length;
 			existingFavorites.forEach(fav => {
 				if(documentIds.includes(fav.dataValues.favorite_document_id)){
 					totalInGroup--;
 				}
-			})
+			});
 			if(totalInGroup > 5){
 				return res.status(400);
 			}
@@ -295,7 +294,7 @@ class FavoritesController {
 			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
 				returning: true,
 				ignoreDuplicates: true
-			})
+			});
 			res.status(200).send(favorites);
 		} catch (err) {
 			this.logger.error(err, '1YT9HQB', userId);
@@ -315,7 +314,7 @@ class FavoritesController {
 					favorite_group_id: groupId,
 					favorite_document_id: documentId
 				}
-			})
+			});
 			res.status(200).send({removed});
 		} catch (err) {
 			this.logger.error(err, '2XR1QAD', userId);

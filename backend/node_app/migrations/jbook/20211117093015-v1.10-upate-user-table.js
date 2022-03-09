@@ -13,7 +13,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -24,7 +24,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'user_id', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'organization', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'email', Sequelize.TEXT),
-        ])
+        ]);
     });
   }
 };

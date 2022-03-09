@@ -21,12 +21,12 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 
 	useEffect(()=>{
 		setEditReviewerData(reviewerData);
-	},[reviewerData])
+	},[reviewerData]);
 
 	const closeReviewerModal = () => {
 		setEditReviewerData({});
 		setShowCreateEditReviewerModal(false);
-	}
+	};
 	/**
      * 
      * @param {*} ReviewerToEdit
@@ -44,13 +44,13 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 				getReviewerData();
 			}
 		});
-	}
+	};
 
 	const handleTextChange = (value, key) => {
 		const tmpData = { ...editReviewerData };
 		tmpData[key] = value;
 
-		console.log(key)
+		console.log(key);
 
 		if (key === 'type'){
 			switch (value) {
@@ -196,5 +196,5 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 			</DialogActions>
 			
 		</Dialog>
-	)
-}
+	);
+};

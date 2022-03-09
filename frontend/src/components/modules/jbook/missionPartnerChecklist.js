@@ -53,4 +53,4 @@ export const renderMissionPartnersCheckboxes = (setMP, mpOptions, finished, agre
 				{checkboxes}
 			</FormGroup>
 		</FormControl>);
-}
+};

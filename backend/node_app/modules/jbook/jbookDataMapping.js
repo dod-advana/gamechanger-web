@@ -343,7 +343,7 @@ module.exports = {
 			processValue: (value) => value
 		},
 		'account': {
-			newName: 'programElement',
+			newName: 'appropriationNumber',
 			defaultValue: '',
 			processValue: (value) => value
 		},
@@ -353,22 +353,22 @@ module.exports = {
 			processValue: (value) => value
 		},
 		'ag_bsa': {
-			newName: 'budgetActivityNumnber',
+			newName: 'projectNum',
 			defaultValue: '',
 			processValue: (value) => value
 		},
 		'ag_budget_subactivity_title': {
-			newName: 'budgetActivityTitle',
+			newName: 'projectTitle',
 			defaultValue: '',
 			processValue: (value) => value
 		},
 		'budget_activity': {
-			newName: 'appropriationNumber',
+			newName: 'budgetActivityNumber',
 			defaultValue: '',
 			processValue: (value) => value
 		},
 		'budget_activity_title': {
-			newName: 'projectTitle',
+			newName: 'budgetActivityTitle',
 			defaultValue: '',
 			processValue: (value) => value
 		},
@@ -398,7 +398,7 @@ module.exports = {
 			processValue: (value) => value
 		},
 		'sag_bli': {
-			newName: 'projectNum',
+			newName: 'programElement',
 			defaultValue: '',
 			processValue: (value) => value
 		}
@@ -477,7 +477,7 @@ module.exports = {
 				if (Array.isArray(value)) {
 					value = value.filter(partner => {
 						return partner !== null && partner !== 'null';
-					})
+					});
 					return value.join(', ');
 				} else {
 					if (value === null || value === 'null') value = '';
@@ -766,6 +766,21 @@ module.exports = {
 		},
 		intelligent_systems_agree: {
 			newName: 'intelligentSystemsAgree',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		appn_num: {
+			newName: 'appropriationNumber',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		agency: {
+			newName: 'serviceAgency',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budget_activity': {
+			newName: 'budgetActivityNumber',
 			defaultValue: '',
 			processValue: (value) => value
 		},
@@ -1832,4 +1847,4 @@ module.exports = {
 		'SDA': 'Space Development Agency (SDA)',
 		'WHS': 'Washington Headquarters Services (WHS)',
 	}
-}
+};

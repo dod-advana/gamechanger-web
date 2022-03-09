@@ -112,12 +112,12 @@ module.exports = (sequelize, DataTypes) => {
 		CLONE_META.belongsToMany(models.api_key_request, { 
 			through: 'api_key_request_clone', 
 			foreignKey: 'cloneId'
-		})
+		});
 		CLONE_META.belongsToMany(models.api_key, { 
 			through: 'api_key_clone', 
 			foreignKey: 'cloneId'
-		})
-	}
+		});
+	};
 	
 	return CLONE_META;
 };

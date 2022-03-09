@@ -6,7 +6,7 @@ module.exports = {
 		return queryInterface.sequelize.transaction(function () {
 			Promise.all([
 				queryInterface.addColumn(tablename, 'doc_id', Sequelize.TEXT)
-			])
+			]);
 		});
 	},
 

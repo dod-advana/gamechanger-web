@@ -20,7 +20,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -39,7 +39,7 @@ module.exports = {
           // queryInterface.removeColumn(tablename, 'Proj_Performance_Metrics_Search', Sequelize.TSVECTOR),
           // queryInterface.removeColumn(tablename, 'OthProgFund_Summary_Remarks_Search', Sequelize.TSVECTOR),
 
-        ])
+        ]);
     });
   }
 };

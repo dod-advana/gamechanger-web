@@ -77,7 +77,7 @@ const JBookNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -158,7 +158,7 @@ const JBookNavigationHandler = {
 				<GCTooltip title="About Us" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -210,6 +210,6 @@ const JBookNavigationHandler = {
 			</div>
 		);
 	}
-}
+};
 
 export default JBookNavigationHandler;

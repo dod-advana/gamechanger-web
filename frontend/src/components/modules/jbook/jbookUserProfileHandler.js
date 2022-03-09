@@ -10,7 +10,7 @@ const displayUserRelatedItems = () => {
 	return (
 		<JBookUserDashboard />
 	);
-}
+};
 
 const JBookUserProfileHandler = {
 	getUserProfilePage: (props) => {

@@ -95,7 +95,7 @@ export const styles = {
 		fontWeight: 'bold',
 		color: '#E9691D'
 	}
-}
+};
 
 export const StyledContainer = styled.div`
 	width: 100%;

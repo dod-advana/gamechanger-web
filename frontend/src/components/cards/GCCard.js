@@ -6,12 +6,12 @@ import {
 	CARD_FONT_SIZE,
 	getTrackingNameForFactory,
 } from '../../utils/gamechangerUtils';
-import { Divider, Checkbox, FormControlLabel, Typography, Switch } from '@material-ui/core';
+import { Divider, Checkbox } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
 import { trackEvent } from '../telemetry/Matomo';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import GCButton from '../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
@@ -27,7 +27,6 @@ import {
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
-import {gcOrange} from '../common/gc-colors';
 
 const CARD_HEIGHT = 412;
 
@@ -38,20 +37,6 @@ var IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
 var IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const gameChangerAPI = new GameChangerAPI();
-
-const OrangeSwitch = withStyles({
-	switchBase: {
-		color: '#ffffff',
-		'&$checked': {
-			color: gcOrange,
-		},
-		'&$checked + $track': {
-			backgroundColor: gcOrange,
-		},
-	},
-	checked: {},
-	track: {},
-})(Switch);
 
 const StyledCardContainer = styled.div`
 	width: ${({ listView, showSideFilters, graphView }) =>
@@ -394,8 +379,6 @@ function GCCard(props) {
 	const [loaded, setLoaded] = useState(false);
 	const [filename, setFilename] = useState('');
 	const [modalOpen, setModalOpen] = useState(false);
-	const [showQuickCompare, setShowQuickCompare] = useState(false);
-	const [compareIndex, setCompareIndex] = useState(0);
 
 	useEffect(() => {
 		// Create the factory
@@ -404,7 +387,6 @@ function GCCard(props) {
 			const factory = new CardFactory(module_name);
 			const handler = factory.createHandler();
 			setCardHandler(handler[cardType]);
-			setCompareIndex(0);
 			setLoaded(true);
 			setFilename(handler[cardType].getFilename(item));
 			if (cardType === 'organization') {
@@ -550,39 +532,7 @@ function GCCard(props) {
 			selectedDocuments: new Map(selectedDocuments),
 			selectedDocumentsForGraph: newDocArray,
 		});
-	}
-	
-	const quickCompareToggleComponent = () => {
-		return (
-			<GCTooltip title={`Quickly compare the matched paragraphs to the input document`} placement='top' arrow>
-				<div style={{marginTop: 2, paddingRight: 5, minWidth: 178}}>
-					<FormControlLabel
-						value="compare"
-						control={<OrangeSwitch checked={showQuickCompare} onChange={handleQuickCompareToggle}/>}
-						label={<Typography style={{fontFamily: 'Montserrat', fontSize: 14, color: '#000000DE'}}>Quick Compare</Typography>}
-						labelPlacement="start"
-					/>
-				</div>
-			</GCTooltip>
-		);
-	}
-	
-	const handleQuickCompareToggle = (e) => {
-		setShowQuickCompare(e.target.checked);
-	}
-	
-	const handleChangeCompareIndex = (change) => {
-		setCompareIndex(compareIndex + change);
-	}
-	
-	const handleCompareDocument = (filename) => {
-		setState(dispatch, {compareModalOpen: true, compareFilename: filename});
-	}
-
-	const handleIgnore = (item, index) => {
-		setCompareIndex(0)
-		setState(dispatch, {ignoredDocs: [{item, index}]});
-	}
+	};
 	
 	const intelligentFeedbackComponent = () => (
 		<div style={styles.tooltipRow}>
@@ -619,11 +569,9 @@ function GCCard(props) {
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
-									'CardInteraction',
-									'IntelligentSearchThumbsUp',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									'thumbsUp',
+									cardHandler.getFilename(item)
+									`search : ${searchText}`
 								);
 							}
 						}}
@@ -641,11 +589,9 @@ function GCCard(props) {
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
-									'CardInteraction',
-									'IntelligentSearchThumbsDown',
-									`search : ${searchText}, title: ${cardHandler.getDisplayTitle(
-										item
-									)}`
+									'thumbsDown',
+									cardHandler.getFilename(item)
+									`search : ${searchText}`
 								);
 							}
 						}}
@@ -707,7 +653,20 @@ function GCCard(props) {
 									No
 								</GCButton>
 								<GCButton
-									onClick={() => handleSaveFavorite(false)}
+									onClick={() => {
+										handleSaveFavorite(false);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_cancel_favorite_document',
+											cardHandler.getDisplayTitle(item),
+											searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'CancelFavorite',
+											cardHandler.getFilename(item),
+											`search : ${searchText}`
+										);
+									}}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -753,7 +712,20 @@ function GCCard(props) {
 									Cancel
 								</GCButton>
 								<GCButton
-									onClick={() => handleSaveFavorite(true)}
+									onClick={() =>{
+										handleSaveFavorite(true);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_favorite_document',
+											cardHandler.getDisplayTitle(item),
+											searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'Favorite',
+											cardHandler.getFilename(item),
+											`search : ${searchText}`
+										);
+									}}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -794,7 +766,6 @@ function GCCard(props) {
 									favoriteComponent,
 									graphView,
 									intelligentSearch,
-									quickCompareToggleComponent
 								})}
 							{/* END CARD HEADER */}
 
@@ -807,14 +778,7 @@ function GCCard(props) {
 							<div className={`styled-card-front-content`}>
 								{loaded &&
 									<>
-										{showQuickCompare ?
-											cardHandler.getDocumentQuickCompare({
-												item,
-												state,
-												compareIndex,
-												handleChangeCompareIndex
-											})
-											:
+										{
 											cardHandler.getCardFront({
 												item,
 												state,
@@ -864,33 +828,6 @@ function GCCard(props) {
 									</div>
 								</div>
 							)}
-							{(state.listView && item.isCompare) &&
-								<div className={'styled-card-front-buttons'}>
-									<div className={'styled-action-buttons-group'}>
-										{loaded && cardHandler.getFooter({
-											toggledMore,
-											graphView,
-											cloneName: state.cloneData.clone_name,
-											filename,
-											searchText,
-											setToggledMore,
-											closeGraphCard,
-											name: item.title,
-											item,
-											setModalOpen,
-											showEsDoc: () => {
-												console.log(item);
-												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
-											},
-											state,
-											handleCompareDocument,
-											handleIgnore,
-											showQuickCompare,
-											compareIndex
-										})}
-									</div>
-								</div>
-							}
 							{/* END CARD FRONT FOOTER */}
 						</div>
 					</div>

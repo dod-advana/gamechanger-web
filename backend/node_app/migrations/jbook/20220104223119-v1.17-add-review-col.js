@@ -12,7 +12,7 @@ module.exports = {
 
         return queryInterface.sequelize.transaction(function () {
             Promise.all(queries);
-        })
+        });
     });
   },
 
@@ -22,7 +22,7 @@ module.exports = {
           queryInterface.removeColumn(tablename, 'intelligent_systems_agree', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'poc_joint_capability_area2', Sequelize.TEXT),
           queryInterface.removeColumn(tablename, 'poc_joint_capability_area3', Sequelize.TEXT),
-        ])
+        ]);
     });
   }
 };

@@ -7,7 +7,7 @@ const jbookTitleBarHandler = {
 	},
 
 	getCategoryTabs(props) {
-		return <></>
+		return <></>;
 	},
 
 	getTitleBarStyle(props) {
@@ -21,7 +21,7 @@ const jbookTitleBarHandler = {
 			backgroundColor: '#1C2D64'
 		};
 	}
-}
+};
 
 export default jbookTitleBarHandler;
 
