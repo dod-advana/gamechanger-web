@@ -110,7 +110,7 @@ const TableStyle = styled.div`
 			}
 		}
 	}
-`
+`;
 
 const styles = {
 	legendItem: {
@@ -122,7 +122,7 @@ const styles = {
 		textTransform: 'uppercase',
 		fontWeight: 'bold'
 	}
-}
+};
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -586,7 +586,7 @@ const GCDataStatusTracker = (props) => {
 				percent = '66%';
 				break;
 			case 'Ingest Complete':
-				percent = '100%'
+				percent = '100%';
 				break;
 			default:
 				percent = '0%';
@@ -599,8 +599,8 @@ const GCDataStatusTracker = (props) => {
 			<div style={{maxWidth: 150, width: '80%', height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
 				<div style={{width: percent, height: 8, background: '#969696', borderRadius: '24px', position: 'absolute'}}/>
 			</div>
-		</>)
-	}
+		</>);
+	};
 
 	const renderCrawlerData = () => {
 		const crawlerColumns = [
