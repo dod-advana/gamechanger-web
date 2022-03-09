@@ -17,10 +17,6 @@ export default function IngestStats() {
 		});
 	}, []);
 
-	useEffect(() => {
-		console.log('ingestData: ', ingestData);
-	}, [ingestData]);
-
 	const getDomain = () => {
 		let highest = 0;
 		if(ingestData.docsByMonth){

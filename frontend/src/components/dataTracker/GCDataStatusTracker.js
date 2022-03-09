@@ -609,15 +609,21 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'crawler_name',
-				Cell: (row) => 
-					<TableRow>
-						<a 
-							href={row.original.url_origin ? row.original.url_origin : '#'} 
-							target='_blank' 
-							rel="noreferrer">
+				Cell: (row) =>{
+					return row.original.url_origin ?
+						<TableRow>
+							<a 
+								href={row.original.url_origin ? row.original.url_origin : '#'} 
+								target='_blank' 
+								rel="noreferrer">
+								{matchCrawlerName(row.value)}
+							</a>
+						</TableRow>
+						:
+						<TableRow>
 							{matchCrawlerName(row.value)}
-						</a>
-					</TableRow>,
+						</TableRow>;
+				},
 				style: { 'whiteSpace': 'unset' },
 			},
 			{
@@ -682,7 +688,6 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Last Action',
 				accessor: 'datetime',
-				width: 150,
 				Cell: (row) => {
 					return (
 						<TableRow>
@@ -694,7 +699,6 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Days Since Last Ingest',
 				accessor: 'datetime',
-				width: 200,
 				Cell: (row) => {
 					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
 				},
