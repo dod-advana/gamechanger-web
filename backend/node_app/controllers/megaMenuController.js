@@ -87,7 +87,7 @@ class MegaMenuController {
 			return {
 				label,
 				links: this.generateLinkLabels(filteredSectionData),
-			}
+			};
 		});
 	}
 	
@@ -110,13 +110,13 @@ class MegaMenuController {
 					label,
 					links: thirdLevelLinks[0].links,
 					permission: null
-				}
-			})
+				};
+			});
 			if (links.length === 1) return links[0];
 			return {
 				label: sectionLabel,
 				links
-			}
+			};
 	
 		});
 	}
@@ -132,7 +132,7 @@ class MegaMenuController {
 				description,
 				link,
 				links: this.generateLinkLabels(sectionData)
-			}
+			};
 		});
 	
 		const data2 = _.map(twoLevelSections, section => {
@@ -143,7 +143,7 @@ class MegaMenuController {
 				description,
 				link,
 				links: this.generateTwoLevelConfig(sectionData)
-			}
+			};
 		});
 	
 		const data3 = _.map(threeLevelSections, section => {
@@ -154,7 +154,7 @@ class MegaMenuController {
 				description,
 				link,
 				links: this.generateThreeLevelConfig(sectionData)
-			}
+			};
 		});
 		return _.indexBy([...data1, ...data2, ...data3], 'title');
 	}

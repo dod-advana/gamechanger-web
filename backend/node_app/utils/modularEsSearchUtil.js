@@ -7,7 +7,7 @@ ModularEsSearchUtil.prototype.createBasicEsQuery = function(opts) {
 		limit
 	} = opts;
 	return 'fake';
-}
+};
 
 const modularEsSearchUtil = new ModularEsSearchUtil();
 

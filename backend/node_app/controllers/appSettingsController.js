@@ -25,7 +25,7 @@ class AppSettingsController {
 			topicSearch:'topic_search',
 			jiraFeedback:'jira_feedback',
 			ltr: 'ltr'
-		}
+		};
 		
 		// Binding the key for combined search mode to get and set
 		this.getCombinedSearchMode = this.getMode.bind(this, this.keys.combinedSearch);
@@ -107,10 +107,10 @@ class AppSettingsController {
 		try {
 			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key} });
 			if (dataValues.value === 'true'){
-				dataValues.value = 'false'
+				dataValues.value = 'false';
 			}
 			else{
-				dataValues.value = 'true'
+				dataValues.value = 'true';
 			}
 			const updatedResult = await this.appSettings.update(dataValues, { where: {key: key} });
 			res.status(200).send({ updatedResult });

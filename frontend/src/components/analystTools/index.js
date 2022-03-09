@@ -31,7 +31,7 @@ const AnalystTools = (props) => {
 		}
 		
 		setTabIndex(tabIndex);
-	}
+	};
 	
 	return (
 		<>
@@ -69,8 +69,8 @@ const AnalystTools = (props) => {
 				</Tabs>
 			</div>
 		</>
-	)
-}
+	);
+};
 
 const styles = {
 	buttons: {
@@ -131,10 +131,10 @@ const styles = {
 		paddingTop: '20px',
 		paddingBottom: '20px'
 	}
-}
+};
 
 AnalystTools.prototypes = {
 	state: propTypes.objectOf({})
-}
+};
 
 export default AnalystTools;

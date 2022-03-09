@@ -84,12 +84,12 @@
   "eslintConfig": {
     "rules": {
       "semi": [
-				"error",
-				"always",
-				{
-					"omitLastInOneLineBlock": true
-				}
-			],
+        "error",
+        "always",
+        {
+          "omitLastInOneLineBlock": true
+        }
+      ],
       "max-len": 0,
       "indent": [
         "warn",

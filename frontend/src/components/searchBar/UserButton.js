@@ -34,7 +34,7 @@ const UserButton = (props) => {
 		>
 			<GCButton
 				onClick={() => {
-					window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`)
+					window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
 					clearDashboardNotification(state.cloneData.clone_name, 'total', state, dispatch);
 					setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				}}
@@ -44,7 +44,7 @@ const UserButton = (props) => {
 			</GCButton>
 		</StyledBadge>
 	);
-}
+};
 
 export default UserButton;
 

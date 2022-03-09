@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import GCButton from '../common/GCButton';
@@ -10,13 +10,13 @@ const styles = {
 		display: 'block',
 		margin: '10px 0'
 	}
-}
+};
 
 const useStyles = makeStyles({
 	root: {
 		width: '500px'
 	}
-})
+});
 
 export default function GCResponsibilitySearch({ 
 	setPreSearch, 
@@ -53,7 +53,7 @@ export default function GCResponsibilitySearch({
 		{ title: 'DoDD 1332.41', year: 1974 },
 		{ title: 'DoDI 3115.15', year: 2008 },
 		{ title: 'DoDI 1225.08', year: 1957 },
-	]
+	];
 
 	return (
 		<div>
@@ -172,7 +172,7 @@ export default function GCResponsibilitySearch({
 				</GCButton>
 			</div>
 		</div>
-	)
+	);
 }
 
 // Doc Title – User should select 0+ from a prepopulated list of options (typing should filter the list for easier selection, see “Study Section” or “Organization” fields of https://reporter.nih.gov/advanced-search)

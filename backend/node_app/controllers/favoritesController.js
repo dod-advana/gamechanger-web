@@ -7,10 +7,10 @@ const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
-const { getTenDigitUserId } = require('../utils/userUtility')
+const { getTenDigitUserId } = require('../utils/userUtility');
 const LOGGER = require('../lib/logger');
 const sparkMD5Lib = require('spark-md5');
-const SearchUtility = require('../utils/searchUtility')
+const SearchUtility = require('../utils/searchUtility');
 const constantsFile = require('../config/constants');
 const Sequelize = require('sequelize');
 const { HandlerFactory } = require('../factories/handlerFactory');
@@ -70,7 +70,7 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId)
+			const new_id = getTenDigitUserId(userId);
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
 
@@ -102,7 +102,7 @@ class FavoritesController {
 					where: {
 						favorite_document_id: favorite_id
 					}
-				})
+				});
 				res.status(200).send(deleted);
 			}
 		} catch (err) {
@@ -118,7 +118,7 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId)
+			const new_id = getTenDigitUserId(userId);
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { search_name, search_summary, search_text, tiny_url, document_count, is_favorite } = req.body;
 
@@ -161,7 +161,7 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId)
+			const new_id = getTenDigitUserId(userId);
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { topic, topicSummary, is_favorite } = req.body;
 
@@ -201,7 +201,7 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId)
+			const new_id = getTenDigitUserId(userId);
 			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { organization, organizationSummary, is_favorite } = req.body;
 
@@ -268,7 +268,7 @@ class FavoritesController {
 					where: {
 						favorite_group_id: group_ids
 					}
-				})
+				});
 				res.status(200).send({deletedGroup, deletedFavs});
 			}
 		} catch (err) {
@@ -286,20 +286,20 @@ class FavoritesController {
 
 			const { groupId, documentIds } = req.body;
 			const docObjects = documentIds.map(docId => {
-				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId}
-			})
+				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId};
+			});
 			
 			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
 				where:{
 					favorite_group_id: groupId
 				}
-			})
+			});
 			let totalInGroup = documentIds.length + existingFavorites.length;
 			existingFavorites.forEach(fav => {
 				if(documentIds.includes(fav.dataValues.favorite_document_id)){
 					totalInGroup--;
 				}
-			})
+			});
 			if(totalInGroup > 5){
 				return res.status(400);
 			}
@@ -307,7 +307,7 @@ class FavoritesController {
 			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
 				returning: true,
 				ignoreDuplicates: true
-			})
+			});
 			res.status(200).send(favorites);
 		} catch (err) {
 			this.logger.error(err, '1YT9HQB', userId);
@@ -327,7 +327,7 @@ class FavoritesController {
 					favorite_group_id: groupId,
 					favorite_document_id: documentId
 				}
-			})
+			});
 			res.status(200).send({removed});
 		} catch (err) {
 			this.logger.error(err, '2XR1QAD', userId);

@@ -158,7 +158,7 @@ const DecoupledFooter = (props) => {
 			console.error('Error getting clone meta data: ', err);
 		}
 		
-	}
+	};
 
 	useEffect (() => {
 		initializeUserMatomoStatus();
@@ -166,7 +166,7 @@ const DecoupledFooter = (props) => {
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
 		getUserData();
 		getCloneData();
-	}, [])
+	}, []);
 
 	const setUserMatomoStatus = (status) => {
 		
@@ -176,12 +176,12 @@ const DecoupledFooter = (props) => {
 		}, (err) => {
 			console.log(err);
 		});
-	}
+	};
 
 	const handleClose = () => {
 		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
 		window.location = '#/gamechanger';
-	}
+	};
 
 	const handleCloneChange = (cloneId) => {
 		setApiRequestError('');
@@ -194,7 +194,7 @@ const DecoupledFooter = (props) => {
 			newRequestAPIKeyData.clones.push(cloneId);
 		}
 		setRequestAPIKeyData(newRequestAPIKeyData);
-	}
+	};
 	
 	const renderAPIKeyRequestForm = () => {
 		return (
@@ -271,7 +271,7 @@ const DecoupledFooter = (props) => {
 									labelPlacement="end"
 									className={classes.titleText}
 								/>
-							)
+							);
 						})}
 					</FormGroup>
 					{apiRequestError && <div style={{color: '#f44336'}}>{apiRequestError}</div>}
@@ -298,7 +298,7 @@ const DecoupledFooter = (props) => {
 			}).catch(e => {
 				console.log(e);
 			});
-	}
+	};
 
 	return (
 		<FooterContainer>

@@ -1,5 +1,5 @@
 'use strict';
-const tablename = 'crawler_info'
+const tablename = 'crawler_info';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(function () {
