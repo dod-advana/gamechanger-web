@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -13,33 +13,33 @@ export default function IngestStats() {
 
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then(res => {
-			setIngestData(res.data)
+			setIngestData(res.data);
 		});
-	}, [])
+	}, []);
 
 	useEffect(() => {
-		console.log('ingestData: ', ingestData)
-	}, [ingestData])
+		console.log('ingestData: ', ingestData);
+	}, [ingestData]);
 
 	const getDomain = () => {
 		let highest = 0;
 		if(ingestData.docsByMonth){
 			ingestData.docsByMonth.forEach(data => {
 				if(data.count > highest) {
-					highest = data.count
+					highest = data.count;
 				};
-			})
+			});
 			const tens = String(highest).length - 1;
 			const domain = Math.ceil(highest/(Math.pow(10, tens))) * Math.pow(10, tens);
 			return domain;
 		}
 		return 10000;
-	}
+	};
 
 	return (
 		<div style={{marginLeft: 20, width: '25%'}}>
 			<div style={{background: '#F7F7F7', padding: 20, marginBottom: 20, minHeight: 300 }}>
-				<div style={{font: 'normal normal 600 14px Noto Sans', color: '#666666', marginBottom: 10}}>DOCUMENTS INGESTION BY MONTH</div>
+				<div style={{font: 'normal normal 600 14px Noto Sans', color: '#666666', marginBottom: 10}}>DOCUMENTS INGESTED BY MONTH</div>
 				<div style={{height: 250}}>
 					<ResponsiveContainer width='100%' height='100%'>
 						{Object.keys(ingestData).length ?

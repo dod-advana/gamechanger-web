@@ -1,5 +1,5 @@
-import React from 'react'
-import { gcOrange } from '../common/gc-colors'
+import React from 'react';
+import { gcOrange } from '../common/gc-colors';
 
 export default function StatPill({ stat, descriptor }) {
 	return (
@@ -7,5 +7,5 @@ export default function StatPill({ stat, descriptor }) {
 			<div style={{color: gcOrange, font: 'normal normal 600 28px/20px Noto Sans', marginBottom: 5}}>{stat}</div>
 			<div style={{font: 'normal normal 600 10px Noto Sans'}}>{descriptor}</div>
 		</div>
-	)
+	);
 }
