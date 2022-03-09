@@ -14,6 +14,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
+import IngestStats from './IngestStats';
 
 const GoalIcon = styled.div`
 	height: 20px;
@@ -25,6 +26,7 @@ const TableRow = styled.div`
 	height: 100%;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 `;
 const CenterRow = styled.div`
 	display: flex;
@@ -607,7 +609,15 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'crawler_name',
-				Cell: (row) => <TableRow>{matchCrawlerName(row.value)}</TableRow>,
+				Cell: (row) => 
+					<TableRow>
+						<a 
+							href={row.original.url_origin ? row.original.url_origin : '#'} 
+							target='_blank' 
+							rel="noreferrer">
+							{matchCrawlerName(row.value)}
+						</a>
+					</TableRow>,
 				style: { 'whiteSpace': 'unset' },
 			},
 			{
@@ -724,20 +734,23 @@ const GCDataStatusTracker = (props) => {
 						</div>
 					</div>
 				</SectionHeader>
-				<TableStyle>
-					<ReactTable
-						data={crawlerTableData}
-						columns={crawlerColumns}
-						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
-						pageSize={PAGE_SIZE}
-						showPageSizeOptions={false}
-						filterable={false}
-						loading={loading}
-						manual={true}
-						pages={numPages}
-						onFetchData={handleFetchCrawlerData}
-					/>
-				</TableStyle>
+				<div style={{display: 'flex'}}>
+					<TableStyle style={{width: '75%'}}>
+						<ReactTable
+							data={crawlerTableData}
+							columns={crawlerColumns}
+							style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+							pageSize={PAGE_SIZE}
+							showPageSizeOptions={false}
+							filterable={false}
+							loading={loading}
+							manual={true}
+							pages={numPages}
+							onFetchData={handleFetchCrawlerData}
+						/>
+					</TableStyle>
+					<IngestStats style={{width: '25%'}}/>
+				</div>
 			</>
 		);
 	};

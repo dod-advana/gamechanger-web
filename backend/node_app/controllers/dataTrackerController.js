@@ -145,13 +145,13 @@ class DataTrackerController {
 	async getCrawlerMetadata(req, res) {
 		let userId = 'webapp_unknown';
 		const { limit = 10, offset = 0, order = [], where = {}, option='all' } = req.body;
-		
+		const attributes = ['crawler_name', 'status', 'datetime'];
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			if (option === 'all'){
 				const crawlerData = await this.crawlerStatus.findAndCountAll({
 					raw: true,
-					attributes: ['crawler_name', 'status', 'datetime'],
+					attributes,
 					where,
 					offset,
 					order,
@@ -161,8 +161,11 @@ class DataTrackerController {
 			}else if (option === 'status'){
 				let level_value;
 				let crawlerData = {};
+				const info = await this.crawlerInfo.findAll({
+					attributes: ['crawler', 'url_origin']
+				});
 				level_value = await this.crawlerStatus.findAll({
-					attributes: ['crawler_name', 'status', 'datetime'],
+					attributes,
 				}).then(data=>{
 					data.map(item =>{
 						if (crawlerData[item.crawler_name] ){
@@ -176,15 +179,16 @@ class DataTrackerController {
 					return crawlerData;
 				});
 				let resp = [];
-				Object.keys(level_value).slice(offset, offset + limit).map(data =>{
-					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime});
+				Object.keys(level_value).slice(offset, offset + limit).forEach(data =>{
+					const url_origin = info.find(crawler => crawler.dataValues.crawler === data)?.dataValues?.url_origin;
+					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime, url_origin});
 				});
 				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
 			}else if (option === 'last'){
 				let level_value;
 				let crawlerData = {};
 				level_value = await this.crawlerStatus.findAll({
-					attributes: ['crawler_name', 'status', 'datetime'],
+					attributes,
 					where: {
 						status: 'Ingest Complete'
 					}
@@ -211,6 +215,7 @@ class DataTrackerController {
 			res.status(502).send({ error: e.message, message: 'Error retrieving crawler metadata' });
 		}
 	}
+
 
 	async getCrawlerInfoData(req, res) {
 		let userId = 'webapp_unknown';
@@ -267,7 +272,7 @@ class DataTrackerController {
 					[Sequelize.fn('count', '*'), 'count']
 				],
 				group: 'month'
-			})
+			});
 			docsByMonthRaw.sort((a,b) => {
 				if(a.dataValues.month > b.dataValues.month) return 1;
 				return -1;
@@ -281,7 +286,7 @@ class DataTrackerController {
 			const monthsObject = {};
 			docsByMonthRaw.forEach(data => {
 				monthsObject[monthNames[data.dataValues.month.getUTCMonth()]] = data.dataValues.count;
-			})
+			});
 
 			const docsByMonth = [];
 			for(let i = 0; i < 12; i++){
@@ -291,7 +296,7 @@ class DataTrackerController {
 				if(monthsObject[month]){ 
 					docsByMonth.push({month, count: Number(monthsObject[month])});
 				}else{
-					docsByMonth.push({month, count: 0})
+					docsByMonth.push({month, count: 0});
 				}
 			}
 
@@ -299,7 +304,7 @@ class DataTrackerController {
 				docsByMonth,
 				numberOfSources,    
 				numberOfDocuments
-			}
+			};
 
 			res.status(200).send(docIngestionStats);
 		} catch (e) {
