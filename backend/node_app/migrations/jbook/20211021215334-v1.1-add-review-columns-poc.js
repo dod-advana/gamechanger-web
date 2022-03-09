@@ -8,7 +8,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'secondary_reviewer', Sequelize.TEXT),
         		queryInterface.addColumn(tablename, 'poc_org', Sequelize.TEXT),
         		queryInterface.addColumn(tablename, 'poc_phone_number', Sequelize.TEXT),
-			])
+			]);
 		});
 	},
 

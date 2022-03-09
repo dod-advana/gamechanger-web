@@ -135,21 +135,21 @@ const EditUserProfile = React.memo((props) => {
 
 		Object.keys(userData).forEach(dataKey => {
 			tempUserDataErrors[dataKey] = false;
-		})
+		});
 
 		setUserDataErrors(tempUserDataErrors);
-	},[userData])
+	},[userData]);
     
 	const closeUserModal = () => {
 		const tmpData = { ...userDataErrors };
 		Object.keys(tmpData).forEach(dataKey => {
 			tmpData[dataKey] = false;
-		})
+		});
 		setUserDataErrors(tmpData);
 		setEditUserData(userData);
 
 		setShowModal(false);
-	}
+	};
 
 	const saveUserData = () => {
 		const tmpData = { ...userDataErrors };
@@ -161,14 +161,14 @@ const EditUserProfile = React.memo((props) => {
 				tmpData[reqField] = true;
 				hasErrors = true;
 			}
-		})
+		});
 
 		setUserDataErrors(tmpData);
-		console.log(tmpData)
+		console.log(tmpData);
 
 		if (!hasErrors)
 			updateUserData(editUserData);
-	}
+	};
 
 	const handleTextChange = (event, key) => {
 		const tmpData = { ...editUserData };
@@ -367,6 +367,6 @@ EditUserProfile.propTypes = {
 	primaryColor: PropTypes.string,
 	secondaryColor: PropTypes.string,
 	customMessage: PropTypes.string
-}
+};
 
 export default EditUserProfile;

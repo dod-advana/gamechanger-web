@@ -7,9 +7,9 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { trackEvent } from '../telemetry/Matomo';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@material-ui/core';
-import GCTooltip from '../common/GCToolTip'
-import { backgroundGreyDark, backgroundWhite } from '../../components/common/gc-colors';
-import { gcOrange } from '../../components/common/gc-colors';
+import GCTooltip from '../common/GCToolTip';
+import { backgroundGreyDark, backgroundWhite } from '../common/gc-colors';
+import { gcOrange } from '../common/gc-colors';
 import Pagination from 'react-js-pagination';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -427,7 +427,7 @@ const GCUserDashboard = React.memo((props) => {
 		const groupId = documentGroups.find(group => group.group_name === target.value).id;
 		setDocumentsToGroup([]);
 		setSelectedGroup({id: groupId, name: target.value});
-	}
+	};
 
 	const searchHistoryColumns = [
 		{
@@ -637,7 +637,7 @@ const GCUserDashboard = React.memo((props) => {
 
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name)
+			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name);
 			userData.favorite_searches.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
@@ -654,7 +654,7 @@ const GCUserDashboard = React.memo((props) => {
 		}
 
 		if (userData.search_history) {
-			userData.search_history = userData.search_history.filter(search=>search.clone_name===cloneData.clone_name)
+			userData.search_history = userData.search_history.filter(search=>search.clone_name===cloneData.clone_name);
 			userData.search_history.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
@@ -676,7 +676,7 @@ const GCUserDashboard = React.memo((props) => {
 		}
 
 		if (userData.export_history) {
-			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name)
+			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
 			userData.export_history.forEach(hist => {
 
 				let orgFilterText = '';
@@ -717,7 +717,7 @@ const GCUserDashboard = React.memo((props) => {
 
 		if(userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			setSelectedGroup({id: null, name: ''})
+			setSelectedGroup({id: null, name: ''});
 		}
 
 		if (userData.favorite_organizations) {
@@ -979,7 +979,7 @@ const GCUserDashboard = React.memo((props) => {
 		favoriteSearchesSlice[idx].updated_results = false;
 		handleClearFavoriteSearchNotification(favoriteSearchesSlice[idx]);
 		updateUserData();
-	}
+	};
 
 	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
@@ -990,7 +990,7 @@ const GCUserDashboard = React.memo((props) => {
 			newDocumentsToGroup.push(value);
 		}
 		setDocumentsToGroup(newDocumentsToGroup);
-	}
+	};
 
 	const handleDeleteGroupCheckbox = (value) => {
 		const newGroupsToDelete = [...groupsToDelete];
@@ -1001,7 +1001,7 @@ const GCUserDashboard = React.memo((props) => {
 			newGroupsToDelete.push(value);
 		}
 		setGroupsToDelete(newGroupsToDelete);
-	}
+	};
 
 	const handleAddToFavorites = async () => {
 		if(!selectedGroup.name) return setAddToGroupError('Please select a group');
@@ -1009,18 +1009,18 @@ const GCUserDashboard = React.memo((props) => {
 		let totalInGroup = documentsToGroup.length;
 		selectedGroupInfo.favorites.forEach(favId => {
 			if(!documentsToGroup.includes(favId)) totalInGroup++;
-		})
+		});
 		if(totalInGroup > 5) return setAddToGroupError('Groups can only contain up to 5 items');
 		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
 		updateUserData();
 		handleCloseAddGroupModal();
-	}
+	};
 
 	const handleCloseAddGroupModal = () => {
 		setAddToGroupError('');
 		setShowAddToGroupModal(false);
 		setDocumentsToGroup([]);
-	}
+	};
 
 	const renderDocumentsToAdd = () => {
 		let groupFavorites;
@@ -1043,10 +1043,10 @@ const GCUserDashboard = React.memo((props) => {
 						/>}
 						label={<Typography variant="h6" noWrap className={classes.label}>{doc.title}</Typography>}
 					/>
-				</GCTooltip>
+				</GCTooltip>;
 			})}
-		</div>
-	}
+		</div>;
+	};
 
 	const renderDocumentFavorites = () => {
 		return (
@@ -1083,7 +1083,7 @@ const GCUserDashboard = React.memo((props) => {
 											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
 											<Select classes={{root: classes.groupSelect}} value={selectedGroup.name} onChange={handleChange}>
 												{_.map(documentGroups, (group) => {
-													return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>
+													return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>;
 												})}
 											</Select>
 										</FormControl>
@@ -1110,7 +1110,7 @@ const GCUserDashboard = React.memo((props) => {
 								<div className={'col-xs-12'} style={{ padding: 0 }}>
 									<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
 										{_.map(favoriteDocumentsSlice, (document, idx) => {
-											return renderFavoriteDocumentCard(document, idx)
+											return renderFavoriteDocumentCard(document, idx);
 										})}
 									</div>
 								</div>
@@ -1964,7 +1964,7 @@ const GCUserDashboard = React.memo((props) => {
 				</GCAccordion>
 			</div>
 		);
-	} 
+	}; 
 
 	const handleSaveGroup = (groupType) => {
 		const group = {
@@ -1972,34 +1972,34 @@ const GCUserDashboard = React.memo((props) => {
 			group_name: groupName, 
 			group_description: groupDescription,
 			create: true
-		}
+		};
 		if(documentGroups.filter(group => group.group_name === groupName).length > 0){
 			return setCreateGroupError('A group with that name already exists');
 		}
 		handleGenerateGroup(group, state, dispatch);
 		handleCloseNewGroupModal();
-	}
+	};
 
 	const handleDeleteGroup = () => {
 		const group = {
 			group_ids: groupsToDelete,
 			create: false
-		}
-		handleGenerateGroup(group, state, dispatch)
+		};
+		handleGenerateGroup(group, state, dispatch);
 		handleCloseDeleteGroupModal();
-	}
+	};
 
 	const handleCloseDeleteGroupModal = () => {
 		setShowDeleteGroupModal(false);
 		setGroupsToDelete([]);
-	}
+	};
 
 	const handleCloseNewGroupModal = () => {
 		setShowNewGroupModal(false);
 		setGroupName('');
 		setGroupDescription('');
 		setCreateGroupError('');
-	}
+	};
 
 	const renderDocumentGroups = () => {
 		return (
@@ -2099,7 +2099,7 @@ const GCUserDashboard = React.memo((props) => {
 													key={group.id}
 												/>}
 												label={<Typography variant="h6" noWrap className={classes.label}>{group.group_name}</Typography>}
-											/>
+											/>;
 										})}
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
@@ -2148,7 +2148,7 @@ const GCUserDashboard = React.memo((props) => {
 											dispatch={dispatch}
 											favorites={group.favorites}
 											key={group.id}
-										/>)
+										/>);
 								})}
 							</div>
 						) : (
@@ -2173,7 +2173,7 @@ const GCUserDashboard = React.memo((props) => {
 				} */}
 			</div>
 		);
-	}
+	};
 
 	const tabList = [];
 	const favoritesTabMeta = {
@@ -2189,19 +2189,19 @@ const GCUserDashboard = React.memo((props) => {
 			</Typography>
 		</StyledBadge>,
 		panel: renderFavorites()
-	}
+	};
 	const historyTabMeta = {
 		title: 'userHistory',
 		onClick: () => {},
 		children: <Typography variant="h6" display="inline" title="cardView">HISTORY</Typography>,
 		panel: renderHistory()
-	}
+	};
 	const groupTabMeta = {
 		title: 'userGroups',
 		onClick: () => {},
 		children: <Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>,
 		panel: renderGroups()
-	}
+	};
 	if(cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
 	tabList.push(historyTabMeta);
 	
@@ -2230,7 +2230,7 @@ const GCUserDashboard = React.memo((props) => {
 								>
 									{tab.children}
 								</Tab>
-							)
+							);
 						})}
 					</TabList>
 

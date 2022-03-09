@@ -277,7 +277,7 @@ class UserController {
 			if (user && user!== null) {
 				if (user.extra_fields.hasOwnProperty('clones_visited')) {
 					if (!user.extra_fields.clones_visited.includes(clone)) {
-						user.extra_fields.clones_visited.push(clone)
+						user.extra_fields.clones_visited.push(clone);
 						await this.updateOrCreateUserHelper(user, user_id, true);
 					}
 				} else {
@@ -333,17 +333,17 @@ class UserController {
 				const favorite_groups = await this.favoriteGroup.findAll({
 					where: {user_id: user.user_id},
 					raw: true
-				})
+				});
 				favorite_groups.forEach(async (group, index) => {
 					const res = await this.favoriteDocumentsGroup.findAll({
 						attributes: ['favorite_document_id'],
 						where: {favorite_group_id: group.id},
 						raw: true
-					})
+					});
 					const favoriteList = [];
-					res.forEach(fav => favoriteList.push(fav.favorite_document_id))
+					res.forEach(fav => favoriteList.push(fav.favorite_document_id));
 					favorite_groups[index].favorites = favoriteList;
-				})
+				});
 				user.favorite_groups = favorite_groups;
 				
 				const favorite_organizations = await this.favoriteOrganization.findAll({
@@ -429,7 +429,7 @@ class UserController {
 							doc.doc_num = docData.doc_num;
 							doc.id = docData.id;
 							doc.summary = docData.summary;
-							doc.download_url_s = docData.download_url_s
+							doc.download_url_s = docData.download_url_s;
 							returnDocs.push(doc);
 						}
 					});
@@ -570,7 +570,7 @@ class UserController {
 				} else {
 
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn})
+					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn});
 
 					const tmpExtraFields = {gamechanger: oldGCUserInfo.policy || {} };
 
@@ -703,7 +703,7 @@ class UserController {
 				raw: true
 			});
 
-			console.log(newUsers)
+			console.log(newUsers);
 
 			// Loop through new users
 			for (const user of newUsers) {
@@ -1174,7 +1174,7 @@ class UserController {
 	}
 
 	async updateUserAPIRequestLimit(req, res){
-		let userId = 'unknown_webapp'
+		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
@@ -1184,27 +1184,27 @@ class UserController {
 			
 			res.status(200).send();
 		} catch(err) {
-			this.logger.error(err, 'OPN1XOE', userId)
+			this.logger.error(err, 'OPN1XOE', userId);
 			res.status(500).send(err);
 		}
 	}
 
 	async resetAPIRequestLimit() {
 		try {
-			this.logger.info('Resetting all API Request limits to 3')
+			this.logger.info('Resetting all API Request limits to 3');
 
 			const ids = await this.gcUser.findAll({
 				attributes: ['id']
 			  });
-			const id_values = []
+			const id_values = [];
 
 			ids.forEach(id => {
-				const value = id.getDataValue('id')
+				const value = id.getDataValue('id');
 				id_values.push(value);
-			})
+			});
 
 			const [count, rows] = await this.gcUser.update({ 'api_requests': 3 }, {where: {id: id_values}});
-			this.logger.info(`Finished resetting; ${count} rows affected.`)
+			this.logger.info(`Finished resetting; ${count} rows affected.`);
 			return count;
 		} catch(e) {
 			this.logger.error(e, '4X1IB7M', 'api-request-reset-cron');
@@ -1249,7 +1249,7 @@ class UserController {
 			res.status(200).send(searches);
 		} catch(e) {
 			this.logger.error(e, '6RN417M', userId);
-			res.status(500).send(e)
+			res.status(500).send(e);
 		}
 	}
 }

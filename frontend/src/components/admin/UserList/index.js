@@ -86,11 +86,11 @@ const UserList = React.memo((props) => {
 			tableData.push(result);
 		});
 		setGCUserTableData(tableData);
-	}
+	};
 
 	const deleteUserData = async (userRowId) => {
 		await gameChangerAPI.deleteUserData(userRowId);
-	}
+	};
 
 	useEffect(()=>{
 		getClonePermissions().then(data => {
@@ -149,7 +149,7 @@ const UserList = React.memo((props) => {
 			});
 		}
 
-		setTableColumns(tmpColumns)
+		setTableColumns(tmpColumns);
 		// eslint-disable-next-line
 	}, [columns, gcUserTableData])
 
@@ -185,7 +185,7 @@ const UserList = React.memo((props) => {
 				cloneName={cloneName}
 			/>
 		</>
-	)
+	);
 });
 
 export default UserList;

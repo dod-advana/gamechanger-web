@@ -22,7 +22,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'ai_role_description', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'ai_type_description', Sequelize.TEXT),
 				queryInterface.removeColumn(tablename, 'doc_id', Sequelize.TEXT)
-			])
+			]);
 		});
 	},
 

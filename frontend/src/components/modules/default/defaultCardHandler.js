@@ -18,7 +18,6 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import { primary } from '../../../components/common/gc-colors';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import sanitizeHtml from 'sanitize-html';
@@ -37,13 +36,13 @@ const styles = {
 	},
 	viewMoreChevron: {
 		fontSize: 14,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'normal',
 		marginLeft: 5,
 	},
 	viewMoreButton: {
 		fontSize: 16,
-		color: primary,
+		color: '#1E88E5',
 		fontWeight: 'bold',
 		cursor: 'pointer',
 		minWidth: 60,

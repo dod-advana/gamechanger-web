@@ -17,11 +17,11 @@ import DropdownFilter from './DropdownFilter.js';
 import InputFilter from './InputFilter.js';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
-import LandingImage from '../../../images/JAIC_banner.png'
+import LandingImage from '../../../images/JAIC_banner.png';
 import JAICLogo from '../../../images/logos/JAIC_logo.png';
 import JBookFAQ from '../../aboutUs/JBookFAQ';
 import FeedbackModal from './jbookFeedbackModal';
-import QueryExp from './QueryExp.js'
+import QueryExp from './QueryExp.js';
 import { Link } from '@mui/material';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
@@ -122,7 +122,7 @@ const styles = {
 		fontWeight: 'bold',
 		color: '#E9691D'
 	}
-}
+};
 
 const StyledContainer = styled.div`
 	width: 100%;
@@ -316,7 +316,7 @@ const setJBookSetting = (field, value, state, dispatch, filteredList = false) =>
 			break;
 	}
 	setState(dispatch, { jbookSearchSettings, dataSources, runSearch, searchText, resultsPage, loading: runSearch });
-}
+};
 
 const handleTabClicked = (dispatch, state, tab) => {
 
@@ -338,13 +338,13 @@ const handleTabClicked = (dispatch, state, tab) => {
 	}
 
 	window.history.replaceState(undefined, undefined, `#/jbook/${tabs[tab]}${isSummary ? '' : params}`);
-}
+};
 
 export const scrollListViewTop = () => {
 	if (document.getElementById('list-view-tbody')) {
 		document.getElementById('list-view-tbody').scrollTop = 0;
 	}
-}
+};
 
 const filterSortFunction = (a, b) => {
 	if (a === 'Blank' && b === 'Unknown') {
@@ -365,7 +365,7 @@ const filterSortFunction = (a, b) => {
 
 		return 0;
 	}
-}
+};
 
 const populateDropDowns = async (state, dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -422,7 +422,7 @@ const populateDropDowns = async (state, dispatch) => {
 	// } else {
 	// 	setState(dispatch, {defaultOptions, dropdownData });
 	// }
-}
+};
 
 const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
@@ -439,8 +439,8 @@ const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => 
 	a.click();
 	//release the reference to the file by revoking the Object URL
 	window.URL.revokeObjectURL(url);
-	document.body.removeChild(a)
-}
+	document.body.removeChild(a);
+};
 
 const jbookMainViewHandler = {
 	async handlePageLoad(props) {
@@ -491,7 +491,7 @@ const jbookMainViewHandler = {
 
 		const setDropdown = (name, value) => {
 			if (name === 'all') {
-				setState(dispatch, { budgetTypeDropdown: false, serviceAgencyDropdown: false, reviewStatusDropdown: false })
+				setState(dispatch, { budgetTypeDropdown: false, serviceAgencyDropdown: false, reviewStatusDropdown: false });
 			}
 			else {
 				setState(dispatch, {
@@ -505,9 +505,9 @@ const jbookMainViewHandler = {
 					sourceTagDropdown: false,
 					hasKeywordsDropdown: false,
 					[name]: value
-				})
+				});
 			}
-		}
+		};
 
 		const getMainPageColumns = () => {
 
@@ -678,7 +678,7 @@ const jbookMainViewHandler = {
 							<div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
 								{row.value}
 							</div>
-						)
+						);
 					},
 					headerStyle: {
 						overflow: 'visible'
@@ -758,7 +758,7 @@ const jbookMainViewHandler = {
 			];
 
 			return mainPageColumns;
-		}
+		};
 
 		const renderMainContainer = ({ state }) => {
 			const { searchText } = state;
@@ -818,7 +818,7 @@ const jbookMainViewHandler = {
 							</GCPrimaryButton>
 							<GCPrimaryButton
 								style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '45px', marginRight: '20px' }}
-								onClick={() => { setJBookSetting('clearDataSources', '', state, dispatch); }}
+								onClick={() => { setJBookSetting('clearDataSources', '', state, dispatch) }}
 							>
 								Clear Filters
 							</GCPrimaryButton>
@@ -856,7 +856,7 @@ const jbookMainViewHandler = {
 							showPagination={false}
 							defaultFilterMethod={(filter, row, column) => {
 								const id = filter.pivotId || filter.id;
-								return row[id] ? String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase()) : true
+								return row[id] ? String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase()) : true;
 							}}
 							getTbodyProps={(state, rowInfo, column) => {
 								return {
@@ -892,7 +892,7 @@ const jbookMainViewHandler = {
 										borderTopLeftRadius: 5,
 										overflow: 'auto'
 									}
-								}
+								};
 							}}
 							getTrProps={(state, rowInfo, column) => {
 								return {
@@ -917,7 +917,7 @@ const jbookMainViewHandler = {
 										}
 										window.open(url);
 									},
-								}
+								};
 							}}
 						/>
 						<div className='gcPagination' style={{ textAlign: 'center' }}>
@@ -937,8 +937,8 @@ const jbookMainViewHandler = {
 					{/* </>
 				} */}
 				</>
-			)
-		}
+			);
+		};
 
 		const renderSummaryAndFAQ = () => {
 			return (
@@ -1006,8 +1006,8 @@ const jbookMainViewHandler = {
 						<JBookFAQ />
 					</div>
 				</StyledSummaryFAQContainer>
-			)
-		}
+			);
+		};
 
 
 		return (
@@ -1066,7 +1066,7 @@ const jbookMainViewHandler = {
 					</StyledMainContainer>
 				</StyledContainer>
 			</>
-		)
+		);
 	},
 
 	renderHideTabs(props) {

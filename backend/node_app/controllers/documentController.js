@@ -252,7 +252,7 @@ class DocumentController {
 		try {
 			
 			const {location} = url.parse(req.url,true).query;
-			console.log(location)
+			console.log(location);
 			let response = await axios.get(`${QLIK_URL}${location}`, { ...this.getRequestConfigs(), responseType: 'stream' });
 	
 			res.writeHead(200, {
@@ -274,8 +274,8 @@ class DocumentController {
 	async getHomepageThumbnail(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			const { filenames, folder, dest, clone_name } = req.body
-			const promises = []
+			const { filenames, folder, dest, clone_name } = req.body;
+			const promises = [];
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			filenames.forEach(({img_filename}) => {
 				const filename = img_filename;
@@ -289,7 +289,7 @@ class DocumentController {
 			let allPromises = await Promise.allSettled(promises);
 			res.status(200).send(allPromises);			
 		} catch (err) {
-			this.logger.error(err, 'TJJUFQC', userId)
+			this.logger.error(err, 'TJJUFQC', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -351,7 +351,7 @@ class DocumentController {
 			
 			res.status(200).send(orgDataCleaned);
 		} catch (err) {
-			this.logger.error(err, 'TJJU7QC', userId)
+			this.logger.error(err, 'TJJU7QC', userId);
 			res.status(500).send(err);
 		}
 	}
@@ -380,7 +380,7 @@ class DocumentController {
 
 			res.status(200).send({});
 		} catch (err) {
-			this.logger.error(err, 'TJDU7QC', userId)
+			this.logger.error(err, 'TJDU7QC', userId);
 			res.status(500).send(err);
 		}
 	}

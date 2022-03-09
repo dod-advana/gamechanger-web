@@ -35,7 +35,7 @@ const styles = {
 
 const renderGeneralAdminButtons = () => {
 	return (<></>);
-}
+};
 
 const DefaultAdminMainViewHandler = {
 	getPages: () => {
@@ -214,7 +214,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		} else if (cloneData.clone_name === 'nfr') {
 			return {
 				...toolTheme,
@@ -224,7 +224,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		} else if (cloneData.clone_name === 'space-force') {
 			return {
 				...toolTheme,
@@ -234,7 +234,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		} else if (cloneData.clone_name === 'cdo') {
 			return {
 				...toolTheme,
@@ -244,7 +244,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		} else if (cloneData.clone_name === 'jbook') {
 			return {
 				...toolTheme,
@@ -254,7 +254,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		}else {
 			return {
 				...toolTheme,
@@ -281,7 +281,7 @@ const DefaultAdminMainViewHandler = {
 					</PageLink>
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
-			}
+			};
 		}
 	}
 };

@@ -344,7 +344,7 @@ const jbookCardHandler = {
 				graphView
 			} = props;
 
-			let displayTitle = ''
+			let displayTitle = '';
 			switch (item.budgetType) {
 				case 'pdoc':
 					displayTitle = `BA Num: ${item.budgetActivityNumber} BA Title: ${item.budgetActivityTitle}`;
@@ -452,7 +452,7 @@ const jbookCardHandler = {
 				}
 
 				return contractElements;
-			}
+			};
 
 			const renderAccomplishments = (accomplishments) => {
 				let accomplishmentElements = `<b>Accomplishments: ${accomplishments.length}</b>`;
@@ -463,7 +463,7 @@ const jbookCardHandler = {
 				}
 
 				return accomplishmentElements;
-			}
+			};
 
 			if (!state.searchText || state.searchText === null || state.searchText === '' || !item.pageHits || item.pageHits.length <= 0) {
 				item.pageHits = [
@@ -696,7 +696,7 @@ const jbookCardHandler = {
 					return `${(parsed / 1000000).toFixed(2)} $T`;
 				}
 				return `${parsed} $M`;
-			}
+			};
 
 			const metadata = [
 				{
@@ -812,7 +812,7 @@ const jbookCardHandler = {
 				cloneName,
 				setToggledMore = () => { },
 				closeGraphCard = () => { },
-			} = props
+			} = props;
 
 			const { searchText } = state;
 
@@ -831,7 +831,7 @@ const jbookCardHandler = {
 				pdoc: 'Procurement',
 				rdoc: 'RDT&E',
 				om: 'O&M',
-			}
+			};
 
 			return (
 				<>
@@ -868,7 +868,7 @@ const jbookCardHandler = {
 					</>
 					<div style={{ ...styles.viewMoreButton }} onClick={() => {
 						trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
-						setToggledMore(!toggledMore)
+						setToggledMore(!toggledMore);
 					}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
@@ -1037,6 +1037,6 @@ const jbookCardHandler = {
 			return '';
 		},
 	}
-}
+};
 
 export default jbookCardHandler;

@@ -20,7 +20,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { JBookContext } from './jbookContext';
 import { StyledTableKeyContainer, StyledTableValueContainer, StyledInlineContainer, StyledAccordionDiv } from './profilePage/profilePageStyles';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist'
+import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import GCPrimaryButton from '../../common/GCButton';
 import GCAccordion from '../../common/GCAccordion';
 import JCAdata from './JCA.json';
@@ -73,7 +73,7 @@ const styles = {
 		width: 12,
 		height: 12,
 	},
-}
+};
 
 const staticAIPartners = ['Alion Science and Technology Corporation', 'Austal USA LLC', 'General Dynamics Corporation', 'Innovative Professional Solutions Inc.', 'Johns Hopkins University', 'Raytheon Company', 'Saic Gemini Inc.', 'Technical Systems Integration Inc.', 'Textron Inc.', 'Unknown'];
 
@@ -130,7 +130,7 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 				{examples}
 			</FormGroup>
 		</FormControl>);
-}
+};
 
 const renderDropdownRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButtonData, text = '', finished) => {
 	const radioDropdowns = [];
@@ -170,7 +170,7 @@ const renderDropdownRadioButtons = (reviewData, reviewDataProp, setReviewData, r
 					{radioButtonData[radioButton]}
 				</StyledAccordionDiv>
 			</GCAccordion>
-		)
+		);
 	}
 
 	return (
@@ -182,11 +182,11 @@ const renderDropdownRadioButtons = (reviewData, reviewDataProp, setReviewData, r
 		</>
 
 
-	)
-}
+	);
+};
 
 const JCAChecklist = (props) => {
-	const { reviewData, setReviewData, finished } = props
+	const { reviewData, setReviewData, finished } = props;
 	const radioDropdowns = [];
 	let tier2List = [];
 	let tier3List = [];
@@ -310,7 +310,7 @@ const JCAChecklist = (props) => {
 					{tier2List}
 				</StyledAccordionDiv>
 			</GCAccordion>
-		)
+		);
 		tier2List = [];
 	}
 
@@ -322,8 +322,8 @@ const JCAChecklist = (props) => {
 		</>
 
 
-	)
-}
+	);
+};
 
 const renderDomainCheckboxes = (secondaries, reviewData, domainTasks, domainTaskOther, setReviewData, setDomainTaskOther, finished) => {
 	let domainTask;
@@ -365,7 +365,7 @@ const renderDomainCheckboxes = (secondaries, reviewData, domainTasks, domainTask
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				{checkboxes}
 			</div>
-		)
+		);
 	}
 
 	return (<TextField
@@ -376,8 +376,8 @@ const renderDomainCheckboxes = (secondaries, reviewData, domainTasks, domainTask
 		onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
 		onChange={(event, value) => setDomainTaskOther(value)}
 		disabled={finished} //|| roleDisabled}
-	/>)
-}
+	/>);
+};
 
 const AltAIPOCKey = React.memo(() => {
 	return (
@@ -386,7 +386,7 @@ const AltAIPOCKey = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>If available, please share the appropriate alternate AI POC for this effort.</Typography>
 			<Typography variant="subtitle1" style={{ fontSize: 12, marginTop: 15 }}>If you are not the appropriate POC for this Program/Project, please enter an alternate AI Point of Contact for this Program/Project in the POC section of the Service Reviewer Section. A suitable type of POC would be the Program Element Monitor. We ask that you enter the POC Title, Name, Email address, Organization and Phone Number in this section.</Typography>
 		</StyledTableKeyContainer>
-	)
+	);
 });
 
 const AltAIPOCValue = React.memo((props) => {
@@ -395,7 +395,7 @@ const AltAIPOCValue = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { reviewData } = state;
-	const finished = reviewData.pocReviewStatus === 'Finished Review'
+	const finished = reviewData.pocReviewStatus === 'Finished Review';
 
 	const [altPOCTitle, setAltPOCTitle] = useState('');
 	const [altPOCName, setAltPOCName] = useState('');
@@ -578,7 +578,7 @@ const LabelingValidationValue = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
-	const finished = reviewData.pocReviewStatus === 'Finished Review'
+	const finished = reviewData.pocReviewStatus === 'Finished Review';
 
 	return (
 		<StyledTableValueContainer>
@@ -674,7 +674,7 @@ const TransitionPartnerValue = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
-	const finished = reviewData.pocReviewStatus === 'Finished Review'
+	const finished = reviewData.pocReviewStatus === 'Finished Review';
 
 	return (
 		<StyledTableValueContainer>
@@ -808,7 +808,7 @@ const MissionPartnersValue = React.memo((props) => {
 					/>
 				)}
 				onChange={(event, value) => {
-					setReviewData('setPOCMissionPartners', value)
+					setReviewData('setPOCMissionPartners', value);
 				}}
 				value={pocMissionPartners}
 				disabled={finished || (!finished && reviewData.pocMPAgreeLabel === 'Yes')}
@@ -850,7 +850,7 @@ const JCAValue = React.memo((props) => {
 			/>
 			<GCPrimaryButton
 				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px', margin: '5px 0px 10px' }}
-				onClick={() => { setReviewData('clearJCA', '', state, dispatch); }}
+				onClick={() => { setReviewData('clearJCA', '', state, dispatch) }}
 			>
 				Clear Selection
 			</GCPrimaryButton>
@@ -1008,7 +1008,7 @@ const AIDomainValue = React.memo((props) => {
 				</div>
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px', margin: '5px 0px 0px', width: '158px' }}
-					onClick={() => { setReviewData('clearDomainTask', '', state, dispatch); }}
+					onClick={() => { setReviewData('clearDomainTask', '', state, dispatch) }}
 				>
 					Clear Selection
 				</GCPrimaryButton>
@@ -1069,7 +1069,7 @@ const DataTypeValue = React.memo((props) => {
 				}
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px', margin: '0px 0px 10px', width: '158px' }}
-					onClick={() => { setReviewData('clearDataType', '', state, dispatch); }}
+					onClick={() => { setReviewData('clearDataType', '', state, dispatch) }}
 				>
 					Clear Selection
 				</GCPrimaryButton>
@@ -1189,13 +1189,13 @@ const SliderValue = React.memo((props) => {
 							const newData = {
 								pocDollarsAttributed: value,
 								pocPercentageAttributed: ((parseFloat(value) / parseFloat(totalBudgetValue)) * 100).toFixed(2)
-							}
+							};
 							setReviewData('pocSlider', newData);
 						} else {
 							const newData = {
 								pocDollarsAttributed: (value * 0.01 * parseFloat(totalBudgetValue)).toFixed(2),
 								pocPercentageAttributed: value
-							}
+							};
 							setReviewData('pocSlider', newData);
 						}
 					}
@@ -1206,12 +1206,12 @@ const SliderValue = React.memo((props) => {
 					onChange={(event, value) => {
 						if (attributionUnits === '$') {
 							setDollarsAttributed(value);
-							const percent = parseFloat(value) / parseFloat(totalBudgetValue)
-							setPercentageAttributed(percent)
+							const percent = parseFloat(value) / parseFloat(totalBudgetValue);
+							setPercentageAttributed(percent);
 						} else {
 							setPercentageAttributed(value);
 							let dollars = value * 0.01 * parseFloat(totalBudgetValue);
-							setDollarsAttributed(dollars)
+							setDollarsAttributed(dollars);
 						}
 					}}
 					min={0}
@@ -1234,13 +1234,13 @@ const SliderValue = React.memo((props) => {
 									const newData = {
 										pocDollarsAttributed: event.target.value,
 										pocPercentageAttributed: ((parseFloat(event.target.value) / totalBudgetValue) * 100).toFixed(2)
-									}
+									};
 									setReviewData('pocSlider', newData);
 								} else {
 									const newData = {
 										pocDollarsAttributed: (parseFloat(event.target.value) * 0.01 * totalBudgetValue).toFixed(2),
 										pocPercentageAttributed: event.target.value
-									}
+									};
 									setReviewData('pocSlider', newData);
 								}
 							}
@@ -1271,7 +1271,7 @@ const SliderValue = React.memo((props) => {
 				/>
 			</StyledInlineContainer>
 		</StyledTableValueContainer >
-	)
+	);
 });
 
 const FooterValue = React.memo(() => {
@@ -1306,4 +1306,4 @@ export {
 	SliderKey,
 	SliderValue,
 	FooterValue
-}
+};

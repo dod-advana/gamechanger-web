@@ -48,7 +48,7 @@ class ReviewController {
 			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS;
 			transportOptions.tls = {
 				servername: process.env.EMAIL_TLS_SERVERNAME || ''
-			}
+			};
 		}
 
 		this.emailUtility = new EmailUtility({
@@ -246,7 +246,7 @@ class ReviewController {
 			Sincerely,<br/>
 			The JBOOK team
 			</p>
-			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`
+			<img src="cid:jbook-newsletter-footer" width="100%"/><br/>`;
 			const attachment = [
 				{
 					filename: 'jbook-newsletter-header.png',
@@ -259,12 +259,12 @@ class ReviewController {
 					cid: 'jbook-newsletter-footer'
 				},
 				excelAttachment
-			]
-			await this.emailUtility.sendEmail(emailBody,'JBOOK Review Status', emails, null, attachment, userId)
+			];
+			await this.emailUtility.sendEmail(emailBody,'JBOOK Review Status', emails, null, attachment, userId);
         	return true;
 		} catch (err) {
 			this.logger.error(err, '164X80Q', userId);
-			return false
+			return false;
 		}
 	}
 }

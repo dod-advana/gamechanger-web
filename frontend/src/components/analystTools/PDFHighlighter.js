@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 import {
 	PdfLoader,
 	PdfHighlighter,
@@ -19,7 +19,7 @@ export default function PDFHighlighter({
 	useEffect(() => {
 		scrollToHighlight();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[scrollId])
+	},[scrollId]);
 
 	const scrollToHighlight = () => {
 		const highlight = getHighlightById(scrollId);
@@ -33,7 +33,7 @@ export default function PDFHighlighter({
 
 	const getHighlightById = (id) => {
 		return highlights.find((highlight) => `${highlight.id}` === id);
-	}
+	};
 
 	return (
 		<PdfLoader url={documentLink} beforeLoad={<LoadingIndicator customColor={'#E9691D'} />}>
@@ -64,7 +64,7 @@ export default function PDFHighlighter({
 									}}
 								/>}
 							</>
-						)
+						);
 					}}
 					highlightTransform={(
 						highlight,
@@ -115,5 +115,5 @@ export default function PDFHighlighter({
 				/>
 			)}
 		</PdfLoader>
-	)
+	);
 }

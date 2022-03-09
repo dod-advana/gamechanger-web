@@ -335,7 +335,7 @@ export default () => {
 		} catch (e) {
 			console.error('Error syncing user table', e);
 		}
-	}
+	};
 
 	useEffect(() => {
 		getCombinedSearch();

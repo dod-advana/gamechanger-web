@@ -15,7 +15,8 @@
     "gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
     "gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
     "orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
-    "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo"
+    "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo",
+    "eslint": "eslint --fix --debug -c package.json ./node_app/"
   },
   "author": "",
   "license": "ISC",
@@ -23,13 +24,13 @@
     "node-forge": "1.2.1"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.34",
-    "@dod-advana/advana-logger": "0.0.3",
+    "@dod-advana/advana-api-auth": "0.0.35",
+    "@dod-advana/advana-logger": "0.0.4",
     "@elastic/elasticsearch": "7.10.0",
     "async": "2.6.3",
     "async-redis": "2.0.0",
     "aws-sdk": "2.948.0",
-    "axios": "0.24.0",
+    "axios": "0.21.4",
     "body-parser": "1.19.0",
     "chai": "4.3.4",
     "cors": "2.8.5",
@@ -54,7 +55,7 @@
     "pagerank.js": "1.0.2",
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
-    "pdfmake": "0.1.72",
+    "pdfmake": "0.2.4",
     "redis": "3.1.2",
     "secure-random": "1.1.1",
     "sequelize": "6.6.5",
@@ -67,6 +68,7 @@
     "winston": "3.3.3"
   },
   "devDependencies": {
+    "eslint": "^8.10.0",
     "jest": "^25.1.0",
     "sonarqube-scanner": "^2.5.0"
   },
@@ -81,9 +83,16 @@
   },
   "eslintConfig": {
     "rules": {
+      "semi": [
+        "error",
+        "always",
+        {
+          "omitLastInOneLineBlock": true
+        }
+      ],
       "max-len": 0,
       "indent": [
-        1,
+        "warn",
         "tab",
         {
           "SwitchCase": 1
@@ -95,7 +104,7 @@
       "strict": 0,
       "no-throw-literal": 0,
       "quotes": [
-        "error",
+        "warn",
         "single",
         {
           "allowTemplateLiterals": true
@@ -113,7 +122,7 @@
       "es6": true
     },
     "parserOptions": {
-      "ecmaVersion": 2018
+      "ecmaVersion": 2020
     }
   }
 }

@@ -10,7 +10,7 @@ const fs = require('fs');
  */
 const getCert = (certEnvVar, certFileEnvVar) => {
 	if (process.env[certEnvVar]) {
-		return process.env[certEnvVar].replace(/\\n/g, '\n')
+		return process.env[certEnvVar].replace(/\\n/g, '\n');
 	} else if (process.env[certFileEnvVar]) {
 		return fs.readFileSync(process.env[certFileEnvVar], 'ascii');
 	} else {
@@ -25,11 +25,11 @@ module.exports = Object.freeze({
 	TLS_CERT_CA: getCert('TLS_CERT_CA', 'TLS_CERT_CA_FILEPATH'),
 	TLS_KEY: getCert('TLS_KEY', 'TLS_KEY_FILEPATH'),
 	EXPRESS_TRUST_PROXY: function () {
-		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : ''
+		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : '';
 		if (['true', 'false'].includes(str_var.toLowerCase())) {
-			return str_var.toLowerCase() === 'true'
+			return str_var.toLowerCase() === 'true';
 		}
-		return str_var
+		return str_var;
 	}(),
 	POSTGRES_CONFIG: {
 		databases: {

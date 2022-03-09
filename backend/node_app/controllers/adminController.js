@@ -95,24 +95,24 @@ class AdminController {
 		}
 	}
 	async getHomepageUserData(req, esIndex, userId){
-		let results = []
+		let results = [];
 		const {
 			favorite_documents
 		} = req.body;
 		let favDocList = [];
 		for (let doc of favorite_documents){
-			favDocList.push(doc.filename.split('.pdf')[0])
+			favDocList.push(doc.filename.split('.pdf')[0]);
 		}
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
-		recDocs.key = "rec_docs"
+		recDocs.key = "rec_docs";
 		try {
 			docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
 
 		} catch (err) {
 			this.logger.error(err, 'FL1LLDU', userId);
-			docs.value = []
+			docs.value = [];
 		}
 		try {
 			if (favDocList.length > 0){
@@ -123,10 +123,10 @@ class AdminController {
 			}
 		} catch (err) {
 			this.logger.error(err, 'FL2LLDU', userId);
-			recDocs.value = []
+			recDocs.value = [];
 		}
 		results.push(docs);
-		results.push(recDocs)
+		results.push(recDocs);
 		return results;
 	}
 	async getHomepageEditorData(req, res) {
@@ -134,7 +134,7 @@ class AdminController {
 		let esIndex = "gamechanger";
 		let userResults = [];
 		try {
-			userResults = await this.getHomepageUserData(req, esIndex, userId)
+			userResults = await this.getHomepageUserData(req, esIndex, userId);
 
 		} catch (err){
 			this.logger.error(err, 'PP1QOA3', userId);
@@ -151,7 +151,7 @@ class AdminController {
 						'homepage_popular_docs_inactive'					]
 				}
 			});
-			results = results.concat(userResults)
+			results = results.concat(userResults);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '7R9BUO3', userId);
@@ -161,7 +161,7 @@ class AdminController {
 	
 
 	async setHomepageEditorData(req, res) {
-		let userId = 'webapp_unknown'
+		let userId = 'webapp_unknown';
 
 		try {
 			const { key, tableData } = req.body;
@@ -173,11 +173,11 @@ class AdminController {
 					where:{
 						key: `homepage_${key}`
 					}
-				})
+				});
 			res.status(200).send();
 		} catch (err) {
 			this.logger.error(err, 'QKTBF4J', userId);
-			res.status(500).send(err)
+			res.status(500).send(err);
 		}
 	}
 }

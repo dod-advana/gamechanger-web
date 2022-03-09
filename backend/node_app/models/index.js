@@ -17,7 +17,7 @@ for (let i = 0; i < databases.length; ++i) {
 	db[database] = new Sequelize(dbPath.database, dbPath.username, dbPath.password, dbPath);
 }
 
-Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value); };
+Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value) };
 
 // Add models from game_changer folder
 fs
