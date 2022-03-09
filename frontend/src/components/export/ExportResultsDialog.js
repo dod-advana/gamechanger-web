@@ -165,14 +165,14 @@ const ExportResultsDialog = ({
 					'intelligent_search_export_document',
 					item,
 					searchObject.search
-				)
+				);
 				trackEvent(
 					getTrackingNameForFactory(cloneData.clone_name),
 					'ExportDocument',
 					`${item}`,
 					`search : ${searchObject.search}`
-				)
-			}) 
+				);
+			}); 
 			let url = window.location.hash.toString();
 			url = url.replace('#/', '');
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);

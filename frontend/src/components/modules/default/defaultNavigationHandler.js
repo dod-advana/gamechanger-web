@@ -68,7 +68,7 @@ const getToolTheme = (cloneData) => {
 				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	} else if (cloneData.display_name === 'NFR') {
 		return {
 			...toolStyles,
@@ -76,7 +76,7 @@ const getToolTheme = (cloneData) => {
 				<img src={GamechangerNFRLogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	} else if (cloneData.display_name === 'Space Force') {
 		return {
 			...toolStyles,
@@ -84,7 +84,7 @@ const getToolTheme = (cloneData) => {
 				<img src={GamechangerSFLogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	} else if (cloneData.display_name === 'CDO') {
 		return {
 			...toolStyles,
@@ -92,7 +92,7 @@ const getToolTheme = (cloneData) => {
 				<img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	} else if (cloneData.display_name === 'Covid-19') {
 		return {
 			...toolStyles,
@@ -100,7 +100,7 @@ const getToolTheme = (cloneData) => {
 				<img src={GamechangerCovid19Logo} href="#/gamechanger" alt="tool logo" />
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	} else {
 		return {
 			...toolStyles,
@@ -125,9 +125,9 @@ const getToolTheme = (cloneData) => {
 				</div>
 			),
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
-		}
+		};
 	}
-}
+};
 
 const DefaultNavigationHandler = {
 	getToolState: (state) => {
@@ -237,7 +237,7 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
-								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`)
+								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`);
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.dataTracker,
 								});
@@ -259,7 +259,7 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
-								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`)
+								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`);
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.analystTools,
 								});

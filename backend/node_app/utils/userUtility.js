@@ -1,7 +1,7 @@
 function getTenDigitUserId (user_id) {
 	const regex = /\d{10}/g;
-	const id = regex.exec(user_id)
-	return id ? id[0] : null
+	const id = regex.exec(user_id);
+	return id ? id[0] : null;
 }
 
 function getUserIdFromSAMLUserId (obj, fromReq = true) {
@@ -14,8 +14,8 @@ function getUserIdFromSAMLUserId (obj, fromReq = true) {
 	} else if (obj.headers && obj.get('SSL_CLIENT_S_DN_CN')) {
 		return obj.get('SSL_CLIENT_S_DN_CN');
 	} else {
-		return 'Unknown User'
+		return 'Unknown User';
 	}
 }
 
-module.exports = { getTenDigitUserId, getUserIdFromSAMLUserId } 
+module.exports = { getTenDigitUserId, getUserIdFromSAMLUserId };

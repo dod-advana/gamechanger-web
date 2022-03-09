@@ -35,7 +35,7 @@ class SimpleExportHandler extends ExportHandler {
 				...rest
 			} = req.body;
 
-			const clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger'}
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger'};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;

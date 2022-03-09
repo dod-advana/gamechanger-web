@@ -513,7 +513,7 @@ const StyledQuickCompareContent = styled.div`
     }
     
     
-`
+`;
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
@@ -585,10 +585,10 @@ const addFavoriteTopicToMetadata = (
 				</div>
 			);
 		}
-		return metaData
-	})
-	return temp
-}
+		return metaData;
+	});
+	return temp;
+};
 	
 const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent}) => {
 	
@@ -1433,7 +1433,7 @@ const PolicyCardHandler = {
 							</>
 							<div style={{...styles.viewMoreButton}} onClick={() => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
-								setToggledMore(!toggledMore)
+								setToggledMore(!toggledMore);
 							}}
 							>
 								{toggledMore ? 'Overview' : 'More'}

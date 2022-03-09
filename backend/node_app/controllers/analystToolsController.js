@@ -24,8 +24,8 @@ class AnalystToolsController {
 		this.mlApi = mlApi;
 		this.sparkMD5 = sparkMD5;
 
-		this.compareDocument = this.compareDocument.bind(this)
-		this.compareFeedback = this.compareFeedback.bind(this)
+		this.compareDocument = this.compareDocument.bind(this);
+		this.compareFeedback = this.compareFeedback.bind(this);
 	}
 
 
@@ -65,7 +65,7 @@ class AnalystToolsController {
 			// Aggregate Data
 			const returnData = this.searchUtility.cleanUpEsResults(esResults, [], userId, [], {}, null, esQuery, true, resultsObject);
 
-			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0)
+			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0);
 			returnData.docs = cleanedDocs;
 
 			res.status(200).send(returnData);
@@ -90,7 +90,7 @@ class AnalystToolsController {
 			if(undo){
 				await this.compareFeedbackModel.destroy({
 					where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
-				})
+				});
 				return res.status(200).send();
 			}
 
@@ -103,10 +103,10 @@ class AnalystToolsController {
 					positiveFeedback,
 					userId
 				}
-			})
+			});
 			
 			if(!created && record.positiveFeedback !== positiveFeedback) {
-				record.set({positiveFeedback})
+				record.set({positiveFeedback});
 				await record.save();
 			}
 

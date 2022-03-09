@@ -46,8 +46,8 @@ const FilterInput = ({value, setValue}) => {
 			style={{width: '100%'}}
 			onChange={(e) => {setValue(e.target.value)}}
 		/>
-	)
-}
+	);
+};
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -136,7 +136,7 @@ const getData = async ({
 		return data;
 	} catch (err) {
 		this.logger.error(err.message, 'GEADAKS');
-		return []
+		return [];
 	}
 };
 
@@ -230,17 +230,17 @@ const GCResponsibilityTracker = ({
 		if(Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 		if(organization.length) {
 			organization.forEach(org => {
-				newFilters.push({id: 'organizationPersonnel', value: org})
-			})
+				newFilters.push({id: 'organizationPersonnel', value: org});
+			});
 		};
 		if(docTitle.length) {
 			docTitle.forEach(doc => {
-				newFilters.push({id: 'documentTitle', value: doc.documentTitle})
-			})
+				newFilters.push({id: 'documentTitle', value: doc.documentTitle});
+			});
 		};
 		setFilters(newFilters);
 		setReloadResponsibilityTable(true);
-	 },[docTitle, organization, responsibilityText, setFilters])
+	 },[docTitle, organization, responsibilityText, setFilters]);
 
 	 const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -282,7 +282,7 @@ const GCResponsibilityTracker = ({
 			});
 			const rtnResults = results.filter((result) => {
 				return selectedIds.includes(result.id);
-			})
+			});
 			trackEvent(
 				getTrackingNameForFactory(state.cloneData.clone_name), 
 				'ResponsibilityTracker', 
@@ -331,7 +331,7 @@ const GCResponsibilityTracker = ({
 		});
 		setSelectRows(false);
 		setSelectedIds([]);
-	}
+	};
 
 	const renderDataTable = () => {
 		const dataColumns = [
@@ -346,9 +346,9 @@ const GCResponsibilityTracker = ({
 						setValue={(filter) => {
 							const splitFilter = filter.split(' AND ');
 							const parsedFilter = splitFilter.map(filter => {
-								return {documentTitle: filter}
-							})
-							setDocTitle(parsedFilter)
+								return {documentTitle: filter};
+							});
+							setDocTitle(parsedFilter);
 						}}
 					/>,
 				Cell: (row) => (
@@ -375,7 +375,7 @@ const GCResponsibilityTracker = ({
 						value={organization.join(' AND ')} 
 						setValue={(filter) => {
 							const parsedFilter = filter.split(' AND ');
-							setOrganization(parsedFilter)
+							setOrganization(parsedFilter);
 						}}
 					/>,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
@@ -577,8 +577,8 @@ const GCResponsibilityTracker = ({
 					selectedIds.splice(selectedIds.indexOf(id), 1);
 				}
 			}
-		})
-	}
+		});
+	};
 	
 	const handleCancelSelect = () => {
 		deselectRows();
@@ -587,7 +587,7 @@ const GCResponsibilityTracker = ({
 			'ResponsibilityTracker', 
 			'Cancel Select Rows'
 		);
-	}
+	};
 	
 	const hideShowReportModal = (show) => {
 		trackEvent(

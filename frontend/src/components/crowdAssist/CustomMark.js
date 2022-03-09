@@ -26,4 +26,4 @@ export const CustomMark = ({
         	<span style={{fontSize: '0.7em', fonßtWeight: 500, marginLeft: 6}}></span>
 		)}
 	</mark>
-)
+);

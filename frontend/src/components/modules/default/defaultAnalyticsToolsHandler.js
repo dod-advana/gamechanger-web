@@ -2,8 +2,8 @@ import React from 'react';
 
 const DefaultAnalyticsToolsHandler = {
 	getSideBarItems(props) {
-		return <></>
+		return <></>;
 	}
-}
+};
 
 export default DefaultAnalyticsToolsHandler;

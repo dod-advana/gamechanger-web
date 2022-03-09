@@ -96,7 +96,7 @@ export default (props) => {
 			'type':type
 		});
 		props.getProcesses();
-	}
+	};
 
 	/**
 	 * Get a list of all the proccesses running and completed
@@ -212,7 +212,7 @@ export default (props) => {
 			Header: 'Download',
 			accessor: '',
 			Cell: (row) => <TableRow><IconButton onClick={() => {
-				downloadS3File(row,'models')
+				downloadS3File(row,'models');
 			}} style={{ color: 'white' }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
 		},
 	];
