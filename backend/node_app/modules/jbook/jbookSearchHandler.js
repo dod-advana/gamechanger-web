@@ -334,11 +334,11 @@ class JBookSearchHandler extends SearchHandler {
 				pgResults[0].forEach(review => {
 					let key;
 					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_year}#${review.budget_line_item}`
+						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
 					} else if (review.budget_type === 'rdoc') {
-						key = `rdoc#${review.budget_year}#${review.budget_line_item}#${review.program_element}`
+						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
 					} else if (review.budget_type === 'odoc') {
-						key = `odoc#${review.budget_year}#${review.budget_line_item}#${review.program_element}#${review.budget_activity}`
+						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
 					}
 					keys.push(key);
 				});
