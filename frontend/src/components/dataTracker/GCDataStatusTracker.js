@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
@@ -243,7 +243,6 @@ const GCDataStatusTracker = (props) => {
 	const { state } = props;
 
 	const [dataTableData, setDataTableData] = useState([]);
-	const [crawlerMapping, setCrawlerMapping] = useState([]);
 	const [crawlerTableData, setCrawlerTableData] = useState([]);
 	const [neo4jPropertiesData, setNeo4jPropertiesData] = useState([]);
 	const [neo4jCountsData, setNeo4jCountsData] = useState([]);
@@ -258,6 +257,13 @@ const GCDataStatusTracker = (props) => {
 	const [loadingNeo4jCounts, setLoadingNeo4jCounts] = useState(true);
 	const [numPages, setNumPages] = useState(0);
 	const [tabIndex, setTabIndex] = useState('crawler');
+	const [ingestData, setIngestData] = useState({});
+
+	useEffect(() => {
+		gameChangerAPI.getDocIngestionStats().then(res => {
+			setIngestData(res.data);
+		});
+	}, []);
 	
 	
 	const handleFetchData = async ({ page, sorted, filtered }) => {
@@ -291,14 +297,11 @@ const GCDataStatusTracker = (props) => {
 				option: 'status',
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
-			const crawlerInfoPostgresTable = await gameChangerAPI.gcCrawlerSealData();
-			setCrawlerMapping(crawlerInfoPostgresTable);
 			setNumPages(pageCount);
 			setCrawlerTableData(docs);
 		} catch (e) {
 			setCrawlerTableData([]);
 			setNumPages(0);
-			setCrawlerMapping([]);
 			console.error(e);
 		} finally {
 			setLoading(false);
@@ -421,19 +424,9 @@ const GCDataStatusTracker = (props) => {
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
 	
-	const matchCrawlerName = (crawler_name) => {
-		if (crawlerMapping && crawlerMapping.data) {
-			for (let crawler of crawlerMapping.data) {
-				if (crawler_name === crawler.crawler){
-					return(crawler.data_source_s + ' - ' + crawler.source_title);
-				}
-			}
-			for (let crawler of crawlerMapping.data) {
-				if (crawler_name !== crawler.crawler) {
-					return(crawler_name);
-				}
-			}
-		}
+	const getCrawlerName = (crawler) => {
+		if(crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
+		return crawler.crawler_name;
 	};
 
 	const renderDataTable = () => {
@@ -554,26 +547,29 @@ const GCDataStatusTracker = (props) => {
 						</Typography>
 					</div>
 				</SectionHeader>
-				<TableStyle>
-					<ReactTable
-						data={dataTableData}
-						columns={dataColumns}
-						style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
-						pageSize={PAGE_SIZE}
-						showPageSizeOptions={false}
-						filterable={true}
-						loading={loading}
-						manual={true}
-						pages={numPages}
-						onFetchData={handleFetchData}
-						defaultSorted={[
-							{
-								id: 'pub_type',
-								desc: false,
-							},
-						]}
-					/>
-				</TableStyle>
+				<div style={{display: 'flex'}}>
+					<TableStyle style={{width: '75%'}}>
+						<ReactTable
+							data={dataTableData}
+							columns={dataColumns}
+							style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+							pageSize={PAGE_SIZE}
+							showPageSizeOptions={false}
+							filterable={true}
+							loading={loading}
+							manual={true}
+							pages={numPages}
+							onFetchData={handleFetchData}
+							defaultSorted={[
+								{
+									id: 'pub_type',
+									desc: false,
+								},
+							]}
+						/>
+					</TableStyle>
+					<IngestStats style={{width: '25%'}} ingestData={ingestData}/>
+				</div>
 			</>
 		);
 	};
@@ -616,12 +612,12 @@ const GCDataStatusTracker = (props) => {
 								href={row.original.url_origin ? row.original.url_origin : '#'} 
 								target='_blank' 
 								rel="noreferrer">
-								{matchCrawlerName(row.value)}
+								{getCrawlerName(row.original)}
 							</a>
 						</TableRow>
 						:
 						<TableRow>
-							{matchCrawlerName(row.value)}
+							{getCrawlerName(row.original)}
 						</TableRow>;
 				},
 				style: { 'whiteSpace': 'unset' },
@@ -753,7 +749,7 @@ const GCDataStatusTracker = (props) => {
 							onFetchData={handleFetchCrawlerData}
 						/>
 					</TableStyle>
-					<IngestStats style={{width: '25%'}}/>
+					<IngestStats style={{width: '25%'}} ingestData={ingestData}/>
 				</div>
 			</>
 		);

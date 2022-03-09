@@ -1,21 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../common/gc-colors';
 import StatPill from './StatPill';
 
-const gameChangerAPI = new GameChangerAPI();
-
-export default function IngestStats() {
-
-	const [ingestData, setIngestData] = useState({});
-
-	useEffect(() => {
-		gameChangerAPI.getDocIngestionStats().then(res => {
-			setIngestData(res.data);
-		});
-	}, []);
+export default function IngestStats({ingestData}) {
 
 	const getDomain = () => {
 		let highest = 0;
@@ -61,7 +50,7 @@ export default function IngestStats() {
 			</div>
 			<div>
 				<div style={{marginBottom: 10, font: 'normal normal 600 14px Noto Sans'}}>DOCUMENTS ANALYTICS</div>
-				<StatPill stat={Number(ingestData.numberOfDocuments).toLocaleString()} descriptor={'NUMBER OF DOCUMENTS INGESTED'}/>
+				<StatPill stat={ingestData.numberOfDocuments? Number(ingestData.numberOfDocuments).toLocaleString() : 0} descriptor={'NUMBER OF DOCUMENTS INGESTED'}/>
 				<StatPill stat={ingestData.numberOfSources} descriptor={'NUMBER OF DOCUMENT SOURCES'}/>
 			</div>		
 		</div>
