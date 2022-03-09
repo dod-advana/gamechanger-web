@@ -17,8 +17,8 @@ describe('DataTrackerController', function () {
 			let passedCountParams = null;
 			let passedFindAllParams = null;
 			const documentCorpus = {
-				count: async (countParams) => { passedCountParams = countParams; return 2; },
-				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse; }
+				count: async (countParams) => { passedCountParams = countParams; return 2 },
+				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse }
 			};
 
 			const opts = {
@@ -80,8 +80,8 @@ describe('DataTrackerController', function () {
 			let passedCountParams = null;
 			let passedFindAllParams = null;
 			const documentCorpus = {
-				count: async (countParams) => { passedCountParams = countParams; return 2; },
-				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse; }
+				count: async (countParams) => { passedCountParams = countParams; return 2 },
+				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse }
 			};
 
 			const opts = {
@@ -145,8 +145,8 @@ describe('DataTrackerController', function () {
 			let passedCountParams = null;
 			let passedFindAllParams = null;
 			const documentCorpus = {
-				count: async (countParams) => { passedCountParams = countParams; throw 'My fake error'; },
-				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse; }
+				count: async (countParams) => { passedCountParams = countParams; throw 'My fake error' },
+				findAll: async (findAllParams) => { passedFindAllParams = findAllParams; return fakeDocumentCorpusResponse }
 			};
 
 			const opts = {
