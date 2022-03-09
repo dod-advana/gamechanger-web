@@ -162,7 +162,7 @@ class DataTrackerController {
 				let level_value;
 				let crawlerData = {};
 				const info = await this.crawlerInfo.findAll({
-					attributes: ['crawler', 'url_origin']
+					attributes: ['crawler', 'url_origin', 'data_source_s', 'source_title']
 				});
 				level_value = await this.crawlerStatus.findAll({
 					attributes,
@@ -179,11 +179,36 @@ class DataTrackerController {
 					return crawlerData;
 				});
 				let resp = [];
-				Object.keys(level_value).slice(offset, offset + limit).forEach(data =>{
-					const url_origin = info.find(crawler => crawler.dataValues.crawler === data)?.dataValues?.url_origin;
-					resp.push({'crawler_name':data, 'status':level_value[data].status, 'datetime':level_value[data].datetime, url_origin});
+
+				const sort = order?.[0]?.[0];
+				const sortDirection = order?.[0]?.[1];
+
+				const crawlerList = Object.keys(level_value);
+
+				
+				crawlerList.forEach(data =>{
+					const dataInfo = info.find(crawler => crawler.dataValues.crawler === data);
+					resp.push({
+						'crawler_name':data, 
+						'status':level_value[data].status, 
+						'datetime':level_value[data].datetime, 
+						url_origin: dataInfo?.dataValues?.url_origin, 
+						data_source_s: dataInfo?.dataValues.data_source_s, 
+						source_title: dataInfo?.dataValues.source_title
+					});
 				});
-				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp});
+
+				if(sort === 'crawler_name'){
+					resp.sort((a,b) => {
+						const aName = a.data_source_s || a.crawler_name;
+						const bName = b.data_source_s || b.crawler_name;
+
+						if(aName.toLocaleLowerCase() > bName.toLocaleLowerCase()) return sortDirection === 'ASC' ? 1 : -1;
+						return sortDirection === 'ASC' ? -1 : 1;
+					});
+				}
+
+				res.status(200).send({totalCount: Object.keys(crawlerData).length, docs: resp.slice(offset, offset + limit)});
 			}else if (option === 'last'){
 				let level_value;
 				let crawlerData = {};
