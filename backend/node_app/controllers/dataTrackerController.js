@@ -267,7 +267,7 @@ class DataTrackerController {
 					[Sequelize.fn('count', '*'), 'count']
 				],
 				group: 'month'
-			})
+			});
 			docsByMonthRaw.sort((a,b) => {
 				if(a.dataValues.month > b.dataValues.month) return 1;
 				return -1;
@@ -281,7 +281,7 @@ class DataTrackerController {
 			const monthsObject = {};
 			docsByMonthRaw.forEach(data => {
 				monthsObject[monthNames[data.dataValues.month.getUTCMonth()]] = data.dataValues.count;
-			})
+			});
 
 			const docsByMonth = [];
 			for(let i = 0; i < 12; i++){
@@ -291,7 +291,7 @@ class DataTrackerController {
 				if(monthsObject[month]){ 
 					docsByMonth.push({month, count: Number(monthsObject[month])});
 				}else{
-					docsByMonth.push({month, count: 0})
+					docsByMonth.push({month, count: 0});
 				}
 			}
 
@@ -299,7 +299,7 @@ class DataTrackerController {
 				docsByMonth,
 				numberOfSources,    
 				numberOfDocuments
-			}
+			};
 
 			res.status(200).send(docIngestionStats);
 		} catch (e) {
