@@ -165,6 +165,7 @@ const JBookSearchHandler = {
 					timeFound: 0.0,
 					iframePreviewLink: null,
 					runningSearch: true,
+					edaRunningSearch: true,
 					urlSearch: false,
 					initial: false,
 					expansionDict: {},
@@ -315,10 +316,10 @@ const JBookSearchHandler = {
 				setState(dispatch, {
 					prevSearchText: null,
 					unauthorizedError: true,
-					loading: false,
+					edaLoading: false,
 					autocompleteItems: [],
 					searchResultsCount: 0,
-					runningSearch: false,
+					edaRunningSearch: false,
 					loadingTinyUrl: false,
 					hasExpansionTerms: false
 				});

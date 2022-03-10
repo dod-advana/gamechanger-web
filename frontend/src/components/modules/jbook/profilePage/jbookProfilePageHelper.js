@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import {Checkbox, CircularProgress, FormControlLabel, Tooltip, Typography} from '@material-ui/core';
+import {Checkbox, FormControlLabel, Tooltip, Typography} from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {
 	StyledTableContainer, StyledNavButton, StyledNavBar, StyledNavContainer, StyledSideNavContainer,
@@ -12,11 +12,6 @@ import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
-import GCPrimaryButton from '../../../common/GCButton';
-import GamechangerAPI from '../../../api/gameChanger-service-api';
-import { autoDownloadFile, b64toBlob } from '../../../export/ExportResultsDialog';
-
-const gamechangerAPI = new GamechangerAPI();
 
 const firstColWidth = {
 	maxWidth: 100,
@@ -70,21 +65,12 @@ const SideNav = (props) => {
 
 const BasicData = (props) => {
 	const {
-		budgetType,
-		admin,
-		loading,
-		programElement,
-		projectNum,
-		budgetYear,
-		budgetLineItem,
-		id,
-		appropriationNumber
+		budgetType
 	} = props;
 
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData } = state;
-	const [exportLoading, setExportLoading] = useState(false);
 
 	return (
 		<StyledLeftContainer>
