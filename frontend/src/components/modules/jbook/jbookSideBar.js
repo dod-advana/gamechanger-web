@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import GCAccordion from '../../common/GCAccordion';
-import {exactMatch, getTrackingNameForFactory} from "../../../utils/gamechangerUtils";
-import {Checkbox, FormControlLabel, FormGroup} from "@material-ui/core";
-import _ from "lodash";
-import {setState} from "../../../utils/sharedFunctions";
-import {makeStyles} from "@material-ui/core/styles";
-import {trackEvent} from "../../telemetry/Matomo";
+import {exactMatch, getTrackingNameForFactory} from '../../../utils/gamechangerUtils';
+import {Checkbox, FormControlLabel, FormGroup} from '@material-ui/core';
+import _ from 'lodash';
+import {setState} from '../../../utils/sharedFunctions';
+import {makeStyles} from '@material-ui/core/styles';
+import {trackEvent} from '../../telemetry/Matomo';
 
 const styles = {
 	innerContainer: {
@@ -179,7 +179,7 @@ const useStyles = makeStyles({
 
 export default function JBookSideBar(props) {
 
-	const { cloneData = {}, context } = props;
+	const { context } = props;
 
 	const classes = useStyles();
 

@@ -478,10 +478,6 @@ const jbookCardHandler = {
 					{
 						title: 'Accomplishments',
 						snippet: _.truncate(item.accomplishments ? renderAccomplishments(item.accomplishments) : 'No Accomplishments', {'length': 200})
-					},
-					{
-						title: 'Section',
-						snippet: 'Section text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 					}
 				];
 			}
@@ -492,8 +488,6 @@ const jbookCardHandler = {
 			}
 			const contextHtml = hoveredSnippet;
 			const isWideCard = true;
-
-			const currentAsOfText = `Budget Year: ${item.budgetYear}`;
 
 			if (state.listView && !intelligentSearch) {
 				return (

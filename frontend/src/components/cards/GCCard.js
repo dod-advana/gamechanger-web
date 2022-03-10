@@ -395,7 +395,7 @@ function GCCard(props) {
 				});
 			}
 		}
-	}, [state, loaded, cardType, item]);
+	}, [state, loaded, cardType, item, card_module]);
 
 	useEffect(() => {}, [popperIsOpen, popperAnchorEl, favorite]);
 
