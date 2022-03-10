@@ -609,7 +609,7 @@ const GCDataStatusTracker = (props) => {
 					return row.original.url_origin ?
 						<TableRow>
 							<a 
-								href={row.original.url_origin ? row.original.url_origin : '#'} 
+								href={row.original.url_origin} 
 								target='_blank' 
 								rel="noreferrer">
 								{getCrawlerName(row.original)}
