@@ -234,6 +234,104 @@ describe('DataTrackerController', function () {
 			}
 
 		});
+
+		it('should get crawler data for data status tracker table', async (done) => {
+			const apiStatusResMock = [{crawler_name: 'test', status: 'Ingest Complete', datetime: new Date('2021-02-19T21:12:56.119Z')}, {crawler_name: 'test2', status: 'In Progress', datetime: new Date('2021-02-20T00:57:27.774Z')}];
+			const apiInfoResMock = [{dataValues: {crawler: 'test', url_origin: 'test', data_source_s: 'test', source_title: 'test'}}, {dataValues: {crawler: 'test2', url_origin: 'test2', data_source_s: 'test2', source_title: 'test2'}}];
+			const crawlerStatus = {
+				findAll() {
+					return Promise.resolve(apiStatusResMock);
+				}
+			};
+			const crawlerInfo = {
+				findAll() {
+					return Promise.resolve(apiInfoResMock);
+				}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				crawlerStatus,
+				crawlerInfo
+			};
+			const target = new DataTrackerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {limit: 10, offset: 0, order: [], where: [], option: 'status'}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				const expected = {totalCount: 2, docs: [{crawler_name: 'test', data_source_s: 'test', source_title: 'test', url_origin: 'test', status: 'Ingest Complete', datetime: new Date('2021-02-19T21:12:56.119Z')}, {crawler_name: 'test2', data_source_s: 'test2', source_title: 'test2', url_origin: 'test2', status: 'In Progress', datetime: new Date('2021-02-20T00:57:27.774Z')}]};
+				await target.getCrawlerMetadata(req, res);
+				assert.strictEqual(resCode, 200);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
+			} catch (e) {
+				assert.fail(e);
+			}
+
+		});
+
+		it('should get crawler data sorted by name for data status tracker table', async (done) => {
+			const apiStatusResMock = [{crawler_name: 'cTest', status: 'Ingest Complete', datetime: new Date('2021-02-19T21:12:56.119Z')}, {crawler_name: 'aTest2', status: 'In Progress', datetime: new Date('2021-02-20T00:57:27.774Z')}];
+			const apiInfoResMock = [{dataValues: {crawler: 'cTest', url_origin: 'test', data_source_s: 'cTest', source_title: 'test'}}, {dataValues: {crawler: 'aTest2', url_origin: 'test2', data_source_s: 'aTest2', source_title: 'test2'}}];
+			const crawlerStatus = {
+				findAll() {
+					return Promise.resolve(apiStatusResMock);
+				}
+			};
+			const crawlerInfo = {
+				findAll() {
+					return Promise.resolve(apiInfoResMock);
+				}
+			};
+			const opts = {
+				...constructorOptionsMock,
+				crawlerStatus,
+				crawlerInfo
+			};
+			const target = new DataTrackerController(opts);
+
+			const req = {
+				...reqMock,
+				body: {limit: 10, offset: 0, order: [['crawler_name', 'ASC']], where: [], option: 'status'}
+			};
+
+			let resMsg;
+			let resCode;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+				}
+			};
+
+			try {
+				const expected = {totalCount: 2, docs: [{crawler_name: 'aTest2', data_source_s: 'aTest2', source_title: 'test2', url_origin: 'test2', status: 'In Progress', datetime: new Date('2021-02-20T00:57:27.774Z')}, {crawler_name: 'cTest', data_source_s: 'cTest', source_title: 'test', url_origin: 'test', status: 'Ingest Complete', datetime: new Date('2021-02-19T21:12:56.119Z')}]};
+				await target.getCrawlerMetadata(req, res);
+				assert.strictEqual(resCode, 200);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
+			} catch (e) {
+				assert.fail(e);
+			}
+
+		});
 	});
 
 	describe('#getOrgSealData', () => {
