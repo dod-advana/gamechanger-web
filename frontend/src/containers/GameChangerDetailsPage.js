@@ -39,9 +39,10 @@ const RESULTS_PER_PAGE = 20;
 
 const colWidth = {
 	maxWidth: '900px',
-	whiteSpace: 'nowrap',
+	// whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	wordBreak: 'break-all'
 };
 
 export const MainContainer = styled.div`
