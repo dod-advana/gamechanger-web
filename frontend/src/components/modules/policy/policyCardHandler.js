@@ -96,6 +96,19 @@ const FavoriteTopic = styled.button`
 	margin-bottom: 3px;
 	cursor: pointer;
 	border: 1px solid darkgray;
+
+	> i {
+		color: #E9691D;
+	}
+
+	&:hover {
+		background-color: #e9691d;
+		color: white;
+
+		> i {
+			color: white;
+		}
+	}
 `;
 
 const CloseButton = styled.div`
@@ -589,7 +602,6 @@ const FavoriteTopicFromCardBack = ({topic, favorited, dispatch, searchText, clon
 				}}
 				className={isFavorite ? 'fa fa-star' : 'fa fa-star-o'}
 				style={{
-					color: isFavorite ? '#E9691D' : 'rgb(224, 224, 224)',
 					marginLeft: 'auto',
 					cursor: 'pointer',
 					alignSelf: 'center',
