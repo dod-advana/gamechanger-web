@@ -8,7 +8,7 @@ RUN yum install -y \
         git \
         make
 
-RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs
+RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs cyrus-sasl-lib
      
 # non-root app USER/GROUP
 ARG APP_UID=1000
