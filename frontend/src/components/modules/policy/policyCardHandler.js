@@ -948,6 +948,7 @@ const PolicyCardHandler = {
 													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 												</div>
 											);
+
 										}).value()}
 									</div>
 									<div className={'expanded-metadata'}>
@@ -1122,47 +1123,50 @@ const PolicyCardHandler = {
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
-										return (
-											<div
-												className={'page-hit'}
-												key={key}
-												style={{
-													...(hoveredHit === key && {
-														backgroundColor: '#E9691D',
-														color: 'white',
-													}),
-												}}
-												onMouseEnter={() => setHoveredHit(key)}
-												onClick={(e) => {
-													e.preventDefault();
-													clickFn(
-														item.filename,
-														state.cloneData.clone_name,
-														state.searchText,
-														page.pageNumber,
-														item.download_url_s
-													);
-												}}
-											>
-												{page.title && <span>{page.title}</span>}
-												{page.pageNumber && (
-													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
-													</span>
-												)}
-												<i
-													className="fa fa-chevron-right"
+										if (page.title || key < 5) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
 													}}
-												/>
-											</div>
-										);
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+														clickFn(
+															item.filename,
+															state.cloneData.clone_name,
+															state.searchText,
+															page.pageNumber,
+															item.download_url_s
+														);
+													}}
+												>
+													{page.title && <span>{page.title}</span>}
+													{page.pageNumber && (
+														<span>
+															{page.pageNumber === 0
+																? 'ID'
+																: `Page ${page.pageNumber}`}
+														</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
 									})
 									.value()}
 							</div>
