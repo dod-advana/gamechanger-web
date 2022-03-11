@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
-    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles",
+    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
     "prestart": "npm install",
     "start": "node index.js",
