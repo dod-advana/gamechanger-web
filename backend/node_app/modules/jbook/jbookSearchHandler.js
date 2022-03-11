@@ -304,9 +304,9 @@ class JBookSearchHandler extends SearchHandler {
 			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer'];
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
 			pgFilters.forEach(filter => {
-				if (jbookSearchSettings[filter] !== undefined) {
-					// console.log(filter);
-					// console.log(jbookSearchSettings[filter]);
+				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
+					console.log(filter);
+					console.log(jbookSearchSettings[filter]);
 
 					if (pgQueryWhere.length > 0) {
 						pgQueryWhere += ` AND ( `
@@ -327,24 +327,29 @@ class JBookSearchHandler extends SearchHandler {
 					pgQueryWhere += ` ) `;
 				}
 			});
+
 			const keys = [];
 			if (pgQueryWhere.length > 0) {
-				let pgQuery = `SELECT * FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				let pgQuery = `SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				console.log(pgQuery);
 				const pgResults = await this.db.jbook.query(pgQuery, {});
 				pgResults[0].forEach(review => {
 					let key;
 					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
+						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
 					} else if (review.budget_type === 'rdoc') {
-						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
+						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
 					} else if (review.budget_type === 'odoc') {
-						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#${review.budget_activity}#${review.agency}`
+						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
 					}
 					keys.push(key);
 				});
-				console.log(keys);
 			}
-
+			console.log(keys.length);
+			console.log(keys);
+			if(pgQueryWhere.length > 0){
+				req.body.jbookSearchSettings.pgKeys = keys;
+			}
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {};
 
@@ -356,10 +361,8 @@ class JBookSearchHandler extends SearchHandler {
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
 			returnData.expansionDict = expansionDict;
-
 			return returnData;
 
 		} catch (e) {
@@ -446,7 +449,7 @@ class JBookSearchHandler extends SearchHandler {
 					}
 				});
 				totalCount = totalCount[0][0].count;
-			} catch(e) {
+			} catch (e) {
 				console.log('Error getting total count');
 				console.log(e);
 			}
@@ -487,7 +490,7 @@ class JBookSearchHandler extends SearchHandler {
 						keywords = keywords.split(',').slice(1);
 						doc.keywords = keywords;
 					}
-					catch(e) {
+					catch (e) {
 						console.log('Error adding keywords to doc');
 						console.log(e);
 					}
@@ -581,10 +584,10 @@ class JBookSearchHandler extends SearchHandler {
 
 
 	}
-	
+
 	async getDataForFullPDFExport(req, userId) {
 		try {
-			const { budgetSearchSettings = {budgetYear: ['2022']} } = req.body;
+			const { budgetSearchSettings = { budgetYear: ['2022'] } } = req.body;
 			let keywordIds = undefined;
 
 			keywordIds = { pdoc: [], rdoc: [], om: [] };
@@ -603,7 +606,7 @@ class JBookSearchHandler extends SearchHandler {
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
-			const queryEnd = this.budgetSearchSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
+			const queryEnd = this.budgetSearchSearchUtility.buildEndQuery([{ id: 'serviceAgency', desc: false }]);
 
 			let giantQuery = ``;
 
