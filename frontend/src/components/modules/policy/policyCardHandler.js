@@ -98,6 +98,7 @@ const FavoriteTopic = styled.button`
 	border: 1px solid darkgray;
 
 	> i {
+		margin-left: 3px;
 		color: #E9691D;
 	}
 
@@ -602,7 +603,6 @@ const FavoriteTopicFromCardBack = ({topic, favorited, dispatch, searchText, clon
 				}}
 				className={isFavorite ? 'fa fa-star' : 'fa fa-star-o'}
 				style={{
-					marginLeft: 'auto',
 					cursor: 'pointer',
 					alignSelf: 'center',
 				}}
