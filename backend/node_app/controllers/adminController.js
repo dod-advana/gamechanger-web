@@ -113,9 +113,9 @@ class AdminController {
 				exportDocList.push(doc.split(".pdf")[0]);
 			}
 		}
-		// combien list
+		// combine list
 		let combinedDocList = favDocList.concat(exportDocList);
-		console.log(combinedDocList);
+		
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
