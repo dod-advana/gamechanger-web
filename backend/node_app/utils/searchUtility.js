@@ -2953,6 +2953,13 @@ class SearchUtility {
 		const isVerbatimSearch = this.isVerbatim(searchText);
 		const plainQuery = (isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery);
 
+		const mustQuery = [];
+		if (jbookSearchSettings.pgKeys !== undefined) {
+			mustQuery.push(
+				{ terms: { key_review_s: jbookSearchSettings.pgKeys } }
+			)
+		}
+
 		let query = {
 			track_total_hits: true,
 			from: offset,
@@ -2967,7 +2974,7 @@ class SearchUtility {
 			},
 			query: {
 				bool: {
-					must: [],
+					must: mustQuery,
 					should: [
 						{
 							multi_match: {
