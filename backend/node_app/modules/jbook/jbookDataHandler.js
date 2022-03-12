@@ -37,7 +37,7 @@ class JBookDataHandler extends DataHandler {
 			accomp = ACCOMP,
 			review = REVIEW,
 			searchUtility = new SearchUtility(opts),
-			jbookSearchUtility = new JBookSearchUtility(),
+			jbookSearchUtility = new JBookSearchUtility(opts),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
 			keyword = KEYWORD,
@@ -108,12 +108,17 @@ class JBookDataHandler extends DataHandler {
 	async getESProjectData(req, userId) {
 		try {
 			const {
-				id
+				id,
+				type
 			} = req.body;
 
 			const keys = id.split('#');
 
-			const budgetYear = keys[1];
+			// pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
+			// rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
+			// odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
+
+			let budgetYear;
 			const budgetType = keys[0];
 			let budgetCycle;
 			let budgetActivityNumber;
@@ -125,20 +130,27 @@ class JBookDataHandler extends DataHandler {
 
 			switch (budgetType) {
 				case 'pdoc':
-				case 'rdoc':
-					budgetCycle = keys[2];
-					budgetActivityNumber = keys[3];
-					budgetLineItem = keys[4];
-					serviceAgency = keys[6];
-					appropriationNumber = keys[7];
+					budgetLineItem = keys[1];
+					budgetYear = keys[2];
+					appropriationNumber = keys[3];
+					budgetActivityNumber = keys[4];
+					serviceAgency = keys[5];
 					break;
-				case 'om':
-					appropriationNumber = keys[2];
-					programElement = keys[3];
-					budgetLineItem = keys[4];
+				case 'rdoc':
+					programElement = keys[1];
+					budgetLineItem = keys[2];
+					budgetYear = keys[3];
+					appropriationNumber = keys[4];
 					budgetActivityNumber = keys[5];
-					projectNum = keys[6];
-					serviceAgency = keys[7];
+					serviceAgency = keys[6];
+					break;
+				case 'odoc':
+					budgetLineItem = keys[1];
+					programElement = keys[2];
+					budgetYear = keys[3];
+					appropriationNumber = keys[4];
+					budgetActivityNumber = keys[5];
+					serviceAgency = keys[6];
 					break;
 				default:
 					break;
@@ -151,9 +163,20 @@ class JBookDataHandler extends DataHandler {
 			const {docs} = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			const data = docs[0];
+			console.log(data)
 			if (!data.currentYearAmount) {
 
 			}
+
+			data.review = await this.getReviewData({
+				budgetYear,
+				appropriationNumber,
+				budgetActivityNumber,
+				serviceAgency,
+				budgetLineItem,
+				programElement,
+				projectNum: budgetLineItem,
+			}, type, 0);
 
 			return data;
 		} catch (err) {
@@ -169,7 +192,6 @@ class JBookDataHandler extends DataHandler {
 			let docType = type;
 			let data;
 			let totalBudget = 0;
-			let query;
 
 			switch (docType) {
 				case 'Procurement':
@@ -196,6 +218,7 @@ class JBookDataHandler extends DataHandler {
 				default:
 					break;
 			}
+
 			docType = types[docType];
 
 			if (data && data.dataValues) {
@@ -216,7 +239,7 @@ class JBookDataHandler extends DataHandler {
 									Sequelize.fn('MAX', Sequelize.col('Proj_Fund_BY1')), 'currentYearAmountMax'
 								]
 							});
-						} else if (docType === 'om') {
+						} else if (docType === 'odoc') {
 							// om doesn't have a currentYearAmount currently
 							// maxVal = this.om.findAll({
 							// 	attributes: [
@@ -382,110 +405,8 @@ class JBookDataHandler extends DataHandler {
 				}
 				data.keywords = keywords;
 
-
 				// REVIEW
-				let review;
-				try {
-					const query = {
-						budget_type: types[type],
-						budget_year: data.budgetYear,
-						appn_num: data.appropriationNumber,
-						budget_activity: data.budgetActivityNumber,
-						agency: data.serviceAgency
-					};
-
-					// in review table, budget_line_item is also projectNum
-
-					switch (type) {
-						case 'Procurement':
-							query.budget_line_item = data.budgetLineItem;
-							break;
-						case 'RDT&E':
-							query.program_element = data.programElement;
-							query.budget_line_item = data.projectNum;
-							break;
-						case 'O&M':
-							query.budget_line_item = data.budgetLineItem;
-							query.program_element = data.programElement;
-							break;
-						default:
-							break;
-					}
-
-					review = await this.rev.findOne({
-						where: query
-					});
-
-					// console.log(review)
-					if (review && review.dataValues) {
-						// parse mission partners
-						if (review.service_mp_list && typeof review.service_mp_list === 'string') {
-							review.service_mp_list = review.service_mp_list.replace(/\[|\]|\\/g, '').split(';').join('|');
-						}
-
-
-
-						data.review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
-						data.review.totalBudget = totalBudget;
-					}
-
-					try {
-						// Add reviewer emails for primary secondary and service
-						let primaryReviewer;
-
-						if (data.review.primaryReviewer) {
-							primaryReviewer = await this.reviewer.findOne({
-								where: {
-									type: 'primary',
-									name: data.review.primaryReviewer.trim()
-								},
-								raw: true
-							});
-						}
-						if (primaryReviewer !== null) {
-							data.review.primaryReviewerEmail = primaryReviewer.email;
-						}
-
-
-						let serviceReviewer;
-						if (data.review.serviceReviewer) {
-							serviceReviewer = await this.reviewer.findOne({
-								where: {
-									type: 'service',
-									name: data.review.serviceReviewer ? data.review.serviceReviewer.split('(')[0].trim() : ''
-								},
-								raw: true
-							});
-							if (serviceReviewer !== null) {
-								data.review.serviceReviewerEmail = serviceReviewer.email;
-							}
-						}
-
-						let secondaryReviewer;
-						const secName = data.review.serviceSecondaryReviewer ? data.review.serviceSecondaryReviewer.split('(')[0].trim() : '';
-						if (data.review.serviceSecondaryReviewer) {
-							secondaryReviewer = await this.reviewer.findOne({
-								where: {
-									type: 'secondary',
-									name: secName
-								},
-								raw: true
-							});
-							if (secondaryReviewer !== null) {
-								data.review.serviceSecondaryReviewerEmail = secondaryReviewer.email;
-							}
-						}
-
-					} catch (err) {
-						console.log('Error fetching reviewer emails');
-						console.log(err);
-					}
-
-
-				} catch (err) {
-					console.log('Error fetching for review');
-					console.log(err);
-				}
+				data.review = await this.getReviewData(data, type, totalBudget);
 
 				// VENDORS
 				let vendorData = [];
@@ -517,6 +438,103 @@ class JBookDataHandler extends DataHandler {
 			this.logger.error(err, 'N49863Q', userId);
 			return [];
 		}
+	}
+
+	async getReviewData(data, type, totalBudget) {
+		let review = {};
+		try {
+			const query = {
+				budget_type: types[type],
+				budget_year: data.budgetYear,
+				// appn_num: data.appropriationNumber,
+				budget_activity: data.budgetActivityNumber,
+				agency: data.serviceAgency
+			};
+
+			// in review table, budget_line_item is also projectNum
+
+			switch (type) {
+				case 'Procurement':
+					query.budget_line_item = data.budgetLineItem;
+					break;
+				case 'RDT&E':
+					query.program_element = data.programElement;
+					query.budget_line_item = data.projectNum;
+					break;
+				case 'O&M':
+					query.budget_line_item = data.budgetLineItem;
+					query.program_element = data.programElement;
+					break;
+				default:
+					break;
+			}
+
+			review = await this.rev.findOne({
+				where: query
+			});
+
+			// console.log(review)
+			if (review && review.dataValues) {
+				// parse mission partners
+				if (review.service_mp_list && typeof review.service_mp_list === 'string') {
+					review.service_mp_list = review.service_mp_list.replace(/\[|\]|\\/g, '').split(';').join('|');
+				}
+
+				review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
+				review.totalBudget = totalBudget;
+			}
+
+			try {
+				// Add reviewer emails for primary secondary and service
+				let primaryReviewer;
+
+				if (review.primaryReviewer) {
+					primaryReviewer = await this.reviewer.findOne({
+						where: {
+							type: 'primary',
+							name: review.primaryReviewer.trim()
+						},
+						raw: true
+					});
+				}
+				review.primaryReviewerEmail = primaryReviewer?.email || null;
+
+				let serviceReviewer;
+				if (review.serviceReviewer) {
+					serviceReviewer = await this.reviewer.findOne({
+						where: {
+							type: 'service',
+							name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : ''
+						},
+						raw: true
+					});
+				}
+				review.serviceReviewerEmail = serviceReviewer?.email || null;
+
+				let secondaryReviewer;
+				const secName = review.serviceSecondaryReviewer ? review.serviceSecondaryReviewer.split('(')[0].trim() : '';
+				if (review.serviceSecondaryReviewer) {
+					secondaryReviewer = await this.reviewer.findOne({
+						where: {
+							type: 'secondary',
+							name: secName
+						},
+						raw: true
+					});
+				}
+				review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
+
+			} catch (err) {
+				console.log('Error fetching reviewer emails');
+				console.log(err);
+			}
+
+
+		} catch (err) {
+			console.log('Error fetching for review');
+			console.log(err);
+		}
+		return review;
 	}
 
 	async getBudgetDropdownData(req, userId) {

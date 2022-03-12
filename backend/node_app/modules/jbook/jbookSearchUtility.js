@@ -39,7 +39,7 @@ class JBookSearchUtility {
 				const newKey = mapping[field].newName;
 				newData[newKey] = mapping[field].processValue(data[field]);
 			}
-			else {
+			else if (data[field] && data[field] !== null) {
 				newData[field] = data[field];
 			}
 		}

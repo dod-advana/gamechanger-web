@@ -3147,7 +3147,7 @@ class SearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: {key_s: docIds}
+							terms: {key_review_s: docIds}
 						}
 					}
 				}
