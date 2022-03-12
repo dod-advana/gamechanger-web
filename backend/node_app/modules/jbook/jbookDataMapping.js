@@ -431,7 +431,7 @@ module.exports = {
 			processValue: (value) => value
 		},
 		budget_year: {
-			newName: 'revBudgetYear',
+			newName: 'budgetYear',
 			defaultValue: '',
 			processValue: (value) => value
 		},
@@ -1490,6 +1490,11 @@ module.exports = {
 			processValue: (value) => value
 		},
 		'budgetActivityTitle_s': {
+			newName: 'budgetLineItem',
+			defaultValue: '',
+			processValue: (value) => value
+		},
+		'budgetActivityTitle_t': {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
 			processValue: (value) => value
@@ -1689,7 +1694,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value
 		},
-		'key_s': {
+		'key_review_s': {
 			newName: 'id',
 			defaultValue: '',
 			processValue: (value) => value
