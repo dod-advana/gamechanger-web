@@ -824,7 +824,7 @@ const jbookCardHandler = {
 			const types = {
 				pdoc: 'Procurement',
 				rdoc: 'RDT&E',
-				om: 'O&M',
+				odoc: 'O&M',
 			};
 
 			return (
