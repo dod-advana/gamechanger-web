@@ -45,7 +45,8 @@ class PolicySearchHandler extends SearchHandler {
 			forCacheReload = false,
 			searchText
 		} = req.body;
-		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, true, getUserIdFromSAMLUserId(req));
+
+		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(req.body, userId, storeHistory, getUserIdFromSAMLUserId(req));
 		// if using cache
 		// if (!forCacheReload && useGCCache && offset === 0) {
 		// 	console.log('something');

@@ -34,7 +34,7 @@ function create(data) {
 		}).then(() => {
 			resolve();
 		}).catch(e => {
-			logger.error(e);
+			LOGGER.error(e);
 			reject(e);
 		});
 	});

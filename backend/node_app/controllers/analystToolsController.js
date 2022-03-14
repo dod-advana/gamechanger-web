@@ -5,6 +5,7 @@ const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
 const sparkMD5Lib = require('spark-md5');
 const { result } = require('underscore');
+const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
 
 class AnalystToolsController {
 	constructor(opts = {}) {
@@ -89,13 +90,13 @@ class AnalystToolsController {
 
 			if(undo){
 				await this.compareFeedbackModel.destroy({
-					where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+					where: { searchedParagraph, matchedParagraphId, userId: getUserIdFromSAMLUserId(req) },
 				});
 				return res.status(200).send();
 			}
 
 			const [record, created] = await this.compareFeedbackModel.findOrCreate({
-				where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+				where: { searchedParagraph, matchedParagraphId, userId: getUserIdFromSAMLUserId(req) },
 				defaults: {
 					searchedParagraph,
 					matchedParagraphId,

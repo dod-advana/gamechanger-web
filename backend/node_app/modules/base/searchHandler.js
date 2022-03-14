@@ -1,9 +1,7 @@
 const asyncRedisLib = require('async-redis');
 const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../../utils/searchUtility');
-const { getTenDigitUserId } = require('../../utils/userUtility');
 const GC_HISTORY = require('../../models').gc_history;
-const sparkMD5 = require('spark-md5');
 
 class SearchHandler {
 	constructor(opts = {}) {

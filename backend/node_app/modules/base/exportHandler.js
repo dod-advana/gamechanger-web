@@ -8,13 +8,17 @@ class ExportHandler {
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
+			searchUtility = new SearchUtility(opts),
+			exportHistory = new ExportHistoryController(opts),
+			reports = new Reports(opts),
+			appSettings = APP_SETTINGS
 		} = opts;
 
 		this.logger = logger;
-		this.searchUtility = new SearchUtility(opts);
-		this.exportHistory = new ExportHistoryController(opts);
-		this.reports = new Reports();
-		this.appSettings = APP_SETTINGS;
+		this.searchUtility = searchUtility;
+		this.exportHistory = exportHistory;
+		this.reports = reports;
+		this.appSettings = appSettings;
 	}
 
 	async export(res, searchText, format, options, cloneName, permissions, userId, session) {

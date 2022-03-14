@@ -10,7 +10,7 @@ describe('UserController', function () {
 			dataApi: {}
 		};
 
-		it('return all internal users', async () => {
+		it('return all internal users', async (done) => {
 			const internalUsers = [{id: 1, username: 'Test'}];
 			const internalUserTracking = {
 				findAll() {
@@ -48,11 +48,12 @@ describe('UserController', function () {
 			const expected = [{id: 1, username: 'Test'}];
 			try {
 				await target.getInternalUsers(req, res);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			assert.deepStrictEqual(resMsg, expected);
-
 		});
 	});
 
@@ -154,14 +155,14 @@ describe('UserController', function () {
 					if (user) {
 						return Promise.resolve(user);
 					} else {
-						return Promise.resolve(undefined)
+						return Promise.resolve(undefined);
 					}
 				}
 			},
 			constants: { GAME_CHANGER_OPTS: {index: 'gamechanger'}}
 		};
 
-		it('should return fake user data for a new user', async () => {
+		it('should return fake user data for a new user', async (done) => {
 			users = [];
 			const target = new UserController(opts);
 
@@ -188,14 +189,16 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserData(req, res);
+				const expected = {'api_key': '', 'export_history': [], 'favorite_documents': [], 'favorite_searches': [], 'notifications': {}, 'search_history': [], 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'api_key': '', 'export_history': [], 'favorite_documents': [], 'favorite_searches': [], 'notifications': {}, 'search_history': [], 'user_id': 'testsuite'};
-			assert.deepStrictEqual(resMsg, expected);
 		});
 
-		it('should return fake user data for a user', async () => {
+		it('should return fake user data for a user', async (done) => {
 			users.push({ user_id: 'testsuite', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
 
 			const favorite_documents = [{
@@ -241,19 +244,19 @@ describe('UserController', function () {
 
 			const favorite_groups = [{
 				id: 1,
-				user_id: "testsuite",
-				group_type: "document",
-				group_name: "Test",
-				group_description: "Test",
+				user_id: 'testsuite',
+				group_type: 'document',
+				group_name: 'Test',
+				group_description: 'Test',
 				is_clone: true,
 				clone_index: 'Test',
-			}]
+			}];
 
 			const favorite_documents_groups = [{
-				user_id: "testsuite",
+				user_id: 'testsuite',
 				favorite_group_id: 1,
 				favorite_document_id: 1,
-			}]
+			}];
 
 			const search_hisotry = [{
 				id: 1,
@@ -413,7 +416,7 @@ describe('UserController', function () {
 							});
 							return Promise.resolve([{favorited_count: count}]);
 						} else {
-							returnFavoriteOrganizations = [];
+							const returnFavoriteOrganizations = [];
 							favorite_organizations.forEach(org => {
 								if (data.where.user_id === org.user_id) {
 									returnFavoriteOrganizations.push(org);
@@ -429,7 +432,7 @@ describe('UserController', function () {
 						col(data) {}
 					},
 					findAll(data) {
-						returnFavoriteGroups = [];
+						const returnFavoriteGroups = [];
 						favorite_groups.forEach(group => {
 							if (data.where.user_id === group.user_id) {
 								returnFavoriteGroups.push(group);
@@ -444,7 +447,7 @@ describe('UserController', function () {
 						col(data) {}
 					},
 					findAll(data) {
-						returnFavoriteDocumentsGroup = [];
+						const returnFavoriteDocumentsGroup = [];
 						favorite_documents_groups.forEach(docGroup => {
 							if (data.where.favorite_group_id === docGroup.favorite_group_id) {
 								returnFavoriteDocumentsGroup.push(docGroup);
@@ -501,11 +504,14 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserData(req, res);
+				const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': 'testsuite'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'download_url_s': 'Test', 'favorite_id': 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': 'testsuite'}], 'favorite_groups': [{'clone_index': 'Test', 'favorites': [1], 'group_description': 'Test', 'group_name': 'Test', 'group_type': 'document', 'id': 1, 'is_clone': true, 'user_id': 'testsuite'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': 'testsuite'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': 'testsuite'}], 'notifications': {'gamechanger': {'favorites': 0, 'history': 0, 'total': 0}}, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': 'testsuite'}], 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': 'testsuite'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', "favorite_id": 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': 'testsuite'}],"favorite_groups": [{"clone_index": "Test", "favorites": [1], "group_description": "Test", "group_name": "Test", "group_type": "document", "id": 1, "is_clone": true, "user_id": "testsuite"}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': 'testsuite'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': 'testsuite'}], 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': 'testsuite'}], 'user_id': 'testsuite'};
-			assert.deepStrictEqual(resMsg, expected);
+			
 
 		});
 	});
@@ -556,7 +562,7 @@ describe('UserController', function () {
 			}
 		};
 
-		it('creates or returns a user settings', async () => {
+		it('creates or returns a user settings', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -582,11 +588,13 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserSettings(req, res);
+				const expected = {'is_beta': false, 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_settings': {}, 'submitted_info': true, 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'is_beta': false, 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_settings': {}, 'submitted_info': true, 'user_id': 'testsuite'};
-			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
 
@@ -631,7 +639,7 @@ describe('UserController', function () {
 			}
 		};
 
-		it('clear dashboard notifications', async () => {
+		it('clear dashboard notifications', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -645,9 +653,10 @@ describe('UserController', function () {
 			await target.clearDashboardNotification(req, res);
 			const expected = { notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } }, search_settings: {}, user_id: 'testsuite' };
 			assert.deepStrictEqual(users[0], expected);
+			done();
 		});
 
-		it('clear dashboard notifications is a no-op on empty notifications', async () => {
+		it('clear dashboard notifications is a no-op on empty notifications', async (done) => {
 			const logger = {
 				...constructorOptionsMock.logger,
 				error: jest.fn(),
@@ -669,16 +678,17 @@ describe('UserController', function () {
 			const expected = { notifications: {}, search_settings: {}, user_id: 'testsuite2' };
 			assert.deepStrictEqual(users[1], expected);
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 	});
 
 	describe('#updateUserAPIRequestLimit', () => {
-		let users = []
+		let users = [];
 		const opts = {
 			...constructorOptionsMock,
 			sequelize: {
 				literal(exp) {
-					return
+					return;
 				}
 			},
 			gcUser: {
@@ -699,9 +709,9 @@ describe('UserController', function () {
 					}
 				}
 			}
-		}
+		};
 		
-		it('should decrement the users API request limit by one', async () => {
+		it('should decrement the users API request limit by one', async (done) => {
 			users.push({user_id: 'testsuite', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
 			const target = new UserController(opts);
 
@@ -713,7 +723,7 @@ describe('UserController', function () {
 				body: {
 					username: 'hashMe'
 				}
-			}
+			};
 
 			const res = {
 				status(code) {
@@ -728,12 +738,15 @@ describe('UserController', function () {
 
 			try {
 				await target.updateUserAPIRequestLimit(req, res);
+				assert.equal(resCode, 200);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			assert.equal(resCode, 200);
-		})
-	})
+
+		});
+	});
 
 	describe('#submitUserInfo', () => {
 		let users = [{user_id: 'testsuite', user_info: null, submitted_info: null}];
@@ -761,7 +774,7 @@ describe('UserController', function () {
 			}
 		};
 
-		it('saves a users response to user info form', async () => {
+		it('saves a users response to user info form', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -796,13 +809,14 @@ describe('UserController', function () {
 			const expected = {user_info:{ email: 'test@example.com', org: 'org', q1: 'a1', q2: 'a2'}, submitted_info: true, user_id: 'testsuite'};
 			assert.deepStrictEqual(users[0], expected);
 			assert.equal(resCode, 200);
+			done();
 		});
 	});
 
 	describe('#resetAPIRequestLimit', () => {
-		it('should reset all API request limits to 3', async () => {
+		it('should reset all API request limits to 3', async (done) => {
 			const id = {
-				getDataValue() { return 1; }
+				getDataValue() { return 1 }
 			};
 
 			const gcUser = {
@@ -828,11 +842,12 @@ describe('UserController', function () {
 			const expected = 1;
 
 			assert.equal(actual, expected);
+			done();
 		});
 	});
 
 	describe('#getRecentSearches', () => {
-		it('should get recent searches', async () => {
+		it('should get recent searches', async (done) => {
 			const ids = [{ id: 1 }];
 
 			const searches = [{
@@ -880,17 +895,20 @@ describe('UserController', function () {
 
 			try {
 				await target.getRecentSearches(req, res);
+				const expected = [{
+					run_at: 1,
+					test: 'test'
+				}];
+
+				assert.equal(resCode, 200);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail();
+				done(e);
 			}
 
-			const expected = [{
-				run_at: 1,
-				test: 'test'
-			}];
 
-			assert.equal(resCode, 200);
-			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
 });
