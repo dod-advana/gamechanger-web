@@ -13,7 +13,7 @@ class Reports {
 			logger = loggerLib,
 			csvStringify = csvStringifyLib,
 			pdfMake = pdfMakeLib,
-			budgetSearchUtility = new BudgetSearchUtility(),
+			budgetSearchUtility = new BudgetSearchUtility(opts),
 			accomp = ACCOMP,
 		} = opts;
 

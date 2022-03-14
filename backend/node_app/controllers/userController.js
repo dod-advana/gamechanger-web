@@ -20,11 +20,14 @@ const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
 const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
+const constants = require('../config/constants');
+const {user_app_versions} = require('../models');
 const Op = Sequelize.Op;
 const ApiKeyRequests = require('../models').api_key_request;
 const ApiKey = require('../models').api_key;
 const FEEDBACK = require('../models').feedback;
 const GC_ASSISTS = require('../models').gc_assists;
+const USER_APP_VERSIONS = require('../models').user_app_versions;
 
 class UserController {
 
@@ -58,7 +61,8 @@ class UserController {
 			feedback = FEEDBACK,
 			gcAssists = GC_ASSISTS,
 			user = USER,
-			jbook_user = JBOOK_USER
+			jbook_user = JBOOK_USER,
+			user_app_versions = USER_APP_VERSIONS
 		} = opts;
 
 		this.logger = logger;
@@ -86,6 +90,7 @@ class UserController {
 		this.gcAssists = gcAssists;
 		this.user = user;
 		this.jbookUser = jbook_user;
+		this.user_app_versions = user_app_versions;
 
 		this.deleteInternalUser = this.deleteInternalUser.bind(this);
 		this.syncUserTable = this.syncUserTable.bind(this);
@@ -107,6 +112,7 @@ class UserController {
 		this.syncUserHelper = this.syncUserHelper.bind(this);
 		this.updateClonesVisited = this.updateClonesVisited.bind(this);
 		this.setupUserProfile = this.setupUserProfile.bind(this);
+		this.postUserAppVersion = this.postUserAppVersion.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -1251,6 +1257,150 @@ class UserController {
 			this.logger.error(e, '6RN417M', userId);
 			res.status(500).send(e);
 		}
+	}
+	
+	postUserAppVersion(req, res) {
+		const { app } = req.body;
+
+		const currentVersion = constants.VERSION;
+		const username = req.user.cn;
+
+		// search for app version
+		return this.findAppVersionByUser(username, app)
+			.then((result) => { 
+
+				// if data found, send data back and update it to newest version
+				if (result) {
+
+					// new users who are still in the same version
+					if (result.dataValues.version === 'NEWUSER_' + currentVersion) {
+						res.status(200).send(
+							{
+								newUser: true,
+								currentVersion: true,
+								message: 'New user app version updated'
+							}
+						);
+					}
+
+					// any user with outdated version
+					else if (result.dataValues.version !== constants.VERSION) {
+
+						this.updateAppVersion(username, app, currentVersion)
+							.then((update) => { 
+
+								// the app version was found and updated
+								if (update[0] === 1) {
+									res.status(200).send(
+										{
+											newUser: false,
+											currentVersion: false, // version had to be updated
+											message: 'user app version updated'
+										}
+									);
+								}
+
+								// failed to update
+								else {
+									res.status(400).send(
+										{ 
+											message: 'failed to update'
+										}
+									);
+								}
+							})
+							.catch((err) => {
+								this.logger.error(err);
+								res.status(400).send(err);
+							});
+					}
+
+					// up to date
+					else {
+
+						res.status(200).send({
+							newUser: false,
+							currentVersion: true,
+							message: 'App version is up to date'
+						});
+					}
+				}
+				// entirely new user
+				else {
+
+ 				// app version was not found, add new row
+					this.addNewAppVersion(username, app, 'NEWUSER_' + currentVersion)
+						.then(() => { 
+							res.status(200).send({
+								newUser: true,
+								currentVersion: false,
+								message: 'new user app version added'
+							});
+						}).catch(err => {
+							this.logger.error(err);
+							res.status(400).send({
+								message: 'failed to add new user app'
+							});
+						});
+				}
+			})
+			.catch((err) => {
+				this.logger.error(err);
+				res.status(400).send(err);
+			});
+	}
+	
+	findAppVersionByUser(username, app) {
+		return new Promise((resolve, reject) => {
+			this.user_app_versions.findOne({ 
+				where: {
+					username: username,
+					app_name: app
+				}
+			}).then((result) => {
+				resolve (result);
+			}).catch(e => {
+				this.logger.error(e);
+				reject(e);
+			});
+		});
+	}
+	
+	updateAppVersion(username, app, currentVersion) {
+		return new Promise((resolve, reject) => {
+			user_app_versions.update(
+				{
+					version: currentVersion
+				},
+				{ 
+					where: {
+						username: username,
+						app_name: app
+					}
+				}
+			).then((update) => {
+				resolve(update);
+			}).catch(e => {
+				this.logger.error(e);
+				reject(e);
+			});
+		});
+	}
+	
+	addNewAppVersion(username, app, currentVersion) {
+		return new Promise((resolve, reject) => {
+			user_app_versions.create({ 
+				username: username,
+				app_name: app,
+				version: currentVersion
+			})
+				.then(resObj => { 
+					resolve(resObj);
+				})
+				.catch(err => { 
+					reject(err);
+				});
+		});
 	}
 }
 

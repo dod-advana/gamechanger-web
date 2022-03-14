@@ -6,7 +6,7 @@ const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 describe('FavoritesController', function () {
 
 	describe('#favoriteTopicPOST', () => {
-		it('should create a favorite topic', (done) => {
+		it('should create a favorite topic', async (done) => {
 			const apiResMock = [{}, true];
 			const expectedReturn = {};
 			const statusMock = 200;
@@ -53,19 +53,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.favoriteTopicPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.favoriteTopicPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#favoriteOrganizationPOST', () => {
-		it('should create a favorite organization', (done) => {
+		it('should create a favorite organization', async (done) => {
 			const apiResMock = [{}, true];
 			const expectedReturn = {};
 			const statusMock = 200;
@@ -112,19 +112,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.favoriteOrganizationPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.favoriteOrganizationPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#favoriteDocumentPOST', () => {
-		it('should create a favorite document', (done) => {
+		it('should create a favorite document', async (done) => {
 			const apiResMock = [{}, true];
 			const expectedReturn = {};
 			const statusMock = 200;
@@ -171,19 +171,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.favoriteDocumentPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.favoriteDocumentPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#favoriteGroupPOST', () => {
-		it('should create a new group for favorites', (done) => {
+		it('should create a new group for favorites', async (done) => {
 			const apiResMock = [{}, true];
 			const expectedReturn = {};
 			const statusMock = 200;
@@ -212,9 +212,9 @@ describe('FavoritesController', function () {
 			const req = {
 				...reqMock,
 				body: {
-					group_type: "document", 
-					group_name: "Test", 
-					group_description: "Test",
+					group_type: 'document', 
+					group_name: 'Test', 
+					group_description: 'Test',
 					create: true
 				}
 			};
@@ -232,19 +232,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.favoriteGroupPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.favoriteGroupPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#addToFavoriteGroupPOST', () => {
-		it('should add a favorite to a group', (done) => {
+		it('should add a favorite to a group', async (done) => {
 			const apiResMock = [{}];
 			const expectedReturn = {};
 			const statusMock = 200;
@@ -263,7 +263,7 @@ describe('FavoritesController', function () {
 				bulkCreate() {
 					return Promise.resolve(apiResMock);
 				}
-			}
+			};
 
 			const opts = {
 				...constructorOptionsMock,
@@ -294,20 +294,20 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.addToFavoriteGroupPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.addToFavoriteGroupPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#deleteFavoriteFromGroupPOST', () => {
-		it('should delete a favorite from a group', (done) => {
-			const expectedReturn = {"removed": 1};
+		it('should delete a favorite from a group', async (done) => {
+			const expectedReturn = {'removed': 1};
 			const statusMock = 200;
 			const constants = {
 				env: {
@@ -321,7 +321,7 @@ describe('FavoritesController', function () {
 				destroy() {
 					return Promise.resolve(1);
 				}
-			}
+			};
 
 			const opts = {
 				...constructorOptionsMock,
@@ -352,19 +352,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.deleteFavoriteFromGroupPOST(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(resMsg, expectedReturn);
-					done();
-				});
+				await target.deleteFavoriteFromGroupPOST(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(resMsg, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#clearFavoriteSearchUpdate', () => {
-		it('should clear a favorite search update flag', (done) => {
+		it('should clear a favorite search update flag', async (done) => {
 			const expectedReturn = [
 				{
 					user_id: 'testsuite',
@@ -427,19 +427,19 @@ describe('FavoritesController', function () {
 			};
 
 			try {
-				target.clearFavoriteSearchUpdate(req, res).then(() => {
-					assert.equal(resCode, statusMock);
-					assert.deepEqual(favorites, expectedReturn);
-					done();
-				});
+				await target.clearFavoriteSearchUpdate(req, res);
+				assert.equal(resCode, statusMock);
+				assert.deepEqual(favorites, expectedReturn);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
 		});
 	});
 
 	describe('#checkLeastRecentFavoritedSearch', () => {
-		it('should check the least recent favorited search and increment existing notifications', async () => {
+		it('should check the least recent favorited search and increment existing notifications', async (done) => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -564,9 +564,10 @@ describe('FavoritesController', function () {
 			});
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 
-		it('should check the least recent favorited search and create new notifications if none exist', async () => {
+		it('should check the least recent favorited search and create new notifications if none exist', async (done) => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -694,9 +695,10 @@ describe('FavoritesController', function () {
 			});
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 
-		it('should only update the last checked timestamp if the number of search results has not changed', async () => {
+		it('should only update the last checked timestamp if the number of search results has not changed', async (done) => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -775,9 +777,10 @@ describe('FavoritesController', function () {
 			expect(user.save).not.toHaveBeenCalled();
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 
-		it('should not update user notifications if the favorite update is already flagged', async () => {
+		it('should not update user notifications if the favorite update is already flagged', async (done) => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -865,9 +868,10 @@ describe('FavoritesController', function () {
 			expect(user.save).not.toHaveBeenCalled();
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 
-		it('should not update user notifications if the document count decreases', async () => {
+		it('should not update user notifications if the document count decreases', async (done) => {
 			const favoriteSaves = [];
 			const initFavorite = {
 				user_id: '54baea34480635caea8437904697bd9c',
@@ -955,9 +959,10 @@ describe('FavoritesController', function () {
 			expect(user.save).not.toHaveBeenCalled();
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 
-		it('should do nothing if there are no favorite searches to check', async () => {
+		it('should do nothing if there are no favorite searches to check', async (done) => {
 			const favorite = null;
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
@@ -1012,6 +1017,7 @@ describe('FavoritesController', function () {
 			expect(gcUser.findOne).not.toHaveBeenCalled();
 
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 	});
 });
