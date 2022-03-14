@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const SearchUtility = require('../../utils/searchUtility');
 const CONSTANTS = require('../../config/constants');
-const sparkMD5 = require('spark-md5');
+// const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
@@ -13,8 +13,8 @@ const KEYWORD = require('../../models').keyword;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
-const { result } = require('underscore');
-const { Sequelize } = require('sequelize');
+// const { result } = require('underscore');
+// const { Sequelize } = require('sequelize');
 const { Reports } = require('../../lib/reports');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
@@ -60,7 +60,7 @@ class JBookSearchHandler extends SearchHandler {
 			accomp = ACCOMP,
 			review = REVIEW,
 			db = DB,
-			reports = Reports,
+			reports = new Reports(opts),
 
 		} = opts;
 
@@ -76,7 +76,7 @@ class JBookSearchHandler extends SearchHandler {
 		this.accomp = accomp;
 		this.review = review;
 		this.db = db;
-		this.reports = new Reports();
+		this.reports = reports;
 
 
 	}
@@ -280,6 +280,7 @@ class JBookSearchHandler extends SearchHandler {
 			if (useElasticSearch) {
 				return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
 			} else {
+				// console.log('postgres');
 				return this.postgresDocumentSearch(req, userId, res, statusExport);
 			}
 		} catch (e) {
@@ -293,23 +294,47 @@ class JBookSearchHandler extends SearchHandler {
 	async elasticSearchDocumentSearch(req, userId, res, statusExport = false) {
 		try {
 
+			// console.log('ES SEARCH DOCS SEARCH');
 			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
+			
+
+			// console.log('clientObj');
+			// console.log(clientObj);
+
+			// console.log('REQ: ');
+			// console.log(JSON.stringify(req));
+
+			// console.log('ELASTIC SEARCH DOCUMENT SEARCH');
+			// console.log(parsedQuery);
+			// console.log(searchTerms);
+
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
-			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+
+			// console.log('ES QUERY'); 
+			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			
+			// console.log(JSON.stringify(esQuery));
 			let expansionDict = {};
 
-			//console.log(JSON.stringify(esQuery))
-
 			if (req.body.searchText && req.body.searchText !== ''){
+				// console.log('EXPANSION DICT');
 				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+				// console.log(expansionDict);
 			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
+			// console.log('ELASTIC SEARCH RESULTS: ');
+			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
+			// console.log(JSON.stringify(esResults));
+
+
+			// console.log('CLEAN ES RESULTS: ');
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+			// console.log(JSON.stringify(returnData));
+
 			returnData.expansionDict = expansionDict;
 
 			return returnData;
