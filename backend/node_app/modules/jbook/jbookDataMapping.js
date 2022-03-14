@@ -1490,7 +1490,7 @@ module.exports = {
 			processValue: (value) => value
 		},
 		'budgetActivityTitle_s': {
-			newName: 'budgetLineItem',
+			newName: 'budgetActivityTitle',
 			defaultValue: '',
 			processValue: (value) => value
 		},

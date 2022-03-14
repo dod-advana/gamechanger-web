@@ -158,12 +158,11 @@ class JBookDataHandler extends DataHandler {
 
 			// Get ES Data
 			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
-			const esQuery = this.searchUtility.getElasticSearchJBookDataFromId({docIds: [id]}, userId);
+			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({docIds: [id]}, userId);
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 			const {docs} = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			const data = docs[0];
-			console.log(data)
 			if (!data.currentYearAmount) {
 
 			}
@@ -446,7 +445,7 @@ class JBookDataHandler extends DataHandler {
 			const query = {
 				budget_type: types[type],
 				budget_year: data.budgetYear,
-				// appn_num: data.appropriationNumber,
+				appn_num: {[Op.iLike]: `${data.appropriationNumber}%`},
 				budget_activity: data.budgetActivityNumber,
 				agency: data.serviceAgency
 			};
