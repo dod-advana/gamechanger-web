@@ -321,7 +321,7 @@ class JBookSearchHandler extends SearchHandler {
 						if (filter === 'pocReviewer') {
 							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `
 						} else {
-							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `
+							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i] === 'Blank' ? '' : jbookSearchSettings[filter][i]}' `
 						}
 					}
 					pgQueryWhere += ` ) `;
@@ -331,23 +331,30 @@ class JBookSearchHandler extends SearchHandler {
 			const keys = [];
 			if (pgQueryWhere.length > 0) {
 				let pgQuery = `SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				// pgQuery = `SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW;`;
 				console.log(pgQuery);
 				const pgResults = await this.db.jbook.query(pgQuery, {});
 				pgResults[0].forEach(review => {
 					let key;
+					let leadingZeroBudgetActivity = review.budget_activity !== null ? review.budget_activity : '';
+					if (leadingZeroBudgetActivity.length === 1) {
+						leadingZeroBudgetActivity = 0 + leadingZeroBudgetActivity;
+					}
+					let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
+
 					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
+						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency !== null ? review.agency : ''}`
 					} else if (review.budget_type === 'rdoc') {
-						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
+						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`
 					} else if (review.budget_type === 'odoc') {
-						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}`
+						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#0${leadingZeroBudgetActivity}#${review.agency}`
 					}
 					keys.push(key);
 				});
 			}
 			console.log(keys.length);
 			console.log(keys);
-			if(pgQueryWhere.length > 0){
+			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
