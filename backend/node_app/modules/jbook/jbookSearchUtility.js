@@ -7,6 +7,7 @@ const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping } = require
 const { MLApiClient } = require('../../lib/mlApiClient');
 const asyncRedisLib = require('async-redis');
 const { Thesaurus } = require('../../lib/thesaurus');
+const {esTopLevelFields} = require('./jbookDataMapping');
 const abbreviationRedisAsyncClientDB = 9;
 
 class JBookSearchUtility {
@@ -39,7 +40,7 @@ class JBookSearchUtility {
 				const newKey = mapping[field].newName;
 				newData[newKey] = mapping[field].processValue(data[field]);
 			}
-			else {
+			else if (data[field] && data[field] !== null) {
 				newData[field] = data[field];
 			}
 		}
@@ -777,6 +778,224 @@ class JBookSearchUtility {
 					'Financial Management': ['Programming & Budgeting', 'Accounting & Finance']
 				}
 		};
+	}
+
+	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and'}, userId, serviceAgencyMappings) {
+
+		const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
+
+		let query = {
+			track_total_hits: true,
+			from: offset,
+			size: limit,
+			aggregations: {
+				service_agency_aggs: {
+					terms: {
+						field: 'serviceAgency_s',
+						size: 10000
+					}
+				}
+			},
+			query: {
+				bool: {
+					must: [],
+					should: []
+				}
+			},
+			highlight: {
+				fields: {}
+			}
+		};
+
+		if (searchText && searchText !== null || searchText !== '') {
+			query.query.bool.should.push(
+				{
+					multi_match: {
+						query: `${parsedQuery}`,
+						fields: esTopLevelFields,
+						type: 'best_fields',
+						operator: `${operator}`
+					}
+				}
+			);
+
+			esTopLevelFields.forEach(field => {
+				query.highlight.fields[field] = {};
+			});
+
+			esInnerHitFields.forEach(innerField => {
+				const nested = {
+					nested: {
+						path: innerField.path,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {}
+							}
+						},
+						query: {
+							bool: {
+								should: [
+									{
+										multi_match: {
+											query: `${parsedQuery}`,
+											fields: innerField.fields,
+											type: 'best_fields',
+											operator: `${operator}`
+										}
+									}
+								]
+							}
+						}
+					}
+				};
+
+				innerField.fields.forEach(field => {
+					nested.nested.inner_hits.highlight.fields[field] = {};
+				});
+				query.query.bool.should.push(nested);
+			});
+
+			const wildcardList = {
+				'type_s': 1,
+				'key_s': 1,
+				'projectTitle_t': 1,
+				'programElementTitle_t': 1,
+				'appropriationTitle_t': 1,
+				'appropriationNumber_s': 6,
+				'budgetActivityTitle_s': 6,
+				'accountTitle_s': 1,
+				'budgetLineItemTitle_s': 1,
+			};
+
+			Object.keys(wildcardList).forEach((wildCardKey) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[wildCardKey]: {
+							value: `*${plainQuery}*`,
+							boost: wildcardList[wildCardKey]
+						}
+					}
+				});
+			});
+		}
+
+		// FILTERS
+
+		console.log(jbookSearchSettings);
+
+		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
+			query.query.bool.must.push({
+				terms: {
+					budgetYear_s: jbookSearchSettings.budgetYear
+				}
+			});
+		}
+
+		if (jbookSearchSettings && jbookSearchSettings.serviceAgency) {
+			query.query.bool.must.push({
+				terms: {
+					org_jbook_desc_s: jbookSearchSettings.serviceAgency
+				}
+			});
+		}
+
+		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
+			const budgetTypesTemp = [];
+
+			jbookSearchSettings.budgetType.forEach(budgetType => {
+				switch (budgetType) {
+					case 'RDT&E':
+						budgetTypesTemp.push('rdte');
+						break;
+					case 'O&M':
+						budgetTypesTemp.push('om');
+						break;
+					case 'Procurement':
+						budgetTypesTemp.push('procurement');
+						break;
+					default:
+						break;
+				}
+			});
+
+			query.query.bool.must.push({
+				terms: {
+					type_s: budgetTypesTemp
+				}
+			});
+		}
+
+		if (jbookSearchSettings && jbookSearchSettings.programElement && jbookSearchSettings.programElement !== '') {
+			query.query.bool.must.push(
+				{
+					bool:
+						{
+							should: [
+								{
+									term: {
+										budgetLineItem_s: jbookSearchSettings.programElement
+									}
+								},
+								{
+									term: {
+										programElement_s: jbookSearchSettings.programElement
+									}
+								}]
+						}
+				}
+			);
+		}
+
+		if (jbookSearchSettings && jbookSearchSettings.projectNum && jbookSearchSettings.projectNum !== '') {
+			query.query.bool.must.push({
+				term: {
+					projectNum_s: jbookSearchSettings.projectNum
+				}
+			});
+		}
+
+		// SORT
+		switch (jbookSearchSettings.sort[0].id) {
+			case 'budgetYear':
+				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				break;
+			case 'programElement':
+				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				break;
+			case 'projectNum':
+				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				break;
+			case 'projectTitle':
+				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				break;
+			case 'serviceAgency':
+				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				break;
+			default:
+				break;
+		}
+
+		return query;
+	}
+
+	getElasticSearchJBookDataFromId({docIds}, userId) {
+		try {
+			return {
+				track_total_hits: true,
+				size: 100,
+				query: {
+					bool: {
+						must: {
+							terms: {key_review_s: docIds}
+						}
+					}
+				}
+			};
+		} catch (err) {
+			this.logger.error(err, '1F07MYM', userId);
+		}
 	}
 	
 }

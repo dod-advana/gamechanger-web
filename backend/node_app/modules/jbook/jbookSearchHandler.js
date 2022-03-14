@@ -297,7 +297,7 @@ class JBookSearchHandler extends SearchHandler {
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {};
 
 			//console.log(JSON.stringify(esQuery))

@@ -270,33 +270,29 @@ const PolicySearchMatrixHandler = {
 					</GCAccordion>
 				</div>
 
-				{!state.useElasticSearch &&
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
-							header={<b>PROGRAM ELEMENT / BLI</b>}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'} />
-						</GCAccordion>
-					</div>
-				}
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
+						header={<b>PROGRAM ELEMENT / BLI</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'programElement'} />
+					</GCAccordion>
+				</div>
 
-				{!state.useElasticSearch &&
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
-							header={<b>PROJECT #</b>}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'} />
-						</GCAccordion>
-					</div>
-				}
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={state.jbookSearchSettings.projectNum && state.jbookSearchSettings.projectNum !== ''}
+						header={<b>PROJECT #</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<InputFilter setJBookSetting={handleFilterInputChange} field={'projectNum'} />
+					</GCAccordion>
+				</div>
 
 				{!state.useElasticSearch &&
 					<div style={{ width: '100%', marginBottom: 10 }}>
