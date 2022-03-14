@@ -410,12 +410,13 @@ const StyledFrontCardContent = styled.div`
 	}
 
 	.hits-container {
-		display: flex;
+		display: grid;
+   		grid-template-columns: 100px auto auto;
 		height: 100%;
 
 		.page-hits {
 			min-width: 100px;
-			height: 100%;
+			height: fit-content;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 
@@ -438,36 +439,11 @@ const StyledFrontCardContent = styled.div`
 					margin-left: 10px;
 				}
 			}
+		}
 
-			> .expanded-metadata {
-				border: 1px solid rgb(189, 189, 189);
-				border-left: 0px;
-				min-height: 126px;
-				width: 100%;
-				max-width: ${({ isWideCard }) => (isWideCard ? '' : '280px')};
-
-				> blockquote {
-					font-size: ${CARD_FONT_SIZE}px;
-					line-height: 20px;
-					background: #dde1e0;
-					margin-bottom: 0;
-					height: 165px;
-					border-left: 0;
-					overflow: hidden;
-					font-family: Noto Sans, Arial, Helvetica, sans-serif;
-					padding: 0.5em 10px;
-					margin-left: 0;
-					quotes: '\\201C''\\201D''\\2018''\\2019';
-
-					> em {
-						color: white;
-						background-color: #e9691d;
-						margin-right: 5px;
-						padding: 4px;
-						font-style: normal;
-					}
-				}
-			}
+		> .expanded-metadata {
+			overflow-wrap: anywhere;
+			grid-column: 2 / 4;
 		}
 	}
 `;
@@ -1109,7 +1085,6 @@ const PolicyCardHandler = {
 				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
 			const contextHtml = hoveredSnippet;
-			const isWideCard = true;
 
 			let publicationDate;
 			if (
@@ -1308,7 +1283,6 @@ const PolicyCardHandler = {
 				return (
 					<StyledFrontCardContent
 						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
-						isWideCard={isWideCard}
 					>
 						<div className={'currents-as-of-div'}>
 							<GCTooltip
