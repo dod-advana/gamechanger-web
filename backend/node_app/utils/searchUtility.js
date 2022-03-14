@@ -2205,17 +2205,15 @@ class SearchUtility {
 
 	filterRecommendations(docList, originalDocs) {
 		try {
-			var unique = new Set(docList);
-			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
+			//var unique = new Set(docList);
+			//var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
 			const docCount = {};
 
 			for (const doc of docList) {
 				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
 			}
-			console.log(docCount)
-			let docListSorted = Object.keys(docCount).sort(function(a,b){return docCount[a]-docCount[b]}).reverse()
-			console.log(docListSorted)
-			return filtered;
+			let docListSorted = Object.keys(docCount).sort(function(a,b){return docCount[a]-docCount[b]}).reverse();
+ 			return docListSorted;
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', '');
 			return docList;
