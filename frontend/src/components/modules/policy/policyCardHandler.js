@@ -1084,6 +1084,7 @@ const PolicyCardHandler = {
 			} else if (item.paragraphs && Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
 				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
+			if(Array.isArray(hoveredSnippet)) hoveredSnippet = hoveredSnippet.join(', ');
 			const contextHtml = hoveredSnippet;
 
 			let publicationDate;
