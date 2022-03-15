@@ -307,7 +307,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 			let pgQueryWhere = ``;
-			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel'];
+			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel', 'sourceTag'];
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
 			pgFilters.forEach(filter => {
 				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
