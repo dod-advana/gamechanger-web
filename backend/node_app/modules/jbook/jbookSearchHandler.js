@@ -356,7 +356,7 @@ class JBookSearchHandler extends SearchHandler {
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {};
 
 			//console.log(JSON.stringify(esQuery))

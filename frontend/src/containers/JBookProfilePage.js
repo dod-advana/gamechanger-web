@@ -723,7 +723,7 @@ const JBookProfilePage = (props) => {
 						revProgramElement: programElement,
 						id: undefined,
 						revBudgetLineItems: budgetLineItem,
-						revBudgetYear: budgetYear
+						budgetYear: budgetYear
 					},
 					isSubmit,
 					reviewType,
