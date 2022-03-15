@@ -806,7 +806,7 @@ class JBookSearchUtility {
 			},
 			query: {
 				bool: {
-					must: [],
+					must: mustQuery,
 					should: []
 				}
 			},
