@@ -1227,11 +1227,13 @@ class JBookSearchHandler extends SearchHandler {
 
 			if (!test) {
 				await workbook.xlsx.write(res);
+				res.end();
 			}
-			res.end();
+			else {
+				// for test purposes
+				return {results, counts};
+			}
 
-			// for test purposes
-			return {results, counts};
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'WW05F8X', userId);
