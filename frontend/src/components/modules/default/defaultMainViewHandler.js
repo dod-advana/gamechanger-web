@@ -159,13 +159,13 @@ const DefaultMainViewHandler = {
 
 		try {
 			//getTrendingSearches(state.cloneData);
-			const daysBack=14
+			const daysBack=14;
 			let trendingES = await gameChangerAPI.trendingSearches({daysBack});
 			
 			setState(dispatch, { trending: trendingES});
 
 		} catch (e) {
-			console.log(e)
+			console.log(e);
 		}
 
 		try {
@@ -198,7 +198,7 @@ const DefaultMainViewHandler = {
 		}
 
 		try {
-			getUserData(dispatch);
+			await getUserData(dispatch);
 		} catch (e) {
 			console.log(e);
 		}
@@ -210,6 +210,7 @@ const DefaultMainViewHandler = {
 
 			searchHandler.setSearchURL(newState);
 		}
+		
 	},
 
 	renderHideTabs(props) {
@@ -477,10 +478,10 @@ const DefaultMainViewHandler = {
 		const { cloneData } = props;
 		const views = [
 			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
-		]
+		];
 		if(cloneData.document_view) views.push(
 			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
-		)
+		);
 		return views;
 	},
 

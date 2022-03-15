@@ -1,6 +1,6 @@
 'use strict';
 
-const tableName = 'internal_user_tracking'
+const tableName = 'internal_user_tracking';
 module.exports = (sequelize, DataTypes) => {
 	const internal_user_tracking = sequelize.define(tableName,
 		{

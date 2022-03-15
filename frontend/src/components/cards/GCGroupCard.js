@@ -77,7 +77,7 @@ const styles = {
 		textAlign: 'center',
 		marginTop: 50
 	}
-}
+};
 
 const GroupCard = (props) => {
 	
@@ -94,14 +94,14 @@ const GroupCard = (props) => {
 	favorites.forEach((favId) => {
 		const doc = state.userData.favorite_documents.find(doc => {
 			return favId === doc.favorite_id;
-		})
+		});
 		if(doc){
 			favFilenames.set(doc.filename,doc.filename);
-			if(!searchTextlist.includes(doc.search_text)) searchTextlist.push(doc.search_text)
+			if(!searchTextlist.includes(doc.search_text)) searchTextlist.push(doc.search_text);
 		}else{
 			handleRemoveFavoriteFromGroup(group.id, favId, dispatch);
 		}
-	})
+	});
 	const combinedSearchText = searchTextlist.join(' OR ');
 
 	const removeSelectedDocument = (key) => {
@@ -112,7 +112,7 @@ const GroupCard = (props) => {
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
-	}
+	};
 
 	return (
 		<StyledFavoriteGroupCard key={idx}>
@@ -149,7 +149,7 @@ const GroupCard = (props) => {
 					{favorites.map((favId, index) => {
 						const doc = state.userData.favorite_documents.find(doc => {
 							return favId === doc.favorite_id;
-						})
+						});
 						const favCardStyles = {
 							main: `top: ${index * 60}px; 
 								transition: top .5s, height .5s;
@@ -159,7 +159,7 @@ const GroupCard = (props) => {
 									cursor: pointer;
 									tansition: top 1s;
 								}`
-						}
+						};
 						if(doc){
 							return <GroupFavoriteCard
 								key={`${doc.favorite_id}`}
@@ -173,7 +173,7 @@ const GroupCard = (props) => {
 								handleRemoveFavoriteFromGroup={handleRemoveFavoriteFromGroup}
 								dispatch={dispatch}
 								group={group}
-							/>
+							/>;
 						} else {return <></>}
 					
 					})}
@@ -187,8 +187,8 @@ const GroupCard = (props) => {
 				</div>
 			</div>
 		</StyledFavoriteGroupCard>
-	)
-}
+	);
+};
 
 GroupCard.propTypes = {
 	group: PropTypes.object,
@@ -196,6 +196,6 @@ GroupCard.propTypes = {
 	state: PropTypes.object,
 	dispatch: PropTypes.func,
 	favorites: PropTypes.arrayOf(PropTypes.number),
-} 
+}; 
 
 export default GroupCard;

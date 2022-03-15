@@ -79,7 +79,7 @@ class CronJobs {
 			}
 		}, {
 			scheduled: false
-		})
+		});
 
 	}
 

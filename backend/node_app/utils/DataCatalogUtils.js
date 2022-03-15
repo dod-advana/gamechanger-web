@@ -59,7 +59,7 @@ const generateAcronymSearchInFields = (acronymAttributeId, datasourceAssetId) =>
 				`Asset:${datasourceAssetId}`
 			]
 		}
-	]
+	];
 };
 
 
@@ -75,11 +75,11 @@ const getSearchTypeId = (searchType) => {
 	if (!searchType) {
 		return null;
 	} else if (ASSET_TYPES[searchType]) {
-		return [ASSET_TYPES[searchType]]
+		return [ASSET_TYPES[searchType]];
 	} else {
 		return _.toArray(ASSET_TYPES);
 	}
-}
+};
 
 
 const getQueryableStatuses = () => constants.DATA_CATALOG_OPTS.api_config.queryableStatuses;

@@ -3,6 +3,7 @@ const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
+const sparkMD5Lib = require('spark-md5');
 const { result } = require('underscore');
 
 class AnalystToolsController {
@@ -13,6 +14,7 @@ class AnalystToolsController {
 			searchUtility = new SearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
+			sparkMD5 = sparkMD5Lib,
 		} = opts;
 
 		this.logger = logger;
@@ -20,9 +22,10 @@ class AnalystToolsController {
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
+		this.sparkMD5 = sparkMD5;
 
-		this.compareDocument = this.compareDocument.bind(this)
-		this.compareFeedback = this.compareFeedback.bind(this)
+		this.compareDocument = this.compareDocument.bind(this);
+		this.compareFeedback = this.compareFeedback.bind(this);
 	}
 
 
@@ -35,7 +38,7 @@ class AnalystToolsController {
 			const permissions = req.permissions ? req.permissions : [];
 			
 			// ML API Call Goes Here
-			const paragraphSearches = paragraphs.map((paragraph, id) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph, userId, id));
+			const paragraphSearches = paragraphs.map((paragraph) => this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, userId, paragraph.id));
 			const paragraphResults = await Promise.all(paragraphSearches);
 
 			const resultsObject = {};
@@ -62,7 +65,7 @@ class AnalystToolsController {
 			// Aggregate Data
 			const returnData = this.searchUtility.cleanUpEsResults(esResults, [], userId, [], {}, null, esQuery, true, resultsObject);
 
-			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0)
+			const cleanedDocs = returnData.docs.filter(doc => doc?.paragraphs?.length > 0);
 			returnData.docs = cleanedDocs;
 
 			res.status(200).send(returnData);
@@ -76,24 +79,40 @@ class AnalystToolsController {
 		let userId = 'webapp_unknown';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
+			const hashed_user = this.sparkMD5.hash(userId);
+
 			const { 
 				searchedParagraph,
 				matchedParagraphId,
 				docId,
-				positiveFeedback 
+				positiveFeedback,
+				undo = false 
 			} = req.body;
 
-			await this.compareFeedbackModel.findOrCreate({
-				where: { searchedParagraph, matchedParagraphId },
+			if(undo){
+				await this.compareFeedbackModel.destroy({
+					where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+				});
+				return res.status(200).send();
+			}
+
+			const [record, created] = await this.compareFeedbackModel.findOrCreate({
+				where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
 				defaults: {
 					searchedParagraph,
 					matchedParagraphId,
 					docId,
-					positiveFeedback 
+					positiveFeedback,
+					userId: hashed_user
 				}
-			})
+			});
 			
-			res.status(200);
+			if(!created && record.positiveFeedback !== positiveFeedback) {
+				record.set({positiveFeedback});
+				await record.save();
+			}
+			
+			res.status(200).send();
 		}catch(e){
 			this.logger.error(e, '60OOE63', userId);
 			res.status(500).send(e);

@@ -49,7 +49,8 @@ const getIframePreviewLinkInferred = (
 	prevSearchText,
 	pageNumber,
 	isClone = false,
-	cloneData = {}
+	cloneData = {},
+	isDLA = false
 ) => {
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
@@ -58,7 +59,8 @@ const getIframePreviewLinkInferred = (
 				prevSearchText,
 				pageNumber,
 				isClone,
-				cloneData
+				cloneData,
+				isDLA
 			)
 			.then((url) => {
 				resolve(url);
@@ -102,7 +104,7 @@ export default function DocumentExplorer({
 				const { dataIdx, pageHitIdx } = iframePreviewLink;
 				const rec = data[dataIdx];
 				if (rec) {
-					// const filepath = rec.filepath;
+					const isDLA = rec.display_org_s === 'Defense Logistics Agency';
 
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
@@ -117,7 +119,8 @@ export default function DocumentExplorer({
 							prevSearchText,
 							pageNumber,
 							isClone,
-							cloneData
+							cloneData,
+							isDLA
 						).then((url) => {
 							node.src = url;
 							setIframeLoading(false);
@@ -375,7 +378,7 @@ export default function DocumentExplorer({
 								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
 						if (item.type === 'document') {
-							const pageHits = item.pageHits.filter(hit => hit.pageNumber)
+							const pageHits = item.pageHits.filter(hit => hit.pageNumber);
 							return (
 								<div key={key}>
 									<div

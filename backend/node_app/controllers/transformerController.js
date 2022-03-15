@@ -27,23 +27,24 @@ class TransformerController {
 			'deleteLocalModel': this.mlApi.deleteLocalModel,
 			'getModelsList': this.mlApi.getModelsList,
 			'getDataList': this.mlApi.getDataList,
-			'getCurrentTransformer': this.mlApi.getCurrentTransformer,
+			'getLoadedModels': this.mlApi.getLoadedModels,
 			'getFilesInCorpus': this.mlApi.getFilesInCorpus,
 			'getProcessStatus': this.mlApi.getProcessStatus,
 			'reloadModels': this.mlApi.reloadModels,
 			'downloadCorpus': this.mlApi.downloadCorpus,
 			'trainModel': this.mlApi.trainModel,
 			'initializeLTR': this.mlApi.initializeLTR,
-			'createModelLTR': this.mlApi.createModelLTR
-		}
+			'createModelLTR': this.mlApi.createModelLTR,
+			'stopProcess': this.mlApi.stopProcess
+		};
 
 		// Get methods
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
-		this.getDataList = this.getData.bind(this,'getDataList')
-		this.getCurrentTransformer = this.getData.bind(this, 'getCurrentTransformer');
+		this.getDataList = this.getData.bind(this,'getDataList');
+		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
@@ -56,6 +57,7 @@ class TransformerController {
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.stopProcess = this.postData.bind(this, 'stopProcess');
 
 
 	}

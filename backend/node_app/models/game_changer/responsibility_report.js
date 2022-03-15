@@ -42,8 +42,8 @@ module.exports = (sequelize, DataTypes) => {
 	RESPONSIBILITY_REPORTS.associate = (models) => {
 		RESPONSIBILITY_REPORTS.belongsTo(models.responsibilities, { 
 			foreignKey: 'responsibility_id'
-		})
-	}
+		});
+	};
 
 	return RESPONSIBILITY_REPORTS;
 };

@@ -340,13 +340,13 @@ const crawlerMapping = {
 	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board']
 };
 export const invertedCrawlerMappingFunc = (item) => {
-	let crawler = "";
+	let crawler = '';
 	for(let key in crawlerMapping) {
 		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())){
-			crawler = key
+			crawler = key;
 			break;
 		}
-	};
+	}
 
 	return crawler;
 };

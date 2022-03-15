@@ -8,7 +8,6 @@ import DecoupledFooter from './DecoupledFooter';
 const isDecoupled =
 	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
 	process.env.REACT_APP_GC_DECOUPLED === 'true';
-
 const FooterDiv = styled.div`
 	width: 100%;
 	-webkit-align-items: center;
@@ -22,7 +21,7 @@ const GCFooter = (props) => {
 	
 	const setUserMatomo = (value) => {
 		localStorage.setItem('userMatomo', value);
-	}
+	};
 	
 	return (
 		<>
@@ -55,8 +54,8 @@ const GCFooter = (props) => {
 				</FooterDiv>
 			}
 		</>
-	)
-}
+	);
+};
 
 const styles = {
 	title: {
@@ -74,6 +73,6 @@ const styles = {
 		fontWeight: 'bold',
 		fontSize: 14
 	}
-}
+};
 
 export default GCFooter;

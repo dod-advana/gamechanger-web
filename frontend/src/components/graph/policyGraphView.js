@@ -24,6 +24,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 
 import { Card } from '../cards/GCCard';
 import { backgroundWhite } from '../common/gc-colors';
+import { Warning } from '@material-ui/icons';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -104,6 +105,45 @@ const StyledCircularMenu = styled.nav`
 		-moz-transform: scale(1);
 		transform: scale(1);
 	}
+`;
+
+export const NotificationWrapper = styled.div`
+	margin-top: 1px;
+	margin-bottom: 20px;
+	width: 100%;
+	height: 50px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-width: 1px;
+	border-style: solid;
+	font-weight: bold;
+	border-radius: 4px;
+	box-sizing: border-box;
+
+	border-color: #F5A622;
+	background-color: #FFE8AF;
+`;
+
+const IconWrapper = styled.div`
+	width: 60px;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: #ffffff;
+
+	background-color: #F5A622;
+`;
+
+const LoadAllButton = styled.button`
+	background-color: #E9691D;
+	color: #fff;
+	height: 100%;
+	width: 150px;
+	border-width: 0;
+	border-top-right-radius: inherit;
+	border-bottom-right-radius: inherit;
 `;
 
 const setFixedCoordsBasedOnView = (is2D, nodes) => {
@@ -325,24 +365,23 @@ export default function PolicyGraphView(props) {
 		height,
 		graphData,
 		runningSearchProp,
-		notificationCountProp = 0,
 		setDocumentsFound = (docs) => {},
 		setTimeFound = (time) => {},
-		expansionTerms = false,
 		cloneData,
 		setNumOfEdges = (num) => {},
 		dispatch = () => {},
-		showSideFilters = false,
 		searchText = '',
 		showBasic = false,
 		hierarchyView = false,
 		detailsView = false,
 		selectedDocuments = [],
+		loadAll,
+		nodeLimit,
+		mockedFromES,
 	} = props;
 
 	const graph2DRef = useRef();
 
-	const [notificationCount, setNotificationCount] = React.useState(0);
 	const [show2DView, setShow2DView] = React.useState(true);
 	const [contextOpen, setContextOpen] = React.useState(false);
 	const [shouldRender, setShouldRender] = React.useState(true);
@@ -358,7 +397,6 @@ export default function PolicyGraphView(props) {
 	});
 	const [docOrgNumbers, setDocOrgNumbers] = React.useState({});
 	const [orgTypesSelected, setOrgTypesSelected] = React.useState([]);
-	const [mouseXY, setMouseXY] = React.useState({ x: 0, y: 0 });
 	const [selectedID, setSelectedID] = React.useState(null);
 	const [shouldCenter, setShouldCenter] = React.useState(true);
 	const [showGraphCard, setShowGraphCard] = React.useState(false);
@@ -377,7 +415,6 @@ export default function PolicyGraphView(props) {
 	const [communityView, setCommunityView] = React.useState(false);
 
 	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('');
-	const [nodeGroupMenuTarget, setNodeGroupMenuTarget] = React.useState(null);
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
 
 	useEffect(() => {
@@ -392,16 +429,20 @@ export default function PolicyGraphView(props) {
 	}, [graphData]);
 
 	useEffect(() => {
+		if (orgTypesSelected.length > 0) {
+			setNodeGroupMenuOpen(true);
+		} else {
+			setNodeGroupMenuOpen(false);
+		}
+	}, [orgTypesSelected]);
+
+	useEffect(() => {
 		if (runningSearch !== runningSearchProp) {
 			setRunningSearch(runningSearchProp);
 			setContextOpen(false);
 			//setRunSimulation(true);
 		}
 	}, [runningSearchProp, runningSearch]);
-
-	useEffect(() => {
-		setNotificationCount(notificationCountProp);
-	}, [notificationCountProp]);
 
 	useEffect(() => {
 		if (!graph || !graph.nodes) return;
@@ -586,11 +627,7 @@ export default function PolicyGraphView(props) {
 		graph2DRef.current.zoom(ZOOM_LIMIT, 500);
 		setZoom(ZOOM_LIMIT);
 
-		sleep(500).then(() => {
-			const { x, y } = graph2DRef.current.graph2ScreenCoords(node.x, node.y);
-			setMouseXY({ x: x, y: y });
-			setContextOpen(true);
-		});
+		sleep(500).then(() => setContextOpen(true));
 
 		lockNodeInPlace(node, true);
 	};
@@ -598,16 +635,8 @@ export default function PolicyGraphView(props) {
 	const showNodeContextMenu = () => {
 		const myStyle = {
 			position: 'absolute',
-			top: `${
-				mouseXY.y +
-				154 +
-				notificationCount * 50 +
-				(expansionTerms ? 41 : 0) +
-				(detailsView ? -175 : 0)
-			}px`,
-			left: `${
-				mouseXY.x - 20 + (showSideFilters ? 372 : detailsView ? -100 : 0)
-			}px`,
+			top: 'calc(50% - 130px)',
+			left: 'calc(50% - 130px)',
 			zIndex: 99,
 		};
 
@@ -747,7 +776,7 @@ export default function PolicyGraphView(props) {
 								).toFixed(4) + '%';
 							const topBack =
 								(
-									28 +
+									50 +
 									31 *
 										Math.sin(
 											-0.5 * Math.PI -
@@ -1171,6 +1200,19 @@ export default function PolicyGraphView(props) {
 		});
 
 		const graphData = resp.data;
+
+		if (mockedFromES) {
+			// when results are mocked from ES, node ids are changed which causes a mismatch with the neo4j query above
+			// this matches based on doc_id and sets the mocked node's id to the id from neo4j
+			graph.nodes.forEach(mockedNode => {
+				graphData.nodes.forEach(node => {
+					if (mockedNode.doc_id === node.doc_id) {
+						mockedNode.id = node.id;
+					}
+				});
+			});
+		}
+
 		const nodeIds = graph.nodes.map((node) => {
 			return node.id;
 		});
@@ -1375,20 +1417,20 @@ export default function PolicyGraphView(props) {
 	 */
 
 	const handleLegendAllDocsClick = (_, legendKey) => {
-		setOrgTypesSelected(
-			orgTypesSelected.includes(legendKey) ?
-				orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity') :
-				[
-					...orgTypesSelected,
-					...Object.keys(legendData).filter(type =>
-						type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
-					), legendKey
-				]
-		);
-
-		setNodeGroupMenuOpen(false);
-		setNodeGroupMenuTarget(null);
-		setNodeGroupMenuLabel('');
+		if (orgTypesSelected.includes(legendKey)) {
+			const allNonDocOrgTypes = orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity');
+			setOrgTypesSelected(allNonDocOrgTypes);
+			setNodeGroupMenuLabel(allNonDocOrgTypes.length > 0 ? allNonDocOrgTypes[0] : '');
+		} else {
+			setOrgTypesSelected([
+				legendKey,
+				...orgTypesSelected,
+				...Object.keys(legendData).filter(type =>
+					type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
+				)
+			]);
+			setNodeGroupMenuLabel('All Documents');
+		}		
 	};
 
 	const renderNodeLegendItems = () => {
@@ -1472,25 +1514,23 @@ export default function PolicyGraphView(props) {
 		const allCurrentOrgTypesExceptTopicAndEntity =
 			newOrgTypesSelected.filter(type => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents');
 
-		setOrgTypesSelected(
-			_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort()) ?
-				[...newOrgTypesSelected, 'All Documents'] : newOrgTypesSelected.filter(type => type !== 'All Documents')
-		);
 
-		if (orgTypesSelected.includes(legendKey)) {
-			setNodeGroupMenuOpen(false);
-			setNodeGroupMenuTarget(null);
-			setNodeGroupMenuLabel('');
+		if (_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort())) {
+			setOrgTypesSelected(newOrgTypesSelected.includes('All Documents') ?
+				[...newOrgTypesSelected] :
+				['All Documents', ...newOrgTypesSelected]);
 		} else {
-			setNodeGroupMenuOpen(true);
-			setNodeGroupMenuTarget(target);
+			setOrgTypesSelected(newOrgTypesSelected.filter(type => type !== 'All Documents'));
+		}
+
+		if (newOrgTypesSelected.includes(legendKey)) {
 			setNodeGroupMenuLabel(legendKey);
+		} else {
+			setNodeGroupMenuLabel(newOrgTypesSelected.length > 0 ? newOrgTypesSelected[0] : '');
 		}
 	};
 
 	const closeGroupNodeMenu = () => {
-		setNodeGroupMenuOpen(false);
-		setNodeGroupMenuTarget(null);
 		setNodeGroupMenuLabel('');
 		setOrgTypesSelected([]);
 	};
@@ -1737,6 +1777,33 @@ export default function PolicyGraphView(props) {
 
 	return (
 		<div>
+			{(nodeLimit?.warningLimit || (graph.nodes.length >= nodeLimit?.maxLimit)) &&
+				<NotificationWrapper>
+					<IconWrapper>
+						<Warning fontSize="large" />
+					</IconWrapper>
+
+					{nodeLimit.warningLimit &&
+						<>
+							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
+							<LoadAllButton
+								onClick={() => {
+									loadAll();
+									resetGraph();
+								}}
+							>
+								Load All
+							</LoadAllButton>
+						</>
+					}
+					{nodeLimit.maxLimit &&
+						<>
+							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
+							<span></span>
+						</>
+					}
+				</NotificationWrapper>
+			}
 			{show2DView && (
 				<MemoizedNodeCluster2D
 					renderContextMenu={showNodeContextMenu}
@@ -1760,7 +1827,7 @@ export default function PolicyGraphView(props) {
 					runSimulationProp={runSimulation}
 					runningSearch={runningSearch}
 					nodeRelativeSizeProp={nodeRelSize}
-					graphWidth={width}
+					graphWidth={document.getElementById('graph2dContainer')?.offsetWidth || width}
 					graphHeight={height}
 					nodeHoverIDProp={nodeHoverID}
 					shouldCenterProp={shouldCenter}
@@ -1772,9 +1839,10 @@ export default function PolicyGraphView(props) {
 					zoom={zoom}
 					closeGroupNodeMenu={closeGroupNodeMenu}
 					nodeGroupMenuOpenProp={nodeGroupMenuOpen}
-					nodeGroupMenuTargetProp={nodeGroupMenuTarget}
 					nodeGroupMenuLabelProp={nodeGroupMenuLabel}
+					setNodeGroupMenuLabelProp={setNodeGroupMenuLabel}
 					setNodeHoverIDProp={setNodeHoverID}
+					orgTypesSelected={orgTypesSelected}
 				/>
 			)}
 			{showGraphCard && (

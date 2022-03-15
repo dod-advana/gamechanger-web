@@ -39,9 +39,10 @@ const RESULTS_PER_PAGE = 20;
 
 const colWidth = {
 	maxWidth: '900px',
-	whiteSpace: 'nowrap',
+	// whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	wordBreak: 'break-all'
 };
 
 export const MainContainer = styled.div`
@@ -276,7 +277,7 @@ const GameChangerDetailsPage = (props) => {
 	
 	const dispatchUserData = (data) => {
 		setUserData(data.payload.userData);
-	}
+	};
 
 	
 
@@ -294,7 +295,7 @@ const GameChangerDetailsPage = (props) => {
 			});
 			setFavoriteTopics(favoriteTopicList);
 		});
-	},[])
+	},[]);
 
 	useEffect(() => {
 		const addFavoriteTopicToMetadata = (data, cloneName) => {
@@ -348,11 +349,11 @@ const GameChangerDetailsPage = (props) => {
 												);
 	
 												if(favorite) {
-													const newFavorites = [...favoriteTopics]
+													const newFavorites = [...favoriteTopics];
 													newFavorites.splice(favoriteTopics.indexOf(topic.toLowerCase()), 1);
 													setFavoriteTopics(newFavorites);
 												}else{
-													const newFavorites = [...favoriteTopics]
+													const newFavorites = [...favoriteTopics];
 													newFavorites.push(topic.toLowerCase());
 													setFavoriteTopics(newFavorites);
 												}
@@ -575,7 +576,7 @@ const GameChangerDetailsPage = (props) => {
 				}
 				
 			}).catch(er => {
-				console.log(er)
+				console.log(er);
 			});
 	}, [topic, graph, cloneData]);
 
@@ -654,7 +655,7 @@ const GameChangerDetailsPage = (props) => {
 			fallbackSources.entity = entity.image;
 			entity.details.forEach((detail, i) => {
 				if(detail.name === 'NodeVec') entity.details.splice(i,1);
-			})
+			});
 		}
 
 		return (
@@ -862,14 +863,11 @@ const GameChangerDetailsPage = (props) => {
 										height={670}
 										graphData={graph}
 										runningSearchProp={runningQuery}
-										notificationCountProp={0}
 										setDocumentsFound={() => {}}
 										setTimeFound={() => {}}
 										cloneData={cloneData}
-										expansionTerms={false}
 										setNumOfEdges={() => {}}
 										dispatch={{}}
-										showSideFilters={false}
 										showBasic={false}
 										searchText={''}
 										hierarchyView={hierarchyView}

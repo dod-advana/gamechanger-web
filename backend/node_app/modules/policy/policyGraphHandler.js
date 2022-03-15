@@ -29,7 +29,8 @@ class PolicyGraphHandler extends GraphHandler {
 			useGCCache,
 			includeRevoked,
 			searchFields,
-			orgFilter
+			orgFilter,
+			loadAll
 		} = req.body;
 
 		const permissions = req.permissions ? req.permissions : [];
@@ -45,7 +46,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const { isTest = false, expandTerms = false, searchText } = req.body;
 
 			const gT0 = new Date().getTime();
-			req.body.questionFlag = this.searchUtility.isQuestion(searchText)
+			req.body.questionFlag = this.searchUtility.isQuestion(searchText);
 			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -59,7 +60,7 @@ class PolicyGraphHandler extends GraphHandler {
 				'display_title_s',
 				'ref_list',
 				'pagerank_r'
-			]
+			];
 			req.body.includeHighlights = false;
 
 			//const esQuery = this.getElasticsearchQueryForGraph(req.body, userId);
@@ -73,16 +74,15 @@ class PolicyGraphHandler extends GraphHandler {
 
 			// const gT1 = new Date().getTime();
 
-			const PULL_NODES_FROM_NEO4J_MAX_LIMIT = 500;
-
 			// const { docIds, pubIds, searchTerms } = searchResults;
 			const { docs, searchTerms, totalCount } = searchResults;
 
 			let results = {};
 			let query = '';
 			let params = [];
+			let limit;
 
-			if (totalCount <= PULL_NODES_FROM_NEO4J_MAX_LIMIT) {
+			if (totalCount <= this.constants.GRAPH_CONFIG.PULL_NODES_FROM_NEO4J_MAX_LIMIT) {
 				// pull nodes from neo4j (this is slow, hence the limit)
 				const docIds = searchResults.docs.map((doc) => doc.doc_id);
 				[results, query, params] = await this.getGraphData(
@@ -94,7 +94,19 @@ class PolicyGraphHandler extends GraphHandler {
 				);
 			} else {
 				// mock nodes from elastic results
-				results = this.createMockGraphReturnFromEsResults(docs, userId);
+				if (totalCount > this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT) {
+					// return only the top GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT results, sorted by page rank
+					const docIDsSortedByPageRank = this.createMockGraphReturnFromEsResults(docs, userId)
+						.nodes.sort((a, b) => b.pageRank - a.pageRank)
+						.map(node => node.doc_id)
+						.slice(0, loadAll ? this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED : this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT);
+					results = this.createMockGraphReturnFromEsResults(docs.filter(doc => docIDsSortedByPageRank.includes(doc.doc_id)), userId);
+					limit = loadAll ?
+						{ maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED } :
+						{ warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
+				} else {
+					results = this.createMockGraphReturnFromEsResults(docs, userId);
+				}
 				query = 'Mocked from ES';
 				params = [];
 			}
@@ -132,7 +144,7 @@ class PolicyGraphHandler extends GraphHandler {
 				await this.storeCachedResults(req, graphData, cloneSpecificObject, userId);
 			}
 
-			graphData.query = {query, params};
+			graphData.query = {query, params, limit};
 
 			return graphData;
 
@@ -389,7 +401,7 @@ class PolicyGraphHandler extends GraphHandler {
 			'RETURN distinct pt LIMIT 1000;', {name: topicName}, isTest, userId
 			);
 			
-			data.graph = graphData
+			data.graph = graphData;
 			
 			return data;
 		} catch (err) {
@@ -417,7 +429,7 @@ class PolicyGraphHandler extends GraphHandler {
 				'RETURN distinct pc limit 1000;', {name: entityName}, isTest, userId
 			);
 			
-			data.graph = graphData
+			data.graph = graphData;
 			
 			return data;
 		} catch (err) {
@@ -475,7 +487,7 @@ class PolicyGraphHandler extends GraphHandler {
 					if (!graph.labels.includes(label)) {
 						graph.labels.push(label);
 					}
-				})
+				});
 				resp[0].nodes.forEach(node => {
 					if (!nodeIds.includes(node.id)) {
 						graph.nodes.push(node);
@@ -499,7 +511,7 @@ class PolicyGraphHandler extends GraphHandler {
 						// edge.source = source;
 						// edge.target = target;
 						graph.edges.push(edge);
-						edgeIds.push(edge.id)
+						edgeIds.push(edge.id);
 					}
 				});
 			});
@@ -551,7 +563,7 @@ class PolicyGraphHandler extends GraphHandler {
 			};
 
 			// const gT0 = new Date().getTime();
-			searchBody.questionFlag = this.searchUtility.isQuestion(searchText)
+			searchBody.questionFlag = this.searchUtility.isQuestion(searchText);
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;

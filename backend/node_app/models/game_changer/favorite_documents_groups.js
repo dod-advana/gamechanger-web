@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 module.exports = (sequelize, DataTypes) => {
     const FAVORITE_DOCUMENTS_GROUP = sequelize.define("favorite_documents_groups", 
     {

@@ -28,6 +28,7 @@ const endpoints = {
 	gcCloneDataPOST: '/api/gameChanger/modular/admin/storeCloneMeta',
 	gcCloneDataDeletePOST: '/api/gameChanger/modular/admin/deleteCloneMeta',
 	gcDataTrackerDataPOST: '/api/gameChanger/dataTracker/getTrackedData',
+	getDocIngestionStats: '/api/gameChanger/getDocIngestionStats',
 	gcBrowsingLibraryPOST: '/api/gameChanger/dataTracker/getBrowsingLibrary',
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
@@ -77,10 +78,11 @@ const endpoints = {
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getModelsList: '/api/gameChanger/admin/getModelsList',
 	getDataList: '/api/gameChanger/admin/getDataList',
-	getCurrentTransformer: '/api/gameChanger/admin/getCurrentTransformer',
+	getLoadedModels: '/api/gameChanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
@@ -91,6 +93,7 @@ const endpoints = {
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
+	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -334,7 +337,8 @@ export default class GameChangerAPI {
 		highlightText,
 		pageNumber,
 		isClone = false,
-		cloneData = { clone_name: 'gamechanger' }
+		cloneData = { clone_name: 'gamechanger' },
+		isDLA = false
 	) => {
 		return new Promise((resolve, reject) => {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
@@ -344,7 +348,7 @@ export default class GameChangerAPI {
 					cloneData.clone_name !== 'gamechanger'
 						? `/projects/${cloneData.clone_name}`
 						: ''
-				}/pdf/${fileName}`
+				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
 			if (cloneData.clone_name === 'eda') {
@@ -433,6 +437,11 @@ export default class GameChangerAPI {
 	getDataTrackerData = async (options) => {
 		const url = endpoints.gcDataTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
+	};
+
+	getDocIngestionStats = async () => {
+		const url = endpoints.getDocIngestionStats;
+		return axiosGET(this.axios, url);
 	};
 
 	getBrowsingLibrary = async (options) => {
@@ -695,11 +704,15 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	stopProcess = async (opts) => {
+		const url = endpoints.stopProcess;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	deleteLocalModel = async (opts) => {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
-
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
@@ -710,8 +723,8 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	getCurrentTransformer = async () => {
-		const url = endpoints.getCurrentTransformer;
+	getLoadedModels = async () => {
+		const url = endpoints.getLoadedModels;
 		return axiosGET(this.axios, url);
 	};
 
@@ -762,6 +775,11 @@ export default class GameChangerAPI {
 
 	getDocumentUsage = async (body) => {
 		const url = endpoints.getDocumentUsage;
+		return axiosGET(this.axios, url, {params:body});
+	}
+
+	getUserAggregations = async (body) => {
+		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, {params:body});
 	}
 
@@ -842,7 +860,7 @@ export default class GameChangerAPI {
 
 	updateAPIKeyDescription = async (description, key) => {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
-		return axiosPOST(this.axios, url, { description, key })
+		return axiosPOST(this.axios, url, { description, key });
 	}
 	
 	approveRejectAPIKeyRequest = async (id, approve) => {
@@ -914,7 +932,7 @@ export default class GameChangerAPI {
 
 	sendJiraFeedback= async (body) => {
 		const url = endpoints.sendJiraFeedback;
-		return axiosPOST(this.axios, url, body)
+		return axiosPOST(this.axios, url, body);
 	}
 
 	getLTRMode = async () => {
@@ -999,9 +1017,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getHomepageEditorData = async () => {
+	getHomepageEditorData = async (body) => {
 		const url = endpoints.getHomepageEditorData;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, body);
 	};
 
 	setHomepageEditorData = async (body) => {

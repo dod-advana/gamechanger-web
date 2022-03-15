@@ -18,7 +18,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import PDFHighlighter from './PDFHighlighter';
 import GCButton from '../common/GCButton';
 import UOTAlert from '../common/GCAlert';
-import { styles as adminStyles} from '../../components/admin/util/GCAdminStyles'
+import { styles as adminStyles} from '../../components/admin/util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 const SIDEBAR_TOGGLE_WIDTH = 20;
@@ -31,7 +31,7 @@ const useStyles = makeStyles({
 		  paddingRight: '45px !important'
 		}
 	}
-})
+});
 
 const cleanHighlightText = (text) => {
 	if(text){
@@ -44,7 +44,7 @@ const cleanHighlightText = (text) => {
 	} else{
 		return '';
 	}
-}
+};
 
 const getIframePreviewLinkInferred = (
 	filename,
@@ -58,7 +58,7 @@ const getIframePreviewLinkInferred = (
 	entityText = cleanHighlightText(entityText);
 	let highlight;
 	if(entityText){
-		highlight = [entityText, responsibilityText]
+		highlight = [entityText, responsibilityText];
 	}else{
 		highlight = `"${responsibilityText}"`;
 	}
@@ -113,7 +113,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [selectedResponsibility, setSelectedResponsibility] = useState({});
 	const [documentLink, setDocumentLink] = useState('');
 	const [clearFilters, setClearFilters] = useState(false);
-	const [highlights, setHighlights] = useState([])
+	const [highlights, setHighlights] = useState([]);
 
 	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
@@ -139,9 +139,9 @@ export default function ResponsibilityDocumentExplorer({
 						'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
 					);
 				}
-			}, 2000)
+			}, 2000);
 		}
-	},[iframeLoading])
+	},[iframeLoading]);
 
 	useEffect(() => {
 		if (Object.keys(responsibilityData).length && infiniteCount === 1) {
@@ -150,15 +150,15 @@ export default function ResponsibilityDocumentExplorer({
 				initialCollapseKeys[doc] = false;
 				Object.keys(responsibilityData[doc]).forEach(entity => {
 					initialCollapseKeys[doc + entity] = false;
-				})
-			})
+				});
+			});
 			setCollapseKeys(initialCollapseKeys);
 			const doc = Object.keys(responsibilityData)[0];
 			const entity = Object.keys(responsibilityData[doc])[0];
 
-			setSelectedResponsibility(responsibilityData[doc][entity][0])
+			setSelectedResponsibility(responsibilityData[doc][entity][0]);
 		}else if(!Object.keys(responsibilityData).length){
-			setSelectedResponsibility({})
+			setSelectedResponsibility({});
 		}
 	}, [responsibilityData, infiniteCount]);
 
@@ -166,7 +166,7 @@ export default function ResponsibilityDocumentExplorer({
 		setIsEditingEntity(false);
 		setIsEditingResp(false);
 		setDocumentLink('');
-	}, [selectedResponsibility])
+	}, [selectedResponsibility]);
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -248,7 +248,7 @@ export default function ResponsibilityDocumentExplorer({
 		const payload = {
 			filename: selectedResponsibility.filename,
 			text
-		}
+		};
 		const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
 		if(data){
 			setHighlights([ {
@@ -275,11 +275,11 @@ export default function ResponsibilityDocumentExplorer({
 					'pageNumber': data.pageNumber + 1
 				},
 				'id': 0
-			}])
+			}]);
 			setDocumentLink(data.fileLink);
 			setIframeLoading(false);
 		}
-	}
+	};
 
 	const getMetadataForTable = () => {
 		const keyMap = {
@@ -288,7 +288,7 @@ export default function ResponsibilityDocumentExplorer({
 			organizationPersonnel: 'Organization/Personnel',
 			responsibilityText: 'Responsibility Text',
 			documentsReferenced: 'Documents Referenced'
-		}
+		};
 		const metaData = [];
 		Object.keys(selectedResponsibility).forEach(key => {
 			if(keyMap[key]){
@@ -355,18 +355,18 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 					</div>
 					:
-					<></>
+					<></>;
 				metaData.push({
 					Key: keyMap[key],
 					Value: <div style={{wordBreak: 'break-word'}}>
 						{selectedResponsibility[key]}
 						{editButtons}
 					</div>
-				})
+				});
 			}
-		})
-		return metaData
-	}
+		});
+		return metaData;
+	};
 
 	const rejectResponsibility = (responsibility) => {
 		gameChangerAPI.storeResponsibilityReportData({
@@ -388,8 +388,8 @@ export default function ResponsibilityDocumentExplorer({
 				'error',
 				'There was an error sending your responsibility update. Please try againg later.'
 			);
-		})
-	}
+		});
+	};
 
 	const updateResponsibility = (updatedResp, textPosition) => {
 		const { id } = selectedResponsibility;
@@ -419,8 +419,8 @@ export default function ResponsibilityDocumentExplorer({
 				'error',
 				'There was an error sending your responsibility update. Please try againg later.'
 			);
-		})
-	}
+		});
+	};
 
 	const iframePanelSize =
 		12 -
@@ -590,13 +590,13 @@ export default function ResponsibilityDocumentExplorer({
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
 									if(organization.length) {
 										organization.forEach(org => {
-											filters.push({id: 'organizationPersonnel', value: org})
-										})
+											filters.push({id: 'organizationPersonnel', value: org});
+										});
 									};
 									if(docTitle.length) {
 										docTitle.forEach(doc => {
-											filters.push({id: 'documentTitle', value: doc.documentTitle})
-										})
+											filters.push({id: 'documentTitle', value: doc.documentTitle});
+										});
 									};
 									setFilters(filters);
 									setResultsPage(1);
@@ -693,7 +693,7 @@ export default function ResponsibilityDocumentExplorer({
 													}
 												</div>
 											</Collapse>
-										</div>
+										</div>;
 									})}
 								</Collapse>
 							</div>
