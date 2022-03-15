@@ -102,7 +102,6 @@ export default function ResponsibilityDocumentExplorer({
 	const { cloneData } = state;
 	const classes = useStyles();
 
-	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState({});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -454,12 +453,12 @@ export default function ResponsibilityDocumentExplorer({
 					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
-					overflow: 'scroll',
+					overflowY: 'scroll',
 				}}
 				ref={infiniteScrollRef}
 			>
 				<GCAccordion
-					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length ? true : false}
+					expanded={filters.length}
 					header={
 						<span>FILTERS  {filters.length ? <span style={{color: '#ed691d'}}>{`(${filters.length})`}</span> : ''}</span>
 					}
@@ -470,7 +469,7 @@ export default function ResponsibilityDocumentExplorer({
 					<div style={{ width: '100%' }}>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={docTitle.length ? true : false}
+								expanded={filters.find(filter => filter.id === 'documentTitle') ? true : false}
 								header={
 									<span>
 										DOCUMENT TITLE  {
@@ -506,7 +505,7 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={organization.length ? true : false}
+								expanded={filters.find(filter => filter.id === 'organizationPersonnel') ? true : false}
 								header={
 									<span>
 										ORGANIZATION  {
@@ -545,7 +544,7 @@ export default function ResponsibilityDocumentExplorer({
 						</div>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={Object.keys(responsibilityText).length ? true : false}
+								expanded={filters.find(filter => filter.id === 'responsibilityText') ? true : false}
 								header={
 									<span>
 										RESPONSIBILITY TEXT  {
@@ -829,7 +828,7 @@ export default function ResponsibilityDocumentExplorer({
 					padding: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
-					overflow: 'scroll',
+					overflowY: 'scroll',
 					zIndex: 100
 				}}
 			>
@@ -856,8 +855,11 @@ export default function ResponsibilityDocumentExplorer({
 					onHide={() => setAlertActive(false)}
 					containerStyles={{
 						...adminStyles.alert, 
-						top: 230,
-						width: '88%',}}
+						top: 31,
+						width: '94%',
+						marginLeft: 0,
+						zIndex: 1011
+					}}
 				/>
 			) : (
 				<></>
