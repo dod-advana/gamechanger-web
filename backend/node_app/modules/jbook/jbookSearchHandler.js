@@ -300,6 +300,12 @@ class JBookSearchHandler extends SearchHandler {
 			// check if there are PG filters
 			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
+			// clean empty options:
+			Object.keys(req.body.jbookSearchSettings).forEach(key => {
+				if ((Array.isArray(req.body.jbookSearchSettings[key]) && req.body.jbookSearchSettings[key].length === 0) || (req.body.jbookSearchSettings[key] === '')) {
+					delete req.body.jbookSearchSettings[key];
+				}
+			});
 			let pgQueryWhere = ``;
 			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel'];
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
@@ -352,16 +358,10 @@ class JBookSearchHandler extends SearchHandler {
 					keys.push(key);
 				});
 			}
+
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
-
-			// clean empty options:
-			Object.keys(req.body.jbookSearchSettings).forEach(key => {
-				if ((Array.isArray(req.body.jbookSearchSettings[key]) && req.body.jbookSearchSettings[key].length === 0) || (req.body.jbookSearchSettings[key] === '')) {
-					delete req.body.jbookSearchSettings[key];
-				}
-			});
 			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {};
 
