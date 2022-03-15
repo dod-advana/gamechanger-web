@@ -2213,6 +2213,7 @@ class SearchUtility {
 				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
 			}
 			let docListSorted = Object.keys(docCount).sort(function(a,b){return docCount[a]-docCount[b]}).reverse();
+
  			return docListSorted;
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', '');
