@@ -7,7 +7,7 @@ const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping } = require
 const { MLApiClient } = require('../../lib/mlApiClient');
 const asyncRedisLib = require('async-redis');
 const { Thesaurus } = require('../../lib/thesaurus');
-const {esTopLevelFields} = require('./jbookDataMapping');
+const { esTopLevelFields } = require('./jbookDataMapping');
 const abbreviationRedisAsyncClientDB = 9;
 
 class JBookSearchUtility {
@@ -142,7 +142,7 @@ class JBookSearchUtility {
 			'serviceClassLabel',
 			'primaryClassLabel',
 		];
-		
+
 		if (fullPDFExport) {
 			requiredCols.push(
 				'budgetActivityNumber',
@@ -712,84 +712,84 @@ class JBookSearchUtility {
 		}
 		return result;
 	}
-	
+
 	getJCAData() {
 		return {
 			'Force Support  (FS)':
-				{
-					'Force Management': ['Global Force Management', 'Force Configuration', 'Global Defense Posture Extraction', 'Readiness Reporting', 'Human Capital Management'],
-					'Force Preparation': ['Training', 'Exercising', 'Education', 'Doctrine', 'Lessons Learned', 'Concepts', 'Experimentation'],
-					'Building Partnerships': ['Engage Partners', 'Manage Partnership Agreements', 'Conduct Security Cooperation Activities', 'Conduct Civil-Military Operations']
-				},
+			{
+				'Force Management': ['Global Force Management', 'Force Configuration', 'Global Defense Posture Extraction', 'Readiness Reporting', 'Human Capital Management'],
+				'Force Preparation': ['Training', 'Exercising', 'Education', 'Doctrine', 'Lessons Learned', 'Concepts', 'Experimentation'],
+				'Building Partnerships': ['Engage Partners', 'Manage Partnership Agreements', 'Conduct Security Cooperation Activities', 'Conduct Civil-Military Operations']
+			},
 			'Battlespace Awareness (aka INTEL)':
-				{
-					'Planning & Direction': ['Define & Prioritize Requirements', 'Develop Plans & Strategies', 'Task & Monitor Resources'],
-					'Collection': ['Signals Collection', 'Imagery Collection', 'Human-based Collection', 'Open Source Collection'],
-					'Processing & Exploitation': ['Processing', 'Exploitation', 'Report Generation'],
-					'Analysis, Estimation, & Production': ['Integration', 'Evaluation', 'Intepretation', 'Estimation', 'Product Generation'],
-					'BA Dissemination & Integration': ['BA Data Transmission', 'BA Data Access'],
-					'Counterintelligence (CI)': ['Offensive CI', 'Investigations']
-				},
+			{
+				'Planning & Direction': ['Define & Prioritize Requirements', 'Develop Plans & Strategies', 'Task & Monitor Resources'],
+				'Collection': ['Signals Collection', 'Imagery Collection', 'Human-based Collection', 'Open Source Collection'],
+				'Processing & Exploitation': ['Processing', 'Exploitation', 'Report Generation'],
+				'Analysis, Estimation, & Production': ['Integration', 'Evaluation', 'Intepretation', 'Estimation', 'Product Generation'],
+				'BA Dissemination & Integration': ['BA Data Transmission', 'BA Data Access'],
+				'Counterintelligence (CI)': ['Offensive CI', 'Investigations']
+			},
 			'Force Application (FA)':
-				{
-					'Maneuver': ['Air', 'Space', 'Land', 'Maritime', 'Cyberspace', 'Cyberspace'],
-					'Fires': ['Kinetic', 'Electromagnetic', 'Information']
-				},
+			{
+				'Maneuver': ['Air', 'Space', 'Land', 'Maritime', 'Cyberspace', 'Cyberspace'],
+				'Fires': ['Kinetic', 'Electromagnetic', 'Information']
+			},
 			'Logistics (LOG)':
-				{
-					'Deployment & Distribution': ['Force Deployment', 'Force Sustainment'],
-					'Supply': ['Supplies & Equipment Management', 'Inventory Management', 'Global Supplier Networks Management'],
-					'Maintenance': ['Inspect', 'Test', 'Service', 'Repair', 'Rebuild', 'Calibrate', 'Reclaim'],
-					'Logistics Services': ['Food Services', 'Water & Ice Services', 'Contingency Base Services', 'Hygiene Services', 'Mortuary Affairs'],
-					'Operational Contract Support': ['Contract Support Integration', 'Contractor Management'],
-					'Engineering': ['General Engineering', 'Combat Engineering', 'Geospatial Engineering'],
-					'Base & Installation Support': ['Real Property Life Cycle Management', 'Installation Services'],
-					'Health Services': ['Operational Medicine', 'Health Services Delivery']
-				},
+			{
+				'Deployment & Distribution': ['Force Deployment', 'Force Sustainment'],
+				'Supply': ['Supplies & Equipment Management', 'Inventory Management', 'Global Supplier Networks Management'],
+				'Maintenance': ['Inspect', 'Test', 'Service', 'Repair', 'Rebuild', 'Calibrate', 'Reclaim'],
+				'Logistics Services': ['Food Services', 'Water & Ice Services', 'Contingency Base Services', 'Hygiene Services', 'Mortuary Affairs'],
+				'Operational Contract Support': ['Contract Support Integration', 'Contractor Management'],
+				'Engineering': ['General Engineering', 'Combat Engineering', 'Geospatial Engineering'],
+				'Base & Installation Support': ['Real Property Life Cycle Management', 'Installation Services'],
+				'Health Services': ['Operational Medicine', 'Health Services Delivery']
+			},
 			'Command & Control (C2)':
-				{
-					'Organize': ['Establish & Maintain Unity of Effort with Mission Partners', 'Structure Organization to Mission', 'Foster Organizational Collaboration'],
-					'Understand': ['Organize Information', 'Develop Knowledge & Situational Awareness', 'Share Knowledge & Situational Awareness'],
-					'Plan': ['Analyze Problem', 'Apply Situational Understanding', 'Develop Strategy', 'Develop Courses of Action', 'Analyze Courses of Action'],
-					'Decide': ['Manage Risk', 'Select Actions', 'Establish Rule Sets', 'Establish Intent & Guidance'],
-					'Direct': ['Communicate Intent & Guidance', 'Task', 'Establish Metrics'],
-					'Monitor': ['Assess Compliance with Guidance', 'Assess Effects', 'Assess Achievement of Objectives', 'Assess Guidance']
-				},
+			{
+				'Organize': ['Establish & Maintain Unity of Effort with Mission Partners', 'Structure Organization to Mission', 'Foster Organizational Collaboration'],
+				'Understand': ['Organize Information', 'Develop Knowledge & Situational Awareness', 'Share Knowledge & Situational Awareness'],
+				'Plan': ['Analyze Problem', 'Apply Situational Understanding', 'Develop Strategy', 'Develop Courses of Action', 'Analyze Courses of Action'],
+				'Decide': ['Manage Risk', 'Select Actions', 'Establish Rule Sets', 'Establish Intent & Guidance'],
+				'Direct': ['Communicate Intent & Guidance', 'Task', 'Establish Metrics'],
+				'Monitor': ['Assess Compliance with Guidance', 'Assess Effects', 'Assess Achievement of Objectives', 'Assess Guidance']
+			},
 			'Communications & Computers':
-				{
-					'Information Transport': ['Wired Transmission', 'Wireless Transmission', 'Switching & Routing'],
-					'Network Management': ['Optimized Network Functions & Resources', 'Deployable, Scalable, & Modular Networks', 'Spectrum Management'],
-					'Cybersecurity': ['Information Exchange Security', 'Networks Protection', 'Data Protection', 'Identity & Access Management', 'Application Security', 'Cyberspace Survivability'],
-					'Defensive Cyberspace Operations (Internal Defensive Measures)': ['Cyberspace Defense'],
-					'Enterprise Services': ['Information Sharing', 'Computing Services', 'Common Enterprises Services', 'Positioning, Navigation & Timing']
-				},
+			{
+				'Information Transport': ['Wired Transmission', 'Wireless Transmission', 'Switching & Routing'],
+				'Network Management': ['Optimized Network Functions & Resources', 'Deployable, Scalable, & Modular Networks', 'Spectrum Management'],
+				'Cybersecurity': ['Information Exchange Security', 'Networks Protection', 'Data Protection', 'Identity & Access Management', 'Application Security', 'Cyberspace Survivability'],
+				'Defensive Cyberspace Operations (Internal Defensive Measures)': ['Cyberspace Defense'],
+				'Enterprise Services': ['Information Sharing', 'Computing Services', 'Common Enterprises Services', 'Positioning, Navigation & Timing']
+			},
 			'Protection':
-				{
-					'Prevention': ['Concealment/Stealth', 'Countering Weapons of Mass Destruction', 'Counter Air & Missile', 'Physical Security'],
-					'Mitigation': ['Explosive', 'Projectile', 'Chemical', 'Biological', 'Radiological', 'Nuclear', 'Electromagnetic Effects', 'Directed Energy', 'Natural Hazards'],
-					'Recovery': ['CBRN Response', 'Maritime Counter-Mine']
-				},
+			{
+				'Prevention': ['Concealment/Stealth', 'Countering Weapons of Mass Destruction', 'Counter Air & Missile', 'Physical Security'],
+				'Mitigation': ['Explosive', 'Projectile', 'Chemical', 'Biological', 'Radiological', 'Nuclear', 'Electromagnetic Effects', 'Directed Energy', 'Natural Hazards'],
+				'Recovery': ['CBRN Response', 'Maritime Counter-Mine']
+			},
 			'Corporate Management & Support':
-				{
-					'Advisory & Compliance': ['Legal Advice', 'Legislative Advice', 'Audit, Inspection, & Investigation', 'Personnel Security Investigations & Clearance Certification', 'Operational Test & Evaluation'],
-					'Strategic Management': ['Strategy Development', 'Capability Development', 'Performance Management', 'Enterprise Risk Management', 'Studies & Analyses', 'Enterprise Architecture'],
-					'Information Management': [],
-					'Acquisition & Technology': ['Research', 'Advanced Technology', 'Developmental Engineering', 'Acquisition Management'],
-					'Financial Management': ['Programming & Budgeting', 'Accounting & Finance']
-				}
+			{
+				'Advisory & Compliance': ['Legal Advice', 'Legislative Advice', 'Audit, Inspection, & Investigation', 'Personnel Security Investigations & Clearance Certification', 'Operational Test & Evaluation'],
+				'Strategic Management': ['Strategy Development', 'Capability Development', 'Performance Management', 'Enterprise Risk Management', 'Studies & Analyses', 'Enterprise Architecture'],
+				'Information Management': [],
+				'Acquisition & Technology': ['Research', 'Advanced Technology', 'Developmental Engineering', 'Acquisition Management'],
+				'Financial Management': ['Programming & Budgeting', 'Accounting & Finance']
+			}
 		};
 	}
 
-	getElasticSearchQueryForJBook({searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and'}, userId, serviceAgencyMappings) {
+	getElasticSearchQueryForJBook({ searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' }, userId, serviceAgencyMappings) {
 
 		const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
-		const plainQuery = (isVerbatimSearch  ? parsedQuery.replace(/["']/g, '') : parsedQuery);
+		const plainQuery = (isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery);
 
 		const mustQuery = [];
 		if (jbookSearchSettings.pgKeys !== undefined) {
 			mustQuery.push(
 				{ terms: { key_review_s: jbookSearchSettings.pgKeys } }
-			)
+			);
 		}
 
 		let query = {
@@ -938,19 +938,19 @@ class JBookSearchUtility {
 			query.query.bool.must.push(
 				{
 					bool:
-						{
-							should: [
-								{
-									term: {
-										budgetLineItem_s: jbookSearchSettings.programElement
-									}
-								},
-								{
-									term: {
-										programElement_s: jbookSearchSettings.programElement
-									}
-								}]
-						}
+					{
+						should: [
+							{
+								term: {
+									budgetLineItem_s: jbookSearchSettings.programElement
+								}
+							},
+							{
+								term: {
+									programElement_s: jbookSearchSettings.programElement
+								}
+							}]
+					}
 				}
 			);
 		}
@@ -966,19 +966,19 @@ class JBookSearchUtility {
 		// SORT
 		switch (jbookSearchSettings.sort[0].id) {
 			case 'budgetYear':
-				query.sort = [{budgetYear_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 				break;
 			case 'programElement':
-				query.sort = [{	programElement_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 				break;
 			case 'projectNum':
-				query.sort = [{	projectNum_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 				break;
 			case 'projectTitle':
-				query.sort = [{	projectTitle_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 				break;
 			case 'serviceAgency':
-				query.sort = [{	serviceAgency_s: {order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc'}}];
+				query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 				break;
 			default:
 				break;
@@ -987,7 +987,7 @@ class JBookSearchUtility {
 		return query;
 	}
 
-	getElasticSearchJBookDataFromId({docIds}, userId) {
+	getElasticSearchJBookDataFromId({ docIds }, userId) {
 		try {
 			return {
 				track_total_hits: true,
@@ -995,7 +995,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: {key_review_s: docIds}
+							terms: { key_review_s: docIds }
 						}
 					}
 				}
@@ -1004,7 +1004,7 @@ class JBookSearchUtility {
 			this.logger.error(err, '1F07MYM', userId);
 		}
 	}
-	
+
 }
 
 module.exports = JBookSearchUtility;

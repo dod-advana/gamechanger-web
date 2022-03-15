@@ -300,7 +300,7 @@ class JBookSearchHandler extends SearchHandler {
 			// check if there are PG filters
 			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
-			let pgQueryWhere = ``
+			let pgQueryWhere = ``;
 			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel'];
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
 			pgFilters.forEach(filter => {
@@ -309,22 +309,21 @@ class JBookSearchHandler extends SearchHandler {
 					console.log(jbookSearchSettings[filter]);
 
 					if (pgQueryWhere.length > 0) {
-						pgQueryWhere += ` AND ( `
+						pgQueryWhere += ` AND ( `;
 					} else {
-						pgQueryWhere += `(`
-
+						pgQueryWhere += `(`;
 					}
 					for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
 						if (i > 0) {
-							pgQueryWhere += ` OR `
+							pgQueryWhere += ` OR `;
 						}
 						if (filter === 'pocReviewer') {
-							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `
+							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `;
 						} else {
 							const hasNull = jbookSearchSettings[filter].includes('Blank');
-							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `
+							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `;
 							if (hasNull) {
-								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `
+								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `;
 							}
 						}
 					}
@@ -344,11 +343,11 @@ class JBookSearchHandler extends SearchHandler {
 					}
 					let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
 					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency !== null ? review.agency : ''}`
+						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency !== null ? review.agency : ''}`;
 					} else if (review.budget_type === 'rdoc') {
-						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`
+						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
 					} else if (review.budget_type === 'odoc') {
-						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`
+						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
 					}
 					keys.push(key);
 				});
@@ -362,7 +361,7 @@ class JBookSearchHandler extends SearchHandler {
 				if (req.body.jbookSearchSettings[key] === []) {
 					req.body.jbookSearchSettings.delete(key);
 				}
-			})
+			});
 
 
 
