@@ -323,7 +323,7 @@ class JBookSearchHandler extends SearchHandler {
 						} else {
 							const hasNull = jbookSearchSettings[filter].includes('Blank');
 							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `
-							if(hasNull){
+							if (hasNull) {
 								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `
 							}
 						}
@@ -356,6 +356,16 @@ class JBookSearchHandler extends SearchHandler {
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
+
+			// clean empty options:
+			Object.keys(req.body.jbookSearchSettings).forEach(key => {
+				if (req.body.jbookSearchSettings[key] === []) {
+					req.body.jbookSearchSettings.delete(key);
+				}
+			})
+
+
+
 			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
 			let expansionDict = {};
 
