@@ -32,6 +32,7 @@ const ApiKey = models.api_key;
 const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
+const moment = require("moment");
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -111,7 +112,12 @@ if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
 		const cn = req.get('x-env-ssl_client_certificate');
 		if (!cn) {
-			res.sendStatus(401);
+			if (req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+				next();
+			}
+			else{
+				res.sendStatus(401);
+			}
 		} else {
 			req.user = { cn: cn.replace(/.*CN=(.*)/g, '$1') };
 			req.headers['ssl_client_s_dn_cn'] = cn;
@@ -207,6 +213,7 @@ app.post('/api/auth/token', async function (req, res) {
 	if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 		let cn = 'unknown user';
 		let perms = [''];
+		redisAsyncClient.select(12);
 		try {
 			cn = req.user.cn;
 			const admin = await Admin.findOne({ where: { username: cn } });
@@ -219,10 +226,30 @@ app.post('/api/auth/token', async function (req, res) {
 			res.sendStatus(500);
 		}
 
-		const csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+		const userTokenOld = await redisAsyncClient.get(`${cn}-token`);
+		let tokenTimeoutOld = await redisAsyncClient.get(`${cn}-tokenExpiration`);
+		let csrfHash
+
+		if (userTokenOld && tokenTimeoutOld) {
+			tokenTimeoutOld = moment(tokenTimeoutOld);
+			if (tokenTimeoutOld <= moment()) {
+				csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+				const tokenTimeout = moment().add(2, 'days').format();
+				await redisAsyncClient.set(`${cn}-token`, csrfHash);
+				await redisAsyncClient.set(`${cn}-tokenExpiration`, tokenTimeout);
+			} else {
+				csrfHash = userTokenOld;
+			}
+		} else {
+			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+			const tokenTimeout = moment().add(2, 'days').format();
+			await redisAsyncClient.set(`${cn}-token`, csrfHash);
+			await redisAsyncClient.set(`${cn}-tokenExpiration`, tokenTimeout);
+		}
+
+		await redisAsyncClient.set(`${cn}-perms`, JSON.stringify(perms));
 
 		const jwtClaims = { perms, cn };
-
 		jwtClaims['csrf-token'] = csrfHash;
 		let token = '';
 		try {
@@ -230,8 +257,8 @@ app.post('/api/auth/token', async function (req, res) {
 				algorithm: 'RS256'
 			});
 
-			redisAsyncClient.select(12);
-			await redisAsyncClient.set(`${cn}-token`, token);
+
+			await redisAsyncClient.set(`${cn}-token`, csrfHash);
 			await redisAsyncClient.set(`${cn}-perms`, perms);
 
 			res.json({
@@ -245,20 +272,33 @@ app.post('/api/auth/token', async function (req, res) {
 		AAA.getToken(req, res);
 	}
 });
+
 if (constants.GAME_CHANGER_OPTS.isDecoupled) {
 	app.use(async function (req, res, next) {
-		const signatureFromApp = req.get('x-ua-signature');
-		redisAsyncClient.select(12);
-		const userToken = await redisAsyncClient.get(`${req.user.cn}-token`);
-		const calculatedSignature = Base64.stringify(CryptoJS.SHA256(req.path, userToken));
-		if (signatureFromApp === calculatedSignature) {
+		const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta'];
+
+		if (routesAllowedWithoutToken.includes(req.path)) {
 			next();
 		} else {
-			if (req.url.includes('getThumbnail')) {
-				next();
+			const signatureFromApp = req.get('x-ua-signature');
+			redisAsyncClient.select(12);
+			let csrfHash = '';
+			if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
+				csrfHash = process.env.ML_WEB_TOKEN
+			} else {
+				redisAsyncClient.select(12);
+				csrfHash = await redisAsyncClient.get(`${req.user.cn}-token`);
 			}
-			else {
-				res.status(403).send({ code: 'not authorized' });
+			const calculatedSignature = Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
+
+			if (signatureFromApp === calculatedSignature) {
+				next();
+			} else {
+				if (req.url.includes('getThumbnail')) {
+					next();
+				} else {
+					res.status(403).send({code: 'not authorized'});
+				}
 			}
 		}
 	});
@@ -268,7 +308,20 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		res.sendStatus(403);
+		
+		if(req.get('SSL_CLIENT_S_DN_CN')==='ml-api'){
+			
+			const signatureFromApp = req.get('x-ua-signature');
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			if (signatureFromApp === userToken){
+				next();
+			} else {
+				res.sendStatus(403);
+			}
+		}
+		else{
+			res.sendStatus(403);
+		}
 	}
 });
 

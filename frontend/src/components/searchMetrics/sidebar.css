@@ -100,6 +100,19 @@
     border-bottom: 15px solid transparent;
     border-left: 15px solid #E9691D;
   }
+
+  .searchdemo-arrow-left-sm {
+    width: 0;
+    height: 0;
+    display: inline-block;
+    left: 0px;
+    top: 0px;
+    z-index: 30;
+    position: absolute;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-right: 20px solid #E9691D;
+  }
   
   .gcassist-modal {
     position: absolute;
@@ -283,6 +296,8 @@
   
   .sidebar-table {
     font-size: 14px;
+    table-layout: fixed;
+    width: 100%;
   }
 
   .sidebar-table > tbody > tr:nth-child(even) {

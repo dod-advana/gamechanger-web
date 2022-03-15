@@ -290,7 +290,7 @@ const FavoriteCard = (props) => {
 
 	const handleClearNotification = () => {
 		handleClearFavoriteSearchNotification(idx);
-	}
+	};
 
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>
@@ -315,7 +315,7 @@ const FavoriteCard = (props) => {
 												documentObject.search_text
 											}&pageNumber=${1}&isClone=${true}&cloneIndex=${
 												cloneData.clone_name
-											}`
+											}&sourceUrl=${documentObject.download_url_s}`
 										);
 									  }
 									: isTopic

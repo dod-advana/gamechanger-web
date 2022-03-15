@@ -15,7 +15,7 @@ import SearchBar from '../components/searchBar/SearchBar';
 import GCUserInfoModal from '../components/user/GCUserInfoModal';
 import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
-import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal'
+import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 // import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
@@ -43,8 +43,8 @@ const GameChangerPage = (props) => {
 	useEffect(() => {
 		gameChangerAPI.getJiraFeedbackMode().then(({data}) => {
 			setJiraFeedback(data.value === 'true');
-		})
-	}, [])
+		});
+	}, []);
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
@@ -76,7 +76,7 @@ const GameChangerPage = (props) => {
 							setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
 							handleSubmit={sendJiraFeedback}
 						/> :
-						<UserFeedback context={context} className="feedback-modal" />
+						<UserFeedback context={context} />
 					}
 					{/* Crowd Sourcing */}
 					{ cloneData.show_crowd_source && (

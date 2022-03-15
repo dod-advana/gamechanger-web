@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE, convertDCTScoreToText,
@@ -11,6 +11,9 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
+import {
+	handleSaveFavoriteTopic,
+} from '../../../utils/sharedFunctions';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
@@ -24,6 +27,11 @@ import { crawlerMappingFunc } from '../../../utils/gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@material-ui/core/styles';
+
+const gameChangerAPI = new GameChangerAPI();
 
 const styles = {
 	footerButtonBack: {
@@ -54,8 +62,16 @@ const styles = {
 	bodyText: {
 		margin: '10px',
 		fontSize: '14px',
-	},
+	}
 };
+
+const useStyles = makeStyles((theme) => ({
+	paper: {
+		border: '1px solid',
+		padding: theme.spacing(1),
+		backgroundColor: theme.palette.background.paper,
+	},
+}));
 
 const colWidth = {
 	maxWidth: '900px',
@@ -82,15 +98,34 @@ const FavoriteTopic = styled.button`
 	border: 1px solid darkgray;
 
 	> i {
-		color: ${({ favorited }) => (favorited ? '#E9691D' : '#B0B9BE')};
+		margin-left: 3px;
+		color: #E9691D;
 	}
+
 	&:hover {
 		background-color: #e9691d;
 		color: white;
+
 		> i {
-			color: ${({ favorited }) => (favorited ? '#FFFFFF' : '#B0B9BE')};
+			color: white;
 		}
 	}
+`;
+
+const CloseButton = styled.div`
+	padding: 6px;
+	background-color: white;
+	border-radius: 5px;
+	color: #8091a5 !important;
+	border: 1px solid #b0b9be;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0.4;
+	position: absolute;
+	right: 15px;
+	top: 15px;
 `;
 
 const StyledFrontCardHeader = styled.div`
@@ -120,6 +155,7 @@ const StyledFrontCardHeader = styled.div`
 			alignItems:  ${({docListView}) => docListView ? 'top': ''};
 			height:  ${({docListView}) => docListView ? 'fit-content': ''};
 			max-width: ${({listView}) => listView ? '60%': ''};
+			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
 			
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -512,7 +548,7 @@ const StyledQuickCompareContent = styled.div`
     }
     
     
-`
+`;
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
@@ -521,13 +557,195 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => 
 	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
+const FavoriteTopicFromCardBack = ({topic, favorited, dispatch, searchText, cloneName}) => {
+	const classes = useStyles();
+	const [popperIsOpen, setPopperIsOpen] = useState(false);
+	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
+	const [isFavorite, setFavorite] = useState(favorited);
+	const [favoriteSummary, setFavoriteSummary] = useState('');
+
+	useEffect(() => {
+		setFavorite(favorited);
+	}, [favorited]);
+
+	const openFavoritePopper = (target) => {
+		if (popperIsOpen) {
+			setPopperIsOpen(false);
+			setPopperAnchorEl(null);
+		} else {
+			setPopperIsOpen(true);
+			setPopperAnchorEl(target);
+		}
+	};
+
+	const handleCancelFavorite = () => {
+		setPopperIsOpen(false);
+		setPopperAnchorEl(null);
+	};
+
+	const handleSaveFavorite = (favorite = false,) => {
+		handleSaveFavoriteTopic(topic, favoriteSummary, favorite, dispatch);
+		setFavorite(favorite);
+		setPopperAnchorEl(null);
+		setPopperIsOpen(false);
+		setFavoriteSummary('');
+	};
+
+	return (<>
+		<GCTooltip
+			title={`Favorite this topic to track in the User Dashboard`}
+			placement="top"
+			arrow
+		>
+			<i
+				onClick={(event) => {
+					openFavoritePopper(event.target);
+				}}
+				className={isFavorite ? 'fa fa-star' : 'fa fa-star-o'}
+				style={{
+					cursor: 'pointer',
+					alignSelf: 'center',
+				}}
+			/>
+		</GCTooltip>
+		<Popover
+			onClose={() => handleCancelFavorite()}
+			id={topic}
+			open={popperIsOpen}
+			anchorEl={popperAnchorEl}
+			anchorOrigin={{
+				vertical: 'bottom',
+				horizontal: 'right',
+			}}
+			transformOrigin={{
+				vertical: 'top',
+				horizontal: 'right',
+			}}
+		>
+			{isFavorite ? (
+				<div style={{ padding: '0px 15px 10px' }}>
+					<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+						<CloseButton onClick={() => handleCancelFavorite()}>
+							<CloseIcon fontSize="small" />
+						</CloseButton>
+					</div>
+					<div style={{ width: 350, margin: 5 }}>
+						<div style={{ margin: '65px 15px 0' }}>
+							Are you sure you want to delete this favorite? You will lose any
+							comments made.
+						</div>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<GCButton
+								onClick={() => handleCancelFavorite()}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+								}}
+								isSecondaryBtn={true}
+							>
+								No
+							</GCButton>
+							<GCButton
+								onClick={() => {
+									handleSaveFavorite(false);
+									gameChangerAPI.sendIntelligentSearchFeedback(
+										'intelligent_search_cancel_favorite_document',
+										topic,
+										searchText
+									);
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'CancelFavorite',
+										'', // empty because topic getFilename always returns empty string
+										`search : ${searchText}`
+									);
+								}}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 10px 0px',
+									marginRight: 10,
+								}}
+							>
+								Yes
+							</GCButton>
+						</div>
+					</div>
+				</div>
+			) : (
+				<div className={classes.paper}>
+					<div style={{ width: 330, margin: 5 }}>
+						<TextField
+							label={'Favorite Summary'}
+							value={favoriteSummary}
+							onChange={(event) => {
+								setFavoriteSummary(event.target.value);
+							}}
+							className={classes.textArea}
+							margin="none"
+							size="small"
+							variant="outlined"
+							multiline={true}
+							rows={8}
+						/>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<GCButton
+								onClick={() => handleCancelFavorite()}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+								}}
+								isSecondaryBtn={true}
+							>
+								Cancel
+							</GCButton>
+							<GCButton
+								onClick={() =>{
+									handleSaveFavorite(true);
+									gameChangerAPI.sendIntelligentSearchFeedback(
+										'intelligent_search_favorite_document',
+										topic,
+										searchText
+									);
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'Favorite',
+										'', // empty because topic getFilename always returns empty string
+										`search : ${searchText}`
+									);
+								}}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+								}}
+							>
+								Save
+							</GCButton>
+						</div>
+					</div>
+				</div>
+			)}
+		</Popover>
+	</>);
+};
+
 const addFavoriteTopicToMetadata = (
 	data,
 	userData,
-	setFavoriteTopic,
-	setFavorite,
-	handleFavoriteTopicClicked,
-	cloneData
+	dispatch,
+	cloneData,
+	searchText,
 ) => {
 	const { favorite_topics = null } = userData ?? {};
 	let favorites = [];
@@ -555,28 +773,24 @@ const addFavoriteTopicToMetadata = (
 						return (
 							<FavoriteTopic
 								key={index}
-								onClick={(event) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneData.clone_name),
-										'TopicOpened',
-										topic
-									);
-									window.open(
-										`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
-									);
-								}}
 								favorited={favorited}
 							>
-								{topic}
-								<i
-									style={{ marginLeft: '5px', cursor: 'pointer' }}
-									className={'fa fa-star'}
-									onClick={(event) => {
-										event.stopPropagation();
-										setFavoriteTopic(topic);
-										setFavorite(favorited);
-										handleFavoriteTopicClicked(event.target);
+								<span								
+									onClick={() => {
+										trackEvent(
+											getTrackingNameForFactory(cloneData.clone_name),
+											'TopicOpened',
+											topic
+										);
+										window.open(
+											`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
+										);
 									}}
+								>
+									{topic}
+								</span>
+								<FavoriteTopicFromCardBack 
+									topic={topic} favorited={favorited} dispatch={dispatch} searchText={searchText} cloneName={cloneData.clone_name}
 								/>
 							</FavoriteTopic>
 						);
@@ -584,10 +798,10 @@ const addFavoriteTopicToMetadata = (
 				</div>
 			);
 		}
-		return metaData
-	})
-	return temp
-}
+		return metaData;
+	});
+	return temp;
+};
 	
 const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent}) => {
 	
@@ -645,7 +859,8 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 										item.filename,
 										state.cloneData.clone_name,
 										state.searchText,
-										0
+										0,
+										item.download_url_s
 									)
 								: () => {}
 						}
@@ -679,21 +894,12 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						</StyledFrontCardSubHeader>
 					)}
 					<div className={'selected-favorite'}>
-						{!item.isCompare ?
-							<div style={{display: 'flex'}}>
-								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(item.filename, item.display_title_s, item.id)}
-								{favoriteComponent()}
-							</div>
-							:
-							<div style={{marginTop: 10, marginLeft: 5}}>
-								{favoriteComponent()}
-							</div>
-						}
+						<div style={{display: 'flex'}}>
+							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
+							{checkboxComponent(item.filename, item.display_title_s, item.id)}
+							{favoriteComponent()}
+						</div>
 					</div>
-					{item.isCompare &&
-						quickCompareToggleComponent()
-					}
 				</div>
 			</div>
 			{docListView && (
@@ -945,7 +1151,7 @@ const PolicyCardHandler = {
 												onMouseEnter={() => setHoveredHit(key) }
 												onClick={e => {
 													e.preventDefault();
-													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber);
+													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber, item.download_url_s);
 												}}
 												>
 													<span>
@@ -955,6 +1161,7 @@ const PolicyCardHandler = {
 													<i className="fa fa-chevron-right" style={{ color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)' }} />
 												</div>
 											);
+
 										}).value()}
 									</div>
 									<div className={'expanded-metadata'}>
@@ -1032,7 +1239,8 @@ const PolicyCardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
-														page.pageNumber
+														page.pageNumber,
+														item.download_url_s
 													);
 												}}
 											>
@@ -1128,46 +1336,50 @@ const PolicyCardHandler = {
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
-										return (
-											<div
-												className={'page-hit'}
-												key={key}
-												style={{
-													...(hoveredHit === key && {
-														backgroundColor: '#E9691D',
-														color: 'white',
-													}),
-												}}
-												onMouseEnter={() => setHoveredHit(key)}
-												onClick={(e) => {
-													e.preventDefault();
-													clickFn(
-														item.filename,
-														state.cloneData.clone_name,
-														state.searchText,
-														page.pageNumber
-													);
-												}}
-											>
-												{page.title && <span>{page.title}</span>}
-												{page.pageNumber && (
-													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
-													</span>
-												)}
-												<i
-													className="fa fa-chevron-right"
+										if (page.title || key < 5) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
 													}}
-												/>
-											</div>
-										);
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+														clickFn(
+															item.filename,
+															state.cloneData.clone_name,
+															state.searchText,
+															page.pageNumber,
+															item.download_url_s
+														);
+													}}
+												>
+													{page.title && <span>{page.title}</span>}
+													{page.pageNumber && (
+														<span>
+															{page.pageNumber === 0
+																? 'ID'
+																: `Page ${page.pageNumber}`}
+														</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color:
+																hoveredHit === key
+																	? 'white'
+																	: 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
 									})
 									.value()}
 							</div>
@@ -1230,8 +1442,7 @@ const PolicyCardHandler = {
 			);
 		},
 		
-		getCardBack: ({item, state, setFavoriteTopic, setFavorite, handleFavoriteTopicClicked}) => {
-			
+		getCardBack: ({item, state, dispatch}) => {
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item;
 			const previewDataReflist =
@@ -1339,10 +1550,9 @@ const PolicyCardHandler = {
 				...addFavoriteTopicToMetadata(
 					data,
 					state.userData,
-					setFavoriteTopic,
-					setFavorite,
-					handleFavoriteTopicClicked,
-					state.cloneData
+					dispatch,
+					state.cloneData,
+					state.searchText,
 				),
 			];
 			return (
@@ -1387,10 +1597,6 @@ const PolicyCardHandler = {
 				item,
 				searchText,
 				state,
-				handleCompareDocument,
-				handleIgnore,
-				showQuickCompare,
-				compareIndex
 			} = props;
 			return (
 				<>
@@ -1442,36 +1648,12 @@ const PolicyCardHandler = {
 							</>
 							<div style={{...styles.viewMoreButton}} onClick={() => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
-								setToggledMore(!toggledMore)
+								setToggledMore(!toggledMore);
 							}}
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 							</div>
-						</>
-					}
-					{(state.listView && item.isCompare) &&
-						<>
-							{showQuickCompare && 
-								<GCTooltip title={'Click to remove from matches'} placement="top" arrow>
-									<GCButton
-										id={'ignore'}
-										onClick={() => { handleIgnore(item, compareIndex) }}
-										isSecondaryBtn={true}
-										style={{height: 36}}
-									>
-										Ignore
-									</GCButton>
-								</GCTooltip>
-							}
-							<GCButton
-								id={'compare'}
-								onClick={() => { handleCompareDocument(item.filename) }}
-								isSecondaryBtn={false}
-								style={{height: 36}}
-							>
-								Compare
-							</GCButton>
 						</>
 					}
 				</>

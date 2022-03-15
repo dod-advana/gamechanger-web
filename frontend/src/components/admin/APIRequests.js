@@ -36,13 +36,13 @@ export default () => {
 		data.pending.forEach((request, idx) => {
 			const cloneString = request.clone_meta.map(meta => meta.clone_name).join(', ');
 			data.pending[idx].cloneString = cloneString;
-		})
+		});
 		data.approved.forEach((request, idx) => {
 			const cloneString = request.keyClones.map(clone => clone.clone_name).join(', ');
 			data.approved[idx].cloneString = cloneString;
-		})
+		});
 		setGCAPIRequestData(data || {approved: [], pending: []});
-	}
+	};
 
 	useEffect(()=>{
 		if(!Object.keys(keyDescriptions).length){
@@ -50,7 +50,7 @@ export default () => {
 			gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
 			setKeyDescriptions(descriptions);
 		}
-	}, [gcAPIRequestData, keyDescriptions])
+	}, [gcAPIRequestData, keyDescriptions]);
 	/**
      * Attemps to revoke a key based on the id
      * @method revokeAPIKeyRequestData
@@ -76,16 +76,16 @@ export default () => {
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
 			getApiKeyRequestData();
 		});
-	}
+	};
 	useEffect(()=>{
-		getApiKeyRequestData()
+		getApiKeyRequestData();
 	},[]);
 
 	const handleChange = (key, event) => {
 		const newDescriptions = {...keyDescriptions};
 		newDescriptions[key] = event.target.value;
 		setKeyDescriptions(newDescriptions);
-	}
+	};
 	// Columns 
 	const approvedColumns = [
 		{
@@ -137,7 +137,7 @@ export default () => {
 			Cell: row => 
 			{ return (gcAPIKeyVision ? 
 				<TableRow>{row.value}</TableRow> :
-				<TableRow>******************************************</TableRow> )
+				<TableRow>******************************************</TableRow> );
 			}
 		},
 		{
@@ -172,7 +172,7 @@ export default () => {
 				</TableRow>
 			)
 		}
-	]
+	];
     
 	const pendingColumns = [
 		{
@@ -238,7 +238,7 @@ export default () => {
 				</TableRow>
 			)
 		}
-	]
+	];
 
 	const CloseButton = styled.div`
         padding: 6px;
@@ -259,7 +259,7 @@ export default () => {
 	const handleClosePopOver = () => {
     	setPopperIsOpen(false);
 		setPopperAnchorEl(null);
-	}
+	};
 
 	const renderPopOver = () => {
 		return<Popover
@@ -299,8 +299,8 @@ export default () => {
 					</div>
 				</div>
 			</div>
-		</Popover>
-	}
+		</Popover>;
+	};
      
 	return (
 		<div style={{height: '100%'}}>
@@ -350,5 +350,5 @@ export default () => {
 				</GCAccordion>
 			</div>
 		</div>
-	)
-}
+	);
+};

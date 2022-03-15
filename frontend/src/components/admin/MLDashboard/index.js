@@ -7,7 +7,6 @@ import { styles } from '../util/GCAdminStyles';
 import Info from './info';
 import S3 from './s3';
 import Models from './models';
-import Processes from './processes';
 
 const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
@@ -167,13 +166,6 @@ export default () => {
 					<TabPanel>
 						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
 					</TabPanel>
-					{/* <TabPanel>
-						<Processes
-							processes={processes}
-							getProcesses={getProcesses}
-							updateLogs={updateLogs}
-						/>
-					</TabPanel> */}
 					<TabPanel>
 						<S3
 							processes={processes}

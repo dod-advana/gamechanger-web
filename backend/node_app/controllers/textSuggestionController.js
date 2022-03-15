@@ -28,13 +28,13 @@ class TextSuggestionController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-
-			const index = req.body.index ? req.body.index : this.constants.GAME_CHANGER_OPTS.index;
+			const index = req.body.index ? req.body.index : [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, 
+				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
 			let corrected;
 			let presearchTitle;
 			let presearchHistory;
-			let presearchEntity = { presearchTopic: [], presearchOrg: [] }
+			let presearchEntity = { presearchTopic: [], presearchOrg: [] };
 
 			if (req.body.searchText.length > 3){
 				const data = await this.textSuggestData({ ...req.body, index }, userId);
@@ -49,7 +49,6 @@ class TextSuggestionController {
 				}
 				if (suggestionsFlag === true){
 					const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
-				
 					try {
 						presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
 					} catch (err) {
@@ -69,7 +68,7 @@ class TextSuggestionController {
 						presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
 					} catch (err) {
 						const { message } = err;
-						this.logger.error(message, 'JBVZKTF', userId)
+						this.logger.error(message, 'JBVZKTF', userId);
 				};
 				}
 				return res.send({
@@ -114,11 +113,11 @@ class TextSuggestionController {
 		}
 	}
 
-	async getPresearchSuggestion(body, userId) {
+	async getPresearchSuggestion(body, index, userId) {
 		try {
-			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body);
+			
+			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			let esClientName = 'gamechanger';
-			let esIndex = 'gamechanger';
 
 			const results = await this.dataApi.mulitqueryElasticSearch(esClientName, this.constants.GAME_CHANGER_OPTS.textSuggestIndex, esQueryArray, userId);
 			return results.body;
@@ -134,7 +133,7 @@ class TextSuggestionController {
 		// amount of users need to be more than 1 (max shown = 3 for efficiency)
 		if (suggesterArray.length > 0) {
 			suggesterArray.forEach(term => {
-				let usercount = term.user.buckets
+				let usercount = term.user.buckets;
 				if ((usercount.length > 1) && (usercount[0].doc_count > 2)) {
 					presearch.push(term['key']);
 				}
@@ -169,7 +168,7 @@ class TextSuggestionController {
 	getPreTitleCorrected(suggesterArray) {
 		const presearch = [];
 		suggesterArray.forEach(suggestion => {
-			presearch.push(suggestion['_source'].display_title_s);
+			presearch.push(suggestion['_source']['display_title_s']);
 		}
 		);
 		return presearch;

@@ -50,25 +50,33 @@ export default (props) => {
 	const [downloadedModelsList, setDownloadedModelsList] = useState({
 		transformers: {},
 		sentence: {},
-		qexp: {}
+		qexp: {},
+		topic_models: {},
+		jbook_qexp: {}
 	});
 	const [deleteModal,setDeleteModal] = useState({
 		show:false,
 		model:'',
 		type:''
-	})
+	});
 	const [modelTable, setModelTable] = useState([]);
-	const [dataTable, setDataTable] = useState([])
+	const [dataTable, setDataTable] = useState([]);
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
 	const [currentQexp, setCurrentQexp] = useState('');
 	const [currentQa, setCurrentQa] = useState('');
+	const [currentJbook, setCurrentJbook] = useState('');
+	const [currentWordSim, setCurrentWordSim] = useState('');
+	const [currentTopicModel, setCurrentTopicModel] = useState('');
+
 	const [corpusCount, setCorpusCount] = useState(0);
 
 	const [selectedSentence, setSelectedSentence] = useState('');
 	const [selectedQEXP, setSelectedQEXP] = useState('');
+	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
+	const [selectedTopicModel, setSelectedTopicModel] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
@@ -76,6 +84,12 @@ export default (props) => {
 	const [validationData, setValidationData] = useState('latest');
 	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
+	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
+	const [qexpupload, setQexpUpload] = useState(false);
+	const [topicsUpload, setTopicsUpload] = useState(false);
+	const [topicsSampling, setTopicsSampling] = useState(0.1);
+	const [topicsVersion, setTopicsVersion] = useState(DEFAULT_VERSION);
+
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
 	const [warmupSteps, setWarmupSteps] = useState(100);
@@ -88,19 +102,19 @@ export default (props) => {
 	 * @method onload
 	 */
 	const onload = async () => {
-		getCurrentTransformer();
+		getLoadedModels();
 		getModelsList();
 		getCorpusCount();
 		getLocalData();
 	};
 	/**
-	 * Retrieves the current transformer from gameChangerAPI.getCurrentTransformer()
-	 * @method getCurrentTransformer
+	 * Retrieves the current transformer from gameChangerAPI.getLoadedModels()
+	 * @method getLoadedModels
 	 */
-	const getCurrentTransformer = async () => {
+	const getLoadedModels = async () => {
 		try {
 			// set currentTransformer
-			const current = await gameChangerAPI.getCurrentTransformer();
+			const current = await gameChangerAPI.getLoadedModels();
 			// current.data is of the form {sentence_models:{encoder, sim}}
 			//setCurrentTransformer(
 			//	current.data.sentence_models
@@ -132,10 +146,25 @@ export default (props) => {
 					? current.data.qa_model.replace(/^.*[\\/]/, '')
 					: ''
 			);
-			props.updateLogs('Successfully queried current transformer', 0);
+			setCurrentJbook(
+				current.data.jbook_model
+					? current.data.jbook_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			setCurrentWordSim(
+				current.data.wordsim_model
+					? current.data.wordsim_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			setCurrentTopicModel(
+				current.data.topic_model
+					? current.data.topic_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			props.updateLogs('Successfully queried current loaded models.', 0);
 		} catch (e) {
 			props.updateLogs(
-				'Error querying current transformer: ' + e.toString(),
+				'Error querying current loaded models: ' + e.toString(),
 				2
 			);
 			throw e;
@@ -148,14 +177,14 @@ export default (props) => {
 			show:false,
 			model:'',
 			type:''
-		})
+		});
 		await gameChangerAPI.deleteLocalModel({
 			'model':model,
 			'type':type
 		});
 		props.getProcesses();
-		getModelsList()
-	}
+		getModelsList();
+	};
 	/**
 	 * Get a list of all the proccesses running and completed
 	 * @method getAllProcessData
@@ -165,12 +194,11 @@ export default (props) => {
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
 				if (key !== 'flags') {
-					const status = key.split(': ');
+					const status = props.processes.process_status[key]['process'].split(': ');
 					if (['models', 'training'].includes(status[0])){
 						processList.push({
 							...props.processes.process_status[key],
-							process: status[1],
-							category: status[0],
+							thread_id: key,
 							date:'Currently Running'
 						});
 					}
@@ -195,8 +223,8 @@ export default (props) => {
 
 	const getLocalData = async () => {
 		const dataList =  await gameChangerAPI.getDataList();
-		setDataTable(dataList.data.dirs)
-	}
+		setDataTable(dataList.data.dirs);
+	};
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getModelsList
@@ -274,7 +302,40 @@ export default (props) => {
 			props.updateLogs('Error training model: ' + e.toString(), 2);
 		}
 	};
-
+	/**
+	 * @method triggerTrainQexp
+	 */
+	 const triggerTrainQexp = async () => {
+		try {
+			await gameChangerAPI.trainModel({
+				validate: false,
+				build_type: 'qexp',
+				version: qexpversion,
+				upload: qexpupload
+			});
+			props.updateLogs('Started training', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error training model: ' + e.toString(), 2);
+		}
+	};
+	/**
+	 * @method triggerTrainTopics
+	 */
+	const triggerTrainTopics = async () => {
+		try {
+			await gameChangerAPI.trainModel({
+				build_type: 'topics',
+				sample_rate: topicsSampling,
+				upload: topicsUpload,
+				version: topicsVersion
+			});
+			props.updateLogs('Started training', 0);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error training model: ' + e.toString(), 2);
+		}
+	};
 	/**
 	 * @method triggerEvaluateModel
 	 */
@@ -290,8 +351,8 @@ export default (props) => {
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
 		} catch (e) {
-			console.log('\nERROR EVALUATING MODEL')
-			console.log(e)
+			console.log('\nERROR EVALUATING MODEL');
+			console.log(e);
 			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
 		}
 	};
@@ -307,6 +368,12 @@ export default (props) => {
 			}
 			if (selectedQEXP) {
 				params['qexp'] = selectedQEXP;
+			}
+			if (selectedTopicModel) {
+				params['topic_models'] = selectedTopicModel;
+			}
+			if (selectedJbookQEXP) {
+				params['jbook_qexp'] = selectedJbookQEXP;
 			}
 			await gameChangerAPI.reloadModels(params);
 			props.updateLogs('Reloaded Models', 0);
@@ -347,12 +414,12 @@ export default (props) => {
 		let downloading = checkFlag('corpus:');
 		return ('' + downloading).toUpperCase();
 	};
-	const checkTraining = () => {
-		return checkFlag('training:') || checkFlag('corpus:');
-	};
-	const checkReloading = () => {
-		return checkFlag('models:');
-	};
+	// const checkTraining = () => {
+	// 	return checkFlag('training:') || checkFlag('corpus:');
+	// };
+	// const checkReloading = () => {
+	// 	return checkFlag('models:');
+	// };
 	/**
 	 * Takes a String and checks if it is in any of the flag keys and checks
 	 * those values. If any of them are true it returns true
@@ -462,7 +529,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local State:</div>
+						<div style={{ display: 'inline-block' }}> <b>Local State:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -477,8 +544,12 @@ export default (props) => {
 								Loaded Models:
 								<br />
 								<div style={{ paddingLeft: '15px' }}>Sentence Index:</div>
-								<div style={{ paddingLeft: '15px' }}>Query Expansion:</div>
+								<div style={{ paddingLeft: '15px' }}>Policy QExp:</div>
 								<div style={{ paddingLeft: '15px' }}>Question Answer:</div>
+								<div style={{ paddingLeft: '15px' }}>Jbook QExp:</div>
+								<div style={{ paddingLeft: '15px' }}>Word Similarity:</div>
+								<div style={{ paddingLeft: '15px' }}>Topic Model:</div>
+
 								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
 								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
 								<div style={{ paddingLeft: '30px' }}>Sim:</div>
@@ -491,6 +562,10 @@ export default (props) => {
 								{currentSentenceIndex} <br />
 								{currentQexp} <br />
 								{currentQa} <br />
+								{currentJbook} <br />
+								{currentWordSim} <br />
+								{currentTopicModel} <br />
+
 								<br />
 								{currentEncoder.replace(/^.*[\\/]/, '')}
 								<br />
@@ -507,7 +582,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local Models:</div>
+						<div style={{ display: 'inline-block' }}><b>Local Models:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -528,7 +603,7 @@ export default (props) => {
 														show:true,
 														model:row.original.model,
 														type:row.original.type
-													})
+													});
 													
 												}}
 												style={{ float: 'left', minWidth: 'unset' }}
@@ -550,7 +625,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>API Controls:</div>
+						<div style={{ display: 'inline-block' }}><b>API Controls:</b></div>
 					</div>
 					<div
 						style={{
@@ -563,13 +638,12 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Reload Index</b>
+						<b>Reload Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerReloadModels();
 							}}
-							disabled={checkReloading()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Reload
@@ -577,7 +651,7 @@ export default (props) => {
 						<div>
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									Sentence Index:
+									SENTENCE EMBEDDINGS:
 								</div>
 								<Select
 									value={selectedSentence}
@@ -601,7 +675,7 @@ export default (props) => {
 
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									QEXP Index:
+									QEXP MODEL:
 								</div>
 								<Select
 									value={selectedQEXP}
@@ -614,6 +688,52 @@ export default (props) => {
 									}}
 								>
 									{Object.keys(downloadedModelsList.qexp).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									JBOOK QEXP MODEL:
+								</div>
+								<Select
+									value={selectedJbookQEXP}
+									onChange={(e) => setSelectedJbookQEXP(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									TOPIC MODEL:
+								</div>
+								<Select
+									value={selectedTopicModel}
+									onChange={(e) => setSelectedTopicModel(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.topic_models).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}
@@ -636,16 +756,15 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Re-Build Index</b>
+						<b>Sentence Embedding Model</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerTrainModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
-							Build
+							Train
 						</GCPrimaryButton>
 
 						<div>
@@ -696,7 +815,6 @@ export default (props) => {
 							/>
 						</div>
 					</div>
-					
 					<div
 						style={{
 							width: '100%',
@@ -708,13 +826,121 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Finetune Encoder</b>
+						<b>Query Expansion Model</b>
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerTrainQexp();
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Train
+						</GCPrimaryButton>
+					
+						<div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
+							Version:
+							</div>
+							<Input
+								value={qexpversion}
+								onChange={(e) => setQexpVersion(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Upload:
+							</div>
+							<Checkbox
+								checked={qexpupload}
+								onChange={(e) => setQexpUpload(e.target.checked)}
+							/>
+						</div>
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Topic Model</b>
+						<br />
+						<GCPrimaryButton
+							onClick={() => {
+								triggerTrainTopics();
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Train
+						</GCPrimaryButton>
+					
+						<div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
+							Version:
+							</div>
+							<Input
+								value={topicsVersion}
+								onChange={(e) => setTopicsVersion(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+							Sampling:
+							</div>
+							<Input
+								value={topicsSampling}
+								onChange={(e) => setTopicsSampling(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Upload:
+							</div>
+							<Checkbox
+								checked={topicsUpload}
+								onChange={(e) => setTopicsUpload(e.target.checked)}
+							/>
+						</div>
+					</div>							
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Finetune Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerFinetuneModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
@@ -741,6 +967,7 @@ export default (props) => {
 							/>
 						</div>
 					</div>
+					
 					<div
 						style={{
 							width: '100%',
@@ -752,13 +979,12 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>Evaluate Model</b>
+						<b>Evaluate Models</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerEvaluateModel();
 							}}
-							disabled={checkTraining()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Evaluate
@@ -820,14 +1046,14 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
-						<b>LTR</b>
+						<b>Learn to Rank Model</b>
 						<br />
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerInitializeLTR();
 							}}
-							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
+							style={{ margin: '0 10px 10px 0', minWidth: 'unset'}}
 						>
 							Initialize
 						</GCPrimaryButton>
@@ -849,7 +1075,6 @@ export default (props) => {
 							onClick={() => {
 								triggerCreateModelLTR();
 							}}
-							disabled={checkReloading()}
 							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
 						>
 							Create Model
@@ -877,7 +1102,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}>Local Data:</div>
+						<div style={{ display: 'inline-block' }}><b>Local Data:</b></div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">

@@ -5,6 +5,7 @@ const globalSearchCardHandler = require('../modules/globalSearch/globalSearchCar
 const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
 const budgetSearchCardHandler = require('../modules/budgetSearch/budgetSearchCardHandler');
+const jexnetCardHandler = require('../modules/jexnet/jexnetCardHandler');
 
 class CardFactory {
 	constructor(module) {
@@ -27,6 +28,9 @@ class CardFactory {
 					break;
 				case 'budgetSearch/budgetSearchCardHandler':
 					this.handler = budgetSearchCardHandler;
+					break;
+				case 'jexnet/jexnetCardHandler':
+					this.handler = jexnetCardHandler;
 					break;
 				default:
 					this.handler = defaultCardHandler;

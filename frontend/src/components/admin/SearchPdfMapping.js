@@ -9,6 +9,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import GCPrimaryButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { styles } from './util/GCAdminStyles';
+import './searchPdfStyles.css';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -34,34 +35,110 @@ export const filterCaseInsensitiveIncludes = (filter, row) =>{
 			:
 			false
 	);
-}
+};
 
 const columns = [
 	{
+		Header: 'User ID',
+		accessor: 'idvisitor',
+		width: 200,
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
 		Header: 'Visit ID',
 		accessor: 'idvisit',
+		width: 100,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Search Time',
 		accessor: 'searchtime',
+		width: 200,
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Action',
+		accessor: 'action',
+		width: 200,
+		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Search',
-		accessor: 'search',
+		accessor: 'value',
+		width: 200,
+		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Document Opened',
-		accessor: 'document',
+		accessor: 'display_title_s',
+		width: 250,
+		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Document Time',
 		accessor: 'documenttime',
+		width: 200,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
+	{
+		Header: 'Document Type',
+		accessor: 'display_doc_type_s',
+		width: 175,
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Source',
+		accessor: 'doc_type',
+		width: 100,
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Organization',
+		accessor: 'display_org_s',
+		width: 100,
+		style: { 'whiteSpace': 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Topics',
+		accessor: 'topics_rs',
+		style: { 'whiteSpace': 'unset' },
+		width: 250,
+		Cell: (row) => {
+			let finalString = '';
+			if(row.value !== undefined){
+				finalString = Object.keys(row.value).join(', ');
+			}
+			return(<TableRow>{finalString}</TableRow>);},
+	},
+	{
+		Header: 'Keywords',
+		accessor: 'keyw_5',
+		width: 250,
+		style: { 'whiteSpace': 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	}
+];
+
+const userAggColumns = [
+	{
+		Header: 'User ID',
+		accessor: 'idvisitor',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Searches Made',
+		accessor: 'searches_made',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Documents Opened',
+		accessor: 'docs_opened',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	}
 ];
 
 const feedbackColumns = [
@@ -187,7 +264,23 @@ const getDocumentData = async (daysBack, setDocumentData) => {
 	} catch (e) {
 		console.error(e);
 	}
-}
+};
+
+/**
+ * This method queries postgres for feedback data.
+ * The query is handled in gamechanger-api.
+ * @method getUserAggData
+ */
+const getUserAggData = async (daysBack, setUserAggData) => {
+	try {
+		const params = { daysBack };
+		const {data = {} } = await gameChangerAPI.getUserAggregations(params);
+		console.log(data);
+		setUserAggData(data);
+	} catch (e) {
+		console.error(e);
+	}
+};
 
 /**
  * This class queries a search to pdf mapping from matomo
@@ -200,6 +293,7 @@ export default () => {
 	const [mappingData, setMappingData] = useState([]);
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
+	const [userAggData, setUserAggData] = useState([]);
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
 
@@ -237,12 +331,14 @@ export default () => {
 			switch (tabIndex){
 				case 'pdfMapping':
 					getSearchPdfMapping(daysBack, setMappingData);
+					getUserAggData(daysBack, setUserAggData);
 					break;
 				case 'userTracking':
 					getDocumentData(daysBack, setDocumentData);
 					break;
 				default:
 					getSearchPdfMapping(daysBack, setMappingData);
+					getUserAggData(daysBack, setUserAggData);
 					getDocumentData(daysBack, setDocumentData);
 			}
 		}
@@ -259,21 +355,12 @@ export default () => {
 	};
 
 	/**
-	 * This method takes the current data loaded in mappingData
+	 * This method takes the a csv name + array in state
 	 * and saves it to the users downloads as a csv.
-	 * @method exportMapping
+	 * @method exportData
 	 */
-	const exportMapping = () => {
-		const name = 'SearchPdfMapping';
-		var ws = XLSX.utils.json_to_sheet(mappingData);
-		var wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, name);
-		XLSX.writeFile(wb, name + '.csv');
-	};
-
-	const exportFeedback = () => {
-		const name = 'Feedback';
-		var ws = XLSX.utils.json_to_sheet(feedbackData);
+	 const exportData = (name, data) => {
+		var ws = XLSX.utils.json_to_sheet(data);
 		var wb = XLSX.utils.book_new();
 		XLSX.utils.book_append_sheet(wb, ws, name);
 		XLSX.writeFile(wb, name + '.csv');
@@ -283,6 +370,7 @@ export default () => {
 		switch (tabIndex){
 			case 'pdfMapping':
 				getSearchPdfMapping(daysBack, setMappingData);
+				getUserAggData(daysBack, setUserAggData);
 				break;
 			case 'userTracking':
 				getDocumentData(daysBack, setDocumentData);
@@ -290,6 +378,7 @@ export default () => {
 			default:
 				getSearchPdfMapping(daysBack, setMappingData);
 				getFeedbackData(setFeedbackData);
+				getUserAggData(daysBack, setUserAggData);
 				getDocumentData(daysBack, setDocumentData);
 		}
 	}, [daysBack,tabIndex]);
@@ -390,7 +479,7 @@ export default () => {
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
-									exportMapping();
+									exportData('SearchPdfMapping', mappingData);
 								}}
 								style={{ minWidth: 'unset' }}
 							>
@@ -401,9 +490,36 @@ export default () => {
 						<ReactTable
 							data={mappingData}
 							columns={columns}
-							style={{ margin: '0 80px 20px 80px', height: 700 }}
+							style={{ margin: '0 80px 20px 80px', height: 1000 }}
 							defaultSorted={[{ id: 'searchtime', desc: true }]}
-						/>		
+						/>
+
+						<div
+							style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								margin: '10px 80px',
+							}}
+						>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+								User Data
+							</p>
+							<GCPrimaryButton
+								onClick={() => {
+									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
+									exportData('UserData', userAggData);
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Export User Data
+							</GCPrimaryButton>
+						</div>
+						<ReactTable
+							data={userAggData}
+							columns={userAggColumns}
+							defaultSorted={[{ id: 'searches_made', desc: true }]}
+							style={{ margin: '0 80px 20px 80px', height: 700 }}
+						/>
 					</TabPanel>
 					<TabPanel>
 						<div
@@ -419,7 +535,7 @@ export default () => {
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-									exportFeedback();
+									exportData('Feedback', feedbackData);
 								}}
 								style={{ minWidth: 'unset' }}
 							>
@@ -453,13 +569,13 @@ export default () => {
 									/>
 								</LabelStack>
 							</CreateWrapper>
-							{/* <GCPrimaryButton
+							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
-										
+									exportData('DocumentUsage', documentData);
 								}}
 								style={{minWidth: 'unset'}}
-							>Export Document Usage</GCPrimaryButton> */}
+							>Export Document Usage</GCPrimaryButton>
 						</div>
 						<ReactTable
 							data={documentData}

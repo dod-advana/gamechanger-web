@@ -235,12 +235,16 @@ const CDOSearchHandler = {
 							false
 						);
 					}
+					const categoryMetadata = {
+						'Documents':  {total: totalCount + (foundEntity ? 1 : 0)},
+					};
 					if (replaceResults) {
 						setState(dispatch, {
 							timeFound: ((t1 - t0) / 1000).toFixed(2),
 							prevSearchText: searchText,
 							loading: false,
 							count: totalCount + (foundEntity ? 1 : 0),
+							categoryMetadata,
 							rawSearchResults: searchResults,
 							docSearchResults: docs,
 							searchResultsCount: searchResults.length,

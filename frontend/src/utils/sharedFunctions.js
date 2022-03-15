@@ -103,7 +103,7 @@ export const handleSaveFavoriteSearch = async (
 export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	const { rawSearchResults, cloneData } = state;
 
-	document.search_text = state.searchText;
+	if(!document.search_text) document.search_text = state.searchText;
 	document.is_clone = true;
 	document.clone_index = cloneData?.clone_data?.project_name;
 
@@ -135,7 +135,7 @@ export const handleSaveFavoriteTopic = async (
 		is_favorite: favorited,
 	});
 	await getUserData(dispatch);
-}
+};
 
 export const handleGenerateGroup = async ( group, state, dispatch ) => {
 	const { cloneData } = state;
@@ -144,7 +144,7 @@ export const handleGenerateGroup = async ( group, state, dispatch ) => {
 
 	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true});
 	await getUserData(dispatch);
-}
+};
 
 export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
 	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
@@ -154,7 +154,7 @@ export const handleSaveFavoriteOrganization = async (organization, organizationS
 export const handleRemoveFavoriteFromGroup = async (groupId, documentId, dispatch) => {
 	await gameChangerAPI.deleteFavoriteFromGroupPOST({groupId, documentId});
 	await getUserData(dispatch);
-}
+};
 
 export const createTinyUrl = async (cloneData) => {
 	let url = window.location.hash.toString();
@@ -235,7 +235,7 @@ export const checkUserInfo = (state, dispatch) => {
 		console.log(err);
 	}
 	return false;
-}
+};
 
 export const setCurrentTime = (dispatch) => {
 	// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -250,8 +250,8 @@ export const setCurrentTime = (dispatch) => {
 	setState(dispatch, { currentTime: currentTime });
 
 	return currentTime;
-}
+};
 
 export const sendJiraFeedback = (data) => {
 	return gameChangerAPI.sendJiraFeedback(data);
-}
+};

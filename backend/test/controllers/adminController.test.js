@@ -245,11 +245,8 @@ describe('AdminController', function () {
 			};
 			const target = new AdminController(opts);
 
-			const req = {
-				...reqMock,
-				body: {
-				}
-			};
+			const req = { ...reqMock,
+				body: { favorite_documents : [{filename:'Title 10.pdf'}]}};
 
 			let resCode;
 			let resMsg;
@@ -264,13 +261,49 @@ describe('AdminController', function () {
 					return this;
 				}
 			};
-
+			let actual = [{"id": 1, "key": "homepage_topics", "value": "[test1,test2]"}, {"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
 			try {
 				await target.getHomepageEditorData(req, res);
 			} catch (e) {
 				assert.fail(e);
 			}
-			assert.deepStrictEqual(resMsg, editorData);
+			assert.deepStrictEqual(resMsg, actual);
+		});
+	})
+	describe('#getHomepageUserData', () => {
+		it('should return homepage user data', async () => {
+			const editorData = [{
+				id: 1, key: 'homepage_topics', value: '[test1,test2]'
+			}];
+			const opts = {
+				...constructorOptionsMock,
+				dataApi: {},
+				appSettings: {
+					findAll(data) {
+						return Promise.resolve(editorData);
+					}
+				}
+			};
+			const req = { ...reqMock,
+				body: { favorite_documents : [{filename:'Title 10.pdf'}]}};
+			const esIndex = 'gamechanger';
+			const userId = 'test';
+
+			const target = new AdminController(opts);
+
+			let resCode;
+			let resMsg;
+			console.log(req)
+
+			let results =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
+			let actual =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
+
+			try {
+				results = await target.getHomepageUserData(req, esIndex, userId);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.deepStrictEqual(results, actual);
 		});
 	});
 
