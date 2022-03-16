@@ -377,7 +377,7 @@ class SearchUtility {
 			docIds = {},
 			selectedDocuments,
 			ltr = false,
-			paragraphLimit = 5, 
+			paragraphLimit = 100, 
 			hasHighlights = true
 		 }, 
 		 user) {
