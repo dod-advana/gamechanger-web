@@ -25,25 +25,25 @@ const excelStyles = {
 	topAlignment: { vertical: 'top', horizontal: 'left' },
 	yellowFill: {
 		type: 'pattern',
-		pattern:'solid',
-		fgColor:{argb:'FFFF00'},
+		pattern: 'solid',
+		fgColor: { argb: 'FFFF00' },
 	},
 	greyFill: {
 		type: 'pattern',
-		pattern:'solid',
-		fgColor:{argb:'E5E5E5'},
+		pattern: 'solid',
+		fgColor: { argb: 'E5E5E5' },
 	},
 	borderAllThin: {
-		top: {style:'thin'},
-		left: {style:'thin'},
-		bottom: {style:'thin'},
-		right: {style:'thin'}
+		top: { style: 'thin' },
+		left: { style: 'thin' },
+		bottom: { style: 'thin' },
+		right: { style: 'thin' }
 	},
 	borderAllMedium: {
-		top: {style:'medium'},
-		left: {style:'medium'},
-		bottom: {style:'medium'},
-		right: {style:'medium'}
+		top: { style: 'medium' },
+		left: { style: 'medium' },
+		bottom: { style: 'medium' },
+		right: { style: 'medium' }
 	}
 };
 
@@ -291,29 +291,90 @@ class JBookSearchHandler extends SearchHandler {
 
 	async elasticSearchDocumentSearch(req, userId, res, statusExport = false) {
 		try {
-
-			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
 
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
+			// check if there are PG filters
+			// console.log(jbookSearchSettings);
+			const { jbookSearchSettings } = req.body;
+			// clean empty options:
+			Object.keys(req.body.jbookSearchSettings).forEach(key => {
+				if ((Array.isArray(req.body.jbookSearchSettings[key]) && req.body.jbookSearchSettings[key].length === 0) || (req.body.jbookSearchSettings[key] === '')) {
+					delete req.body.jbookSearchSettings[key];
+				}
+			});
+			let pgQueryWhere = ``;
+			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel', 'sourceTag'];
+			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
+			pgFilters.forEach(filter => {
+				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
+					console.log(filter);
+					console.log(jbookSearchSettings[filter]);
+
+					if (pgQueryWhere.length > 0) {
+						pgQueryWhere += ` AND ( `;
+					} else {
+						pgQueryWhere += `(`;
+					}
+					for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
+						if (i > 0) {
+							pgQueryWhere += ` OR `;
+						}
+						if (filter === 'pocReviewer') {
+							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `;
+						} else {
+							const hasNull = jbookSearchSettings[filter].includes('Blank');
+							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `;
+							if (hasNull) {
+								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `;
+							}
+						}
+					}
+					pgQueryWhere += ` ) `;
+				}
+			});
+
+			const keys = [];
+			if (pgQueryWhere.length > 0) {
+				let pgQuery = `SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				const pgResults = await this.db.jbook.query(pgQuery, {});
+				pgResults[0].forEach(review => {
+					let key;
+					let leadingZeroBudgetActivity = review.budget_activity !== null ? review.budget_activity : '';
+					if (leadingZeroBudgetActivity.length === 1) {
+						leadingZeroBudgetActivity = 0 + leadingZeroBudgetActivity;
+					}
+					let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
+					if (review.budget_type === 'pdoc') {
+						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency !== null ? review.agency : ''}`;
+					} else if (review.budget_type === 'rdoc') {
+						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
+					} else if (review.budget_type === 'odoc') {
+						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
+					}
+					keys.push(key);
+				});
+			}
+
+			if (pgQueryWhere.length > 0) {
+				req.body.jbookSearchSettings.pgKeys = keys;
+			}
 			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
-			
 			let expansionDict = {};
 
-			if (req.body.searchText && req.body.searchText !== ''){
+			if (req.body.searchText && req.body.searchText !== '') {
 				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
 			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			returnData.expansionDict = expansionDict;
-
 			return returnData;
 
 		} catch (e) {
@@ -323,7 +384,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	async postgresDocumentSearch(req, userId, res, statusExport = false)  {
+	async postgresDocumentSearch(req, userId, res, statusExport = false) {
 		try {
 			const {
 				offset,
@@ -336,7 +397,7 @@ class JBookSearchHandler extends SearchHandler {
 
 			let expansionDict = {};
 
-			if (searchText && searchText !== ''){
+			if (searchText && searchText !== '') {
 				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
 			}
 
@@ -347,7 +408,7 @@ class JBookSearchHandler extends SearchHandler {
 
 			let keywordIds = undefined;
 
-			keywordIds = {pdoc: [], rdoc: [], om: []};
+			keywordIds = { pdoc: [], rdoc: [], om: [] };
 			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
 							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
@@ -400,7 +461,7 @@ class JBookSearchHandler extends SearchHandler {
 					}
 				});
 				totalCount = totalCount[0][0].count;
-			} catch(e) {
+			} catch (e) {
 				console.log('Error getting total count');
 				console.log(e);
 			}
@@ -422,7 +483,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
-		
+
 			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
 			let returnData = data2[0];
 
@@ -441,7 +502,7 @@ class JBookSearchHandler extends SearchHandler {
 						keywords = keywords.split(',').slice(1);
 						doc.keywords = keywords;
 					}
-					catch(e) {
+					catch (e) {
 						console.log('Error adding keywords to doc');
 						console.log(e);
 					}
@@ -451,18 +512,18 @@ class JBookSearchHandler extends SearchHandler {
 					try {
 						let contracts = doc.contracts.replace(/[\(\)]\s*/g, '');
 						contracts = contracts.split('",');
-	
+
 						let titles = contracts[0].replace(/[\"]\s*/g, '').split('; ');
 						let piids = contracts[1].replace(/[\"]\s*/g, '').split('; ');
 						let fys = contracts[2].replace(/[\"]\s*/g, '').split('; ');
-	
+
 						let contractData = [];
 						for (let i = 0; i < titles.length; i++) {
 							contractData.push(`${titles[i]} ${piids[i]} ${fys[i]}`);
 						}
-	
+
 						doc.contracts = contractData;
-					} catch(e) {
+					} catch (e) {
 						console.log('Error adding contracts to doc');
 						console.log(e);
 					}
@@ -477,7 +538,7 @@ class JBookSearchHandler extends SearchHandler {
 
 						doc.accomplishments = titles;
 
-					} catch(e) {
+					} catch (e) {
 						console.log('Error adding accomplishments to doc');
 						console.log(e);
 					}
@@ -490,7 +551,7 @@ class JBookSearchHandler extends SearchHandler {
 
 
 			if (exportSearch) {
-				const csvStream = await this.reports.createCsvStream({docs: returnData}, userId);
+				const csvStream = await this.reports.createCsvStream({ docs: returnData }, userId);
 				csvStream.pipe(res);
 				res.status(200);
 			} else {
@@ -535,7 +596,7 @@ class JBookSearchHandler extends SearchHandler {
 
 
 	}
-	
+
 	async getDataForFullPDFExport(req, userId) {
 		try {
 			const { jbookSearchSettings = {budgetYear: ['2022']} } = req.body;
@@ -557,7 +618,7 @@ class JBookSearchHandler extends SearchHandler {
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
-			// const queryEnd = this.jbookSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
+			const queryEnd = this.jbookSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
 
 			let giantQuery = ``;
 
@@ -669,20 +730,20 @@ class JBookSearchHandler extends SearchHandler {
 			const { test = false } = req;
 			const workbook = new ExcelJS.Workbook();
 
-			const sheet = workbook.addWorksheet('Review Status', {properties: {tabColor: {argb: 'FFC0000'}}});
+			const sheet = workbook.addWorksheet('Review Status', { properties: { tabColor: { argb: 'FFC0000' } } });
 
 			sheet.columns = [
-				{width: 14},
-				{width: 6},
-				{width: 14},
-				{width: 14},
-				{width: 14},
-				{width: 6},
-				{width: 14},
-				{width: 14},
-				{width: 14},
-				{width: 14},
-				{width: 6},
+				{ width: 14 },
+				{ width: 6 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 6 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 6 },
 			];
 			sheet.mergeCells('A1:A3');
 			sheet.getCell('A1').value = `As of: ${moment().format('DDMMMYY')}`;
@@ -701,7 +762,7 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G2').value = 'Review Status (JAIC 2021 Review Only)';
 
 			['A1:A3', 'B1:E1', 'F1:J1', 'C2:E2', 'G2:I2', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'I3', 'J3', 'K3'].forEach(col => {
-				sheet.getCell(`${col}`).font = {bold: true};
+				sheet.getCell(`${col}`).font = { bold: true };
 				sheet.getCell(`${col}`).alignment = excelStyles.middleAlignment;
 				sheet.getCell(`${col}`).border = excelStyles.borderAllThin;
 			});
@@ -751,7 +812,7 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('K13:K21').alignment = excelStyles.topAlignment;
 
 			['A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4', 'I4', 'J4', 'K4:K12', 'A13', 'B13:E13', 'F13:J13', 'K13:K21', 'B22:E22', 'F22:J22', 'K22', 'A22', 'J2'].forEach(col => {
-				sheet.getCell(`${col}`).font = {bold: true};
+				sheet.getCell(`${col}`).font = { bold: true };
 				sheet.getCell(`${col}`).border = excelStyles.borderAllThin;
 			});
 
@@ -1083,7 +1144,7 @@ class JBookSearchHandler extends SearchHandler {
 						keywordsKey = 'noKeywords';
 					}
 
-					if (result.budgetYear ===  '2022') {
+					if (result.budgetYear === '2022') {
 						yearKey = 'fy22';
 					} else {
 						yearKey = 'fy21';
