@@ -474,7 +474,7 @@ export default function DocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position:'relative' }}
 			>
 				<div
 					style={{
