@@ -294,6 +294,7 @@ export default function GraphNodeCluster2D(props) {
 		setNodeGroupMenuLabelProp = () => {},
 		closeGroupNodeMenu = undefined,
 		orgTypesSelected = [],
+		nodePointerAreaPaint,
 	} = props;
 
 	const graphRef = useRef();
@@ -1539,6 +1540,7 @@ export default function GraphNodeCluster2D(props) {
 				height={graphHeight}
 				backgroundColor={backgroundWhite}
 				nodeCanvasObject={handleCreateGraphNode}
+				nodePointerAreaPaint={nodePointerAreaPaint}
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
