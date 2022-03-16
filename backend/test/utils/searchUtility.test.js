@@ -1632,10 +1632,6 @@ describe('SearchUtility', function () {
 			const filenames = ["Title 10"]
 			const actual = await target.getRecDocs(filenames, "test");
 			const expected =  {"filenames": ["Title 10"], "method": "MLAPI search history", "results": ["DoD Dictionary", "DOD-DIGITAL-MODERNIZATION-STRATEGY-2019", "NDAA 2017 Conference Report", "AACP 02.1", "Title 50"]}
-<<<<<<< HEAD
-=======
-
->>>>>>> 03122431a8470a325fed0b0bae3fc60ee1ff1793
 			assert.deepStrictEqual(actual, expected);
 		});
 	 });
@@ -1742,10 +1738,6 @@ describe('SearchUtility', function () {
 			const actual = await target.getRecDocs(filenames, "test");
 			const expected = {"filenames": ["Title 10 - Armed Forces"], "method": "Neo4j graph", "results": ["EO 13384", "DoDD 5515.06", "DoDI 1241.06", "H.R. 2494 EH 117th"]}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 03122431a8470a325fed0b0bae3fc60ee1ff1793
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
