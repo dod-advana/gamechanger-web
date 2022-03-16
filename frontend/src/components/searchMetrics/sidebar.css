@@ -296,6 +296,8 @@
   
   .sidebar-table {
     font-size: 14px;
+    table-layout: fixed;
+    width: 100%;
   }
 
   .sidebar-table > tbody > tr:nth-child(even) {
