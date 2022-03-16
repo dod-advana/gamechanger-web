@@ -2984,6 +2984,12 @@ class SearchUtility {
 			}
 		};
 
+		if (jbookSearchSettings.pgKeys !== undefined) {
+			query.query.must.push(
+				{ terms: { key_review_s: jbookSearchSettings.pgKeys } }
+			);
+		}
+
 		esTopLevelFields.forEach(field => {
 			query.highlight.fields[field] = {};
 		});
