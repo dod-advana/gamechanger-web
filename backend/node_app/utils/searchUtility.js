@@ -2205,8 +2205,6 @@ class SearchUtility {
 
 	filterRecommendations(docList, originalDocs) {
 		try {
-			//var unique = new Set(docList);
-			//var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
 			const docCount = {};
 
 			for (const doc of docList) {
