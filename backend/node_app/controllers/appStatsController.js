@@ -466,7 +466,6 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		this.logger.info(JSON.stringify(req.query));
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
 		let connection;
