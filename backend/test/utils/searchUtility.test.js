@@ -1635,7 +1635,55 @@ describe('SearchUtility', function () {
 			assert.deepStrictEqual(actual, expected);
 		});
 	 });
-
+	 describe('#filterRecommendations', () => {
+		it('it should return most common documents first in order', async () => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: {downloadLimit: 1000},
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: {index: 'Test'}
+				},
+				dataLibrary: {},
+				mlApi: {
+					recommender: (filenames, userId) => { return Promise.resolve({
+						"filenames": [
+							"Title 10"
+						],
+						"results": [
+							"Title 50",
+							"Title 50",
+							"Title 50",
+							"AACP 02.1",
+							"NDAA 2017 Conference Report",
+							"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+							"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+							"DoD Dictionary"
+						]
+					}); }
+				}
+			};
+			const target = new SearchUtility(opts);
+			const filenames = [
+				"Title 50",
+				"Title 50",
+				"Title 50",
+				"AACP 02.1",
+				"NDAA 2017 Conference Report",
+				"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+				"DOD-DIGITAL-MODERNIZATION-STRATEGY-2019",
+				"DoD Dictionary"
+			]
+			const actual = await target.filterRecommendations(filenames);
+			const expected =  [
+				'Title 50',
+				'DOD-DIGITAL-MODERNIZATION-STRATEGY-2019',
+				'DoD Dictionary',
+				'NDAA 2017 Conference Report',
+				'AACP 02.1'
+			  ];
+		assert.deepStrictEqual(actual, expected);
+		});
+	 });
 	describe('#getGraphRecs', () => {
 		it('given a doc, return similar docs from Neo4j', async () => {
 			const opts = {

@@ -2196,14 +2196,14 @@ class SearchUtility {
 				recommendations = await this.getAllGraphRecs(docs, userId);
 				recommendations.method = "Neo4j graph";
 			}
-			recommendations.results = this.filterRecommendations(recommendations.results, docs);
+			recommendations.results = this.filterRecommendations(recommendations.results);
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
 		return recommendations;
 	}
 
-	filterRecommendations(docList, originalDocs) {
+	filterRecommendations(docList) {
 		try {
 			const docCount = {};
 
