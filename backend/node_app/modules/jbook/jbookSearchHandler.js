@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const SearchUtility = require('../../utils/searchUtility');
 const CONSTANTS = require('../../config/constants');
-const sparkMD5 = require('spark-md5');
+// const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
@@ -13,8 +13,8 @@ const KEYWORD = require('../../models').keyword;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
-const { result } = require('underscore');
-const { Sequelize } = require('sequelize');
+// const { result } = require('underscore');
+// const { Sequelize } = require('sequelize');
 const { Reports } = require('../../lib/reports');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
@@ -60,8 +60,8 @@ class JBookSearchHandler extends SearchHandler {
 			accomp = ACCOMP,
 			review = REVIEW,
 			db = DB,
-			reports = Reports,
-
+			keyword_assoc = KEYWORD_ASSOC,
+			reports = new Reports(opts),
 		} = opts;
 
 		super({ ...opts });
@@ -76,8 +76,8 @@ class JBookSearchHandler extends SearchHandler {
 		this.accomp = accomp;
 		this.review = review;
 		this.db = db;
-		this.reports = new Reports();
-
+		this.reports = reports;
+		this.keyword_assoc = keyword_assoc;
 
 	}
 
@@ -160,7 +160,7 @@ class JBookSearchHandler extends SearchHandler {
 		} else if (dataType === 'om') {
 			assoc_query = `SELECT * from keyword_assoc where om_id in (${rawIds})`;
 		}
-		let assoc_results = await KEYWORD_ASSOC.sequelize.query(assoc_query);
+		let assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
 		assoc_results = assoc_results && assoc_results[0] ? assoc_results[0] : [];
 
 		let lookup = {};
@@ -271,7 +271,6 @@ class JBookSearchHandler extends SearchHandler {
 	}
 
 	async documentSearch(req, userId, res, statusExport = false) {
-
 		const {
 			useElasticSearch = false
 		} = req.body;
@@ -295,21 +294,24 @@ class JBookSearchHandler extends SearchHandler {
 
 			const clientObj = {esClientName: 'gamechanger', esIndex: 'jbook'};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
+
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
-			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
-			let expansionDict = {};
 
-			//console.log(JSON.stringify(esQuery))
+			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			
+			let expansionDict = {};
 
 			if (req.body.searchText && req.body.searchText !== ''){
 				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
 			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
+
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+
 			returnData.expansionDict = expansionDict;
 
 			return returnData;
@@ -349,7 +351,7 @@ class JBookSearchHandler extends SearchHandler {
 			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
 							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
-			const assoc_results = await KEYWORD_ASSOC.sequelize.query(assoc_query);
+			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
 			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map(i => Number(i)) : [0];
@@ -527,7 +529,7 @@ class JBookSearchHandler extends SearchHandler {
 		} catch (err) {
 			console.log(err);
 			const { message } = err;
-			this.logger.error(message, 'D03Z7K6', userId);
+			this.logger.error(message, 'D03Z7K7', userId);
 			throw err;
 		}
 
@@ -536,41 +538,41 @@ class JBookSearchHandler extends SearchHandler {
 	
 	async getDataForFullPDFExport(req, userId) {
 		try {
-			const { budgetSearchSettings = {budgetYear: ['2022']} } = req.body;
+			const { jbookSearchSettings = {budgetYear: ['2022']} } = req.body;
 			let keywordIds = undefined;
 
 			keywordIds = { pdoc: [], rdoc: [], om: [] };
 			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
 								ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 								ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
-			const assoc_results = await KEYWORD_ASSOC.sequelize.query(assoc_query);
+			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
 			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
 			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map(i => Number(i)) : [0];
 
-			const keywordIdsParam = budgetSearchSettings.hasKeywords !== undefined && budgetSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
+			const keywordIdsParam = jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
 
-			const [pSelect, rSelect, oSelect] = this.budgetSearchSearchUtility.buildSelectQueryForFullPDF();
-			const [pWhere, rWhere, oWhere] = this.budgetSearchSearchUtility.buildWhereQuery(budgetSearchSettings, false, keywordIdsParam, [], userId);
+			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQueryForFullPDF();
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, false, keywordIdsParam, [], userId);
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
-			const queryEnd = this.budgetSearchSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
+			// const queryEnd = this.jbookSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
 
 			let giantQuery = ``;
 
 			// setting up promise.all
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('Procurement') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
 				giantQuery = pQuery;
 			}
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
 				if (giantQuery.length === 0) {
 					giantQuery = rQuery;
 				} else {
 					giantQuery += ` UNION ALL ` + rQuery;
 				}
 			}
-			if (!budgetSearchSettings.budgetType || budgetSearchSettings.budgetType.indexOf('O&M') !== -1) {
+			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
 				if (giantQuery.length === 0) {
 					giantQuery = oQuery;
 				} else {
@@ -597,7 +599,7 @@ class JBookSearchHandler extends SearchHandler {
 			return returnData;
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, 'D03Z7K6', userId);
+			this.logger.error(message, '8', userId);
 			return [];
 		}
 	}
@@ -622,10 +624,10 @@ class JBookSearchHandler extends SearchHandler {
 		returnData.serviceAgency = [];
 
 		const pdocQuery = `SELECT array_agg(DISTINCT "P40-04_BudgetYear") as budgetYear, array_agg(DISTINCT "P40-06_Organization") as serviceAgency FROM pdoc`;
-		const odocQuer = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
-		const rdocQuer = `SELECT array_agg(DISTINCT "BudgetYear") as budgetYear, array_agg(DISTINCT "Organization") as serviceAgency FROM rdoc`;
+		const odocQuery = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
+		const rdocQuery = `SELECT array_agg(DISTINCT "BudgetYear") as budgetYear, array_agg(DISTINCT "Organization") as serviceAgency FROM rdoc`;
 
-		const mainQuery = `${pdocQuery} UNION ALL ${odocQuer} UNION ALL ${rdocQuer};`;
+		const mainQuery = `${pdocQuery} UNION ALL ${odocQuery} UNION ALL ${rdocQuery};`;
 
 		const agencyYearData = await this.db.jbook.query(mainQuery, { replacements: {} });
 
@@ -664,6 +666,7 @@ class JBookSearchHandler extends SearchHandler {
 
 	async getExcelDataForReviewStatus(req, userId, res) {
 		try {
+			const { test = false } = req;
 			const workbook = new ExcelJS.Workbook();
 
 			const sheet = workbook.addWorksheet('Review Status', {properties: {tabColor: {argb: 'FFC0000'}}});
@@ -1221,8 +1224,16 @@ class JBookSearchHandler extends SearchHandler {
 			res.status(200);
 			res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			res.setHeader('Content-Disposition', `attachment; filename=${'data'}.xlsx`);
-			await workbook.xlsx.write(res);
-			res.end();
+
+			if (!test) {
+				await workbook.xlsx.write(res);
+				res.end();
+			}
+			else {
+				// for test purposes
+				return {results, counts};
+			}
+
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'WW05F8X', userId);
