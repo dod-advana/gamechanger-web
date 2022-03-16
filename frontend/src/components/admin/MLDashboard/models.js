@@ -80,8 +80,6 @@ export default (props) => {
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
-	const [evalType, setEvalType] = useState('original');
-	const [validationData, setValidationData] = useState('latest');
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
 	const [qexpupload, setQexpUpload] = useState(false);
@@ -349,8 +347,8 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'eval',
 				model_name: evalModelName,
-				validation_data: validationData,
-				eval_type: evalType
+				validation_data: 'latest',
+				eval_type: 'domain'
 			});
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
@@ -971,6 +969,8 @@ export default (props) => {
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Epochs:
 							</div>
@@ -980,6 +980,8 @@ export default (props) => {
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div
 								style={{
 									width: '60px',
@@ -1037,31 +1039,6 @@ export default (props) => {
 							<Input
 								value={evalModelName}
 								onChange={(e) => setEvalModelName(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
-							/>
-							<div style={{ width: '120px', display: 'inline-block' }}>
-								Validation Data:
-							</div>
-							<Input
-								value={validationData}
-								onChange={(e) => setValidationData(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
-							/>
-						</div>
-						<div>
-							<div
-								style={{
-									width: '60px',
-									display: 'inline-block'
-								}}
-							>
-								Eval Type:
-							</div>
-							<Input
-								value={evalType}
-								onChange={(e) => setEvalType(e.target.value)}
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
