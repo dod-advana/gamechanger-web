@@ -1091,16 +1091,18 @@ export default function GraphNodeCluster2D(props) {
 			}
 			ctx.stroke();
 
-			// Draw Arrow
-			draw2DArrows(
-				link,
-				ctx,
-				globalScale,
-				arrowLength,
-				arrowRelativePosition,
-				color,
-				nodeRelativeSize
-			);
+			if (globalScale > 5) {
+				// Draw Arrow
+				draw2DArrows(
+					link,
+					ctx,
+					globalScale,
+					arrowLength,
+					arrowRelativePosition,
+					color,
+					nodeRelativeSize
+				);
+			}
 
 			if (displayLinkLabel) {
 				handleCreateGraphLinkText(link, ctx, globalScale);
