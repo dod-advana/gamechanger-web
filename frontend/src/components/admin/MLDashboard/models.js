@@ -958,8 +958,10 @@ export default (props) => {
 								value={baseModel}
 								onChange={(e) => setBaseModel(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Warmup Steps:
 							</div>
@@ -967,7 +969,7 @@ export default (props) => {
 								value={warmupSteps}
 								onChange={(e) => setWarmupSteps(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
 							/>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Epochs:
@@ -976,7 +978,7 @@ export default (props) => {
 								value={epochs}
 								onChange={(e) => setEpochs(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
 							/>
 							<div
 								style={{
