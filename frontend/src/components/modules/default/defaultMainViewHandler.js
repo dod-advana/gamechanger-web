@@ -648,13 +648,13 @@ const DefaultMainViewHandler = {
 										>
 											<div
 												className="row"
-												style={{ marginLeft: 0, marginRight: 0 }}
+												style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
 											>
 												{!loading && getQAResults()}
 											</div>
 											<div
 												className="row"
-												style={{ marginLeft: 0, marginRight: 0 }}
+												style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
 											>
 												{(!loading || !state.replaceResults) && getSearchResults(rawSearchResults)}
 											</div>
