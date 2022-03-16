@@ -97,8 +97,8 @@ class AdminController {
 	async getHomepageUserData(req, esIndex, userId){
 		let results = [];
 		const {
-			favorite_documents,
-			export_history,
+			favorite_documents =[],
+			export_history=[],
 		} = req.body;
 		let favDocList = [];
 		let exportDocList = [];

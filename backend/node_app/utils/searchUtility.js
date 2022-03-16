@@ -2184,7 +2184,7 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-	async getRecDocs(docs=["Title 10"], userId=""){
+	async getRecDocs(docs=[], userId=""){
 		let recDocs = [];
 		let recommendations = {};
 		try {
@@ -2193,7 +2193,7 @@ class SearchUtility {
 				recommendations = recDocs;
 				recommendations.method = "MLAPI search history";
 			} else {
-				recommendations = await this.getAllGraphRecs(doc, userId);
+				recommendations = await this.getAllGraphRecs(docs, userId);
 				recommendations.method = "Neo4j graph";
 			}
 			recommendations.results = this.filterRecommendations(recommendations.results, docs);
