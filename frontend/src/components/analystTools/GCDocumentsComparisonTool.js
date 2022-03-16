@@ -334,7 +334,7 @@ const GCDocumentsComparisonTool = (props) => {
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
-			if(!selectedParagraph) {
+			if(!selectedParagraph && sortedDocs.length) {
 				setSelectedParagraph(sortedDocs[0].paragraphs[0]);
 				setCompareDocument(sortedDocs[0]);
 			}
