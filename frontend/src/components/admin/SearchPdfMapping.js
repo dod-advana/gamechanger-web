@@ -2,7 +2,19 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import XLSX from 'xlsx';
-import { Typography } from '@material-ui/core';
+import {
+	Typography,
+	Grid,
+	Card,
+	CardContent
+} from '@material-ui/core';
+import {
+	MuiPickersUtilsProvider,
+	KeyboardDateTimePicker 
+} from '@material-ui/pickers';
+import moment from 'moment';
+
+import DateFnsUtils from '@date-io/date-fns';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -225,10 +237,10 @@ const documentUsageColumns = [
  * The query is handled in gamechanger-api.
  * @method getSearchPdfMapping
  */
-const getSearchPdfMapping = async (daysBack, setMappingData) => {
+const getSearchPdfMapping = async (startDate,endDate, setMappingData) => {
 	try {
 		// daysBack, offset, filters, sorting, pageSize
-		const params = { daysBack };
+		const params = { startDate:moment(startDate).utc().format('YYYY-MM-DD HH:mm'),endDate:moment(endDate).utc().format('YYYY-MM-DD HH:mm') };
 		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
 		setMappingData(data.data);
 	} catch (e) {
@@ -271,12 +283,12 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
-const getUserAggData = async (daysBack, setUserAggData) => {
+const getUserAggData = async (startDate,endDate, setUserAggData,setCardData) => {
 	try {
-		const params = { daysBack };
+		const params = { startDate:moment(startDate).utc().format('YYYY-MM-DD HH:mm'),endDate:moment(endDate).utc().format('YYYY-MM-DD HH:mm') };
 		const {data = {} } = await gameChangerAPI.getUserAggregations(params);
-		console.log(data);
-		setUserAggData(data);
+		setUserAggData(data.users);
+		setCardData(data.cards);
 	} catch (e) {
 		console.error(e);
 	}
@@ -294,6 +306,9 @@ export default () => {
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
+	const [cardData, setCardData] = useState({unique_users:0,total_searches:0});
+	const [startDate, setStartDate] = useState(moment().subtract(3,'d').set({'hour':0,'minute':0}));
+	const [endDate, setEndDate] = useState(moment());
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
 
@@ -315,6 +330,9 @@ export default () => {
 			setDaysBack(value);
 		}
 	};
+	const handleDateChange = (date,setFunction) => {
+		setFunction(date);
+	};
 	/**
 	 * When an input is deselected check if the inputs are valid and a
 	 * change was made. If so then query the data with new values.
@@ -330,14 +348,14 @@ export default () => {
 			setShouldUpdate(false);
 			switch (tabIndex){
 				case 'pdfMapping':
-					getSearchPdfMapping(daysBack, setMappingData);
+					getSearchPdfMapping(startDate,endDate, setMappingData);
 					getUserAggData(daysBack, setUserAggData);
 					break;
 				case 'userTracking':
 					getDocumentData(daysBack, setDocumentData);
 					break;
 				default:
-					getSearchPdfMapping(daysBack, setMappingData);
+					getSearchPdfMapping(startDate,endDate, setMappingData);
 					getUserAggData(daysBack, setUserAggData);
 					getDocumentData(daysBack, setDocumentData);
 			}
@@ -369,19 +387,19 @@ export default () => {
 	useEffect(() => {
 		switch (tabIndex){
 			case 'pdfMapping':
-				getSearchPdfMapping(daysBack, setMappingData);
-				getUserAggData(daysBack, setUserAggData);
+				getSearchPdfMapping(startDate,endDate, setMappingData);
+				getUserAggData(startDate,endDate, setUserAggData,setCardData);
 				break;
 			case 'userTracking':
 				getDocumentData(daysBack, setDocumentData);
 				break;
 			default:
-				getSearchPdfMapping(daysBack, setMappingData);
+				getSearchPdfMapping(startDate,endDate, setMappingData);
 				getFeedbackData(setFeedbackData);
-				getUserAggData(daysBack, setUserAggData);
+				getUserAggData(startDate,endDate, setUserAggData,setCardData);
 				getDocumentData(daysBack, setDocumentData);
 		}
-	}, [daysBack,tabIndex]);
+	}, [daysBack,tabIndex,startDate,endDate]);
 
 
 
@@ -401,13 +419,13 @@ export default () => {
 								...(tabIndex === 'pdfMapping' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `5px 0 0 0`,
 							}}
-							title="pdfMapping"
+							title='pdfMapping'
 							onClick={() => {
 								setTabIndex('pdfMapping');
 								setDaysBack(3);
 							}
 							}						>
-							<Typography variant="h6" display="inline">
+							<Typography variant='h6' display='inline'>
 								Search PDF Mapping
 							</Typography>
 						</Tab>
@@ -417,10 +435,10 @@ export default () => {
 								...(tabIndex === 'feedback' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: '0 0 0 0',
 							}}
-							title="feedback"
+							title='feedback'
 							onClick={() => setTabIndex('feedback')}
 						>
-							<Typography variant="h6" display="inline">
+							<Typography variant='h6' display='inline'>
 								Feedback
 							</Typography>
 						</Tab>
@@ -430,14 +448,14 @@ export default () => {
 								...(tabIndex === 'userTracker' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 0 0 0`,
 							}}
-							title="userTracker"
+							title='userTracker'
 							onClick={() => {
 								setTabIndex('userTracker');
 								setDaysBack(30);
 							}
 							}
 						>
-							<Typography variant="h6" display="inline">
+							<Typography variant='h6' display='inline'>
 								User Tracker Tools
 							</Typography>
 						</Tab>
@@ -455,38 +473,75 @@ export default () => {
 								margin: '10px 80px',
 							}}
 						>
+							<Grid container spacing={2}>
+								<MuiPickersUtilsProvider utils={DateFnsUtils}>
+									<Grid item xs={3}>
+										<KeyboardDateTimePicker 
+											margin='normal'
+											format='MM/dd/yyyy hh:mm'
+											InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
+											value={startDate}
+											onChange={date => handleDateChange(date,setStartDate)}
+											// onOpen={setDatePickerOpen}
+											// onClose={setDatePickerClosed}
+											style={{flex: '110px', margin: '5px'}}
+										/>
+									</Grid>
+									<Grid item xs={3}>
+										<KeyboardDateTimePicker 
+											margin='normal'
+											format='MM/dd/yyyy hh:mm'
+											InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
+											value={endDate}
+											onChange={date => handleDateChange(date,setEndDate)}
+											// onOpen={setDatePickerOpen}
+											// onClose={setDatePickerClosed}
+											style={{flex: '110px', margin: '5px'}}
+										/>
+									</Grid>
+									<Grid item xs={3}></Grid>
+									<Grid item xs={3}>
+										<GCPrimaryButton
+											onClick={() => {
+												trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
+												exportData('SearchPdfMapping', mappingData);
+											}}
+											style={{ minWidth: 'unset' }}
+										>
+											Export Mapping
+										</GCPrimaryButton>
+									</Grid>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Total Searches</p>
+												{cardData.total_searches}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Unique Users</p>
+												{cardData.unique_users}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={8}></Grid>
+								</MuiPickersUtilsProvider>
+							</Grid>
+						</div>
+						<div
+							style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								margin: '10px 80px',
+							}}
+						>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
 								Documents Opened Given Search
 							</p>
-
-							<CreateWrapper>
-								<LabelStack>
-									<label
-										htmlFor="daysBack"
-										style={{ marginRight: '10px', marginTop: '4px' }}
-									>
-										Days Back:
-									</label>
-									<input
-										name="daysBack"
-										value={daysBack}
-										onChange={handleDaysBackChange}
-										onBlur={handleBlur}
-										onKeyPress={handlePositionEnter}
-									/>
-								</LabelStack>
-							</CreateWrapper>
-							<GCPrimaryButton
-								onClick={() => {
-									trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
-									exportData('SearchPdfMapping', mappingData);
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Export Mapping
-							</GCPrimaryButton>
 						</div>
-
 						<ReactTable
 							data={mappingData}
 							columns={columns}
@@ -555,13 +610,13 @@ export default () => {
 							<CreateWrapper>
 								<LabelStack>
 									<label
-										htmlFor="daysBack"
+										htmlFor='daysBack'
 										style={{ marginRight: '10px', marginTop: '4px' }}
 									>
 										Days Back:
 									</label>
 									<input
-										name="daysBack"
+										name='daysBack'
 										value={daysBack}
 										onChange={handleDaysBackChange}
 										onBlur={handleBlur}
