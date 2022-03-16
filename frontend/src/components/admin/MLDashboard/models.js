@@ -82,7 +82,6 @@ export default (props) => {
 	const [evalModelName, setEvalModelName] = useState('');
 	const [evalType, setEvalType] = useState('original');
 	const [validationData, setValidationData] = useState('latest');
-	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
 	const [qexpupload, setQexpUpload] = useState(false);
@@ -92,8 +91,11 @@ export default (props) => {
 
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
+	const [baseModel, setBaseModel] = useState('msmarco-distilbert-base-v2');
 	const [warmupSteps, setWarmupSteps] = useState(100);
 	const [epochs, setEpochs] = useState(10);
+	const [testingOnly, setTesting] = useState(false);
+	const [remakeTD, setRemakeTD] = useState(true);
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
@@ -294,7 +296,10 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'sent_finetune',
 				epochs: epochs,
-				warmup_steps: warmupSteps
+				warmup_steps: warmupSteps,
+				model: baseModel,
+				remake_train_data: remakeTD,
+				testing_only: testingOnly
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -345,8 +350,7 @@ export default (props) => {
 				build_type: 'eval',
 				model_name: evalModelName,
 				validation_data: validationData,
-				eval_type: evalType,
-				sample_limit: sampleLimit
+				eval_type: evalType
 			});
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
@@ -948,6 +952,15 @@ export default (props) => {
 					
 						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
+								Base Model:
+							</div>
+							<Input
+								value={baseModel}
+								onChange={(e) => setBaseModel(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+							/>
+							<div style={{ width: '60px', display: 'inline-block' }}>
 								Warmup Steps:
 							</div>
 							<Input
@@ -964,6 +977,32 @@ export default (props) => {
 								onChange={(e) => setEpochs(e.target.value)}
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Remake Training Data:
+							</div>
+							<Checkbox
+								checked={remakeTD}
+								onChange={(e) => setRemakeTD(e.target.checked)}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Testing Only:
+							</div>
+							<Checkbox
+								checked={testingOnly}
+								onChange={(e) => setTesting(e.target.checked)}
 							/>
 						</div>
 					</div>
@@ -1023,15 +1062,6 @@ export default (props) => {
 								onChange={(e) => setEvalType(e.target.value)}
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
-							/>
-							<div style={{ width: '70px', display: 'inline-block' }}>
-								Sample Limit:
-							</div>
-							<Input
-								value={sampleLimit}
-								onChange={(e) => setSampleLimit(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '10px' }}
 							/>
 						</div>
 					</div>
