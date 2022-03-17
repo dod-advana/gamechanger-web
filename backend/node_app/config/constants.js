@@ -137,7 +137,7 @@ module.exports = Object.freeze({
 		user: process.env.EDA_ELASTICSEARCH_USER ? process.env.EDA_ELASTICSEARCH_USER : '',
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD || 'password',
 		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
-		index: process.env.EDA_ELASTICSEARCH_INDEX | 'eda',
+		index: process.env.EDA_ELASTICSEARCH_INDEX || 'eda',
 		extSearchFields: ['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
 		extRetrieveFields: ['*_eda_ext'],
 		// index: 'eda'
