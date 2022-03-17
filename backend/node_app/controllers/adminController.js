@@ -97,12 +97,25 @@ class AdminController {
 	async getHomepageUserData(req, esIndex, userId){
 		let results = [];
 		const {
-			favorite_documents
+			favorite_documents =[],
+			export_history=[],
 		} = req.body;
 		let favDocList = [];
+		let exportDocList = [];
+		// remove pdf, and get favorited docs
 		for (let doc of favorite_documents){
 			favDocList.push(doc.filename.split('.pdf')[0]);
 		}
+		// remove pdf, and get exported docs
+		for (let obj of export_history){
+			const sel_docs = obj.download_request_body.selectedDocuments;
+			for (let doc of sel_docs) {
+				exportDocList.push(doc.split(".pdf")[0]);
+			}
+		}
+		// combine list
+		let combinedDocList = favDocList.concat(exportDocList);
+		
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
@@ -115,9 +128,12 @@ class AdminController {
 			docs.value = [];
 		}
 		try {
-			if (favDocList.length > 0){
-				const rec_results =  await this.searchUtility.getRecDocs(favDocList, userId);
+			if (combinedDocList.length > 0){
+				// get recommendations
+				const rec_results =  await this.searchUtility.getRecDocs(combinedDocList, userId);
 				recDocs.value = rec_results.results ? rec_results.results: [];
+				// only get top 20 recommendations
+				recDocs.value = recDocs.value.slice(0,20);
 			} else {
 				recDocs.value = [];
 			}

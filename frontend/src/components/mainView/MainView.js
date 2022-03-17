@@ -154,7 +154,7 @@ const MainView = (props) => {
 				});
 			}
 		},
-		{ debounce: 5000 }
+		{ offset: 200, debounce: 5000 }
 	);
 
 	const getViewPanels = () => {

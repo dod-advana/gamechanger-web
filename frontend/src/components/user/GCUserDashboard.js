@@ -651,29 +651,34 @@ const GCUserDashboard = (props) => {
 		}
 
 		if (userData.export_history) {
-			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
-			userData.export_history.forEach(hist => {
+			try {
+				userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
+				userData.export_history.forEach(hist => {
+	
+					let orgFilterText = '';
+					if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilterQuery &&
+						hist.download_request_body.orgFilterQuery === '*'
+					) {
+						orgFilterText = 'All sources';
+					} else if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilter
+					) {
+						Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
+							if (hist.download_request_body.orgFilter[key]) {
+								orgFilterText += `${key}, `;
+							}
+						});
+						orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
+					}
+					hist.orgFilterText = orgFilterText;
+				});
+			} catch (e) {
+				console.log('Export history error', e);
+			} 
 
-				let orgFilterText = '';
-				if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilterQuery &&
-					hist.download_request_body.orgFilterQuery === '*'
-				) {
-					orgFilterText = 'All sources';
-				} else if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilter
-				) {
-					Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
-						if (hist.download_request_body.orgFilter[key]) {
-							orgFilterText += `${key}, `;
-						}
-					});
-					orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
-				}
-				hist.orgFilterText = orgFilterText;
-			});
 
 			setExportHistory(userData.export_history);
 			setExportHistoryLoading(false);
