@@ -597,6 +597,7 @@ export default function ResponsibilityDocumentExplorer({
 											filters.push({id: 'documentTitle', value: doc.documentTitle});
 										});
 									};
+									setCollapseKeys({});
 									setFilters(filters);
 									setResultsPage(1);
 									setReloadResponsibilities(true);
