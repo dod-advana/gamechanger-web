@@ -270,6 +270,7 @@ export default function GCResponsibilityExplorer({
 					loading={loading}
 					totalCount={offsets.length}
 					setResultsPage={setInfiniteCount}
+					infiniteCount={infiniteCount}
 					setReloadResponsibilities={setReloadResponsibilities}
 					docTitle={docTitle}
 					setDocTitle={setDocTitle}
