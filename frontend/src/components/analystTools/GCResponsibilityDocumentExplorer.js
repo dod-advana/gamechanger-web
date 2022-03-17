@@ -453,7 +453,7 @@ export default function ResponsibilityDocumentExplorer({
 					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
-					overflowY: 'scroll',
+					overflowY: 'auto',
 				}}
 				ref={infiniteScrollRef}
 			>
@@ -698,7 +698,22 @@ export default function ResponsibilityDocumentExplorer({
 								</Collapse>
 							</div>
 						);
-					})}
+					})
+				}
+				{Object.keys(responsibilityData).length < 1 && !loading && 
+                        <div style={{
+                        	fontSize: 24,
+                        	fontFamily: 'Montserrat',
+                        	borderBottom: '2px solid #BCCBDB',
+                        	display: 'flex',
+                        	placeContent: 'space-between',
+                        	marginTop: 20,
+                        }}>
+                        	<div className={'text'}>
+                                No results found
+                        	</div>
+                        </div>
+				}
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={'#E9691D'} />
@@ -829,7 +844,7 @@ export default function ResponsibilityDocumentExplorer({
 					padding: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
-					overflowY: 'scroll',
+					overflowY: 'auto',
 					zIndex: 100
 				}}
 			>
