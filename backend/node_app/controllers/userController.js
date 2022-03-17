@@ -316,7 +316,6 @@ class UserController {
 				user.api_key = '';
 			}
 
-			console.log(user)
 			res.send(user);
 
 		} catch (err) {
