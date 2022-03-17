@@ -277,7 +277,7 @@ const initState = {
 		],
 	},
 	currentSort: 'Budget Year',
-	currentOrder: 'asc',
+	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
 	//
