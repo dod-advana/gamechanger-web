@@ -2184,30 +2184,35 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-	async getRecDocs(doc=["Title 10"], userId=""){
+	async getRecDocs(docs=[], userId=""){
 		let recDocs = [];
 		let recommendations = {};
 		try {
-			recDocs = await this.mlApi.recommender(doc, userId);
+			recDocs = await this.mlApi.recommender(docs, userId);
 			if (recDocs.results && recDocs.results.length > 0) {
 				recommendations = recDocs;
 				recommendations.method = "MLAPI search history";
 			} else {
-				recommendations = await this.getAllGraphRecs(doc, userId);
+				recommendations = await this.getAllGraphRecs(docs, userId);
 				recommendations.method = "Neo4j graph";
 			}
-			recommendations.results = this.filterRecommendations(recommendations.results, doc);
+			recommendations.results = this.filterRecommendations(recommendations.results);
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
 		return recommendations;
 	}
 
-	filterRecommendations(docList, originalDocs) {
+	filterRecommendations(docList) {
 		try {
-			var unique = new Set(docList);
-			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
-			return filtered;
+			const docCount = {};
+
+			for (const doc of docList) {
+				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
+			}
+			let docListSorted = Object.keys(docCount).sort(function(a,b){return docCount[a]-docCount[b]}).reverse();
+
+ 			return docListSorted;
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', '');
 			return docList;
