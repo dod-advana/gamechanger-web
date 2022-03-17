@@ -26,30 +26,47 @@ const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
 const useStyles = makeStyles({
 	root: {
-		width: '100%'
+		width: '100%',
+		'&[class*="MuiAutocomplete-root"] [class*="MuiOutlinedInput-root"]': {
+		  paddingRight: '45px !important'
+		}
 	}
 });
+
+const cleanHighlightText = (text) => {
+	if(text){
+		text = text.replace(/&/g, '%26');
+		//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
+		const textArray = text.split(' ');
+		if(textArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) textArray[0] += ' ';
+		text = textArray.join(' ');
+		return text;
+	} else{
+		return '';
+	}
+};
 
 const getIframePreviewLinkInferred = (
 	filename,
 	responsibilityText,
+	entityText,
 	pageNumber,
 	isClone = false,
 	cloneData = {}
 ) => {
-	let highlightText = responsibilityText;
-	highlightText = highlightText.replace(/&/g, '%26');
-	//solution for discrepancy in PDF text having extra space after letters and numbers at beginning of responsibilities 
-	if(highlightText){
-		const textArray = highlightText.split(' ');
-		if(textArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) textArray[0] += ' ';
-		highlightText = textArray.join(' ');
+	responsibilityText = cleanHighlightText(responsibilityText);
+	entityText = cleanHighlightText(entityText);
+	let highlight;
+	if(entityText){
+		highlight = [entityText, responsibilityText];
+	}else{
+		highlight = `"${responsibilityText}"`;
 	}
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
 			.dataStorageDownloadGET(
 				filename,
-				`"${highlightText}"`,
+				highlight,
 				pageNumber,
 				isClone,
 				cloneData
@@ -67,6 +84,7 @@ export default function ResponsibilityDocumentExplorer({
 	loading,
 	totalCount,
 	setResultsPage,
+	infiniteCount,
 	isClone = true,
 	setReloadResponsibilities,
 	docTitle, 
@@ -84,13 +102,7 @@ export default function ResponsibilityDocumentExplorer({
 	const { cloneData } = state;
 	const classes = useStyles();
 
-	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState({});
-	const [iframePreviewLink, setIframePreviewLink] = useState({
-		dataIdx: 0,
-		entityIdx: 0,
-		responsibilityIdx: 0
-	});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -116,20 +128,6 @@ export default function ResponsibilityDocumentExplorer({
 	};
 
 	useEffect(() => {
-		if(Object.keys(responsibilityData).length){
-			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
-			const doc = Object.keys(responsibilityData)[dataIdx];
-			if(!doc) return;
-			const entity = Object.keys(responsibilityData[doc])[entityIdx];
-			if(!entity) return;
-			const resp = responsibilityData[doc][entity][responsibilityIdx];
-			if (resp) {
-				setSelectedResponsibility(resp);
-			}
-		}
-	}, [responsibilityData, iframePreviewLink]);
-
-	useEffect(() => {
 		if(!iframeLoading){
 			setTimeout(() => {
 				const notFound = document.getElementById('PdfViewer')?.contentWindow?.document.getElementsByClassName('notFound');
@@ -145,7 +143,7 @@ export default function ResponsibilityDocumentExplorer({
 	},[iframeLoading]);
 
 	useEffect(() => {
-		if (Object.keys(responsibilityData).length) {
+		if (Object.keys(responsibilityData).length && infiniteCount === 1) {
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach(doc => {
 				initialCollapseKeys[doc] = false;
@@ -154,13 +152,14 @@ export default function ResponsibilityDocumentExplorer({
 				});
 			});
 			setCollapseKeys(initialCollapseKeys);
+			const doc = Object.keys(responsibilityData)[0];
+			const entity = Object.keys(responsibilityData[doc])[0];
+
+			setSelectedResponsibility(responsibilityData[doc][entity][0]);
+		}else if(!Object.keys(responsibilityData).length){
+			setSelectedResponsibility({});
 		}
-		setIframePreviewLink({
-			dataIdx: 0,
-			entityIdx: 0,
-			responsibilityIdx: 0
-		});
-	}, [responsibilityData]);
+	}, [responsibilityData, infiniteCount]);
 
 	useEffect(() => {
 		setIsEditingEntity(false);
@@ -171,8 +170,7 @@ export default function ResponsibilityDocumentExplorer({
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null) {
-				const rec = Object.keys(responsibilityData).length;
-				if (rec) {
+				if (Object.keys(selectedResponsibility).length) {
 					const pageNumber = 1;
 					if (
 						selectedResponsibility.filename
@@ -181,6 +179,7 @@ export default function ResponsibilityDocumentExplorer({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
+							selectedResponsibility.organizationPersonnel,
 							pageNumber,
 							isClone,
 							cloneData
@@ -195,8 +194,7 @@ export default function ResponsibilityDocumentExplorer({
 		[
 			selectedResponsibility,
 			isClone,
-			cloneData,
-			responsibilityData,
+			cloneData
 		]
 	);
 
@@ -220,28 +218,9 @@ export default function ResponsibilityDocumentExplorer({
 		setLeftPanelOpen(!leftPanelOpen);
 	}
 
-	function handleQuoteLinkClick(e, respKey, entKey, key) {
-		// if (Object.keys(selectedResponsibility).length) {
-		// 	const fileName = selectedResponsibility.filename;
-		// 	trackEvent(
-		// 		getTrackingNameForFactory(cloneData.clone_name),
-		// 		'ResponsibilityExplorerInteraction',
-		// 		'PDFOpen'
-		// 	);
-		// 	trackEvent(
-		// 		getTrackingNameForFactory(cloneData.clone_name),
-		// 		'ResponsibilityExplorerInteraction',
-		// 		'filename',
-		// 		fileName
-		// 	);
-		// 	setPdfLoaded(false);
-		// }
+	function handleQuoteLinkClick(e, resp) {
 		e.preventDefault();
-		setIframePreviewLink({
-			responsibilityIdx: respKey,
-			entityIdx: entKey,
-			dataIdx: key,
-		});
+		setSelectedResponsibility(resp);
 	}
 
 	function handlePdfOnLoadStart() {
@@ -302,11 +281,6 @@ export default function ResponsibilityDocumentExplorer({
 	};
 
 	const getMetadataForTable = () => {
-		if(!Object.keys(responsibilityData).length) return [];
-		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-		if(!doc) return [];
-		const entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
-		const responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -315,7 +289,7 @@ export default function ResponsibilityDocumentExplorer({
 			documentsReferenced: 'Documents Referenced'
 		};
 		const metaData = [];
-		Object.keys(responsibility).forEach(key => {
+		Object.keys(selectedResponsibility).forEach(key => {
 			if(keyMap[key]){
 				const editButtons = key === 'responsibilityText' || key === 'organizationPersonnel'
 					? 
@@ -346,7 +320,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingResp && key === 'responsibilityText' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo(responsibility.responsibilityText);
+								getResponsibilityPageInfo(selectedResponsibility.responsibilityText);
 								setIsEditingResp(true);
 							}}
 							style={{
@@ -363,7 +337,7 @@ export default function ResponsibilityDocumentExplorer({
 						</GCButton>}
 						{!isEditingEntity && key === 'organizationPersonnel' && <GCButton
 							onClick={() => {
-								getResponsibilityPageInfo(responsibility.organizationPersonnel || responsibility.responsibilityText);
+								getResponsibilityPageInfo(selectedResponsibility.organizationPersonnel || selectedResponsibility.responsibilityText);
 								setIsEditingEntity(true);
 							}}
 							style={{
@@ -384,7 +358,7 @@ export default function ResponsibilityDocumentExplorer({
 				metaData.push({
 					Key: keyMap[key],
 					Value: <div style={{wordBreak: 'break-word'}}>
-						{responsibility[key]}
+						{selectedResponsibility[key]}
 						{editButtons}
 					</div>
 				});
@@ -471,6 +445,7 @@ export default function ResponsibilityDocumentExplorer({
 			style={{ height: 'calc(100% - 70px)', marginTop: 0, padding: 0, marginLeft: 0 }}
 		>
 			<div
+				id='re-document-col'
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
@@ -478,12 +453,12 @@ export default function ResponsibilityDocumentExplorer({
 					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
 					height: '800px',
-					overflow: 'scroll',
+					overflowY: 'auto',
 				}}
 				ref={infiniteScrollRef}
 			>
 				<GCAccordion
-					expanded={docTitle.length || organization.length || Object.keys(responsibilityText).length ? true : false}
+					expanded={filters.length}
 					header={
 						<span>FILTERS  {filters.length ? <span style={{color: '#ed691d'}}>{`(${filters.length})`}</span> : ''}</span>
 					}
@@ -494,7 +469,7 @@ export default function ResponsibilityDocumentExplorer({
 					<div style={{ width: '100%' }}>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={docTitle.length ? true : false}
+								expanded={filters.find(filter => filter.id === 'documentTitle') ? true : false}
 								header={
 									<span>
 										DOCUMENT TITLE  {
@@ -530,7 +505,7 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 						</div><div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={organization.length ? true : false}
+								expanded={filters.find(filter => filter.id === 'organizationPersonnel') ? true : false}
 								header={
 									<span>
 										ORGANIZATION  {
@@ -569,7 +544,7 @@ export default function ResponsibilityDocumentExplorer({
 						</div>
 						<div style={{ width: '100%', marginBottom: 10 }}>
 							<GCAccordion
-								expanded={Object.keys(responsibilityText).length ? true : false}
+								expanded={filters.find(filter => filter.id === 'responsibilityText') ? true : false}
 								header={
 									<span>
 										RESPONSIBILITY TEXT  {
@@ -595,11 +570,6 @@ export default function ResponsibilityDocumentExplorer({
 							</GCAccordion>
 							<GCButton 
 								onClick={() => {
-									setIframePreviewLink({
-										dataIdx: 0,
-										entityIdx: 0,
-										responsibilityIdx: 0
-									});
 									setResponsibilityText({});
 									setOrganization([]);
 									setDocTitle([]);
@@ -615,11 +585,6 @@ export default function ResponsibilityDocumentExplorer({
 							</GCButton>
 							<GCButton 
 								onClick={() => {
-									setIframePreviewLink({
-										dataIdx: 0,
-										entityIdx: 0,
-										responsibilityIdx: 0
-									});
 									const filters = [];
 									if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
 									if(organization.length) {
@@ -632,6 +597,7 @@ export default function ResponsibilityDocumentExplorer({
 											filters.push({id: 'documentTitle', value: doc.documentTitle});
 										});
 									};
+									setCollapseKeys({});
 									setFilters(filters);
 									setResultsPage(1);
 									setReloadResponsibilities(true);
@@ -695,23 +661,7 @@ export default function ResponsibilityDocumentExplorer({
 											<Collapse isOpened={entOpen && docOpen}>
 												<div>
 													{responsibilityData[doc][entity].map((responsibility, respKey) => {
-														let isHighlighted = false;
-														const dataObj = responsibilityData[doc];
-														if (dataObj) {
-															const pageObj =
-																responsibilityData[doc][entity][
-																	iframePreviewLink.entityIdx
-																];
-															if (pageObj) {
-																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-																const selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
-																isHighlighted =
-																	selectedDoc === responsibility.documentTitle &&
-																	selectedEntity === responsibility.organizationPersonnel &&
-																	respKey === iframePreviewLink.responsibilityIdx;
-															}
-														}
-
+														let isHighlighted = selectedResponsibility.responsibilityText === responsibility.responsibilityText;
 														let blockquoteClass = 'searchdemo-blockquote-sm';
 
 														if (isHighlighted)
@@ -725,7 +675,7 @@ export default function ResponsibilityDocumentExplorer({
 																<div
 																	className="searchdemo-quote-link"
 																	onClick={(e) => {
-																		handleQuoteLinkClick(e, respKey, entKey, key);
+																		handleQuoteLinkClick(e, responsibility);
 																	}}
 																>
 																	<div className={blockquoteClass} style={{marginLeft: 40}}>
@@ -748,7 +698,22 @@ export default function ResponsibilityDocumentExplorer({
 								</Collapse>
 							</div>
 						);
-					})}
+					})
+				}
+				{Object.keys(responsibilityData).length < 1 && !loading && 
+                        <div style={{
+                        	fontSize: 24,
+                        	fontFamily: 'Montserrat',
+                        	borderBottom: '2px solid #BCCBDB',
+                        	display: 'flex',
+                        	placeContent: 'space-between',
+                        	marginTop: 20,
+                        }}>
+                        	<div className={'text'}>
+                                No results found
+                        	</div>
+                        </div>
+				}
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={'#E9691D'} />
@@ -879,7 +844,7 @@ export default function ResponsibilityDocumentExplorer({
 					padding: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
-					overflow: 'scroll',
+					overflowY: 'auto',
 					zIndex: 100
 				}}
 			>
@@ -906,8 +871,11 @@ export default function ResponsibilityDocumentExplorer({
 					onHide={() => setAlertActive(false)}
 					containerStyles={{
 						...adminStyles.alert, 
-						top: 230,
-						width: '88%',}}
+						top: 31,
+						width: '94%',
+						marginLeft: 0,
+						zIndex: 1011
+					}}
 				/>
 			) : (
 				<></>

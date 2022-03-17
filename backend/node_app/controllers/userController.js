@@ -155,7 +155,7 @@ class UserController {
 				});
 				const export_history = await this.exportHistory.findAll({
 					raw: true,
-					limit: 20,
+					limit: 5,
 					where: { user_id: user.user_id 	},
 					order: [
 						['updatedAt', 'DESC']
