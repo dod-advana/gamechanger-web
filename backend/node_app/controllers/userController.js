@@ -18,6 +18,7 @@ const { ExternalAPIController } = require('./externalAPI/externalAPIController')
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
+const { AppStatsController } = require('../controllers/appStatsController');
 const Sequelize = require('sequelize');
 const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const constants = require('../config/constants');
@@ -50,6 +51,7 @@ class UserController {
 			search = new SearchController(opts),
 			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
+			appStats = new AppStatsController(),
 			emailUtility = new EmailUtility({
 				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
@@ -81,6 +83,7 @@ class UserController {
 		this.search = search;
 		this.sequelize = sequelize;
 		this.externalAPI = externalAPI;
+		this.appStats = appStats
 		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
@@ -335,6 +338,10 @@ class UserController {
 					where: {user_id: user.user_id},
 					raw: true
 				});
+
+				// const pdf_opened = await this.appStats.queryPDFOpenedByUserId(userId,'gamechanger');
+
+				// this.logger.info(JSON.stringify(pdf_opened));
 
 				const favorite_groups = await this.favoriteGroup.findAll({
 					where: {user_id: user.user_id},

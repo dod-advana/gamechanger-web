@@ -3,7 +3,11 @@ const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
+<<<<<<< HEAD
 const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
+=======
+const sparkMD5Lib = require('spark-md5');
+>>>>>>> cc320702... working on how to track users in matomo
 
 /**
  * This class queries matomo for app stats and passes
@@ -18,6 +22,7 @@ class AppStatsController {
 			constants = constantsFile,
 			searchUtility = new SearchUtility(opts),
 			dataApi = new DataLibrary(opts),
+			sparkMD5 = sparkMD5Lib,
 		} = opts;
 
 		this.logger = logger;
@@ -25,9 +30,11 @@ class AppStatsController {
 		this.searchUtility = searchUtility;
 		this.dataApi = dataApi;
 		this.mysql = mysql_lib;
+		this.sparkMD5 = sparkMD5;
 	
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
+		this.getRecentlyOpenedDocs = this.getRecentlyOpenedDocs.bind(this);
 		this.getAvgSearchesPerSession = this.getAvgSearchesPerSession.bind(this);
 		this.getTopSearches = this.getTopSearches.bind(this);
 		this.getDateNDaysAgo = this.getDateNDaysAgo.bind(this);
@@ -214,6 +221,7 @@ class AppStatsController {
 			connection.query(`
 				select 
 					a.idvisit as idvisit, 
+					hex(a.idvisitor) as idvisitor,
 					idaction_name, 
 					b.name as document, 
 					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
@@ -243,11 +251,8 @@ class AppStatsController {
 	 * by a specific user based on userID
 	 * @method queryPDFOpenedByUserId
 	 * @param {String} userId  
-	 */
-	async queryPDFOpenedByUserId(userId, clone_name, connection) {
-		return new Promise((resolve, reject) => {
-			const self = this;
-			connection.query(`
+	 * 
+	 * `
 			SELECT DISTINCT
 				idaction_name, 
 				b.name as document, 
@@ -259,15 +264,32 @@ class AppStatsController {
 			WHERE 
 				a.idaction_name = b.idaction  
 				and b.name like 'PDFViewer%'
-				and b.name like '% - ?'
-				and c.user_id = ?
 			GROUP BY 
 				document,
 				a.idaction_name
 			ORDER BY 
 				documenttime desc
-			LIMIT 10;`,
-			[`${clone_name}`, `${userId}`],
+			LIMIT 10;`
+	 */
+	async queryPDFOpenedByUserId(userId, clone_name, connection) {
+		return new Promise((resolve, reject) => {
+			const self = this;
+			connection.query(`
+				select 
+					a.idvisit as idvisit, 
+					hex(a.idvisitor) as idvisitor,
+					idaction_name, 
+					b.name as document, 
+					a.server_time as documenttime 
+				from 
+					matomo_log_link_visit_action a, 
+					matomo_log_action b 
+				where 
+					a.idaction_name = b.idaction  
+					and b.name like 'PDFViewer%'
+				order by 
+					idvisit,
+					documenttime desc;`,
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'B07IQHT');
@@ -502,9 +524,22 @@ class AppStatsController {
 	async getRecentlyOpenedDocs(req, res) {
 		let userId = 'Unknown';
 		let connection;
+
 		try {
+<<<<<<< HEAD
 			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
+=======
+			// const { clone_name } = req.body;
+			const clone_name = 'gamechanger';
+			const userId = 'steve';
+			const hashed_user = this.sparkMD5.hash('steve');
+			const regex = /\d{10}/g;
+			const id = regex.exec(userId);
+			console.log(hashed_user)
+			console.log(id)
+			// const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
+>>>>>>> cc320702... working on how to track users in matomo
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,
@@ -512,7 +547,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId(userId, clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId('steve', clone_name, connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -728,9 +763,9 @@ class AppStatsController {
 	}
 
 	/**
-		 * This method takes gets user aggregated data
-		 * @returns an array of data from Matomo.
-		 */
+	 * This method gets aggregations for the cards
+	 * @returns an array of data from Matomo.
+	 */
 	async getCardAggregationQuery(opts, connection){
 		return new Promise((resolve, reject) => {
 			connection.query(`
@@ -758,35 +793,95 @@ class AppStatsController {
 		});	
 	}
 	/**
+		 * This method takes gets user aggregated data
+		 * @returns an array of data from Matomo.
+		 */
+	async getUserDocuments(startDate, connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				select
+					hex(a.idvisitor) as idvisitor,
+					a.idvisit as idvisit,
+					a.server_time as documenttime,
+					b.name as action,
+					c.name as document
+				from matomo_log_link_visit_action a
+				join matomo_log_action as b
+				join matomo_log_action as c
+				where 
+					a.idaction_event_action = b.idaction
+					AND a.idaction_name = c.idaction
+					AND (b.name LIKE 'Favorite' OR b.name LIKE 'ExportDocument')
+					AND server_time >= ?
+				order by 
+					idvisitor,
+					documenttime desc;`,
+				[startDate],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});	
+	}
+	/**
 	 * This method is called by an endpoint to query matomo to find the most recently opened documents
 	 * by a user
 	 * @param {*} req
 	 * @param {*} res
 	 */
-	async getUserAggregations(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
-		let connection;
-		try {
-			connection = this.mysql.createConnection({
-				host: this.constants.MATOMO_DB_CONFIG.host,
-				user: this.constants.MATOMO_DB_CONFIG.user,
-				password: this.constants.MATOMO_DB_CONFIG.password,
-				database: this.constants.MATOMO_DB_CONFIG.database
-			});
-			connection.connect();
-			const results = await this.getUserAggregationsQuery(opts, connection);
-			const cards =  await this.getCardAggregationQuery(opts,connection);
+		 async getUserAggregations(req, res) {
+			const userId = req.get('SSL_CLIENT_S_DN_CN');
+			const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
+			const opts = { daysBack, offset, filters, sorting, pageSize };
+			const startDate = this.getDateNDaysAgo(opts.daysBack);
+			const documentMap = {};
 
-			res.status(200).send({users:results,cards:cards[0]});
-		} catch (err) {
-			this.logger.error(err, '1CZPASK', userId);
-			res.status(500).send(err);
-		} finally {
-			connection.end();
+			let connection;
+			try {
+				connection = this.mysql.createConnection({
+					host: this.constants.MATOMO_DB_CONFIG.host,
+					user: this.constants.MATOMO_DB_CONFIG.user,
+					password: this.constants.MATOMO_DB_CONFIG.password,
+					database: this.constants.MATOMO_DB_CONFIG.database
+				});
+				connection.connect();
+				const results = await this.getUserAggregationsQuery(startDate, connection);
+				const documents = await this.getUserDocuments(startDate, connection);
+				const opened = await this.queryPdfOpend(startDate, connection);
+				for(let user of results){
+					documentMap[user.idvisitor] = {opened:[],ExportDocument:[],Favorite:[]}
+				}
+				for (let doc of documents){
+					if (!documentMap[doc.idvisitor][doc.action].includes(doc.document)){
+						documentMap[doc.idvisitor][doc.action].push(doc.document)
+					}
+				}
+				for (let open of opened){
+					if (!documentMap[open.idvisitor]['opened'].includes(open.document)){
+						documentMap[open.idvisitor]['opened'].push(open.document)
+					}
+				}
+				results.forEach((user,index) => {
+					results[index] = {
+						...user,
+						opened:documentMap[user.idvisitor]['opened'].slice(-5),
+						export:documentMap[user.idvisitor]['ExportDocument'].slice(-5),
+						favorite:documentMap[user.idvisitor]['Favorite'].slice(-5)
+					}
+				})
+					
+				res.status(200).send(results);
+			} catch (err) {
+				this.logger.error(err, '1CZPASK', userId);
+				res.status(500).send(err);
+			} finally {
+				connection.end();
+			}
 		}
 	}
 
-}
 module.exports.AppStatsController = AppStatsController;

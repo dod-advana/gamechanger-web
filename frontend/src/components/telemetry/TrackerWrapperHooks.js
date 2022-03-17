@@ -12,7 +12,9 @@ export default function TrackerWrapperHooks(ComposedComponent, documentTitle) {
 			const userId = Auth.getUserId() || ' ';
 			const regex = /\d{10}/g;
 			const id = regex.exec(userId);
-			pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
+			
+			console.log('matomo',userId,id,id ? id[0] : userId,SparkMD5.hash(id ? id[0] : userId));
+			pushInstruction('setUserId',id, SparkMD5.hash(id ? id[0] : userId));
 			trackPageView({
 				// documentTitle and href get logged automatically
 
