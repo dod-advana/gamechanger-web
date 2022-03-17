@@ -167,7 +167,7 @@ export const createTinyUrl = async (cloneData) => {
 export const getUserData = async (dispatch) => {
 	try {
 		const { data } = await gcUserManagementAPI.getUserData();
-		setState(dispatch, { userData: data });
+		setState(dispatch, { userData: data, userDataSet: true });
 	} catch (err) {
 		console.log(err);
 		console.log(err.message);

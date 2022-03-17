@@ -339,10 +339,8 @@ const PolicyMainViewHandler = {
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
 		const user = await gcUserManagementAPI.getUserData();
-		console.log(user.data);
 		const { favorite_documents = [], export_history = []} = user.data;
 
-	
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history});
 			data.forEach((obj) => {
