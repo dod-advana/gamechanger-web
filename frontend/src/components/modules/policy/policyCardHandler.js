@@ -853,7 +853,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 					<div
 						className={'title-text'}
 						onClick={
-							docListView
+							docListView && !item.notInCorpus
 								? () =>
 									clickFn(
 										item.filename,
@@ -902,7 +902,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 					</div>
 				</div>
 			</div>
-			{docListView && (
+			{docListView && !item.notInCorpus && (
 				<div className={'list-view-sub-header'}>
 					<p style={{ fontWeight: 400 }}>{`Published on: ${
 						publicationDate ?? 'Unknown'
@@ -1203,16 +1203,20 @@ const PolicyCardHandler = {
 								</div>
 							</GCAccordion>
 						}
-						<GCAccordion
-							header={'DOCUMENT METADATA'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
-							</div>
-						</GCAccordion>
+						{!item.notInCorpus ?
+							<GCAccordion
+								header={'DOCUMENT METADATA'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<div className={'metadata'}>
+									<div className={'inner-scroll-container'}>{backBody}</div>
+								</div>
+							</GCAccordion>
+							:
+							<>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eget tortor sed ex dignissim lacinia. In hac habitasse platea dictumst. Aenean eget egestas neque, at viverra risus.</>
+						}
 					</StyledListViewFrontCardContent>
 				);
 			} else if (state.listView && intelligentSearch) {
@@ -1443,6 +1447,7 @@ const PolicyCardHandler = {
 		},
 		
 		getCardBack: ({item, state, dispatch}) => {
+			if(item.notInCorpus) return <></> ;
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item;
 			const previewDataReflist =

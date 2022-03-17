@@ -246,6 +246,12 @@ const DocumentDetailsPage = (props) => {
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
 				);
+				const notInCorpus = document?.ref_list.filter(doc => {
+					return !docsReferenced.docs.find(ref => ref.display_title_s.includes(doc)) && !document.display_title_s.includes(doc);
+				});
+				const emptyDoc = {...document};
+				Object.keys(emptyDoc).forEach(prop => emptyDoc[prop] = null);
+				notInCorpus?.forEach(doc => docsVisible.push({...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true}));
 				break;
 			case 'referencedByDocs':
 				docsVisible = referencedByDocs.docs.slice(
