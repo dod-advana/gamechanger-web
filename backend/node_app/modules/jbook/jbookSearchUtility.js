@@ -351,7 +351,6 @@ class JBookSearchUtility {
 					}
 					break;
 				case 'sourceTag':
-					break;
 				case 'primaryReviewer':
 					if (jbookSearchSettings[setting] && Array.isArray(jbookSearchSettings[setting]) && jbookSearchSettings[setting].length > 0) {
 						const fieldString = `('${jbookSearchSettings[setting].join('\', \'')}')`;
