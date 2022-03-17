@@ -246,6 +246,7 @@ const JBookSearchHandler = {
 					loadingTinyUrl: false,
 					hasExpansionTerms: false,
 					paginationSearch: false,
+					runSearch: false,
 				});
 			}
 	
@@ -419,6 +420,11 @@ const JBookSearchHandler = {
 			// if (optionType === 'reviewStatus') continue;
 
 			if (state.defaultOptions[optionType] && searchSettings[optionType] && state.defaultOptions[optionType].length === searchSettings[optionType].length) {
+				delete searchSettings[optionType];
+			}
+
+			if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
+				console.log('empty search setting detected');
 				delete searchSettings[optionType];
 			}
 		}
