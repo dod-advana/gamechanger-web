@@ -1,8 +1,6 @@
 import React from 'react';
 import CloseIcon from '@material-ui/icons/Close';
-import Check from '@material-ui/icons/Check';
-import Warning from '@material-ui/icons/Warning';
-import Info from '@material-ui/icons/Info';
+import { Report, Warning, Check, Info } from '@material-ui/icons';
 import {
 	success,
 	successLight,
@@ -34,7 +32,7 @@ const alertStyles = {
 		},
 	},
 	error: {
-		icon: <CloseIcon style={{ fontSize: '26', color: { error } }} />,
+		icon: <Report style={{ fontSize: '26', color: '#e85454' }} />,
 		styles: {
 			backgroundColor: errorLight,
 			borderColor: error,
@@ -139,8 +137,8 @@ const styles = {
 		display: 'flex',
 		alignItems: 'center',
 	},
-	iconWrapper: {
+	iconWrapper: { 
 		display: 'flex',
 		alignItems: 'center',
-	},
+	}
 };

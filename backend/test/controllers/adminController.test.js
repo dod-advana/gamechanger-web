@@ -271,7 +271,7 @@ describe('AdminController', function () {
 		});
 	})
 	describe('#getHomepageUserData', () => {
-		it('should return homepage user data', async () => {
+		it('should return homepage user data with just favorite docs', async () => {
 			const editorData = [{
 				id: 1, key: 'homepage_topics', value: '[test1,test2]'
 			}];
@@ -291,10 +291,90 @@ describe('AdminController', function () {
 
 			const target = new AdminController(opts);
 
-			let resCode;
-			let resMsg;
+			let results = [];
+			let actual =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
 
-			let results =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
+			try {
+				results = await target.getHomepageUserData(req, esIndex, userId);
+			} catch (e) {
+				assert.fail(e);
+			}
+			assert.deepStrictEqual(results, actual);
+		});
+		it('should return homepage user data with just export history', async () => {
+			const editorData = [{
+				id: 1, key: 'homepage_topics', value: '[test1,test2]'
+			}];
+			const opts = {
+				...constructorOptionsMock,
+				dataApi: {},
+				appSettings: {
+					findAll(data) {
+						return Promise.resolve(editorData);
+					}
+				}
+			};
+			const req = { ...reqMock,
+				body: [
+					{
+					  "id": 618,
+					  "user_id": "f2e3e25e63be9acbb82c1e0ba8eabae6",
+					  "new_user_id": null,
+					  "download_request_body": {
+						"index": "gamechanger",
+						"format": "pdf",
+						"isClone": false,
+						"tiny_url": "https://gamechanger.advana.data.mil/#/gamechanger?tiny=2916",
+						"orgFilter": {
+						  "FMR": false,
+						  "OPM": false,
+						  "NATO": false,
+						  "US Army": false,
+						  "US Navy": false,
+						  "US Marine Corps": false,
+						  "US Navy Reserve": false,
+						  "Dept. of Defense": true,
+						  "Executive Branch": false,
+						  "US Navy Medicine": false,
+						  "United States Code": true,
+						  "Classification Guides": false,
+						  "Joint Chiefs of Staff": true,
+						  "Dept. of the Air Force": false,
+						  "Intelligence Community": true
+						},
+						"searchText": "fork",
+						"searchType": "Keyword",
+						"parsedQuery": "fork",
+						"searchTerms": [
+						  "fork"
+						],
+						"searchFields": {
+						  "initial": {
+							"field": null,
+							"input": ""
+						  }
+						},
+						"searchVersion": 1,
+						"orgFilterQuery": "*",
+						"selectedDocuments": ['Title 10.pdf']
+					  },
+					  "search_response_metadata": {
+						"totalCount": 20,
+						"searchTerms": [
+						  "fork"
+						]
+					  },
+					  "createdAt": "2021-03-05T17:52:36.780Z",
+					  "updatedAt": "2021-03-05T17:52:36.780Z"
+					},
+
+				  ]};
+			const esIndex = 'gamechanger';
+			const userId = 'test';
+
+			const target = new AdminController(opts);
+
+			let results = [];
 			let actual =  [{"key": "popular_docs", "value": []}, {"key": "rec_docs", "value": []}]
 
 			try {

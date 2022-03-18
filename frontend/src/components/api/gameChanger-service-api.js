@@ -336,8 +336,13 @@ export default class GameChangerAPI {
 		);
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
-		if (highlightText)
-			append += `#search=${this.splitSearchText(highlightText)}`;
+		if (highlightText){
+			if(Array.isArray(highlightText)){
+				append += `#search=${JSON.stringify(highlightText)}&searchArray`;
+			}else{
+				append += `#search=${this.splitSearchText(highlightText)}`;
+			}
+		}
 		if (pageNumber)
 			append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
 		if (fileName)

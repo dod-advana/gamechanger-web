@@ -634,10 +634,12 @@ const GCUserDashboard = React.memo((props) => {
 
 	useEffect(() => {
 		if (userData === null) return;
-
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name);
+			userData.favorite_searches = userData.favorite_searches.filter(search => {
+				const searchArr = search.url.split('?');
+				return searchArr[0] === cloneData.url;
+			});
 			userData.favorite_searches.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
@@ -676,29 +678,34 @@ const GCUserDashboard = React.memo((props) => {
 		}
 
 		if (userData.export_history) {
-			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
-			userData.export_history.forEach(hist => {
+			try {
+				userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
+				userData.export_history.forEach(hist => {
+	
+					let orgFilterText = '';
+					if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilterQuery &&
+						hist.download_request_body.orgFilterQuery === '*'
+					) {
+						orgFilterText = 'All sources';
+					} else if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilter
+					) {
+						Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
+							if (hist.download_request_body.orgFilter[key]) {
+								orgFilterText += `${key}, `;
+							}
+						});
+						orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
+					}
+					hist.orgFilterText = orgFilterText;
+				});
+			} catch (e) {
+				console.log('Export history error', e);
+			} 
 
-				let orgFilterText = '';
-				if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilterQuery &&
-					hist.download_request_body.orgFilterQuery === '*'
-				) {
-					orgFilterText = 'All sources';
-				} else if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilter
-				) {
-					Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
-						if (hist.download_request_body.orgFilter[key]) {
-							orgFilterText += `${key}, `;
-						}
-					});
-					orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
-				}
-				hist.orgFilterText = orgFilterText;
-			});
 
 			setExportHistory(userData.export_history);
 			setExportHistoryLoading(false);
@@ -733,7 +740,7 @@ const GCUserDashboard = React.memo((props) => {
 			setFavoriteOrganizationsLoading(false);
 		}
 
-	}, [userData, cloneData.clone_name]);
+	}, [userData, cloneData.clone_name, cloneData.url]);
 
 	useEffect(() => {}, [reload]);
 
@@ -927,7 +934,7 @@ const GCUserDashboard = React.memo((props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		const searchSettings = (
+		const searchSettings = cloneData.clone_name === 'gamechanger' ? (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
@@ -944,6 +951,17 @@ const GCUserDashboard = React.memo((props) => {
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
 					{search.isRevoked ? 'true' : 'false'}
+				</div>
+			</>
+		) : (
+			<>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Search Text:</span>{' '}
+					{search.search_text}
+				</div>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Source:</span>{' '}
+					{search.orgFilterText}
 				</div>
 			</>
 		);
