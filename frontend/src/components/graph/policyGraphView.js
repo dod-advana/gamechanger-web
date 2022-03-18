@@ -356,6 +356,18 @@ const filterGraphData = (nodes, edges) => {
 		}
 	});
 
+	filteredGraph.nodes.forEach(node => {
+		const edgePercent = node.edgePercent ? node.edgePercent : 0;
+		node.normalizedSize = node.pageRank * edgePercent;
+	});
+
+	const preNormalizedSizes = filteredGraph.nodes.map(node => node.normalizedSize);
+	const min = Math.min(...preNormalizedSizes);
+	const delta = Math.max(...preNormalizedSizes) - min;
+	filteredGraph.nodes.forEach(node => {
+		node.normalizedSize = (node.normalizedSize - min) / delta;
+	});
+
 	return { filteredGraph, docOrgNumbers };
 };
 
@@ -1545,7 +1557,7 @@ export default function PolicyGraphView(props) {
 		setSelectedID(-1);
 	};
 
-	const create2dGraphNode = (node, ctx, globalScale) => {
+	const nodePaint = (node, color, ctx, globalScale) => {
 		let outlineThickness = 3;
 		let connectedLevel = -1;
 
@@ -1573,7 +1585,7 @@ export default function PolicyGraphView(props) {
 				? node.label
 				: node.orgType;
 
-		const nodeColor =
+		const nodeColor = color ? color :
 			orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
 				? convertHexToRgbA(node.color, HIDDEN_NODE_ALPHA)
 				: convertHexToRgbA(node.color, NODE_ALPHA);
@@ -1590,13 +1602,12 @@ export default function PolicyGraphView(props) {
 		ctx.beginPath();
 		let nodeSize = nodeRelSize;
 		if (!detailsView) {
-			const scalingParam = Math.max(filteredGraph.nodes.length, 150);
-			const edgePercent = node.edgePercent ? node.edgePercent : 0;
+			const scalingParam = Math.min(filteredGraph.nodes.length, 150) * 0.2;
 			nodeSize =
 				nodeRelSize +
 				(combinedTypes.includes(node.label)
 					? 1
-					: Math.max(node.pageRank * edgePercent * (scalingParam / zoom), 1));
+					: Math.max(node.normalizedSize * (scalingParam / zoom), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
@@ -1628,9 +1639,13 @@ export default function PolicyGraphView(props) {
 		handleCreateNodeText(node, ctx, globalScale, null);
 	};
 
+	const create2dGraphNode = (node, ctx, globalScale) => {
+		nodePaint(node, undefined, ctx, globalScale);
+	};
+
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
 		const label = createNodeLabel(node);
-		const MAX_FONT_SIZE = (nodeRelSize / 5) * 1.5;
+		const maxFontBasis = (nodeRelSize / 5) * 1.5;
 
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
@@ -1640,7 +1655,7 @@ export default function PolicyGraphView(props) {
 			const lines = getLines(ctx, label, node.value * nodeRelSize);
 			lines.lines.forEach(function (line, i) {
 				const fontSize = Math.min(
-					MAX_FONT_SIZE,
+					node.nodeSize / (nodeRelSize + 1) * maxFontBasis,
 					(node.value * nodeRelSize + 1.5) / lines.lines.length
 				);
 				ctx.font = `${fontSize}px Sans-Serif`;
@@ -1843,6 +1858,7 @@ export default function PolicyGraphView(props) {
 					setNodeGroupMenuLabelProp={setNodeGroupMenuLabel}
 					setNodeHoverIDProp={setNodeHoverID}
 					orgTypesSelected={orgTypesSelected}
+					nodePointerAreaPaint={nodePaint}
 				/>
 			)}
 			{showGraphCard && (

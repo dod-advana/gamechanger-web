@@ -10,7 +10,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
 import AnalystTools from '../analystTools';
-import { setState } from '../../utils/sharedFunctions';
+import { setState, getUserData } from '../../utils/sharedFunctions';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import UserProfileHandlerFactory from '../factories/userProfileFactory';
@@ -29,7 +29,13 @@ const MainView = (props) => {
 	const [userProfileHandler, setUserProfileHandler] = useState();
 
 	useEffect(() => {
-		return function cleanUp() {
+		if (state.cloneDataSet && !state.userDataSet) {
+			getUserData(dispatch);
+		}
+	}, [dispatch, state.cloneData, state.cloneDataSet, state.userDataSet]);
+
+	useEffect(() => {
+		return function cleanUp(){
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
 		};
@@ -155,7 +161,7 @@ const MainView = (props) => {
 				});
 			}
 		},
-		{ debounce: 5000 }
+		{ offset: 200, debounce: 5000 }
 	);
 
 	const getViewPanels = () => {

@@ -340,6 +340,7 @@ class UserController {
 					where: {user_id: user.user_id},
 					raw: true
 				});
+
 				favorite_groups.forEach(async (group, index) => {
 					const res = await this.favoriteDocumentsGroup.findAll({
 						attributes: ['favorite_document_id'],
@@ -371,7 +372,7 @@ class UserController {
 				});
 				const export_history = await this.exportHistory.findAll({
 					raw: true,
-					limit: 20,
+					limit: 5,
 					where: { user_id: user.user_id 	},
 					order: [
 						['updatedAt', 'DESC']
@@ -523,7 +524,6 @@ class UserController {
 				} else {
 					user.export_history = [];
 				}
-
 			} else {
 				user = {
 					user_id: user_id,

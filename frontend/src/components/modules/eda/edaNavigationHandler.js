@@ -249,7 +249,25 @@ const EdaNavigationHandler = {
 						</HoverNavItem>
 					</a>
 				</GCTooltip>
-				{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+					</HoverNavItem>
+				</GCTooltip>
+				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
 							href={`#/${state.cloneData.url}/admin`}
@@ -418,7 +436,25 @@ const EdaNavigationHandler = {
 						</HoverNavItem>
 					</a>
 				</GCTooltip>
-				{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'shoeUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+						<span style={{ marginLeft: '10px' }}>User Dashboard</span>
+					</HoverNavItem>
+				</GCTooltip>
+				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>

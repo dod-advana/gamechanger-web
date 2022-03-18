@@ -122,7 +122,7 @@ const GCAccordion = (props) => {
 
 	return (
 		<StyledAccordion
-			style={{ border: borderString }}
+			style={{ border: borderString, borderRadius: '7px' }}
 			expanded={isExpanded}
 			onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)}
 			onClick={onClick}

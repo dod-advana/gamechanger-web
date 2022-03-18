@@ -3,20 +3,20 @@ import {
 	SearchBarForm,
 	SearchBarInput,
 	SearchButton,
-	AdvancedSearchButton,
 } from '../../searchBar/SearchBarStyledComponents';
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
-import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
+import GCTooltip from '../../common/GCToolTip';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
+const inputBorder = '1px solid lightgrey';
 
-const EDASearchBarHandler = {
+const DefaultSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(
 		value,
-		state,
+		cloneData,
 		setAutocorrect,
 		setPresearchTitle,
 		setPresearchTopic,
@@ -24,7 +24,7 @@ const EDASearchBarHandler = {
 		setPredictions
 	) {
 		try {
-			const index = state.cloneData?.clone_data?.esCluster ?? '';
+			const index = cloneData?.clone_data?.esCluster ?? '';
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
@@ -41,12 +41,11 @@ const EDASearchBarHandler = {
 			);
 			setPredictions(data?.predictions?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
-			console.log('EDA debouncedFetchSearchSuggestions err', e);
+			console.log('default debouncedFetchSearchSuggestions err', e);
 		}
 	},
 	getSearchBar(props) {
 		const {
-			context,
 			state,
 			classes,
 			searchFavoritePopperAnchorEl,
@@ -62,8 +61,6 @@ const EDASearchBarHandler = {
 			handleFavoriteSearchClicked,
 			dataRows,
 			cursor,
-			hideSearchResults,
-			setAdvancedSearchOpen,
 			searchFavoritePopperOpen,
 			favoriteName,
 			setFavoriteName,
@@ -105,6 +102,44 @@ const EDASearchBarHandler = {
 						id="gcSearchInput"
 					/>
 
+					<GCTooltip
+						title={'Favorite a search to track in the User Dashboard'}
+						placement="top"
+						arrow
+					>
+						<button
+							type="button"
+							style={{
+								border: inputBorder,
+								borderLeft: 'none',
+								height: 50,
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								backgroundColor: 'white',
+								padding: '0 15px',
+							}}
+							onClick={(event) =>
+								handleFavoriteSearchClicked(
+									event.target,
+									state.isFavoriteSearch
+								)
+							}
+						>
+							<i
+								className={
+									state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'
+								}
+								style={{
+									color: state.isFavoriteSearch
+										? '#E9691D'
+										: 'rgb(224, 224, 224)',
+									cursor: 'pointer',
+									fontSize: 26,
+								}}
+							/>
+						</button>
+					</GCTooltip>
 					{dropdownOpen && !advancedSearchOpen && (
 						<SearchBarDropdown
 							searchText={searchText}
@@ -112,30 +147,12 @@ const EDASearchBarHandler = {
 							cursor={cursor}
 						/>
 					)}
-					{hideSearchResults && (
-						<AdvancedDropdown
-							context={context}
-							handleSubmit={handleSubmit}
-							open={advancedSearchOpen}
-							close={() => {
-								setAdvancedSearchOpen(false);
-							}}
-						></AdvancedDropdown>
-					)}
-					{hideSearchResults && (
-						<AdvancedSearchButton
-							type="button"
-							id="advancedSearchButton"
-							onClick={() => {
-								setAdvancedSearchOpen(!advancedSearchOpen);
-							}}
-						>
-							Advanced
-							<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
-						</AdvancedSearchButton>
-					)}
 				</SearchBarForm>
-				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
+				<SearchButton
+					backgroundColor={'#9E9E9E'}
+					id="gcSearchButton"
+					onClick={handleSubmit}
+				>
 					<i className="fa fa-search" />
 				</SearchButton>
 
@@ -215,4 +232,4 @@ const EDASearchBarHandler = {
 	},
 };
 
-export default EDASearchBarHandler;
+export default DefaultSearchBarHandler;
