@@ -449,7 +449,7 @@ const PolicyNavigationHandler = {
 						toolTheme={toolTheme}
 					>
 						<ConstrainedIcon src={UserIcon} />
-						<span style={{ marginLeft: '10px' }}>Data Tracker</span>
+						<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
