@@ -7,7 +7,9 @@ export default {
 		window?.__env__?.REACT_APP_GLUU_SSO !== 'disabled' &&
 		process.env.REACT_APP_GLUU_SSO !== 'disabled',
 	TLD: 'mil',
-	QLIK_URL: 'https://qlik.audit.boozallencsn.com',
+	QLIK_URL: window?.__env__?.REACT_APP_QLIK_URL
+	? window?.__env__?.REACT_APP_QLIK_URL
+	: process.env.REACT_APP_QLIK_URL,
 	GAMECHANGER_DECOUPLED_URL: 'https://gamechanger.advana.data.mil',
 	STREAMSETS_URL: 'https://streamsets',
 	CLASSIFICATION_BANNER_TEXT: 'DEVELOPMENT',
