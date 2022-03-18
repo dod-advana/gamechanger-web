@@ -10,7 +10,6 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import GCTooltip from '../../common/GCToolTip';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import UserButton from '../../searchBar/UserButton';
 const gameChangerAPI = new GameChangerAPI();
 const inputBorder = '1px solid lightgrey';
 
@@ -47,7 +46,6 @@ const DefaultSearchBarHandler = {
 	},
 	getSearchBar(props) {
 		const {
-			context,
 			state,
 			classes,
 			searchFavoritePopperAnchorEl,
@@ -157,8 +155,6 @@ const DefaultSearchBarHandler = {
 				>
 					<i className="fa fa-search" />
 				</SearchButton>
-
-				<UserButton context={context}></UserButton>
 
 				<Popover
 					onClose={() => {
