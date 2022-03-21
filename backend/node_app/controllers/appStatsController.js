@@ -3,11 +3,8 @@ const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
-<<<<<<< HEAD
 const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
-=======
 const sparkMD5Lib = require('spark-md5');
->>>>>>> cc320702... working on how to track users in matomo
 
 /**
  * This class queries matomo for app stats and passes
@@ -538,20 +535,8 @@ class AppStatsController {
 		let connection;
 
 		try {
-<<<<<<< HEAD
 			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
-=======
-			// const { clone_name } = req.body;
-			const clone_name = 'gamechanger';
-			const userId = 'steve';
-			const hashed_user = this.sparkMD5.hash('steve');
-			const regex = /\d{10}/g;
-			const id = regex.exec(userId);
-			console.log(hashed_user);
-			console.log(id);
-			// const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
->>>>>>> cc320702... working on how to track users in matomo
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,

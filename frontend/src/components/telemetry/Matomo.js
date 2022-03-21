@@ -139,9 +139,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		if (!useMatomo) return;
 
 		// Set User
-		const userId = isDecoupled
-			? GCAuth.getTokenPayload().cn
-			: Auth.getUserId() || ' ';
+		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
@@ -168,9 +166,7 @@ export function trackError(e, eventName) {
 			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
 		// Set User
-		const userId = isDecoupled
-			? GCAuth.getTokenPayload().cn
-			: Auth.getUserId() || ' ';
+		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
@@ -193,9 +189,7 @@ export function trackSearch(keyword, category, count, customDimensions) {
 		setupDimensions(customDimensions, true);
 
 		// Set User
-		const userId = isDecoupled
-			? GCAuth.getTokenPayload().cn
-			: Auth.getUserId() || ' ';
+		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
