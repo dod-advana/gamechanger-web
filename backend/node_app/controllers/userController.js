@@ -381,7 +381,7 @@ class UserController {
 						['updatedAt', 'DESC']
 					]
 				});
-				const hashed_user =  this.sparkMD5.hash(user_id)
+				const hashed_user =  this.sparkMD5.hash(user_id);
 				const pdf_opened = await this.appStats.getUserLastOpened(hashed_user);
 				user.pdf_opened = pdf_opened;
 
