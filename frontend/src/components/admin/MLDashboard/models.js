@@ -52,7 +52,8 @@ export default (props) => {
 		sentence: {},
 		qexp: {},
 		topic_models: {},
-		jbook_qexp: {}
+		jbook_qexp: {},
+		qa_model: {},
 	});
 	const [deleteModal,setDeleteModal] = useState({
 		show:false,
@@ -77,6 +78,7 @@ export default (props) => {
 	const [selectedQEXP, setSelectedQEXP] = useState('');
 	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
 	const [selectedTopicModel, setSelectedTopicModel] = useState('');
+	const [selectedQAModel, setSelectedQAModel] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
@@ -736,6 +738,29 @@ export default (props) => {
 									}}
 								>
 									{Object.keys(downloadedModelsList.topic_models).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									QA Model:
+								</div>
+								<Select
+									value={selectedQAModel}
+									onChange={(e) => setSelectedQAModel(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.qa_model).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}

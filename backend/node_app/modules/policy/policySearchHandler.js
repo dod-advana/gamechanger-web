@@ -309,15 +309,12 @@ class PolicySearchHandler extends SearchHandler {
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if (intelligentSearchOn){
+				// get sentence search from ML API 
 				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId);
 				enrichedResults.sentenceResults = sentenceResults;
 
 			}
 
-			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
-				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
-				enrichedResults.intelligentSearch = intelligentSearchResult;
-			}
 			// QA data
 			let intelligentAnswersOn = await this.app_settings.findOrCreate({where: { key: 'intelligent_answers'}, defaults: {value: 'true'} });
 			let qaParams = {maxLength: 1500, maxDocContext: 3, maxParaContext: 2, minLength: 200, scoreThreshold: 100, entityLimit: 10};
@@ -325,6 +322,12 @@ class PolicySearchHandler extends SearchHandler {
 			if(intelligentAnswersOn && intelligentSearchOn){
 				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
 				enrichedResults.qaResults = QA;
+			}
+
+			if(intelligentSearchOn && _.isEqual(enrichedResults.qaResults.answers, [])){ // add intelligent search result if QA empty
+				// query ES for the document from the sentence search results
+				const intelligentSearchResult = await this.intelligentSearch(req, sentenceResults, clientObj, userId);
+				enrichedResults.intelligentSearch = intelligentSearchResult;
 			}
 
 			// add entities
@@ -433,6 +436,8 @@ class PolicySearchHandler extends SearchHandler {
 				}
 				if (context.length > 0) { // if context results, query QA model
 					QA.qaContext = context;
+					console.log(qaQueries.text)
+					console.log(QA.qaContext)
 					let shortenedResults = await this.mlApi.getIntelAnswer(qaQueries.text, context.map(item => item.text), userId);
 					QA= this.searchUtility.cleanQAResults(QA, shortenedResults, context);
 				}
