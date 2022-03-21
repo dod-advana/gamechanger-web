@@ -1,8 +1,9 @@
 const mysql = require('mysql');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
+const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
 
 /**
  * This class queries matomo for app stats and passes
@@ -503,7 +504,7 @@ class AppStatsController {
 		let connection;
 		try {
 			const { clone_name } = req.body;
-			const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
+			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,

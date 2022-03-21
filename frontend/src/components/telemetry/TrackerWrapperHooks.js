@@ -7,15 +7,9 @@ import SparkMD5 from 'spark-md5';
 export default function TrackerWrapperHooks(ComposedComponent, documentTitle) {
 	const { trackPageView, pushInstruction } = useMatomo();
 
-	const isDecoupled =
-		window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-		process.env.REACT_APP_GC_DECOUPLED === 'true';
-
 	function WrappedComponent(props) {
 		useEffect(() => {
-			const userId = isDecoupled
-				? Auth.getTokenPayload().cn
-				: Auth.getUserId() || ' ';
+			const userId = Auth.getUserId() || ' ';
 			const regex = /\d{10}/g;
 			const id = regex.exec(userId);
 			pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));

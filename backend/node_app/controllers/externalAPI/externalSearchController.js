@@ -1,6 +1,6 @@
 const { ModularGameChangerController } = require('../modularGameChangerController');
 const { ORGFILTER, getOrgOptions, getOrgToDocQuery } = require('../../utils/routeUtility');
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 /**
  * @class ExternalSearchController

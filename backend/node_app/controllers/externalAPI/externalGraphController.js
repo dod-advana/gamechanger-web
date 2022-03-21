@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 /**
  * @class ExternalGraphController

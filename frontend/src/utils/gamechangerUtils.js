@@ -144,6 +144,25 @@ export const StyledCenterContainer = styled.div`
 		padding-left:10px;
     }
     
+    .top-container {
+    	display: flex;
+    	justify-content: flex-end;
+    	margin: 0 0 0 15px;
+    }
+    
+    .results-count-view-buttons-container {
+		display: flex;
+		justify-content: right;
+		margin: 20px 0;
+			
+		 & .view-buttons-container {
+			margin-top: -14px;
+			display: flex;
+		}
+	}
+    
+   
+    
     .left-container {
     	width: ${({ showSideFilters }) => (showSideFilters ? '20%' : '0%')};
 		margin-top: 0px;
@@ -160,23 +179,12 @@ export const StyledCenterContainer = styled.div`
     }
     
     .right-container {
-    	margin-left: ${({ showSideFilters }) => (showSideFilters ? '22.5%' : '0%')};
+    	margin-left: ${({ showSideFilters }) => (showSideFilters ? '22%' : '0%')};
 		margin-top: 0px;
-		width: ${({ showSideFilters }) => (showSideFilters ? '75.7%' : '100%')};
+		width: ${({ showSideFilters }) => (showSideFilters ? '78%' : '100%')};
 		padding: 0px;
 		box-shadow: none;
-		
-		.results-count-view-buttons-container {
-			display: flex;
-			justify-content: right;
-			margin: 20px 0
-    		
-    		.view-buttons-container {
-    			margin-top: -14px;
-    			display: flex;
-    		}
-		}
-		
+
 		.card-container {
 			height: 100%;
 			overflow: hidden;
@@ -858,7 +866,7 @@ export const exactMatch = (phrase, word, split) => {
 
 export const displayBackendError = (resp, dispatch = () => {}) => {
 	if (resp?.data?.error) {
-		const errorMessage = Permissions.isGameChangerAdmin()
+		const errorMessage = Permissions.permissionValidator('Gamechanger Super Admin', true)
 			? `An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}`
 			: `An error has occurred in the application, but we are working to fix it!`;
 		setState(dispatch, {

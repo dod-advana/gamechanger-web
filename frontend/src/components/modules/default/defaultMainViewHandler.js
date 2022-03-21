@@ -140,6 +140,8 @@ const DefaultMainViewHandler = {
 			history,
 			searchHandler,
 		} = props;
+
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 		
 		if (state.runSearch || state.runDocumentComparisonSearch) return;
 
@@ -706,6 +708,10 @@ const DefaultMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		return (<></>);
+	}
 };
 
 export default DefaultMainViewHandler;

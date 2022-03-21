@@ -1,5 +1,5 @@
 const { MLApiClient } = require('../lib/mlApiClient');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 /**
  * This class takes HTTP requests and passes needed 
  * data onto the MLApiClient to get information 
