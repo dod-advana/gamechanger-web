@@ -89,6 +89,8 @@ const DocumentDetailsPage = (props) => {
 
 	const [backendError, setBackendError] = useState({});
 
+	const[notInCorpusCount, setNotInCorpusCount] = useState(0);
+
 	useEffect(() => {
 		setRunningQuery(true);
 	}, [document]);
@@ -226,12 +228,13 @@ const DocumentDetailsPage = (props) => {
 		}
 	};
 
-	const renderDocs = (
+	const RenderDocs = ({
 		documentObj = {},
 		docPage = 0,
 		section,
-		runningQuery = true
-	) => {
+		runningQuery = true,
+		setNotInCorpusCount
+	}) => {
 		let docsVisible = [];
 
 		switch (section) {
@@ -246,12 +249,13 @@ const DocumentDetailsPage = (props) => {
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
 				);
-				const notInCorpus = document?.ref_list.filter(doc => {
+				const notInCorpusDocs = document?.ref_list.filter(doc => {
 					return !docsReferenced.docs.find(ref => ref.display_title_s.includes(doc)) && !document.display_title_s.includes(doc);
 				});
 				const emptyDoc = {...document};
 				Object.keys(emptyDoc).forEach(prop => emptyDoc[prop] = null);
-				notInCorpus?.forEach(doc => docsVisible.push({...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true}));
+				notInCorpusDocs?.forEach(doc => docsVisible.push({...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true}));
+				if(notInCorpusDocs) setNotInCorpusCount(notInCorpusDocs.length);
 				break;
 			case 'referencedByDocs':
 				docsVisible = referencedByDocs.docs.slice(
@@ -328,10 +332,10 @@ const DocumentDetailsPage = (props) => {
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={gcColors.buttonColor2} />
 						</div>
-					) : documentObj.docCount > 0 ? (
-						renderDocs()
-					) : (
+					) : documentObj.docCount < 1 && notInCorpusCount < 1 ? (
 						<div style={styles.noResults}>No Documents Found</div>
+					) : (
+						renderDocs()
 					)}
 				</div>
 			</div>
@@ -456,12 +460,13 @@ const DocumentDetailsPage = (props) => {
 							itemCount={similarDocs.docs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
-							{renderDocs(
-								similarDocs,
-								similarDocsPage,
-								'similarDocs',
-								runningSimilarDocsQuery
-							)}
+							<RenderDocs
+								documentObj={similarDocs}
+								docPage={similarDocsPage}
+								section={'similarDocs'}
+								runningQuery={runningSimilarDocsQuery}
+								setNotInCorpusCount={setNotInCorpusCount}
+							/>
 						</GCAccordion>
 					</div>
 
@@ -469,15 +474,16 @@ const DocumentDetailsPage = (props) => {
 						<GCAccordion
 							expanded={false}
 							header={'DOCUMENTS REFERENCED'}
-							itemCount={docsReferenced.docs.length || 0}
+							itemCount={docsReferenced.docs.length + notInCorpusCount || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
-							{renderDocs(
-								docsReferenced,
-								docsReferencedPage,
-								'docsReferenced',
-								runningDocsReferencedQuery
-							)}
+							<RenderDocs
+								documentObj={docsReferenced}
+								docPage={docsReferencedPage}
+								section={'docsReferenced'}
+								runningQuery={runningDocsReferencedQuery}
+								setNotInCorpusCount={setNotInCorpusCount}
+							/>
 						</GCAccordion>
 					</div>
 
@@ -488,12 +494,13 @@ const DocumentDetailsPage = (props) => {
 							itemCount={referencedByDocs.docs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
-							{renderDocs(
-								referencedByDocs,
-								referencedByDocsPage,
-								'referencedByDocs',
-								runningReferencedByDocsQuery
-							)}
+							<RenderDocs
+								documentObj={referencedByDocs}
+								docPage={referencedByDocsPage}
+								section={'referencedByDocs'}
+								runningQuery={runningReferencedByDocsQuery}
+								setNotInCorpusCount={setNotInCorpusCount}
+							/>
 						</GCAccordion>
 					</div>
 				</div>
