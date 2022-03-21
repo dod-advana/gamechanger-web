@@ -852,6 +852,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				<GCTooltip title={displayTitle} placement="top" arrow>
 					<div
 						className={'title-text'}
+						style={item.notInCorpus ? {cursor: 'initial'} : {}}
 						onClick={
 							docListView && !item.notInCorpus
 								? () =>
@@ -875,7 +876,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						)}
 					</div>
 				</GCTooltip>
-				<div style={{ display: 'flex' }}>
+				{!item.notInCorpus && <div style={{ display: 'flex' }}>
 					{docListView && (
 						<StyledFrontCardSubHeader
 							typeTextColor={typeTextColor}
@@ -900,7 +901,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 							{favoriteComponent()}
 						</div>
 					</div>
-				</div>
+				</div>}
 			</div>
 			{docListView && !item.notInCorpus && (
 				<div className={'list-view-sub-header'}>
@@ -1215,7 +1216,7 @@ const PolicyCardHandler = {
 								</div>
 							</GCAccordion>
 							:
-							<>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eget tortor sed ex dignissim lacinia. In hac habitasse platea dictumst. Aenean eget egestas neque, at viverra risus.</>
+							<>Data does not yet exist for this document within the GAMECHANGER corpus</>
 						}
 					</StyledListViewFrontCardContent>
 				);
