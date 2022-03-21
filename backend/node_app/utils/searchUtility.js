@@ -644,9 +644,9 @@ class SearchUtility {
 				delete query.highlight;
 			}
 			if (Object.keys(docIds).length !== 0){
-				query.query.bool.must.push(
+				query.query.bool.filter.push(
 					{terms: {id: docIds}}
-					);
+				);
 
 			}
 

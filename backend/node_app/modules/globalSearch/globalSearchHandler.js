@@ -53,13 +53,22 @@ class GlobalSearchHandler extends SearchHandler {
 			getApplications,
 			getDashboards,
 			getDataSources,
-			getDatabases
+			getDatabases,
+			tiny_url,
+			cloneName,
+			searchType,
+			searchVersion,
 		} = req.body;
 
 		try {
 			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
 			historyRec.showTutorial = showTutorial;
+			historyRec.tiny_url = tiny_url;
+			historyRec.clone_name = cloneName;
+			historyRec.searchType = searchType;
+			historyRec.search_version = searchVersion;
+			historyRec.request_body = req.body;
 
 			const cloneSpecificObject = {};
 
