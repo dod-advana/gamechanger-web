@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const SearchHandler = require('../base/searchHandler');
 const lunr = require('lunr');
 const __ = require('lodash');
@@ -11,6 +11,7 @@ const _ = require('lodash');
 const dcUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;
 
@@ -35,7 +36,7 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			searchText: '',
 			startTime: new Date().toISOString(),
 			numResults: -1,
@@ -53,13 +54,22 @@ class GlobalSearchHandler extends SearchHandler {
 			getApplications,
 			getDashboards,
 			getDataSources,
-			getDatabases
+			getDatabases,
+			tiny_url,
+			cloneName,
+			searchType,
+			searchVersion,
 		} = req.body;
 
 		try {
 			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
 			historyRec.showTutorial = showTutorial;
+			historyRec.tiny_url = tiny_url;
+			historyRec.clone_name = cloneName;
+			historyRec.searchType = searchType;
+			historyRec.search_version = searchVersion;
+			historyRec.request_body = req.body;
 
 			const cloneSpecificObject = {};
 

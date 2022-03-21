@@ -17,9 +17,11 @@ import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
 import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 // import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 export const gcColors = {
 	buttonColor1: '#131E43',
@@ -53,6 +55,12 @@ const GameChangerPage = (props) => {
 
 		if (!state.historySet) {
 			setState(dispatch, { history: history, historySet: true });
+		}
+
+		if (!state.userDataSet) {
+			gameChangerUserAPI.getUserProfileData().then(data => {
+				setState(dispatch, { userData: data.data, userDataSet: true });
+			});
 		}
 	}, [cloneData, state, dispatch, history]);
 

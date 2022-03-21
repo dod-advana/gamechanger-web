@@ -11,8 +11,21 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				unique: true,
 			},
+			cn: {
+				type: DataTypes.TEXT,
+				unique: false,
+			},
 			is_beta: {
 				type: DataTypes.BOOLEAN,
+				defaultValue: false
+			},
+			is_internal: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false
+			},
+			is_admin: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false
 			},
 			notifications: {
 				type: DataTypes.JSONB

@@ -17,7 +17,7 @@ export const defaultNotification = {
 export const pollNotifications = async (state, dispatch) => {
 	let newNotifications = [];
 	try {
-		const { data = [] } = await gameChangerAPI.getNotifications();
+		const { data = [] } = await gameChangerAPI.getNotifications(state.cloneData.clone_name);
 		const tmpNotifications = data.filter(({ active }) => active);
 		newNotifications = tmpNotifications.filter(
 			({ id }) => state.notificationIds.indexOf(id) === -1
@@ -39,9 +39,9 @@ export const pollNotifications = async (state, dispatch) => {
 	}
 };
 
-export const getNotifications = async (dispatch) => {
+export const getNotifications = async (state, dispatch) => {
 	try {
-		const { data = [] } = await gameChangerAPI.getNotifications();
+		const { data = [] } = await gameChangerAPI.getNotifications(state.cloneData.clone_name);
 		const notifications = data.filter(({ active }) => active);
 		setState(dispatch, {
 			notificationIds: notifications.map(({ id }) => id),
@@ -60,7 +60,7 @@ const Notifications = (props) => {
 
 	// Get any notifications
 	useMountEffect(() => {
-		getNotifications(dispatch).finally(() => {
+		getNotifications(state, dispatch).finally(() => {
 			notificationInterval = setInterval(async () => {
 				pollNotifications(state, dispatch);
 			}, 90000);

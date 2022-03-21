@@ -2,11 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Badge from '@material-ui/core/Badge';
 import { withStyles } from '@material-ui/core/styles';
-import { ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
-import UserIcon from '../../images/icon/UserIcon.png';
 import GCButton from '../common/GCButton';
 import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 import { setState, clearDashboardNotification } from '../../utils/sharedFunctions';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const StyledBadge = withStyles((theme) => ({
 	badge: {
@@ -22,7 +21,7 @@ const StyledBadge = withStyles((theme) => ({
 }))(Badge);
 
 const UserButton = (props) => {
-	const { context } = props;
+	const { context, backgroundColor } = props;
 	const { state, dispatch } = context;
 	const { userData, cloneData } = state;
 
@@ -38,9 +37,9 @@ const UserButton = (props) => {
 					clearDashboardNotification(state.cloneData.clone_name, 'total', state, dispatch);
 					setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				}}
-				style={{ height: 50, width: 60, minWidth: 'none', padding: '0 18px', margin: '0 0 0 4%', backgroundColor: '#131E43', border: '#131E43' }}
+				style={{ margin: '0 0 0 60px', height: 50, width: 50, minWidth: 'none', backgroundColor: `${backgroundColor ||  '#131E43'}`, border: `${backgroundColor ||  '#131E43'}` }}
 			>
-				<ConstrainedIcon src={UserIcon} />
+				<AccountCircleIcon sx={{ fontSize: 30, margin: '-10px 0' }}/>
 			</GCButton>
 		</StyledBadge>
 	);
@@ -58,5 +57,6 @@ UserButton.propTypes = {
 			})
 		}),
 		dispatch: PropTypes.func
-	})
+	}),
+	backgroundColor: PropTypes.string
 };

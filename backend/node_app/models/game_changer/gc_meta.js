@@ -61,6 +61,9 @@ module.exports = (sequelize, DataTypes) => {
 			search_bar_module: {
 				type: DataTypes.STRING
 			},
+			data_module: {
+				type: DataTypes.STRING
+			},
 			s3_bucket: {
 				type: DataTypes.STRING
 			},
@@ -93,6 +96,9 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			updatedAt: {
 				type: DataTypes.DATE
+			},
+			permissions: {
+				type: DataTypes.ARRAY(DataTypes.STRING)
 			}
 		},
 		{

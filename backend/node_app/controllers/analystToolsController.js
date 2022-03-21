@@ -1,10 +1,11 @@
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary} = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
 const sparkMD5Lib = require('spark-md5');
 const { result } = require('underscore');
+const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
 
 class AnalystToolsController {
 	constructor(opts = {}) {
@@ -58,7 +59,7 @@ class AnalystToolsController {
 			const ids = Object.keys(resultsObject);
 			// Query ES
 			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);			
+			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
 
 			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
 
@@ -79,31 +80,29 @@ class AnalystToolsController {
 		let userId = 'webapp_unknown';
 		try{
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
-
 			const { 
 				searchedParagraph,
 				matchedParagraphId,
 				docId,
 				positiveFeedback,
-				undo = false 
+				undo = false
 			} = req.body;
 
 			if(undo){
 				await this.compareFeedbackModel.destroy({
-					where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+					where: { searchedParagraph, matchedParagraphId, userId: getUserIdFromSAMLUserId(req) },
 				});
 				return res.status(200).send();
 			}
 
 			const [record, created] = await this.compareFeedbackModel.findOrCreate({
-				where: { searchedParagraph, matchedParagraphId, userId: hashed_user },
+				where: { searchedParagraph, matchedParagraphId, userId: getUserIdFromSAMLUserId(req) },
 				defaults: {
 					searchedParagraph,
 					matchedParagraphId,
 					docId,
 					positiveFeedback,
-					userId: hashed_user
+					userId
 				}
 			});
 			
@@ -111,7 +110,7 @@ class AnalystToolsController {
 				record.set({positiveFeedback});
 				await record.save();
 			}
-			
+
 			res.status(200).send();
 		}catch(e){
 			this.logger.error(e, '60OOE63', userId);

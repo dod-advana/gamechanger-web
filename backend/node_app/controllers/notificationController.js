@@ -1,5 +1,5 @@
 const NOTIFICATIONS = require('../models').notifications;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class NotificationController {
 
@@ -23,7 +23,7 @@ class NotificationController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { project_name = 'gamechanger' } = req.body;
+			const { project_name } = req.body;
 			const notifications = await this.notifications.findAll({ where: { project_name } });
 			res.status(200).send(notifications);
 

@@ -1,6 +1,6 @@
-const {HandlerFactory} = require('../factories/handlerFactory');
+const { HandlerFactory } = require('../factories/handlerFactory');
 const CLONE_META = require('../models').clone_meta;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class ModularGameChangerController {
 	constructor(opts = {}) {
@@ -26,6 +26,11 @@ class ModularGameChangerController {
 		this.graphSearch = this.graphSearch.bind(this);
 		this.graphQuery = this.graphQuery.bind(this);
 		this.callGraphFunction = this.callGraphFunction.bind(this);
+		this.callDataFunction = this.callDataFunction.bind(this);
+		this.exportReview = this.exportReview.bind(this);
+		this.exportChecklist = this.exportChecklist.bind(this);
+		this.exportUsers = this.exportUsers.bind(this);
+		this.exportProfilePage = this.exportProfilePage.bind(this);
 	}
 
 	async getCloneTableStructure(req, res) {
@@ -45,7 +50,7 @@ class ModularGameChangerController {
 
 	async getCloneMeta(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName} = req.body;
+		const { cloneName } = req.body;
 		this.clone_meta.findOne({ where: { clone_name: cloneName } }).then((c) => {
 			res.status(200).send(c);
 		}).catch((e) => {
@@ -68,6 +73,7 @@ class ModularGameChangerController {
 					main_view_module: 'policy/policyMainViewHandler',
 					graph_module: 'policy/policyGraphHandler',
 					search_bar_module: 'policy/policySearchBarHandler',
+					data_module: 'simple/SimpleDataHandler',
 					display_name: 'GAMECHANGER',
 					is_live: true,
 					url: '/',
@@ -157,14 +163,13 @@ class ModularGameChangerController {
 
 	async search(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, searchText, limit = 18, options} = req.body;
+		const { cloneName, searchText, limit = 18, options, storeHistory = true } = req.body;
 		let { offset = 0 } = req.body;
 		try {
 			// NOTE: if this code changes then this will likely necessitate changes to `favoritesController.checkLeastRecentFavoritedSearch`
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const storeHistory = true;
-			if(offset === null) offset = 0;
-			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory);
+			if (offset === null) offset = 0;
+			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory, req.session);
 			const error = handler.getError();
 			if (error.code) results.error = error;
 			res.status(200).send(results);
@@ -176,10 +181,10 @@ class ModularGameChangerController {
 
 	async callSearchFunction(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, functionName, options} = req.body;
+		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res, req.session);
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
@@ -189,19 +194,70 @@ class ModularGameChangerController {
 
 	async export(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, searchText, format, options} = req.body;
+		const { cloneName, searchText, format, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
-			await handler.export(res, searchText, format, options, cloneName, req.permissions, userId);
-		} catch(error) {
+			await handler.export(res, searchText, format, options, cloneName, req.permissions, userId, req.session);
+		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, '812U6Q2', userId);
 		}
 	}
 
+	async exportReview(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { cloneName, options } = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('export', cloneName);
+			await handler.exportReview(res, req.permissions, options, userId);
+		} catch (error) {
+			res.status(500).send(error);
+			this.logger.error(error, 'V3BNX3E', userId);
+		}
+	}
+
+	async exportUsers(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { cloneName, options } = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('export', cloneName);
+			await handler.exportUsers(res, req.permissions, options, userId);
+		} catch (error) {
+			res.status(500).send(error);
+			this.logger.error(error, 'V3BNX31', userId);
+		}
+	}
+
+	async exportChecklist(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { cloneName, options } = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('export', cloneName);
+			await handler.exportChecklist(res, req.permissions, options, userId);
+		} catch (error) {
+			res.status(500).send(error);
+			this.logger.error(error, 'V3BNX33', userId);
+		}
+	}
+
+	async exportProfilePage(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const {cloneName, options} = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('export', cloneName);
+			const search_handler = this.handler_factory.createHandler('search', cloneName);
+			const data = await search_handler.callFunction('getDataForFullPDFExport', options, cloneName, req.permissions, userId);
+
+			await handler.exportProfilePage(res, req.permissions, {data}, userId);
+		} catch(error) {
+			res.status(500).send(error);
+			this.logger.error(error, 'V3BNX34', userId);
+		}
+	}
+
 	async graphSearch(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, searchText, options} = req.body;
+		const { cloneName, searchText, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
 			const results = await handler.search(searchText, options, cloneName, req.permissions, userId);
@@ -214,7 +270,7 @@ class ModularGameChangerController {
 
 	async graphQuery(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, query, code, options} = req.body;
+		const { cloneName, query, code, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
 			const results = await handler.query(query, code, options, cloneName, req.permissions, userId);
@@ -229,7 +285,7 @@ class ModularGameChangerController {
 
 	async callGraphFunction(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, functionName, options} = req.body;
+		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
 			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId);
@@ -237,6 +293,19 @@ class ModularGameChangerController {
 		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, 'LSZ82AY', userId);
+		}
+	}
+
+	async callDataFunction(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { cloneName, functionName, options } = req.body;
+		try {
+			const handler = this.handler_factory.createHandler('data', cloneName);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId);
+			res.status(200).send(results);
+		} catch (error) {
+			res.status(500).send(error, 'N1AF564', userId);
+			this.logger.error(error, 'N1AF564', userId);
 		}
 	}
 

@@ -24,8 +24,8 @@ fs
 	.readdirSync(__dirname + '/game_changer')
 	.filter(file =>
 		(file.indexOf('.') !== 0) &&
-        (file !== basename) &&
-        (file.slice(-3) === '.js'))
+		(file !== basename) &&
+		(file.slice(-3) === '.js'))
 	.forEach(file => {
 		// const model = db.game_changer.import(path.join(__dirname + '/game_changer', file));
 		const model = require(path.join(__dirname + '/game_changer', file))(db['game_changer'], DataTypes);
@@ -37,8 +37,8 @@ fs
 	.readdirSync(__dirname + '/gc-orchestration')
 	.filter(file =>
 		(file.indexOf('.') !== 0) &&
-        (file !== basename) &&
-        (file.slice(-3) === '.js'))
+		(file !== basename) &&
+		(file.slice(-3) === '.js'))
 	.forEach(file => {
 		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
 		const model = require(path.join(__dirname + '/gc-orchestration', file))(db['gc-orchestration'], DataTypes);
@@ -50,11 +50,24 @@ fs
 	.readdirSync(__dirname + '/uot')
 	.filter(file =>
 		(file.indexOf('.') !== 0) &&
+		(file !== basename) &&
+		(file.slice(-3) === '.js'))
+	.forEach(file => {
+		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
+		const model = require(path.join(__dirname + '/uot', file))(db['uot'], DataTypes);
+		db[model.name] = model;
+	});
+
+// Add models from jbook folder
+fs
+	.readdirSync(__dirname + '/jbook')
+	.filter(file =>
+		(file.indexOf('.') !== 0) &&
         (file !== basename) &&
         (file.slice(-3) === '.js'))
 	.forEach(file => {
 		// const model = db['gc-orchestration'].import(path.join(__dirname + '/gc-orchestration', file));
-		const model = require(path.join(__dirname + '/uot', file))(db['uot'], DataTypes);
+		const model = require(path.join(__dirname + '/jbook', file))(db['jbook'], DataTypes);
 		db[model.name] = model;
 	});
 

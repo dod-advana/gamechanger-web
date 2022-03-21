@@ -681,6 +681,10 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getDocumentsForTopicHelper(req, userId) {
 		try {
+			if(req.body) {
+				req.body.includeRevoked = true;
+			}
+
 			// Get the full doc data from ES
 			return await this.documentSearchUsingDocId(req, userId);
 		} catch (err) {

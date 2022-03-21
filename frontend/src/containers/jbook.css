@@ -1,0 +1,93 @@
+.jbookPagination > .pagination > .active > a {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
+    color: white !important;
+    padding: 11px 19px;
+}
+
+.jbookPagination > .pagination > li > a {
+    color: black !important;
+    padding: 11px 19px;
+}
+
+.jbookPagination > .pagination > .active > a:hover {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
+}
+
+.jbookPagination > .pagination > .active > a:focus {
+    background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
+}
+
+.docExplorerPag > .pagination {
+    margin: 7px 0 0 0;
+}
+
+
+.cardContainer {
+    width: 25%;
+    min-width: 351px;
+}
+
+
+
+/* for 15 inch mac screen 3 to a row  */
+@media screen and (max-width: 1563px) {
+    .cardContainer {
+        min-width: 395px;
+    }
+}
+
+.feedback-modal {
+  position: absolute;
+  top: 150px;
+  left: 200px;
+  right: 200px;
+  bottom: 113px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.feedback-modal:focus {
+  outline: 0;
+}
+
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999999;
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.flipCardContainer {
+    transition: box-shadow .2s, transform .5s !important;
+}
+
+.flipCardContainer:hover {
+    box-shadow: #386F94 0px 0px 2px 2px !important;
+    border: 2px solid #386F94;
+}
+
+.pagination > li:first-child > a {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.listViewContainer {
+    transition: transform .5s !important;
+}
+
+.listViewContainer:hover {
+    box-shadow: none !important;
+    border: none;
+}
+
+.main-container { 
+    background-color: white;
+    min-height: calc(100vh - 120px);
+}

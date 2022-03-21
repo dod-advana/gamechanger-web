@@ -36,6 +36,12 @@ lineReader.on('close', () => {
 });
 
 class Thesaurus {
+	constructor(opts={}) {
+		const {
+
+		} = opts;
+	}
+
 	lookUp(word) {
 		let result = data[word];
 		let cleaned = [];

@@ -1,4 +1,4 @@
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const { DataLibrary } = require('../lib/dataLibrary');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');

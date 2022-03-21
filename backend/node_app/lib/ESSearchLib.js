@@ -1,5 +1,5 @@
 const { Client: esClient } = require('@elastic/elasticsearch');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class ESSearchLib {
 	constructor(optionsObj = {}) {

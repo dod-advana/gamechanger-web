@@ -97,11 +97,19 @@
 
 .main-container { 
     background-color: white;
-    min-height: calc(100vh - 30px);
+    min-height: calc(100vh - 120px);
 }
 
 #gc-user-dash .row > * { 
     width: auto; 
+}
+
+#re-document-col [class*="MuiAccordionSummary-root"] {
+    height: auto !important;
+}
+
+#re-document-col [class*="MuiAccordion-root"] [class*="MuiAccordionSummary-content"] {
+    margin: 0 !important;
 }
 
 .analyst-tools-filters [class*="MuiAccordionSummary-root"] {
