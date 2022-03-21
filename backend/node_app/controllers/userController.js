@@ -83,7 +83,7 @@ class UserController {
 		this.search = search;
 		this.sequelize = sequelize;
 		this.externalAPI = externalAPI;
-		this.appStats = appStats
+		this.appStats = appStats;
 		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
@@ -339,10 +339,6 @@ class UserController {
 					raw: true
 				});
 
-				// const pdf_opened = await this.appStats.queryPDFOpenedByUserId(userId,'gamechanger');
-
-				// this.logger.info(JSON.stringify(pdf_opened));
-
 				const favorite_groups = await this.favoriteGroup.findAll({
 					where: {user_id: user.user_id},
 					raw: true
@@ -385,6 +381,9 @@ class UserController {
 						['updatedAt', 'DESC']
 					]
 				});
+
+				const pdf_opened = await this.appStats.getUserLastOpened(hashed_user);
+				user.pdf_opened = pdf_opened;
 
 				if (favorite_documents) {
 					for (const doc of favorite_documents) {
@@ -540,6 +539,7 @@ class UserController {
 				user.favorite_searches = [];
 				user.search_history = [];
 				user.export_history = [];
+				user.pdf_opened = [];
 				user.api_key = '';
 			}
 
