@@ -910,6 +910,22 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 					}`}</p>
 				</div>
 			)}
+			{docListView && item.notInCorpus && (
+				<GCTooltip
+					title={
+						'Click to request that this document be made part of the GAMCHANGER corpus'
+					}
+					placement="top"
+					arrow
+				>
+					<GCButton 
+						style={{position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1}}
+						onClick={()=>console.log('cliked!')}
+					>
+					 Report Issue
+					</GCButton>
+				</GCTooltip>
+			)}
 		</StyledFrontCardHeader>
 	);
 };
