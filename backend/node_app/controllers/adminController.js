@@ -1,5 +1,5 @@
 const GC_ADMINS = require('../models').admin;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');

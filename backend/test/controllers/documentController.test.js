@@ -1120,10 +1120,9 @@ describe('DocumentController', function () {
 				{ status: 'fulfilled', value: 'gamechanger/test/test2' }
 			];
 
-			target.getHomepageThumbnail(req, res).then( () => {
-				assert.deepEqual(resData, apiResMock);
-				done();
-			});
+			await target.getHomepageThumbnail(req, res);
+			assert.deepEqual(resData, apiResMock);
+			done();
 		});
 	});
 });

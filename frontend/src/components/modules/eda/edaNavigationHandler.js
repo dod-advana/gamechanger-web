@@ -270,7 +270,7 @@ const EdaNavigationHandler = {
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
-							href="#/gamechanger-admin"
+							href={`#/${state.cloneData.url}/admin`}
 							centered
 							style={{ width: '100%' }}
 						>
@@ -456,7 +456,7 @@ const EdaNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin">
+						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 								<span style={{ marginLeft: '10px' }}>Admin Page</span>

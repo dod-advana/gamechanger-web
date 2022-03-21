@@ -97,7 +97,7 @@
 
 .main-container { 
     background-color: white;
-    min-height: calc(100vh - 30px);
+    min-height: calc(100vh - 120px);
 }
 
 #gc-user-dash .row > * { 

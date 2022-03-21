@@ -1,5 +1,5 @@
 const APP_SETTINGS = require('../models').app_settings;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 /**
  * A contoller for app wide mode settings. Each setting has 
  * an id, key, and value. The values are 'true' or 'false'

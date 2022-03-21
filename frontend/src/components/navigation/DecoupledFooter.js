@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import {
 	Button,
-	Modal, 
+	Modal,
 	TextField,
 	Typography,
 	FormGroup,
@@ -117,9 +117,9 @@ const DecoupledFooter = (props) => {
 	const { setUserMatomo } = props;
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 	const [useMatomo, setUseMatomo] = useState(false);
-	const [requestAPIKeyData, setRequestAPIKeyData] = useState({name: '', email: '', reason: '', clones: []});
+	const [requestAPIKeyData, setRequestAPIKeyData] = useState({ name: '', email: '', reason: '', clones: [] });
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
-	const [cloneMeta,  setCloneMeta] = useState([]);
+	const [cloneMeta, setCloneMeta] = useState([]);
 	const [apiRequestError, setApiRequestError] = useState('');
 
 	const getUserData = async () => {
@@ -154,13 +154,13 @@ const DecoupledFooter = (props) => {
 		try {
 			const { data } = await gameChangerAPI.getCloneData();
 			setCloneMeta(data);
-		} catch(err) {
+		} catch (err) {
 			console.error('Error getting clone meta data: ', err);
 		}
 		
 	};
 
-	useEffect (() => {
+	useEffect(() => {
 		initializeUserMatomoStatus();
 		initializeAppMatomoStatus();
 		setUseMatomo(localStorage.getItem('userMatomo') === 'true');
@@ -169,7 +169,7 @@ const DecoupledFooter = (props) => {
 	}, []);
 
 	const setUserMatomoStatus = (status) => {
-		
+
 		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then((data) => {
 			setUseMatomo(data.data);
 			setUserMatomo(data.data);
@@ -179,18 +179,18 @@ const DecoupledFooter = (props) => {
 	};
 
 	const handleClose = () => {
-		setRequestAPIKeyData({name: '', email: '', reason: '', clones: []});
+		setRequestAPIKeyData({ name: '', email: '', reason: '', clones: [] });
 		window.location = '#/gamechanger';
 	};
 
 	const handleCloneChange = (cloneId) => {
 		setApiRequestError('');
-		const newRequestAPIKeyData = {...requestAPIKeyData};
-		if(!newRequestAPIKeyData.clones) newRequestAPIKeyData.clones =[];
+		const newRequestAPIKeyData = { ...requestAPIKeyData };
+		if (!newRequestAPIKeyData.clones) newRequestAPIKeyData.clones = [];
 		const index = newRequestAPIKeyData.clones.indexOf(cloneId);
-		if(index > -1){
+		if (index > -1) {
 			newRequestAPIKeyData.clones.splice(index, 1);
-		}else{
+		} else {
 			newRequestAPIKeyData.clones.push(cloneId);
 		}
 		setRequestAPIKeyData(newRequestAPIKeyData);
@@ -251,10 +251,10 @@ const DecoupledFooter = (props) => {
 						margin="dense"
 						variant="outlined"
 					/>
-					<Typography variant="h3" style={{ width: '100%', fontSize:'24px' }}>Select clones to access</Typography>
-					<FormGroup style={{margin: '0px 10px', width: '100%', flexDirection: 'row'}}>
+					<Typography variant="h3" style={{ width: '100%', fontSize: '24px' }}>Select clones to access</Typography>
+					<FormGroup style={{ margin: '0px 10px', width: '100%', flexDirection: 'row' }}>
 						{cloneMeta.map((clone) => {
-							return  (
+							return (
 								<FormControlLabel
 									key={clone.id}
 									name={clone.clone_name}
@@ -274,25 +274,25 @@ const DecoupledFooter = (props) => {
 							);
 						})}
 					</FormGroup>
-					{apiRequestError && <div style={{color: '#f44336'}}>{apiRequestError}</div>}
+					{apiRequestError && <div style={{ color: '#f44336' }}>{apiRequestError}</div>}
 				</div>
 			</>
 		);
 	};
 
 	const sendAPIKeyRequest = () => {
-		if(!requestAPIKeyData.clones.length) return setApiRequestError('Select at least one clone');
+		if (!requestAPIKeyData.clones.length) return setApiRequestError('Select at least one clone');
 		gameChangerAPI
 			.createAPIKeyRequest(
-				requestAPIKeyData.name, 
-				requestAPIKeyData.email, 
-				requestAPIKeyData.reason, 
+				requestAPIKeyData.name,
+				requestAPIKeyData.email,
+				requestAPIKeyData.reason,
 				requestAPIKeyData.clones
 			)
 			.then(resp => {
 				gameChangerAPI
 					.updateUserAPIRequestLimit()
-					.then(()=>setAPIRequestLimit(apiRequestLimit-1));
+					.then(() => setAPIRequestLimit(apiRequestLimit - 1));
 				setApiRequestError('');
 				handleClose();
 			}).catch(e => {
