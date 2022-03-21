@@ -1,7 +1,6 @@
 const { DataLibrary} = require('../../lib/dataLibrary');
 const ExportHandler = require('../base/exportHandler');
 const CONSTANTS = require('../../config/constants');
-const SearchUtility = require('../../utils/searchUtility');
 const EDASearchUtility = require('./edaSearchUtility');
 const csvStringifyLib = require('csv-stringify');
 
@@ -11,14 +10,13 @@ class EdaExportHandler extends ExportHandler {
 		const {
 			dataLibrary = new DataLibrary(opts),
 			csvStringify = csvStringifyLib,
-			searchUtility = new SearchUtility(opts),
 			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS
 		} = opts;
-		super({...opts});
+
+		super(opts);
 		this.dataLibrary = dataLibrary;
 		this.csvStringify = csvStringify;
-		this.searchUtility = searchUtility;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
 	}
@@ -136,7 +134,7 @@ class EdaExportHandler extends ExportHandler {
 			const stringifier = this.csvStringify({ delimiter: ',' });
 
 			stringifier.on('error', (err) => {
-				this.logger.error(e.message, 'P9KP9BX', userId);
+				this.logger.error(err.message, 'P9KP9BX', userId);
 				throw new Error(err);
 			});
 

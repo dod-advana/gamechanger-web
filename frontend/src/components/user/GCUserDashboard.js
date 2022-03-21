@@ -111,6 +111,31 @@ const FavoriteStyledI = styled.div`
 	}
 `;
 
+const TabContainer = styled.div`
+	align-items: center;
+	min-height: 613px;
+	
+	.tab-button-container {
+		width: 100%;
+		display: flex;
+		align-items: center;
+	}
+	
+	.tabs-list {
+		border-bottom: 2px solid ${gcOrange};
+		padding: 0;
+		display: flex;
+		align-items: center;
+		flex: 9;
+		margin: 10px !important;
+	}
+	
+	.panel-container {
+		align-items: center;
+		margin: 10px;
+	}
+`;
+
 const useStyles = makeStyles((theme) => ({
 	root: {
 		padding: 0,
@@ -295,7 +320,7 @@ const useStyles = makeStyles((theme) => ({
 
 const RESULTS_PER_PAGE = 12;
 
-const GCUserDashboard = (props) => {
+const GCUserDashboard = React.memo((props) => {
 	const {
 		userData,
 		updateUserData,
@@ -2200,14 +2225,14 @@ const GCUserDashboard = (props) => {
 	
 
 	return (
-		<div style={styles.tabContainer} id='gc-user-dash'>
+		<TabContainer id='gc-user-dash'>
 			<Tabs
 				onSelect={(tabIndex, lastIndex, event) =>
 					handleTabClicked(tabIndex, lastIndex, event)
 				}
 			>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
+				<div className={'tab-button-container'}>
+					<TabList className={'tabs-list'} >
 						{tabList.map((tab, index) => {
 							const tl = index === 0 ? '5px' : '0';
 							const tr = index === tabList.length - 1 ? '5px' : '0';
@@ -2304,25 +2329,17 @@ const GCUserDashboard = (props) => {
 					</Popper>
 				</div>
 
-				<div style={styles.panelContainer}>
+				<div className={'panel-container'}>
 					{tabList.map(tab => <TabPanel> {tab.panel} </TabPanel>)}
 				</div>
 			</Tabs>
-		</div>
+		</TabContainer>
 	);
-};
+});
 
 const styles = {
 	menuItem: {
 		fontSize: 16
-	},
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px',
 	},
 	tabStyle: {
 		width: '140px',
@@ -2348,19 +2365,6 @@ const styles = {
 		backgroundColor: gcOrange,
 		borderColor: 'none',
 		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
 	},
 	panelContainer: {
 		alignItems: 'center',

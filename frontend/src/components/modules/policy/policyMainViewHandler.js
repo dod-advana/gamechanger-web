@@ -37,6 +37,7 @@ import '../../mainView/main-view.css';
 import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
+import GCAboutUs from '../../aboutUs/GCAboutUs';
 
 const _ = require('lodash');
 
@@ -220,6 +221,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
+
 const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
@@ -263,6 +265,7 @@ const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 		setState(dispatch, { recDocs: filteredPubs });
 	}
 };
+
 const handleSources = async (state, dispatch, cancelToken) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
@@ -313,7 +316,6 @@ const handleSources = async (state, dispatch, cancelToken) => {
 	}
 };
 
-
 const formatString = (text) => {
 	let titleCase = text
 		.split(' ')
@@ -327,7 +329,6 @@ const formatString = (text) => {
 		.join(' ');
 	return _.truncate(titleCase, { length: 60, separator: /,?\.* +/ });
 };
-
 
 const PolicyMainViewHandler = {
 	async handlePageLoad(props) {
@@ -1086,6 +1087,11 @@ const PolicyMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		const {state} = props;
+		return <GCAboutUs state={state} />;
+	}
 };
 
 export default PolicyMainViewHandler;

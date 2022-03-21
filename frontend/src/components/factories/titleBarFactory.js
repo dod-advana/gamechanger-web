@@ -4,7 +4,7 @@ const detailsTitleBarHandler = require(`../modules/details/detailsTitleBarHandle
 const edaTitleBarHandler = require(`../modules/eda/edaTitleBarHandler`);
 const policyTitleBarHandler = require(`../modules/policy/policyTitleBarHandler`);
 const globalSearchTitleBarHandler = require(`../modules/globalSearch/globalSearchTitleBarHandler`);
-const budgetSearchTitleBarHandler = require(`../modules/budgetSearch/budgetSearchTitleBarHandler`);
+const jbookTitleBarHandler = require(`../modules/jbook/jbookTitleBarHandler`);
 
 class TitleBarFactory {
 	constructor(module) {
@@ -25,8 +25,8 @@ class TitleBarFactory {
 				case 'admin/adminTitleBarHandler':
 					this.handler = adminTitleBarHandler;
 					break;
-				case 'budgetSearch/budgetSearchTitleBarHandler':
-					this.handler = budgetSearchTitleBarHandler;
+				case 'jbook/jbookTitleBarHandler':
+					this.handler = jbookTitleBarHandler;
 					break;
 				default:
 					this.handler = defaultTitleBarHandler;

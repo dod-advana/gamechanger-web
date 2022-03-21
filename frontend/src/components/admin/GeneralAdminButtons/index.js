@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Paper } from '@material-ui/core';
-
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';
 import { styles } from '../util/GCAdminStyles';
 import UOTAlert from '../../common/GCAlert';
-
 import TrendingBlackListModal from './TrendingBlackListModal';
 import EditEsIndexModal from './EditEsIndexModal';
 
@@ -177,24 +175,6 @@ export default () => {
 			createAlert(title, 'error', 'Cache clearing failed');
 		}
 	};
-	const populateNewUserId = async () => {
-		try {
-			await gameChangerAPI.populateNewUserId().then(() => {
-				createAlert(
-					'Populating New User IDs',
-					'success',
-					'Updated new_user_id column'
-				);
-			});
-		} catch (e) {
-			console.log(e);
-			createAlert(
-				'Populating New User IDs',
-				'error',
-				'Failed updating Postgres table'
-			);
-		}
-	};
 
 	const reloadHandlerMap = async () => {
 		const title = 'Reloading Handler Map: ';
@@ -212,6 +192,7 @@ export default () => {
 			);
 		}
 	};
+
 	const toggleUserFeedback = async () => {
 		const title = 'Requst User Feedback: ';
 		createAlert(title, 'info', 'Started');
@@ -307,6 +288,7 @@ export default () => {
 			console.error('Error getting entity search mode', e);
 		}
 	};
+
 	const getUserFeedback = async () => {
 		try {
 			const { data } = await gameChangerAPI.getUserFeedbackMode();
@@ -316,6 +298,7 @@ export default () => {
 			console.error('Error getting user feedback mode', e);
 		}
 	};
+
 	const getJiraFeedback = async () => {
 		try {
 			const { data } = await gameChangerAPI.getJiraFeedbackMode();
@@ -345,6 +328,15 @@ export default () => {
 			console.error('Error getting topic search mode', e);
 		}
 	};
+
+	const syncOldUserTableToNew = async () => {
+		try {
+			await gameChangerAPI.syncUserTable();
+		} catch (e) {
+			console.error('Error syncing user table', e);
+		}
+	};
+
 	useEffect(() => {
 		getCombinedSearch();
 		getIntelligentAnswers();
@@ -484,22 +476,6 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Edit Trending Blacklist
-									</span>
-								</h2>
-							</Link>
-						</Paper>
-					</div>
-					<div style={styles.feature}>
-						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={populateNewUserId}
-								style={{ textDecoration: 'none' }}
-							>
-								<i style={styles.image} className="fa fa-users fa-2x" />
-								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Populate New User ID Column
 									</span>
 								</h2>
 							</Link>
@@ -675,6 +651,22 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Toggle LTR
+									</span>
+								</h2>
+							</Link>
+						</Paper>
+					</div>
+					<div style={styles.feature}>
+						<Paper style={styles.paper} zDepth={2}>
+							<Link
+								to="#"
+								onClick={syncOldUserTableToNew}
+								style={{ textDecoration: 'none' }}
+							>
+								<i style={styles.image} className="fa fa-id-badge fa-2x" />
+								<h2 style={styles.featureName}>
+									<span style={styles.featureNameLink}>
+										Sync User Table
 									</span>
 								</h2>
 							</Link>

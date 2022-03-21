@@ -94,12 +94,24 @@ const constructorOptionsMock = {
 		select() {},
 		get() {}
 	},
-	dataTracker: {}
+	dataTracker: {},
+	apiKeyRequests: {},
+	apiKey: {},
+	feedback: {},
+	gcAssists: {},
+	favoriteDocument: {},
+
+
 };
 
 const reqMock = {
 	headers: {
 		SSL_CLIENT_S_DN_CN: 'testsuite'
+	},
+	session: {
+		user: {
+			id: 'testsuite'
+		}
 	},
 	get(key) {
 		return this.headers[key];

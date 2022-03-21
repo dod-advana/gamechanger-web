@@ -4,14 +4,7 @@ import { Typography } from '@material-ui/core';
 import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
 import TitleBarFactory from '../factories/titleBarFactory';
-import AdvanaMegaMenuPill, {
-	PillButton,
-	TitleText,
-} from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
-
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 
 const styles = {
 	container: {
@@ -157,22 +150,10 @@ const SearchBanner = (props) => {
 					)}
 					<div style={styles.searchBar}>{children}</div>
 					{!jupiter && (
-						<>
-							{isDecoupled ? (
-								<PillButton
-									margin={'0 60px 0 5px'}
-									justifyContent="center"
-									onClick={() => window.location.href = 'https://advana.data.mil/'}
-								>
-									<TitleText>ADVANA</TitleText>
-								</PillButton>
-							) : (
-								<AdvanaMegaMenuPill
-									margin="0 0 0 5px"
-									defaultHeader="Applications"
-								/>
-							)}
-						</>
+						<AdvanaMegaMenuPill
+							margin="0 15px 0 5px"
+							defaultHeader="Applications"
+						/>
 					)}
 				</div>
 			)}
