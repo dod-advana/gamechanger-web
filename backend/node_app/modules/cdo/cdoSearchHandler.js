@@ -7,6 +7,7 @@ const constants = require('../../config/constants');
 const SearchHandler = require('../base/searchHandler');
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const sparkMD5 = require('spark-md5');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;
 
@@ -17,7 +18,7 @@ class CDOSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			searchText: '',
 			startTime: new Date().toISOString(),
 			numResults: -1,

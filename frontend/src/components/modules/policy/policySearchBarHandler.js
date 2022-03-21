@@ -13,7 +13,6 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import { setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import UserButton from '../../searchBar/UserButton';
 const gameChangerAPI = new GameChangerAPI();
 
 const PolicySearchBarHandler = {
@@ -182,8 +181,6 @@ const PolicySearchBarHandler = {
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
-
-				<UserButton context={context}></UserButton>
 
 				<Popover
 					onClose={() => {

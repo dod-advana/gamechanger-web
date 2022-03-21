@@ -10,22 +10,12 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
 import AnalystTools from '../analystTools';
-import GCUserDashboard from '../user/GCUserDashboard';
-import GCAboutUs from '../aboutUs/GCAboutUs';
-import {
-	checkUserInfo,
-	getUserData,
-	handleSaveFavoriteDocument,
-	handleSaveFavoriteTopic,
-	handleSaveFavoriteOrganization,
-	setState,
-} from '../../utils/sharedFunctions';
-import GameChangerAPI from '../api/gameChanger-service-api';
+import { setState, getUserData } from '../../utils/sharedFunctions';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
+import UserProfileHandlerFactory from '../factories/userProfileFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
-const gameChangerAPI = new GameChangerAPI();
 let cancelToken = axios.CancelToken.source();
 
 const MainView = (props) => {
@@ -36,24 +26,31 @@ const MainView = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [mainViewHandler, setMainViewHandler] = useState();
 	const [searchHandler, setSearchHandler] = useState();
+	const [userProfileHandler, setUserProfileHandler] = useState();
+
+	useEffect(() => {
+		if (state.cloneDataSet && !state.userDataSet) {
+			getUserData(dispatch);
+		}
+	}, [dispatch, state.cloneData, state.cloneDataSet, state.userDataSet]);
 
 	useEffect(() => {
 		return function cleanUp(){
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
 		};
-	},[]);
+	}, []);
 
 	useEffect(() => {
-		if(state.runningSearch && cancelToken) {
+		if (state.runningSearch && cancelToken) {
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
 		};
-	},[state.runningSearch]);
+	}, [state.runningSearch]);
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
-		setState( dispatch, {pageDisplayed: urlArray[urlArray.length - 1]});
+		setState(dispatch, {pageDisplayed: urlArray[urlArray.length - 1]});
 	}, [dispatch]);
 
 	useEffect(() => {
@@ -62,13 +59,20 @@ const MainView = (props) => {
 			const handler = factory.createHandler();
 			setMainViewHandler(handler);
 			setPageLoaded(true);
-			const viewNames = handler.getViewNames({cloneData: state.cloneData});
+			const viewNames = handler.getViewNames({ cloneData: state.cloneData });
 
 			const searchFactory = new SearchHandlerFactory(
 				state.cloneData.search_module
 			);
 			const searchHandler = searchFactory.createHandler();
 			setSearchHandler(searchHandler);
+
+			const profileFactory = new UserProfileHandlerFactory(
+				state.cloneData.main_view_module
+			);
+
+			const profileHandler = profileFactory.createHandler();
+			setUserProfileHandler(profileHandler);
 
 			handler.handlePageLoad({
 				state,
@@ -77,6 +81,8 @@ const MainView = (props) => {
 				searchHandler,
 				cancelToken
 			});
+
+
 
 			setState(dispatch, { viewNames });
 		}
@@ -125,7 +131,7 @@ const MainView = (props) => {
 			if (state.databasesPagination && searchHandler) {
 				searchHandler.handleDatabasesPagination(state, dispatch);
 			}
-		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo') {
+		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo' || state.cloneData.clone_name.toLowerCase() === 'jbook') {
 			if (state.docsPagination && searchHandler) {
 				setState(dispatch, {
 					docsPagination: false,
@@ -144,7 +150,8 @@ const MainView = (props) => {
 			if (
 				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
-				!state.docsPagination
+				!state.docsPagination &&
+				state.cloneData.clone_name.toLowerCase() !== 'jbook' // disabling infinite scroll for jbook
 			) {
 				setState(dispatch, {
 					docsLoading: true,
@@ -154,7 +161,7 @@ const MainView = (props) => {
 				});
 			}
 		},
-		{ debounce: 5000 }
+		{ offset: 200, debounce: 5000 }
 	);
 
 	const getViewPanels = () => {
@@ -179,88 +186,11 @@ const MainView = (props) => {
 	};
 
 	const getUserDashboard = () => {
-		return (
-			<GCUserDashboard 
-				state={state} 
-				userData={state.userData} 
-				updateUserData={() => getUserData(dispatch)}
-				handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
-				handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search)}
-				handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search)}
-				saveFavoriteSearch={(
-					favoriteName,
-					favoriteSummary,
-					favorite,
-					tinyUrl,
-					searchText,
-					count
-				) =>
-					handleSaveFavoriteSearchHistory(
-						favoriteName,
-						favoriteSummary,
-						favorite,
-						tinyUrl,
-						searchText,
-						count
-					)
-				}
-				handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
-					handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
-				}
-				handleFavoriteOrganization={({
-					organization_name,
-					organization_summary,
-					favorite,
-				}) =>
-					handleSaveFavoriteOrganization(
-						organization_name,
-						organization_summary,
-						favorite,
-						dispatch
-					)
-				}
-				cloneData={state.cloneData}
-				checkUserInfo={() => {
-					return checkUserInfo(state, dispatch);
-				}}
-				dispatch={dispatch}
-			/>
-		);
+		return userProfileHandler.getUserProfilePage({ state, dispatch });
 	};
 
 	const getAboutUs = () => {
-		return <GCAboutUs state={state} />;
-	};
-
-	const handleDeleteFavoriteSearch = async (search) => {
-		await gameChangerAPI.favoriteSearch(search);
-		await getUserData(dispatch);
-	};
-
-	const handleClearFavoriteSearchNotification = async (search) => {
-		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
-		await getUserData(dispatch);
-	};
-
-	const handleSaveFavoriteSearchHistory = async (
-		favoriteName,
-		favoriteSummary,
-		favorite,
-		tinyUrl,
-		searchText,
-		count
-	) => {
-		const searchData = {
-			search_name: favoriteName,
-			search_summary: favoriteSummary,
-			search_text: searchText,
-			tiny_url: tinyUrl,
-			document_count: count,
-			is_favorite: favorite,
-		};
-
-		await gameChangerAPI.favoriteSearch(searchData);
-		await getUserData(dispatch);
+		return mainViewHandler.getAboutUs({ state });
 	};
 
 	const getNonMainPageOuterContainer = (getInnerChildren) => {
@@ -269,14 +199,14 @@ const MainView = (props) => {
 				<div
 					style={{
 						backgroundColor: 'rgba(223, 230, 238, 0.5)',
-						marginBottom: 10,
+						minHeight: 'calc(100vh - 200px)'
 					}}
 				>
 					{state.pageDisplayed !== 'aboutUs' && (
 						<div
 							style={{
 								borderTop: '1px solid #B0BAC5',
-								width: '91.2%',
+								width: '96.5%',
 								marginLeft: 'auto',
 								marginRight: 'auto',
 							}}
@@ -344,8 +274,8 @@ const MainView = (props) => {
 							style={{
 								backgroundColor:
 									state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
-									state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-									state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+										state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
+										state.pageDisplayed === PAGE_DISPLAYED.aboutUs
 										? '#ffffff'
 										: '#DFE6EE',
 							}}

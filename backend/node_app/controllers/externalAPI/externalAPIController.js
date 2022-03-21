@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const ApiKey = require('../../models').api_key;
 const ApiKeyRequests = require('../../models').api_key_request;
 const ApiKeyRequestClones = require('../../models').api_key_request_clone;
@@ -7,6 +7,7 @@ const CloneMeta = require('../../models').clone_meta;
 const EmailUtility = require('../../utils/emailUtility');
 const constantsFile = require('../../config/constants');
 const hat = require('hat');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 module.exports.SwaggerDefinition = {
 	swaggerDefinition: {
@@ -265,7 +266,7 @@ class ExternalAPIController {
 			if (name && email && reason) {
 				try {
 					const request = await this.apiKeyRequests.create({
-						username: userId,
+						username: getUserIdFromSAMLUserId(req),
 						name,
 						email,
 						reason

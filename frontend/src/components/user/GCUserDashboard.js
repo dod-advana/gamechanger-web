@@ -111,6 +111,31 @@ const FavoriteStyledI = styled.div`
 	}
 `;
 
+const TabContainer = styled.div`
+	align-items: center;
+	min-height: 613px;
+	
+	.tab-button-container {
+		width: 100%;
+		display: flex;
+		align-items: center;
+	}
+	
+	.tabs-list {
+		border-bottom: 2px solid ${gcOrange};
+		padding: 0;
+		display: flex;
+		align-items: center;
+		flex: 9;
+		margin: 10px !important;
+	}
+	
+	.panel-container {
+		align-items: center;
+		margin: 10px;
+	}
+`;
+
 const useStyles = makeStyles((theme) => ({
 	root: {
 		padding: 0,
@@ -295,7 +320,7 @@ const useStyles = makeStyles((theme) => ({
 
 const RESULTS_PER_PAGE = 12;
 
-const GCUserDashboard = (props) => {
+const GCUserDashboard = React.memo((props) => {
 	const {
 		userData,
 		updateUserData,
@@ -609,10 +634,12 @@ const GCUserDashboard = (props) => {
 
 	useEffect(() => {
 		if (userData === null) return;
-
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name);
+			userData.favorite_searches = userData.favorite_searches.filter(search => {
+				const searchArr = search.url.split('?');
+				return searchArr[0] === cloneData.url;
+			});
 			userData.favorite_searches.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
@@ -651,29 +678,34 @@ const GCUserDashboard = (props) => {
 		}
 
 		if (userData.export_history) {
-			userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
-			userData.export_history.forEach(hist => {
+			try {
+				userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
+				userData.export_history.forEach(hist => {
+	
+					let orgFilterText = '';
+					if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilterQuery &&
+						hist.download_request_body.orgFilterQuery === '*'
+					) {
+						orgFilterText = 'All sources';
+					} else if (
+						hist.download_request_body &&
+						hist.download_request_body.orgFilter
+					) {
+						Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
+							if (hist.download_request_body.orgFilter[key]) {
+								orgFilterText += `${key}, `;
+							}
+						});
+						orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
+					}
+					hist.orgFilterText = orgFilterText;
+				});
+			} catch (e) {
+				console.log('Export history error', e);
+			} 
 
-				let orgFilterText = '';
-				if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilterQuery &&
-					hist.download_request_body.orgFilterQuery === '*'
-				) {
-					orgFilterText = 'All sources';
-				} else if (
-					hist.download_request_body &&
-					hist.download_request_body.orgFilter
-				) {
-					Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
-						if (hist.download_request_body.orgFilter[key]) {
-							orgFilterText += `${key}, `;
-						}
-					});
-					orgFilterText = orgFilterText.slice(0, orgFilterText.length - 2);
-				}
-				hist.orgFilterText = orgFilterText;
-			});
 
 			setExportHistory(userData.export_history);
 			setExportHistoryLoading(false);
@@ -708,7 +740,7 @@ const GCUserDashboard = (props) => {
 			setFavoriteOrganizationsLoading(false);
 		}
 
-	}, [userData, cloneData.clone_name]);
+	}, [userData, cloneData.clone_name, cloneData.url]);
 
 	useEffect(() => {}, [reload]);
 
@@ -902,7 +934,7 @@ const GCUserDashboard = (props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		const searchSettings = (
+		const searchSettings = cloneData.clone_name === 'gamechanger' ? (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
@@ -919,6 +951,17 @@ const GCUserDashboard = (props) => {
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
 					{search.isRevoked ? 'true' : 'false'}
+				</div>
+			</>
+		) : (
+			<>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Search Text:</span>{' '}
+					{search.search_text}
+				</div>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Source:</span>{' '}
+					{search.orgFilterText}
 				</div>
 			</>
 		);
@@ -2182,14 +2225,14 @@ const GCUserDashboard = (props) => {
 	
 
 	return (
-		<div style={styles.tabContainer} id='gc-user-dash'>
+		<TabContainer id='gc-user-dash'>
 			<Tabs
 				onSelect={(tabIndex, lastIndex, event) =>
 					handleTabClicked(tabIndex, lastIndex, event)
 				}
 			>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
+				<div className={'tab-button-container'}>
+					<TabList className={'tabs-list'} >
 						{tabList.map((tab, index) => {
 							const tl = index === 0 ? '5px' : '0';
 							const tr = index === tabList.length - 1 ? '5px' : '0';
@@ -2286,25 +2329,17 @@ const GCUserDashboard = (props) => {
 					</Popper>
 				</div>
 
-				<div style={styles.panelContainer}>
+				<div className={'panel-container'}>
 					{tabList.map(tab => <TabPanel> {tab.panel} </TabPanel>)}
 				</div>
 			</Tabs>
-		</div>
+		</TabContainer>
 	);
-};
+});
 
 const styles = {
 	menuItem: {
 		fontSize: 16
-	},
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px',
 	},
 	tabStyle: {
 		width: '140px',
@@ -2330,19 +2365,6 @@ const styles = {
 		backgroundColor: gcOrange,
 		borderColor: 'none',
 		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
 	},
 	panelContainer: {
 		alignItems: 'center',

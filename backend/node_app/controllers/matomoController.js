@@ -1,5 +1,5 @@
 const MATOMO_STATUS = require('../models').matomo_status;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class MatomoController {
 	constructor(opts = {}) {

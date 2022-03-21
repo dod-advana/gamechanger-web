@@ -25,6 +25,9 @@ import ApplicationsIcon from '../../../images/icon/slideout-menu/applications ic
 import DashboardsIcon from '../../../images/icon/slideout-menu/dashboard icon.png';
 import DatabasesIcon from '../../../images/icon/slideout-menu/database icon.png';
 import DataSourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+
+const gameChangerAPI = new GameChangerAPI();
 
 const fullWidthCentered = {
 	width: '100%',
@@ -164,6 +167,8 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 const GlobalSearchMainViewHandler = {
 	async handlePageLoad(props) {
 		const { state, dispatch, searchHandler } = props;
+
+		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 		const parsedURL = searchHandler.parseSearchURL(state);
 		if (parsedURL.searchText) {
@@ -488,6 +493,10 @@ const GlobalSearchMainViewHandler = {
 			</div>
 		);
 	},
+
+	getAboutUs(props) {
+		return defaultMainViewHandler.getAboutUs(props);
+	}
 };
 
 export default GlobalSearchMainViewHandler;
