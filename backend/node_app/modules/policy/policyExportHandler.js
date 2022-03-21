@@ -42,7 +42,7 @@ class PolicyExportHandler extends ExportHandler {
 			if(doubleQuoteCount % 2 === 1){
 				req.body.searchText = searchText.replace(/["]+/g,"");
 			}
-			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index}
+			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;

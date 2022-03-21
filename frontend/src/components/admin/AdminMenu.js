@@ -10,10 +10,10 @@ import AdminIcon from '../../images/icon/AdminIcon.png';
 import CloneIcon from '../../images/icon/CloneIcon.png';
 import AuthIcon from '../../images/icon/Authority.png';
 import AnalystToolsIcon from '../../images/icon/analyticswht.png';
-import DocumumentIcon from '../../images/icon/Document.png'
+import DocumumentIcon from '../../images/icon/Document.png';
 import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
 import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
-import { HoverNavItem } from '../../components/navigation/NavItems';
+import { HoverNavItem } from '../navigation/NavItems';
 import { toolTheme } from './util/GCAdminStyles';
 /**
  * This file containes two components ClosedAdminMenu and OpenedAdminMenu

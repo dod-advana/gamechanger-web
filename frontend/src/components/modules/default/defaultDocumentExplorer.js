@@ -378,7 +378,7 @@ export default function DocumentExplorer({
 								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
 						if (item.type === 'document') {
-							const pageHits = item.pageHits.filter(hit => hit.pageNumber)
+							const pageHits = item.pageHits.filter(hit => hit.pageNumber);
 							return (
 								<div key={key}>
 									<div

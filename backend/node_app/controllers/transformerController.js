@@ -36,14 +36,14 @@ class TransformerController {
 			'initializeLTR': this.mlApi.initializeLTR,
 			'createModelLTR': this.mlApi.createModelLTR,
 			'stopProcess': this.mlApi.stopProcess
-		}
+		};
 
 		// Get methods
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
-		this.getDataList = this.getData.bind(this,'getDataList')
+		this.getDataList = this.getData.bind(this,'getDataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');

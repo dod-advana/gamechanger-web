@@ -78,27 +78,27 @@ class SearchUtility {
 			let nextIsAbb = true;
 			let timesSinceLastAdd = 0;
 
-			let expandedWords = {}
-			let similarWords = {}
+			let expandedWords = {};
+			let similarWords = {};
 			//let expandedWords= (typeof expansionDict['qexp']  === 'undefined') ? [] : expansionDict['qexp'] ;
 			if (expansionDict) {
-				expandedWords = expansionDict['qexp']
-				similarWords = expansionDict['wordsim']
+				expandedWords = expansionDict['qexp'];
+				similarWords = expansionDict['wordsim'];
 			}
 
 
 			let wordsList = [];
 			for (var word in similarWords){
-				wordsList = wordsList.concat(similarWords[word])
+				wordsList = wordsList.concat(similarWords[word]);
 			}
 			for (var word in expandedWords){
-				wordsList = wordsList.concat(expandedWords[word])
+				wordsList = wordsList.concat(expandedWords[word]);
 			}
 
 			if (relatedSearches && relatedSearches.length > 0) {
 				relatedSearches.forEach((term) => {
-					result[key].push({phrase: term, source: 'related'})
-				})
+					result[key].push({phrase: term, source: 'related'});
+				});
 			}
 			while (result[key].length < 12 && timesSinceLastAdd < 18) {
 				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
@@ -172,16 +172,16 @@ class SearchUtility {
 		if (toReturn && toReturn[key] && toReturn[key].length) {
 			var ordered =[];
 			var currList = [];
-			let orig = key.replace(/[^\w\s]|_/g, "").trim()
-			currList.push(orig)
+			let orig = key.replace(/[^\w\s]|_/g, "").trim();
+			currList.push(orig);
 			toReturn[key].forEach((y) => {
 					y.phrase = y.phrase.replace(/[^\w\s]|_/g, "").trim();
 					if (y.phrase && y.phrase !== '' && y.phrase !== key && !currList.includes(y.phrase.toLowerCase())) {
 							ordered.push(y);
-							currList.push(y.phrase.toLowerCase())
+							currList.push(y.phrase.toLowerCase());
 					}
 				});
-			cleaned[key] = ordered
+			cleaned[key] = ordered;
 		}
 
 		return cleaned;
@@ -208,25 +208,25 @@ class SearchUtility {
 		return decodeURIComponent(results[2].replace(/\+/g, ' '));
 	}
 
-	remove_stopwords = (str) => {
+	remove_stopwords(str) {
 		const stopwords = ["a", "about", "above", "after", "again", "against", "ain", "all", "am", "an", "and", "any", "are", "aren", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can", "couldn", "couldn't", "d", "did", "didn", "didn't", "do", "does", "doesn", "doesn't", "doing", "don", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn", "hadn't", "has", "hasn", "hasn't", "have", "haven", "haven't", "having", "he", "her", "here", "hers", "herself", "him", "himself", "his", "how", "i", "if", "in", "into", "is", "isn", "isn't", "it", "it's", "its", "itself", "just", "ll", "m", "ma", "me", "mightn", "mightn't", "more", "most", "mustn", "mustn't", "my", "myself", "needn", "needn't", "no", "nor", "not", "now", "o", "of", "off", "on", "once", "only", "or", "other", "our", "ours", "ourselves", "out", "over", "own", "re", "s", "same", "shan", "shan't", "she", "she's", "should", "should've", "shouldn", "shouldn't", "so", "some", "such", "t", "than", "that", "that'll", "the", "their", "theirs", "them", "themselves", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", "up", "ve", "very", "was", "wasn", "wasn't", "we", "were", "weren", "weren't", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "won", "won't", "wouldn", "wouldn't", "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "could", "he'd", "he'll", "he's", "here's", "how's", "i'd", "i'll", "i'm", "i've", "let's", "ought", "she'd", "she'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "we'd", "we'll", "we're", "we've", "what's", "when's", "where's", "who's", "why's", "would"];
-    let res = [];
-    const words = str.toLowerCase().split(' ');
-    for(let i=0;i<words.length;i++) {
-       const word_clean = words[i].split(".").join("")
-       if(!stopwords.includes(word_clean)) {
-           res.push(word_clean);
-       }
-    }
-    return(res.join(' '));
-} 
+		let res = [];
+		const words = str.toLowerCase().split(' ');
+		for(let i=0;i<words.length;i++) {
+			const word_clean = words[i].split(".").join("");
+			if(!stopwords.includes(word_clean)) {
+				res.push(word_clean);
+			}
+		}
+		return(res.join(' '));
+	} 
 
 	getEsSearchTerms({ searchText, questionFlag }) {
 		let terms = searchText;
 		if (questionFlag){
 			const stopwordsRemoved = this.remove_stopwords(searchText);
 			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
-			terms = cleanedText
+			terms = cleanedText;
 		}
 		return this.getQueryAndSearchTerms(terms);
 	}
@@ -377,7 +377,7 @@ class SearchUtility {
 			docIds = {},
 			selectedDocuments,
 			ltr = false,
-			paragraphLimit = 5, 
+			paragraphLimit = 100, 
 			hasHighlights = true
 		 }, 
 		 user) {
@@ -395,10 +395,10 @@ class SearchUtility {
 				}
 			}
 			storedFields = [...storedFields, ...extStoredFields];
-			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english')
+			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english');
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *")
+			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
 			
 			let query = {
 				_source: {
@@ -554,23 +554,23 @@ class SearchUtility {
 
 			switch(sort){
 				case 'Relevance':
-					query.sort = [ {"_score": {"order" : order}} ]
+					query.sort = [ {"_score": {"order" : order}} ];
 					break;
 				case 'Publishing Date':
-					query.sort = [ {"publication_date_dt": {"order" : order}} ]
+					query.sort = [ {"publication_date_dt": {"order" : order}} ];
 					break;
 				case 'Alphabetical':
-					query.sort = [ {"display_title_s": {"order" : order}} ]
+					query.sort = [ {"display_title_s": {"order" : order}} ];
 					break;
 				case 'Popular':
-					query.sort = [ {"pop_score": {"order" : order}} ]
+					query.sort = [ {"pop_score": {"order" : order}} ];
 					break;
 				case 'References':
 					query.sort = [{"_script": {
 						"type": "number",
 						"script": "doc.ref_list.size()",
 						"order": order
-					}}]
+					}}];
 				default: 
 					break;
 			} 
@@ -644,9 +644,9 @@ class SearchUtility {
 				delete query.highlight;
 			}
 			if (Object.keys(docIds).length !== 0){
-				query.query.bool.must.push(
+				query.query.bool.filter.push(
 					{terms: {id: docIds}}
-					)
+				);
 
 			}
 
@@ -680,7 +680,7 @@ class SearchUtility {
 					  }
 					
 				  }
-			]
+			];
 			}
 			return query;
 		} catch (err) {
@@ -705,7 +705,7 @@ class SearchUtility {
 	async getTitle (parsedQuery, clientObj, userId) {
 	// get contents of single document searching by doc display title
 		try {
-			let results = {}
+			let results = {};
 			let { esClientName, esIndex } = clientObj;
 			let titleQuery = {
 				size: 1,
@@ -720,9 +720,9 @@ class SearchUtility {
 						]
 					}
 				}
-			}
+			};
             results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-            return results
+            return results;
         } catch (err) {
             this.logger.error(err, 'TJKBNOF', userId);
             }
@@ -834,7 +834,7 @@ class SearchUtility {
 						id: id
 					}
 				}
-			}
+			};
 		} catch (err) {
 			this.logger.error(err, 'TJKFH5F', userId);
 			}
@@ -876,7 +876,7 @@ class SearchUtility {
 						}
 					}
 				]
-			}
+			};
 			
 			// make phrase queries for each bigram
 			for (const element of bigrams) {
@@ -889,7 +889,7 @@ class SearchUtility {
 							boost: 6
 						}
 					}
-				}
+				};
 				bigramQueries.docMustQueries.push(wildcard);
 
 				const qs = {
@@ -900,7 +900,7 @@ class SearchUtility {
 					fuzzy_max_expansions: 100,
 					fuzziness: 'AUTO'
 					}
-				}
+				};
 				bigramQueries.docMustQueries.push(qs);
 
 				const mm = {
@@ -910,7 +910,7 @@ class SearchUtility {
 					type: "phrase",
 					boost: 3
 					}
-				}
+				};
 				bigramQueries.docShouldQueries.push(mm);
 
 				// entities 
@@ -922,7 +922,7 @@ class SearchUtility {
 							boost: 0.5
 						}
 					}
-				}
+				};
 				bigramQueries.entityShouldQueries.push(nameEntityQuery);
 
 				const multiEntityQuery = {
@@ -931,7 +931,7 @@ class SearchUtility {
 						query: element,
 						type: 'phrase_prefix'
 					}
-				}
+				};
 				bigramQueries.entityShouldQueries.push(multiEntityQuery);
 			};
 			return bigramQueries;
@@ -1007,7 +1007,7 @@ class SearchUtility {
 							should: bigramQueries.docShouldQueries
 						}
 					}
-				}
+				};
 			};
 			return query;
 		} catch (e) {
@@ -1024,7 +1024,7 @@ class SearchUtility {
 			for (const word of searchTextList) {
 				const alias = {
 					match: { 'aliases.name': word }
-				}
+				};
 				mustQueries.push(alias);
 			};
 
@@ -1063,12 +1063,12 @@ class SearchUtility {
 				for (var i = 0; i < aliases.length; i++) {
 					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
 						matchingAlias = aliasResults.body.hits.hits[0];
-						matchingAlias.match = aliases[i]
-						break
+						matchingAlias.match = aliases[i];
+						break;
 					}
 				}
 			};
-			return matchingAlias
+			return matchingAlias;
 		} catch (e) {
 		this.logger.error(e, 'MBWYH5F', user);
 		}
@@ -1082,7 +1082,7 @@ class SearchUtility {
 				let paragraphs = docs[i]._source.paragraphs;
 				let parText = paragraphs.map(item => item.par_raw_text_t).join(" ");
 				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
-					filteredResults.push(docs[i])
+					filteredResults.push(docs[i]);
 				} else { // pass
 					//console.log("REMOVING DOC: ", docs[i])
 				}
@@ -1101,21 +1101,21 @@ class SearchUtility {
 		let end = +start + +1;
 		let text = qaTextList[start];
 		let total_pars = qaTextList.length;
-		let context = []
+		let context = [];
 		let arr = text.split(/\s+/);
 		try {
 			for (start,end; start>=0,end<=total_pars; --start,++end) {
 				if (start <= 1) {
-					start = 1
+					start = 1;
 				}
 				if (end >= total_pars) {
-					end = total_pars
+					end = total_pars;
 				}
 				context = qaTextList.slice(start, end);
 				text = context.join(' ');
 				arr = text.split(/\s+/);
 				if (arr.length > minLength) {
-					break
+					break;
 				}
 			}
 			return context;
@@ -1174,7 +1174,7 @@ class SearchUtility {
 				entities.allResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, qaEntityQuery, userId);
 			};
 			if (entities.allResults.body && entities.allResults.body.hits.total.value > 0) {
-				entities.QAResults = entities.allResults.body.hits.hits[0]
+				entities.QAResults = entities.allResults.body.hits.hits[0];
 			};
 			return entities;
 		} catch (e) {
@@ -1206,7 +1206,7 @@ class SearchUtility {
 					cac_only: context[ix].cac_only,
 					pub_date: context[ix].pubDate,
 					displaySource: "Source: " + context[ix].filename.toUpperCase() + " (" + context[ix].resultType.toUpperCase() + ')'
-					}
+					};
 				matchedResults.push(matchedAnswer);
 			};
 			QA.answers = matchedResults;
@@ -1219,7 +1219,7 @@ class SearchUtility {
 	getInnerHitHighlight (paragraph) {
 		// gets just the highlight from an inner hit
 		try {
-			return paragraph.highlight['paragraphs.par_raw_text_t'][0]
+			return paragraph.highlight['paragraphs.par_raw_text_t'][0];
 		} catch (e) {
 			LOGGER.error(e.message, 'NPLWDQCX', '');
 		}
@@ -1228,7 +1228,7 @@ class SearchUtility {
 	getInnerHitParagraph (paragraph) {
 		// get the paragraph text from an inner hit
 		try {
-			return paragraph.fields['paragraphs.par_raw_text_t'][0]
+			return paragraph.fields['paragraphs.par_raw_text_t'][0];
 		} catch (e) {
 			LOGGER.error(e.message, 'NQCPQBX', '');
 		}
@@ -1285,7 +1285,7 @@ class SearchUtility {
 	async processQADocumentResults (docResults, context, esClientName, esIndex, userId, qaParams) {
 
 		let filterLength = 15;
-		let docs = docResults.body.hits.hits
+		let docs = docResults.body.hits.hits;
 		let filteredResults = this.filterEmptyDocs(docs, filterLength);
 		let docLimit = Math.min(qaParams.maxDocContext, filteredResults.length);
 		//let orgList = [];
@@ -1309,7 +1309,7 @@ class SearchUtility {
 							if (para.length > qaParams.maxLength) { // if paragraph is too long, take highlight
 								contextPara.text = this.cleanParagraph(this.getInnerHitHighlight(paraHits[x]));
 							} else if (para.length > 200) { // only keep actual paragraphs not empty strings/titles/headers
-								contextPara.text = para
+								contextPara.text = para;
 							}
 							context.push(contextPara);
 						}
@@ -1360,7 +1360,7 @@ class SearchUtility {
 					recursive: true
 				});
 			}
-			let filedir = dir  + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt'
+			let filedir = dir  + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, "_") + '_search_reports.txt';
 			let report = {query: query, userId: userId, date: today, params: params, saveResults: saveResults};
 			fs.writeFile(filedir, JSON.stringify(report), (err) => { 
 				if (err) { 
@@ -1388,7 +1388,7 @@ class SearchUtility {
 					}
 				}
 			};
-		return query
+		return query;
 
 	}
 	getSearchCountQuery(daysBack, filterWords){
@@ -1432,31 +1432,31 @@ class SearchUtility {
 				}
 			  }
 			}
-		  }
+		  };
 		  return query;
 	}
 	async getSearchCount(daysBack, filterWords, userId, esClientName='gamechanger', maxSearches=10){
 		// need to caps all search text for ID and Title since it's stored like that in ES
-		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
-		let searchCounts = []
-		let searches = []
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
+		let searchCounts = [];
+		let searches = [];
 		try {
 
-			const query = this.getSearchCountQuery(daysBack, filterWords)
+			const query = this.getSearchCountQuery(daysBack, filterWords);
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
 			let aggs = results.body.aggregations.searchTerms.buckets;
 			let maxCount = 0;
 			if (aggs.length > 0) {
 				aggs.forEach(term => {
-					let searchCount = {}
+					let searchCount = {};
 					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
 					searchCount['search'] = word;
 					searchCount['count'] = term.doc_count;
 					if (term.user.buckets.length > 1){
 						word = word.replace(/\s{2,}/g," ");
 						if (!searches.includes(word) && maxCount < maxSearches){
-							searchCounts.push(searchCount)
-							searches.push(word)
+							searchCounts.push(searchCount);
+							searches.push(word);
 							maxCount += 1;
 						}
 					}
@@ -1467,13 +1467,13 @@ class SearchUtility {
 			this.logger.error(err.message, 'LAO1TT', userId);
 		}
 
-		return searchCounts
+		return searchCounts;
 	}
 	getESpresearchMultiQuery({ searchText, index, title = 'display_title_s', name = 'name', aliases = 'aliases', queryTypes = ['title', 'searchhistory', 'entities']}) {
 		const plainQuery = (this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, "") : searchText);
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3){
-			let query = []
+			let query = [];
 			let titleQuery = [
 				{
 					index: index
@@ -1506,12 +1506,12 @@ class SearchUtility {
 				}
 			];
 			if (title !== 'display_title_s'){
-				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search']
+				delete titleQuery[1]['query']['bool']['must'][0]['wildcard']['display_title_s.search'];
 				titleQuery[1]['query']['bool']['must'][0]['wildcard'][title] = {
 					value: `*${plainQuery}*`,
 					boost: 1.0,
 					rewrite: 'constant_score'
-				}
+				};
 			}
 
 			let searchHistoryQuery = [ 
@@ -1569,7 +1569,7 @@ class SearchUtility {
 				query = query.concat(searchHistoryQuery);
 			}
 			if (queryTypes.includes('entities')){
-				query = query.concat(entitiesQuery)
+				query = query.concat(entitiesQuery);
 			}
 			return query;
 		} else {
@@ -1578,33 +1578,33 @@ class SearchUtility {
 	}
 	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
-		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex
-		let relatedSearches = []
-		let simWordList = []
+		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
+		let relatedSearches = [];
+		let simWordList = [];
 		try {
 			if (expansionDict['wordsim']){
-				let similarWords = expansionDict['wordsim']
-				simWordList = Object.keys(expansionDict['wordsim'])
+				let similarWords = expansionDict['wordsim'];
+				simWordList = Object.keys(expansionDict['wordsim']);
 				for (var key in similarWords) {
-					simWordList = simWordList.concat(similarWords[key])
+					simWordList = simWordList.concat(similarWords[key]);
 				}
 			}
 			if (expansionDict['qexp']){
-				let similarWords = expansionDict['qexp']
-				simWordList = Object.keys(expansionDict['qexp'])
+				let similarWords = expansionDict['qexp'];
+				simWordList = Object.keys(expansionDict['qexp']);
 				for (var key in similarWords) {
-					simWordList = simWordList.concat(similarWords[key])
+					simWordList = simWordList.concat(similarWords[key]);
 				}
 			}			
 			if (simWordList.length <1) {
-				simWordList = [searchText]
+				simWordList = [searchText];
 			}
 			for (var key in simWordList){
-				simWordList[key] = simWordList[key].replace(/["']/g, "")
+				simWordList[key] = simWordList[key].replace(/["']/g, "");
 				
 			}
 
-			let similarWordsQuery = simWordList.join("* OR *")
+			let similarWordsQuery = simWordList.join("* OR *");
 			const query = 
 				{
 					size: 1,
@@ -1625,7 +1625,7 @@ class SearchUtility {
 							}
 						}
 					}
-				}
+				};
 		
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
 			let aggs = results.body.aggregations.related.buckets;
@@ -1646,7 +1646,7 @@ class SearchUtility {
 			this.logger.error(err.message, 'ALS01AZ', userId);
 		}
 
-		return relatedSearches
+		return relatedSearches;
 	}
 
 	cleanUpIdEsResultsForGraphCache(raw, user) {
@@ -1747,7 +1747,7 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
 									result.pageHits.push({title: 'Keywords', snippet: new_highlights});
 								}
 								if (r.highlight['filename.search']) {
@@ -1818,7 +1818,7 @@ class SearchUtility {
 									result.pageHits.push({title: 'Title', snippet: r.highlight['display_title_s.search'][0]});
 								}
 								if(r.highlight.keyw_5){
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5)
+									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
 									result.pageHits.push({title: 'Keywords', snippet: new_highlights});								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({title: 'Filename', snippet: r.highlight['filename.search'][0]});
@@ -1867,18 +1867,18 @@ class SearchUtility {
 	}
 	highlight_keywords(all_words, highlights) {
 		// purpose is to highlight words from the entire list.
-		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '');});
+		var resultHighlights = highlights.map(function(x){return x.replace(/<em>/g, '').replace(`</em>`, '')});
 		if (all_words instanceof Array){
-			var all_words_str = all_words.join(", ")
+			var all_words_str = all_words.join(", ");
 		}
 		else {
-			var all_words_str = all_words
+			var all_words_str = all_words;
 		}
 		for (let ind in resultHighlights) {
-			var word = resultHighlights[ind]
-			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`)
+			var word = resultHighlights[ind];
+			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`);
 		}
-		let complete_words = all_words_str.split(', ')
+		let complete_words = all_words_str.split(', ');
 
 		return complete_words;
 	}
@@ -1955,7 +1955,7 @@ class SearchUtility {
 	transformEsFields(raw) {
 		let result = {};
 		const arrayFields = ['keyw_5', 'topics_s', 'top_entities_t',  'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
-		const edaArrayFields = ['pds_header_items_eda_ext_n','pds_line_items_eda_ext_n','syn_header_items_eda_ext_n','syn_line_items_eda_ext_n']
+		const edaArrayFields = ['pds_header_items_eda_ext_n','pds_line_items_eda_ext_n','syn_header_items_eda_ext_n','syn_line_items_eda_ext_n'];
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
 				if (arrayFields.includes(key) || edaArrayFields.includes(key)) {
@@ -1981,7 +1981,7 @@ class SearchUtility {
 						query: searchTerm
 					}
 				}
-			}
+			};
 			return query;
 		}
 		catch {
@@ -1998,7 +1998,7 @@ class SearchUtility {
 		} catch (e) {
 			this.logger.error(e, 'PQKLW5XN', userId);
 		};
-		return sentResults
+		return sentResults;
 	}
 
 	async intelligentSearchHandler(sentenceResults, userId, req, clientObj){
@@ -2094,16 +2094,16 @@ class SearchUtility {
 	}
 	checkValidResults(results){
 		if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-			return true
+			return true;
 		}else{
-			return false
+			return false;
 		}
 	}
 	reorderFirst(results, titleResults) {
 		// reorders a matching title result to the top of the results
-		let reorderedHits = []
-		let firstResult = titleResults.body.hits.hits[0]
-		let firstTitle = firstResult._source.display_title_s
+		let reorderedHits = [];
+		let firstResult = titleResults.body.hits.hits[0];
+		let firstTitle = firstResult._source.display_title_s;
 		let inResults = false;
 		try {
 			results.body.hits.hits.forEach((r) => {
@@ -2115,9 +2115,9 @@ class SearchUtility {
 				}
 			});
 			if (inResults === true) {
-				results.body.hits.hits = reorderedHits
+				results.body.hits.hits = reorderedHits;
 			};
-			return results
+			return results;
 		} catch (e) {
 			this.logger.error(e, 'JKJDFPOF', '');
 		}
@@ -2184,61 +2184,66 @@ class SearchUtility {
 					this.logger.error(err, 'YTP3YF0', '');
 				}
 	}
-	async getRecDocs(doc=["Title 10"], userId=""){
+	async getRecDocs(docs=[], userId=""){
 		let recDocs = [];
 		let recommendations = {};
 		try {
-			recDocs = await this.mlApi.recommender(doc, userId);
+			recDocs = await this.mlApi.recommender(docs, userId);
 			if (recDocs.results && recDocs.results.length > 0) {
-				recommendations = recDocs
-				recommendations.method = "MLAPI search history"
+				recommendations = recDocs;
+				recommendations.method = "MLAPI search history";
 			} else {
-				recommendations = await this.getAllGraphRecs(doc, userId)
-				recommendations.method = "Neo4j graph"
+				recommendations = await this.getAllGraphRecs(docs, userId);
+				recommendations.method = "Neo4j graph";
 			}
-			recommendations.results = this.filterRecommendations(recommendations.results, doc)
+			recommendations.results = this.filterRecommendations(recommendations.results);
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', userId);
 		};
-		return recommendations
+		return recommendations;
 	}
 
-	filterRecommendations(docList, originalDocs) {
+	filterRecommendations(docList) {
 		try {
-			var unique = new Set(docList);
-			var filtered = Array.from(unique).filter(val => !originalDocs.includes(val));
-			return filtered
+			const docCount = {};
+
+			for (const doc of docList) {
+				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
+			}
+			let docListSorted = Object.keys(docCount).sort(function(a,b){return docCount[a]-docCount[b]}).reverse();
+
+ 			return docListSorted;
 		} catch (e) {
 			this.logger.error(e, 'LLLZ12P', '');
-			return docList
+			return docList;
 		}
 	}
 
 	async getAllGraphRecs(docList, userId, max_results=10) {
-		let graphRecs = {}
-		let graphResults = []
-		let usedDocs = []
+		let graphRecs = {};
+		let graphResults = [];
+		let usedDocs = [];
 		try {
 			for (let i = 0; i < docList.length; i++) {
 				if (graphResults.length >= max_results) {
-					break
+					break;
 				} else {
-					const results = await this.getGraphRecs(docList[i], userId)
+					const results = await this.getGraphRecs(docList[i], userId);
                 	results.forEach((d) => graphResults.push(d));
 					usedDocs.push(docList[i]);
 				}
 			}
-			graphRecs.filenames = usedDocs
-			graphRecs.results = graphResults
+			graphRecs.filenames = usedDocs;
+			graphRecs.results = graphResults;
 		} catch (e) {
-			this.logger.error(e, 'ADFAD90', userId)
+			this.logger.error(e, 'ADFAD90', userId);
 		};
-		return graphRecs
+		return graphRecs;
 	}
 
 	async getGraphRecs(doc, userId, algo="louvain") {
 		let suggested = [];
-		let name = doc + ".pdf"
+		let name = doc + ".pdf";
 		let comm_resp = {};
 		let resp = {};
 		try { // first try getting docs by similarity
@@ -2249,15 +2254,15 @@ class SearchUtility {
 				LIMIT 5;`, {file: name}, userId
 			);
 			if (resp.result.records.length == 0) { // if no results, try group algo
-				console.log("no similar docs")
+				console.log("no similar docs");
 				comm_resp = await this.dataLibrary.queryGraph(`
 				MATCH (d:Document {filename: $filename})
 				RETURN d.filename, d.louvain_community, d.lp_community;`, {filename: name}, userId
 				);
 				if (comm_resp.result.records.length > 0) {
-					const singleRecord = comm_resp.result.records[0]
-					let louvain = singleRecord._fields[1]["low"]
-					let label = singleRecord._fields[2]["low"]
+					const singleRecord = comm_resp.result.records[0];
+					let louvain = singleRecord._fields[1]["low"];
+					let label = singleRecord._fields[2]["low"];
 					if (label && algo === "label_propagation") {
 						resp = await this.dataLibrary.queryGraph(`
 							MATCH (d:Document)
@@ -2279,19 +2284,19 @@ class SearchUtility {
 			}
 			if (resp!=={}) {
 				resp.result.records.forEach((r) => {
-				let doc = {}
-				doc.filename = r._fields[0]
-				doc.louvain = r._fields[1]["low"]
-				doc.label_prop = r._fields[2]["low"]
-				doc.betweenness = r._fields[3]
+				let doc = {};
+				doc.filename = r._fields[0];
+				doc.louvain = r._fields[1]["low"];
+				doc.label_prop = r._fields[2]["low"];
+				doc.betweenness = r._fields[3];
 				suggested.push(doc);
 				});
-				suggested = suggested.map(item => item.filename.split('.pdf')[0])
+				suggested = suggested.map(item => item.filename.split('.pdf')[0]);
 			}
 		} catch (e) {
-			this.logger.error(e, 'WQPX84H', userId)
+			this.logger.error(e, 'WQPX84H', userId);
 		};
-		return suggested
+		return suggested;
 	}
 
 	getPopularDocsQuery(offset = 0, limit = 10) {
@@ -2328,11 +2333,11 @@ class SearchUtility {
 			let esResults = await this.dataLibrary.queryElasticSearch("gamechanger", esIndex, popDocsQuery, userId);
 			if (esResults) {
 				esResults.body.hits.hits.forEach((r) => {
-					let doc = {}
+					let doc = {};
 					doc.doc_filename = r['_source'].filename;
 					doc.name = r['_source'].title;
 					const path = require('path');
-					doc.img_filename = path.parse(doc.doc_filename).name + '.png'
+					doc.img_filename = path.parse(doc.doc_filename).name + '.png';
 					doc.id =r['_source'].id;
 					popDocs.push(doc);
 				});
@@ -2341,7 +2346,7 @@ class SearchUtility {
 			return popDocs;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XQQA1F');
-			return popDocs
+			return popDocs;
 		}
 	}
 	getSourceQuery(searchText, offset, limit) {
@@ -2384,8 +2389,8 @@ class SearchUtility {
 						order: "desc"
 					}
 				}]
-			}
-			return query
+			};
+			return query;
 		} catch(err){
 			this.logger.error(err, 'G3WEJ64','');
 		}
@@ -2435,13 +2440,13 @@ class SearchUtility {
 	}
 
 	getDocMetadataQuery(meta, filenames){
-		let source = []
+		let source = [];
 		switch(meta){
 			case 'filenames':
 				source = [
 					"filename",
 					"display_title_s"
-				]
+				];
 				break;
 			case 'all':
 				source = [
@@ -2455,7 +2460,7 @@ class SearchUtility {
 				];
 				break;
 			default:
-				source = []
+				source = [];
 		}
 		return {
 			"_source": source,
@@ -2471,7 +2476,7 @@ class SearchUtility {
 					]
 				}
 			}
-		}
+		};
 	}
 
 	getESClient(cloneName, permissions){
@@ -2503,7 +2508,7 @@ class SearchUtility {
 	checkESResultsEmpty(results){
 		if (results && results.body && results.body.hits) {
 			if (results.body.hits.total.value == 0){
-				return true
+				return true;
 			}
 			else { return false }
 		}
@@ -2881,7 +2886,7 @@ class SearchUtility {
 					]
 				}
 			}
-		}
+		};
 
 		if (filters?.orgFilters?.length > 0) {
 			query.query.bool.filter.push(

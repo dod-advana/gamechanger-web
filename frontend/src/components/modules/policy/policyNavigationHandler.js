@@ -25,6 +25,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
+import UserIcon from '../../../images/icon/UserIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 
 const isDecoupled =
@@ -164,7 +165,7 @@ const PolicyNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -181,7 +182,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="Analyst Tools" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`);
 							setState(dispatch, {
 								pageDisplayed: PAGE_DISPLAYED.analystTools,
 							});
@@ -225,7 +226,7 @@ const PolicyNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -237,6 +238,24 @@ const PolicyNavigationHandler = {
 						toolTheme={toolTheme}
 					>
 						<ConstrainedIcon src={AboutUsIcon} />
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
@@ -344,7 +363,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="Data Tracker" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -362,7 +381,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="Analyst Tools" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`);
 							setState(dispatch, {
 								pageDisplayed: PAGE_DISPLAYED.analystTools,
 							});
@@ -400,7 +419,7 @@ const PolicyNavigationHandler = {
 				<GCTooltip title="About Us" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`)
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -413,6 +432,24 @@ const PolicyNavigationHandler = {
 					>
 						<ConstrainedIcon src={AboutUsIcon} />
 						<span style={{ marginLeft: '10px' }}>About Us</span>
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'shoeUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+						<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (

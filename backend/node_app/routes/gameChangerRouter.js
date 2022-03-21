@@ -60,6 +60,7 @@ router.post('/dataTracker/getTrackedSource', dataTracker.getTrackedSource);
 router.post('/getCrawlerMetadata', dataTracker.getCrawlerMetadata);
 router.post('/getCrawlerSeals', dataTracker.getCrawlerInfoData);
 router.post('/getOrgSeals', dataTracker.getOrgSealData);
+router.get('/getDocIngestionStats', dataTracker.getDocIngestionStats);
 
 router.get('/admin/getAdminData', admin.getGCAdminData);
 router.post('/admin/storeAdminData', admin.storeGCAdminData);
@@ -83,7 +84,7 @@ router.post('/responsibilities/getDoc', responsibility.queryOneDocES);
 router.post('/responsibilities/getDocLink', responsibility.getFileLink);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
-router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport)
+router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport);
 router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);

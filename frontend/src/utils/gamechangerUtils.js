@@ -343,10 +343,10 @@ export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
 	for(let key in crawlerMapping) {
 		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())){
-			crawler = key
+			crawler = key;
 			break;
 		}
-	};
+	}
 
 	return crawler;
 };

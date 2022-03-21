@@ -58,9 +58,9 @@ export default (props) => {
 		show:false,
 		model:'',
 		type:''
-	})
+	});
 	const [modelTable, setModelTable] = useState([]);
-	const [dataTable, setDataTable] = useState([])
+	const [dataTable, setDataTable] = useState([]);
 	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
@@ -80,9 +80,6 @@ export default (props) => {
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
-	const [evalType, setEvalType] = useState('original');
-	const [validationData, setValidationData] = useState('latest');
-	const [sampleLimit, setSampleLimit] = useState(15000);
 	const [version, setVersion] = useState(DEFAULT_VERSION);
 	const [qexpversion, setQexpVersion] = useState(DEFAULT_VERSION);
 	const [qexpupload, setQexpUpload] = useState(false);
@@ -92,8 +89,11 @@ export default (props) => {
 
 	const [gpu, setgpu] = useState(true);
 	const [upload, setUpload] = useState(false);
+	const [baseModel, setBaseModel] = useState('msmarco-distilbert-base-v2');
 	const [warmupSteps, setWarmupSteps] = useState(100);
 	const [epochs, setEpochs] = useState(10);
+	const [testingOnly, setTesting] = useState(false);
+	const [remakeTD, setRemakeTD] = useState(true);
 	
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
@@ -177,14 +177,14 @@ export default (props) => {
 			show:false,
 			model:'',
 			type:''
-		})
+		});
 		await gameChangerAPI.deleteLocalModel({
 			'model':model,
 			'type':type
 		});
 		props.getProcesses();
-		getModelsList()
-	}
+		getModelsList();
+	};
 	/**
 	 * Get a list of all the proccesses running and completed
 	 * @method getAllProcessData
@@ -194,12 +194,11 @@ export default (props) => {
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
 				if (key !== 'flags') {
-					const status = key.split(': ');
+					const status = props.processes.process_status[key]['process'].split(': ');
 					if (['models', 'training'].includes(status[0])){
 						processList.push({
 							...props.processes.process_status[key],
-							process: status[1],
-							category: status[0],
+							thread_id: key,
 							date:'Currently Running'
 						});
 					}
@@ -224,8 +223,8 @@ export default (props) => {
 
 	const getLocalData = async () => {
 		const dataList =  await gameChangerAPI.getDataList();
-		setDataTable(dataList.data.dirs)
-	}
+		setDataTable(dataList.data.dirs);
+	};
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getModelsList
@@ -295,7 +294,10 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'sent_finetune',
 				epochs: epochs,
-				warmup_steps: warmupSteps
+				warmup_steps: warmupSteps,
+				model: baseModel,
+				remake_train_data: remakeTD,
+				testing_only: testingOnly
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -345,15 +347,14 @@ export default (props) => {
 			await gameChangerAPI.trainModel({
 				build_type: 'eval',
 				model_name: evalModelName,
-				validation_data: validationData,
-				eval_type: evalType,
-				sample_limit: sampleLimit
+				validation_data: 'latest',
+				eval_type: 'domain'
 			});
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
 		} catch (e) {
-			console.log('\nERROR EVALUATING MODEL')
-			console.log(e)
+			console.log('\nERROR EVALUATING MODEL');
+			console.log(e);
 			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
 		}
 	};
@@ -604,7 +605,7 @@ export default (props) => {
 														show:true,
 														model:row.original.model,
 														type:row.original.type
-													})
+													});
 													
 												}}
 												style={{ float: 'left', minWidth: 'unset' }}
@@ -949,14 +950,27 @@ export default (props) => {
 					
 						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
+								Base Model:
+							</div>
+							<Input
+								value={baseModel}
+								onChange={(e) => setBaseModel(e.target.value)}
+								name="labels"
+								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
+							/>
+						</div>
+						<div>
+							<div style={{ width: '60px', display: 'inline-block' }}>
 								Warmup Steps:
 							</div>
 							<Input
 								value={warmupSteps}
 								onChange={(e) => setWarmupSteps(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
 							/>
+						</div>
+						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>
 								Epochs:
 							</div>
@@ -964,7 +978,35 @@ export default (props) => {
 								value={epochs}
 								onChange={(e) => setEpochs(e.target.value)}
 								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '20px' }}
+								style={{ fontSize: 'small', minWidth: '20px', margin: '10px' }}
+							/>
+						</div>
+						<div>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Remake Training Data:
+							</div>
+							<Checkbox
+								checked={remakeTD}
+								onChange={(e) => setRemakeTD(e.target.checked)}
+							/>
+							<div
+								style={{
+									width: '60px',
+									display: 'inline-block',
+									marginLeft: '10px',
+								}}
+							>
+								Testing Only:
+							</div>
+							<Checkbox
+								checked={testingOnly}
+								onChange={(e) => setTesting(e.target.checked)}
 							/>
 						</div>
 					</div>
@@ -999,40 +1041,6 @@ export default (props) => {
 								onChange={(e) => setEvalModelName(e.target.value)}
 								name="labels"
 								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
-							/>
-							<div style={{ width: '120px', display: 'inline-block' }}>
-								Validation Data:
-							</div>
-							<Input
-								value={validationData}
-								onChange={(e) => setValidationData(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '120px', margin: '10px' }}
-							/>
-						</div>
-						<div>
-							<div
-								style={{
-									width: '60px',
-									display: 'inline-block'
-								}}
-							>
-								Eval Type:
-							</div>
-							<Input
-								value={evalType}
-								onChange={(e) => setEvalType(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '200px', margin: '10px' }}
-							/>
-							<div style={{ width: '70px', display: 'inline-block' }}>
-								Sample Limit:
-							</div>
-							<Input
-								value={sampleLimit}
-								onChange={(e) => setSampleLimit(e.target.value)}
-								name="labels"
-								style={{ fontSize: 'small', minWidth: '50px', margin: '10px' }}
 							/>
 						</div>
 					</div>

@@ -21,7 +21,7 @@ const GCFooter = (props) => {
 	
 	const setUserMatomo = (value) => {
 		localStorage.setItem('userMatomo', value);
-	}
+	};
 	
 	return (
 		<>
@@ -54,8 +54,8 @@ const GCFooter = (props) => {
 				</FooterDiv>
 			}
 		</>
-	)
-}
+	);
+};
 
 const styles = {
 	title: {
@@ -73,6 +73,6 @@ const styles = {
 		fontWeight: 'bold',
 		fontSize: 14
 	}
-}
+};
 
 export default GCFooter;

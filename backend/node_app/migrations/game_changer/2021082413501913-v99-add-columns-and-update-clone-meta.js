@@ -12,7 +12,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'source_s3_bucket', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'source_s3_prefix', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'needs_ingest', { type: Sequelize.BOOLEAN, defaultValue: false }),
-			])
+			]);
 		});
 	},
 

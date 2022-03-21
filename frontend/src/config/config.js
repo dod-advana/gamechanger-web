@@ -43,7 +43,7 @@ export default {
 			? window?.__env__?.REACT_APP_BACKEND_URL
 			: process.env.REACT_APP_BACKEND_URL
 	}/api/auth/token`,
-	JEXNET_LINK: window?.__env__?.REACT_APP_JEXNET_LINK 
+	JEXNET_LINK: window?.__env__?.REACT_APP_JEXNET_LINK
 		? window?.__env__?.REACT_APP_JEXNET_LINK
-		: process.env.REACT_APP_JEXNET_LINK 
+		: process.env.REACT_APP_JEXNET_LINK
 };

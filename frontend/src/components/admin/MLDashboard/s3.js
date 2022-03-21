@@ -96,7 +96,7 @@ export default (props) => {
 			'type':type
 		});
 		props.getProcesses();
-	}
+	};
 
 	/**
 	 * Get a list of all the proccesses running and completed
@@ -107,12 +107,11 @@ export default (props) => {
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
 				if (key !== 'flags') {
-					const status = key.split(': ');
+					const status = props.processes.process_status[key]['process'].split(': ');
 					if (['s3', 'corpus'].includes(status[0])){
 						processList.push({
 							...props.processes.process_status[key],
-							process: status[1],
-							category: status[0],
+							thread_id: key,
 							date:'Currently Running'
 						});
 					}
@@ -212,7 +211,7 @@ export default (props) => {
 			Header: 'Download',
 			accessor: '',
 			Cell: (row) => <TableRow><IconButton onClick={() => {
-				downloadS3File(row,'models')
+				downloadS3File(row,'models');
 			}} style={{ color: 'white' }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
 		},
 	];

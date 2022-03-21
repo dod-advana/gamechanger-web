@@ -66,7 +66,7 @@ const styles = {
 		marginTop: 20,
 		marginLeft: 20
 	}
-}
+};
 
 const DocumentInputContainer = styled.div`
 	border: 5px ${'#FFFFFF'};
@@ -179,11 +179,11 @@ const getPresearchData = async (state, dispatch) => {
 		newSearchSettings.typeFilter = state.presearchTypes;
 		setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
 	}
-}
+};
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({type: 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS'});
-}
+};
 
 const GCDocumentsComparisonTool = (props) => {
 	
@@ -233,30 +233,30 @@ const GCDocumentsComparisonTool = (props) => {
 		}
 		
 		setParagraphs(paragraphs);
-	}, [paragraphText])
+	}, [paragraphText]);
 
 	useEffect(() => {
 		let disable = 0;
 		Object.keys(itemsToCombine).forEach(par => {
 			if(itemsToCombine[par]) disable++;
-		})
-		setCombineDisabled(disable < 2)
-	}, [itemsToCombine])
+		});
+		setCombineDisabled(disable < 2);
+	}, [itemsToCombine]);
 	
 	useEffect(() => {
 		if(!filtersLoaded){
 			getPresearchData(state, dispatch);
 			setFiltersLoaded(true);
 		}
-	}, [state, dispatch, filtersLoaded])
+	}, [state, dispatch, filtersLoaded]);
 
 	useEffect(() => {
 		setFilterChange(true);
-	}, [orgFilter, typeFilter, publicationDateFilter, includeRevoked])
+	}, [orgFilter, typeFilter, publicationDateFilter, includeRevoked]);
 
 	useEffect(() => {
-		setNoResults(false)
-	}, [paragraphText])
+		setNoResults(false);
+	}, [paragraphText]);
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
@@ -268,22 +268,22 @@ const GCDocumentsComparisonTool = (props) => {
 				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
 				dateFilter: publicationDateFilter,
 				canceledDocs: includeRevoked
-			}
+			};
 			
 			gameChangerAPI.compareDocumentPOST({cloneName: state.cloneData.cloneName, paragraphs: paragraphs, filters}).then(resp => {
 				if(resp.data.docs.length <= 0) {
-					setNoResults(true)
+					setNoResults(true);
 				}else{
 					let paragraph;
 					const document = resp.data.docs.find(doc => {
-						const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === selectedInput)
+						const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === selectedInput);
 						if(foundPar){
 							paragraph = foundPar;
 							return true;
 						}else {
 							return false;
 						}
-					})
+					});
 					setCompareDocument(document);
 					setSelectedParagraph(paragraph);
 				}
@@ -294,7 +294,7 @@ const GCDocumentsComparisonTool = (props) => {
 				setReturnedDocs([]);
 				setState(dispatch, {runDocumentComparisonSearch: false});
 				setLoading(false);
-				console.log('server error')
+				console.log('server error');
 			});
 		}
 		
@@ -305,7 +305,7 @@ const GCDocumentsComparisonTool = (props) => {
 			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter(doc => {
 				return doc.paragraphs.find(match => match.paragraphIdBeingMatched === selectedInput);
-			})
+			});
 			const order = sortOrder === 'desc' ? 1 : -1;
 			let sortFunc = () => {};
 			switch(sortType){
@@ -314,7 +314,7 @@ const GCDocumentsComparisonTool = (props) => {
 						if(docA.title > docB.title) return order;
 						if(docA.title < docB.title) return -order;
 						return 0;
-					}
+					};
 					break;
 				case 'Date Published':
 					sortFunc = (docA, docB) => {
@@ -323,18 +323,18 @@ const GCDocumentsComparisonTool = (props) => {
 						if(!docA.publication_date_dt) return 1;
 						if(!docB.publication_date_dt) return -1;
 						return 0;
-					}
+					};
 					break;
 				default: 
 					sortFunc = (docA, docB) => {
 						if(docA.score > docB.score) return -order;
 						if(docA.score < docB.score) return order;
 						return 0;
-					}
+					};
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
-			if(!selectedParagraph) {
+			if(!selectedParagraph && sortedDocs.length) {
 				setSelectedParagraph(sortedDocs[0].paragraphs[0]);
 				setCompareDocument(sortedDocs[0]);
 			}
@@ -362,8 +362,8 @@ const GCDocumentsComparisonTool = (props) => {
 			docId: doc.id,
 			positiveFeedback,
 			undo
-		})
-	}
+		});
+	};
 	
 	const measuredRef = useCallback(
 		(node) => {
@@ -389,21 +389,21 @@ const GCDocumentsComparisonTool = (props) => {
 
 	useEffect(() => {
 		handleSetParagraphs();
-	}, [paragraphText, handleSetParagraphs])
+	}, [paragraphText, handleSetParagraphs]);
 	
 	const reset = () => {
 		setParagraphText('');
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
-	}
+	};
 
 	const handleCheck = (id) => {
 		setItemsToCombine({
 			...itemsToCombine,
 			[id]: !itemsToCombine?.[id],
 		});
-	}
+	};
 
 	const removeParagraph = (id) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
@@ -413,29 +413,29 @@ const GCDocumentsComparisonTool = (props) => {
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
-	}
+	};
 
 	const handleCombine = () => {
 		const oldParagraphs = [];
 		const paragraphsToCombine = [];
 		paragraphs.forEach(par => {
 			if(itemsToCombine[par.id]){ 
-				paragraphsToCombine.push(par.text)
+				paragraphsToCombine.push(par.text);
 			}else{
-				oldParagraphs.push(par.text)
+				oldParagraphs.push(par.text);
 			}
 		});
 		const combinedParagraphs = paragraphsToCombine.join(' ');
 		oldParagraphs.push(combinedParagraphs);
 		const newParagraphs = oldParagraphs.map((text, idx) => {
 			return {text, id: idx};
-		})
+		});
 		setParagraphs(newParagraphs);
 		const newParagraphText = newParagraphs.map(paragraph => paragraph.text).join('\n');
 		setParagraphText(newParagraphText);
 		setReturnedDocs([]);
 		handleCompare();
-	}
+	};
 
 	const handleCompare = () => {
 		setNoResults(false);
@@ -444,17 +444,17 @@ const GCDocumentsComparisonTool = (props) => {
 		setNeedsSort(true);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
-	}
+	};
 
 	const saveDocToFavorites = (filename, paragraph) => {
 		const text = paragraphs.find(input => input.id === paragraph.paragraphIdBeingMatched).text;
-		handleSaveFavoriteDocument({filename, is_favorite: true, search_text: text, favorite_summary: `Document Comparison result of "${text}"`}, state, dispatch)
-	}
+		handleSaveFavoriteDocument({filename, is_favorite: true, search_text: text, favorite_summary: `Document Comparison result of "${text}"`}, state, dispatch);
+	};
 
 	const exportSingleDoc = (document) => {
 		const exportList = [];
 		document.paragraphs.forEach(paragraph => {
-			const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
+			const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text;
 			exportList.push({
 				filename: document.filename,
 				title: document.title,
@@ -462,8 +462,8 @@ const GCDocumentsComparisonTool = (props) => {
 				textInput,
 				textMatch: paragraph.par_raw_text_t,
 				score: convertDCTScoreToText(paragraph.score)
-			})
-		})
+			});
+		});
 		heandleExport(exportList, 'ExportSindleDocCSV');
 	};
 
@@ -471,7 +471,7 @@ const GCDocumentsComparisonTool = (props) => {
 		const exportList = [];
 		returnedDocs.forEach(document => {
 			document.paragraphs.forEach(paragraph => {
-				const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text
+				const textInput = paragraphs.find(input => paragraph.paragraphIdBeingMatched === input.id).text;
 				exportList.push({
 					filename: document.filename,
 					title: document.title,
@@ -479,9 +479,9 @@ const GCDocumentsComparisonTool = (props) => {
 					textInput,
 					textMatch: paragraph.par_raw_text_t,
 					score: convertDCTScoreToText(paragraph.score)
-				})
-			})
-		})
+				});
+			});
+		});
 		heandleExport(exportList, 'ExportSindleDocCSV');
 	};
 
@@ -502,33 +502,33 @@ const GCDocumentsComparisonTool = (props) => {
 			console.error(e);
 			return [];
 		}
-	}
+	};
 
 	const setToFirstResultofInput = (inputId) => {
 		let paragraph;
 		const document = viewableDocs.find(doc => {
-			const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === inputId)
+			const foundPar = doc.paragraphs.find(par => par.paragraphIdBeingMatched === inputId);
 			if(foundPar){
 				paragraph = foundPar;
 				return true;
 			}else {
 				return false;
 			}
-		})
+		});
 		setCompareDocument(document);
 		setSelectedParagraph(paragraph);
-	}
+	};
 
 	const handleSelectInput = (id) => {
 		setSelectedParagraph(undefined);
 		setSelectedInput(id);
 		setNeedsSort(true);
-	}
+	};
 
 	const handleChangeOrder = (order) => {
 		setSortOrder(order);
 		setNeedsSort(true);
-	}
+	};
 	
 	return (
 		<>
@@ -939,7 +939,7 @@ const GCDocumentsComparisonTool = (props) => {
 															</div>
 														</div>
 													</Collapse>
-												</div>
+												</div>;
 											})}
 										</Collapse>
 									</div>
@@ -952,7 +952,7 @@ const GCDocumentsComparisonTool = (props) => {
 			</Grid>
 		</>
 		
-	)
+	);
 };
 
 GCDocumentsComparisonTool.propTypes = {
