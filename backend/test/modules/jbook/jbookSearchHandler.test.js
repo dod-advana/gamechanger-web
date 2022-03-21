@@ -131,7 +131,8 @@ describe('JBookSearchHandler', function () {
 						EDA_ELASTIC_SEARCH_OPTS: {index: 'Test', assist_index: 'Test'},
 					},
 					gl_contracts: {},
-					reports: {}
+					reports: {},
+					redisDB: {}
 				};
 
 				const target = new JBookSearchHandler(opts);
@@ -262,6 +263,7 @@ describe('JBookSearchHandler', function () {
 							}
 						}
 					},
+					redisDB: {}
 				};
 
 				const target = new JBookSearchHandler(opts);
@@ -393,7 +395,8 @@ describe('JBookSearchHandler', function () {
 								return mockAgencyYearData;
 							}
 						}
-					}
+					},
+					redisDB: {}
 				};
 
 				const target = new JBookSearchHandler(opts);
@@ -507,7 +510,8 @@ describe('JBookSearchHandler', function () {
 								return Promise.resolve(giantQueryMock);
 							}
 						}
-					}
+					},
+					redisDB: {}
 				};
 
 				const target = new JBookSearchHandler(opts);
