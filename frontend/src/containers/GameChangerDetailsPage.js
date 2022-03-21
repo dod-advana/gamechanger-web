@@ -240,7 +240,7 @@ const GameChangerDetailsPage = (props) => {
 				topicName: name,
 			},
 		});
-	
+		console.log(resp);
 		if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0) {
 			const tmpTopic = resp.data.topicData.nodes[0];
 			tmpTopic.details = [
@@ -524,6 +524,7 @@ const GameChangerDetailsPage = (props) => {
 			searchText += ` or ${alias}`;
 		});
 
+
 		const t0 = new Date().getTime();
 		gameChangerAPI
 			.getDocumentsForEntity(cloneData.clone_name, {
@@ -556,6 +557,7 @@ const GameChangerDetailsPage = (props) => {
 			}
 		});
 
+
 		const t0 = new Date().getTime();
 		gameChangerAPI
 			.getDocumentsForTopic(cloneData.clone_name, { docIds, searchText })
@@ -565,6 +567,8 @@ const GameChangerDetailsPage = (props) => {
 				if(resp.data.docs){
 					setDocCount(resp.data.totalCount);
 					setDocResults(resp.data.docs);
+					console.log(resp.data.totalCount);
+
 					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE));
 					if (resp.data.docs.length > 0) {
 						setTimeFound(((t1 - t0) / 1000).toFixed(2));

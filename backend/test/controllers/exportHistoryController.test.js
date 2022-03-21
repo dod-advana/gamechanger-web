@@ -7,7 +7,7 @@ describe('ExportHistoryController', function () {
 	describe('#getExportHistory', () => {
 		it('it should return the export history for a user', async () => {
 			const exportHistoryList = [{
-				id: 1, user_id: '27d1ca9e10b731476b7641eae2710ac0', download_request_body: {}, search_response_metadata: {}
+				id: 1, user_id: 'testsuite', download_request_body: {}, search_response_metadata: {}
 			}];
 			const opts = {
 				...constructorOptionsMock,
@@ -51,7 +51,7 @@ describe('ExportHistoryController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = [{download_request_body: {}, id: 1, search_response_metadata: {}, user_id: '27d1ca9e10b731476b7641eae2710ac0'}];
+			const expected = [{download_request_body: {}, id: 1, search_response_metadata: {}, user_id: 'testsuite'}];
 			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
@@ -59,7 +59,7 @@ describe('ExportHistoryController', function () {
 	describe('#deleteExportHistory', () => {
 		it('it should delete a export history for a user', async () => {
 			const exportHistoryList = [{
-				id: 1, user_id: '27d1ca9e10b731476b7641eae2710ac0', download_request_body: {}, search_response_metadata: {}
+				id: 1, user_id: 'testsuite', download_request_body: {}, search_response_metadata: {}
 			}];
 			const opts = {
 				...constructorOptionsMock,
@@ -105,7 +105,7 @@ describe('ExportHistoryController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {id: {download_request_body: {}, id: 1, search_response_metadata: {}, user_id: '27d1ca9e10b731476b7641eae2710ac0'}, message: 'delete success'};
+			const expected = {id: {download_request_body: {}, id: 1, search_response_metadata: {}, user_id: 'testsuite'}, message: 'delete success'};
 			assert.deepStrictEqual(resMsg, expected);
 			assert.deepStrictEqual(exportHistoryList, []);
 		});
@@ -114,7 +114,7 @@ describe('ExportHistoryController', function () {
 	describe('#updateExportHistoryDate', () => {
 		it('it should update export history date', async () => {
 			const exportHistoryList = [{
-				id: 1, user_id: '27d1ca9e10b731476b7641eae2710ac0', download_request_body: {}, search_response_metadata: {}
+				id: 1, user_id: 'testsuite', download_request_body: {}, search_response_metadata: {}
 			}];
 			let savedItem = {};
 			const opts = {
@@ -169,7 +169,7 @@ describe('ExportHistoryController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {download_request_body: {}, id: 1, search_response_metadata: {}, updatedAt: true, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {download_request_body: {}, id: 1, search_response_metadata: {}, updatedAt: true, user_id: 'testsuite'};
 			assert.deepStrictEqual(savedItem, expected);
 		});
 	});

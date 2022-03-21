@@ -3,7 +3,7 @@ const { CacheController } = require('../controllers/cacheController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const { distributedPoll } = require('../utils/pollUtility');
 
 class CronJobs {

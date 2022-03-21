@@ -1,4 +1,4 @@
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { ExportHistoryController } = require('./exportHistoryController');
@@ -78,6 +78,7 @@ class SearchController {
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.combinedSearch = this.combinedSearch.bind(this);
 		this.queryEs = this.queryEs.bind(this);
+		this.expandTerms = this.expandTerms.bind(this);
 	}
 
 	async combinedSearch(searchText, userId, req, expansionDict, index, operator, offset) {
@@ -252,15 +253,12 @@ class SearchController {
 		let userId = 'Unknown';
 		try {
 			const { user_id, searchText, startTime, endTime, hadError, numResults, searchType, cachedResult, orgFilters, tiny_url, request_body, search_version, clone_name } = historyRec;
-			const hashed_user = this.sparkMD5.hash(user_id);
-			const new_id = getTenDigitUserId(user_id);
-			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 
 			if (user_id) userId = user_id;
 
 			const obj = {
-				user_id: hashed_user,
-				new_user_id: new_hashed_user,
+				user_id: user_id,
+				new_user_id: user_id,
 				search: searchText,
 				run_at: startTime,
 				completion_time: endTime,
@@ -280,27 +278,6 @@ class SearchController {
 
 		} catch (err) {
 			this.logger.error(err, 'UQ5B8CP', userId);
-		}
-	}
-
-	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
-		try {
-			// log search query to elasticsearch
-			if (offset === 0){
-				let clone_log = clone_name || 'policy';
-				const searchLog = {
-					user_id: this.sparkMD5.hash(userId),
-					search_query: searchText,
-					run_time: new Date().getTime(),
-					clone_name: clone_log
-
-				};
-				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
-
-				this.dataApi.putDocument(esClient, search_history_index, searchLog);
-			}
-		} catch (e) {
-			this.logger.error(e.message, 'UA0YDAL');
 		}
 	}
 
@@ -483,252 +460,17 @@ class SearchController {
 		return { esClientName, esIndex };
 	}
 
-	async documentSearchHelperOld(req, userId) {
-		const historyRec = {
-			user_id: userId,
-			clone_name: undefined,
-			search: '',
-			startTime: new Date().toISOString(),
-			numResults: -1,
-			endTime: null,
-			hadError: false,
-			tiny_url: '',
-			cachedResult: false,
-			search_version: 1,
-			request_body: {},
-		};
-
-		const {
-			searchText,
-			searchType,
-			searchVersion,
-			isClone = false,
-			cloneData = {},
-			offset,
-			orgFilter = 'Department of Defense_Joint Chiefs of Staff_Intelligence Community_United States Code',
-			useGCCache,
-			showTutorial = false,
-			tiny_url,
-			forCacheReload = false,
-			searchFields = {},
-			includeRevoked = false
-		} = req.body;
-
-		const { clone_name } = cloneData;
-
+	async expandTerms(req,res) {
+		const {searchText} = req.body;
+		let expansionDict = {};
 		try {
-			historyRec.search = searchText;
-			historyRec.searchText = searchText;
-			historyRec.orgFilters = JSON.stringify(orgFilter);
-			historyRec.tiny_url = tiny_url;
-			historyRec.clone_name = clone_name;
-			historyRec.searchType = searchType;
-			historyRec.search_version = searchVersion;
-			historyRec.request_body = req.body;
-			let index = isClone ? cloneData.clone_data.project_name : (req.body.index ? req.body.index : this.constants.GAME_CHANGER_OPTS.index);
-
-			if (isClone && cloneData && cloneData.clone_data) {
-				if (cloneData.clone_data.gcIndex) {
-					index = cloneData.clone_data.gcIndex;
-				} else if (cloneData.clone_data.project_name) {
-					index = cloneData.clone_data.project_name;
-				}
-			}
-
-			const operator = 'and';
-
-			// ## try to get cached results
-			const options = { searchType, searchText, orgFilter, clone_name, searchFields: Object.values(searchFields), index, includeRevoked };
-			const redisKey = this.searchUtility.createCacheKeyFromOptions(options);
-			const separatedClones = ['EDA', 'eda'];
-
-			const redisDB = separatedClones.includes(clone_name) ? this.separatedRedisAsyncClient : this.redisAsyncClient;
-			if (!forCacheReload && useGCCache && offset === 0) {
-				try {
-					// check cache for search (first page only)
-					const cachedResults = JSON.parse(await redisDB.get(redisKey));
-					const timestamp = await redisDB.get(redisKey + ':time');
-					const timeDiffHours = Math.floor((new Date().getTime() - timestamp) / (1000 * 60 * 60));
-					if (cachedResults) {
-						const { totalCount } = cachedResults;
-						historyRec.endTime = new Date().toISOString();
-						historyRec.numResults = totalCount;
-						historyRec.cachedResult = true;
-						await this.storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
-						return { ...cachedResults, isCached: true, timeSinceCache: timeDiffHours };
-					}
-
-				} catch (e) {
-					// don't reject if cache errors just log
-					this.logger.error(e.message, 'UA0YFKY', userId);
-				}
-			}
-
-			// try to get search expansion
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({searchText});
-			let expansionDict = {};
-			try {
-				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
-			} catch (e) {
-				// log error and move on, expansions are not required
-				if (forCacheReload){
-					throw Error('Cannot get expanded search terms in cache reload');
-				}
-				this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38', userId);
-			}
-
-			let lookUpTerm = searchText.replace(/\"/g, '');
-			let useText = true;
-			if (termsArray && termsArray.length && termsArray[0]) {
-				useText = false;
-				lookUpTerm = termsArray[0].replace(/\"/g, '');
-			}
-			const synonyms = this.thesaurus.lookUp(lookUpTerm);
-			let text = searchText;
-			if (!useText && termsArray && termsArray.length && termsArray[0]) {
-				text = termsArray[0];
-			}
-
-			// get expanded abbreviations
-			await this.redisAsyncClient.select(abbreviationRedisAsyncClientDB);
-			let abbreviationExpansions = [];
-			let i = 0;
-			for (i = 0; i < termsArray.length; i++) {
-				let term = termsArray[i];
-				let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-				let expandedTerm = await this.redisAsyncClient.get(upperTerm);
-				let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-				let compressedTerm = await this.redisAsyncClient.get(lowerTerm);
-				if (expandedTerm) {
-					if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-					}
-				}
-				if (compressedTerm) {
-					if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-					}
-				}
-			}
-
-			// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-			let cleanedAbbreviations = [];
-			abbreviationExpansions.forEach(abb => {
-				let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
-				let found = false;
-				termsArray.forEach((term) => {
-					if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
-						found = true;
-					}
-				});
-				if (!found) {
-					cleanedAbbreviations.push(abb);
-				}
-			});
-
-			// this.logger.info(cleanedAbbreviations);
-
-			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
-			// this.logger.info('exp: ' + expansionDict);
-			await this.redisAsyncClient.select(redisAsyncClientDB);
-
-			let searchResults;
-			if (searchType === 'Sentence'){
-
-				try {
-					const sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-					const filenames = sentenceResults.map(({ id }) => id);
-
-					const docSearchRes = await this.documentSearchUsingParaId(req, {...req.body, expansionDict, index, filenames}, userId);
-
-					if (sentenceResults === TRANSFORM_ERRORED) {
-						searchResults.transformFailed = true;
-					} else {
-						searchResults = docSearchRes;
-					}
-				} catch (e) {
-					if (forCacheReload) {
-						throw Error('Cannot transform document search terms in cache reload');
-					}
-					this.logger.error(`Error sentence transforming document search results ${e.message}`, '7EYPXX7', userId);
-				}
-
-
-			} else {
-				// get results
-				try {
-					searchResults = await this.documentSearch(req, {...req.body, expansionDict, index, operator}, userId);
-				} catch (e) {
-					const { message } = e;
-					this.logger.error(message, 'U04K9H3', userId);
-					throw e;
-				}
-			}
-
-			// insert crawler dates into search results
-			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-
-			// use transformer on results
-			if (searchType === 'Intelligent') {
-				try {
-					const { docs } = searchResults;
-					const transformed = await this.transformDocumentSearchResults(docs, searchText, userId);
-					if (transformed === TRANSFORM_ERRORED) {
-						searchResults.transformFailed = true;
-					} else {
-						searchResults.docs = transformed;
-					}
-				} catch (e) {
-					if (forCacheReload) {
-						throw Error('Cannot transform document search terms in cache reload');
-					}
-					this.logger.error(`Error transforming document search results ${e.message}`, 'U64MDOA', userId);
-				}
-			}
-
-			// try to store to cache
-			if (useGCCache && searchResults && redisKey) {
-				try {
-					const timestamp = new Date().getTime();
-					this.logger.info(`Storing new keyword cache entry: ${redisKey}`);
-					await redisDB.set(redisKey, JSON.stringify(searchResults));
-					await redisDB.set(redisKey + ':time', timestamp);
-					historyRec.cachedResult = false;
-				} catch (e) {
-					if (forCacheReload) {
-						throw Error('Storing to cache failed in cache reload');
-					}
-
-					this.logger.error(e.message, 'WVVCLPX', userId);
-				}
-			}
-
-			// try storing results record
-			if (!forCacheReload) {
-				try {
-					const { totalCount } = searchResults;
-					historyRec.endTime = new Date().toISOString();
-					historyRec.numResults = totalCount;
-					await this.storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
-				} catch (e) {
-					this.logger.error(e.message, 'MPK1GGN', userId);
-				}
-			}
-
-			return searchResults;
-
-		} catch (err) {
-			if (!forCacheReload){
-				const { message } = err;
-				this.logger.error(message, 'NCCROJE', userId);
-				historyRec.endTime = new Date().toISOString();
-				historyRec.hadError = true;
-				await this.storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
-			}
-			throw err;
+			expansionDict = await this.mlApi.queryExpansion(searchText);
+		} catch (e) {
+			// log error and move on, expansions are not required
+			this.logger.error('Cannot get expanded search terms, continuing with search', '93SQB38');
 		}
+		res.status(200).send(expansionDict);
 	}
-
 }
 
 module.exports.SearchController = SearchController;

@@ -55,7 +55,8 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 					break;
 				case 'character varying':
 				default:
-					stringFields.push({ key: meta.column_name, display_name });
+					if (meta.column_name !== 'permissions')
+						stringFields.push({ key: meta.column_name, display_name });
 					break;
 			}
 		}
@@ -87,8 +88,8 @@ export default () => {
 			const filteredClones = _.filter(gcCloneTableData, (clone) => {
 				return clone.id === num;
 			});
-			const cloneEdit = { ...filteredClones[0] };
-			setCloneToEdit(cloneEdit);
+			const tmpCloneToEdit = { ...filteredClones[0] };
+			setCloneToEdit(tmpCloneToEdit);
 		} else {
 			setCloneToEdit(null);
 		}

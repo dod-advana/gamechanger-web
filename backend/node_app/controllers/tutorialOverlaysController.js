@@ -1,5 +1,5 @@
 const TUTORIAL_OVERLAYS = require('../models').tutorial_overlays;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class TutorialOverlayController {
 	constructor(opts = {}) {

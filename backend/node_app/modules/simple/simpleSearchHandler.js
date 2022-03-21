@@ -5,17 +5,14 @@ const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const sparkMD5 = require('spark-md5');
 const { DataLibrary} = require('../../lib/dataLibrary');
 const {Thesaurus} = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
-const FAVORITE_SEARCH = require('../../models').favorite_searches;
-const LOGGER = require('../../lib/logger');
-
+const LOGGER = require('@dod-advana/advana-logger');
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
-
 const SearchHandler = require('../base/searchHandler');
+const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
 
 class SimpleSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -37,7 +34,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -84,7 +81,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 			// log query to ES
 			if (storeHistory) {
-				this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				this.storeEsRecord(clientObj.esClientName, offset, cloneName, historyRec.user_id, searchText);
 			}
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
@@ -244,7 +241,7 @@ class SimpleSearchHandler extends SearchHandler {
 			if (offset === 0){
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
 					clone_name: clone_log

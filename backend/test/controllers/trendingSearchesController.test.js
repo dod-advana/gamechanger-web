@@ -4,7 +4,7 @@ const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
 describe('TrendingSearchesController', function () {
 	describe('#trendingSearchesPOST', () => {
-		it('should return trending searches with clone name undefined if not a clone', (done) => {
+		it('should return trending searches with clone name undefined if not a clone', async (done) => {
 			const mockTrending = {
 				request_body: {
 					search: [
@@ -31,7 +31,7 @@ describe('TrendingSearchesController', function () {
 
 			const gcHistory = {
 				findAll: async (data) => {
-					clone_name = data.where.clone_name;
+					let clone_name = data.where.clone_name;
 					let ret = [];
 					for (let elt in mockTrending.request_body.search) {
 						if (mockTrending.request_body.search[elt].clone_name == clone_name) {
@@ -45,6 +45,7 @@ describe('TrendingSearchesController', function () {
 
 			const opts = {
 				...constructorOptionsMock,
+				redisDB: {},
 				gcHistory
 			};
 			const target = new TrendingSearchesController(opts);
@@ -69,10 +70,9 @@ describe('TrendingSearchesController', function () {
 			};
 
 			try {
-				target.trendingSearchesPOST(req, res).then(() => {
-					assert.equal(JSON.stringify(resMsg), JSON.stringify(mockRes));
-					done();
-				});
+				await target.trendingSearchesPOST(req, res);
+				assert.equal(JSON.stringify(resMsg), JSON.stringify(mockRes));
+				done();
 			} catch (e) {
 				assert.fail(e);
 			}
@@ -105,7 +105,7 @@ describe('TrendingSearchesController', function () {
 
 			const gcHistory = {
 				findAll: async (data) => {
-					clone_name = data.where.clone_name;
+					let clone_name = data.where.clone_name;
 					let ret = [];
 					for (let elt in mockTrending.request_body.search) {
 						if (mockTrending.request_body.search[elt].clone_name == clone_name) {

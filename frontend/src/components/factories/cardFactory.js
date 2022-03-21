@@ -4,7 +4,7 @@ const cdoCardHandler = require('../modules/cdo/cdoCardHandler');
 const globalSearchCardHandler = require('../modules/globalSearch/globalSearchCardHandler');
 const edaCardHandler = require('../modules/eda/edaCardHandler');
 const defaultCardHandler = require('../modules/default/defaultCardHandler');
-const budgetSearchCardHandler = require('../modules/budgetSearch/budgetSearchCardHandler');
+const jbookCardHandler = require('../modules/jbook/jbookCardHandler');
 const jexnetCardHandler = require('../modules/jexnet/jexnetCardHandler');
 
 class CardFactory {
@@ -26,8 +26,8 @@ class CardFactory {
 				case 'eda/edaCardHandler':
 					this.handler = edaCardHandler;
 					break;
-				case 'budgetSearch/budgetSearchCardHandler':
-					this.handler = budgetSearchCardHandler;
+				case 'jbook/jbookCardHandler':
+					this.handler = jbookCardHandler;
 					break;
 				case 'jexnet/jexnetCardHandler':
 					this.handler = jexnetCardHandler;
