@@ -341,7 +341,6 @@ const PolicyMainViewHandler = {
 		const user = await gcUserManagementAPI.getUserData();
 		const { favorite_documents = [], export_history = []} = user.data;
 
-	
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history});
 			data.forEach((obj) => {
