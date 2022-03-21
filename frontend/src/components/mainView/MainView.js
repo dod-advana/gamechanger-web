@@ -38,6 +38,12 @@ const MainView = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
+		if (state.cloneDataSet && !state.userDataSet) {
+			getUserData(dispatch);
+		}
+	}, [dispatch, state.cloneData, state.cloneDataSet, state.userDataSet]);
+
+	useEffect(() => {
 		return function cleanUp(){
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
@@ -48,7 +54,7 @@ const MainView = (props) => {
 		if(state.runningSearch && cancelToken) {
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
-		};
+		}
 	},[state.runningSearch]);
 
 	useEffect(() => {

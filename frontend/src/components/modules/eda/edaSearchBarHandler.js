@@ -11,7 +11,6 @@ import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import UserButton from '../../searchBar/UserButton';
 const gameChangerAPI = new GameChangerAPI();
 
 const EDASearchBarHandler = {
@@ -139,8 +138,6 @@ const EDASearchBarHandler = {
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
-
-				<UserButton context={context}></UserButton>
 
 				<Popover
 					onClose={() => {
