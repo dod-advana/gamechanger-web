@@ -609,10 +609,12 @@ const GCUserDashboard = (props) => {
 
 	useEffect(() => {
 		if (userData === null) return;
-
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches = userData.favorite_searches.filter(search=>search.url.split('?')[0]===cloneData.clone_name);
+			userData.favorite_searches = userData.favorite_searches.filter(search => {
+				const searchArr = search.url.split('?');
+				return searchArr[0] === cloneData.url;
+			});
 			userData.favorite_searches.forEach(search => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
@@ -713,7 +715,7 @@ const GCUserDashboard = (props) => {
 			setFavoriteOrganizationsLoading(false);
 		}
 
-	}, [userData, cloneData.clone_name]);
+	}, [userData, cloneData.clone_name, cloneData.url]);
 
 	useEffect(() => {}, [reload]);
 
@@ -907,7 +909,7 @@ const GCUserDashboard = (props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		const searchSettings = (
+		const searchSettings = cloneData.clone_name === 'gamechanger' ? (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
@@ -924,6 +926,17 @@ const GCUserDashboard = (props) => {
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
 					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
 					{search.isRevoked ? 'true' : 'false'}
+				</div>
+			</>
+		) : (
+			<>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Search Text:</span>{' '}
+					{search.search_text}
+				</div>
+				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+					<span style={{ fontWeight: 'bold' }}>Source:</span>{' '}
+					{search.orgFilterText}
 				</div>
 			</>
 		);

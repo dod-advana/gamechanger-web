@@ -25,6 +25,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
+import UserIcon from '../../../images/icon/UserIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 
 const isDecoupled =
@@ -239,6 +240,24 @@ const PolicyNavigationHandler = {
 						<ConstrainedIcon src={AboutUsIcon} />
 					</HoverNavItem>
 				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
@@ -413,6 +432,24 @@ const PolicyNavigationHandler = {
 					>
 						<ConstrainedIcon src={AboutUsIcon} />
 						<span style={{ marginLeft: '10px' }}>About Us</span>
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'shoeUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+						<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (

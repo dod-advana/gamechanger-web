@@ -47,6 +47,7 @@ const initState = {
 		export_history: [],
 		api_key: '',
 	},
+	userDataSet: false,
 	newUser: false,
 	userInfoModalOpen: false,
 	userInfo: {
