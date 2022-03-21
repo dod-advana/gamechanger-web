@@ -207,7 +207,7 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	async queryPdfOpend(startDate, connection) {
+	async queryPdfOpend(startDate, endDate, connection) {
 		return new Promise((resolve, reject) => {
 			const self = this;
 			connection.query(`
@@ -215,18 +215,19 @@ class AppStatsController {
 					a.idvisit as idvisit, 
 					idaction_name, 
 					b.name as document, 
-					a.server_time as documenttime 
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
 				where 
 					a.idaction_name = b.idaction  
 					and b.name like 'PDFViewer%'
-					and a.server_time > ?
+					and a.server_time >= ?
+					and a.server_time <= ?
 				order by 
 					idvisit,
 					documenttime desc;`,
-			[`${startDate}`],
+			[`${startDate}`,endDate],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -273,7 +274,7 @@ class AppStatsController {
 				}
 				resolve(self.cleanFilePath(results));
 			});
-		})
+		});
 	}
 	/**
 	 * This method gets an array of searches made with a timestamp and idvisit
@@ -282,7 +283,7 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	async querySearches(startDate, connection) {
+	async querySearches(startDate, endDate, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(`
 				select
@@ -290,7 +291,7 @@ class AppStatsController {
 					idaction_name,
 					a.search_cat,
 					b.name as value,
-					a.server_time as searchtime,
+					CONVERT_TZ(a.server_time,'UTC','EST') as searchtime,
 					hex(a.idvisitor) as idvisitor,
 					'Search' as action
 				from
@@ -300,10 +301,11 @@ class AppStatsController {
 					a.idaction_name = b.idaction
 					and (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
 					and a.server_time > ?
+					and server_time <= ?
 				order by
 					idvisit,
 					searchtime desc;`,
-			[`${startDate}`],
+			[`${startDate}`, endDate],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -321,13 +323,14 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	 async queryEvents(startDate, connection) {
+	 async queryEvents(startDate, endDate, connection) {
+
 		return new Promise((resolve, reject) => {
 			connection.query(`
 				SELECT 
 					llva.idvisit,
 					llva.idaction_name,
-					llva.server_time as searchtime,
+					CONVERT_TZ(llva.server_time,'UTC','EST') as searchtime,
 					hex(llva.idvisitor) as idvisitor,
 					la_names.name as document,
 					la.name as action
@@ -338,8 +341,9 @@ class AppStatsController {
 				AND llva.idaction_name = la_names.idaction
 				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument')
 				AND server_time >= ?
+				AND server_time <= ?
 			`,
-			[`${startDate}`],
+			[`${startDate}`,endDate],
 			(error, results, fields) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
@@ -357,10 +361,9 @@ class AppStatsController {
 	 */
 	async querySearchPdfMapping(opts, connection) {
 		const {userId} = opts;
-		const startDate = this.getDateNDaysAgo(opts.daysBack);
-		const searches = await this.querySearches(startDate, connection);
-		const documents = await this.queryPdfOpend(startDate, connection);
-		const events = await this.queryEvents(startDate,connection)
+		const searches = await this.querySearches(opts.startDate,opts.endDate, connection);
+		const documents = await this.queryPdfOpend(opts.startDate,opts.endDate, connection);
+		const events = await this.queryEvents(opts.startDate,opts.endDate,connection);
 
 		const searchMap = {};
 		const eventMap = {};
@@ -370,24 +373,24 @@ class AppStatsController {
 			if (!searchMap[search.idvisit]) {
 				searchMap[search.idvisit] = [];
 			}
-			search = {...search, value: this.htmlDecode(search.value)}
+			search = {...search, value: this.htmlDecode(search.value)};
 			searchMap[search.idvisit].push(search);
 		}
-		const tempSearch = {...searchMap}
+		const tempSearch = {...searchMap};
 
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
 			if (tempSearch[event.idvisit]){
-				let i = 0
-				let search = ''
-				let tempSearchList = [...tempSearch[event.idvisit]].reverse()
+				let i = 0;
+				let search = '';
+				let tempSearchList = [...tempSearch[event.idvisit]].reverse();
 				while(i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime){
-					search = tempSearchList[i].value
-					i++
+					search = tempSearchList[i].value;
+					i++;
 				}
-				event = {...event, value:  search}
+				event = {...event, value:  search};
 			}
 			searchMap[event.idvisit].push(event);
 		}
@@ -413,7 +416,7 @@ class AppStatsController {
 		}
 
 		// filename mapping to titles; pulled from ES
-		let filenames = searchPdfMapping.filter(item => item.document !== undefined && item.document !== 'null')
+		let filenames = searchPdfMapping.filter(item => item.document !== undefined && item.document !== 'null');
 		filenames = filenames.map(item => item.document);
 		const esQuery = this.searchUtility.getDocMetadataQuery('all',filenames);
 		const esClientName = 'gamechanger';
@@ -435,7 +438,7 @@ class AppStatsController {
 				searchPdfMapping[i] = {...doc, ...item};
 			}
 			else{
-				searchPdfMapping[i] = {...doc,display_title_s:doc.document}
+				searchPdfMapping[i] = {...doc,display_title_s:doc.document};
 			}
 		}
 		return searchPdfMapping;
@@ -463,8 +466,9 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { daysBack, offset, filters, sorting, pageSize, userId };
+		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
+		
+		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -475,7 +479,7 @@ class AppStatsController {
 			});
 			connection.connect();
 			const results = {
-				daysBack,
+				daysBack:3,
 				data: []
 			};
 			results.data = await this.querySearchPdfMapping(opts, connection);
@@ -498,7 +502,7 @@ class AppStatsController {
 		let userId = 'Unknown';
 		let connection;
 		try {
-			const { clone_name } = req.body
+			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(req.get('SSL_CLIENT_S_DN_CN'));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -510,8 +514,8 @@ class AppStatsController {
 			const results = await this.queryPDFOpenedByUserId(userId, clone_name, connection);
 			res.status(200).send(results);
 		} catch (err) {
-			this.logger.error(err, '1CZPASK', userId)
-			res.status(500).send(err)
+			this.logger.error(err, '1CZPASK', userId);
+			res.status(500).send(err);
 		} finally {
 			connection.end();
 		}
@@ -623,7 +627,7 @@ class AppStatsController {
 			}
 
 			// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
-			const docMap = {}
+			const docMap = {};
 			for(const [visitID, arr] of  Object.entries(searchMap)){
 				let currentSearch = '';
 				for(const search_doc of arr){
@@ -648,10 +652,10 @@ class AppStatsController {
 				if(searches !== undefined){
 					const sortSearches = Object
 						.keys(searches)
-						.sort(function (a, b) { return searches[b] - searches[a]; })
+						.sort(function (a, b) { return searches[b] - searches[a] })
 						.map(item => item + ' (' + searches[item] + ')')
 						.slice(0, 5);
-					const strSearches = sortSearches.join(', ')
+					const strSearches = sortSearches.join(', ');
 					doc.searches = strSearches;
 				} else {
 					doc.searches = '';
@@ -693,7 +697,7 @@ class AppStatsController {
 	 * This method takes gets user aggregated data
 	 * @returns an array of data from Matomo.
 	 */
-	async getUserAggregationsQuery(startDate, connection){
+	 async getUserAggregationsQuery(opts, connection){
 		return new Promise((resolve, reject) => {
 			connection.query(`
 				select
@@ -706,10 +710,11 @@ class AppStatsController {
 				where 
 					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger'))
 					AND b.idaction = a.idaction_name
-					AND server_time > ?
+					AND server_time >= ?
+					AND server_time <= ?
 				group by
 					a.idvisitor;`,
-				[`${startDate}`],
+				[opts.startDate,opts.endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -721,35 +726,66 @@ class AppStatsController {
 		});	
 	}
 
-		/**
+	/**
+		 * This method takes gets user aggregated data
+		 * @returns an array of data from Matomo.
+		 */
+	async getCardAggregationQuery(opts, connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+				select
+					count( distinct a.idvisitor) as unique_users,
+					count(a.idvisit) as total_searches
+				from 
+					matomo_log_link_visit_action a,
+					matomo_log_action b
+				where 
+					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger'))
+					AND b.idaction = a.idaction_name
+					AND server_time >= ?
+					AND server_time <= ?
+				`,
+				[opts.startDate,opts.endDate],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});	
+	}
+	/**
 	 * This method is called by an endpoint to query matomo to find the most recently opened documents
 	 * by a user
 	 * @param {*} req
 	 * @param {*} res
 	 */
-		 async getUserAggregations(req, res) {
-			const userId = req.get('SSL_CLIENT_S_DN_CN');
-			const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
-			const opts = { daysBack, offset, filters, sorting, pageSize };
-			const startDate = this.getDateNDaysAgo(opts.daysBack);
-			let connection;
-			try {
-				connection = this.mysql.createConnection({
-					host: this.constants.MATOMO_DB_CONFIG.host,
-					user: this.constants.MATOMO_DB_CONFIG.user,
-					password: this.constants.MATOMO_DB_CONFIG.password,
-					database: this.constants.MATOMO_DB_CONFIG.database
-				});
-				connection.connect();
-				const results = await this.getUserAggregationsQuery(startDate, connection);
-				res.status(200).send(results);
-			} catch (err) {
-				this.logger.error(err, '1CZPASK', userId)
-				res.status(500).send(err)
-			} finally {
-				connection.end();
-			}
+	async getUserAggregations(req, res) {
+		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
+		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database
+			});
+			connection.connect();
+			const results = await this.getUserAggregationsQuery(opts, connection);
+			const cards =  await this.getCardAggregationQuery(opts,connection);
+
+			res.status(200).send({users:results,cards:cards[0]});
+		} catch (err) {
+			this.logger.error(err, '1CZPASK', userId);
+			res.status(500).send(err);
+		} finally {
+			connection.end();
 		}
+	}
 
 }
 module.exports.AppStatsController = AppStatsController;

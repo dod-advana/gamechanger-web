@@ -11,7 +11,7 @@ import moment from 'moment';
 // Local Imports
 import {trackEvent} from '../telemetry/Matomo';
 import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils';
-import GCTooltip from '../common/GCToolTip'
+import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import {CardButton} from '../common/CardButton';
 
@@ -284,7 +284,7 @@ const GroupFavoriteCard = (props) => {
 			setPopoverOpen(false);
 			setPopoverIdx(-1);
 		}
-	}
+	};
 
 	const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
@@ -294,7 +294,7 @@ const GroupFavoriteCard = (props) => {
 	};
 	
 	return (
-		<StyledFavoriteDocumentCard key={idx} groupStyles={styles} active={active} onClick={() => {if(!active) setActive(true)}} style={active ? {height: 500, top: 0} : {}}>
+		<StyledFavoriteDocumentCard key={idx} groupStyles={styles} active={active} onClick={() => {if(!active) setActive(true);}} style={active ? {height: 500, top: 0} : {}}>
 			<div className={'main-info'}>
 				<div className={'top-buttons'}>
 					<div className={'back-button'} onClick={() => setActive(false)}>{'< Back'}</div>
@@ -404,8 +404,8 @@ const GroupFavoriteCard = (props) => {
 				</div>
 			</div>
 		</StyledFavoriteDocumentCard>
-	)
-}
+	);
+};
 
 GroupFavoriteCard.propTypes = {
 	styles: PropTypes.object,
@@ -422,6 +422,6 @@ GroupFavoriteCard.propTypes = {
 	cloneData: PropTypes.shape({
 		clone_name: PropTypes.string
 	})
-}
+};
 
 export default GroupFavoriteCard;

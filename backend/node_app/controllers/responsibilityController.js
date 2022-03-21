@@ -75,7 +75,7 @@ class ResponsibilityController {
 						if (!filterReturns.includes(org)) {
 							filterReturns.push(org);
 						}
-					})
+					});
 				}
 			});
 			
@@ -161,8 +161,8 @@ class ResponsibilityController {
 					}
 				}
 			]
-		}
-		return query
+		};
+		return query;
 	}
 
 	oneDocQuery(filename) {
@@ -178,7 +178,7 @@ class ResponsibilityController {
 						}	
 					}
 				}
-			}
+			};
 		} catch (err) {
 			this.logger.error(err, 'DOIFCN', userId);
 		}
@@ -266,7 +266,7 @@ class ResponsibilityController {
 			}
 			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			const pageNumber = rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields['paragraphs.page_num_i'][0];
-			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s
+			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s;
 
 			res.status(200).send({fileLink, pageNumber});
 		} catch (err) {
@@ -279,10 +279,10 @@ class ResponsibilityController {
 	async getParagraphNum(raw, user) {
 		try {
 			if (raw.body.hits.hits.length === 0 ){
-				return -1
+				return -1;
 			} else {
 				let fields = raw.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields;
-				return fields['paragraphs.par_inc_count'][0]
+				return fields['paragraphs.par_inc_count'][0];
 			}
 			
 		} catch (err) {
@@ -363,7 +363,7 @@ class ResponsibilityController {
 									{ [Op.like]: { [Op.any]: value } },
 									{ [Op.eq]: null },
 								]
-							}
+							};
 						} else {
 							tmpWhere[id] = {
 								[Op.like]: { [Op.any]: value }
@@ -395,7 +395,7 @@ class ResponsibilityController {
 						'documentTitle',
 					]
 				});
-				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.documentCount)))
+				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.documentCount)));
 				for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
 					if(!newOffsets[i]) break;
 					newLimit += newOffsets[i];
@@ -511,7 +511,7 @@ class ResponsibilityController {
 					where: {
 						id: responsibilityId
 					}
-				})
+				});
 				await this.responsibility_reports.update({
 					issue_description: status
 				}, 
@@ -519,7 +519,7 @@ class ResponsibilityController {
 					where: {
 						id: updateId
 					}
-				})
+				});
 
 				return res.status(200).send();
 			}
@@ -529,12 +529,12 @@ class ResponsibilityController {
 					model: RESPONSIBILITY_REPORTS,
 					where: {issue_description: 'review'}
 				}
-			})
+			});
 			if(status === 'accepted'){ 
 				if(foundResp?.dataValues.responsibility_reports.length <= 1) {
 					responsibilityStatus = 'updated';
 				}else{
-					responsibilityStatus = 'updated, review'
+					responsibilityStatus = 'updated, review';
 				}
 				await this.responsibilities.update({
 					[updatedColumn]: updatedText,
@@ -544,7 +544,7 @@ class ResponsibilityController {
 					where: {
 						id: responsibilityId
 					}
-				})
+				});
 				let responsibilityUpdate;
 				if(updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
 				if(updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
@@ -556,14 +556,14 @@ class ResponsibilityController {
 					where: {
 						id: updateId
 					}
-				})
+				});
 			}
 			if(status === 'rejected'){
 				await this.responsibility_reports.destroy({
 					where: {
 						id: updateId
 					}
-				})
+				});
 				if(foundResp?.dataValues.responsibility_reports.length <= 1){
 					await this.responsibilities.update({
 						status: 'active'
@@ -572,7 +572,7 @@ class ResponsibilityController {
 						where: {
 							id: responsibilityId
 						}
-					})
+					});
 				}
 			}
 			res.status(200).send();
@@ -599,7 +599,7 @@ class ResponsibilityController {
 				where: {
 					id
 				}
-			})
+			});
 			res.status(200).send(result);
 		}catch (err) {
 			this.logger.error(err, '1PU0TKR', userId);
@@ -622,7 +622,7 @@ class ResponsibilityController {
 				updatedColumn,
 				updatedText,
 				textPosition
-			})
+			});
 			await this.responsibilities.update({
 				status: 'review'
 			},
@@ -679,7 +679,7 @@ class ResponsibilityController {
 					'filename',
 				]
 			});
-			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)))
+			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)));
 			for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
 				if(!newOffsets[i]) break;
 				limit += newOffsets[i];

@@ -35,7 +35,7 @@ const handleTypeFilterChange = (event, state, dispatch) => {
 	newSearchSettings.typeUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'typeFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
-}
+};
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
@@ -49,7 +49,7 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	newSearchSettings.orgUpdate = true;
 	setState(dispatch, {searchSettings: newSearchSettings, metricsCounted: false, runSearch: true, runGraphSearch: true});
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.innerHTML, event.currentTarget.ariaPressed ? 1 : 0);
-}
+};
 
 const useStyles = makeStyles({
 	root: {
@@ -85,7 +85,7 @@ const useStyles = makeStyles({
 	formlabel: {
 		paddingTop: '16px'
 	}
-})
+});
 
 const ViewHeader = (props) => {
 
@@ -116,10 +116,10 @@ const ViewHeader = (props) => {
 
 	useEffect(()=> {
 		if(IS_EDGE){
-			setDropdownValue('List')
+			setDropdownValue('List');
 			setState(dispatch, {currentViewName: 'Card', listView: true});
 		}
-	},[dispatch])
+	},[dispatch]);
 
 	useEffect(()=> {
 		let tempCount;
@@ -138,20 +138,20 @@ const ViewHeader = (props) => {
 			default:
 				tempCount = count;
 		}
-		setDisplayCount(tempCount)
-	},[activeCategoryTab, count, entityCount, topicCount, selectedCategories])
+		setDisplayCount(tempCount);
+	},[activeCategoryTab, count, entityCount, topicCount, selectedCategories]);
 	
 	const setDrawer = (open) => {
 		setState(dispatch, {docsDrawerOpen: open});
-	}
+	};
 
 	const setDrawerReady = (ready) => {
 		setState(dispatch, {isDrawerReady: ready});
-	}
+	};
 	
 	const setStepIndex = (stepIndex) => {
 		setState(dispatch, {stepIndex: stepIndex});
-	}
+	};
 
 	const removeSelectedDocument = (key) => {
 		const { selectedDocuments } = state;
@@ -161,16 +161,16 @@ const ViewHeader = (props) => {
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
-	}
+	};
 
 	const handleChangeSort = (event) => {
 		const {target: { value }} = event;
 		setState(dispatch,{currentSort: value, currentOrder: (value === 'Alphabetical' ? 'asc' : 'desc'), resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true, infiniteScrollPage: 1});
-	}
+	};
 
 	const handleChangeOrder = (value) => {
 		setState(dispatch,{currentOrder: value, resultsPage: 1, docSearchResults: [], replaceResults: true, docsPagination: true});
-	}
+	};
 
 	const handleChangeView = (event) => {
 		const {target: { value }} = event;
@@ -196,7 +196,7 @@ const ViewHeader = (props) => {
 		setDropdownValue(value);
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 		window.history.pushState(null, document.title, linkString);
-	}
+	};
 
 	return (
 		<div className={'results-count-view-buttons-container'}> 
@@ -230,7 +230,7 @@ const ViewHeader = (props) => {
 										</span>
 
 									</Button>
-								)} else {
+								);} else {
 								return null;
 							}
 						})}
@@ -260,7 +260,7 @@ const ViewHeader = (props) => {
             				</span>
 
             			</Button>
-            		)} else {
+            		);} else {
             		return null;
             	}
             })}
@@ -285,7 +285,7 @@ const ViewHeader = (props) => {
 								autoWidth
 							>
 								{categorySorting[activeCategoryTab].map(sort => {
-									return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>
+									return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>;
 								})}
 							</Select>
 						</FormControl>
@@ -338,9 +338,9 @@ const ViewHeader = (props) => {
 								return([
 									<MenuItem key={`Card-List`}value={'List'}>List View</MenuItem>,
 									<MenuItem key={`Card-Grid`}value={'Grid'}>Grid View</MenuItem>
-								])
+								]);
 							} else {
-								return <MenuItem key={`${view.name}-key`}value={view.name}>{view.title}</MenuItem>
+								return <MenuItem key={`${view.name}-key`}value={view.name}>{view.title}</MenuItem>;
 							}
 						})}
 					</Select>
@@ -382,9 +382,9 @@ const ViewHeader = (props) => {
 				/>
 			</div>
 		</div>
-	)
+	);
 
-}
+};
 
 ViewHeader.propTypes = {
 	activeCategoryTab: PropTypes.string,
@@ -406,6 +406,6 @@ ViewHeader.propTypes = {
 	categorySorting: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)),
 	currentSort: PropTypes.string,
 	currentOrder: PropTypes.string
-}
+};
 
 export default ViewHeader;

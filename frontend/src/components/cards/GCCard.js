@@ -530,7 +530,7 @@ function GCCard(props) {
 			selectedDocuments: new Map(selectedDocuments),
 			selectedDocumentsForGraph: newDocArray,
 		});
-	}
+	};
 	
 	const intelligentFeedbackComponent = () => (
 		<div style={styles.tooltipRow}>
@@ -652,7 +652,7 @@ function GCCard(props) {
 								</GCButton>
 								<GCButton
 									onClick={() => {
-										handleSaveFavorite(false)
+										handleSaveFavorite(false);
 										gameChangerAPI.sendIntelligentSearchFeedback(
 											'intelligent_search_cancel_favorite_document',
 											cardHandler.getDisplayTitle(item),
@@ -663,7 +663,7 @@ function GCCard(props) {
 											'CancelFavorite',
 											cardHandler.getFilename(item),
 											`search : ${searchText}`
-										)
+										);
 									}}
 									style={{
 										height: 40,
@@ -711,7 +711,7 @@ function GCCard(props) {
 								</GCButton>
 								<GCButton
 									onClick={() =>{
-										handleSaveFavorite(true)
+										handleSaveFavorite(true);
 										gameChangerAPI.sendIntelligentSearchFeedback(
 											'intelligent_search_favorite_document',
 											cardHandler.getDisplayTitle(item),
@@ -722,7 +722,7 @@ function GCCard(props) {
 											'Favorite',
 											cardHandler.getFilename(item),
 											`search : ${searchText}`
-										)
+										);
 									}}
 									style={{
 										height: 40,

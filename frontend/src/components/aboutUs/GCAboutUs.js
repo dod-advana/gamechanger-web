@@ -80,8 +80,8 @@ const GCAboutUs = (props) => {
 			'Data',
 			'Analyst Tools',
 			'Collaboration',
-		]
-	},[])
+		];
+	},[]);
 
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;
@@ -354,9 +354,8 @@ const GCAboutUs = (props) => {
 					<br />
 				</Typography>
 				<Typography variant="body">
-					Browse our answers to some of your most frequently asked questions.
-					We’ll continually update this page with new insights and information,
-					so check back often.
+				Browse our answers to some of your most frequently asked questions. 
+				We’ll continually update this page with new insights and information, so check back often.
 				</Typography>
 			</div>,
 			<div style={{ margin: '30px 0 30px 100px', display: 'flex' }}>

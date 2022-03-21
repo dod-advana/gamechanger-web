@@ -9,7 +9,7 @@ const db = {};
 let eda_sequelize = new Sequelize(
 	constants.POSTGRES_CONFIG.databases.eda.database, constants.POSTGRES_CONFIG.databases.eda.username, constants.POSTGRES_CONFIG.databases.eda.password, constants.POSTGRES_CONFIG.databases.eda
 );
-Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value); };
+Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value) };
 
 // Add models from eda folder
 fs

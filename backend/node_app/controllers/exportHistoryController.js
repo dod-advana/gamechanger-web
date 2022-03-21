@@ -34,7 +34,7 @@ class ExportHistoryController {
 	}
 
 	async storeExportHistory(res, reqBody, respMeta, userId = 'webapp_unknown'){
-		const new_id = getTenDigitUserId(userId)
+		const new_id = getTenDigitUserId(userId);
 		const record = {
 			user_id: this.sparkMD5.hash(userId),
 			download_request_body: reqBody,

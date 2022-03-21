@@ -23,7 +23,7 @@ const abbreviationRedisAsyncClientDB = 9;
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
-const SimplePdfSearchHandler = function SimplePdfSearchHandler() {}
+const SimplePdfSearchHandler = function SimplePdfSearchHandler() {};
 SimplePdfSearchHandler.prototype.search = async function(searchText, offset, limit, options, userId, storeHistory) {
 	console.log(`${userId} is doing a covid19 search for ${searchText} with offset ${offset}, limit ${limit}, options ${options}`);
 	const proxyBody = options;
@@ -31,7 +31,7 @@ SimplePdfSearchHandler.prototype.search = async function(searchText, offset, lim
 	proxyBody.offset = offset;
 	proxyBody.limit = limit;
 	return documentSearchHelper({body: proxyBody, permissions: []}, userId, storeHistory);
-}
+};
 
 async function documentSearchHelper(req, userId, storeHistory) {
 	const historyRec = {
@@ -358,7 +358,7 @@ async function storeEsRecord(esClient, offset, clone_name, userId, searchText){
 			};
 			let search_history_index = constants.GAME_CHANGER_OPTS.historyIndex;
 
-			dataLibrary.putDocument(esClient, search_history_index, searchLog)
+			dataLibrary.putDocument(esClient, search_history_index, searchLog);
 		}
 	} catch (e) {
 		LOGGER.error(e.message, 'UA0YDAL');

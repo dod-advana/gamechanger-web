@@ -294,6 +294,7 @@ export default function GraphNodeCluster2D(props) {
 		setNodeGroupMenuLabelProp = () => {},
 		closeGroupNodeMenu = undefined,
 		orgTypesSelected = [],
+		nodePointerAreaPaint,
 	} = props;
 
 	const graphRef = useRef();
@@ -1091,16 +1092,18 @@ export default function GraphNodeCluster2D(props) {
 			}
 			ctx.stroke();
 
-			// Draw Arrow
-			draw2DArrows(
-				link,
-				ctx,
-				globalScale,
-				arrowLength,
-				arrowRelativePosition,
-				color,
-				nodeRelativeSize
-			);
+			if (globalScale > 5) {
+				// Draw Arrow
+				draw2DArrows(
+					link,
+					ctx,
+					globalScale,
+					arrowLength,
+					arrowRelativePosition,
+					color,
+					nodeRelativeSize
+				);
+			}
 
 			if (displayLinkLabel) {
 				handleCreateGraphLinkText(link, ctx, globalScale);
@@ -1366,7 +1369,7 @@ export default function GraphNodeCluster2D(props) {
 										);
 										setZoomFactor(event.target.value);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>
@@ -1415,7 +1418,7 @@ export default function GraphNodeCluster2D(props) {
 										handleUpdateNodeSize(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>
@@ -1440,7 +1443,7 @@ export default function GraphNodeCluster2D(props) {
 										setEdgeThickness(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
 								/>
 							</FormControl>
 						</div>
@@ -1537,6 +1540,7 @@ export default function GraphNodeCluster2D(props) {
 				height={graphHeight}
 				backgroundColor={backgroundWhite}
 				nodeCanvasObject={handleCreateGraphNode}
+				nodePointerAreaPaint={nodePointerAreaPaint}
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}

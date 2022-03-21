@@ -49,7 +49,7 @@ class BudgetSearchSearchUtility {
 				record_n: 'ProgramElementMissionDescription_t',
 				project_n: 'ProjectMissionDescription_t',
 				meta_n: 'filename_s'
-			}
+			};
 
 			for (const source in nestedQueries) {
 				query.query.bool.should.push(
@@ -113,7 +113,7 @@ class BudgetSearchSearchUtility {
 				}
 				catch(err) {
 					console.log(err);
-					console.log('Error parsing BudgetSearch fields')
+					console.log('Error parsing BudgetSearch fields');
 				}
 
 				results.docs.push(result);
@@ -133,13 +133,13 @@ class BudgetSearchSearchUtility {
 			query: {
 				match_all: {}
 			}
-		}
+		};
 	}
 
 	transformEsFields(raw) {
 		let result = {};
 		const arrayFields = ['keyw_5', 'ref_list', 'paragraphs', 'entities', 'abbreviations_n'];
-		const budgetSearchArrayFields = ['meta_n', 'record_n', 'project_n']
+		const budgetSearchArrayFields = ['meta_n', 'record_n', 'project_n'];
 		for (let key in raw) {
 			if ((raw[key] && raw[key][0]) || Number.isInteger(raw[key]) || typeof raw[key] === 'object' && raw[key] !== null) {
 				if (arrayFields.includes(key) || budgetSearchArrayFields.includes(key)) {

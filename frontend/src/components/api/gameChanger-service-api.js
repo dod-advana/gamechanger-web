@@ -28,6 +28,7 @@ const endpoints = {
 	gcCloneDataPOST: '/api/gameChanger/modular/admin/storeCloneMeta',
 	gcCloneDataDeletePOST: '/api/gameChanger/modular/admin/deleteCloneMeta',
 	gcDataTrackerDataPOST: '/api/gameChanger/dataTracker/getTrackedData',
+	getDocIngestionStats: '/api/gameChanger/getDocIngestionStats',
 	gcBrowsingLibraryPOST: '/api/gameChanger/dataTracker/getBrowsingLibrary',
 	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
 	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
@@ -316,8 +317,13 @@ export default class GameChangerAPI {
 		);
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
-		if (highlightText)
-			append += `#search=${this.splitSearchText(highlightText)}`;
+		if (highlightText){
+			if(Array.isArray(highlightText)){
+				append += `#search=${JSON.stringify(highlightText)}&searchArray`;
+			}else{
+				append += `#search=${this.splitSearchText(highlightText)}`;
+			}
+		}
 		if (pageNumber)
 			append += `${append[0] === '#' ? '&' : '#'}page=${pageNumber}`;
 		if (fileName)
@@ -431,6 +437,11 @@ export default class GameChangerAPI {
 	getDataTrackerData = async (options) => {
 		const url = endpoints.gcDataTrackerDataPOST;
 		return axiosPOST(this.axios, url, options);
+	};
+
+	getDocIngestionStats = async () => {
+		const url = endpoints.getDocIngestionStats;
+		return axiosGET(this.axios, url);
 	};
 
 	getBrowsingLibrary = async (options) => {
@@ -849,7 +860,7 @@ export default class GameChangerAPI {
 
 	updateAPIKeyDescription = async (description, key) => {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
-		return axiosPOST(this.axios, url, { description, key })
+		return axiosPOST(this.axios, url, { description, key });
 	}
 	
 	approveRejectAPIKeyRequest = async (id, approve) => {
@@ -921,7 +932,7 @@ export default class GameChangerAPI {
 
 	sendJiraFeedback= async (body) => {
 		const url = endpoints.sendJiraFeedback;
-		return axiosPOST(this.axios, url, body)
+		return axiosPOST(this.axios, url, body);
 	}
 
 	getLTRMode = async () => {

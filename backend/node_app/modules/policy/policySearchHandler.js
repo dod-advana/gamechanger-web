@@ -59,14 +59,14 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/["]+/g,'');
 		}
 		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
-		var startTime = performance.now()
+		var startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
-		var startTimeInt = performance.now()
+		var startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		var endTimeInt = performance.now()
-		var endTime = performance.now()
-		this.logger.info(`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${endTimeInt - startTimeInt}`)
+		var endTimeInt = performance.now();
+		var endTime = performance.now();
+		this.logger.info(`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${endTimeInt - startTimeInt}`);
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject);
 		}
@@ -185,7 +185,7 @@ class PolicySearchHandler extends SearchHandler {
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
-			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId)
+			let relatedSearches = await this.searchUtility.getRelatedSearches(searchText, expansionDict, cloneName, userId);
 			expansionDict = this.searchUtility.combineExpansionTerms(expansionDict, synonyms, relatedSearches, termsArray[0], cleanedAbbreviations, userId);
 			return expansionDict;
 		} catch (e) {
@@ -212,14 +212,14 @@ class PolicySearchHandler extends SearchHandler {
 	thesaurusExpansion(searchText, termsArray){
 		let lookUpTerm = searchText.replace(/\"/g, '');
 		let useText = true;
-		let synList = []
+		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
 			for(var term in termsArray){
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1){
-					synList = synList.concat(synonyms.slice(0,2))
+					synList = synList.concat(synonyms.slice(0,2));
 				}
 			}
 		}
@@ -293,7 +293,7 @@ class PolicySearchHandler extends SearchHandler {
 			offset,
 		} = req.body;
 		try {
-			let sentenceResults = {}
+			let sentenceResults = {};
 
 			let enrichedResults = searchResults;
 			//set empty values
@@ -309,7 +309,7 @@ class PolicySearchHandler extends SearchHandler {
 			let intelligentSearchOn = await this.app_settings.findOrCreate({where: { key: 'combined_search'}, defaults: {value: 'true'} });
 			intelligentSearchOn = intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if (intelligentSearchOn){
-				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId)
+				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId);
 				enrichedResults.sentenceResults = sentenceResults;
 
 			}
@@ -324,7 +324,7 @@ class PolicySearchHandler extends SearchHandler {
 			intelligentAnswersOn = intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if(intelligentAnswersOn && intelligentSearchOn){
 				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
-				enrichedResults.qaResults = QA
+				enrichedResults.qaResults = QA;
 			}
 
 			// add entities
@@ -438,7 +438,7 @@ class PolicySearchHandler extends SearchHandler {
 				}
 				
 			} catch (e) {
-				this.error.category = 'ML API'
+				this.error.category = 'ML API';
 				this.error.code = 'KBBIOYCJ';
 				this.logger.error('DETECTED ERROR:', e.message, 'KBBIOYCJ', userId);
 			}
@@ -528,7 +528,7 @@ class PolicySearchHandler extends SearchHandler {
 
 			esQuery = this.searchUtility.getSourceQuery(searchText, offset, limit);
 
-			const clientObj = this.searchUtility.getESClient(cloneName, permissions)
+			const clientObj = this.searchUtility.getESClient(cloneName, permissions);
 			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
 			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
 				let searchResults = this.searchUtility.cleanUpEsResults(esResults, '', userId, null, null, clientObj.esIndex, esQuery);
@@ -663,7 +663,7 @@ class PolicySearchHandler extends SearchHandler {
 			return {orgs: orgsCleaned, types: typesCleaned};
 		} catch (e) {
 			this.logger.error(e.message, 'OICE7JS');
-			return {orgs: [], types: []}
+			return {orgs: [], types: []};
 		}
 	}
 
