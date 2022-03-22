@@ -163,6 +163,7 @@ export default (props) => {
 					? current.data.topic_model.replace(/^.*[\\/]/, '')
 					: ''
 			);
+
 			props.updateLogs('Successfully queried current loaded models.', 0);
 		} catch (e) {
 			props.updateLogs(
@@ -378,6 +379,9 @@ export default (props) => {
 			}
 			if (selectedJbookQEXP) {
 				params['jbook_qexp'] = selectedJbookQEXP;
+			}
+			if (selectedQAModel) {
+				params['qa_model'] = selectedQAModel;
 			}
 			await gameChangerAPI.reloadModels(params);
 			props.updateLogs('Reloaded Models', 0);
