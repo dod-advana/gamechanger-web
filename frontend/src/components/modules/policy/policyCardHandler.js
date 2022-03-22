@@ -896,7 +896,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				>
 					<GCButton 
 						style={{position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1}}
-						onClick={()=>console.log('cliked!')}
+						onClick={()=> gameChangerAPI.requestDocIngest({docId: item.display_title_s})}
 					>
 					 Report Issue
 					</GCButton>
