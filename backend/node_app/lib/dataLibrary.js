@@ -1,4 +1,4 @@
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const axiosLib = require('axios');
 const https = require('https');

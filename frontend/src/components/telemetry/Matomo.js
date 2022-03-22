@@ -1,5 +1,4 @@
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
-import GCAuth from '../common/GCAuth';
 import React, { useEffect } from 'react';
 import Config from '../../config/config';
 
@@ -10,14 +9,10 @@ const MATOMO_LINK = Config.MATOMO_LINK;
 
 let matomo = null;
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
-
 try {
 	matomo = MatomoReactRouter({
 		url: MATOMO_LINK,
-		siteId: isDecoupled ? 2 : 1,
+		siteId: 2,
 	});
 	// matomo = {
 	// 	push: (data) => { console.log(data) },
@@ -98,9 +93,7 @@ export function trackPageView(documentTitle, customDimensions) {
 		if (!useMatomo) return;
 
 		// Set User
-		const userId = isDecoupled
-			? GCAuth.getTokenPayload().cn
-			: Auth.getUserId() || ' ';
+		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
@@ -144,13 +137,14 @@ export function trackEvent(category, action, name, value, customDimensions) {
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
 		if (!useMatomo) return;
+
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
+
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
 		// Nothing
-		console.error('matomo error',error);
 	}
 }
 

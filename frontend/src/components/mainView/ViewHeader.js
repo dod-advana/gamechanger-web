@@ -90,7 +90,7 @@ const useStyles = makeStyles({
 const ViewHeader = (props) => {
 
 	const classes = useStyles();
-	const {context ={}} = props;
+	const {context ={}, extraStyle={}} = props;
 
 	const {state, dispatch} = context;
 	const {typeFilter, orgFilter} = state.searchSettings;
@@ -199,7 +199,7 @@ const ViewHeader = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'}> 
+		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			{state.cloneData.clone_name === 'gamechanger' ?
 				<>
             	<div className={'view-filters-container'}>
@@ -268,7 +268,7 @@ const ViewHeader = (props) => {
 				</> : <> </>
 			} 
 			<div className={'view-buttons-container'}
-				style={cloneData.clone_name !== 'gamechanger' ? {marginRight: 35} : {}}
+				style={cloneData.clone_name !== 'gamechanger' ? {marginRight: 35, zIndex: 99} : {marginRight: 15, zIndex: 99}}
 			>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined &&  
 					<>
@@ -285,7 +285,7 @@ const ViewHeader = (props) => {
 								autoWidth
 							>
 								{categorySorting[activeCategoryTab].map(sort => {
-									return <MenuItem key={`${sort}-key`}value={sort}>{sort}</MenuItem>;
+									return <MenuItem key={`${sort}-key`} value={sort}>{sort}</MenuItem>;
 								})}
 							</Select>
 						</FormControl>
@@ -296,13 +296,13 @@ const ViewHeader = (props) => {
 									style={{marginTop: '80%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
-								></i>
+								/>
 								<i 
 									className="fa fa-sort-amount-asc"
 									style={{marginTop: '80%', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
-								></i>
+								/>
 							</div>) : 
 							(<div style={{width: '40px', marginRight: '6px', display: 'flex'}}>
 								<i 
@@ -310,13 +310,13 @@ const ViewHeader = (props) => {
 									style={{marginTop: '80%', marginRight: '5px', cursor: 'pointer', color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('asc')}	}
-								></i>
+								/>
 								<i 
 									className="fa fa-sort-alpha-desc"
 									style={{marginTop: '80%', cursor: 'pointer', color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey'}} 
 									aria-hidden="true"
 									onClick={() => {handleChangeOrder('desc')}	}
-								></i>
+								/>
 							</div>)
 						}
 					</>

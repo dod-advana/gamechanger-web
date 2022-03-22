@@ -26,7 +26,7 @@ module.exports = Object.freeze({
 	TLS_KEY: getCert('TLS_KEY', 'TLS_KEY_FILEPATH'),
 	EXPRESS_TRUST_PROXY: function () {
 		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : '';
-		if (['true','false'].includes(str_var.toLowerCase())) {
+		if (['true', 'false'].includes(str_var.toLowerCase())) {
 			return str_var.toLowerCase() === 'true';
 		}
 		return str_var;
@@ -69,6 +69,15 @@ module.exports = Object.freeze({
 				port: 5432,
 				dialect: 'postgres',
 				logging: false
+			},
+			jbook: {
+				username: process.env.POSTGRES_USER_JBOOK,
+				password: process.env.POSTGRES_PASSWORD_JBOOK,
+				database: process.env.POSTGRES_DB_JBOOK?.trim() || 'jbook',
+				host: process.env.POSTGRES_HOST_JBOOK,
+				port: 5432,
+				dialect: 'postgres',
+				logging: false
 			}
 			
 		}
@@ -83,6 +92,7 @@ module.exports = Object.freeze({
 		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || "007",
 		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === "true",
 		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
+		rootClone: process.env.REACT_APP_ROOT_CLONE,
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
 		protocol: 'http',
@@ -98,48 +108,49 @@ module.exports = Object.freeze({
 		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
-	ADVANA_EMAIL_CONTACT_NAME: 'Advana Do Not Reply',
-	ADVANA_NOREPLY_EMAIL_ADDRESS: 'no-reply@boozallencsn.com',
+	ADVANA_EMAIL_CONTACT_NAME: process.env.EMAIL_FROM_NAME || 'Advana Do Not Reply',
+	ADVANA_NOREPLY_EMAIL_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
-		sendmail: true,
-		newline: 'unix',
-		secure: true
+		host: process.env.EMAIL_HOST,
+		port: process.env.EMAIL_PORT
 	},
+	ADVANA_EMAIL_CC: process.env.EMAIL_CC || '',
+	BASE_URL_FOR_EMAIL: process.env.BASE_URL_FOR_EMAIL || `https://${process.env.REACT_APP_ROOT_CLONE}.advana.data.mil`,
 	GAMECHANGER_ELASTIC_SEARCH_OPTS: {
 		useElasticSearch: true,
-		protocol: process.env.GAMECHANGER_ELASTICSEARCH_PROTOCOL,
-		host: process.env.GAMECHANGER_ELASTICSEARCH_HOST,
-		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT,
+		protocol: process.env.GAMECHANGER_ELASTICSEARCH_PROTOCOL || 'https',
+		host: process.env.GAMECHANGER_ELASTICSEARCH_HOST || 'localhost',
+		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT || '443',
 		user: process.env.GAMECHANGER_ELASTICSEARCH_USER ? process.env.GAMECHANGER_ELASTICSEARCH_USER : '',
-		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD,
+		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD || 'passowrd',
 		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
-		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX,
+		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX || 'gamechanger',
 		legislation_index: process.env.GAMECHANGER_LEGISLATION ? process.env.GAMECHANGER_LEGISLATION : 'gamechanger_legislation',
-		assist_index: process.env.GAMECHANGER_ASSIST ? process.env.GAMECHANGER_ASSIST : 'gamechanger_assist',
+		assist_index: process.env.GAMECHANGER_ASSIST || 'gamechanger_assist',
 		history_index: 'search_history',
 		requestTimeout: 60000
 	},
 	EDA_ELASTIC_SEARCH_OPTS: {
-		protocol: process.env.EDA_ELASTICSEARCH_PROTOCOL,
-		host: process.env.EDA_ELASTICSEARCH_HOST,
-		port: process.env.EDA_ELASTICSEARCH_PORT,
+		protocol: process.env.EDA_ELASTICSEARCH_PROTOCOL || 'https',
+		host: process.env.EDA_ELASTICSEARCH_HOST || 'loclhost',
+		port: process.env.EDA_ELASTICSEARCH_PORT || '443',
 		user: process.env.EDA_ELASTICSEARCH_USER ? process.env.EDA_ELASTICSEARCH_USER : '',
-		password: process.env.EDA_ELASTICSEARCH_PASSWORD,
+		password: process.env.EDA_ELASTICSEARCH_PASSWORD || 'password',
 		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
-		index: process.env.EDA_ELASTICSEARCH_INDEX,
-		extSearchFields:['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
-		extRetrieveFields:['*_eda_ext'],
+		index: process.env.EDA_ELASTICSEARCH_INDEX || 'eda',
+		extSearchFields: ['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
+		extRetrieveFields: ['*_eda_ext'],
 		// index: 'eda'
 		requestTimeout: 60000
 	},
 	BUDGETSEARCH_ELASTIC_SEARCH_OPTS: {
-		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX
+		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX || 'jbook'
 	},
 	S3_REGION: process.env.S3_REGION ? process.env.S3_REGION : undefined,
 	GRAPH_DB_CONFIG: {
 		url: process.env.NEO4J_URL,
 		user: process.env.NEO4J_USER,
-		password:  process.env.NEO4J_PASSWORD
+		password: process.env.NEO4J_PASSWORD
 	},
 	MATOMO_DB_CONFIG: {
 		host: process.env.MYSQL_HOST_MATOMO,
@@ -161,8 +172,8 @@ module.exports = Object.freeze({
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
 		CA: process.env.QLIK_CERT_CA ? process.env.QLIK_CERT_CA.replace(/\\n/g, '\n') : '',
-		KEY:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
-		CERT:  process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
+		KEY: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
+		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN
 	},
@@ -222,7 +233,7 @@ module.exports = Object.freeze({
 		ENVIRONMENT: process.env.SERVICE_ACCOUNT_ENV,
 	},
 	REQUEST_TYPE_ID: 113,
-	JIRA_CONFIG:{
+	JIRA_CONFIG: {
 		username: process.env.JIRA_USERNAME,
 		password: process.env.JIRA_PASSWORD,
 		domain: process.env.JIRA_DOMAIN,

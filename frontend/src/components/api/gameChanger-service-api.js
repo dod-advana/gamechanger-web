@@ -2,9 +2,6 @@ import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
 import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
-// import util from '../advana/api/util';
-
-// import { getPdfViewerUrl } from '../advana/api/storage-service-api'
 
 const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
@@ -40,7 +37,7 @@ const endpoints = {
 	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
 	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
 	queryEs: '/api/gameChanger/admin/queryEs',
-	notificationsGET: '/api/gameChanger/getNotifications',
+	notificationsPOST: '/api/gameChanger/getNotifications',
 	notificationCreatePOST: '/api/gameChanger/admin/createNotification',
 	notificationEditActivePOST: '/api/gameChanger/admin/editNotificationActive',
 	notificationDeletePOST: '/api/gameChanger/admin/deleteNotification',
@@ -86,7 +83,6 @@ const endpoints = {
 	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
 	getUserSettings: '/api/gameChanger/getUserSettings',
-	setUserBetaStatus: '/api/gameChanger/setUserBetaStatus',
 	getInternalUsers: '/api/gameChanger/getInternalUsers',
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
@@ -117,7 +113,6 @@ const endpoints = {
 	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
 	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
 	combinedSearchMode: '/api/gamechanger/appSettings/combinedSearch',
-	populateNewUserId: '/api/gamechanger/admin/populateNewUserId',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
 	userFeedback: '/api/gamechanger/appSettings/userFeedback',
@@ -136,6 +131,20 @@ const endpoints = {
 	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
+	updateClonesVisitedPOST: '/api/gameChanger/user/updateClonesVisited',
+	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
+	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
+	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
+	callDataFunctionPOST: '/api/gameChanger/modular/callDataFunction',
+	queryExp: '/api/gameChanger/expandTerms',
+	reviewerDataGET: '/api/gameChanger/admin/getReviewerData',
+	reviewerDataDeletePOST: '/api/gameChanger/admin/deleteReviewerData',
+	reviewerDataPOST: '/api/gameChanger/admin/createUpdateReviewer',
+	exportReview: '/api/gameChanger/modular/exportReview',
+	exportChecklist: '/api/gameChanger/modular/exportChecklist',
+	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
+	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -214,9 +223,19 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, data);
 	};
 
-	modularSearch = async (data) => {
+	modularSearch = async (data, cancelToken) => {
 		const url = endpoints.modularSearch;
 		data.options.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
+		if (cancelToken) {
+			return axiosPOST(
+				this.axios,
+				url,
+				data,
+				{
+					cancelToken: cancelToken?.token ? cancelToken.token : {}
+				}
+			);
+		}
 		return axiosPOST(this.axios, url, data);
 	};
 
@@ -344,10 +363,9 @@ export default class GameChangerAPI {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 
 			let filename = encodeURIComponent(
-				`gamechanger${
-					cloneData.clone_name !== 'gamechanger'
-						? `/projects/${cloneData.clone_name}`
-						: ''
+				`gamechanger${cloneData.clone_name !== 'gamechanger'
+					? `/projects/${cloneData.clone_name}`
+					: ''
 				}/${isDLA ? 'pdf-assist' : 'pdf'}/${fileName}`
 			);
 
@@ -359,8 +377,7 @@ export default class GameChangerAPI {
 				this.axios,
 				`${endpoints.dataStorageDownloadGET}?path=${encodeURIComponent(
 					fileName
-				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${
-					cloneData.clone_name
+				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${cloneData.clone_name
 				}`,
 				{
 					responseType: 'blob',
@@ -390,12 +407,12 @@ export default class GameChangerAPI {
 	thumbnailStorageDownloadPOST = async (filenames, folder, cloneData, cancelToken) => {
 		const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 		const url = endpoints.thumbnailStorageDownloadPOST;
-		if(cancelToken){
+		if (cancelToken) {
 			return axiosPOST(
 				this.axios,
 				url,
 				{ filenames, folder, clone_name: cloneData.clone_name, dest: s3Bucket },
-				{ 
+				{
 					timeout: 0,
 					cancelToken: cancelToken?.token ? cancelToken.token : {}
 				}
@@ -503,7 +520,7 @@ export default class GameChangerAPI {
 		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
 	}
-	
+
 	getOtherEntityFilterList = async (options) => {
 		const url = endpoints.getOtherEntityFilterList;
 		return axiosGET(this.axios, url, options);
@@ -554,9 +571,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { index });
 	};
 
-	getNotifications = async () => {
-		const url = endpoints.notificationsGET;
-		return axiosGET(this.axios, url);
+	getNotifications = async (cloneName) => {
+		const url = endpoints.notificationsPOST;
+		return axiosPOST(this.axios, url, { project_name: cloneName });
 	};
 
 	createNotification = async (body) => {
@@ -743,11 +760,6 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
-	setUserBetaStatus = async (checked) => {
-		const url = endpoints.setUserBetaStatus;
-		return axiosPOST(this.axios, url, { status: checked });
-	};
-
 	getInternalUsers = async () => {
 		const url = endpoints.getInternalUsers;
 		return axiosGET(this.axios, url);
@@ -775,12 +787,12 @@ export default class GameChangerAPI {
 
 	getDocumentUsage = async (body) => {
 		const url = endpoints.getDocumentUsage;
-		return axiosGET(this.axios, url, {params:body});
+		return axiosGET(this.axios, url, { params: body });
 	}
 
 	getUserAggregations = async (body) => {
 		const url = endpoints.getUserAggregations;
-		return axiosGET(this.axios, url, {params:body});
+		return axiosGET(this.axios, url, { params: body });
 	}
 
 	addInternalUser = async (body) => {
@@ -862,12 +874,12 @@ export default class GameChangerAPI {
 		const url = endpoints.updateAPIKeyDescriptionPOST;
 		return axiosPOST(this.axios, url, { description, key });
 	}
-	
+
 	approveRejectAPIKeyRequest = async (id, approve) => {
 		const url = endpoints.approveRejectAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { id, approve });
 	}
-	
+
 	createAPIKeyRequest = async (name, email, reason, clones) => {
 		const url = endpoints.createAPIKeyRequestPOST;
 		return axiosPOST(this.axios, url, { name, email, reason, clones });
@@ -930,7 +942,7 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, {});
 	};
 
-	sendJiraFeedback= async (body) => {
+	sendJiraFeedback = async (body) => {
 		const url = endpoints.sendJiraFeedback;
 		return axiosPOST(this.axios, url, body);
 	}
@@ -976,19 +988,14 @@ export default class GameChangerAPI {
 		});
 	};
 
-	populateNewUserId = async () => {
-		const url = endpoints.populateNewUserId;
-		return axiosGET(this.axios, url);
-	};
-
 	callGraphFunction = async (body) => {
 		const url = endpoints.callGraphFunctionPOST;
 		return axiosPOST(this.axios, url, body);
 	};
 
-	callSearchFunction = async (body) => {
+	callSearchFunction = async (body, config) => {
 		const url = endpoints.callSearchFunctionPOST;
-		return axiosPOST(this.axios, url, body);
+		return axiosPOST(this.axios, url, body, config);
 	};
 
 	sendQAFeedback = async (eventName, question, answer, qaContext, params) => {
@@ -1041,7 +1048,7 @@ export default class GameChangerAPI {
 		const url = endpoints.saveOrgImageOverrideURL;
 		return axiosPOST(this.axios, url, { name, imageURL });
 	};
-	
+
 	compareDocumentPOST = async ({ cloneName, paragraphs, filters }) => {
 		const url = endpoints.compareDocumentPOST;
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
@@ -1065,5 +1072,79 @@ export default class GameChangerAPI {
 	createModelLTR = async () => {
 		const url = endpoints.createModelLTR;
 		return axiosGET(this.axios, url);
+	};
+
+	getUserData = async (cloneName) => {
+		const url = endpoints.gcUserDataGET;
+		return axiosPOST(this.axios, url, { cloneName });
+	}
+
+	storeUserData = async (userData) => {
+		const url = endpoints.gcUserDataPOST;
+		return axiosPOST(this.axios, url, { userData, fromApp: true });
+	}
+
+	deleteUserData = async (userRowId) => {
+		const url = endpoints.gcUserDataDeletePOST;
+		return axiosPOST(this.axios, url, { userRowId });
+	}
+
+	syncUserTable = async () => {
+		const url = endpoints.syncUserTableGET;
+		return axiosGET(this.axios, url);
+	};
+
+	updateClonesVisited = async (clone) => {
+		const url = endpoints.updateClonesVisitedPOST;
+		return axiosPOST(this.axios, url, { clone });
+	};
+
+	callDataFunction = async (body) => {
+		const url = endpoints.callDataFunctionPOST;
+		return axiosPOST(this.axios, url, body);
+	};
+
+	queryExp = async (data) => {
+		const querydata = { 'searchText': data };
+		const url = endpoints.queryExp;
+		return axiosPOST(this.axios, url, data = querydata);
+	};
+
+	getReviewerData = async () => {
+		const url = endpoints.reviewerDataGET;
+		return axiosGET(this.axios, url);
+	};
+
+	deleteReviewerData = async (reviewerRowId) => {
+		const url = endpoints.reviewerDataDeletePOST;
+		return axiosPOST(this.axios, url, { reviewerRowId });
+	};
+
+	storeReviewerData = async (reviewerData) => {
+		const url = endpoints.reviewerDataPOST;
+		return axiosPOST(this.axios, url, { reviewerData, fromApp: true });
+	};
+
+	exportReview = async (body) => {
+		const url = endpoints.exportReview;
+		const options = { responseType: 'blob' };
+		return axiosPOST(this.axios, url, body, options);
+	};
+
+	exportChecklist = async (body) => {
+		const url = endpoints.exportChecklist;
+		const options = { responseType: 'blob' };
+		return axiosPOST(this.axios, url, body, options);
+	};
+
+	sendReviewStatusUpdates = async (data) => {
+		const url = endpoints.sendReviewStatusUpdates;
+		return axiosPOST(this.axios, url, data);
+	};
+
+	exportProfilePage = async (body) => {
+		const url = endpoints.exportProfilePage;
+		const options = {}; //{responseType: 'blob'};
+		return axiosPOST(this.axios, url, body, options);
 	};
 }

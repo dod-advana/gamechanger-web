@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class EmailUtility {
 	constructor({ transportOptions, fromName, fromEmail}){

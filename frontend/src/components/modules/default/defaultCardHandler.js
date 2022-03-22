@@ -922,7 +922,7 @@ const DefaultCardHandler = {
 								Close
 							</CardButton>
 						)}
-						{toggledMore && Permissions.isGameChangerAdmin() && (
+						{toggledMore && Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 							<CardButton
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
