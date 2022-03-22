@@ -1,6 +1,6 @@
 const RESPONSIBILITIES = require('../models').responsibilities;
 const RESPONSIBILITY_REPORTS = require('../models').responsibility_report;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');

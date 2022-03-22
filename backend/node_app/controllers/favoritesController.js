@@ -8,13 +8,14 @@ const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
 const { getTenDigitUserId } = require('../utils/userUtility');
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility');
 const constantsFile = require('../config/constants');
 const Sequelize = require('sequelize');
 const { HandlerFactory } = require('../factories/handlerFactory');
 const db = require('../models');
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 
 class FavoritesController {
 
@@ -69,18 +70,15 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId);
-			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteDocument.findOrCreate(
 					{
-						where: { user_id: hashed_user, filename: filename },
+						where: { user_id: getUserIdFromSAMLUserId(req), filename: filename },
 						defaults: {
-							user_id: hashed_user,
-							new_user_id: new_hashed_user,
+							user_id: getUserIdFromSAMLUserId(req),
+							new_user_id: getUserIdFromSAMLUserId(req),
 							filename: filename,
 							favorite_name: favorite_name,
 							favorite_summary: favorite_summary,
@@ -94,7 +92,7 @@ class FavoritesController {
 			} else {
 				const deleted = this.favoriteDocument.destroy({
 					where: {
-						user_id: hashed_user,
+						user_id: getUserIdFromSAMLUserId(req),
 						filename: filename
 					}
 				});
@@ -117,18 +115,15 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId);
-			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { search_name, search_summary, search_text, tiny_url, document_count, is_favorite } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteSearch.findOrCreate(
 					{
-						where: { user_id: hashed_user, tiny_url: tiny_url },
+						where: { user_id: getUserIdFromSAMLUserId(req), tiny_url: tiny_url },
 						defaults: {
-							user_id: hashed_user,
-							new_user_id: new_hashed_user,
+							user_id: getUserIdFromSAMLUserId(req),
+							new_user_id: getUserIdFromSAMLUserId(req),
 							search_name: search_name,
 							search_summary: search_summary,
 							search_text: search_text,
@@ -142,7 +137,7 @@ class FavoritesController {
 			} else {
 				const deleted = this.favoriteSearch.destroy({
 					where: {
-						user_id: hashed_user,
+						user_id: getUserIdFromSAMLUserId(req),
 						tiny_url: tiny_url
 					}
 				});
@@ -160,18 +155,15 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId);
-			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { topic, topicSummary, is_favorite } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteTopic.findOrCreate(
 					{
-						where: { user_id: hashed_user, topic_name: topic },
+						where: { user_id: getUserIdFromSAMLUserId(req), topic_name: topic },
 						defaults: {
-							user_id: hashed_user,
-							new_user_id: new_hashed_user,
+							user_id: getUserIdFromSAMLUserId(req),
+							new_user_id: getUserIdFromSAMLUserId(req),
 							topic_name: topic,
 							topic_summary: topicSummary,
 							is_clone: false
@@ -182,7 +174,7 @@ class FavoritesController {
 			} else {
 				const deleted = this.favoriteTopic.destroy({
 					where: {
-						user_id: hashed_user,
+						user_id: getUserIdFromSAMLUserId(req),
 						topic_name: topic
 					}
 				});
@@ -200,18 +192,15 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
-			const new_id = getTenDigitUserId(userId);
-			const new_hashed_user = new_id ? this.sparkMD5.hash(new_id) : null;
 			const { organization, organizationSummary, is_favorite } = req.body;
 
 			if (is_favorite) {
 				const [favorite] = await this.favoriteOrganization.findOrCreate(
 					{
-						where: { user_id: hashed_user, organization_name: organization },
+						where: { user_id: getUserIdFromSAMLUserId(req), organization_name: organization },
 						defaults: {
-							user_id: hashed_user,
-							new_user_id: new_hashed_user,
+							user_id: getUserIdFromSAMLUserId(req),
+							new_user_id: getUserIdFromSAMLUserId(req),
 							organization_name: organization,
 							organization_summary: organizationSummary,
 							is_clone: false
@@ -222,7 +211,7 @@ class FavoritesController {
 			} else {
 				const deleted = this.favoriteOrganization.destroy({
 					where: {
-						user_id: hashed_user,
+						user_id: getUserIdFromSAMLUserId(req),
 						organization_name: organization
 					}
 				});
@@ -240,15 +229,14 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const hashed_user = this.sparkMD5.hash(userId);
 			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids} = req.body;
 
 			if (create) {
 				const [group] = await this.favoriteGroup.findOrCreate(
 					{
-						where: { user_id: hashed_user, group_name: group_name },
+						where: { user_id: getUserIdFromSAMLUserId(req), group_name: group_name },
 						defaults: {
-							user_id: hashed_user,
+							user_id: getUserIdFromSAMLUserId(req),
 							group_type: group_type,
 							group_name: group_name,
 							group_description: group_description,
@@ -282,11 +270,10 @@ class FavoritesController {
 		let userId = 'Unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const hashed_user = this.sparkMD5.hash(userId);
 
 			const { groupId, documentIds } = req.body;
 			const docObjects = documentIds.map(docId => {
-				return {user_id: hashed_user, favorite_group_id: groupId, favorite_document_id: docId};
+				return {user_id: getUserIdFromSAMLUserId(req), favorite_group_id: groupId, favorite_document_id: docId};
 			});
 			
 			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
@@ -434,14 +421,13 @@ class FavoritesController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			const hashed_user = this.sparkMD5.hash(userId);
 
 			const { tinyurl } = req.body;
 
 			await this.favoriteSearch.update({ updated_results: false },
 				{
 					where: {
-						user_id: hashed_user,
+						user_id: getUserIdFromSAMLUserId(req),
 						tiny_url: tinyurl
 					}
 				});

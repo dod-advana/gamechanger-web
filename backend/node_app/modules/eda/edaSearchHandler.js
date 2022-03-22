@@ -13,6 +13,7 @@ const { DataLibrary} = require('../../lib/dataLibrary');
 // const abbreviationRedisAsyncClientDB = 9;
 
 const SearchHandler = require('../base/searchHandler');
+const {getUserIdFromSAMLUserId} = require("../../utils/userUtility");
 
 class EdaSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -39,7 +40,7 @@ class EdaSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -75,7 +76,7 @@ class EdaSearchHandler extends SearchHandler {
 			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
 			// log query to ES
 			if (storeHistory) {
-				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, historyRec.user_id, searchText);
 			}
 
 			let searchResults;
@@ -112,7 +113,7 @@ class EdaSearchHandler extends SearchHandler {
 			if (offset === 0){
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
 					clone_name: clone_log
@@ -143,7 +144,7 @@ class EdaSearchHandler extends SearchHandler {
 	
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin') || permissions.includes('eda Admin')) {
 				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());

@@ -27,7 +27,7 @@ export const clearDashboardNotification = (cloneName, type, state, dispatch) => 
 	let userData = state.userData;
 
 	// only update if the notification exists and is non-zero
-	if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+	if (userData && userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
 		/* await */ gameChangerAPI.clearDashboardNotification(cloneName, type);
 		userData = _.cloneDeep(userData);
 		userData.notifications[cloneName][type] = 0;
@@ -137,22 +137,54 @@ export const handleSaveFavoriteTopic = async (
 	await getUserData(dispatch);
 };
 
-export const handleGenerateGroup = async ( group, state, dispatch ) => {
+export const handleDeleteFavoriteSearch = async (search, dispatch) => {
+	await gameChangerAPI.favoriteSearch(search);
+	await getUserData(dispatch);
+};
+
+export const handleClearFavoriteSearchNotification = async (search, dispatch) => {
+	await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
+	await getUserData(dispatch);
+};
+
+export const handleSaveFavoriteSearchHistory = async (
+	favoriteName,
+	favoriteSummary,
+	favorite,
+	tinyUrl,
+	searchText,
+	count,
+	dispatch
+) => {
+	const searchData = {
+		search_name: favoriteName,
+		search_summary: favoriteSummary,
+		search_text: searchText,
+		tiny_url: tinyUrl,
+		document_count: count,
+		is_favorite: favorite,
+	};
+
+	await gameChangerAPI.favoriteSearch(searchData);
+	await getUserData(dispatch);
+};
+
+export const handleGenerateGroup = async (group, state, dispatch) => {
 	const { cloneData } = state;
 	const clone_index = cloneData?.clone_data?.project_name;
-	const {group_type, group_name, group_description, create, group_ids} = group;
+	const { group_type, group_name, group_description, create, group_ids } = group;
 
-	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true});
+	await gameChangerAPI.favoriteGroup({ group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true });
 	await getUserData(dispatch);
 };
 
 export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
-	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
+	await gameChangerAPI.favoriteOrganization({ organization, organizationSummary, is_favorite: favorited });
 	await getUserData(dispatch);
 };
 
 export const handleRemoveFavoriteFromGroup = async (groupId, documentId, dispatch) => {
-	await gameChangerAPI.deleteFavoriteFromGroupPOST({groupId, documentId});
+	await gameChangerAPI.deleteFavoriteFromGroupPOST({ groupId, documentId });
 	await getUserData(dispatch);
 };
 
@@ -246,7 +278,7 @@ export const setCurrentTime = (dispatch) => {
 
 	// currentTime = `${months[currentTime.getMonth() - 1]} ${currentTime.getDate()}, ${currentTime.getHours()}:${currentTime.getMinutes()}`;
 	currentTime = `${currentTime.getFullYear()}-${currentMonth}-${currentDay}-${currentTime.getHours()}-${currentTime.getSeconds()}-${currentTime.getMilliseconds()}`;
-	
+
 	setState(dispatch, { currentTime: currentTime });
 
 	return currentTime;

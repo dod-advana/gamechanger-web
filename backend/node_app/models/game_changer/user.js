@@ -7,38 +7,70 @@ module.exports = (sequelize, DataTypes) => {
 				autoIncrement: true,
 				primaryKey: true,
 			},
-			username: {
+			user_id: {
 				type: DataTypes.TEXT,
-				unique: true
+				unique: true,
 			},
-			displayname: DataTypes.TEXT,
-			email: DataTypes.TEXT,
-			lastlogin: DataTypes.DATE,
-			sandbox_id: DataTypes.INTEGER,
-			disabled: {
+			cn: {
+				type: DataTypes.TEXT
+			},
+			first_name: {
+				type: DataTypes.TEXT
+			},
+			last_name: {
+				type: DataTypes.TEXT
+			},
+			organization: {
+				type: DataTypes.TEXT
+			},
+			email: {
+				type: DataTypes.TEXT
+			},
+			phone_number: {
+				type: DataTypes.TEXT
+			},
+			sub_office: {
+				type: DataTypes.TEXT
+			},
+			country: {
+				type: DataTypes.TEXT
+			},
+			state: {
+				type: DataTypes.TEXT
+			},
+			city: {
+				type: DataTypes.TEXT
+			},
+			job_title: {
+				type: DataTypes.TEXT
+			},
+			preferred_name: {
+				type: DataTypes.TEXT
+			},
+			extra_fields: {
+				type: DataTypes.JSONB
+			},
+			is_super_admin: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false
 			},
-			session_id: {
-				type: DataTypes.TEXT
-			},
-			subAgency: {
-				type: DataTypes.TEXT,
-				field: 'sub_agency',
-			},
-			extra_fields: DataTypes.JSONB,
 		},
 		{
-			classMethods: {
-				associate: (models) => {
-					User.hasMany(models.user_app_versions, { foreignKey: 'username' });
-					User.hasMany(models.userrole, { foreignKey: 'userid' });
-					User.belongsToMany(models.role, { through: models.userrole, foreignKey: 'userid' });
-					User.hasMany(models.darq_group_user, { foreignKey: 'user_id' });
-					User.belongsToMany(models.darq_group, { through: models.darq_group_user, foreignKey: 'user_id' });
-				},
-			}
+			freezeTableName: true,
+			tableName: 'users',
+			timestamps: false
 		}
+		// {
+		// 	classMethods: {
+		// 		associate: (models) => {
+		// 			User.hasMany(models.user_app_versions, { foreignKey: 'username' })
+		// 			User.hasMany(models.userrole, { foreignKey: 'userid' });
+		// 			User.belongsToMany(models.role, { through: models.userrole, foreignKey: 'userid' });
+		// 			User.hasMany(models.darq_group_user, { foreignKey: 'user_id' });
+		// 			User.belongsToMany(models.darq_group, { through: models.darq_group_user, foreignKey: 'user_id' });
+		// 		},
+		// 	}
+		// }
 	);
 	return User;
 };

@@ -1,0 +1,281 @@
+{
+  "Force Support  (FS)": {
+    "Description": "The ability to establish, develop, maintain and manage a mission ready Total Force.",
+    "Force Management": {
+      "Description": "The ability to integrate new and existing human and technical assets from across the Joint Force and its mission partners to make the right capabilities available at the right time and place to support National security.",
+      "Global Force Management": "The ability to align force apportionment, assignment, and allocation methodologies in support of the National Defense Strategy and joint force availability requirements; present comprehensive insights into the global availability and operational readiness of U.S. military forces; globally source joint force requirements; and provide senior decision makers a vehicle to quickly and accurately assess the impact and risk of proposed allocation, assignment and apportionment changes. (From Annex A (Glossary) \"Global Force Management Guidance FY 2005\")",
+      "Force Configuration": "The ability to take DOTMLPF requirements and translate them into programs and structure to accomplish the missions and functions required by the Secretary of Defense.",
+      "Global Defense Posture Extraction": "The ability to develop a global network of host-nation relationships, activities, and footprint of facilities and forces by refining operational requirements for, implementing, and sustaining posture changes.",
+      "Readiness Reporting": "The ability to evaluate, appraise, and characterize the status of military forces and the supporting infrastructure to perform assigned missions.",
+      "Human Capital Management": "The ability to ensure, within the life cycle management of total force human resources, the availability of highly motivated personnel equipped with required skill sets and capabilities to achieve mission success."
+    },
+    "Force Preparation": {
+      "Description": "The ability to develop, enhance, adapt and sustain the total force to effectively support National security.",
+      "Training": "The ability to enhance the capacity to perform specific functions and tasks using institutional, operational, or self-development (to include distance learning) domains in order to improve the individual or collective performance of personnel, units, forces, and staffs. (Derived from CJCSM 3500.03B)",
+      "Exercising": "The ability to plan, prepare, execute and evaluate maneuvers or simulated operations to validate training or conduct mission rehearsal. (Derived form CJCSM 3500-03A)",
+      "Education": "The ability to convey general bodies of knowledge and develop habits of mind applicable to a broad spectrum of endeavors to foster breadth of view, diverse perspectives, critical analysis, and abstract reasoning. (Derived from CJCSI 1800.01C)",
+      "Doctrine": "The ability to provide fundamental principles that guide the employment of US military forces in coordinated action toward a common objective and serves to make US policy and strategy effective in the application of US military power. (Developed from CJCSI 3170.01F/CJCSI 5120.02)",
+      "Lessons Learned": "The ability to obtain results from an evolution or observation of an implemented corrective action that contributed to improved performance or increased capability or from an evaluation or observation of a positive finding that did not necessarily require corrective action other than sustainment. (Derived from CJCSI 3150.25D)",
+      "Concepts": "The ability to provide a notion or statement of an idea ? an expression of how something might be done. (Derived from CJCSI 3010.02B)",
+      "Experimentation": "The ability to conduct an iterative process for developing and assessing concept-based hypotheses to identify and recommend the best value-added solutions for changes in doctrine, organization, training, materiel, leadership and education, personnel, and facilities and policy required to achieve significant advances in future operational capabilities. (derived from CJCSI 3170.01F)"
+    },
+    "Building Partnerships": {
+      "Description": "The ability to interact with partner, competitor or adversary leaders, security institutions, or relevant populations by developing and presenting information and conducting activities to affect their perceptions, will, behavior, and capabilities in order to build effective, legitimate, interoperable, and self-sustaining strategic partners.",
+      "Engage Partners": "The ability to integrate and synchronize interaction with selected domestic and foreign institutions, countries, or populations under available identified and aligned authorities and resources authorities to facilitate development of formal or informal relationships.",
+      "Manage Partnership Agreements": "The ability to negotiate and establish partnership agreements based on prioritized relationships, containing measurable objectives, with domestic and foreign institutions, organizations, and governments.\t",
+      "Conduct Security Cooperation Activities": "",
+      "Conduct Civil-Military Operations": ""
+    }
+  },
+  "Battlespace Awareness (aka INTEL)": {
+    "Description": "The ability to understand dispositions and intentions as well as the characteristics and conditions of the operational environment that bear on national and military decision-making by leveraging all sources of information to include Intelligence, Surveillance, Reconnaissance, Meteorological, and Oceanographic.",
+    "Planning & Direction": {
+      "Description": "The ability to synchronize and integrate the activities of collection, processing, exploitation, analysis and dissemination resources to meet BA information requirements.",
+      "Define & Prioritize Requirements": "The ability to translate national through tactical objectives and needs into specific information and operational requirements.",
+      "Develop Plans & Strategies": "The ability to determine the best approach to collect, process, exploit, analyze, and disseminate data and information to address requirements and predict outcomes.",
+      "Task & Monitor Resources": "The ability to task, track, direct, and adjust BA operations and their associated resources to fulfill requirements.\t"
+    },
+    "Collection": {
+      "Description": "The ability to gather data and obtain required information to satisfy information needs.",
+      "Signals Collection": "The ability to gather information based on the interception of electromagnetic impulses.\t",
+      "Imagery Collection": "The ability to obtain a visual presentation or likeness of any natural or man-made feature, object, or activity at rest or in motion.\t",
+      "Human-based Collection": "The ability to acquire information from human resources, human-derived data, and human reconnaissance assets.\t",
+      "Open Source Collection": ""
+    },
+    "Processing & Exploitation": {
+      "Description": "The ability to describe the anticipated future state of the meteorological, oceanographic and space environment.\t",
+      "Processing": "",
+      "Exploitation": "",
+      "Report Generation": ""
+    },
+    "Analysis, Estimation, & Production": {
+      "Description": "The ability to integrate, evaluate, interpret, and predict knowledge and information from available sources to develop intelligence and forecast the future state to enable situational awareness and provide actionable information.\t",
+      "Integration": "The ability to identify, assimilate and correlate relevant information from single or multiple sources.\t",
+      "Evaluation": "The ability to provide focused examination of the information and assess its reliability and credibility to a stated degree of confidence.\t",
+      "Intepretation": "The ability to derive knowledge and develop new insight from gathered information to postulate its significance.\t",
+      "Estimation": "The ability to describe the anticipated future state of the operational/physical environment based on the depiction of past and current information.\t",
+      "Product Generation": "The ability to develop and tailor intelligence, information, and environmental content and products per customer requirements.\t"
+    },
+    "BA Dissemination & Integration": {
+      "Description": "The ability to present, distribute, or make available intelligence, information and environmental content and products that enable understanding of the operational/physical environment to military and national decision-makers.\t",
+      "BA Data Transmission": "The ability to send collected data directly to processing, exploitation analysis, production and visualization systems, leveraging both Net-Centric information transport and intelligence-controlled systems.\t",
+      "BA Data Access": "The ability to provide authorized customer access to data and products, leveraging both Net-Centric computing infrastructure and intelligence-controlled systems."
+    },
+    "Counterintelligence (CI)": {
+      "Description": "The ability to gather information and conduct activities to identify, exploit, or protect against threats posed by foreign governments and organizations, foreign persons, or international terrorists.\t",
+      "Offensive CI": "",
+      "Investigations": ""
+    }
+  },
+  "Force Application (FA)": {
+    "Description": "The ability to integrate the use of maneuver and engagement in all environments to create the effects necessary to achieve mission objectives.\t",
+    "Maneuver": {
+      "Description": "The ability to move to a position of advantage in all environments in order to generate or enable the generation of effects in all domains and the information environment.\t",
+      "Air": "The ability to maneuver to engage in the region beginning at the upper boundary of the land or water and extending upward to the lower boundary of the Earth's ionosphere (approximately 50 KMs).\t",
+      "Space": "The ability to maneuver to engage in the region beginning at the lower boundary of the Earth's ionosphere (approximately 50 KMs) and extending outward. (JP 1-02)\t",
+      "Land": "The ability to maneuver to engage on the surface of the land.\t",
+      "Maritime": "The ability to maneuver to engage on the surface of the sea.\t",
+      "Cyberspace": "The ability to maneuver to engage within the interdependent network of information technology infrastructures and the data within them.\t",
+      "Electromagnetic Spectrum": ""
+    },
+    "Fires": {
+      "Description": "The ability to use kinetic and non-kinetic means in all environments to generate the desired lethal and/or non-lethal effects from all domains and the information environment.\t",
+      "Kinetic": "The ability to create effects that rely on explosives or physical momentum (i.e., of, relating to, or produced by motion).\t",
+      "Electromagnetic": "The ability to conduct non-kinetic engagements against an adversary's use of the range of electromagnetic radiation.\t",
+      "Information": "The ability to disrupt, deny, degrade or destroy adversarial intelligence, surveillance and reconnaissance capabilities.\t"
+    }
+  },
+  "Logistics (LOG)": {
+    "Description": "The ability to project and sustain a logistically ready joint force through the deliberate sharing of national and multi-national resources to effectively support operations, extend operational reach and provide the joint force commander the freedom of action necessary to meet mission objectives.\t",
+    "Deployment & Distribution": {
+      "Description": "The ability to plan, coordinate, synchronize, and execute force movement and sustainment tasks in support of military operations. Deployment and distribution includes the ability to strategically and operationally move forces and sustainment to the point of need and operate the Joint Deployment and Distribution Enterprise. (JL(D) JIC pg 5 and pages 14-21)\t",
+      "Force Deployment": "The ability to transport units, equipment and initial sustainment from the point of origin to the point of need and provide JDDE resources to augment or support operational movement requirements of the JFC. (JL(D) JIC pg. 16)\t",
+      "Force Sustainment": "The ability to deliver supplies, equipment and personnel replacements to the joint force. (JL(D) JIC pg. 17)\t"
+    },
+    "Supply": {
+      "Description": "The ability to identify and select supply sources, schedule deliveries, receive, verify, and transfer product and authorize supplier payments. It includes the ability to see and manage inventory levels, capital assets, business rules, supplier networks and agreements (to include import requirements) as well as assessment of supplier performance.\t",
+      "Supplies & Equipment Management": "The ability to maintain accountability and set retention levels of materiel and equipment.\t",
+      "Inventory Management": "The ability to receive materiel in the right quality and quantity and to enable precise distribution and transfer of materiel to the customer while integrating and optimizing the links or business processes between supply nodes, maintenance, and distribution providers.\t",
+      "Global Supplier Networks Management": "The ability to source routine and surge requirements from the U.S. industrial base, ensure global supply availability and the capacity to support operations involving U.S., IA, PVO, and MN partners engaged in ever changing military activities around the globe.\t"
+    },
+    "Maintenance": {
+      "Description": "The ability to perform materiel maintenance requiring major overhaul, or a complete rebuilding of parts, assemblies, subassemblies, and end items to include the manufacture of parts, modifications, testing, and reclamation as required, provide stocks of serviceable equipment, and support field maintenance by providing technical assistance or performing maintenance tasks beyond their responsibility.\t",
+      "Inspect": "The ability to determine faults or verify repairs or determine condition of an item of equipment based on established equipment maintenance and serviceability standards.\t",
+      "Test": "The ability to evaluate the operational condition of an end item or subsystem thereof against an established standard or performance parameter.\t",
+      "Service": "The ability to conduct preventive maintenance checks and scheduled maintenance to detect, correct or prevent minor faults before these faults cause serious damage, failure, or injury.\t",
+      "Repair": "The ability to restore an item to serviceable condition through correction of a specific failure or condition.\t",
+      "Rebuild": "The ability to recapitalize an item to a standard as nearly as possible to its original condition in appearance, performance, and life expectancy.\t",
+      "Calibrate": "The ability to compare an instrument with an unverified accuracy to an instrument of known or greater accuracy to detect and correct any discrepancy in the accuracy of the unverified instrument.",
+      "Reclaim": "The ability to process authorized end items, assemblies, or subassemblies to obtain parts or components that are to be retained in operating materials and supplies prior to taking disposal action. Includes demilitarization actions on items prior to disposal.\t"
+    },
+    "Logistics Services": {
+      "Description": "The ability to provide services and functions essential to the technical management and support of the joint force.\t",
+      "Food Services": "The ability to plan, synchronize and manage subsistence support to the joint force to include dining facility management, subsistence procurement and storage, food preparation, field feeding and nutrition awareness.\t",
+      "Water & Ice Services": "The ability to produce, test, store and distribute bulk, packaged and frozen water in a contingency environment.\t",
+      "Contingency Base Services": "The ability to provide shelter, billeting, waste management and common user life support management in a contingency environment.\t",
+      "Hygiene Services": "The ability to provide laundry, shower, textile and fabric repair support.\t",
+      "Mortuary Affairs": "The ability to provide for search, recovery, identification, evacuation, preparation, and disposition of remains of persons and personal effects for whom the DoD Components are responsible by policy and statute.\t"
+    },
+    "Operational Contract Support": {
+      "Description": "The ability to orchestrate and synchronize the provision of integrated contract support and management of contractor personnel providing that support to the joint force in a designated operational area.\t",
+      "Contract Support Integration": "The ability to synchronize and integrate contract support being executed in a designated operational area in support of the Joint Force.\t",
+      "Contractor Management": "The ability to manage and maintain visibility of associated contractor personnel providing support to the Joint Force in a designated operational area.\t"
+    },
+    "Engineering": {
+      "Description": "The ability to execute and integrate combat, general, and geospatial engineering to meet national and JFC requirements to assure mobility, provide infrastructure to position, project, protect, and sustain the joint force, and enhance visualization of the operational area, across the full spectrum of military operations.\t",
+      "General Engineering": "The ability to employ engineering capabilities and activities, other than combat engineering, that modify, maintain, or protect the physical environment. Examples include: the construction, repair, maintenance, and operation of infrastructure, facilities, lines of communication and bases; terrain modification and repair; and selected explosive hazard activities. (JP 3-34)\t",
+      "Combat Engineering": "The ability to employ engineering capabilities and activities that support the maneuver of land combat forces and that require close support to those forces. Combat engineering consists of three types of capabilities and activities: mobility, countermobility, and survivability. (JP 3-34)\t",
+      "Geospatial Engineering": "The ability to portray and refine data pertaining to the geographic location and characteristics of natural or constructed features and boundaries in order to provide engineer services. Examples include: terrain analyses, terrain visualization, digitized terrain products, nonstandard tailored map products, facility support, and force beddown analysis. (JP 3-34)\t"
+    },
+    "Base & Installation Support": {
+      "Description": "The ability to provide enduring bases and installations with the assets, programs, and services necessary to support US military forces.\t",
+      "Real Property Life Cycle Management": "The ability to acquire, operate, sustain, recapitalize, realign, and dispose of real property assets to meet the requirements of the force.\t",
+      "Installation Services": "The ability to deliver selected services not related to real property (or personnel services) to meet the requirements of the installation population and mission.\t"
+    },
+    "Health Services": {
+      "Description": "The ability to enhance DOD and our Nation's security by providing health support for the full range of military operations and sustaining the health of all those entrusted to our care.\t",
+      "Operational Medicine": "The ability to promote, improve, conserve and restore the mental and physical well being of deployed forces.\t",
+      "Health Services Delivery": "The ability to provide acute or long-term primary or specialty care capabilities to all eligible beneficiaries outside the theater in either the direct or purchased care system.\t"
+    }
+  },
+  "Command & Control (C2)": {
+    "Description": "The ability to exercise authority and direction by a properly designated commander or decision maker over assigned and attached forces and resources in the accomplishment of the mission.\t",
+    "Organize": {
+      "Description": "The ability to align or synchronize interdependent and disparate entities, including their associated processes and capabilities to achieve unity of effort.\t",
+      "Establish & Maintain Unity of Effort with Mission Partners": "The ability to foster and maintain cooperative relations with mission partners.\t",
+      "Structure Organization to Mission": "The ability to dynamically organize elements and define roles, responsibilities, and authorities.\t",
+      "Foster Organizational Collaboration": "The ability to establish internal structures and processes and external interfaces that facilitate interaction and coordination.\t"
+    },
+    "Understand": {
+      "Description": "The ability to individually and collectively comprehend the implications of the character, nature, or subtleties of information about the environment and situation to aid decision-making.",
+      "Organize Information": "The ability to discover, select, and distill information within an established context.\t",
+      "Develop Knowledge & Situational Awareness": "The ability to apply context, experience, and intuition to data and information to derive meaning and value. (Derived from NCE JFC)\t",
+      "Share Knowledge & Situational Awareness": "The ability to communicate synthesized information and context. (Derived from NCOE JIC)\t"
+    },
+    "Plan": {
+      "Description": "The ability to establish a framework to employ resources to achieve a desired outcome or effect.\t",
+      "Analyze Problem": "The ability to review and examine all available information to determine necessary actions.\t",
+      "Apply Situational Understanding": "The ability to use synthesized information and awareness applicable to a given situation or environment to further understand the problem.\t",
+      "Develop Strategy": "The ability to create a framework that synchronizes and integrates the resources available to achieve a desired outcome or effect.\t",
+      "Develop Courses of Action": "The ability to build and refine sequences of activities to achieve a desired outcome or effect.\t",
+      "Analyze Courses of Action": "The ability to evaluate potential solutions to determine likelihood of success.\t"
+    },
+    "Decide": {
+      "Description": "The ability to select a course of action informed and influenced by the understanding of the environment or a given situation.\t",
+      "Manage Risk": "The ability to recognize and balance the likelihood and consequences of undesired effects with the desired outcomes/effects.\t",
+      "Select Actions": "The ability to choose a prudent idea or set of ideas that leads to a desired outcome or end-state within a defined set of constraints.\t",
+      "Establish Rule Sets": "The ability to construct directives that delineate circumstances and limitations for actions.\t",
+      "Establish Intent & Guidance": "The ability to formulate a concise expression of purpose, methods, acceptable risk, and desired end state.\t"
+    },
+    "Direct": {
+      "Description": "The ability to employ resources to achieve an objective.\t",
+      "Communicate Intent & Guidance": "The ability to promulgate a concise expression of the operational purpose, assessment of acceptable operational risk, and guidance to achieve the desired end state.\t",
+      "Task": "The ability to direct actions and resources.\t",
+      "Establish Metrics": "The ability to establish objective criteria to assess performance and results.\t"
+    },
+    "Monitor": {
+      "Description": "The ability to adequately observe and assess events/effects of a decision.\t",
+      "Assess Compliance with Guidance": "The ability to determine if performance adheres to established parameters and expectations.\t",
+      "Assess Effects": "The ability to analyze, track, and measure the results of actions taken.\t",
+      "Assess Achievement of Objectives": "The ability to determine when the desired end-state has been reached.",
+      "Assess Guidance": "The ability to determine if direction is achieving the desired end-state and is appropriate for the situation.\t"
+    }
+  },
+  "Communications & Computers": {
+    "Description": "The ability to provide a framework for full human and technical connectivity and interoperability that allows all DoD users and mission partners to share the information they need, when they need it, in a form they can understand and act on with confidence, and protects information from those who should not have it.\t",
+    "Information Transport": {
+      "Description": "The ability to transport information and services via assured end-to-end connectivity across the NC environment.\t",
+      "Wired Transmission": "The ability to transfer data or information with an electrical/optical conductor.\t",
+      "Wireless Transmission": "The ability to transfer data or information without an electrical/optical conductor.\t",
+      "Switching & Routing": "The ability to move data and information end to end across multiple transmission media.\t"
+    },
+    "Network Management": {
+      "Description": "The ability to configure and re-configure networks, services and the underlying physical assets that provide end-user services, as well as connectivity to enterprise application services.\t",
+      "Optimized Network Functions & Resources": "The ability to provide DOD with responsive network functionality and dynamically configurable resources, to include allocation of required bandwidth, computing and storage.\t",
+      "Deployable, Scalable, & Modular Networks": "The ability to design, assemble, transport, and establish mission-scaled networks from adaptable components network modules.\t",
+      "Spectrum Management": "The ability to synchronize, coordinate, and manage all elements of the electromagnetic spectrum through engineering and administrative tools and procedures.\t"
+    },
+    "Cybersecurity": {
+      "Description": "The ability to provide the measures that protect, defend and restore information and information systems.\t",
+      "Information Exchange Security": "The ability to secure dynamic information flow within and across domains.\t",
+      "Networks Protection": "The ability to prevent unauthorized access.\t",
+      "Data Protection": "The ability to prevent or contain activities which may expose or modify data.\t",
+      "Identity & Access Management": "",
+      "Application Security": "",
+      "Cyberspace Survivability": ""
+    },
+    "Defensive Cyberspace Operations (Internal Defensive Measures)": {
+      "Description": "",
+      "Cyberspace Defense": ""
+    },
+    "Enterprise Services": {
+      "Description": "The ability to provide to all authorized users awareness of and access to all DoD information and DoD-wide information services.\t",
+      "Information Sharing": "The ability to provide physical and virtual access to hosted information and data centers across the enterprise based on established data standards.\t",
+      "Computing Services": "The ability to process data and provide physical and virtual access to hosted information and data centers across the enterprise based on established data standards.\t",
+      "Common Enterprises Services": "The ability to provide awareness of, access to and delivery of information on the GIG via a small set of CIO mandated services.\t",
+      "Positioning, Navigation & Timing": "The ability to determine accurate and precise location, orientation, time and course corrections anywhere in the battlespace and to provide timely and assured PNT services across the DOD enterprise.\t"
+    }
+  },
+  "Protection": {
+    "Description": "The ability to prevent/mitigate adverse effects of attacks on personnel (combatant/non-combatant) and physical assets of the United States, allies and friends.\t",
+    "Prevention": {
+      "Description": "The ability to neutralize an imminent attack or defeat attacks on personnel (combatant/non-combatant) and physical assets.\t",
+      "Concealment/Stealth": "",
+      "Countering Weapons of Mass Destruction": "",
+      "Counter Air & Missile": "",
+      "Physical Security": ""
+    },
+    "Mitigation": {
+      "Description": "The ability to minimize the effects and manage the consequence of attacks (and designated emergencies) on personnel and physical assets.\t",
+      "Explosive": "The ability to minimize the effects of explosive attacks which do not have the potential to kill personnel and destroy physical assets.\t",
+      "Projectile": "The ability to minimize the effects of projectile attacks which do not have the potential to kill personnel and destroy physical assets.\t",
+      "Chemical": "The ability to minimize the effects of chemical attacks which do not have the potential to kill personnel and destroy physical assets.\t",
+      "Biological": "The ability to minimize the effects of biological attacks which do not have the potential to kill personnel and destroy physical assets.\t",
+      "Radiological": "The ability to minimize the effect of radiological hazards which do not have the potential to kill personnel and destroy physical assets.\t",
+      "Nuclear": "The ability to minimize the effects of nuclear attacks which have the potential to kill personnel and destroy physical assets.\t",
+      "Electromagnetic Effects": "The ability to minimize the effects of electromagnetic pulse attacks which have the potential to kill personnel and destroy physical assets.\t",
+      "Directed Energy": "The ability to minimize the effects of directed energy attacks which have the potential to kill personnel and destroy physical assets.\t",
+      "Natural Hazards": "The ability to minimize the effects of natural hazards which do not have the potential to kill personnel and destroy physical assets.\t"
+    },
+    "Recovery": {
+      "Description": "",
+      "CBRN Response": "",
+      "Maritime Counter-Mine": ""
+    }
+  },
+  "Corporate Management & Support": {
+    "Description": "The ability to provide strategic senior level, enterprise-wide leadership, direction, coordination, and oversight through a chief management officer function.\t",
+    "Advisory & Compliance": {
+      "Description": "The ability to provide advice, counsel, review, inspection and evaluation of policies, standards, systems, procedures and internal controls to ensure compliance with statutory and regulatory requirements and to propose changes to existing requirements.\t",
+      "Legal Advice": "The ability to support decision makers on all civil, acquisition, fiscal, military, international, and operational law issues.\t",
+      "Legislative Advice": "The ability to advise and assist the Department of Defense leaders on all issues involving Congressional testimony or reporting.\t",
+      "Audit, Inspection, & Investigation": "The ability to understand and monitor matters relating to effective operations of DOD with particular regard to internal review activities.\t",
+      "Personnel Security Investigations & Clearance Certification": "",
+      "Operational Test & Evaluation": "The ability to understand and monitor matters relating to the operational effectiveness, suitability and survivability of systems in their expected combat environment.\t"
+    },
+    "Strategic Management": {
+      "Description": "The ability to establish the direction and priority of activities that DOD must do in support of its Constitutional responsibilities.\t",
+      "Strategy Development": "The ability to assess the security environment, establish a DOD direction, strategic goals, priorities, objectives and guidance. Includes enterprise-level planning activities to determine the integrated and balanced military forces and Joint force capabilities needed to accomplish the DOD strategy.\t",
+      "Capability Development": "The ability to translate, validate and prioritize capability and capacity requirements or gaps and acceptable areas to increase risk to support DOD strategy.\t",
+      "Performance Management": "The ability to translate, validate and prioritize capability and capacity requirements or gaps and acceptable areas to increase risk to support DOD strategy.\t",
+      "Enterprise Risk Management": "The ability to continually monitor the environment, examine progress towards and achievement of DOD strategic goals and priorities, and inform future strategy development or implement necessary corrective actions to stay on course.\t",
+      "Studies & Analyses": "The ability to conduct reviews with appropriate rigor to improve and support policy development, decision making, management, and administration of DoD capabilities, programs and activities.\t",
+      "Enterprise Architecture": "The ability to provide oversight and policy guidance to ensure compliance with standards for developing, maintaining, and implementing sound, integrated and interoperable architectures across the Department.\t"
+    },
+    "Information Management": {
+      "Description": "The ability to establish, manage and oversee policies, standards and assessment mechanisms with regard to Information Technology (IT) architecture, data, security, and information sharing.\t"
+    },
+    "Acquisition & Technology": {
+      "Description": "The ability to organize and execute the activities necessary to provide materiel for DOD operations.\t",
+      "Research": "The ability to conduct fundamental research, science, technology, development and experimentation important to all Departmental capabilities and operations.\t",
+      "Advanced Technology": "The ability to produce innovative and unique components and prototypes that can be integrated into defense systems for field experiments and/or tests in a simulated \"or operational\" environment \"to assess military utility\" prior to full development.\t",
+      "Developmental Engineering": "The ability to apply scientific, mathematical, economic, social, and practical knowledge to design and build DoD weapons and other systems.\t",
+      "Acquisition Management": ""
+    },
+    "Financial Management": {
+      "Description": "The ability to direct, supervise, provide advice, formulate policy, and conduct analysis on DOD program, budget, performance, and financial matters, pursuant to DOD strategic goals, objectives, priorities and approved strategies and policies.\t",
+      "Programming & Budgeting": "The ability to direct, supervise, provide advice, formulate policy, analyze, evaluate, and recommend efficient and effective resource allocation and performance targets/measures that support DOD missions, strategic goals, objectives, priorities, and approved strategies and policies including the ability to direct, formulate, justify, and present the costs, efficiency, effectiveness, and capabilities of DOD programs and Defense budgets timely and accurately.\t",
+      "Accounting & Finance": "The ability to supervise, direct, advise, formulate policy, and account for the execution of DOD resources, including preparation of auditable financial statements. The ability to direct, supervise, and operate integrated DOD accounting and financial management systems and manage and execute financial operations that provide common DOD support in the areas of finance (payroll, commercial pay, etc), and accounting.\t"
+    }
+  }
+}

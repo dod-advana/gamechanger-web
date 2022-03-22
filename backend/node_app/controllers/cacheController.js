@@ -1,5 +1,5 @@
 const GC_HISTORY = require('../models').gc_history;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const asyncRedisLib = require('async-redis');
 const { SearchController } = require('./searchController');
