@@ -478,440 +478,440 @@ describe('AppStatsController', function () {
     });
   });
 
-  describe('#getSearchPdfMapping', () => {
-    jest.setTimeout(10000);
-    const opts = {
-      ...constructorOptionsMock,
-			dataApi: {
-        queryElasticSearch: (esClientName, esIndex, esQuery, userId) => (
-          {body: {
-            hits: {
-              hits: [{"_index":"gamechanger_sans_abbreviations","_type":"_doc","_id":"1","_score":1,"_source":{"display_title_s":"Test Title","filename":"test.pdf"}}]
-            }
-          }
-        })
-			},
-			// add searchUtility
-      constants: {
-        MATOMO_DB_CONFIG: {
-          host: 'fakeHost',
-          user: 'fakeUser',
-          password: 'fakePassword',
-          database: 'fakeDatabase',
-        },
-      },
-    };
+  // describe('#getSearchPdfMapping', () => {
+  //   jest.setTimeout(10000);
+  //   const opts = {
+  //     ...constructorOptionsMock,
+	// 		dataApi: {
+  //       queryElasticSearch: (esClientName, esIndex, esQuery, userId) => (
+  //         {body: {
+  //           hits: {
+  //             hits: [{"_index":"gamechanger_sans_abbreviations","_type":"_doc","_id":"1","_score":1,"_source":{"display_title_s":"Test Title","filename":"test.pdf"}}]
+  //           }
+  //         }
+  //       })
+	// 		},
+	// 		// add searchUtility
+  //     constants: {
+  //       MATOMO_DB_CONFIG: {
+  //         host: 'fakeHost',
+  //         user: 'fakeUser',
+  //         password: 'fakePassword',
+  //         database: 'fakeDatabase',
+  //       },
+  //     },
+  //   };
 
-    it('should get users searches', async (done) => {
-      let mysqlParams = null;
-      const mySqlConnection = {
-        connect: () => {
-          connectCalled = true;
-        },
-        end: () => {
-          endCalled = true;
-        },
-        query: (query, params, callback) => {
-          queries.push(query);
-          let response = expectedResponses[counter];
-          counter++;
-          callback(null, response, []);
-        },
-      };
-      const tmpOpts = {
-        ...opts,
-        mysql_lib: {
-          createConnection: (params) => {
-            mysqlParams = params;
-            return mySqlConnection;
-          },
-        },
-      };
+  //   it('should get users searches', async (done) => {
+  //     let mysqlParams = null;
+  //     const mySqlConnection = {
+  //       connect: () => {
+  //         connectCalled = true;
+  //       },
+  //       end: () => {
+  //         endCalled = true;
+  //       },
+  //       query: (query, params, callback) => {
+  //         queries.push(query);
+  //         let response = expectedResponses[counter];
+  //         counter++;
+  //         callback(null, response, []);
+  //       },
+  //     };
+  //     const tmpOpts = {
+  //       ...opts,
+  //       mysql_lib: {
+  //         createConnection: (params) => {
+  //           mysqlParams = params;
+  //           return mySqlConnection;
+  //         },
+  //       },
+  //     };
 
-      let connectCalled = false;
-      let endCalled = false;
-      let queries = [];
-      let counter = 0;
-      const req = {
-        query: {
-          startDate: '2022-03-14+04:00', 
-          endDate:'2022-03-17+19:21'
-        },
-        get: (header) => ('test')
-      };
-      let passedCode = null;
-      let sentData = null;
-      const res = {
-        status: (code) => {
-          passedCode = code;
-          return {
-            send: (data) => {
-              sentData = data;
-            },
-          };
-        },
-      };
+  //     let connectCalled = false;
+  //     let endCalled = false;
+  //     let queries = [];
+  //     let counter = 0;
+  //     const req = {
+  //       query: {
+  //         startDate: '2022-03-14+04:00', 
+  //         endDate:'2022-03-17+19:21'
+  //       },
+  //       get: (header) => ('test')
+  //     };
+  //     let passedCode = null;
+  //     let sentData = null;
+  //     const res = {
+  //       status: (code) => {
+  //         passedCode = code;
+  //         return {
+  //           send: (data) => {
+  //             sentData = data;
+  //           },
+  //         };
+  //       },
+  //     };
 
-      const expectedData = {
-        daysBack: 3,
-        data: [
-          {
-            idvisit: 1,
-            idvisitor: '007',
-            idaction_name: 1,
-            document: 'test.pdf',
-            documenttime: new Date('2022-01-01T01:05:00'),
-            clone_name: 'gamechanger',
-            search_cat: 'GAMECHANGER_gamechanger_combined',
-            value: 'test 1',
-            searchtime: new Date('2022-01-01T01:00:00'),
-            action: 'Search',
-            visited: undefined,
-            display_title_s: 'Test Title',
-            filename: 'test.pdf'
-          },
-          {
-            idvisit: 1,
-            idaction_name: 4,
-            search_cat: 'GAMECHANGER_gamechanger_combined',
-            value: 'test 1',
-            searchtime:new Date('2022-01-01T01:05:00'),
-            document: 'test.pdf',
-            idvisitor: '007',
-            action: 'ExportDocument',
-            display_title_s: 'Test Title',
-            filename: 'test.pdf'
-          },
-          {
-            idvisit: 1,
-            idaction_name: 3,
-            search_cat: 'GAMECHANGER_gamechanger_combined',
-            value: 'test 1',
-            searchtime: new Date('2022-01-01T01:06:00'),
-            document: 'test.pdf',
-            idvisitor: '007',
-            action: 'Favorite',
-            display_title_s: 'Test Title',
-            filename: 'test.pdf'
-          },
-          {
-            idvisit: 2,
-            idaction_name: 2,
-            search_cat: 'GAMECHANGER_gamechanger_combined',
-            value: 'test 2',
-            searchtime: new Date('2022-01-01T02:00:00'),
-            idvisitor: '007',
-            action: 'Search',
-            display_title_s: undefined
-          }
-        ]
-      };
-      const target = new AppStatsController(tmpOpts);
-      target.querySearches = (connection) =>  [
-        {
-          idvisit: 1,
-          idaction_name: 1,
-          search_cat: 'GAMECHANGER_gamechanger_combined',
-          value: 'test 1',
-          searchtime: new Date('2022-01-01T01:00:00'),
-          idvisitor: '007',
-          action: 'Search'
-        },
-        {
-          idvisit: 2,
-          idaction_name: 2,
-          search_cat: 'GAMECHANGER_gamechanger_combined',
-          value: 'test 2',
-          searchtime: new Date('2022-01-01T02:00:00'),
-          idvisitor: '007',
-          action: 'Search'
-        }
-      ];
-      target.queryPdfOpend = (connection) => [
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test.pdf',
-          documenttime: new Date('2022-01-01T01:05:00'),
-          clone_name: 'gamechanger'
-        }
-      ];
-      target.queryEvents = (connection) =>[
-        {
-          idvisit: 1,
-          idaction_name: 4,
-          search_cat: 'GAMECHANGER_gamechanger_combined',
-          value: 'test 1',
-          searchtime: new Date('2022-01-01T01:05:00'),
-          document: 'test.pdf',
-          idvisitor: '007',
-          action: 'ExportDocument'
-        },
-        {
-          idvisit: 1,
-          idaction_name: 3,
-          search_cat: 'GAMECHANGER_gamechanger_combined',
-          value: 'test 2',
-          searchtime: new Date('2022-01-01T01:06:00'),
-          document: 'test.pdf',
-          idvisitor: '007',
-          action: 'Favorite'
-        }
-      ];
+  //     const expectedData = {
+  //       daysBack: 3,
+  //       data: [
+  //         {
+  //           idvisit: 1,
+  //           idvisitor: '007',
+  //           idaction_name: 1,
+  //           document: 'test.pdf',
+  //           documenttime: new Date('2022-01-01T01:05:00'),
+  //           clone_name: 'gamechanger',
+  //           search_cat: 'GAMECHANGER_gamechanger_combined',
+  //           value: 'test 1',
+  //           searchtime: new Date('2022-01-01T01:00:00'),
+  //           action: 'Search',
+  //           visited: undefined,
+  //           display_title_s: 'Test Title',
+  //           filename: 'test.pdf'
+  //         },
+  //         {
+  //           idvisit: 1,
+  //           idaction_name: 4,
+  //           search_cat: 'GAMECHANGER_gamechanger_combined',
+  //           value: 'test 1',
+  //           searchtime:new Date('2022-01-01T01:05:00'),
+  //           document: 'test.pdf',
+  //           idvisitor: '007',
+  //           action: 'ExportDocument',
+  //           display_title_s: 'Test Title',
+  //           filename: 'test.pdf'
+  //         },
+  //         {
+  //           idvisit: 1,
+  //           idaction_name: 3,
+  //           search_cat: 'GAMECHANGER_gamechanger_combined',
+  //           value: 'test 1',
+  //           searchtime: new Date('2022-01-01T01:06:00'),
+  //           document: 'test.pdf',
+  //           idvisitor: '007',
+  //           action: 'Favorite',
+  //           display_title_s: 'Test Title',
+  //           filename: 'test.pdf'
+  //         },
+  //         {
+  //           idvisit: 2,
+  //           idaction_name: 2,
+  //           search_cat: 'GAMECHANGER_gamechanger_combined',
+  //           value: 'test 2',
+  //           searchtime: new Date('2022-01-01T02:00:00'),
+  //           idvisitor: '007',
+  //           action: 'Search',
+  //           display_title_s: undefined
+  //         }
+  //       ]
+  //     };
+  //     const target = new AppStatsController(tmpOpts);
+  //     target.querySearches = (connection) =>  [
+  //       {
+  //         idvisit: 1,
+  //         idaction_name: 1,
+  //         search_cat: 'GAMECHANGER_gamechanger_combined',
+  //         value: 'test 1',
+  //         searchtime: new Date('2022-01-01T01:00:00'),
+  //         idvisitor: '007',
+  //         action: 'Search'
+  //       },
+  //       {
+  //         idvisit: 2,
+  //         idaction_name: 2,
+  //         search_cat: 'GAMECHANGER_gamechanger_combined',
+  //         value: 'test 2',
+  //         searchtime: new Date('2022-01-01T02:00:00'),
+  //         idvisitor: '007',
+  //         action: 'Search'
+  //       }
+  //     ];
+  //     target.queryPdfOpend = (connection) => [
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test.pdf',
+  //         documenttime: new Date('2022-01-01T01:05:00'),
+  //         clone_name: 'gamechanger'
+  //       }
+  //     ];
+  //     target.queryEvents = (connection) =>[
+  //       {
+  //         idvisit: 1,
+  //         idaction_name: 4,
+  //         search_cat: 'GAMECHANGER_gamechanger_combined',
+  //         value: 'test 1',
+  //         searchtime: new Date('2022-01-01T01:05:00'),
+  //         document: 'test.pdf',
+  //         idvisitor: '007',
+  //         action: 'ExportDocument'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idaction_name: 3,
+  //         search_cat: 'GAMECHANGER_gamechanger_combined',
+  //         value: 'test 2',
+  //         searchtime: new Date('2022-01-01T01:06:00'),
+  //         document: 'test.pdf',
+  //         idvisitor: '007',
+  //         action: 'Favorite'
+  //       }
+  //     ];
 
-      await target.getSearchPdfMapping(req, res);
-      assert.equal(passedCode, 200);
-      assert.deepEqual(sentData, expectedData);
-      done();
-    });
-  });
+  //     await target.getSearchPdfMapping(req, res);
+  //     assert.equal(passedCode, 200);
+  //     assert.deepEqual(sentData, expectedData);
+  //     done();
+  //   });
+  // });
 
-  describe('#getUserAggregations', () => {
-    jest.setTimeout(10000);
-    const opts = {
-      ...constructorOptionsMock,
-			// add searchUtility
-      constants: {
-        MATOMO_DB_CONFIG: {
-          host: 'fakeHost',
-          user: 'fakeUser',
-          password: 'fakePassword',
-          database: 'fakeDatabase',
-        },
-      },
-    };
+  // describe('#getUserAggregations', () => {
+  //   jest.setTimeout(10000);
+  //   const opts = {
+  //     ...constructorOptionsMock,
+	// 		// add searchUtility
+  //     constants: {
+  //       MATOMO_DB_CONFIG: {
+  //         host: 'fakeHost',
+  //         user: 'fakeUser',
+  //         password: 'fakePassword',
+  //         database: 'fakeDatabase',
+  //       },
+  //     },
+  //   };
 
-    it('should get users aggregated searches', async (done) => {
-      let mysqlParams = null;
-      const mySqlConnection = {
-        connect: () => {
-          connectCalled = true;
-        },
-        end: () => {
-          endCalled = true;
-        },
-        query: (query, params, callback) => {
-          queries.push(query);
-          let response = expectedResponses[counter];
-          counter++;
-          callback(null, response, []);
-        },
-      };
-      const tmpOpts = {
-        ...opts,
-        mysql_lib: {
-          createConnection: (params) => {
-            mysqlParams = params;
-            return mySqlConnection;
-          },
-        },
-      };
+  //   it('should get users aggregated searches', async (done) => {
+  //     let mysqlParams = null;
+  //     const mySqlConnection = {
+  //       connect: () => {
+  //         connectCalled = true;
+  //       },
+  //       end: () => {
+  //         endCalled = true;
+  //       },
+  //       query: (query, params, callback) => {
+  //         queries.push(query);
+  //         let response = expectedResponses[counter];
+  //         counter++;
+  //         callback(null, response, []);
+  //       },
+  //     };
+  //     const tmpOpts = {
+  //       ...opts,
+  //       mysql_lib: {
+  //         createConnection: (params) => {
+  //           mysqlParams = params;
+  //           return mySqlConnection;
+  //         },
+  //       },
+  //     };
 
-      let connectCalled = false;
-      let endCalled = false;
-      let queries = [];
-      let counter = 0;
-      const req = {
-        query: {
-          startDate: '2022-03-14+04:00', 
-          endDate:'2022-03-17+19:21'
-        },
-        get: (header) => ('test')
-      };
-      let passedCode = null;
-      let sentData = null;
-      const res = {
-        status: (code) => {
-          passedCode = code;
-          return {
-            send: (data) => {
-              sentData = data;
-            },
-          };
-        },
-      };
+  //     let connectCalled = false;
+  //     let endCalled = false;
+  //     let queries = [];
+  //     let counter = 0;
+  //     const req = {
+  //       query: {
+  //         startDate: '2022-03-14+04:00', 
+  //         endDate:'2022-03-17+19:21'
+  //       },
+  //       get: (header) => ('test')
+  //     };
+  //     let passedCode = null;
+  //     let sentData = null;
+  //     const res = {
+  //       status: (code) => {
+  //         passedCode = code;
+  //         return {
+  //           send: (data) => {
+  //             sentData = data;
+  //           },
+  //         };
+  //       },
+  //     };
 
-      const expectedData = {
-        users: [
-         {
-          idvisitor:'007',
-          docs_opened:5,
-          searches_made:10,
-          opened: [
-            'test3.pdf',
-            'test4.pdf',
-            'test5.pdf',
-            'test6.pdf',
-            'test7.pdf',
-          ],
-          export: [
-            'test2.pdf',
-            'test3.pdf',
-            'test4.pdf',
-            'test5.pdf',
-            'test6.pdf',
-          ],
-          favorite: [
-            'test2.pdf',
-            'test3.pdf',
-            'test4.pdf',
-            'test5.pdf',
-            'test6.pdf',
-          ]
-         }
-        ],
-        cards:{
-          unique_users:5,
-          total_searches:20
-        }
-      };
-      const target = new AppStatsController(tmpOpts);
-      target.getUserAggregationsQuery = (connection) =>  [
-        {
-          idvisitor:'007',
-          docs_opened:5,
-          searches_made:10
-        },
-      ];
-      target.queryPdfOpend = (connection) => [
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test1.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test2.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test3.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test4.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test5.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test6.pdf',
-          clone_name: 'gamechanger'
-        },
-        {
-          idvisit: 1,
-          idvisitor: '007',
-          idaction_name: 6,
-          document: 'test7.pdf',
-          clone_name: 'gamechanger'
-        },
-      ];
-      target.getUserDocuments = (connection) =>[
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test1.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test2.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test3.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test4.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test5.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'Favorite',
-          document:'test6.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test1.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test2.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test3.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test4.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test5.pdf'
-        },
-        {
-          idvisitor:'007',
-          idvisit:1,
-          action:'ExportDocument',
-          document:'test6.pdf'
-        }
-      ];
-      target.getCardAggregationQuery = (connection) =>[
-        {
-          unique_users:5,
-          total_searches:20
-        }
-      ];
+  //     const expectedData = {
+  //       users: [
+  //        {
+  //         idvisitor:'007',
+  //         docs_opened:5,
+  //         searches_made:10,
+  //         opened: [
+  //           'test3.pdf',
+  //           'test4.pdf',
+  //           'test5.pdf',
+  //           'test6.pdf',
+  //           'test7.pdf',
+  //         ],
+  //         export: [
+  //           'test2.pdf',
+  //           'test3.pdf',
+  //           'test4.pdf',
+  //           'test5.pdf',
+  //           'test6.pdf',
+  //         ],
+  //         favorite: [
+  //           'test2.pdf',
+  //           'test3.pdf',
+  //           'test4.pdf',
+  //           'test5.pdf',
+  //           'test6.pdf',
+  //         ]
+  //        }
+  //       ],
+  //       cards:{
+  //         unique_users:5,
+  //         total_searches:20
+  //       }
+  //     };
+  //     const target = new AppStatsController(tmpOpts);
+  //     target.getUserAggregationsQuery = (connection) =>  [
+  //       {
+  //         idvisitor:'007',
+  //         docs_opened:5,
+  //         searches_made:10
+  //       },
+  //     ];
+  //     target.queryPdfOpend = (connection) => [
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test1.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test2.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test3.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test4.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test5.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test6.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //       {
+  //         idvisit: 1,
+  //         idvisitor: '007',
+  //         idaction_name: 6,
+  //         document: 'test7.pdf',
+  //         clone_name: 'gamechanger'
+  //       },
+  //     ];
+  //     target.getUserDocuments = (connection) =>[
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test1.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test2.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test3.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test4.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test5.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'Favorite',
+  //         document:'test6.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test1.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test2.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test3.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test4.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test5.pdf'
+  //       },
+  //       {
+  //         idvisitor:'007',
+  //         idvisit:1,
+  //         action:'ExportDocument',
+  //         document:'test6.pdf'
+  //       }
+  //     ];
+  //     target.getCardAggregationQuery = (connection) =>[
+  //       {
+  //         unique_users:5,
+  //         total_searches:20
+  //       }
+  //     ];
 
-      await target.getUserAggregations(req, res);
-      assert.equal(passedCode, 200);
-      assert.deepEqual(sentData, expectedData);
-      done();
-    });
-  });
+  //     await target.getUserAggregations(req, res);
+  //     assert.equal(passedCode, 200);
+  //     assert.deepEqual(sentData, expectedData);
+  //     done();
+  //   });
+  // });
 });
 
 
