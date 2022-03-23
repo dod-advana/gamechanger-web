@@ -51,7 +51,7 @@ class UserController {
 			search = new SearchController(opts),
 			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
-			appStats = new AppStatsController(),
+			appStats = new AppStatsController(opts),
 			emailUtility = new EmailUtility({
 				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
