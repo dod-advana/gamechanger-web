@@ -438,6 +438,7 @@ const GCDocumentsComparisonTool = (props) => {
 	};
 
 	const handleCompare = () => {
+		if(!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
 		setSelectedInput(paragraphs?.[0].id);
@@ -575,24 +576,25 @@ const GCDocumentsComparisonTool = (props) => {
 									></i>
 								</div>
 								<GCTooltip title="Export all results" placement="bottom" arrow>
-									<GCButton
-										onClick={exportAll}
-										style={{
-											minWidth: 50,
-											padding: '0px 7px',
-											height: 50,
-											marginTop: 6
-										}}
-									>
-										<img
-											src={ExportIcon}
+									<div style={{marginTop: 6}}>
+										<GCButton
+											onClick={exportAll}
 											style={{
-												margin: '0 0 3px 3px',
-												width: 15,
+												minWidth: 50,
+												padding: '0px 7px',
+												height: 50,
 											}}
-											alt="export"
-										/>
-									</GCButton>
+										>
+											<img
+												src={ExportIcon}
+												style={{
+													margin: '0 0 3px 3px',
+													width: 15,
+												}}
+												alt="export"
+											/>
+										</GCButton>
+									</div>
 								</GCTooltip>
 							</div>
 						}
@@ -679,13 +681,14 @@ const GCDocumentsComparisonTool = (props) => {
 								title={'Compare Documents'} 
 								placement="top" arrow
 							>
-								<GCButton
-									style={{ marginTop: 20 }}
-									disabled={inputError}
-									onClick={handleCompare}
-								>
+								<div style={{ marginTop: 20 }}>
+									<GCButton
+										disabled={inputError}
+										onClick={handleCompare}
+									>
 									Submit
-								</GCButton>
+									</GCButton>
+								</div>
 							</GCTooltip>
 						</Grid>
 					</DocumentInputContainer>
@@ -907,20 +910,24 @@ const GCDocumentsComparisonTool = (props) => {
 															</span>
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
 																<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
-																	<GCButton
-																		onClick={() => exportSingleDoc(doc)}
-																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																	>
-																		Export
-																	</GCButton>
+																	<div>
+																		<GCButton
+																			onClick={() => exportSingleDoc(doc)}
+																			style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																		>
+																			Export
+																		</GCButton>
+																	</div>
 																</GCTooltip>
 																<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
-																	<GCButton 
-																		onClick={() => saveDocToFavorites(doc.filename, paragraph)}
-																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																	>
-																		Save to Favorites
-																	</GCButton>
+																	<div>
+																		<GCButton 
+																			onClick={() => saveDocToFavorites(doc.filename, paragraph)}
+																			style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																		>
+																			Save to Favorites
+																		</GCButton>
+																	</div>
 																</GCTooltip>
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
