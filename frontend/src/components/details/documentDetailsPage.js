@@ -27,6 +27,7 @@ const colWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	overflowWrap: 'anywhere'
 };
 
 const RESULTS_PER_PAGE = 10;
@@ -90,6 +91,17 @@ const DocumentDetailsPage = (props) => {
 	const [backendError, setBackendError] = useState({});
 
 	const[notInCorpusCount, setNotInCorpusCount] = useState(0);
+	const [refList, setRefList] = useState([]);
+
+	useEffect(() => {
+		if(document?.refList){
+			const newList = [];
+			document.ref_list.forEach(ref => {
+				newList.push({References: ref});
+			});
+			setRefList(newList);
+		}
+	}, [document]);
 
 	useEffect(() => {
 		setRunningQuery(true);
@@ -405,21 +417,19 @@ const DocumentDetailsPage = (props) => {
 											title={'Metadata'}
 											hideHeader={true}
 										/>
-										<div style={{ marginTop: -18 }}>
-											<SimpleTable
-												tableClass={'magellan-table'}
-												zoom={1}
-												headerExtraStyle={{
-													backgroundColor: '#313541',
-													color: 'white',
-												}}
-												rows={document?.refList || []}
-												height={'auto'}
-												dontScroll={true}
-												colWidth={{ minWidth: '25%', maxWidth: '25%' }}
-												disableWrap={true}
-											/>
-										</div>
+										<SimpleTable
+											tableClass={'magellan-table'}
+											zoom={1}
+											headerExtraStyle={{
+												backgroundColor: '#313541',
+												color: 'white',
+											}}
+											rows={refList}
+											height={'auto'}
+											dontScroll={true}
+											colWidth={{ minWidth: '25%', maxWidth: '25%' }}
+											disableWrap={true}
+										/>
 									</>
 								) : (
 									<div style={{ margin: '0 auto' }}>

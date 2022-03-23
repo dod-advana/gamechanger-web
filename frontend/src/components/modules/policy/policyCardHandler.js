@@ -894,12 +894,15 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 					placement="top"
 					arrow
 				>
-					<GCButton 
+					<div
 						style={{position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1}}
-						onClick={()=> gameChangerAPI.requestDocIngest({docId: item.display_title_s})}
 					>
-					 Report Issue
-					</GCButton>
+						<GCButton 
+							onClick={()=> gameChangerAPI.requestDocIngest({docId: item.display_title_s})}
+						>
+							Report Issue
+						</GCButton>
+					</div>
 				</GCTooltip>
 			)}
 		</StyledFrontCardHeader>
