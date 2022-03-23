@@ -121,7 +121,7 @@ const styles = {
 	panelContainer: {
 		alignItems: 'center',
 		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20
+		// paddingBottom: 20
 	},
 	disclaimerContainer: {
 		alignItems: 'center',
