@@ -937,7 +937,7 @@ const GCUserDashboard = React.memo((props) => {
 		const searchSettings = cloneData.clone_name === 'gamechanger' ? (
 			<>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
+					<span style={{ fontWeight: 'bold' }}>Source Filter:</span>{' '}
 					{search.orgFilterText}
 				</div>
 				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
@@ -1879,7 +1879,7 @@ const GCUserDashboard = React.memo((props) => {
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
 								<span style={{ fontWeight: 'bold' }}>
-									Organization Filter:
+									Source Filter:
 								</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>

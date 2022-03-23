@@ -163,7 +163,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 				<Typography style={styles.containerText}>{searchText}</Typography>
 			</div>
 			<Typography style={styles.subtext}>
-				<strong>Organization Filter: </strong>{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
+				<strong>Source Filter: </strong>{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
 				<strong>Type Filter: </strong>{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
