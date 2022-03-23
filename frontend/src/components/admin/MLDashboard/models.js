@@ -752,7 +752,7 @@ export default (props) => {
 							</div>
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>
-									QA Model:
+									QA MODEL:
 								</div>
 								<Select
 									value={selectedQAModel}
@@ -764,7 +764,7 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.qa_model).map((name) => {
+									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}
