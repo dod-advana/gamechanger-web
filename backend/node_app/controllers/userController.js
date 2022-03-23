@@ -18,6 +18,7 @@ const { ExternalAPIController } = require('./externalAPI/externalAPIController')
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
+const { AppStatsController } = require('../controllers/appStatsController');
 const Sequelize = require('sequelize');
 const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const constants = require('../config/constants');
@@ -50,6 +51,7 @@ class UserController {
 			search = new SearchController(opts),
 			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
+			appStats = new AppStatsController(opts),
 			emailUtility = new EmailUtility({
 				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
@@ -81,6 +83,7 @@ class UserController {
 		this.search = search;
 		this.sequelize = sequelize;
 		this.externalAPI = externalAPI;
+		this.appStats = appStats;
 		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
@@ -378,6 +381,9 @@ class UserController {
 						['updatedAt', 'DESC']
 					]
 				});
+				const hashed_user =  this.sparkMD5.hash(user_id);
+				const pdf_opened = await this.appStats.getUserLastOpened(hashed_user);
+				user.pdf_opened = pdf_opened;
 
 				if (favorite_documents) {
 					for (const doc of favorite_documents) {
@@ -533,6 +539,7 @@ class UserController {
 				user.favorite_searches = [];
 				user.search_history = [];
 				user.export_history = [];
+				user.pdf_opened = [];
 				user.api_key = '';
 			}
 
