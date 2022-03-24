@@ -116,6 +116,7 @@ class UserController {
 		this.updateClonesVisited = this.updateClonesVisited.bind(this);
 		this.setupUserProfile = this.setupUserProfile.bind(this);
 		this.postUserAppVersion = this.postUserAppVersion.bind(this);
+		this.deleteUserData = this.deleteUserData.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -306,21 +307,13 @@ class UserController {
 	async getUserData(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-
 			const user_id = getUserIdFromSAMLUserId(req);
-
-			let user = await this.gcUser.findOne(
+			let user = await this.user.findOne(
 				{
 					where: { user_id: user_id },
-					defaults: {
-						user_id: user_id,
-						notifications: {}
-					},
 					raw: true,
 				}
 			);
-
 			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
 					where: {user_id: user.user_id},
@@ -996,7 +989,7 @@ class UserController {
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
-			const user = await this.gcUser.findOne(
+			const user = await this.user.findOne(
 				{
 					where: { user_id: user_id },
 					raw: true
@@ -1020,7 +1013,7 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
-			await this.gcUser.update(
+			await this.user.update(
 				{
 					user_info: req.body,
 					submitted_info: true
@@ -1153,7 +1146,7 @@ class UserController {
 			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.sequelize.transaction(async (t) => {
-				const userData = await this.gcUser.findOne({
+				const userData = await this.user.findOne({
 					where: {
 						user_id: user_id
 					},
@@ -1168,7 +1161,7 @@ class UserController {
 				// only update if the notification exists and is non-zero
 				if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
 					userData.notifications[cloneName][type] = 0;
-					await this.gcUser.update({ notifications: userData.notifications },
+					await this.user.update({ notifications: userData.notifications },
 						{
 							where: {
 								user_id: user_id
