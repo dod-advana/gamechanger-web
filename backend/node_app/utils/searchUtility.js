@@ -432,7 +432,6 @@ class SearchUtility {
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
 			let mainKeywords = plainQuery.replace(/"|'| OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
-			console.log(mainKeywords)
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
