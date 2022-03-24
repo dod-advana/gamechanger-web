@@ -80,10 +80,12 @@ const handleFilterChange = (event, state, dispatch, type) => {
 const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => {
 
 	const endsInY = displayName[displayName.length - 1] === 'y';
+	const endsInS = displayName[displayName.length - 1] === 's';
+
 
 	const allSelected = `${type}AllSelected`;
-	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : 's'}`;
-	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : 's'}`;
+	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : (endsInS ? 'es' : 's')}`;
+	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : (endsInS ? 'es' : 's')}`;
 	const specificSelected = `${type}SpecificSelected`;
 	const options = state.defaultOptions[type];
 
