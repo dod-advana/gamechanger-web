@@ -431,8 +431,8 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english');
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
-
+			let mainKeywords = plainQuery.replace(/"|'| OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
+			console.log(mainKeywords)
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -1649,21 +1649,22 @@ class SearchUtility {
 						}
 					}
 				};
-		
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
-			let aggs = results.body.aggregations.related.buckets;
-			let maxCount = 0;
-			if (aggs.length > 0) {
-				aggs.forEach(term => {
-					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
-					if (word !== searchText && term.user.buckets.length > 1) {
-						word = word.replace(/\s{2,}/g, ' ');
-						if (!relatedSearches.includes(word) && maxCount < maxSearches) {
-							relatedSearches.push(word);
-							maxCount += 1;
+			if (results.body.aggregations){
+				let aggs = results.body.aggregations.related.buckets;
+				let maxCount = 0;
+				if (aggs.length > 0) {
+					aggs.forEach(term => {
+						let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+						if (word !== searchText && term.user.buckets.length > 1) {
+							word = word.replace(/\s{2,}/g, ' ');
+							if (!relatedSearches.includes(word) && maxCount < maxSearches) {
+								relatedSearches.push(word);
+								maxCount += 1;
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
