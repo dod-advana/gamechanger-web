@@ -110,7 +110,7 @@ const DocumentInputContainer = styled.div`
 	
 	.input-box {
 		font-size: 14px;
-		overflow: scroll;
+		overflow: auto;
 		font-family: Noto Sans;
 	}
 
@@ -220,6 +220,29 @@ const GCDocumentsComparisonTool = (props) => {
 	const [sortType, setSortType] = useState('Similarity Score');
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
+
+	useEffect(() => {
+		const newSearchSettings = {...state.searchSettings};
+		const sourceCount = {};
+		const typeCount = {};
+
+		returnedDocs.forEach(doc => {
+			if(typeCount[doc.display_doc_type_s + 's']){
+				typeCount[doc.display_doc_type_s + 's'] ++;
+			}else{
+				typeCount[doc.display_doc_type_s + 's'] = 1;
+			}
+			if(sourceCount[doc.display_org_s]){
+				sourceCount[doc.display_org_s] ++;
+			}else{
+				sourceCount[doc.display_org_s] = 1;
+			}
+		});
+		newSearchSettings.orgCount = sourceCount;
+		newSearchSettings.typeCount = typeCount;
+
+		setState(dispatch, {analystToolsSearchSettings: newSearchSettings});
+	}, [dispatch, returnedDocs]);
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -554,7 +577,7 @@ const GCDocumentsComparisonTool = (props) => {
 											setNeedsSort(true);
 										}}
 										classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-										autoWidthd
+										autoWidth
 									>
 										<MenuItem key={`Similarity Score`} value={'Similarity Score'}>Similarity Score</MenuItem>
 										<MenuItem key={`Alphabetically`} value={'Alphabetically'}>Alphabetically</MenuItem>
@@ -601,7 +624,7 @@ const GCDocumentsComparisonTool = (props) => {
 					</div>
 				</Grid>
 				<Grid item xs={2} style={{marginTop: 20}}>
-					<GCAnalystToolsSideBar context={context} />
+					<GCAnalystToolsSideBar context={context} results={returnedDocs}/>
 					<GCButton 
 						isSecondaryBtn 
 						onClick={() => resetAdvancedSettings(dispatch)}
@@ -730,7 +753,7 @@ const GCDocumentsComparisonTool = (props) => {
 							/>
 						</div>
 					</Grid>
-					<Grid item xs={4} style={{marginTop: 20, height: '800px', overflowY: 'scroll', maxWidth: 'calc(33.333333% + 20px)', flexBasis: 'calc((33.333333% + 20px)', paddingLeft: '20px', marginLeft: '-20px'}}>
+					<Grid item xs={4} style={{marginTop: 20, height: '800px', overflowY: 'auto', maxWidth: 'calc(33.333333% + 20px)', flexBasis: 'calc((33.333333% + 20px)', paddingLeft: '20px', marginLeft: '-20px'}}>
 						<div 
 							style={{
 								padding: 20,
