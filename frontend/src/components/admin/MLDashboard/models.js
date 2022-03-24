@@ -52,7 +52,8 @@ export default (props) => {
 		sentence: {},
 		qexp: {},
 		topic_models: {},
-		jbook_qexp: {}
+		jbook_qexp: {},
+		qa_model: {},
 	});
 	const [deleteModal,setDeleteModal] = useState({
 		show:false,
@@ -77,6 +78,7 @@ export default (props) => {
 	const [selectedQEXP, setSelectedQEXP] = useState('');
 	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
 	const [selectedTopicModel, setSelectedTopicModel] = useState('');
+	const [selectedQAModel, setSelectedQAModel] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
@@ -161,6 +163,7 @@ export default (props) => {
 					? current.data.topic_model.replace(/^.*[\\/]/, '')
 					: ''
 			);
+
 			props.updateLogs('Successfully queried current loaded models.', 0);
 		} catch (e) {
 			props.updateLogs(
@@ -376,6 +379,9 @@ export default (props) => {
 			}
 			if (selectedJbookQEXP) {
 				params['jbook_qexp'] = selectedJbookQEXP;
+			}
+			if (selectedQAModel) {
+				params['qa_model'] = selectedQAModel;
 			}
 			await gameChangerAPI.reloadModels(params);
 			props.updateLogs('Reloaded Models', 0);
@@ -736,6 +742,29 @@ export default (props) => {
 									}}
 								>
 									{Object.keys(downloadedModelsList.topic_models).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									QA MODEL:
+								</div>
+								<Select
+									value={selectedQAModel}
+									onChange={(e) => setSelectedQAModel(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}

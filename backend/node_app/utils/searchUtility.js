@@ -2028,7 +2028,7 @@ class SearchUtility {
 		let filename;
 		let result;
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.60) {
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.70){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, { ...req.body, id: filename }, clientObj, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
