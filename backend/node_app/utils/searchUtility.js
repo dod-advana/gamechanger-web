@@ -1676,9 +1676,6 @@ class SearchUtility {
 					});
 				}
 			}
-			else {
-				console.log("no related")
-			}
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
 		}
