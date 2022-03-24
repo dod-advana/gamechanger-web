@@ -1646,6 +1646,17 @@ class SearchUtility {
 							query: `*${similarWordsQuery}*`,
 							fuzziness: 5
 						}
+					},
+					aggs: {
+						related: {
+							terms: {
+								field: 'search_query',
+								min_doc_count: 5
+							},
+							aggs: {
+								user: { terms: {field: 'user_id', size: 2}}
+							}
+						}
 					}
 				};
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
@@ -1664,6 +1675,9 @@ class SearchUtility {
 						}
 					});
 				}
+			}
+			else {
+				console.log("no related")
 			}
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
