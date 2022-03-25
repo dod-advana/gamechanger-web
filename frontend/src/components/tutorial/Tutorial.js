@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { gcOrange } from '../../components/common/gc-colors';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import { setState } from '../../utils/sharedFunctions';
-import { initializeTutorial } from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper';
+// import { initializeTutorial } from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper';
 // import { useMountEffect } from '../../utils/gamechangerUtils';
 
 const Tutorial = (props) => {
