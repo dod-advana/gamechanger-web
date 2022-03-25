@@ -72,7 +72,7 @@ export default () => {
 			}
 			if (checkProcess) {
 				clearTimeout(processTimer);
-				processTimer = setTimeout(getProcesses, 5000);
+				processTimer = setTimeout(getProcesses, 10000);
 			}
 		}
 	};
