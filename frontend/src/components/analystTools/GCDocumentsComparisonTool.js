@@ -220,29 +220,37 @@ const GCDocumentsComparisonTool = (props) => {
 	const [sortType, setSortType] = useState('Similarity Score');
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
+	const [updateFilters, setUpdateFilters] = useState(false);
 
 	useEffect(() => {
-		const newSearchSettings = {...state.searchSettings};
-		const sourceCount = {};
-		const typeCount = {};
+		if(updateFilters){
+			setUpdateFilters(false);
+			const newSearchSettings = {...state.analystToolsSearchSettings};
+			const sourceCount = {};
+			const typeCount = {};
 
-		returnedDocs.forEach(doc => {
-			if(typeCount[doc.display_doc_type_s + 's']){
-				typeCount[doc.display_doc_type_s + 's'] ++;
-			}else{
-				typeCount[doc.display_doc_type_s + 's'] = 1;
-			}
-			if(sourceCount[doc.display_org_s]){
-				sourceCount[doc.display_org_s] ++;
-			}else{
-				sourceCount[doc.display_org_s] = 1;
-			}
-		});
-		newSearchSettings.orgCount = sourceCount;
-		newSearchSettings.typeCount = typeCount;
+			returnedDocs.forEach(doc => {
+				if(typeCount[doc.display_doc_type_s + 's']){
+					typeCount[doc.display_doc_type_s + 's'] ++;
+				}else{
+					typeCount[doc.display_doc_type_s + 's'] = 1;
+				}
+				if(sourceCount[doc.display_org_s]){
+					sourceCount[doc.display_org_s] ++;
+				}else{
+					sourceCount[doc.display_org_s] = 1;
+				}
+			});
+			newSearchSettings.orgCount = sourceCount;
+			newSearchSettings.typeCount = typeCount;
 
-		setState(dispatch, {analystToolsSearchSettings: newSearchSettings});
-	}, [dispatch, returnedDocs]);
+			setState(dispatch, {analystToolsSearchSettings: newSearchSettings});
+		}
+	}, [dispatch, returnedDocs, state.analystToolsSearchSettings, updateFilters]);
+
+	useEffect(() => {
+		setUpdateFilters(true);
+	},[returnedDocs]);
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -436,6 +444,13 @@ const GCDocumentsComparisonTool = (props) => {
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
+		const newReturnedDocs = returnedDocs.filter(doc => {
+			const newParagraphs = doc.paragraphs.filter(par => {
+				return par.paragraphIdBeingMatched !== id;
+			});
+			return newParagraphs.length;
+		});
+		setReturnedDocs(newReturnedDocs);
 	};
 
 	const handleCombine = () => {
