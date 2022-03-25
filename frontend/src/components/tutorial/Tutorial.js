@@ -10,7 +10,7 @@ const Tutorial = (props) => {
 	const { tutorialData } = props;
 	const { state, dispatch } = props.context;
 	useEffect(() => {
-		if ((Object.keys(state.componentStepNumbers).length === 0 || state.tutorialJoyrideSteps.length === 0)) {
+		if (tutorialData !== null && ((Object.keys(state.componentStepNumbers).length === 0 || state.tutorialJoyrideSteps.length === 0))) {
 			const { componentStepNumbers, tutorialJoyrideSteps } = tutorialData;
 			setState(dispatch, {
 				componentStepNumbers,
