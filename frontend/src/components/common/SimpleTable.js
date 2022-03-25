@@ -120,7 +120,7 @@ export default class SimpleTable extends React.Component {
 			else {
 				if (!r.Hidden) {
 					_.each(cols, (c, cIdx) => {
-						let value = r[c] ? r[c] !== null ? r[c] : '' : '';
+						let value = r[c] ?? '';
 						if (useInnerHtml) {
 							if (!value || _.isBoolean(value)) value = '';
 							rowCells.push(<td style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
@@ -131,11 +131,9 @@ export default class SimpleTable extends React.Component {
 						} else {
 							const editIcon = this.props.showEditIcon && cIdx === 0 &&
 								<i style={{ marginRight: 10, color: 'blue' }} className="fa fa-pencil" />;
-							if (!value || _.isBoolean(value)) value = '';
 							rowCells.push(<td style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
-								key={`${rIdx}_${cIdx}`}>{editIcon}{(useParser) ? parse(r[c]) : r[c]}</td>);
+								key={`${rIdx}_${cIdx}`}>{editIcon}{(useParser) ? parse(r[c]) : r[c]?.toString()}</td>);
 						}
-
 					});
 				}
 			}
