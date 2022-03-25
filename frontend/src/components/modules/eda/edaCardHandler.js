@@ -54,7 +54,27 @@ export const EDA_FIELDS = [
 	'effective_date_eda_ext',
 	'naics_eda_ext',
 	'obligated_amounts_eda_ext',
+	'fpds_funding_agency_name_eda_ext',
+	'fpds_funding_office_code_eda_ext',
+	'fpds_description_of_requirement_eda_ext',
+	'fpds_closed_date_eda_ext'
 ];
+
+export const EDA_FPDS_MAP = {
+	reference_idv_eda_ext: 'fpds_idv_piid_eda_ext',
+	award_id_eda_ext: 'fpds_piid_eda_ext',
+	modification_eda_ext: 'fpds_modification_number_eda_ext',
+	signature_date_eda_ext: 'fpds_date_signed_eda_ext',
+	effective_date_eda_ext: 'fpds_effective_date_eda_ext',
+	naics_eda_ext: 'fpds_naics_code_eda_ext',
+	vendor_name_eda_ext: 'fpds_vendor_name_eda_ext',
+	vendor_duns_eda_ext: 'fpds_duns_eda_ext',
+	vendor_cage_eda_ext: 'fpds_cage_code_eda_ext',
+	contract_issue_name_eda_ext: 'fpds_contracting_agency_name_eda_ext',
+	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
+	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
+	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext'
+};
 
 export const EDA_FIELD_JSON_MAP = {
 	award_id_eda_ext: 'Award ID',
@@ -78,6 +98,24 @@ export const EDA_FIELD_JSON_MAP = {
 	paying_office_majcom_eda_ext: 'Paying Office MAJCOM',
 	contract_admin_majcom_eda_ext: 'Admin Office MAJCOM',
 	issuing_organization_eda_ext: 'Issuing Organization',
+
+	fpds_dollars_obligated_eda_ext: 'FPDS Dollars Obligated',
+	fpds_contracting_agency_name_eda_ext: 'FPDS Contracting Agency',
+	fpds_vendor_name_eda_ext: 'FPDS Vendor Name',
+	fpds_contracting_office_code_eda_ext: 'FPDS Contracting Office Code',
+	fpds_effective_date_eda_ext: 'FPDS Effective Date',
+	fpds_funding_office_code_eda_ext: 'FPDS Funding Office Code',
+	fpds_idv_piid_eda_ext: 'FPDS IDV PIID',
+	fpds_modification_number_eda_ext: 'FPDS Mod Number',
+	fpds_psc_desc_eda_ext: 'FPDS PSC Description',
+	fpds_contracting_office_name_eda_ext: 'FPDS Contracting Office',
+	fpds_piid_eda_ext: 'FPDS PIID',
+	fpds_date_signed_eda_ext: 'FPDS Date Signed',
+	fpds_description_of_requirement_eda_ext: 'FPDS Description of Requirement',
+	fpds_psc_eda_ext: 'FPDS PSC',
+	fpds_funding_agency_name_eda_ext: 'FPDS Funding Agency',
+	fpds_naics_code_eda_ext: 'FPDS NAICS Code', 
+	fpds_duns_eda_ext: 'FPDS DUNS'
 };
 
 const styles = {
@@ -1022,7 +1060,8 @@ const EdaCardHandler = {
 							rows={getEDAMetadataForPropertyTable(
 								EDA_FIELD_JSON_MAP,
 								fields,
-								item
+								item,
+								EDA_FPDS_MAP
 							)}
 							height={'auto'}
 							dontScroll={true}
