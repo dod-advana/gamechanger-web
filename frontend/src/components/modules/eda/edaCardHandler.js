@@ -57,7 +57,7 @@ export const EDA_FIELDS = [
 	'fpds_funding_agency_name_eda_ext',
 	'fpds_funding_office_code_eda_ext',
 	'fpds_description_of_requirement_eda_ext',
-	'fpds_closed_date_eda_ext'
+	// 'fpds_closed_date_eda_ext'
 ];
 
 export const EDA_FPDS_MAP = {
