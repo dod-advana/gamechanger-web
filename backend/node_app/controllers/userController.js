@@ -116,6 +116,7 @@ class UserController {
 		this.updateClonesVisited = this.updateClonesVisited.bind(this);
 		this.setupUserProfile = this.setupUserProfile.bind(this);
 		this.postUserAppVersion = this.postUserAppVersion.bind(this);
+		this.deleteUserData = this.deleteUserData.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -309,8 +310,7 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
-
-			let user = await this.gcUser.findOne(
+			let user = await this.user.findOne(
 				{
 					where: { user_id: user_id },
 					defaults: {
@@ -320,7 +320,6 @@ class UserController {
 					raw: true,
 				}
 			);
-
 			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
 					where: {user_id: user.user_id},
