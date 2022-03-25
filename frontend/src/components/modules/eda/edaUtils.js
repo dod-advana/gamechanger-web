@@ -1,3 +1,7 @@
+import {
+	numberWithCommas,
+} from '../../../utils/gamechangerUtils';
+
 export const getEDAMetadataForPropertyTable = (
 	edaFieldJSONMap,
 	edaFields,
@@ -15,11 +19,11 @@ export const getEDAMetadataForPropertyTable = (
 
 			let fpdsFieldName = edaFPDSMap[fieldName];
 			if (fpdsFieldName && item[fpdsFieldName]) {
-				row['Value'] = item[fpdsFieldName];
+				row['Value'] = fieldName.indexOf('amount') === -1 ? item[fpdsFieldName] : numberWithCommas(item[fpdsFieldName]);
 			}
 			else {
 				if (item[fieldName]) {
-					row['Value'] = item[fieldName];
+					row['Value'] = fieldName.indexOf('amount') === -1 ? item[fieldName] : numberWithCommas(item[fieldName]);
 				} else {
 					row['Value'] = 'Data Not Available';
 				}
