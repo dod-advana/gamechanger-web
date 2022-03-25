@@ -121,7 +121,7 @@ describe('UserController', function () {
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
-			gcUser: {
+			user: {
 				findOrCreate(data) {
 					let user;
 
