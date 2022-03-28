@@ -348,7 +348,7 @@ const ViewHeader = (props) => {
 				{cloneData?.clone_name === 'eda' &&
 					<a target="_blank" rel="noopener noreferrer" href="https://qlik.advana.data.mil/sense/app/604403a7-bf08-4d56-8807-7b5491a3db22/sheet/96329f3e-18a3-40e8-8b02-99d82feb1a6b/state/analysis">
 						<GCButton
-							style={{ height: 34, margin: '16px 0px 0px 10px', minWidth: 0 }}
+							style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}
 						>Validation Metrics</GCButton>
 					</a>
 				}

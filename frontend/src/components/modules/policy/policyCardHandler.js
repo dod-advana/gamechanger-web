@@ -1569,7 +1569,7 @@ const PolicyCardHandler = {
 						title={'Metadata'}
 						hideHeader={!!state.listView}
 					/>
-					<div style={{ marginTop: -18 }}>
+					<div>
 						<SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}
