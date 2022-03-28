@@ -1543,6 +1543,7 @@ export default function GraphNodeCluster2D(props) {
 				nodePointerAreaPaint={nodePointerAreaPaint}
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
+				linkPointerAreaPaint={() => {}}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}
