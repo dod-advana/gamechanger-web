@@ -1800,7 +1800,7 @@ export default function PolicyGraphView(props) {
 
 					{nodeLimit.warningLimit &&
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
+							<div style={styles.warningBox}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
 							<LoadAllButton
 								onClick={() => {
 									loadAll();
@@ -1813,7 +1813,7 @@ export default function PolicyGraphView(props) {
 					}
 					{nodeLimit.maxLimit &&
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
+							<div style={styles.warningBox}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
 							<span></span>
 						</>
 					}
@@ -1896,6 +1896,15 @@ const styles = {
 		fontWeight: 'bold',
 		fontSize: '20px',
 		margin: 'auto',
+	},
+	warningBox: {
+		padding: '0px 15px',
+		maxHeight: '100%',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		display: '-webkit-box',
+		'-webkit-line-clamp': '2',
+		'-webkit-box-orient': 'vertical'
 	},
 };
 
