@@ -48,7 +48,7 @@ require('./favicon.ico');
 
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
-	siteId: 1,
+	siteId: Config.MATOMO_SITE_ID || 2,
 });
 
 const history = createBrowserHistory();
