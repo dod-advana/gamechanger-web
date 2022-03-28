@@ -16,7 +16,7 @@ import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png
 import {setState} from '../../../utils/sharedFunctions';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
-import UserIcon from "../../../images/icon/UserIcon.png";
+import UserIcon from '../../../images/icon/UserIcon.png';
 
 const getToolTheme = (cloneData) => {
 	return {

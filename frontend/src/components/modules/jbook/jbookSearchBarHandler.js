@@ -4,7 +4,6 @@ import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
-import UserButton from '../../searchBar/UserButton';
 
 const jbookSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(value, cloneData, setAutocorrect, setPresearchTitle, setPresearchTopic, setPresearchOrg, setPredictions) {
@@ -16,7 +15,6 @@ const jbookSearchBarHandler = {
 	},
 	getSearchBar(props) {
 		const {
-			context,
 			state,
 			classes,
 			searchFavoritePopperAnchorEl,

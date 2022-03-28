@@ -12,6 +12,19 @@ import { styles, TableRow } from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const getApiKeyRequestData = async (setGCAPIRequestData) => {
+	const { data } = await gameChangerAPI.getAPIKeyRequestData();
+	data.pending.forEach((request, idx) => {
+		const cloneString = request.clone_meta.map(meta => meta.clone_name).join(', ');
+		data.pending[idx].cloneString = cloneString;
+	});
+	data.approved.forEach((request, idx) => {
+		const cloneString = request.keyClones.map(clone => clone.clone_name).join(', ');
+		data.approved[idx].cloneString = cloneString;
+	});
+	setGCAPIRequestData(data || {approved: [], pending: []});
+};
+
 /**
  * A table to view api keys and requests
  * @class APIRequests
@@ -25,27 +38,16 @@ export default () => {
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-	const [keyDescriptions, setKeyDescriptions] = useState({});
+	const [keyDescriptions, setKeyDescriptions] = useState(null);
 	// Comonent Methods
 	/**
      * Grabs all the data from the backend to populate the table
      * @method getApiKeyRequestData
      */
-	const getApiKeyRequestData = async () => {
-		const { data } = await gameChangerAPI.getAPIKeyRequestData();
-		data.pending.forEach((request, idx) => {
-			const cloneString = request.clone_meta.map(meta => meta.clone_name).join(', ');
-			data.pending[idx].cloneString = cloneString;
-		});
-		data.approved.forEach((request, idx) => {
-			const cloneString = request.keyClones.map(clone => clone.clone_name).join(', ');
-			data.approved[idx].cloneString = cloneString;
-		});
-		setGCAPIRequestData(data || {approved: [], pending: []});
-	};
+
 
 	useEffect(()=>{
-		if(!Object.keys(keyDescriptions).length){
+		if(keyDescriptions === null){
 			const descriptions = {};
 			gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
 			setKeyDescriptions(descriptions);
@@ -58,7 +60,7 @@ export default () => {
      */
 	const revokeAPIKeyRequestData = async (id) => {
 		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
-			getApiKeyRequestData();
+			getApiKeyRequestData(setGCAPIRequestData);
 		});
 	};
 	/**
@@ -74,11 +76,12 @@ export default () => {
 			return setPopperIsOpen(true);
 		}
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
-			getApiKeyRequestData();
+			getApiKeyRequestData(setGCAPIRequestData);
 		});
 	};
+
 	useEffect(()=>{
-		getApiKeyRequestData();
+		getApiKeyRequestData(setGCAPIRequestData);
 	},[]);
 
 	const handleChange = (key, event) => {

@@ -36,6 +36,7 @@ import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
 import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoundPage';
+import UnauthorizedPage from '@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage';
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
 import './index.css';
@@ -334,6 +335,10 @@ const App = () => {
 		}
 	}
 
+	const setUserMatomo = (value) => {
+		localStorage.setItem('userMatomo', value);
+	};
+
 	return (
 		<Router>
 			<MatomoProvider value={instance}>
@@ -402,12 +407,18 @@ const App = () => {
 														component={GamechangerPdfViewer}
 														location={location}
 													/>
+													<Route
+														exact
+														path="/unauthorized"
+														component={UnauthorizedPage}
+														location={location}
+													/>
 													<Route path="*" component={NotFoundPage} />
 												</Switch>
 											</ErrorBoundary>
 										</>
 									</SlideOutMenuContextHandler>
-									<GCFooter />
+									<GCFooter setUserMatomo={setUserMatomo}/>
 								</div>
 							)}
 						/>
