@@ -542,7 +542,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId(['steve'], clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId([userId], clone_name, connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
