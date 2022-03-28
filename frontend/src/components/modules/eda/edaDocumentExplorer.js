@@ -594,7 +594,7 @@ export default function EDADocumentExplorer({
 						title={'Metadata'}
 						hideHeader={true}
 					/>
-					<div style={{ marginTop: -18 }}>
+					<div>
 						<SimpleTable
 							tableClass={'magellan-table'}
 							zoom={0.8}
