@@ -265,7 +265,7 @@ class AppStatsController {
 				where 
 					a.idaction_name = b.idaction  
 					and b.name like 'PDFViewer%'
-					and hex(a.idvisitor) = ?
+					and hex(a.idvisitor) in (?)
 				order by 
 					documenttime desc
 				limit 10`,
@@ -333,13 +333,11 @@ class AppStatsController {
 		return new Promise((resolve, reject) => {
 			connection.query(`
 			select
-				c.user_id,
-				hex(c.idvisitor) as idvisitor
+				DISTINCT hex(c.idvisitor) as idvisitor
 			from
 				matomo_log_visit c
 			where 
 				c.user_id = ?
-			limit 1
 			`,
 			[userID],
 			(error, results, fields) => {
@@ -544,7 +542,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId('steve', clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId(['steve'], clone_name, connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -888,7 +886,7 @@ class AppStatsController {
 		 */
 		async getUserLastOpened(userdID) {
 			const documentMap = {};
-
+			console.log(userdID)
 			let connection;
 			try {
 				connection = this.mysql.createConnection({
@@ -899,7 +897,7 @@ class AppStatsController {
 				});
 				connection.connect();
 				const visitorID = await this.getUserVisitorID(userdID,connection);
-				const opened = await this.queryPDFOpenedByUserId(visitorID[0].idvisitor, connection);
+				const opened = await this.queryPDFOpenedByUserId(visitorID.map(x => x.idvisitor), connection);
 				return opened;
 			}catch (err) {
 				this.logger.error(err, '1CZPASK', userdID);
