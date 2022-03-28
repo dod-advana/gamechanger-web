@@ -886,7 +886,6 @@ class AppStatsController {
 		 */
 		async getUserLastOpened(userdID) {
 			const documentMap = {};
-			console.log(userdID)
 			let connection;
 			try {
 				connection = this.mysql.createConnection({
