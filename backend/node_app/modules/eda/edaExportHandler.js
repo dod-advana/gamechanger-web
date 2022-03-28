@@ -49,11 +49,11 @@ class EdaExportHandler extends ExportHandler {
 			try {
 
 				// Using getESClient check to enable eda export. Verify whether permissible
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin') || permissions.includes('eda Admin')){
 					clientObj.esClientName = 'eda';
 					clientObj.esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 				} else {
-					throw 'Unauthorized';
+					throw {message: 'Unauthorized'};
 				}
 				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 
@@ -73,7 +73,7 @@ class EdaExportHandler extends ExportHandler {
 					const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
 
 					for (const result of searchResults.docs) {
-						if (result.filename) {
+						if (result.filename && pgResults) {
 							result.line_items = pgResults.filter(lineItem => lineItem.pdf_filename === result.filename);
 						}
 					}
@@ -82,7 +82,7 @@ class EdaExportHandler extends ExportHandler {
 					searchResults = { totalCount: 0, docs: [] };
 				}
 			} catch (e) {
-				this.logger.error(`Error sentence transforming document search results ${e.message}`, '3MP4JCA', userId);
+				this.logger.error(`Error sentence transforming document search results: ${e.message}`, '3MP4JCA', userId);
 				throw e;
 			}
 

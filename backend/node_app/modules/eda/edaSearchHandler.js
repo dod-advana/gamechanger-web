@@ -81,6 +81,7 @@ class EdaSearchHandler extends SearchHandler {
 
 			let searchResults;
 			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
+
 			// try storing results record
 			if (storeHistory && !forCacheReload) {
 				try {
@@ -144,7 +145,7 @@ class EdaSearchHandler extends SearchHandler {
 	
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin') || permissions.includes('eda Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
@@ -162,7 +163,6 @@ class EdaSearchHandler extends SearchHandler {
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
 			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-	
 				if (getIdList) {
 					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
@@ -193,7 +193,7 @@ class EdaSearchHandler extends SearchHandler {
 			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
 			} else {
 				throw 'Unauthorized';
@@ -258,7 +258,7 @@ class EdaSearchHandler extends SearchHandler {
 			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
 			} else {
 				throw 'Unauthorized';
@@ -298,7 +298,7 @@ class EdaSearchHandler extends SearchHandler {
 
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery({...body, limit: 5, edaSearchSettings: { issueOfficeDoDAAC, issueOfficeName }}, userId);
 			} else {
 				throw 'Unauthorized';
@@ -334,7 +334,7 @@ class EdaSearchHandler extends SearchHandler {
 
 		try {
 			const permissions = req.permissions ? req.permissions : [];
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				switch (functionName) {
 					case 'queryContractMods':
 						return await this.queryContractMods(req, userId);
