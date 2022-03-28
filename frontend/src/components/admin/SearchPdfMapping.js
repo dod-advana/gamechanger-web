@@ -53,20 +53,7 @@ export const filterCaseInsensitiveIncludes = (filter, row) =>{
 };
 
 const columns = [
-	{
-		Header: '',
-		width: 35,
-		filterable: false,
-		resizable: false,
-		sortable: false,
-		Aggregated: cellInfo => {
-		  const expanderEnabled = !cellInfo.column.disableExpander;
-		  return expanderEnabled ? (
-			<ArrowDropDown/>
-		  ) : <KeyboardArrowUp/>;
-		},
-		Cell: null
-	},
+	
 	{
 		Header: 'User ID',
 		accessor: 'idvisitor',
@@ -153,6 +140,8 @@ const columns = [
 ];
 
 const userAggColumns = [
+	
+	{ pivot: true },
 	{
 		Header: 'User ID',
 		accessor: 'idvisitor',
@@ -565,8 +554,6 @@ export default () => {
 							columns={columns}
 							style={{ margin: '0 80px 20px 80px', height: 1000 }}
 							defaultSorted={[{ id: 'searchtime', desc: true }]}
-							onExpandedChange={newExpanded => this.setExpandUser(newExpanded)}
-							expanded={expandUser}
 						/>
 
 						<div
@@ -593,7 +580,10 @@ export default () => {
 							data={userAggData}
 							columns={userAggColumns}
 							defaultSorted={[{ id: 'searches_made', desc: true }]}
+							pivotBy={["idvisitor"]}
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
+							onExpandedChange={newExpanded => this.setExpandUser(newExpanded)}
+							expanded={expandUser}
 						/>
 					</TabPanel>
 					<TabPanel>
