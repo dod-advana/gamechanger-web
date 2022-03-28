@@ -320,6 +320,7 @@ class UserController {
 					raw: true,
 				}
 			);
+			console.log(user);
 			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
 					where: {user_id: user.user_id},
