@@ -59,7 +59,7 @@ const styles = {
 		overflowY: 'auto',
 		maxHeight: '650px',
 		minWidth: '240px',
-		//left: '30em',
+		maxWidth: '25%',
 		textAlign: 'left',
 	},
 	legendRow: {
