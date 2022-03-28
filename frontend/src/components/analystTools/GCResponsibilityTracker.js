@@ -449,7 +449,7 @@ const GCResponsibilityTracker = ({
 									style={{ width: 25, height: 25, fill: gcOrange }}
 								/>
 							}
-							checked={row.row.selected}
+							checked={selectedIds.includes(row.original.id)}
 						/>
 					</TableRow>
 				),
@@ -572,9 +572,13 @@ const GCResponsibilityTracker = ({
 					`ID ${row.selected ? 'Selected' : 'Des-Selected'}`, 
 					id);
 				if (row.selected) {
-					selectedIds.push(id);
+					const newSelectedIds = [...selectedIds];
+					newSelectedIds.push(id);
+					setSelectedIds(newSelectedIds);
 				} else {
-					selectedIds.splice(selectedIds.indexOf(id), 1);
+					const newSelectedIds = [...selectedIds];
+					newSelectedIds.splice(selectedIds.indexOf(id), 1);
+					setSelectedIds(newSelectedIds);
 				}
 			}
 		});
