@@ -6,14 +6,17 @@ import {
 	Typography,
 	Grid,
 	Card,
-	CardContent
+	CardContent,
 } from '@material-ui/core';
 import {
 	MuiPickersUtilsProvider,
 	KeyboardDateTimePicker 
 } from '@material-ui/pickers';
+import { 
+	ArrowDropDown,
+	KeyboardArrowUp
+} from '@material-ui/icons';
 import moment from 'moment';
-
 import DateFnsUtils from '@date-io/date-fns';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
@@ -50,6 +53,20 @@ export const filterCaseInsensitiveIncludes = (filter, row) =>{
 };
 
 const columns = [
+	{
+		Header: '',
+		width: 35,
+		filterable: false,
+		resizable: false,
+		sortable: false,
+		Aggregated: cellInfo => {
+		  const expanderEnabled = !cellInfo.column.disableExpander;
+		  return expanderEnabled ? (
+			<ArrowDropDown/>
+		  ) : <KeyboardArrowUp/>;
+		},
+		Cell: null
+	},
 	{
 		Header: 'User ID',
 		accessor: 'idvisitor',
@@ -132,7 +149,7 @@ const columns = [
 		width: 250,
 		style: { 'whiteSpace': 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	}
+	},
 ];
 
 const userAggColumns = [
@@ -311,6 +328,7 @@ export default () => {
 	const [endDate, setEndDate] = useState(moment());
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
+	const [expandUser, setExpandUser] = useState({});
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -547,6 +565,8 @@ export default () => {
 							columns={columns}
 							style={{ margin: '0 80px 20px 80px', height: 1000 }}
 							defaultSorted={[{ id: 'searchtime', desc: true }]}
+							onExpandedChange={newExpanded => this.setExpandUser(newExpanded)}
+							expanded={expandUser}
 						/>
 
 						<div
