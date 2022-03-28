@@ -17,6 +17,7 @@ import { setState } from '../../../utils/sharedFunctions';
 import { Card } from '../../cards/GCCard';
 import ViewHeader from '../../mainView/ViewHeader';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
+import { Typography } from '@material-ui/core';
 
 const _ = require('lodash');
 
@@ -183,6 +184,7 @@ const EdaMainViewHandler = {
 			summaryCardView,
 			summaryCardData,
 			resultsText,
+			timeFound
 		} = state;
 
 		let sideScroll = {
@@ -209,7 +211,7 @@ const EdaMainViewHandler = {
 		return (
 			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 				<div id="game-changer-content-top" />
-				{!loading && (
+				{!loading && searchResults && searchResults.length > 0 && (
 					<StyledCenterContainer showSideFilters={true}>
 						<div
 							className={'left-container'}
@@ -240,7 +242,14 @@ const EdaMainViewHandler = {
 							className={'right-container'}
 							style={summaryCardView ? styles.rightContainerSummary : {}}
 						>
-							{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}
+							<div
+								style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 50px'}}
+							>
+								<Typography variant="h3" display="inline">{`${searchResults ? searchResults.length : '0'} results found in ${timeFound} seconds`}</Typography>
+
+								{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}
+							</div>
+
 
 							<div
 								className={`tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}

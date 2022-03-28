@@ -1000,10 +1000,10 @@ const EDASearchMatrixHandler = {
 
 		return (
 			<div>
-				<div className={'sidebar-section-title'}>
+				<div className={'sidebar-section-title'} style={{paddingTop: 20}}>
 					FILTERS
-					<p style={{ fontSize: 10, color: 'gray', margin: '0px' }}>
-						Data sources: PDS, SYN
+					<p style={{ fontSize: 10, color: 'gray', margin: '5px 0px' }}>
+						Data sources: PDS, SYN, FPDS
 					</p>
 				</div>
 				<GCAccordion
