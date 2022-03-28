@@ -1557,7 +1557,7 @@ export default function PolicyGraphView(props) {
 		setSelectedID(-1);
 	};
 
-	const nodePaint = (node, color, ctx, globalScale) => {
+	const nodePaint = (node, color, ctx, globalScale, drawText) => {
 		let outlineThickness = 3;
 		let connectedLevel = -1;
 
@@ -1636,11 +1636,11 @@ export default function PolicyGraphView(props) {
 			ctx.stroke();
 		}
 
-		handleCreateNodeText(node, ctx, globalScale, null);
+		if (drawText) handleCreateNodeText(node, ctx, globalScale, null);
 	};
 
 	const create2dGraphNode = (node, ctx, globalScale) => {
-		nodePaint(node, undefined, ctx, globalScale);
+		nodePaint(node, undefined, ctx, globalScale, true);
 	};
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
