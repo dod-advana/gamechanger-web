@@ -142,7 +142,6 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
-		console.log('trackEvent', category, action, name, value,userId,SparkMD5.hash(id ? id[0] : userId));
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
