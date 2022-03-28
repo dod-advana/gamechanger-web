@@ -493,7 +493,7 @@ const GameChangerDetailsPage = (props) => {
 
 				break;
 			case 'contract':
-				const permissions = Permissions.allowGCClone('eda');
+				const permissions = Permissions.permissionValidator(`eda Admin`, true) || Permissions.permissionValidator(`View EDA`, true);
 				setEDAPermissions(permissions);
 				if (permissions) {
 					setDetailsType('Contract');
