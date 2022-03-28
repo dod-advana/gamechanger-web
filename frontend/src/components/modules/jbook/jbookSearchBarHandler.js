@@ -64,8 +64,6 @@ const jbookSearchBarHandler = {
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<UserButton context={context} backgroundColor={'#9E9E9E'} />
-
 				<Popover onClose={() => { handleFavoriteSearchClicked(null) }}
 					open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
 					anchorOrigin={{
