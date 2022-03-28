@@ -51,6 +51,10 @@ const getToolTheme = (cloneData) => {
 	};
 };
 
+const resetAdvancedSettings = (dispatch) => {
+	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+};
+
 const PolicyNavigationHandler = {
 	getToolState: (state) => {
 		return {
@@ -107,6 +111,7 @@ const PolicyNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
+								resetAdvancedSettings(dispatch);
 								setState(dispatch, {
 									showTutorial: true,
 									clickedTutorial: true,
@@ -305,6 +310,7 @@ const PolicyNavigationHandler = {
 					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							onClick={() => {
+								resetAdvancedSettings(dispatch);
 								setState(dispatch, {
 									showTutorial: true,
 									clickedTutorial: true,
