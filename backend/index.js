@@ -298,7 +298,7 @@ app.post('/api/auth/token', async function (req, res) {
 });
 
 app.use(async function (req, res, next) {
-	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta'];
+	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta', '/api/tutorialOverlay', '/api/userAppVersion'];
 
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
@@ -318,7 +318,7 @@ app.use(async function (req, res, next) {
 			if (req.url.includes('getThumbnail')) {
 				next();
 			} else {
-				res.status(403).send({code: 'not authorized'});
+				res.status(403).send({ code: 'not authorized' });
 			}
 		}
 	}
