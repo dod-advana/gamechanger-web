@@ -207,7 +207,7 @@ const App = () => {
 									)}
 									pageName={clone.display_name}
 									allowFunction={() => {
-										return Permissions.allowGCClone(clone.clone_name);
+										return Permissions.allowGCClone(clone.clone_name) || Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
 									}}
 								/>
 							);
