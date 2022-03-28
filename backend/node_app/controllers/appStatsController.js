@@ -902,7 +902,7 @@ class AppStatsController {
 				const opened = await this.queryPDFOpenedByUserId(visitorID[0].idvisitor, connection);
 				return opened;
 			}catch (err) {
-				this.logger.error(err, '1CZPASK', userId);
+				this.logger.error(err, '1CZPASK', userdID);
 				return [];
 			} finally {
 				connection.end();
