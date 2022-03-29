@@ -151,7 +151,7 @@ const SearchBanner = (props) => {
 					<div style={styles.searchBar}>{children}</div>
 					{!jupiter && (
 						<AdvanaMegaMenuPill
-							margin="0 15px 0 5px"
+							margin="0 -30px 0 20px"
 							defaultHeader="Applications"
 						/>
 					)}

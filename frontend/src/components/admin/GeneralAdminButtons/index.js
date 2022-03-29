@@ -17,7 +17,6 @@ export default () => {
 	const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
-	const [userFeedback, setUserFeedback] = useState(true);
 	const [jiraFeedback, setJiraFeedback] = useState(true);
 	const [topicSearch, setTopicSearch] = useState(true);
 	const [ltr, setLTR] = useState(true);
@@ -193,28 +192,6 @@ export default () => {
 		}
 	};
 
-	const toggleUserFeedback = async () => {
-		const title = 'Requst User Feedback: ';
-		createAlert(title, 'info', 'Started');
-		try {
-			await gameChangerAPI.toggleUserFeedbackMode().then((res) => {
-				createAlert(
-					'Toggling user feedback value',
-					'success',
-					'updated user feedback mode'
-				);
-				getUserFeedback();
-			});
-		} catch (e) {
-			console.log(e);
-			createAlert(
-				'Toggling user feedback value',
-				'error',
-				'failed updating user feedback mode'
-			);
-		}
-	};
-
 	const toggleJiraFeedback = async () => {
 		const title = 'Request Jira Feedback: ';
 		createAlert(title, 'info', 'Started');
@@ -289,16 +266,6 @@ export default () => {
 		}
 	};
 
-	const getUserFeedback = async () => {
-		try {
-			const { data } = await gameChangerAPI.getUserFeedbackMode();
-			const value = data.value === 'true';
-			setUserFeedback(value);
-		} catch (e) {
-			console.error('Error getting user feedback mode', e);
-		}
-	};
-
 	const getJiraFeedback = async () => {
 		try {
 			const { data } = await gameChangerAPI.getJiraFeedbackMode();
@@ -341,7 +308,6 @@ export default () => {
 		getCombinedSearch();
 		getIntelligentAnswers();
 		getEntitySearch();
-		getUserFeedback();
 		getTopicSearch();
 		getJiraFeedback();
 		getLTR();
@@ -582,29 +548,6 @@ export default () => {
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>
 										Toggle Topic Search
-									</span>
-								</h2>
-							</Link>
-						</Paper>
-					</div>
-					<div style={styles.feature}>
-						<Paper
-							style={
-								userFeedback
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
-							}
-							zDepth={2}
-						>
-							<Link
-								to="#"
-								onClick={toggleUserFeedback}
-								style={{ textDecoration: 'none' }}
-							>
-								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
-								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle User Feedback
 									</span>
 								</h2>
 							</Link>
