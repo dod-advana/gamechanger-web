@@ -26,9 +26,9 @@ module.exports = (sequelize, DataTypes) => {
 			service_trans_known: {
 				type: DataTypes.TEXT
 			},
-			rev_trans_agree: {
-				type: DataTypes.TEXT
-			},
+			// rev_trans_agree: {
+			// 	type: DataTypes.TEXT
+			// },
 			service_trans_type: {
 				type: DataTypes.TEXT
 			},
@@ -151,9 +151,9 @@ module.exports = (sequelize, DataTypes) => {
 			primary_service_reviewer: {
 				type: DataTypes.TEXT
 			},
-			reviewer: {
-				type: DataTypes.TEXT
-			},
+			// reviewer: {
+			// 	type: DataTypes.TEXT
+			// },
 			service_mp_list: {
 				type: DataTypes.TEXT
 			},
