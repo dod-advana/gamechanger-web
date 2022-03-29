@@ -12,13 +12,11 @@ import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
 import UserFeedback from '../components/user/UserFeedback';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
-import GCUserInfoModal from '../components/user/GCUserInfoModal';
 import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
 import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
-// import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 const gameChangerAPI = new GameChangerAPI();
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
@@ -103,8 +101,6 @@ const GameChangerPage = (props) => {
 					{state.cloneDataSet && (
 						<SearchBar context={context} jupiter={jupiter} />
 					)}
-
-					<GCUserInfoModal context={context} />
 
 					{/* Main View */}
 					{state.historySet && <MainView context={context} />}
