@@ -12,10 +12,6 @@ import {
 	MuiPickersUtilsProvider,
 	KeyboardDateTimePicker 
 } from '@material-ui/pickers';
-import { 
-	ArrowDropDown,
-	KeyboardArrowUp
-} from '@material-ui/icons';
 import moment from 'moment';
 import DateFnsUtils from '@date-io/date-fns';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
@@ -23,6 +19,7 @@ import TabStyles from '../common/TabStyles';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCPrimaryButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
+import { encode } from '../../utils/gamechangerUtils';
 import { styles } from './util/GCAdminStyles';
 import './searchPdfStyles.css';
 
@@ -140,8 +137,6 @@ const columns = [
 ];
 
 const userAggColumns = [
-	
-	{ pivot: true },
 	{
 		Header: 'User ID',
 		accessor: 'idvisitor',
@@ -300,6 +295,7 @@ const getUserAggData = async (startDate,endDate, setUserAggData,setCardData) => 
 	}
 };
 
+
 /**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
@@ -317,7 +313,6 @@ export default () => {
 	const [endDate, setEndDate] = useState(moment());
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
-	const [expandUser, setExpandUser] = useState({});
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -379,6 +374,50 @@ export default () => {
 		}
 	};
 
+	/**
+	* This method renders the documents for react table
+	* @method subComponent
+	*/
+	const subComponent = (row) => {
+		return (
+			<div>
+				<Grid container spacing={2}>
+					<Grid item xs={1}></Grid>
+					<Grid item xs={4}>
+						<p>Opened:</p>
+						<ol>
+							{row.original.opened.map((o) => (
+								<li>
+									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(o)}`}> {o} </a> 
+								</li>
+							))}
+						</ol>
+					</Grid>
+					<Grid item xs={3}>
+						<p>Exported:</p>
+						<ol>
+							{row.original.export.map((e) => (
+								<li>
+									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(e)}`}> {e} </a> 
+								</li>
+							))}
+						</ol>
+					</Grid>
+					<Grid item xs={4}>
+						<p>Favorited:</p>
+						<ol>
+							{row.original.favorite.map((f) => (
+								<li>
+									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(f)}`}> {f} </a> 
+								</li>
+							))}
+						</ol>
+					</Grid>
+				</Grid>
+			</div>
+		);
+	  };
+	
 	/**
 	 * This method takes the a csv name + array in state
 	 * and saves it to the users downloads as a csv.
@@ -580,10 +619,8 @@ export default () => {
 							data={userAggData}
 							columns={userAggColumns}
 							defaultSorted={[{ id: 'searches_made', desc: true }]}
-							pivotBy={["idvisitor"]}
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
-							onExpandedChange={newExpanded => this.setExpandUser(newExpanded)}
-							expanded={expandUser}
+							SubComponent={subComponent}
 						/>
 					</TabPanel>
 					<TabPanel>
