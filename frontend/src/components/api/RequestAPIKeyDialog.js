@@ -46,12 +46,13 @@ const RequestAPIKeyDialog = ({
 	handleSave,
 	apiRequestLimit,
 	renderContent,
+	open
 }) => {
 	const classes = useStyles();
 
 	return (
 		<Dialog
-			open
+			open={open}
 			scroll={'paper'}
 			maxWidth="lg"
 			disableEscapeKeyDown

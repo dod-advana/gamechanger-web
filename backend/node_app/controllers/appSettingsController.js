@@ -18,7 +18,6 @@ class AppSettingsController {
 
 		// Keys to query the app_settings table
 		this.keys = {
-			userFeedback:'request_user_feedback',
 			intelligentAnswers:'intelligent_answers',
 			entitySearch:'entity_search',
 			combinedSearch:'combined_search',
@@ -40,9 +39,6 @@ class AppSettingsController {
 		this.setEntitySearchMode = this.setMode.bind(this, this.keys.entitySearch);
 
 		// Binding the key for combined search mode to get and toggle
-		this.getUserFeedbackMode = this.getMode.bind(this, this.keys.userFeedback);
-		this.toggleUserFeedbackMode = this.toggleMode.bind(this, this.keys.userFeedback);
-
 		this.getJiraFeedbackMode = this.getMode.bind(this, this.keys.jiraFeedback);
 		this.toggleJiraFeedbackMode = this.toggleMode.bind(this, this.keys.jiraFeedback);
 

@@ -4,7 +4,6 @@ import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
-import UserButton from '../../searchBar/UserButton';
 
 const jbookSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(value, cloneData, setAutocorrect, setPresearchTitle, setPresearchTopic, setPresearchOrg, setPredictions) {
@@ -16,7 +15,6 @@ const jbookSearchBarHandler = {
 	},
 	getSearchBar(props) {
 		const {
-			context,
 			state,
 			classes,
 			searchFavoritePopperAnchorEl,
@@ -63,8 +61,6 @@ const jbookSearchBarHandler = {
 				<SearchButton backgroundColor={'#9E9E9E'} id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
-
-				<UserButton context={context} backgroundColor={'#9E9E9E'} />
 
 				<Popover onClose={() => { handleFavoriteSearchClicked(null) }}
 					open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
