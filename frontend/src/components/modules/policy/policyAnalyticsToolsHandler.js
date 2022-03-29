@@ -56,11 +56,15 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'OrgFilterToggle', event.target.name, event.target.value ? 1 : 0);
 };
 
-const renderSources = (state, dispatch, classes) => {
-	const { originalOrgFilters, orgFilter } = state.analystToolsSearchSettings;
-	const betterOrgData = {};
-	for(let i=0; i<originalOrgFilters.length; i++) {
-		betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
+const renderSources = (state, dispatch, classes, results) => {
+	const { orgFilter, allOrgsSelected, specificOrgsSelected, orgCount } = state.analystToolsSearchSettings;
+	const sortedOrgs = Object.keys(orgFilter).map(org => org);
+	if(results.length){
+		sortedOrgs.sort((a, b) => {
+			if((orgCount?.[a] ?? 0) > (orgCount?.[b] ?? 0)) return -1;
+			if((orgCount?.[a] ?? 0) < (orgCount?.[b] ?? 0)) return 1;
+			return 0;
+		});
 	}
 
 
@@ -76,7 +80,7 @@ const renderSources = (state, dispatch, classes) => {
 							classes={{ root: classes.filterBox }}
 							onClick={() => handleSelectAllOrgs(state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.analystToolsSearchSettings.allOrgsSelected}
+							checked={allOrgsSelected}
 							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='All sources'
 							style={styles.filterBox}
@@ -93,7 +97,7 @@ const renderSources = (state, dispatch, classes) => {
 							classes={{ root: classes.filterBox }}
 							onClick={() => handleSelectSpecificOrgs(state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.analystToolsSearchSettings.specificOrgsSelected}
+							checked={specificOrgsSelected}
 							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='Specific source(s)'
 							style={styles.filterBox}
@@ -104,15 +108,17 @@ const renderSources = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.analystToolsSearchSettings.specificOrgsSelected && Object.keys(orgFilter).map( (org, index) => {
+					{specificOrgsSelected && sortedOrgs.map( (org, index) => {
 						if(index < 10 || state.seeMoreSources){
+							const label =  results.length ? `${org} (${orgCount?.[org] ?? 0})` : `${org}`;
 							return (
 								<FormControlLabel
+									disabled={results.length ? !orgCount?.[org] : false}
 									key={`${org}`}
-									value={`${originalOrgFilters[org]}`}
+									value={`${orgFilter[org]}`}
 									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
 									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${org}`} checked={state.analystToolsSearchSettings.orgFilter[org]} onClick={(event) => handleOrganizationFilterChange(event, state, dispatch)} />}
-									label={`${org}`}
+									label={label}
 									labelPlacement="end"
 								/>
 							);
@@ -121,7 +127,7 @@ const renderSources = (state, dispatch, classes) => {
 						}
 					})}
 				</FormGroup>
-				{state.analystToolsSearchSettings.specificOrgsSelected &&
+				{specificOrgsSelected &&
 						// eslint-disable-next-line
 						<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreSources: !state.seeMoreSources})}}>See {state.seeMoreSources ? 'Less' : 'More'}</a> // jsx-a11y/anchor-is-valid
 				}
@@ -175,11 +181,15 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 };
 
 
-const renderTypes = (state, dispatch, classes) => {
-	const { originalTypeFilters, typeFilter } = state.analystToolsSearchSettings;
-	const betterTypeData = {};
-	for(let i=0; i<originalTypeFilters.length; i++) {
-		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
+const renderTypes = (state, dispatch, classes, results) => {
+	const { typeFilter, allTypesSelected, specificTypesSelected, typeCount } = state.analystToolsSearchSettings;
+	const sortedTypes = Object.keys(typeFilter).map(type => type);
+	if(results.length){
+		sortedTypes.sort((a, b) => {
+			if((typeCount?.[a] ?? 0) > (typeCount?.[b] ?? 0)) return -1;
+			if((typeCount?.[a] ?? 0) < (typeCount?.[b] ?? 0)) return 1;
+			return 0;
+		});
 	}
 
 	return (
@@ -194,7 +204,7 @@ const renderTypes = (state, dispatch, classes) => {
 							classes={{ root: classes.filterBox }}
 							onClick={() => handleSelectAllTypes(state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.analystToolsSearchSettings.allTypesSelected}
+							checked={allTypesSelected}
 							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='All types'
 							style={styles.filterBox}
@@ -211,7 +221,7 @@ const renderTypes = (state, dispatch, classes) => {
 							classes={{ root: classes.filterBox }}
 							onClick={() => handleSelectSpecificTypes(state, dispatch)}
 							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={state.analystToolsSearchSettings.specificTypesSelected}
+							checked={specificTypesSelected}
 							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 							name='Specific type(s)'
 							style={styles.filterBox}
@@ -222,15 +232,17 @@ const renderTypes = (state, dispatch, classes) => {
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-					{state.analystToolsSearchSettings.specificTypesSelected && Object.keys(typeFilter).map((type, index) => {
+					{specificTypesSelected && sortedTypes.map((type, index) => {
 						if(index < 10 || state.seeMoreTypes){
+							const label =  results.length ? `${type} (${typeCount?.[type] ?? 0})` : `${type}`;
 							return (
 								<FormControlLabel
+									disabled={results.length ? !typeCount?.[type] : false}
 									key={`${type}`}
 									value={`${type}`}
 									classes={{ root: classes.rootLabel, label: classes.checkboxPill }}
-									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={state.analystToolsSearchSettings.typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
-									label={`${type}`}
+									control={<Checkbox classes={{ root: classes.rootButton, checked: classes.checkedButton }} name={`${type}`} checked={typeFilter[type]} onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch, true)} />}
+									label={label}
 									labelPlacement="end"
 								/>
 							);
@@ -239,7 +251,7 @@ const renderTypes = (state, dispatch, classes) => {
 						}
 					})}
 				</FormGroup>
-				{state.analystToolsSearchSettings.specificTypesSelected &&
+				{specificTypesSelected &&
 				// eslint-disable-next-line
 				<a style={{cursor: 'pointer', fontSize: '16px'}} onClick={() => {setState(dispatch, {seeMoreTypes: !state.seeMoreTypes})}}>See {state.seeMoreTypes ? 'Less' : 'More'}</a> 
 				}
@@ -464,6 +476,7 @@ const PolicyAnalyticsToolsHandler = {
 			state,
 			dispatch,
 			classes,
+			results
 		} = props;
 
 		const { analystToolsSearchSettings } = state;
@@ -484,13 +497,13 @@ const PolicyAnalyticsToolsHandler = {
 					
 					<div style={{width: '100%', marginBottom: 10}}>
 						<GCAccordion expanded={analystToolsSearchSettings.specificOrgsSelected} header={<>SOURCE  <span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-							{ renderSources(state, dispatch, classes) }
+							{ renderSources(state, dispatch, classes, results) }
 						</GCAccordion>
 					</div>
 					
 					<div style={{width: '100%', marginBottom: 10}}>
 						<GCAccordion expanded={analystToolsSearchSettings.specificTypesSelected} header={<>TYPE  <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span></>} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'normal'}>
-							{ renderTypes(state, dispatch, classes) }
+							{ renderTypes(state, dispatch, classes, results) }
 						</GCAccordion>
 					</div>
 					

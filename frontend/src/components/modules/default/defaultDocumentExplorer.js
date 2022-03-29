@@ -474,7 +474,7 @@ export default function DocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position:'relative' }}
 			>
 				<div
 					style={{
@@ -616,7 +616,7 @@ export default function DocumentExplorer({
 					disableWrap={true}
 					title={'Metadata'}
 				/>
-				<div style={{ marginTop: -18 }}>
+				<div>
 					{' '}
 					<SimpleTable
 						tableClass={'magellan-table'}
