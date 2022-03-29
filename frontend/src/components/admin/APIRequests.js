@@ -38,7 +38,7 @@ export default () => {
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-	const [keyDescriptions, setKeyDescriptions] = useState(null);
+	const [keyDescriptions, setKeyDescriptions] = useState(undefined);
 	// Comonent Methods
 	/**
      * Grabs all the data from the backend to populate the table
@@ -47,12 +47,10 @@ export default () => {
 
 
 	useEffect(()=>{
-		if(keyDescriptions === null){
-			const descriptions = {};
-			gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
-			setKeyDescriptions(descriptions);
-		}
-	}, [gcAPIRequestData, keyDescriptions]);
+		const descriptions = {};
+		gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
+		setKeyDescriptions(descriptions);
+	}, [gcAPIRequestData]);
 	/**
      * Attemps to revoke a key based on the id
      * @method revokeAPIKeyRequestData
@@ -121,7 +119,7 @@ export default () => {
 			width: 200,
 			Cell: row => (
 				<TableRow>
-					{Object.keys(keyDescriptions).length && 
+					{keyDescriptions &&
                     <input style={{width: '100%'}} value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
 				</TableRow>
 			)

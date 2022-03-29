@@ -9,7 +9,6 @@ import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
 import {makeStyles} from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import GCButton from '../common/GCButton';
-import {Route, Switch} from 'react-router-dom';
 import RequestAPIKeyDialog from '../api/RequestAPIKeyDialog';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -99,6 +98,7 @@ const GCFooter = (props) => {
 	const { setUserMatomo } = props;
 
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+	const [apiRequestModalOpen, setApiRequestModalOpen] = useState(false);
 	const [useMatomo, setUseMatomo] = useState(false);
 	const [requestAPIKeyData, setRequestAPIKeyData] = useState({ name: '', email: '', reason: '', clones: [] });
 	const [apiRequestLimit, setAPIRequestLimit] = useState(0);
@@ -164,7 +164,7 @@ const GCFooter = (props) => {
 
 	const handleClose = () => {
 		setRequestAPIKeyData({ name: '', email: '', reason: '', clones: [] });
-		window.location = '#/gamechanger';
+		setApiRequestModalOpen(false);
 	};
 
 	const handleCloneChange = (cloneId) => {
@@ -278,6 +278,7 @@ const GCFooter = (props) => {
 					.updateUserAPIRequestLimit()
 					.then(() => setAPIRequestLimit(apiRequestLimit - 1));
 				setApiRequestError('');
+				setApiRequestModalOpen(false);
 				handleClose();
 			}).catch(e => {
 				console.log(e);
@@ -302,7 +303,7 @@ const GCFooter = (props) => {
 					</LinkButton>),
 					(<LinkButton
 						key="apiKeyRequest"
-						onClick={() => (window.location = '#/gamechanger/APIKey')}
+						onClick={() => setApiRequestModalOpen(true)}
 					>
 						Request API Key
 					</LinkButton>)
@@ -376,19 +377,13 @@ const GCFooter = (props) => {
 				</div>
 			</Modal>
 
-			<Switch>
-				<Route
-					path="/gamechanger/APIKey"
-					children={
-						<RequestAPIKeyDialog
-							handleClose={handleClose}
-							handleSave={sendAPIKeyRequest}
-							apiRequestLimit={apiRequestLimit}
-							renderContent={renderAPIKeyRequestForm}
-						/>
-					}
-				/>
-			</Switch>
+			<RequestAPIKeyDialog
+				handleClose={handleClose}
+				handleSave={sendAPIKeyRequest}
+				apiRequestLimit={apiRequestLimit}
+				renderContent={renderAPIKeyRequestForm}
+				open={apiRequestModalOpen}
+			/>
 		</>
 	);
 };
