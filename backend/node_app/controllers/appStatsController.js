@@ -272,10 +272,9 @@ class AppStatsController {
 			[userId],
 			(error, results, fields) => {
 				if (error) {
-					this.logger.error(error, 'B07IQHT');
-					throw error;
+					this.logger.error('No userids found', 'B07IQHT');
 				}
-				resolve(self.cleanFilePath(results));
+				resolve([]);
 			});
 		});
 	}
