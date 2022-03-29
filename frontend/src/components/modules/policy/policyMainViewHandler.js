@@ -908,64 +908,27 @@ const PolicyMainViewHandler = {
 											{!loading &&
 												(activeCategoryTab === 'Documents' ||
 													activeCategoryTab === 'all') &&
-												selectedCategories['Documents'] &&
-												(
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
-													>
-														{!searchSettings.isFilterUpdate ? (
-															<SearchSection
-																section={'Documents'}
-																color={'#131E43'}
-																icon={DocumentIcon}
-															>
-																{activeCategoryTab === 'all' ? (
-																	<>
-																		{!docsLoading && !docsPagination ? (
-																			getSearchResults(
-																				docSearchResults,
-																				state,
-																				dispatch
-																			)
-																		) : (
-																			<div className="col-xs-12">
-																				<LoadingIndicator
-																					customColor={gcOrange}
-																				/>
-																			</div>
-																		)}
-																		<div className="gcPagination col-xs-12 text-center">
-																			<Pagination
-																				activePage={resultsPage}
-																				itemsCountPerPage={RESULTS_PER_PAGE}
-																				totalItemsCount={count}
-																				pageRangeDisplayed={8}
-																				onChange={async (page) => {
-																					trackEvent(
-																						getTrackingNameForFactory(
-																							cloneData.clone_name
-																						),
-																						'PaginationChanged',
-																						'page',
-																						page
-																					);
-																					setState(dispatch, {
-																						docsLoading: true,
-																						resultsPage: page,
-																						docsPagination: true,
-																					});
-																				}}
-																			/>
-																		</div>
-																	</>
-																) : (
-																	<>
-																		{getSearchResults(
+												selectedCategories['Documents'] && (
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
+													}}
+												>
+													{!searchSettings.isFilterUpdate ? (
+														<SearchSection
+															section={'Documents'}
+															color={'#131E43'}
+															icon={DocumentIcon}
+														>
+															{activeCategoryTab === 'all' ? (
+																<>
+																	{!docsLoading && !docsPagination ? (
+																		getSearchResults(
 																			docSearchResults,
 																			state,
 																			dispatch
@@ -995,15 +958,21 @@ const PolicyMainViewHandler = {
 												entitySearchResults.length > 0 &&
 												(activeCategoryTab === 'Organizations' ||
 													activeCategoryTab === 'all') &&
-												selectedCategories['Organizations'] &&
-												(
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
+												selectedCategories['Organizations'] && (
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
+													}}
+												>
+													<SearchSection
+														section={'Organizations'}
+														color={'#376f94'}
+														icon={OrganizationIcon}
 													>
 														<SearchSection
 															section={'Organizations'}
@@ -1046,15 +1015,21 @@ const PolicyMainViewHandler = {
 												topicSearchResults.length > 0 &&
 												(activeCategoryTab === 'Topics' ||
 													activeCategoryTab === 'all') &&
-												selectedCategories['Topics'] &&
-												(
-													<div
-														className={'col-xs-12'}
-														style={{
-															marginTop: 10,
-															marginLeft: 0,
-															marginRight: 0,
-														}}
+												selectedCategories['Topics'] && (
+												<div
+													className={'col-xs-12'}
+													style={{
+														marginTop: 10,
+														marginLeft: 0,
+														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
+													}}
+												>
+													<SearchSection
+														section={'Topics'}
+														color={'#4da593'}
+														icon={ApplicationsIcon}
 													>
 														<SearchSection
 															section={'Topics'}

@@ -36,7 +36,7 @@ const CloseButton = styled.div`
 
 const styles = {
 	intelligentContainer: {
-		margin: '10px',
+		margin: '10px 0',
 		padding: '20px',
 		backgroundColor: 'rgb(241, 245, 249)',
 		fontSize: '1.2em',
