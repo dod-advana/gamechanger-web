@@ -46,7 +46,7 @@
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
     "lunr": "2.3.9",
-    "moment": "2.27.0",
+    "moment": "2.20.1",
     "mysql": "2.18.1",
     "neo4j-driver": "4.3.1",
     "node-cron": "2.0.3",
