@@ -87,10 +87,13 @@ function setupDimensions(customDimensions, useMatomo) {
  */
 export function trackPageView(documentTitle, customDimensions) {
 	try {
+
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
 
 		// Set User
 		const userId = Auth.getUserId() || ' ';
@@ -136,8 +139,9 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
-
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
 		// Set User
 		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;
@@ -146,7 +150,6 @@ export function trackEvent(category, action, name, value, customDimensions) {
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
@@ -164,7 +167,9 @@ export function trackError(e, eventName) {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
 		// Set User
 		const userId = Auth.getUserId() || ' ';
 		const regex = /\d{10}/g;

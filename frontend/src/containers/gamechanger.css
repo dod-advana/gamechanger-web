@@ -6,6 +6,10 @@
     padding: 11px 19px;
 }
 
+.gcPagination > .pagination {
+    margin-top: 15px;
+}
+
 .gcPagination > .pagination > li > a {
     color: black !important;
     padding: 11px 19px;
