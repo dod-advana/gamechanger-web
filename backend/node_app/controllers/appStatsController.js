@@ -3,7 +3,7 @@ const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
-const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const sparkMD5Lib = require('spark-md5');
 
 /**
@@ -588,38 +588,38 @@ class AppStatsController {
 		});
 	}
 
-		/**
+	/**
 	 * This method takes in options from the endpoint and queries matomo with those parameters.
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-		 async getSearchesAndPdfs(startDate, connection){
-			return new Promise((resolve, reject) => {
-				connection.query(`
-				select 
-					b.name as search_doc,
-					a.idvisit, 
-					a.server_time
-				from 
-					matomo_log_link_visit_action a,
-					matomo_log_action b
-				where 
-					( b.name LIKE 'PDFViewer%gamechanger'
-					OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
-					AND b.idaction = a.idaction_name
-					AND server_time > ?
-				order by 
-					server_time asc;`,
-				[`${startDate}`],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(results);
-				});
+	async getSearchesAndPdfs(startDate, connection){
+		return new Promise((resolve, reject) => {
+			connection.query(`
+			select 
+				b.name as search_doc,
+				a.idvisit, 
+				a.server_time
+			from 
+				matomo_log_link_visit_action a,
+				matomo_log_action b
+			where 
+				( b.name LIKE 'PDFViewer%gamechanger'
+				OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
+				AND b.idaction = a.idaction_name
+				AND server_time > ?
+			order by 
+				server_time asc;`,
+			[`${startDate}`],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
+				}
+				resolve(results);
 			});
-		}
+		});
+	}
 
 	/**
 	 * This method is called by an endpoint to query matomo to list documents, visit count, and list of users that visited. 
@@ -885,7 +885,6 @@ class AppStatsController {
 		 * @param {*} userdID
 		 */
 		async getUserLastOpened(userdID) {
-			const documentMap = {};
 			let connection;
 			try {
 				connection = this.mysql.createConnection({
