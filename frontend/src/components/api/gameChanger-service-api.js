@@ -115,7 +115,6 @@ const endpoints = {
 	combinedSearchMode: '/api/gamechanger/appSettings/combinedSearch',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
-	userFeedback: '/api/gamechanger/appSettings/userFeedback',
 	jiraFeedback: '/api/gamechanger/appSettings/jiraFeedback',
 	ltr: '/api/gamechanger/appSettings/ltr',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
@@ -921,16 +920,6 @@ export default class GameChangerAPI {
 		const url = endpoints.entitySearch;
 		const bodyValue = value ? 'true' : 'false';
 		return axiosPOST(this.axios, url, { value: bodyValue });
-	};
-
-	getUserFeedbackMode = async () => {
-		const url = endpoints.userFeedback;
-		return axiosGET(this.axios, url);
-	};
-
-	toggleUserFeedbackMode = async () => {
-		const url = endpoints.userFeedback;
-		return axiosPOST(this.axios, url, {});
 	};
 
 	getJiraFeedbackMode = async () => {
