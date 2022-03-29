@@ -25,6 +25,24 @@ const getApiKeyRequestData = async (setGCAPIRequestData) => {
 	setGCAPIRequestData(data || {approved: [], pending: []});
 };
 
+const EditableCell = props => {
+	const [value, setValue] = useState(props.value);
+	const onChange = e => {
+		setValue(e.target.value);
+	};
+	const onBlur = () => {
+		props.handleChange(props.key, value);
+	};
+	
+	return (
+		<input
+			onChange={onChange}
+			onBlur={onBlur}
+			value={value}
+		/>
+	);
+};
+
 /**
  * A table to view api keys and requests
  * @class APIRequests
@@ -82,9 +100,9 @@ export default () => {
 		getApiKeyRequestData(setGCAPIRequestData);
 	},[]);
 
-	const handleChange = (key, event) => {
+	const handleChange = (id, value) => {
 		const newDescriptions = {...keyDescriptions};
-		newDescriptions[key] = event.target.value;
+		newDescriptions[id] = value;
 		setKeyDescriptions(newDescriptions);
 	};
 	// Columns 
@@ -119,8 +137,7 @@ export default () => {
 			width: 200,
 			Cell: row => (
 				<TableRow>
-					{keyDescriptions &&
-                    <input style={{width: '100%'}} value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
+					{EditableCell({...row, handleChange, value: keyDescriptions ? keyDescriptions[row.value] : '', key: row.value})}
 				</TableRow>
 			)
 		},
@@ -315,6 +332,8 @@ export default () => {
 				<GCAccordion expanded={false} header={'APPROVED API KEYS'}>
 					<div style={{display:'flex', flexDirection: 'column', width: '100%'}}>
 						<ReactTable
+							sortable={false}
+							filterable={false}
 							data={gcAPIRequestData.approved}
 							columns={approvedColumns}
 							pageSize={10}
