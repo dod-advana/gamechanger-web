@@ -132,11 +132,12 @@ export function trackPageView(documentTitle, customDimensions) {
  * @param customDimensions: false or an array of customDimensions.
  */
 export function trackEvent(category, action, name, value, customDimensions) {
+	console.log(localStorage.getItem('userMatomo'));
 	try {
-		const useMatomo =
-			JSON.parse(localStorage.getItem('userMatomo')) &&
-			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		// const useMatomo =
+		// 	JSON.parse(localStorage.getItem('userMatomo')) &&
+		// 	JSON.parse(localStorage.getItem('appMatomo'));
+		// if (!useMatomo) return;
 
 		// Set User
 		const userId = Auth.getUserId() || ' ';
@@ -145,8 +146,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		// Set custom dimensions
-		setupDimensions(customDimensions, useMatomo);
-
+		setupDimensions(customDimensions, true);
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {

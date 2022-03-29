@@ -340,10 +340,10 @@ const PolicyMainViewHandler = {
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
 		const user = await gcUserManagementAPI.getUserData();
-		const { favorite_documents = [], export_history = []} = user.data;
-
+		const { favorite_documents = [], export_history = [], pdf_opened = []} = user.data;
+		console.log(pdf_opened);
 		try {
-			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history});
+			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history, pdf_opened});
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);

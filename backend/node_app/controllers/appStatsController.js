@@ -886,7 +886,7 @@ class AppStatsController {
 		 * 
 		 * @param {*} userdID
 		 */
-		async getUserLastOpened(userdID) {
+		async getUserLastOpened(userID) {
 			const documentMap = {};
 
 			let connection;
@@ -898,11 +898,11 @@ class AppStatsController {
 					database: this.constants.MATOMO_DB_CONFIG.database
 				});
 				connection.connect();
-				const visitorID = await this.getUserVisitorID(userdID,connection);
+				const visitorID = await this.getUserVisitorID(userID,connection);
 				const opened = await this.queryPDFOpenedByUserId(visitorID[0].idvisitor, connection);
 				return opened;
 			}catch (err) {
-				this.logger.error(err, '1CZPASK', userId);
+				this.logger.error(err, '1CZPASK', userID);
 				return [];
 			} finally {
 				connection.end();

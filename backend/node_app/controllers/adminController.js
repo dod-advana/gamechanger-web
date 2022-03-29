@@ -99,9 +99,11 @@ class AdminController {
 		const {
 			favorite_documents =[],
 			export_history=[],
+			pdf_opened=[],
 		} = req.body;
 		let favDocList = [];
 		let exportDocList = [];
+		let last_opened = [];
 		// remove pdf, and get favorited docs
 		for (let doc of favorite_documents){
 			favDocList.push(doc.filename.split('.pdf')[0]);
@@ -113,9 +115,14 @@ class AdminController {
 				exportDocList.push(doc.split(".pdf")[0]);
 			}
 		}
+		for (let obj of pdf_opened){
+			const doc = obj.document;
+			last_opened.push(doc.split(".pdf")[0]);
+		}
+
 		// combine list
-		let combinedDocList = favDocList.concat(exportDocList);
-		
+		let combinedDocList = favDocList.concat(exportDocList).concat(last_opened);
+
 		let docs = {};
 		let recDocs = {};
 		docs.key = "popular_docs";
