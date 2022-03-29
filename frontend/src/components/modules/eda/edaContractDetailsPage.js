@@ -4,7 +4,7 @@ import {Paper} from '@material-ui/core';
 import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import { EDA_FIELD_JSON_MAP, EDA_FIELDS } from './edaCardHandler';
+import { EDA_FIELD_JSON_MAP, EDA_FIELDS, EDA_FPDS_MAP } from './edaCardHandler';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../../common/gc-colors';
 import { Card } from '../../cards/GCCard';
@@ -342,7 +342,8 @@ const EDAContractDetailsPage = (props) => {
 									rows={getEDAMetadataForPropertyTable(
 										EDA_FIELD_JSON_MAP,
 										EDA_FIELDS,
-										contractAwardData
+										contractAwardData,
+										EDA_FPDS_MAP
 									)}
 									height={'auto'}
 									dontScroll={true}

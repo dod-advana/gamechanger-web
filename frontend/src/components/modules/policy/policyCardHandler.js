@@ -828,8 +828,9 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				<GCTooltip title={displayTitle} placement="top" arrow>
 					<div
 						className={'title-text'}
+						style={item.notInCorpus ? {cursor: 'initial'} : {}}
 						onClick={
-							docListView
+							docListView && !item.notInCorpus
 								? () =>
 									clickFn(
 										item.filename,
@@ -851,7 +852,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						)}
 					</div>
 				</GCTooltip>
-				<div style={{ display: 'flex' }}>
+				{!item.notInCorpus && <div style={{ display: 'flex' }}>
 					{docListView && (
 						<StyledFrontCardSubHeader
 							typeTextColor={typeTextColor}
@@ -876,14 +877,33 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 							{favoriteComponent()}
 						</div>
 					</div>
-				</div>
+				</div>}
 			</div>
-			{docListView && (
+			{docListView && !item.notInCorpus && (
 				<div className={'list-view-sub-header'}>
 					<p style={{ fontWeight: 400 }}>{`Published on: ${
 						publicationDate ?? 'Unknown'
 					}`}</p>
 				</div>
+			)}
+			{docListView && item.notInCorpus && (
+				<GCTooltip
+					title={
+						'Click to request that this document be made part of the GAMCHANGER corpus'
+					}
+					placement="top"
+					arrow
+				>
+					<div
+						style={{position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1}}
+					>
+						<GCButton 
+							onClick={()=> gameChangerAPI.requestDocIngest({docId: item.display_title_s})}
+						>
+							Report Issue
+						</GCButton>
+					</div>
+				</GCTooltip>
 			)}
 		</StyledFrontCardHeader>
 	);
@@ -1179,16 +1199,20 @@ const PolicyCardHandler = {
 								</div>
 							</GCAccordion>
 						}
-						<GCAccordion
-							header={'DOCUMENT METADATA'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
-							</div>
-						</GCAccordion>
+						{!item.notInCorpus ?
+							<GCAccordion
+								header={'DOCUMENT METADATA'}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<div className={'metadata'}>
+									<div className={'inner-scroll-container'}>{backBody}</div>
+								</div>
+							</GCAccordion>
+							:
+							<>Data does not yet exist for this document within the GAMECHANGER corpus</>
+						}
 					</StyledListViewFrontCardContent>
 				);
 			} else if (state.listView && intelligentSearch) {
@@ -1418,6 +1442,7 @@ const PolicyCardHandler = {
 		},
 		
 		getCardBack: ({item, state, dispatch}) => {
+			if(item.notInCorpus) return <></> ;
 			const data = getMetadataForPropertyTable(item);
 			const { ref_list = [] } = item;
 			const previewDataReflist =
@@ -1544,7 +1569,7 @@ const PolicyCardHandler = {
 						title={'Metadata'}
 						hideHeader={!!state.listView}
 					/>
-					<div style={{ marginTop: -18 }}>
+					<div>
 						<SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}

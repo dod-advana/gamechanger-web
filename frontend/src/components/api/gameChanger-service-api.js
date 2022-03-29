@@ -119,6 +119,7 @@ const endpoints = {
 	jiraFeedback: '/api/gamechanger/appSettings/jiraFeedback',
 	ltr: '/api/gamechanger/appSettings/ltr',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
+	requestDocIngest: '/api/gamechanger/sendFeedback/requestDoc',
 	getThumbnail: '/api/gameChanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
@@ -944,6 +945,11 @@ export default class GameChangerAPI {
 
 	sendJiraFeedback = async (body) => {
 		const url = endpoints.sendJiraFeedback;
+		return axiosPOST(this.axios, url, body);
+	}
+
+	requestDocIngest = async (body) => {
+		const url = endpoints.requestDocIngest;
 		return axiosPOST(this.axios, url, body);
 	}
 

@@ -110,7 +110,7 @@ const DocumentInputContainer = styled.div`
 	
 	.input-box {
 		font-size: 14px;
-		overflow: scroll;
+		overflow: auto;
 		font-family: Noto Sans;
 	}
 
@@ -220,6 +220,37 @@ const GCDocumentsComparisonTool = (props) => {
 	const [sortType, setSortType] = useState('Similarity Score');
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
+	const [updateFilters, setUpdateFilters] = useState(false);
+
+	useEffect(() => {
+		if(updateFilters){
+			setUpdateFilters(false);
+			const newSearchSettings = {...state.analystToolsSearchSettings};
+			const sourceCount = {};
+			const typeCount = {};
+
+			returnedDocs.forEach(doc => {
+				if(typeCount[doc.display_doc_type_s + 's']){
+					typeCount[doc.display_doc_type_s + 's'] ++;
+				}else{
+					typeCount[doc.display_doc_type_s + 's'] = 1;
+				}
+				if(sourceCount[doc.display_org_s]){
+					sourceCount[doc.display_org_s] ++;
+				}else{
+					sourceCount[doc.display_org_s] = 1;
+				}
+			});
+			newSearchSettings.orgCount = sourceCount;
+			newSearchSettings.typeCount = typeCount;
+
+			setState(dispatch, {analystToolsSearchSettings: newSearchSettings});
+		}
+	}, [dispatch, returnedDocs, state.analystToolsSearchSettings, updateFilters]);
+
+	useEffect(() => {
+		setUpdateFilters(true);
+	},[returnedDocs]);
 
 	const handleSetParagraphs = useCallback(() => {
 		const paragraphs = paragraphText.split('\n').map((paragraph, idx) => {
@@ -413,6 +444,13 @@ const GCDocumentsComparisonTool = (props) => {
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
+		const newReturnedDocs = returnedDocs.filter(doc => {
+			const newParagraphs = doc.paragraphs.filter(par => {
+				return par.paragraphIdBeingMatched !== id;
+			});
+			return newParagraphs.length;
+		});
+		setReturnedDocs(newReturnedDocs);
 	};
 
 	const handleCombine = () => {
@@ -438,6 +476,7 @@ const GCDocumentsComparisonTool = (props) => {
 	};
 
 	const handleCompare = () => {
+		if(!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
 		setSelectedInput(paragraphs?.[0].id);
@@ -553,7 +592,7 @@ const GCDocumentsComparisonTool = (props) => {
 											setNeedsSort(true);
 										}}
 										classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-										autoWidthd
+										autoWidth
 									>
 										<MenuItem key={`Similarity Score`} value={'Similarity Score'}>Similarity Score</MenuItem>
 										<MenuItem key={`Alphabetically`} value={'Alphabetically'}>Alphabetically</MenuItem>
@@ -575,31 +614,32 @@ const GCDocumentsComparisonTool = (props) => {
 									></i>
 								</div>
 								<GCTooltip title="Export all results" placement="bottom" arrow>
-									<GCButton
-										onClick={exportAll}
-										style={{
-											minWidth: 50,
-											padding: '0px 7px',
-											height: 50,
-											marginTop: 6
-										}}
-									>
-										<img
-											src={ExportIcon}
+									<div style={{marginTop: 6}}>
+										<GCButton
+											onClick={exportAll}
 											style={{
-												margin: '0 0 3px 3px',
-												width: 15,
+												minWidth: 50,
+												padding: '0px 7px',
+												height: 50,
 											}}
-											alt="export"
-										/>
-									</GCButton>
+										>
+											<img
+												src={ExportIcon}
+												style={{
+													margin: '0 0 3px 3px',
+													width: 15,
+												}}
+												alt="export"
+											/>
+										</GCButton>
+									</div>
 								</GCTooltip>
 							</div>
 						}
 					</div>
 				</Grid>
 				<Grid item xs={2} style={{marginTop: 20}}>
-					<GCAnalystToolsSideBar context={context} />
+					<GCAnalystToolsSideBar context={context} results={returnedDocs}/>
 					<GCButton 
 						isSecondaryBtn 
 						onClick={() => resetAdvancedSettings(dispatch)}
@@ -679,13 +719,14 @@ const GCDocumentsComparisonTool = (props) => {
 								title={'Compare Documents'} 
 								placement="top" arrow
 							>
-								<GCButton
-									style={{ marginTop: 20 }}
-									disabled={inputError}
-									onClick={handleCompare}
-								>
+								<div style={{ marginTop: 20 }}>
+									<GCButton
+										disabled={inputError}
+										onClick={handleCompare}
+									>
 									Submit
-								</GCButton>
+									</GCButton>
+								</div>
 							</GCTooltip>
 						</Grid>
 					</DocumentInputContainer>
@@ -727,7 +768,7 @@ const GCDocumentsComparisonTool = (props) => {
 							/>
 						</div>
 					</Grid>
-					<Grid item xs={4} style={{marginTop: 20, height: '800px', overflowY: 'scroll', maxWidth: 'calc(33.333333% + 20px)', flexBasis: 'calc((33.333333% + 20px)', paddingLeft: '20px', marginLeft: '-20px'}}>
+					<Grid item xs={4} style={{marginTop: 20, height: '800px', overflowY: 'auto', maxWidth: 'calc(33.333333% + 20px)', flexBasis: 'calc((33.333333% + 20px)', paddingLeft: '20px', marginLeft: '-20px'}}>
 						<div 
 							style={{
 								padding: 20,
@@ -907,20 +948,24 @@ const GCDocumentsComparisonTool = (props) => {
 															</span>
 															<div style={{display: 'flex', justifyContent:'right', marginTop:'10px'}}>
 																<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
-																	<GCButton
-																		onClick={() => exportSingleDoc(doc)}
-																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																	>
-																		Export
-																	</GCButton>
+																	<div>
+																		<GCButton
+																			onClick={() => exportSingleDoc(doc)}
+																			style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																		>
+																			Export
+																		</GCButton>
+																	</div>
 																</GCTooltip>
 																<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
-																	<GCButton 
-																		onClick={() => saveDocToFavorites(doc.filename, paragraph)}
-																		style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
-																	>
-																		Save to Favorites
-																	</GCButton>
+																	<div>
+																		<GCButton 
+																			onClick={() => saveDocToFavorites(doc.filename, paragraph)}
+																			style={{marginLeft: 10, height: 36, padding: '0px, 10px', minWidth: 0, fontSize: '14px', lineHeight: '15px'}}
+																		>
+																			Save to Favorites
+																		</GCButton>
+																	</div>
 																</GCTooltip>
 																<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
 																	<i
