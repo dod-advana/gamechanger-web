@@ -657,11 +657,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value
 		},
-		reviewer: {
-			newName: 'reviewer',
-			defaultValue: '',
-			processValue: (value) => value
-		},
+		// reviewer: {
+		// 	newName: 'reviewer',
+		// 	defaultValue: '',
+		// 	processValue: (value) => value
+		// },
 		primary_class_label: {
 			newName: 'primaryClassLabel', //'coreAILabel'
 			defaultValue: '',
