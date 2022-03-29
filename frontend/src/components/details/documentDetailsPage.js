@@ -321,7 +321,7 @@ const DocumentDetailsPage = (props) => {
 								: ''}
 					</div>
 					<div
-						style={{ marginTop: '-14px', display: 'flex' }}
+						style={{ display: 'flex' }}
 						className={'gcPagination'}
 					>
 						{!runningQuery && documentObj.docCount > 0 && (
@@ -554,7 +554,7 @@ const styles = {
 		fontSize: 22,
 		fontWeight: 'bold',
 		color: '#131E43',
-		paddingTop: '10px',
+		paddingTop: '15px',
 	},
 	noResults: {
 		fontSize: 22,
