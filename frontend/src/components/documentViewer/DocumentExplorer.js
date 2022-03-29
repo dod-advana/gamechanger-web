@@ -598,7 +598,7 @@ const DocumentExplorer = ({
 						title={'Metadata'}
 						hideHeader={isEDA}
 					/>
-					<div style={{ marginTop: -18 }}>
+					<div>
 						{' '}
 						<SimpleTable
 							tableClass={'magellan-table'}
