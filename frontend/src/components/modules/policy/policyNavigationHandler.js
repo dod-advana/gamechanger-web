@@ -209,7 +209,7 @@ const PolicyNavigationHandler = {
 						href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
 						target="_blank"
 						rel="noopener noreferrer"
-						style={{ color: 'white', textDecoration: 'none', width: '100%' }}
+						style={{ color: 'white', textDecoration: 'none', width: '40px' }}
 					>
 						<HoverNavItem
 							centered
