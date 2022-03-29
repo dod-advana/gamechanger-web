@@ -616,7 +616,7 @@ export default function DocumentExplorer({
 					disableWrap={true}
 					title={'Metadata'}
 				/>
-				<div style={{ marginTop: -18 }}>
+				<div>
 					{' '}
 					<SimpleTable
 						tableClass={'magellan-table'}

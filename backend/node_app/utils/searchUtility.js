@@ -431,8 +431,7 @@ class SearchUtility {
 			const default_field = (this.isVerbatim(searchText) ? 'paragraphs.par_raw_text_t' :  'paragraphs.par_raw_text_t.gc_english');
 			const analyzer = (this.isVerbatim(searchText)  ? 'standard' :  'gc_english');
 			const plainQuery = (this.isVerbatim(searchText)  ? parsedQuery.replace(/["']/g, "") : parsedQuery);
-			let mainKeywords = plainQuery.replace(/ OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
-
+			let mainKeywords = plainQuery.replace(/"|'| OR | AND /gi, ' ').split(' ').slice(0,mainMaxkeywords).join("* OR *");
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
@@ -1647,23 +1646,35 @@ class SearchUtility {
 							query: `*${similarWordsQuery}*`,
 							fuzziness: 5
 						}
-					}
-				};
-		
-			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
-			let aggs = results.body.aggregations.related.buckets;
-			let maxCount = 0;
-			if (aggs.length > 0) {
-				aggs.forEach(term => {
-					let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
-					if (word !== searchText && term.user.buckets.length > 1) {
-						word = word.replace(/\s{2,}/g, ' ');
-						if (!relatedSearches.includes(word) && maxCount < maxSearches) {
-							relatedSearches.push(word);
-							maxCount += 1;
+					},
+					aggs: {
+						related: {
+							terms: {
+								field: 'search_query',
+								min_doc_count: 5
+							},
+							aggs: {
+								user: { terms: {field: 'user_id', size: 2}}
+							}
 						}
 					}
-				});
+				};
+			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+			if (results.body.aggregations){
+				let aggs = results.body.aggregations.related.buckets;
+				let maxCount = 0;
+				if (aggs.length > 0) {
+					aggs.forEach(term => {
+						let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+						if (word !== searchText && term.user.buckets.length > 1) {
+							word = word.replace(/\s{2,}/g, ' ');
+							if (!relatedSearches.includes(word) && maxCount < maxSearches) {
+								relatedSearches.push(word);
+								maxCount += 1;
+							}
+						}
+					});
+				}
 			}
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
@@ -2028,7 +2039,7 @@ class SearchUtility {
 		let filename;
 		let result;
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.60) {
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.70){
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.documentSearchOneID(req, { ...req.body, id: filename }, clientObj, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
