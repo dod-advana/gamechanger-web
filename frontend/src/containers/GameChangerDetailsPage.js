@@ -176,6 +176,7 @@ const GameChangerDetailsPage = (props) => {
 	const [sealURLOverride, setSealURLOverride] = useState(null);
 
 	const graphRef = useRef();
+	const graphContainerRef = useRef();
 
 	function useQuery(location, setQuery, query) {
 		if (!query) {
@@ -293,7 +294,7 @@ const GameChangerDetailsPage = (props) => {
 			const favoriteTopicList = data.data.favorite_topics?.map(t => {
 				return t.topic_name.toLowerCase();
 			});
-			setFavoriteTopics(favoriteTopicList);
+			setFavoriteTopics(favoriteTopicList || []);
 		});
 	},[]);
 
@@ -726,15 +727,14 @@ const GameChangerDetailsPage = (props) => {
 							</Paper>
 						</div>
 						<div className={'graph-top-docs'}>
-							<div className={'section'}>
+							<div className={'section'} ref={graphContainerRef}>
 								<GCAccordion
 									expanded={false}
 									header={'GRAPH VIEW'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
 									<MemoizedNodeCluster2D
-										graphWidth={window.innerWidth - 465}
-										graphHeight={400}
+										graphWidth={graphContainerRef?.current?.clientWidth ? graphContainerRef.current.clientWidth - 25 : undefined}
 										runningQuery={runningQuery}
 										displayLinkLabel={false}
 										graph={graph}
@@ -855,15 +855,14 @@ const GameChangerDetailsPage = (props) => {
 							</Paper>
 						</div>
 						<div className={'graph-top-docs'}>
-							<div className={'section'}>
+							<div className={'section'} ref={graphContainerRef}>
 								<GCAccordion
 									expanded={fromNeo4j}
 									header={'GRAPH VIEW'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
 									<MemoizedPolicyGraphView
-										width={1420}
-										height={670}
+										width={graphContainerRef?.current?.clientWidth ? graphContainerRef.current.clientWidth - 25 : undefined}
 										graphData={graph}
 										runningSearchProp={runningQuery}
 										setDocumentsFound={() => {}}
