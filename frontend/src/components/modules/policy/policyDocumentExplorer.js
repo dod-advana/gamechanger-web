@@ -13,6 +13,7 @@ import {
 	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
+	policyMetadata
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
@@ -111,7 +112,7 @@ export default function DocumentExplorer({
 					if (
 						filename &&
 						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
+						JSON.stringify(iframePreviewLink)
 					) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
@@ -250,11 +251,18 @@ export default function DocumentExplorer({
 		data.length > 0 &&
 		data[iframePreviewLink.dataIdx] &&
 		data[iframePreviewLink.dataIdx].filepath;
-	const previewData =
-		(data.length > 0 &&
-			data[iframePreviewLink.dataIdx] &&
-			getMetadataForPropertyTable(data[iframePreviewLink.dataIdx])) ||
-		[];
+
+	// preview Data
+	let policyData = [];
+	if (data.length > 0 && data[iframePreviewLink.dataIdx]) {
+		policyData = getMetadataForPropertyTable(data[iframePreviewLink.dataIdx]);
+		policyData =
+			[
+				...policyMetadata(data[iframePreviewLink.dataIdx]),
+				...policyData,
+			];
+	}
+
 	const previewDataReflist =
 		(data.length > 0 &&
 			data[iframePreviewLink.dataIdx] &&
@@ -311,9 +319,9 @@ export default function DocumentExplorer({
 			>
 				<div
 					className='doc-exp-nav'
-					style={{  
-						color: grey800, 
-						fontWeight: 'bold', 
+					style={{
+						color: grey800,
+						fontWeight: 'bold',
 						display: 'flex',
 						marginBottom: '10px'
 					}}
@@ -340,8 +348,8 @@ export default function DocumentExplorer({
 					</div>
 					{totalCount ? (
 						<div>
-							<div 
-								style={{ 
+							<div
+								style={{
 									display: 'flex',
 									height: 45,
 									width: 45,
@@ -349,9 +357,9 @@ export default function DocumentExplorer({
 									justifyContent: 'center',
 									fontSize: 18,
 									borderRadius: 4,
-									marginRight: 2  
+									marginRight: 2
 								}}
-								className="view-toggle" 
+								className="view-toggle"
 								onClick={() => handleViewToggle()}
 							>
 								{viewTogle ? '+' : '-'}
@@ -413,14 +421,11 @@ export default function DocumentExplorer({
 													let isHighlighted = false;
 													const dataObj = data[iframePreviewLink.dataIdx];
 													if (dataObj) {
-														const pageObj =
-															data[iframePreviewLink.dataIdx].pageHits[
-																iframePreviewLink.pageHitIdx
-															];
+														const pageObj = data[iframePreviewLink.dataIdx].pageHits[iframePreviewLink.pageHitIdx];
 														if (pageObj) {
 															isHighlighted =
 																data[iframePreviewLink.dataIdx].filename ===
-																	item.filename &&
+																item.filename &&
 																pageKey === iframePreviewLink.pageHitIdx;
 														}
 													}
@@ -474,7 +479,7 @@ export default function DocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position:'relative' }}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
 			>
 				<div
 					style={{
@@ -490,9 +495,7 @@ export default function DocumentExplorer({
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -503,9 +506,7 @@ export default function DocumentExplorer({
 						/>
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -568,9 +569,7 @@ export default function DocumentExplorer({
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -581,9 +580,7 @@ export default function DocumentExplorer({
 						/>
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -609,14 +606,14 @@ export default function DocumentExplorer({
 					tableClass={'magellan-table'}
 					zoom={0.8}
 					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-					rows={previewData}
+					rows={policyData}
 					height={'auto'}
 					dontScroll={true}
 					colWidth={colWidth}
 					disableWrap={true}
 					title={'Metadata'}
 				/>
-				<div>
+				<div style={{ marginTop: 0 }}>
 					{' '}
 					<SimpleTable
 						tableClass={'magellan-table'}

@@ -260,7 +260,7 @@ const EdaMainViewHandler = {
 								>
 									<div
 										className="row"
-										style={{ marginLeft: 0, marginRight: 0 }}
+										style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
 									>
 										{!loading && getSearchResults(searchResults)}
 									</div>
