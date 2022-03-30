@@ -197,6 +197,8 @@ const initState = {
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
+		orgCount: {},
+		typeCount: {},
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
 		allOrgsSelected: true,

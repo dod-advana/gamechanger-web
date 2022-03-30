@@ -597,7 +597,7 @@ export default function ResponsibilityUpdates() {
 				</div>
 				<div
 					className={`col-xs-${iframePanelSize}`}
-					style={{ paddingLeft: 0, paddingRight: 0, height: 800}}
+					style={{ paddingLeft: 0, paddingRight: 0, height: 800, position: 'relative'}}
 				>
 					<div
 						style={{

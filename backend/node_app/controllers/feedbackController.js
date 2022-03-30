@@ -1,4 +1,5 @@
 const FEEDBACK = require('../models').feedback;
+const DOC_INGEST_REQUEST = require('../models').doc_ingest_requests;
 const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const constants = require('../config/constants');
@@ -13,15 +14,18 @@ class FeedbackController {
 		const {
 			logger = LOGGER,
 			feedback = FEEDBACK,
+			doc_ingest_request = DOC_INGEST_REQUEST
 		} = opts;
 
 		this.logger = logger;
 		this.feedback = feedback;
+		this.doc_ingest_request = doc_ingest_request;
 
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
 		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
+		this.requestDocIngest = this.requestDocIngest.bind(this);
 	}
 
 	async sendIntelligentSearchFeedback(req, res) {
@@ -134,6 +138,25 @@ class FeedbackController {
 		} catch(err) {
 			console.log('(JIRA FEEDBACK) error response ', err.response);
 			this.logger.error(err, '0KYXA1V', userId);
+			res.status(500).send({error: true});
+		}
+	}
+
+	async requestDocIngest(req, res) {
+		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		try{
+			const { docId } = req.body;
+
+			await this.doc_ingest_request.findOrCreate({ 
+				where: {
+					doc_id: docId, 
+					user_id: getUserIdFromSAMLUserId(req),
+				}
+			});
+	
+			res.status(200).send();
+		} catch(err) {
+			this.logger.error(err, '0UYXM1Z', userId);
 			res.status(500).send({error: true});
 		}
 	}

@@ -240,7 +240,7 @@ const GameChangerDetailsPage = (props) => {
 				topicName: name,
 			},
 		});
-		console.log(resp);
+		
 		if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0) {
 			const tmpTopic = resp.data.topicData.nodes[0];
 			tmpTopic.details = [
@@ -493,7 +493,7 @@ const GameChangerDetailsPage = (props) => {
 
 				break;
 			case 'contract':
-				const permissions = Permissions.allowGCClone('eda');
+				const permissions = Permissions.permissionValidator(`eda Admin`, true) || Permissions.permissionValidator(`View EDA`, true);
 				setEDAPermissions(permissions);
 				if (permissions) {
 					setDetailsType('Contract');
@@ -567,7 +567,6 @@ const GameChangerDetailsPage = (props) => {
 				if(resp.data.docs){
 					setDocCount(resp.data.totalCount);
 					setDocResults(resp.data.docs);
-					console.log(resp.data.totalCount);
 
 					setVisibleDocs(resp.data.docs.slice(0, RESULTS_PER_PAGE));
 					if (resp.data.docs.length > 0) {
