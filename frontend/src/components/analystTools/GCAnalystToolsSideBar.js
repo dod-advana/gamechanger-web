@@ -8,7 +8,8 @@ export default function GCAnalystToolsSideBar(props) {
 	const classes = useStyles();
 	
 	const {
-		context
+		context,
+		results
 	} = props;
 	
 	const {state, dispatch} = context;
@@ -44,12 +45,13 @@ export default function GCAnalystToolsSideBar(props) {
 	};
 	
 	return (
-		<div style={styles.cardBody} class='analyst-tools-filters'>
+		<div style={styles.cardBody} className='analyst-tools-filters'>
 			<div style={styles.innerContainer} ref={sideBarFilterRef}>
 				{loaded && analystToolsSideBarHandler.getSideBarItems({
 					state,
 					classes,
 					dispatch,
+					results,
 					handleSubmit,
 					sideFilterOverlayDimension
 				})}

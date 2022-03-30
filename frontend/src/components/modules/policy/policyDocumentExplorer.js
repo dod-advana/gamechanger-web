@@ -10,20 +10,14 @@ import '../../../containers/gamechanger.css';
 import grey from '@material-ui/core/colors/grey';
 import {
 	getReferenceListMetadataPropertyTable,
+	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
+	policyMetadata
 } from '../../../utils/gamechangerUtils';
-import {
-	getEDAMetadataForPropertyTable,
-	getDisplayTitle,
-} from '../../modules/eda/edaUtils';
+
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
-import GCTooltip from '../../common/GCToolTip';
-import {
-	EDA_FIELDS,
-	EDA_FIELD_JSON_MAP,
-} from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -47,22 +41,17 @@ const styles = {
 	},
 	docExplorerPag: {
 		display: 'flex',
-		flexDirection: 'row-reverse',
 		width: '100%',
-		paddingRight: '25px',
 	},
 };
-function numberWithCommas(x) {
-	if (!x) return x;
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
 
 const getIframePreviewLinkInferred = (
 	filename,
 	prevSearchText,
 	pageNumber,
 	isClone = false,
-	cloneData = {}
+	cloneData = {},
+	isDLA = false
 ) => {
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
@@ -71,7 +60,8 @@ const getIframePreviewLinkInferred = (
 				prevSearchText,
 				pageNumber,
 				isClone,
-				cloneData
+				cloneData,
+				isDLA
 			)
 			.then((url) => {
 				resolve(url);
@@ -79,9 +69,10 @@ const getIframePreviewLinkInferred = (
 	});
 };
 
-export default function EDADocumentExplorer({
+export default function DocumentExplorer({
 	data = [],
 	totalCount,
+	searchText = '',
 	prevSearchText = '',
 	loading,
 	resultsPage,
@@ -96,7 +87,6 @@ export default function EDADocumentExplorer({
 		dataIdx: 0,
 		pageHitIdx: 0,
 	});
-
 	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({
 		dataIdx: -1,
 		pageHitIdx: -1,
@@ -106,6 +96,8 @@ export default function EDADocumentExplorer({
 	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
 	const [pdfLoaded, setPdfLoaded] = React.useState(false);
 	const [viewTogle, setViewTogle] = React.useState(false);
+	const [fileUrl, setFileUrl] = React.useState(null);
+	const [filename, setFilename] = React.useState(null);
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -113,14 +105,14 @@ export default function EDADocumentExplorer({
 				const { dataIdx, pageHitIdx } = iframePreviewLink;
 				const rec = data[dataIdx];
 				if (rec) {
-					// const filepath = rec.filepath;
-					const filename = rec.file_location_eda_ext;
+					const isDLA = rec.display_org_s === 'Defense Logistics Agency';
+
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
 					if (
 						filename &&
 						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
+						JSON.stringify(iframePreviewLink)
 					) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
@@ -128,7 +120,8 @@ export default function EDADocumentExplorer({
 							prevSearchText,
 							pageNumber,
 							isClone,
-							cloneData
+							cloneData,
+							isDLA
 						).then((url) => {
 							node.src = url;
 							setIframeLoading(false);
@@ -145,8 +138,18 @@ export default function EDADocumentExplorer({
 			isClone,
 			cloneData,
 			data,
+			filename,
 		]
 	);
+
+	useEffect(() => {
+		const { dataIdx } = iframePreviewLink;
+		const rec = data[dataIdx];
+		if (rec) {
+			setFilename(rec.filename);
+			setFileUrl(rec.download_url_s);
+		}
+	}, [filename, data, iframePreviewLink]);
 
 	useEffect(() => {
 		if (!collapseKeys) {
@@ -243,22 +246,29 @@ export default function EDADocumentExplorer({
 			}
 		}
 	}
-	const currentDocData = data[iframePreviewLink.dataIdx];
+
 	const previewPathname =
-		data.length > 0 && currentDocData && currentDocData.filepath;
-	const previewData =
-		(data.length > 0 &&
-			currentDocData &&
-			getEDAMetadataForPropertyTable(
-				EDA_FIELD_JSON_MAP,
-				EDA_FIELDS,
-				currentDocData
-			)) ||
-		[];
+		data.length > 0 &&
+		data[iframePreviewLink.dataIdx] &&
+		data[iframePreviewLink.dataIdx].filepath;
+
+	// preview Data
+	let policyData = [];
+	if (data.length > 0 && data[iframePreviewLink.dataIdx]) {
+		policyData = getMetadataForPropertyTable(data[iframePreviewLink.dataIdx]);
+		policyData =
+			[
+				...policyMetadata(data[iframePreviewLink.dataIdx]),
+				...policyData,
+			];
+	}
+
 	const previewDataReflist =
 		(data.length > 0 &&
-			currentDocData &&
-			getReferenceListMetadataPropertyTable(currentDocData.ref_list)) ||
+			data[iframePreviewLink.dataIdx] &&
+			getReferenceListMetadataPropertyTable(
+				data[iframePreviewLink.dataIdx].ref_list
+			)) ||
 		[];
 	const iframePanelSize =
 		12 -
@@ -278,23 +288,6 @@ export default function EDADocumentExplorer({
 		setCollapseKeys(collapseDictionary);
 	}
 
-	// set the tooltip for the right panel
-	let tooltipText = 'No metadata available';
-	if (
-		currentDocData &&
-		currentDocData.metadata_type_eda_ext &&
-		currentDocData.award_id_eda_ext
-	) {
-		if (currentDocData.metadata_type_eda_ext === 'pds') {
-			tooltipText = 'Pulled from PDS data';
-		} else if (
-			currentDocData.metadata_type_eda_ext === 'syn' &&
-			currentDocData.award_id_eda_ext
-		) {
-			tooltipText = 'Pulled from Synopsis data';
-		}
-	}
-
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
 
@@ -310,52 +303,71 @@ export default function EDADocumentExplorer({
 		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
+		<div
+			className="row"
+			style={{ height: 'calc(100% - 70px)', marginTop: '10px' }}
+		>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
 					borderRight: '1px solid lightgrey',
-					height: '94%',
+					height: '100%',
 					overflow: 'scroll',
 				}}
 			>
 				<div
-					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
+					className='doc-exp-nav'
+					style={{
+						color: grey800,
+						fontWeight: 'bold',
+						display: 'flex',
+						marginBottom: '10px'
+					}}
 				>
+					<div
+						style={styles.docExplorerPag}
+						className="gcPagination docExplorerPag"
+					>
+						<Pagination
+							activePage={resultsPage}
+							itemsCountPerPage={resultsPerPage}
+							totalItemsCount={totalCount}
+							pageRangeDisplayed={3}
+							onChange={(page) => {
+								trackEvent(
+									getTrackingNameForFactory(cloneData.clone_name),
+									'DocumentExplorerInteraction',
+									'Pagination',
+									page
+								);
+								onPaginationClick(page);
+							}}
+						/>
+					</div>
 					{totalCount ? (
 						<div>
-							{numberWithCommas(totalCount)} results found.
-							<div className="view-toggle" onClick={() => handleViewToggle()}>
+							<div
+								style={{
+									display: 'flex',
+									height: 45,
+									width: 45,
+									alignItems: 'center',
+									justifyContent: 'center',
+									fontSize: 18,
+									borderRadius: 4,
+									marginRight: 2
+								}}
+								className="view-toggle"
+								onClick={() => handleViewToggle()}
+							>
 								{viewTogle ? '+' : '-'}
 							</div>
 						</div>
 					) : (
 						'Make a search to get started.'
 					)}
-				</div>
-
-				<div
-					style={styles.docExplorerPag}
-					className="gcPagination docExplorerPag"
-				>
-					<Pagination
-						activePage={resultsPage}
-						itemsCountPerPage={resultsPerPage}
-						totalItemsCount={totalCount}
-						pageRangeDisplayed={6}
-						onChange={(page) => {
-							trackEvent(
-								getTrackingNameForFactory(cloneData.clone_name),
-								'DocumentExplorerInteraction',
-								'Pagination',
-								page
-							);
-							onPaginationClick(page);
-						}}
-						style={{ margin: '10px 0' }}
-					/>
 				</div>
 
 				{loading && (
@@ -368,9 +380,13 @@ export default function EDADocumentExplorer({
 						const collapsed = collapseKeys
 							? collapseKeys[key.toString()]
 							: true;
-						const displayTitle = getDisplayTitle(item);
+						const displayTitle =
+							item.title === 'NA'
+								? `${item.doc_type} ${item.doc_num}`
+								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
 						if (item.type === 'document') {
+							const pageHits = item.pageHits.filter(hit => hit.pageNumber);
 							return (
 								<div key={key}>
 									<div
@@ -400,19 +416,16 @@ export default function EDADocumentExplorer({
 									</div>
 									<Collapse isOpened={!collapsed}>
 										<div>
-											{_.chain(item.pageHits)
+											{_.chain(pageHits)
 												.map((page, pageKey) => {
 													let isHighlighted = false;
 													const dataObj = data[iframePreviewLink.dataIdx];
 													if (dataObj) {
-														const pageObj =
-															data[iframePreviewLink.dataIdx].pageHits[
-																iframePreviewLink.pageHitIdx
-															];
+														const pageObj = data[iframePreviewLink.dataIdx].pageHits[iframePreviewLink.pageHitIdx];
 														if (pageObj) {
 															isHighlighted =
 																data[iframePreviewLink.dataIdx].filename ===
-																	item.filename &&
+																item.filename &&
 																pageKey === iframePreviewLink.pageHitIdx;
 														}
 													}
@@ -466,25 +479,23 @@ export default function EDADocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
 			>
 				<div
 					style={{
 						display: 'flex',
 						width: '100%',
-						height: '94%',
+						height: '100%',
 						flexDirection: 'column',
 					}}
 				>
 					<div
 						className="searchdemo-vertical-bar-toggle"
-						style={leftBarExtraStyles}
+						style={{ ...leftBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -495,9 +506,7 @@ export default function EDADocumentExplorer({
 						/>
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -519,20 +528,36 @@ export default function EDADocumentExplorer({
 							height: '100%',
 						}}
 					>
-						<iframe
-							className="aref"
-							id={'docPdfViewer'}
-							onLoad={handlePdfOnLoadStart}
-							ref={measuredRef}
-							style={{
-								borderStyle: 'none',
-								display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
-							}}
-							title="pdf"
-							width="100%"
-							height="100%%"
-						></iframe>
+						<div style={{ height: '100%' }}>
+							{filename && filename.endsWith('pdf') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'PdfViewer'}
+									ref={measuredRef}
+									onLoad={handlePdfOnLoadStart}
+									style={{
+										borderStyle: 'none',
+										display:
+											data.length > 0 && !iframeLoading ? 'initial' : 'none',
+									}}
+									width="100%"
+									height="100%%"
+								></iframe>
+							)}
+
+							{filename && filename.endsWith('html') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'pdfViewer'}
+									src={fileUrl}
+									style={{ width: '100%', height: '100%' }}
+								></iframe>
+							)}
+						</div>
 					</div>
+
 					{iframeLoading && (
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={'#E9691D'} />
@@ -540,13 +565,11 @@ export default function EDADocumentExplorer({
 					)}
 					<div
 						className="searchdemo-vertical-bar-toggle"
-						style={rightBarExtraStyles}
+						style={{ ...rightBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -557,9 +580,7 @@ export default function EDADocumentExplorer({
 						/>
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -571,43 +592,41 @@ export default function EDADocumentExplorer({
 					</div>
 				</div>
 			</div>
-			<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
-				<div
-					className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
-					style={{
-						display: rightPanelOpen ? 'block' : 'none',
-						paddingLeft: 0,
-						borderLeft: '1px solid lightgrey',
-						height: '94%',
-						overflow: 'scroll',
-					}}
-				>
+			<div
+				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
+				style={{
+					display: rightPanelOpen ? 'block' : 'none',
+					paddingLeft: 0,
+					borderLeft: '1px solid lightgrey',
+					height: '100%',
+					overflow: 'scroll',
+				}}
+			>
+				<SimpleTable
+					tableClass={'magellan-table'}
+					zoom={0.8}
+					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+					rows={policyData}
+					height={'auto'}
+					dontScroll={true}
+					colWidth={colWidth}
+					disableWrap={true}
+					title={'Metadata'}
+				/>
+				<div style={{ marginTop: 0 }}>
+					{' '}
 					<SimpleTable
 						tableClass={'magellan-table'}
 						zoom={0.8}
 						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewData}
+						rows={previewDataReflist}
 						height={'auto'}
 						dontScroll={true}
-						colWidth={colWidth}
+						colWidth={colWidthRefTable}
 						disableWrap={true}
-						title={'Metadata'}
-						hideHeader={true}
 					/>
-					<div>
-						<SimpleTable
-							tableClass={'magellan-table'}
-							zoom={0.8}
-							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={previewDataReflist}
-							height={'auto'}
-							dontScroll={true}
-							colWidth={colWidthRefTable}
-							disableWrap={true}
-						/>
-					</div>
 				</div>
-			</GCTooltip>
+			</div>
 		</div>
 	);
 }

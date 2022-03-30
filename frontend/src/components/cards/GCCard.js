@@ -42,6 +42,8 @@ const StyledCardContainer = styled.div`
 	width: ${({ listView, showSideFilters, graphView }) =>
 		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.33% !important' : '25% !important'};
 	min-width: ${({ listView }) => (listView ? '' : '351px')};
+	padding-right: 5px !important;
+    padding-left: 5px !important;
 
 	.styled-card-container {
 		min-height: ${({ listView }) => (listView ? 70 : CARD_HEIGHT)}px;

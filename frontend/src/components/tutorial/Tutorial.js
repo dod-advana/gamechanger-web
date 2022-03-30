@@ -1,45 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { gcOrange } from '../../components/common/gc-colors';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import { setState } from '../../utils/sharedFunctions';
-import { initializeTutorial } from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper';
-import { useMountEffect } from '../../utils/gamechangerUtils';
-
-async function initTutorial(dispatch, cloneName) {
-	try {
-		let nameToUse = '';
-		switch (cloneName) {
-			case 'gamechanger':
-				nameToUse = 'gamechanger';
-				break;
-			default:
-				nameToUse = '';
-				break;
-		}
-		const { componentStepNumbers, tutorialJoyrideSteps } =
-			await initializeTutorial(nameToUse);
-		setState(dispatch, {
-			componentStepNumbers,
-			tutorialJoyrideSteps,
-		});
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+// import { initializeTutorial } from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlayHelper';
+// import { useMountEffect } from '../../utils/gamechangerUtils';
 
 const Tutorial = (props) => {
+	const { tutorialData } = props;
 	const { state, dispatch } = props.context;
-
-	useMountEffect(() => {
-		if (
-			!sessionStorage.getItem(
-				`${state.cloneData.clone_name}-userVersionChecked`
-			)
-		) {
-			initTutorial(dispatch, state.cloneData.clone_name);
+	useEffect(() => {
+		if (tutorialData !== null && ((Object.keys(state.componentStepNumbers).length === 0 || state.tutorialJoyrideSteps.length === 0))) {
+			const { componentStepNumbers, tutorialJoyrideSteps } = tutorialData;
+			setState(dispatch, {
+				componentStepNumbers,
+				tutorialJoyrideSteps,
+			});
 		}
-	});
+	}, [state, dispatch, tutorialData]);
 
 	const resetState = () => {
 		dispatch({ type: 'RESET_STATE' });

@@ -51,6 +51,10 @@ const getToolTheme = (cloneData) => {
 	};
 };
 
+const resetAdvancedSettings = (dispatch) => {
+	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+};
+
 const PolicyNavigationHandler = {
 	getToolState: (state) => {
 		return {
@@ -107,6 +111,7 @@ const PolicyNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
+								resetAdvancedSettings(dispatch);
 								setState(dispatch, {
 									showTutorial: true,
 									clickedTutorial: true,
@@ -204,7 +209,7 @@ const PolicyNavigationHandler = {
 						href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
 						target="_blank"
 						rel="noopener noreferrer"
-						style={{ color: 'white', textDecoration: 'none', width: '40px' }}
+						style={{ color: 'white', textDecoration: 'none', width: '100%' }}
 					>
 						<HoverNavItem
 							centered
@@ -305,6 +310,7 @@ const PolicyNavigationHandler = {
 					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							onClick={() => {
+								resetAdvancedSettings(dispatch);
 								setState(dispatch, {
 									showTutorial: true,
 									clickedTutorial: true,

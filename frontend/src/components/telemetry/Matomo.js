@@ -87,10 +87,13 @@ function setupDimensions(customDimensions, useMatomo) {
  */
 export function trackPageView(documentTitle, customDimensions) {
 	try {
+
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
 
 		// Set User
 		const userId = Auth.getUserId() || ' ';
@@ -136,11 +139,17 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
+		// Set User
+		const userId = Auth.getUserId() || ' ';
+		const regex = /\d{10}/g;
+		const id = regex.exec(userId);
+		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
@@ -158,7 +167,14 @@ export function trackError(e, eventName) {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) &&
 			JSON.parse(localStorage.getItem('appMatomo'));
-		if (!useMatomo) return;
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			if (!useMatomo) return;
+		}
+		// Set User
+		const userId = Auth.getUserId() || ' ';
+		const regex = /\d{10}/g;
+		const id = regex.exec(userId);
+		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		matomo.trackError(e, eventName);
 	} catch (error) {
@@ -177,6 +193,11 @@ export function trackSearch(keyword, category, count, customDimensions) {
 	try {
 		setupDimensions(customDimensions, true);
 
+		// Set User
+		const userId = Auth.getUserId() || ' ';
+		const regex = /\d{10}/g;
+		const id = regex.exec(userId);
+		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 		matomo.push(['trackSiteSearch', keyword, category, count]);
 	} catch (error) {
 		console.error(error);

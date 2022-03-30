@@ -27,6 +27,7 @@ const colWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	overflowWrap: 'anywhere'
 };
 
 const RESULTS_PER_PAGE = 10;
@@ -88,6 +89,28 @@ const DocumentDetailsPage = (props) => {
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
 
 	const [backendError, setBackendError] = useState({});
+
+	const[notInCorpusDocs, setNotInCorpusDocs] = useState(0);
+	const [refList, setRefList] = useState([]);
+
+	useEffect(() => {
+		if(document?.refList){
+			const newList = [];
+			document.ref_list.forEach(ref => {
+				newList.push({References: ref});
+			});
+			setRefList(newList);
+		}
+	}, [document]);
+
+	useEffect(() => {
+		if(document){
+			const docs = document?.ref_list.filter(doc => {
+				return !docsReferenced.docs.find(ref => ref.display_title_s.includes(doc)) && !document.display_title_s.includes(doc);
+			});
+			setNotInCorpusDocs(docs);
+		}
+	}, [docsReferenced.docs, document]);
 
 	useEffect(() => {
 		setRunningQuery(true);
@@ -230,7 +253,7 @@ const DocumentDetailsPage = (props) => {
 		documentObj = {},
 		docPage = 0,
 		section,
-		runningQuery = true
+		runningQuery = true,
 	) => {
 		let docsVisible = [];
 
@@ -246,6 +269,12 @@ const DocumentDetailsPage = (props) => {
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
 				);
+				const notInCorpusDocs = document?.ref_list.filter(doc => {
+					return !docsReferenced.docs.find(ref => ref.display_title_s.includes(doc)) && !document.display_title_s.includes(doc);
+				});
+				const emptyDoc = {...document};
+				Object.keys(emptyDoc).forEach(prop => emptyDoc[prop] = null);
+				notInCorpusDocs?.forEach(doc => docsVisible.push({...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true}));
 				break;
 			case 'referencedByDocs':
 				docsVisible = referencedByDocs.docs.slice(
@@ -292,7 +321,7 @@ const DocumentDetailsPage = (props) => {
 								: ''}
 					</div>
 					<div
-						style={{ marginTop: '-14px', display: 'flex' }}
+						style={{ display: 'flex' }}
 						className={'gcPagination'}
 					>
 						{!runningQuery && documentObj.docCount > 0 && (
@@ -322,10 +351,10 @@ const DocumentDetailsPage = (props) => {
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={gcColors.buttonColor2} />
 						</div>
-					) : documentObj.docCount > 0 ? (
-						renderDocs()
-					) : (
+					) : documentObj.docCount < 1 && notInCorpusDocs.length < 1 ? (
 						<div style={styles.noResults}>No Documents Found</div>
+					) : (
+						renderDocs()
 					)}
 				</div>
 			</div>
@@ -395,21 +424,19 @@ const DocumentDetailsPage = (props) => {
 											title={'Metadata'}
 											hideHeader={true}
 										/>
-										<div style={{ marginTop: -18 }}>
-											<SimpleTable
-												tableClass={'magellan-table'}
-												zoom={1}
-												headerExtraStyle={{
-													backgroundColor: '#313541',
-													color: 'white',
-												}}
-												rows={document?.refList || []}
-												height={'auto'}
-												dontScroll={true}
-												colWidth={{ minWidth: '25%', maxWidth: '25%' }}
-												disableWrap={true}
-											/>
-										</div>
+										<SimpleTable
+											tableClass={'magellan-table'}
+											zoom={1}
+											headerExtraStyle={{
+												backgroundColor: '#313541',
+												color: 'white',
+											}}
+											rows={refList}
+											height={'auto'}
+											dontScroll={true}
+											colWidth={{ minWidth: '25%', maxWidth: '25%' }}
+											disableWrap={true}
+										/>
 									</>
 								) : (
 									<div style={{ margin: '0 auto' }}>
@@ -463,7 +490,7 @@ const DocumentDetailsPage = (props) => {
 						<GCAccordion
 							expanded={false}
 							header={'DOCUMENTS REFERENCED'}
-							itemCount={docsReferenced.docs.length || 0}
+							itemCount={docsReferenced.docs.length + notInCorpusDocs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
 							{renderDocs(
@@ -527,7 +554,7 @@ const styles = {
 		fontSize: 22,
 		fontWeight: 'bold',
 		color: '#131E43',
-		paddingTop: '10px',
+		paddingTop: '15px',
 	},
 	noResults: {
 		fontSize: 22,

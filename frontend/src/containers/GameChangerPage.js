@@ -12,13 +12,11 @@ import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
 import UserFeedback from '../components/user/UserFeedback';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
-import GCUserInfoModal from '../components/user/GCUserInfoModal';
 import { sendJiraFeedback } from '../utils/sharedFunctions';
 import { Snackbar } from '@material-ui/core';
 import Feedback from '@dod-advana/advana-jira-feedback/dist/components/FeedbackModal';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
-// import ResponsibilityAssist from '../components/crowdAssist/ResponsibilityAssist';
 
 const gameChangerAPI = new GameChangerAPI();
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
@@ -35,7 +33,7 @@ export const scrollToContentTop = () => {
 };
 
 const GameChangerPage = (props) => {
-	const { cloneData, history, jupiter } = props;
+	const { cloneData, history, jupiter, tutorialData } = props;
 
 	const cloneName = cloneData.clone_name;
 	const context = useContext(getContext(cloneName));
@@ -43,7 +41,7 @@ const GameChangerPage = (props) => {
 	const [jiraFeedback, setJiraFeedback] = useState(false);
 
 	useEffect(() => {
-		gameChangerAPI.getJiraFeedbackMode().then(({data}) => {
+		gameChangerAPI.getJiraFeedbackMode().then(({ data }) => {
 			setJiraFeedback(data.value === 'true');
 		});
 	}, []);
@@ -78,33 +76,31 @@ const GameChangerPage = (props) => {
 					<Notifications context={context} />
 
 					{/* User Feedback */}
-					{jiraFeedback ? 
-						<Feedback 
-							open={state.showFeedbackModal} 
-							setOpen={()=>setState(dispatch, {showFeedbackModal: false})}
+					{jiraFeedback ?
+						<Feedback
+							open={state.showFeedbackModal}
+							setOpen={() => setState(dispatch, { showFeedbackModal: false })}
 							handleSubmit={sendJiraFeedback}
 						/> :
 						<UserFeedback context={context} />
 					}
 					{/* Crowd Sourcing */}
-					{ cloneData.show_crowd_source && (
-						<GameChangerAssist context={context} primaryColor={gcOrange} /> 
+					{cloneData.show_crowd_source && (
+						<GameChangerAssist context={context} primaryColor={gcOrange} />
 					)}
 
 					{/* Crowd Sourcing */}
 					{/* { cloneData.show_crowd_source && (
 						<ResponsibilityAssist context={context} primaryColor={gcOrange} /> 
 					)} */}
-					
+
 					{/* Tutorial Overlay */}
-					{cloneData.show_tutorial && <Tutorial context={context} />}
+					{cloneData.show_tutorial && <Tutorial context={context} tutorialData={tutorialData} />}
 
 					{/* Search Banner */}
 					{state.cloneDataSet && (
 						<SearchBar context={context} jupiter={jupiter} />
 					)}
-
-					<GCUserInfoModal context={context} />
 
 					{/* Main View */}
 					{state.historySet && <MainView context={context} />}

@@ -11,8 +11,8 @@ export default {
 		process.env.REACT_APP_GLUU_SSO !== 'disabled',
 	TLD: 'mil',
 	QLIK_URL: window?.__env__?.REACT_APP_QLIK_URL
-	? window?.__env__?.REACT_APP_QLIK_URL
-	: process.env.REACT_APP_QLIK_URL,
+		? window?.__env__?.REACT_APP_QLIK_URL
+		: process.env.REACT_APP_QLIK_URL,
 	GAMECHANGER_DECOUPLED_URL: 'https://gamechanger.advana.data.mil',
 	STREAMSETS_URL: 'https://streamsets',
 	CLASSIFICATION_BANNER_TEXT: 'DEVELOPMENT',
@@ -27,6 +27,9 @@ export default {
 	MATOMO_LINK: window?.__env__?.REACT_APP_MATOMO_LINK
 		? window?.__env__?.REACT_APP_MATOMO_LINK
 		: process.env.REACT_APP_MATOMO_LINK,
+	MATOMO_SITE_ID: window?.__env__?.REACT_APP_MATOMO_SITE_ID
+		? window?.__env__?.REACT_APP_MATOMO_SITE_ID
+		: process.env.REACT_APP_MATOMO_SITE_ID ? process.env.REACT_APP_MATOMO_SITE_ID : 2,
 	MAX_SIMPLE_TABLE_CELLS: 50000,
 	PERMISSIONS: {
 		GAMECHANGER_ADMIN: 'Gamechanger Admin',
