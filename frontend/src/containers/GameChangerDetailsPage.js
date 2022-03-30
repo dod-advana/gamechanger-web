@@ -294,7 +294,7 @@ const GameChangerDetailsPage = (props) => {
 			const favoriteTopicList = data.data.favorite_topics?.map(t => {
 				return t.topic_name.toLowerCase();
 			});
-			setFavoriteTopics(favoriteTopicList);
+			setFavoriteTopics(favoriteTopicList || []);
 		});
 	},[]);
 
