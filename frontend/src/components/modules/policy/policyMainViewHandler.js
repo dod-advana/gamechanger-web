@@ -221,7 +221,52 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
+const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) => {
+	let filteredPubs = [];
+	console.log(last_opened_docs);
+	try {
+		filteredPubs = last_opened_docs.map((name) => ({
+			name,
+			doc_filename: name,
+			img_filename: name + '.png',
+			id: name + '.pdf_0',
 
+			imgSrc: DefaultPub,
+		}));
+
+		console.log(filteredPubs);
+		setState(dispatch, { lastOpened: filteredPubs });
+		setState(dispatch, { loadingLastOpened: false });
+
+		for (let i = 0; i < filteredPubs.length; i++) {
+			gameChangerAPI
+				.thumbnailStorageDownloadPOST(
+					[filteredPubs[i]],
+					'thumbnails',
+					state.cloneData,
+					cancelToken
+				)
+				.then((pngs) => {
+					const buffers = pngs.data;
+					buffers.forEach((buf, idx) => {
+						if (buf.status === 'fulfilled') {
+							filteredPubs[i].imgSrc = 'data:image/png;base64,' + buf.value;
+						} else {
+							filteredPubs[i].imgSrc = DefaultPub;
+						}
+					});
+					setState(dispatch, { lastOpened: filteredPubs });
+				}).catch(e => {
+					//Do nothing
+				});
+		}
+
+	} catch (e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, { lastOpened: filteredPubs });
+	}
+};
 const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
@@ -335,13 +380,15 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		setState(dispatch, { loadingrecDocs: true });
+		setState(dispatch, { loadingLastOpened: true });
+
 		let topics = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
+		let last_opened_docs = [];
 		const user = await gcUserManagementAPI.getUserData();
 		const { favorite_documents = [], export_history = [], pdf_opened = []} = user.data;
-		console.log(pdf_opened);
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history, pdf_opened});
 			data.forEach((obj) => {
@@ -368,10 +415,12 @@ const PolicyMainViewHandler = {
 				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
 				{ adminTopics: topics }
 		);
+		last_opened_docs = pdf_opened;
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch, props.cancelToken);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 		handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
+		handleLastOpened(last_opened_docs, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {
@@ -389,6 +438,8 @@ const PolicyMainViewHandler = {
 			searchMajorPubs,
 			recDocs,
 			loadingrecDocs,
+			lastOpened,
+			loadingLastOpened,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -626,6 +677,7 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
+
 					<GameChangerThumbnailRow
 						links={crawlerSources}
 						title="Sources"
@@ -886,8 +938,6 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
-														paddingRight: 0,
-														paddingLeft: 0
 													}}
 												>
 													{!searchSettings.isFilterUpdate ? (
@@ -974,8 +1024,6 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
-														paddingRight: 0,
-														paddingLeft: 0
 													}}
 												>
 													<SearchSection
@@ -1026,8 +1074,6 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
-														paddingRight: 0,
-														paddingLeft: 0
 													}}
 												>
 													<SearchSection
