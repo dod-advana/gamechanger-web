@@ -120,7 +120,7 @@ export default class SimpleTable extends React.Component {
 			else {
 				if (!r.Hidden) {
 					_.each(cols, (c, cIdx) => {
-						let value = r[c] ? r[c] !== null ? r[c] : '' : '';
+						let value = r[c] ?? '';
 						if (useInnerHtml) {
 							if (!value || _.isBoolean(value)) value = '';
 							rowCells.push(<td style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
@@ -143,7 +143,6 @@ export default class SimpleTable extends React.Component {
 								</td>
 							);
 						}
-
 					});
 				}
 			}

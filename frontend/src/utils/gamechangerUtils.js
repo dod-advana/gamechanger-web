@@ -289,6 +289,110 @@ export const getMetadataForPropertyTable = (item) => {
 	return data;
 };
 
+export const policyMetadata = (item) => {
+	const labelText = item.isRevoked ? 'Cancel Date' : 'Verification Date';
+	let dateText = 'Unknown';
+	if (item.current_as_of !== undefined && item.current_as_of !== '') {
+		const currentDate = new Date(item.current_as_of);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
+			currentDate
+		);
+		const month = new Intl.DateTimeFormat('en', {
+			month: '2-digit',
+		}).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
+			currentDate
+		);
+		dateText = `${month}-${day}-${year}`;
+	}
+
+	let publicationDate;
+	if (
+		item.publication_date_dt !== undefined &&
+		item.publication_date_dt !== ''
+	) {
+		const currentDate = new Date(item.publication_date_dt);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
+			currentDate
+		);
+		const month = new Intl.DateTimeFormat('en', {
+			month: '2-digit',
+		}).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
+			currentDate
+		);
+		publicationDate = `${month}-${day}-${year}`;
+	} else {
+		publicationDate = `unknown`;
+	}
+
+	let source_item;
+	if (
+		item.source_fqdn_s !== undefined &&
+		item.source_fqdn_s !== '' &&
+		item.crawler_used_s !== undefined &&
+		item.crawler_used_s !== ''
+	) {
+		let source_name;
+		if (item.source_fqdn_s.startsWith('https://')) {
+			source_name = item.source;
+		} else {
+			source_name = `https://${item.source_fqdn_s}`;
+		}
+		source_item = (
+			<a href={source_name} target="_blank" rel="noopener noreferrer">
+				{crawlerMappingFunc(item.crawler_used_s)}
+			</a>
+		);
+	} else {
+		source_item = 'unknown';
+	}
+
+	let file_origin_item;
+	if (
+		item.source_page_url_s !== undefined &&
+		item.source_page_url_s !== ''
+	) {
+		file_origin_item = (
+			<a
+				href={item.source_page_url_s}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{' '}
+				Go to Source{' '}
+			</a>
+		);
+	} else {
+		file_origin_item = 'unknown';
+	}
+
+	let source_file_item;
+	if (item.download_url_s !== undefined && item.download_url_s !== '') {
+		source_file_item = (
+			<a
+				href={item.download_url_s}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{' '}
+				Open from Source
+			</a>
+		);
+	} else {
+		source_file_item = 'unknown';
+	}
+
+	const favoritableData = [
+		{ Key: 'Published', Value: publicationDate },
+		{ Key: labelText, Value: dateText },
+		{ Key: 'Source', Value: source_item },
+		{ Key: 'File Origin', Value: file_origin_item },
+		{ Key: 'Source File', Value: source_file_item },
+	];
+	return favoritableData;
+};
+
 export function commaThousands(value) {
 	if (_.isNull(value) || _.isUndefined(value)) return '';
 
@@ -333,7 +437,7 @@ const crawlerMapping = {
 	Bupers_Crawler: ['Bureau of Naval Personnel Instructions', 'Mynavy Hr'],
 	milpersman_crawler: ['Navy Personnel Command Instructions'],
 	nato_stanag: ['NATO Publications', 'NATO Standardization Office'],
-	fmr_pubs: ['DoD Financial Management Regulation', 'Under Secretary Of Defense (comptroller)',  'Defense Publications'],
+	fmr_pubs: ['DoD Financial Management Regulation', 'Under Secretary Of Defense (comptroller)', 'Defense Publications'],
 	legislation_pubs: ['Congressional Legislation', 'U.S. Government Publishing Office'],
 	Army_Reserve: ['U.S. Army Reserve Publications'],
 	Memo: ['OSD Executive Secretary'],
@@ -349,8 +453,8 @@ const crawlerMapping = {
 };
 export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
-	for(let key in crawlerMapping) {
-		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())){
+	for (let key in crawlerMapping) {
+		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())) {
 			crawler = key;
 			break;
 		}
@@ -864,7 +968,7 @@ export const exactMatch = (phrase, word, split) => {
 	return exists;
 };
 
-export const displayBackendError = (resp, dispatch = () => {}) => {
+export const displayBackendError = (resp, dispatch = () => { }) => {
 	if (resp?.data?.error) {
 		const errorMessage = Permissions.permissionValidator('Gamechanger Super Admin', true)
 			? `An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}`
