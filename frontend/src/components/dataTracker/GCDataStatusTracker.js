@@ -95,6 +95,8 @@ const TableStyle = styled.div`
 			.rt-th,
 			.rt-td {
 				border-right: 1px solid #0000001F !important;
+				white-space: normal;
+				text-align: center;
 			}
 			.rt-th {
 				font-weight: bold;
@@ -448,13 +450,12 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Type',
 				accessor: 'pub_type',
-				width: 100,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Number',
 				accessor: 'pub_number',
-				width: 110,
+				width: 90,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -471,7 +472,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ color: '#386F94' }}
 						>
 							<div>
-								<p>{props.original.pub_title}</p>
+								{props.original.pub_title}
 							</div>
 						</Link>
 					</TableRow>
@@ -480,7 +481,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'json_metadata',
-				width: 350,
+				width: 200,
 				filterable: false,
 				sortable: false,
 				Cell: (props) => (
@@ -494,7 +495,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ color: '#386F94' }}
 						>
 							<div>
-								<p>{props.original.json_metadata.crawler_used}</p>
+								{props.original.json_metadata.crawler_used}
 							</div>
 						</Link>
 					</TableRow>
@@ -504,7 +505,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Publication Date',
 				accessor: 'publication_date',
 				filterable: false,
-				width: 150,
+				width: 115,
 				Cell: (row) => (
 					<TableRow>
 						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
@@ -515,7 +516,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Ingestion Date',
 				accessor: 'upload_date',
 				filterable: false,
-				width: 150,
+				width: 115,
 				Cell: (row) => (
 					<TableRow>
 						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
@@ -524,7 +525,7 @@ const GCDataStatusTracker = (props) => {
 			},
 			{
 				Header: 'Next update',
-				width: 150,
+				width: 115,
 				filterable: false,
 				sortable: false,
 				Cell: (row) => (
