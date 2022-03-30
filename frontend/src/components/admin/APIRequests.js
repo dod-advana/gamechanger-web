@@ -12,6 +12,37 @@ import { styles, TableRow } from './util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const getApiKeyRequestData = async (setGCAPIRequestData) => {
+	const { data } = await gameChangerAPI.getAPIKeyRequestData();
+	data.pending.forEach((request, idx) => {
+		const cloneString = request.clone_meta.map(meta => meta.clone_name).join(', ');
+		data.pending[idx].cloneString = cloneString;
+	});
+	data.approved.forEach((request, idx) => {
+		const cloneString = request.keyClones.map(clone => clone.clone_name).join(', ');
+		data.approved[idx].cloneString = cloneString;
+	});
+	setGCAPIRequestData(data || {approved: [], pending: []});
+};
+
+const EditableCell = props => {
+	const [value, setValue] = useState(props.value);
+	const onChange = e => {
+		setValue(e.target.value);
+	};
+	const onBlur = () => {
+		props.handleChange(props.key, value);
+	};
+	
+	return (
+		<input
+			onChange={onChange}
+			onBlur={onBlur}
+			value={value}
+		/>
+	);
+};
+
 /**
  * A table to view api keys and requests
  * @class APIRequests
@@ -25,32 +56,19 @@ export default () => {
 	const [gcAPIKeyVision, setGCAPIKeyVision] = useState(false);
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-	const [keyDescriptions, setKeyDescriptions] = useState({});
+	const [keyDescriptions, setKeyDescriptions] = useState(undefined);
 	// Comonent Methods
 	/**
      * Grabs all the data from the backend to populate the table
      * @method getApiKeyRequestData
      */
-	const getApiKeyRequestData = async () => {
-		const { data } = await gameChangerAPI.getAPIKeyRequestData();
-		data.pending.forEach((request, idx) => {
-			const cloneString = request.clone_meta.map(meta => meta.clone_name).join(', ');
-			data.pending[idx].cloneString = cloneString;
-		});
-		data.approved.forEach((request, idx) => {
-			const cloneString = request.keyClones.map(clone => clone.clone_name).join(', ');
-			data.approved[idx].cloneString = cloneString;
-		});
-		setGCAPIRequestData(data || {approved: [], pending: []});
-	};
+
 
 	useEffect(()=>{
-		if(!Object.keys(keyDescriptions).length){
-			const descriptions = {};
-			gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
-			setKeyDescriptions(descriptions);
-		}
-	}, [gcAPIRequestData, keyDescriptions]);
+		const descriptions = {};
+		gcAPIRequestData.approved.forEach(request => descriptions[request.key] = request.description);
+		setKeyDescriptions(descriptions);
+	}, [gcAPIRequestData]);
 	/**
      * Attemps to revoke a key based on the id
      * @method revokeAPIKeyRequestData
@@ -58,7 +76,7 @@ export default () => {
      */
 	const revokeAPIKeyRequestData = async (id) => {
 		gameChangerAPI.revokeAPIKeyRequest(id).then(resp => {
-			getApiKeyRequestData();
+			getApiKeyRequestData(setGCAPIRequestData);
 		});
 	};
 	/**
@@ -74,16 +92,17 @@ export default () => {
 			return setPopperIsOpen(true);
 		}
 		gameChangerAPI.approveRejectAPIKeyRequest(id, approve).then(resp => {
-			getApiKeyRequestData();
+			getApiKeyRequestData(setGCAPIRequestData);
 		});
 	};
+
 	useEffect(()=>{
-		getApiKeyRequestData();
+		getApiKeyRequestData(setGCAPIRequestData);
 	},[]);
 
-	const handleChange = (key, event) => {
+	const handleChange = (id, value) => {
 		const newDescriptions = {...keyDescriptions};
-		newDescriptions[key] = event.target.value;
+		newDescriptions[id] = value;
 		setKeyDescriptions(newDescriptions);
 	};
 	// Columns 
@@ -118,8 +137,7 @@ export default () => {
 			width: 200,
 			Cell: row => (
 				<TableRow>
-					{Object.keys(keyDescriptions).length && 
-                    <input style={{width: '100%'}} value={keyDescriptions[row.value]} onChange={(event) => handleChange(row.value, event)} />}
+					{EditableCell({...row, handleChange, value: keyDescriptions ? keyDescriptions[row.value] : '', key: row.value})}
 				</TableRow>
 			)
 		},
@@ -314,6 +332,8 @@ export default () => {
 				<GCAccordion expanded={false} header={'APPROVED API KEYS'}>
 					<div style={{display:'flex', flexDirection: 'column', width: '100%'}}>
 						<ReactTable
+							sortable={false}
+							filterable={false}
 							data={gcAPIRequestData.approved}
 							columns={approvedColumns}
 							pageSize={10}

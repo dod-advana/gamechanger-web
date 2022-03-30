@@ -16,6 +16,7 @@ import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png
 import {setState} from '../../../utils/sharedFunctions';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
+import UserIcon from '../../../images/icon/UserIcon.png';
 
 const getToolTheme = (cloneData) => {
 	return {
@@ -107,6 +108,24 @@ const JBookNavigationHandler = {
 						<ConstrainedIcon src={UserFeedbackIcon} />
 					</HoverNavItem>
 				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'showUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+					</HoverNavItem>
+				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
 						<PageLink
@@ -187,6 +206,24 @@ const JBookNavigationHandler = {
 					>
 						<ConstrainedIcon src={UserFeedbackIcon} />
 						<span style={{ marginLeft: '10px' }}>User Feedback</span>
+					</HoverNavItem>
+				</GCTooltip>
+				<GCTooltip title="User Dashboard" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'shoeUserDashboard'
+							);
+						}}
+						active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={UserIcon} />
+						<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 					</HoverNavItem>
 				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (

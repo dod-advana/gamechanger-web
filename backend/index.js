@@ -28,7 +28,7 @@ const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/ex
 const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
-const moment = require("moment");
+const moment = require('moment');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -40,8 +40,8 @@ const userController = new UserController();
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
 // var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
-var keyFileData = constants.TLS_KEY;
-var private_key = '-----BEGIN RSA PRIVATE KEY-----\n' + (RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')).match(/.{1,64}/g).join('\n') + '\n-----END RSA PRIVATE KEY-----';
+const keyFileData = constants.TLS_KEY;
+const private_key = '-----BEGIN RSA PRIVATE KEY-----\n' + (RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')).match(/.{1,64}/g).join('\n') + '\n-----END RSA PRIVATE KEY-----';
 
 
 logger.boot(`
@@ -83,12 +83,12 @@ try {
 
 } catch (err) {
 	console.error(err);
-	console.error('No env variables created')
+	console.error('No env variables created');
 }
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
-	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY)
+	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -97,7 +97,7 @@ app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 app.use(AAA.redisSession());
-AAA.setupSaml(app)
+AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);
 
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
@@ -126,7 +126,7 @@ app.use(async function (req, res, next) {
 		}
 	}
 
-	redisAsyncClient.select(12);
+	await redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${user_id}-perms`);
 
 	if (perms) {
@@ -183,7 +183,7 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 			}],
 		});
 		let cloneAccess;
-		if (key) cloneAccess = key.clone_meta.map(clone => clone.clone_name)
+		if (key) cloneAccess = key.clone_meta.map(clone => clone.clone_name);
 		if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 			req.headers['ssl_client_s_dn_cn'] = key.username;
 			req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
@@ -197,11 +197,10 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
 
 app.post('/api/auth/token', async function (req, res) {
-
 	let cn = 'unknown user';
 	let perms = ['View gamechanger'];
 	const sessUser = req.session.user;
-	redisAsyncClient.select(12);
+	await redisAsyncClient.select(12);
 
 	try {
 		cn = sessUser.cn;
@@ -259,7 +258,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
-		let csrfHash
+		let csrfHash;
 
 		if (userTokenOld && tokenTimeoutOld) {
 			tokenTimeoutOld = moment(tokenTimeoutOld);
@@ -299,15 +298,16 @@ app.post('/api/auth/token', async function (req, res) {
 
 app.use(async function (req, res, next) {
 	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta', '/api/tutorialOverlay', '/api/userAppVersion'];
+	// SIG BYTES ERROR is HERE TODO
 
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
 	} else {
 		const signatureFromApp = req.get('x-ua-signature');
-		redisAsyncClient.select(12);
+		await redisAsyncClient.select(12);
 		let csrfHash = '';
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			csrfHash = process.env.ML_WEB_TOKEN
+			csrfHash = process.env.ML_WEB_TOKEN;
 		} else {
 			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		}
@@ -335,7 +335,7 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
 
 			const signatureFromApp = req.get('x-ua-signature');
-			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN))
+			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN));
 			if (signatureFromApp === userToken) {
 				next();
 			} else {
@@ -368,15 +368,15 @@ try {
 	const reset = cron.resetAPIRequestLimitJob();
 	reset.start();
 } catch (e) {
-	logger.error(`Error initializing API request reset cron job: ${e.message}`, 'J6BNFP3', 'Startup Process')
+	logger.error(`Error initializing API request reset cron job: ${e.message}`, 'J6BNFP3', 'Startup Process');
 }
 
 try {
 	// check for updated favorited search results in the background
 	const updateFavorited = cron.getUpdateFavoritedSearchesJob();
-	updateFavorited.start()
+	updateFavorited.start();
 } catch (e) {
-	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process')
+	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process');
 }
 
 const options = {
@@ -432,4 +432,4 @@ if (process.env.PRINT_ROUTES === 'true') {
 	});
 }
 
-setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick'); }, 10000);
+setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick') }, 10000);
