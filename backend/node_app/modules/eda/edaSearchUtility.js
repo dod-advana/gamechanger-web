@@ -5,11 +5,11 @@ const SearchUtility = require('../../utils/searchUtility');
 class EDASearchUtility {
 	constructor(opts = {}) {
 
-        const {
-            logger = LOGGER,
-            constants = constantsFile,
+		const {
+			logger = LOGGER,
+			constants = constantsFile,
 			searchUtility = new SearchUtility(opts)
-        } = opts;
+		} = opts;
 
 		this.logger = logger;
 		this.constants = constants;
@@ -60,7 +60,7 @@ class EDASearchUtility {
 	
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*']
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*']
 				},
 				stored_fields: storedFields,
 				from: offset,
@@ -718,11 +718,19 @@ class EDASearchUtility {
 	}
 
 	getExtractedFields(source, result) {
-		const { extracted_data_eda_n } = source;
+		const { extracted_data_eda_n, fpds_ng_n } = source;
 		const data = extracted_data_eda_n;
 
 		if (!data) {
 			return result;
+		}
+
+		// temporarily pull in all fpds data
+		if (fpds_ng_n) {
+			let fpdsKeys = Object.keys(fpds_ng_n);
+			for (let i = 0; i < fpdsKeys.length; i++) {
+				result['fpds_' + fpdsKeys[i]] = fpds_ng_n[fpdsKeys[i]];
+			}
 		}
 
 		// Contract Issuing Office Name and Contract Issuing Office DoDaaC

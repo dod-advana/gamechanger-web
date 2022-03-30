@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE, convertDCTScoreToText,
@@ -6,6 +6,7 @@ import {
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable,
+	policyMetadata,
 	getTrackingNameForFactory,
 	getTypeDisplay,
 	getTypeIcon,
@@ -23,7 +24,6 @@ import GCButton from '../../common/GCButton';
 import { Popover, TextField, Typography } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
-import { crawlerMappingFunc } from '../../../utils/gamechangerUtils';
 import GCAccordion from '../../common/GCAccordion';
 import sanitizeHtml from 'sanitize-html';
 import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.svg.png';
@@ -143,19 +143,19 @@ const StyledFrontCardHeader = styled.div`
 	margin-right: ${({ listView }) => (listView ? '5px' : '0px')};
 
 	.title-text-selected-favorite-div {
-		max-height: ${({listView}) => listView ? '35px': '50px'};
-		height: ${({listView}) => listView ? '35px': ''};
+		max-height: ${({ listView }) => listView ? '35px' : '50px'};
+		height: ${({ listView }) => listView ? '35px' : ''};
 		overflow: hidden;
 		display: flex;
 		justify-content: space-between;
 
 		.title-text {
 			cursor: pointer;
-			display:  ${({docListView}) => docListView ? 'flex': ''};
-			alignItems:  ${({docListView}) => docListView ? 'top': ''};
-			height:  ${({docListView}) => docListView ? 'fit-content': ''};
-			max-width: ${({listView}) => listView ? '60%': ''};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			display:  ${({ docListView }) => docListView ? 'flex' : ''};
+			alignItems:  ${({ docListView }) => docListView ? 'top' : ''};
+			height:  ${({ docListView }) => docListView ? 'fit-content' : ''};
+			max-width: ${({ listView }) => listView ? '60%' : ''};
+			overflow-wrap: ${({ listView }) => listView ? '' : 'anywhere'};
 			
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -527,13 +527,13 @@ const StyledQuickCompareContent = styled.div`
 `;
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction' , 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'PDFOpen' , filename,`search : ${searchText}`);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
 	window.open(`/#/pdfviewer/gamechanger?filename=${encode(filename)}${searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`);
 };
 
-const FavoriteTopicFromCardBack = ({topic, favorited, dispatch, searchText, cloneName}) => {
+const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, cloneName }) => {
 	const classes = useStyles();
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
@@ -684,7 +684,7 @@ const FavoriteTopicFromCardBack = ({topic, favorited, dispatch, searchText, clon
 								Cancel
 							</GCButton>
 							<GCButton
-								onClick={() =>{
+								onClick={() => {
 									handleSaveFavorite(true);
 									gameChangerAPI.sendIntelligentSearchFeedback(
 										'intelligent_search_favorite_document',
@@ -751,7 +751,7 @@ const addFavoriteTopicToMetadata = (
 								key={index}
 								favorited={favorited}
 							>
-								<span								
+								<span
 									onClick={() => {
 										trackEvent(
 											getTrackingNameForFactory(cloneData.clone_name),
@@ -765,7 +765,7 @@ const addFavoriteTopicToMetadata = (
 								>
 									{topic}
 								</span>
-								<FavoriteTopicFromCardBack 
+								<FavoriteTopicFromCardBack
 									topic={topic} favorited={favorited} dispatch={dispatch} searchText={searchText} cloneName={cloneData.clone_name}
 								/>
 							</FavoriteTopic>
@@ -778,9 +778,9 @@ const addFavoriteTopicToMetadata = (
 	});
 	return temp;
 };
-	
-const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent}) => {
-	
+
+const getCardHeaderHandler = ({ item, state, idx, checkboxComponent, favoriteComponent, graphView, intelligentSearch, quickCompareToggleComponent }) => {
+
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
@@ -828,7 +828,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 				<GCTooltip title={displayTitle} placement="top" arrow>
 					<div
 						className={'title-text'}
-						style={item.notInCorpus ? {cursor: 'initial'} : {}}
+						style={item.notInCorpus ? { cursor: 'initial' } : {}}
 						onClick={
 							docListView && !item.notInCorpus
 								? () =>
@@ -839,7 +839,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 										0,
 										item.download_url_s
 									)
-								: () => {}
+								: () => { }
 						}
 					>
 						<div className={'text'}>{displayTitle}</div>
@@ -871,7 +871,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 						</StyledFrontCardSubHeader>
 					)}
 					<div className={'selected-favorite'}>
-						<div style={{display: 'flex'}}>
+						<div style={{ display: 'flex' }}>
 							{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
 							{checkboxComponent(item.filename, item.display_title_s, item.id)}
 							{favoriteComponent()}
@@ -881,9 +881,7 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 			</div>
 			{docListView && !item.notInCorpus && (
 				<div className={'list-view-sub-header'}>
-					<p style={{ fontWeight: 400 }}>{`Published on: ${
-						publicationDate ?? 'Unknown'
-					}`}</p>
+					<p style={{ fontWeight: 400 }}>{`Published on: ${publicationDate ?? 'Unknown'}`}</p>
 				</div>
 			)}
 			{docListView && item.notInCorpus && (
@@ -895,10 +893,10 @@ const getCardHeaderHandler = ({item, state, idx, checkboxComponent, favoriteComp
 					arrow
 				>
 					<div
-						style={{position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1}}
+						style={{ position: 'absolute', right: '5px', top: '50%', msTransform: 'translateY(-50%)', transform: 'translateY(-50%)', zIndex: 1 }}
 					>
-						<GCButton 
-							onClick={()=> gameChangerAPI.requestDocIngest({docId: item.display_title_s})}
+						<GCButton
+							onClick={() => gameChangerAPI.requestDocIngest({ docId: item.display_title_s })}
 						>
 							Report Issue
 						</GCButton>
@@ -1097,14 +1095,14 @@ const PolicyCardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
-			
+
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
 			} else if (item.paragraphs && Array.isArray(item.paragraphs) && item.paragraphs.length > 0 && item.paragraphs[hoveredHit]) {
 				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
 			}
-			if(Array.isArray(hoveredSnippet)) hoveredSnippet = hoveredSnippet.join(', ');
+			if (Array.isArray(hoveredSnippet)) hoveredSnippet = hoveredSnippet.join(', ');
 			const contextHtml = hoveredSnippet;
 
 			let publicationDate;
@@ -1141,14 +1139,13 @@ const PolicyCardHandler = {
 									<div className={'page-hits'}>
 										{_.chain(item.pageHits).map((page, key) => {
 											return (
-												<div className={'page-hit'} key={key} style={{
-													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
-												}}
-												onMouseEnter={() => setHoveredHit(key) }
-												onClick={e => {
-													e.preventDefault();
-													clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber, item.download_url_s);
-												}}
+												<div
+													className={'page-hit'} key={key} style={{ ...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }) }}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={e => {
+														e.preventDefault();
+														clickFn(item.filename, state.cloneData.clone_name, state.searchText, page.pageNumber, item.download_url_s);
+													}}
 												>
 													<span>
 														{page.title && <span >{page.title}</span>}
@@ -1172,13 +1169,12 @@ const PolicyCardHandler = {
 									<div className={'page-hits'}>
 										{_.chain(item.paragraphs).map((paragraph, key) => {
 											return (
-												<div className={'paragraph-hit'} key={key} style={{
-													...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }),
-												}}
-												onMouseEnter={() => setHoveredHit(key) }
-												onClick={e => {
-													e.preventDefault();
-												}}
+												<div
+													className={'paragraph-hit'} key={key} style={{ ...(hoveredHit === key && { backgroundColor: '#E9691D', color: 'white' }) }}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={e => {
+														e.preventDefault();
+													}}
 												>
 													<div>
 														{paragraph.id && <div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${paragraph.id.split('_')[1]}`}</div>}
@@ -1395,10 +1391,10 @@ const PolicyCardHandler = {
 				);
 			}
 		},
-		
+
 		getDocumentQuickCompare: (props) => {
-			const {item, compareIndex, handleChangeCompareIndex} = props;
-			
+			const { item, compareIndex, handleChangeCompareIndex } = props;
+
 			return (
 				<StyledQuickCompareContent>
 					{item.paragraphs.length > 1 &&
@@ -1409,7 +1405,7 @@ const PolicyCardHandler = {
 									handleChangeCompareIndex(-1);
 								}}
 								isSecondaryBtn={true}
-								style={{height: 36}}
+								style={{ height: 36 }}
 								disabled={compareIndex === 0}
 							>
 								Previous
@@ -1420,7 +1416,7 @@ const PolicyCardHandler = {
 									handleChangeCompareIndex(1);
 								}}
 								isSecondaryBtn={true}
-								style={{height: 36}}
+								style={{ height: 36 }}
 								disabled={compareIndex >= item.paragraphs.length - 1}
 							>
 								Next
@@ -1440,113 +1436,16 @@ const PolicyCardHandler = {
 				</StyledQuickCompareContent>
 			);
 		},
-		
-		getCardBack: ({item, state, dispatch}) => {
-			if(item.notInCorpus) return <></> ;
-			const data = getMetadataForPropertyTable(item);
+
+		getCardBack: ({ item, state, dispatch }) => {
+			if (item.notInCorpus) return <></>;
 			const { ref_list = [] } = item;
 			const previewDataReflist =
 				getReferenceListMetadataPropertyTable(ref_list);
-
-			const labelText = item.isRevoked ? 'Cancel Date' : 'Verification Date';
-			let dateText = 'Unknown';
-			if (item.current_as_of !== undefined && item.current_as_of !== '') {
-				const currentDate = new Date(item.current_as_of);
-				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-					currentDate
-				);
-				const month = new Intl.DateTimeFormat('en', {
-					month: '2-digit',
-				}).format(currentDate);
-				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-					currentDate
-				);
-				dateText = `${month}-${day}-${year}`;
-			}
-
-			let publicationDate;
-			if (
-				item.publication_date_dt !== undefined &&
-				item.publication_date_dt !== ''
-			) {
-				const currentDate = new Date(item.publication_date_dt);
-				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-					currentDate
-				);
-				const month = new Intl.DateTimeFormat('en', {
-					month: '2-digit',
-				}).format(currentDate);
-				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-					currentDate
-				);
-				publicationDate = `${month}-${day}-${year}`;
-			} else {
-				publicationDate = `unknown`;
-			}
-
-			let source_item;
-			if (
-				item.source_fqdn_s !== undefined &&
-				item.source_fqdn_s !== '' &&
-				item.crawler_used_s !== undefined &&
-				item.crawler_used_s !== ''
-			) {
-				let source_name;
-				if (item.source_fqdn_s.startsWith('https://')) {
-					source_name = item.source;
-				} else {
-					source_name = `https://${item.source_fqdn_s}`;
-				}
-				source_item = (
-					<a href={source_name} target="_blank" rel="noopener noreferrer">
-						{crawlerMappingFunc(item.crawler_used_s)}
-					</a>
-				);
-			} else {
-				source_item = 'unknown';
-			}
-
-			let file_orgin_item;
-			if (
-				item.source_page_url_s !== undefined &&
-				item.source_page_url_s !== ''
-			) {
-				file_orgin_item = (
-					<a
-						href={item.source_page_url_s}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{' '}
-						Go to Source{' '}
-					</a>
-				);
-			} else {
-				file_orgin_item = 'unknown';
-			}
-
-			let source_file_item;
-			if (item.download_url_s !== undefined && item.download_url_s !== '') {
-				source_file_item = (
-					<a
-						href={item.download_url_s}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{' '}
-						Open from Source
-					</a>
-				);
-			} else {
-				source_file_item = 'unknown';
-			}
-
-			const favoritableData = [
-				{ Key: 'Published', Value: publicationDate },
-				{ Key: labelText, Value: dateText },
-				{ Key: 'Source', Value: source_item },
-				{ Key: 'File Orgin', Value: file_orgin_item },
-				{ Key: 'Source File', Value: source_file_item },
+			const data = getMetadataForPropertyTable(item);
+			let favoritableData = policyMetadata(item);
+			favoritableData = [
+				...favoritableData,
 				...addFavoriteTopicToMetadata(
 					data,
 					state.userData,
@@ -1569,7 +1468,7 @@ const PolicyCardHandler = {
 						title={'Metadata'}
 						hideHeader={!!state.listView}
 					/>
-					<div style={{ marginTop: -18 }}>
+					<div>
 						<SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}
@@ -1584,7 +1483,7 @@ const PolicyCardHandler = {
 				</div>
 			);
 		},
-		
+
 		getFooter: (props) => {
 			const {
 				filename,
@@ -1603,16 +1502,16 @@ const PolicyCardHandler = {
 					{!state.listView &&
 						<>
 							<>
-								<CardButton target={'_blank'} style={{...styles.footerButtonBack, CARD_FONT_SIZE}} href={'#'}
-								            onClick={(e) => {
-									            e.preventDefault();
-									            clickFn(filename, cloneName, searchText, 0, item.download_url_s);
-								            }}
+								<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={'#'}
+									onClick={(e) => {
+										e.preventDefault();
+										clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+									}}
 								>
 									Open
 								</CardButton>
 								{graphView && <CardButton
-									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 									href={'#'}
 									onClick={(e) => {
 										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
@@ -1623,7 +1522,7 @@ const PolicyCardHandler = {
 									Close
 								</CardButton>}
 								<CardButton
-									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
+									style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 									href={'#'}
 									onClick={(e) => {
 										trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'showDocumentDetails');
@@ -1634,19 +1533,19 @@ const PolicyCardHandler = {
 									Details
 								</CardButton>
 								{(toggledMore && Permissions.isGameChangerAdmin()) &&
-								<CardButton
-									style={{...styles.footerButtonBack, CARD_FONT_SIZE}}
-									href={'#'}
-									onClick={(e) => {
-										e.preventDefault();
-										showEsDoc();
-									}}
-								>
-									<i className="fa fa-code"/>
-								</CardButton>
+									<CardButton
+										style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+										href={'#'}
+										onClick={(e) => {
+											e.preventDefault();
+											showEsDoc();
+										}}
+									>
+										<i className="fa fa-code" />
+									</CardButton>
 								}
 							</>
-							<div style={{...styles.viewMoreButton}} onClick={() => {
+							<div style={{ ...styles.viewMoreButton }} onClick={() => {
 								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
 								setToggledMore(!toggledMore);
 							}}
@@ -2067,7 +1966,7 @@ const PolicyCardHandler = {
 											window.open(
 												`#/gamechanger-details?type=topic&topicName=${item.name}&cloneName=${state.cloneData.clone_name}`
 											)
-										: () => {}
+										: () => { }
 								}
 							>
 								<div className={'text'}>{displayTitle}</div>
