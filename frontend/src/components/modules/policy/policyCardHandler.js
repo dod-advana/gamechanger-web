@@ -716,7 +716,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	</>);
 };
 
-const addFavoriteTopicToMetadata = (
+export const addFavoriteTopicToMetadata = (
 	data,
 	userData,
 	dispatch,
