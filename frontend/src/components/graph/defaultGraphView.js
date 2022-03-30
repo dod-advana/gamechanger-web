@@ -81,7 +81,7 @@ const getGraphData = async (
 
 		const gT1 = new Date().getTime();
 
-		if (graphData.nodes.length > 0) {
+		if (graphData.nodes?.length > 0) {
 			setGraph({ ...graphData, timeFound: (gT1 - gT0) / 1000 });
 			setRunningSearch(false);
 			setGraphResultsFound(true);
@@ -93,7 +93,7 @@ const getGraphData = async (
 			setNoSearches(true);
 		}
 		setNodeLimit(graphResp?.data?.query?.limit);
-		setMockedFromES(graphResp?.data?.query.query === 'Mocked from ES');
+		setMockedFromES(graphResp?.data?.query?.query === 'Mocked from ES');
 	} catch (err) {
 		console.log(err);
 	}
