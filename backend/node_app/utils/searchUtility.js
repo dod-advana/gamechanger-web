@@ -2835,7 +2835,10 @@ class SearchUtility {
 					'publication_date_dt',
 					'crawler_used_s',
 					'topics_s',
-					'top_entities_t'
+					'top_entities_t',
+					'download_url_s',
+					'source_page_url_s',
+					'source_fqdn_s',
 				],
 				track_total_hits: true,
 				size: 100,

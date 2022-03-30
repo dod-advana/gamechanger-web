@@ -15,10 +15,13 @@ import Pagination from 'react-js-pagination';
 import {
 	getTrackingNameForFactory,
 	numberWithCommas,
+	policyMetadata,
+	getMetadataForPropertyTable
 } from '../../utils/gamechangerUtils';
 import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
+import { addFavoriteTopicToMetadata } from '../modules/policy/policyCardHandler';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -61,6 +64,8 @@ const DocumentDetailsPage = (props) => {
 
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
+	const [metadata, setMetadata] = useState(document?.detail);
+
 
 	const [similarDocs, setSimilarDocs] = useState({
 		docCount: 0,
@@ -101,6 +106,23 @@ const DocumentDetailsPage = (props) => {
 			});
 			setRefList(newList);
 		}
+
+		if (document) {
+			const data = getMetadataForPropertyTable(document);
+			let favoritableData = policyMetadata(document);
+			favoritableData = [
+				...favoritableData,
+				...addFavoriteTopicToMetadata(
+					data,
+					userData,
+					{},
+					cloneData,
+					'',
+				),
+			];
+			setMetadata(favoritableData);
+		}
+
 	}, [document]);
 
 	useEffect(() => {
@@ -416,7 +438,7 @@ const DocumentDetailsPage = (props) => {
 												backgroundColor: '#313541',
 												color: 'white',
 											}}
-											rows={document?.details || []}
+											rows={metadata || []}
 											height={'auto'}
 											dontScroll={true}
 											colWidth={colWidth}
