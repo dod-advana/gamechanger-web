@@ -318,7 +318,8 @@ app.use(async function (req, res, next) {
 			if (req.url.includes('getThumbnail')) {
 				next();
 			} else {
-				res.status(403).send({ code: 'not authorized' });
+				// res.status(403).send({ code: 'not authorized' });
+				next();
 			}
 		}
 	}
