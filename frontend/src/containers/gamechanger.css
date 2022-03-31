@@ -123,3 +123,11 @@
 .analyst-tools-filters [class*="MuiAccordion-root"] [class*="MuiAccordionSummary-content"] {
     margin: 0 !important;
 }
+
+#faq-section #accordion-header {
+    height: auto;
+}
+
+#faq-section [class*="MuiAccordionSummary-content"] {
+    margin: 0 !important;
+}

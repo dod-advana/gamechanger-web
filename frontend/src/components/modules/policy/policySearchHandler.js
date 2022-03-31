@@ -87,9 +87,12 @@ const PolicySearchHandler = {
 			}
 		}
 
-		const favSearchUrls = userData.favorite_searches.map((search) => {
-			return search.url;
-		});
+		let favSearchUrls = [];
+		if (userData !== undefined && userData.favorite_searches !== undefined) {
+			favSearchUrls = userData.favorite_searches.map((search) => {
+				return search.url;
+			});
+		}
 
 		this.setSearchURL({ ...state, searchSettings });
 
@@ -138,7 +141,7 @@ const PolicySearchHandler = {
 
 		setState(dispatch, {
 			selectedDocuments: new Map(),
-			loading: searchSettings.isFilterUpdate ? false: true,
+			loading: searchSettings.isFilterUpdate ? false : true,
 			replaceResults: true,
 			metricsLoading: false,
 			noResultsMessage: null,
@@ -470,8 +473,7 @@ const PolicySearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''
 							}`,
 							totalCount,
 							false
@@ -515,8 +517,7 @@ const PolicySearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''
 							}`,
 							totalCount,
 							false
@@ -799,16 +800,16 @@ const PolicySearchHandler = {
 
 		const pubDateText =
 			!publicationDateAllTime &&
-			publicationDateFilter &&
-			publicationDateFilter[0] &&
-			publicationDateFilter[1]
+				publicationDateFilter &&
+				publicationDateFilter[0] &&
+				publicationDateFilter[1]
 				? publicationDateFilter.map((date) => date.getTime()).join('_')
 				: undefined;
 
 		const categoriesText = state.selectedCategories
 			? Object.keys(
 				_.pickBy(state.selectedCategories, (value) => !!value)
-			  ).join('_')
+			).join('_')
 			: undefined;
 
 		const currentParams =
