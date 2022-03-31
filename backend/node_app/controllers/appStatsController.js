@@ -3,7 +3,8 @@ const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
-const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
+const USER = require('../models').user;
+const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
 const sparkMD5Lib = require('spark-md5');
 
 /**
@@ -20,6 +21,7 @@ class AppStatsController {
 			searchUtility = new SearchUtility(opts),
 			dataApi = new DataLibrary(opts),
 			sparkMD5 = sparkMD5Lib,
+			user = USER,
 		} = opts;
 
 		this.logger = logger;
@@ -28,7 +30,7 @@ class AppStatsController {
 		this.dataApi = dataApi;
 		this.mysql = mysql_lib;
 		this.sparkMD5 = sparkMD5;
-
+		this.user = user;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.getRecentlyOpenedDocs = this.getRecentlyOpenedDocs.bind(this);
@@ -240,17 +242,15 @@ class AppStatsController {
 					and a.server_time >= ?
 					and a.server_time <= ?
 				order by 
-					idvisit,
-					documenttime desc;`,
-				[`${startDate}`, endDate],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(self.cleanFilePath(results));
+					documenttime desc,
+					idvisit;`,
+			[`${startDate}`,endDate],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					throw error;
 				}
-			);
+			});
 		});
 	}
 	/**
@@ -279,15 +279,16 @@ class AppStatsController {
 				order by 
 					documenttime desc
 				limit 10`,
-				[userId],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error('No userids found', 'B07IQHT');
-						resolve([]);
-					}
+			[userId],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error('No userids found', 'B07IQHT');
+					resolve([]);
+				}
+				else{
 					resolve(results);
 				}
-			);
+			});
 		});
 	}
 	/**
@@ -334,6 +335,7 @@ class AppStatsController {
 		});
 	}
 
+
 	/**
 	 * This method gets the visitorID tied to a userid
 	 * @method getUserVisitorID
@@ -346,21 +348,20 @@ class AppStatsController {
 			connection.query(
 				`
 			select
-				DISTINCT hex(c.idvisitor) as idvisitor
+				distinct hex(c.idvisitor) as idvisitor,
+				c.user_id as user_id
 			from
 				matomo_log_visit c
 			where 
-				c.user_id = ?
+				c.user_id in (?)
 			`,
-				[userID],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						throw error;
-					}
-					resolve(results);
+			[userID],
+			(error, results, fields) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP');
+					resolve([]);
 				}
-			);
+			});
 		});
 	}
 
@@ -752,7 +753,8 @@ class AppStatsController {
 				select
 					hex(a.idvisitor) as idvisitor,
 					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
-					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made
+					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made,
+					max(server_time) as last_search
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
@@ -830,9 +832,9 @@ class AppStatsController {
 					AND server_time >= ?
 					AND server_time <= ?
 				order by 
-					idvisitor,
-					documenttime desc;`,
-				[startDate, endDate],
+					documenttime desc,
+					idvisitor;`,
+				[startDate,endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -855,43 +857,66 @@ class AppStatsController {
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
 		const documentMap = {};
-
+		const vistitIDMap = {};
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,
 				password: this.constants.MATOMO_DB_CONFIG.password,
-				database: this.constants.MATOMO_DB_CONFIG.database,
+				database: this.constants.MATOMO_DB_CONFIG.database
 			});
 			connection.connect();
-			const users = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
-			const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
-			const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-			const cards = await this.getCardAggregationQuery(opts.startDate, opts.endDate, connection);
-			for (let user of users) {
-				documentMap[user.idvisitor] = { opened: [], ExportDocument: [], Favorite: [] };
-			}
-			for (let doc of documents) {
-				if (!documentMap[doc.idvisitor][doc.action].includes(doc.document)) {
-					documentMap[doc.idvisitor][doc.action].push(doc.document);
-				}
-			}
-			for (let open of opened) {
-				if (!documentMap[open.idvisitor]['opened'].includes(open.document)) {
-					documentMap[open.idvisitor]['opened'].push(open.document);
-				}
-			}
-			users.forEach((user, index) => {
-				users[index] = {
-					...user,
-					opened: documentMap[user.idvisitor]['opened'].slice(-5),
-					export: documentMap[user.idvisitor]['ExportDocument'].slice(-5),
-					favorite: documentMap[user.idvisitor]['Favorite'].slice(-5),
+			const users = await this.user.findAll();
+			const visitorIDs = await this.getUserVisitorID(users.map(x => this.sparkMD5.hash(x.user_id)),connection); 
+			
+			for (let user of users){
+				documentMap[this.sparkMD5.hash(user.user_id)] = {
+					opened:[],
+					ExportDocument:[],
+					Favorite:[],
+					docs_opened:0,
+					searches_made:0,
+					name:user.first_name + ' ' + user.last_name,
+					user_id: user.user_id,
+					org: user.organization,
+					last_search:null
 				};
-			});
+			}
+			for (let visit of visitorIDs){
+				vistitIDMap[visit.idvisitor] = visit.user_id;
+			}
 
-			res.status(200).send({ users: users, cards: cards[0] });
+			const searches = await this.getUserAggregationsQuery(opts.startDate,opts.endDate, connection);
+			const documents = await this.getUserDocuments(opts.startDate,opts.endDate, connection);
+			const opened = await this.queryPdfOpend(opts.startDate,opts.endDate, connection);
+			const cards = await this.getCardAggregationQuery(opts.startDate,opts.endDate, connection);
+
+			for(let search of searches){
+				if (vistitIDMap[search.idvisitor]){					
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] = documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] = documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made
+					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search){
+						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search
+					}
+				}
+			}
+			for (let doc of documents){
+				if (vistitIDMap[doc.idvisitor]){
+					if (!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) && documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5 ){
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					}
+				}
+			}
+			for (let open of opened){
+				if (vistitIDMap[open.idvisitor]){
+					if (!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) && documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5 ){
+						documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					}
+				}
+			}
+				
+			res.status(200).send({users:Object.values(documentMap),cards:cards[0]});
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
 			res.status(500).send(err);
@@ -905,22 +930,20 @@ class AppStatsController {
 	 * @param {*} userdID
 	 */
 	async getUserLastOpened(userdID) {
+
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,
 				password: this.constants.MATOMO_DB_CONFIG.password,
-				database: this.constants.MATOMO_DB_CONFIG.database,
+				database: this.constants.MATOMO_DB_CONFIG.database
 			});
 			connection.connect();
-			const visitorID = await this.getUserVisitorID(userdID, connection);
-			const opened = await this.queryPDFOpenedByUserId(
-				visitorID.map((x) => x.idvisitor),
-				connection
-			);
+			const visitorID = await this.getUserVisitorID([userdID],connection);
+			const opened = await this.queryPDFOpenedByUserId(visitorID.map(x => x.idvisitor), connection);
 			return opened;
-		} catch (err) {
+		}catch (err) {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];
 		} finally {
