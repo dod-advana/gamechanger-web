@@ -2,16 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import XLSX from 'xlsx';
-import {
-	Typography,
-	Grid,
-	Card,
-	CardContent,
-} from '@material-ui/core';
-import {
-	MuiPickersUtilsProvider,
-	KeyboardDateTimePicker 
-} from '@material-ui/pickers';
+import { Typography, Grid, Card, CardContent } from '@material-ui/core';
+import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import DateFnsUtils from '@date-io/date-fns';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
@@ -39,18 +31,12 @@ const TableRow = styled.div`
 	text-align: center;
 `;
 
-export const filterCaseInsensitiveIncludes = (filter, row) =>{
+export const filterCaseInsensitiveIncludes = (filter, row) => {
 	const id = filter.pivotId || filter.id;
-	return (
-		row[id] !== undefined ?
-			String(row[id].toLowerCase()).includes(filter.value.toLowerCase())
-			:
-			false
-	);
+	return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : false;
 };
 
 const columns = [
-	
 	{
 		Header: 'User ID',
 		accessor: 'idvisitor',
@@ -73,21 +59,21 @@ const columns = [
 		Header: 'Action',
 		accessor: 'action',
 		width: 200,
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Search',
 		accessor: 'value',
 		width: 200,
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Document Opened',
 		accessor: 'display_title_s',
 		width: 250,
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
@@ -112,26 +98,27 @@ const columns = [
 		Header: 'Organization',
 		accessor: 'display_org_s',
 		width: 100,
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Topics',
 		accessor: 'topics_rs',
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		width: 250,
 		Cell: (row) => {
 			let finalString = '';
-			if(row.value !== undefined){
+			if (row.value !== undefined) {
 				finalString = Object.keys(row.value).join(', ');
 			}
-			return(<TableRow>{finalString}</TableRow>);},
+			return <TableRow>{finalString}</TableRow>;
+		},
 	},
 	{
 		Header: 'Keywords',
 		accessor: 'keyw_5',
 		width: 250,
-		style: { 'whiteSpace': 'unset' },
+		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
@@ -151,7 +138,7 @@ const userAggColumns = [
 		Header: 'Documents Opened',
 		accessor: 'docs_opened',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	}
+	},
 ];
 
 const feedbackColumns = [
@@ -187,50 +174,42 @@ const documentUsageColumns = [
 		Header: 'Document',
 		accessor: 'document',
 		width: 400,
-		headerStyle: {textAlign: 'left', paddingLeft: '15px'},
-		style: { 'whiteSpace': 'unset' },
+		headerStyle: { textAlign: 'left', paddingLeft: '15px' },
+		style: { whiteSpace: 'unset' },
 		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-		Cell: row => (
-			<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}} >{row.value}</TableRow>
-		)
+		Cell: (row) => <TableRow style={{ textAlign: 'left', paddingLeft: '15px' }}>{row.value}</TableRow>,
 	},
 	{
 		Header: 'View Count',
 		accessor: 'visit_count',
 		width: 140,
 		filterable: false,
-		Cell: row => (
-			<TableRow>{row.value}</TableRow>
-		)
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Unique Viewers',
 		accessor: 'user_count',
 		width: 140,
 		filterable: false,
-		Cell: row => (
-			<TableRow>{row.value}</TableRow>
-		)
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Viewer List',
 		accessor: 'user_list',
-		headerStyle: {textAlign: 'left' , paddingLeft: '15px'},
+		headerStyle: { textAlign: 'left', paddingLeft: '15px' },
 		sortable: false,
 		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-		style: { 'whiteSpace': 'unset' },
-		Cell: row => (
-			<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>
-		)
+		style: { whiteSpace: 'unset' },
+		Cell: (row) => <TableRow style={{ textAlign: 'left', paddingLeft: '15px' }}>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Searches', 
+		Header: 'Searches',
 		accessor: 'searches',
 		sortable: false,
 		filterMethod: (filter, row) => filterCaseInsensitiveIncludes(filter, row),
-		style: { 'whiteSpace': 'unset' },
-		Cell: row => (<TableRow style={{textAlign: 'left' , paddingLeft: '15px'}}>{row.value}</TableRow>)
-	}
+		style: { whiteSpace: 'unset' },
+		Cell: (row) => <TableRow style={{ textAlign: 'left', paddingLeft: '15px' }}>{row.value}</TableRow>,
+	},
 ];
 
 /**
@@ -238,10 +217,13 @@ const documentUsageColumns = [
  * The query is handled in gamechanger-api.
  * @method getSearchPdfMapping
  */
-const getSearchPdfMapping = async (startDate,endDate, setMappingData) => {
+const getSearchPdfMapping = async (startDate, endDate, setMappingData) => {
 	try {
 		// daysBack, offset, filters, sorting, pageSize
-		const params = { startDate:moment(startDate).utc().format('YYYY-MM-DD HH:mm'),endDate:moment(endDate).utc().format('YYYY-MM-DD HH:mm') };
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+		};
 		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
 		setMappingData(data.data);
 	} catch (e) {
@@ -272,7 +254,7 @@ const getFeedbackData = async (setFeedbackData) => {
 const getDocumentData = async (daysBack, setDocumentData) => {
 	try {
 		const params = { daysBack };
-		const {data = {} } = await gameChangerAPI.getDocumentUsage(params);
+		const { data = {} } = await gameChangerAPI.getDocumentUsage(params);
 		setDocumentData(data.data);
 	} catch (e) {
 		console.error(e);
@@ -284,17 +266,19 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
-const getUserAggData = async (startDate,endDate, setUserAggData,setCardData) => {
+const getUserAggData = async (startDate, endDate, setUserAggData, setCardData) => {
 	try {
-		const params = { startDate:moment(startDate).utc().format('YYYY-MM-DD HH:mm'),endDate:moment(endDate).utc().format('YYYY-MM-DD HH:mm') };
-		const {data = {} } = await gameChangerAPI.getUserAggregations(params);
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+		};
+		const { data = {} } = await gameChangerAPI.getUserAggregations(params);
 		setUserAggData(data.users);
 		setCardData(data.cards);
 	} catch (e) {
 		console.error(e);
 	}
 };
-
 
 /**
  * This class queries a search to pdf mapping from matomo
@@ -308,8 +292,8 @@ export default () => {
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
-	const [cardData, setCardData] = useState({unique_users:0,total_searches:0});
-	const [startDate, setStartDate] = useState(moment().subtract(3,'d').set({'hour':0,'minute':0}));
+	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0 });
+	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 }));
 	const [endDate, setEndDate] = useState(moment());
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
@@ -332,7 +316,7 @@ export default () => {
 			setDaysBack(value);
 		}
 	};
-	const handleDateChange = (date,setFunction) => {
+	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
 	/**
@@ -348,16 +332,16 @@ export default () => {
 		}
 		if (shouldUpdate) {
 			setShouldUpdate(false);
-			switch (tabIndex){
+			switch (tabIndex) {
 				case 'pdfMapping':
-					getSearchPdfMapping(startDate,endDate, setMappingData);
+					getSearchPdfMapping(startDate, endDate, setMappingData);
 					getUserAggData(daysBack, setUserAggData);
 					break;
 				case 'userTracking':
 					getDocumentData(daysBack, setDocumentData);
 					break;
 				default:
-					getSearchPdfMapping(startDate,endDate, setMappingData);
+					getSearchPdfMapping(startDate, endDate, setMappingData);
 					getUserAggData(daysBack, setUserAggData);
 					getDocumentData(daysBack, setDocumentData);
 			}
@@ -375,9 +359,9 @@ export default () => {
 	};
 
 	/**
-	* This method renders the documents for react table
-	* @method subComponent
-	*/
+	 * This method renders the documents for react table
+	 * @method subComponent
+	 */
 	const subComponent = (row) => {
 		return (
 			<div>
@@ -388,7 +372,14 @@ export default () => {
 						<ol>
 							{row.original.opened.map((o) => (
 								<li>
-									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(o)}`}> {o} </a> 
+									<a
+										target={'_blank'}
+										rel="noreferrer"
+										href={`/#/pdfviewer/gamechanger?filename=${encode(o)}`}
+									>
+										{' '}
+										{o}{' '}
+									</a>
 								</li>
 							))}
 						</ol>
@@ -398,7 +389,14 @@ export default () => {
 						<ol>
 							{row.original.export.map((e) => (
 								<li>
-									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(e)}`}> {e} </a> 
+									<a
+										target={'_blank'}
+										rel="noreferrer"
+										href={`/#/pdfviewer/gamechanger?filename=${encode(e)}`}
+									>
+										{' '}
+										{e}{' '}
+									</a>
 								</li>
 							))}
 						</ol>
@@ -408,7 +406,14 @@ export default () => {
 						<ol>
 							{row.original.favorite.map((f) => (
 								<li>
-									<a target={'_blank'} rel="noreferrer"  href={`/#/pdfviewer/gamechanger?filename=${encode(f)}`}> {f} </a> 
+									<a
+										target={'_blank'}
+										rel="noreferrer"
+										href={`/#/pdfviewer/gamechanger?filename=${encode(f)}`}
+									>
+										{' '}
+										{f}{' '}
+									</a>
 								</li>
 							))}
 						</ol>
@@ -416,14 +421,14 @@ export default () => {
 				</Grid>
 			</div>
 		);
-	  };
-	
+	};
+
 	/**
 	 * This method takes the a csv name + array in state
 	 * and saves it to the users downloads as a csv.
 	 * @method exportData
 	 */
-	 const exportData = (name, data) => {
+	const exportData = (name, data) => {
 		var ws = XLSX.utils.json_to_sheet(data);
 		var wb = XLSX.utils.book_new();
 		XLSX.utils.book_append_sheet(wb, ws, name);
@@ -431,23 +436,21 @@ export default () => {
 	};
 
 	useEffect(() => {
-		switch (tabIndex){
+		switch (tabIndex) {
 			case 'pdfMapping':
-				getSearchPdfMapping(startDate,endDate, setMappingData);
-				getUserAggData(startDate,endDate, setUserAggData,setCardData);
+				getSearchPdfMapping(startDate, endDate, setMappingData);
+				getUserAggData(startDate, endDate, setUserAggData, setCardData);
 				break;
 			case 'userTracking':
 				getDocumentData(daysBack, setDocumentData);
 				break;
 			default:
-				getSearchPdfMapping(startDate,endDate, setMappingData);
+				getSearchPdfMapping(startDate, endDate, setMappingData);
 				getFeedbackData(setFeedbackData);
-				getUserAggData(startDate,endDate, setUserAggData,setCardData);
+				getUserAggData(startDate, endDate, setUserAggData, setCardData);
 				getDocumentData(daysBack, setDocumentData);
 		}
-	}, [daysBack,tabIndex,startDate,endDate]);
-
-
+	}, [daysBack, tabIndex, startDate, endDate]);
 
 	return (
 		<div style={{ ...TabStyles.tabContainer, minHeight: 'calc(100vh-100px)' }}>
@@ -465,13 +468,13 @@ export default () => {
 								...(tabIndex === 'pdfMapping' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `5px 0 0 0`,
 							}}
-							title='pdfMapping'
+							title="pdfMapping"
 							onClick={() => {
 								setTabIndex('pdfMapping');
 								setDaysBack(3);
-							}
-							}						>
-							<Typography variant='h6' display='inline'>
+							}}
+						>
+							<Typography variant="h6" display="inline">
 								Search PDF Mapping
 							</Typography>
 						</Tab>
@@ -481,10 +484,10 @@ export default () => {
 								...(tabIndex === 'feedback' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: '0 0 0 0',
 							}}
-							title='feedback'
+							title="feedback"
 							onClick={() => setTabIndex('feedback')}
 						>
-							<Typography variant='h6' display='inline'>
+							<Typography variant="h6" display="inline">
 								Feedback
 							</Typography>
 						</Tab>
@@ -494,14 +497,13 @@ export default () => {
 								...(tabIndex === 'userTracker' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 0 0 0`,
 							}}
-							title='userTracker'
+							title="userTracker"
 							onClick={() => {
 								setTabIndex('userTracker');
 								setDaysBack(30);
-							}
-							}
+							}}
 						>
-							<Typography variant='h6' display='inline'>
+							<Typography variant="h6" display="inline">
 								User Tracker Tools
 							</Typography>
 						</Tab>
@@ -522,27 +524,31 @@ export default () => {
 							<Grid container spacing={2}>
 								<MuiPickersUtilsProvider utils={DateFnsUtils}>
 									<Grid item xs={3}>
-										<KeyboardDateTimePicker 
-											margin='normal'
-											format='MM/dd/yyyy hh:mm'
-											InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
+										<KeyboardDateTimePicker
+											margin="normal"
+											format="MM/dd/yyyy hh:mm"
+											InputProps={{
+												style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
+											}}
 											value={startDate}
-											onChange={date => handleDateChange(date,setStartDate)}
+											onChange={(date) => handleDateChange(date, setStartDate)}
 											// onOpen={setDatePickerOpen}
 											// onClose={setDatePickerClosed}
-											style={{flex: '110px', margin: '5px'}}
+											style={{ flex: '110px', margin: '5px' }}
 										/>
 									</Grid>
 									<Grid item xs={3}>
-										<KeyboardDateTimePicker 
-											margin='normal'
-											format='MM/dd/yyyy hh:mm'
-											InputProps={{ style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' } }}
+										<KeyboardDateTimePicker
+											margin="normal"
+											format="MM/dd/yyyy hh:mm"
+											InputProps={{
+												style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
+											}}
 											value={endDate}
-											onChange={date => handleDateChange(date,setEndDate)}
+											onChange={(date) => handleDateChange(date, setEndDate)}
 											// onOpen={setDatePickerOpen}
 											// onClose={setDatePickerClosed}
-											style={{flex: '110px', margin: '5px'}}
+											style={{ flex: '110px', margin: '5px' }}
 										/>
 									</Grid>
 									<Grid item xs={3}></Grid>
@@ -560,7 +566,9 @@ export default () => {
 									<Grid item xs={2}>
 										<Card>
 											<CardContent>
-												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Total Searches</p>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Total Searches
+												</p>
 												{cardData.total_searches}
 											</CardContent>
 										</Card>
@@ -568,7 +576,9 @@ export default () => {
 									<Grid item xs={2}>
 										<Card>
 											<CardContent>
-												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Unique Users</p>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Unique Users
+												</p>
 												{cardData.unique_users}
 											</CardContent>
 										</Card>
@@ -602,9 +612,7 @@ export default () => {
 								margin: '10px 80px',
 							}}
 						>
-							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-								User Data
-							</p>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>User Data</p>
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
@@ -631,9 +639,7 @@ export default () => {
 								margin: '10px 80px',
 							}}
 						>
-							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-								Feedback Data
-							</p>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Feedback Data</p>
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
@@ -652,18 +658,15 @@ export default () => {
 						/>
 					</TabPanel>
 					<TabPanel>
-						<div style={{display: 'flex', justifyContent: 'space-between', margin: '10px 80px'}}>
-							<p style={{...styles.sectionHeader, marginLeft: 0, marginTop: 10}}>Document Usage Data</p>
+						<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Document Usage Data</p>
 							<CreateWrapper>
 								<LabelStack>
-									<label
-										htmlFor='daysBack'
-										style={{ marginRight: '10px', marginTop: '4px' }}
-									>
+									<label htmlFor="daysBack" style={{ marginRight: '10px', marginTop: '4px' }}>
 										Days Back:
 									</label>
 									<input
-										name='daysBack'
+										name="daysBack"
 										value={daysBack}
 										onChange={handleDaysBackChange}
 										onBlur={handleBlur}
@@ -676,15 +679,17 @@ export default () => {
 									trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
 									exportData('DocumentUsage', documentData);
 								}}
-								style={{minWidth: 'unset'}}
-							>Export Document Usage</GCPrimaryButton>
+								style={{ minWidth: 'unset' }}
+							>
+								Export Document Usage
+							</GCPrimaryButton>
 						</div>
 						<ReactTable
 							data={documentData}
 							columns={documentUsageColumns}
 							filterable={true}
-							style={{margin: '0 80px 20px 80px', height: 700}}
-							defaultSorted = {[ { id: 'visit_count', desc: true } ]}
+							style={{ margin: '0 80px 20px 80px', height: 700 }}
+							defaultSorted={[{ id: 'visit_count', desc: true }]}
 						/>
 					</TabPanel>
 				</div>

@@ -15,7 +15,7 @@ const initState = {
 		last_name: '',
 		email: '',
 		type: '',
-		description: ''
+		description: '',
 	},
 	feedbackFormValidation: {
 		first_name: false,
@@ -34,18 +34,43 @@ const initState = {
 	jbookSearchSettings: {
 		clearText: true,
 		budgetType: ['RDT&E', 'Procurement', 'O&M'],
-		reviewStatus: ['Needs Review', 'Partial Review (Primary)', 'Partial Review (Service)', 'Partial Review (POC)', 'Finished Review'],
+		reviewStatus: [
+			'Needs Review',
+			'Partial Review (Primary)',
+			'Partial Review (Service)',
+			'Partial Review (POC)',
+			'Finished Review',
+		],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		programElement: '',
 		projectNum: '',
 		projectTitle: '',
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
-		serviceReviewer: ['Brett Vaughan (Navy)', 'Ruben Cruz (Army)', 'Joseph Chapa (Air Force)', 'Misty Blowers (Marine Corp)', 'Paige Nemmers (SOCOM)', 'Reb Butler (Space Force)', 'Wade Pulliam (OUSD)', 'Unknown'],
+		serviceReviewer: [
+			'Brett Vaughan (Navy)',
+			'Ruben Cruz (Army)',
+			'Joseph Chapa (Air Force)',
+			'Misty Blowers (Marine Corp)',
+			'Paige Nemmers (SOCOM)',
+			'Reb Butler (Space Force)',
+			'Wade Pulliam (OUSD)',
+			'Unknown',
+		],
 		pocReviewer: '',
 		sort: [],
 		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
-		sourceTag: ['Unknown', 'JAIC 2021 Review', 'JAIC Ontology', 'NSCAI', 'JAIC Ontology|OSD CIO', 'JAIC Ontology|NSCAI', 'JAIC Ontology|OSD CIO|NSCAI', 'OSD CIO|NSCAI', 'OSD CIO'],
+		sourceTag: [
+			'Unknown',
+			'JAIC 2021 Review',
+			'JAIC Ontology',
+			'NSCAI',
+			'JAIC Ontology|OSD CIO',
+			'JAIC Ontology|NSCAI',
+			'JAIC Ontology|OSD CIO|NSCAI',
+			'OSD CIO|NSCAI',
+			'OSD CIO',
+		],
 		hasKeywords: ['Yes', 'No'],
 
 		// v --- all and selected --- v
@@ -74,25 +99,84 @@ const initState = {
 		sourceTagAllSelected: true,
 
 		reviewStatusSpecificSelected: false,
-		reviewStatusAllSelected: true
+		reviewStatusAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
 		budgetType: ['RDT&E', 'Procurement', 'O&M'],
-		reviewStatus: ['Needs Review', 'Partial Review (Primary)', 'Partial Review (Service)', 'Partial Review (POC)', 'Finished Review'],
+		reviewStatus: [
+			'Needs Review',
+			'Partial Review (Primary)',
+			'Partial Review (Service)',
+			'Partial Review (POC)',
+			'Finished Review',
+		],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
-		serviceReviewer: ['Brett Vaughan (Navy)', 'Ruben Cruz (Army)', 'Joseph Chapa (Air Force)', 'Misty Blowers (Marine Corp)', 'Paige Nemmers (SOCOM)', 'Reb Butler (Space Force)', 'Wade Pulliam (OUSD)', 'Unknown'],
+		serviceReviewer: [
+			'Brett Vaughan (Navy)',
+			'Ruben Cruz (Army)',
+			'Joseph Chapa (Air Force)',
+			'Misty Blowers (Marine Corp)',
+			'Paige Nemmers (SOCOM)',
+			'Reb Butler (Space Force)',
+			'Wade Pulliam (OUSD)',
+			'Unknown',
+		],
 		pocReviewer: '',
 		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
-		sourceTag: ['Unknown', 'JAIC 2021 Review', 'JAIC Ontology', 'NSCAI', 'JAIC Ontology|OSD CIO', 'JAIC Ontology|NSCAI', 'JAIC Ontology|OSD CIO|NSCAI', 'OSD CIO|NSCAI', 'OSD CIO'],
+		sourceTag: [
+			'Unknown',
+			'JAIC 2021 Review',
+			'JAIC Ontology',
+			'NSCAI',
+			'JAIC Ontology|OSD CIO',
+			'JAIC Ontology|NSCAI',
+			'JAIC Ontology|OSD CIO|NSCAI',
+			'OSD CIO|NSCAI',
+			'OSD CIO',
+		],
 		programElement: '',
 		projectNum: '',
 		projectTitle: '',
 		sort: [],
 		hasKeywords: ['Yes', 'No'],
-		secondaryReviewer: ['Vicki Belleau', 'Robert Brooks', 'Randy Backley', 'Rudolph Butler', 'Matthew Cocuzzi', 'Amorella Davis', 'Edward Faudra', 'Nicholas Forrest', 'Angela Giddings', 'Adam Gilmore', 'Paul Hayes', 'Jason Hill', 'Russell Jimeno', 'Chetna Kapadia', 'Kevin Kennedy', 'Callie King', 'Christopher Kubricky', 'Elony May', 'Lisa Mazur', 'Melissa Moore', 'Laila Moretto', 'Kayla Peterson', 'Paul Roque', 'Tracy Slack', 'Samantha Roy', 'Cristina Stone', 'Kebin Umodu', 'Robert McFarland', 'Timothy Laban', 'Christina Buco', 'David Aha', 'Matt Poe', 'Erik Kirk']
+		secondaryReviewer: [
+			'Vicki Belleau',
+			'Robert Brooks',
+			'Randy Backley',
+			'Rudolph Butler',
+			'Matthew Cocuzzi',
+			'Amorella Davis',
+			'Edward Faudra',
+			'Nicholas Forrest',
+			'Angela Giddings',
+			'Adam Gilmore',
+			'Paul Hayes',
+			'Jason Hill',
+			'Russell Jimeno',
+			'Chetna Kapadia',
+			'Kevin Kennedy',
+			'Callie King',
+			'Christopher Kubricky',
+			'Elony May',
+			'Lisa Mazur',
+			'Melissa Moore',
+			'Laila Moretto',
+			'Kayla Peterson',
+			'Paul Roque',
+			'Tracy Slack',
+			'Samantha Roy',
+			'Cristina Stone',
+			'Kebin Umodu',
+			'Robert McFarland',
+			'Timothy Laban',
+			'Christina Buco',
+			'David Aha',
+			'Matt Poe',
+			'Erik Kirk',
+		],
 	},
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
@@ -191,7 +275,7 @@ const initState = {
 		'Modeling and Simulation': [],
 		'Human-Machine Interaction': [],
 		'Responsible AI': [],
-		'Other': []
+		Other: [],
 	},
 	budgetTypeDropdown: false,
 	serviceAgencyDropdown: false,
@@ -232,7 +316,7 @@ const initState = {
 		show_graph: false,
 		show_crowd_source: false,
 		show_feedback: false,
-		config: { esIndex: 'gc_budgetsearch' }
+		config: { esIndex: 'gc_budgetsearch' },
 	},
 	edaCloneData: {
 		clone_name: 'eda',
@@ -251,7 +335,7 @@ const initState = {
 		show_tutorial: false,
 		show_graph: false,
 		show_crowd_source: false,
-		show_feedback: true
+		show_feedback: true,
 	},
 
 	loading: true,
@@ -319,10 +403,9 @@ const init = (initialState) => {
 const handleSetMultipleStates = (state, action) => {
 	return {
 		...state,
-		...action.payload
+		...action.payload,
 	};
 };
-
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -335,7 +418,7 @@ function reducer(state, action) {
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				jbookSearchSettings: { ...state.defaultOptions }
+				jbookSearchSettings: { ...state.defaultOptions },
 			};
 		default:
 			return state;
@@ -347,11 +430,7 @@ const JBookContext = React.createContext(initState);
 const JBookProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
-	return (
-		<JBookContext.Provider value={{ state, dispatch }}>
-			{props.children}
-		</JBookContext.Provider>
-	);
+	return <JBookContext.Provider value={{ state, dispatch }}>{props.children}</JBookContext.Provider>;
 });
 
 export { JBookContext, JBookProvider };

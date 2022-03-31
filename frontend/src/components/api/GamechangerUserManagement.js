@@ -43,21 +43,21 @@ export default class GamechangerUserManagementAPI {
 	getUserProfileData = async () => {
 		const url = endpoints.getUserProfileDataGET;
 		return axiosGET(this.axios, url);
-	}
+	};
 
 	updateUserProfileData = async (data) => {
 		const url = endpoints.updateUserProfileDataPOST;
 		return axiosPOST(this.axios, url, data);
-	}
+	};
 
 	setupUserProfile = async (body) => {
 		const url = endpoints.setupUserProfilePOST;
 		return axiosPOST(this.axios, url, body);
-	}
+	};
 
 	exportUsers = async (body) => {
 		const url = endpoints.exportUsers;
 		const options = { responseType: 'blob' };
 		return axiosPOST(this.axios, url, body, options);
-	}
+	};
 }

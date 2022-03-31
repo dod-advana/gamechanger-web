@@ -6,17 +6,17 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			userID: {
-				type: Sequelize.STRING
+				type: Sequelize.STRING,
 			},
 			tracking: {
-				type: Sequelize.BOOLEAN
-			}
+				type: Sequelize.BOOLEAN,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('matomo_status');
-	}
+	},
 };

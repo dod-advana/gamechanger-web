@@ -4,11 +4,7 @@ const LOGGER = require('@dod-advana/advana-logger');
 
 class ModularGameChangerController {
 	constructor(opts = {}) {
-		const {
-			logger = LOGGER,
-			clone_meta = CLONE_META,
-			handler_factory = new HandlerFactory(opts),
-		} = opts;
+		const { logger = LOGGER, clone_meta = CLONE_META, handler_factory = new HandlerFactory(opts) } = opts;
 
 		this.logger = logger;
 		this.clone_meta = clone_meta;
@@ -51,58 +47,64 @@ class ModularGameChangerController {
 	async getCloneMeta(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName } = req.body;
-		this.clone_meta.findOne({ where: { clone_name: cloneName } }).then((c) => {
-			res.status(200).send(c);
-		}).catch((e) => {
-			this.logger.error(e, 'C5UONCZ', userId);
-			res.status(500).send();
-		});
+		this.clone_meta
+			.findOne({ where: { clone_name: cloneName } })
+			.then((c) => {
+				res.status(200).send(c);
+			})
+			.catch((e) => {
+				this.logger.error(e, 'C5UONCZ', userId);
+				res.status(500).send();
+			});
 	}
 
 	async getAllCloneMeta(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		this.clone_meta.findAll({ raw: true }).then((c) => {
-			if (c.filter(clone => clone.clone_name === 'gamechanger').length <= 0) {
-				c.push({
-					clone_name: 'gamechanger',
-					search_module: 'policy/policySearchHandler',
-					export_module: 'policy/policyExportHandler',
-					title_bar_module: 'policy/policyTitleBarHandler',
-					navigation_module: 'policy/policyNavigationHandler',
-					card_module: 'policy/policyCardHandler',
-					main_view_module: 'policy/policyMainViewHandler',
-					graph_module: 'policy/policyGraphHandler',
-					search_bar_module: 'policy/policySearchBarHandler',
-					data_module: 'simple/SimpleDataHandler',
-					display_name: 'GAMECHANGER',
-					is_live: true,
-					url: '/',
-					permissions_required: false,
-					clone_to_advana: true,
-					clone_to_gamchanger: true,
-					clone_to_jupiter: true,
-					clone_to_sipr: false,
-					show_tutorial: true,
-					show_graph: true,
-					show_crowd_source: true,
-					show_feedback: true,
-					data_source_name: '',
-					source_agency_name: '',
-					metadata_creation_group: '',
-					source_s3_bucket: '',
-					source_s3_prefix: '',
-					elasticsearch_index: 'gamechanger',
-					needs_ingest: false,
+		this.clone_meta
+			.findAll({ raw: true })
+			.then((c) => {
+				if (c.filter((clone) => clone.clone_name === 'gamechanger').length <= 0) {
+					c.push({
+						clone_name: 'gamechanger',
+						search_module: 'policy/policySearchHandler',
+						export_module: 'policy/policyExportHandler',
+						title_bar_module: 'policy/policyTitleBarHandler',
+						navigation_module: 'policy/policyNavigationHandler',
+						card_module: 'policy/policyCardHandler',
+						main_view_module: 'policy/policyMainViewHandler',
+						graph_module: 'policy/policyGraphHandler',
+						search_bar_module: 'policy/policySearchBarHandler',
+						data_module: 'simple/SimpleDataHandler',
+						display_name: 'GAMECHANGER',
+						is_live: true,
+						url: '/',
+						permissions_required: false,
+						clone_to_advana: true,
+						clone_to_gamchanger: true,
+						clone_to_jupiter: true,
+						clone_to_sipr: false,
+						show_tutorial: true,
+						show_graph: true,
+						show_crowd_source: true,
+						show_feedback: true,
+						data_source_name: '',
+						source_agency_name: '',
+						metadata_creation_group: '',
+						source_s3_bucket: '',
+						source_s3_prefix: '',
+						elasticsearch_index: 'gamechanger',
+						needs_ingest: false,
+					});
+				}
+				c.forEach((clone) => {
+					clone.can_edit = true;
 				});
-			}
-			c.forEach(clone => {
-				clone.can_edit = true;
+				res.status(200).send(c);
+			})
+			.catch((e) => {
+				this.logger.error(e, 'CC0F2OK', userId);
+				res.status(500).send();
 			});
-			res.status(200).send(c);
-		}).catch((e) => {
-			this.logger.error(e, 'CC0F2OK', userId);
-			res.status(500).send();
-		});
 	}
 
 	async storeCloneMeta(req, res) {
@@ -110,15 +112,13 @@ class ModularGameChangerController {
 		try {
 			const { cloneData } = req.body;
 
-			const [clone, created] = await this.clone_meta.findOrCreate(
-				{
-					where: { clone_name: cloneData.clone_name },
-					defaults: { ...cloneData }
-				}
-			);
+			const [clone, created] = await this.clone_meta.findOrCreate({
+				where: { clone_name: cloneData.clone_name },
+				defaults: { ...cloneData },
+			});
 
 			if (!created) {
-				Object.keys(cloneData).forEach(key => {
+				Object.keys(cloneData).forEach((key) => {
 					clone[key] = cloneData[key];
 				});
 				await clone.save();
@@ -127,7 +127,6 @@ class ModularGameChangerController {
 			this.handler_factory.reloadCloneMeta();
 
 			res.status(200).send({ created: created, updated: !created });
-
 		} catch (err) {
 			this.logger.error(err, '1WHVIJU', userId);
 			res.status(500).send(err);
@@ -143,7 +142,6 @@ class ModularGameChangerController {
 			await clone.destroy();
 
 			res.status(200).send({ deleted: true });
-
 		} catch (err) {
 			this.logger.error(err, 'A5LTNHP', userId);
 			res.status(500).send(err);
@@ -169,7 +167,17 @@ class ModularGameChangerController {
 			// NOTE: if this code changes then this will likely necessitate changes to `favoritesController.checkLeastRecentFavoritedSearch`
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			if (offset === null) offset = 0;
-			const results = await handler.search(searchText, offset, limit, options, cloneName, req.permissions, userId, storeHistory, req.session);
+			const results = await handler.search(
+				searchText,
+				offset,
+				limit,
+				options,
+				cloneName,
+				req.permissions,
+				userId,
+				storeHistory,
+				req.session
+			);
 			const error = handler.getError();
 			if (error.code) results.error = error;
 			res.status(200).send(results);
@@ -184,7 +192,15 @@ class ModularGameChangerController {
 		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId, res, req.session);
+			const results = await handler.callFunction(
+				functionName,
+				options,
+				cloneName,
+				req.permissions,
+				userId,
+				res,
+				req.session
+			);
 			res.status(200).send(results);
 		} catch (error) {
 			res.status(500).send(error);
@@ -242,14 +258,20 @@ class ModularGameChangerController {
 
 	async exportProfilePage(req, res) {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
-		const {cloneName, options} = req.body;
+		const { cloneName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
 			const search_handler = this.handler_factory.createHandler('search', cloneName);
-			const data = await search_handler.callFunction('getDataForFullPDFExport', options, cloneName, req.permissions, userId);
+			const data = await search_handler.callFunction(
+				'getDataForFullPDFExport',
+				options,
+				cloneName,
+				req.permissions,
+				userId
+			);
 
-			await handler.exportProfilePage(res, req.permissions, {data}, userId);
-		} catch(error) {
+			await handler.exportProfilePage(res, req.permissions, { data }, userId);
+		} catch (error) {
 			res.status(500).send(error);
 			this.logger.error(error, 'V3BNX34', userId);
 		}

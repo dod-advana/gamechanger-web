@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-	Redirect,
-	Route,
-	HashRouter as Router,
-	Switch,
-} from 'react-router-dom';
+import { Redirect, Route, HashRouter as Router, Switch } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
 import { getProvider } from './components/factories/contextFactory';
@@ -93,11 +88,7 @@ const PrivateTrackedRoute = ({
 	customTelemetryDimensions = false,
 	...rest
 }) => {
-	const WrappedComponent = TrackerWrapper(
-		Component || Render,
-		pageName,
-		customTelemetryDimensions
-	);
+	const WrappedComponent = TrackerWrapper(Component || Render, pageName, customTelemetryDimensions);
 	return (
 		<Route
 			{...rest}
@@ -116,12 +107,7 @@ const PrivateTrackedRoute = ({
 	);
 };
 
-const TrackedPDFView = ({
-	component: Component,
-	render: Render,
-	location,
-	...rest
-}) => {
+const TrackedPDFView = ({ component: Component, render: Render, location, ...rest }) => {
 	const { trackPageView, pushInstruction } = useMatomo();
 	const query = new URLSearchParams(location.search);
 	const filename = query.get('filename');
@@ -140,12 +126,7 @@ const TrackedPDFView = ({
 			href: window.location.href,
 		});
 	});
-	return (
-		<Route
-			{...rest}
-			render={(props) => <RenderComponent {...rest} {...props} />}
-		/>
-	);
+	return <Route {...rest} render={(props) => <RenderComponent {...rest} {...props} />} />;
 };
 
 const App = () => {
@@ -166,18 +147,14 @@ const App = () => {
 					if (clone.available_at === null) {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
-					if (clone.available_at.some(v => v.includes(url) || v === 'all')) {
+					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
 						cloneRoutes.push(
 							<PrivateTrackedRoute
 								key={idx}
 								path={`/${clone.url}/admin`}
 								render={(props) => (
 									<GamechangerProvider>
-										<GamechangerLiteAdminPage
-											{...props}
-											cloneData={clone}
-											jupiter={false}
-										/>
+										<GamechangerLiteAdminPage {...props} cloneData={clone} jupiter={false} />
 									</GamechangerProvider>
 								)}
 								pageName={clone.display_name}
@@ -208,15 +185,17 @@ const App = () => {
 									)}
 									pageName={clone.display_name}
 									allowFunction={() => {
-										return Permissions.allowGCClone(clone.clone_name) || Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+										return (
+											Permissions.allowGCClone(clone.clone_name) ||
+											Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
+										);
 									}}
 								/>
 							);
-						} else { // if clone name is jbook, then push jbook route + cloneData
+						} else {
+							// if clone name is jbook, then push jbook route + cloneData
 							if (clone.clone_name === 'jbook') {
-								cloneRoutes.push(
-									getJBookProfileRoute(clone)
-								);
+								cloneRoutes.push(getJBookProfileRoute(clone));
 							}
 							cloneRoutes.push(
 								<PrivateTrackedRoute
@@ -274,11 +253,7 @@ const App = () => {
 	};
 
 	const isShowNothingButComponent = (location) => {
-		const includePaths = [
-			'/pdfviewer/gamechanger',
-			'/gamechanger/internalUsers/track/me',
-			'/gamechanger-details',
-		];
+		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
 		return includePaths.includes(location.pathname);
 	};
 
@@ -354,16 +329,9 @@ const App = () => {
 								<div style={getStyleType(match, location)}>
 									<SlideOutMenuContextHandler>
 										<>
-											<ErrorBoundary
-												FallbackComponent={ErrorPage}
-												onError={errorHandler}
-											>
+											<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
 												{!isShowNothingButComponent(location) && (
-													<SlideOutMenu
-														match={match}
-														location={location}
-														history={history}
-													/>
+													<SlideOutMenu match={match} location={location} history={history} />
 												)}
 												<Switch>
 													{tokenLoaded &&
@@ -373,7 +341,9 @@ const App = () => {
 													<Route
 														exact
 														path="/"
-														render={() => <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />}
+														render={() => (
+															<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+														)}
 													/>
 													<Route
 														exact
@@ -391,7 +361,10 @@ const App = () => {
 														pageName={'GamechangerAdminPage'}
 														component={GamechangerAdminPage}
 														allowFunction={() => {
-															return Permissions.permissionValidator('Gamechanger Super Admin', true);
+															return Permissions.permissionValidator(
+																'Gamechanger Super Admin',
+																true
+															);
 														}}
 													/>
 													<PrivateTrackedRoute
@@ -418,7 +391,7 @@ const App = () => {
 											</ErrorBoundary>
 										</>
 									</SlideOutMenuContextHandler>
-									<GCFooter setUserMatomo={setUserMatomo}/>
+									<GCFooter setUserMatomo={setUserMatomo} />
 								</div>
 							)}
 						/>

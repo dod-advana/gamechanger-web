@@ -2,19 +2,12 @@ import React, { useState, useEffect } from 'react';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import {
-	Dialog,
-	DialogTitle,
-	DialogContent,
-	DialogActions,
-	TextField,
-	Typography, Input,
-} from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography, Input } from '@material-ui/core';
 import GCButton from '../../common/GCButton';
 import { styles, GCCheckbox, useStyles } from '../util/GCAdminStyles';
 import styled from 'styled-components';
-import {gcOrange} from '../../common/gc-colors';
-import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
+import { gcOrange } from '../../common/gc-colors';
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 
 const DEFAULT_VALUES = {
 	clone_name: '',
@@ -33,19 +26,19 @@ const DEFAULT_VALUES = {
 	metadata_creation_group: '',
 	source_s3_bucket: '',
 	source_s3_prefix: '',
-	permissions: ['is_admin']
+	permissions: ['is_admin'],
 };
 
 const TabContainer = styled.div`
 	align-items: center;
 	min-height: 613px;
-	
+
 	.tab-button-container {
 		width: 100%;
 		display: flex;
 		align-items: center;
 	}
-	
+
 	.tabs-list {
 		border-bottom: 2px solid ${gcOrange};
 		padding: 0;
@@ -54,7 +47,7 @@ const TabContainer = styled.div`
 		flex: 9;
 		margin: 10px !important;
 	}
-	
+
 	.panel-container {
 		align-items: center;
 		margin: 10px;
@@ -65,13 +58,21 @@ const tabList = [
 	{
 		title: 'cloneMeta',
 		onClick: () => {},
-		children: <Typography variant="h6" display="inline" title="cardView">Clone Meta</Typography>
+		children: (
+			<Typography variant="h6" display="inline" title="cardView">
+				Clone Meta
+			</Typography>
+		),
 	},
 	{
 		title: 'clonePermissions',
 		onClick: () => {},
-		children: <Typography variant="h6" display="inline" title="cardView">Clone Permissions</Typography>
-	}
+		children: (
+			<Typography variant="h6" display="inline" title="cardView">
+				Clone Permissions
+			</Typography>
+		),
+	},
 ];
 
 /**
@@ -124,7 +125,7 @@ export default ({
 	useEffect(() => {
 		if (showCreateEditCloneModal && cloneToEdit) {
 			const tmpData = { ...cloneToEdit };
-			if(tmpData.available_at !== null){
+			if (tmpData.available_at !== null) {
 				tmpData.available_at = tmpData.available_at.join(', ');
 			}
 			if (!tmpData.permissions || tmpData.permissions === null) {
@@ -185,7 +186,6 @@ export default ({
 	};
 
 	const renderClonePermissions = () => {
-
 		const addPermission = (permission) => {
 			const tmpData = { ...editCloneData };
 
@@ -201,7 +201,7 @@ export default ({
 			const tmpData = { ...editCloneData };
 
 			if (tmpData.permissions.includes(permission)) {
-				tmpData.permissions = tmpData.permissions.filter(item => item !== permission);
+				tmpData.permissions = tmpData.permissions.filter((item) => item !== permission);
 				setEditCloneData(tmpData);
 			}
 		};
@@ -215,7 +215,7 @@ export default ({
 				<Typography variant="h4" style={styles.modalHeaders}>
 					Add Permission
 				</Typography>
-				<div style={{marginBottom: 20}}>
+				<div style={{ marginBottom: 20 }}>
 					<TextField
 						label={'Add Permission'}
 						value={addPermissionField}
@@ -235,28 +235,29 @@ export default ({
 					Permissions
 				</Typography>
 				<div>
-					{editCloneData.permissions && editCloneData.permissions.map(permission =>
-						<div style={{marginBottom: 10}}>
-							<Input
-								id={`${permission}-input`}
-								className={classes.inputBox}
-								value={permission}
-								disabled={true}
-							/>
-							<GCButton
-								id={`${permission}-delete`}
-								onClick={() => deletePermissions(permission)}
-								style={{
-									minWidth: 'unset',
-									backgroundColor: 'red',
-									borderColor: 'red',
-									marginTop: -15
-								}}
-							>
-								Remove
-							</GCButton>
-						</div>
-					)}
+					{editCloneData.permissions &&
+						editCloneData.permissions.map((permission) => (
+							<div style={{ marginBottom: 10 }}>
+								<Input
+									id={`${permission}-input`}
+									className={classes.inputBox}
+									value={permission}
+									disabled={true}
+								/>
+								<GCButton
+									id={`${permission}-delete`}
+									onClick={() => deletePermissions(permission)}
+									style={{
+										minWidth: 'unset',
+										backgroundColor: 'red',
+										borderColor: 'red',
+										marginTop: -15,
+									}}
+								>
+									Remove
+								</GCButton>
+							</div>
+						))}
 				</div>
 			</div>
 		);
@@ -276,9 +277,7 @@ export default ({
 			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
 					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
-						{editCloneData.id && editCloneData.id > 0
-							? 'Edit Clone'
-							: 'Create Clone'}
+						{editCloneData.id && editCloneData.id > 0 ? 'Edit Clone' : 'Create Clone'}
 					</Typography>
 				</div>
 				<IconButton
@@ -300,14 +299,10 @@ export default ({
 			</DialogTitle>
 
 			<DialogContent style={{ height: 760 }}>
-				<TabContainer id='gc-clone-modal'>
-					<Tabs
-						onSelect={(tabIndex, lastIndex, event) =>
-							handleTabClicked(tabIndex, lastIndex, event)
-						}
-					>
+				<TabContainer id="gc-clone-modal">
+					<Tabs onSelect={(tabIndex, lastIndex, event) => handleTabClicked(tabIndex, lastIndex, event)}>
 						<div className={'tab-button-container'}>
-							<TabList className={'tabs-list'} >
+							<TabList className={'tabs-list'}>
 								{tabList.map((tab, index) => {
 									const tl = index === 0 ? '5px' : '0';
 									const tr = index === tabList.length - 1 ? '5px' : '0';
@@ -329,12 +324,8 @@ export default ({
 						</div>
 
 						<div className={'panel-container'}>
-							<TabPanel>
-								{renderCloneMeta()}
-							</TabPanel>
-							<TabPanel>
-								{renderClonePermissions()}
-							</TabPanel>
+							<TabPanel>{renderCloneMeta()}</TabPanel>
+							<TabPanel>{renderClonePermissions()}</TabPanel>
 						</div>
 					</Tabs>
 				</TabContainer>

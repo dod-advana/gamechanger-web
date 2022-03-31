@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {styled as muiStyled, styled} from '@mui/material/styles';
+import { styled as muiStyled, styled } from '@mui/material/styles';
 import {
 	Dialog,
 	DialogTitle,
@@ -11,28 +11,30 @@ import {
 	DialogActions,
 	Grid,
 	Avatar,
-	Box, TextField, Stack, Badge
+	Box,
+	TextField,
+	Stack,
+	Badge,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 // import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
-import {convertHexToRgbA} from '../../utils/gamechangerUtils';
+import { convertHexToRgbA } from '../../utils/gamechangerUtils';
 
-const StyledDialog = styled(Dialog)(({ theme}) => ({
+const StyledDialog = styled(Dialog)(({ theme }) => ({
 	'& .MuiPaper-root': {
 		maxWidth: 1600,
-		minWidth: 1600
+		minWidth: 1600,
 	},
 	'& .MuiDialogActions-root': {
-		margin: 20
-	}
+		margin: 20,
+	},
 }));
 
-const StyledGrid = styled(Grid)(({theme}) => ({
+const StyledGrid = styled(Grid)(({ theme }) => ({
 	background: '#F5F5F5',
 	width: '94%',
-	margin: '20px 20px 0 20px'
-
+	margin: '20px 20px 0 20px',
 }));
 
 const StyledOutlinedButton = muiStyled(Button)(
@@ -44,20 +46,20 @@ const StyledOutlinedButton = muiStyled(Button)(
 		},
 		'&:active': {
 			boxShadow: 'none',
-		}
+		},
 	},
-	props => ({
+	(props) => ({
 		borderColor: props.primaryColor,
 		color: props.primaryColor,
 		'&:hover': {
-			borderColor: props.primaryColor
+			borderColor: props.primaryColor,
 		},
 		'&:active': {
-			borderColor: props.primaryColor
+			borderColor: props.primaryColor,
 		},
 		'&:focus': {
-			boxShadow: `0 0 0 0.2rem ${convertHexToRgbA(props.primaryColor, 0.5)}`
-		}
+			boxShadow: `0 0 0 0.2rem ${convertHexToRgbA(props.primaryColor, 0.5)}`,
+		},
 	})
 );
 
@@ -71,9 +73,9 @@ const StyledFilledButton = muiStyled(Button)(
 		},
 		'&:active': {
 			boxShadow: 'none',
-		}
+		},
 	},
-	props => ({
+	(props) => ({
 		borderColor: props.primaryColor,
 		background: props.primaryColor,
 		'&:hover': {
@@ -81,27 +83,25 @@ const StyledFilledButton = muiStyled(Button)(
 			background: props.primaryColor,
 		},
 		'&:active': {
-			borderColor: props.primaryColor
+			borderColor: props.primaryColor,
 		},
 		'&:focus': {
-			boxShadow: `0 0 0 0.2rem ${convertHexToRgbA(props.primaryColor, 0.5)}`
-		}
+			boxShadow: `0 0 0 0.2rem ${convertHexToRgbA(props.primaryColor, 0.5)}`,
+		},
 	})
 );
 
-const StyledTextField = muiStyled(TextField)(
-	{
-		'& .MuiInputLabel-root': {
-			fontSize: 16,
-			fontFamily: 'Montserrat'
-		},
-		'& .MuiOutlinedInput-root': {
-			fontSize: 18,
-			fontFamily: 'Montserrat',
-			background: '#ffffff'
-		}
-	}
-);
+const StyledTextField = muiStyled(TextField)({
+	'& .MuiInputLabel-root': {
+		fontSize: 16,
+		fontFamily: 'Montserrat',
+	},
+	'& .MuiOutlinedInput-root': {
+		fontSize: 18,
+		fontFamily: 'Montserrat',
+		background: '#ffffff',
+	},
+});
 
 // const SmallAvatar = styled(Avatar)(({ theme }) => (
 // 	props => ({
@@ -115,7 +115,6 @@ const StyledTextField = muiStyled(TextField)(
 const REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'organization', 'country'];
 
 const EditUserProfile = React.memo((props) => {
-    
 	const {
 		updateUserData = () => {},
 		setShowModal = () => {},
@@ -123,26 +122,26 @@ const EditUserProfile = React.memo((props) => {
 		userData = {},
 		primaryColor = '#E9691D',
 		secondaryColor = '#8091A5',
-		customMessage
+		customMessage,
 	} = props;
-    
+
 	const [editUserData, setEditUserData] = useState({});
 	const [userDataErrors, setUserDataErrors] = useState({});
 
-	useEffect(()=>{
+	useEffect(() => {
 		setEditUserData(userData);
 		const tempUserDataErrors = {};
 
-		Object.keys(userData).forEach(dataKey => {
+		Object.keys(userData).forEach((dataKey) => {
 			tempUserDataErrors[dataKey] = false;
 		});
 
 		setUserDataErrors(tempUserDataErrors);
-	},[userData]);
-    
+	}, [userData]);
+
 	const closeUserModal = () => {
 		const tmpData = { ...userDataErrors };
-		Object.keys(tmpData).forEach(dataKey => {
+		Object.keys(tmpData).forEach((dataKey) => {
 			tmpData[dataKey] = false;
 		});
 		setUserDataErrors(tmpData);
@@ -156,7 +155,7 @@ const EditUserProfile = React.memo((props) => {
 		let hasErrors = false;
 
 		// Check required fields are filled in
-		REQUIRED_FIELDS.forEach(reqField => {
+		REQUIRED_FIELDS.forEach((reqField) => {
 			if (!editUserData[reqField] || editUserData[reqField] === null || editUserData[reqField] === '') {
 				tmpData[reqField] = true;
 				hasErrors = true;
@@ -166,8 +165,7 @@ const EditUserProfile = React.memo((props) => {
 		setUserDataErrors(tmpData);
 		console.log(tmpData);
 
-		if (!hasErrors)
-			updateUserData(editUserData);
+		if (!hasErrors) updateUserData(editUserData);
 	};
 
 	const handleTextChange = (event, key) => {
@@ -175,16 +173,17 @@ const EditUserProfile = React.memo((props) => {
 		tmpData[key] = event.target.value;
 		setEditUserData(tmpData);
 	};
-    
+
 	return (
-		<StyledDialog
-			open={showModal}
-			scroll={'paper'}
-			disableEscapeKeyDown
-			disableBackdropClick
-		>
+		<StyledDialog open={showModal} scroll={'paper'} disableEscapeKeyDown disableBackdropClick>
 			<DialogTitle sx={{ m: 3, p: 0 }}>
-				<Typography variant="h3" display="inline" style={{ fontFamily: 'Montserrat', fontWeight: 700, marginLeft: 20 }}>Edit Profile Data</Typography>
+				<Typography
+					variant="h3"
+					display="inline"
+					style={{ fontFamily: 'Montserrat', fontWeight: 700, marginLeft: 20 }}
+				>
+					Edit Profile Data
+				</Typography>
 				<IconButton
 					aria-label="close"
 					onClick={closeUserModal}
@@ -195,16 +194,20 @@ const EditUserProfile = React.memo((props) => {
 						color: (theme) => theme.palette.grey[500],
 					}}
 				>
-					<CloseIcon sx={{width: 30, height: 30, color: '#1F2020'}} />
+					<CloseIcon sx={{ width: 30, height: 30, color: '#1F2020' }} />
 				</IconButton>
 			</DialogTitle>
 			<DialogContent style={{ height: customMessage ? 640 : 612 }}>
-				{customMessage &&
-					<Typography style={{fontFamily: 'Montserrat', fontSize: 18, marginLeft: 20}}>{customMessage}</Typography>
-				}
-				<Typography style={{ fontFamily: 'Montserrat', fontSize: 18, marginLeft: 20 }}>Use the form below to edit your profile information</Typography>
+				{customMessage && (
+					<Typography style={{ fontFamily: 'Montserrat', fontSize: 18, marginLeft: 20 }}>
+						{customMessage}
+					</Typography>
+				)}
+				<Typography style={{ fontFamily: 'Montserrat', fontSize: 18, marginLeft: 20 }}>
+					Use the form below to edit your profile information
+				</Typography>
 				<StyledGrid container>
-					<Grid container justify="center" item xs={2} sx={{p: 2, justifyContent: 'center'}}>
+					<Grid container justify="center" item xs={2} sx={{ p: 2, justifyContent: 'center' }}>
 						<Badge
 							overlap="circular"
 							anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -215,15 +218,21 @@ const EditUserProfile = React.memo((props) => {
 							// }
 							sx={{ width: 145, height: 145, marginTop: 5 }}
 						>
-							<Avatar src={ProfileDefaultImg} alt="profile-pic" sx={{ width: 145, height: 145, marginTop: 5 }}/>
+							<Avatar
+								src={ProfileDefaultImg}
+								alt="profile-pic"
+								sx={{ width: 145, height: 145, marginTop: 5 }}
+							/>
 						</Badge>
 					</Grid>
-					<Grid item xs={10} sx={{p: 2}}>
-						<Typography style={{ fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{editUserData.preferred_name || `${editUserData.first_name || ''} ${editUserData.last_name || ''}`}</Typography>
-						<Box
-							component="form"
-							autoComplete="off"
+					<Grid item xs={10} sx={{ p: 2 }}>
+						<Typography
+							style={{ fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}
 						>
+							{editUserData.preferred_name ||
+								`${editUserData.first_name || ''} ${editUserData.last_name || ''}`}
+						</Typography>
+						<Box component="form" autoComplete="off">
 							<Stack spacing={2}>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
@@ -232,8 +241,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Preferred Name"
 										variant="outlined"
 										value={editUserData.preferred_name || ''}
-										onChange={event => handleTextChange(event, 'preferred_name')}
-										sx={{width: 340}}
+										onChange={(event) => handleTextChange(event, 'preferred_name')}
+										sx={{ width: 340 }}
 									/>
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
@@ -243,7 +252,7 @@ const EditUserProfile = React.memo((props) => {
 										label="First Name"
 										variant="outlined"
 										value={editUserData.first_name || ''}
-										onChange={event => handleTextChange(event, 'first_name')}
+										onChange={(event) => handleTextChange(event, 'first_name')}
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('last_name')}
@@ -251,7 +260,7 @@ const EditUserProfile = React.memo((props) => {
 										label="Last Name"
 										variant="outlined"
 										value={editUserData.last_name || ''}
-										onChange={event => handleTextChange(event, 'last_name')}
+										onChange={(event) => handleTextChange(event, 'last_name')}
 									/>
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
@@ -261,8 +270,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Email"
 										variant="outlined"
 										value={editUserData.email || ''}
-										onChange={event => handleTextChange(event, 'email')}
-										sx={{width: 400}}
+										onChange={(event) => handleTextChange(event, 'email')}
+										sx={{ width: 400 }}
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('phone_number')}
@@ -270,8 +279,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Phone"
 										variant="outlined"
 										value={editUserData.phone_number || ''}
-										onChange={event => handleTextChange(event, 'phone_number')}
-										sx={{width: 400}}
+										onChange={(event) => handleTextChange(event, 'phone_number')}
+										sx={{ width: 400 }}
 									/>
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
@@ -281,8 +290,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Agency/Organization"
 										variant="outlined"
 										value={editUserData.organization || ''}
-										onChange={event => handleTextChange(event, 'organization')}
-										sx={{width: 440}}
+										onChange={(event) => handleTextChange(event, 'organization')}
+										sx={{ width: 440 }}
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('sub_office')}
@@ -290,11 +299,20 @@ const EditUserProfile = React.memo((props) => {
 										label="Sub-Office"
 										variant="outlined"
 										value={editUserData.sub_office || ''}
-										onChange={event => handleTextChange(event, 'sub_office')}
-										sx={{width: 440}}
+										onChange={(event) => handleTextChange(event, 'sub_office')}
+										sx={{ width: 440 }}
 									/>
 								</Stack>
-								<Typography style={{ fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 14, marginBottom: 2 }}>Work Location</Typography>
+								<Typography
+									style={{
+										fontFamily: 'Montserrat',
+										fontWeight: 'bold',
+										fontSize: 14,
+										marginBottom: 2,
+									}}
+								>
+									Work Location
+								</Typography>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('country')}
@@ -302,8 +320,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Country"
 										variant="outlined"
 										value={editUserData.country || ''}
-										onChange={event => handleTextChange(event, 'country')}
-										sx={{width: 340}}
+										onChange={(event) => handleTextChange(event, 'country')}
+										sx={{ width: 340 }}
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('state')}
@@ -311,8 +329,8 @@ const EditUserProfile = React.memo((props) => {
 										label="State"
 										variant="outlined"
 										value={editUserData.state || ''}
-										onChange={event => handleTextChange(event, 'state')}
-										sx={{width: 340}}
+										onChange={(event) => handleTextChange(event, 'state')}
+										sx={{ width: 340 }}
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('city')}
@@ -320,8 +338,8 @@ const EditUserProfile = React.memo((props) => {
 										label="City"
 										variant="outlined"
 										value={editUserData.city || ''}
-										onChange={event => handleTextChange(event, 'city')}
-										sx={{width: 200}}
+										onChange={(event) => handleTextChange(event, 'city')}
+										sx={{ width: 200 }}
 									/>
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
@@ -331,8 +349,8 @@ const EditUserProfile = React.memo((props) => {
 										label="Job Title"
 										variant="outlined"
 										value={editUserData.job_title || ''}
-										onChange={event => handleTextChange(event, 'job_title')}
-										sx={{width: 490}}
+										onChange={(event) => handleTextChange(event, 'job_title')}
+										sx={{ width: 490 }}
 									/>
 								</Stack>
 							</Stack>
@@ -341,17 +359,10 @@ const EditUserProfile = React.memo((props) => {
 				</StyledGrid>
 			</DialogContent>
 			<DialogActions>
-				<StyledOutlinedButton
-					variant="outlined"
-					onClick={closeUserModal}
-					primaryColor={secondaryColor}
-				>
+				<StyledOutlinedButton variant="outlined" onClick={closeUserModal} primaryColor={secondaryColor}>
 					Cancel
 				</StyledOutlinedButton>
-				<StyledFilledButton
-					onClick={saveUserData}
-					primaryColor={primaryColor}
-				>
+				<StyledFilledButton onClick={saveUserData} primaryColor={primaryColor}>
 					Save
 				</StyledFilledButton>
 			</DialogActions>
@@ -366,7 +377,7 @@ EditUserProfile.propTypes = {
 	showModal: PropTypes.bool,
 	primaryColor: PropTypes.string,
 	secondaryColor: PropTypes.string,
-	customMessage: PropTypes.string
+	customMessage: PropTypes.string,
 };
 
 export default EditUserProfile;

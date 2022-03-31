@@ -1,11 +1,7 @@
-const ModularEsSearchUtil = function ModularEsSearchUtil(){};
+const ModularEsSearchUtil = function ModularEsSearchUtil() {};
 
-ModularEsSearchUtil.prototype.createBasicEsQuery = function(opts) {
-	const {
-		searchText,
-		offset,
-		limit
-	} = opts;
+ModularEsSearchUtil.prototype.createBasicEsQuery = function (opts) {
+	const { searchText, offset, limit } = opts;
 	return 'fake';
 };
 

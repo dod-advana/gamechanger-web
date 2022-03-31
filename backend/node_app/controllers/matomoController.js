@@ -3,10 +3,7 @@ const LOGGER = require('@dod-advana/advana-logger');
 
 class MatomoController {
 	constructor(opts = {}) {
-		const {
-			matomoStatus = MATOMO_STATUS,
-			logger = LOGGER
-		} = opts;
+		const { matomoStatus = MATOMO_STATUS, logger = LOGGER } = opts;
 
 		this.matomoStatus = matomoStatus;
 		this.logger = logger;
@@ -21,11 +18,10 @@ class MatomoController {
 		const userID = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-
 			const data = await this.matomoStatus.findOne({
 				where: {
-					userID: 'advana' // the 'userID' of the app-wide matomo
-				}
+					userID: 'advana', // the 'userID' of the app-wide matomo
+				},
 			});
 
 			if (data === null) {
@@ -36,7 +32,6 @@ class MatomoController {
 			}
 
 			return data;
-
 		} catch (err) {
 			this.logger.error(err, 'gcNHADT0R', userID);
 			res.status(500).send(err);
@@ -48,26 +43,26 @@ class MatomoController {
 		const userID = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-
 			const { tracking } = req.body;
 
 			const data = await this.matomoStatus.findOne({
 				where: {
-					userID: 'advana'
-				}
+					userID: 'advana',
+				},
 			});
 
 			if (data === null) {
 				this.matomoStatus.create({ userID: 'advana', tracking: true });
 			} else {
-				this.matomoStatus.update({
-					tracking
-				},
-				{
-					where: {
-						userID: 'advana'
+				this.matomoStatus.update(
+					{
+						tracking,
+					},
+					{
+						where: {
+							userID: 'advana',
+						},
 					}
-				}
 				);
 			}
 
@@ -85,8 +80,8 @@ class MatomoController {
 		try {
 			const data = await this.matomoStatus.findOne({
 				where: {
-					userID
-				}
+					userID,
+				},
 			});
 
 			if (data === null) {
@@ -111,29 +106,28 @@ class MatomoController {
 
 			const data = await this.matomoStatus.findOne({
 				where: {
-					userID
-				}
+					userID,
+				},
 			});
 
 			if (data === null) {
 				if (!tracking) {
 					this.matomoStatus.create({
 						userID,
-						tracking: false
+						tracking: false,
 					});
 				}
 			} else {
 				if (tracking) {
 					this.matomoStatus.destroy({
 						where: {
-							userID
-						}
+							userID,
+						},
 					});
 				}
 			}
 
 			res.status(200).send(tracking);
-
 		} catch (err) {
 			this.logger.error(err, 'gc4XFH9TA', userID);
 			res.status(500).send(err);

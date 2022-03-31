@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { setState } from '../../../utils/sharedFunctions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { Typography, Grid, Dialog, DialogTitle, DialogContent, DialogActions, TextField, makeStyles } from '@material-ui/core';
+import {
+	Typography,
+	Grid,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	TextField,
+	makeStyles,
+} from '@material-ui/core';
 import GCPrimaryButton from '../../common/GCButton';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GameChangerAPI from '../../api/gameChanger-service-api';
@@ -13,19 +22,12 @@ const _ = require('lodash');
 const useStyles = makeStyles((theme) => ({
 	input: {
 		height: 40,
-		fontSize: '1.2em'
+		fontSize: '1.2em',
 	},
 }));
 
-
 const FeedbackModal = ({ dispatch, state }) => {
-
-	const {
-		feedbackModalOpen,
-		feedbackForm,
-		feedbackValidated,
-		feedbackFormValidation
-	} = state;
+	const { feedbackModalOpen, feedbackForm, feedbackValidated, feedbackFormValidation } = state;
 
 	const classes = useStyles();
 
@@ -34,7 +36,6 @@ const FeedbackModal = ({ dispatch, state }) => {
 	const [focusFName, setFocusFName] = useState(false);
 	const [focusLName, setFocusLName] = useState(false);
 	const [focusEmail, setFocusEmail] = useState(false);
-
 
 	useEffect(() => {
 		setDescription(feedbackForm.description);
@@ -66,10 +67,9 @@ const FeedbackModal = ({ dispatch, state }) => {
 		let validated = true;
 
 		for (const field of Object.keys(feedbackValidation)) {
-
 			const fieldValue = feedbackForm[field];
 
-			feedbackValidation[field] = (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			feedbackValidation[field] = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
 			if (feedbackValidation[field] === false) {
 				validated = false;
 			}
@@ -80,27 +80,29 @@ const FeedbackModal = ({ dispatch, state }) => {
 	};
 
 	return (
-		<Dialog
-			open={feedbackModalOpen}
-			scroll={'paper'}
-			maxWidth="lg"
-			disableEscapeKeyDown
-			disableBackdropClick
-		>
-			<DialogTitle >
+		<Dialog open={feedbackModalOpen} scroll={'paper'} maxWidth="lg" disableEscapeKeyDown disableBackdropClick>
+			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
-					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{`Help us improve your experience with feedback!`}</Typography>
+					<Typography
+						variant="h3"
+						display="inline"
+						style={{ fontWeight: 700 }}
+					>{`Help us improve your experience with feedback!`}</Typography>
 				</div>
-				<IconButton aria-label="close" style={{
-					position: 'absolute',
-					right: '0px',
-					top: '0px',
-					height: 60,
-					width: 60,
-					color: 'black',
-					// backgroundColor: styles.backgroundGreyLight,
-					borderRadius: 0
-				}} onClick={() => setState(dispatch, { feedbackModalOpen: false })}>
+				<IconButton
+					aria-label="close"
+					style={{
+						position: 'absolute',
+						right: '0px',
+						top: '0px',
+						height: 60,
+						width: 60,
+						color: 'black',
+						// backgroundColor: styles.backgroundGreyLight,
+						borderRadius: 0,
+					}}
+					onClick={() => setState(dispatch, { feedbackModalOpen: false })}
+				>
 					<CloseIcon style={{ fontSize: 30 }} />
 				</IconButton>
 			</DialogTitle>
@@ -118,7 +120,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 								style={{ width: 330 }}
 								InputProps={{
 									classes: {
-										input: classes.input
+										input: classes.input,
 									},
 									onFocus: () => {
 										setFocusFName(true);
@@ -126,17 +128,20 @@ const FeedbackModal = ({ dispatch, state }) => {
 									onBlur: (e) => {
 										setFeedbackForm('first_name', e.target.value);
 										setFocusFName(false);
-									}
+									},
 								}}
 								InputLabelProps={{
 									style: {
-										top: focusFName || (feedbackForm && feedbackForm['first_name'].length > 0) ? '0px' : '8px'
-									}
+										top:
+											focusFName || (feedbackForm && feedbackForm['first_name'].length > 0)
+												? '0px'
+												: '8px',
+									},
 								}}
 								FormHelperTextProps={{
 									style: {
-										margin: '5px 0 0'
-									}
+										margin: '5px 0 0',
+									},
 								}}
 								helperText={<i style={{ color: '#d32f2f', fontSize: '11px' }}>*Required</i>}
 							/>
@@ -150,7 +155,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 								style={{ width: 330 }}
 								InputProps={{
 									classes: {
-										input: classes.input
+										input: classes.input,
 									},
 									onFocus: () => {
 										setFocusLName(true);
@@ -158,17 +163,20 @@ const FeedbackModal = ({ dispatch, state }) => {
 									onBlur: (e) => {
 										setFeedbackForm('last_name', e.target.value);
 										setFocusLName(false);
-									}
+									},
 								}}
 								InputLabelProps={{
 									style: {
-										top: focusLName || (feedbackForm && feedbackForm['last_name'].length > 0) ? '0px' : '8px'
-									}
+										top:
+											focusLName || (feedbackForm && feedbackForm['last_name'].length > 0)
+												? '0px'
+												: '8px',
+									},
 								}}
 								FormHelperTextProps={{
 									style: {
-										margin: '5px 0 0'
-									}
+										margin: '5px 0 0',
+									},
 								}}
 								helperText={<i style={{ color: '#d32f2f', fontSize: '11px' }}>*Required</i>}
 							/>
@@ -185,7 +193,7 @@ const FeedbackModal = ({ dispatch, state }) => {
 								variant="outlined"
 								InputProps={{
 									classes: {
-										input: classes.input
+										input: classes.input,
 									},
 									onFocus: () => {
 										setFocusEmail(true);
@@ -193,17 +201,20 @@ const FeedbackModal = ({ dispatch, state }) => {
 									onBlur: (e) => {
 										setFeedbackForm('email', e.target.value);
 										setFocusEmail(false);
-									}
+									},
 								}}
 								InputLabelProps={{
 									style: {
-										top: focusEmail || (feedbackForm && feedbackForm['email'].length > 0) ? '0px' : '8px'
-									}
+										top:
+											focusEmail || (feedbackForm && feedbackForm['email'].length > 0)
+												? '0px'
+												: '8px',
+									},
 								}}
 								FormHelperTextProps={{
 									style: {
-										margin: '5px 0 0'
-									}
+										margin: '5px 0 0',
+									},
 								}}
 								helperText={<i style={{ color: '#d32f2f', fontSize: '11px' }}>*Required</i>}
 							/>
@@ -212,11 +223,9 @@ const FeedbackModal = ({ dispatch, state }) => {
 							<Autocomplete
 								options={['Question', 'Suggestion', 'Content', 'Other']}
 								style={{ width: 330, backgroundColor: 'white', margin: '15px 0 0' }}
-								renderInput={(params) =>
-									<TextField {...params}
-										label="Report a technical issue"
-										variant="outlined"
-									/>}
+								renderInput={(params) => (
+									<TextField {...params} label="Report a technical issue" variant="outlined" />
+								)}
 								value={feedbackForm ? feedbackForm.type : null}
 								onChange={(event, value) => setFeedbackForm('type', value)}
 							/>
@@ -255,17 +264,22 @@ const FeedbackModal = ({ dispatch, state }) => {
 								functionName: 'submitFeedbackForm',
 								cloneName: 'jbook',
 								options: {
-									feedbackForm
-								}
+									feedbackForm,
+								},
 							});
 							if (res.data) {
-								setState(dispatch, { feedbackModalOpen: false, feedbackSubmitted: true, feedbackText: 'Successfully submitted' });
-							}
-							else {
-								setState(dispatch, { feedbackModalOpen: true, feedbackText: 'Error submitting feedback' });
+								setState(dispatch, {
+									feedbackModalOpen: false,
+									feedbackSubmitted: true,
+									feedbackText: 'Successfully submitted',
+								});
+							} else {
+								setState(dispatch, {
+									feedbackModalOpen: true,
+									feedbackText: 'Error submitting feedback',
+								});
 							}
 						}
-
 					}}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
 				>

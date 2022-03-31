@@ -35,68 +35,82 @@ class CronJobs {
 		// https://www.npmjs.com/package/node-cron
 		const timingPattern = this.constants.GAME_CHANGER_OPTS.cacheReloadCronTimingPattern;
 
-		return cron.schedule(timingPattern, async () => {
-			let offset = 0;
-			let pid;
-			if (process.env.pm_id) {
-				pid = parseInt(process.env.pm_id) + 1;
-			} else {
-				// not in pm2 just pick some random
-				pid = Math.floor(Math.random() * 50);
+		return cron.schedule(
+			timingPattern,
+			async () => {
+				let offset = 0;
+				let pid;
+				if (process.env.pm_id) {
+					pid = parseInt(process.env.pm_id) + 1;
+				} else {
+					// not in pm2 just pick some random
+					pid = Math.floor(Math.random() * 50);
+				}
+
+				offset = (parseInt(pid) + 1) * 2000;
+
+				setTimeout(async () => {
+					// try {
+					// 	await this.cacheController.clearSearchHistoryCacheHelper(userId, true);
+					// 	await this.cacheController.createSearchHistoryCacheHelper(userId);
+					// } catch (e) {
+					// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, 'ZFH252A', userId);
+					// }
+					// try {
+					// 	await this.cacheController.clearGraphDataCacheHelper(userId, true);
+					// 	await this.cacheController.createGraphDataCacheHelper(userId);
+					// } catch (e) {
+					// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, '252AJHF', userId);
+					// }
+				}, offset);
+			},
+			{
+				// requires start to be called
+				scheduled: false,
 			}
-
-			offset = (parseInt(pid) + 1) * 2000;
-
-			setTimeout(async () => {
-				// try {
-				// 	await this.cacheController.clearSearchHistoryCacheHelper(userId, true);
-				// 	await this.cacheController.createSearchHistoryCacheHelper(userId);
-				// } catch (e) {
-				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, 'ZFH252A', userId);
-				// }
-
-				// try {
-				// 	await this.cacheController.clearGraphDataCacheHelper(userId, true);
-				// 	await this.cacheController.createGraphDataCacheHelper(userId);
-				// } catch (e) {
-				// 	this.logger.error(`Cron job error in search history cache reload: ${e.message}`, '252AJHF', userId);
-				// }
-
-			}, offset);
-
-		}, {
-			// requires start to be called
-			scheduled: false
-		});
+		);
 	}
 
 	resetAPIRequestLimitJob() {
-		return cron.schedule('0 0 1 * *', async () => {
-			try {
-				await this.userController.resetAPIRequestLimit();
-			} catch (e) {
-				this.logger.error(`Cron job error in setting API Request Limit: ${e.message}`, 'NHVT7HI', 'api-request-reset-cron');
+		return cron.schedule(
+			'0 0 1 * *',
+			async () => {
+				try {
+					await this.userController.resetAPIRequestLimit();
+				} catch (e) {
+					this.logger.error(
+						`Cron job error in setting API Request Limit: ${e.message}`,
+						'NHVT7HI',
+						'api-request-reset-cron'
+					);
+				}
+			},
+			{
+				scheduled: false,
 			}
-		}, {
-			scheduled: false
-		});
-
+		);
 	}
 
 	getUpdateFavoritedSearchesJob() {
 		return {
 			start: () => {
-				const favoriteSearchPollInterval = parseInt(this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval, 10);
+				const favoriteSearchPollInterval = parseInt(
+					this.constants.GAME_CHANGER_OPTS.favoriteSearchPollInterval,
+					10
+				);
 				if (favoriteSearchPollInterval >= 0) {
-					this.logger.info(`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`);
+					this.logger.info(
+						`Polling for favorite search updates enabled every ${favoriteSearchPollInterval}ms.`
+					);
 					distributedPoll(
 						this.favoritesController.checkLeastRecentFavoritedSearch,
 						favoriteSearchPollInterval,
-						'locks:checkLeastRecentFavoritedSearch');
+						'locks:checkLeastRecentFavoritedSearch'
+					);
 				} else {
 					this.logger.info('Polling for favorite search updates disabled.');
 				}
-			}
+			},
 		};
 	}
 }

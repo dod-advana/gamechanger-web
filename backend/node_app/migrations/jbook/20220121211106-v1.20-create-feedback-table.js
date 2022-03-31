@@ -6,26 +6,26 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			first_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
-      last_name: {
-				type: Sequelize.TEXT
+			last_name: {
+				type: Sequelize.TEXT,
 			},
-      email: {
-				type: Sequelize.TEXT
+			email: {
+				type: Sequelize.TEXT,
 			},
-      type: {
-				type: Sequelize.TEXT
+			type: {
+				type: Sequelize.TEXT,
 			},
-      description: {
-				type: Sequelize.TEXT
+			description: {
+				type: Sequelize.TEXT,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('feedback');
-	}
+	},
 };

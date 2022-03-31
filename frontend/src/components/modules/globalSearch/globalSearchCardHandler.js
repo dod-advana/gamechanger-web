@@ -1,11 +1,7 @@
 import React from 'react';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
-import {
-	capitalizeFirst,
-	CARD_FONT_SIZE,
-	getTrackingNameForFactory,
-} from '../../../utils/gamechangerUtils';
+import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Link, Typography } from '@material-ui/core';
@@ -90,8 +86,7 @@ const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({ restricted }) =>
-		!restricted ? 'white' : 'rgba(223,230,238,0.5)'};
+	background-color: ${({ restricted }) => (!restricted ? 'white' : 'rgba(223,230,238,0.5)')};
 	font-weight: bold;
 	font-family: Montserrat;
 	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
@@ -111,7 +106,7 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ listView }) => (listView ? 'flex' : '')};
 			alignitems: ${({ listView }) => (listView ? 'top' : '')};
 			height: ${({ listView }) => (listView ? 'fit-content' : '')};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -198,17 +193,12 @@ const StyledFrontCardContent = styled.div`
 `;
 
 const clickFn = (cloneName, href, type) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		`SearchResults_${capitalizeFirst(type)}_Click`,
-		href
-	);
+	trackEvent(getTrackingNameForFactory(cloneName), `SearchResults_${capitalizeFirst(type)}_Click`, href);
 	window.open(href);
 };
 
 const getUrl = (id, restricted) => {
-	if (restricted)
-		return `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
+	if (restricted) return `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
 	return `${CONFIG.QLIK_URL}/sense/app/${id}`;
 };
 
@@ -260,22 +250,14 @@ const GlobalSearchCardHandler = {
 			} else permission = true;
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					restricted={!permission}
-				>
+				<StyledFrontCardHeader listView={state.listView} restricted={!permission}>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-						<div
-							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, href, type)}
-						>
+						<div className={'title-text'} onClick={() => clickFn(state.cloneData.clone_name, href, type)}>
 							<div className={'text'}>{link_label}</div>
 							{docListView && (
 								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight
-										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-									/>
+									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 								</div>
 							)}
 						</div>
@@ -322,16 +304,10 @@ const GlobalSearchCardHandler = {
 				permission = Permissions?.[permission]?.();
 			} else permission = true;
 
-			const url = !permission
-				? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`
-				: href;
+			const url = !permission ? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
 
 			const RestrictedLink = (
-				<Link
-					href={url}
-					onClick={() => clickFn(state.cloneData.clone_name, url, type)}
-					style={styles.link}
-				>
+				<Link href={url} onClick={() => clickFn(state.cloneData.clone_name, url, type)} style={styles.link}>
 					Request Access
 					<KeyboardArrowRightIcon style={styles.linkIcon} />
 				</Link>
@@ -342,11 +318,7 @@ const GlobalSearchCardHandler = {
 					{!permission ? (
 						RestrictedLink
 					) : (
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-							href={url}
-						>
+						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={url}>
 							Open
 						</CardButton>
 					)}
@@ -372,28 +344,17 @@ const GlobalSearchCardHandler = {
 			let { name, id, restricted, type } = item;
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					restricted={restricted}
-				>
+				<StyledFrontCardHeader listView={state.listView} restricted={restricted}>
 					<div className={'title-text-selected-favorite-div'}>
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
-							onClick={() =>
-								clickFn(
-									state.cloneData.clone_name,
-									getUrl(id, restricted),
-									type
-								)
-							}
+							onClick={() => clickFn(state.cloneData.clone_name, getUrl(id, restricted), type)}
 						>
 							<div className={'text'}>{name}</div>
 							{docListView && (
 								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight
-										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-									/>
+									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 								</div>
 							)}
 						</div>
@@ -444,33 +405,26 @@ const GlobalSearchCardHandler = {
 		getCardBack: (props) => {
 			const { item } = props;
 
-			const { lastReloadTime, modifiedDate, publishTime, restricted, owner } =
-				item;
+			const { lastReloadTime, modifiedDate, publishTime, restricted, owner } = item;
 
 			return (
 				<div style={styles.body(restricted)}>
 					<Typography variant="body2">
-						Data last reloaded:{' '}
-						{new moment(lastReloadTime).format('MM-DD-YYYY').toString()}
+						Data last reloaded: {new moment(lastReloadTime).format('MM-DD-YYYY').toString()}
 					</Typography>
 					<Typography variant="body2">
-						Last modified date:{' '}
-						{new moment(modifiedDate).format('MM-DD-YYYY').toString()}
+						Last modified date: {new moment(modifiedDate).format('MM-DD-YYYY').toString()}
 					</Typography>
 					<Typography variant="body2">
-						Published date:{' '}
-						{new moment(publishTime).format('MM-DD-YYYY').toString()}
+						Published date: {new moment(publishTime).format('MM-DD-YYYY').toString()}
 					</Typography>
-					<Typography variant="body2">
-						Lead Developer: {parseOwnerName(owner?.name)}
-					</Typography>
+					<Typography variant="body2">Lead Developer: {parseOwnerName(owner?.name)}</Typography>
 				</div>
 			);
 		},
 
 		getFooter: (props) => {
-			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } =
-				props;
+			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
 
 			let { restricted, betaAvailable, id } = item;
 
@@ -512,11 +466,7 @@ const GlobalSearchCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);
@@ -532,8 +482,7 @@ const GlobalSearchCardHandler = {
 				window.open(url, '_blank');
 			};
 			const onCancelClick = () => setModalOpen(false);
-			const onLegacyClick = () =>
-				openWindowCloseModal(`${CONFIG.QLIK_URL}/sense/app/${id}`);
+			const onLegacyClick = () => openWindowCloseModal(`${CONFIG.QLIK_URL}/sense/app/${id}`);
 			const onBetaClick = () => openWindowCloseModal(`#/qlik/app/${id}`);
 
 			return (
@@ -571,16 +520,12 @@ const GlobalSearchCardHandler = {
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
-							onClick={() =>
-								clickFn(state.cloneData.clone_name, url, item.type)
-							}
+							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
 						>
 							<div className={'text'}>{name}</div>
 							{docListView && (
 								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight
-										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-									/>
+									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 								</div>
 							)}
 						</div>
@@ -676,16 +621,12 @@ const GlobalSearchCardHandler = {
 						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
 						<div
 							className={'title-text'}
-							onClick={() =>
-								clickFn(state.cloneData.clone_name, url, item.type)
-							}
+							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
 						>
 							<div className={'text'}>{name}</div>
 							{docListView && (
 								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight
-										style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-									/>
+									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 								</div>
 							)}
 						</div>
