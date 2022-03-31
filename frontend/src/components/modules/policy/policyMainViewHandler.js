@@ -886,6 +886,8 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
 													}}
 												>
 													{!searchSettings.isFilterUpdate ? (
@@ -972,6 +974,8 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
 													}}
 												>
 													<SearchSection
@@ -1022,6 +1026,8 @@ const PolicyMainViewHandler = {
 														marginTop: 10,
 														marginLeft: 0,
 														marginRight: 0,
+														paddingRight: 0,
+														paddingLeft: 0
 													}}
 												>
 													<SearchSection
