@@ -178,6 +178,8 @@ const GameChangerDetailsPage = (props) => {
 	const graphRef = useRef();
 	const graphContainerRef = useRef();
 
+	const blacklistedEntityProperties = ['Lp_community', 'Louvain_community', 'Betweenness', 'PageRank'];
+
 	function useQuery(location, setQuery, query) {
 		if (!query) {
 			setQuery(new URLSearchParams(location.search));
@@ -660,6 +662,7 @@ const GameChangerDetailsPage = (props) => {
 			entity.details.forEach((detail, i) => {
 				if(detail.name === 'NodeVec') entity.details.splice(i,1);
 			});
+			console.log(entity.details);
 		}
 
 		return (
@@ -715,7 +718,9 @@ const GameChangerDetailsPage = (props) => {
 											backgroundColor: '#313541',
 											color: 'white',
 										}}
-										rows={entity.details}
+										rows={entity.details.filter(entity => {
+											return !blacklistedEntityProperties.includes(entity.name);
+										})}
 										height={'auto'}
 										dontScroll={true}
 										firstColWidth={styles.entityColWidth}
