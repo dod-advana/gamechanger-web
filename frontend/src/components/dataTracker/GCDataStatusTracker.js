@@ -508,7 +508,7 @@ const GCDataStatusTracker = (props) => {
 				width: 115,
 				Cell: (row) => (
 					<TableRow>
-						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
+						{moment(row.value).isValid() ? moment(Date.parse(row.value)).format('YYYY-MM-DD') : 'N/A'}
 					</TableRow>
 				),
 			},
