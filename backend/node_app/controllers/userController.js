@@ -5,7 +5,7 @@ const JBOOK_USER = require('../models').jbook_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
-const FAVORITE_GROUP= require('../models').favorite_groups;
+const FAVORITE_GROUP = require('../models').favorite_groups;
 const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const FAVORITE_DOCUMENTS_GROUP = require('../models').favorite_documents_groups;
 const GC_HISTORY = require('../models').gc_history;
@@ -20,9 +20,9 @@ const constantsFile = require('../config/constants');
 const { DataLibrary } = require('../lib/dataLibrary');
 const { AppStatsController } = require('../controllers/appStatsController');
 const Sequelize = require('sequelize');
-const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
+const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const constants = require('../config/constants');
-const {user_app_versions} = require('../models');
+const { user_app_versions } = require('../models');
 const Op = Sequelize.Op;
 const ApiKeyRequests = require('../models').api_key_request;
 const ApiKey = require('../models').api_key;
@@ -31,7 +31,6 @@ const GC_ASSISTS = require('../models').gc_assists;
 const USER_APP_VERSIONS = require('../models').user_app_versions;
 
 class UserController {
-
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
@@ -55,7 +54,7 @@ class UserController {
 			emailUtility = new EmailUtility({
 				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS
+				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS,
 			}),
 			dataApi = new DataLibrary(opts),
 			apiKeyRequests = ApiKeyRequests,
@@ -64,7 +63,7 @@ class UserController {
 			gcAssists = GC_ASSISTS,
 			user = USER,
 			jbook_user = JBOOK_USER,
-			user_app_versions = USER_APP_VERSIONS
+			user_app_versions = USER_APP_VERSIONS,
 		} = opts;
 
 		this.logger = logger;
@@ -126,21 +125,25 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
-			const user = await this.user.findOne({attributes: [
-				'id',
-				'first_name',
-				'last_name',
-				'email',
-				'organization',
-				'phone_number',
-				'preferred_name',
-				'sub_office',
-				'country',
-				'state',
-				'city',
-				'job_title',
-				'extra_fields'
-			], where: { user_id: user_id }, raw: true});
+			const user = await this.user.findOne({
+				attributes: [
+					'id',
+					'first_name',
+					'last_name',
+					'email',
+					'organization',
+					'phone_number',
+					'preferred_name',
+					'sub_office',
+					'country',
+					'state',
+					'city',
+					'job_title',
+					'extra_fields',
+				],
+				where: { user_id: user_id },
+				raw: true,
+			});
 			return res.status(200).send(user);
 		} catch (err) {
 			this.logger.error(err, 'BGNU8KA', userId);
@@ -156,7 +159,7 @@ class UserController {
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
-			const user = await this.user.findOne({where: { user_id: user_id }});
+			const user = await this.user.findOne({ where: { user_id: user_id } });
 
 			if (user) {
 				user.first_name = userData.first_name;
@@ -191,7 +194,7 @@ class UserController {
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
-			const user = await this.user.findOne({where: { user_id: user_id }});
+			const user = await this.user.findOne({ where: { user_id: user_id } });
 
 			if (user) {
 				user.first_name = userData.first_name;
@@ -224,41 +227,42 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const {cloneName} = req.body;
+			const { cloneName } = req.body;
 
-			const results = await this.user.findAll(
-				{
-					attributes: [
-						'id',
-						'first_name',
-						'last_name',
-						'email',
-						'organization',
-						'phone_number',
-						'extra_fields',
-						'is_super_admin'
-					],
-					raw: true
-				}
-			);
+			const results = await this.user.findAll({
+				attributes: [
+					'id',
+					'first_name',
+					'last_name',
+					'email',
+					'organization',
+					'phone_number',
+					'extra_fields',
+					'is_super_admin',
+				],
+				raw: true,
+			});
 
 			const fieldsToIgnore = ['clones_visited'];
 
-			let filteredResults = results.map(result => {
+			let filteredResults = results.map((result) => {
 				let is_admin = false;
-				Object.keys(result.extra_fields).forEach(extraKey => {
-					if (!fieldsToIgnore.includes(extraKey) && result.extra_fields[extraKey].hasOwnProperty('is_admin')) {
+				Object.keys(result.extra_fields).forEach((extraKey) => {
+					if (
+						!fieldsToIgnore.includes(extraKey) &&
+						result.extra_fields[extraKey].hasOwnProperty('is_admin')
+					) {
 						if (result.extra_fields[extraKey].is_admin) {
 							is_admin = true;
 						}
 					}
 				});
 
-				return {...result, is_admin};
+				return { ...result, is_admin };
 			});
 
 			if (cloneName) {
-				filteredResults = filteredResults.filter(result => {
+				filteredResults = filteredResults.filter((result) => {
 					if (result.extra_fields.clones_visited) {
 						return result.extra_fields.clones_visited.includes(cloneName);
 					} else {
@@ -282,9 +286,9 @@ class UserController {
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { clone } = req.body;
 
-			const user = await this.user.findOne({where: { user_id: user_id }, raw: true});
+			const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
 
-			if (user && user!== null) {
+			if (user && user !== null) {
 				if (user.extra_fields.hasOwnProperty('clones_visited')) {
 					if (!user.extra_fields.clones_visited.includes(clone)) {
 						user.extra_fields.clones_visited.push(clone);
@@ -297,7 +301,6 @@ class UserController {
 			}
 
 			res.sendStatus(200);
-
 		} catch (err) {
 			this.logger.error(err, 'CFHGJJ4', userId);
 			res.status(500).send(`Error updating clones visited: ${err.message}`);
@@ -310,108 +313,111 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
-			let user = await this.user.findOne(
-				{
-					where: { user_id: user_id },
-					defaults: {
-						user_id: user_id,
-						notifications: {}
-					},
-					raw: true,
-				}
-			);
+			let user = await this.user.findOne({
+				where: { user_id: user_id },
+				defaults: {
+					user_id: user_id,
+					notifications: {},
+				},
+				raw: true,
+			});
 			if (user) {
 				const favorite_documents = await this.favoriteDocument.findAll({
-					where: {user_id: user.user_id},
-					raw: true
+					where: { user_id: user.user_id },
+					raw: true,
 				});
 
 				const favorite_searches = await this.favoriteSearch.findAll({
-					where: {user_id: user.user_id},
+					where: { user_id: user.user_id },
 					order: [['id', 'DESC']],
-					raw: true
+					raw: true,
 				});
 
-
 				const favorite_topics = await this.favoriteTopic.findAll({
-					where: {user_id: user.user_id},
-					raw: true
+					where: { user_id: user.user_id },
+					raw: true,
 				});
 
 				const favorite_groups = await this.favoriteGroup.findAll({
-					where: {user_id: user.user_id},
-					raw: true
+					where: { user_id: user.user_id },
+					raw: true,
 				});
 
 				favorite_groups.forEach(async (group, index) => {
 					const res = await this.favoriteDocumentsGroup.findAll({
 						attributes: ['favorite_document_id'],
-						where: {favorite_group_id: group.id},
-						raw: true
+						where: { favorite_group_id: group.id },
+						raw: true,
 					});
 					const favoriteList = [];
-					res.forEach(fav => favoriteList.push(fav.favorite_document_id));
+					res.forEach((fav) => favoriteList.push(fav.favorite_document_id));
 					favorite_groups[index].favorites = favoriteList;
 				});
 				user.favorite_groups = favorite_groups;
-				
+
 				const favorite_organizations = await this.favoriteOrganization.findAll({
-					where: {user_id: user.user_id},
-					raw: true
+					where: { user_id: user.user_id },
+					raw: true,
 				});
 
 				const search_history = await this.gcHistory.findAll({
 					where: {
 						user_id: user.user_id,
 						is_tutorial_search: false,
-						tiny_url: {[Op.ne]: null}
+						tiny_url: { [Op.ne]: null },
 					},
-					order: [
-						['id', 'DESC'],
-					],
+					order: [['id', 'DESC']],
 					limit: 20,
-					raw: true
+					raw: true,
 				});
 				const export_history = await this.exportHistory.findAll({
 					raw: true,
 					limit: 5,
-					where: { user_id: user.user_id 	},
-					order: [
-						['updatedAt', 'DESC']
-					]
+					where: { user_id: user.user_id },
+					order: [['updatedAt', 'DESC']],
 				});
-				const hashed_user =  this.sparkMD5.hash(user.user_id);
+				const hashed_user = this.sparkMD5.hash(user.user_id);
 				const pdf_opened = await this.appStats.getUserLastOpened(hashed_user);
 				user.pdf_opened = pdf_opened;
 
 				if (favorite_documents) {
 					for (const doc of favorite_documents) {
 						const countData = await this.favoriteDocument.findAll({
-							attributes: [[this.favoriteDocument.sequelize.fn('COUNT', this.favoriteDocument.sequelize.col('id')), 'favorited_count']],
-							where: {filename: doc.filename},
-							raw: true
+							attributes: [
+								[
+									this.favoriteDocument.sequelize.fn(
+										'COUNT',
+										this.favoriteDocument.sequelize.col('id')
+									),
+									'favorited_count',
+								],
+							],
+							where: { filename: doc.filename },
+							raw: true,
 						});
 
 						doc.favorited = countData[0].favorited_count;
 					}
 
-					const index = [this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index];
+					const index = [
+						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
+						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.legislation_index,
+						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
+					];
 
-					const filenames = favorite_documents.map(doc => {
+					const filenames = favorite_documents.map((doc) => {
 						return doc.filename;
 					});
 
 					const esQuery = {
 						_source: {
-							'includes': [
-								'download_url_s',
-							]
+							includes: ['download_url_s'],
 						},
-						stored_fields: [ 'filename', 'title', 'id', 'summary_30', 'doc_type', 'doc_num'],
+						stored_fields: ['filename', 'title', 'id', 'summary_30', 'doc_type', 'doc_num'],
 						size: favorite_documents.length,
 						query: {
-							terms: { filename: filenames }
-						}
+							terms: { filename: filenames },
+						},
 					};
 
 					let esClientName = 'gamechanger';
@@ -419,7 +425,7 @@ class UserController {
 
 					const returnDocsTemp = [];
 
-					results.body.hits.hits.forEach(hit => {
+					results.body.hits.hits.forEach((hit) => {
 						returnDocsTemp.push({
 							filename: hit.fields.filename[0],
 							summary: hit.fields.summary_30[0],
@@ -427,13 +433,13 @@ class UserController {
 							doc_type: hit.fields.doc_type[0],
 							doc_num: hit.fields.doc_num[0],
 							id: hit.fields.id[0],
-							download_url_s: hit._source.download_url_s
+							download_url_s: hit._source.download_url_s,
 						});
 					});
 
 					const returnDocs = [];
-					favorite_documents.forEach(doc => {
-						const docData = returnDocsTemp.find(data => data.filename === doc.filename);
+					favorite_documents.forEach((doc) => {
+						const docData = returnDocsTemp.find((data) => data.filename === doc.filename);
 						if (docData) {
 							doc.favorite_id = doc.id;
 							doc.title = `${docData.doc_type} ${docData.doc_num} ${docData.title}`;
@@ -455,9 +461,14 @@ class UserController {
 				if (favorite_searches) {
 					for (const search of favorite_searches) {
 						const countData = await this.favoriteSearch.findAll({
-							attributes: [[this.favoriteSearch.sequelize.fn('COUNT', this.favoriteSearch.sequelize.col('id')), 'favorited_count']],
-							where: {tiny_url: search.tiny_url},
-							raw: true
+							attributes: [
+								[
+									this.favoriteSearch.sequelize.fn('COUNT', this.favoriteSearch.sequelize.col('id')),
+									'favorited_count',
+								],
+							],
+							where: { tiny_url: search.tiny_url },
+							raw: true,
 						});
 						favorite_urls.push(search.tiny_url);
 						search.favorited = countData[0].favorited_count;
@@ -476,9 +487,14 @@ class UserController {
 				if (favorite_topics) {
 					for (const topic of favorite_topics) {
 						const countData = await this.favoriteTopic.findAll({
-							attributes: [[this.favoriteTopic.sequelize.fn('COUNT', this.favoriteTopic.sequelize.col('id')), 'favorited_count']],
-							where: {topic_name: topic.topic_name},
-							raw: true
+							attributes: [
+								[
+									this.favoriteTopic.sequelize.fn('COUNT', this.favoriteTopic.sequelize.col('id')),
+									'favorited_count',
+								],
+							],
+							where: { topic_name: topic.topic_name },
+							raw: true,
 						});
 						topic.favorited = countData[0].favorited_count;
 					}
@@ -490,9 +506,17 @@ class UserController {
 				if (favorite_organizations) {
 					for (const org of favorite_organizations) {
 						const countData = await this.favoriteOrganization.findAll({
-							attributes: [[this.favoriteOrganization.sequelize.fn('COUNT', this.favoriteOrganization.sequelize.col('id')), 'favorited_count']],
-							where: {organization_name: org.organization_name},
-							raw: true
+							attributes: [
+								[
+									this.favoriteOrganization.sequelize.fn(
+										'COUNT',
+										this.favoriteOrganization.sequelize.col('id')
+									),
+									'favorited_count',
+								],
+							],
+							where: { organization_name: org.organization_name },
+							raw: true,
 						});
 						org.favorited = countData[0].favorited_count;
 					}
@@ -532,7 +556,7 @@ class UserController {
 			} else {
 				user = {
 					user_id: user_id,
-					notifications: {}
+					notifications: {},
 				};
 				user.favorite_documents = [];
 				user.favorite_searches = [];
@@ -543,7 +567,6 @@ class UserController {
 			}
 
 			res.send(user);
-
 		} catch (err) {
 			this.logger.error(err, 'NG6CETF', userId);
 			res.status(500).send(err);
@@ -571,44 +594,109 @@ class UserController {
 			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id, false) : userId;
 
 			if (fromApp) {
-				foundItem = await this.user.findOne({ where: {id: userData.id}, raw: true});
+				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
 			} else {
-				foundItem = await this.user.findOne({where: {user_id: user_id}, raw: true});
+				foundItem = await this.user.findOne({ where: { user_id: user_id }, raw: true });
 			}
 
 			if (!foundItem) {
-				if (fromApp){
+				if (fromApp) {
 					await this.user.create(userData);
 				} else {
-
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({user_id, cn: userData.cn});
+					const oldGCUserInfo = await this.syncUserHelper({ user_id, cn: userData.cn });
 
-					const tmpExtraFields = {gamechanger: oldGCUserInfo.policy || {} };
+					const tmpExtraFields = { gamechanger: oldGCUserInfo.policy || {} };
 
 					// Bring in jbook user info we want into extra fields and update the main user info with jbook info if available
 					tmpExtraFields['jbook'] = {
 						is_primary_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_primary_reviewer : false,
 						is_service_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_service_reviewer : false,
 						is_poc_reviewer: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_poc_reviewer : false,
-						is_admin: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_admin : false
+						is_admin: oldGCUserInfo.jbook ? oldGCUserInfo.jbook.is_admin : false,
 					};
 
 					const newUser = {
 						user_id: user_id,
-						first_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.first_name && oldGCUserInfo.jbook.first_name !== null && oldGCUserInfo.jbook.first_name !== '') ? oldGCUserInfo.jbook.first_name : userData.firstName : userData.firstName,
-						last_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.last_name && oldGCUserInfo.jbook.last_name !== null && oldGCUserInfo.jbook.last_name !== '') ? oldGCUserInfo.jbook.last_name : userData.lastName : userData.lastName,
-						organization: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.organization && oldGCUserInfo.jbook.organization !== null && oldGCUserInfo.jbook.organization !== '') ? oldGCUserInfo.jbook.organization : null : null,
-						email: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.email && oldGCUserInfo.jbook.email !== null && oldGCUserInfo.jbook.email !== '') ? oldGCUserInfo.jbook.email : null : null,
-						phone_number: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.phone_number && oldGCUserInfo.jbook.phone_number !== null && oldGCUserInfo.jbook.phone_number !== '') ? oldGCUserInfo.jbook.phone_number : null : null,
-						sub_office: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.sub_office && oldGCUserInfo.jbook.sub_office !== null && oldGCUserInfo.jbook.sub_office !== '') ? oldGCUserInfo.jbook.sub_office : null : null,
-						country: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.country && oldGCUserInfo.jbook.country !== null && oldGCUserInfo.jbook.country !== '') ? oldGCUserInfo.jbook.country : null : null,
-						state: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.state && oldGCUserInfo.jbook.state !== null && oldGCUserInfo.jbook.state !== '') ? oldGCUserInfo.jbook.state : null : null,
-						city: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.city && oldGCUserInfo.jbook.city !== null && oldGCUserInfo.jbook.city !== '') ? oldGCUserInfo.jbook.city : null : null,
-						job_title: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.job_title && oldGCUserInfo.jbook.job_title !== null && oldGCUserInfo.jbook.job_title !== '') ? oldGCUserInfo.jbook.job_title : null : null,
-						preferred_name: oldGCUserInfo.jbook ? (oldGCUserInfo.jbook.preferred_name && oldGCUserInfo.jbook.preferred_name !== null && oldGCUserInfo.jbook.preferred_name !== '') ? oldGCUserInfo.jbook.preferred_name : null : null,
+						first_name: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.first_name &&
+							  oldGCUserInfo.jbook.first_name !== null &&
+							  oldGCUserInfo.jbook.first_name !== ''
+								? oldGCUserInfo.jbook.first_name
+								: userData.firstName
+							: userData.firstName,
+						last_name: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.last_name &&
+							  oldGCUserInfo.jbook.last_name !== null &&
+							  oldGCUserInfo.jbook.last_name !== ''
+								? oldGCUserInfo.jbook.last_name
+								: userData.lastName
+							: userData.lastName,
+						organization: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.organization &&
+							  oldGCUserInfo.jbook.organization !== null &&
+							  oldGCUserInfo.jbook.organization !== ''
+								? oldGCUserInfo.jbook.organization
+								: null
+							: null,
+						email: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.email &&
+							  oldGCUserInfo.jbook.email !== null &&
+							  oldGCUserInfo.jbook.email !== ''
+								? oldGCUserInfo.jbook.email
+								: null
+							: null,
+						phone_number: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.phone_number &&
+							  oldGCUserInfo.jbook.phone_number !== null &&
+							  oldGCUserInfo.jbook.phone_number !== ''
+								? oldGCUserInfo.jbook.phone_number
+								: null
+							: null,
+						sub_office: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.sub_office &&
+							  oldGCUserInfo.jbook.sub_office !== null &&
+							  oldGCUserInfo.jbook.sub_office !== ''
+								? oldGCUserInfo.jbook.sub_office
+								: null
+							: null,
+						country: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.country &&
+							  oldGCUserInfo.jbook.country !== null &&
+							  oldGCUserInfo.jbook.country !== ''
+								? oldGCUserInfo.jbook.country
+								: null
+							: null,
+						state: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.state &&
+							  oldGCUserInfo.jbook.state !== null &&
+							  oldGCUserInfo.jbook.state !== ''
+								? oldGCUserInfo.jbook.state
+								: null
+							: null,
+						city: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.city &&
+							  oldGCUserInfo.jbook.city !== null &&
+							  oldGCUserInfo.jbook.city !== ''
+								? oldGCUserInfo.jbook.city
+								: null
+							: null,
+						job_title: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.job_title &&
+							  oldGCUserInfo.jbook.job_title !== null &&
+							  oldGCUserInfo.jbook.job_title !== ''
+								? oldGCUserInfo.jbook.job_title
+								: null
+							: null,
+						preferred_name: oldGCUserInfo.jbook
+							? oldGCUserInfo.jbook.preferred_name &&
+							  oldGCUserInfo.jbook.preferred_name !== null &&
+							  oldGCUserInfo.jbook.preferred_name !== ''
+								? oldGCUserInfo.jbook.preferred_name
+								: null
+							: null,
 						cn: userData.cn,
-						extra_fields: tmpExtraFields
+						extra_fields: tmpExtraFields,
 					};
 
 					await this.user.create(newUser);
@@ -616,15 +704,24 @@ class UserController {
 				return true;
 			} else {
 				if (fromApp) {
-					await this.user.update(userData, {where: {id: userData.id}});
+					await this.user.update(userData, { where: { id: userData.id } });
 				} else {
-					const tempUser = {...foundItem};
+					const tempUser = { ...foundItem };
 
-					if ((!tempUser.first_name || tempUser.first_name === null || tempUser.first_name === '') && userData.firstName) tempUser.first_name = userData.firstName;
-					if ((!tempUser.last_name || tempUser.last_name === null || tempUser.last_name === '') && userData.lastName) tempUser.last_name = userData.lastName;
-					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn) tempUser.cn = userData.cn;
+					if (
+						(!tempUser.first_name || tempUser.first_name === null || tempUser.first_name === '') &&
+						userData.firstName
+					)
+						tempUser.first_name = userData.firstName;
+					if (
+						(!tempUser.last_name || tempUser.last_name === null || tempUser.last_name === '') &&
+						userData.lastName
+					)
+						tempUser.last_name = userData.lastName;
+					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn)
+						tempUser.cn = userData.cn;
 
-					await this.user.update(tempUser, {where: {user_id: user_id}});
+					await this.user.update(tempUser, { where: { user_id: user_id } });
 				}
 			}
 
@@ -661,14 +758,14 @@ class UserController {
 			const userRequest = await this.userRequest.findOne({ where: { email: email }, raw: true });
 
 			if (userRequest && !userRequest.is_activated) {
-				const user = await this.user.findOne({where: { user_id: user_id }, raw: true});
+				const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
 
 				if (user) {
 					user.organization = userRequest.organization;
 					user.email = email;
 					user.phone_number = userRequest.phone_number;
 
-					permissions.forEach(permission => {
+					permissions.forEach((permission) => {
 						switch (permission) {
 							case 'PrimaryReviewer':
 								user.is_primary_reviewer = true;
@@ -686,8 +783,8 @@ class UserController {
 
 					userRequest.is_activated = true;
 
-					await this.userRequest.update(userRequest, {where: {id: userRequest.id}});
-					await this.user.update(user, {where: {id: user.id}});
+					await this.userRequest.update(userRequest, { where: { id: userRequest.id } });
+					await this.user.update(user, { where: { id: user.id } });
 
 					return res.status(200).send({ setup: true });
 				}
@@ -704,15 +801,14 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-
 			// First pull all the users that have a CN as that means they are using new system
 			const newUsers = await this.user.findAll({
 				where: {
 					cn: {
-						[Op.not]: null
-					}
+						[Op.not]: null,
+					},
 				},
-				raw: true
+				raw: true,
 			});
 
 			console.log(newUsers);
@@ -743,17 +839,15 @@ class UserController {
 			let oldUsers = await this.gcUser.findAll({
 				where: {
 					user_id: {
-						[Op.in]: hashedIds
-					}
+						[Op.in]: hashedIds,
+					},
 				},
-				raw: true
+				raw: true,
 			});
 
 			if (oldUsers.length > 0) {
-
 				// Combine basic user data and delete the old user
 				for (const oldUser of oldUsers) {
-
 					const nonHashedIds = [user.cn, `${user.user_id}@mil`];
 					const allIds = hashedIds.concat(nonHashedIds);
 
@@ -761,180 +855,180 @@ class UserController {
 					let foundRecords = await this.apiKeyRequests.findAll({
 						where: {
 							username: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const apiKeyRequest of foundRecords) {
 						apiKeyRequest.username = user.user_id;
-						await this.apiKeyRequests.update(apiKeyRequest, {where: {id: apiKeyRequest.id}});
+						await this.apiKeyRequests.update(apiKeyRequest, { where: { id: apiKeyRequest.id } });
 					}
 
 					// API Keys
 					foundRecords = await this.apiKey.findAll({
 						where: {
 							username: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const apiKey of foundRecords) {
 						apiKey.username = user.user_id;
-						await this.apiKey.update(apiKey, {where: {id: apiKey.id}});
+						await this.apiKey.update(apiKey, { where: { id: apiKey.id } });
 					}
 
 					// Export History
 					foundRecords = await this.exportHistory.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const history of foundRecords) {
 						history.user_id = user.user_id;
-						await this.exportHistory.update(history, {where: {id: history.id}});
+						await this.exportHistory.update(history, { where: { id: history.id } });
 					}
 
 					// Favorite Documents
 					foundRecords = await this.favoriteDocument.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteDocument.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteDocument.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Favorite Documents Group
 					foundRecords = await this.favoriteDocumentsGroup.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteDocumentsGroup.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteDocumentsGroup.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Favorite Groups
 					foundRecords = await this.favoriteGroup.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteGroup.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteGroup.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Favorite Organizations
 					foundRecords = await this.favoriteOrganization.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteOrganization.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteOrganization.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Favorite Searches
 					foundRecords = await this.favoriteSearch.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteSearch.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteSearch.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Favorite Topics
 					foundRecords = await this.favoriteTopic.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const favorite of foundRecords) {
 						favorite.user_id = user.user_id;
-						await this.favoriteTopic.update(favorite, {where: {id: favorite.id}});
+						await this.favoriteTopic.update(favorite, { where: { id: favorite.id } });
 					}
 
 					// Feedback
 					foundRecords = await this.feedback.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const feedback of foundRecords) {
 						feedback.user_id = user.user_id;
-						await this.feedback.update(feedback, {where: {id: feedback.id}});
+						await this.feedback.update(feedback, { where: { id: feedback.id } });
 					}
 
 					// GC Assists
 					foundRecords = await this.gcAssists.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const assist of foundRecords) {
 						assist.user_id = user.user_id;
-						await this.gcAssists.update(assist, {where: {id: assist.id}});
+						await this.gcAssists.update(assist, { where: { id: assist.id } });
 					}
 
 					// GC History
 					foundRecords = await this.gcHistory.findAll({
 						where: {
 							user_id: {
-								[Op.in]: allIds
-							}
+								[Op.in]: allIds,
+							},
 						},
-						raw: true
+						raw: true,
 					});
 
 					for (const history of foundRecords) {
 						history.user_id = user.user_id;
-						await this.gcHistory.update(history, {where: {id: history.id}});
+						await this.gcHistory.update(history, { where: { id: history.id } });
 					}
 
 					// Update old user id
@@ -945,44 +1039,45 @@ class UserController {
 							api_requests: oldUser.api_requests,
 							submitted_info: oldUser.submitted_info,
 							is_internal: oldUser.is_internal,
-							is_admin: oldUser.is_admin
+							is_admin: oldUser.is_admin,
 						};
 						finalOldUser.user_id = user.user_id;
 						delete finalOldUser.id;
 					} else {
 						if (oldUser.is_beta != null) finalOldUser['gamechanger'].is_beta = oldUser.is_beta;
-						if (oldUser.notifications != null) finalOldUser['gamechanger'].notifications = oldUser.notifications;
-						if (oldUser.api_requests != null) finalOldUser['gamechanger'].api_requests = oldUser.api_requests;
-						if (oldUser.submitted_info != null) finalOldUser['gamechanger'].submitted_info = oldUser.submitted_info;
+						if (oldUser.notifications != null)
+							finalOldUser['gamechanger'].notifications = oldUser.notifications;
+						if (oldUser.api_requests != null)
+							finalOldUser['gamechanger'].api_requests = oldUser.api_requests;
+						if (oldUser.submitted_info != null)
+							finalOldUser['gamechanger'].submitted_info = oldUser.submitted_info;
 						if (oldUser.is_internal != null) finalOldUser['gamechanger'].is_internal = oldUser.is_internal;
 						if (oldUser.is_admin != null) finalOldUser['gamechanger'].is_admin = oldUser.is_admin;
 					}
 
 					await this.gcUser.destroy({
 						where: {
-							id: oldUser.id
-						}
+							id: oldUser.id,
+						},
 					});
 				}
-
 			}
 
 			oldUsers = await this.jbookUser.findOne({
 				where: {
-					user_id: user.user_id
+					user_id: user.user_id,
 				},
-				raw: true
+				raw: true,
 			});
 
 			if (oldUsers && oldUsers !== null) {
 				finalOldUser['jbook'] = {
-					...oldUsers
+					...oldUsers,
 				};
 			}
 
 			return finalOldUser || {};
-		}
-		 catch (err) {
+		} catch (err) {
 			this.logger.error(err, 'Z70XSYL', userId);
 			return {};
 		}
@@ -995,12 +1090,10 @@ class UserController {
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
-			const user = await this.gcUser.findOne(
-				{
-					where: { user_id: user_id },
-					raw: true
-				}
-			);
+			const user = await this.gcUser.findOne({
+				where: { user_id: user_id },
+				raw: true,
+			});
 
 			if (user) {
 				user.submitted_info = true;
@@ -1022,12 +1115,12 @@ class UserController {
 			await this.gcUser.update(
 				{
 					user_info: req.body,
-					submitted_info: true
+					submitted_info: true,
 				},
 				{
 					where: {
-						user_id: user_id
-					}
+						user_id: user_id,
+					},
 				}
 			);
 			res.status(200).send();
@@ -1044,7 +1137,6 @@ class UserController {
 
 			const internalUsers = await this.internalUserTracking.findAll();
 			res.status(200).send(internalUsers);
-
 		} catch (err) {
 			this.logger.error(err, '8QJXVTA', userId);
 			res.status(500).send(`Error getting internal users list: ${err.message}`);
@@ -1057,12 +1149,11 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const deleted = this.internalUserTracking.destroy({
 				where: {
-					id: req.body.id
-				}
+					id: req.body.id,
+				},
 			});
 
 			res.status(200).send(deleted);
-
 		} catch (err) {
 			this.logger.error(err, 'GZMUW3T', userId);
 			res.status(500).send(`Error deleting internal user: ${err.message}`);
@@ -1073,11 +1164,11 @@ class UserController {
 		let userId = 'Unknown_Webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {feedbackType, feedbackText, screenShot, userEmail} = req.body.feedbackData;
+			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
 			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
 			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
 			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
-			res.status(200).send({status: 'good'});
+			res.status(200).send({ status: 'good' });
 			// }).catch(error => {
 			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
 			// res.status(500).send(error);
@@ -1130,10 +1221,12 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { alertData } = req.body;
-			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${alertData.options.classificationMarking}</p><p>${JSON.stringify(alertData)}</p>`;
+			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${
+				alertData.options.classificationMarking
+			}</p><p>${JSON.stringify(alertData)}</p>`;
 			this.logger.info(`Classification alert: ${emailBody}`);
 			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
-			res.status(200).send({status: 'good'});
+			res.status(200).send({ status: 'good' });
 			// }).catch(error => {
 			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
 			// res.status(500).send(error);
@@ -1154,7 +1247,7 @@ class UserController {
 			await this.sequelize.transaction(async (t) => {
 				const userData = await this.gcUser.findOne({
 					where: {
-						user_id: user_id
+						user_id: user_id,
 					},
 					transaction: t,
 					// there is a race condition between this select and the notification json modification
@@ -1165,15 +1258,21 @@ class UserController {
 				const { cloneName, type } = req.body;
 
 				// only update if the notification exists and is non-zero
-				if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+				if (
+					userData.notifications &&
+					userData.notifications[cloneName] &&
+					userData.notifications[cloneName][type]
+				) {
 					userData.notifications[cloneName][type] = 0;
-					await this.gcUser.update({ notifications: userData.notifications },
+					await this.gcUser.update(
+						{ notifications: userData.notifications },
 						{
 							where: {
-								user_id: user_id
+								user_id: user_id,
 							},
 							transaction: t,
-						});
+						}
+					);
 				}
 			});
 
@@ -1182,20 +1281,22 @@ class UserController {
 			const { message } = err;
 			this.logger.error(message, 'J9VDKM2', userId);
 		}
-
 	}
 
-	async updateUserAPIRequestLimit(req, res){
+	async updateUserAPIRequestLimit(req, res) {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
-			await this.gcUser.update({ 'api_requests': Sequelize.literal('api_requests - 1') }, { where: { user_id: user_id } });
-			
+			await this.gcUser.update(
+				{ api_requests: Sequelize.literal('api_requests - 1') },
+				{ where: { user_id: user_id } }
+			);
+
 			res.status(200).send();
-		} catch(err) {
+		} catch (err) {
 			this.logger.error(err, 'OPN1XOE', userId);
 			res.status(500).send(err);
 		}
@@ -1206,19 +1307,19 @@ class UserController {
 			this.logger.info('Resetting all API Request limits to 3');
 
 			const ids = await this.gcUser.findAll({
-				attributes: ['id']
-			  });
+				attributes: ['id'],
+			});
 			const id_values = [];
 
-			ids.forEach(id => {
+			ids.forEach((id) => {
 				const value = id.getDataValue('id');
 				id_values.push(value);
 			});
 
-			const [count, rows] = await this.gcUser.update({ 'api_requests': 3 }, {where: {id: id_values}});
+			const [count, rows] = await this.gcUser.update({ api_requests: 3 }, { where: { id: id_values } });
 			this.logger.info(`Finished resetting; ${count} rows affected.`);
 			return count;
-		} catch(e) {
+		} catch (e) {
 			this.logger.error(e, '4X1IB7M', 'api-request-reset-cron');
 		}
 	}
@@ -1228,43 +1329,41 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
-			
+
 			const user_id = getUserIdFromSAMLUserId(req);
-			
+
 			let ids = await this.gcHistory.findAll({
-				attributes: [
-					[Sequelize.fn('MAX', Sequelize.col('id')), 'id']
-				],
+				attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']],
 				where: {
 					clone_name,
 					had_error: 'f',
-					user_id: user_id
+					user_id: user_id,
 				},
 				group: ['search'],
 				order: [[Sequelize.col('id'), 'DESC']],
-				limit: 10
+				limit: 10,
 			});
-			ids = ids.map(id=>id.id);
+			ids = ids.map((id) => id.id);
 			let searches = await this.gcHistory.findAll({
-				attributes: ['request_body','search','run_at'],
+				attributes: ['request_body', 'search', 'run_at'],
 				where: {
 					clone_name,
 					had_error: 'f',
-					id: ids
+					id: ids,
 				},
 				order: [['run_at', 'DESC']],
-				limit: 10
+				limit: 10,
 			});
-			searches = searches.map(search=>{
-				return({...search.request_body, run_at: search.run_at});
+			searches = searches.map((search) => {
+				return { ...search.request_body, run_at: search.run_at };
 			});
 			res.status(200).send(searches);
-		} catch(e) {
+		} catch (e) {
 			this.logger.error(e, '6RN417M', userId);
 			res.status(500).send(e);
 		}
 	}
-	
+
 	postUserAppVersion(req, res) {
 		const { app } = req.body;
 
@@ -1273,46 +1372,36 @@ class UserController {
 
 		// search for app version
 		return this.findAppVersionByUser(username, app)
-			.then((result) => { 
-
+			.then((result) => {
 				// if data found, send data back and update it to newest version
 				if (result) {
-
 					// new users who are still in the same version
 					if (result.dataValues.version === 'NEWUSER_' + currentVersion) {
-						res.status(200).send(
-							{
-								newUser: true,
-								currentVersion: true,
-								message: 'New user app version updated'
-							}
-						);
+						res.status(200).send({
+							newUser: true,
+							currentVersion: true,
+							message: 'New user app version updated',
+						});
 					}
 
 					// any user with outdated version
 					else if (result.dataValues.version !== constants.VERSION) {
-
 						this.updateAppVersion(username, app, currentVersion)
-							.then((update) => { 
-
+							.then((update) => {
 								// the app version was found and updated
 								if (update[0] === 1) {
-									res.status(200).send(
-										{
-											newUser: false,
-											currentVersion: false, // version had to be updated
-											message: 'user app version updated'
-										}
-									);
+									res.status(200).send({
+										newUser: false,
+										currentVersion: false, // version had to be updated
+										message: 'user app version updated',
+									});
 								}
 
 								// failed to update
 								else {
-									res.status(400).send(
-										{ 
-											message: 'failed to update'
-										}
-									);
+									res.status(400).send({
+										message: 'failed to update',
+									});
 								}
 							})
 							.catch((err) => {
@@ -1323,29 +1412,28 @@ class UserController {
 
 					// up to date
 					else {
-
 						res.status(200).send({
 							newUser: false,
 							currentVersion: true,
-							message: 'App version is up to date'
+							message: 'App version is up to date',
 						});
 					}
 				}
 				// entirely new user
 				else {
-
- 				// app version was not found, add new row
+					// app version was not found, add new row
 					this.addNewAppVersion(username, app, 'NEWUSER_' + currentVersion)
-						.then(() => { 
+						.then(() => {
 							res.status(200).send({
 								newUser: true,
 								currentVersion: false,
-								message: 'new user app version added'
+								message: 'new user app version added',
 							});
-						}).catch(err => {
+						})
+						.catch((err) => {
 							this.logger.error(err);
 							res.status(400).send({
-								message: 'failed to add new user app'
+								message: 'failed to add new user app',
 							});
 						});
 				}
@@ -1355,55 +1443,62 @@ class UserController {
 				res.status(400).send(err);
 			});
 	}
-	
+
 	findAppVersionByUser(username, app) {
 		return new Promise((resolve, reject) => {
-			this.user_app_versions.findOne({ 
-				where: {
-					username: username,
-					app_name: app
-				}
-			}).then((result) => {
-				resolve (result);
-			}).catch(e => {
-				this.logger.error(e);
-				reject(e);
-			});
-		});
-	}
-	
-	updateAppVersion(username, app, currentVersion) {
-		return new Promise((resolve, reject) => {
-			user_app_versions.update(
-				{
-					version: currentVersion
-				},
-				{ 
+			this.user_app_versions
+				.findOne({
 					where: {
 						username: username,
-						app_name: app
-					}
-				}
-			).then((update) => {
-				resolve(update);
-			}).catch(e => {
-				this.logger.error(e);
-				reject(e);
-			});
+						app_name: app,
+					},
+				})
+				.then((result) => {
+					resolve(result);
+				})
+				.catch((e) => {
+					this.logger.error(e);
+					reject(e);
+				});
 		});
 	}
-	
+
+	updateAppVersion(username, app, currentVersion) {
+		return new Promise((resolve, reject) => {
+			user_app_versions
+				.update(
+					{
+						version: currentVersion,
+					},
+					{
+						where: {
+							username: username,
+							app_name: app,
+						},
+					}
+				)
+				.then((update) => {
+					resolve(update);
+				})
+				.catch((e) => {
+					this.logger.error(e);
+					reject(e);
+				});
+		});
+	}
+
 	addNewAppVersion(username, app, currentVersion) {
 		return new Promise((resolve, reject) => {
-			user_app_versions.create({ 
-				username: username,
-				app_name: app,
-				version: currentVersion
-			})
-				.then(resObj => { 
+			user_app_versions
+				.create({
+					username: username,
+					app_name: app,
+					version: currentVersion,
+				})
+				.then((resObj) => {
 					resolve(resObj);
 				})
-				.catch(err => { 
+				.catch((err) => {
 					reject(err);
 				});
 		});

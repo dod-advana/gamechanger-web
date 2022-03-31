@@ -6,23 +6,23 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			email: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			organization: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			phone_number: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			is_activated: {
-				type: Sequelize.BOOLEAN
-			}
+				type: Sequelize.BOOLEAN,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('user_requests');
-	}
+	},
 };

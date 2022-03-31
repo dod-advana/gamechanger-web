@@ -14,7 +14,7 @@ class GraphHandler {
 			gc_history = GC_HISTORY,
 			dataLibrary = new DataLibrary(opts),
 			logger = LOGGER,
-			searchUtility = new SearchUtility(opts)
+			searchUtility = new SearchUtility(opts),
 		} = opts;
 		this.redisClientDB = redisClientDB;
 		this.redisDB = redisDB;
@@ -31,7 +31,7 @@ class GraphHandler {
 		proxyBody.searchText = searchText;
 		proxyBody.cloneName = cloneName;
 
-		return await this.searchHelper({body: proxyBody, permissions}, userId);
+		return await this.searchHelper({ body: proxyBody, permissions }, userId);
 	}
 
 	async query(query, code, options, cloneName, permissions, userId) {
@@ -41,17 +41,19 @@ class GraphHandler {
 		proxyBody.query = query;
 		proxyBody.cloneName = cloneName;
 
-		return await this.queryHelper({body: proxyBody, permissions}, userId, code);
+		return await this.queryHelper({ body: proxyBody, permissions }, userId, code);
 	}
 
 	async callFunction(functionName, options, cloneName, permissions, userId) {
 		// Setup the request
-		this.logger.info(`${userId} is calling ${functionName} in the ${cloneName} graph module with options ${options}`);
+		this.logger.info(
+			`${userId} is calling ${functionName} in the ${cloneName} graph module with options ${options}`
+		);
 		const proxyBody = options;
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;
 
-		return await this.callFunctionHelper({body: proxyBody, permissions}, userId);
+		return await this.callFunctionHelper({ body: proxyBody, permissions }, userId);
 	}
 
 	async searchHelper(req, userId) {
@@ -81,18 +83,16 @@ class GraphHandler {
 
 	async getCachedResults(req, cloneSpecificObject, userId) {
 		try {
-
 			await this.redisDB.select(this.redisClientDB);
 
 			// ## try to get cached results
-			const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
+			const redisKey = this.searchUtility.createCacheKeyFromOptions({ ...req.body, cloneSpecificObject });
 
 			// check cache for search (first page only)
 			const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
 			if (cachedResults) {
 				return { ...cachedResults, isCached: true };
 			}
-
 		} catch (e) {
 			// don't reject if cache errors just log
 			this.logger.error(e.message, 'MHLY46W', userId);
@@ -103,7 +103,7 @@ class GraphHandler {
 		await this.redisDB.select(this.redisClientDB);
 
 		// ## try to get cached results
-		const redisKey = this.searchUtility.createCacheKeyFromOptions({...req.body, cloneSpecificObject});
+		const redisKey = this.searchUtility.createCacheKeyFromOptions({ ...req.body, cloneSpecificObject });
 
 		try {
 			this.logger.info(`Storing new graph cache entry: ${redisKey}`);
@@ -124,7 +124,8 @@ class GraphHandler {
 			charge.strength(-5);
 			charge.distanceMin(100);
 			charge.distanceMax(200);
-			const simulation = d3Force.forceSimulation(nodes, 2)
+			const simulation = d3Force
+				.forceSimulation(nodes, 2)
 				.force('link', forceLink)
 				.force('charge', charge)
 				.force('collision', forceCollide)
@@ -135,15 +136,12 @@ class GraphHandler {
 			const linkForce = simulation.force('link');
 
 			if (linkForce) {
-				linkForce
-					.id(d => d['id'])
-					.links(renderEdges);
+				linkForce.id((d) => d['id']).links(renderEdges);
 			}
 
 			for (let i = 0; i < 500; ++i) {
 				simulation.tick();
 			}
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'FA2PCCZ', user);
@@ -153,7 +151,8 @@ class GraphHandler {
 	render3dNodeLocations(nodes, edges, user) {
 		try {
 			const renderEdges = JSON.parse(JSON.stringify(edges));
-			const simulation = d3Force.forceSimulation(nodes, 3)
+			const simulation = d3Force
+				.forceSimulation(nodes, 3)
 				.force('link', d3Force.forceLink())
 				.force('charge', d3Force.forceManyBody())
 				.force('center', d3Force.forceCenter())
@@ -162,15 +161,12 @@ class GraphHandler {
 			const linkForce = simulation.force('link');
 
 			if (linkForce) {
-				linkForce
-					.id(d => d['id'])
-					.links(renderEdges);
+				linkForce.id((d) => d['id']).links(renderEdges);
 			}
 
 			for (let i = 0; i < 500; ++i) {
 				simulation.tick();
 			}
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'PCCZEDC', user);

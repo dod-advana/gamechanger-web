@@ -13,11 +13,7 @@ const PolicyTitleBarHandler = {
 				onClick={onTitleClick}
 				alt="gamechanger"
 				id={'titleButton'}
-				className={
-					componentStepNumbers
-						? `tutorial-step-${componentStepNumbers['Gamechanger Title']}`
-						: null
-				}
+				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Gamechanger Title']}` : null}
 			/>
 		);
 	},
@@ -37,9 +33,7 @@ const PolicyTitleBarHandler = {
 
 		return (
 			<>
-				{rawSearchResults?.length !== 0 &&
-					!loading &&
-					pageDisplayed === 'main' && (
+				{rawSearchResults?.length !== 0 && !loading && pageDisplayed === 'main' && (
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,
@@ -63,11 +57,8 @@ const PolicyTitleBarHandler = {
 		const { rawSearchResults, pageDisplayed, backgroundColor } = props;
 		return {
 			...styles.titleBar,
-			borderBottom:
-				rawSearchResults.length > 0 && pageDisplayed === 'main'
-					? '2px solid rgb(176, 186, 197)'
-					: '',
-			backgroundColor: `${backgroundColor || null}`
+			borderBottom: rawSearchResults.length > 0 && pageDisplayed === 'main' ? '2px solid rgb(176, 186, 197)' : '',
+			backgroundColor: `${backgroundColor || null}`,
 		};
 	},
 };

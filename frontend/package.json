@@ -93,8 +93,11 @@
 		"enzyme": "^3.11.0",
 		"enzyme-adapter-react-16": "^1.15.6",
 		"eslint": "^7.11.0",
+		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-import": "^2.23.4",
+		"eslint-plugin-prettier": "^4.0.0",
 		"eslint-plugin-react": "^7.24.0",
+		"prettier": "^2.6.1",
 		"sonarqube-scanner": "^2.5.0",
 		"typescript": "^4.4.3"
 	},
@@ -112,7 +115,7 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"eslint": "eslint --fix --debug -c package.json ./src/"
+		"eslint": "eslint --fix --debug -c .eslintrc.json ./src/"
 	},
 	"jest": {
 		"moduleDirectories": [
@@ -148,65 +151,5 @@
 			"last 1 firefox version",
 			"last 1 safari version"
 		]
-	},
-	"eslintConfig": {
-		"extends": [
-			"react-app"
-		],
-		"rules": {
-			"semi": [
-				"error",
-				"always",
-				{
-					"omitLastInOneLineBlock": true
-				}
-			],
-			"max-len": 0,
-			"indent": [
-				"warn",
-				"tab",
-				{
-					"SwitchCase": 1
-				}
-			],
-			"space-before-function-paren": 0,
-			"radix": 0,
-			"comma-dangle": 0,
-			"strict": 0,
-			"no-throw-literal": 0,
-			"quotes": [
-				"warn",
-				"single",
-				{
-					"allowTemplateLiterals": true
-				}
-			],
-			"no-eval": 0,
-			"no-irregular-whitespace": [
-				"warn",
-				{
-					"skipComments": true
-				}
-			],
-			"import/no-anonymous-default-export": [
-				"warn",
-				{
-					"allowArray": false,
-					"allowArrowFunction": true,
-					"allowAnonymousClass": false,
-					"allowAnonymousFunction": true,
-					"allowCallExpression": true,
-					"allowLiteral": false,
-					"allowObject": true
-				}
-			]
-		},
-		"env": {
-			"es6": true
-		},
-		"parserOptions": {
-			"ecmaVersion": 2018,
-			"sourceType": "module"
-		}
 	}
 }

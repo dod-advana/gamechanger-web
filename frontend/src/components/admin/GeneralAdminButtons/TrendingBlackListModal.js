@@ -10,10 +10,7 @@ import { styles } from '../util/GCAdminStyles';
  *
  * @class TrendingBlacklistModal
  */
-export default ({
-	showTrendingBlacklistModal,
-	setShowTrendingBlacklistModal,
-}) => {
+export default ({ showTrendingBlacklistModal, setShowTrendingBlacklistModal }) => {
 	const closeTrendingBlacklistModal = () => {
 		setShowTrendingBlacklistModal(false);
 	};

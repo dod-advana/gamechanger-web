@@ -7,10 +7,7 @@ const LOGGER = require('@dod-advana/advana-logger');
  */
 class ExternalSearchController {
 	constructor(opts = {}) {
-		const {
-			logger = LOGGER,
-			search = new ModularGameChangerController(opts)
-		} = opts;
+		const { logger = LOGGER, search = new ModularGameChangerController(opts) } = opts;
 		this.searchController = search;
 		this.logger = logger;
 	}
@@ -21,25 +18,24 @@ class ExternalSearchController {
 	 * @param {String} filter - a string of orgs separated by _
 	 * @returns orgFilter, orgFilterQuery
 	 */
-	createOrgFilter(filter){
-		if (!filter){
-			return {orgFilter: {}, orgFilterQuery: '*'};
+	createOrgFilter(filter) {
+		if (!filter) {
+			return { orgFilter: {}, orgFilterQuery: '*' };
 		}
 		const orgFilter = Object.assign({}, ORGFILTER);
 		const filterArray = filter ? filter.split('_') : getOrgOptions().split('_');
 		// Use the list of orgs to set the filter
-		for (let org of filterArray){
-			if (org in orgFilter){
+		for (let org of filterArray) {
+			if (org in orgFilter) {
 				orgFilter[org] = true;
 			}
 		}
 		// Use the orgFilter for the org query
 		const orgFilterQuery = getOrgToDocQuery(orgFilter);
-		return {orgFilter, orgFilterQuery};
+		return { orgFilter, orgFilterQuery };
 	}
 
-
-	async externalSearch(req, res){
+	async externalSearch(req, res) {
 		let userId = 'API';
 		try {
 			if (!req.query || !req.query.search || req.query.search === '') {
@@ -59,16 +55,18 @@ class ExternalSearchController {
 				let publicationDateFilterEnd;
 				let publicationDateAllTime = true;
 				const publicationDateFilter = [null, null];
-				if(req.query.publicationDateFilterStart) {
+				if (req.query.publicationDateFilterStart) {
 					publicationDateFilterStart = new Date(req.query.publicationDateFilterStart);
 					publicationDateAllTime = false;
 				}
-				if(req.query.publicationDateFilterEnd) {
+				if (req.query.publicationDateFilterEnd) {
 					publicationDateFilterEnd = new Date(req.query.publicationDateFilterEnd);
 					publicationDateAllTime = false;
 				}
-				if(publicationDateFilterStart instanceof Date && !isNaN(publicationDateFilterStart)) publicationDateFilter[0] = req.query.publicationDateFilterStart;
-				if(publicationDateFilterEnd instanceof Date && !isNaN(publicationDateFilterEnd)) publicationDateFilter[1] = req.query.publicationDateFilterEnd;
+				if (publicationDateFilterStart instanceof Date && !isNaN(publicationDateFilterStart))
+					publicationDateFilter[0] = req.query.publicationDateFilterStart;
+				if (publicationDateFilterEnd instanceof Date && !isNaN(publicationDateFilterEnd))
+					publicationDateFilter[1] = req.query.publicationDateFilterEnd;
 
 				// Format filter from query
 				const body = {
@@ -85,7 +83,7 @@ class ExternalSearchController {
 						publicationDateFilter,
 						publicationDateAllTime,
 						tiny_url: 'gamechanger?tiny=4',
-					}
+					},
 				};
 				req.body = body;
 				await this.searchController.search(req, res);

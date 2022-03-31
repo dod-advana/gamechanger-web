@@ -1,9 +1,5 @@
 import React, { useReducer } from 'react';
-import {
-	orgFilters,
-	typeFilters,
-	SEARCH_TYPES,
-} from '../../../utils/gamechangerUtils';
+import { orgFilters, typeFilters, SEARCH_TYPES } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	cloneDataSet: false,
@@ -95,13 +91,7 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: [
-			'Relevance',
-			'Publishing Date',
-			'Alphabetical',
-			'References',
-			'Popular',
-		],
+		Documents: ['Relevance', 'Publishing Date', 'Alphabetical', 'References', 'Popular'],
 	},
 
 	// Documents
@@ -250,11 +240,7 @@ const DefaultContext = React.createContext(initState);
 const DefaultProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
-	return (
-		<DefaultContext.Provider value={{ state, dispatch }}>
-			{props.children}
-		</DefaultContext.Provider>
-	);
+	return <DefaultContext.Provider value={{ state, dispatch }}>{props.children}</DefaultContext.Provider>;
 });
 
 export { DefaultContext, DefaultProvider };

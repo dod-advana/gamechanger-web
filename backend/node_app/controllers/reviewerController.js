@@ -4,14 +4,8 @@ const sparkMD5Lib = require('spark-md5');
 const constantsFile = require('../config/constants');
 
 class ReviewerController {
-
 	constructor(opts = {}) {
-		const {
-			constants = constantsFile,
-			logger = LOGGER,
-			sparkMD5 = sparkMD5Lib,
-			reviewer = REVIEWER,
-		} = opts;
+		const { constants = constantsFile, logger = LOGGER, sparkMD5 = sparkMD5Lib, reviewer = REVIEWER } = opts;
 
 		this.logger = logger;
 		this.sparkMD5 = sparkMD5;
@@ -29,7 +23,7 @@ class ReviewerController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			this.reviewer.findAll().then(results => {
+			this.reviewer.findAll().then((results) => {
 				console.log(results);
 				res.status(200).send(results);
 			});
@@ -70,7 +64,7 @@ class ReviewerController {
 
 	async updateOrCreateReviewerHelper(reviewerData, userId, fromApp = false) {
 		try {
-			const foundItem = await this.reviewer.findOne({ where: {id: reviewerData.id || 0}});
+			const foundItem = await this.reviewer.findOne({ where: { id: reviewerData.id || 0 } });
 
 			if (!foundItem) {
 				await this.reviewer.create(reviewerData);

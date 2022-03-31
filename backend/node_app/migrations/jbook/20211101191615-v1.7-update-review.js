@@ -1,28 +1,27 @@
 'use strict';
-const tablename='review';
+const tablename = 'review';
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-      return queryInterface.describeTable(tablename).then(tableDefinition => {
-          const queries = [];
-          if (!tableDefinition['service_poc_phone_number']) {
-              queries.push(queryInterface.addColumn(tablename, 'service_poc_phone_number', Sequelize.TEXT));
-          }
-          if (!tableDefinition['rev_stp']) {
-              queries.push(queryInterface.renameColumn(tablename, 'rev_stp', 'service_ptp_agree_label'));
-          }
-          return queryInterface.sequelize.transaction(function () {
-			    Promise.all(queries);
-            });
-      });
-    
-  },
+	up: (queryInterface, Sequelize) => {
+		return queryInterface.describeTable(tablename).then((tableDefinition) => {
+			const queries = [];
+			if (!tableDefinition['service_poc_phone_number']) {
+				queries.push(queryInterface.addColumn(tablename, 'service_poc_phone_number', Sequelize.TEXT));
+			}
+			if (!tableDefinition['rev_stp']) {
+				queries.push(queryInterface.renameColumn(tablename, 'rev_stp', 'service_ptp_agree_label'));
+			}
+			return queryInterface.sequelize.transaction(function () {
+				Promise.all(queries);
+			});
+		});
+	},
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.transaction(function () {
+	down: (queryInterface, Sequelize) => {
+		return queryInterface.sequelize.transaction(function () {
 			Promise.all([
-        queryInterface.renameColumn(tablename, 'service_ptp_agree_label', 'rev_stp'),
-        queryInterface.removeColumn(tablename, 'service_poc_phone_number')
-      ]);
-    });
-  }
+				queryInterface.renameColumn(tablename, 'service_ptp_agree_label', 'rev_stp'),
+				queryInterface.removeColumn(tablename, 'service_poc_phone_number'),
+			]);
+		});
+	},
 };

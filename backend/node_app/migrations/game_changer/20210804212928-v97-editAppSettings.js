@@ -6,7 +6,7 @@ module.exports = {
 			return Promise.all([
 				queryInterface.changeColumn(tablename, 'value', {
 					type: Sequelize.TEXT,
-          allowNull: false
+					allowNull: false,
 				}),
 			]);
 		});
@@ -17,9 +17,9 @@ module.exports = {
 			return Promise.all([
 				queryInterface.changeColumn(tablename, 'value', {
 					type: Sequelize.STRING,
-          allowNull: false
+					allowNull: false,
 				}),
 			]);
 		});
-	}
+	},
 };

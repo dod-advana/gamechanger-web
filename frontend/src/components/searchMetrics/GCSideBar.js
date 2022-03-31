@@ -5,11 +5,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
-import {
-	getTrackingNameForFactory,
-	orgColorMap,
-	exactMatch,
-} from  '../../utils/gamechangerUtils';
+import { getTrackingNameForFactory, orgColorMap, exactMatch } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';
@@ -20,11 +16,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import DefaultSeal from '../mainView/img/GC Default Seal.png';
 import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
 
-import {
-	FormGroup,
-	FormControlLabel,
-	Checkbox,
-} from '@material-ui/core';
+import { FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 const gcColors = {
 	buttonColor1: '#131E43',
 	buttonColor2: '#E9691D',
@@ -289,12 +281,8 @@ export default function SideBar(props) {
 
 	const [topEntities, setTopEntities] = useState([]);
 	const [topTopics, setTopTopics] = useState([]);
-	const [runningTopicSearch, setRunningTopicSearch] = useState(
-		state.runningTopicSearch
-	);
-	const [runningEntitySearch, setRunningEntitySearch] = useState(
-		state.runningEntitySearch
-	);
+	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
+	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
 	const [expansionTerms, setExpansionTerms] = React.useState([]);
 
 	let expansionTermSelected = true;
@@ -390,19 +378,15 @@ export default function SideBar(props) {
 	}, [state, expansionTerms, dispatch]);
 
 	useEffect(() => {
-		gameChangerAPI
-			.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name))
-			.then(({ data }) => {
-				setOrgOverrideImageURLs(data);
-			});
+		gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({ data }) => {
+			setOrgOverrideImageURLs(data);
+		});
 	}, [topEntities]);
 
 	useEffect(() => {
 		try {
 			gameChangerAPI.gcOrgSealData().then(({ data }) => {
-				let orgSources = data.filter((org) =>
-					org.image_link.startsWith('s3://')
-				);
+				let orgSources = data.filter((org) => org.image_link.startsWith('s3://'));
 				if (orgSources.length > 0) {
 					let folder = orgSources[0].image_link.split('/');
 					folder = folder[folder.length - 2];
@@ -411,29 +395,22 @@ export default function SideBar(props) {
 						return { img_filename: filename };
 					});
 					gameChangerAPI
-						.thumbnailStorageDownloadPOST(
-							thumbnailList,
-							folder,
-							state.cloneData
-						)
+						.thumbnailStorageDownloadPOST(thumbnailList, folder, state.cloneData)
 						.then(({ data }) => {
 							const buffers = data;
 							buffers.forEach((buf, idx) => {
 								if (buf.status === 'fulfilled') {
 									if (orgSources[idx].image_link.split('.').pop() === 'png') {
-										orgSources[idx].imgSrc =
-											'data:image/png;base64,' + buf.value;
-									} else if (
-										orgSources[idx].image_link.split('.').pop() === 'svg'
-									) {
-										orgSources[idx].imgSrc =
-											'data:image/svg+xml;base64,' + buf.value;
+										orgSources[idx].imgSrc = 'data:image/png;base64,' + buf.value;
+									} else if (orgSources[idx].image_link.split('.').pop() === 'svg') {
+										orgSources[idx].imgSrc = 'data:image/svg+xml;base64,' + buf.value;
 									}
 								} else {
 									orgSources[idx].imgSrc = DefaultSeal;
 								}
 							});
-						}).catch(e => {
+						})
+						.catch((e) => {
 							//Do nothing
 						});
 				}
@@ -464,13 +441,7 @@ export default function SideBar(props) {
 						entity: entity.image,
 					};
 					return (
-						<GCTooltip
-							key={entity.name}
-							title={entity.name}
-							arrow
-							enterDelay={30}
-							leaveDelay={10}
-						>
+						<GCTooltip key={entity.name} title={entity.name} arrow enterDelay={30} leaveDelay={10}>
 							<div
 								className={'entity-div'}
 								onClick={() => {
@@ -486,15 +457,10 @@ export default function SideBar(props) {
 							>
 								<img
 									alt={`${entity.name} Img`}
-									src={
-										fallbackSources.s3 ||
-										fallbackSources.admin ||
-										fallbackSources.entity
-									}
+									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
-										if (fallbackSources.admin)
-											fallbackSources.admin = undefined;
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
 									}}
 								/>
 								<span>{entity.aliase}</span>
@@ -505,11 +471,7 @@ export default function SideBar(props) {
 			</StyledTopEntities>
 		);
 	};
-	const renderExpansionTerms = (
-		expansionTerms,
-		handleAddSearchTerm,
-		classes
-	) => {
+	const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		return (
 			<div style={{ margin: '10px 0 10px 0' }}>
 				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
@@ -518,13 +480,7 @@ export default function SideBar(props) {
 						term = term.length > 25 ? term.substring(0, 25 - 3) + '...' : term;
 
 						return (
-							<GCTooltip
-								key={phrase}
-								title={phrase}
-								arrow
-								enterDelay={30}
-								leaveDelay={10}
-							>
+							<GCTooltip key={phrase} title={phrase} arrow enterDelay={30} leaveDelay={10}>
 								<FormControlLabel
 									key={term}
 									value={term}
@@ -629,31 +585,20 @@ export default function SideBar(props) {
 		setExpansionTerms(temp);
 	};
 	return (
-		<div
-			className={''}
-			style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}
-		>
+		<div className={''} style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}>
 			<div className={''}>
 				<div style={styles.innerContainer}>
 					<div style={styles.cardBody} className={`tutorial-step-unknown2`}>
 						<div style={styles.innerContainer}>
 							{expansionTerms.length > 0 && (
 								<div style={{ width: '100%', marginBottom: 10 }}>
-									<GCTooltip
-										title={'Select a document for export'}
-										placement="top"
-										arrow
-									>
+									<GCTooltip title={'Select a document for export'} placement="top" arrow>
 										<GCAccordion
 											expanded={expansionTermSelected}
 											header={'SEARCHES'}
 											headerTextWeight={'normal'}
 										>
-											{renderExpansionTerms(
-												expansionTerms,
-												handleAddSearchTerm,
-												classes
-											)}
+											{renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes)}
 										</GCAccordion>
 									</GCTooltip>
 								</div>
@@ -668,9 +613,7 @@ export default function SideBar(props) {
 										>
 											{runningEntitySearch ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator
-														customColor={gcColors.buttonColor2}
-													/>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
 												</div>
 											) : (
 												<>{renderTopEntities()}</>
@@ -678,16 +621,10 @@ export default function SideBar(props) {
 										</GCAccordion>
 									</div>
 									<div style={{ width: '100%', marginBottom: 10 }}>
-										<GCAccordion
-											expanded={false}
-											header={'TOPICS'}
-											headerTextWeight={'normal'}
-										>
+										<GCAccordion expanded={false} header={'TOPICS'} headerTextWeight={'normal'}>
 											{runningTopicSearch ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator
-														customColor={gcColors.buttonColor2}
-													/>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
 												</div>
 											) : (
 												<>{renderTopTopics()}</>
@@ -696,11 +633,7 @@ export default function SideBar(props) {
 									</div>
 									{false && (
 										<div style={{ width: '100%', marginBottom: 10 }}>
-											<GCAccordion
-												expanded={false}
-												header={'LEGEND'}
-												headerTextWeight={'normal'}
-											>
+											<GCAccordion expanded={false} header={'LEGEND'} headerTextWeight={'normal'}>
 												<>{renderLegend()}</>
 											</GCAccordion>
 										</div>

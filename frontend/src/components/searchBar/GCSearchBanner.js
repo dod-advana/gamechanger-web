@@ -107,11 +107,7 @@ const SearchBanner = (props) => {
 	return (
 		<div
 			style={{ ...styles.container, ...style }}
-			className={
-				componentStepNumbers
-					? `tutorial-step-${componentStepNumbers['Search Bar']}`
-					: null
-			}
+			className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Search Bar']}` : null}
 		>
 			{loaded && (
 				<div
@@ -139,22 +135,13 @@ const SearchBanner = (props) => {
 										: null
 								}
 							/>
-							<Typography
-								variant="h2"
-								style={styles.adminWording}
-								display="inline"
-							>
+							<Typography variant="h2" style={styles.adminWording} display="inline">
 								Data Tracker
 							</Typography>
 						</div>
 					)}
 					<div style={styles.searchBar}>{children}</div>
-					{!jupiter && (
-						<AdvanaMegaMenuPill
-							margin="0 -30px 0 20px"
-							defaultHeader="Applications"
-						/>
-					)}
+					{!jupiter && <AdvanaMegaMenuPill margin="0 -30px 0 20px" defaultHeader="Applications" />}
 				</div>
 			)}
 
@@ -169,8 +156,7 @@ const SearchBanner = (props) => {
 					cloneData,
 					dispatch,
 					loading,
-				})
-			}
+				})}
 		</div>
 	);
 };

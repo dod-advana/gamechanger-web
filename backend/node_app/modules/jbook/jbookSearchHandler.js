@@ -37,14 +37,14 @@ const excelStyles = {
 		top: { style: 'thin' },
 		left: { style: 'thin' },
 		bottom: { style: 'thin' },
-		right: { style: 'thin' }
+		right: { style: 'thin' },
 	},
 	borderAllMedium: {
 		top: { style: 'medium' },
 		left: { style: 'medium' },
 		bottom: { style: 'medium' },
-		right: { style: 'medium' }
-	}
+		right: { style: 'medium' },
+	},
 };
 
 class JBookSearchHandler extends SearchHandler {
@@ -78,7 +78,6 @@ class JBookSearchHandler extends SearchHandler {
 		this.db = db;
 		this.reports = reports;
 		this.keyword_assoc = keyword_assoc;
-
 	}
 
 	async searchHelper(req, userId, res) {
@@ -103,7 +102,7 @@ class JBookSearchHandler extends SearchHandler {
 			offset,
 			showTutorial = false,
 			tiny_url,
-			jbookSearchSettings = {}
+			jbookSearchSettings = {},
 		} = req.body;
 
 		try {
@@ -131,7 +130,6 @@ class JBookSearchHandler extends SearchHandler {
 			}
 
 			return searchResults;
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'WHMU1G2', userId);
@@ -227,19 +225,19 @@ class JBookSearchHandler extends SearchHandler {
 		let rawBlis = [];
 		if (dataType === 'pdoc') {
 			raw.forEach((r) => {
-				rawBlis.push('\'' + r.budgetLineItem + '\'');
+				rawBlis.push("'" + r.budgetLineItem + "'");
 			});
 			review_query = `SELECT * from review where budget_type = 'pdoc' and budget_line_item in (${rawBlis})`;
 		} else if (dataType === 'rdoc') {
 			raw.forEach((r) => {
-				rawBlis.push('\'' + r.projectNum + '\'');
+				rawBlis.push("'" + r.projectNum + "'");
 			});
 			review_query = `SELECT * from review where budget_type = 'rdoc' and budget_line_item in (${rawBlis})`;
 		} else if (dataType === 'om') {
 			raw.forEach((r) => {
-				rawBlis.push('\'' + r.line_number + '\'');
+				rawBlis.push("'" + r.line_number + "'");
 			});
-			review_query = `SELECT * from review where budget_type = 'om' and budget_line_item in (${rawBlis})`;// where doc_id in (${rawIds})`;
+			review_query = `SELECT * from review where budget_type = 'om' and budget_line_item in (${rawBlis})`; // where doc_id in (${rawIds})`;
 		}
 
 		let review_results = await REVIEW.sequelize.query(review_query);
@@ -251,11 +249,18 @@ class JBookSearchHandler extends SearchHandler {
 
 			// don't match on budget year for now
 			if (dataType === 'rdoc') {
-				reviews = review_results.filter(rev => rev.budgetYear === r.BudgetYear && rev.program_element === r.programElement && rev.budget_line_item === r.projectNum);
+				reviews = review_results.filter(
+					(rev) =>
+						rev.budgetYear === r.BudgetYear &&
+						rev.program_element === r.programElement &&
+						rev.budget_line_item === r.projectNum
+				);
 			} else if (dataType === 'pdoc') {
-				reviews = review_results.filter(rev => rev.budgetYear === r['P40-04_BudgetYear'] && rev.budget_line_item === r.budgetLineItem);
+				reviews = review_results.filter(
+					(rev) => rev.budgetYear === r['P40-04_BudgetYear'] && rev.budget_line_item === r.budgetLineItem
+				);
 			} else if (dataType === 'om') {
-				reviews = review_results.filter(rev => rev.budget_line_item === r.line_number);
+				reviews = review_results.filter((rev) => rev.budget_line_item === r.line_number);
 			}
 
 			if (reviews && reviews.length) {
@@ -271,9 +276,7 @@ class JBookSearchHandler extends SearchHandler {
 	}
 
 	async documentSearch(req, userId, res, statusExport = false) {
-		const {
-			useElasticSearch = false
-		} = req.body;
+		const { useElasticSearch = false } = req.body;
 
 		try {
 			if (useElasticSearch) {
@@ -301,15 +304,26 @@ class JBookSearchHandler extends SearchHandler {
 			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
 			// clean empty options:
-			Object.keys(req.body.jbookSearchSettings).forEach(key => {
-				if ((Array.isArray(req.body.jbookSearchSettings[key]) && req.body.jbookSearchSettings[key].length === 0) || (req.body.jbookSearchSettings[key] === '')) {
+			Object.keys(req.body.jbookSearchSettings).forEach((key) => {
+				if (
+					(Array.isArray(req.body.jbookSearchSettings[key]) &&
+						req.body.jbookSearchSettings[key].length === 0) ||
+					req.body.jbookSearchSettings[key] === ''
+				) {
 					delete req.body.jbookSearchSettings[key];
 				}
 			});
 			let pgQueryWhere = ``;
-			const pgFilters = ['reviewStatus', 'primaryReviewer', 'serviceReviewer', 'pocReviewer', 'primaryClassLabel', 'sourceTag'];
+			const pgFilters = [
+				'reviewStatus',
+				'primaryReviewer',
+				'serviceReviewer',
+				'pocReviewer',
+				'primaryClassLabel',
+				'sourceTag',
+			];
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
-			pgFilters.forEach(filter => {
+			pgFilters.forEach((filter) => {
 				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
 					console.log(filter);
 					console.log(jbookSearchSettings[filter]);
@@ -339,9 +353,12 @@ class JBookSearchHandler extends SearchHandler {
 
 			const keys = [];
 			if (pgQueryWhere.length > 0) {
-				let pgQuery = `SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` + pgQueryWhere + `;`;
+				let pgQuery =
+					`SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` +
+					pgQueryWhere +
+					`;`;
 				const pgResults = await this.db.jbook.query(pgQuery, {});
-				pgResults[0].forEach(review => {
+				pgResults[0].forEach((review) => {
 					let key;
 					let leadingZeroBudgetActivity = review.budget_activity !== null ? review.budget_activity : '';
 					if (leadingZeroBudgetActivity.length === 1) {
@@ -349,7 +366,11 @@ class JBookSearchHandler extends SearchHandler {
 					}
 					let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
 					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency !== null ? review.agency : ''}`;
+						key = `pdoc#${review.budget_line_item}#${
+							review.budget_year
+						}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${
+							review.agency !== null ? review.agency : ''
+						}`;
 					} else if (review.budget_type === 'rdoc') {
 						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
 					} else if (review.budget_type === 'odoc') {
@@ -362,7 +383,11 @@ class JBookSearchHandler extends SearchHandler {
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(req.body, userId, this.jbookSearchUtility.getMapping('esServiceAgency', false));
+			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(
+				req.body,
+				userId,
+				this.jbookSearchUtility.getMapping('esServiceAgency', false)
+			);
 			let expansionDict = {};
 
 			if (req.body.searchText && req.body.searchText !== '') {
@@ -371,12 +396,16 @@ class JBookSearchHandler extends SearchHandler {
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
+			);
 			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			returnData.expansionDict = expansionDict;
 			return returnData;
-
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'G4W6UNW', userId);
@@ -386,12 +415,7 @@ class JBookSearchHandler extends SearchHandler {
 
 	async postgresDocumentSearch(req, userId, res, statusExport = false) {
 		try {
-			const {
-				offset,
-				searchText,
-				jbookSearchSettings,
-				exportSearch
-			} = req.body;
+			const { offset, searchText, jbookSearchSettings, exportSearch } = req.body;
 
 			const perms = req.permissions;
 
@@ -413,14 +437,23 @@ class JBookSearchHandler extends SearchHandler {
 							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
 			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map(i => Number(i)) : [0];
-			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
-			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map(i => Number(i)) : [0];
+			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map((i) => Number(i)) : [0];
+			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map((i) => Number(i)) : [0];
+			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map((i) => Number(i)) : [0];
 
-			const keywordIdsParam = jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
+			const keywordIdsParam =
+				jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0
+					? keywordIds
+					: null;
 
 			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, hasSearchText, keywordIdsParam, perms, userId);
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
+				jbookSearchSettings,
+				hasSearchText,
+				keywordIdsParam,
+				perms,
+				userId
+			);
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
@@ -457,15 +490,14 @@ class JBookSearchHandler extends SearchHandler {
 					replacements: {
 						searchText: structuredSearchText,
 						offset,
-						limit
-					}
+						limit,
+					},
 				});
 				totalCount = totalCount[0][0].count;
 			} catch (e) {
 				console.log('Error getting total count');
 				console.log(e);
 			}
-
 
 			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
 			giantQuery += queryEnd;
@@ -479,20 +511,19 @@ class JBookSearchHandler extends SearchHandler {
 				replacements: {
 					searchText: structuredSearchText,
 					offset,
-					limit
-				}
+					limit,
+				},
 			});
-
 
 			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
 			let returnData = data2[0];
 
 			// set the keywords
-			returnData.map(doc => {
+			returnData.map((doc) => {
 				const typeMap = {
-					'Procurement': 'pdoc',
+					Procurement: 'pdoc',
 					'RDT&E': 'rdoc',
-					'O&M': 'odoc'
+					'O&M': 'odoc',
 				};
 				doc.budgetType = typeMap[doc.type];
 				doc.hasKeywords = keywordIds[typeMap[doc.type]]?.indexOf(doc.id) !== -1;
@@ -501,8 +532,7 @@ class JBookSearchHandler extends SearchHandler {
 						let keywords = doc.keywords.replace(/[\(\)\"]\s*/g, '');
 						keywords = keywords.split(',').slice(1);
 						doc.keywords = keywords;
-					}
-					catch (e) {
+					} catch (e) {
 						console.log('Error adding keywords to doc');
 						console.log(e);
 					}
@@ -537,18 +567,14 @@ class JBookSearchHandler extends SearchHandler {
 						let titles = accomps[0].replace(/[\"]\s*/g, '').split('; ');
 
 						doc.accomplishments = titles;
-
 					} catch (e) {
 						console.log('Error adding accomplishments to doc');
 						console.log(e);
 					}
 				}
 
-
 				return doc;
 			});
-
-
 
 			if (exportSearch) {
 				const csvStream = await this.reports.createCsvStream({ docs: returnData }, userId);
@@ -558,7 +584,7 @@ class JBookSearchHandler extends SearchHandler {
 				return {
 					totalCount,
 					docs: returnData,
-					expansionDict
+					expansionDict,
 				};
 			}
 		} catch (e) {
@@ -593,13 +619,11 @@ class JBookSearchHandler extends SearchHandler {
 			this.logger.error(message, 'D03Z7K7', userId);
 			throw err;
 		}
-
-
 	}
 
 	async getDataForFullPDFExport(req, userId) {
 		try {
-			const { jbookSearchSettings = {budgetYear: ['2022']} } = req.body;
+			const { jbookSearchSettings = { budgetYear: ['2022'] } } = req.body;
 			let keywordIds = undefined;
 
 			keywordIds = { pdoc: [], rdoc: [], om: [] };
@@ -607,18 +631,27 @@ class JBookSearchHandler extends SearchHandler {
 								ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 								ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
 			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map(i => Number(i)) : [0];
-			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map(i => Number(i)) : [0];
-			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map(i => Number(i)) : [0];
+			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map((i) => Number(i)) : [0];
+			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map((i) => Number(i)) : [0];
+			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map((i) => Number(i)) : [0];
 
-			const keywordIdsParam = jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0 ? keywordIds : null;
+			const keywordIdsParam =
+				jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0
+					? keywordIds
+					: null;
 
 			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQueryForFullPDF();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(jbookSearchSettings, false, keywordIdsParam, [], userId);
+			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
+				jbookSearchSettings,
+				false,
+				keywordIdsParam,
+				[],
+				userId
+			);
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
-			const queryEnd = this.jbookSearchUtility.buildEndQuery([{id: 'serviceAgency', desc: false}]);
+			const queryEnd = this.jbookSearchUtility.buildEndQuery([{ id: 'serviceAgency', desc: false }]);
 
 			let giantQuery = ``;
 
@@ -647,11 +680,11 @@ class JBookSearchHandler extends SearchHandler {
 
 			let returnData = data[0];
 
-			returnData.map(doc => {
+			returnData.map((doc) => {
 				const typeMap = {
-					'Procurement': 'pdoc',
+					Procurement: 'pdoc',
 					'RDT&E': 'rdoc',
-					'O&M': 'om'
+					'O&M': 'om',
 				};
 				doc.hasKeywords = keywordIds[typeMap[doc.type]].indexOf(doc.id) !== -1;
 				return doc;
@@ -696,14 +729,25 @@ class JBookSearchHandler extends SearchHandler {
 		returnData.serviceAgency = [];
 
 		if (agencyYearData[0].length > 0) {
-			agencyYearData[0].forEach(data => {
-				returnData.budgetYear = [...new Set([...returnData.budgetYear, ...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : [])])];
-				returnData.serviceAgency = [...new Set([...returnData.serviceAgency, ...(data.serviceagency && data.serviceagency !== null ? data.serviceagency : [])])];
+			agencyYearData[0].forEach((data) => {
+				returnData.budgetYear = [
+					...new Set([
+						...returnData.budgetYear,
+						...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : []),
+					]),
+				];
+				returnData.serviceAgency = [
+					...new Set([
+						...returnData.serviceAgency,
+						...(data.serviceagency && data.serviceagency !== null ? data.serviceagency : []),
+					]),
+				];
 			});
 		}
 
-
-		const serviceReviewers = Array.from(new Set([...returnData.servicereviewer, ...returnData.servicesecondaryreviewer]));
+		const serviceReviewers = Array.from(
+			new Set([...returnData.servicereviewer, ...returnData.servicesecondaryreviewer])
+		);
 
 		// cover null index of service reviewer + service agency
 		let index = serviceReviewers.indexOf('');
@@ -761,7 +805,23 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.mergeCells('G2:I2');
 			sheet.getCell('G2').value = 'Review Status (JAIC 2021 Review Only)';
 
-			['A1:A3', 'B1:E1', 'F1:J1', 'C2:E2', 'G2:I2', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'I3', 'J3', 'K3'].forEach(col => {
+			[
+				'A1:A3',
+				'B1:E1',
+				'F1:J1',
+				'C2:E2',
+				'G2:I2',
+				'B3',
+				'C3',
+				'D3',
+				'E3',
+				'F3',
+				'G3',
+				'H3',
+				'I3',
+				'J3',
+				'K3',
+			].forEach((col) => {
 				sheet.getCell(`${col}`).font = { bold: true };
 				sheet.getCell(`${col}`).alignment = excelStyles.middleAlignment;
 				sheet.getCell(`${col}`).border = excelStyles.borderAllThin;
@@ -811,70 +871,96 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('K4:K12').alignment = excelStyles.topAlignment;
 			sheet.getCell('K13:K21').alignment = excelStyles.topAlignment;
 
-			['A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4', 'I4', 'J4', 'K4:K12', 'A13', 'B13:E13', 'F13:J13', 'K13:K21', 'B22:E22', 'F22:J22', 'K22', 'A22', 'J2'].forEach(col => {
+			[
+				'A4',
+				'B4',
+				'C4',
+				'D4',
+				'E4',
+				'F4',
+				'G4',
+				'H4',
+				'I4',
+				'J4',
+				'K4:K12',
+				'A13',
+				'B13:E13',
+				'F13:J13',
+				'K13:K21',
+				'B22:E22',
+				'F22:J22',
+				'K22',
+				'A22',
+				'J2',
+			].forEach((col) => {
 				sheet.getCell(`${col}`).font = { bold: true };
 				sheet.getCell(`${col}`).border = excelStyles.borderAllThin;
 			});
 
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}5`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}6`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}7`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}8`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}9`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}10`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}11`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}12`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}14`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}15`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}16`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}17`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}18`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}19`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}20`).border = excelStyles.borderAllThin;
 			});
-			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach((col) => {
 				sheet.getCell(`${col}21`).border = excelStyles.borderAllThin;
 			});
 
-			const results = await this.documentSearch({
-				body: {
-					offset: 0,
-					searchText: '',
-					jbookSearchSettings: {
-						budgetYear: ['2022', '2021']
+			const results = await this.documentSearch(
+				{
+					body: {
+						offset: 0,
+						searchText: '',
+						jbookSearchSettings: {
+							budgetYear: ['2022', '2021'],
+						},
+						exportSearch: false,
 					},
-					exportSearch: false
-				}
-			}, userId, null, true);
+				},
+				userId,
+				null,
+				true
+			);
 
 			const counts = {
 				fy22: {
@@ -883,108 +969,108 @@ class JBookSearchHandler extends SearchHandler {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						af: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						navy: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						usmc: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						socom: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						osd: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						js: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						other: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						total: 0,
 						service: 0,
 						poc: 0,
-						finished: 0
+						finished: 0,
 					},
 					noKeywords: {
 						army: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						af: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						navy: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						usmc: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						socom: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						osd: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						js: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						other: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						total: 0,
 						service: 0,
 						poc: 0,
-						finished: 0
+						finished: 0,
 					},
 				},
 				fy21: {
@@ -993,114 +1079,114 @@ class JBookSearchHandler extends SearchHandler {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						af: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						navy: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						usmc: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						socom: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						osd: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						js: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						other: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						total: 0,
 						service: 0,
 						poc: 0,
-						finished: 0
+						finished: 0,
 					},
 					noKeywords: {
 						army: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						af: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						navy: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						usmc: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						socom: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						osd: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						js: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						other: {
 							total: 0,
 							service: 0,
 							poc: 0,
-							finished: 0
+							finished: 0,
 						},
 						total: 0,
 						service: 0,
 						poc: 0,
-						finished: 0
+						finished: 0,
 					},
-				}
+				},
 			};
 
 			if (results && results.docs) {
-				results.docs.forEach(result => {
+				results.docs.forEach((result) => {
 					let serviceKey;
 					let reviewStep = 'service';
 					let keywordsKey;
@@ -1139,8 +1225,7 @@ class JBookSearchHandler extends SearchHandler {
 
 					if (result.hasKeywords === true) {
 						keywordsKey = 'hasKeywords';
-					}
-					else {
+					} else {
 						keywordsKey = 'noKeywords';
 					}
 
@@ -1152,7 +1237,8 @@ class JBookSearchHandler extends SearchHandler {
 
 					counts[yearKey][keywordsKey][serviceKey].total = counts[yearKey][keywordsKey][serviceKey].total + 1;
 					counts[yearKey][keywordsKey].total = counts[yearKey][keywordsKey].total + 1;
-					counts[yearKey][keywordsKey][serviceKey][reviewStep] = counts[yearKey][keywordsKey][serviceKey][reviewStep] + 1;
+					counts[yearKey][keywordsKey][serviceKey][reviewStep] =
+						counts[yearKey][keywordsKey][serviceKey][reviewStep] + 1;
 					counts[yearKey][keywordsKey][reviewStep] = counts[yearKey][keywordsKey][reviewStep] + 1;
 				});
 			}
@@ -1166,7 +1252,9 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G4').value = counts.fy22.noKeywords.service;
 			sheet.getCell('H4').value = counts.fy22.noKeywords.poc;
 			sheet.getCell('I4').value = counts.fy22.noKeywords.finished;
-			sheet.getCell('J4').value = counts.fy22.noKeywords.total - (counts.fy22.noKeywords.service + counts.fy22.noKeywords.poc + counts.fy22.noKeywords.finished);
+			sheet.getCell('J4').value =
+				counts.fy22.noKeywords.total -
+				(counts.fy22.noKeywords.service + counts.fy22.noKeywords.poc + counts.fy22.noKeywords.finished);
 			sheet.getCell('K4').value = counts.fy22.hasKeywords.total + counts.fy22.noKeywords.total;
 
 			//FY22  Army
@@ -1178,7 +1266,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G5').value = counts.fy22.noKeywords.army.service;
 			sheet.getCell('H5').value = counts.fy22.noKeywords.army.poc;
 			sheet.getCell('I5').value = counts.fy22.noKeywords.army.finished;
-			sheet.getCell('J5').value = counts.fy22.noKeywords.army.total - (counts.fy22.noKeywords.army.service + counts.fy22.noKeywords.army.poc + counts.fy22.noKeywords.army.finished);
+			sheet.getCell('J5').value =
+				counts.fy22.noKeywords.army.total -
+				(counts.fy22.noKeywords.army.service +
+					counts.fy22.noKeywords.army.poc +
+					counts.fy22.noKeywords.army.finished);
 
 			//FY22  AF
 			sheet.getCell('B6').value = counts.fy22.hasKeywords.af.total;
@@ -1189,7 +1281,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G6').value = counts.fy22.noKeywords.af.service;
 			sheet.getCell('H6').value = counts.fy22.noKeywords.af.poc;
 			sheet.getCell('I6').value = counts.fy22.noKeywords.af.finished;
-			sheet.getCell('J6').value = counts.fy22.noKeywords.af.total - (counts.fy22.noKeywords.af.service + counts.fy22.noKeywords.af.poc + counts.fy22.noKeywords.af.finished);
+			sheet.getCell('J6').value =
+				counts.fy22.noKeywords.af.total -
+				(counts.fy22.noKeywords.af.service +
+					counts.fy22.noKeywords.af.poc +
+					counts.fy22.noKeywords.af.finished);
 
 			//FY22  Navy
 			sheet.getCell('B7').value = counts.fy22.hasKeywords.navy.total;
@@ -1200,7 +1296,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G7').value = counts.fy22.noKeywords.navy.service;
 			sheet.getCell('H7').value = counts.fy22.noKeywords.navy.poc;
 			sheet.getCell('I7').value = counts.fy22.noKeywords.navy.finished;
-			sheet.getCell('J7').value = counts.fy22.noKeywords.navy.total - (counts.fy22.noKeywords.navy.service + counts.fy22.noKeywords.navy.poc + counts.fy22.noKeywords.navy.finished);
+			sheet.getCell('J7').value =
+				counts.fy22.noKeywords.navy.total -
+				(counts.fy22.noKeywords.navy.service +
+					counts.fy22.noKeywords.navy.poc +
+					counts.fy22.noKeywords.navy.finished);
 
 			//FY22  USMC
 			sheet.getCell('B8').value = counts.fy22.hasKeywords.usmc.total;
@@ -1211,7 +1311,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G8').value = counts.fy22.noKeywords.usmc.service;
 			sheet.getCell('H8').value = counts.fy22.noKeywords.usmc.poc;
 			sheet.getCell('I8').value = counts.fy22.noKeywords.usmc.finished;
-			sheet.getCell('J8').value = counts.fy22.noKeywords.usmc.total - (counts.fy22.noKeywords.usmc.service + counts.fy22.noKeywords.usmc.poc + counts.fy22.noKeywords.usmc.finished);
+			sheet.getCell('J8').value =
+				counts.fy22.noKeywords.usmc.total -
+				(counts.fy22.noKeywords.usmc.service +
+					counts.fy22.noKeywords.usmc.poc +
+					counts.fy22.noKeywords.usmc.finished);
 
 			//FY22  SOCOM
 			sheet.getCell('B9').value = counts.fy22.hasKeywords.socom.total;
@@ -1222,7 +1326,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G9').value = counts.fy22.noKeywords.socom.service;
 			sheet.getCell('H9').value = counts.fy22.noKeywords.socom.poc;
 			sheet.getCell('I9').value = counts.fy22.noKeywords.socom.finished;
-			sheet.getCell('J9').value = counts.fy22.noKeywords.socom.total - (counts.fy22.noKeywords.socom.service + counts.fy22.noKeywords.socom.poc + counts.fy22.noKeywords.socom.finished);
+			sheet.getCell('J9').value =
+				counts.fy22.noKeywords.socom.total -
+				(counts.fy22.noKeywords.socom.service +
+					counts.fy22.noKeywords.socom.poc +
+					counts.fy22.noKeywords.socom.finished);
 
 			//FY22  OSD
 			sheet.getCell('B10').value = counts.fy22.hasKeywords.osd.total;
@@ -1233,7 +1341,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G10').value = counts.fy22.noKeywords.osd.service;
 			sheet.getCell('H10').value = counts.fy22.noKeywords.osd.poc;
 			sheet.getCell('I10').value = counts.fy22.noKeywords.osd.finished;
-			sheet.getCell('J10').value = counts.fy22.noKeywords.osd.total - (counts.fy22.noKeywords.osd.service + counts.fy22.noKeywords.osd.poc + counts.fy22.noKeywords.osd.finished);
+			sheet.getCell('J10').value =
+				counts.fy22.noKeywords.osd.total -
+				(counts.fy22.noKeywords.osd.service +
+					counts.fy22.noKeywords.osd.poc +
+					counts.fy22.noKeywords.osd.finished);
 
 			//FY22  JS
 			sheet.getCell('B11').value = counts.fy22.hasKeywords.js.total;
@@ -1244,7 +1356,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G11').value = counts.fy22.noKeywords.js.service;
 			sheet.getCell('H11').value = counts.fy22.noKeywords.js.poc;
 			sheet.getCell('I11').value = counts.fy22.noKeywords.js.finished;
-			sheet.getCell('J11').value = counts.fy22.noKeywords.js.total - (counts.fy22.noKeywords.js.service + counts.fy22.noKeywords.js.poc + counts.fy22.noKeywords.js.finished);
+			sheet.getCell('J11').value =
+				counts.fy22.noKeywords.js.total -
+				(counts.fy22.noKeywords.js.service +
+					counts.fy22.noKeywords.js.poc +
+					counts.fy22.noKeywords.js.finished);
 
 			//FY22  Other
 			sheet.getCell('B12').value = counts.fy22.hasKeywords.other.total;
@@ -1255,7 +1371,11 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('G12').value = counts.fy22.noKeywords.other.service;
 			sheet.getCell('H12').value = counts.fy22.noKeywords.other.poc;
 			sheet.getCell('I12').value = counts.fy22.noKeywords.other.finished;
-			sheet.getCell('J12').value = counts.fy22.noKeywords.other.total - (counts.fy22.noKeywords.other.service + counts.fy22.noKeywords.other.poc + counts.fy22.noKeywords.other.finished);
+			sheet.getCell('J12').value =
+				counts.fy22.noKeywords.other.total -
+				(counts.fy22.noKeywords.other.service +
+					counts.fy22.noKeywords.other.poc +
+					counts.fy22.noKeywords.other.finished);
 
 			// FY21
 			sheet.getCell('B13').value = counts.fy21.hasKeywords.total;
@@ -1281,7 +1401,6 @@ class JBookSearchHandler extends SearchHandler {
 			sheet.getCell('F22').value = counts.fy22.noKeywords.total + counts.fy21.noKeywords.total;
 			sheet.getCell('K22').value = sheet.getCell('K4').value + sheet.getCell('K13').value;
 
-
 			res.status(200);
 			res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			res.setHeader('Content-Disposition', `attachment; filename=${'data'}.xlsx`);
@@ -1289,19 +1408,16 @@ class JBookSearchHandler extends SearchHandler {
 			if (!test) {
 				await workbook.xlsx.write(res);
 				res.end();
-			}
-			else {
+			} else {
 				// for test purposes
-				return {results, counts};
+				return { results, counts };
 			}
-
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'WW05F8X', userId);
 			throw e;
 		}
 	}
-
 }
 
 module.exports = JBookSearchHandler;

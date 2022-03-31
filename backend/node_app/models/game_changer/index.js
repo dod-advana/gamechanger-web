@@ -7,13 +7,21 @@ const constants = require('../../config/constants.js');
 const db = {};
 
 let gc_sequelize = new Sequelize(
-	constants.POSTGRES_CONFIG.databases.game_changer.database, constants.POSTGRES_CONFIG.databases.game_changer.username, constants.POSTGRES_CONFIG.databases.game_changer.password, constants.POSTGRES_CONFIG.databases.game_changer
+	constants.POSTGRES_CONFIG.databases.game_changer.database,
+	constants.POSTGRES_CONFIG.databases.game_changer.username,
+	constants.POSTGRES_CONFIG.databases.game_changer.password,
+	constants.POSTGRES_CONFIG.databases.game_changer
 );
 let uot_sequelize = new Sequelize(
-	constants.POSTGRES_CONFIG.databases.uot.database, constants.POSTGRES_CONFIG.databases.uot.username, constants.POSTGRES_CONFIG.databases.uot.password, constants.POSTGRES_CONFIG.databases.uot
+	constants.POSTGRES_CONFIG.databases.uot.database,
+	constants.POSTGRES_CONFIG.databases.uot.username,
+	constants.POSTGRES_CONFIG.databases.uot.password,
+	constants.POSTGRES_CONFIG.databases.uot
 );
 
-Sequelize.postgres.DECIMAL.parse = function (value) { return parseFloat(value) };
+Sequelize.postgres.DECIMAL.parse = function (value) {
+	return parseFloat(value);
+};
 
 db.uot = uot_sequelize;
 db.gc = gc_sequelize;

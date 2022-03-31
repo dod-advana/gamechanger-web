@@ -1,12 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const GL_CONTRACTS = sequelize.define('gl_contracts',
+	const GL_CONTRACTS = sequelize.define(
+		'gl_contracts',
 		{
 			id: {
 				type: DataTypes.INTEGER,
 				autoIncrement: true,
 				primaryKey: true,
-				allowNull: false
+				allowNull: false,
 			},
 			bli: {
 				type: DataTypes.TEXT,
@@ -46,12 +47,13 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			modification_number: {
 				type: DataTypes.TEXT,
-			}
-		}, {
-		freezeTableName: true,
-		timestamps: false,
-		tableName: 'gl_contracts'
-	}
+			},
+		},
+		{
+			freezeTableName: true,
+			timestamps: false,
+			tableName: 'gl_contracts',
+		}
 	);
 	return GL_CONTRACTS;
 };

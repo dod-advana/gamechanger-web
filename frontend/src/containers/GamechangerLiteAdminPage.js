@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import {getContext} from '../components/factories/contextFactory';
-import {setState} from '../utils/sharedFunctions';
+import { getContext } from '../components/factories/contextFactory';
+import { setState } from '../utils/sharedFunctions';
 import AdminMainView from '../components/admin/AdminMainView';
 
 /**
@@ -9,11 +9,11 @@ import AdminMainView from '../components/admin/AdminMainView';
  */
 const GamechangerLiteAdminPage = (props) => {
 	const { cloneData, jupiter } = props;
-	
+
 	const cloneName = cloneData.clone_name;
 	const context = useContext(getContext(cloneName));
 	const { state, dispatch } = context;
-	
+
 	useEffect(() => {
 		if (!state.cloneDataSet) {
 			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
@@ -21,10 +21,8 @@ const GamechangerLiteAdminPage = (props) => {
 	}, [cloneData, state, dispatch]);
 
 	return (
-		<div className="main-container" style={{minHeight: 'calc(100vh - 120px'}}>
-			{state.cloneDataSet && (
-				<AdminMainView context={context} jupiter={jupiter} />
-			)}
+		<div className="main-container" style={{ minHeight: 'calc(100vh - 120px' }}>
+			{state.cloneDataSet && <AdminMainView context={context} jupiter={jupiter} />}
 		</div>
 	);
 };
