@@ -4,9 +4,10 @@ import axios from 'axios';
 import {
 	displayBackendError,
 	getQueryVariable,
-	getTrackingNameForFactory, NO_RESULTS_MESSAGE,
+	getTrackingNameForFactory,
+	NO_RESULTS_MESSAGE,
 	RECENT_SEARCH_LIMIT,
-	RESULTS_PER_PAGE
+	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
 import {
@@ -29,7 +30,6 @@ const getAndSetDidYouMean = (index, searchText, dispatch) => {
 };
 
 const JBookSearchHandler = {
-
 	updateRecentSearches(searchText) {
 		const recentSearches = localStorage.getItem(`recentjbookSearches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
@@ -46,9 +46,7 @@ const JBookSearchHandler = {
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
 			const offset = 0;
 
-			const {
-				searchText = '',
-			} = state;
+			const { searchText = '' } = state;
 
 			// regular search with no limit
 			const resp = await gamechangerAPI.modularSearch({
@@ -58,17 +56,15 @@ const JBookSearchHandler = {
 				options: {
 					searchVersion: 1,
 					jbookSearchSettings: cleanSearchSettings,
-					exportSearch: true
-				}
+					exportSearch: true,
+				},
 			});
 
 			if (resp) {
 				return resp.data;
-			}
-			else {
+			} else {
 				return null;
 			}
-
 		} catch (e) {
 			console.log(e);
 		}
@@ -76,9 +72,8 @@ const JBookSearchHandler = {
 
 	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
-
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
-			const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+			const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 			if (runningSearch) {
 				cancelToken.cancel('cancelled axios with consecutive call');
@@ -86,16 +81,19 @@ const JBookSearchHandler = {
 			}
 
 			// regular search
-			const resp = await gamechangerAPI.modularSearch({
-				cloneName: 'jbook',
-				searchText,
-				offset,
-				options: {
-					searchVersion: 1,
-					jbookSearchSettings: cleanSearchSettings,
-					useElasticSearch: state.useElasticSearch
-				}
-			}, cancelToken);
+			const resp = await gamechangerAPI.modularSearch(
+				{
+					cloneName: 'jbook',
+					searchText,
+					offset,
+					options: {
+						searchVersion: 1,
+						jbookSearchSettings: cleanSearchSettings,
+						useElasticSearch: state.useElasticSearch,
+					},
+				},
+				cancelToken
+			);
 
 			if (_.isObject(resp.data)) {
 				displayBackendError(resp, dispatch);
@@ -118,73 +116,60 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
-				useElasticSearch: state.useElasticSearch
-			}
+				useElasticSearch: state.useElasticSearch,
+			},
 		});
 		return data;
 	},
 
 	async handleSearch(state, dispatch) {
+		const { searchText = '', resultsPage, urlSearch, paginationSearch, edaPaginationSearch, runningSearch } = state;
 
-		const {
-			searchText = '',
-			resultsPage,
-			urlSearch,
-			paginationSearch,
-			edaPaginationSearch,
-			runningSearch
-		} = state;
-
-		
 		if (edaPaginationSearch) {
 			this.handleEDASearch(state, dispatch);
-		}
-		else {
-
+		} else {
 			if (!urlSearch) {
 				this.setSearchURL(state);
 			}
-	
+
 			this.updateRecentSearches(searchText);
-	
-			setState(dispatch,
-				{
-					runSearch: false,
-					budgetTypeDropdown: false,
-					serviceAgencyDropdown: false,
-					serviceReviewStatusDropdown: false,
-					reviewStatusDropdown: false,
-					budgetYearDropdown: false,
-					primaryReviewerDropdown: false,
-					serviceReviewerDropdown: false,
-					primaryClassLabelDropdown: false,
-					sourceTagDropdown: false,
-					hasKeywordsDropdown: false,
-					noResultsMessage: null,
-					count: 0,
-					timeFound: 0.0,
-					iframePreviewLink: null,
-					runningSearch: true,
-					edaRunningSearch: true,
-					urlSearch: false,
-					initial: false,
-					expansionDict: {},
-				});
-	
+
+			setState(dispatch, {
+				runSearch: false,
+				budgetTypeDropdown: false,
+				serviceAgencyDropdown: false,
+				serviceReviewStatusDropdown: false,
+				reviewStatusDropdown: false,
+				budgetYearDropdown: false,
+				primaryReviewerDropdown: false,
+				serviceReviewerDropdown: false,
+				primaryClassLabelDropdown: false,
+				sourceTagDropdown: false,
+				hasKeywordsDropdown: false,
+				noResultsMessage: null,
+				count: 0,
+				timeFound: 0.0,
+				iframePreviewLink: null,
+				runningSearch: true,
+				edaRunningSearch: true,
+				urlSearch: false,
+				initial: false,
+				expansionDict: {},
+			});
+
 			try {
 				const t0 = new Date().getTime();
-	
+
 				// run these simultaneously
 				if (!paginationSearch) {
 					this.handleEDASearch(state, dispatch);
 				}
-	
+
 				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
 				const { contractTotals } = await this.getContractTotals(state, dispatch);
 				const t1 = new Date().getTime();
-	
-	
-				if (results === null || (!results.docs || results.docs.length <= 0)) {
+
+				if (results === null || !results.docs || results.docs.length <= 0) {
 					setState(dispatch, {
 						prevSearchText: null,
 						loading: false,
@@ -197,15 +182,15 @@ const JBookSearchHandler = {
 						paginationSearch: false,
 					});
 				} else {
-					let { docs, totalCount, query, expansionDict, } = results;
-	
+					let { docs, totalCount, query, expansionDict } = results;
+
 					let hasExpansionTerms = false;
 					if (expansionDict) {
 						Object.keys(expansionDict).forEach((key) => {
 							if (expansionDict[key].length > 0) hasExpansionTerms = true;
 						});
 					}
-	
+
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						activeCategoryTab: 'jbook',
@@ -224,14 +209,9 @@ const JBookSearchHandler = {
 						paginationSearch: false,
 					});
 				}
-	
+
 				if (resultsPage < 2) {
-					trackSearch(
-						searchText,
-						`${getTrackingNameForFactory('jbook')}`,
-						results.totalCount,
-						false
-					);
+					trackSearch(searchText, `${getTrackingNameForFactory('jbook')}`, results.totalCount, false);
 				}
 				// this.setSearchURL({...state, searchText, resultsPage, tabName});
 			} catch (e) {
@@ -249,20 +229,14 @@ const JBookSearchHandler = {
 					runSearch: false,
 				});
 			}
-	
+
 			const index = 'gamechanger';
 			getAndSetDidYouMean(index, searchText, dispatch);
 		}
-
-		
 	},
 
 	async handleEDASearch(state, dispatch) {
-		const {
-			searchText = '',
-			edaResultsPage,
-			edaCloneData
-		} = state;
+		const { searchText = '', edaResultsPage, edaCloneData } = state;
 
 		// let searchResults = [];
 		setState(dispatch, {
@@ -270,7 +244,7 @@ const JBookSearchHandler = {
 			edaSearchResults: [],
 			edaLoading: true,
 			edaPaginationSearch: false,
-			runSearch: false
+			runSearch: false,
 		});
 
 		const offset = (edaResultsPage - 1) * RESULTS_PER_PAGE;
@@ -280,30 +254,29 @@ const JBookSearchHandler = {
 			// run EDA Search
 			// const t0 = new Date().getTime();
 			const results = await gamechangerAPI.modularSearch({
-				cloneName: edaCloneData.clone_name, 
+				cloneName: edaCloneData.clone_name,
 				searchText,
 				offset,
 				storeHistory: false,
 				options: {
-					charsPadding
-				}
+					charsPadding,
+				},
 			});
 
 			// const t1 = new Date().getTime();
 
 			if (_.isObject(results.data)) {
-				let { docs, totalCount} = results.data;
+				let { docs, totalCount } = results.data;
 
 				// set EDA search results
 				if (docs && Array.isArray(docs)) {
 					setState(dispatch, {
 						edaLoading: false,
 						edaCount: totalCount,
-						edaSearchResults: docs
+						edaSearchResults: docs,
 					});
 				}
-			}
-			else {
+			} else {
 				setState(dispatch, {
 					edaLoading: false,
 				});
@@ -311,7 +284,7 @@ const JBookSearchHandler = {
 		} catch (e) {
 			console.log('Error running EDA search in JBOOK');
 			console.log(e);
-			// if it's a consecutive call triggered by a filter update, don't reset state, 
+			// if it's a consecutive call triggered by a filter update, don't reset state,
 			// the error is taken care of; there's another call later in the stack working the updated search
 			if (e.message !== 'cancelled axios with consecutive call') {
 				setState(dispatch, {
@@ -322,7 +295,7 @@ const JBookSearchHandler = {
 					searchResultsCount: 0,
 					edaRunningSearch: false,
 					loadingTinyUrl: false,
-					hasExpansionTerms: false
+					hasExpansionTerms: false,
 				});
 			}
 		}
@@ -345,8 +318,7 @@ const JBookSearchHandler = {
 
 		if (!isNullish(offsetURL)) {
 			const offset = parseInt(offsetURL);
-			if (!isNaN(offset))
-				parsed.offset = offset;
+			if (!isNaN(offset)) parsed.offset = offset;
 			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
 		}
 
@@ -356,7 +328,7 @@ const JBookSearchHandler = {
 	setSearchURL(state) {
 		const { searchText, resultsPage } = state;
 
-		const offset = ((resultsPage - 1) * RESULTS_PER_PAGE);
+		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const params = new URLSearchParams();
 		let linkString = `/`;
@@ -368,14 +340,14 @@ const JBookSearchHandler = {
 
 		const paramIndex = hash.indexOf('?');
 
-		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${searchText && searchText !== '' ? '?' : ''}${params}`;
+		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${
+			searchText && searchText !== '' ? '?' : ''
+		}${params}`;
 
 		window.history.pushState(null, document.title, linkString);
 	},
 
-	getPresearchData(state) {
-
-	},
+	getPresearchData(state) {},
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -413,13 +385,16 @@ const JBookSearchHandler = {
 			default:
 				searchSettings.sort = [{ id: 'budgetYear', desc: sortDesc }];
 				break;
-
 		}
 
 		for (const optionType in state.defaultOptions) {
 			// if (optionType === 'reviewStatus') continue;
 
-			if (state.defaultOptions[optionType] && searchSettings[optionType] && state.defaultOptions[optionType].length === searchSettings[optionType].length) {
+			if (
+				state.defaultOptions[optionType] &&
+				searchSettings[optionType] &&
+				state.defaultOptions[optionType].length === searchSettings[optionType].length
+			) {
 				delete searchSettings[optionType];
 			}
 
@@ -436,7 +411,7 @@ const JBookSearchHandler = {
 		}
 
 		return searchSettings;
-	}
+	},
 };
 
 export default JBookSearchHandler;

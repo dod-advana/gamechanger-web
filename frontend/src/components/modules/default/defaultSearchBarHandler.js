@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-	SearchBarForm,
-	SearchBarInput,
-	SearchButton,
-} from '../../searchBar/SearchBarStyledComponents';
+import { SearchBarForm, SearchBarInput, SearchButton } from '../../searchBar/SearchBarStyledComponents';
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
@@ -14,17 +10,13 @@ const gameChangerAPI = new GameChangerAPI();
 const inputBorder = '1px solid lightgrey';
 
 const DefaultSearchBarHandler = {
-	async debouncedFetchSearchSuggestions(
-		value,
-		cloneData,
-		setAutocorrect
-	) {
+	async debouncedFetchSearchSuggestions(value, cloneData, setAutocorrect) {
 		try {
 			const index = cloneData?.clone_data?.esCluster ?? '';
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
-				suggestions: false
+				suggestions: false,
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
@@ -89,11 +81,7 @@ const DefaultSearchBarHandler = {
 						id="gcSearchInput"
 					/>
 
-					<GCTooltip
-						title={'Favorite a search to track in the User Dashboard'}
-						placement="top"
-						arrow
-					>
+					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top" arrow>
 						<button
 							type="button"
 							style={{
@@ -106,21 +94,12 @@ const DefaultSearchBarHandler = {
 								backgroundColor: 'white',
 								padding: '0 15px',
 							}}
-							onClick={(event) =>
-								handleFavoriteSearchClicked(
-									event.target,
-									state.isFavoriteSearch
-								)
-							}
+							onClick={(event) => handleFavoriteSearchClicked(event.target, state.isFavoriteSearch)}
 						>
 							<i
-								className={
-									state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'
-								}
+								className={state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
-									color: state.isFavoriteSearch
-										? '#E9691D'
-										: 'rgb(224, 224, 224)',
+									color: state.isFavoriteSearch ? '#E9691D' : 'rgb(224, 224, 224)',
 									cursor: 'pointer',
 									fontSize: 26,
 								}}
@@ -128,11 +107,7 @@ const DefaultSearchBarHandler = {
 						</button>
 					</GCTooltip>
 					{dropdownOpen && !advancedSearchOpen && (
-						<SearchBarDropdown
-							searchText={searchText}
-							rowData={dataRows}
-							cursor={cursor}
-						/>
+						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
 					)}
 				</SearchBarForm>
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>

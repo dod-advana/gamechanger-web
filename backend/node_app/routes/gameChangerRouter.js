@@ -185,13 +185,11 @@ router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
 if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
-
-  router.post('/getAppStats', appStatsController.getAppStats);
-  router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
-  router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
-  router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
-  router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
-
+	router.post('/getAppStats', appStatsController.getAppStats);
+	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
+	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+	router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 }
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);

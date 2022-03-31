@@ -1,31 +1,28 @@
 const APP_SETTINGS = require('../models').app_settings;
 const LOGGER = require('@dod-advana/advana-logger');
 /**
- * A contoller for app wide mode settings. Each setting has 
+ * A contoller for app wide mode settings. Each setting has
  * an id, key, and value. The values are 'true' or 'false'
  * This class gets, sets and toggles these values.
  * @class AppSettingsController
  */
 class AppSettingsController {
 	constructor(opts = {}) {
-		const {
-			logger = LOGGER,
-			appSettings = APP_SETTINGS,
-		} = opts;
+		const { logger = LOGGER, appSettings = APP_SETTINGS } = opts;
 
 		this.logger = logger;
 		this.appSettings = appSettings;
 
 		// Keys to query the app_settings table
 		this.keys = {
-			intelligentAnswers:'intelligent_answers',
-			entitySearch:'entity_search',
-			combinedSearch:'combined_search',
-			topicSearch:'topic_search',
-			jiraFeedback:'jira_feedback',
-			ltr: 'ltr'
+			intelligentAnswers: 'intelligent_answers',
+			entitySearch: 'entity_search',
+			combinedSearch: 'combined_search',
+			topicSearch: 'topic_search',
+			jiraFeedback: 'jira_feedback',
+			ltr: 'ltr',
 		};
-		
+
 		// Binding the key for combined search mode to get and set
 		this.getCombinedSearchMode = this.getMode.bind(this, this.keys.combinedSearch);
 		this.setCombinedSearchMode = this.setMode.bind(this, this.keys.combinedSearch);
@@ -56,12 +53,16 @@ class AppSettingsController {
 	 * @method getMode
 	 * @param {string} key - this is bound in the constructor
 	 * @param {*} req - no parameters
-	 * @param {*} res 
+	 * @param {*} res
 	 */
-	async getMode(key, req, res){
+	async getMode(key, req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const mode = await this.appSettings.findOrCreate({ attributes: ['value'], where: { key: key}, defaults: {value: 'true'} });
+			const mode = await this.appSettings.findOrCreate({
+				attributes: ['value'],
+				where: { key: key },
+				defaults: { value: 'true' },
+			});
 			res.status(200).send(mode[0]);
 		} catch (err) {
 			this.logger.error(err, 'DF90FR3', userId);
@@ -73,18 +74,18 @@ class AppSettingsController {
 	 * @method setMode
 	 * @param {string} key - this is bound in the constructor
 	 * @param {*} req - expects a value parameter
-	 * @param {*} res 
+	 * @param {*} res
 	 */
 	async setMode(key, req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		const { value } = req.body;
 		try {
 			let updateValues = { value };
-			if (updateValues.value === 'true' || updateValues.value === 'false'){
-				const updatedResult = await this.appSettings.update(updateValues, { where: {key: key} });
+			if (updateValues.value === 'true' || updateValues.value === 'false') {
+				const updatedResult = await this.appSettings.update(updateValues, { where: { key: key } });
 				res.status(200).send({ updatedResult });
 			} else {
-				res.status(500).send('value can only be \'true\' or \'false\'');
+				res.status(500).send("value can only be 'true' or 'false'");
 			}
 		} catch (err) {
 			this.logger.error(err, 'PQNAF35', userId);
@@ -96,19 +97,18 @@ class AppSettingsController {
 	 * @method toggleMode
 	 * @param {string} key - this is bound in the constructor
 	 * @param {*} req - no parameters
-	 * @param {*} res 
+	 * @param {*} res
 	 */
 	async toggleMode(key, req, res) {
 		let userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key} });
-			if (dataValues.value === 'true'){
+			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key } });
+			if (dataValues.value === 'true') {
 				dataValues.value = 'false';
-			}
-			else{
+			} else {
 				dataValues.value = 'true';
 			}
-			const updatedResult = await this.appSettings.update(dataValues, { where: {key: key} });
+			const updatedResult = await this.appSettings.update(dataValues, { where: { key: key } });
 			res.status(200).send({ updatedResult });
 		} catch (err) {
 			this.logger.error(err, 'PQNAF36', userId);

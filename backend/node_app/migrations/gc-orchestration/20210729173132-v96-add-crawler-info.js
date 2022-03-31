@@ -2,37 +2,37 @@
 const tablename = 'crawler_info';
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
+	up: (queryInterface, Sequelize) => {
 		return queryInterface.createTable(tablename, {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			crawler: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			display_org: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			display_source_s: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
-      url_origin: {
+			url_origin: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
-      image_link: {
+			image_link: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

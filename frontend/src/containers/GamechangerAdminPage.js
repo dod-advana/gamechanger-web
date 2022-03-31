@@ -14,18 +14,13 @@ import UserList from '../components/admin/UserList';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
-import {
-	ClosedAdminMenu,
-	OpenedAdminMenu,
-} from '../components/admin/AdminMenu';
+import { ClosedAdminMenu, OpenedAdminMenu } from '../components/admin/AdminMenu';
 
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import {GCCheckbox, styles, TableRow, toolTheme} from '../components/admin/util/GCAdminStyles';
+import { GCCheckbox, styles, TableRow, toolTheme } from '../components/admin/util/GCAdminStyles';
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const PAGES = {
 	general: 'General',
@@ -38,7 +33,7 @@ const PAGES = {
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
-	responsibilityUpdates: 'Responsibility Updates'
+	responsibilityUpdates: 'Responsibility Updates',
 };
 
 const userListTableAdditions = [
@@ -46,34 +41,34 @@ const userListTableAdditions = [
 		Header: 'Admin',
 		accessor: 'is_admin',
 		width: 100,
-		Cell: row => (
+		Cell: (row) => (
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
 					onChange={() => {}}
 					name={'admin'}
 					color="inherit"
-					style={{...styles.checkbox, color: '#1C2D64'}}
+					style={{ ...styles.checkbox, color: '#1C2D64' }}
 				/>
 			</TableRow>
-		)
+		),
 	},
 	{
 		Header: 'Super Admin',
 		accessor: 'is_super_admin',
 		width: 100,
-		Cell: row => (
+		Cell: (row) => (
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
 					onChange={() => {}}
 					name={'super_admin'}
 					color="inherit"
-					style={{...styles.checkbox, color: '#1C2D64'}}
+					style={{ ...styles.checkbox, color: '#1C2D64' }}
 				/>
 			</TableRow>
-		)
-	}
+		),
+	},
 ];
 
 /**
@@ -87,12 +82,7 @@ const GamechangerAdminPage = (props) => {
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
 	const renderSwitch = (page) => {
-		trackEvent(
-			'GAMECHANGER_Admin',
-			'ChangeAdminPage',
-			'onChange',
-			page.toString()
-		);
+		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
 
 		switch (page) {
 			case PAGES.general:
@@ -108,7 +98,7 @@ const GamechangerAdminPage = (props) => {
 			case PAGES.notifications:
 				return <NotificationsManagement />;
 			case PAGES.userList:
-				return <UserList columns={userListTableAdditions}/>;
+				return <UserList columns={userListTableAdditions} />;
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
@@ -141,12 +131,8 @@ const GamechangerAdminPage = (props) => {
 
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
-			<SlideOutMenuContent type="closed">
-				{ClosedAdminMenu({ setPageToView, PAGES })}
-			</SlideOutMenuContent>
-			<SlideOutMenuContent type="open">
-				{OpenedAdminMenu({ setPageToView, PAGES })}
-			</SlideOutMenuContent>
+			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 
 			<SearchBanner
 				onTitleClick={() => {
@@ -156,7 +142,7 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-				cloneData={{clone_name: 'gamechanger'}}
+				cloneData={{ clone_name: 'gamechanger' }}
 			/>
 
 			{renderSwitch(pageToView)}

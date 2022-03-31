@@ -1,414 +1,414 @@
 // defaultValue and processValue not currently being used
 module.exports = {
 	pdocMapping: {
-		'count': {
+		count: {
 			newName: 'count',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-16_Title': {
 			newName: 'P3a-16_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-18_Milestone_Date': {
 			newName: 'toComplete',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-19_ModItem_Title': {
 			newName: 'P3a-19_ModItem_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40a-14_Title': {
 			newName: 'P40a-14_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40a-16_Title': {
 			newName: 'P40a-16_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40a-73_TotCost_APY': {
 			newName: 'P40a-73_TotCost_APY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-77_TOA_PY': {
 			newName: 'P40-77_TOA_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-78_TOA_CY': {
 			newName: 'priorYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-81_TOA_BY1': {
 			newName: 'by1BaseYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title': {
 			newName: 'P40-13_BSA_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P5-14_Item_Title': {
 			newName: 'P5-14_Item_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P5-16_Item_Title': {
 			newName: 'P5-16_Item_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-01_LI_Number': {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-02_LI_Title': {
 			newName: 'projectTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-03_P1_LineNumber': {
 			newName: 'p1LineNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-06_Organization': {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-08_Appn_Number': {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-11_BA_Title': {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-10_BA_Number': {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-09_Appn_Title': {
 			newName: 'appropriationTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-04_BudgetYear': {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-05_BudgetCycle': {
 			newName: 'budgetCycle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-21_ModItem_Title': {
 			newName: 'programElementTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-20_Milestone_Desc': {
 			newName: 'P3a-20_Milestone_Desc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-19_Milestone_Title': {
 			newName: 'projectTitle2',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-20_ModItem_PENumber': {
 			newName: 'P3a-20_ModItem_PENumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-14_Description': {
 			newName: 'projectMissionDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-15_Justification': {
 			newName: 'P40-15_Justification',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-57_NetP1_BY1': {
 			newName: 'P40-57_NetP1_BY1',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-79_TOA_BY1Base': {
 			newName: 'currentYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-76_TOA_APY': {
 			newName: 'P40-76_TOA_APY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-52_NetP1_APY': {
 			newName: 'allPriorYearsAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'totalCost': {
+		totalCost: {
 			newName: 'totalCost',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
 
 	rdocMapping: {
-		'count': {
+		count: {
 			newName: 'count',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Adj_OtherAdj_Title': {
+		Adj_OtherAdj_Title: {
 			newName: 'Adj_OtherAdj_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Adj_Total_PY': {
+		Adj_Total_PY: {
 			newName: 'Adj_Total_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Appn_Num': {
+		Appn_Num: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Appn_Title': {
+		Appn_Title: {
 			newName: 'appropriationTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'AwardDate_CY': {
+		AwardDate_CY: {
 			newName: 'submissionDate',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'BA_Number': {
+		BA_Number: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'BA_Title': {
+		BA_Title: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'BudgetCycle': {
+		BudgetCycle: {
 			newName: 'budgetCycle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'BudgetYear': {
+		BudgetYear: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'CongAdds_Title': {
+		CongAdds_Title: {
 			newName: 'CongAdds_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'EndDate': {
+		EndDate: {
 			newName: 'toComplete',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Event_Title': {
+		Event_Title: {
 			newName: 'Event_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'JointFund_Title': {
+		JointFund_Title: {
 			newName: 'JointFund_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'OthProgFund_Title': {
+		OthProgFund_Title: {
 			newName: 'OthProgFund_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'SubProj_Title': {
+		SubProj_Title: {
 			newName: 'SubProj_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'PE_MSN_Dsec': {
+		PE_MSN_Dsec: {
 			newName: 'missionDescBudgetJustification',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'PE_Num': {
+		PE_Num: {
 			newName: 'programElement',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'PE_Title': {
+		PE_Title: {
 			newName: 'programElementTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_PY': {
+		Proj_Fund_PY: {
 			newName: 'Proj_Fund_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_CY': {
+		Proj_Fund_CY: {
 			newName: 'priorYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_Total': {
+		Proj_Fund_Total: {
 			newName: 'totalCost',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Number': {
+		Proj_Number: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Title': {
+		Proj_Title: {
 			newName: 'projectTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Organization': {
+		Organization: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_MSN_Desc': {
+		Proj_MSN_Desc: {
 			newName: 'projectMissionDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Notes': {
+		Proj_Notes: {
 			newName: 'projectNotes',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Aquisition_Startegy': {
+		Proj_Aquisition_Startegy: {
 			newName: 'projectAquisitionStrategy',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Performance_Metrics': {
+		Proj_Performance_Metrics: {
 			newName: 'projectPerformanceMetrics',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'OthProgFund_Summary_Remarks': {
+		OthProgFund_Summary_Remarks: {
 			newName: 'otherProgramFundSummaryRemarks',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_BY1': {
+		Proj_Fund_BY1: {
 			newName: 'currentYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_APY': {
+		Proj_Fund_APY: {
 			newName: 'allPriorYearsAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 	},
 
 	odocMapping: {
-		'count': {
+		count: {
 			newName: 'count',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'account': {
+		account: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'account_title': {
+		account_title: {
 			newName: 'accountTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ag_bsa': {
+		ag_bsa: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ag_budget_subactivity_title': {
+		ag_budget_subactivity_title: {
 			newName: 'projectTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budget_activity': {
+		budget_activity: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budget_activity_title': {
+		budget_activity_title: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'fy_2021_actual': {
+		fy_2021_actual: {
 			newName: 'priorYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'organization': {
+		organization: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budget_year': {
+		budget_year: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'line_number': {
+		line_number: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'sag_budget_line_item_title': {
+		sag_budget_line_item_title: {
 			newName: 'budgetLineItemTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'sag_bli': {
+		sag_bli: {
 			newName: 'programElement',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
 
 	reviewMapping: {
 		id: {
 			newName: 'id',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		// doc_id: {
 		//     newName: 'docID',
@@ -418,64 +418,64 @@ module.exports = {
 		source_tag: {
 			newName: 'sourceTag',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		program_element: {
 			newName: 'revProgramElement', // these mainly act as foreign keys
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		budget_line_item: {
 			newName: 'revBudgetLineItems',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		budget_year: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		budget_type: {
 			newName: 'budgetType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_agree_label: {
 			newName: 'serviceAgreeLabel', //'aiLabelAgreement',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_ptp_agree_label: {
 			newName: 'servicePTPAgreeLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_class_label: {
 			newName: 'serviceClassLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_trans_known: {
 			newName: 'serviceTransKnown', //'transitionPartnerKnown',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_trans_type: {
 			newName: 'serviceTransType', //'transitionType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_ptp: {
 			newName: 'servicePlannedTransitionPartner', //'plannedTransitionPartner',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_mp_list: {
-			newName: 'serviceMissionPartnersList',//'missionPartnersList',
+			newName: 'serviceMissionPartnersList', //'missionPartnersList',
 			defaultValue: '',
 			processValue: (value) => {
 				if (Array.isArray(value)) {
-					value = value.filter(partner => {
+					value = value.filter((partner) => {
 						return partner !== null && partner !== 'null';
 					});
 					return value.join(', ');
@@ -483,127 +483,127 @@ module.exports = {
 					if (value === null || value === 'null') value = '';
 					return value;
 				}
-			}
+			},
 		},
 		service_mp_checklist: {
-			newName: 'serviceMissionPartnersChecklist',//'missionPartnersList',
+			newName: 'serviceMissionPartnersChecklist', //'missionPartnersList',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_mp_add: {
-			newName: 'serviceAdditionalMissionPartners',//'additionalMissionPartner',
+			newName: 'serviceAdditionalMissionPartners', //'additionalMissionPartner',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		review_status: {
 			newName: 'reviewStatus',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_poc_title: {
 			newName: 'servicePOCTitle', //'pocTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_poc_name: {
 			newName: 'servicePOCName', //'pocName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_poc_email: {
 			newName: 'servicePOCEmail', //'pocEmail',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_poc_org: {
 			newName: 'servicePOCOrg', //'pocOrg',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_phone_number: {
 			newName: 'servicePOCPhoneNumber', //'pocPhoneNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_review_notes: {
 			newName: 'pocReviewNotes',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_review_status: {
 			newName: 'primaryReviewStatus', //'jaicReviewStatus',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_review_notes: {
 			newName: 'primaryReviewNotes', //'reviewNotes',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_review_status: {
 			newName: 'serviceReviewStatus',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_review_status: {
 			newName: 'pocReviewStatus',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_reviewer: {
 			newName: 'primaryReviewer', //'jaicReviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_reviewer: {
 			newName: 'serviceReviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_reviewer: {
 			newName: 'pocReviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		other_mission_partners: {
 			newName: 'otherMissionPartners',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_review_notes: {
 			newName: 'serviceReviewerNotes',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_dollars_attributed_category: {
 			newName: 'pocDollarsAttributedCategory', //'dollarsAttributedCategory',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_dollars_attributed: {
 			newName: 'pocDollarsAttributed', //'dollarsAttributed',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_percentage_attributed_category: {
 			newName: 'pocPercentageAttributedCategory', //'percentageAttributedCategory',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_percentage_attributed: {
 			newName: 'pocPercentageAttributed', //'percentageAttributed',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_ai_type: {
 			newName: 'pocAIType', //'aiType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_joint_capability_area: {
 			newName: 'pocJointCapabilityArea', //'jointCapabilityArea',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_joint_capability_area2: {
 			newName: 'pocJointCapabilityArea2', //'jointCapabilityArea',
@@ -614,7 +614,7 @@ module.exports = {
 				} else {
 					return value.split(', ');
 				}
-			}
+			},
 		},
 		poc_joint_capability_area3: {
 			newName: 'pocJointCapabilityArea3', //'jointCapabilityArea',
@@ -625,62 +625,62 @@ module.exports = {
 				} else {
 					return value.split(', ');
 				}
-			}
+			},
 		},
 		poc_ai_role_description: {
 			newName: 'pocAIRoleDescription', //'aiRoleDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_ai_type_description: {
 			newName: 'pocAITypeDescription', //'aiTypeDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		createdAt: {
 			newName: 'createdAt',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		updatedAt: {
 			newName: 'updatedAt',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		deletedAt: {
 			newName: 'deletedAt',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_service_reviewer: {
 			newName: 'primaryServiceReviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		reviewer: {
 			newName: 'reviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_class_label: {
 			newName: 'primaryClassLabel', //'coreAILabel'
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		service_secondary_reviewer: {
 			newName: 'serviceSecondaryReviewer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		primary_ptp: {
 			newName: 'primaryPlannedTransitionPartner',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		domain_task: {
 			newName: 'domainTask',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		domain_task_secondary: {
 			newName: 'domainTaskSecondary',
@@ -691,62 +691,62 @@ module.exports = {
 				} else {
 					return value.split(', ');
 				}
-			}
+			},
 		},
 		robotics_system_agree: {
 			newName: 'roboticsSystemAgree',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		alternate_poc_title: {
 			newName: 'altPOCTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		alternate_poc_name: {
 			newName: 'altPOCName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		alternate_poc_email: {
 			newName: 'altPOCEmail',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		alternate_poc_org: {
 			newName: 'altPOCOrg',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		alternate_poc_phone_number: {
 			newName: 'altPOCPhoneNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_agree_label: {
 			newName: 'pocAgreeLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_class_label: {
 			newName: 'pocClassLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_ptp_agree_label: {
 			newName: 'pocPTPAgreeLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_ptp: {
 			newName: 'pocPlannedTransitionPartner', //'plannedTransitionPartner',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_mp_agree_label: {
 			newName: 'pocMPAgreeLabel',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		poc_mp_list: {
 			newName: 'pocMissionPartnersList',
@@ -757,32 +757,32 @@ module.exports = {
 				} else {
 					return value;
 				}
-			}
+			},
 		},
 		poc_mp_checklist: {
 			newName: 'pocMissionPartnersChecklist',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		intelligent_systems_agree: {
 			newName: 'intelligentSystemsAgree',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		appn_num: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		agency: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budget_activity': {
+		budget_activity: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 	},
 
@@ -790,635 +790,635 @@ module.exports = {
 		index: {
 			newName: 'index',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		id: {
 			newName: 'aiTypeDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Program_Element: {
 			newName: 'programElement',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Project_Number: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomplishment_Title: {
 			newName: 'accomplishment',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomplishment_Description: {
 			newName: 'accomplishmentDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Procurement_Line_Item_Number: {
 			newName: 'procurementLineItemNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomp_Fund_PY: {
 			newName: 'Accomp_Fund_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomp_Fund_PY_Text: {
 			newName: 'Accomp_Fund_PY_Text',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		PlanPrgrm_Fund_CY: {
 			newName: 'PlanPrgrm_Fund_CY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		PlanPrgrm_Fund_CY_Text: {
 			newName: 'PlanPrgrm_Fund_CY_Text',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomp_Title_text: {
 			newName: 'Accomp_Title_text',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		Accomp_Desc_text: {
 			newName: 'Accomp_Desc_text',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
 
 	glMapping: {
-		'uot_aai': {
+		uot_aai: {
 			newName: 'uot_aai',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_absamount': {
+		uot_absamount: {
 			newName: 'uot_absamount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_acctgperiod_calendar': {
+		uot_acctgperiod_calendar: {
 			newName: 'uot_acctgperiod_calendar',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_acrn': {
+		uot_acrn: {
 			newName: 'uot_acrn',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_assessableunit': {
+		uot_assessableunit: {
 			newName: 'uot_assessableunit',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_budgetactivity': {
+		uot_budgetactivity: {
 			newName: 'budgetActivity',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_budgetlineitem': {
+		uot_budgetlineitem: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_budgetsubactivity': {
+		uot_budgetsubactivity: {
 			newName: 'budgetSubActivity',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_clin': {
+		uot_clin: {
 			newName: 'uot_clin',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_commitmentnumber': {
+		uot_commitmentnumber: {
 			newName: 'uot_commitmentnumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_costcenter': {
+		uot_costcenter: {
 			newName: 'uot_costcenter',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_dcas_id': {
+		uot_dcas_id: {
 			newName: 'uot_dcas_id',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_department': {
+		uot_department: {
 			newName: 'uot_department',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_departmenttransfer': {
+		uot_departmenttransfer: {
 			newName: 'uot_departmenttransfer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_dssn': {
+		uot_dssn: {
 			newName: 'uot_dssn',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_endfy': {
+		uot_endfy: {
 			newName: 'uot_endfy',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fednonfedind': {
+		uot_fednonfedind: {
 			newName: 'uot_fednonfedind',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fiscalperiod': {
+		uot_fiscalperiod: {
 			newName: 'uot_fiscalperiod',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fiscalyear': {
+		uot_fiscalyear: {
 			newName: 'uot_fiscalyear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fundscenter': {
+		uot_fundscenter: {
 			newName: 'uot_fundscenter',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_invoicenumber': {
+		uot_invoicenumber: {
 			newName: 'uot_invoicenumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_mainaccount': {
+		uot_mainaccount: {
 			newName: 'uot_mainaccount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_objectclass': {
+		uot_objectclass: {
 			newName: 'uot_objectclass',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_obligationnumber': {
+		uot_obligationnumber: {
 			newName: 'uot_obligationnumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_periodname': {
+		uot_periodname: {
 			newName: 'uot_periodname',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_piin': {
+		uot_piin: {
 			newName: 'uot_piin',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_receivingreport': {
+		uot_receivingreport: {
 			newName: 'uot_receivingreport',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_reimbbillnumber': {
+		uot_reimbbillnumber: {
 			newName: 'uot_reimbbillnumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_reimbcustorder': {
+		uot_reimbcustorder: {
 			newName: 'uot_reimbcustorder',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_reimbursableflag': {
+		uot_reimbursableflag: {
 			newName: 'uot_reimbursableflag',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sglprefix': {
+		uot_sglprefix: {
 			newName: 'uot_sglprefix',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sglsuffix': {
+		uot_sglsuffix: {
 			newName: 'uot_sglsuffix',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_signedamount': {
+		uot_signedamount: {
 			newName: 'uot_signedamount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_slin': {
+		uot_slin: {
 			newName: 'uot_slin',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_source_system': {
+		uot_source_system: {
 			newName: 'uot_source_system',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_spiin': {
+		uot_spiin: {
 			newName: 'uot_spiin',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_subhead': {
+		uot_subhead: {
 			newName: 'uot_subhead',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_system': {
+		uot_system: {
 			newName: 'uot_system',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_tradingpartnerentity': {
+		uot_tradingpartnerentity: {
 			newName: 'uot_tradingpartnerentity',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_tradingpartnerind': {
+		uot_tradingpartnerind: {
 			newName: 'uot_tradingpartnerind',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_tradingpartnermainacct': {
+		uot_tradingpartnermainacct: {
 			newName: 'uot_tradingpartnermainacct',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_transeffdate': {
+		uot_transeffdate: {
 			newName: 'uot_transeffdate',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_transid': {
+		uot_transid: {
 			newName: 'uot_transid',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_transpostdate': {
+		uot_transpostdate: {
 			newName: 'uot_transpostdate',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_user': {
+		uot_user: {
 			newName: 'uot_user',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_voucher': {
+		uot_voucher: {
 			newName: 'uot_voucher',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_activity': {
+		uot_activity: {
 			newName: 'uot_activity',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_apportcategory': {
+		uot_apportcategory: {
 			newName: 'uot_apportcategory',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_authoritytype': {
+		uot_authoritytype: {
 			newName: 'uot_authoritytype',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_availabilitytype': {
+		uot_availabilitytype: {
 			newName: 'uot_availabilitytype',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_bali': {
+		uot_bali: {
 			newName: 'uot_bali',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_betc': {
+		uot_betc: {
 			newName: 'uot_betc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_bpn': {
+		uot_bpn: {
 			newName: 'uot_bpn',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_costelementcode': {
+		uot_costelementcode: {
 			newName: 'uot_costelementcode',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_debitcreditindicator': {
+		uot_debitcreditindicator: {
 			newName: 'uot_debitcreditindicator',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fiscalmonth': {
+		uot_fiscalmonth: {
 			newName: 'uot_fiscalmonth',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fiscalquarter': {
+		uot_fiscalquarter: {
 			newName: 'uot_fiscalquarter',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_fundsstatus': {
+		uot_fundsstatus: {
 			newName: 'uot_fundsstatus',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_ledger': {
+		uot_ledger: {
 			newName: 'uot_ledger',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_programelement': {
+		uot_programelement: {
 			newName: 'programElement',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_programyear': {
+		uot_programyear: {
 			newName: 'programYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_project': {
+		uot_project: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_psc': {
+		uot_psc: {
 			newName: 'uot_psc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sces_agency': {
+		uot_sces_agency: {
 			newName: 'uot_sces_agency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sces_case': {
+		uot_sces_case: {
 			newName: 'uot_sces_case',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sces_case_line': {
+		uot_sces_case_line: {
 			newName: 'uot_sces_case_line',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_sces_customer': {
+		uot_sces_customer: {
 			newName: 'uot_sces_customer',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_subaccount': {
+		uot_subaccount: {
 			newName: 'uot_subaccount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_suballottee': {
+		uot_suballottee: {
 			newName: 'uot_suballottee',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_disasteremergencyfundcode': {
+		uot_disasteremergencyfundcode: {
 			newName: 'uot_disasteremergencyfundcode',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_contingencycode': {
+		uot_contingencycode: {
 			newName: 'uot_contingencycode',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'uot_begfy': {
+		uot_begfy: {
 			newName: 'uot_begfy',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
 
 	contractMapping: {
-		'bli': {
+		bli: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'proj_number': {
+		proj_number: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'appn_num': {
+		appn_num: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ba_num': {
+		ba_num: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetyear': {
+		budgetyear: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetcycle': {
+		budgetcycle: {
 			newName: 'budgetCycle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'organization': {
+		organization: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ce_cat_name': {
+		ce_cat_name: {
 			newName: 'ceCatName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ce_cat_type': {
+		ce_cat_type: {
 			newName: 'ceCatType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ce_name': {
+		ce_name: {
 			newName: 'ceName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ce_item_name': {
+		ce_item_name: {
 			newName: 'ceItemName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'vendor': {
+		vendor: {
 			newName: 'vendor',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'vendor_location': {
+		vendor_location: {
 			newName: 'vendorLocation',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'award_date': {
+		award_date: {
 			newName: 'awardDate',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 	},
 
 	obligationMapping: {
-		'bli': {
+		bli: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'department_code': {
+		department_code: {
 			newName: 'departmentCode',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'appn_num': {
+		appn_num: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'ba_num': {
+		ba_num: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetyear': {
+		budgetyear: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'yearmonth': {
+		yearmonth: {
 			newName: 'yearMonth',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'organization': {
+		organization: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'begfy': {
+		begfy: {
 			newName: 'beginFY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'endfy': {
+		endfy: {
 			newName: 'endFY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'cumulative_obligations': {
+		cumulative_obligations: {
 			newName: 'cumulativeObligations',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'cumulative_disbursements': {
+		cumulative_disbursements: {
 			newName: 'cumulativeDisbursements',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'doc_type': {
+		doc_type: {
 			newName: 'docType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 	},
 
 	glContractMapping: {
-		'bli': {
+		bli: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projnumber': {
+		projnumber: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'global_parent_duns_name': {
+		global_parent_duns_name: {
 			newName: 'globalParentDUNSName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'vendor_name': {
+		vendor_name: {
 			newName: 'vendorName',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'parent_award': {
+		parent_award: {
 			newName: 'parentAward',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'piin': {
+		piin: {
 			newName: 'piin',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'fiscal_year': {
+		fiscal_year: {
 			newName: 'fiscalYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'product_desc': {
+		product_desc: {
 			newName: 'productDesc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'award_desc': {
+		award_desc: {
 			newName: 'awardDesc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budget_type': {
+		budget_type: {
 			newName: 'budgetType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'table_source': {
+		table_source: {
 			newName: 'tableSource',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'total_oblig_amount': {
+		total_oblig_amount: {
 			newName: 'totalObligatedAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'modification_number': {
+		modification_number: {
 			newName: 'modNumber',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
 
 	pdocSearchMapping: [
@@ -1459,253 +1459,251 @@ module.exports = {
 		'OthProgFund_Summary_Remarks_Search',
 	],
 
-	odocSearchMapping: [
-		'sag_budget_line_item_title_search',
-	],
+	odocSearchMapping: ['sag_budget_line_item_title_search'],
 
 	elasticSearchMapping: {
-		'accountTitle_s': {
+		accountTitle_s: {
 			newName: 'accountTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'allPriorYearsAmount_d': {
+		allPriorYearsAmount_d: {
 			newName: 'allPriorYearsAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'appropriationNumber_s': {
+		appropriationNumber_s: {
 			newName: 'appropriationNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'appropriationTitle_t': {
+		appropriationTitle_t: {
 			newName: 'appropriationTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetActivityNumber_s': {
+		budgetActivityNumber_s: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetActivityTitle_s': {
+		budgetActivityTitle_s: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetActivityTitle_t': {
+		budgetActivityTitle_t: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetCycle_s': {
+		budgetCycle_s: {
 			newName: 'budgetCycle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetLineItem_s': {
+		budgetLineItem_s: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetLineItemTitle_s': {
+		budgetLineItemTitle_s: {
 			newName: 'budgetLineItemTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'budgetYear_s': {
+		budgetYear_s: {
 			newName: 'budgetYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'by1BaseYear_d': {
+		by1BaseYear_d: {
 			newName: 'by1BaseYear',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'currentYearAmount_d': {
+		currentYearAmount_d: {
 			newName: 'currentYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'missionDescBudgetJustification_t': {
+		missionDescBudgetJustification_t: {
 			newName: 'missionDescBudgetJustification',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'otherProgramFundSummaryRemarks_t': {
+		otherProgramFundSummaryRemarks_t: {
 			newName: 'otherProgramFundSummaryRemarks',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'p1LineNumber_s': {
+		p1LineNumber_s: {
 			newName: 'p1LineNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_contract_data_n.P3a-16_Title_t': {
 			newName: 'P3a-16_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_contract_data_n.programElementTitle_t': {
 			newName: 'programElementTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_dev_milestones_n.P3a-20_Milestone_Desc_t': {
 			newName: 'P3a-20_Milestone_Desc',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_dev_milestones_n.projectTitle2_t': {
 			newName: 'projectTitle2',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_dev_milestones.toComplete_year_month_only': {
 			newName: 'toComplete',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p3a_rdte_n.P3a-19_ModItem_Title_t': {
 			newName: 'P3a-19_ModItem_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p40_p3a_rdte.P3a-20_ModItem_PENumber_s': {
 			newName: 'P3a-20_ModItem_PENumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P3a-20_ModItem_PENumber': {
 			newName: 'p1LineNumber',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title_t': {
 			newName: 'P40-13_BSA_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-15_Justification_t': {
 			newName: 'P40-15_Justification',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-52_NetP1_APY_d': {
 			newName: 'allPriorYearsAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-76_TOA_APY_d': {
 			newName: 'P40-76_TOA_APY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'P40-77_TOA_PY_d': {
 			newName: 'P40-77_TOA_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p40a_aggregated_items_n.P40a-16_Title_t': {
 			newName: 'P40a-16_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p40a_aggregated_items_n.P40a-73_TotCost_APY_d': {
 			newName: 'P40a-73_TotCost_APY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p40a_secondary_distribution_n.P40a-14_Title_t': {
 			newName: 'P40a-14_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
 		'p5_res_sum_optional_rows_n.P5-16_Item_Title_t': {
 			newName: 'P5-16_Item_Title',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'priorYearAmount_d': {
+		priorYearAmount_d: {
 			newName: 'priorYearAmount',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'programElement_s': {
+		programElement_s: {
 			newName: 'programElement',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'programElementTitle_t': {
+		programElementTitle_t: {
 			newName: 'programElementTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'Proj_Fund_PY_d': {
+		Proj_Fund_PY_d: {
 			newName: 'Proj_Fund_PY',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectAquisitionStrategy_t': {
+		projectAquisitionStrategy_t: {
 			newName: 'projectAquisitionStrategy',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectMissionDescription_t': {
+		projectMissionDescription_t: {
 			newName: 'projectMissionDescription',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectNotes_t': {
+		projectNotes_t: {
 			newName: 'projectNotes',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectNum_s': {
+		projectNum_s: {
 			newName: 'projectNum',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectPerformanceMetrics_t': {
+		projectPerformanceMetrics_t: {
 			newName: 'projectPerformanceMetrics',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'projectTitle_s': {
+		projectTitle_s: {
 			newName: 'projectTitle',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'serviceAgency_s': {
+		serviceAgency_s: {
 			newName: 'serviceAgency',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'totalCost_s': {
+		totalCost_s: {
 			newName: 'totalCost',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'type_s': {
+		type_s: {
 			newName: 'budgetType',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'key_review_s': {
+		key_review_s: {
 			newName: 'id',
 			defaultValue: '',
-			processValue: (value) => value
+			processValue: (value) => value,
 		},
-		'keyword_n': {
+		keyword_n: {
 			newName: 'keywords',
 			defaultValue: '',
-			processValue: (value) => value
-		}
+			processValue: (value) => value,
+		},
 	},
-	
+
 	esTopLevelFields: [
 		'programElementTitle_t',
 		'projectMissionDescription_t',
@@ -1719,27 +1717,27 @@ module.exports = {
 		'P40-13_BSA_Title_t',
 		'P40-15_Justification_t',
 		'projectTitle_s',
-		'budgetActivityTitle_s'
+		'budgetActivityTitle_s',
 	],
 
 	esTopLevelFieldsNameMapping: {
-		'programElementTitle_t': 'PE Title',
-		'projectMissionDescription_t': 'Project Description',
-		'appropriationTitle_t': 'Appropriation Title',
-		'budgetActivityTitle_t': 'Budget Activity Title',
-		'missionDescBudgetJustification_t': 'Justification',
-		'projectNotes_t': 'Project Notes',
-		'projectAquisitionStrategy_t': 'Acquisition Strat.',
-		'projectPerformanceMetrics_t': 'Metrics',
-		'otherProgramFundSummaryRemarks_t': 'Other Summary Remarks',
+		programElementTitle_t: 'PE Title',
+		projectMissionDescription_t: 'Project Description',
+		appropriationTitle_t: 'Appropriation Title',
+		budgetActivityTitle_t: 'Budget Activity Title',
+		missionDescBudgetJustification_t: 'Justification',
+		projectNotes_t: 'Project Notes',
+		projectAquisitionStrategy_t: 'Acquisition Strat.',
+		projectPerformanceMetrics_t: 'Metrics',
+		otherProgramFundSummaryRemarks_t: 'Other Summary Remarks',
 		'P40-13_BSA_Title_t': 'P40-13_BSA_Title',
 		'P40-15_Justification_t': 'P40-15_Justification',
-		'projectTitle_s': 'Project Title',
-		'r_2a_accomp_pp_n': 'Accomplishments',
-		'p3a_contract_data_n': 'Contracts',
-		'r4a_schedule_details_n': 'Schedule Details',
-		'p3a_dev_milestones_n': 'Milestones',
-		'budgetActivityTitle_s': 'Activity Title'
+		projectTitle_s: 'Project Title',
+		r_2a_accomp_pp_n: 'Accomplishments',
+		p3a_contract_data_n: 'Contracts',
+		r4a_schedule_details_n: 'Schedule Details',
+		p3a_dev_milestones_n: 'Milestones',
+		budgetActivityTitle_s: 'Activity Title',
 	},
 
 	esInnerHitFields: [
@@ -1752,104 +1750,95 @@ module.exports = {
 				'r_2a_accomp_pp_n.PlanPrgrm_Fund_BY1OCO_Text_t',
 				'r_2a_accomp_pp_n.PlanPrgrm_Fund_BY1_Text_t',
 				'r_2a_accomp_pp_n.Accomp_Title_text_t',
-				'r_2a_accomp_pp_n.Accomp_Desc_text_t'
-			]
+				'r_2a_accomp_pp_n.Accomp_Desc_text_t',
+			],
 		},
 		{
 			path: 'p3a_contract_data_n',
-			fields: [
-				'p3a_contract_data_n.programElementTitle_t',
-				'p3a_contract_data_n.P3a-16_Title_t',
-			]
+			fields: ['p3a_contract_data_n.programElementTitle_t', 'p3a_contract_data_n.P3a-16_Title_t'],
 		},
 		{
 			path: 'r4a_schedule_details_n',
-			fields: [
-				'r4a_schedule_details_n.Event_Title_t',
-				'r4a_schedule_details_n.SubProj_Title_t',
-			]
+			fields: ['r4a_schedule_details_n.Event_Title_t', 'r4a_schedule_details_n.SubProj_Title_t'],
 		},
 		{
 			path: 'p3a_dev_milestones_n',
-			fields: [
-				'p3a_dev_milestones_n.P3a-20_Milestone_Desc_t',
-				'p3a_dev_milestones_n.projectTitle2_t'
-			]
+			fields: ['p3a_dev_milestones_n.P3a-20_Milestone_Desc_t', 'p3a_dev_milestones_n.projectTitle2_t'],
 		},
 		{
 			path: 'r2_adjustments_n',
-			fields: ['r2_adjustments_n.Adj_OtherAdj_Title_t']
+			fields: ['r2_adjustments_n.Adj_OtherAdj_Title_t'],
 		},
 		{
 			path: 'r2a_cong_adds_n',
-			fields: ['r2a_cong_adds_n.CongAdds_Title_t']
+			fields: ['r2a_cong_adds_n.CongAdds_Title_t'],
 		},
 		{
 			path: 'r2a_joint_funding_n',
-			fields: ['r2a_joint_funding_n.JointFund_Title_t']
+			fields: ['r2a_joint_funding_n.JointFund_Title_t'],
 		},
 		{
 			path: 'r2a_other_program_funding_n',
-			fields: ['r2a_other_program_funding_n.OthProgFund_Title_t']
+			fields: ['r2a_other_program_funding_n.OthProgFund_Title_t'],
 		},
 		{
 			path: 'p40a_secondary_distribution_n',
-			fields: ['p40a_secondary_distribution_n.P40a-14_Title_t']
+			fields: ['p40a_secondary_distribution_n.P40a-14_Title_t'],
 		},
 		{
 			path: 'p40a_aggregated_items_n',
-			fields: ['p40a_aggregated_items_n.P40a-16_Title_t']
+			fields: ['p40a_aggregated_items_n.P40a-16_Title_t'],
 		},
 		{
 			path: 'p3a_rdte_n',
-			fields: ['p3a_rdte_n.P3a-19_ModItem_Title_t']
+			fields: ['p3a_rdte_n.P3a-19_ModItem_Title_t'],
 		},
 		{
 			path: 'p5_cost_elements_n',
-			fields: ['p5_cost_elements_n.P5-14_Item_Title_t']
+			fields: ['p5_cost_elements_n.P5-14_Item_Title_t'],
 		},
 		{
 			path: 'p5_res_sum_optional_rows_n',
-			fields: ['p5_res_sum_optional_rows_n.P5-16_Item_Title_t']
-		}
+			fields: ['p5_res_sum_optional_rows_n.P5-16_Item_Title_t'],
+		},
 	],
 
 	esServiceAgencyMapping: {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
-		'ARMY': 'Army',
-		'NAVY': 'Navy',
-		'AF': 'Air Force (AF)',
-		'DHA': 'Defense Health Agency (DHA)',
-		'SOCOM': 'United States Special Operations Command (SOCOM)',
-		'DEFW': 'Defense Defense Worldwide (DEFW)',
-		'DTRA': 'Defense Threat Reduction Agency (DTRA)',
-		'IG': 'Office of the Inspector General (IG)',
-		'TJS': 'The Joint Staff (TJS)',
-		'DCAA': 'Defense Contract Audit Agency (DCAA)',
-		'DEPS': 'DoD Enterprise Portal Service (DEPS)',
-		'DISA': 'Defense Information Systems Agency (DISA)',
-		'DAU': 'Defense Acquisition University (DAU)',
-		'DCMA': 'Defense Contract Management Agency (DCMA)',
-		'DCSA': 'Defense Counterintelligence and Security Agency (DCSA)',
-		'DHRA': 'DoD Human Resources Activity (DHRA)',
-		'DODEA': 'Department of Defense Education Activity (DODEA)',
-		'DSCA': 'Defense Security Cooperation Agency (DSCA)',
-		'DTSA': 'Defense Technology Security Administration (DTSA)',
-		'OSD': 'Office of the Secretary of Defense (OSD)',
-		'CAAF': 'Court of Appeals for the Armed Forces (CAAF)',
-		'CMP': 'Civil Military Programs (CMP)',
-		'DEPSDDR': 'DEPSDDR',
-		'DLA': 'Defense Logistics Agency (DLA)',
-		'DLSA': 'Defense Legal Services Agency (DLSA)',
-		'DMACT': 'Defense Media Activity (DMACT)',
-		'DPAA': 'Defense POW MIA Accounting Agency (DPAA)',
-		'DTIC': 'Defense Technical Information Center (DTIC)',
-		'MDA': 'Missile Defense Agency (MDA)',
-		'OEA': 'Office of Economic Adjustment (OEA)',
-		'OLDCC': 'Office of the Local Defense Community Cooperation (OLDCC)',
-		'SDA': 'Space Development Agency (SDA)',
-		'WHS': 'Washington Headquarters Services (WHS)',
-	}
+		ARMY: 'Army',
+		NAVY: 'Navy',
+		AF: 'Air Force (AF)',
+		DHA: 'Defense Health Agency (DHA)',
+		SOCOM: 'United States Special Operations Command (SOCOM)',
+		DEFW: 'Defense Defense Worldwide (DEFW)',
+		DTRA: 'Defense Threat Reduction Agency (DTRA)',
+		IG: 'Office of the Inspector General (IG)',
+		TJS: 'The Joint Staff (TJS)',
+		DCAA: 'Defense Contract Audit Agency (DCAA)',
+		DEPS: 'DoD Enterprise Portal Service (DEPS)',
+		DISA: 'Defense Information Systems Agency (DISA)',
+		DAU: 'Defense Acquisition University (DAU)',
+		DCMA: 'Defense Contract Management Agency (DCMA)',
+		DCSA: 'Defense Counterintelligence and Security Agency (DCSA)',
+		DHRA: 'DoD Human Resources Activity (DHRA)',
+		DODEA: 'Department of Defense Education Activity (DODEA)',
+		DSCA: 'Defense Security Cooperation Agency (DSCA)',
+		DTSA: 'Defense Technology Security Administration (DTSA)',
+		OSD: 'Office of the Secretary of Defense (OSD)',
+		CAAF: 'Court of Appeals for the Armed Forces (CAAF)',
+		CMP: 'Civil Military Programs (CMP)',
+		DEPSDDR: 'DEPSDDR',
+		DLA: 'Defense Logistics Agency (DLA)',
+		DLSA: 'Defense Legal Services Agency (DLSA)',
+		DMACT: 'Defense Media Activity (DMACT)',
+		DPAA: 'Defense POW MIA Accounting Agency (DPAA)',
+		DTIC: 'Defense Technical Information Center (DTIC)',
+		MDA: 'Missile Defense Agency (MDA)',
+		OEA: 'Office of Economic Adjustment (OEA)',
+		OLDCC: 'Office of the Local Defense Community Cooperation (OLDCC)',
+		SDA: 'Space Development Agency (SDA)',
+		WHS: 'Washington Headquarters Services (WHS)',
+	},
 };

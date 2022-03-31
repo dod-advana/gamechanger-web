@@ -21,22 +21,25 @@ function getTableName(instance) {
 
 function create(data) {
 	return new Promise(function (resolve, reject) {
-		let { userCn, table, objectId, action, field, oldValue, newValue, } = data;
+		let { userCn, table, objectId, action, field, oldValue, newValue } = data;
 
-		eventHistory.create({
-			userCn,
-			table,
-			objectId,
-			action,
-			field,
-			oldValue,
-			newValue,
-		}).then(() => {
-			resolve();
-		}).catch(e => {
-			LOGGER.error(e);
-			reject(e);
-		});
+		eventHistory
+			.create({
+				userCn,
+				table,
+				objectId,
+				action,
+				field,
+				oldValue,
+				newValue,
+			})
+			.then(() => {
+				resolve();
+			})
+			.catch((e) => {
+				LOGGER.error(e);
+				reject(e);
+			});
 	});
 }
 

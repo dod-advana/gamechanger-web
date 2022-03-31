@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import UOTDialog from '../common/GCDialog';
 import GCButton from '../common/GCButton';
-import {
-	Select,
-	InputLabel,
-	FormControl,
-	MenuItem,
-	Typography,
-	TextField,
-} from '@material-ui/core';
+import { Select, InputLabel, FormControl, MenuItem, Typography, TextField } from '@material-ui/core';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingBar from '../common/LoadingBar';
 import './export-results-dialog.css';
@@ -20,11 +13,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 
 const gameChangerAPI = new GameChangerAPI();
-export const autoDownloadFile = ({
-	data,
-	filename = 'results',
-	extension = 'txt',
-}) => {
+export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 	//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
 
 	const a = document.createElement('a');
@@ -90,14 +79,8 @@ const styles = {
 };
 
 export const downloadFile = async (data, format, cloneData) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneData.clone_name),
-		'ExportResults',
-		'onDownloadFile',
-		format
-	);
-	const filename =
-		'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', 'onDownloadFile', format);
+	const filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
 	if (format === 'pdf') {
 		const blob = b64toBlob(data, 'application/pdf');
 		autoDownloadFile({ data: blob, extension: 'pdf', filename });
@@ -159,8 +142,7 @@ const ExportResultsDialog = ({
 				'onGenerate',
 				selectedFormat
 			);
-			Array.from(selectedDocuments.keys()).forEach(item =>{
-				
+			Array.from(selectedDocuments.keys()).forEach((item) => {
 				gameChangerAPI.sendIntelligentSearchFeedback(
 					'intelligent_search_export_document',
 					item,
@@ -172,7 +154,7 @@ const ExportResultsDialog = ({
 					`${item}`,
 					`search : ${searchObject.search}`
 				);
-			}); 
+			});
 			let url = window.location.hash.toString();
 			url = url.replace('#/', '');
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
@@ -185,16 +167,13 @@ const ExportResultsDialog = ({
 					limit: 10000,
 					searchType,
 					index,
-					classificationMarking:
-						classificationMarking === 'None' ? '' : classificationMarking,
+					classificationMarking: classificationMarking === 'None' ? '' : classificationMarking,
 					cloneData,
 					orgFilter: orgFilter,
 					orgFilterString: orgFilterString,
 					typeFilter,
 					typeFilterString,
-					selectedDocuments: isSelectedDocs
-						? Array.from(selectedDocuments.keys())
-						: [],
+					selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [],
 					tiny_url: tiny_url_send,
 					edaSearchSettings,
 					sort,
@@ -328,11 +307,7 @@ const ExportResultsDialog = ({
 				</div>
 			</div>
 			{errorMsg ? (
-				<div
-					style={{ color: 'red', display: 'flex', justifyContent: 'center' }}
-				>
-					{errorMsg}
-				</div>
+				<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>{errorMsg}</div>
 			) : (
 				<LoadingBar color="primary" loading={loading} />
 			)}

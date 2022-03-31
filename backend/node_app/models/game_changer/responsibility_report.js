@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const RESPONSIBILITY_REPORTS = sequelize.define('responsibility_report',
+	const RESPONSIBILITY_REPORTS = sequelize.define(
+		'responsibility_report',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,39 +10,39 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			responsibility_id: {
 				type: DataTypes.INTEGER,
-				allowNull: false
+				allowNull: false,
 			},
 			reporter_hashed_username: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			issue_description: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			updatedColumn: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			updatedText: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			textPosition: {
 				type: DataTypes.JSON,
-				allowNull: true
-			}
+				allowNull: true,
+			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'responsibility_reports',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 
 	RESPONSIBILITY_REPORTS.associate = (models) => {
-		RESPONSIBILITY_REPORTS.belongsTo(models.responsibilities, { 
-			foreignKey: 'responsibility_id'
+		RESPONSIBILITY_REPORTS.belongsTo(models.responsibilities, {
+			foreignKey: 'responsibility_id',
 		});
 	};
 

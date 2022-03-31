@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const API_KEY = sequelize.define('api_key',
+	const API_KEY = sequelize.define(
+		'api_key',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -10,30 +11,30 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			apiKey: {
 				type: DataTypes.TEXT,
-				unique: true
+				unique: true,
 			},
 			username: {
 				type: DataTypes.TEXT,
-				unique: false
+				unique: false,
 			},
 			active: {
-				type: DataTypes.BOOLEAN
+				type: DataTypes.BOOLEAN,
 			},
 			description: {
-				type: DataTypes.TEXT
-			}
+				type: DataTypes.TEXT,
+			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'api_keys',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 
 	API_KEY.associate = (models) => {
-		API_KEY.belongsToMany(models.clone_meta, { 
-			through: 'api_key_clone', 
-			foreignKey: 'apiKeyId'
+		API_KEY.belongsToMany(models.clone_meta, {
+			through: 'api_key_clone',
+			foreignKey: 'apiKeyId',
 		});
 	};
 

@@ -6,20 +6,20 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			username: {
-				type: Sequelize.STRING
+				type: Sequelize.STRING,
 			},
 			app_name: {
-				type: Sequelize.STRING
+				type: Sequelize.STRING,
 			},
 			version: {
-				type: Sequelize.STRING
-			}
+				type: Sequelize.STRING,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('user_app_versions');
-	}
+	},
 };

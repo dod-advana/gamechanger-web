@@ -16,9 +16,8 @@ module.exports = {
 			return Promise.all([
 				queryInterface.removeColumn('responsibility_reports', 'updatedColumn', Sequelize.TEXT),
 				queryInterface.removeColumn('responsibility_reports', 'updatedText', Sequelize.TEXT),
-				queryInterface.removeColumn('responsibility_reports', 'textPosition', Sequelize.JSON)
+				queryInterface.removeColumn('responsibility_reports', 'textPosition', Sequelize.JSON),
 			]);
 		});
-	}
+	},
 };
-

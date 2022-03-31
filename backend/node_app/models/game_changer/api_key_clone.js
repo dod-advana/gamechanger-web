@@ -1,14 +1,15 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const API_KEY_CLONE = sequelize.define('api_key_clone',
+	const API_KEY_CLONE = sequelize.define(
+		'api_key_clone',
 		{
 			id: {
 				type: DataTypes.INTEGER,
 				autoIncrement: true,
 				primaryKey: true,
-			}, 
-            apiKeyId: {
+			},
+			apiKeyId: {
 				allowNull: false,
 				type: DataTypes.INTEGER,
 			},
@@ -16,11 +17,11 @@ module.exports = (sequelize, DataTypes) => {
 				allowNull: false,
 				type: DataTypes.INTEGER,
 			},
-        },
+		},
 		{
 			freezeTableName: true,
 			tableName: 'api_key_clones',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return API_KEY_CLONE;

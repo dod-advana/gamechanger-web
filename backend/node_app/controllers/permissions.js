@@ -2,15 +2,17 @@ const _ = require('lodash');
 const constants = require('../config/constants');
 
 var privateMethods = {
-
 	getPermissionsFromSession(req) {
-		return (req.session.user && req.session.user.perms) ? req.session.user.perms : [];
+		return req.session.user && req.session.user.perms ? req.session.user.perms : [];
 	},
 
 	hadPermission(desiredPermission, permissions) {
 		if (!_.isEmpty(permissions)) {
 			for (let perm of permissions) {
-				if (perm.toUpperCase() === desiredPermission.toUpperCase() || perm.toUpperCase() === constants.PERMISSIONS.WEBAPP_SUPER_ADMIN.toUpperCase()) {
+				if (
+					perm.toUpperCase() === desiredPermission.toUpperCase() ||
+					perm.toUpperCase() === constants.PERMISSIONS.WEBAPP_SUPER_ADMIN.toUpperCase()
+				) {
 					return true;
 				}
 			}
@@ -20,8 +22,8 @@ var privateMethods = {
 
 	getAllAllowedPrefixesFromString(prefix, perms) {
 		const allowImpalaStr = prefix.replace(' #PREFIX', '');
-		const permsWithPrefixes = _.filter(perms, p => p.includes(allowImpalaStr));
-		return _.map(permsWithPrefixes, p => p.replace(allowImpalaStr, '').trim());
+		const permsWithPrefixes = _.filter(perms, (p) => p.includes(allowImpalaStr));
+		return _.map(permsWithPrefixes, (p) => p.replace(allowImpalaStr, '').trim());
 	},
 
 	// Get list of of permitted prefixes via db table combo (derived from EXPLAIN query)
@@ -32,15 +34,14 @@ var privateMethods = {
 	getDatabasePrivilegeMapPrefixFromDbTbl(dbTblMap, prefix, perms) {
 		const allAllowedPrefixes = privateMethods.getAllAllowedPrefixesFromString(prefix, perms);
 		let allowMap = {};
-		_.each(dbTblMap, dbTbl => {
+		_.each(dbTblMap, (dbTbl) => {
 			const { db } = dbTbl;
 			let allowed = false;
-			_.each(allAllowedPrefixes, thisPrefix => {
+			_.each(allAllowedPrefixes, (thisPrefix) => {
 				const dbPrefix = db.substr(0, thisPrefix.length);
 				if (dbPrefix.toLowerCase() === thisPrefix.toLowerCase()) allowed = true;
 			});
 			allowMap[db] = allowed;
-
 		});
 		return allowMap;
 	},
@@ -48,7 +49,7 @@ var privateMethods = {
 	hasUnrestrictedOnDBsInQuery(req, databases, perm, userPermissions = null) {
 		let allowed = true;
 		let perms, userId;
-		if (userPermissions){
+		if (userPermissions) {
 			perms = userPermissions;
 			userId = 'user';
 		} else {
@@ -59,8 +60,8 @@ var privateMethods = {
 		const hasSuperAdmin = perms.includes(constants.PERMISSIONS.WEBAPP_SUPER_ADMIN);
 		if (hasSuperAdmin) return allowed;
 		let permPrefix = perm.replace(' #DB', '');
-		const permsWithPrefixes = _.filter(perms, p => p.includes(permPrefix));
-		const allAllowedDbs = _.map(permsWithPrefixes, p => p.replace(permPrefix, '').trim());
+		const permsWithPrefixes = _.filter(perms, (p) => p.includes(permPrefix));
+		const allAllowedDbs = _.map(permsWithPrefixes, (p) => p.replace(permPrefix, '').trim());
 
 		console.log(`${userId} is allowed to query ${allAllowedDbs}`);
 		console.log(`${userId} is trying to query ${databases}`);
@@ -88,10 +89,13 @@ var privateMethods = {
 };
 
 module.exports = class permissions {
-
 	static canPerformTransition(req, transition, preloadedPermissions) {
 		let perms = preloadedPermissions || privateMethods.getPermissionsFromSession(req);
-		return _.isNull(transition.perms) || perms.filter(v => transition.perms.indexOf(v) !== -1).length > 0 || perms.includes(constants.PERMISSIONS.WEBAPP_SUPER_ADMIN);
+		return (
+			_.isNull(transition.perms) ||
+			perms.filter((v) => transition.perms.indexOf(v) !== -1).length > 0 ||
+			perms.includes(constants.PERMISSIONS.WEBAPP_SUPER_ADMIN)
+		);
 	}
 
 	static allowCreateDatabase(req) {
@@ -102,17 +106,26 @@ module.exports = class permissions {
 	static canViewEntity(req, entity) {
 		if (req.get('SSL_CLIENT_S_DN_CN') === constants.DARQ_EMAIL_SERVICE_USER) return true;
 		let perms = privateMethods.getPermissionsFromSession(req);
-		if (privateMethods.hadPermission(constants.PERMISSIONS.CAN_VIEW_AGENCY.replace('#ENTITY', entity), perms)) return true;
+		if (privateMethods.hadPermission(constants.PERMISSIONS.CAN_VIEW_AGENCY.replace('#ENTITY', entity), perms))
+			return true;
 		if (privateMethods.hadPermission(constants.PERMISSIONS.CAN_VIEW_AGENCY_ALL, perms)) return true;
 		return false;
 	}
 
 	static canCreatePrefixedDatabase(req, query) {
-		return privateMethods.hasDatabasePrivilegePrefix(req, query, constants.PERMISSIONS.CAN_CREATE_PREFIXED_IMPALA_DATABASE);
+		return privateMethods.hasDatabasePrivilegePrefix(
+			req,
+			query,
+			constants.PERMISSIONS.CAN_CREATE_PREFIXED_IMPALA_DATABASE
+		);
 	}
 
 	static canCreateExternalPrefixedDatabase(req, query) {
-		return privateMethods.hasDatabasePrivilegePrefix(req, query, constants.PERMISSIONS.CAN_LOAD_DATA_INTO_PREFIXED_IMPALA_TABLE);
+		return privateMethods.hasDatabasePrivilegePrefix(
+			req,
+			query,
+			constants.PERMISSIONS.CAN_LOAD_DATA_INTO_PREFIXED_IMPALA_TABLE
+		);
 	}
 
 	static canLoadIntoPrefixedDatabaseTable(req, query) {
@@ -120,7 +133,11 @@ module.exports = class permissions {
 	}
 
 	static canDropPrefixedDatabaseTable(req, query) {
-		return privateMethods.hasDatabasePrivilegePrefix(req, query, constants.PERMISSIONS.CAN_DROP_PREFIXED_IMPALA_DATABASE_TABLE);
+		return privateMethods.hasDatabasePrivilegePrefix(
+			req,
+			query,
+			constants.PERMISSIONS.CAN_DROP_PREFIXED_IMPALA_DATABASE_TABLE
+		);
 	}
 
 	static canExportUnlimited(req) {
@@ -154,7 +171,7 @@ module.exports = class permissions {
 	}
 
 	static getSandbox(req) {
-		return (req.session.user && req.session.user.sandboxId) ? req.session.user.sandboxId : -1;
+		return req.session.user && req.session.user.sandboxId ? req.session.user.sandboxId : -1;
 	}
 
 	static isSuperAdmin(req) {
@@ -175,6 +192,9 @@ module.exports = class permissions {
 	}
 
 	static canSelfAssign(req, prefix = '') {
-		return privateMethods.hadPermission(prefix + constants.PERMISSIONS.CAN_WORKFLOW_SELF_ASSIGN, privateMethods.getPermissionsFromSession(req));
+		return privateMethods.hadPermission(
+			prefix + constants.PERMISSIONS.CAN_WORKFLOW_SELF_ASSIGN,
+			privateMethods.getPermissionsFromSession(req)
+		);
 	}
 };

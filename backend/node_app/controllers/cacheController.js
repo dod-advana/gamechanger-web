@@ -23,9 +23,7 @@ const abbreviationRedisAsyncClientDB = 9;
 const separatedRedisAsyncClientDB = 4;
 const graphRedisAsyncClientDB = 8;
 
-
 class CacheController {
-
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
@@ -40,7 +38,7 @@ class CacheController {
 		this.gcHistory = gcHistory;
 		this.search = search;
 
-		if (!async_redis){
+		if (!async_redis) {
 			this.redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 			this.separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 		} else {
@@ -67,7 +65,7 @@ class CacheController {
 		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
 	}
 
-	async setStartupSearchHistoryCacheKeys(){
+	async setStartupSearchHistoryCacheKeys() {
 		this.redisAsyncClient.set(CACHE_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 	}
 
@@ -110,12 +108,10 @@ class CacheController {
 				],
 				where: {
 					run_at: {
-						$gt: twoWeeksAgo
+						$gt: twoWeeksAgo,
 					},
 				},
-				group: [
-					'clone_name'
-				]
+				group: ['clone_name'],
 			});
 
 			// map names that exist into flat array
@@ -123,7 +119,9 @@ class CacheController {
 			const { latest_version } = params[0];
 
 			if (!latest_version) {
-				throw new Error(`Error creating search cache: Trying for search_version ${latest_version}, for projects ${projects}`);
+				throw new Error(
+					`Error creating search cache: Trying for search_version ${latest_version}, for projects ${projects}`
+				);
 			}
 
 			// limit to 1000 total cached
@@ -135,46 +133,42 @@ class CacheController {
 			const cloneLimit = Math.floor((projects.length + 1) / 2);
 
 			// check clone histories
-			if (projects.length > 0){
+			if (projects.length > 0) {
 				// get distinct clone searches for each clone
 				for (const name of projects) {
 					const data = await this.gcHistory.findAll({
 						raw: true,
-						attributes: [
-							Sequelize.fn('DISTINCT', Sequelize.col('request_body'))
-						],
+						attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 						where: {
 							is_tutorial_search: false,
 							search_version: latest_version,
 							clone_name: name,
 							run_at: {
-								$gt: twoWeeksAgo
-							}
+								$gt: twoWeeksAgo,
+							},
 						},
-						limit: cloneLimit
+						limit: cloneLimit,
 					});
 
 					const bodies = data.map(({ request_body }) => request_body);
 					searches.push(...bodies);
 				}
-			};
+			}
 
 			// fill remaining searches with default gamechanger history
 			const mainLimit = 1000 - searches.length;
 			const data = await this.gcHistory.findAll({
 				raw: true,
-				attributes: [
-					Sequelize.fn('DISTINCT', Sequelize.col('request_body'))
-				],
+				attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 				where: {
 					is_tutorial_search: false,
 					search_version: latest_version,
 					clone_name: null,
 					run_at: {
-						$gt: twoWeeksAgo
-					}
+						$gt: twoWeeksAgo,
+					},
 				},
-				limit: mainLimit
+				limit: mainLimit,
 			});
 
 			const bodies = data.map(({ request_body }) => request_body);
@@ -182,12 +176,12 @@ class CacheController {
 
 			let hadError = false;
 			let end = Date.now();
-			let diffMins = ((end - start) / (1000 * 60));
+			let diffMins = (end - start) / (1000 * 60);
 			let stoppedEarly = false;
 			for (const body of searches) {
 				end = Date.now();
-				diffMins = ((end - start) / (1000 * 60));
-				if (diffMins > MAX_RELOAD_TIME_MINS){
+				diffMins = (end - start) / (1000 * 60);
+				if (diffMins > MAX_RELOAD_TIME_MINS) {
 					stoppedEarly = true;
 					break;
 				}
@@ -203,13 +197,11 @@ class CacheController {
 			this.logger.metrics('END SEARCH HISTORY CACHE RELOAD', {
 				time: `${diffMins.toFixed(2)} minutes elapsed reloading cache`,
 				hadError,
-				stoppedEarly
+				stoppedEarly,
 			});
-
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'GPPFDQ9', userId);
-
 		} finally {
 			await this.redisAsyncClient.set(CACHE_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 		}
@@ -226,15 +218,14 @@ class CacheController {
 			this.logger.error(message, 'JK3MHI5', userId);
 			res.status(500).send(err);
 		}
-
 	}
 
-	async clearSearchHistoryCacheHelper(userId, forCacheReload = false){
+	async clearSearchHistoryCacheHelper(userId, forCacheReload = false) {
 		try {
 			this.redisAsyncClient.select(redisAsyncClientDB);
 			this.logger.info('CLEAR search history cache');
 			const isReloading = await this.redisAsyncClient.get(CACHE_RELOAD_KEY);
-			if (forCacheReload){
+			if (forCacheReload) {
 				if (isReloading === CACHE_IS_RELOADING) {
 					throw new Error('Will not clear cache - Search history cache is currently reloading');
 				}
@@ -245,7 +236,6 @@ class CacheController {
 
 			await this.redisAsyncClient.set(CACHE_RELOAD_KEY, isReloading);
 			await this.redisAsyncClient.set(CACHE_ACTIVE_STATUS_KEY, Boolean(status));
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'R4S7E0T', userId);
@@ -298,11 +288,9 @@ class CacheController {
 				this.logger.info(k + ', ' + top.trim());
 				this.logger.info(top.trim() + ', ' + k);
 			}
-
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'GPPFDQ9', userId);
-
 		} finally {
 			await this.redisAsyncClient.set(ABB_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 		}
@@ -319,15 +307,14 @@ class CacheController {
 			this.logger.error(message, 'JK3MHI5', userId);
 			res.status(500).send(err);
 		}
-
 	}
 
-	async clearAbbreviationsCacheHelper(userId, forCacheReload = false){
+	async clearAbbreviationsCacheHelper(userId, forCacheReload = false) {
 		try {
 			await this.redisAsyncClient.select(abbreviationRedisAsyncClientDB);
 			this.logger.info('CLEAR abbreviation cache');
 			const isReloading = await this.redisAsyncClient.get(ABB_RELOAD_KEY);
-			if (forCacheReload){
+			if (forCacheReload) {
 				if (isReloading === CACHE_IS_RELOADING) {
 					throw new Error('Will not clear cache - Abbreviation cache is currently reloading');
 				}
@@ -338,7 +325,6 @@ class CacheController {
 
 			await this.redisAsyncClient.set(ABB_RELOAD_KEY, isReloading);
 			await this.redisAsyncClient.set(ABB_ACTIVE_STATUS_KEY, Boolean(status));
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'R4S7E0T', userId);
@@ -359,7 +345,6 @@ class CacheController {
 				useGCCache = true;
 			}
 			res.status(200).send(useGCCache);
-
 		} catch (err) {
 			this.logger.error(err.message, 'HMJND55', userId);
 			res.status(500).send(err);
@@ -377,7 +362,6 @@ class CacheController {
 			await this.redisAsyncClient.set(CACHE_ACTIVE_STATUS_KEY, toggle);
 
 			res.status(200).send(toggle);
-
 		} catch (err) {
 			this.logger.error(err.message, 'HMJND55', userId);
 			res.status(500).send(err);
@@ -396,7 +380,6 @@ class CacheController {
 			this.logger.error(message, 'MHI5EDC', userId);
 			res.status(500).send(err);
 		}
-
 	}
 
 	async clearGraphDataCacheHelper(userId, forCacheReload) {
@@ -404,7 +387,7 @@ class CacheController {
 			this.redisAsyncClient.select(graphRedisAsyncClientDB);
 			this.logger.info('CLEAR graph data cache');
 			const isReloading = await this.redisAsyncClient.get(CACHE_GRAPH_RELOAD_KEY);
-			if (forCacheReload){
+			if (forCacheReload) {
 				if (isReloading === CACHE_GRAPH_IS_RELOADING) {
 					throw new Error('Will not clear cache - Graph data cache is currently reloading');
 				}
@@ -415,7 +398,6 @@ class CacheController {
 
 			await this.redisAsyncClient.set(CACHE_GRAPH_RELOAD_KEY, isReloading || false);
 			await this.redisAsyncClient.set(CACHE_GRAPH_ACTIVE_STATUS_KEY, Boolean(status));
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '7E0TEDF', userId);
@@ -463,12 +445,10 @@ class CacheController {
 				],
 				where: {
 					run_at: {
-						$gt: twoWeeksAgo
+						$gt: twoWeeksAgo,
 					},
 				},
-				group: [
-					'clone_name'
-				]
+				group: ['clone_name'],
 			});
 
 			// map names that exist into flat array
@@ -476,7 +456,9 @@ class CacheController {
 			const { latest_version } = params[0];
 
 			if (!latest_version) {
-				throw new Error(`Error creating graph data cache: Trying for search_version ${latest_version}, for projects ${projects}`);
+				throw new Error(
+					`Error creating graph data cache: Trying for search_version ${latest_version}, for projects ${projects}`
+				);
 			}
 
 			// limit to 1000 total cached
@@ -488,23 +470,21 @@ class CacheController {
 			const cloneLimit = Math.floor((projects.length + 1) / 2);
 
 			// check clone histories
-			if (projects.length > 0){
+			if (projects.length > 0) {
 				// get distinct clone searches for each clone
 				for (const name of projects) {
 					const data = await this.gcHistory.findAll({
 						raw: true,
-						attributes: [
-							Sequelize.fn('DISTINCT', Sequelize.col('request_body'))
-						],
+						attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 						where: {
 							is_tutorial_search: false,
 							search_version: latest_version,
 							clone_name: name,
 							run_at: {
-								$gt: twoWeeksAgo
-							}
+								$gt: twoWeeksAgo,
+							},
 						},
-						limit: cloneLimit
+						limit: cloneLimit,
 					});
 
 					const bodies = data.map(({ request_body }) => request_body);
@@ -516,18 +496,16 @@ class CacheController {
 			const mainLimit = 1000 - searches.length;
 			const data = await this.gcHistory.findAll({
 				raw: true,
-				attributes: [
-					Sequelize.fn('DISTINCT', Sequelize.col('request_body'))
-				],
+				attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 				where: {
 					is_tutorial_search: false,
 					search_version: latest_version,
 					clone_name: null,
 					run_at: {
-						$gt: twoWeeksAgo
-					}
+						$gt: twoWeeksAgo,
+					},
 				},
-				limit: mainLimit
+				limit: mainLimit,
 			});
 
 			const bodies = data.map(({ request_body }) => request_body);
@@ -535,12 +513,12 @@ class CacheController {
 
 			let hadError = false;
 			let end = Date.now();
-			let diffMins = ((end - start) / (1000 * 60));
+			let diffMins = (end - start) / (1000 * 60);
 			let stoppedEarly = false;
 			for (const body of searches) {
 				end = Date.now();
-				diffMins = ((end - start) / (1000 * 60));
-				if (diffMins > MAX_RELOAD_TIME_MINS){
+				diffMins = (end - start) / (1000 * 60);
+				if (diffMins > MAX_RELOAD_TIME_MINS) {
 					stoppedEarly = true;
 					break;
 				}
@@ -556,13 +534,11 @@ class CacheController {
 			this.logger.metrics('END GRAPH DATA CACHE RELOAD', {
 				time: `${diffMins.toFixed(2)} minutes elapsed reloading cache`,
 				hadError,
-				stoppedEarly
+				stoppedEarly,
 			});
-
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'FDQ9EDC', userId);
-
 		} finally {
 			await this.redisAsyncClient.set(CACHE_GRAPH_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
 		}
