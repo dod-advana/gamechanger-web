@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const RESPONSIBILITIES = sequelize.define('responsibilities',
+	const RESPONSIBILITIES = sequelize.define(
+		'responsibilities',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,43 +10,43 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			filename: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			documentTitle: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			organizationPersonnel: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			responsibilityText: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			otherOrganizationPersonnel: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			documentsReferenced: {
 				type: DataTypes.ARRAY(DataTypes.TEXT),
-				allowNull: true
+				allowNull: true,
 			},
 			status: {
 				type: DataTypes.TEXT,
-				defaultValue: 'active'
+				defaultValue: 'active',
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'responsibilities',
-			timestamps: false
+			timestamps: false,
 		}
 	);
 
 	RESPONSIBILITIES.associate = (models) => {
-		RESPONSIBILITIES.hasMany(models.responsibility_report, { 
-			foreignKey: 'responsibility_id'
+		RESPONSIBILITIES.hasMany(models.responsibility_report, {
+			foreignKey: 'responsibility_id',
 		});
 	};
 

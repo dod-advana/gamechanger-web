@@ -3,11 +3,7 @@ import _ from 'lodash';
 
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	getSearchObjectFromString,
-	getUserData,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import DefaultDocumentExplorer from './defaultDocumentExplorer';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { Card } from '../../cards/GCCard';
@@ -95,9 +91,7 @@ const getDocumentProperties = async (dispatch) => {
 			doc_num: 'Document Number',
 			filename: 'Filename',
 		};
-		documentProperties = docPropsResponse.data.filter(
-			(field) => Object.keys(keepList).indexOf(field.name) !== -1
-		);
+		documentProperties = docPropsResponse.data.filter((field) => Object.keys(keepList).indexOf(field.name) !== -1);
 		documentProperties.forEach((field) => {
 			field.display_name = keepList[field.name];
 		});
@@ -124,25 +118,16 @@ const checkForTinyURL = async (location) => {
 };
 
 const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'SuggestionSelected',
-		'DidYouMean'
-	);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
 	setState(dispatch, { searchText: didYouMean, runSearch: true });
 };
 
 const DefaultMainViewHandler = {
 	async handlePageLoad(props) {
-		const {
-			state,
-			dispatch,
-			history,
-			searchHandler,
-		} = props;
+		const { state, dispatch, history, searchHandler } = props;
 
 		gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
-		
+
 		if (state.runSearch || state.runDocumentComparisonSearch) return;
 
 		const documentProperties = await getDocumentProperties(dispatch);
@@ -161,21 +146,18 @@ const DefaultMainViewHandler = {
 
 		try {
 			//getTrendingSearches(state.cloneData);
-			const daysBack=14;
-			let trendingES = await gameChangerAPI.trendingSearches({daysBack});
-			
-			setState(dispatch, { trending: trendingES});
+			const daysBack = 14;
+			let trendingES = await gameChangerAPI.trendingSearches({ daysBack });
 
+			setState(dispatch, { trending: trendingES });
 		} catch (e) {
 			console.log(e);
 		}
 
 		try {
-			gameChangerAPI
-				.recentSearchesPOST(state.cloneData.clone_name)
-				.then(({ data }) => {
-					setState(dispatch, { recentSearches: data });
-				});
+			gameChangerAPI.recentSearchesPOST(state.cloneData.clone_name).then(({ data }) => {
+				setState(dispatch, { recentSearches: data });
+			});
 		} catch (e) {
 			// Do nothing
 		}
@@ -212,24 +194,14 @@ const DefaultMainViewHandler = {
 
 			searchHandler.setSearchURL(newState);
 		}
-		
 	},
 
 	renderHideTabs(props) {
 		const { state, dispatch, searchHandler } = props;
-		const {
-			componentStepNumbers,
-			cloneData,
-			resetSettingsSwitch,
-			didYouMean,
-			loading,
-			prevSearchText,
-		} = state;
+		const { componentStepNumbers, cloneData, resetSettingsSwitch, didYouMean, loading, prevSearchText } = state;
 		const showDidYouMean = didYouMean && !loading;
-		const latestLinks =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
-		const trendingStorage =
-			localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
+		const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
 		let trendingLinks = [];
 		if (trendingStorage) {
 			JSON.parse(trendingStorage).forEach((search) => {
@@ -252,12 +224,7 @@ const DefaultMainViewHandler = {
 		}
 
 		const handleLinkListItemClick = (searchText) => {
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'TrendingSearchSelected',
-				'text',
-				searchText
-			);
+			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
 			setState(dispatch, {
 				searchText,
 				autoCompleteItems: [],
@@ -288,11 +255,7 @@ const DefaultMainViewHandler = {
 						}}
 					>
 						Did you mean{' '}
-						<DidYouMean
-							onClick={() =>
-								handleDidYouMeanClicked(didYouMean, state, dispatch)
-							}
-						>
+						<DidYouMean onClick={() => handleDidYouMeanClicked(didYouMean, state, dispatch)}>
 							{didYouMean}
 						</DidYouMean>
 						?
@@ -300,9 +263,7 @@ const DefaultMainViewHandler = {
 				)}
 				{cloneData.clone_name === 'gamechanger' && (
 					<div style={{ margin: '10px auto', width: '67%' }}>
-						<div
-							className={`tutorial-step-${componentStepNumbers['Trending Searches']}`}
-						>
+						<div className={`tutorial-step-${componentStepNumbers['Trending Searches']}`}>
 							<MagellanTrendingLinkList
 								onLinkClick={handleLinkListItemClick}
 								links={trendingLinks}
@@ -314,9 +275,7 @@ const DefaultMainViewHandler = {
 				)}
 				{cloneData.clone_name !== 'gamechanger' && (
 					<div style={{ margin: '10px auto', width: '67%' }}>
-						<div
-							className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}
-						>
+						<div className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}>
 							<MagellanTrendingLinkList
 								onLinkClick={handleLinkListItemClick}
 								links={JSON.parse(latestLinks)}
@@ -330,14 +289,7 @@ const DefaultMainViewHandler = {
 	},
 
 	getMainView(props) {
-		const {
-			state,
-			dispatch,
-			setCurrentTime,
-			renderHideTabs,
-			pageLoaded,
-			getViewPanels,
-		} = props;
+		const { state, dispatch, setCurrentTime, renderHideTabs, pageLoaded, getViewPanels } = props;
 
 		const {
 			exportDialogVisible,
@@ -350,31 +302,21 @@ const DefaultMainViewHandler = {
 			edaSearchSettings,
 			currentSort,
 			currentOrder,
-			currentViewName
+			currentViewName,
 		} = state;
-		const {
-			allOrgsSelected,
-			orgFilter,
-			searchType,
-			searchFields,
-			allTypesSelected,
-			typeFilter,
-		} = searchSettings;
+		const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
 
 		const noResults = Boolean(rawSearchResults?.length === 0);
 		const hideSearchResults = noResults && !loading;
 
-		const isSelectedDocs =
-			selectedDocuments && selectedDocuments.size ? true : false;
-		
+		const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
+
 		return (
 			<>
 				{exportDialogVisible && (
 					<ExportResultsDialog
 						open={exportDialogVisible}
-						handleClose={() =>
-							setState(dispatch, { exportDialogVisible: false })
-						}
+						handleClose={() => setState(dispatch, { exportDialogVisible: false })}
 						searchObject={getSearchObjectFromString(prevSearchText)}
 						setCurrentTime={setCurrentTime}
 						selectedDocuments={selectedDocuments}
@@ -396,11 +338,7 @@ const DefaultMainViewHandler = {
 				{hideSearchResults && renderHideTabs(props)}
 				{((!hideSearchResults && pageLoaded) || !state.replaceResults) && (
 					<div style={styles.tabButtonContainer}>
-						<ResultView
-							context={{ state, dispatch }}
-							viewNames={viewNames}
-							viewPanels={getViewPanels()}
-						/>
+						<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
 						<div style={styles.spacer} />
 					</div>
 				)}
@@ -478,12 +416,9 @@ const DefaultMainViewHandler = {
 
 	getViewNames(props) {
 		const { cloneData } = props;
-		const views = [
-			{ name: 'Card', title: 'Card View', id: 'gcCardView' }
-		];
-		if(cloneData.document_view) views.push(
-			{ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' }
-		);
+		const views = [{ name: 'Card', title: 'Card View', id: 'gcCardView' }];
+		if (cloneData.document_view)
+			views.push({ name: 'Explorer', title: 'Document Explorer', id: 'gcOpenDocExplorer' });
 		return views;
 	},
 
@@ -491,30 +426,15 @@ const DefaultMainViewHandler = {
 		const { context } = props;
 		const { state, dispatch } = context;
 
-		const {
-			cloneData,
-			count,
-			docSearchResults,
-			resultsPage,
-			loading,
-			prevSearchText,
-			searchText,
-		} = state;
+		const { cloneData, count, docSearchResults, resultsPage, loading, prevSearchText, searchText } = state;
 
 		const viewPanels = [];
 		viewPanels.push({
 			panelName: 'Explorer',
 			panel: (
 				<StyledCenterContainer showSideFilters={false}>
-					<div
-						className={'right-container'}
-						style={{ ...styles.tabContainer, margin: '0', height: '800px' }}
-					>
-						<ViewHeader
-							{...props}
-							mainStyles={{ margin: '20px 0 0 0' }}
-							resultsText=" "
-						/>
+					<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
+						<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 						<DefaultDocumentExplorer
 							handleSearch={() => setState(dispatch, { runSearch: true })}
 							data={docSearchResults}
@@ -564,22 +484,12 @@ const DefaultMainViewHandler = {
 		if (!iframePreviewLink) sideScroll = {};
 
 		const cacheTip = `Cached result from ${
-			timeSinceCache > 0
-				? timeSinceCache + ' hour(s) ago'
-				: 'less than an hour ago'
+			timeSinceCache > 0 ? timeSinceCache + ' hour(s) ago' : 'less than an hour ago'
 		}`;
 
 		const getSearchResults = (searchResultData) => {
 			return _.map(searchResultData, (item, idx) => {
-				return (
-					<Card
-						key={idx}
-						item={item}
-						idx={idx}
-						state={state}
-						dispatch={dispatch}
-					/>
-				);
+				return <Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />;
 			});
 		};
 
@@ -596,11 +506,7 @@ const DefaultMainViewHandler = {
 				width: '100%',
 			};
 			// wikiResults[0]._source.text
-			if (
-				Permissions.isGameChangerAdmin() &&
-				question !== '' &&
-				answers.length > 0
-			) {
+			if (Permissions.isGameChangerAdmin() && question !== '' && answers.length > 0) {
 				return (
 					<div style={wikiContainer}>
 						<strong>{question.toUpperCase()}</strong>
@@ -621,19 +527,12 @@ const DefaultMainViewHandler = {
 								{showSideFilters && (
 									<div className={'left-container'}>
 										<div className={'side-bar-container'}>
-											<div
-												className={'filters-container sidebar-section-title'}
-											>
-												FILTERS
-											</div>
+											<div className={'filters-container sidebar-section-title'}>FILTERS</div>
 											<GameChangerSearchMatrix context={context} />
 											{sidebarDocTypes.length > 0 && sidebarOrgs.length > 0 && (
 												<>
 													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar
-														context={context}
-														cloneData={cloneData}
-													/>
+													<GameChangerSideBar context={context} cloneData={cloneData} />
 												</>
 											)}
 										</div>
@@ -644,21 +543,29 @@ const DefaultMainViewHandler = {
 									<div
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 									>
-										<div
-											className={'col-xs-12'}
-											style={{ ...sideScroll, padding: 0 }}
-										>
+										<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 											<div
 												className="row"
-												style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
+												style={{
+													marginLeft: 0,
+													marginRight: 0,
+													paddingRight: 0,
+													paddingLeft: 0,
+												}}
 											>
 												{!loading && getQAResults()}
 											</div>
 											<div
 												className="row"
-												style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
+												style={{
+													marginLeft: 0,
+													marginRight: 0,
+													paddingRight: 0,
+													paddingLeft: 0,
+												}}
 											>
-												{(!loading || !state.replaceResults) && getSearchResults(rawSearchResults)}
+												{(!loading || !state.replaceResults) &&
+													getSearchResults(rawSearchResults)}
 											</div>
 										</div>
 									</div>
@@ -697,9 +604,7 @@ const DefaultMainViewHandler = {
 								<i
 									style={{ ...styles.image, cursor: 'pointer' }}
 									className="fa fa-rocket"
-									onClick={() =>
-										setState(dispatch, { showEsQueryDialog: true })
-									}
+									onClick={() => setState(dispatch, { showEsQueryDialog: true })}
 								/>
 							</div>
 						)}
@@ -710,8 +615,8 @@ const DefaultMainViewHandler = {
 	},
 
 	getAboutUs(props) {
-		return (<></>);
-	}
+		return <></>;
+	},
 };
 
 export default DefaultMainViewHandler;

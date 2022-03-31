@@ -23,21 +23,15 @@ export default function PDFViewer({ location }) {
 			if (node !== null && filename) {
 				gameChangerAPI.getCloneMeta({ cloneName: cloneIndex }).then((data) => {
 					let isDLA = false;
-					if(fileUrl?.split('.').includes('dla')) isDLA = true;
+					if (fileUrl?.split('.').includes('dla')) isDLA = true;
 					if (filename) {
 						const encoded = encode(filename);
 						gameChangerAPI
-							.dataStorageDownloadGET(
-								encoded,
-								prevSearchText,
-								pageNumber,
-								isClone,
-								data.data,
-								isDLA
-							)
+							.dataStorageDownloadGET(encoded, prevSearchText, pageNumber, isClone, data.data, isDLA)
 							.then((url) => {
 								node.src = url;
-							}).catch((err) => {
+							})
+							.catch((err) => {
 								console.error(err);
 							});
 					}
@@ -63,14 +57,7 @@ export default function PDFViewer({ location }) {
 				className="aref"
 				id={'pdfViewer'}
 				ref={measuredRef}
-				onLoad={() =>
-					handlePdfOnLoad(
-						'pdfViewer',
-						'viewerContainer',
-						filename,
-						'PDF Viewer'
-					)
-				}
+				onLoad={() => handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')}
 				style={{ width: '100%', height: '100%' }}
 			/>
 		);

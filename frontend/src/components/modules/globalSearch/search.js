@@ -2,12 +2,8 @@ import _ from 'lodash';
 
 export const DEFAULT_SEARCH_TYPES = {
 	applications: true,
-	dashboards:
-		process.env.REACT_APP_NODE_ENV !== 'sipr' &&
-		window?.__env__?.REACT_APP_NODE_ENV !== 'sipr',
-	dataSources:
-		process.env.REACT_APP_NODE_ENV !== 'sipr' &&
-		window?.__env__?.REACT_APP_NODE_ENV !== 'sipr',
+	dashboards: process.env.REACT_APP_NODE_ENV !== 'sipr' && window?.__env__?.REACT_APP_NODE_ENV !== 'sipr',
+	dataSources: process.env.REACT_APP_NODE_ENV !== 'sipr' && window?.__env__?.REACT_APP_NODE_ENV !== 'sipr',
 	databases: true,
 	documentation: false,
 	organizations: false,
@@ -62,11 +58,7 @@ const capitalizeWords = (string) => {
 
 export const parseOwnerName = (name = '') => {
 	try {
-		const newStr = name
-			.replace(/[0-9]/g, '')
-			.replace(/\./g, ' ')
-			.toLowerCase()
-			.trim();
+		const newStr = name.replace(/[0-9]/g, '').replace(/\./g, ' ').toLowerCase().trim();
 		return capitalizeWords(newStr);
 	} catch (err) {
 		console.warn('Error occurred in parseOwnerName');

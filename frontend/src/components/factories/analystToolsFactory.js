@@ -2,7 +2,6 @@ const DefaultAnalyticsToolsHandler = require(`../modules/default/defaultAnalytic
 const PolicyAnalyticsToolsHandler = require(`../modules/policy/policyAnalyticsToolsHandler`);
 
 class AnalystToolsFactory {
-
 	constructor(module) {
 		try {
 			switch (module) {

@@ -17,8 +17,7 @@ const gameChangerAPI = new GameChangerAPI();
 export default () => {
 	// Component Properties
 	const [gcAdminTableData, setGCAdminTableData] = useState([]);
-	const [showCreateEditAdminModal, setShowCreateEditAdminModal] =
-		useState(false);
+	const [showCreateEditAdminModal, setShowCreateEditAdminModal] = useState(false);
 	// Component Methods
 
 	const openAdminModal = () => {
@@ -61,12 +60,7 @@ export default () => {
 				<TableRow>
 					<GCButton
 						onClick={() => {
-							trackEvent(
-								'GAMECHANGER_Admin',
-								'DeleteAdmin',
-								'onClick',
-								row.value
-							);
+							trackEvent('GAMECHANGER_Admin', 'DeleteAdmin', 'onClick', row.value);
 							deleteAdminData(row.value).then(() => {
 								getAdminData().then(() => {
 									setShowCreateEditAdminModal(false);
@@ -96,9 +90,7 @@ export default () => {
 						margin: '10px 80px',
 					}}
 				>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-						Gamechanger Admins
-					</p>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Gamechanger Admins</p>
 					<GCButton
 						onClick={() => {
 							trackEvent('GAMECHANGER_Admin', 'CreateAdmin', 'onClick');

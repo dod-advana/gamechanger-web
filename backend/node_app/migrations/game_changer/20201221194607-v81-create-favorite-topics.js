@@ -7,27 +7,27 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			user_id: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			topic_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			topic_summary: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: Sequelize.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			createdAt: Sequelize.DATE,
 			updatedAt: Sequelize.DATE,
@@ -35,5 +35,5 @@ module.exports = {
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

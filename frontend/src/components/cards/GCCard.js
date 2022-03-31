@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import _ from 'lodash';
-import {
-	CARD_FONT_SIZE,
-	getTrackingNameForFactory,
-} from '../../utils/gamechangerUtils';
+import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { Divider, Checkbox } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
@@ -43,7 +40,7 @@ const StyledCardContainer = styled.div`
 		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.33% !important' : '25% !important'};
 	min-width: ${({ listView }) => (listView ? '' : '351px')};
 	padding-right: 5px !important;
-    padding-left: 5px !important;
+	padding-left: 5px !important;
 
 	.styled-card-container {
 		min-height: ${({ listView }) => (listView ? 70 : CARD_HEIGHT)}px;
@@ -65,15 +62,23 @@ const StyledCardContainer = styled.div`
 			background-color: transparent;
 			border-radius: 5px;
 			display: flex;
-			border: ${({ listView, isRevoked, selected }) => listView ? 'none': selected ? '2px solid #386F94' : isRevoked? '2px solid #e50000' : '2px solid rgb(224, 224, 224)'};
-			box-shadow: ${({ listView, selected }) => listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
-			transition: ${({ listView }) =>listView ? 'transform .5s !important;' : 'box-shadow .2s, transform .5s !important'};
+			border: ${({ listView, isRevoked, selected }) =>
+				listView
+					? 'none'
+					: selected
+					? '2px solid #386F94'
+					: isRevoked
+					? '2px solid #e50000'
+					: '2px solid rgb(224, 224, 224)'};
+			box-shadow: ${({ listView, selected }) =>
+				listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+			transition: ${({ listView }) =>
+				listView ? 'transform .5s !important;' : 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
 			transform-style: preserve-3d !important;
 			position: relative;
 			width: 100%;
 			height: 100%;
-
 
 			&:hover {
 				box-shadow: #386f94 0px 0px 2px 2px !important;
@@ -92,7 +97,8 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView, intelligentSearch }) =>listView ? intelligentSearch ? '#9BB1C8': 'white' : 'rgb(238,241,242)'};
+					background-color: ${({ listView, intelligentSearch }) =>
+						listView ? (intelligentSearch ? '#9BB1C8' : 'white') : 'rgb(238,241,242)'};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -106,7 +112,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-front-buttons {
 						margin-top: auto;
 						display: flex;
-						border-top: ${({listView}) => listView ? '' : '1px solid rgb(189, 189, 189)'};
+						border-top: ${({ listView }) => (listView ? '' : '1px solid rgb(189, 189, 189)')};
 						align-items: center;
 						padding: 0px 10px;
 						min-height: 60px;
@@ -137,7 +143,7 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView }) => listView ? 'white' : 'rgb(238,241,242)'};
+					background-color: ${({ listView }) => (listView ? 'white' : 'rgb(238,241,242)')};
 
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
@@ -347,23 +353,17 @@ function GCCard(props) {
 				}) !== undefined;
 			break;
 		case 'organization':
-			const faveOrganizations = state.userData
-				? state.userData.favorite_organizations
-				: [];
+			const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
 			isFavorite =
 				_.find(faveOrganizations, (organization) => {
-					return (
-						organization.organization_name.toLowerCase() ===
-						item.name.toLowerCase()
-					);
+					return organization.organization_name.toLowerCase() === item.name.toLowerCase();
 				}) !== undefined;
 			break;
 		default:
 			break;
 	}
 	const isRevoked = item.is_revoked_b;
-	const intelligentSearch =
-		item.search_mode && item.search_mode === 'Intelligent Search';
+	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
 	const allowScroll = true;
 
 	const classes = useStyles();
@@ -434,12 +434,7 @@ function GCCard(props) {
 				handleSaveFavoriteDocument(documentData, state, dispatch);
 				break;
 			case 'organization':
-				handleSaveFavoriteOrganization(
-					item.name,
-					favoriteSummary,
-					favorite,
-					dispatch
-				);
+				handleSaveFavoriteOrganization(item.name, favoriteSummary, favorite, dispatch);
 				break;
 			case 'topic':
 				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
@@ -460,11 +455,7 @@ function GCCard(props) {
 
 	const favoriteComponent = () => {
 		return (
-			<GCTooltip
-				title={`Favorite this ${cardType} to track in the User Dashboard`}
-				placement="top"
-				arrow
-			>
+			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
 				<i
 					onClick={(event) => {
 						openFavoritePopper(event.target);
@@ -495,9 +486,7 @@ function GCCard(props) {
 							fontSize="large"
 						/>
 					}
-					checkedIcon={
-						<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />
-					}
+					checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
 					checked={selected}
 					className={`tutorial-step-${state.componentStepNumbers['Search Result Checkbox']}`}
 					id={'gcSearchResultCheckbox'}
@@ -513,21 +502,11 @@ function GCCard(props) {
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
 			newDocArray = newDocArray.filter((item) => item !== id);
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'CardCheckboxUnchecked',
-				key,
-				0
-			);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
 		} else {
 			selectedDocuments.set(key, value);
 			newDocArray.push(id);
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'CardCheckboxChecked',
-				key,
-				1
-			);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
 		}
 
 		setState(dispatch, {
@@ -535,7 +514,7 @@ function GCCard(props) {
 			selectedDocumentsForGraph: newDocArray,
 		});
 	};
-	
+
 	const intelligentFeedbackComponent = () => (
 		<div style={styles.tooltipRow}>
 			<GCTooltip
@@ -551,10 +530,7 @@ function GCCard(props) {
 				placement="right"
 				arrow
 			>
-				<i
-					className={classes.infoCircle + ' fa fa-info-circle'}
-					aria-hidden="true"
-				/>
+				<i className={classes.infoCircle + ' fa fa-info-circle'} aria-hidden="true" />
 			</GCTooltip>
 			<Fade in={feedback === ''} timeout={1500}>
 				<div style={{ flexGrow: 2, display: 'flex' }}>
@@ -572,8 +548,7 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsUp',
-									cardHandler.getFilename(item)
-									`search : ${searchText}`
+									cardHandler.getFilename(item)`search : ${searchText}`
 								);
 							}
 						}}
@@ -592,8 +567,7 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsDown',
-									cardHandler.getFilename(item)
-									`search : ${searchText}`
+									cardHandler.getFilename(item)`search : ${searchText}`
 								);
 							}
 						}}
@@ -637,8 +611,7 @@ function GCCard(props) {
 						</div>
 						<div style={{ width: 350, margin: 5 }}>
 							<div style={{ margin: '65px 15px 0' }}>
-								Are you sure you want to delete this favorite? You will lose any
-								comments made.
+								Are you sure you want to delete this favorite? You will lose any comments made.
 							</div>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 								<GCButton
@@ -714,7 +687,7 @@ function GCCard(props) {
 									Cancel
 								</GCButton>
 								<GCButton
-									onClick={() =>{
+									onClick={() => {
 										handleSaveFavorite(true);
 										gameChangerAPI.sendIntelligentSearchFeedback(
 											'intelligent_search_favorite_document',
@@ -772,36 +745,33 @@ function GCCard(props) {
 							{/* END CARD HEADER */}
 
 							{/* START CARD SUBHEADER */}
-							{loaded &&
-								cardHandler.getCardSubHeader({ item, state, toggledMore })}
+							{loaded && cardHandler.getCardSubHeader({ item, state, toggledMore })}
 							{/* END CARD SUBHEADER */}
 
 							{/* START CARD CONTENT */}
 							<div className={`styled-card-front-content`}>
-								{loaded &&
+								{loaded && (
 									<>
-										{
-											cardHandler.getCardFront({
+										{cardHandler.getCardFront({
+											item,
+											state,
+											backBody: cardHandler.getCardBack({
 												item,
 												state,
-												backBody: cardHandler.getCardBack({
-													item,
-													state,
-													detailPage
-												}),
-												hitsExpanded,
-												setHitsExpanded,
-												hoveredHit,
-												setHoveredHit,
-												metadataExpanded,
-												setMetadataExpanded,
-												intelligentSearch,
-												intelligentFeedbackComponent,
-												collection
-											})
-										}
+												detailPage,
+											}),
+											hitsExpanded,
+											setHitsExpanded,
+											hoveredHit,
+											setHoveredHit,
+											metadataExpanded,
+											setMetadataExpanded,
+											intelligentSearch,
+											intelligentFeedbackComponent,
+											collection,
+										})}
 									</>
-								}
+								)}
 							</div>
 							{/* END CARD CONTENT */}
 
@@ -810,23 +780,24 @@ function GCCard(props) {
 								<div className={'styled-card-front-buttons'}>
 									<div className={'styled-action-buttons-group'}>
 										{intelligentSearch && intelligentFeedbackComponent()}
-										{loaded && cardHandler.getFooter({
-											toggledMore,
-											graphView,
-											cloneName: state.cloneData.clone_name,
-											filename,
-											searchText,
-											setToggledMore,
-											closeGraphCard,
-											name: item.title,
-											item,
-											setModalOpen,
-											showEsDoc: () => {
-												console.log(item);
-												setState(dispatch, {selectedDoc: item, showEsDocDialog: true});
-											},
-											state
-										})}
+										{loaded &&
+											cardHandler.getFooter({
+												toggledMore,
+												graphView,
+												cloneName: state.cloneData.clone_name,
+												filename,
+												searchText,
+												setToggledMore,
+												closeGraphCard,
+												name: item.title,
+												item,
+												setModalOpen,
+												showEsDoc: () => {
+													console.log(item);
+													setState(dispatch, { selectedDoc: item, showEsDocDialog: true });
+												},
+												state,
+											})}
 									</div>
 								</div>
 							)}

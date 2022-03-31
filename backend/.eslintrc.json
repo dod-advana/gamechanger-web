@@ -1,0 +1,24 @@
+{
+  "extends": [ "prettier", "plugin:prettier/recommended"],
+  "rules": {
+    "max-len": 0,
+    "space-before-function-paren": 0,
+    "radix": 0,
+    "comma-dangle": 0,
+    "strict": 0,
+    "no-throw-literal": 0,
+    "no-eval": 0,
+    "no-irregular-whitespace": [
+      "error",
+      {
+        "skipComments": true
+      }
+    ]
+  },
+  "env": {
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  }
+}

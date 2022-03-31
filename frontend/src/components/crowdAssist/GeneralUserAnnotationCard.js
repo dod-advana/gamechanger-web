@@ -1,24 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-	FormControl,
-	FormControlLabel,
-	Radio,
-	RadioGroup,
-	Select,
-	MenuItem,
-} from '@material-ui/core';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Select, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import {TokenAnnotator} from 'react-text-annotate';
-import {CustomMark} from './CustomMark';
+import { TokenAnnotator } from 'react-text-annotate';
+import { CustomMark } from './CustomMark';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Typography } from '@material-ui/core';
-import {
-	backgroundWhite, 
-	tertiaryRed, 
-	tertiaryGreen, 
-	secondaryAlt
-} from '../common/gc-colors';
+import { backgroundWhite, tertiaryRed, tertiaryGreen, secondaryAlt } from '../common/gc-colors';
 import GCButton from '../common/GCButton';
 
 const useStyles = makeStyles((theme) => ({
@@ -74,9 +62,7 @@ export const GeneralUserAnnotationCard = ({
 	const [tokens, setTokens] = useState([]);
 	const [entityIncorrect, setEntityIncorrect] = useState(!entityAnswer.correct);
 	const [entityUnknown, setEntityUnknown] = useState(entityAnswer.unknown);
-	const [incorrectReason, setIncorrectReason] = useState(
-		entityAnswer.incorrectReason
-	);
+	const [incorrectReason, setIncorrectReason] = useState(entityAnswer.incorrectReason);
 	const [answered, setAnswered] = useState(entityAnswer.incorrectReason);
 
 	const classes = useStyles();
@@ -99,10 +85,7 @@ export const GeneralUserAnnotationCard = ({
 									display: 'flex',
 								}}
 							>
-								{tagText}{' '}
-								<div style={{ fontSize: 10, marginLeft: 5 }}>
-									{tagDescriptions[tagText]}
-								</div>
+								{tagText} <div style={{ fontSize: 10, marginLeft: 5 }}>{tagDescriptions[tagText]}</div>
 							</span>
 						}
 						labelPlacement="start"
@@ -153,9 +136,7 @@ export const GeneralUserAnnotationCard = ({
 	}
 
 	return (
-		<div
-			className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`}
-		>
+		<div className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`}>
 			<div
 				style={{
 					backgroundColor: '#DFE6EE',
@@ -164,14 +145,13 @@ export const GeneralUserAnnotationCard = ({
 				}}
 			>
 				<p style={{ margin: 0 }}>
-					Help the community! Answer a simple yes or no if the highlighted words
-					are tagged correctly.
+					Help the community! Answer a simple yes or no if the highlighted words are tagged correctly.
 				</p>
 				<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600 }}>
 					<li>Click "Yes" if the word(s) is/are tagged correctly.</li>
 					<li>
-						Click "No" if the word(s) is/are not tagged correctly. Then select
-						why using the drop down menu that appears.
+						Click "No" if the word(s) is/are not tagged correctly. Then select why using the drop down menu
+						that appears.
 					</li>
 					<li>Click "Not Sure" if unsure.</li>
 					<li>Submit Assist to save the assist and show another.</li>
@@ -199,9 +179,7 @@ export const GeneralUserAnnotationCard = ({
 					</FormControl>
 					<div style={{ width: '100%' }}></div>
 				</div>
-				<div
-					style={{ display: 'flex', marginTop: '10px', marginLeft: '-10px' }}
-				>
+				<div style={{ display: 'flex', marginTop: '10px', marginLeft: '-10px' }}>
 					<GCButton
 						id={'correctBtn'}
 						onClick={() => annotationCorrect()}
@@ -241,11 +219,7 @@ export const GeneralUserAnnotationCard = ({
 						style={{
 							height: 40,
 							minWidth: 150,
-							boxShadow: answered
-								? entityUnknown
-									? `0 0 14px 3px ${secondaryAlt}`
-									: null
-								: null,
+							boxShadow: answered ? (entityUnknown ? `0 0 14px 3px ${secondaryAlt}` : null) : null,
 						}}
 					>
 						Not Sure
@@ -264,11 +238,7 @@ export const GeneralUserAnnotationCard = ({
 								className={classes.selectEmpty}
 								inputProps={{ 'aria-label': 'Without label' }}
 							>
-								<MenuItem
-									value=""
-									disabled
-									classes={{ root: { fontSize: '16px' } }}
-								>
+								<MenuItem value="" disabled classes={{ root: { fontSize: '16px' } }}>
 									Select...
 								</MenuItem>
 								<MenuItem value={1} classes={{ root: { fontSize: '16px' } }}>

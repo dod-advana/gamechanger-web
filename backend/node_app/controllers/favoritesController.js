@@ -15,10 +15,9 @@ const constantsFile = require('../config/constants');
 const Sequelize = require('sequelize');
 const { HandlerFactory } = require('../factories/handlerFactory');
 const db = require('../models');
-const {getUserIdFromSAMLUserId} = require('../utils/userUtility');
+const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 
 class FavoritesController {
-
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
@@ -43,7 +42,7 @@ class FavoritesController {
 		this.favoriteSearch = favoriteSearch;
 		this.favoriteTopic = favoriteTopic;
 		this.favoriteGroup = favoriteGroup;
-		this.favoriteDocumentsGroup =favoriteDocumentsGroup;
+		this.favoriteDocumentsGroup = favoriteDocumentsGroup;
 		this.favoriteOrganization = favoriteOrganization;
 		this.sparkMD5 = sparkMD5;
 		this.sequelize = sequelize;
@@ -59,7 +58,7 @@ class FavoritesController {
 		this.favoriteTopicPOST = this.favoriteTopicPOST.bind(this);
 		this.favoriteGroupPOST = this.favoriteGroupPOST.bind(this);
 		this.addToFavoriteGroupPOST = this.addToFavoriteGroupPOST.bind(this);
-		this.deleteFavoriteFromGroupPOST =this.deleteFavoriteFromGroupPOST.bind(this);
+		this.deleteFavoriteFromGroupPOST = this.deleteFavoriteFromGroupPOST.bind(this);
 		this.favoriteOrganizationPOST = this.favoriteOrganizationPOST.bind(this);
 		this.checkLeastRecentFavoritedSearch = this.checkLeastRecentFavoritedSearch.bind(this);
 		this.clearFavoriteSearchUpdate = this.clearFavoriteSearchUpdate.bind(this);
@@ -70,36 +69,43 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { filename, favorite_name, favorite_summary, favorite_id, search_text, is_clone, is_favorite, clone_index = '' } = req.body;
+			const {
+				filename,
+				favorite_name,
+				favorite_summary,
+				favorite_id,
+				search_text,
+				is_clone,
+				is_favorite,
+				clone_index = '',
+			} = req.body;
 
 			if (is_favorite) {
-				const [favorite] = await this.favoriteDocument.findOrCreate(
-					{
-						where: { user_id: getUserIdFromSAMLUserId(req), filename: filename },
-						defaults: {
-							user_id: getUserIdFromSAMLUserId(req),
-							new_user_id: getUserIdFromSAMLUserId(req),
-							filename: filename,
-							favorite_name: favorite_name,
-							favorite_summary: favorite_summary,
-							search_text: search_text,
-							is_clone: is_clone,
-							clone_index: clone_index
-						}
-					}
-				);
+				const [favorite] = await this.favoriteDocument.findOrCreate({
+					where: { user_id: getUserIdFromSAMLUserId(req), filename: filename },
+					defaults: {
+						user_id: getUserIdFromSAMLUserId(req),
+						new_user_id: getUserIdFromSAMLUserId(req),
+						filename: filename,
+						favorite_name: favorite_name,
+						favorite_summary: favorite_summary,
+						search_text: search_text,
+						is_clone: is_clone,
+						clone_index: clone_index,
+					},
+				});
 				res.status(200).send(favorite);
 			} else {
 				const deleted = this.favoriteDocument.destroy({
 					where: {
 						user_id: getUserIdFromSAMLUserId(req),
-						filename: filename
-					}
+						filename: filename,
+					},
 				});
 				this.favoriteDocumentsGroup.destroy({
 					where: {
-						favorite_document_id: favorite_id
-					}
+						favorite_document_id: favorite_id,
+					},
 				});
 				res.status(200).send(deleted);
 			}
@@ -118,28 +124,26 @@ class FavoritesController {
 			const { search_name, search_summary, search_text, tiny_url, document_count, is_favorite } = req.body;
 
 			if (is_favorite) {
-				const [favorite] = await this.favoriteSearch.findOrCreate(
-					{
-						where: { user_id: getUserIdFromSAMLUserId(req), tiny_url: tiny_url },
-						defaults: {
-							user_id: getUserIdFromSAMLUserId(req),
-							new_user_id: getUserIdFromSAMLUserId(req),
-							search_name: search_name,
-							search_summary: search_summary,
-							search_text: search_text,
-							tiny_url: tiny_url,
-							document_count: document_count,
-							updated_results: false
-						}
-					}
-				);
+				const [favorite] = await this.favoriteSearch.findOrCreate({
+					where: { user_id: getUserIdFromSAMLUserId(req), tiny_url: tiny_url },
+					defaults: {
+						user_id: getUserIdFromSAMLUserId(req),
+						new_user_id: getUserIdFromSAMLUserId(req),
+						search_name: search_name,
+						search_summary: search_summary,
+						search_text: search_text,
+						tiny_url: tiny_url,
+						document_count: document_count,
+						updated_results: false,
+					},
+				});
 				res.status(200).send(favorite);
 			} else {
 				const deleted = this.favoriteSearch.destroy({
 					where: {
 						user_id: getUserIdFromSAMLUserId(req),
-						tiny_url: tiny_url
-					}
+						tiny_url: tiny_url,
+					},
 				});
 				res.status(200).send(deleted);
 			}
@@ -158,25 +162,23 @@ class FavoritesController {
 			const { topic, topicSummary, is_favorite } = req.body;
 
 			if (is_favorite) {
-				const [favorite] = await this.favoriteTopic.findOrCreate(
-					{
-						where: { user_id: getUserIdFromSAMLUserId(req), topic_name: topic },
-						defaults: {
-							user_id: getUserIdFromSAMLUserId(req),
-							new_user_id: getUserIdFromSAMLUserId(req),
-							topic_name: topic,
-							topic_summary: topicSummary,
-							is_clone: false
-						}
-					}
-				);
+				const [favorite] = await this.favoriteTopic.findOrCreate({
+					where: { user_id: getUserIdFromSAMLUserId(req), topic_name: topic },
+					defaults: {
+						user_id: getUserIdFromSAMLUserId(req),
+						new_user_id: getUserIdFromSAMLUserId(req),
+						topic_name: topic,
+						topic_summary: topicSummary,
+						is_clone: false,
+					},
+				});
 				res.status(200).send(favorite);
 			} else {
 				const deleted = this.favoriteTopic.destroy({
 					where: {
 						user_id: getUserIdFromSAMLUserId(req),
-						topic_name: topic
-					}
+						topic_name: topic,
+					},
 				});
 				res.status(200).send(deleted);
 			}
@@ -195,25 +197,23 @@ class FavoritesController {
 			const { organization, organizationSummary, is_favorite } = req.body;
 
 			if (is_favorite) {
-				const [favorite] = await this.favoriteOrganization.findOrCreate(
-					{
-						where: { user_id: getUserIdFromSAMLUserId(req), organization_name: organization },
-						defaults: {
-							user_id: getUserIdFromSAMLUserId(req),
-							new_user_id: getUserIdFromSAMLUserId(req),
-							organization_name: organization,
-							organization_summary: organizationSummary,
-							is_clone: false
-						}
-					}
-				);
+				const [favorite] = await this.favoriteOrganization.findOrCreate({
+					where: { user_id: getUserIdFromSAMLUserId(req), organization_name: organization },
+					defaults: {
+						user_id: getUserIdFromSAMLUserId(req),
+						new_user_id: getUserIdFromSAMLUserId(req),
+						organization_name: organization,
+						organization_summary: organizationSummary,
+						is_clone: false,
+					},
+				});
 				res.status(200).send(favorite);
 			} else {
 				const deleted = this.favoriteOrganization.destroy({
 					where: {
 						user_id: getUserIdFromSAMLUserId(req),
-						organization_name: organization
-					}
+						organization_name: organization,
+					},
 				});
 				res.status(200).send(deleted);
 			}
@@ -229,35 +229,33 @@ class FavoritesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids} = req.body;
+			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids } = req.body;
 
 			if (create) {
-				const [group] = await this.favoriteGroup.findOrCreate(
-					{
-						where: { user_id: getUserIdFromSAMLUserId(req), group_name: group_name },
-						defaults: {
-							user_id: getUserIdFromSAMLUserId(req),
-							group_type: group_type,
-							group_name: group_name,
-							group_description: group_description,
-							is_clone: is_clone,
-							clone_index: clone_index
-						}
-					}
-				);
+				const [group] = await this.favoriteGroup.findOrCreate({
+					where: { user_id: getUserIdFromSAMLUserId(req), group_name: group_name },
+					defaults: {
+						user_id: getUserIdFromSAMLUserId(req),
+						group_type: group_type,
+						group_name: group_name,
+						group_description: group_description,
+						is_clone: is_clone,
+						clone_index: clone_index,
+					},
+				});
 				res.status(200).send(group);
 			} else {
 				const deletedGroup = await this.favoriteGroup.destroy({
 					where: {
 						id: group_ids,
-					}
+					},
 				});
 				const deletedFavs = await this.favoriteDocumentsGroup.destroy({
 					where: {
-						favorite_group_id: group_ids
-					}
+						favorite_group_id: group_ids,
+					},
 				});
-				res.status(200).send({deletedGroup, deletedFavs});
+				res.status(200).send({ deletedGroup, deletedFavs });
 			}
 		} catch (err) {
 			this.logger.error(err, '2EA9CTR', userId);
@@ -272,28 +270,32 @@ class FavoritesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const { groupId, documentIds } = req.body;
-			const docObjects = documentIds.map(docId => {
-				return {user_id: getUserIdFromSAMLUserId(req), favorite_group_id: groupId, favorite_document_id: docId};
+			const docObjects = documentIds.map((docId) => {
+				return {
+					user_id: getUserIdFromSAMLUserId(req),
+					favorite_group_id: groupId,
+					favorite_document_id: docId,
+				};
 			});
-			
+
 			const existingFavorites = await this.favoriteDocumentsGroup.findAll({
-				where:{
-					favorite_group_id: groupId
-				}
+				where: {
+					favorite_group_id: groupId,
+				},
 			});
 			let totalInGroup = documentIds.length + existingFavorites.length;
-			existingFavorites.forEach(fav => {
-				if(documentIds.includes(fav.dataValues.favorite_document_id)){
+			existingFavorites.forEach((fav) => {
+				if (documentIds.includes(fav.dataValues.favorite_document_id)) {
 					totalInGroup--;
 				}
 			});
-			if(totalInGroup > 5){
+			if (totalInGroup > 5) {
 				return res.status(400);
 			}
 
-			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects,{
+			const [favorites] = await this.favoriteDocumentsGroup.bulkCreate(docObjects, {
 				returning: true,
-				ignoreDuplicates: true
+				ignoreDuplicates: true,
 			});
 			res.status(200).send(favorites);
 		} catch (err) {
@@ -312,10 +314,10 @@ class FavoritesController {
 			const removed = await this.favoriteDocumentsGroup.destroy({
 				where: {
 					favorite_group_id: groupId,
-					favorite_document_id: documentId
-				}
+					favorite_document_id: documentId,
+				},
 			});
-			res.status(200).send({removed});
+			res.status(200).send({ removed });
 		} catch (err) {
 			this.logger.error(err, '2XR1QAD', userId);
 			console.log(err);
@@ -323,11 +325,14 @@ class FavoritesController {
 			return err;
 		}
 	}
-	
+
 	async checkLeastRecentFavoritedSearch() {
 		try {
 			const favorite = await this.favoriteSearch.findOne({
-				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+				order: [
+					['last_checked', 'ASC'],
+					['id', 'ASC'],
+				],
 			});
 			if (!favorite) {
 				this.logger.info('no favorite searches to check');
@@ -346,21 +351,21 @@ class FavoritesController {
 			const history = await this.gcHistory.findOne({
 				where: {
 					user_id: favorite.user_id,
-					tiny_url: favorite.tiny_url
+					tiny_url: favorite.tiny_url,
 				},
-				order: [['run_at', 'DESC']]
+				order: [['run_at', 'DESC']],
 			});
 
 			if (!history || !history.request_body) {
 				this.logger.error('no request body data to make the search', 'B32AUDE');
 				return;
 			}
-			
+
 			// largely copypasta-ed from modularGameChangerController.js
 			// so will need to be updated if ^ changes (we can't directly use the original code as-is);
 			// unfortunately the recorded `request_body` in the history isn't the actual original search body,
 			// so we attempt to transform it back into the original format (not sure how brittle this is)
-			const { cloneName, searchText, offset = 0, limit = 1 /*, options */} = history.request_body;
+			const { cloneName, searchText, offset = 0, limit = 1 /*, options */ } = history.request_body;
 			const options = history.request_body;
 
 			// run the search as a non-user
@@ -369,7 +374,16 @@ class FavoritesController {
 
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const storeHistory = false;
-			const results = await handler.search(searchText, offset, limit, options, cloneName, permissions, userId, storeHistory);
+			const results = await handler.search(
+				searchText,
+				offset,
+				limit,
+				options,
+				cloneName,
+				permissions,
+				userId,
+				storeHistory
+			);
 
 			// we will ignore recoverable errors even though they may alter the search results
 			// and use the assumption that degradations in search services will only result in
@@ -392,7 +406,7 @@ class FavoritesController {
 				favorite.updated_results = true;
 				await this.sequelize.transaction(async (t) => {
 					await favorite.save({ transaction: t });
-					const user = await this.gcUser.findOne({ 
+					const user = await this.gcUser.findOne({
 						where: { user_id: favorite.user_id },
 						transaction: t,
 						// there is a race condition between this select and the notification json modification
@@ -400,7 +414,10 @@ class FavoritesController {
 						lock: t.LOCK.UPDATE,
 					});
 					const notifications = Object.assign({}, user.notifications);
-					const cloneNotifications = Object.assign({ favorites: 0, history: 0, total: 0 }, notifications[cloneName]);
+					const cloneNotifications = Object.assign(
+						{ favorites: 0, history: 0, total: 0 },
+						notifications[cloneName]
+					);
 					cloneNotifications.favorites += 1;
 					cloneNotifications.total += 1;
 					notifications[cloneName] = cloneNotifications;
@@ -421,25 +438,24 @@ class FavoritesController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-
 			const { tinyurl } = req.body;
 
-			await this.favoriteSearch.update({ updated_results: false },
+			await this.favoriteSearch.update(
+				{ updated_results: false },
 				{
 					where: {
 						user_id: getUserIdFromSAMLUserId(req),
-						tiny_url: tinyurl
-					}
-				});
+						tiny_url: tinyurl,
+					},
+				}
+			);
 
 			res.status(200).send();
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'XF00LQC', userId);
 		}
 	}
-
 }
 
 module.exports.FavoritesController = FavoritesController;

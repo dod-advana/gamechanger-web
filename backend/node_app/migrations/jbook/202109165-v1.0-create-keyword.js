@@ -6,17 +6,17 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			aliases: {
-				type: Sequelize.ARRAY(Sequelize.TEXT)
-			}
+				type: Sequelize.ARRAY(Sequelize.TEXT),
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('keyword');
-	}
+	},
 };

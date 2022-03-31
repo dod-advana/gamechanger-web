@@ -6,7 +6,7 @@ module.exports = {
 				allowNull: false,
 				type: Sequelize.INTEGER,
 				autoIncrement: true,
-				primaryKey: true
+				primaryKey: true,
 			},
 			question: {
 				allowNull: false,
@@ -18,13 +18,13 @@ module.exports = {
 			},
 			category: {
 				allowNull: false,
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			createdAt: Sequelize.DATE,
-			updatedAt: Sequelize.DATE
+			updatedAt: Sequelize.DATE,
 		});
 	},
 	down: async (queryInterface, Sequelize) => {
 		await queryInterface.dropTable('faq');
-	}
+	},
 };

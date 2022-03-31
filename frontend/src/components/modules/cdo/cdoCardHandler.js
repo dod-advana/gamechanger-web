@@ -75,7 +75,7 @@ const auxDisplayBackFields = [
 	'AuthorID',
 	'AuthorFullName',
 	'AuthorEmail',
-	'Classification'
+	'Classification',
 ];
 const auxDisplayTitleField = 'PresentationTitle';
 const auxDisplayFieldJSONMap = {
@@ -87,7 +87,7 @@ const auxDisplayFieldJSONMap = {
 	AuthorID: 'Author ID',
 	AuthorFullName: 'Author Name',
 	AuthorEmail: 'Author Email',
-	Classification: 'Classification'
+	Classification: 'Classification',
 };
 const auxDisplayLeftSubtitleText = 'AuthorFullName';
 const auxDisplayRightSubtitleField = 'Classification';
@@ -97,8 +97,7 @@ const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 	font-weight: bold;
 	font-family: Montserrat;
 	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
@@ -118,7 +117,7 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
 			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -145,8 +144,7 @@ const StyledFrontCardHeader = styled.div`
 		color: black;
 		margin-bottom: 0px;
 		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -158,10 +156,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -177,8 +173,7 @@ const StyledFrontCardSubHeader = styled.div`
 		width: 50%;
 		color: white;
 		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
 	}
 `;
 
@@ -198,12 +193,7 @@ const Row = ({ label, value, minWidth = 'inherit' }) => {
 	);
 };
 
-const makeRows = (
-	fieldsArr = [],
-	itemWithValues = {},
-	displayNameMap,
-	forTable = false
-) => {
+const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
 	const rows = [];
 	for (const fieldName of fieldsArr) {
 		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
@@ -227,14 +217,7 @@ const makeRows = (
 				row['Value'] = value;
 				rows.push(row);
 			} else {
-				rows.push(
-					<Row
-						key={cleanFieldName}
-						label={displayName}
-						value={value}
-						minWidth={40}
-					/>
-				);
+				rows.push(<Row key={cleanFieldName} label={displayName} value={value} minWidth={40} />);
 			}
 		}
 	}
@@ -242,12 +225,7 @@ const makeRows = (
 	return rows;
 };
 
-const renderHighlights = (
-	text,
-	hoveredHit,
-	setHoveredHit,
-	setHighlightText
-) => {
+const renderHighlights = (text, hoveredHit, setHoveredHit, setHighlightText) => {
 	const fontSize = 12;
 	const highlightList = [];
 
@@ -288,10 +266,7 @@ const renderHighlights = (
 				}}
 			>
 				<span style={{ fontSize }}>{highlightLabel}</span>
-				<i
-					className="fa fa-chevron-right"
-					style={{ marginLeft: 10, fontSize, color: 'white' }}
-				/>
+				<i className="fa fa-chevron-right" style={{ marginLeft: 10, fontSize, color: 'white' }} />
 			</div>
 		</>
 	);
@@ -319,20 +294,14 @@ const CDOCardHandler = {
 			const title = getDisplayTitle(item);
 			// $ to indicate use text as is
 			let type = item[auxDisplayLeftSubtitleText];
-			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${
-				item[auxDisplayRightSubtitleField]
-			}`;
+			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${item[auxDisplayRightSubtitleField]}`;
 
 			type = `Author: ${type}`;
 
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					docListView={docListView}
-					intelligentSearch={false}
-				>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={title} placement="top" arrow>
 							<div
@@ -342,9 +311,7 @@ const CDOCardHandler = {
 								<div className={'text'}>{title}</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight
-											style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-										/>
+										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 									</div>
 								)}
 							</div>
@@ -367,9 +334,7 @@ const CDOCardHandler = {
 
 			// $ to indicate use text as is
 			let type = item[auxDisplayLeftSubtitleText];
-			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${
-				item[auxDisplayRightSubtitleField]
-			}`;
+			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${item[auxDisplayRightSubtitleField]}`;
 			let typeColor = 'black';
 
 			if (type === 'Z') {
@@ -418,9 +383,7 @@ const CDOCardHandler = {
 			return (
 				<div style={styles.bodyContainer}>
 					{item?.['Abstract Text'] && (
-						<div
-							style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}
-						>
+						<div style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}>
 							<div
 								style={{
 									minWidth: 100,
@@ -428,24 +391,19 @@ const CDOCardHandler = {
 									borderTop: 0,
 								}}
 							>
-								{renderHighlights(
-									item['Abstract Text'],
-									hoveredHit,
-									setHoveredHit,
-									setHighlightText
-								)}
+								{renderHighlights(item['Abstract Text'], hoveredHit, setHoveredHit, setHighlightText)}
 							</div>
 							<div
 								style={{
 									border: '1px solid rgb(189, 189, 189)',
 									borderLeft: 0,
 									maxWidth: props?.state?.listView ? '100%' : '72%',
-									width: '100%'
+									width: '100%',
 								}}
 							>
 								<blockquote
 									className="searchdemo-blockquote"
-									style={{height: '100%', overflowY: 'scroll', wordWrap: 'break-word'}}
+									style={{ height: '100%', overflowY: 'scroll', wordWrap: 'break-word' }}
 									dangerouslySetInnerHTML={{
 										__html: sanitizeHtml(highlightText),
 									}}
@@ -469,12 +427,7 @@ const CDOCardHandler = {
 				}
 			}
 
-			const backItemsTable = makeRows(
-				auxDisplayBackFields,
-				item,
-				displayNameMap,
-				true
-			);
+			const backItemsTable = makeRows(auxDisplayBackFields, item, displayNameMap, true);
 
 			return (
 				<SimpleTable
@@ -521,11 +474,7 @@ const CDOCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);

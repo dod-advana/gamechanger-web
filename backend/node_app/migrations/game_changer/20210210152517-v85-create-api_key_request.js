@@ -7,10 +7,10 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			username: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			name: {
 				type: Sequelize.TEXT,
@@ -23,24 +23,24 @@ module.exports = {
 			},
 			approved: {
 				type: Sequelize.BOOLEAN,
-				defaultValue: false
+				defaultValue: false,
 			},
 			rejected: {
 				type: Sequelize.BOOLEAN,
-				defaultValue: false
+				defaultValue: false,
 			},
 			createdAt: {
 				allowNull: false,
-				type: Sequelize.DATE
+				type: Sequelize.DATE,
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

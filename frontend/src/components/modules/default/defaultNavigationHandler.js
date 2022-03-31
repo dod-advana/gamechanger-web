@@ -2,16 +2,8 @@ import React from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { HoverNavItem, NavItem } from '../../navigation/NavItems';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	getCloneTitleForFactory,
-	getTrackingNameForFactory,
-	PAGE_DISPLAYED,
-} from '../../../utils/gamechangerUtils';
-import {
-	ConstrainedIcon,
-	PageLink,
-	StyledBadgeSmall
-} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import { getCloneTitleForFactory, getTrackingNameForFactory, PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
+import { ConstrainedIcon, PageLink, StyledBadgeSmall } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
@@ -29,11 +21,9 @@ import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
 import GamechangerNFRLogo from '../../../images/logos/NFR-Sidemenu.png';
 import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
 import GamechangerCovid19Logo from '../../../images/logos/Covid19-Sidemenu.png';
-import {Typography} from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const styles = {
 	wording: {
@@ -56,49 +46,37 @@ const getToolTheme = (cloneData) => {
 	if (cloneData.display_name === 'NGA') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerNGALogo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerNGALogo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'Hermes') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerHermesLogo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'NFR') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerNFRLogo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerNFRLogo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'Space Force') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerSFLogo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerSFLogo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'CDO') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerCDOLogo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else if (cloneData.display_name === 'Covid-19') {
 		return {
 			...toolStyles,
-			toolLogo: (
-				<img src={GamechangerCovid19Logo} href="#/gamechanger" alt="tool logo" />
-			),
+			toolLogo: <img src={GamechangerCovid19Logo} href="#/gamechanger" alt="tool logo" />,
 			toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 		};
 	} else {
@@ -106,10 +84,7 @@ const getToolTheme = (cloneData) => {
 			...toolStyles,
 			toolLogo: (
 				<div>
-					<Typography
-						variant="h1"
-						style={{ ...styles.wording, margin: '0 15px 0 0' }}
-					>
+					<Typography variant="h1" style={{ ...styles.wording, margin: '0 15px 0 0' }}>
 						{getCloneTitleForFactory(cloneData, false)}
 					</Typography>
 					<Typography
@@ -237,7 +212,11 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
-								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`);
+								window.history.pushState(
+									null,
+									document.title,
+									`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`
+								);
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.dataTracker,
 								});
@@ -259,7 +238,11 @@ const DefaultNavigationHandler = {
 						<HoverNavItem
 							centered
 							onClick={() => {
-								window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`);
+								window.history.pushState(
+									null,
+									document.title,
+									`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.analystTools}`
+								);
 								setState(dispatch, {
 									pageDisplayed: PAGE_DISPLAYED.analystTools,
 								});
@@ -301,11 +284,7 @@ const DefaultNavigationHandler = {
 				</GCTooltip>
 				{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href={`#/${state.cloneData.url}/admin`}
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>

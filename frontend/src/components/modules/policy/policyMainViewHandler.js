@@ -104,19 +104,13 @@ const styles = {
 };
 
 const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'SuggestionSelected',
-		'DidYouMean'
-	);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
 	setState(dispatch, { searchText: didYouMean, runSearch: true });
 };
 
 const getSearchResults = (searchResultData, state, dispatch) => {
 	return _.map(searchResultData, (item, idx) => {
-		return (
-			<Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />
-		);
+		return <Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />;
 	});
 };
 
@@ -163,19 +157,23 @@ const renderRecentSearches = (search, state, dispatch) => {
 				<Typography style={styles.containerText}>{searchText}</Typography>
 			</div>
 			<Typography style={styles.subtext}>
-				<strong>Source Filter: </strong>{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
+				<strong>Source Filter: </strong>
+				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				<strong>Type Filter: </strong>{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
+				<strong>Type Filter: </strong>
+				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				<strong>Publication Date: </strong>{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				<strong>Publication Date: </strong>
+				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
 			</Typography>
 			<Typography style={styles.subtext}>
-				<strong>Include Canceled: </strong>{includeRevoked ? 'Yes' : 'No'}
+				<strong>Include Canceled: </strong>
+				{includeRevoked ? 'Yes' : 'No'}
 			</Typography>
 			<Typography style={styles.subtext}>
-				<strong>Search Time:{' '}</strong>
+				<strong>Search Time: </strong>
 				{moment(Date.parse(run_at)).utc().format('YYYY-MM-DD HH:mm UTC')}
 			</Typography>
 		</RecentSearchContainer>
@@ -195,12 +193,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
-				.thumbnailStorageDownloadPOST(
-					[filteredPubs[i]],
-					'thumbnails',
-					state.cloneData,
-					cancelToken
-				)
+				.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', state.cloneData, cancelToken)
 				.then((pngs) => {
 					const buffers = pngs.data;
 					buffers.forEach((buf, idx) => {
@@ -211,7 +204,8 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 						}
 					});
 					setState(dispatch, { searchMajorPubs: filteredPubs });
-				}).catch(e => {
+				})
+				.catch((e) => {
 					//Do nothing
 				});
 		}
@@ -238,12 +232,7 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
 
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
-				.thumbnailStorageDownloadPOST(
-					[filteredPubs[i]],
-					'thumbnails',
-					state.cloneData,
-					cancelToken
-				)
+				.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', state.cloneData, cancelToken)
 				.then((pngs) => {
 					const buffers = pngs.data;
 					buffers.forEach((buf, idx) => {
@@ -254,11 +243,11 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
 						}
 					});
 					setState(dispatch, { recDocs: filteredPubs });
-				}).catch(e => {
+				})
+				.catch((e) => {
 					//Do nothing
 				});
 		}
-
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -281,12 +270,7 @@ const handleSources = async (state, dispatch, cancelToken) => {
 		});
 		for (let i = 0; i < thumbnailList.length; i++) {
 			gameChangerAPI
-				.thumbnailStorageDownloadPOST(
-					[thumbnailList[i]],
-					folder,
-					state.cloneData,
-					cancelToken
-				)
+				.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, state.cloneData, cancelToken)
 				.then((pngs) => {
 					const buffers = pngs.data;
 					buffers.forEach((buf, idx) => {
@@ -294,18 +278,16 @@ const handleSources = async (state, dispatch, cancelToken) => {
 							crawlerSources[i].imgSrc = 'data:image/png;base64,' + buf.value;
 							if (crawlerSources[i].image_link.split('.').pop() === 'png') {
 								crawlerSources[i].imgSrc = 'data:image/png;base64,' + buf.value;
-							} else if (
-								crawlerSources[i].image_link.split('.').pop() === 'svg'
-							) {
-								crawlerSources[i].imgSrc =
-									'data:image/svg+xml;base64,' + buf.value;
+							} else if (crawlerSources[i].image_link.split('.').pop() === 'svg') {
+								crawlerSources[i].imgSrc = 'data:image/svg+xml;base64,' + buf.value;
 							}
 						} else {
 							crawlerSources[i].imgSrc = DefaultSeal;
 						}
 					});
 					setState(dispatch, { crawlerSources });
-				}).catch(e => {
+				})
+				.catch((e) => {
 					//Do nothing
 				});
 		}
@@ -347,14 +329,11 @@ const PolicyMainViewHandler = {
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
-				}
-				else if (obj.key === 'homepage_popular_docs_inactive') {
+				} else if (obj.key === 'homepage_popular_docs_inactive') {
 					pop_pubs_inactive = JSON.parse(obj.value);
-				}
-				else if (obj.key === 'popular_docs') {
+				} else if (obj.key === 'popular_docs') {
 					pop_pubs = obj.value;
-				}
-				else if (obj.key === 'rec_docs') {
+				} else if (obj.key === 'rec_docs') {
 					rec_docs = obj.value;
 				}
 			});
@@ -364,9 +343,9 @@ const PolicyMainViewHandler = {
 		}
 		setState(
 			dispatch,
-			getQueryVariable('view', window.location.hash.toString()) === 'graph' ?
-				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
-				{ adminTopics: topics }
+			getQueryVariable('view', window.location.hash.toString()) === 'graph'
+				? { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true }
+				: { adminTopics: topics }
 		);
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch, props.cancelToken);
@@ -397,7 +376,7 @@ const PolicyMainViewHandler = {
 			loading,
 			userData,
 			recentSearches,
-			trending
+			trending,
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
@@ -414,7 +393,6 @@ const PolicyMainViewHandler = {
 		}
 
 		const { favorite_topics = [], favorite_searches = [] } = userData;
-
 
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
@@ -446,9 +424,7 @@ const PolicyMainViewHandler = {
 			});
 		});
 
-		const favTopicNames = favorite_topics.map((item) =>
-			item.topic_name.toLowerCase()
-		);
+		const favTopicNames = favorite_topics.map((item) => item.topic_name.toLowerCase());
 		adminTopics.forEach((topic, idx) => {
 			if (
 				_.find(favTopicNames, (item) => {
@@ -483,47 +459,40 @@ const PolicyMainViewHandler = {
 						}}
 					>
 						Did you mean{' '}
-						<DidYouMean
-							onClick={() =>
-								handleDidYouMeanClicked(didYouMean, state, dispatch)
-							}
-						>
+						<DidYouMean onClick={() => handleDidYouMeanClicked(didYouMean, state, dispatch)}>
 							{didYouMean}
 						</DidYouMean>
 						?
 					</div>
 				)}
 				<div style={{ margin: '0 70px 0 70px' }}>
-					<GameChangerThumbnailRow
-						links={trendingLinks}
-						title={'Trending Searches'}
-						width={'300px'}
-					>
+					<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
 						{trendingLinks.map(({ search, favorite, count }, idx) => (
 							<TrendingSearchContainer
-								onClick={() =>
-									setState(dispatch, { searchText: search, runSearch: true })
-								}
+								onClick={() => setState(dispatch, { searchText: search, runSearch: true })}
 							>
 								<div
-									style={{ display: 'flex', justifyContent: 'space-between', wordSpacing: 3, letterSpacing: 2, marginTop: 8 }}
+									style={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										wordSpacing: 3,
+										letterSpacing: 2,
+										marginTop: 8,
+									}}
 								>
 									<Typography style={styles.containerText}>
-										<i
-											className="fa fa-search"
-											style={{ marginRight: 12 }}
-
-										/>
-										{`   ${idx + 1}. ${search.length < 18 ? search : search.substring(0, 20) + '...'}`}
+										<i className="fa fa-search" style={{ marginRight: 12 }} />
+										{`   ${idx + 1}. ${
+											search.length < 18 ? search : search.substring(0, 20) + '...'
+										}`}
 									</Typography>
 								</div>
-
 							</TrendingSearchContainer>
 						))}
 					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={adminTopics}
-						title={'Editor\'s Choice: Top Topics'}
+						title={"Editor's Choice: Top Topics"}
 						width="100px"
 						style={{ marginLeft: '0' }}
 					>
@@ -537,7 +506,8 @@ const PolicyMainViewHandler = {
 										item.name
 									);
 									window.open(
-										`#/gamechanger-details?cloneName=${cloneData.clone_name
+										`#/gamechanger-details?cloneName=${
+											cloneData.clone_name
 										}&type=topic&topicName=${item.name.toLowerCase()}`
 									);
 								}}
@@ -553,33 +523,19 @@ const PolicyMainViewHandler = {
 									}}
 									onClick={(event) => {
 										event.stopPropagation();
-										handleSaveFavoriteTopic(
-											item.name.toLowerCase(),
-											'',
-											!item.favorite,
-											dispatch
-										);
+										handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
 									}}
 								/>
 							</div>
 						))}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={recDocs}
-						title="Recommended For You"
-						width="215px"
-					>
+					<GameChangerThumbnailRow links={recDocs} title="Recommended For You" width="215px">
 						{recDocs.length > 0 &&
 							recDocs[0].imgSrc &&
 							recDocs.map((pub) => (
 								<div className="topPublication">
 									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
+										<img className="image" src={pub.imgSrc} alt="thumbnail" title={pub.name} />
 									) : (
 										<div className="image">{pub.name}</div>
 									)}
@@ -592,8 +548,11 @@ const PolicyMainViewHandler = {
 												'PublicationOpened',
 												pub.name
 											);
-											pub.imgSrc !== DefaultPub ? (
-												window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`)) : (setState(dispatch, { searchText: pub.name, runSearch: true }));
+											pub.imgSrc !== DefaultPub
+												? window.open(
+														`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
+												  )
+												: setState(dispatch, { searchText: pub.name, runSearch: true });
 										}}
 									>
 										<div className="hover-text">{formatString(pub.name)}</div>
@@ -616,16 +575,13 @@ const PolicyMainViewHandler = {
 						)}
 						{!loadingrecDocs && recDocs.length === 0 && (
 							<div className="col-xs-12" style={{ height: '140px' }}>
-								<Typography style={styles.containerText}>Try favoriting more documents to see your personalized recommendations.</Typography>
-
+								<Typography style={styles.containerText}>
+									Try favoriting more documents to see your personalized recommendations.
+								</Typography>
 							</div>
 						)}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={crawlerSources}
-						title="Sources"
-						width="300px"
-					>
+					<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 						{crawlerSources.length > 0 &&
 							crawlerSources[0].imgSrc &&
 							crawlerSources.map((source) => (
@@ -637,7 +593,8 @@ const PolicyMainViewHandler = {
 											source.data_source_s
 										);
 										window.open(
-											`#/gamechanger-details?cloneName=${cloneData.clone_name
+											`#/gamechanger-details?cloneName=${
+												cloneData.clone_name
 											}&type=source&sourceName=${source.data_source_s.toLowerCase()}`
 										);
 									}}
@@ -665,31 +622,16 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={recentSearches}
-						title="Recent Searches"
-						width="300px"
-					>
-						{recentSearches.map((search) =>
-							renderRecentSearches(search, state, dispatch)
-						)}
+					<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
+						{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={searchMajorPubs}
-						title="Popular Publications"
-						width="215px"
-					>
+					<GameChangerThumbnailRow links={searchMajorPubs} title="Popular Publications" width="215px">
 						{searchMajorPubs.length > 0 &&
 							searchMajorPubs[0].imgSrc &&
 							searchMajorPubs.map((pub) => (
 								<div className="topPublication">
 									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
+										<img className="image" src={pub.imgSrc} alt="thumbnail" title={pub.name} />
 									) : (
 										<div className="image">{pub.name}</div>
 									)}
@@ -727,7 +669,6 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
-
 				</div>
 			</div>
 		);
@@ -746,29 +687,14 @@ const PolicyMainViewHandler = {
 	getExtraViewPanels(props) {
 		const { context } = props;
 		const { state, dispatch } = context;
-		const {
-			cloneData,
-			count,
-			docSearchResults,
-			resultsPage,
-			loading,
-			prevSearchText,
-			searchText,
-		} = state;
+		const { cloneData, count, docSearchResults, resultsPage, loading, prevSearchText, searchText } = state;
 		const viewPanels = [];
 		viewPanels.push({
 			panelName: 'Explorer',
 			panel: (
 				<StyledCenterContainer showSideFilters={false}>
-					<div
-						className={'right-container'}
-						style={{ ...styles.tabContainer, margin: '0', height: '800px' }}
-					>
-						<ViewHeader
-							{...props}
-							mainStyles={{ margin: '20px 0 0 0' }}
-							resultsText=" "
-						/>
+					<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
+						<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 						<PolicyDocumentExplorer
 							handleSearch={() => setState(dispatch, { runSearch: true })}
 							data={docSearchResults}
@@ -797,18 +723,14 @@ const PolicyMainViewHandler = {
 							{state.showSideFilters && (
 								<div className={'left-container'}>
 									<div className={'side-bar-container'}>
-										<div className={'filters-container sidebar-section-title'}>
-											FILTERS
-										</div>
+										<div className={'filters-container sidebar-section-title'}>FILTERS</div>
 										<GameChangerSearchMatrix context={context} />
-										{state.sidebarDocTypes.length > 0 &&
-											state.sidebarOrgs.length > 0 &&
-											(
-												<>
-													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar context={context} cloneData={state.cloneData} />
-												</>
-											)}
+										{state.sidebarDocTypes.length > 0 && state.sidebarOrgs.length > 0 && (
+											<>
+												<div className={'sidebar-section-title'}>RELATED</div>
+												<GameChangerSideBar context={context} cloneData={state.cloneData} />
+											</>
+										)}
 									</div>
 								</div>
 							)}
@@ -855,17 +777,16 @@ const PolicyMainViewHandler = {
 			sidebarDocTypes,
 			timeSinceCache,
 			searchSettings,
-			rawSearchResults
+			rawSearchResults,
 		} = state;
 
 		let sideScroll = {
 			height: '72vh',
 		};
 		if (!iframePreviewLink) sideScroll = {};
-		const cacheTip = `Cached result from ${timeSinceCache > 0
-			? timeSinceCache + ' hour(s) ago'
-			: 'less than an hour ago'
-			}`;
+		const cacheTip = `Cached result from ${
+			timeSinceCache > 0 ? timeSinceCache + ' hour(s) ago' : 'less than an hour ago'
+		}`;
 
 		return (
 			<div key={'cardView'}>
@@ -881,10 +802,7 @@ const PolicyMainViewHandler = {
 											{sidebarDocTypes.length > 0 && sidebarOrgs.length > 0 && (
 												<>
 													<div className={'sidebar-section-title'}>RELATED</div>
-													<GameChangerSideBar
-														context={context}
-														cloneData={cloneData}
-													/>
+													<GameChangerSideBar context={context} cloneData={cloneData} />
 												</>
 											)}
 										</div>
@@ -896,19 +814,12 @@ const PolicyMainViewHandler = {
 										className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 										style={{ padding: 0 }}
 									>
-										<div
-											className={'col-xs-12'}
-											style={{ ...sideScroll, padding: 0 }}
-										>
-											<div
-												className="row"
-												style={{ marginLeft: 0, marginRight: 0, padding: 0 }}
-											>
+										<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+											<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
 												{!loading && <GetQAResults context={context} />}
 											</div>
 											{!loading &&
-												(activeCategoryTab === 'Documents' ||
-													activeCategoryTab === 'all') &&
+												(activeCategoryTab === 'Documents' || activeCategoryTab === 'all') &&
 												selectedCategories['Documents'] && (
 													<div
 														className={'col-xs-12'}
@@ -917,7 +828,7 @@ const PolicyMainViewHandler = {
 															marginLeft: 0,
 															marginRight: 0,
 															paddingRight: 0,
-															paddingLeft: 0
+															paddingLeft: 0,
 														}}
 													>
 														{!searchSettings.isFilterUpdate ? (
@@ -1005,7 +916,7 @@ const PolicyMainViewHandler = {
 															marginLeft: 0,
 															marginRight: 0,
 															paddingRight: 0,
-															paddingLeft: 0
+															paddingLeft: 0,
 														}}
 													>
 														<SearchSection
@@ -1013,11 +924,7 @@ const PolicyMainViewHandler = {
 															color={'#376f94'}
 															icon={OrganizationIcon}
 														>
-															{getSearchResults(
-																entitySearchResults,
-																state,
-																dispatch
-															)}
+															{getSearchResults(entitySearchResults, state, dispatch)}
 															<div className="gcPagination col-xs-12 text-center">
 																<Pagination
 																	activePage={entityPage}
@@ -1047,8 +954,7 @@ const PolicyMainViewHandler = {
 
 											{topicSearchResults &&
 												topicSearchResults.length > 0 &&
-												(activeCategoryTab === 'Topics' ||
-													activeCategoryTab === 'all') &&
+												(activeCategoryTab === 'Topics' || activeCategoryTab === 'all') &&
 												selectedCategories['Topics'] && (
 													<div
 														className={'col-xs-12'}
@@ -1057,7 +963,7 @@ const PolicyMainViewHandler = {
 															marginLeft: 0,
 															marginRight: 0,
 															paddingRight: 0,
-															paddingLeft: 0
+															paddingLeft: 0,
 														}}
 													>
 														<SearchSection
@@ -1065,11 +971,7 @@ const PolicyMainViewHandler = {
 															color={'#4da593'}
 															icon={ApplicationsIcon}
 														>
-															{getSearchResults(
-																topicSearchResults,
-																state,
-																dispatch
-															)}
+															{getSearchResults(topicSearchResults, state, dispatch)}
 															<div className="gcPagination col-xs-12 text-center">
 																<Pagination
 																	activePage={topicPage}
@@ -1100,10 +1002,7 @@ const PolicyMainViewHandler = {
 						{isCachedResult && (
 							<div style={styles.cachedResultIcon}>
 								<GCTooltip title={cacheTip} placement="right" arrow>
-									<i
-										style={{ cursor: 'pointer' }}
-										className="fa fa-bolt fa-2x"
-									/>
+									<i style={{ cursor: 'pointer' }} className="fa fa-bolt fa-2x" />
 								</GCTooltip>
 							</div>
 						)}
@@ -1112,9 +1011,7 @@ const PolicyMainViewHandler = {
 								<i
 									style={{ cursor: 'pointer' }}
 									className="fa fa-rocket"
-									onClick={() =>
-										setState(dispatch, { showEsQueryDialog: true })
-									}
+									onClick={() => setState(dispatch, { showEsQueryDialog: true })}
 								/>
 							</div>
 						)}
@@ -1127,7 +1024,7 @@ const PolicyMainViewHandler = {
 	getAboutUs(props) {
 		const { state } = props;
 		return <GCAboutUs state={state} />;
-	}
+	},
 };
 
 export default PolicyMainViewHandler;
