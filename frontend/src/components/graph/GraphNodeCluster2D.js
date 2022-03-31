@@ -496,7 +496,11 @@ export default function GraphNodeCluster2D(props) {
 		? onNodeDragEnd
 		: (node, translate) => {
 			setShouldRunSimulation(false);
-		  };
+			if (Math.max(Math.abs(translate.x), Math.abs(translate.y)) < 0.3) {
+				// Node was not dragged far enough, treat as click event
+				handleNodeClick(node);
+			}
+		};
 
 	const handleBackgroundClick = onBackgroundClick
 		? onBackgroundClick
