@@ -489,7 +489,8 @@ export default function SideBar(props) {
 									src={
 										fallbackSources.s3 ||
 										fallbackSources.admin ||
-										fallbackSources.entity
+										fallbackSources.entity ||
+										dodSeal
 									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
@@ -497,7 +498,16 @@ export default function SideBar(props) {
 											fallbackSources.admin = undefined;
 									}}
 								/>
-								<span>{entity.aliase}</span>
+								<span
+									style={{
+										maxWidth: '62px',
+										textOverflow: 'ellipsis',
+										overflow: 'hidden',
+										whiteSpace: 'nowrap'
+									}}
+								>
+									{entity.aliase || entity.name}
+								</span>
 							</div>
 						</GCTooltip>
 					);

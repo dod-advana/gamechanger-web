@@ -684,7 +684,8 @@ const GameChangerDetailsPage = (props) => {
 									src={
 										fallbackSources.s3 ||
 										fallbackSources.admin ||
-										fallbackSources.entity
+										fallbackSources.entity ||
+										dodSeal
 									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
