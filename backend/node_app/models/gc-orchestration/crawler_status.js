@@ -1,30 +1,33 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const Admin = sequelize.define('crawler_status',
+	const Admin = sequelize.define(
+		'crawler_status',
 		{
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: DataTypes.INTEGER
+				type: DataTypes.INTEGER,
 			},
 			crawler_name: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			status: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			datetime: {
 				type: DataTypes.DATE,
-				allowNull: false
+				allowNull: false,
 			},
-		},{
+		},
+		{
 			freezeTableName: true,
 			tableName: 'crawler_status',
-			timestamps: false
-		});
+			timestamps: false,
+		}
+	);
 	return Admin;
 };

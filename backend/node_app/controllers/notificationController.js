@@ -2,12 +2,8 @@ const NOTIFICATIONS = require('../models').notifications;
 const LOGGER = require('@dod-advana/advana-logger');
 
 class NotificationController {
-
 	constructor(opts = {}) {
-		const {
-			logger = LOGGER,
-			notifications = NOTIFICATIONS,
-		} = opts;
+		const { logger = LOGGER, notifications = NOTIFICATIONS } = opts;
 
 		this.logger = logger;
 		this.notifications = notifications;
@@ -26,7 +22,6 @@ class NotificationController {
 			const { project_name } = req.body;
 			const notifications = await this.notifications.findAll({ where: { project_name } });
 			res.status(200).send(notifications);
-
 		} catch (err) {
 			this.logger.error(err, 'Y3GSXTM', userId);
 			res.status(500).send('Error retrieving notifications list');
@@ -46,11 +41,10 @@ class NotificationController {
 				project_name,
 				level: body.level,
 				message: body.message,
-				active: body.active
+				active: body.active,
 			});
 
 			res.status(200).send(created);
-
 		} catch (err) {
 			this.logger.error(err, 'OYZAUNT', userId);
 			res.status(500).send(`Error creating notification: ${err.message}`);
@@ -65,12 +59,11 @@ class NotificationController {
 
 			const deleted = this.notifications.destroy({
 				where: {
-					id
-				}
+					id,
+				},
 			});
 
 			res.status(200).send(deleted);
-
 		} catch (err) {
 			this.logger.error(err, 'TD78YZ9', userId);
 			res.status(500).send('Error deleting notification');
@@ -85,17 +78,16 @@ class NotificationController {
 
 			const edited = this.notifications.update(
 				{
-					active
+					active,
 				},
 				{
 					where: {
-						id
-					}
+						id,
+					},
 				}
 			);
 
 			res.status(200).send(edited);
-
 		} catch (err) {
 			this.logger.error(err, 'Tx28Yo9', userId);
 			res.status(500).send('Error updating notification');

@@ -3,21 +3,20 @@ import UserProfile from '../../user/UserProfile';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import {
 	checkUserInfo,
-	getUserData, handleClearFavoriteSearchNotification, handleDeleteFavoriteSearch,
+	getUserData,
+	handleClearFavoriteSearchNotification,
+	handleDeleteFavoriteSearch,
 	handleSaveFavoriteDocument,
-	handleSaveFavoriteOrganization, handleSaveFavoriteSearchHistory,
-	handleSaveFavoriteTopic
+	handleSaveFavoriteOrganization,
+	handleSaveFavoriteSearchHistory,
+	handleSaveFavoriteTopic,
 } from '../../../utils/sharedFunctions';
 import GCUserDashboard from '../../user/GCUserDashboard';
 
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 const getGCUserDashboard = (props) => {
-	
-	const {
-		state,
-		dispatch,
-	} = props;
+	const { state, dispatch } = props;
 	return (
 		<GCUserDashboard
 			state={state}
@@ -26,14 +25,7 @@ const getGCUserDashboard = (props) => {
 			handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
 			handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search, dispatch)}
 			handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search, dispatch)}
-			saveFavoriteSearch={(
-				favoriteName,
-				favoriteSummary,
-				favorite,
-				tinyUrl,
-				searchText,
-				count
-			) =>
+			saveFavoriteSearch={(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count) =>
 				handleSaveFavoriteSearchHistory(
 					favoriteName,
 					favoriteSummary,
@@ -47,17 +39,8 @@ const getGCUserDashboard = (props) => {
 			handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
 				handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
 			}
-			handleFavoriteOrganization={({
-				organization_name,
-				organization_summary,
-				favorite,
-			}) =>
-				handleSaveFavoriteOrganization(
-					organization_name,
-					organization_summary,
-					favorite,
-					dispatch
-				)
+			handleFavoriteOrganization={({ organization_name, organization_summary, favorite }) =>
+				handleSaveFavoriteOrganization(organization_name, organization_summary, favorite, dispatch)
 			}
 			cloneData={state.cloneData}
 			checkUserInfo={() => {
@@ -70,11 +53,7 @@ const getGCUserDashboard = (props) => {
 
 const PolicyUserProfileHandler = {
 	getUserProfilePage: (props) => {
-
-		const {
-			state,
-			dispatch
-		} = props;
+		const { state, dispatch } = props;
 
 		return (
 			<UserProfile
@@ -82,8 +61,8 @@ const PolicyUserProfileHandler = {
 				updateUserData={gameChangerUserAPI.updateUserProfileData}
 				getAppRelatedUserData={() => {}}
 				updateAppRelatedUserData={() => {}}
-				displayCustomAppContent={() => getGCUserDashboard({state, dispatch})}
-				style={{width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)'}}
+				displayCustomAppContent={() => getGCUserDashboard({ state, dispatch })}
+				style={{ width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)' }}
 				primaryColor={'#1C2D65'}
 				secondaryColor={'#8091A5'}
 			/>

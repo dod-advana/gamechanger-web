@@ -152,9 +152,7 @@ const AdvancedDropdown = (props) => {
 			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
 
-			const searchFactory = new SearchHandlerFactory(
-				state.cloneData.search_module
-			);
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandlerTmp = searchFactory.createHandler();
 			// get pre-search data
 			searchHandlerTmp.getPresearchData(state, dispatch);
@@ -220,11 +218,7 @@ const AdvancedDropdown = (props) => {
 	};
 
 	return (
-		<AdvDropdownWrapper
-			ref={ref}
-			id="advanced-filters"
-			style={{ display: open ? 'block' : 'none' }}
-		>
+		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{ display: open ? 'block' : 'none' }}>
 			{matrixHandler &&
 				matrixHandler.getAdvancedOptions({
 					state,

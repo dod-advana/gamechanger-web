@@ -6,26 +6,26 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			global_parent_duns_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			vendor_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			piid: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			pe_num: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			fiscal_year: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('vendors');
-	}
+	},
 };

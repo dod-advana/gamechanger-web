@@ -33,15 +33,9 @@ const PolicySearchBarHandler = {
 				suggestions: true,
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
-			setPresearchTitle(
-				data?.presearchTitle?.map((item) => ({ text: item })) ?? []
-			);
-			setPresearchTopic(
-				data?.presearchTopic?.map((item) => ({ text: item })) ?? []
-			);
-			setPresearchOrg(
-				data?.presearchOrg?.map((item) => ({ text: item })) ?? []
-			);
+			setPresearchTitle(data?.presearchTitle?.map((item) => ({ text: item })) ?? []);
+			setPresearchTopic(data?.presearchTopic?.map((item) => ({ text: item })) ?? []);
+			setPresearchOrg(data?.presearchOrg?.map((item) => ({ text: item })) ?? []);
 			setPredictions(data?.predictions?.map((item) => ({ text: item })) ?? []);
 		} catch (e) {
 			console.log('Policy debouncedFetchSearchSuggestions err', e);
@@ -106,15 +100,11 @@ const PolicySearchBarHandler = {
 						onFocus={() => {
 							setDropdownOpen(true);
 						}}
-						onClick={() => setState(dispatch, {inputActive: 'searchInput'})}
+						onClick={() => setState(dispatch, { inputActive: 'searchInput' })}
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>
-					<GCTooltip
-						title={'Favorite a search to track in the User Dashboard'}
-						placement="top"
-						arrow
-					>
+					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top" arrow>
 						<button
 							type="button"
 							style={{
@@ -127,21 +117,12 @@ const PolicySearchBarHandler = {
 								backgroundColor: 'white',
 								padding: '0 15px',
 							}}
-							onClick={(event) =>
-								handleFavoriteSearchClicked(
-									event.target,
-									state.isFavoriteSearch
-								)
-							}
+							onClick={(event) => handleFavoriteSearchClicked(event.target, state.isFavoriteSearch)}
 						>
 							<i
-								className={
-									state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'
-								}
+								className={state.isFavoriteSearch ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
-									color: state.isFavoriteSearch
-										? '#E9691D'
-										: 'rgb(224, 224, 224)',
+									color: state.isFavoriteSearch ? '#E9691D' : 'rgb(224, 224, 224)',
 									cursor: 'pointer',
 									fontSize: 26,
 								}}
@@ -149,11 +130,7 @@ const PolicySearchBarHandler = {
 						</button>
 					</GCTooltip>
 					{dropdownOpen && !advancedSearchOpen && (
-						<SearchBarDropdown
-							searchText={searchText}
-							rowData={dataRows}
-							cursor={cursor}
-						/>
+						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
 					)}
 					{hideSearchResults && (
 						<AdvancedDropdown

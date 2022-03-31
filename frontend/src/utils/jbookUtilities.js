@@ -1,11 +1,15 @@
-import {orgColorMap, typeColorMap} from './gamechangerUtils';
+import { orgColorMap, typeColorMap } from './gamechangerUtils';
 import _ from 'lodash';
 
 export const getClassLabel = (reviewData) => {
 	if (reviewData) {
 		if (reviewData.pocAgreeLabel && reviewData.pocAgreeLabel === 'No' && reviewData.pocClassLabel) {
 			return reviewData.pocClassLabel;
-		} else if (reviewData.serviceAgreeLabel && reviewData.serviceAgreeLabel === 'No' && reviewData.serviceClassLabel) {
+		} else if (
+			reviewData.serviceAgreeLabel &&
+			reviewData.serviceAgreeLabel === 'No' &&
+			reviewData.serviceClassLabel
+		) {
 			return reviewData.serviceClassLabel;
 		} else if (reviewData.primaryClassLabel) {
 			return reviewData.primaryClassLabel;
@@ -39,7 +43,7 @@ export const getSearchTerms = (searchText) => {
 const getQueryAndSearchTerms = (searchText) => {
 	// change all text to lower case, need upper case AND/OR for solr search so easier if everything is lower
 	const searchTextLower = searchText.toLowerCase();
-	
+
 	// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 	const rawSequences = findQuoted(searchTextLower);
 
@@ -123,7 +127,6 @@ export const getDocTypeStyles = (docType) => {
 };
 
 export const getConvertedName = (orgName) => {
-
 	switch (orgName) {
 		case 'United States Special Operations Command (SOCOM)':
 			orgName = 'USSOCOM';
@@ -136,7 +139,6 @@ export const getConvertedName = (orgName) => {
 };
 
 export const getConvertedType = (budgetType) => {
-
 	switch (budgetType) {
 		case 'pdoc':
 			budgetType = 'Procurement';
@@ -160,7 +162,11 @@ export const processSearchSettings = (state, dispatch) => {
 	for (const optionType in state.defaultOptions) {
 		// if (optionType === 'reviewStatus') continue;
 
-		if (state.defaultOptions[optionType] && searchSettings[optionType] && state.defaultOptions[optionType].length === searchSettings[optionType].length) {
+		if (
+			state.defaultOptions[optionType] &&
+			searchSettings[optionType] &&
+			state.defaultOptions[optionType].length === searchSettings[optionType].length
+		) {
 			delete searchSettings[optionType];
 		}
 	}
@@ -173,5 +179,3 @@ export const processSearchSettings = (state, dispatch) => {
 
 	return searchSettings;
 };
-
-

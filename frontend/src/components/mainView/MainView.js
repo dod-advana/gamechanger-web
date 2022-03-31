@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import {
-	getTrackingNameForFactory,
-	PAGE_DISPLAYED,
-} from '../../utils/gamechangerUtils';
+import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 import { Button } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
@@ -35,7 +32,7 @@ const MainView = (props) => {
 	}, [dispatch, state.cloneData, state.cloneDataSet, state.userDataSet]);
 
 	useEffect(() => {
-		return function cleanUp(){
+		return function cleanUp() {
 			cancelToken.cancel('canceled axios with cleanup');
 			cancelToken = axios.CancelToken.source();
 		};
@@ -45,12 +42,12 @@ const MainView = (props) => {
 		if (state.runningSearch && cancelToken) {
 			cancelToken.cancel('canceled axios request from search run');
 			cancelToken = axios.CancelToken.source();
-		};
+		}
 	}, [state.runningSearch]);
 
 	useEffect(() => {
 		const urlArray = window.location.href.split('/');
-		setState(dispatch, {pageDisplayed: urlArray[urlArray.length - 1]});
+		setState(dispatch, { pageDisplayed: urlArray[urlArray.length - 1] });
 	}, [dispatch]);
 
 	useEffect(() => {
@@ -61,15 +58,11 @@ const MainView = (props) => {
 			setPageLoaded(true);
 			const viewNames = handler.getViewNames({ cloneData: state.cloneData });
 
-			const searchFactory = new SearchHandlerFactory(
-				state.cloneData.search_module
-			);
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
 			setSearchHandler(searchHandler);
 
-			const profileFactory = new UserProfileHandlerFactory(
-				state.cloneData.main_view_module
-			);
+			const profileFactory = new UserProfileHandlerFactory(state.cloneData.main_view_module);
 
 			const profileHandler = profileFactory.createHandler();
 			setUserProfileHandler(profileHandler);
@@ -79,10 +72,8 @@ const MainView = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler,
-				cancelToken
+				cancelToken,
 			});
-
-
 
 			setState(dispatch, { viewNames });
 		}
@@ -106,11 +97,7 @@ const MainView = (props) => {
 	useEffect(() => {
 		if (state.cloneData.clone_name === 'gamechanger') {
 			if (state.docsPagination && searchHandler) {
-				searchHandler.handleDocPagination(
-					state,
-					dispatch,
-					state.replaceResults
-				);
+				searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
 			}
 			if (state.entityPagination && searchHandler) {
 				searchHandler.handleEntityPagination(state, dispatch);
@@ -131,16 +118,15 @@ const MainView = (props) => {
 			if (state.databasesPagination && searchHandler) {
 				searchHandler.handleDatabasesPagination(state, dispatch);
 			}
-		} else if (state.cloneData.clone_name.toLowerCase() === 'cdo' || state.cloneData.clone_name.toLowerCase() === 'jbook') {
+		} else if (
+			state.cloneData.clone_name.toLowerCase() === 'cdo' ||
+			state.cloneData.clone_name.toLowerCase() === 'jbook'
+		) {
 			if (state.docsPagination && searchHandler) {
 				setState(dispatch, {
 					docsPagination: false,
 				});
-				searchHandler.handleSearch(
-					state,
-					dispatch,
-					state.replaceResults
-				);
+				searchHandler.handleSearch(state, dispatch, state.replaceResults);
 			}
 		}
 	}, [state, dispatch, searchHandler]);
@@ -176,11 +162,9 @@ const MainView = (props) => {
 	};
 
 	const getAnalystTools = () => {
-		return (
-			<AnalystTools context={context} />
-		);
+		return <AnalystTools context={context} />;
 	};
-	
+
 	const getDataTracker = () => {
 		return <GCDataStatusTracker state={state} />;
 	};
@@ -199,7 +183,7 @@ const MainView = (props) => {
 				<div
 					style={{
 						backgroundColor: 'rgba(223, 230, 238, 0.5)',
-						minHeight: 'calc(100vh - 200px)'
+						minHeight: 'calc(100vh - 200px)',
 					}}
 				>
 					{state.pageDisplayed !== 'aboutUs' && (
@@ -224,7 +208,11 @@ const MainView = (props) => {
 								}}
 								startIcon={<ArrowBackIcon />}
 								onClick={() => {
-									window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}`);
+									window.history.pushState(
+										null,
+										document.title,
+										`/#/${state.cloneData.url.toLowerCase()}`
+									);
 									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
 									let viewName;
 									switch (state.pageDisplayed) {
@@ -241,11 +229,7 @@ const MainView = (props) => {
 											viewName = 'Main';
 											break;
 									}
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										viewName,
-										'Back'
-									);
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
 								}}
 							>
 								<></>
@@ -263,10 +247,13 @@ const MainView = (props) => {
 								}}
 							>
 								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
-								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && <span>Analyst Tools | {state.analystToolsPageDisplayed} <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b></span>}
-								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && (
-									<span>User Dashboard</span>
+								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && (
+									<span>
+										Analyst Tools | {state.analystToolsPageDisplayed}{' '}
+										<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
+									</span>
 								)}
+								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
 							</p>
 						</div>
 
@@ -274,8 +261,8 @@ const MainView = (props) => {
 							style={{
 								backgroundColor:
 									state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
-										state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-										state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+									state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
+									state.pageDisplayed === PAGE_DISPLAYED.aboutUs
 										? '#ffffff'
 										: '#DFE6EE',
 							}}
@@ -293,13 +280,8 @@ const MainView = (props) => {
 
 		let currentTime = new Date();
 		let currentMonth =
-			currentTime.getMonth() + 1 < 10
-				? `0${currentTime.getMonth() + 1}`
-				: currentTime.getMonth() + 1;
-		let currentDay =
-			currentTime.getDate() < 10
-				? `0${currentTime.getDate()}`
-				: currentTime.getDate();
+			currentTime.getMonth() + 1 < 10 ? `0${currentTime.getMonth() + 1}` : currentTime.getMonth() + 1;
+		let currentDay = currentTime.getDate() < 10 ? `0${currentTime.getDate()}` : currentTime.getDate();
 
 		// currentTime = `${months[currentTime.getMonth() - 1]} ${currentTime.getDate()}, ${currentTime.getHours()}:${currentTime.getMinutes()}`;
 		currentTime = `${currentTime.getFullYear()}-${currentMonth}-${currentDay}-${currentTime.getHours()}-${currentTime.getSeconds()}-${currentTime.getMilliseconds()}`;

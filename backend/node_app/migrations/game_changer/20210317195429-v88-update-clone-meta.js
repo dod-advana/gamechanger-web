@@ -46,5 +46,5 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'config', Sequelize.JSONB),
 			]);
 		});
-	}
+	},
 };

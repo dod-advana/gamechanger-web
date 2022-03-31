@@ -66,12 +66,7 @@ const CDOSearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		if (
-			isDecoupled &&
-			userData &&
-			userData.search_history &&
-			userData.search_history.length > 9
-		) {
+		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
@@ -103,18 +98,13 @@ const CDOSearchHandler = {
 		if (_.isEmpty(trimmed)) return;
 
 		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 
 		const t0 = new Date().getTime();
@@ -146,9 +136,7 @@ const CDOSearchHandler = {
 			hideTabs: true,
 		});
 
-		const offset = 
-			((replaceResults ? resultsPage : state.infiniteScrollPage) - 1) *
-			RESULTS_PER_PAGE;
+		const offset = ((replaceResults ? resultsPage : state.infiniteScrollPage) - 1) * RESULTS_PER_PAGE;
 
 		const charsPadding = listView ? 750 : 90;
 
@@ -187,8 +175,7 @@ const CDOSearchHandler = {
 			let getUserDataFlag = true;
 
 			if (_.isObject(resp.data)) {
-				let { docs, totalCount, expansionDict, isCached, timeSinceCache } =
-					resp.data;
+				let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
 
 				if (docs && Array.isArray(docs)) {
 					// intelligent search failed, show keyword results with warning alert
@@ -228,15 +215,13 @@ const CDOSearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							totalCount + (foundEntity ? 1 : 0),
 							false
 						);
 					}
 					const categoryMetadata = {
-						'Documents':  {total: totalCount + (foundEntity ? 1 : 0)},
+						Documents: { total: totalCount + (foundEntity ? 1 : 0) },
 					};
 					if (replaceResults) {
 						setState(dispatch, {
@@ -274,16 +259,14 @@ const CDOSearchHandler = {
 							loadingTinyUrl: false,
 							hideTabs: false,
 							docsLoading: false,
-							docsPagination: false
+							docsPagination: false,
 						});
 					}
 				} else {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							0,
 							false
 						);
@@ -346,10 +329,7 @@ const CDOSearchHandler = {
 	},
 
 	parseSearchURL(defaultState, url) {
-		const { searchText, resultsPage } = simpleSearchHandler.parseSearchURL(
-			defaultState,
-			url
-		);
+		const { searchText, resultsPage } = simpleSearchHandler.parseSearchURL(defaultState, url);
 		return { searchText, resultsPage };
 	},
 

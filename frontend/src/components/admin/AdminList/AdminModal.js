@@ -12,11 +12,7 @@ const gameChangerAPI = new GameChangerAPI();
  *
  * @class AdminModal
  */
-export default ({
-	showCreateEditAdminModal,
-	setShowCreateEditAdminModal,
-	getAdminData,
-}) => {
+export default ({ showCreateEditAdminModal, setShowCreateEditAdminModal, getAdminData }) => {
 	const [editAdminID, setEditAdminID] = useState(-99);
 	const [editAdminData, setEditAdminData] = useState({});
 
@@ -120,11 +116,7 @@ export default ({
 				>
 					Close
 				</GCButton>
-				<GCButton
-					id={'editCloneSubmit'}
-					onClick={() => storeAdminData()}
-					style={{ margin: '10px' }}
-				>
+				<GCButton id={'editCloneSubmit'} onClick={() => storeAdminData()} style={{ margin: '10px' }}>
 					Submit
 				</GCButton>
 			</div>

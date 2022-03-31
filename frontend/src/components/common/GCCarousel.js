@@ -15,14 +15,7 @@ let timeoutId = null;
 const GCCarousel = ({ classes, includeOnlyList }) => {
 	const [carouselIndex, setCarouselIndex] = useState(0);
 
-	let carouselOptions = [
-		SearchImage,
-		CardImage,
-		GraphImage,
-		ExplorerImage,
-		CrowdsourceImage,
-		TutorialImage,
-	];
+	let carouselOptions = [SearchImage, CardImage, GraphImage, ExplorerImage, CrowdsourceImage, TutorialImage];
 	let carouselText = [
 		'Search Results: Search the corpus of requirements and policy using simple or complex queries. Each result is tied to an interactive card with information-rich metadata.',
 		'Card View: Every card is equivalent to a document and has information-rich metadata which users can interact with by flipping any card around.',
@@ -33,21 +26,17 @@ const GCCarousel = ({ classes, includeOnlyList }) => {
 	];
 
 	if (includeOnlyList) {
-		carouselOptions = carouselOptions.filter((_, i) =>
-			includeOnlyList.includes(i)
-		);
+		carouselOptions = carouselOptions.filter((_, i) => includeOnlyList.includes(i));
 		carouselText = carouselText.filter((_, i) => includeOnlyList.includes(i));
 	}
 
 	const onNext = () => {
-		let next =
-			carouselIndex + 1 > carouselOptions.length - 1 ? 0 : carouselIndex + 1;
+		let next = carouselIndex + 1 > carouselOptions.length - 1 ? 0 : carouselIndex + 1;
 		setCarouselIndex(next);
 	};
 
 	const onPrev = () => {
-		let prev =
-			carouselIndex - 1 < 0 ? carouselOptions.length - 1 : carouselIndex - 1;
+		let prev = carouselIndex - 1 < 0 ? carouselOptions.length - 1 : carouselIndex - 1;
 		setCarouselIndex(prev);
 	};
 
@@ -64,27 +53,13 @@ const GCCarousel = ({ classes, includeOnlyList }) => {
 
 	return [
 		<div style={{ minHeight: 500, marginTop: 50 }} key="option">
-			<img
-				src={carouselOptions[carouselIndex]}
-				style={{ width: '100%' }}
-				alt="Carousel Images"
-			/>
+			<img src={carouselOptions[carouselIndex]} style={{ width: '100%' }} alt="Carousel Images" />
 		</div>,
 		<div style={{ width: '100%' }} key="scrollButtons">
-			<Button
-				variant="outlined"
-				onClick={onPrev}
-				style={{ float: 'left', left: '-20px' }}
-				classes={classes}
-			>
+			<Button variant="outlined" onClick={onPrev} style={{ float: 'left', left: '-20px' }} classes={classes}>
 				<CheveronLeftIcon style={styles.icon} />
 			</Button>
-			<Button
-				variant="outlined"
-				onClick={onNext}
-				style={{ float: 'right', right: '-20px' }}
-				classes={classes}
-			>
+			<Button variant="outlined" onClick={onNext} style={{ float: 'right', right: '-20px' }} classes={classes}>
 				<CheveronRightIcon style={styles.icon} />
 			</Button>
 		</div>,

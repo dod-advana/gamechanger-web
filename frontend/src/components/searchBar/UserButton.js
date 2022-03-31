@@ -16,8 +16,8 @@ const StyledBadge = withStyles((theme) => ({
 		fontSize: 12,
 		minWidth: 15,
 		width: 16,
-		height: 16
-	}
+		height: 16,
+	},
 }))(Badge);
 
 const UserButton = (props) => {
@@ -26,20 +26,29 @@ const UserButton = (props) => {
 	const { userData, cloneData } = state;
 
 	return (
-		<StyledBadge 
-			badgeContent={
-				userData?.notifications ? userData.notifications[cloneData.clone_name]?.total : undefined
-			}
+		<StyledBadge
+			badgeContent={userData?.notifications ? userData.notifications[cloneData.clone_name]?.total : undefined}
 		>
 			<GCButton
 				onClick={() => {
-					window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+					window.history.pushState(
+						null,
+						document.title,
+						`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+					);
 					clearDashboardNotification(state.cloneData.clone_name, 'total', state, dispatch);
 					setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 				}}
-				style={{ margin: '0 0 0 60px', height: 50, width: 50, minWidth: 'none', backgroundColor: `${backgroundColor ||  '#131E43'}`, border: `${backgroundColor ||  '#131E43'}` }}
+				style={{
+					margin: '0 0 0 60px',
+					height: 50,
+					width: 50,
+					minWidth: 'none',
+					backgroundColor: `${backgroundColor || '#131E43'}`,
+					border: `${backgroundColor || '#131E43'}`,
+				}}
 			>
-				<AccountCircleIcon sx={{ fontSize: 30, margin: '-10px 0' }}/>
+				<AccountCircleIcon sx={{ fontSize: 30, margin: '-10px 0' }} />
 			</GCButton>
 		</StyledBadge>
 	);
@@ -52,11 +61,11 @@ UserButton.propTypes = {
 		state: PropTypes.shape({
 			userData: PropTypes.shape({
 				notifications: PropTypes.shape({
-					total: PropTypes.number
-				})
-			})
+					total: PropTypes.number,
+				}),
+			}),
 		}),
-		dispatch: PropTypes.func
+		dispatch: PropTypes.func,
 	}),
-	backgroundColor: PropTypes.string
+	backgroundColor: PropTypes.string,
 };
