@@ -358,7 +358,7 @@ const GCAboutUs = (props) => {
 				We’ll continually update this page with new insights and information, so check back often.
 				</Typography>
 			</div>,
-			<div style={{ margin: '30px 0 30px 100px', display: 'flex' }}>
+			<div id='faq-section' style={{ margin: '30px 0 30px 100px', display: 'flex' }}>
 				<StyledCategories>
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();

@@ -884,6 +884,7 @@ class AppStatsController {
 		 * @param {*} userdID
 		 */
 		async getUserLastOpened(userdID) {
+
 			let connection;
 			try {
 				connection = this.mysql.createConnection({
