@@ -1557,7 +1557,7 @@ export default function PolicyGraphView(props) {
 		setSelectedID(-1);
 	};
 
-	const nodePaint = (node, color, ctx, globalScale) => {
+	const nodePaint = (node, color, ctx, globalScale, drawText) => {
 		let outlineThickness = 3;
 		let connectedLevel = -1;
 
@@ -1607,7 +1607,7 @@ export default function PolicyGraphView(props) {
 				nodeRelSize +
 				(combinedTypes.includes(node.label)
 					? 1
-					: Math.max(node.normalizedSize * (scalingParam / zoom), 1));
+					: Math.max(node.normalizedSize || 0 * (scalingParam / zoom), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
@@ -1636,11 +1636,11 @@ export default function PolicyGraphView(props) {
 			ctx.stroke();
 		}
 
-		handleCreateNodeText(node, ctx, globalScale, null);
+		if (drawText) handleCreateNodeText(node, ctx, globalScale, null);
 	};
 
 	const create2dGraphNode = (node, ctx, globalScale) => {
-		nodePaint(node, undefined, ctx, globalScale);
+		nodePaint(node, undefined, ctx, globalScale, true);
 	};
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
@@ -1800,7 +1800,7 @@ export default function PolicyGraphView(props) {
 
 					{nodeLimit.warningLimit &&
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
+							<div style={styles.warningBox}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
 							<LoadAllButton
 								onClick={() => {
 									loadAll();
@@ -1813,7 +1813,7 @@ export default function PolicyGraphView(props) {
 					}
 					{nodeLimit.maxLimit &&
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
+							<div style={styles.warningBox}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
 							<span></span>
 						</>
 					}
@@ -1896,6 +1896,15 @@ const styles = {
 		fontWeight: 'bold',
 		fontSize: '20px',
 		margin: 'auto',
+	},
+	warningBox: {
+		padding: '0px 15px',
+		maxHeight: '100%',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		display: '-webkit-box',
+		'-webkit-line-clamp': '2',
+		'-webkit-box-orient': 'vertical'
 	},
 };
 

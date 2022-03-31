@@ -59,7 +59,7 @@ const styles = {
 		overflowY: 'auto',
 		maxHeight: '650px',
 		minWidth: '240px',
-		//left: '30em',
+		maxWidth: '25%',
 		textAlign: 'left',
 	},
 	legendRow: {
@@ -496,7 +496,11 @@ export default function GraphNodeCluster2D(props) {
 		? onNodeDragEnd
 		: (node, translate) => {
 			setShouldRunSimulation(false);
-		  };
+			if (Math.max(Math.abs(translate.x), Math.abs(translate.y)) < 0.3) {
+				// Node was not dragged far enough, treat as click event
+				handleNodeClick(node);
+			}
+		};
 
 	const handleBackgroundClick = onBackgroundClick
 		? onBackgroundClick
@@ -1543,6 +1547,7 @@ export default function GraphNodeCluster2D(props) {
 				nodePointerAreaPaint={nodePointerAreaPaint}
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
+				linkPointerAreaPaint={() => {}}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}
