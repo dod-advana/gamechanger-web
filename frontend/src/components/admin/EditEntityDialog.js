@@ -36,13 +36,7 @@ const styles = {
 	},
 };
 
-const EditEntityDialog = ({
-	open,
-	handleClose,
-	url,
-	orgName,
-	setSealURLOverride,
-}) => {
+const EditEntityDialog = ({ open, handleClose, url, orgName, setSealURLOverride }) => {
 	const [sealURL, setSealURL] = useState(url);
 	const classes = useStyles();
 

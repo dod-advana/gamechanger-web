@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const NOTIFICATIONS = sequelize.define('notifications',
+	const NOTIFICATIONS = sequelize.define(
+		'notifications',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -8,21 +9,22 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 			},
 			project_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			level: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			message: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			active: {
 				type: DataTypes.BOOLEAN,
-			}
-		}, {
+			},
+		},
+		{
 			freezeTableName: true,
 			tableName: 'notifications',
-			timestamps: false
+			timestamps: false,
 		}
 	);
 	return NOTIFICATIONS;

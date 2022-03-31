@@ -78,6 +78,8 @@ const controller = new ExternalSearchController();
  *         401:
  *            $ref: "#/components/responses/UnauthorizedError"
  */
-router.get('/search/keywordSearch', async (req, res) => { await controller.externalSearch(req, res) });
+router.get('/search/keywordSearch', async (req, res) => {
+	await controller.externalSearch(req, res);
+});
 
 module.exports = router;

@@ -19,15 +19,10 @@ export const pollNotifications = async (state, dispatch) => {
 	try {
 		const { data = [] } = await gameChangerAPI.getNotifications(state.cloneData.clone_name);
 		const tmpNotifications = data.filter(({ active }) => active);
-		newNotifications = tmpNotifications.filter(
-			({ id }) => state.notificationIds.indexOf(id) === -1
-		);
+		newNotifications = tmpNotifications.filter(({ id }) => state.notificationIds.indexOf(id) === -1);
 		if (newNotifications.length > 0) {
 			setState(dispatch, {
-				notificationIds: [
-					...state.notificationIds,
-					...newNotifications.map(({ id }) => id),
-				],
+				notificationIds: [...state.notificationIds, ...newNotifications.map(({ id }) => id)],
 				notifications: [...state.notifications, ...newNotifications],
 			});
 		}
@@ -79,9 +74,7 @@ const Notifications = (props) => {
 
 	const renderNotifications = () => {
 		const dismissFunc = (i) => {
-			const newNotifications = state.notifications.filter(
-				(_, index) => i !== index
-			);
+			const newNotifications = state.notifications.filter((_, index) => i !== index);
 			dismissNotifications(newNotifications);
 		};
 		return state.notifications.map(({ level, message }, index) => (

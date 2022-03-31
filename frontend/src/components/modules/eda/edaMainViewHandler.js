@@ -107,15 +107,8 @@ const EdaMainViewHandler = {
 			panelName: 'Explorer',
 			panel: (
 				<StyledCenterContainer showSideFilters={false}>
-					<div
-						className={'right-container'}
-						style={{ ...styles.tabContainer, margin: '0', height: '800px' }}
-					>
-						<ViewHeader
-							{...props}
-							mainStyles={{ margin: '20px 0 0 0' }}
-							resultsText=" "
-						/>
+					<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
+						<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 						<EDADocumentExplorer
 							handleSearch={() => setState(dispatch, { runSearch: true })}
 							data={docSearchResults}
@@ -184,7 +177,7 @@ const EdaMainViewHandler = {
 			summaryCardView,
 			summaryCardData,
 			resultsText,
-			timeFound
+			timeFound,
 		} = state;
 
 		let sideScroll = {
@@ -194,15 +187,7 @@ const EdaMainViewHandler = {
 
 		const getSearchResults = (searchResultData) => {
 			return _.map(searchResultData, (item, idx) => {
-				return (
-					<Card
-						key={item.doc_num}
-						item={item}
-						idx={idx}
-						state={state}
-						dispatch={dispatch}
-					/>
-				);
+				return <Card key={item.doc_num} item={item} idx={idx} state={state} dispatch={dispatch} />;
 			});
 		};
 
@@ -213,10 +198,7 @@ const EdaMainViewHandler = {
 				<div id="game-changer-content-top" />
 				{!loading && searchResults && searchResults.length > 0 && (
 					<StyledCenterContainer showSideFilters={true}>
-						<div
-							className={'left-container'}
-							style={summaryCardView ? styles.leftContainerSummary : {}}
-						>
+						<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
 							<div className={'side-bar-container'}>
 								{summaryCardView ? (
 									<div>
@@ -238,26 +220,26 @@ const EdaMainViewHandler = {
 								)}
 							</div>
 						</div>
-						<div
-							className={'right-container'}
-							style={summaryCardView ? styles.rightContainerSummary : {}}
-						>
+						<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
 							<div
-								style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 50px'}}
+								style={{
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									padding: '0 0 0 50px',
+								}}
 							>
-								<Typography variant="h3" display="inline">{`${searchResults ? searchResults.length : '0'} results found in ${timeFound} seconds`}</Typography>
+								<Typography variant="h3" display="inline">{`${
+									searchResults ? searchResults.length : '0'
+								} results found in ${timeFound} seconds`}</Typography>
 
 								{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}
 							</div>
 
-
 							<div
 								className={`tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 							>
-								<div
-									className={'col-xs-12'}
-									style={{ ...sideScroll, padding: 0 }}
-								>
+								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 									<div
 										className="row"
 										style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
@@ -305,7 +287,7 @@ const EdaMainViewHandler = {
 
 	getAboutUs(props) {
 		return defaultMainViewHandler.getAboutUs(props);
-	}
+	},
 };
 
 export default EdaMainViewHandler;

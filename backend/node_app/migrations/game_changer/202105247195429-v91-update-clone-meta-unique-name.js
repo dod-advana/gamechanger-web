@@ -7,7 +7,7 @@ module.exports = {
 			return Promise.all([
 				queryInterface.changeColumn(tablename, 'clone_name', {
 					type: Sequelize.STRING,
-					unique: true
+					unique: true,
 				}),
 			]);
 		});
@@ -18,9 +18,9 @@ module.exports = {
 			return Promise.all([
 				queryInterface.changeColumn(tablename, 'clone_name', {
 					type: Sequelize.STRING,
-					unique: false
+					unique: false,
 				}),
 			]);
 		});
-	}
+	},
 };

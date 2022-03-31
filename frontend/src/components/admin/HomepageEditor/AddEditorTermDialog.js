@@ -6,12 +6,7 @@ import { useStyles } from '../util/GCAdminStyles';
  *
  * @class AddEditorTermDialog
  */
-export default ({
-	handleAddRow,
-	setShowAddEditorTermDialog,
-	showAddEditorTermDialog,
-	section,
-}) => {
+export default ({ handleAddRow, setShowAddEditorTermDialog, showAddEditorTermDialog, section }) => {
 	const [editorAddTerm, setEditorAddTerm] = useState({});
 	const classes = useStyles();
 
@@ -23,9 +18,7 @@ export default ({
 		<Dialog open={showAddEditorTermDialog} scroll={'paper'} maxWidth="sm">
 			<TextField
 				id="margin-dense"
-				onBlur={(event) =>
-					setEditorAddTerm({ ...editorAddTerm, name: event.target.value })
-				}
+				onBlur={(event) => setEditorAddTerm({ ...editorAddTerm, name: event.target.value })}
 				className={classes.textField}
 				style={{ padding: 10 }}
 				helperText="Term to add..."

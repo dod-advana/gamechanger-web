@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import GCAccordion from '../../common/GCAccordion';
-import {exactMatch, getTrackingNameForFactory} from '../../../utils/gamechangerUtils';
-import {Checkbox, FormControlLabel, FormGroup} from '@material-ui/core';
+import { exactMatch, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import _ from 'lodash';
-import {setState} from '../../../utils/sharedFunctions';
-import {makeStyles} from '@material-ui/core/styles';
-import {trackEvent} from '../../telemetry/Matomo';
+import { setState } from '../../../utils/sharedFunctions';
+import { makeStyles } from '@material-ui/core/styles';
+import { trackEvent } from '../../telemetry/Matomo';
 
 const styles = {
 	innerContainer: {
@@ -178,7 +178,6 @@ const useStyles = makeStyles({
 });
 
 export default function JBookSideBar(props) {
-
 	const { context } = props;
 
 	const classes = useStyles();
@@ -260,11 +259,7 @@ export default function JBookSideBar(props) {
 		}
 	}, [state, expansionTerms, dispatch]);
 
-	const renderExpansionTerms = (
-		expansionTerms,
-		handleAddSearchTerm,
-		classes
-	) => {
+	const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		return (
 			<div style={{ margin: '10px 0 10px 0' }}>
 				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
@@ -273,13 +268,7 @@ export default function JBookSideBar(props) {
 						term = term.length > 25 ? term.substring(0, 25 - 3) + '...' : term;
 
 						return (
-							<GCTooltip
-								key={phrase}
-								title={phrase}
-								arrow
-								enterDelay={30}
-								leaveDelay={10}
-							>
+							<GCTooltip key={phrase} title={phrase} arrow enterDelay={30} leaveDelay={10}>
 								<FormControlLabel
 									key={term}
 									value={term}
@@ -320,31 +309,20 @@ export default function JBookSideBar(props) {
 	};
 
 	return (
-		<div
-			className={''}
-			style={{ height: 'fit-content', minWidth: '100%', marginRight: -10, marginLeft: 15 }}
-		>
+		<div className={''} style={{ height: 'fit-content', minWidth: '100%', marginRight: -10, marginLeft: 15 }}>
 			<div className={''}>
 				<div style={styles.innerContainer}>
 					<div style={styles.cardBody} className={`tutorial-step-unknown2`}>
 						<div style={styles.innerContainer}>
 							{expansionTerms.length > 0 && (
 								<div style={{ width: '100%', marginBottom: 10 }}>
-									<GCTooltip
-										title={'Select a document for export'}
-										placement="top"
-										arrow
-									>
+									<GCTooltip title={'Select a document for export'} placement="top" arrow>
 										<GCAccordion
 											expanded={expansionTermSelected}
 											header={'SEARCHES'}
 											headerTextWeight={'normal'}
 										>
-											{renderExpansionTerms(
-												expansionTerms,
-												handleAddSearchTerm,
-												classes
-											)}
+											{renderExpansionTerms(expansionTerms, handleAddSearchTerm, classes)}
 										</GCAccordion>
 									</GCTooltip>
 								</div>

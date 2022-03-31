@@ -58,11 +58,7 @@ export default () => {
 	 * @method
 	 */
 	const checkProcesses = (processesData) => {
-		if (
-			processesData &&
-			processesData.process_status &&
-			processesData.process_status.flags
-		) {
+		if (processesData && processesData.process_status && processesData.process_status.flags) {
 			let checkProcess = false;
 			const flags = processesData.process_status.flags;
 			for (const key in flags) {
@@ -93,9 +89,7 @@ export default () => {
 					right: '0px',
 				}}
 			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-					Machine Learning API
-				</p>
+				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Machine Learning API</p>
 			</div>
 			<Tabs>
 				<div
@@ -167,18 +161,10 @@ export default () => {
 						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
 					</TabPanel>
 					<TabPanel>
-						<S3
-							processes={processes}
-							getProcesses={getProcesses}
-							updateLogs={updateLogs}
-						/>
+						<S3 processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
 					</TabPanel>
 					<TabPanel>
-						<Models
-							processes={processes}
-							getProcesses={getProcesses}
-							updateLogs={updateLogs}
-						/>
+						<Models processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
 					</TabPanel>
 				</div>
 			</Tabs>

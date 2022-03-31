@@ -12,11 +12,7 @@ import {
 	getTextColorBasedOnBackground,
 	shuffleArray,
 } from '../../utils/graphUtils';
-import {
-	convertHexToRgbA,
-	getLinkColor,
-	getTrackingNameForFactory,
-} from '../../utils/gamechangerUtils';
+import { convertHexToRgbA, getLinkColor, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import styled from 'styled-components';
 import { FormControl, Input, InputLabel, Popper } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -193,8 +189,7 @@ export const StyledLegendClickable = styled.div`
 	transition: opacity 0.3s ease-in-out;
 	border-radius: 6px;
 	padding: 5px;
-	opacity: ${({ type, typesSelected }) => 
-		typesSelected.length === 0 || typesSelected.includes(type) ? 1 : 0.2};
+	opacity: ${({ type, typesSelected }) => (typesSelected.length === 0 || typesSelected.includes(type) ? 1 : 0.2)};
 
 	&:hover {
 		background: rgba(222, 235, 255, 0.5);
@@ -331,7 +326,7 @@ export default function GraphNodeCluster2D(props) {
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
 
 	const [dagMode, setDagMode] = React.useState(false);
-	
+
 	const [resetGraphClicked, setResetGraphClicked] = React.useState(false);
 
 	const legendRef = React.useRef();
@@ -421,15 +416,15 @@ export default function GraphNodeCluster2D(props) {
 	const handleNodeHover = onNodeHover
 		? onNodeHover
 		: (node) => {
-			const elem = document.getElementById('graph2dContainer');
-			elem.style.cursor = node ? 'pointer' : null;
-			setNodeHoverID(node ? node.id : -1);
+				const elem = document.getElementById('graph2dContainer');
+				elem.style.cursor = node ? 'pointer' : null;
+				setNodeHoverID(node ? node.id : -1);
 
-			if (node && shouldHighlightNodes) {
-				highlightSelectedNodes(node, graph.edges);
-			} else {
-				highlightNodes.clear();
-			}
+				if (node && shouldHighlightNodes) {
+					highlightSelectedNodes(node, graph.edges);
+				} else {
+					highlightNodes.clear();
+				}
 		  };
 
 	const highlightSelectedNodes = (node, edges) => {
@@ -444,20 +439,14 @@ export default function GraphNodeCluster2D(props) {
 			newNodes.forEach((tmpNode) => {
 				edges.forEach((edge) => {
 					if (edge.source === tmpNode) {
-						if (
-							!alreadyVisitedNodes.includes(edge.target) &&
-							!tmpNewNodes.includes(edge.target)
-						) {
+						if (!alreadyVisitedNodes.includes(edge.target) && !tmpNewNodes.includes(edge.target)) {
 							tmpNewNodes.push(edge.target);
 							alreadyVisitedNodes.push(edge.target);
 							highlightNodes.add(edge.target);
 							degreeConnected[i].push(edge.target);
 						}
 					} else if (edge.target === tmpNode) {
-						if (
-							!alreadyVisitedNodes.includes(edge.source) &&
-							!tmpNewNodes.includes(edge.source)
-						) {
+						if (!alreadyVisitedNodes.includes(edge.source) && !tmpNewNodes.includes(edge.source)) {
 							tmpNewNodes.push(edge.source);
 							alreadyVisitedNodes.push(edge.source);
 							highlightNodes.add(edge.source);
@@ -473,50 +462,45 @@ export default function GraphNodeCluster2D(props) {
 	const handleNodeClick = onNodeClick
 		? onNodeClick
 		: async (node, event) => {
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'GraphNode',
-				'onClick',
-				node.name
-			);
-			if (selectedNodeID !== node.id) {
-				setSelectedNodeID(node.id);
-			} else {
-				setSelectedNodeID(null);
-			}
+				trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNode', 'onClick', node.name);
+				if (selectedNodeID !== node.id) {
+					setSelectedNodeID(node.id);
+				} else {
+					setSelectedNodeID(null);
+				}
 		  };
 
 	const handleNodeDrag = onNodeDrag
 		? onNodeDrag
 		: (node, translate) => {
-			setShouldRunSimulation(true);
+				setShouldRunSimulation(true);
 		  };
 
 	const handleNodeDragEnd = onNodeDragEnd
 		? onNodeDragEnd
 		: (node, translate) => {
-			setShouldRunSimulation(false);
-			if (Math.max(Math.abs(translate.x), Math.abs(translate.y)) < 0.3) {
-				// Node was not dragged far enough, treat as click event
-				handleNodeClick(node);
-			}
-		};
+				setShouldRunSimulation(false);
+				if (Math.max(Math.abs(translate.x), Math.abs(translate.y)) < 0.3) {
+					// Node was not dragged far enough, treat as click event
+					handleNodeClick(node);
+				}
+		  };
 
 	const handleBackgroundClick = onBackgroundClick
 		? onBackgroundClick
 		: (event) => {
-			setSelectedNodeID(-1);
+				setSelectedNodeID(-1);
 		  };
 
 	const handleOnZoom = onZoom
 		? onZoom
 		: (event) => {
-			// trackEvent('Graph', 'onZoom', 'zoom', event.k);
-			if (event.k > zoomLimit) {
-				const ref = graphRefProp ? graphRefProp : graphRef;
-				ref.current.zoom(zoomLimit);
-			} else {
-			}
+				// trackEvent('Graph', 'onZoom', 'zoom', event.k);
+				if (event.k > zoomLimit) {
+					const ref = graphRefProp ? graphRefProp : graphRef;
+					ref.current.zoom(zoomLimit);
+				} else {
+				}
 		  };
 
 	const zoomInOut = (zoomIn) => {
@@ -532,12 +516,12 @@ export default function GraphNodeCluster2D(props) {
 	const handleResetGraph = resetGraph
 		? resetGraph
 		: () => {
-			graph.nodes.forEach((node) => {
-				node.hidden = false;
-			});
+				graph.nodes.forEach((node) => {
+					node.hidden = false;
+				});
 
-			setReloadGraph(!reloadGraph);
-			setShouldRunSimulation(true);
+				setReloadGraph(!reloadGraph);
+				setShouldRunSimulation(true);
 		  };
 
 	const recenterGraph = () => {
@@ -563,9 +547,9 @@ export default function GraphNodeCluster2D(props) {
 	const handleRenderNodeLegendItems = renderNodeLegendItems
 		? renderNodeLegendItems
 		: () => {
-			return (
-				<>
-					{!runningQuery &&
+				return (
+					<>
+						{!runningQuery &&
 							Object.keys(legendData)
 								.sort()
 								.map((key) => {
@@ -580,9 +564,7 @@ export default function GraphNodeCluster2D(props) {
 										>
 											<StyledLegendClickable
 												key={legendData[key].name}
-												onClick={(event) =>
-													handleLegendNodeClick(key, event.target)
-												}
+												onClick={(event) => handleLegendNodeClick(key, event.target)}
 												typesSelected={nodeLabelSelected ? [nodeLabelSelected] : []}
 												type={key}
 											>
@@ -602,16 +584,16 @@ export default function GraphNodeCluster2D(props) {
 										</GCTooltip>
 									);
 								})}
-				</>
-			);
+					</>
+				);
 		  };
 
 	const handleRenderEdgeLegendItems = renderEdgeLegendItems
 		? renderEdgeLegendItems
 		: () => {
-			return (
-				<>
-					{!runningQuery &&
+				return (
+					<>
+						{!runningQuery &&
 							Object.keys(edgeLabelPatterns).map((label) => {
 								if (edgeLabels[label] > 0) {
 									return (
@@ -624,15 +606,13 @@ export default function GraphNodeCluster2D(props) {
 												height={10}
 												width={50}
 											/>
-											<div style={{ marginLeft: '1em' }}>
-												{edgeLabelPatterns[label].label}
-											</div>
+											<div style={{ marginLeft: '1em' }}>{edgeLabelPatterns[label].label}</div>
 										</div>
 									);
 								} else return <></>;
 							})}
-				</>
-			);
+					</>
+				);
 		  };
 
 	const handleRenderLegend = () => {
@@ -640,9 +620,7 @@ export default function GraphNodeCluster2D(props) {
 			<div ref={legendRef} style={{ ...styles.legendKey, maxHeight: `calc(${graphHeight}px - 15px)` }}>
 				<div style={styles.legendRow} key="legendKeys">
 					<div style={{ fontWeight: 'bold' }}>Icon</div>
-					<div style={{ fontWeight: 'bold', marginLeft: '1em', width: '80%' }}>
-						Label
-					</div>
+					<div style={{ fontWeight: 'bold', marginLeft: '1em', width: '80%' }}>Label</div>
 				</div>
 
 				{handleRenderNodeLegendItems()}
@@ -739,7 +717,7 @@ export default function GraphNodeCluster2D(props) {
 		tabsContainer: {
 			height: '100%',
 			width: '100%',
-	
+
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: 'flex-start',
@@ -776,7 +754,7 @@ export default function GraphNodeCluster2D(props) {
 				row = [type];
 			}
 		});
-		
+
 		if (row.length > 0) array2d.push(row);
 
 		return array2d;
@@ -787,14 +765,16 @@ export default function GraphNodeCluster2D(props) {
 	};
 
 	const renderNodeGroupMenu = () => {
-		const activeFilterTab = nodeGroupMenuLabel || nodeGroupMenuLabelProp ||
+		const activeFilterTab =
+			nodeGroupMenuLabel ||
+			nodeGroupMenuLabelProp ||
 			(orgTypesSelected.length > 0 ? orgTypesSelected[0] : undefined);
 		const filterTab2dArray = make2dArray(orgTypesSelected);
 		const nodesInGroup = graphData.nodes.filter((node) => {
 			if (activeFilterTab === 'All Documents') {
-				return (node.label === 'Document' || node.label === 'UKN_Document');
+				return node.label === 'Document' || node.label === 'UKN_Document';
 			}
-			return (node.display_org_s ? node.display_org_s === activeFilterTab : node.label === activeFilterTab);
+			return node.display_org_s ? node.display_org_s === activeFilterTab : node.label === activeFilterTab;
 		});
 
 		return (
@@ -823,27 +803,31 @@ export default function GraphNodeCluster2D(props) {
 					<div style={{ width: 290 }}>
 						<div style={{ margin: '16px 0px 0px' }}>
 							<span style={{ fontWeight: 'bold', marginLeft: 10 }}>Nodes in Group</span>
-							<div style={{ margin: '14px 0px', borderBottom: '1px solid lightgray', borderTop: '1px solid lightgray' }}>
-								{filterTab2dArray.map(row => (
+							<div
+								style={{
+									margin: '14px 0px',
+									borderBottom: '1px solid lightgray',
+									borderTop: '1px solid lightgray',
+								}}
+							>
+								{filterTab2dArray.map((row) => (
 									<div style={legendStyles.tabsContainer}>
-										{
-											row.map(tab => (
-												<GCTooltip title={tab} enterDelay={30}>
-													<Typography
-														key={tab}
-														style={
-															activeFilterTab === tab ?
-																{ ...legendStyles.tab, ...legendStyles.activeTab } :
-																{ ...legendStyles.tab }
-														}
-														variant="body1"
-														onClick={() => setActiveTab(tab)}
-													>
-														{tab}
-													</Typography>
-												</GCTooltip>
-											))
-										}
+										{row.map((tab) => (
+											<GCTooltip title={tab} enterDelay={30}>
+												<Typography
+													key={tab}
+													style={
+														activeFilterTab === tab
+															? { ...legendStyles.tab, ...legendStyles.activeTab }
+															: { ...legendStyles.tab }
+													}
+													variant="body1"
+													onClick={() => setActiveTab(tab)}
+												>
+													{tab}
+												</Typography>
+											</GCTooltip>
+										))}
 									</div>
 								))}
 							</div>
@@ -860,7 +844,11 @@ export default function GraphNodeCluster2D(props) {
 									let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
 									return (
 										<GCTooltip
-											title={(isTopicOrEntityNode || node.label === 'UKN_Document') ? '' : node.display_title_s}
+											title={
+												isTopicOrEntityNode || node.label === 'UKN_Document'
+													? ''
+													: node.display_title_s
+											}
 											arrow
 											style={{ zIndex: 99999 }}
 										>
@@ -894,9 +882,9 @@ export default function GraphNodeCluster2D(props) {
 	const handleCloseGroupNodeMenu = closeGroupNodeMenu
 		? closeGroupNodeMenu
 		: () => {
-			setNodeGroupMenuOpen(false);
-			setNodeGroupMenuTarget(null);
-			setNodeGroupMenuLabel('');
+				setNodeGroupMenuOpen(false);
+				setNodeGroupMenuTarget(null);
+				setNodeGroupMenuLabel('');
 		  };
 
 	/**
@@ -906,87 +894,56 @@ export default function GraphNodeCluster2D(props) {
 	const handleCreateNodeLabel = createNodeLabel
 		? createNodeLabel
 		: (node) => {
-			return node.name;
+				return node.name;
 		  };
 
 	const handleCreateGraphNode = createGraphNode
 		? createGraphNode
 		: (node, ctx, globalScale) => {
-			let outlineThickness = 3;
-			let connectedLevel = -1;
+				let outlineThickness = 3;
+				let connectedLevel = -1;
 
-			if (highlightNodes.size > 0 && highlightNodes.has(node)) {
-				if (degreeConnected[0].includes(node)) {
-					connectedLevel = 0;
-				} else if (degreeConnected[1].includes(node)) {
-					connectedLevel = 1;
+				if (highlightNodes.size > 0 && highlightNodes.has(node)) {
+					if (degreeConnected[0].includes(node)) {
+						connectedLevel = 0;
+					} else if (degreeConnected[1].includes(node)) {
+						connectedLevel = 1;
+					}
+					outlineThickness += 2;
 				}
-				outlineThickness += 2;
-			}
 
-			if (selectedNodeID === node.id) {
-				outlineThickness += 2;
-			}
+				if (selectedNodeID === node.id) {
+					outlineThickness += 2;
+				}
 
-			const { nodeColor, nodeHexColor, nodeTextColor } =
+				const { nodeColor, nodeHexColor, nodeTextColor } =
 					nodeLabelSelected !== null && nodeLabelSelected !== node.label
 						? getNodeColors(node, hiddenNodeAlpha, nodeLabelColors)
 						: getNodeColors(node, nodeAlpha, nodeLabelColors);
-			const outlineColor =
+				const outlineColor =
 					nodeLabelSelected !== null && nodeLabelSelected !== node.label
-						? getNodeOutlineColors(
-							node,
-							hiddenNodeAlpha,
-							nodeHexColor,
-							connectedLevel
-						  )
-						: getNodeOutlineColors(
-							node,
-							nodeAlpha,
-							nodeHexColor,
-							connectedLevel
-						  );
+						? getNodeOutlineColors(node, hiddenNodeAlpha, nodeHexColor, connectedLevel)
+						: getNodeOutlineColors(node, nodeAlpha, nodeHexColor, connectedLevel);
 
-			ctx.beginPath();
+				ctx.beginPath();
 
-			ctx.fillStyle = nodeColor;
-			ctx.arc(
-				node.x,
-				node.y,
-				node.value * nodeRelativeSize,
-				0,
-				2 * Math.PI,
-				false
-			);
-			ctx.fill();
-			ctx.strokeStyle = outlineColor;
-			ctx.lineWidth = outlineThickness / globalScale;
-			ctx.arc(
-				node.x,
-				node.y,
-				node.value * nodeRelativeSize,
-				0,
-				2 * Math.PI,
-				false
-			);
-			ctx.stroke();
-
-			// Selected/Hovered Outline
-			if (node.id === selectedNodeID || node.id === nodeHoverID) {
-				ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
-				ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
-				ctx.arc(
-					node.x,
-					node.y,
-					node.value * nodeRelativeSize + 0.2,
-					0,
-					2 * Math.PI,
-					false
-				);
+				ctx.fillStyle = nodeColor;
+				ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
+				ctx.fill();
+				ctx.strokeStyle = outlineColor;
+				ctx.lineWidth = outlineThickness / globalScale;
+				ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
 				ctx.stroke();
-			}
 
-			handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
+				// Selected/Hovered Outline
+				if (node.id === selectedNodeID || node.id === nodeHoverID) {
+					ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
+					ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
+					ctx.arc(node.x, node.y, node.value * nodeRelativeSize + 0.2, 0, 2 * Math.PI, false);
+					ctx.stroke();
+				}
+
+				handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
 		  };
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
@@ -1000,10 +957,7 @@ export default function GraphNodeCluster2D(props) {
 		if (label && globalScale > 3 / (nodeRelativeSize / 5)) {
 			const lines = getLines(ctx, label, node.value * nodeRelativeSize);
 			lines.lines.forEach(function (line, i) {
-				const fontSize = Math.min(
-					MAX_FONT_SIZE,
-					(node.value * nodeRelativeSize + 1.5) / lines.lines.length
-				);
+				const fontSize = Math.min(MAX_FONT_SIZE, (node.value * nodeRelativeSize + 1.5) / lines.lines.length);
 				ctx.font = `${fontSize}px Sans-Serif`;
 
 				const mid = lines.lines.length / 2;
@@ -1053,67 +1007,58 @@ export default function GraphNodeCluster2D(props) {
 	const handleCreateGraphLink = createGraphLink
 		? createGraphLink
 		: (link, ctx, globalScale) => {
-			if (!showBasic) {
-				calcLinkControlPoints(link);
-			}
+				if (!showBasic) {
+					calcLinkControlPoints(link);
+				}
 
-			const start = link.source;
-			const end = link.target;
-			let lineWidth = edgeThickness;
+				const start = link.source;
+				const end = link.target;
+				let lineWidth = edgeThickness;
 
-			if (
-				highlightNodes.size > 0 &&
-					(highlightNodes.has(start) || highlightNodes.has(end))
-			) {
-				lineWidth += 1;
-			}
+				if (highlightNodes.size > 0 && (highlightNodes.has(start) || highlightNodes.has(end))) {
+					lineWidth += 1;
+				}
 
-			const color = handleGetLinkColor(link);
+				const color = handleGetLinkColor(link);
 
-			ctx.strokeStyle = color;
+				ctx.strokeStyle = color;
 
-			// ignore unbound links
-			if (typeof start !== 'object' || typeof end !== 'object') return;
+				// ignore unbound links
+				if (typeof start !== 'object' || typeof end !== 'object') return;
 
-			ctx.save();
+				ctx.save();
 
-			// Draw link
-			ctx.beginPath();
-			ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
-			ctx.lineWidth = lineWidth / globalScale;
-			ctx.moveTo(start.x, start.y);
+				// Draw link
+				ctx.beginPath();
+				ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
+				ctx.lineWidth = lineWidth / globalScale;
+				ctx.moveTo(start.x, start.y);
 
-			const controlPoints = link.__controlPoints;
+				const controlPoints = link.__controlPoints;
 
-			if (!controlPoints) {
-				// Straight line
-				ctx.lineTo(end.x, end.y);
-			} else {
-				// Use quadratic curves for regular lines and bezier for loops
-				ctx[
-					controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'
-				](...controlPoints, end.x, end.y);
-			}
-			ctx.stroke();
+				if (!controlPoints) {
+					// Straight line
+					ctx.lineTo(end.x, end.y);
+				} else {
+					// Use quadratic curves for regular lines and bezier for loops
+					ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](
+						...controlPoints,
+						end.x,
+						end.y
+					);
+				}
+				ctx.stroke();
 
-			if (globalScale > 5) {
-				// Draw Arrow
-				draw2DArrows(
-					link,
-					ctx,
-					globalScale,
-					arrowLength,
-					arrowRelativePosition,
-					color,
-					nodeRelativeSize
-				);
-			}
+				if (globalScale > 5) {
+					// Draw Arrow
+					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
+				}
 
-			if (displayLinkLabel) {
-				handleCreateGraphLinkText(link, ctx, globalScale);
-			}
+				if (displayLinkLabel) {
+					handleCreateGraphLinkText(link, ctx, globalScale);
+				}
 
-			ctx.restore();
+				ctx.restore();
 		  };
 
 	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
@@ -1135,9 +1080,7 @@ export default function GraphNodeCluster2D(props) {
 
 		const relLink = { x: end.x - start.x, y: end.y - start.y };
 
-		const maxTextLength =
-			Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) -
-			LABEL_NODE_MARGIN * 2;
+		const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
 
 		let textAngle = Math.atan2(relLink.y, relLink.x);
 		// maintain label vertical orientation for legibility
@@ -1148,10 +1091,7 @@ export default function GraphNodeCluster2D(props) {
 
 		// estimate fontSize to fit in link length
 		ctx.font = '1px Sans-Serif';
-		const fontSize = Math.min(
-			MAX_FONT_SIZE,
-			maxTextLength / ctx.measureText(label).width
-		);
+		const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
 		ctx.font = `${fontSize}px Sans-Serif`;
 		const textWidth = ctx.measureText(label).width;
 		const bckgDimensions = [textWidth, fontSize].map((n) => n + fontSize * 0.2); // some padding
@@ -1168,11 +1108,7 @@ export default function GraphNodeCluster2D(props) {
 		ctx.rotate(textAngle);
 
 		ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-		ctx.fillRect(
-			-bckgDimensions[0] / 2,
-			-bckgDimensions[1] / 2,
-			...bckgDimensions
-		);
+		ctx.fillRect(-bckgDimensions[0] / 2, -bckgDimensions[1] / 2, ...bckgDimensions);
 
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
@@ -1184,74 +1120,74 @@ export default function GraphNodeCluster2D(props) {
 	const handleGetLinkColor = onGetLinkColor
 		? onGetLinkColor
 		: (link) => {
-			return getLinkColor(link, linkAlpha);
+				return getLinkColor(link, linkAlpha);
 		  };
 
 	const handleSimulationStop = onSimulationStop
 		? onSimulationStop
 		: () => {
-			if (graphData.nodes?.[0]?.x !== null) {
-				setShouldRunSimulation(false);
-			} else {
-				setShouldRunSimulation(true);
-			}
-
-			if (!graphRendered1stTime) {
-				recenterGraph();
-				setGraphRendered1stTime(true);
-			}
-
-			if (!shouldCenter) setShouldCenter(true);
-
-			const nodes = {};
-			let centralNode = null;
-
-			graph.nodes.forEach((node) => {
-				node.fx = null;
-				node.fy = null;
-				node.fz = null;
-			});
-
-			let count = 0;
-			graph.edges.forEach((edge) => {
-				const end = edge.target;
-				const start = edge.source;
-
-				if (nodes.hasOwnProperty(end.id)) {
-					nodes[end.id] += 1;
+				if (graphData.nodes?.[0]?.x !== null) {
+					setShouldRunSimulation(false);
 				} else {
-					nodes[end.id] = 1;
+					setShouldRunSimulation(true);
 				}
 
-				if (nodes.hasOwnProperty(start.id)) {
-					nodes[start.id] += 1;
-				} else {
-					nodes[start.id] = 1;
+				if (!graphRendered1stTime) {
+					recenterGraph();
+					setGraphRendered1stTime(true);
 				}
 
-				if (nodes[end.id] > count) {
-					count = nodes[end.id];
-					centralNode = end;
-				} else if (nodes[start.id] > count) {
-					count = nodes[start.id];
-					centralNode = start;
-				} else if (!centralNode) {
-					centralNode = end;
+				if (!shouldCenter) setShouldCenter(true);
+
+				const nodes = {};
+				let centralNode = null;
+
+				graph.nodes.forEach((node) => {
+					node.fx = null;
+					node.fy = null;
+					node.fz = null;
+				});
+
+				let count = 0;
+				graph.edges.forEach((edge) => {
+					const end = edge.target;
+					const start = edge.source;
+
+					if (nodes.hasOwnProperty(end.id)) {
+						nodes[end.id] += 1;
+					} else {
+						nodes[end.id] = 1;
+					}
+
+					if (nodes.hasOwnProperty(start.id)) {
+						nodes[start.id] += 1;
+					} else {
+						nodes[start.id] = 1;
+					}
+
+					if (nodes[end.id] > count) {
+						count = nodes[end.id];
+						centralNode = end;
+					} else if (nodes[start.id] > count) {
+						count = nodes[start.id];
+						centralNode = start;
+					} else if (!centralNode) {
+						centralNode = end;
+					}
+				});
+
+				if (centralNode) {
+					centralNode.fx = centralNode?.x;
+					centralNode.fy = centralNode?.y;
+					centralNode.fz = centralNode?.z;
 				}
-			});
 
-			if (centralNode) {
-				centralNode.fx = centralNode?.x;
-				centralNode.fy = centralNode?.y;
-				centralNode.fz = centralNode?.z;
-			}
-
-			if (resetGraphClicked) {
-				setReloadGraph(!reloadGraph);
-				setShouldRunSimulation(!shouldRunSimulation);
-				recenterGraph();
-				setResetGraphClicked(false);
-			}
+				if (resetGraphClicked) {
+					setReloadGraph(!reloadGraph);
+					setShouldRunSimulation(!shouldRunSimulation);
+					recenterGraph();
+					setResetGraphClicked(false);
+				}
 		  };
 
 	const handleUpdateNodeSize = (size) => {
@@ -1373,7 +1309,9 @@ export default function GraphNodeCluster2D(props) {
 										);
 										setZoomFactor(event.target.value);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
+									onKeyPress={(e) => {
+										e.key === 'Enter' && e.preventDefault();
+									}}
 								/>
 							</FormControl>
 						</div>
@@ -1422,7 +1360,9 @@ export default function GraphNodeCluster2D(props) {
 										handleUpdateNodeSize(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
+									onKeyPress={(e) => {
+										e.key === 'Enter' && e.preventDefault();
+									}}
 								/>
 							</FormControl>
 						</div>
@@ -1447,7 +1387,9 @@ export default function GraphNodeCluster2D(props) {
 										setEdgeThickness(Number(event.target.value));
 										setShouldRunSimulation(true);
 									}}
-									onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault() }}
+									onKeyPress={(e) => {
+										e.key === 'Enter' && e.preventDefault();
+									}}
 								/>
 							</FormControl>
 						</div>
@@ -1458,9 +1400,7 @@ export default function GraphNodeCluster2D(props) {
 					<form noValidate autoComplete="off">
 						<div className={'settings-item'}>
 							<FormControl className={'form-item-width'}>
-								<InputLabel htmlFor="charge-strength">
-									Charge Strength
-								</InputLabel>
+								<InputLabel htmlFor="charge-strength">Charge Strength</InputLabel>
 								<Input
 									id="charge-strength"
 									value={chargeStrength * -1}
@@ -1498,9 +1438,7 @@ export default function GraphNodeCluster2D(props) {
 						</div>
 						<div className={'settings-item'}>
 							<FormControl className={'form-item-width'}>
-								<InputLabel htmlFor="link-iterations">
-									Link Iterations
-								</InputLabel>
+								<InputLabel htmlFor="link-iterations">Link Iterations</InputLabel>
 								<Input
 									id="link-iterations"
 									value={linkIterations}
@@ -1528,9 +1466,7 @@ export default function GraphNodeCluster2D(props) {
 	 */
 
 	const renderNodeViewer = () => {
-		const forceGraphRef = graphRefProp
-			? graphRefProp.current
-			: graphRef.current;
+		const forceGraphRef = graphRefProp ? graphRefProp.current : graphRef.current;
 		if (forceGraphRef) {
 			forceGraphRef.d3Force('charge').strength(chargeStrength).distanceMin(20).distanceMax(700);
 			forceGraphRef.d3Force('link').distance(linkDistance).iterations(linkIterations);
@@ -1580,11 +1516,7 @@ export default function GraphNodeCluster2D(props) {
 					<GCTooltip title="Zoom In" arrow>
 						<StyledRefresh
 							onClick={() => {
-								trackEvent(
-									getTrackingNameForFactory(cloneData.clone_name),
-									'graphView',
-									'ZoomIn'
-								);
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ZoomIn');
 								zoomInOut(true);
 							}}
 						>
@@ -1594,11 +1526,7 @@ export default function GraphNodeCluster2D(props) {
 					<GCTooltip title="Zoom Out" arrow>
 						<StyledRefresh
 							onClick={() => {
-								trackEvent(
-									getTrackingNameForFactory(cloneData.clone_name),
-									'graphView',
-									'ZoomOut'
-								);
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ZoomOut');
 								zoomInOut(false);
 							}}
 						>
@@ -1608,11 +1536,7 @@ export default function GraphNodeCluster2D(props) {
 					<GCTooltip title="Recenter graph" arrow>
 						<StyledRefresh
 							onClick={() => {
-								trackEvent(
-									getTrackingNameForFactory(cloneData.clone_name),
-									'graphView',
-									'CenterGraph'
-								);
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'CenterGraph');
 								recenterGraph();
 							}}
 						>
@@ -1627,11 +1551,7 @@ export default function GraphNodeCluster2D(props) {
 					<GCTooltip title="Reset graph" arrow>
 						<StyledRefresh
 							onClick={() => {
-								trackEvent(
-									getTrackingNameForFactory(cloneData.clone_name),
-									'graphView',
-									'ResetGraph'
-								);
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'graphView', 'ResetGraph');
 								handleResetGraph();
 								setResetGraphClicked(true);
 							}}

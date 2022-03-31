@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const export_history = sequelize.define('export_history',
+	const export_history = sequelize.define(
+		'export_history',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,22 +10,22 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			user_id: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			new_user_id: {
 				type: DataTypes.STRING,
 			},
 			download_request_body: {
-				type: DataTypes.JSONB
+				type: DataTypes.JSONB,
 			},
 			search_response_metadata: {
-				type: DataTypes.JSONB
-			}
+				type: DataTypes.JSONB,
+			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'export_history',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return export_history;

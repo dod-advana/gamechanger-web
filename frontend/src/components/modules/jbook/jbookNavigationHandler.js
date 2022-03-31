@@ -1,19 +1,16 @@
 import React from 'react';
 import JAICLogo from '../../../images/logos/JBooks_wht.svg';
-import {
-	PageLink,
-	ConstrainedIcon
-} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import { PageLink, ConstrainedIcon } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import { HoverNavItem } from '../../navigation/NavItems';
 import GCTooltip from '../../common/GCToolTip';
 import { getNotifications } from '../../notifications/Notifications';
 import { trackEvent } from '../../telemetry/Matomo';
-import {getTrackingNameForFactory, PAGE_DISPLAYED} from '../../../utils/gamechangerUtils';
+import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
-import {setState} from '../../../utils/sharedFunctions';
+import { setState } from '../../../utils/sharedFunctions';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 import UserIcon from '../../../images/icon/UserIcon.png';
@@ -33,12 +30,11 @@ const getToolTheme = (cloneData) => {
 				<img src={JAICLogo} alt="tool logo" />
 			</PageLink>
 		),
-		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`
+		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 	};
 };
 
 const JBookNavigationHandler = {
-
 	getToolState: (state) => {
 		return {
 			knowledgeBaseHref: 'https://wiki.advana.data.mil',
@@ -47,7 +43,7 @@ const JBookNavigationHandler = {
 			hideAllApplicationsSection: false,
 			hideContentSection: false,
 			extraSupportLinks: [],
-			associatedApplications: []
+			associatedApplications: [],
 		};
 	},
 
@@ -78,7 +74,11 @@ const JBookNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -112,7 +112,11 @@ const JBookNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -128,11 +132,7 @@ const JBookNavigationHandler = {
 				</GCTooltip>
 				{Permissions.hasPermission('JBOOK Admin') && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href={`#/${state.cloneData.url}/admin`}
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>
@@ -140,9 +140,13 @@ const JBookNavigationHandler = {
 					</GCTooltip>
 				)}
 				<GCTooltip title="User Guide" placement="right" arrow>
-					<a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', width: '40px' }}>
-						<HoverNavItem centered toolTheme={toolTheme}
-						>
+					<a
+						href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources"
+						target="_blank"
+						rel="noopener noreferrer"
+						style={{ color: 'white', textDecoration: 'none', width: '40px' }}
+					>
+						<HoverNavItem centered toolTheme={toolTheme}>
 							<ConstrainedIcon src={ResourcesIcon} />
 						</HoverNavItem>
 					</a>
@@ -177,7 +181,11 @@ const JBookNavigationHandler = {
 				<GCTooltip title="About Us" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -211,7 +219,11 @@ const JBookNavigationHandler = {
 				<GCTooltip title="User Dashboard" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -237,7 +249,12 @@ const JBookNavigationHandler = {
 					</GCTooltip>
 				)}
 				<GCTooltip title="User Guide" placement="right" arrow>
-					<a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>
+					<a
+						href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources"
+						target="_blank"
+						rel="noopener noreferrer"
+						style={{ color: 'white', textDecoration: 'none' }}
+					>
 						<HoverNavItem toolTheme={toolTheme}>
 							<ConstrainedIcon src={ResourcesIcon} />
 							<span style={{ marginLeft: '10px' }}>User Guide</span>
@@ -246,7 +263,7 @@ const JBookNavigationHandler = {
 				</GCTooltip>
 			</div>
 		);
-	}
+	},
 };
 
 export default JBookNavigationHandler;

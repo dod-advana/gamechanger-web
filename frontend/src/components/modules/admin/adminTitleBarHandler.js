@@ -16,12 +16,7 @@ const AdminTitleBar = {
 		if (cloneData.clone_name === 'gamechanger') {
 			return (
 				<div style={{ display: 'flex' }}>
-					<img
-						src={GamechangerLogo}
-						style={styles.adminTitle}
-						onClick={onTitleClick}
-						alt="title"
-					/>
+					<img src={GamechangerLogo} style={styles.adminTitle} onClick={onTitleClick} alt="title" />
 					<Typography variant="h2" style={styles.adminWording} display="inline">
 						Admin
 					</Typography>
@@ -29,10 +24,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'nga') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={NGA}
 						style={styles.adminTitle}
@@ -47,10 +39,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'hermes') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={Hermes}
 						style={styles.adminTitle}
@@ -65,10 +54,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'nfr') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={NFR}
 						style={styles.adminTitle}
@@ -83,10 +69,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'space-force') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={SpaceForce}
 						style={styles.adminTitle}
@@ -101,10 +84,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'covid19') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={Covid19}
 						style={styles.adminTitle}
@@ -119,10 +99,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'cdo') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={CDO}
 						style={styles.adminTitle}
@@ -137,10 +114,7 @@ const AdminTitleBar = {
 			);
 		} else if (cloneData.clone_name === 'jbook') {
 			return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<img
 						src={JAICLogo}
 						style={styles.adminTitle}
@@ -154,11 +128,8 @@ const AdminTitleBar = {
 				</div>
 			);
 		} else {
-			 return (
-				<div
-					onClick={onTitleClick}
-					style={{ display: 'flex' }}
-				>
+			return (
+				<div onClick={onTitleClick} style={{ display: 'flex' }}>
 					<Typography variant="h1" style={styles.wording} display="inline">
 						{cloneData.display_name}
 					</Typography>

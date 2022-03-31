@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const faq = sequelize.define('faq',
+	const faq = sequelize.define(
+		'faq',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,20 +10,20 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			question: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			answer: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			category: {
-				type: DataTypes.STRING
+				type: DataTypes.STRING,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'faq',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return faq;

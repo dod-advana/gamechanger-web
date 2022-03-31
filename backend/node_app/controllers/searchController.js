@@ -7,11 +7,11 @@ const FAVORITE_SEARCH = require('../models').favorite_searches;
 const GC_SEARCH_URLS = require('../models').gc_search_urls;
 const APP_SETTINGS = require('../models').app_settings;
 const { MLApiClient } = require('../lib/mlApiClient');
-const {Thesaurus} = require('../lib/thesaurus');
+const { Thesaurus } = require('../lib/thesaurus');
 const asyncRedisLib = require('async-redis');
 const sparkMD5Lib = require('spark-md5');
 const _ = require('lodash');
-const { DataLibrary} = require('../lib/dataLibrary');
+const { DataLibrary } = require('../lib/dataLibrary');
 const { Reports } = require('../lib/reports');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
 const { getTenDigitUserId } = require('../utils/userUtility');
@@ -23,7 +23,6 @@ const separatedRedisAsyncClientDB = 4;
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 class SearchController {
-
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
@@ -40,7 +39,7 @@ class SearchController {
 			reports = new Reports(opts),
 			gcSearchURLs = GC_SEARCH_URLS,
 			appSettings = APP_SETTINGS,
-			dataTracker = new DataTrackerController(opts)
+			dataTracker = new DataTrackerController(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -58,7 +57,7 @@ class SearchController {
 		this.dataTracker = dataTracker;
 		this.appSettings = appSettings;
 
-		if (!async_redis){
+		if (!async_redis) {
 			this.redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 			this.separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 		} else {
@@ -68,7 +67,7 @@ class SearchController {
 
 		this.redisAsyncClient.select(redisAsyncClientDB);
 		this.separatedRedisAsyncClient.select(separatedRedisAsyncClientDB);
-		
+
 		this.storeRecordOfSearchInPg = this.storeRecordOfSearchInPg.bind(this);
 		this.transformDocumentSearchResults = this.transformDocumentSearchResults.bind(this);
 		this.convertTinyURL = this.convertTinyURL.bind(this);
@@ -84,23 +83,25 @@ class SearchController {
 	async combinedSearch(searchText, userId, req, expansionDict, index, operator, offset) {
 		let filename;
 		let sentenceResults = this.mlApi.getSentenceTransformerResults(searchText, userId);
-		let searchResults = this.documentSearch(req, {...req.body, expansionDict, index, operator}, userId);
+		let searchResults = this.documentSearch(req, { ...req.body, expansionDict, index, operator }, userId);
 		const resultArray = await Promise.all([sentenceResults, searchResults]);
 		sentenceResults = resultArray[0];
 		searchResults = resultArray[1];
 
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95){
+		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.95) {
 			filename = sentenceResults[0].id;
 			searchResults.totalCount += 1;
 		}
 		const topSentenceFind = searchResults.docs.find((item) => item.id === filename);
 		if (sentenceResults === TRANSFORM_ERRORED) {
 			searchResults.transformFailed = true;
-		} else if (topSentenceFind && offset === 0){	// if the +95% result exists within the documentSearch results, reorder them
+		} else if (topSentenceFind && offset === 0) {
+			// if the +95% result exists within the documentSearch results, reorder them
 			topSentenceFind.search_mode = 'Intelligent Search';
 			searchResults.docs.unshift(topSentenceFind);
-		} else if (offset === 0 && filename) { // if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
-			const sentenceSearchRes = await this.documentSearchOneID(req, {...req.body, id: filename}, userId);
+		} else if (offset === 0 && filename) {
+			// if sentenceSearch is not found in the documentSearch results, and we're on the first page, find and add
+			const sentenceSearchRes = await this.documentSearchOneID(req, { ...req.body, id: filename }, userId);
 			sentenceSearchRes.docs[0].search_mode = 'Intelligent Search';
 			searchResults.docs.unshift(sentenceSearchRes.docs[0]);
 		}
@@ -117,7 +118,7 @@ class SearchController {
 				forGraphCache = false,
 				cloneData = {},
 				searchType,
-				index = ''
+				index = '',
 			} = body;
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
@@ -131,8 +132,8 @@ class SearchController {
 				switch (cloneData.clone_data.esCluster) {
 					case 'eda':
 						if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-
-							const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
+							const { extSearchFields = [], extRetrieveFields = [] } =
+								this.constants.EDA_ELASTIC_SEARCH_OPTS;
 
 							body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 							body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
@@ -160,16 +161,30 @@ class SearchController {
 			}
 
 			const results = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				if (getIdList) {
 					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
 
-				if (forGraphCache){
+				if (forGraphCache) {
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return this.searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+					return this.searchUtility.cleanUpEsResults(
+						results,
+						searchTerms,
+						userId,
+						selectedDocuments,
+						expansionDict,
+						esIndex,
+						esQuery
+					);
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'M91NVGW', userId);
@@ -188,26 +203,39 @@ class SearchController {
 
 			const { cloneData = {}, id = '', searchTerms = [], expansionDict = {}, limit = 20 } = body;
 
-			const {index} = this.constants.EDA_ELASTIC_SEARCH_OPTS;
+			const { index } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 			const esQuery = this.searchUtility.getESQueryUsingOneID(id, userId, limit);
 
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
 
 			const esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-				return this.searchUtility.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, esIndex, esQuery);
+			if (
+				esResults &&
+				esResults.body &&
+				esResults.body.hits &&
+				esResults.body.hits.total &&
+				esResults.body.hits.total.value &&
+				esResults.body.hits.total.value > 0
+			) {
+				return this.searchUtility.cleanUpEsResults(
+					esResults,
+					searchTerms,
+					userId,
+					null,
+					expansionDict,
+					esIndex,
+					esQuery
+				);
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
 				return { totalCount: 0, docs: [] };
 			}
-
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'U1EIAR2', userId);
 			throw msg;
 		}
-
 	}
 
 	async documentSearchUsingParaId(req, body, userId) {
@@ -221,38 +249,82 @@ class SearchController {
 			body.parsedQuery = parsedQuery;
 			body.paraIds = filenames;
 
-			const {index} = this.constants.EDA_ELASTIC_SEARCH_OPTS;
+			const { index } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 
 			const esQuery = this.searchUtility.getElasticsearchQueryUsingParagraphId(body, userId);
 
 			let clientObj = this.getESClient(cloneData, permissions, index);
 
-			const esResults = await this.dataApi.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
-				return this.searchUtility.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, clientObj.esIndex, esQuery);
-
+			const esResults = await this.dataApi.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
+			);
+			if (
+				esResults &&
+				esResults.body &&
+				esResults.body.hits &&
+				esResults.body.hits.total &&
+				esResults.body.hits.total.value &&
+				esResults.body.hits.total.value > 0
+			) {
+				return this.searchUtility.cleanUpEsResults(
+					esResults,
+					searchTerms,
+					userId,
+					null,
+					expansionDict,
+					clientObj.esIndex,
+					esQuery
+				);
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JBVXMP6', userId);
 				return { totalCount: 0, docs: [] };
 			}
-
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'A5TS6ST', userId);
 			throw msg;
 		}
 	}
 
 	async storeSearchES(historyRec) {
-		const { user_id, searchText, startTime, endTime, hadError, numResults, searchType, cachedResult, orgFilters, tiny_url, request_body, search_version, clone_name } = historyRec;
-
+		const {
+			user_id,
+			searchText,
+			startTime,
+			endTime,
+			hadError,
+			numResults,
+			searchType,
+			cachedResult,
+			orgFilters,
+			tiny_url,
+			request_body,
+			search_version,
+			clone_name,
+		} = historyRec;
 	}
-	
+
 	async storeRecordOfSearchInPg(historyRec, cloneData = {}, showTutorial) {
 		let userId = 'Unknown';
 		try {
-			const { user_id, searchText, startTime, endTime, hadError, numResults, searchType, cachedResult, orgFilters, tiny_url, request_body, search_version, clone_name } = historyRec;
+			const {
+				user_id,
+				searchText,
+				startTime,
+				endTime,
+				hadError,
+				numResults,
+				searchType,
+				cachedResult,
+				orgFilters,
+				tiny_url,
+				request_body,
+				search_version,
+				clone_name,
+			} = historyRec;
 
 			if (user_id) userId = user_id;
 
@@ -271,11 +343,10 @@ class SearchController {
 				tiny_url: tiny_url,
 				clone_name,
 				request_body,
-				search_version
+				search_version,
 			};
 
 			this.gcHistory.create(obj);
-
 		} catch (err) {
 			this.logger.error(err, 'UQ5B8CP', userId);
 		}
@@ -287,9 +358,9 @@ class SearchController {
 			let rankedDocs = [];
 
 			// removing the highlighting that comes from elasticsearch and adds pagenumber to the id
-			docs.forEach(doc => {
-				const updatedHits = doc.pageHits.map(hit => {
-					return { id: `${doc.id}+${hit.pageNumber}`, text: hit.snippet.replace(/<em>(.*?)<\/em>/g, '$1')};
+			docs.forEach((doc) => {
+				const updatedHits = doc.pageHits.map((hit) => {
+					return { id: `${doc.id}+${hit.pageNumber}`, text: hit.snippet.replace(/<em>(.*?)<\/em>/g, '$1') };
 				});
 				flatHits = flatHits.concat(updatedHits);
 			});
@@ -298,23 +369,23 @@ class SearchController {
 			const aggregated = new Map();
 
 			// highlights context and aggregates the flattened pageHits to their respective docIds
-			transformedResults.answers.forEach(r => {
-				const {text, answer, id} = r;
+			transformedResults.answers.forEach((r) => {
+				const { text, answer, id } = r;
 				const [docId, parNum] = id.split('+');
 				const highlightedText = text.replace(answer, `<em>${answer}</em>`);
-				if (!aggregated.get(docId)){
-					aggregated.set(docId, [{pageNumber: parNum, snippet: highlightedText}]);
+				if (!aggregated.get(docId)) {
+					aggregated.set(docId, [{ pageNumber: parNum, snippet: highlightedText }]);
 				} else {
 					const arr = aggregated.get(docId);
-					arr.push({pageNumber: parNum, snippet: highlightedText});
+					arr.push({ pageNumber: parNum, snippet: highlightedText });
 					aggregated.set(docId, arr);
 				}
 			});
 
 			// pushes newly aggregated docs to an array in new ranked order
 			for (let [docId, hits] of aggregated) {
-				const d = docs.filter(doc => doc.id === docId);
-				const updatedDoc = {...d[0], pageHits: hits};
+				const d = docs.filter((doc) => doc.id === docId);
+				const updatedDoc = { ...d[0], pageHits: hits };
 				rankedDocs.push(updatedDoc);
 			}
 
@@ -334,9 +405,9 @@ class SearchController {
 			const tinyUrl = await this.convertTiny(url);
 
 			if (tinyUrl && tinyUrl.url) {
-				res.status(200).send({url: tinyUrl.url});
+				res.status(200).send({ url: tinyUrl.url });
 			} else {
-				res.status(200).send({url: null});
+				res.status(200).send({ url: null });
 			}
 		} catch (err) {
 			this.logger.error(err.message, 'X3R6DI5', userId);
@@ -351,9 +422,9 @@ class SearchController {
 		}
 		const tinyUrl = await this.gcSearchURLs.findOne({
 			where: {
-				id
+				id,
 			},
-			raw: true
+			raw: true,
 		});
 
 		return tinyUrl;
@@ -364,20 +435,17 @@ class SearchController {
 		try {
 			const { url } = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const [tiny] = await this.gcSearchURLs.findOrCreate(
-				{
-					where: { url: url },
-					defaults: {
-						url: url,
-					},
-					raw: true
-				}
-			);
+			const [tiny] = await this.gcSearchURLs.findOrCreate({
+				where: { url: url },
+				defaults: {
+					url: url,
+				},
+				raw: true,
+			});
 
 			const tinyURL = tiny ? tiny.id : '';
 
-			res.status(200).send({tinyURL});
-
+			res.status(200).send({ tinyURL });
 		} catch (err) {
 			this.logger.error(err.message, '8NA29ET', userId);
 			res.status(500).send(err);
@@ -401,7 +469,7 @@ class SearchController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {query, esClient} = req.body;
+			const { query, esClient } = req.body;
 			let safeEsClient = esClient;
 			let index = this.constants.GAME_CHANGER_OPTS.index;
 			if (req.permissions.includes('View EDA') || req.permissions.includes('Webapp Super Admin')) {
@@ -440,7 +508,7 @@ class SearchController {
 		let esIndex = 'gamechanger';
 		switch (cloneData.clone_name) {
 			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 					esClientName = 'eda';
 					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 					return { esClientName, esIndex };
@@ -460,8 +528,8 @@ class SearchController {
 		return { esClientName, esIndex };
 	}
 
-	async expandTerms(req,res) {
-		const {searchText} = req.body;
+	async expandTerms(req, res) {
+		const { searchText } = req.body;
 		let expansionDict = {};
 		try {
 			expansionDict = await this.mlApi.queryExpansion(searchText);

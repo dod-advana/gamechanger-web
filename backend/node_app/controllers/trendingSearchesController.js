@@ -6,15 +6,12 @@ const sequelize = require('sequelize');
 const Op = sequelize.Op;
 
 class TrendingSearchesController {
-
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
 			gcHistory = GC_HISTORY,
 			gcTrendingBlacklist = GC_TRENDING_BLACKLIST,
 			searchUtility = new SearchUtility(opts),
-
-
 		} = opts;
 
 		this.logger = logger;
@@ -27,7 +24,6 @@ class TrendingSearchesController {
 		this.setTrendingBlacklist = this.setTrendingBlacklist.bind(this);
 		this.deleteTrendingBlacklist = this.deleteTrendingBlacklist.bind(this);
 		this.getWeeklySearchCount = this.getWeeklySearchCount.bind(this);
-
 	}
 
 	async trendingSearchesPOST(req, res) {
@@ -36,24 +32,17 @@ class TrendingSearchesController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {
-				cloneData = {},
-				daysBack,
-			} = req.body;
+			const { cloneData = {}, daysBack } = req.body;
 			const blacklist = [];
-			try{
+			try {
 				const blacklistItems = await this.gcTrendingBlacklist.findAll({
-					attributes: [
-						sequelize.literal('search_text, added_by, \"updatedAt\"')
-					],
-					order: [
-						[sequelize.literal('\"updatedAt\"'), 'DESC']
-					],
-					raw: true
+					attributes: [sequelize.literal('search_text, added_by, "updatedAt"')],
+					order: [[sequelize.literal('"updatedAt"'), 'DESC']],
+					raw: true,
 				});
 				for (let items of blacklistItems) {
 					blacklist.push(items['search_text']);
-				 }
+				}
 			} catch (err) {
 				this.logger.error(err, '5ED1092');
 			}
@@ -67,7 +56,6 @@ class TrendingSearchesController {
 		}
 	}
 
-
 	async getTrendingBlacklist(req, res) {
 		let userId = 'Unknown';
 
@@ -75,13 +63,9 @@ class TrendingSearchesController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const blacklist = await this.gcTrendingBlacklist.findAll({
-				attributes: [
-					sequelize.literal('search_text, added_by, \"updatedAt\"')
-				],
-				order: [
-					[sequelize.literal('\"updatedAt\"'), 'DESC']
-				],
-				raw: true
+				attributes: [sequelize.literal('search_text, added_by, "updatedAt"')],
+				order: [[sequelize.literal('"updatedAt"'), 'DESC']],
+				raw: true,
 			});
 			res.status(200).send(blacklist);
 		} catch (err) {
@@ -96,19 +80,17 @@ class TrendingSearchesController {
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {
-				createEntry = 'test'
-			} = req.body;
+			const { createEntry = 'test' } = req.body;
 
 			const blacklist = await this.gcTrendingBlacklist.findOrCreate({
 				where: {
 					search_text: createEntry,
-					added_by: userId
+					added_by: userId,
 				},
 				default: {
 					search_text: createEntry,
-					added_by: userId
-				}
+					added_by: userId,
+				},
 			});
 			res.status(200).send(blacklist);
 		} catch (err) {
@@ -123,14 +105,12 @@ class TrendingSearchesController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const {
-				searchText = 'test'
-			} = req.body;
+			const { searchText = 'test' } = req.body;
 
 			const deleted = this.gcTrendingBlacklist.destroy({
 				where: {
-					search_text: searchText
-				}
+					search_text: searchText,
+				},
 			});
 
 			res.status(200).send(deleted);
@@ -153,7 +133,6 @@ class TrendingSearchesController {
 			res.status(500).send(results);
 		}
 	}
-
 }
 
 module.exports.TrendingSearchesController = TrendingSearchesController;

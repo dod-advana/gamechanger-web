@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const RESPONSIBILITIES = sequelize.define('app_settings',
+	const RESPONSIBILITIES = sequelize.define(
+		'app_settings',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,17 +10,17 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			key: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			value: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'app_settings',
-			timestamps: false
+			timestamps: false,
 		}
 	);
 	return RESPONSIBILITIES;

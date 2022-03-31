@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-	FormControl,
-	FormControlLabel,
-	Radio,
-	RadioGroup,
-} from '@material-ui/core';
+import { FormControl, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import { TokenAnnotator } from 'react-text-annotate';
 import { CustomMark } from './CustomMark';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
@@ -62,14 +57,7 @@ const StyledRadio = (props) => {
 	);
 };
 
-const highlightColors = [
-	primaryPurple,
-	primaryAlt,
-	tertiaryGoldDarkest,
-	primaryRed,
-	primaryDark,
-	tertiaryGreen,
-];
+const highlightColors = [primaryPurple, primaryAlt, tertiaryGoldDarkest, primaryRed, primaryDark, tertiaryGreen];
 
 export const PowerUserAnnotationCard = ({
 	text,
@@ -89,10 +77,7 @@ export const PowerUserAnnotationCard = ({
 		// when tags prop changes this will create a new Map of colors for each tag
 		for (let i = highlightColors.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
-			[highlightColors[i], highlightColors[j]] = [
-				highlightColors[j],
-				highlightColors[i],
-			];
+			[highlightColors[i], highlightColors[j]] = [highlightColors[j], highlightColors[i]];
 		}
 		const tagmap = tags.reduce((acc, tag, i) => {
 			acc.set(tag, highlightColors[i % highlightColors.length]);
@@ -130,9 +115,7 @@ export const PowerUserAnnotationCard = ({
 	));
 
 	return (
-		<div
-			className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`}
-		>
+		<div className={`tutorial-step-${componentStepNumbers['Crowd Assist Panel']}`}>
 			<div
 				style={{
 					backgroundColor: '#DFE6EE',
@@ -141,8 +124,7 @@ export const PowerUserAnnotationCard = ({
 				}}
 			>
 				<p style={{ margin: 0 }}>
-					Help the community! Highlight text you're familiar with, and tag it
-					with a corresponding opinion.
+					Help the community! Highlight text you're familiar with, and tag it with a corresponding opinion.
 				</p>
 				<ol style={{ margin: 0, padding: '0 18px', fontWeight: 600 }}>
 					<li>Select one option</li>
@@ -181,11 +163,7 @@ export const PowerUserAnnotationCard = ({
 						{options}
 					</RadioGroup>
 				</FormControl>
-				<Typography
-					variant="h5"
-					display="outline"
-					style={{ margin: '15px 0 0 0' }}
-				>
+				<Typography variant="h5" display="outline" style={{ margin: '15px 0 0 0' }}>
 					Highlight text for: {tag}
 				</Typography>
 			</div>
