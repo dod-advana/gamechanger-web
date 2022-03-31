@@ -138,7 +138,8 @@ export default class SimpleTable extends React.Component {
 									key={`${rIdx}_${cIdx}`}
 								>
 									{editIcon}{(useParser) ? parse(r[c]) : 
-										Array.isArray(r[c]) ? r[c].join(', ') : r[c]
+										Array.isArray(r[c]) ? r[c].join(', ') :
+											typeof(r[c]) === 'boolean' ? r[c].toString() : r[c]
 									}
 								</td>
 							);
