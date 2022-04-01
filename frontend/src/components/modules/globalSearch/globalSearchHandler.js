@@ -8,13 +8,7 @@ import {
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { checkUserInfo, createTinyUrl, getUserData, isDecoupled, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -35,12 +29,7 @@ const GlobalSearchHandler = {
 			selectedCategories,
 		} = state;
 
-		if (
-			isDecoupled &&
-			userData &&
-			userData.search_history &&
-			userData.search_history.length > 9
-		) {
+		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
@@ -70,18 +59,13 @@ const GlobalSearchHandler = {
 		const trimmed = searchText.trim();
 		if (_.isEmpty(trimmed)) return;
 
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 
 		const t0 = new Date().getTime();
@@ -193,12 +177,7 @@ const GlobalSearchHandler = {
 
 			if (searchResults && searchResults.length > 0) {
 				if (!offset) {
-					trackSearch(
-						searchText,
-						`${getTrackingNameForFactory(cloneData.clone_name)}`,
-						totalCount,
-						false
-					);
+					trackSearch(searchText, `${getTrackingNameForFactory(cloneData.clone_name)}`, totalCount, false);
 				}
 
 				setState(dispatch, {
@@ -226,12 +205,7 @@ const GlobalSearchHandler = {
 				});
 			} else {
 				if (!offset) {
-					trackSearch(
-						searchText,
-						`${getTrackingNameForFactory(cloneData.clone_name)}`,
-						0,
-						false
-					);
+					trackSearch(searchText, `${getTrackingNameForFactory(cloneData.clone_name)}`, 0, false);
 				}
 
 				setState(dispatch, {
@@ -280,13 +254,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleApplicationsPagination(state, dispatch) {
-		const {
-			searchText = '',
-			applicationsPage,
-			listView,
-			showTutorial,
-			cloneData,
-		} = state;
+		const { searchText = '', applicationsPage, listView, showTutorial, cloneData } = state;
 
 		const offset = (applicationsPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
@@ -321,13 +289,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDashboardsPagination(state, dispatch) {
-		const {
-			searchText = '',
-			dashboardsPage,
-			listView,
-			showTutorial,
-			cloneData,
-		} = state;
+		const { searchText = '', dashboardsPage, listView, showTutorial, cloneData } = state;
 
 		const offset = (dashboardsPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
@@ -362,13 +324,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDataSourcesPagination(state, dispatch) {
-		const {
-			searchText = '',
-			dataSourcesPage,
-			listView,
-			showTutorial,
-			cloneData,
-		} = state;
+		const { searchText = '', dataSourcesPage, listView, showTutorial, cloneData } = state;
 
 		const offset = (dataSourcesPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
@@ -392,12 +348,10 @@ const GlobalSearchHandler = {
 
 		if (resp.data) {
 			setState(dispatch, {
-				dataSourcesSearchResults: resp.data.dataSources.results.map(
-					(result) => {
-						result.type = 'dataSource';
-						return result;
-					}
-				),
+				dataSourcesSearchResults: resp.data.dataSources.results.map((result) => {
+					result.type = 'dataSource';
+					return result;
+				}),
 				dataSourcesLoading: false,
 				dataSourcesPagination: false,
 			});
@@ -405,13 +359,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDatabasesPagination(state, dispatch) {
-		const {
-			searchText = '',
-			databasesPage,
-			listView,
-			showTutorial,
-			cloneData,
-		} = state;
+		const { searchText = '', databasesPage, listView, showTutorial, cloneData } = state;
 
 		const offset = (databasesPage - 1) * RESULTS_PER_PAGE;
 		const charsPadding = listView ? 750 : 90;
@@ -459,9 +407,7 @@ const GlobalSearchHandler = {
 
 		if (categoriesURL) {
 			const categories = categoriesURL.split('_');
-			const selectedCategories = _.cloneDeep(
-				defaultState.selectedCategories || {}
-			);
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
 			for (const category in selectedCategories) {
 				selectedCategories[category] = categories.includes(category);
 			}
@@ -478,16 +424,13 @@ const GlobalSearchHandler = {
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(
-				_.pickBy(state.selectedCategories, (value) => !!value)
-			  ).join('_')
+			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join('_')
 			: undefined;
 
 		const params = new URLSearchParams();
 		if (searchText) params.append('keyword', searchText);
 		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (categoriesText !== undefined)
-			params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

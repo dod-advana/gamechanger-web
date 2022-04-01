@@ -8,24 +8,24 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			org_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			org_acronym: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			image_link: {
 				type: Sequelize.STRING,
-				allowNull: false
-			}
+				allowNull: false,
+			},
 		});
 	},
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

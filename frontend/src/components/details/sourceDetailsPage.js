@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { gcColors } from '../../containers/GameChangerPage';
-import {Paper} from '@material-ui/core';
+import { Paper } from '@material-ui/core';
 import SimpleTable from '../common/SimpleTable';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GCAccordion from '../common/GCAccordion';
@@ -63,7 +63,7 @@ const SourceDetailsPage = ({ source, cloneData, initialSourceData, userData, raw
 						listView: true,
 						showSideFilters: false,
 						userData,
-						rawSearchResults
+						rawSearchResults,
 					}}
 					dispatch={() => {}}
 				/>
@@ -74,9 +74,8 @@ const SourceDetailsPage = ({ source, cloneData, initialSourceData, userData, raw
 	return (
 		<div>
 			<p style={{ margin: '10px 4%', fontSize: 18 }}>
-				Welcome to our new (Beta version) Source Details page! As you look
-				around, you may note some technical issues below; please bear with us
-				while we continue making improvements here and check back often for a
+				Welcome to our new (Beta version) Source Details page! As you look around, you may note some technical
+				issues below; please bear with us while we continue making improvements here and check back often for a
 				more stable version.
 			</p>
 			<MainContainer>
@@ -132,22 +131,15 @@ const SourceDetailsPage = ({ source, cloneData, initialSourceData, userData, raw
 							backgroundColor={'rgb(238,241,242)'}
 						>
 							<div style={{ width: '100%' }}>
-								<div
-									style={{ display: 'flex', justifyContent: 'space-between' }}
-								>
+								<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 									<div style={styles.resultsCount}>
 										{initialSourceData.totalCount > 0
-											? `${numberWithCommas(
-												initialSourceData.totalCount
-											  )} results found in ${
-												initialSourceData.timeFound
+											? `${numberWithCommas(initialSourceData.totalCount)} results found in ${
+													initialSourceData.timeFound
 											  } seconds`
 											: ''}
 									</div>
-									<div
-										style={{ marginTop: '-14px', display: 'flex' }}
-										className={'gcPagination'}
-									>
+									<div style={{ marginTop: '-14px', display: 'flex' }} className={'gcPagination'}>
 										<Pagination
 											activePage={page}
 											itemsCountPerPage={10}

@@ -75,13 +75,7 @@ const PolicySearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		if (
-			isDecoupled &&
-			userData &&
-			userData.search_history &&
-			userData.search_history.length > 9 &&
-			!showTutorial
-		) {
+		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9 && !showTutorial) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
@@ -117,20 +111,15 @@ const PolicySearchHandler = {
 		if (_.isEmpty(trimmed)) return;
 
 		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
 		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 
 		const t0 = new Date().getTime();
@@ -247,7 +236,7 @@ const PolicySearchHandler = {
 					publicationDateAllTime,
 					includeRevoked,
 					archivedCongressSelected,
-					ltr
+					ltr,
 				},
 				limit: 18,
 			});
@@ -286,12 +275,10 @@ const PolicySearchHandler = {
 					// if entity, add wiki description
 					entities.forEach(async (obj, i) => {
 						if (obj && obj.type === 'organization') {
-							const descriptionAPI =
-								await gameChangerAPI.getDescriptionFromWikipedia(obj.name);
+							const descriptionAPI = await gameChangerAPI.getDescriptionFromWikipedia(obj.name);
 							let description = descriptionAPI.query;
 							if (description.pages) {
-								entities[i].description =
-									description.pages[Object.keys(description.pages)[0]].extract;
+								entities[i].description = description.pages[Object.keys(description.pages)[0]].extract;
 							}
 						}
 					});
@@ -384,10 +371,7 @@ const PolicySearchHandler = {
 
 						let sidebarTypes = [];
 						for (let elt in sortedTypes) {
-							sidebarTypes.push([
-								sortedTypes[elt].name,
-								numberWithCommas(sortedTypes[elt].value),
-							]);
+							sidebarTypes.push([sortedTypes[elt].name, numberWithCommas(sortedTypes[elt].value)]);
 						}
 						let orgData = [];
 						for (let key in orgCountMap) {
@@ -412,10 +396,7 @@ const PolicySearchHandler = {
 
 						let sidebarOrgData = [];
 						for (let elt2 in sortedOrgs) {
-							sidebarOrgData.push([
-								sortedOrgs[elt2].name,
-								numberWithCommas(sortedOrgs[elt2].value),
-							]);
+							sidebarOrgData.push([sortedOrgs[elt2].name, numberWithCommas(sortedOrgs[elt2].value)]);
 						}
 
 						if (
@@ -432,31 +413,29 @@ const PolicySearchHandler = {
 						}
 						if (searchSettings.orgUpdate) {
 							const typeFilterObject = {};
-							newSearchSettings.originalTypeFilters.forEach(
-								(type) => (typeFilterObject[type[0]] = 0)
-							);
+							newSearchSettings.originalTypeFilters.forEach((type) => (typeFilterObject[type[0]] = 0));
 
 							sidebarTypes.forEach((type) => {
 								typeFilterObject[type[0]] = type[1];
 							});
 
-							newSearchSettings.originalTypeFilters = Object.keys(
-								typeFilterObject
-							).map((type) => [type, typeFilterObject[type]]);
+							newSearchSettings.originalTypeFilters = Object.keys(typeFilterObject).map((type) => [
+								type,
+								typeFilterObject[type],
+							]);
 							newSearchSettings.originalTypeFilters.sort((a, b) => b[1] - a[1]);
 						} else if (searchSettings.typeUpdate) {
 							const orgFilterObject = {};
-							newSearchSettings.originalOrgFilters.forEach(
-								(org) => (orgFilterObject[org[0]] = 0)
-							);
+							newSearchSettings.originalOrgFilters.forEach((org) => (orgFilterObject[org[0]] = 0));
 
 							sidebarOrgData.forEach((org) => {
 								orgFilterObject[org[0]] = org[1];
 							});
 
-							newSearchSettings.originalOrgFilters = Object.keys(
-								orgFilterObject
-							).map((obj) => [obj, orgFilterObject[obj]]);
+							newSearchSettings.originalOrgFilters = Object.keys(orgFilterObject).map((obj) => [
+								obj,
+								orgFilterObject[obj],
+							]);
 							newSearchSettings.originalOrgFilters.sort((a, b) => b[1] - a[1]);
 						}
 
@@ -473,8 +452,7 @@ const PolicySearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							totalCount,
 							false
 						);
@@ -482,10 +460,7 @@ const PolicySearchHandler = {
 
 					setState(dispatch, {
 						searchSettings: newSearchSettings,
-						activeCategoryTab:
-							entities.length === 0 && topics.length === 0
-								? 'Documents'
-								: 'all',
+						activeCategoryTab: entities.length === 0 && topics.length === 0 ? 'Documents' : 'all',
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
 						loading: false,
@@ -517,8 +492,7 @@ const PolicySearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							totalCount,
 							false
 						);
@@ -615,9 +589,7 @@ const PolicySearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		const offset =
-			((activeCategoryTab === 'all' ? resultsPage : infiniteScrollPage) - 1) *
-			RESULTS_PER_PAGE;
+		const offset = ((activeCategoryTab === 'all' ? resultsPage : infiniteScrollPage) - 1) * RESULTS_PER_PAGE;
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
 		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
 		const transformResults = searchType === SEARCH_TYPES.contextual;
@@ -784,13 +756,8 @@ const PolicySearchHandler = {
 			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
 			: undefined;
 
-		const searchFieldText = Object.keys(
-			_.pickBy(searchFields, (value, key) => value.field)
-		)
-			.map(
-				(key) =>
-					`${searchFields[key].field.display_name}-${searchFields[key].input}`
-			)
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map((key) => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
 			.join('_');
 
 		const accessDateText =
@@ -799,21 +766,17 @@ const PolicySearchHandler = {
 				: undefined;
 
 		const pubDateText =
-			!publicationDateAllTime &&
-				publicationDateFilter &&
-				publicationDateFilter[0] &&
-				publicationDateFilter[1]
+			!publicationDateAllTime && publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]
 				? publicationDateFilter.map((date) => date.getTime()).join('_')
 				: undefined;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(
-				_.pickBy(state.selectedCategories, (value) => !!value)
-			).join('_')
+			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join('_')
 			: undefined;
 
-		const currentParams =
-			new URLSearchParams(window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, ''));
+		const currentParams = new URLSearchParams(
+			window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, '')
+		);
 
 		const params = new URLSearchParams();
 		if (searchText) params.append('q', searchText);
@@ -825,8 +788,7 @@ const PolicySearchHandler = {
 		if (accessDateText) params.append('accessDate', accessDateText);
 		if (pubDateText) params.append('pubDate', pubDateText);
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
-		if (categoriesText !== undefined)
-			params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;

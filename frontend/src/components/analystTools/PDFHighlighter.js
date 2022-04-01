@@ -1,25 +1,13 @@
 import React, { useEffect } from 'react';
-import {
-	PdfLoader,
-	PdfHighlighter,
-	Highlight,
-	Popup,
-	AreaHighlight,
-} from 'react-pdf-highlighter';
+import { PdfLoader, PdfHighlighter, Highlight, Popup, AreaHighlight } from 'react-pdf-highlighter';
 import Tip from './Tip';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
-export default function PDFHighlighter({ 
-	highlights,
-	scrollId,
-	handleSave,
-	saveActive,
-	documentLink
-}) {
+export default function PDFHighlighter({ highlights, scrollId, handleSave, saveActive, documentLink }) {
 	useEffect(() => {
 		scrollToHighlight();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[scrollId]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [scrollId]);
 
 	const scrollToHighlight = () => {
 		const highlight = getHighlightById(scrollId);
@@ -48,21 +36,18 @@ export default function PDFHighlighter({
 
 						scrollToHighlight();
 					}}
-					onSelectionFinished={(
-						position,
-						content,
-						hideTipAndSelection,
-						transformSelection
-					) => {
+					onSelectionFinished={(position, content, hideTipAndSelection, transformSelection) => {
 						return (
 							<>
-								{saveActive && <Tip
-									onOpen={transformSelection}
-									onConfirm={() => {
-										handleSave(content.text.trim(), position);
-										hideTipAndSelection();
-									}}
-								/>}
+								{saveActive && (
+									<Tip
+										onOpen={transformSelection}
+										onConfirm={() => {
+											handleSave(content.text.trim(), position);
+											hideTipAndSelection();
+										}}
+									/>
+								)}
 							</>
 						);
 					}}
@@ -75,9 +60,7 @@ export default function PDFHighlighter({
 						screenshot,
 						isScrolledTo
 					) => {
-						const isTextHighlight = !Boolean(
-							highlight.content && highlight.content.image
-						);
+						const isTextHighlight = !Boolean(highlight.content && highlight.content.image);
 
 						const component = isTextHighlight ? (
 							<Highlight
@@ -102,9 +85,7 @@ export default function PDFHighlighter({
 						return (
 							<Popup
 								popupContent={<></>}
-								onMouseOver={(popupContent) =>
-									setTip(highlight, (highlight) => popupContent)
-								}
+								onMouseOver={(popupContent) => setTip(highlight, (highlight) => popupContent)}
 								onMouseOut={hideTip}
 								key={index}
 								children={component}

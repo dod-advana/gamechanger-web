@@ -1,25 +1,28 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const organization_info = sequelize.define('organization_info',
+	const organization_info = sequelize.define(
+		'organization_info',
 		{
 			org_name: {
 				type: DataTypes.STRING,
 				primaryKey: true,
-				allowNull: false
+				allowNull: false,
 			},
 			org_acronym: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			image_link: {
 				type: DataTypes.STRING,
-				allowNull: false
-			}
-		},{
+				allowNull: false,
+			},
+		},
+		{
 			freezeTableName: true,
 			tableName: 'organization_info',
-			timestamps: false
-		});
+			timestamps: false,
+		}
+	);
 	return organization_info;
 };

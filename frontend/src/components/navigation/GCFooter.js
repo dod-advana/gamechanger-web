@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
-import {Button, Checkbox, FormControlLabel, FormGroup, Modal, TextField, Typography} from '@material-ui/core';
+import { Button, Checkbox, FormControlLabel, FormGroup, Modal, TextField, Typography } from '@material-ui/core';
 import JAICLogo from '../../images/logos/JAIC_wht.png';
 import styled from 'styled-components';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import GCButton from '../common/GCButton';
 import RequestAPIKeyDialog from '../api/RequestAPIKeyDialog';
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	dialogLg: {
 		maxWidth: '800px',
-		minWidth: '800px'
+		minWidth: '800px',
 	},
 	filterBox: {
 		backgroundColor: '#ffffff',
@@ -47,12 +47,12 @@ const useStyles = makeStyles((theme) => ({
 		border: '2px solid #bdccde',
 		pointerEvents: 'none',
 		marginLeft: '5px',
-		marginRight: '5px'
+		marginRight: '5px',
 	},
 	titleText: {
 		fontWeight: 900,
-		marginBottom: 5
-	}
+		marginBottom: 5,
+	},
 }));
 
 const FooterDiv = styled.div`
@@ -92,7 +92,6 @@ const CloseButton = styled.div`
 `;
 
 const GCFooter = (props) => {
-
 	const classes = useStyles();
 
 	const { setUserMatomo } = props;
@@ -141,7 +140,6 @@ const GCFooter = (props) => {
 		} catch (err) {
 			console.error('Error getting clone meta data: ', err);
 		}
-
 	};
 
 	useEffect(() => {
@@ -153,13 +151,15 @@ const GCFooter = (props) => {
 	}, []);
 
 	const setUserMatomoStatus = (status) => {
-
-		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then((data) => {
-			setUseMatomo(data.data);
-			setUserMatomo(data.data);
-		}, (err) => {
-			console.log(err);
-		});
+		gameChangerAPI.setUserMatomoStatus({ tracking: status }).then(
+			(data) => {
+				setUseMatomo(data.data);
+				setUserMatomo(data.data);
+			},
+			(err) => {
+				console.log(err);
+			}
+		);
 	};
 
 	const handleClose = () => {
@@ -183,9 +183,7 @@ const GCFooter = (props) => {
 	const renderAPIKeyRequestForm = () => {
 		return (
 			<>
-				<div
-					style={{ margin: '0 20px', display: 'flex', flexDirection: 'column' }}
-				>
+				<div style={{ margin: '0 20px', display: 'flex', flexDirection: 'column' }}>
 					{apiRequestLimit === 0 && (
 						<Typography display="inline" style={{ color: 'red' }}>
 							You have reached you're request limit for this month
@@ -195,9 +193,7 @@ const GCFooter = (props) => {
 						label="Name"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.name ? requestAPIKeyData.name : null
-						}
+						defaultValue={requestAPIKeyData.name ? requestAPIKeyData.name : null}
 						onChange={(event) => {
 							requestAPIKeyData.name = event.target.value;
 						}}
@@ -209,9 +205,7 @@ const GCFooter = (props) => {
 						label="Email"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.email ? requestAPIKeyData.email : null
-						}
+						defaultValue={requestAPIKeyData.email ? requestAPIKeyData.email : null}
 						onChange={(event) => {
 							requestAPIKeyData.email = event.target.value;
 						}}
@@ -223,9 +217,7 @@ const GCFooter = (props) => {
 						label="Reason"
 						required
 						fullWidth
-						defaultValue={
-							requestAPIKeyData.reason ? requestAPIKeyData.reason : null
-						}
+						defaultValue={requestAPIKeyData.reason ? requestAPIKeyData.reason : null}
 						onChange={(event) => {
 							requestAPIKeyData.reason = event.target.value;
 						}}
@@ -235,7 +227,9 @@ const GCFooter = (props) => {
 						margin="dense"
 						variant="outlined"
 					/>
-					<Typography variant="h3" style={{ width: '100%', fontSize: '24px' }}>Select clones to access</Typography>
+					<Typography variant="h3" style={{ width: '100%', fontSize: '24px' }}>
+						Select clones to access
+					</Typography>
 					<FormGroup style={{ margin: '0px 10px', width: '100%', flexDirection: 'row' }}>
 						{cloneMeta.map((clone) => {
 							return (
@@ -243,14 +237,16 @@ const GCFooter = (props) => {
 									key={clone.id}
 									name={clone.clone_name}
 									value={clone}
-									control={<Checkbox
-										onClick={() => handleCloneChange(clone.id)}
-										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-										checked={requestAPIKeyData?.clones.includes(clone.id)}
-										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-										name={clone.clone_name}
-										className={classes.filterBox}
-									/>}
+									control={
+										<Checkbox
+											onClick={() => handleCloneChange(clone.id)}
+											icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+											checked={requestAPIKeyData?.clones.includes(clone.id)}
+											checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+											name={clone.clone_name}
+											className={classes.filterBox}
+										/>
+									}
 									label={clone.clone_name}
 									labelPlacement="end"
 									className={classes.titleText}
@@ -273,47 +269,37 @@ const GCFooter = (props) => {
 				requestAPIKeyData.reason,
 				requestAPIKeyData.clones
 			)
-			.then(resp => {
-				gameChangerAPI
-					.updateUserAPIRequestLimit()
-					.then(() => setAPIRequestLimit(apiRequestLimit - 1));
+			.then((resp) => {
+				gameChangerAPI.updateUserAPIRequestLimit().then(() => setAPIRequestLimit(apiRequestLimit - 1));
 				setApiRequestError('');
 				setApiRequestModalOpen(false);
 				handleClose();
-			}).catch(e => {
+			})
+			.catch((e) => {
 				console.log(e);
 			});
 	};
-	
+
 	return (
 		<>
 			<FooterDiv>
 				<div style={styles.footerStyle}>
 					<Typography style={styles.footerText}>in partnership with</Typography>
-					<img
-						src={JAICLogo}
-						style={styles.title}
-						alt="jaic-title"
-						id={'titleButton'}
-					/>
+					<img src={JAICLogo} style={styles.title} alt="jaic-title" id={'titleButton'} />
 				</div>
-				<AdvanaFooter extraLinks={[
-					(<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
-						App-wide Tracking Agreement
-					</LinkButton>),
-					(<LinkButton
-						key="apiKeyRequest"
-						onClick={() => setApiRequestModalOpen(true)}
-					>
-						Request API Key
-					</LinkButton>)
-				]} />
+				<AdvanaFooter
+					extraLinks={[
+						<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
+							App-wide Tracking Agreement
+						</LinkButton>,
+						<LinkButton key="apiKeyRequest" onClick={() => setApiRequestModalOpen(true)}>
+							Request API Key
+						</LinkButton>,
+					]}
+				/>
 			</FooterDiv>
 
-			<Modal
-				open={trackingModalOpen}
-				onClose={() => setTrackingModalOpen(false)}
-			>
+			<Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)}>
 				<div
 					style={{
 						width: '50%',
@@ -329,20 +315,16 @@ const GCFooter = (props) => {
 					</CloseButton>
 					<div style={{ paddingTop: 50 }}>
 						<p>
-							Advana employs a web measurement and customization technology
-							(WMCT), on this site to remember your online interactions, to
-							conduct measurement and analysis of usage, or to customize your
-							experience. This WMCT activity is categorized as a Tier 2 WMCT:
-							i.e., multi-session tracking without collection of personally
-							identifiable information (PII), and is enabled by default. Advana
-							does not use the information associated with the WMCT to track
-							individual user activity on the Internet outside of Advana
-							websites, nor does it share the data obtained through such
-							technologies, without your explicit consent, with other
-							departments or agencies. Advana keeps a database of information
-							obtained from the use of this WMCT in an encrypted RDS instance,
-							but no personal data is maintained. Opting out of this WMCT does
-							not effect a user's access to information on this website.
+							Advana employs a web measurement and customization technology (WMCT), on this site to
+							remember your online interactions, to conduct measurement and analysis of usage, or to
+							customize your experience. This WMCT activity is categorized as a Tier 2 WMCT: i.e.,
+							multi-session tracking without collection of personally identifiable information (PII), and
+							is enabled by default. Advana does not use the information associated with the WMCT to track
+							individual user activity on the Internet outside of Advana websites, nor does it share the
+							data obtained through such technologies, without your explicit consent, with other
+							departments or agencies. Advana keeps a database of information obtained from the use of
+							this WMCT in an encrypted RDS instance, but no personal data is maintained. Opting out of
+							this WMCT does not effect a user's access to information on this website.
 						</p>
 					</div>
 					<div
@@ -358,10 +340,7 @@ const GCFooter = (props) => {
 								margin: '10px 0 0 0',
 							}}
 						>
-							<GCButton
-								isSecondaryBtn={true}
-								onClick={() => setTrackingModalOpen(false)}
-							>
+							<GCButton isSecondaryBtn={true} onClick={() => setTrackingModalOpen(false)}>
 								Cancel
 							</GCButton>
 							<GCButton
@@ -390,7 +369,7 @@ const GCFooter = (props) => {
 
 const styles = {
 	title: {
-		width: 80
+		width: 80,
 	},
 	footerStyle: {
 		display: 'flex',
@@ -402,8 +381,8 @@ const styles = {
 		margin: '0 10px 0 40px',
 		fontFamily: 'Montserrat',
 		fontWeight: 'bold',
-		fontSize: 14
-	}
+		fontSize: 14,
+	},
 };
 
 export default GCFooter;

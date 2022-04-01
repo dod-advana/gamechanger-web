@@ -8,9 +8,7 @@ export default function SearchSection(props) {
 		<div style={styles.container(color)}>
 			<div style={styles.headerWrapper}>
 				<span style={styles.header(color)}>
-					{icon && (
-						<img src={icon} alt={`${section}-icon`} style={styles.icon} />
-					)}
+					{icon && <img src={icon} alt={`${section}-icon`} style={styles.icon} />}
 
 					<Typography variant="h5" color="inherit" align="center">
 						{section}

@@ -13,7 +13,7 @@ module.exports = {
 			]);
 		});
 	},
-	
+
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			return Promise.all([
@@ -23,5 +23,5 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'P40-15_Justification_Search', Sequelize.TSVECTOR),
 			]);
 		});
-	}
+	},
 };

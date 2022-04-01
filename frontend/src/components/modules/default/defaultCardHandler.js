@@ -162,8 +162,7 @@ export const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 	font-weight: bold;
 	font-family: Montserrat;
 	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
@@ -183,7 +182,7 @@ export const StyledFrontCardHeader = styled.div`
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
 			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -210,8 +209,7 @@ export const StyledFrontCardHeader = styled.div`
 		color: black;
 		margin-bottom: 0px;
 		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -223,8 +221,7 @@ export const StyledEntityFrontCardContent = styled.div`
 	height: 100%;
 	flex-direction: column;
 	align-items: center;
-	background-color: ${({ listView }) =>
-		listView ? 'transparent' : 'rgb(238, 241, 242)'};
+	background-color: ${({ listView }) => (listView ? 'transparent' : 'rgb(238, 241, 242)')};
 
 	> img {
 		width: 75px;
@@ -246,10 +243,8 @@ export const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -265,15 +260,12 @@ export const StyledFrontCardSubHeader = styled.div`
 		width: 50%;
 		color: white;
 		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
 	}
 
 	.sub-header-full {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		padding: 8px;
 		display: flex;
 		align-items: center;
@@ -377,12 +369,8 @@ const getCardHeaderHandler = ({
 
 	const docListView = state.listView && !graphView;
 
-	const displayOrg = item['display_org_s']
-		? item['display_org_s']
-		: 'Uncategorized';
-	const displayType = item['display_doc_type_s']
-		? item['display_doc_type_s']
-		: 'Document';
+	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
+	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
 
 	return (
 		<StyledFrontCardHeader
@@ -396,22 +384,14 @@ const getCardHeaderHandler = ({
 						className={'title-text'}
 						onClick={
 							docListView
-								? () =>
-									clickFn(
-										item.filename,
-										state.cloneData.clone_name,
-										state.searchText,
-										0
-									)
+								? () => clickFn(item.filename, state.cloneData.clone_name, state.searchText, 0)
 								: () => {}
 						}
 					>
 						<div className={'text'}>{displayTitle}</div>
 						{docListView && (
 							<div className={'list-view-arrow'}>
-								<KeyboardArrowRight
-									style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-								/>
+								<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 							</div>
 						)}
 					</div>
@@ -441,12 +421,8 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 	const iconSrc = getTypeIcon(cardType);
 	const typeTextColor = getTypeTextColor(cardType);
 
-	const displayOrg = item['display_org_s']
-		? item['display_org_s']
-		: 'Uncategorized';
-	const displayType = item['display_doc_type_s']
-		? item['display_doc_type_s']
-		: 'Document';
+	const displayOrg = item['display_org_s'] ? item['display_org_s'] : 'Uncategorized';
+	const displayType = item['display_doc_type_s'] ? item['display_doc_type_s'] : 'Document';
 
 	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
 
@@ -463,9 +439,7 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 						{displayType}
 					</div>
 					<div className={'sub-header-two'}>
-						{item.display_org_s
-							? item.display_org_s
-							: getTypeDisplay(displayOrg)}
+						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
 					</div>
 				</StyledFrontCardSubHeader>
 			)}
@@ -478,27 +452,11 @@ const getDisplayTitle = (item) => {
 };
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'PDFOpen'
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'filename',
-		filename
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'pageNumber',
-		pageNumber
-	);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
 	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(
-			filename
-		)}&prevSearchText=${searchText.replace(
+		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText.replace(
 			/"/gi,
 			''
 		)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
@@ -514,12 +472,7 @@ const Row = ({ label, value, minWidth = 'inherit' }) => {
 	);
 };
 
-const makeRows = (
-	fieldsArr = [],
-	itemWithValues = {},
-	displayNameMap,
-	forTable = false
-) => {
+const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
 	const rows = [];
 	for (const fieldName of fieldsArr) {
 		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
@@ -546,14 +499,7 @@ const makeRows = (
 				row['Value'] = value;
 				rows.push(row);
 			} else {
-				rows.push(
-					<Row
-						key={cleanFieldName}
-						label={displayName}
-						value={value}
-						minWidth={40}
-					/>
-				);
+				rows.push(<Row key={cleanFieldName} label={displayName} value={value} minWidth={40} />);
 			}
 		}
 	}
@@ -613,9 +559,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Page Hits</span>
 							<i
-								className={
-									hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -646,17 +590,12 @@ const DefaultCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
+														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color:
-																hoveredHit === key
-																	? 'white'
-																	: 'rgb(189, 189, 189)',
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -687,9 +626,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={
-									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -728,18 +665,11 @@ const DefaultCardHandler = {
 													);
 												}}
 											>
-												<span>
-													{page.pageNumber === 0
-														? 'ID'
-														: `Page ${page.pageNumber}`}
-												</span>
+												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -769,9 +699,7 @@ const DefaultCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={
-									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -819,18 +747,11 @@ const DefaultCardHandler = {
 													);
 												}}
 											>
-												<span>
-													{page.pageNumber === 0
-														? 'ID'
-														: `Page ${page.pageNumber}`}
-												</span>
+												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -857,9 +778,7 @@ const DefaultCardHandler = {
 			const metadata = getMetadataForPropertyTable(item);
 
 			const fields = metadata.map((d) => d.Key);
-			const displayItem = Object.fromEntries(
-				metadata.map((d) => [d.Key, d.Value])
-			);
+			const displayItem = Object.fromEntries(metadata.map((d) => [d.Key, d.Value]));
 
 			const backItemsTable = makeRows(fields, displayItem, null, true);
 
@@ -948,11 +867,7 @@ const DefaultCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);
@@ -1004,11 +919,7 @@ const DefaultCardHandler = {
 			const displayTitle = item.name;
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					docListView={state.listView}
-					intelligentSearch={false}
-				>
+				<StyledFrontCardHeader listView={state.listView} docListView={state.listView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
@@ -1016,18 +927,16 @@ const DefaultCardHandler = {
 								onClick={
 									state.listView
 										? () =>
-											window.open(
-												`#/gamechanger-details?type=entity&entityName=${item.name}&cloneName=${state.cloneData.clone_name}`
-											)
+												window.open(
+													`#/gamechanger-details?type=entity&entityName=${item.name}&cloneName=${state.cloneData.clone_name}`
+												)
 										: () => {}
 								}
 							>
 								<div className={'text'}>{displayTitle}</div>
 								{state.listView && (
 									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight
-											style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-										/>
+										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 									</div>
 								)}
 							</div>
@@ -1129,14 +1038,7 @@ const DefaultCardHandler = {
 		},
 
 		getFooter: (props) => {
-			const {
-				name,
-				cloneName,
-				graphView,
-				toggledMore,
-				setToggledMore,
-				closeGraphCard,
-			} = props;
+			const { name, cloneName, graphView, toggledMore, setToggledMore, closeGraphCard } = props;
 
 			return (
 				<>
@@ -1191,11 +1093,7 @@ const DefaultCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);

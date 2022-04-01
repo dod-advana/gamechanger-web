@@ -5,7 +5,7 @@ const _ = require('lodash');
 
 const data = {};
 let lineReader = readline.createInterface({
-	input: fs.createReadStream(path.join(__dirname, '../resources/thesaurus.jsonl'))
+	input: fs.createReadStream(path.join(__dirname, '../resources/thesaurus.jsonl')),
 });
 
 let isLoaded = false;
@@ -14,18 +14,18 @@ lineReader.on('line', (line) => {
 	let parsed = JSON.parse(line);
 	let cleaned = [];
 
-	if(parsed && parsed.synonyms && Array.isArray(parsed.synonyms)) {
+	if (parsed && parsed.synonyms && Array.isArray(parsed.synonyms)) {
 		parsed.synonyms.forEach((syn) => {
-			if(syn.indexOf(' ') > -1) {
+			if (syn.indexOf(' ') > -1) {
 				cleaned.push(`"${syn}"`);
 			} else {
 				cleaned.push(syn);
 			}
 		});
 
-		if(!data[parsed.word]) {
+		if (!data[parsed.word]) {
 			data[parsed.word] = cleaned;
-		} else if(data[parsed.word] && Array.isArray(data[parsed.word])) {
+		} else if (data[parsed.word] && Array.isArray(data[parsed.word])) {
 			data[parsed.word] = _.uniqBy(data[parsed.word].concat(cleaned));
 		}
 	}
@@ -36,24 +36,22 @@ lineReader.on('close', () => {
 });
 
 class Thesaurus {
-	constructor(opts={}) {
-		const {
-
-		} = opts;
+	constructor(opts = {}) {
+		const {} = opts;
 	}
 
 	lookUp(word) {
 		let result = data[word];
 		let cleaned = [];
-		if(result && result.length && result.length > 0) {
+		if (result && result.length && result.length > 0) {
 			result.forEach((syn) => {
-				if(syn.toLowerCase() !== word.toLowerCase()) {
+				if (syn.toLowerCase() !== word.toLowerCase()) {
 					cleaned.push(syn);
 				}
 			});
 			result = cleaned;
 		}
-		if(result && !result.length) {
+		if (result && !result.length) {
 			result = undefined;
 		}
 		return result;
@@ -65,11 +63,11 @@ class Thesaurus {
 
 	async waitForLoad() {
 		return new Promise((resolve, reject) => {
-			if(isLoaded) {
+			if (isLoaded) {
 				resolve(true);
 			} else {
 				let interval = setInterval(() => {
-					if(isLoaded) {
+					if (isLoaded) {
 						clearInterval(interval);
 						resolve(true);
 					}

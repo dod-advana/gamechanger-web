@@ -11,16 +11,13 @@ const jbookTitleBarHandler = {
 	},
 
 	getTitleBarStyle(props) {
-		const {
-			rawSearchResults,
-			pageDisplayed
-		} = props;
+		const { rawSearchResults, pageDisplayed } = props;
 		return {
 			...styles.titleBar,
-			borderBottom: (rawSearchResults.length > 0 && pageDisplayed === 'main') ? '2px solid rgb(176, 186, 197)' : '',
-			backgroundColor: '#1C2D64'
+			borderBottom: rawSearchResults.length > 0 && pageDisplayed === 'main' ? '2px solid rgb(176, 186, 197)' : '',
+			backgroundColor: '#1C2D64',
 		};
-	}
+	},
 };
 
 export default jbookTitleBarHandler;
@@ -33,6 +30,6 @@ const styles = {
 		alignItems: 'center',
 		flex: 1,
 		minHeight: 80,
-		width: '100%'
-	}
+		width: '100%',
+	},
 };

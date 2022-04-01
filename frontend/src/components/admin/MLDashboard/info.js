@@ -30,17 +30,13 @@ const apiColumns = [
 		width: 100,
 		Cell: (row) => (
 			<TableRow>
-				<div
-					style={{ borderRadius: '8px' }}
-					className={row.value.toLowerCase()}
-				>
+				<div style={{ borderRadius: '8px' }} className={row.value.toLowerCase()}>
 					{row.value}
 				</div>
 			</TableRow>
 		),
 	},
 ];
-
 
 /**
  * This class queries the ml api information
@@ -49,7 +45,6 @@ const apiColumns = [
 export default (props) => {
 	// Set state variables
 	const [APIData, setAPIData] = useState({});
-
 
 	/**
 	 * Load all the initial data on transformers and s3
@@ -129,9 +124,7 @@ export default (props) => {
 					margin: '10px 80px',
 				}}
 			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-					General Information
-				</p>
+				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>General Information</p>
 
 				<GCPrimaryButton
 					onClick={() => {
@@ -153,9 +146,7 @@ export default (props) => {
 					>
 						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Current State:</div>
 						<Tooltip
-							title={
-								'Connection ' + status[getConnectionStatus()].toUpperCase()
-							}
+							title={'Connection ' + status[getConnectionStatus()].toUpperCase()}
 							placement="right"
 							arrow
 						>
@@ -164,17 +155,13 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div
-								style={{ width: '35%', boxSizing: 'border-box' }}
-								className="half"
-							>
+							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
 								Application: <br />
 								Version: <br />
 								Connection Status: <br />
 								Last Queried: <br />
 								Elasticsearch Host: <br />
 								Elasticsearch Status: <br />
-
 							</div>
 							<div style={{ width: '65%' }} className="half">
 								{APIData.API_Name} <br />
@@ -183,9 +170,7 @@ export default (props) => {
 								{getLastQueried()} <br />
 								{APIData.Elasticsearch_Host} <br />
 								{APIData.Elasticsearch_Status} <br />
-
 								<br />
-
 							</div>
 						</div>
 					</fieldset>

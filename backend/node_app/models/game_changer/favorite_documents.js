@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const FAVORITE_DOCUMENT = sequelize.define('favorite_documents',
+	const FAVORITE_DOCUMENT = sequelize.define(
+		'favorite_documents',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,40 +10,40 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			user_id: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			new_user_id: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			filename: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			favorite_name: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			favorite_summary: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			search_text: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: DataTypes.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'favorite_documents',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return FAVORITE_DOCUMENT;

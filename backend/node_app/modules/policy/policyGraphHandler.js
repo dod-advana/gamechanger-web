@@ -1,6 +1,6 @@
 const SearchUtility = require('../../utils/searchUtility');
 const CONSTANTS = require('../../config/constants');
-const { DataLibrary} = require('../../lib/dataLibrary');
+const { DataLibrary } = require('../../lib/dataLibrary');
 const GraphHandler = require('../base/graphHandler');
 const redisAsyncClientDB = 8;
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
@@ -11,9 +11,9 @@ class PolicyGraphHandler extends GraphHandler {
 			searchUtility = new SearchUtility(opts),
 			constants = CONSTANTS,
 			dataLibrary = new DataLibrary(opts),
-			dataTracker = new DataTrackerController(opts)
+			dataTracker = new DataTrackerController(opts),
 		} = opts;
-		super({redisClientDB: redisAsyncClientDB, ...opts});
+		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
 		this.searchUtility = searchUtility;
 		this.constants = constants;
@@ -30,7 +30,7 @@ class PolicyGraphHandler extends GraphHandler {
 			includeRevoked,
 			searchFields,
 			orgFilter,
-			loadAll
+			loadAll,
 		} = req.body;
 
 		const permissions = req.permissions ? req.permissions : [];
@@ -59,7 +59,7 @@ class PolicyGraphHandler extends GraphHandler {
 				'display_org_s',
 				'display_title_s',
 				'ref_list',
-				'pagerank_r'
+				'pagerank_r',
 			];
 			req.body.includeHighlights = false;
 
@@ -67,8 +67,13 @@ class PolicyGraphHandler extends GraphHandler {
 			const esQuery = this.searchUtility.getElasticsearchQuery(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneData.clone_name, permissions);
 
-			let esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
-		
+			let esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
+			);
+
 			// const searchResults = this.searchUtility.cleanUpIdEsResults(esResults, parsedTerms, userId, expandTerms);
 			const searchResults = this.cleanUpEsResultsForGraph(esResults, parsedTerms, userId, expandTerms);
 
@@ -90,7 +95,9 @@ class PolicyGraphHandler extends GraphHandler {
 					OPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)
 					WHERE NOT d = d2 AND d2.doc_id in $ids
 					RETURN d, pt;`,
-					{ids: docIds}, isTest, userId
+					{ ids: docIds },
+					isTest,
+					userId
 				);
 			} else {
 				// mock nodes from elastic results
@@ -98,12 +105,20 @@ class PolicyGraphHandler extends GraphHandler {
 					// return only the top GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT results, sorted by page rank
 					const docIDsSortedByPageRank = this.createMockGraphReturnFromEsResults(docs, userId)
 						.nodes.sort((a, b) => b.pageRank - a.pageRank)
-						.map(node => node.doc_id)
-						.slice(0, loadAll ? this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED : this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT);
-					results = this.createMockGraphReturnFromEsResults(docs.filter(doc => docIDsSortedByPageRank.includes(doc.doc_id)), userId);
-					limit = loadAll ?
-						{ maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED } :
-						{ warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
+						.map((node) => node.doc_id)
+						.slice(
+							0,
+							loadAll
+								? this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED
+								: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT
+						);
+					results = this.createMockGraphReturnFromEsResults(
+						docs.filter((doc) => docIDsSortedByPageRank.includes(doc.doc_id)),
+						userId
+					);
+					limit = loadAll
+						? { maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED }
+						: { warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
 				} else {
 					results = this.createMockGraphReturnFromEsResults(docs, userId);
 				}
@@ -144,12 +159,11 @@ class PolicyGraphHandler extends GraphHandler {
 				await this.storeCachedResults(req, graphData, cloneSpecificObject, userId);
 			}
 
-			graphData.query = {query, params, limit};
+			graphData.query = { query, params, limit };
 
 			return graphData;
-
 		} catch (err) {
-			if (!forCacheReload){
+			if (!forCacheReload) {
 				const { message } = err;
 				this.logger.error(message, 'E08YH0S', userId);
 				return { graphData: {}, searchTerms: [] };
@@ -167,7 +181,7 @@ class PolicyGraphHandler extends GraphHandler {
 			tmpCode = code || tmpCode;
 
 			const [graphData] = await this.getGraphData(query, params, isTest, userId);
-			graphData.query = {query, params};
+			graphData.query = { query, params };
 			return graphData;
 		} catch (err) {
 			const { message } = err;
@@ -179,7 +193,7 @@ class PolicyGraphHandler extends GraphHandler {
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName} = req.body;
+		const { functionName } = req.body;
 
 		switch (functionName) {
 			case 'getDataForSearch':
@@ -216,17 +230,22 @@ class PolicyGraphHandler extends GraphHandler {
 				);
 		}
 	}
-	
+
 	async getReferencesPolicyGraphHelper(req, userId) {
 		try {
 			const { ref_name, isUnknown, isTest = false } = req.body;
-			
+
 			const [refData] = await this.getGraphData(
-				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${isUnknown ? 'UKN_Document' : 'Document'})
+				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+					isUnknown ? 'UKN_Document' : 'Document'
+				})
 				WHERE d2.ref_name = $ref_name AND NOT d = d2
-				RETURN ref;`, {ref_name: ref_name}, isTest, userId
+				RETURN ref;`,
+				{ ref_name: ref_name },
+				isTest,
+				userId
 			);
-			
+
 			return refData;
 		} catch (err) {
 			const { message } = err;
@@ -234,26 +253,29 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getTopicCardDataHelper(req, userId) {
 		try {
 			const { topicName, isTest = false } = req.body;
-			
+
 			const data = {};
 
 			const [topicData] = await this.getGraphData(
 				`MATCH (n:Topic)-[:IS_IN]->(d:Document)
 				WHERE n.name = $name
 				WITH COUNT(d) as docs, collect(d.doc_id) as doc_ids
-				return sum(docs) as doc_count, doc_ids;`, {name: topicName}, isTest, userId
+				return sum(docs) as doc_count, doc_ids;`,
+				{ name: topicName },
+				isTest,
+				userId
 			);
-			
+
 			const { doc_count, doc_ids } = topicData;
-		
-			const convertedIds = doc_ids.map(docId => {
+
+			const convertedIds = doc_ids.map((docId) => {
 				return docId.replace(/'/g, '');
 			});
-			
+
 			const [entityData] = await this.getGraphData(
 				`MATCH (d:Document)-[m:MENTIONS]->(e:Entity)
 				WHERE d.doc_id in $ids AND EXISTS(e.aliases)
@@ -261,12 +283,15 @@ class PolicyGraphHandler extends GraphHandler {
 				MATCH (e)<-[:MENTIONS]-(d:Document)
 				WHERE d.doc_id in $ids
 				RETURN e as node, count(d) as entityScore, count(e) as mentions
-				ORDER BY mentions DESC LIMIT 10;`, {ids: convertedIds}, isTest, userId
+				ORDER BY mentions DESC LIMIT 10;`,
+				{ ids: convertedIds },
+				isTest,
+				userId
 			);
-			
+
 			data.doc_count = doc_count;
 			data.entityData = entityData;
-			
+
 			return data;
 		} catch (err) {
 			const { message } = err;
@@ -274,11 +299,11 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getGraphSchemaHelper(req, userId) {
 		try {
 			const { isTest = false } = req.body;
-			
+
 			const data = {};
 
 			const [schemaData] = await this.getGraphData(
@@ -291,21 +316,25 @@ class PolicyGraphHandler extends GraphHandler {
 					'RETURN label, ' +
 					'property, ' +
 					'propData.type as type, ' +
-					'propData.indexed as primary_key;', {}, isTest, userId
+					'propData.indexed as primary_key;',
+				{},
+				isTest,
+				userId
 			);
-			
-			const [graphData] = await this.getGraphData(
-				'call apoc.meta.graph', {}, isTest, userId
-			);
-			
+
+			const [graphData] = await this.getGraphData('call apoc.meta.graph', {}, isTest, userId);
+
 			const [statData] = await this.getGraphData(
-				'CALL apoc.meta.stats() YIELD labels, relTypesCount', {}, isTest, userId
+				'CALL apoc.meta.stats() YIELD labels, relTypesCount',
+				{},
+				isTest,
+				userId
 			);
-			
+
 			data.schema = schemaData;
 			data.graph = graphData;
 			data.stats = statData;
-			
+
 			return data;
 		} catch (err) {
 			const { message } = err;
@@ -313,17 +342,18 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getEntitiesForNodeHelper(req, userId) {
 		try {
 			const { doc_id, isTest = false } = req.body;
 
 			const [graphData] = await this.getGraphData(
-				'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' +
-				'WHERE d.doc_id = $doc_id ' +
-				'RETURN pt;', {doc_id: doc_id}, isTest, userId
+				'MATCH pt=(d:Document)-[m:MENTIONS]->(e:Entity) ' + 'WHERE d.doc_id = $doc_id ' + 'RETURN pt;',
+				{ doc_id: doc_id },
+				isTest,
+				userId
 			);
-			
+
 			return graphData;
 		} catch (err) {
 			const { message } = err;
@@ -331,16 +361,18 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getTopicsForNodeHelper(req, userId) {
 		try {
 			const { doc_id, isTest = false } = req.body;
 
 			const [graphData] = await this.getGraphData(
-				'MATCH mt = (d:Document)-[c:CONTAINS]->(:Topic) ' +
-				'WHERE d.doc_id = $doc_id RETURN mt;', {doc_id: doc_id}, isTest, userId
+				'MATCH mt = (d:Document)-[c:CONTAINS]->(:Topic) ' + 'WHERE d.doc_id = $doc_id RETURN mt;',
+				{ doc_id: doc_id },
+				isTest,
+				userId
 			);
-			
+
 			return graphData;
 		} catch (err) {
 			const { message } = err;
@@ -348,31 +380,37 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getTopicDataPolicyGraphHelper(req, userId) {
 		try {
 			const { topicName, isTest = false } = req.body;
-			
+
 			const data = {};
 
 			const topicDocumentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)-[:CONTAINS]->(t2:Topic)
 				RETURN t2.name as topic_name, count(distinct d) as doc_count
-				ORDER BY doc_count DESC LIMIT 5;`, {name: topicName}, isTest, userId
+				ORDER BY doc_count DESC LIMIT 5;`,
+				{ name: topicName },
+				isTest,
+				userId
 			);
-			
+
 			const documentCount = this.getGraphData(
 				`MATCH (t:Topic) where t.name = $name
 				OPTIONAL MATCH (t) <-[:CONTAINS]-(d:Document)
-				RETURN count(distinct d) as doc_count`, {name: topicName}, isTest, userId
+				RETURN count(distinct d) as doc_count`,
+				{ name: topicName },
+				isTest,
+				userId
 			);
-			
+
 			const results = await Promise.all([topicDocumentCount, documentCount]);
-			
+
 			data.relatedTopics = results[0][0];
 			data.documentCountData = results[1][0];
-			
+
 			return data;
 		} catch (err) {
 			const { message } = err;
@@ -380,29 +418,35 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getTopicDataDetailsPageHelper(req, userId) {
 		try {
 			const { topicName, isTest = false } = req.body;
-			
+
 			const data = {};
 
 			const [topicData] = await this.getGraphData(
 				'MATCH (t:Topic) WHERE t.name = $name ' +
-				'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
-				'RETURN t as topic, count(distinct d) as documentCountsForTopic;', {name: topicName}, isTest, userId
+					'WITH t MATCH (d:Document)-[:CONTAINS]->(t) ' +
+					'RETURN t as topic, count(distinct d) as documentCountsForTopic;',
+				{ name: topicName },
+				isTest,
+				userId
 			);
-			
+
 			data.topicData = topicData;
-			
+
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pt=(d:Document)-[c:CONTAINS]->(t:Topic) ' +
-			'WHERE t.name = $name ' +
-			'RETURN distinct pt LIMIT 1000;', {name: topicName}, isTest, userId
+					'WHERE t.name = $name ' +
+					'RETURN distinct pt LIMIT 1000;',
+				{ name: topicName },
+				isTest,
+				userId
 			);
-			
+
 			data.graph = graphData;
-			
+
 			return data;
 		} catch (err) {
 			const { message } = err;
@@ -410,27 +454,33 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getEntityDataDetailsPageHelper(req, userId) {
 		try {
 			const { entityName, isTest = false } = req.body;
-			
+
 			const data = {};
 
 			const [entData, entQuery, entParams] = await this.getGraphData(
-				`MATCH (e:Entity) WHERE e.name = $name RETURN e;`, {name: entityName}, isTest, userId
+				`MATCH (e:Entity) WHERE e.name = $name RETURN e;`,
+				{ name: entityName },
+				isTest,
+				userId
 			);
-			
+
 			data.nodes = entData.nodes;
-			
+
 			const [graphData] = await this.getGraphData(
 				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
-				'WHERE c.name = $name ' +
-				'RETURN distinct pc limit 1000;', {name: entityName}, isTest, userId
+					'WHERE c.name = $name ' +
+					'RETURN distinct pc limit 1000;',
+				{ name: entityName },
+				isTest,
+				userId
 			);
-			
+
 			data.graph = graphData;
-			
+
 			return data;
 		} catch (err) {
 			const { message } = err;
@@ -438,63 +488,78 @@ class PolicyGraphHandler extends GraphHandler {
 			return message;
 		}
 	}
-	
+
 	async getDocumentDetailsPageDataFullHelper(req, userId) {
 		try {
 			const { doc_id, isTest = false } = req.body;
-			
+
 			const resps = await Promise.all([
 				this.getGraphData(
 					'MATCH (d:Document) ' +
-					'WHERE d.doc_id = $doc_id ' +
-					'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
-					'WHERE d2.is_revoked_b = false ' +
-					'RETURN distinct pt;', {doc_id}, isTest, userId
+						'WHERE d.doc_id = $doc_id ' +
+						'OPTIONAL MATCH pt=(d)-[:SIMILAR_TO]->(d2:Document) ' +
+						'WHERE d2.is_revoked_b = false ' +
+						'RETURN distinct pt;',
+					{ doc_id },
+					isTest,
+					userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
-					'WHERE d.doc_id = $doc_id ' +
-					'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
-					'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
-					'RETURN distinct pt;', {doc_id}, isTest, userId
+						'WHERE d.doc_id = $doc_id ' +
+						'OPTIONAL MATCH pt=(d)-[:REFERENCES]-(d2:Document) ' +
+						'WHERE NOT d = d2 AND d2.is_revoked_b = false ' +
+						'RETURN distinct pt;',
+					{ doc_id },
+					isTest,
+					userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
-					'WHERE d.doc_id = $doc_id ' +
-					'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
-					'WHERE NOT d = d2 ' +
-					'RETURN distinct pt;', {doc_id}, isTest, userId
+						'WHERE d.doc_id = $doc_id ' +
+						'OPTIONAL MATCH pt=(d)-[:REFERENCES_UKN]-(d2:UKN_Document) ' +
+						'WHERE NOT d = d2 ' +
+						'RETURN distinct pt;',
+					{ doc_id },
+					isTest,
+					userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
-					'WHERE d.doc_id = $doc_id ' +
-					'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
-					'RETURN distinct pt;', {doc_id}, isTest, userId
+						'WHERE d.doc_id = $doc_id ' +
+						'MATCH pt=(d)-[:CONTAINS]->(t:Topic) ' +
+						'RETURN distinct pt;',
+					{ doc_id },
+					isTest,
+					userId
 				),
 				this.getGraphData(
 					'MATCH (d:Document) ' +
-					'WHERE d.doc_id = $doc_id ' +
-					'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
-					'RETURN distinct pt;', {doc_id}, isTest, userId
-				)
+						'WHERE d.doc_id = $doc_id ' +
+						'MATCH pt=(d)-[:MENTIONS]->(e:Entity) ' +
+						'RETURN distinct pt;',
+					{ doc_id },
+					isTest,
+					userId
+				),
 			]);
-			
-			const graph = {nodes: [], edges: [], labels: []};
+
+			const graph = { nodes: [], edges: [], labels: [] };
 			const nodeIds = [];
 			const edgeIds = [];
-			resps.forEach(resp => {
-				resp[0].labels.forEach(label => {
+			resps.forEach((resp) => {
+				resp[0].labels.forEach((label) => {
 					if (!graph.labels.includes(label)) {
 						graph.labels.push(label);
 					}
 				});
-				resp[0].nodes.forEach(node => {
+				resp[0].nodes.forEach((node) => {
 					if (!nodeIds.includes(node.id)) {
 						graph.nodes.push(node);
 						nodeIds.push(node.id);
 					}
 				});
-				resp[0].edges.forEach(edge => {
+				resp[0].edges.forEach((edge) => {
 					if (!edgeIds.includes(edge.id)) {
 						// let source = edge.source;
 						// let target = edge.target;
@@ -515,7 +580,7 @@ class PolicyGraphHandler extends GraphHandler {
 					}
 				});
 			});
-			return {graph};
+			return { graph };
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'OHS2VPT', userId);
@@ -540,7 +605,7 @@ class PolicyGraphHandler extends GraphHandler {
 				publicationDateFilter,
 				cloneData = {},
 				orgFilter,
-				includeRevoked
+				includeRevoked,
 			} = req.body;
 
 			const searchBody = {
@@ -559,7 +624,7 @@ class PolicyGraphHandler extends GraphHandler {
 				orgFilter,
 				includeRevoked,
 				paragraphLimit: 1,
-				hasHighlights: false
+				hasHighlights: false,
 			};
 
 			// const gT0 = new Date().getTime();
@@ -567,45 +632,55 @@ class PolicyGraphHandler extends GraphHandler {
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
-			
+
 			const esQuery = this.searchUtility.getElasticsearchQuery(searchBody, userId);
 
 			let clientObj = this.searchUtility.getESClient(cloneData.clone_name, permissions);
 
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery
+			);
 
 			if (esResults?.body?.hits?.total?.value > 0) {
+				const { docIds } = this.searchUtility.cleanUpIdEsResults(esResults, searchTerms, userId, []);
 
-				const {docIds} = this.searchUtility.cleanUpIdEsResults(esResults, searchTerms, userId, []);
-
-				const convertedIds = docIds.map(docId => {
+				const convertedIds = docIds.map((docId) => {
 					return docId.replace(/'/g, '');
 				});
 
 				// const gT1 = new Date().getTime();
 
 				try {
-
-					const [entityResp, entityQuery, entityParams] = await this.getGraphData(`
+					const [entityResp, entityQuery, entityParams] = await this.getGraphData(
+						`
 						MATCH (d:Document)-[m:MENTIONS]->(e:Entity)
 						WHERE d.doc_id in $ids AND EXISTS(e.aliases)
 						WITH e
 						MATCH (e)<-[:MENTIONS]-(d:Document)
 						WHERE d.doc_id in $ids
 						RETURN e as node, count(d) as entityScore, count(e) as mentions
-						ORDER BY mentions DESC LIMIT 10;`, {ids: convertedIds}, isTest, userId
+						ORDER BY mentions DESC LIMIT 10;`,
+						{ ids: convertedIds },
+						isTest,
+						userId
 					);
 
 					const entities = entityResp.nodes;
 
-					const [topicResp, topicQuery, topicParams] = await this.getGraphData(`
+					const [topicResp, topicQuery, topicParams] = await this.getGraphData(
+						`
 						MATCH (d:Document)-[m:CONTAINS]->(t:Topic)
 						WHERE d.doc_id in $ids
 						WITH t
 						MATCH (t)<-[:CONTAINS]-(d:Document)
 						WHERE d.doc_id in $ids
 						RETURN t as node, count(d) as topicScore
-						ORDER BY topicScore DESC LIMIT 10;`, {ids: convertedIds}, isTest, userId
+						ORDER BY topicScore DESC LIMIT 10;`,
+						{ ids: convertedIds },
+						isTest,
+						userId
 					);
 
 					// const gT2 = new Date().getTime();
@@ -615,7 +690,12 @@ class PolicyGraphHandler extends GraphHandler {
 					// console.log(`Time for Overall = ${(gT2 - gT0) / 1000}`);
 
 					const topics = topicResp.nodes;
-					return { entities: entities, topics: topics, entityQuery: {query: entityQuery, params: entityParams}, topicQuery: {query: topicQuery, params: topicParams} };
+					return {
+						entities: entities,
+						topics: topics,
+						entityQuery: { query: entityQuery, params: entityParams },
+						topicQuery: { query: topicQuery, params: topicParams },
+					};
 				} catch (err) {
 					this.logger.error(`DETECTED ERROR: Error with Neo4j results: ${err}`, 'PUTA0E1', userId);
 					this.error.category = 'Neo4j';
@@ -624,7 +704,9 @@ class PolicyGraphHandler extends GraphHandler {
 				}
 			} else {
 				this.logger.error(`Error with Elasticsearch results`, 'V053I6O', userId);
-				if (this.searchUtility.checkESResultsEmpty(esResults)) { this.logger.warn('Search has no hits') }
+				if (this.searchUtility.checkESResultsEmpty(esResults)) {
+					this.logger.warn('Search has no hits');
+				}
 				return { entities: [], topics: [] };
 			}
 		} catch (err) {
@@ -641,17 +723,20 @@ class PolicyGraphHandler extends GraphHandler {
 			const [{ doc_ids }, query, params] = await this.getGraphData(
 				`OPTIONAL MATCH (d:Document)-[m:MENTIONS]->(e:Entity) WHERE e.name = $entityName
 					RETURN d.doc_id as doc_id, m.count as mentions
-					ORDER BY mentions DESC LIMIT 100;`, {entityName: entityName}, isTest, userId
+					ORDER BY mentions DESC LIMIT 100;`,
+				{ entityName: entityName },
+				isTest,
+				userId
 			);
 
 			if (doc_ids[0].doc_id === null) {
 				return {
 					totalCount: 0,
-					docs: []
+					docs: [],
 				};
 			}
 
-			const docIds = doc_ids.map(docId => {
+			const docIds = doc_ids.map((docId) => {
 				return docId.doc_id;
 			});
 
@@ -660,14 +745,14 @@ class PolicyGraphHandler extends GraphHandler {
 			// Get the full doc data from ES
 			const docResp = await this.documentSearchUsingDocId(req, userId);
 
-			docResp.docs.forEach(doc => {
-				doc.mentions = doc_ids.filter(docId => {
+			docResp.docs.forEach((doc) => {
+				doc.mentions = doc_ids.filter((docId) => {
 					return docId.doc_id === doc.id;
 				})[0].mentions;
 			});
 
 			docResp.docs.sort((a, b) => b.mentions - a.mentions);
-			docResp.graphQuery = {query, params};
+			docResp.graphQuery = { query, params };
 
 			return docResp;
 		} catch (err) {
@@ -681,7 +766,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getDocumentsForTopicHelper(req, userId) {
 		try {
-			if(req.body) {
+			if (req.body) {
 				req.body.includeRevoked = true;
 			}
 
@@ -710,7 +795,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneName } = req.body;
-			
+
 			const [parsedQuery, searchTerms] = await this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -719,25 +804,41 @@ class PolicyGraphHandler extends GraphHandler {
 
 			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
 
-			const esResults = await this.dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery);
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery
+			);
 
-			if (esResults && esResults.body && esResults.body.hits && esResults.body.hits.total && esResults.body.hits.total.value && esResults.body.hits.total.value > 0) {
-
-				const searchResults = this.searchUtility.cleanUpEsResults(esResults, searchTerms, userId, null, null, clientObj.esIndex, esQuery);
+			if (
+				esResults &&
+				esResults.body &&
+				esResults.body.hits &&
+				esResults.body.hits.total &&
+				esResults.body.hits.total.value &&
+				esResults.body.hits.total.value > 0
+			) {
+				const searchResults = this.searchUtility.cleanUpEsResults(
+					esResults,
+					searchTerms,
+					userId,
+					null,
+					null,
+					clientObj.esIndex,
+					esQuery
+				);
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'KN1XREP', userId);
 				return { totalCount: 0, docs: [] };
 			}
-
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'STWEJSK', userId);
 			throw msg;
 		}
 	}
-
 
 	addDocIdsToPubs(graphData, user) {
 		try {
@@ -760,7 +861,7 @@ class PolicyGraphHandler extends GraphHandler {
 				}
 			});
 
-			pubsIdx.forEach(idx => {
+			pubsIdx.forEach((idx) => {
 				graphData.nodes[idx].doc_ids = pubDocs[graphData.nodes[idx].name];
 			});
 		} catch (err) {
@@ -770,7 +871,13 @@ class PolicyGraphHandler extends GraphHandler {
 
 	cleanUpEsResultsForGraph(raw, searchTerms, user, expansionDict) {
 		try {
-			if (!raw.body || !raw.body.hits || !raw.body.hits.total || !raw.body.hits.total.value || raw.body.hits.total.value === 0) {
+			if (
+				!raw.body ||
+				!raw.body.hits ||
+				!raw.body.hits.total ||
+				!raw.body.hits.total.value ||
+				raw.body.hits.total.value === 0
+			) {
 				return { totalCount: 0, docs: [] };
 			}
 
@@ -790,7 +897,7 @@ class PolicyGraphHandler extends GraphHandler {
 					display_doc_type_s: result.display_doc_type_s,
 					ref_list: result.ref_list,
 					pagerank_r: result.pagerank_r,
-					ref_name: `${result.doc_type} ${result.doc_num}`
+					ref_name: `${result.doc_type} ${result.doc_num}`,
 				});
 			});
 
@@ -805,7 +912,7 @@ class PolicyGraphHandler extends GraphHandler {
 
 	createMockGraphReturnFromEsResults(docs, userId) {
 		try {
-			const result = {records: []};
+			const result = { records: [] };
 
 			const documentsRecords = [];
 			const referencesRecords = [];
@@ -817,7 +924,7 @@ class PolicyGraphHandler extends GraphHandler {
 			let linkIndex = 0;
 			const docsRefDict = {};
 
-			docs.forEach(doc => {
+			docs.forEach((doc) => {
 				const pubName = `${doc.doc_type} ${doc.doc_num}`;
 				const docIndex = nodeIndex++;
 
@@ -830,31 +937,36 @@ class PolicyGraphHandler extends GraphHandler {
 				doc.index = docIndex;
 
 				// Doc
-				documentsRecords.push(new Record(['document'], [
-					{
-						identity: { low: doc.index, high: 0 },
-						labels: ['Document'],
-						properties: {
-							doc_id: doc.doc_id,
-							doc_type: doc.doc_type,
-							doc_num: doc.doc_num,
-							display_title_s: doc.display_title_s,
-							display_org_s: doc.display_org_s,
-							display_doc_type_s: doc.display_doc_type_s,
-							pagerank_r: doc.pagerank_r,
-							ref_name: doc.ref_name
-						}
-					}
-				], { document: 0 }));
-
+				documentsRecords.push(
+					new Record(
+						['document'],
+						[
+							{
+								identity: { low: doc.index, high: 0 },
+								labels: ['Document'],
+								properties: {
+									doc_id: doc.doc_id,
+									doc_type: doc.doc_type,
+									doc_num: doc.doc_num,
+									display_title_s: doc.display_title_s,
+									display_org_s: doc.display_org_s,
+									display_doc_type_s: doc.display_doc_type_s,
+									pagerank_r: doc.pagerank_r,
+									ref_name: doc.ref_name,
+								},
+							},
+						],
+						{ document: 0 }
+					)
+				);
 			});
 
-			docs.forEach(doc => {
+			docs.forEach((doc) => {
 				const pubName = `${doc.doc_type} ${doc.doc_num}`;
 				if (!doc.ref_list) doc.ref_list = [];
 
 				// Ensure refs are good with spaces between type and num
-				doc.ref_list.forEach(ref => {
+				doc.ref_list.forEach((ref) => {
 					const refArr = ref.split(' ');
 					let newRef = '';
 					if (refArr.length < 2) {
@@ -869,29 +981,32 @@ class PolicyGraphHandler extends GraphHandler {
 					}
 
 					if (docsRefDict.hasOwnProperty(newRef) && newRef !== pubName) {
-						docsRefDict[newRef].forEach(ref => {
-							referencesRecords.push(new Record(['references'], [
-								{
-									end: { low: ref, high: 0 },
-									identity: { low: linkIndex++, high: 0 },
-									properties: {},
-									start: { low: doc.index, high: 0 },
-									type: 'REFERENCES'
-								}
-							], { references: 0 }));
+						docsRefDict[newRef].forEach((ref) => {
+							referencesRecords.push(
+								new Record(
+									['references'],
+									[
+										{
+											end: { low: ref, high: 0 },
+											identity: { low: linkIndex++, high: 0 },
+											properties: {},
+											start: { low: doc.index, high: 0 },
+											type: 'REFERENCES',
+										},
+									],
+									{ references: 0 }
+								)
+							);
 						});
 					}
 				});
-
-
 			});
 
 			result.records = [...documentsRecords, ...referencesRecords];
 			return this.searchUtility.cleanNeo4jData(result, true, userId);
-
 		} catch (err) {
 			this.logger.error(err, '8TP5S8L', userId);
-			return {nodes: [], edges: []};
+			return { nodes: [], edges: [] };
 		}
 	}
 
@@ -900,7 +1015,7 @@ class PolicyGraphHandler extends GraphHandler {
 	}
 }
 
-function generateFieldLookup (keys) {
+function generateFieldLookup(keys) {
 	const lookup = {};
 	keys.forEach((name, idx) => {
 		lookup[name] = idx;
@@ -909,20 +1024,20 @@ function generateFieldLookup (keys) {
 }
 
 class Record {
-	constructor (keys, fields, fieldLookup = null) {
+	constructor(keys, fields, fieldLookup = null) {
 		this.keys = keys;
 		this.length = keys.length;
 		this._fields = fields;
 		this._fieldLookup = fieldLookup || generateFieldLookup(keys);
 	}
 
-	forEach (visitor) {
+	forEach(visitor) {
 		for (const [key, value] of this.entries()) {
 			visitor(value, key, this);
 		}
 	}
 
-	toObject () {
+	toObject() {
 		const object = {};
 
 		for (const [key, value] of this.entries()) {
@@ -932,19 +1047,18 @@ class Record {
 		return object;
 	}
 
-	* entries () {
+	*entries() {
 		for (let i = 0; i < this.keys.length; i++) {
 			yield [this.keys[i], this._fields[i]];
 		}
 	}
 
-	* values () {
+	*values() {
 		for (let i = 0; i < this.keys.length; i++) {
 			yield this._fields[i];
 		}
 	}
 }
-
 
 // const policyGraphHandler = new PolicyGraphHandler();
 

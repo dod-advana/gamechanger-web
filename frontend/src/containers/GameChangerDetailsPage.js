@@ -42,7 +42,7 @@ const colWidth = {
 	// whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-	wordBreak: 'break-all'
+	wordBreak: 'break-all',
 };
 
 export const MainContainer = styled.div`
@@ -135,8 +135,6 @@ const FavoriteTopic = styled.button`
 	}
 `;
 
-
-
 const GameChangerDetailsPage = (props) => {
 	const { location } = props;
 
@@ -185,10 +183,10 @@ const GameChangerDetailsPage = (props) => {
 			setQuery(new URLSearchParams(location.search));
 		}
 	}
-	
+
 	const getEntityData = async (name, cloneName) => {
 		const data = {};
-	
+
 		const resp = await gameChangerAPI.callGraphFunction({
 			functionName: 'getEntityDataDetailsPage',
 			cloneName: cloneName,
@@ -196,7 +194,7 @@ const GameChangerDetailsPage = (props) => {
 				entityName: name,
 			},
 		});
-	
+
 		if (resp.data.nodes) {
 			const tmpEntity = resp.data.nodes[0];
 			tmpEntity.details = [];
@@ -224,18 +222,18 @@ const GameChangerDetailsPage = (props) => {
 					}
 				}
 			});
-	
+
 			data.entity = tmpEntity;
 		}
-	
+
 		data.graph = resp.data.graph;
-	
+
 		return data;
 	};
-	
+
 	const getTopicData = async (name, cloneName) => {
 		const data = { topic: {}, graph: { nodes: [], edges: [] }, isNeo4j: true };
-	
+
 		const resp = await gameChangerAPI.callGraphFunction({
 			functionName: 'getTopicDataDetailsPage',
 			cloneName: cloneName,
@@ -243,7 +241,7 @@ const GameChangerDetailsPage = (props) => {
 				topicName: name,
 			},
 		});
-		
+
 		if (resp.data.topicData.nodes && resp.data.topicData.nodes.length > 0) {
 			const tmpTopic = resp.data.topicData.nodes[0];
 			tmpTopic.details = [
@@ -252,18 +250,18 @@ const GameChangerDetailsPage = (props) => {
 					value: resp.data.topicData.nodeProperties.documentCountsForTopic.low,
 				},
 			];
-	
+
 			data.topic = tmpTopic;
-	
+
 			data.graph = resp.data.graph;
 		} else {
 			data.topic = { name, details: [] };
 			data.isNeo4j = false;
 		}
-	
+
 		return data;
 	};
-	
+
 	const getSourceData = async (searchText, cloneName) => {
 		const t0 = new Date().getTime();
 		const { data } = await gameChangerAPI.callSearchFunction({
@@ -277,12 +275,10 @@ const GameChangerDetailsPage = (props) => {
 		data.timeFound = ((t1 - t0) / 1000).toFixed(2);
 		return data;
 	};
-	
+
 	const dispatchUserData = (data) => {
 		setUserData(data.payload.userData);
 	};
-
-	
 
 	useQuery(location, setQuery, query);
 
@@ -293,12 +289,12 @@ const GameChangerDetailsPage = (props) => {
 	useEffect(() => {
 		gcUserManagementAPI.getUserData().then((data) => {
 			setUserData(data.data);
-			const favoriteTopicList = data.data.favorite_topics?.map(t => {
+			const favoriteTopicList = data.data.favorite_topics?.map((t) => {
 				return t.topic_name.toLowerCase();
 			});
 			setFavoriteTopics(favoriteTopicList || []);
 		});
-	},[]);
+	}, []);
 
 	useEffect(() => {
 		const addFavoriteTopicToMetadata = (data, cloneName) => {
@@ -322,11 +318,7 @@ const GameChangerDetailsPage = (props) => {
 									<FavoriteTopic
 										key={index}
 										onClick={(event) => {
-											trackEvent(
-												getTrackingNameForFactory(cloneName),
-												'TopicOpened',
-												topic
-											);
+											trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
 											window.open(
 												`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
 											);
@@ -350,12 +342,12 @@ const GameChangerDetailsPage = (props) => {
 													!favorite,
 													dispatchUserData
 												);
-	
-												if(favorite) {
+
+												if (favorite) {
 													const newFavorites = [...favoriteTopics];
 													newFavorites.splice(favoriteTopics.indexOf(topic.toLowerCase()), 1);
 													setFavoriteTopics(newFavorites);
-												}else{
+												} else {
 													const newFavorites = [...favoriteTopics];
 													newFavorites.push(topic.toLowerCase());
 													setFavoriteTopics(newFavorites);
@@ -382,66 +374,43 @@ const GameChangerDetailsPage = (props) => {
 					docIds: [doc_id],
 				},
 			});
-		
+
 			data.document = resp.data.docs[0];
-		
+
 			const docData = getMetadataForPropertyTable(data.document);
 			const { ref_list = [] } = data.document;
-			const previewDataReflist = getReferenceListMetadataPropertyTable(
-				ref_list,
-				true
-			);
-		
-			const labelText = data.document.isRevoked
-				? 'Cancel Date'
-				: 'Verification Date';
+			const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list, true);
+
+			const labelText = data.document.isRevoked ? 'Cancel Date' : 'Verification Date';
 			let dateText = 'Unknown';
-			if (
-				data.document.current_as_of !== undefined &&
-				data.document.current_as_of !== ''
-			) {
+			if (data.document.current_as_of !== undefined && data.document.current_as_of !== '') {
 				const currentDate = new Date(data.document.current_as_of);
-				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-					currentDate
-				);
-				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-					currentDate
-				);
-				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-					currentDate
-				);
+				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
 				dateText = `${month}-${day}-${year}`;
 			}
-		
+
 			let publicationDate;
-			if (
-				data.document.publication_date_dt !== undefined &&
-				data.document.publication_date_dt !== ''
-			) {
+			if (data.document.publication_date_dt !== undefined && data.document.publication_date_dt !== '') {
 				const currentDate = new Date(data.document.publication_date_dt);
-				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-					currentDate
-				);
-				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-					currentDate
-				);
-				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-					currentDate
-				);
+				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+				const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
 				publicationDate = `${month}-${day}-${year}`;
 			} else {
 				publicationDate = `unknown`;
 			}
-		
+
 			const favoritableData = [
 				{ Key: 'Published', Value: publicationDate },
 				{ Key: labelText, Value: dateText },
 				...addFavoriteTopicToMetadata(docData, cloneName),
 			];
-		
+
 			data.document.details = favoritableData;
 			data.document.refList = previewDataReflist;
-		
+
 			return data;
 		};
 
@@ -496,7 +465,9 @@ const GameChangerDetailsPage = (props) => {
 
 				break;
 			case 'contract':
-				const permissions = Permissions.permissionValidator(`eda Admin`, true) || Permissions.permissionValidator(`View EDA`, true);
+				const permissions =
+					Permissions.permissionValidator(`eda Admin`, true) ||
+					Permissions.permissionValidator(`View EDA`, true);
 				setEDAPermissions(permissions);
 				if (permissions) {
 					setDetailsType('Contract');
@@ -527,7 +498,6 @@ const GameChangerDetailsPage = (props) => {
 			searchText += ` or ${alias}`;
 		});
 
-
 		const t0 = new Date().getTime();
 		gameChangerAPI
 			.getDocumentsForEntity(cloneData.clone_name, {
@@ -551,7 +521,7 @@ const GameChangerDetailsPage = (props) => {
 	useEffect(() => {
 		if (!topic || !cloneData || graph.nodes.length <= 0) return;
 		let searchText = `${topic.name}`;
-		
+
 		const docIds = [];
 
 		graph.nodes.forEach((node) => {
@@ -560,14 +530,13 @@ const GameChangerDetailsPage = (props) => {
 			}
 		});
 
-
 		const t0 = new Date().getTime();
 		gameChangerAPI
 			.getDocumentsForTopic(cloneData.clone_name, { docIds, searchText })
 			.then((resp) => {
 				const t1 = new Date().getTime();
 				setDocResultsPage(1);
-				if(resp.data.docs){
+				if (resp.data.docs) {
 					setDocCount(resp.data.totalCount);
 					setDocResults(resp.data.docs);
 
@@ -576,12 +545,12 @@ const GameChangerDetailsPage = (props) => {
 						setTimeFound(((t1 - t0) / 1000).toFixed(2));
 						setGettingDocuments(false);
 					}
-				}else{
+				} else {
 					setDocCount(0);
 					setGettingDocuments(false);
 				}
-				
-			}).catch(er => {
+			})
+			.catch((er) => {
 				console.log(er);
 			});
 	}, [topic, graph, cloneData]);
@@ -629,12 +598,7 @@ const GameChangerDetailsPage = (props) => {
 
 	const handleChangeDocsPage = (page) => {
 		setDocResultsPage(page);
-		setVisibleDocs(
-			docResults.slice(
-				(page - 1) * RESULTS_PER_PAGE,
-				page * RESULTS_PER_PAGE
-			)
-		);
+		setVisibleDocs(docResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
 	};
 
 	const editEntity = () => {
@@ -660,7 +624,7 @@ const GameChangerDetailsPage = (props) => {
 			fallbackSources.admin = sealURLOverride;
 			fallbackSources.entity = entity.image;
 			entity.details.forEach((detail, i) => {
-				if(detail.name === 'NodeVec') entity.details.splice(i,1);
+				if (detail.name === 'NodeVec') entity.details.splice(i, 1);
 			});
 			console.log(entity.details);
 		}
@@ -685,15 +649,11 @@ const GameChangerDetailsPage = (props) => {
 									className={'img'}
 									alt={`${entity.name} Img`}
 									src={
-										fallbackSources.s3 ||
-										fallbackSources.admin ||
-										fallbackSources.entity ||
-										dodSeal
+										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal
 									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
-										if (fallbackSources.admin)
-											fallbackSources.admin = undefined;
+										if (fallbackSources.admin) fallbackSources.admin = undefined;
 									}}
 								/>
 
@@ -718,7 +678,7 @@ const GameChangerDetailsPage = (props) => {
 											backgroundColor: '#313541',
 											color: 'white',
 										}}
-										rows={entity.details.filter(entity => {
+										rows={entity.details.filter((entity) => {
 											return !blacklistedEntityProperties.includes(entity.name);
 										})}
 										height={'auto'}
@@ -740,7 +700,11 @@ const GameChangerDetailsPage = (props) => {
 									backgroundColor={'rgb(238,241,242)'}
 								>
 									<MemoizedNodeCluster2D
-										graphWidth={graphContainerRef?.current?.clientWidth ? graphContainerRef.current.clientWidth - 25 : undefined}
+										graphWidth={
+											graphContainerRef?.current?.clientWidth
+												? graphContainerRef.current.clientWidth - 25
+												: undefined
+										}
 										runningQuery={runningQuery}
 										displayLinkLabel={false}
 										graph={graph}
@@ -757,10 +721,7 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div
-										className={'related-documents'}
-										style={{ width: '100%' }}
-									>
+									<div className={'related-documents'} style={{ width: '100%' }}>
 										<div
 											style={{
 												display: 'flex',
@@ -771,7 +732,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-														docCount
+															docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -826,10 +787,9 @@ const GameChangerDetailsPage = (props) => {
 		return (
 			<div>
 				<p style={{ margin: '10px 4%', fontSize: 18 }}>
-					Welcome to our new (Beta version) Topic Details page! As you look
-					around, you may note some technical issues below; please bear with us
-					while we continue making improvements here and check back often for a
-					more stable version.
+					Welcome to our new (Beta version) Topic Details page! As you look around, you may note some
+					technical issues below; please bear with us while we continue making improvements here and check
+					back often for a more stable version.
 				</p>
 				{topic && (
 					<MainContainer>
@@ -868,7 +828,11 @@ const GameChangerDetailsPage = (props) => {
 									backgroundColor={'rgb(238,241,242)'}
 								>
 									<MemoizedPolicyGraphView
-										width={graphContainerRef?.current?.clientWidth ? graphContainerRef.current.clientWidth - 25 : undefined}
+										width={
+											graphContainerRef?.current?.clientWidth
+												? graphContainerRef.current.clientWidth - 25
+												: undefined
+										}
 										graphData={graph}
 										runningSearchProp={runningQuery}
 										setDocumentsFound={() => {}}
@@ -890,10 +854,7 @@ const GameChangerDetailsPage = (props) => {
 									header={'RELATED DOCUMENTS'}
 									backgroundColor={'rgb(238,241,242)'}
 								>
-									<div
-										className={'related-documents'}
-										style={{ width: '100%' }}
-									>
+									<div className={'related-documents'} style={{ width: '100%' }}>
 										<div
 											style={{
 												display: 'flex',
@@ -904,7 +865,7 @@ const GameChangerDetailsPage = (props) => {
 												{gettingDocuments
 													? 'Searching for documents...'
 													: `${numberWithCommas(
-														docCount
+															docCount
 													  )} results found in ${timeFound} seconds`}
 											</div>
 											<div
@@ -939,9 +900,7 @@ const GameChangerDetailsPage = (props) => {
 										>
 											{gettingDocuments ? (
 												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator
-														customColor={gcColors.buttonColor2}
-													/>
+													<LoadingIndicator customColor={gcColors.buttonColor2} />
 												</div>
 											) : (
 												renderDocuments()
@@ -969,9 +928,7 @@ const GameChangerDetailsPage = (props) => {
 
 			{showTopicContainer && renderTopicContainer()}
 
-			{showSourceContainer &&
-				!_.isEmpty(cloneData) &&
-				!_.isEmpty(initialSourceData) && (
+			{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) && (
 				<SourceDetailsPage
 					source={source}
 					cloneData={cloneData}
@@ -993,10 +950,7 @@ const GameChangerDetailsPage = (props) => {
 			)}
 
 			{showContractContainer && edaPermissions && (
-				<EDAContractDetailsPage
-					awardID={contractAwardID}
-					cloneData={cloneData}
-				/>
+				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
 			)}
 		</div>
 	);
