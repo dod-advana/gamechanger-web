@@ -265,9 +265,9 @@ const GCDataStatusTracker = (props) => {
 		gameChangerAPI.getDocIngestionStats().then((res) => {
 			setIngestData(res.data);
 		});
-		gameChangerAPI.gcCrawlerSealData().then(res => {
+		gameChangerAPI.gcCrawlerSealData().then((res) => {
 			const map = {};
-			res.data.forEach(crawler => {
+			res.data.forEach((crawler) => {
 				map[crawler.crawler] = crawler;
 			});
 			setCrawlerInfoMap(map);
@@ -467,9 +467,7 @@ const GCDataStatusTracker = (props) => {
 							}}
 							style={{ color: '#386F94' }}
 						>
-							<div>
-								{props.original.pub_title}
-							</div>
+							<div>{props.original.pub_title}</div>
 						</Link>
 					</TableRow>
 				),
@@ -482,20 +480,24 @@ const GCDataStatusTracker = (props) => {
 				sortable: false,
 				Cell: (props) => {
 					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
-					return (<TableRow>
-						<Link
-							href={'#'}
-							onClick={(event) => {
-								preventDefault(event);
-								window.open(props.original.json_metadata.source_page_url);
-							}}
-							style={{ color: '#386F94' }}
-						>
-							<div>
-								{crawler ? `${crawler.data_source_s} - ${crawler.source_title}` : props.original.json_metadata.crawler_used}
-							</div>
-						</Link>
-					</TableRow>);
+					return (
+						<TableRow>
+							<Link
+								href={'#'}
+								onClick={(event) => {
+									preventDefault(event);
+									window.open(props.original.json_metadata.source_page_url);
+								}}
+								style={{ color: '#386F94' }}
+							>
+								<div>
+									{crawler
+										? `${crawler.data_source_s} - ${crawler.source_title}`
+										: props.original.json_metadata.crawler_used}
+								</div>
+							</Link>
+						</TableRow>
+					);
 				},
 			},
 			{
@@ -514,11 +516,7 @@ const GCDataStatusTracker = (props) => {
 				accessor: 'upload_date',
 				filterable: false,
 				width: 115,
-				Cell: (row) => (
-					<TableRow>
-						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-					</TableRow>
-				),
+				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
 			},
 			{
 				Header: 'Next update',
