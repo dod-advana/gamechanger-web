@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-	SearchBarForm,
-	SearchBarInput,
-	SearchButton,
-} from '../../searchBar/SearchBarStyledComponents';
+import { SearchBarForm, SearchBarInput, SearchButton } from '../../searchBar/SearchBarStyledComponents';
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
@@ -70,11 +66,7 @@ const GlobalSearchSearchBarHandler = {
 					/>
 
 					{dropdownOpen && !advancedSearchOpen && (
-						<SearchBarDropdown
-							searchText={searchText}
-							rowData={dataRows}
-							cursor={cursor}
-						/>
+						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
 					)}
 				</SearchBarForm>
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>

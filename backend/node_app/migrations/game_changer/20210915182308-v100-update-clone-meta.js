@@ -8,7 +8,7 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'clone_to_advana', Sequelize.BOOLEAN),
 				queryInterface.removeColumn(tablename, 'clone_to_gamechanger', Sequelize.BOOLEAN),
 				queryInterface.removeColumn(tablename, 'clone_to_jupiter', Sequelize.BOOLEAN),
-        queryInterface.addColumn(tablename, 'available_at', Sequelize.ARRAY(Sequelize.STRING))
+				queryInterface.addColumn(tablename, 'available_at', Sequelize.ARRAY(Sequelize.STRING)),
 			]);
 		});
 	},
@@ -19,8 +19,8 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'clone_to_advana', Sequelize.BOOLEAN),
 				queryInterface.addColumn(tablename, 'clone_to_gamechanger', Sequelize.BOOLEAN),
 				queryInterface.addColumn(tablename, 'clone_to_jupiter', Sequelize.BOOLEAN),
-        queryInterface.removeColumn(tablename, 'available_at', Sequelize.ARRAY(Sequelize.STRING))
-      ]);
+				queryInterface.removeColumn(tablename, 'available_at', Sequelize.ARRAY(Sequelize.STRING)),
+			]);
 		});
-	}
+	},
 };

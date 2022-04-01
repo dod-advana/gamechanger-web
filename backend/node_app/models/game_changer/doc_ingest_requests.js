@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const DOC_INGEST_REQUEST = sequelize.define('doc_ingest_requests',
+	const DOC_INGEST_REQUEST = sequelize.define(
+		'doc_ingest_requests',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,12 +10,12 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			doc_id: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			user_id: {
 				type: DataTypes.STRING,
-				allowNull: false
-			}
+				allowNull: false,
+			},
 		},
 		{
 			freezeTableName: true,

@@ -8,7 +8,7 @@ module.exports = {
 				allowNull: false,
 				type: Sequelize.INTEGER,
 				autoIncrement: true,
-				primaryKey: true
+				primaryKey: true,
 			},
 			user_id: {
 				allowNull: false,
@@ -19,10 +19,10 @@ module.exports = {
 				type: Sequelize.TEXT,
 			},
 			createdAt: Sequelize.DATE,
-			updatedAt: Sequelize.DATE
+			updatedAt: Sequelize.DATE,
 		});
 	},
 	down: async (queryInterface, Sequelize) => {
 		await queryInterface.dropTable(tablename);
-	}
+	},
 };

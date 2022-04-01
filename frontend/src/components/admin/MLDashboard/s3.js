@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Input,IconButton  } from '@material-ui/core';
+import { Input, IconButton } from '@material-ui/core';
 import { TableRow, BorderDiv } from './util/styledDivs';
-import { CloudDownload  } from '@material-ui/icons';
+import { CloudDownload } from '@material-ui/icons';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from '../../common/GCButton';
@@ -12,8 +12,6 @@ import 'react-table/react-table.css';
 import './index.scss';
 
 const gameChangerAPI = new GameChangerAPI();
-
-
 
 const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 
@@ -58,12 +56,12 @@ export default (props) => {
 			throw e;
 		}
 	};
-	
+
 	/**
 	 * Get all the tar data files in s3 with their upload time.
 	 * @method getS3DataList
 	 */
-	 const getS3DataList = async () => {
+	const getS3DataList = async () => {
 		try {
 			// set transformerList
 			const slist = await gameChangerAPI.getS3DataList();
@@ -89,11 +87,10 @@ export default (props) => {
 	 * Pass a file from s3 to download into the ml-api
 	 * @method downloadS3File
 	 */
-	const  downloadS3File = async (row,type) => {
-
+	const downloadS3File = async (row, type) => {
 		await gameChangerAPI.downloadS3File({
-			'file':row.original.file,
-			'type':type
+			file: row.original.file,
+			type: type,
 		});
 		props.getProcesses();
 	};
@@ -102,17 +99,17 @@ export default (props) => {
 	 * Get a list of all the proccesses running and completed
 	 * @method getAllProcessData
 	 */
-	 const getAllProcessData = () => {
+	const getAllProcessData = () => {
 		const processList = [];
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
 				if (key !== 'flags') {
 					const status = props.processes.process_status[key]['process'].split(': ');
-					if (['s3', 'corpus'].includes(status[0])){
+					if (['s3', 'corpus'].includes(status[0])) {
 						processList.push({
 							...props.processes.process_status[key],
 							thread_id: key,
-							date:'Currently Running'
+							date: 'Currently Running',
 						});
 					}
 				}
@@ -121,12 +118,12 @@ export default (props) => {
 		if (props.processes && props.processes.completed_process) {
 			for (const completed of props.processes.completed_process) {
 				const completed_process = completed.process.split(': ');
-				if (['s3', 'corpus'].includes(completed_process[0])){
+				if (['s3', 'corpus'].includes(completed_process[0])) {
 					processList.push({
 						...completed,
 						process: completed_process[1],
 						category: completed_process[0],
-						progress: completed.total
+						progress: completed.total,
 					});
 				}
 			}
@@ -175,10 +172,7 @@ export default (props) => {
 	 */
 	const checkFlag = (flag) => {
 		let flagged = false;
-		if (
-			props.processes.process_status &&
-			props.processes.process_status.flags
-		) {
+		if (props.processes.process_status && props.processes.process_status.flags) {
 			const flags = props.processes.process_status.flags;
 			for (const key in flags) {
 				if (key.includes(flag) && flags[key]) {
@@ -210,9 +204,18 @@ export default (props) => {
 		{
 			Header: 'Download',
 			accessor: '',
-			Cell: (row) => <TableRow><IconButton onClick={() => {
-				downloadS3File(row,'models');
-			}} style={{ color: 'white' }}><CloudDownload fontSize="large" /></IconButton></TableRow>,
+			Cell: (row) => (
+				<TableRow>
+					<IconButton
+						onClick={() => {
+							downloadS3File(row, 'models');
+						}}
+						style={{ color: 'white' }}
+					>
+						<CloudDownload fontSize="large" />
+					</IconButton>
+				</TableRow>
+			),
 		},
 	];
 
@@ -225,9 +228,7 @@ export default (props) => {
 					margin: '10px 80px',
 				}}
 			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-					S3 Resources and Controls
-				</p>
+				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>S3 Resources and Controls</p>
 
 				<GCPrimaryButton
 					onClick={() => {
@@ -241,9 +242,7 @@ export default (props) => {
 			</div>
 			<div>
 				<div>
-					<Processes
-						processData={getAllProcessData()}
-					/>
+					<Processes processData={getAllProcessData()} />
 				</div>
 			</div>
 			<div className="info">
@@ -255,7 +254,7 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block', fontWeight: 'bold'}}>API Controls:</div>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>API Controls:</div>
 					</div>
 					<div
 						style={{

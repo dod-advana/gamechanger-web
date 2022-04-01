@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('contracts',
+	return sequelize.define(
+		'contracts',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -11,16 +12,16 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 			},
 			proj_number: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			appn_num: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			ba_num: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			budgetyear: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			budgetcycle: {
 				type: DataTypes.TEXT,
@@ -37,10 +38,10 @@ module.exports = (sequelize, DataTypes) => {
 			ce_name: {
 				type: DataTypes.TEXT,
 			},
-            ce_item_name: {
+			ce_item_name: {
 				type: DataTypes.TEXT,
 			},
-            vendor: {
+			vendor: {
 				type: DataTypes.TEXT,
 			},
 			vendor_location: {
@@ -49,10 +50,11 @@ module.exports = (sequelize, DataTypes) => {
 			award_date: {
 				type: DataTypes.TEXT,
 			},
-		}, {
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'contracts'
+			tableName: 'contracts',
 		}
 	);
 };

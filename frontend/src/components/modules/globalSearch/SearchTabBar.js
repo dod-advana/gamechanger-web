@@ -18,8 +18,7 @@ const formatMetaData = (meta = {}, tab) => {
 
 	if (tab === 'all') return ` (${commaThousands(calculatSumTotal(meta))})`;
 
-	if (!_.isNil(meta?.[tab]?.total))
-		return ` (${commaThousands(meta[tab]?.total)})`;
+	if (!_.isNil(meta?.[tab]?.total)) return ` (${commaThousands(meta[tab]?.total)})`;
 
 	return null;
 };
@@ -29,8 +28,7 @@ const calculatSumTotal = (meta) => {
 };
 
 const SearchTabBar = (props) => {
-	const { searchTypes, activeTab, setActiveTab, resultMetaData, returnHome } =
-		useContext(SearchContext);
+	const { searchTypes, activeTab, setActiveTab, resultMetaData, returnHome } = useContext(SearchContext);
 
 	const { containerStyles = {} } = props;
 
@@ -39,12 +37,7 @@ const SearchTabBar = (props) => {
 	return (
 		<div style={{ ...styles.container, ...containerStyles }}>
 			<div style={styles.left}>
-				<JumpButton
-					style={{ marginTop: 0 }}
-					reverse={true}
-					label="Back to Home"
-					action={returnHome}
-				/>
+				<JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} />
 			</div>
 
 			<div style={styles.tabsContainer}>
@@ -54,8 +47,7 @@ const SearchTabBar = (props) => {
 
 					let style = styles.tab;
 
-					if (activeTab === searchType)
-						style = { ...style, ...styles.activeTab };
+					if (activeTab === searchType) style = { ...style, ...styles.activeTab };
 
 					return (
 						<Typography

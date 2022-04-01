@@ -18,12 +18,23 @@ import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
 import {
-	Accomplishments, aggregateProjectDescriptions, Contracts, formatNum,
-	BasicData, Metadata, ProjectDescription, SideNav
+	Accomplishments,
+	aggregateProjectDescriptions,
+	Contracts,
+	formatNum,
+	BasicData,
+	Metadata,
+	ProjectDescription,
+	SideNav,
 } from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
-	CloseButton, StyledContainer, StyledReviewContainer, StyledReviewLeftContainer,
-	StyledReviewRightContainer, StyledAccordionContainer, StyledAccordionHeader
+	CloseButton,
+	StyledContainer,
+	StyledReviewContainer,
+	StyledReviewLeftContainer,
+	StyledReviewRightContainer,
+	StyledAccordionContainer,
+	StyledAccordionHeader,
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
@@ -32,14 +43,16 @@ const _ = require('lodash');
 const gameChangerAPI = new GameChangerAPI();
 
 const JBookProfilePage = (props) => {
-	const {
-		cloneData,
-	} = props;
+	const { cloneData } = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
-	const [permissions, setPermissions] = useState({is_primary_reviewer: false, is_service_reviewer: false, is_poc_reviewer: false});
+	const [permissions, setPermissions] = useState({
+		is_primary_reviewer: false,
+		is_service_reviewer: false,
+		is_poc_reviewer: false,
+	});
 
 	useEffect(() => {
 		if (!state.cloneDataSet) {
@@ -67,7 +80,16 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const getProjectData = async (programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber, useElasticSearch) => {
+	const getProjectData = async (
+		programElement,
+		projectNum,
+		type,
+		budgetYear,
+		budgetLineItem,
+		id,
+		appropriationNumber,
+		useElasticSearch
+	) => {
 		setProfileLoading(true);
 
 		let projectData;
@@ -83,8 +105,8 @@ const JBookProfilePage = (props) => {
 					budgetLineItem,
 					id,
 					appropriationNumber,
-					useElasticSearch
-				}
+					useElasticSearch,
+				},
 			});
 
 			if (projectData.data) {
@@ -98,15 +120,20 @@ const JBookProfilePage = (props) => {
 						}
 					}
 					setContractMapping(tempMapping);
-					if (projectData.data.review.serviceMissionPartnersChecklist === null || projectData.data.review.serviceMissionPartnersChecklist === undefined) {
+					if (
+						projectData.data.review.serviceMissionPartnersChecklist === null ||
+						projectData.data.review.serviceMissionPartnersChecklist === undefined
+					) {
 						projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
 					}
-					if (projectData.data.review.pocMissionPartnersChecklist === null || projectData.data.review.pocMissionPartnersChecklist === undefined) {
+					if (
+						projectData.data.review.pocMissionPartnersChecklist === null ||
+						projectData.data.review.pocMissionPartnersChecklist === undefined
+					) {
 						projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
 					}
 				}
 			}
-
 		} catch (err) {
 			console.log('Error fetching project and review data');
 			console.log(err);
@@ -117,7 +144,7 @@ const JBookProfilePage = (props) => {
 			dropdownData = await gameChangerAPI.callDataFunction({
 				functionName: 'getBudgetDropdownData',
 				cloneName: cloneData.clone_name,
-				options: {}
+				options: {},
 			});
 			setDropdownData(dropdownData.data);
 		} catch (err) {
@@ -138,7 +165,10 @@ const JBookProfilePage = (props) => {
 			if (!projectData.data.review.serviceAgreeLabel || projectData.data.review.serviceAgreeLabel === null) {
 				projectData.data.review.serviceAgreeLabel = 'Yes';
 			}
-			if (!projectData.data.review.servicePTPAgreeLabel || projectData.data.review.servicePTPAgreeLabel === null) {
+			if (
+				!projectData.data.review.servicePTPAgreeLabel ||
+				projectData.data.review.servicePTPAgreeLabel === null
+			) {
 				projectData.data.review.servicePTPAgreeLabel = 'Yes';
 			}
 			// Review changes to make things behave properly
@@ -178,12 +208,20 @@ const JBookProfilePage = (props) => {
 			setID(id);
 			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(programElement, projectNum, type, budgetYear, budgetLineItem, id, appropriationNumber, useElasticSearch);
+			getProjectData(
+				programElement,
+				projectNum,
+				type,
+				budgetYear,
+				budgetLineItem,
+				id,
+				appropriationNumber,
+				useElasticSearch
+			);
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
 			}
-
 		} catch (err) {
 			console.log(err);
 			console.log('Error retrieving budget profile page data');
@@ -217,7 +255,7 @@ const JBookProfilePage = (props) => {
 				let accomp = [];
 
 				if (projectData.accomplishments) {
-					projectData.accomplishments.forEach(accom => {
+					projectData.accomplishments.forEach((accom) => {
 						accomp.push({
 							title: accom.Accomp_Title_text,
 							data: [
@@ -241,17 +279,25 @@ const JBookProfilePage = (props) => {
 									Key: 'Current Year Amount',
 									Value: accom.PlanPrgrm_Fund_BY1Base ? formatNum(accom.PlanPrgrm_Fund_BY1Base) : '',
 								},
-							]
+							],
 						});
 					});
 
 					accomp.forEach((accom, i) => {
 						accom.data.forEach((accompObject, y) => {
-							if ((accompObject.Key === 'Description' || accompObject.Key === 'Prior Year Plans' || accompObject.Key === 'Current Year Plans') && accompObject.Value !== undefined && accompObject.Value !== null) {
-								accomp[i].data[y].Value = accomp[i].data[y].Value.replaceAll(/(^|[^\n])\n(?!\n)/g, '$1<br />');
+							if (
+								(accompObject.Key === 'Description' ||
+									accompObject.Key === 'Prior Year Plans' ||
+									accompObject.Key === 'Current Year Plans') &&
+								accompObject.Value !== undefined &&
+								accompObject.Value !== null
+							) {
+								accomp[i].data[y].Value = accomp[i].data[y].Value.replaceAll(
+									/(^|[^\n])\n(?!\n)/g,
+									'$1<br />'
+								);
 								accomp[i].data[y].Value = accomp[i].data[y].Value.replaceAll(`â¢`, `&bull;`);
 								accomp[i].data[y].Value = accomp[i].data[y].Value.replaceAll(`â`, `'`);
-
 							}
 						});
 					});
@@ -269,7 +315,10 @@ const JBookProfilePage = (props) => {
 					for (let i = 0; i < projectDescriptions.length; i++) {
 						projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(`â¢`, `&bull;`);
 						projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(`â`, `'`);
-						projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(/(^|[^\n])\n(?!\n)/g, '$1<br />');
+						projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(
+							/(^|[^\n])\n(?!\n)/g,
+							'$1<br />'
+						);
 					}
 
 					if (searchText) {
@@ -280,7 +329,7 @@ const JBookProfilePage = (props) => {
 
 							// if there is an or, highlight terms separately
 							if (searchText.indexOf('or') !== -1) {
-								terms.forEach(term => {
+								terms.forEach((term) => {
 									const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
 									const tmpMatches = projectDescriptions[i].value.match(regex);
 									matches = matches.concat(tmpMatches);
@@ -293,45 +342,56 @@ const JBookProfilePage = (props) => {
 								matches = matches.concat(tmpMatches);
 							}
 
-
 							if (matches && matches !== null) {
 								for (const match of matches) {
-									projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(match, `<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`);
+									projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(
+										match,
+										`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+									);
 								}
 							}
 						}
 
-						accomp.forEach(accomplishment => {
-							accomplishment.data.forEach(accompObject => {
-								if ((accompObject.Key === 'Description' || accompObject.Key === 'Prior Year Plans' || accompObject.Key === 'Current Year Plans') && accompObject.Value !== undefined && accompObject.Value !== null) {
+						accomp.forEach((accomplishment) => {
+							accomplishment.data.forEach((accompObject) => {
+								if (
+									(accompObject.Key === 'Description' ||
+										accompObject.Key === 'Prior Year Plans' ||
+										accompObject.Key === 'Current Year Plans') &&
+									accompObject.Value !== undefined &&
+									accompObject.Value !== null
+								) {
 									let matches = [];
 
-									terms.forEach(term => {
+									terms.forEach((term) => {
 										const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
 										const tmpMatches = accompObject.Value.match(regex);
 										matches = matches.concat(tmpMatches);
 									});
 									if (matches && matches.length > 0 && matches !== null) {
 										for (const match of matches) {
-											accompObject.Value = accompObject.Value.replaceAll(match, `<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`);
+											accompObject.Value = accompObject.Value.replaceAll(
+												match,
+												`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+											);
 										}
 									}
-
 								}
 							});
 						});
-
 					}
 
 					if (keywordsChecked) {
 						const keywordBoxes = [];
 						for (let i = 0; i < projectDescriptions.length; i++) {
-
 							for (const keyword of keywordsChecked) {
 								let tempKeyword = keyword;
 								let regex = new RegExp(`${keyword}([a-z]+)?`, 'gi');
 								if (keyword.split(' ').length > 1) {
-									tempKeyword = keyword.split(' ').map(word => `([a-z]+)?${word}([a-z]+)?`).join(' ');
+									tempKeyword = keyword
+										.split(' ')
+										.map((word) => `([a-z]+)?${word}([a-z]+)?`)
+										.join(' ');
 									regex = new RegExp(tempKeyword, 'gi');
 								}
 
@@ -346,7 +406,10 @@ const JBookProfilePage = (props) => {
 
 								if (keywordsChecked.length > 0 && matches) {
 									for (const match of matches) {
-										projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(match, `<span style="background-color: ${gcOrange}; color: white; padding: 0 4px;">${match}</span>`);
+										projectDescriptions[i].value = projectDescriptions[i].value.replaceAll(
+											match,
+											`<span style="background-color: ${gcOrange}; color: white; padding: 0 4px;">${match}</span>`
+										);
 
 										if (!isCheckboxSet && keywordBoxes.indexOf(keyword) === -1) {
 											keywordBoxes.push(keyword);
@@ -356,8 +419,8 @@ const JBookProfilePage = (props) => {
 							}
 						}
 
-						accomp.forEach(accomplishment => {
-							accomplishment.data.forEach(accompObject => {
+						accomp.forEach((accomplishment) => {
+							accomplishment.data.forEach((accompObject) => {
 								if (accompObject.Key === 'Description' && accompObject.Value !== null) {
 									for (const keyword of keywordsChecked) {
 										const regex = new RegExp(`${keyword}([a-z]+)?`, 'gi');
@@ -365,7 +428,10 @@ const JBookProfilePage = (props) => {
 
 										if (keywordsChecked.length > 0 && matches) {
 											for (const match of matches) {
-												accompObject.Value = accompObject.Value.replaceAll(match, `<span style="background-color: ${gcOrange}; color: white; padding: 0 4px;">${match}</span>`);
+												accompObject.Value = accompObject.Value.replaceAll(
+													match,
+													`<span style="background-color: ${gcOrange}; color: white; padding: 0 4px;">${match}</span>`
+												);
 											}
 										}
 									}
@@ -389,18 +455,16 @@ const JBookProfilePage = (props) => {
 				}
 			}
 		}
-
 	}, [projectData, keywordsChecked, dispatch, isCheckboxSet, searchText]);
 
 	const renderReenableModal = (reviewType) => {
 		return (
-			<Dialog
-				open={state[reviewType + 'ModalOpen']}
-				maxWidth="xl"
-			>
+			<Dialog open={state[reviewType + 'ModalOpen']} maxWidth="xl">
 				<DialogTitle>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>Re-Enable Review Form</Typography>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+							Re-Enable Review Form
+						</Typography>
 					</div>
 				</DialogTitle>
 				<CloseButton>
@@ -418,7 +482,10 @@ const JBookProfilePage = (props) => {
 					</GCPrimaryButton>
 					<GCPrimaryButton
 						style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
-						onClick={() => { setState(dispatch, { [`${reviewType}ModalOpen`]: false }); reenableForm('primaryReviewLoading', reviewType.toLowerCase()) }}
+						onClick={() => {
+							setState(dispatch, { [`${reviewType}ModalOpen`]: false });
+							reenableForm('primaryReviewLoading', reviewType.toLowerCase());
+						}}
 					>
 						Re-Enable
 					</GCPrimaryButton>
@@ -447,7 +514,7 @@ const JBookProfilePage = (props) => {
 					serviceReviewer: '',
 					primaryPlannedTransitionPartner: null,
 					serviceAdditionalMissionPartners: null,
-					primaryReviewNotes: null
+					primaryReviewNotes: null,
 				};
 				break;
 			case 'serviceForm':
@@ -512,7 +579,7 @@ const JBookProfilePage = (props) => {
 					'Modeling and Simulation': [],
 					'Human-Machine Interaction': [],
 					'Responsible AI': [],
-					'Other': []
+					Other: [],
 				};
 				break;
 			case 'domainTaskSecondary':
@@ -521,8 +588,7 @@ const JBookProfilePage = (props) => {
 
 					if (index !== -1) {
 						newDomainTasks[domainTask].splice(index, 1);
-					}
-					else {
+					} else {
 						newDomainTasks[domainTask].push(value);
 					}
 				}
@@ -532,8 +598,7 @@ const JBookProfilePage = (props) => {
 			case 'domainTaskOther':
 				if (domainTasks['Other'].length > 0) {
 					newDomainTasks['Other'][0] = value;
-				}
-				else {
+				} else {
 					newDomainTasks['Other'].push(value);
 				}
 				newReviewData.domainTaskSecondary = newDomainTasks['Other'];
@@ -565,8 +630,7 @@ const JBookProfilePage = (props) => {
 			case 'domainTask':
 				if (newReviewData.domainTask === value) {
 					newReviewData.domainTask = '';
-				}
-				else {
+				} else {
 					newReviewData[field] = value;
 				}
 				break;
@@ -575,8 +639,7 @@ const JBookProfilePage = (props) => {
 					newReviewData.pocJointCapabilityArea = '';
 					newReviewData.pocJointCapabilityArea2 = [];
 					newReviewData.pocJointCapabilityArea3 = [];
-				}
-				else {
+				} else {
 					newReviewData[field] = value;
 					newReviewData.pocJointCapabilityArea2 = [];
 					newReviewData.pocJointCapabilityArea3 = [];
@@ -586,10 +649,11 @@ const JBookProfilePage = (props) => {
 				const JCAindex2 = newReviewData['pocJointCapabilityArea2'].indexOf(value);
 				if (JCAindex2 !== -1) {
 					const tier3 = Object.keys(jca_data[newReviewData.pocJointCapabilityArea][value]);
-					newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(val => tier3.indexOf(val) === -1);
+					newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(
+						(val) => tier3.indexOf(val) === -1
+					);
 					newReviewData.pocJointCapabilityArea2.splice(JCAindex2, 1);
-				}
-				else {
+				} else {
 					newReviewData[field].push(value);
 				}
 				break;
@@ -597,8 +661,7 @@ const JBookProfilePage = (props) => {
 				const JCAindex3 = newReviewData['pocJointCapabilityArea3'].indexOf(value);
 				if (JCAindex3 !== -1) {
 					newReviewData.pocJointCapabilityArea3.splice(JCAindex3, 1);
-				}
-				else {
+				} else {
 					newReviewData[field].push(value);
 				}
 				break;
@@ -616,7 +679,7 @@ const JBookProfilePage = (props) => {
 					'Modeling and Simulation': [],
 					'Human-Machine Interaction': [],
 					'Responsible AI': [],
-					'Other': []
+					Other: [],
 				};
 				break;
 			case 'clearDataType':
@@ -634,13 +697,11 @@ const JBookProfilePage = (props) => {
 		stateObject.reviewData = newReviewData;
 		stateObject.domainTasks = newDomainTasks;
 
-
 		if (field in serviceValidation && value && value.length > 0) {
 			newServiceValidation = _.cloneDeep(serviceValidation);
 			newServiceValidation[field] = true;
 			stateObject.serviceValidation = newServiceValidation;
-		}
-		else if (field in pocValidation && value && value.length > 0) {
+		} else if (field in pocValidation && value && value.length > 0) {
 			newPOCValidation = _.cloneDeep(pocValidation);
 			newPOCValidation[field] = true;
 			stateObject.pocValidation = newPOCValidation;
@@ -661,8 +722,11 @@ const JBookProfilePage = (props) => {
 					let dollarsAttributed = reviewData['pocDollarsAttributed'];
 					let percentageAttributed = reviewData['pocPercentageAttributed'];
 
-					validationForm[field] = (dollarsAttributed !== undefined && dollarsAttributed !== null && dollarsAttributed !== '') ||
-						(percentageAttributed !== undefined && percentageAttributed !== null && percentageAttributed !== '');
+					validationForm[field] =
+						(dollarsAttributed !== undefined && dollarsAttributed !== null && dollarsAttributed !== '') ||
+						(percentageAttributed !== undefined &&
+							percentageAttributed !== null &&
+							percentageAttributed !== '');
 
 					if (validationForm[field] === false) {
 						validated = false;
@@ -670,36 +734,47 @@ const JBookProfilePage = (props) => {
 				} else {
 					validationForm[field] = true;
 				}
-			}
-			else if (field === 'servicePlannedTransitionPartner') {
-				validationForm[field] = (reviewData['servicePTPAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
-			}
-			else if (field === 'serviceClassLabel') {
-				validationForm[field] = (reviewData['serviceAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
-			}
-			else if (field === 'pocClassLabel') {
-				validationForm[field] = (reviewData['pocAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
-			}
-			else if (field === 'pocMissionPartners') {
-				validationForm[field] = (reviewData['pocMPAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
-			}
-			else if (field === 'pocPlannedTransitionPartner') {
-				validationForm[field] = (reviewData['pocPTPAgreeLabel'] === 'Yes') || (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
-			}
-			else if ((getClassLabel(reviewData) === 'AI Enabling' || getClassLabel(reviewData) === 'Not AI')) {
-				if (!(field === 'domainTask' || field === 'pocJointCapabilityArea' || field === 'roboticsSystemAgree' ||
-					field === 'intelligentSystemsAgree' || field === 'pocAIType' || field === 'pocAITypeDescription' ||
-					field === 'pocAIRoleDescription')) {
-					validationForm[field] = (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (field === 'servicePlannedTransitionPartner') {
+				validationForm[field] =
+					reviewData['servicePTPAgreeLabel'] === 'Yes' ||
+					(fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (field === 'serviceClassLabel') {
+				validationForm[field] =
+					reviewData['serviceAgreeLabel'] === 'Yes' ||
+					(fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (field === 'pocClassLabel') {
+				validationForm[field] =
+					reviewData['pocAgreeLabel'] === 'Yes' ||
+					(fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (field === 'pocMissionPartners') {
+				validationForm[field] =
+					reviewData['pocMPAgreeLabel'] === 'Yes' ||
+					(fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (field === 'pocPlannedTransitionPartner') {
+				validationForm[field] =
+					reviewData['pocPTPAgreeLabel'] === 'Yes' ||
+					(fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else if (getClassLabel(reviewData) === 'AI Enabling' || getClassLabel(reviewData) === 'Not AI') {
+				if (
+					!(
+						field === 'domainTask' ||
+						field === 'pocJointCapabilityArea' ||
+						field === 'roboticsSystemAgree' ||
+						field === 'intelligentSystemsAgree' ||
+						field === 'pocAIType' ||
+						field === 'pocAITypeDescription' ||
+						field === 'pocAIRoleDescription'
+					)
+				) {
+					validationForm[field] = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
 					if (validationForm[field] === false) {
 						validated = false;
 					}
 				} else {
 					validationForm[field] = true;
 				}
-			}
-			else {
-				validationForm[field] = (fieldValue !== null && fieldValue !== undefined && fieldValue !== '');
+			} else {
+				validationForm[field] = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
 				if (validationForm[field] === false) {
 					validated = false;
 				}
@@ -711,7 +786,12 @@ const JBookProfilePage = (props) => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		if (!isSubmit || reviewType === 'primary' || validateForm(reviewType) || getClassLabel(reviewData) === 'Not AI') {
+		if (
+			!isSubmit ||
+			reviewType === 'primary' ||
+			validateForm(reviewType) ||
+			getClassLabel(reviewData) === 'Not AI'
+		) {
 			setState(dispatch, { [loading]: true });
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
@@ -723,19 +803,18 @@ const JBookProfilePage = (props) => {
 						revProgramElement: programElement,
 						id: undefined,
 						revBudgetLineItems: budgetLineItem,
-						budgetYear: budgetYear
+						budgetYear: budgetYear,
 					},
 					isSubmit,
 					reviewType,
 					projectNum,
-					appropriationNumber
-				}
+					appropriationNumber,
+				},
 			});
 
 			getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
 			setState(dispatch, { [loading]: false });
 		}
-
 	};
 
 	const reenableForm = async (loading, reviewType) => {
@@ -749,10 +828,18 @@ const JBookProfilePage = (props) => {
 				programElement,
 				budgetLineItem,
 				projectNum,
-				appropriationNumber
-			}
+				appropriationNumber,
+			},
 		});
-		await getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
+		await getProjectData(
+			programElement,
+			projectNum,
+			budgetType,
+			budgetYear,
+			budgetLineItem,
+			id,
+			appropriationNumber
+		);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -763,28 +850,21 @@ const JBookProfilePage = (props) => {
 
 			if (index !== -1) {
 				newKeywordsChecked.splice(index, 1);
-			}
-			else {
+			} else {
 				newKeywordsChecked.push(keyword);
 			}
-		}
-		else {
+		} else {
 			newKeywordsChecked = [keyword];
 		}
 
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
-
 	return (
 		<div>
 			<Notifications context={context} />
 			<SearchBar context={context} />
-			<SideNav
-				context={context}
-				budgetType={budgetType}
-				budgetYear={budgetYear}
-			/>
+			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<BasicData
 					budgetType={budgetType}
@@ -813,55 +893,115 @@ const JBookProfilePage = (props) => {
 			</StyledContainer>
 			<StyledReviewContainer>
 				<StyledReviewLeftContainer>
-					{accomplishments && accomplishments.length && accomplishments.length > 0 ?
+					{accomplishments && accomplishments.length && accomplishments.length > 0 ? (
 						<StyledAccordionContainer id={'Accomplishment'}>
-							<GCAccordion contentPadding={0} expanded={false} header={`ACCOMPLISHMENTS ${accomplishments ? `(${accomplishments.length})` : ''}`}
-								headerBackground={'rgb(238,241,242)'} headerTextColor={'black'}
-								headerTextWeight={'600'}>
+							<GCAccordion
+								contentPadding={0}
+								expanded={false}
+								header={`ACCOMPLISHMENTS ${accomplishments ? `(${accomplishments.length})` : ''}`}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'600'}
+							>
 								<Accomplishments accomplishments={accomplishments} />
 							</GCAccordion>
 						</StyledAccordionContainer>
-						: <></>
-					}
-					{contracts.length > 0 &&
+					) : (
+						<></>
+					)}
+					{contracts.length > 0 && (
 						<StyledAccordionContainer id={'Contracts'}>
-							<GCAccordion contentPadding={0} expanded={false} header={`CONTRACT DATA (FROM GENERAL LEDGER AND FPDS-NG) ${contracts ? `(${contracts.length})` : ''}`} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+							<GCAccordion
+								contentPadding={0}
+								expanded={false}
+								header={`CONTRACT DATA (FROM GENERAL LEDGER AND FPDS-NG) ${
+									contracts ? `(${contracts.length})` : ''
+								}`}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'600'}
+							>
 								<Contracts contracts={contracts} />
 							</GCAccordion>
 						</StyledAccordionContainer>
-					}
+					)}
 					<StyledAccordionContainer id={'Primary Reviewer Section'}>
-						<GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
-							<StyledAccordionHeader headerWidth='100%'>
-								<strong>PRIMARY REVIEWER</strong>
-								<FiberManualRecordIcon style={{ color: reviewData.primaryReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
-							</StyledAccordionHeader>
-						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+						<GCAccordion
+							contentPadding={0}
+							expanded={true}
+							headerWidth="100%"
+							header={
+								<StyledAccordionHeader headerWidth="100%">
+									<strong>PRIMARY REVIEWER</strong>
+									<FiberManualRecordIcon
+										style={{
+											color:
+												reviewData.primaryReviewStatus === 'Finished Review'
+													? 'green'
+													: '#F9B32D',
+										}}
+									/>
+								</StyledAccordionHeader>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'600'}
+						>
 							<JBookJAICReviewForm
 								renderReenableModal={renderReenableModal}
 								reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_primary_reviewer && Auth.getTokenPayload().email === reviewData.primaryReviewerEmail)}
+								roleDisabled={
+									Permissions.hasPermission('JBOOK Admin')
+										? false
+										: !(
+												permissions.is_primary_reviewer &&
+												Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
+										  )
+								}
 								finished={reviewData.primaryReviewStatus === 'Finished Review'}
 								submitReviewForm={submitReviewForm}
 								setReviewData={setReviewData}
 								dropdownData={dropdownData}
 								reviewerProp={projectData.reviewer}
-								serviceReviewerProp={projectData.serviceReview} />
+								serviceReviewerProp={projectData.serviceReview}
+							/>
 						</GCAccordion>
 					</StyledAccordionContainer>
 
 					<StyledAccordionContainer id={'Service / DoD Component Reviewer Section'}>
-						<GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
-							<StyledAccordionHeader>
-								<strong>SERVICE REVIEWER</strong>
-								<FiberManualRecordIcon style={{ color: reviewData.serviceReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
-							</StyledAccordionHeader>
-						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+						<GCAccordion
+							contentPadding={0}
+							expanded={true}
+							headerWidth="100%"
+							header={
+								<StyledAccordionHeader>
+									<strong>SERVICE REVIEWER</strong>
+									<FiberManualRecordIcon
+										style={{
+											color:
+												reviewData.serviceReviewStatus === 'Finished Review'
+													? 'green'
+													: '#F9B32D',
+										}}
+									/>
+								</StyledAccordionHeader>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'600'}
+						>
 							<JBookServiceReviewForm
 								renderReenableModal={renderReenableModal}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(permissions.is_service_reviewer  &&
-									(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
-										Auth.getTokenPayload().email === reviewData.serviceSecondaryReviewerEmail))}
+								roleDisabled={
+									Permissions.hasPermission('JBOOK Admin')
+										? false
+										: !(
+												permissions.is_service_reviewer &&
+												(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
+													Auth.getTokenPayload().email ===
+														reviewData.serviceSecondaryReviewerEmail)
+										  )
+								}
 								reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
 								finished={reviewData.serviceReviewStatus === 'Finished Review'}
 								submitReviewForm={submitReviewForm}
@@ -873,31 +1013,54 @@ const JBookProfilePage = (props) => {
 					</StyledAccordionContainer>
 
 					<StyledAccordionContainer id={'POC Reviewer Section'}>
-						<GCAccordion contentPadding={0} expanded={true} headerWidth='100%' header={
-							<StyledAccordionHeader>
-								<strong>POC REVIEWER</strong>
-								<FiberManualRecordIcon style={{ color: reviewData.pocReviewStatus === 'Finished Review' ? 'green' : '#F9B32D' }} />
-							</StyledAccordionHeader>
-						} headerBackground={'rgb(238,241,242)'} headerTextColor={'black'} headerTextWeight={'600'}>
+						<GCAccordion
+							contentPadding={0}
+							expanded={true}
+							headerWidth="100%"
+							header={
+								<StyledAccordionHeader>
+									<strong>POC REVIEWER</strong>
+									<FiberManualRecordIcon
+										style={{
+											color:
+												reviewData.pocReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
+										}}
+									/>
+								</StyledAccordionHeader>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'600'}
+						>
 							<JBookPOCReviewForm
 								renderReenableModal={renderReenableModal}
 								finished={reviewData.pocReviewStatus === 'Finished Review'}
-								roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !(Permissions.hasPermission('JBOOK POC Reviewer') &&
-									(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-										Auth.getTokenPayload().email === reviewData.altPOCEmail))}
+								roleDisabled={
+									Permissions.hasPermission('JBOOK Admin')
+										? false
+										: !(
+												Permissions.hasPermission('JBOOK POC Reviewer') &&
+												(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
+													Auth.getTokenPayload().email === reviewData.altPOCEmail)
+										  )
+								}
 								reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 								dropdownData={dropdownData}
 								vendorData={projectData.vendors}
 								submitReviewForm={submitReviewForm}
 								setReviewData={setReviewData}
-								totalBudget={(projectData.currentYearAmount && projectData.currentYearAmount > 0) ? projectData.currentYearAmount :
-									(projectData.currentYearAmountMax && projectData.currentYearAmountMax > 0) ? projectData.currentYearAmountMax : 3000}
+								totalBudget={
+									projectData.currentYearAmount && projectData.currentYearAmount > 0
+										? projectData.currentYearAmount
+										: projectData.currentYearAmountMax && projectData.currentYearAmountMax > 0
+										? projectData.currentYearAmountMax
+										: 3000
+								}
 							/>
 						</GCAccordion>
 					</StyledAccordionContainer>
 				</StyledReviewLeftContainer>
-				<StyledReviewRightContainer>
-				</StyledReviewRightContainer>
+				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
 		</div>
 	);

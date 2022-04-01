@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('user_request',
+	return sequelize.define(
+		'user_request',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -21,12 +22,13 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			is_activated: {
 				type: DataTypes.BOOLEAN,
-				defaultValue: false
-			}
-		}, {
+				defaultValue: false,
+			},
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'user_requests'
+			tableName: 'user_requests',
 		}
 	);
 };

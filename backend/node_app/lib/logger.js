@@ -7,7 +7,7 @@ const stripAnsi = require('strip-ansi');
 const constants = require('../config/constants');
 const permissions = require('../controllers/permissions');
 
-const { LOG_FOLDER, LOG_FILE, EDL_UPLOAD_DIRECTORY} = constants;
+const { LOG_FOLDER, LOG_FILE, EDL_UPLOAD_DIRECTORY } = constants;
 const { LOG_LEVELS } = constants;
 
 let logger = {};
@@ -19,7 +19,6 @@ const DEFAULT_LOG_LEVEL = 'debug';
 
 winston.addColors(logLevels);
 
-
 class UoTLogger {
 	static checkDirectorySync(directory) {
 		try {
@@ -27,7 +26,7 @@ class UoTLogger {
 		} catch (e) {
 			try {
 				fs.mkdirSync(directory);
-			} catch(e) {
+			} catch (e) {
 				console.log('----------------- FAILED TO MAKE LOGGER DIRECTORY', directory);
 			}
 		}
@@ -41,26 +40,24 @@ class UoTLogger {
 		res.write('data: ' + JSON.stringify(data) + '\n\n');
 	}
 
-
 	static getConsoleFormatter() {
 		return winston.format.combine(
 			winston.format.colorize(),
 			winston.format.timestamp(),
 			// winston.format.align(),
 			winston.format.printf((info) => {
-				const {
-					timestamp, level, message
-				} = info;
+				const { timestamp, level, message } = info;
 
 				const ts = timestamp.replace('T', ' ').replace('Z', '');
 				return `${ts} [${level}]: ${message}`;
-			}));
+			})
+		);
 	}
 
 	static getFileFormatter() {
 		return winston.format.combine(
 			winston.format.timestamp(),
-			winston.format.printf(info => {
+			winston.format.printf((info) => {
 				return JSON.stringify(info);
 			})
 		);
@@ -68,27 +65,27 @@ class UoTLogger {
 
 	static getFileTransportsPerLevel(logFile, levels = LOG_LEVELS.levels) {
 		const logFileBase = logFile.replace('.log', '');
-		return _.map(levels, (idx, level) => new winston.transports.File({
-			filename: `${logFileBase}.${level}.log`,
-			level,
-			colorize: false,
-			format: winston.format.combine(
-				winston.format.timestamp(),
-				// winston.format.align(),
-				winston.format.printf((info) => {
-					const {
-						timestamp, level, message
-					} = info;
+		return _.map(
+			levels,
+			(idx, level) =>
+				new winston.transports.File({
+					filename: `${logFileBase}.${level}.log`,
+					level,
+					colorize: false,
+					format: winston.format.combine(
+						winston.format.timestamp(),
+						// winston.format.align(),
+						winston.format.printf((info) => {
+							const { timestamp, level, message } = info;
 
+							const ts = timestamp.replace('T', ' ').replace('Z', '');
 
-					const ts = timestamp.replace('T', ' ').replace('Z', '');
-
-
-					return stripAnsi(`${ts} [${level}]: ${message}`);
-				}))
-		}));
+							return stripAnsi(`${ts} [${level}]: ${message}`);
+						})
+					),
+				})
+		);
 	}
-
 }
 
 try {
@@ -97,15 +94,15 @@ try {
 		levels: logLevels.levels,
 		format: UoTLogger.getConsoleFormatter(),
 		transports: [
-			new winston.transports.File({filename: LOG_FILE + '.log'}),
-			new winston.transports.File({filename: LOG_FILE + '.error', level: 'error'}),
-			new winston.transports.Console()
+			new winston.transports.File({ filename: LOG_FILE + '.log' }),
+			new winston.transports.File({ filename: LOG_FILE + '.error', level: 'error' }),
+			new winston.transports.Console(),
 		],
 		exceptionHandlers: [
-			new winston.transports.File({filename: LOG_FILE + '.log', level: 'error'}),
-			new winston.transports.File({filename: LOG_FILE + '.error', level: 'error'}),
-			new winston.transports.Console()
-		]
+			new winston.transports.File({ filename: LOG_FILE + '.log', level: 'error' }),
+			new winston.transports.File({ filename: LOG_FILE + '.error', level: 'error' }),
+			new winston.transports.Console(),
+		],
 	});
 } catch (e) {
 	// mock logger for dev env and when running tests
@@ -115,14 +112,13 @@ try {
 	logger.info = () => {};
 }
 
-
 logger.error = (error, code, user) => {
 	let message = '';
 	if (error instanceof Error) {
 		message = error.message;
 	}
-	message += (user) ? `[${user}]` : '';
-	message += (code) ? `[${code}] ` : '';
+	message += user ? `[${user}]` : '';
+	message += code ? `[${code}] ` : '';
 	logger.log('error', message + error);
 };
 
@@ -139,54 +135,63 @@ logger.metrics = (event = 'NOEVENTPASSED', info) => {
 	}
 };
 
-logger.tracing = (function() {
+logger.tracing = (function () {
 	let components = {};
 	let exact = false;
-	const resp = (res, msg) => { res.status(200).send(`${msg}<br>Process ${process.env.pm_id || 0}<br>HOST_ID ${process.env.HOST_ID}<br>hostname ${os.hostname()}`) };
+	const resp = (res, msg) => {
+		res.status(200).send(
+			`${msg}<br>Process ${process.env.pm_id || 0}<br>HOST_ID ${process.env.HOST_ID}<br>hostname ${os.hostname()}`
+		);
+	};
 
 	return {
 		add: (req, res) => {
 			if (process.env.REACT_APP_NODE_ENV === undefined) {
-				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied'});
+				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied' });
 			}
 			let component = req.query.component;
 			let level = req.query.level;
 			let exists = false;
-			if (component === undefined || component === '') resp(res, 'Required query parameter "component" is missing');
+			if (component === undefined || component === '')
+				resp(res, 'Required query parameter "component" is missing');
 			if (components[component] === undefined) components[component] = { levels: [] };
 			if (level === undefined) return resp(res, `Added component "${component}"`);
 			level = parseInt(level);
-			components[component].levels.forEach(v => { if (level === v) exists = true; });
+			components[component].levels.forEach((v) => {
+				if (level === v) exists = true;
+			});
 			if (exists) return resp(res, `Level ${level} already exists for component "${component}"`);
 			components[component].levels.push(level);
-			components[component].levels.sort((a, b) => { return a - b });
+			components[component].levels.sort((a, b) => {
+				return a - b;
+			});
 			return resp(res, `Added level ${level} for component "${component}"`);
 		},
 		clear: (req, res) => {
 			if (process.env.REACT_APP_NODE_ENV === undefined) {
-				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied'});
+				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied' });
 			}
 			components = {};
 			return resp(res, 'Cleared all components');
 		},
 		exact: (req, res) => {
 			if (process.env.REACT_APP_NODE_ENV === undefined) {
-				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied'});
+				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied' });
 			}
 			if (_.includes(['true', 'false'], req.query.value.toLowerCase())) {
-				exact = (req.query.value.toLowerCase() === 'true');
+				exact = req.query.value.toLowerCase() === 'true';
 				resp(res, `Value of exact set to ${req.query.value.toLowerCase()}`);
 			}
 		},
 		list: (req, res) => {
 			if (process.env.REACT_APP_NODE_ENV === undefined) {
-				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied'});
+				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied' });
 			}
 			return resp(res, `Components: ${JSON.stringify(components)}`);
 		},
 		remove: (req, res) => {
 			if (process.env.REACT_APP_NODE_ENV === undefined) {
-				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied'});
+				if (!permissions.isSuperAdmin(req)) return res.status(403).send({ message: 'Permisson denied' });
 			}
 			let component = req.query.component;
 			let level = req.query.level;
@@ -198,8 +203,11 @@ logger.tracing = (function() {
 			}
 			level = parseInt(level);
 			let len = components[component].levels.length;
-			components[component].levels = components[component].levels.filter(v => { return v !== level });
-			if (components[component].levels.length === len) return resp(res, `Level ${level} for component "${component}" doesn't exist`);
+			components[component].levels = components[component].levels.filter((v) => {
+				return v !== level;
+			});
+			if (components[component].levels.length === len)
+				return resp(res, `Level ${level} for component "${component}" doesn't exist`);
 			return resp(res, `Deleted level ${level} for component "${component}"`);
 		},
 		trace: (message, component, level) => {
@@ -207,11 +215,14 @@ logger.tracing = (function() {
 			if (level === undefined) {
 				logger.info(message);
 			} else if (exact) {
-				components[component].levels.forEach(v => { if (v === level) logger.info(message); });
+				components[component].levels.forEach((v) => {
+					if (v === level) logger.info(message);
+				});
 			} else {
-				if (components[component].levels.length === 0 || level <= _.last(components[component].levels)) logger.info(message);
+				if (components[component].levels.length === 0 || level <= _.last(components[component].levels))
+					logger.info(message);
 			}
-		}
+		},
 	};
 })();
 
@@ -223,7 +234,6 @@ const edlLogCache = {};
 let logStreamStore = {};
 
 class EdlLogFactory {
-
 	static createEdlLogFileIfNotExist(identifier) {
 		identifier = identifier || 'log';
 		const edlDirectory = path.join(EDL_UPLOAD_DIRECTORY, identifier);
@@ -263,8 +273,8 @@ class EdlLogFactory {
 				//
 				new winston.transports.File({ filename: logFile, level: 'http' }),
 				new winston.transports.File({ filename: logFile + '.error', level: 'error' }),
-				new winston.transports.Console({ format: UoTLogger.getConsoleFormatter() })
-			]
+				new winston.transports.Console({ format: UoTLogger.getConsoleFormatter() }),
+			],
 		});
 
 		edlLogCache[identifier] = newLog;
@@ -293,7 +303,7 @@ class EdlLogFactory {
 				level: 'http',
 				levels: LOG_LEVELS.levels,
 				format: UoTLogger.getFileFormatter(),
-				transports: [transporter]
+				transports: [transporter],
 			});
 			logStreamStore[userId] = log;
 			logger.streamOPEN('New stream open', { userId, identifier });

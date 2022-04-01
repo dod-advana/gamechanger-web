@@ -58,10 +58,7 @@ const LabelStack = styled.div`
 const gameChangerAPI = new GameChangerAPI();
 
 export default (props) => {
-
-	const {
-		cloneName
-	} = props;
+	const { cloneName } = props;
 
 	const [notifications, setNotifications] = useState([]);
 
@@ -117,7 +114,7 @@ export default (props) => {
 				active: createActive,
 				message: createMessage,
 				level: createLevel,
-				project_name: cloneName
+				project_name: cloneName,
 			});
 			getNotifications();
 			resetState();
@@ -151,9 +148,7 @@ export default (props) => {
 			<ListWrapper>
 				<ListItem key="header">
 					<div>ID</div>
-					<div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-						Notification
-					</div>
+					<div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>Notification</div>
 					<div>Active</div>
 					<div style={{ marginLeft: '50px' }}>Delete</div>
 				</ListItem>
@@ -161,19 +156,9 @@ export default (props) => {
 					return (
 						<ListItem key={id}>
 							<div>{id}</div>
-							<Notification
-								level={level}
-								message={message}
-								key={level + message}
-							/>
-							<Switch
-								name={id}
-								checked={active[id]}
-								onChange={handleActiveChanged}
-							/>
-							<DeleteButton onClick={() => handleDelete(id)}>
-								Delete
-							</DeleteButton>
+							<Notification level={level} message={message} key={level + message} />
+							<Switch name={id} checked={active[id]} onChange={handleActiveChanged} />
+							<DeleteButton onClick={() => handleDelete(id)}>Delete</DeleteButton>
 						</ListItem>
 					);
 				})}
@@ -200,18 +185,10 @@ export default (props) => {
 						<label htmlFor="level-select" style={{ marginRight: '4px' }}>
 							Level
 						</label>
-						<select
-							name="level-select"
-							onChange={handleLevelSelect}
-							value={createLevel}
-						>
+						<select name="level-select" onChange={handleLevelSelect} value={createLevel}>
 							{NOTIFICATION_LEVELS.map((level) => {
 								return (
-									<option
-										key={level}
-										value={level}
-										style={{ textTransform: 'capitalize' }}
-									>
+									<option key={level} value={level} style={{ textTransform: 'capitalize' }}>
 										{level}
 									</option>
 								);
@@ -220,10 +197,7 @@ export default (props) => {
 					</LabelStack>
 					<LabelStack>
 						<label style={{ marginRight: '4px' }}>Active</label>
-						<Switch
-							checked={createActive}
-							onChange={handleCreateActiveChanged}
-						/>
+						<Switch checked={createActive} onChange={handleCreateActiveChanged} />
 					</LabelStack>
 				</CreateWrapper>
 				<button

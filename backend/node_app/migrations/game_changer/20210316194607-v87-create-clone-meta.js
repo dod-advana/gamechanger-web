@@ -7,19 +7,19 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			clone_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			search_module: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			export_module: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			createdAt: Sequelize.DATE,
 			updatedAt: Sequelize.DATE,
@@ -27,5 +27,5 @@ module.exports = {
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

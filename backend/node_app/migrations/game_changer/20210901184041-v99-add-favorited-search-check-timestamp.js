@@ -23,5 +23,5 @@ module.exports = {
 		 * await queryInterface.dropTable('users');
 		 */
 		await queryInterface.removeColumn('favorite_searches', 'last_checked');
-	}
+	},
 };

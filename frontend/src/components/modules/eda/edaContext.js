@@ -95,11 +95,7 @@ const EDAContext = React.createContext(initState);
 const EDAProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
-	return (
-		<EDAContext.Provider value={{ state, dispatch }}>
-			{props.children}
-		</EDAContext.Provider>
-	);
+	return <EDAContext.Provider value={{ state, dispatch }}>{props.children}</EDAContext.Provider>;
 });
 
 export { EDAContext, EDAProvider };

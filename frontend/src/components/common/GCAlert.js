@@ -74,8 +74,7 @@ export default class UoTAlert extends React.Component {
 
 	render() {
 		const self = this;
-		const { message, title, onHide, elementId, top, containerStyles } =
-			this.props;
+		const { message, title, onHide, elementId, top, containerStyles } = this.props;
 		const { isOpen } = this.state;
 		if (!isOpen) {
 			return <i></i>;
@@ -91,10 +90,7 @@ export default class UoTAlert extends React.Component {
 		const icon = alertStyles[type].icon;
 		return (
 			<div style={allRootStyles} className="UoTAlert">
-				<div
-					id={elementId ? elementId : 'alert-message'}
-					style={styles.message}
-				>
+				<div id={elementId ? elementId : 'alert-message'} style={styles.message}>
 					<div style={styles.iconWrapper}>{icon}</div>
 					<span style={styles.title}>{title}</span>
 					{message}
@@ -137,8 +133,8 @@ const styles = {
 		display: 'flex',
 		alignItems: 'center',
 	},
-	iconWrapper: { 
+	iconWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-	}
+	},
 };

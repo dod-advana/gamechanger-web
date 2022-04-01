@@ -25,8 +25,8 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'elasticsearch_index', Sequelize.TEXT),
 				queryInterface.removeColumn(tablename, 'source_s3_bucket', Sequelize.TEXT),
 				queryInterface.removeColumn(tablename, 'source_s3_prefix', Sequelize.TEXT),
-				queryInterface.removeColumn(tablename, 'needs_ingest', Sequelize.BOOLEAN)
+				queryInterface.removeColumn(tablename, 'needs_ingest', Sequelize.BOOLEAN),
 			]);
 		});
-	}
+	},
 };

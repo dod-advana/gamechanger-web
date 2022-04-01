@@ -198,10 +198,7 @@ export default () => {
 							});
 						}}
 						disabled={
-							_.find(
-								editorTableData.popular_docs_inactive,
-								(item) => item === row.value
-							) === undefined
+							_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) === undefined
 						}
 						style={{
 							minWidth: 'unset',
@@ -221,10 +218,7 @@ export default () => {
 							});
 						}}
 						disabled={
-							_.find(
-								editorTableData.popular_docs_inactive,
-								(item) => item === row.value
-							) !== undefined
+							_.find(editorTableData.popular_docs_inactive, (item) => item === row.value) !== undefined
 						}
 						style={{
 							minWidth: 'unset',
@@ -250,9 +244,7 @@ export default () => {
 						margin: '10px 80px',
 					}}
 				>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-						Homepage Editor
-					</p>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Homepage Editor</p>
 				</div>
 
 				<div style={{ margin: '10px 80px' }}>
