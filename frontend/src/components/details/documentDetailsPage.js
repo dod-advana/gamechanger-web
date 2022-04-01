@@ -16,7 +16,7 @@ import {
 	getTrackingNameForFactory,
 	numberWithCommas,
 	policyMetadata,
-	getMetadataForPropertyTable
+	getMetadataForPropertyTable,
 } from '../../utils/gamechangerUtils';
 import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -60,7 +60,6 @@ const DocumentDetailsPage = (props) => {
 	const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
 	const [metadata, setMetadata] = useState(document?.detail);
 
-
 	const [similarDocs, setSimilarDocs] = useState({
 		docCount: 0,
 		timeFound: '0.0',
@@ -102,19 +101,9 @@ const DocumentDetailsPage = (props) => {
 		if (document) {
 			const data = getMetadataForPropertyTable(document);
 			let favoritableData = policyMetadata(document);
-			favoritableData = [
-				...favoritableData,
-				...addFavoriteTopicToMetadata(
-					data,
-					userData,
-					{},
-					cloneData,
-					'',
-				),
-			];
+			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
 			setMetadata(favoritableData);
 		}
-
 	}, [document]);
 
 	useEffect(() => {
