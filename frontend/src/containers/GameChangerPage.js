@@ -56,7 +56,7 @@ const GameChangerPage = (props) => {
 		}
 
 		if (!state.userDataSet) {
-			gameChangerUserAPI.getUserProfileData().then(data => {
+			gameChangerUserAPI.getUserProfileData().then((data) => {
 				setState(dispatch, { userData: data.data, userDataSet: true });
 			});
 		}
@@ -76,18 +76,17 @@ const GameChangerPage = (props) => {
 					<Notifications context={context} />
 
 					{/* User Feedback */}
-					{jiraFeedback ?
+					{jiraFeedback ? (
 						<Feedback
 							open={state.showFeedbackModal}
 							setOpen={() => setState(dispatch, { showFeedbackModal: false })}
 							handleSubmit={sendJiraFeedback}
-						/> :
+						/>
+					) : (
 						<UserFeedback context={context} />
-					}
-					{/* Crowd Sourcing */}
-					{cloneData.show_crowd_source && (
-						<GameChangerAssist context={context} primaryColor={gcOrange} />
 					)}
+					{/* Crowd Sourcing */}
+					{cloneData.show_crowd_source && <GameChangerAssist context={context} primaryColor={gcOrange} />}
 
 					{/* Crowd Sourcing */}
 					{/* { cloneData.show_crowd_source && (
@@ -98,9 +97,7 @@ const GameChangerPage = (props) => {
 					{cloneData.show_tutorial && <Tutorial context={context} tutorialData={tutorialData} />}
 
 					{/* Search Banner */}
-					{state.cloneDataSet && (
-						<SearchBar context={context} jupiter={jupiter} />
-					)}
+					{state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} />}
 
 					{/* Main View */}
 					{state.historySet && <MainView context={context} />}

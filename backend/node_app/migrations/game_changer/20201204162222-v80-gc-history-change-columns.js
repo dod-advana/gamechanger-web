@@ -10,7 +10,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'request_body', Sequelize.JSONB),
 				queryInterface.addColumn(tablename, 'search_version', {
 					type: Sequelize.INTEGER,
-					defaultValue: 0
+					defaultValue: 0,
 				}),
 				queryInterface.addColumn(tablename, 'search_type', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'clone_name', Sequelize.TEXT),
@@ -29,5 +29,5 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'clone_name'),
 			]);
 		});
-	}
+	},
 };

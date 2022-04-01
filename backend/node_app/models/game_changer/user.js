@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const User = sequelize.define('user',
+	const User = sequelize.define(
+		'user',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -12,53 +13,53 @@ module.exports = (sequelize, DataTypes) => {
 				unique: true,
 			},
 			cn: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			first_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			last_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			organization: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			email: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			phone_number: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			sub_office: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			country: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			state: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			city: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			job_title: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			preferred_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			extra_fields: {
-				type: DataTypes.JSONB
+				type: DataTypes.JSONB,
 			},
 			is_super_admin: {
 				type: DataTypes.BOOLEAN,
-				defaultValue: false
+				defaultValue: false,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'users',
-			timestamps: false
+			timestamps: false,
 		}
 		// {
 		// 	classMethods: {

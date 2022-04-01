@@ -1,41 +1,37 @@
 const { MLApiClient } = require('../lib/mlApiClient');
 const LOGGER = require('@dod-advana/advana-logger');
 /**
- * This class takes HTTP requests and passes needed 
- * data onto the MLApiClient to get information 
+ * This class takes HTTP requests and passes needed
+ * data onto the MLApiClient to get information
  * or update the ML API.
  * @class TransformerController
  */
 class TransformerController {
-
 	constructor(opts = {}) {
-		const {
-			logger = LOGGER,
-			mlApi = new MLApiClient(opts),
-		} = opts;
+		const { logger = LOGGER, mlApi = new MLApiClient(opts) } = opts;
 
 		this.logger = logger;
 		this.mlApi = mlApi;
 
-		// A mapping to the methods in MLApiClient 
+		// A mapping to the methods in MLApiClient
 		this.registry = {
-			'getAPIInformation': this.mlApi.getAPIInformation,
-			'getS3List': this.mlApi.getS3List,
-			'getS3DataList':this.mlApi.getS3DataList,
-			'downloadDependencies': this.mlApi.downloadDependencies,
-			'downloadS3File': this.mlApi.downloadS3File,
-			'deleteLocalModel': this.mlApi.deleteLocalModel,
-			'getModelsList': this.mlApi.getModelsList,
-			'getDataList': this.mlApi.getDataList,
-			'getLoadedModels': this.mlApi.getLoadedModels,
-			'getFilesInCorpus': this.mlApi.getFilesInCorpus,
-			'getProcessStatus': this.mlApi.getProcessStatus,
-			'reloadModels': this.mlApi.reloadModels,
-			'downloadCorpus': this.mlApi.downloadCorpus,
-			'trainModel': this.mlApi.trainModel,
-			'initializeLTR': this.mlApi.initializeLTR,
-			'createModelLTR': this.mlApi.createModelLTR,
-			'stopProcess': this.mlApi.stopProcess
+			getAPIInformation: this.mlApi.getAPIInformation,
+			getS3List: this.mlApi.getS3List,
+			getS3DataList: this.mlApi.getS3DataList,
+			downloadDependencies: this.mlApi.downloadDependencies,
+			downloadS3File: this.mlApi.downloadS3File,
+			deleteLocalModel: this.mlApi.deleteLocalModel,
+			getModelsList: this.mlApi.getModelsList,
+			getDataList: this.mlApi.getDataList,
+			getLoadedModels: this.mlApi.getLoadedModels,
+			getFilesInCorpus: this.mlApi.getFilesInCorpus,
+			getProcessStatus: this.mlApi.getProcessStatus,
+			reloadModels: this.mlApi.reloadModels,
+			downloadCorpus: this.mlApi.downloadCorpus,
+			trainModel: this.mlApi.trainModel,
+			initializeLTR: this.mlApi.initializeLTR,
+			createModelLTR: this.mlApi.createModelLTR,
+			stopProcess: this.mlApi.stopProcess,
 		};
 
 		// Get methods
@@ -43,7 +39,7 @@ class TransformerController {
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
-		this.getDataList = this.getData.bind(this,'getDataList');
+		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
@@ -58,19 +54,17 @@ class TransformerController {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
-
-
 	}
 	/**
-	 * A generic get method to query the ML API. 
-	 * A key is bound to this method to dynamically call 
+	 * A generic get method to query the ML API.
+	 * A key is bound to this method to dynamically call
 	 * the differnet MLApiClient methods.
 	 * @method getData
 	 * @param {string} key - bound in constructor, maps to a MLApiClient method
-	 * @param {*} req 
-	 * @param {*} res 
+	 * @param {*} req
+	 * @param {*} res
 	 */
-	async getData(key, req, res){
+	async getData(key, req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -83,14 +77,14 @@ class TransformerController {
 	}
 	/**
 	 * A generic post method to update the ML API
-	 * A key is bound to this method to dynamically call 
+	 * A key is bound to this method to dynamically call
 	 * the differnet MLApiClient methods.
 	 * @method postData
 	 * @param {string} key - bound in constructor, maps to a MLApiClient method
 	 * @param {*} req - all post data is in req.body
-	 * @param {*} res 
+	 * @param {*} res
 	 */
-	async postData(key, req, res){
+	async postData(key, req, res) {
 		let userId = 'webapp_unknown';
 		try {
 			const data = req.body;

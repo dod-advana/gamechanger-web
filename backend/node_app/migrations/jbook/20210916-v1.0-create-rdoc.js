@@ -6,161 +6,161 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			Appn_Num: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Appn_Title: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			AwardDate_BY1Base: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			AwardDate_BY1OCO: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			AwardDate_CY: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			AwardDate_PY: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			BA_Number: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			BA_Title: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			BudgetCycle: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			BudgetYear: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			ContractMethod: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			ContractType: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			CostCat_Item_Name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			CostCat_Item_PerfAct: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			CostCat_Item_Perfact_Location: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			CostCat_Name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			FundingVehicle: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Location: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Organization: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			OrganizationCode: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			PE_MDAP_Code: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			PE_MSN_Dsec: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			uot_budgetlineitem: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			uot_budgetlineitemtitle: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			performingactivity: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Proj_Number: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Proj_Title: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			R1_Line_Num: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostAPY: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostBY1: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostBY1Base: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostBY1OCO: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostCTC: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostCY: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostPY: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costCatItemCostTotal: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costcatitemcosttv: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costcatitemname: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			costcatname: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			PE_MSN_desc: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			PE_Num: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			PE_Title: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			EndDate: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			EndQuarter: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			EndYear: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			Event_Title: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			StartDate: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			StartQuarter: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			StartYear: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			SubProj_Title: {
-				type: Sequelize.TEXT
-			}
+				type: Sequelize.TEXT,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('rdoc');
-	}
+	},
 };

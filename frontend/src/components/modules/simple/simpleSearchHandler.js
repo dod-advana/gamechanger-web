@@ -67,12 +67,7 @@ const SimpleSearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		if (
-			isDecoupled &&
-			userData &&
-			userData.search_history &&
-			userData.search_history.length > 9
-		) {
+		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
@@ -104,18 +99,13 @@ const SimpleSearchHandler = {
 		if (_.isEmpty(trimmed)) return;
 
 		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 
 		const t0 = new Date().getTime();
@@ -187,8 +177,7 @@ const SimpleSearchHandler = {
 			let getUserDataFlag = true;
 
 			if (_.isObject(resp.data)) {
-				let { docs, totalCount, expansionDict, isCached, timeSinceCache } =
-					resp.data;
+				let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
 
 				if (docs && Array.isArray(docs)) {
 					// intelligent search failed, show keyword results with warning alert
@@ -227,16 +216,14 @@ const SimpleSearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							totalCount + (foundEntity ? 1 : 0),
 							false
 						);
 					}
 
 					const categoryMetadata = {
-						'Documents':  {total: totalCount + (foundEntity ? 1 : 0)},
+						Documents: { total: totalCount + (foundEntity ? 1 : 0) },
 					};
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
@@ -261,9 +248,7 @@ const SimpleSearchHandler = {
 					if (!offset) {
 						trackSearch(
 							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${
-								combinedSearch ? '_combined' : ''
-							}`,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
 							0,
 							false
 						);
@@ -344,8 +329,7 @@ const SimpleSearchHandler = {
 		const categoriesURL = getQueryVariable('categories', url);
 
 		// in preexisting links some null or undefined params were written out as string literals
-		const isNullish = (param) =>
-			!param || param === 'null' || param === 'undefined';
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
 
 		if (searchText) {
 			parsed.searchText = searchText;
@@ -357,30 +341,21 @@ const SimpleSearchHandler = {
 			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
 		}
 
-		if (
-			!isNullish(searchTypeURL) &&
-			Object.values(SEARCH_TYPES).includes(searchTypeURL)
-		) {
+		if (!isNullish(searchTypeURL) && Object.values(SEARCH_TYPES).includes(searchTypeURL)) {
 			newSearchSettings.searchType = searchTypeURL;
 		}
 
 		if (!isNullish(orgURL) && orgURL !== 'ALLORGS' /* legacy  value */) {
 			newSearchSettings.allOrgsSelected = false;
 			newSearchSettings.specificOrgsSelected = true;
-			newSearchSettings.orgFilter = Object.assign(
-				{},
-				...orgURL.split('_').map((org) => ({ [org]: true }))
-			);
+			newSearchSettings.orgFilter = Object.assign({}, ...orgURL.split('_').map((org) => ({ [org]: true })));
 		}
 
 		if (!isNullish(typeURL) && typeURL !== 'ALLTYPES' /* legacy value */) {
 			newSearchSettings.allTypesSelected = false;
 			newSearchSettings.specificTypesSelected = true;
 			newSearchSettings.typeFilter = {};
-			newSearchSettings.typeFilter = Object.assign(
-				{},
-				...typeURL.split('_').map((org) => ({ [org]: true }))
-			);
+			newSearchSettings.typeFilter = Object.assign({}, ...typeURL.split('_').map((org) => ({ [org]: true })));
 		}
 
 		if (!isNullish(searchFieldsURL)) {
@@ -396,9 +371,7 @@ const SimpleSearchHandler = {
 			if (!_.isEmpty(searchFields)) {
 				for (const id in searchFields) {
 					const field = searchFields[id];
-					const prop = defaultState.documentProperties.find(
-						(prop) => prop.display_name === field.field
-					);
+					const prop = defaultState.documentProperties.find((prop) => prop.display_name === field.field);
 					if (prop) {
 						field.field = prop;
 					} else {
@@ -410,29 +383,16 @@ const SimpleSearchHandler = {
 			}
 		}
 
-		if (
-			!isNullish(accessDateURL) &&
-			accessDateURL !== 'ALL' /* legacy value */
-		) {
-			const parsedDates = accessDateURL
-				.split('_')
-				.map((dateStr) => new Date(parseInt(dateStr)));
-			if (
-				parsedDates.length === 2 &&
-				parsedDates.every((date) => !isNaN(date.getTime()))
-			) {
+		if (!isNullish(accessDateURL) && accessDateURL !== 'ALL' /* legacy value */) {
+			const parsedDates = accessDateURL.split('_').map((dateStr) => new Date(parseInt(dateStr)));
+			if (parsedDates.length === 2 && parsedDates.every((date) => !isNaN(date.getTime()))) {
 				newSearchSettings.accessDateFilter = parsedDates;
 			}
 		}
 
 		if (!isNullish(pubDateURL) && pubDateURL !== 'ALL' /* legacy value */) {
-			const parsedDates = pubDateURL
-				.split('_')
-				.map((dateStr) => new Date(parseInt(dateStr)));
-			if (
-				parsedDates.length === 2 &&
-				parsedDates.every((date) => !isNaN(date.getTime()))
-			) {
+			const parsedDates = pubDateURL.split('_').map((dateStr) => new Date(parseInt(dateStr)));
+			if (parsedDates.length === 2 && parsedDates.every((date) => !isNaN(date.getTime()))) {
 				newSearchSettings.publicationDateAllTime = false;
 				newSearchSettings.publicationDateFilter = parsedDates;
 			}
@@ -447,9 +407,7 @@ const SimpleSearchHandler = {
 		if (categoriesURL === '' || !isNullish(categoriesURL)) {
 			// '' means all false vs null as default
 			const categories = categoriesURL.split('_');
-			const selectedCategories = _.cloneDeep(
-				defaultState.selectedCategories || {}
-			);
+			const selectedCategories = _.cloneDeep(defaultState.selectedCategories || {});
 			for (const category in selectedCategories) {
 				selectedCategories[category] = categories.includes(category);
 			}
@@ -458,33 +416,20 @@ const SimpleSearchHandler = {
 			}
 		}
 
-		parsed.searchSettings = _.defaults(
-			newSearchSettings,
-			_.cloneDeep(defaultState.searchSettings)
-		);
+		parsed.searchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.searchSettings));
 
 		return parsed;
 	},
 
 	setSearchURL(state) {
 		const { searchText, resultsPage } = state;
-		const {
-			searchFields,
-			accessDateFilter,
-			publicationDateFilter,
-			publicationDateAllTime,
-			includeRevoked,
-		} = state.searchSettings;
+		const { searchFields, accessDateFilter, publicationDateFilter, publicationDateAllTime, includeRevoked } =
+			state.searchSettings;
 
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
-		const searchFieldText = Object.keys(
-			_.pickBy(searchFields, (value, key) => value.field)
-		)
-			.map(
-				(key) =>
-					`${searchFields[key].field.display_name}-${searchFields[key].input}`
-			)
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+			.map((key) => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
 			.join('_');
 
 		const accessDateText =
@@ -493,17 +438,13 @@ const SimpleSearchHandler = {
 				: undefined;
 
 		const publicationDateText =
-			publicationDateFilter &&
-			publicationDateFilter[0] &&
-			publicationDateFilter[1]
+			publicationDateFilter && publicationDateFilter[0] && publicationDateFilter[1]
 				? publicationDateFilter.map((date) => date.getTime()).join('_')
 				: undefined;
 		const pubDateText = publicationDateAllTime ? 'ALL' : publicationDateText;
 
 		const categoriesText = state.selectedCategories
-			? Object.keys(
-				_.pickBy(state.selectedCategories, (value) => !!value)
-			  ).join('_')
+			? Object.keys(_.pickBy(state.selectedCategories, (value) => !!value)).join('_')
 			: undefined;
 
 		const params = new URLSearchParams();
@@ -513,8 +454,7 @@ const SimpleSearchHandler = {
 		if (accessDateText) params.append('accessDate', accessDateText);
 		if (pubDateText) params.append('pubDate', pubDateText);
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
-		if (categoriesText !== undefined)
-			params.append('categories', categoriesText); // '' is different than undefined
+		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

@@ -2,29 +2,29 @@
 const tablename = 'crawler_status';
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
+	up: (queryInterface, Sequelize) => {
 		return queryInterface.createTable(tablename, {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			crawler_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			status: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			datetime: {
 				type: Sequelize.DATE,
-				allowNull: false
+				allowNull: false,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

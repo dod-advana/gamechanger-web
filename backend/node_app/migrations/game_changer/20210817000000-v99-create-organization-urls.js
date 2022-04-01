@@ -8,19 +8,19 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			org_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			image_url: {
 				type: Sequelize.STRING,
-				allowNull: false
-			}
+				allowNull: false,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

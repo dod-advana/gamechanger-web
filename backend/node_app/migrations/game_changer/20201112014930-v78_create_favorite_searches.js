@@ -7,7 +7,7 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			user_id: {
 				type: Sequelize.STRING,
@@ -15,38 +15,38 @@ module.exports = {
 			},
 			search_name: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			search_summary: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			search_text: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			tiny_url: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			document_count: {
 				type: Sequelize.INTEGER,
-				allowNull: true
+				allowNull: true,
 			},
 			createdAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
+				defaultValue: Sequelize.fn('NOW'),
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('favorite_searches');
-	}
+	},
 };

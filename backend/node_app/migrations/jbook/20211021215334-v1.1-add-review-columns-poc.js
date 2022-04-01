@@ -6,8 +6,8 @@ module.exports = {
 		return queryInterface.sequelize.transaction(function () {
 			Promise.all([
 				queryInterface.addColumn(tablename, 'secondary_reviewer', Sequelize.TEXT),
-        		queryInterface.addColumn(tablename, 'poc_org', Sequelize.TEXT),
-        		queryInterface.addColumn(tablename, 'poc_phone_number', Sequelize.TEXT),
+				queryInterface.addColumn(tablename, 'poc_org', Sequelize.TEXT),
+				queryInterface.addColumn(tablename, 'poc_phone_number', Sequelize.TEXT),
 			]);
 		});
 	},
@@ -16,9 +16,9 @@ module.exports = {
 		return queryInterface.sequelize.transaction(function () {
 			return Promise.all([
 				queryInterface.removeColumn(tablename, 'secondary_reviewer', Sequelize.TEXT),
-        		queryInterface.removeColumn(tablename, 'poc_org', Sequelize.TEXT),
-        		queryInterface.removeColumn(tablename, 'poc_phone_number', Sequelize.TEXT)
+				queryInterface.removeColumn(tablename, 'poc_org', Sequelize.TEXT),
+				queryInterface.removeColumn(tablename, 'poc_phone_number', Sequelize.TEXT),
 			]);
 		});
-	}
+	},
 };

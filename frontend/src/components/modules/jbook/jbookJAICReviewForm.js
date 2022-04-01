@@ -11,17 +11,15 @@ import {
 	PlannedTransitionPartnerValue,
 	CurrentMissionPartnersValue,
 	ReviewStatus,
-	ButtonFooter
+	ButtonFooter,
 } from './jbookJAICHelper';
 
-
-
 const StyledTableContainer = styled.div`
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    text-align: left;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	text-align: left;
 `;
 
 const firstColWidth = {
@@ -32,76 +30,70 @@ const firstColWidth = {
 };
 
 const boldKeys = (data) => {
-	return data.map(pair => {
+	return data.map((pair) => {
 		pair.Key = <strong>{pair.Key}</strong>;
 		return pair;
 	});
 };
 
 const JBookJAICReviewForm = React.memo((props) => {
-
-	const {
-		submitReviewForm,
-		dropdownData,
-		setReviewData,
-		reviewStatus,
-		finished,
-		renderReenableModal,
-		roleDisabled
-	} = props;
+	const { submitReviewForm, dropdownData, setReviewData, reviewStatus, finished, renderReenableModal, roleDisabled } =
+		props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { reviewData, primaryReviewLoading } = state;
 
-
 	const getPrimaryReviewData = () => {
-
-
 		const primaryReviewData = [
-			{ // this is a column in pdoc/rdoc, but not review
+			{
+				// this is a column in pdoc/rdoc, but not review
 				Key: 'Reviewers',
-				Value:
+				Value: (
 					<ReviewersValue
 						primaryReviewer={reviewData.primaryReviewer}
 						finished={finished}
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
 					/>
+				),
 			},
 			{
 				Key: <CoreAIAnalysisKey />,
-				Value:
+				Value: (
 					<CoreAIAnalysisValue
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
 						primaryClassLabel={reviewData.primaryClassLabel}
 						finished={finished}
 					/>
+				),
 			},
 			{
 				Key: 'Service/DoD Component Reviewer',
-				Value:
+				Value: (
 					<ServiceComponentReviewerValue
 						serviceReviewer={reviewData.serviceReviewer}
 						finished={finished}
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
 					/>
+				),
 			},
 			{
 				Key: <PlannedTransitionPartnerKey />,
-				Value:
+				Value: (
 					<PlannedTransitionPartnerValue
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
 						primaryPlannedTransitionPartner={reviewData.primaryPlannedTransitionPartner}
 						finished={finished}
 					/>
+				),
 			},
 			{
 				Key: 'Current Mission Partners (Academia, Industry, or Other)',
-				Value:
+				Value: (
 					<CurrentMissionPartnersValue
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
@@ -109,22 +101,20 @@ const JBookJAICReviewForm = React.memo((props) => {
 						finished={finished}
 						primaryReviewNotes={reviewData.primaryReviewNotes}
 					/>
-			}
+				),
+			},
 		];
 		return primaryReviewData;
 	};
-
 
 	return (
 		<StyledTableContainer>
 			{renderReenableModal('JAIC')}
 
-			<ReviewStatus
-				reviewStatus={reviewStatus}
-				finished={finished}
-			/>
+			<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
 
-			<SimpleTable tableClass={'magellan-table'}
+			<SimpleTable
+				tableClass={'magellan-table'}
 				zoom={1}
 				rows={boldKeys(getPrimaryReviewData())}
 				height={'auto'}
@@ -133,7 +123,7 @@ const JBookJAICReviewForm = React.memo((props) => {
 				title={''}
 				headerExtraStyle={{
 					backgroundColor: '#313541',
-					color: 'white'
+					color: 'white',
 				}}
 				hideHeader={true}
 				firstColWidth={firstColWidth}
@@ -150,6 +140,5 @@ const JBookJAICReviewForm = React.memo((props) => {
 		</StyledTableContainer>
 	);
 });
-
 
 export default JBookJAICReviewForm;

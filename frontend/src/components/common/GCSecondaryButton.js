@@ -3,14 +3,7 @@ import Button from '@material-ui/core/Button';
 import { backgroundWhite, primary } from './gc-colors';
 
 const UOTSecondaryButton = (props) => {
-	const {
-		marginRight,
-		marginLeft,
-		minWidth,
-		secondaryLabelStyle,
-		secondaryButtonStyle,
-		...remaining
-	} = props;
+	const { marginRight, marginLeft, minWidth, secondaryLabelStyle, secondaryButtonStyle, ...remaining } = props;
 
 	const styles = {
 		secondaryButtonStyle: {
@@ -35,13 +28,7 @@ const UOTSecondaryButton = (props) => {
 
 	if (props.disabled) styles.secondaryButtonStyle['cursor'] = 'not-allowed';
 
-	return (
-		<Button
-			style={styles.secondaryButtonStyle}
-			labelStyle={styles.secondaryLabelStyle}
-			{...remaining}
-		/>
-	);
+	return <Button style={styles.secondaryButtonStyle} labelStyle={styles.secondaryLabelStyle} {...remaining} />;
 };
 
 export default UOTSecondaryButton;

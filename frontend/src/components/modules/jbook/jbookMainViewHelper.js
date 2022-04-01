@@ -4,7 +4,6 @@ const _ = require('lodash');
 
 const gamechangerAPI = new GameChangerAPI();
 
-
 export const setJBookSetting = (field, value, state, dispatch, filteredList = false) => {
 	let jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	let dataSources = _.cloneDeep(state.dataSources);
@@ -22,8 +21,7 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 			const dataSourceIndex = dataSources.indexOf(value);
 			if (dataSourceIndex !== -1) {
 				dataSources.splice(dataSourceIndex, 1);
-			}
-			else {
+			} else {
 				dataSources.push(value);
 			}
 			break;
@@ -41,21 +39,17 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 		case 'reviewStatus':
 			if (value === 'all') {
 				jbookSearchSettings[field] = state.defaultOptions[field];
-			}
-			else if (value === 'none') {
+			} else if (value === 'none') {
 				jbookSearchSettings[field] = [];
-			}
-			else if (filteredList) {
+			} else if (filteredList) {
 				jbookSearchSettings[field] = value;
 				runSearch = true;
 				resultsPage = 1;
-			}
-			else {
+			} else {
 				const typeIndex = jbookSearchSettings[field].indexOf(value);
 				if (typeIndex !== -1) {
 					jbookSearchSettings[field].splice(typeIndex, 1);
-				}
-				else {
+				} else {
 					jbookSearchSettings[field].push(value);
 				}
 			}
@@ -69,21 +63,17 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 		case 'sourceTag':
 			if (value === 'all') {
 				jbookSearchSettings[field] = state.defaultOptions[field];
-			}
-			else if (value === 'none') {
+			} else if (value === 'none') {
 				jbookSearchSettings[field] = [];
-			}
-			else if (filteredList) {
+			} else if (filteredList) {
 				jbookSearchSettings[field] = value;
 				runSearch = true;
 				resultsPage = 1;
-			}
-			else {
+			} else {
 				const typeIndex = jbookSearchSettings[field].indexOf(value);
 				if (typeIndex !== -1) {
 					jbookSearchSettings[field].splice(typeIndex, 1);
-				}
-				else {
+				} else {
 					jbookSearchSettings[field].push(value);
 				}
 			}
@@ -102,10 +92,7 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 };
 
 export const handleTabClicked = (dispatch, state, tab) => {
-
-
 	setState(dispatch, { mainTabSelected: tab });
-
 };
 
 export const scrollListViewTop = () => {
@@ -144,38 +131,68 @@ export const populateDropDowns = async (state, dispatch) => {
 		options: {},
 	});
 
-	jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear.map(year => year !== null ? year : 'Blank').sort(filterSortFunction);
-	jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus.map(status => status !== null ? status : 'Blank').sort(filterSortFunction);
-	jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency.map(agency => agency !== null ? agency : 'Blank').sort(filterSortFunction);
-	jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel.map(label => label !== null ? label : 'Blank').sort(filterSortFunction);
-	jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag.map(tag => tag !== null ? tag : 'Blank').sort(filterSortFunction);
+	jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
+		.map((year) => (year !== null ? year : 'Blank'))
+		.sort(filterSortFunction);
+	jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
+		.map((status) => (status !== null ? status : 'Blank'))
+		.sort(filterSortFunction);
+	jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
+		.map((agency) => (agency !== null ? agency : 'Blank'))
+		.sort(filterSortFunction);
+	jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
+		.map((label) => (label !== null ? label : 'Blank'))
+		.sort(filterSortFunction);
+	jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
+		.map((tag) => (tag !== null ? tag : 'Blank'))
+		.sort(filterSortFunction);
 
 	let dropdownData;
 	try {
 		dropdownData = await gamechangerAPI.callDataFunction({
 			functionName: 'getBudgetDropdownData',
 			cloneName: 'jbook',
-			options: {}
+			options: {},
 		});
 
 		if (dropdownData && dropdownData.data) {
-
 			dropdownData = dropdownData.data;
 			dropdownData.serviceReviewers.push({ name: 'Blank' });
 
-			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = dropdownData.reviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').sort(filterSortFunction);
-			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = dropdownData.serviceReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank').concat(dropdownData.secondaryReviewers.map(reviewer => reviewer !== null && reviewer.name !== null ? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}` : 'Blank')).sort(filterSortFunction);
+			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = dropdownData.reviewers
+				.map((reviewer) =>
+					reviewer !== null && reviewer.name !== null
+						? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
+						: 'Blank'
+				)
+				.sort(filterSortFunction);
+			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = dropdownData.serviceReviewers
+				.map((reviewer) =>
+					reviewer !== null && reviewer.name !== null
+						? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
+						: 'Blank'
+				)
+				.concat(
+					dropdownData.secondaryReviewers.map((reviewer) =>
+						reviewer !== null && reviewer.name !== null
+							? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
+							: 'Blank'
+					)
+				)
+				.sort(filterSortFunction);
 
 			jbookSearchSettings.primaryReviewer.push('Unknown');
 			jbookSearchSettings.primaryReviewer.push('Blank');
 
 			jbookSearchSettings.serviceReviewer.push('Blank');
 			defaultOptions.serviceReviewer.push('Blank');
-
-		}
-		else {
-			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = data.primaryreviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
-			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = data.servicereviewer.map(reviewer => reviewer !== null ? reviewer : 'Blank').sort(filterSortFunction);
+		} else {
+			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = data.primaryreviewer
+				.map((reviewer) => (reviewer !== null ? reviewer : 'Blank'))
+				.sort(filterSortFunction);
+			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = data.servicereviewer
+				.map((reviewer) => (reviewer !== null ? reviewer : 'Blank'))
+				.sort(filterSortFunction);
 		}
 	} catch (err) {
 		console.log('Error fetching dropdown data');
@@ -197,7 +214,7 @@ export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt'
 	const a = document.createElement('a');
 	a.style = 'display: none';
 	document.body.appendChild(a);
-	//Create a DOMString representing the blob 
+	//Create a DOMString representing the blob
 	//and point the link element towards it
 	const url = window.URL.createObjectURL(data);
 	a.href = url;
@@ -208,4 +225,3 @@ export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt'
 	window.URL.revokeObjectURL(url);
 	document.body.removeChild(a);
 };
-

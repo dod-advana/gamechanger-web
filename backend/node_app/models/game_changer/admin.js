@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const Admin = sequelize.define('admin',
+	const Admin = sequelize.define(
+		'admin',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -10,10 +11,11 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			username: {
 				type: DataTypes.TEXT,
-				unique: true
-			}
-		},{
-			timestamps: false
+				unique: true,
+			},
+		},
+		{
+			timestamps: false,
 		}
 	);
 	return Admin;

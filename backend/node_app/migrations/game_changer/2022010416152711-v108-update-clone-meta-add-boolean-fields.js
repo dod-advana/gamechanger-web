@@ -18,5 +18,5 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'user_favorites', Sequelize.BOOLEAN),
 			]);
 		});
-	}
+	},
 };

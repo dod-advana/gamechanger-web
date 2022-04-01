@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-	MuiPickersUtilsProvider,
-	KeyboardDatePicker,
-} from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
 import GCButton from '../../common/GCButton';
@@ -89,14 +86,7 @@ const styles = {
 };
 
 export const EDASummaryView = (props) => {
-	const {
-		edaSearchSettings,
-		searchResults,
-		loading,
-		dispatch,
-		currentViewName,
-		summaryCardView,
-	} = props;
+	const { edaSearchSettings, searchResults, loading, dispatch, currentViewName, summaryCardView } = props;
 
 	const [showDialog, setShowDialog] = useState(false);
 	const [summaryDetailData, setSummaryDetailData] = useState([]);
@@ -285,9 +275,7 @@ export const EDASummaryView = (props) => {
 		if (!isDetailColumns) {
 			summaryColumns = summaryColumns.concat([
 				{
-					Header: () => (
-						<p style={styles.tableColumn}>Total Procurement Instruments</p>
-					),
+					Header: () => <p style={styles.tableColumn}>Total Procurement Instruments</p>,
 					filterable: false,
 					accessor: 'procurement',
 					width: 150,
@@ -365,9 +353,7 @@ export const EDASummaryView = (props) => {
 			]);
 			if (edaSearchSettings.aggregations.length > 0) {
 				summaryColumns.push({
-					Header: () => (
-						<p style={styles.tableColumn}>Procurement Instrument List</p>
-					),
+					Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
 					filterable: false,
 					accessor: 'procurementList',
 					width: 250,
@@ -382,11 +368,7 @@ export const EDASummaryView = (props) => {
 						let resultData = [];
 						for (let i = 0; i < subRows.length; i++) {
 							let subRow = subRows[i];
-							for (
-								let j = 0;
-								j < edaSearchSettings.aggregations.length - 1;
-								j++
-							) {
+							for (let j = 0; j < edaSearchSettings.aggregations.length - 1; j++) {
 								subRow = subRow._subRows[0];
 							}
 							resultData.push(subRow);
@@ -477,28 +459,15 @@ export const EDASummaryView = (props) => {
 
 	return (
 		<div>
-			<Dialog
-				open={showDialog}
-				maxWidth="lg"
-				onClose={() => setShowDialog(false)}
-				style={styles.dialog}
-			>
+			<Dialog open={showDialog} maxWidth="lg" onClose={() => setShowDialog(false)} style={styles.dialog}>
 				<DialogTitle style={{ padding: '16px 30px 0' }}>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography
-							variant="h3"
-							display="inline"
-							style={{ fontWeight: 700 }}
-						>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
 							Summary Details
 						</Typography>
 					</div>
 					<div style={{ display: 'flex', width: '100%', margin: '5px 0' }}>
-						<Typography
-							variant="h5"
-							display="block"
-							style={{ fontWeight: 400 }}
-						>
+						<Typography variant="h5" display="block" style={{ fontWeight: 400 }}>
 							{summaryDetailTitle}
 						</Typography>
 					</div>
@@ -519,9 +488,7 @@ export const EDASummaryView = (props) => {
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
 				</DialogTitle>
-				<DialogContent style={styles.dialogContent}>
-					{renderDetailTable()}
-				</DialogContent>
+				<DialogContent style={styles.dialogContent}>{renderDetailTable()}</DialogContent>
 				<DialogActions>
 					<GCButton
 						onClick={() => {
@@ -550,10 +517,7 @@ export const EDASummaryView = (props) => {
 						}}
 					>
 						<div style={{ display: 'flex' }}>
-							<Typography style={styles.filterTitle}>
-								{' '}
-								Aggregations:{' '}
-							</Typography>
+							<Typography style={styles.filterTitle}> Aggregations: </Typography>
 							<FormControl style={styles.filterInput}>
 								<FormGroup row>
 									<FormControlLabel
@@ -564,16 +528,9 @@ export const EDASummaryView = (props) => {
 											<Checkbox
 												style={styles.filterBox}
 												onClick={() =>
-													setEDASearchSetting(
-														'aggregations',
-														'contract_issue_name_eda_ext'
-													)
+													setEDASearchSetting('aggregations', 'contract_issue_name_eda_ext')
 												}
-												icon={
-													<CheckBoxOutlineBlankIcon
-														style={{ visibility: 'hidden' }}
-													/>
-												}
+												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 												checked={
 													edaSearchSettings &&
 													edaSearchSettings.aggregations &&
@@ -581,12 +538,7 @@ export const EDASummaryView = (props) => {
 														'contract_issue_name_eda_ext'
 													) !== -1
 												}
-												checkedIcon={
-													<i
-														style={{ color: '#E9691D' }}
-														className="fa fa-check"
-													/>
-												}
+												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 												name="Issue Office Agency"
 											/>
 										}
@@ -601,29 +553,15 @@ export const EDASummaryView = (props) => {
 											<Checkbox
 												style={styles.filterBox}
 												onClick={() =>
-													setEDASearchSetting(
-														'aggregations',
-														'vendor_name_eda_ext'
-													)
+													setEDASearchSetting('aggregations', 'vendor_name_eda_ext')
 												}
-												icon={
-													<CheckBoxOutlineBlankIcon
-														style={{ visibility: 'hidden' }}
-													/>
-												}
+												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 												checked={
 													edaSearchSettings &&
 													edaSearchSettings.aggregations &&
-													edaSearchSettings.aggregations.indexOf(
-														'vendor_name_eda_ext'
-													) !== -1
+													edaSearchSettings.aggregations.indexOf('vendor_name_eda_ext') !== -1
 												}
-												checkedIcon={
-													<i
-														style={{ color: '#E9691D' }}
-														className="fa fa-check"
-													/>
-												}
+												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 												name="Vendor"
 											/>
 										}
@@ -638,29 +576,16 @@ export const EDASummaryView = (props) => {
 											<Checkbox
 												style={styles.filterBox}
 												onClick={() =>
-													setEDASearchSetting(
-														'aggregations',
-														'reference_idv_eda_ext'
-													)
+													setEDASearchSetting('aggregations', 'reference_idv_eda_ext')
 												}
-												icon={
-													<CheckBoxOutlineBlankIcon
-														style={{ visibility: 'hidden' }}
-													/>
-												}
+												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 												checked={
 													edaSearchSettings &&
 													edaSearchSettings.aggregations &&
-													edaSearchSettings.aggregations.indexOf(
-														'reference_idv_eda_ext'
-													) !== -1
+													edaSearchSettings.aggregations.indexOf('reference_idv_eda_ext') !==
+														-1
 												}
-												checkedIcon={
-													<i
-														style={{ color: '#E9691D' }}
-														className="fa fa-check"
-													/>
-												}
+												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 												name="Parent IDV"
 											/>
 										}
@@ -684,19 +609,9 @@ export const EDASummaryView = (props) => {
 							</Typography>
 							<div style={{ display: 'inline-block', margin: '0 0 0 15px' }}>
 								<Autocomplete
-									options={[
-										'Dept of Army',
-										'Dept of Navy',
-										'Dept of Air Force',
-										'DARPA',
-										'DLA',
-									]}
+									options={['Dept of Army', 'Dept of Navy', 'Dept of Air Force', 'DARPA', 'DLA']}
 									renderInput={(params) => (
-										<TextField
-											{...params}
-											label="Choose an agency"
-											variant="outlined"
-										/>
+										<TextField {...params} label="Choose an agency" variant="outlined" />
 									)}
 									clearOnEscape
 									clearOnBlur
@@ -705,9 +620,7 @@ export const EDASummaryView = (props) => {
 									style={{ backgroundColor: 'white', width: 300 }}
 									value={edaSearchSettings && edaSearchSettings.issueAgency}
 									default
-									onChange={(event, value) =>
-										setEDASearchSetting('contractIssueAgency', value)
-									}
+									onChange={(event, value) => setEDASearchSetting('contractIssueAgency', value)}
 								/>
 							</div>
 						</div>
@@ -719,10 +632,7 @@ export const EDASummaryView = (props) => {
 							margin: '0 0 15px 0',
 						}}
 					>
-						<Typography style={styles.filterTitle}>
-							{' '}
-							PIID Issue Date Range:{' '}
-						</Typography>
+						<Typography style={styles.filterTitle}> PIID Issue Date Range: </Typography>
 						<div style={{ ...styles.filterInput, display: 'inline-block' }}>
 							<MuiPickersUtilsProvider utils={DateFnsUtils}>
 								<KeyboardDatePicker
@@ -732,9 +642,7 @@ export const EDASummaryView = (props) => {
 									format="MM/dd/yyyy"
 									InputProps={{ style: { backgroundColor: 'white' } }}
 									value={edaSearchSettings && edaSearchSettings.startDate}
-									onChange={(date) =>
-										setEDASearchSetting('issueDateRange', date, true)
-									}
+									onChange={(date) => setEDASearchSetting('issueDateRange', date, true)}
 								/>
 								<KeyboardDatePicker
 									margin="normal"
@@ -743,9 +651,7 @@ export const EDASummaryView = (props) => {
 									format="MM/dd/yyyy"
 									InputProps={{ style: { backgroundColor: 'white' } }}
 									value={edaSearchSettings && edaSearchSettings.endDate}
-									onChange={(date) =>
-										setEDASearchSetting('issueDateRange', date, false)
-									}
+									onChange={(date) => setEDASearchSetting('issueDateRange', date, false)}
 								/>
 							</MuiPickersUtilsProvider>
 						</div>

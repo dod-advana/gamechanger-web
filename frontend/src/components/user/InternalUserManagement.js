@@ -85,9 +85,7 @@ export default () => {
 
 	const handleCreate = async (_, trackMe = false) => {
 		try {
-			const body = trackMe
-				? { trackByRequest: true }
-				: { username: inputUsername };
+			const body = trackMe ? { trackByRequest: true } : { username: inputUsername };
 			await gameChangerAPI.addInternalUser(body);
 			getInternalUsers();
 			resetState();
@@ -132,9 +130,7 @@ export default () => {
 				</button>
 			</ListWrapper>
 
-			<div style={{ color: 'red', fontSize: '30px', margin: '10px 0 10px 0' }}>
-				{errorMessage}
-			</div>
+			<div style={{ color: 'red', fontSize: '30px', margin: '10px 0 10px 0' }}>{errorMessage}</div>
 
 			<Heading>Internal Users</Heading>
 			<ListWrapper>
@@ -148,9 +144,7 @@ export default () => {
 						<ListItem key={id}>
 							<div>{id}</div>
 							<div>{username}</div>
-							<DeleteButton onClick={() => handleDelete(id)}>
-								Delete
-							</DeleteButton>
+							<DeleteButton onClick={() => handleDelete(id)}>Delete</DeleteButton>
 						</ListItem>
 					);
 				})}

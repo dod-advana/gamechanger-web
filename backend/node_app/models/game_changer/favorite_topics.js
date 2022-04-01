@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const FAVORITE_TOPICS = sequelize.define('favorite_topics',
+	const FAVORITE_TOPICS = sequelize.define(
+		'favorite_topics',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,32 +10,32 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			user_id: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			new_user_id: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			topic_name: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			topic_summary: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: DataTypes.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'favorite_topics',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return FAVORITE_TOPICS;

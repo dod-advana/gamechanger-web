@@ -11,28 +11,36 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 const useStyles = makeStyles((theme) => ({
 	customWidth: {
 		maxWidth: 1050,
-		padding: '15px 10px 15px 0'
-	}
+		padding: '15px 10px 15px 0',
+	},
 }));
 
 const StyledFooterDiv = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
 `;
-
 
 const ReviewersValue = React.memo((props) => {
 	const {
 		primaryReviewer, // from reviewData
 		finished,
 		dropdownData,
-		setReviewData
+		setReviewData,
 	} = props;
 
-	const primaryReviewers = dropdownData && dropdownData.reviewers ? dropdownData.reviewers.map(reviewer => {
-		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`;
-	}).sort() : [];
+	const primaryReviewers =
+		dropdownData && dropdownData.reviewers
+			? dropdownData.reviewers
+					.map((reviewer) => {
+						return `${reviewer.name}${
+							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
+								? ` (${reviewer.organization})`
+								: ''
+						}`;
+					})
+					.sort()
+			: [];
 
 	return (
 		<Autocomplete
@@ -49,42 +57,52 @@ const ReviewersValue = React.memo((props) => {
 });
 
 const CoreAIAnalysisKey = React.memo(() => {
-
 	const classes = useStyles();
 
 	return (
-		<div style={{ width: '100%', height: '43px' }}>Core AI Analysis <Tooltip
-			classes={{ tooltip: classes.customWidth }}
-			placement="right"
-			arrow
-			title={
-				<div style={{ width: '1000px' }}>
-					<ul>
-						<li>
-							<i>Core AI</i> programs develop AI applications such as machine learning/deep learning, collaborative behavior, computer vision, human-machine teaming, automated reasoning, robotic autonomy, automated data fusion, and self-healing networks. DoD’s RDT&E programs are not the only source of Core AI for the Department; private sector R&D and commercially available products may also provide Core AI applications for incorporation into DoD systems. By this definition, Core AI spending is always RDT&E spending.
-						</li>
-						<hr />
-						<li>
-							<i>AI-enabled</i> programs develop the gamut of DoD warfighting and business systems, incorporating Core AI applications for analyzing, automating, communicating, maneuvering, monitoring, sensing, and many other tasks. While AI spending is usually a small percentage of these programs, their system’s performance may be critically dependent upon the incorporation of Core AI.
-						</li>
-						<hr />
-						<li>
-							<i>AI-enabling</i> programs include technologies such as cloud computing and advanced microelectronics required to support the deployment of effective AI-enabled capabilities at scale.
-						</li>
-					</ul>
-				</div>
-			}
-		><InfoOutlinedIcon style={{ margin: '-2px 0px' }} /></Tooltip></div>
+		<div style={{ width: '100%', height: '43px' }}>
+			Core AI Analysis{' '}
+			<Tooltip
+				classes={{ tooltip: classes.customWidth }}
+				placement="right"
+				arrow
+				title={
+					<div style={{ width: '1000px' }}>
+						<ul>
+							<li>
+								<i>Core AI</i> programs develop AI applications such as machine learning/deep learning,
+								collaborative behavior, computer vision, human-machine teaming, automated reasoning,
+								robotic autonomy, automated data fusion, and self-healing networks. DoD’s RDT&E programs
+								are not the only source of Core AI for the Department; private sector R&D and
+								commercially available products may also provide Core AI applications for incorporation
+								into DoD systems. By this definition, Core AI spending is always RDT&E spending.
+							</li>
+							<hr />
+							<li>
+								<i>AI-enabled</i> programs develop the gamut of DoD warfighting and business systems,
+								incorporating Core AI applications for analyzing, automating, communicating,
+								maneuvering, monitoring, sensing, and many other tasks. While AI spending is usually a
+								small percentage of these programs, their system’s performance may be critically
+								dependent upon the incorporation of Core AI.
+							</li>
+							<hr />
+							<li>
+								<i>AI-enabling</i> programs include technologies such as cloud computing and advanced
+								microelectronics required to support the deployment of effective AI-enabled capabilities
+								at scale.
+							</li>
+						</ul>
+					</div>
+				}
+			>
+				<InfoOutlinedIcon style={{ margin: '-2px 0px' }} />
+			</Tooltip>
+		</div>
 	);
 });
 
 const CoreAIAnalysisValue = React.memo((props) => {
-	const {
-		dropdownData,
-		setReviewData,
-		primaryClassLabel,
-		finished
-	} = props;
+	const { dropdownData, setReviewData, primaryClassLabel, finished } = props;
 
 	return (
 		<Autocomplete
@@ -103,16 +121,20 @@ const CoreAIAnalysisValue = React.memo((props) => {
 });
 
 const ServiceComponentReviewerValue = React.memo((props) => {
-	const {
-		serviceReviewer,
-		finished,
-		dropdownData,
-		setReviewData
-	} = props;
+	const { serviceReviewer, finished, dropdownData, setReviewData } = props;
 
-	const serviceReviewers = dropdownData && dropdownData.serviceReviewers ? dropdownData.serviceReviewers.map(reviewer => {
-		return `${reviewer.name}${reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1 ? ` (${reviewer.organization})` : ''}`;
-	}).sort() : [];
+	const serviceReviewers =
+		dropdownData && dropdownData.serviceReviewers
+			? dropdownData.serviceReviewers
+					.map((reviewer) => {
+						return `${reviewer.name}${
+							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
+								? ` (${reviewer.organization})`
+								: ''
+						}`;
+					})
+					.sort()
+			: [];
 
 	return (
 		<Autocomplete
@@ -129,48 +151,49 @@ const ServiceComponentReviewerValue = React.memo((props) => {
 });
 
 const PlannedTransitionPartnerKey = React.memo(() => {
-
 	const classes = useStyles();
 
 	return (
-		<div style={{ width: '100%', height: '43px' }}>Planned Transition Partner <Tooltip
-			classes={{ tooltip: classes.customWidth }}
-			placement="right"
-			arrow
-			title={
-				<div style={{ width: '1000px', paddingLeft: '15px' }}>
-					Transition Is Defined As:
-					<ul>
-						<li>
-							The process of applying critical technology in military systems to provide an effective weapons or support system—in the quantity and quality needed by the operators to carry out assigned missions and at the “best value” as measured by the technology sponsor and customer.
-						</li>
-						<hr />
-						<li>
-							The process by which technology deemed to be of significant use to the operational military community is transitioned from the science and technology environment to a military operational field unit for evaluation and then:
-							<ul>
-								<li>
-									Incorporated into an existing acquisition program or
-								</li>
-								<li>
-									Identified as the subject matter for a new acquisition program.
-								</li>
-							</ul>
-						</li>
-					</ul>
-					The transition partner is defined as the DoD Entity responsible for executing the transition processes described above
-				</div>
-			}
-		><InfoOutlinedIcon style={{ margin: '-2px 0px' }} /></Tooltip></div>
+		<div style={{ width: '100%', height: '43px' }}>
+			Planned Transition Partner{' '}
+			<Tooltip
+				classes={{ tooltip: classes.customWidth }}
+				placement="right"
+				arrow
+				title={
+					<div style={{ width: '1000px', paddingLeft: '15px' }}>
+						Transition Is Defined As:
+						<ul>
+							<li>
+								The process of applying critical technology in military systems to provide an effective
+								weapons or support system—in the quantity and quality needed by the operators to carry
+								out assigned missions and at the “best value” as measured by the technology sponsor and
+								customer.
+							</li>
+							<hr />
+							<li>
+								The process by which technology deemed to be of significant use to the operational
+								military community is transitioned from the science and technology environment to a
+								military operational field unit for evaluation and then:
+								<ul>
+									<li>Incorporated into an existing acquisition program or</li>
+									<li>Identified as the subject matter for a new acquisition program.</li>
+								</ul>
+							</li>
+						</ul>
+						The transition partner is defined as the DoD Entity responsible for executing the transition
+						processes described above
+					</div>
+				}
+			>
+				<InfoOutlinedIcon style={{ margin: '-2px 0px' }} />
+			</Tooltip>
+		</div>
 	);
 });
 
 const PlannedTransitionPartnerValue = React.memo((props) => {
-	const {
-		dropdownData,
-		setReviewData,
-		primaryPlannedTransitionPartner,
-		finished
-	} = props;
+	const { dropdownData, setReviewData, primaryPlannedTransitionPartner, finished } = props;
 
 	return (
 		<Autocomplete
@@ -187,13 +210,7 @@ const PlannedTransitionPartnerValue = React.memo((props) => {
 });
 
 const CurrentMissionPartnersValue = React.memo((props) => {
-	const {
-		dropdownData,
-		setReviewData,
-		serviceAdditionalMissionPartners,
-		finished,
-		primaryReviewNotes
-	} = props;
+	const { dropdownData, setReviewData, serviceAdditionalMissionPartners, finished, primaryReviewNotes } = props;
 
 	const [reviewerNotes, setReviewerNotes] = useState(primaryReviewNotes);
 
@@ -224,8 +241,8 @@ const CurrentMissionPartnersValue = React.memo((props) => {
 				onChange={(event, value) => setReviewerNotes(value)}
 				inputProps={{
 					style: {
-						width: '100%'
-					}
+						width: '100%',
+					},
 				}}
 				rows={10}
 				multiline
@@ -236,40 +253,33 @@ const CurrentMissionPartnersValue = React.memo((props) => {
 });
 
 const ReviewStatus = React.memo((props) => {
-
-	const {
-		reviewStatus,
-		finished
-	} = props;
+	const { reviewStatus, finished } = props;
 
 	return (
 		<div style={{ margin: '0 0 15px 0' }}>
-			<Typography variant="subtitle1" style={{ color: finished ? 'green' : '#F9B32D', fontSize: '18px', textAlign: 'right' }}>{reviewStatus}</Typography>
+			<Typography
+				variant="subtitle1"
+				style={{ color: finished ? 'green' : '#F9B32D', fontSize: '18px', textAlign: 'right' }}
+			>
+				{reviewStatus}
+			</Typography>
 		</div>
 	);
 });
 
 const ButtonFooter = React.memo((props) => {
-
-	const {
-		finished,
-		roleDisabled,
-		dispatch,
-		setReviewData,
-		submitReviewForm,
-		primaryReviewLoading
-	} = props;
+	const { finished, roleDisabled, dispatch, setReviewData, submitReviewForm, primaryReviewLoading } = props;
 
 	return (
 		<StyledFooterDiv>
-			{finished && !roleDisabled &&
+			{finished && !roleDisabled && (
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 					onClick={() => setState(dispatch, { JAICModalOpen: true })}
 				>
 					Re-Enable (Partial Review)
 				</GCPrimaryButton>
-			}
+			)}
 			<GCPrimaryButton
 				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 				onClick={() => {
@@ -277,33 +287,33 @@ const ButtonFooter = React.memo((props) => {
 				}}
 				disabled={finished || roleDisabled}
 			>
-				{!primaryReviewLoading ?
+				{!primaryReviewLoading ? (
 					'Reset Form'
-					:
+				) : (
 					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
-				}
+				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
 				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 				onClick={() => submitReviewForm('primaryReviewLoading', false, 'primary')}
 				disabled={finished || roleDisabled}
 			>
-				{!primaryReviewLoading ?
+				{!primaryReviewLoading ? (
 					'Save (Partial Review)'
-					:
+				) : (
 					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
-				}
+				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
 				style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
 				onClick={() => submitReviewForm('primaryReviewLoading', true, 'primary')}
 				disabled={finished || roleDisabled}
 			>
-				{!primaryReviewLoading ?
+				{!primaryReviewLoading ? (
 					'Submit'
-					:
+				) : (
 					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
-				}
+				)}
 			</GCPrimaryButton>
 		</StyledFooterDiv>
 	);
@@ -318,5 +328,5 @@ export {
 	PlannedTransitionPartnerValue,
 	CurrentMissionPartnersValue,
 	ReviewStatus,
-	ButtonFooter
+	ButtonFooter,
 };

@@ -1,19 +1,18 @@
-
 const SearchUtility = require('../../utils/searchUtility');
 const searchUtility = new SearchUtility();
-const { DataLibrary} = require('../../lib/dataLibrary');
+const { DataLibrary } = require('../../lib/dataLibrary');
 const dataLibrary = new DataLibrary();
 const constants = require('../../config/constants');
 const SearchHandler = require('../base/searchHandler');
 const FAVORITE_SEARCH = require('../../models').favorite_searches;
 const sparkMD5 = require('spark-md5');
-const {getUserIdFromSAMLUserId} = require('../../utils/userUtility');
+const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;
 
 class CDOSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
-		super({redisClientDB: redisAsyncClientDB, ...opts});
+		super({ redisClientDB: redisAsyncClientDB, ...opts });
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -26,7 +25,7 @@ class CDOSearchHandler extends SearchHandler {
 			hadError: false,
 			isSemanticSearch: false,
 			tiny_url: '',
-			cachedResult: false
+			cachedResult: false,
 		};
 
 		const {
@@ -37,7 +36,7 @@ class CDOSearchHandler extends SearchHandler {
 			searchVersion,
 			cloneName,
 			searchText,
-			tiny_url
+			tiny_url,
 		} = req.body;
 
 		try {
@@ -54,10 +53,10 @@ class CDOSearchHandler extends SearchHandler {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 
-			const clientObj = {esClientName: 'gamechanger', esIndex: constants.CDO_ELASTIC_SEARCH_OPTS.index};
+			const clientObj = { esClientName: 'gamechanger', esIndex: constants.CDO_ELASTIC_SEARCH_OPTS.index };
 
 			// get results
-			let searchResults = {totalCount: 0, docs: []};
+			let searchResults = { totalCount: 0, docs: [] };
 			try {
 				const { offset = 0, limit = 20 } = req.body;
 				const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(req.body);
@@ -70,9 +69,9 @@ class CDOSearchHandler extends SearchHandler {
 					size: limit,
 					query: {
 						query_string: {
-							query: searchText
-						}
-					}
+							query: searchText,
+						},
+					},
 				};
 
 				if (auxSearchFields.length > 0 && !(auxSearchFields.length === 1 && auxSearchFields[0] === '')) {
@@ -83,20 +82,19 @@ class CDOSearchHandler extends SearchHandler {
 							doc_type_aggs: {
 								terms: {
 									field: 'doc_type',
-									size: 10000
-								}
-							}
+									size: 10000,
+								},
+							},
 						},
 						query: {
 							multi_match: {
 								query: searchText,
-								fields: []
-							}
-						}
+								fields: [],
+							},
+						},
 					};
 					esQuery.query.multi_match.fields = auxSearchFields.map((field) => field.toLowerCase());
 					esQuery.stored_fields = auxRetrieveFields.map((field) => field.toLowerCase());
-
 				}
 
 				esQuery.highlight = {
@@ -105,14 +103,22 @@ class CDOSearchHandler extends SearchHandler {
 						Subject: {},
 						Body: {},
 						originator: {},
-						receiver: {}
-					}
+						receiver: {},
+					},
 				};
 
-				const esResults = await dataLibrary.queryElasticSearch(clientObj.esClientName, clientObj.esIndex, esQuery, userId);
+				const esResults = await dataLibrary.queryElasticSearch(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					esQuery,
+					userId
+				);
 				const { body = {} } = esResults;
 				const { hits: esHits = {} } = body;
-				const { hits = [], total: { value } } = esHits;
+				const {
+					hits = [],
+					total: { value },
+				} = esHits;
 
 				searchResults.totalCount = value;
 
@@ -153,7 +159,6 @@ class CDOSearchHandler extends SearchHandler {
 			}
 
 			return searchResults;
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '43EFJQJ', userId);
