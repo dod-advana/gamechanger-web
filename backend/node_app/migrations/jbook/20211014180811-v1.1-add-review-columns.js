@@ -18,5 +18,5 @@ module.exports = {
 				queryInterface.removeColumn(tablename, 'rev_trans_agree', Sequelize.TEXT),
 			]);
 		});
-	}
+	},
 };

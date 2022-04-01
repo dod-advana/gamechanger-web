@@ -24,13 +24,13 @@ module.exports = Object.freeze({
 	TLS_CERT: getCert('TLS_CERT', 'TLS_CERT_FILEPATH'),
 	TLS_CERT_CA: getCert('TLS_CERT_CA', 'TLS_CERT_CA_FILEPATH'),
 	TLS_KEY: getCert('TLS_KEY', 'TLS_KEY_FILEPATH'),
-	EXPRESS_TRUST_PROXY: function () {
+	EXPRESS_TRUST_PROXY: (function () {
 		const str_var = process.env.EXPRESS_TRUST_PROXY ? process.env.EXPRESS_TRUST_PROXY.trim() : '';
 		if (['true', 'false'].includes(str_var.toLowerCase())) {
 			return str_var.toLowerCase() === 'true';
 		}
 		return str_var;
-	}(),
+	})(),
 	POSTGRES_CONFIG: {
 		databases: {
 			game_changer: {
@@ -41,7 +41,7 @@ module.exports = Object.freeze({
 				host: process.env.POSTGRES_HOST_GAME_CHANGER,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			'gc-orchestration': {
 				username: process.env.POSTGRES_USER_GC_ORCHESTRATION,
@@ -50,7 +50,7 @@ module.exports = Object.freeze({
 				host: process.env.POSTGRES_HOST_GC_ORCHESTRATION,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			uot: {
 				username: process.env.POSTGRES_USER_UOT,
@@ -59,7 +59,7 @@ module.exports = Object.freeze({
 				host: process.env.POSTGRES_HOST_UOT,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			eda: {
 				username: process.env.POSTGRES_USER_EDA,
@@ -68,7 +68,7 @@ module.exports = Object.freeze({
 				host: process.env.POSTGRES_HOST_EDA,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			jbook: {
 				username: process.env.POSTGRES_USER_JBOOK,
@@ -77,10 +77,9 @@ module.exports = Object.freeze({
 				host: process.env.POSTGRES_HOST_JBOOK,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
-			}
-			
-		}
+				logging: false,
+			},
+		},
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
 	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}:8990`,
@@ -89,8 +88,8 @@ module.exports = Object.freeze({
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
 	GAME_CHANGER_OPTS: {
 		isDemoDeployment: (process.env.GAMECHANGER_DEMO_DEPLOYMENT?.trim() || 'false') === 'true',
-		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || "007",
-		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === "true",
+		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || '007',
+		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === 'true',
 		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
 		rootClone: process.env.REACT_APP_ROOT_CLONE,
 		version: 'game_changer',
@@ -105,14 +104,14 @@ module.exports = Object.freeze({
 		historyIndex: process.env.GAMECHANGER_ELASTICSEARCH_HISTORY_INDEX,
 		entityIndex: process.env.GAMECHANGER_ELASTICSEARCH_ENTITIES_INDEX,
 		textSuggestIndex: process.env.GAMECHANGER_ELASTICSEARCH_SUGGEST_INDEX,
-		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL
+		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL,
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
 	ADVANA_EMAIL_CONTACT_NAME: process.env.EMAIL_FROM_NAME || 'Advana Do Not Reply',
 	ADVANA_NOREPLY_EMAIL_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
 		host: process.env.EMAIL_HOST,
-		port: process.env.EMAIL_PORT
+		port: process.env.EMAIL_PORT,
 	},
 	ADVANA_EMAIL_CC: process.env.EMAIL_CC || '',
 	BASE_URL_FOR_EMAIL: process.env.BASE_URL_FOR_EMAIL || `https://${process.env.REACT_APP_ROOT_CLONE}.advana.data.mil`,
@@ -123,12 +122,16 @@ module.exports = Object.freeze({
 		port: process.env.GAMECHANGER_ELASTICSEARCH_PORT || '443',
 		user: process.env.GAMECHANGER_ELASTICSEARCH_USER ? process.env.GAMECHANGER_ELASTICSEARCH_USER : '',
 		password: process.env.GAMECHANGER_ELASTICSEARCH_PASSWORD || 'passowrd',
-		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA ? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
+		ca: process.env.GAMECHANGER_ELASTICSEARCH_CA
+			? process.env.GAMECHANGER_ELASTICSEARCH_CA.replace(/\\n/g, '\n')
+			: '',
 		index: process.env.GAMECHANGER_ELASTICSEARCH_INDEX || 'gamechanger',
-		legislation_index: process.env.GAMECHANGER_LEGISLATION ? process.env.GAMECHANGER_LEGISLATION : 'gamechanger_legislation',
+		legislation_index: process.env.GAMECHANGER_LEGISLATION
+			? process.env.GAMECHANGER_LEGISLATION
+			: 'gamechanger_legislation',
 		assist_index: process.env.GAMECHANGER_ASSIST || 'gamechanger_assist',
 		history_index: 'search_history',
-		requestTimeout: 60000
+		requestTimeout: 60000,
 	},
 	EDA_ELASTIC_SEARCH_OPTS: {
 		protocol: process.env.EDA_ELASTICSEARCH_PROTOCOL || 'https',
@@ -138,35 +141,35 @@ module.exports = Object.freeze({
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD || 'password',
 		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.EDA_ELASTICSEARCH_INDEX || 'eda',
-		extSearchFields: ['*_eda_ext'],//['acomod_eda_ext','product_or_service_line_item_eda_ext'],
+		extSearchFields: ['*_eda_ext'], //['acomod_eda_ext','product_or_service_line_item_eda_ext'],
 		extRetrieveFields: ['*_eda_ext'],
 		// index: 'eda'
-		requestTimeout: 60000
+		requestTimeout: 60000,
 	},
 	BUDGETSEARCH_ELASTIC_SEARCH_OPTS: {
-		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX || 'jbook'
+		index: process.env.BUDGETSEARCH_ELASTICSEARCH_INDEX || 'jbook',
 	},
 	S3_REGION: process.env.S3_REGION ? process.env.S3_REGION : undefined,
 	GRAPH_DB_CONFIG: {
 		url: process.env.NEO4J_URL,
 		user: process.env.NEO4J_USER,
-		password: process.env.NEO4J_PASSWORD
+		password: process.env.NEO4J_PASSWORD,
 	},
 	MATOMO_DB_CONFIG: {
 		host: process.env.MYSQL_HOST_MATOMO,
 		user: process.env.MYSQL_USER_MATOMO,
 		password: process.env.MYSQL_PASSWORD_MATOMO,
-		database: 'matomo'
+		database: 'matomo',
 	},
 	HERMES_ELASTIC_SEARCH_OPTS: {
 		index: process.env.HERMES_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
-		auxRetrieveFields: ['']
+		auxRetrieveFields: [''],
 	},
 	CDO_ELASTIC_SEARCH_OPTS: {
 		index: process.env.CDO_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
-		auxRetrieveFields: ['']
+		auxRetrieveFields: [''],
 	},
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
@@ -175,7 +178,7 @@ module.exports = Object.freeze({
 		KEY: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
 		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
-		AD_DOMAIN: process.env.QLIK_AD_DOMAIN
+		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,
@@ -185,7 +188,7 @@ module.exports = Object.freeze({
 		username: process.env.DATA_CATALOG_USER,
 		password: process.env.DATA_CATALOG_PASSWORD,
 		api_config: dataCatalogConfig,
-		ca: process.env.DATA_CATALOG_CA ? process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n') : ''
+		ca: process.env.DATA_CATALOG_CA ? process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n') : '',
 	},
 	TLS_KEY_PASSPHRASE: process.env.TLS_KEY_PASSPHRASE,
 	LOG_LEVELS: {
@@ -220,7 +223,7 @@ module.exports = Object.freeze({
 			boot: 'magenta',
 			streamOPEN: 'red',
 			streamCLOSE: 'red',
-			debug: 'red'
+			debug: 'red',
 		},
 	},
 	SERVICEDESK_ID: 5,
@@ -240,7 +243,7 @@ module.exports = Object.freeze({
 		project_key: process.env.JIRA_PROJECT_KEY,
 		rating_id: process.env.JIRA_RATING_ID,
 		advana_product: process.env.JIRA_ADVANA_PRODUCT,
-		feedbackType: process.env.JIRA_FEEDBACK_TYPE
+		feedbackType: process.env.JIRA_FEEDBACK_TYPE,
 	},
 	GRAPH_CONFIG: {
 		PULL_NODES_FROM_NEO4J_MAX_LIMIT: process.env.PULL_NODES_FROM_NEO4J_MAX_LIMIT,

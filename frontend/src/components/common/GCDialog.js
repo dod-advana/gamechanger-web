@@ -8,11 +8,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 
 const UOTDialog = (props) => {
-	const hasBtn =
-		props.primaryLabel || props.secondaryLabel || props.tertiaryLabel
-			? true
-			: false;
-	
+	const hasBtn = props.primaryLabel || props.secondaryLabel || props.tertiaryLabel ? true : false;
+
 	const useStyles = makeStyles(() => ({
 		dialog: {
 			width: '100%',
@@ -25,7 +22,7 @@ const UOTDialog = (props) => {
 
 	const styles = {
 		mainContainer: {
-			padding: 20
+			padding: 20,
 		},
 		title: {
 			fontFamily: 'Roboto',
@@ -72,12 +69,9 @@ const UOTDialog = (props) => {
 			onRequestClose={props.onRequestClose}
 			autoScrollBodyContent={true}
 			paperProps={props.paperProps} // container
-			classes={{paper: classes.dialog}}
+			classes={{ paper: classes.dialog }}
 		>
-			<div
-				className="row"
-				style={{ ...styles.mainContainer, ...props.mainContainerStyle }}
-			>
+			<div className="row" style={{ ...styles.mainContainer, ...props.mainContainerStyle }}>
 				<div className="col-xs-12">
 					<div className="row" style={props?.titleStyle}>
 						<div className="col-xs-12">

@@ -36,11 +36,7 @@ try {
  * @returns
  * @constructor
  */
-export const TrackerWrapper = (
-	ComposedComponent,
-	documentTitle,
-	customDimensions
-) => {
+export const TrackerWrapper = (ComposedComponent, documentTitle, customDimensions) => {
 	function WrappedComponent(props) {
 		useEffect(() => {
 			trackPageView(documentTitle, customDimensions);
@@ -64,18 +60,9 @@ export const TrackerWrapper = (
  * @param useMatomo
  */
 function setupDimensions(customDimensions, useMatomo) {
-	if (
-		customDimensions &&
-		Array.isArray(customDimensions) &&
-		customDimensions.length &&
-		useMatomo
-	) {
+	if (customDimensions && Array.isArray(customDimensions) && customDimensions.length && useMatomo) {
 		customDimensions.map((customDimension) =>
-			matomo.push([
-				'setCustomDimension',
-				customDimension.id,
-				customDimension.value,
-			])
+			matomo.push(['setCustomDimension', customDimension.id, customDimension.value])
 		);
 	}
 }
@@ -87,11 +74,9 @@ function setupDimensions(customDimensions, useMatomo) {
  */
 export function trackPageView(documentTitle, customDimensions) {
 	try {
-
 		const useMatomo =
-			JSON.parse(localStorage.getItem('userMatomo')) &&
-			JSON.parse(localStorage.getItem('appMatomo'));
-		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null) {
 			if (!useMatomo) return;
 		}
 
@@ -138,9 +123,8 @@ export function trackEvent(category, action, name, value, customDimensions) {
 	console.log(localStorage.getItem('userMatomo'));
 	try {
 		const useMatomo =
-			JSON.parse(localStorage.getItem('userMatomo')) &&
-			JSON.parse(localStorage.getItem('appMatomo'));
-		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null) {
 			if (!useMatomo) return;
 		}
 		// Set User
@@ -148,7 +132,6 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		const regex = /\d{10}/g;
 		const id = regex.exec(userId);
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
-
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
 		// Track Event
@@ -166,9 +149,8 @@ export function trackEvent(category, action, name, value, customDimensions) {
 export function trackError(e, eventName) {
 	try {
 		const useMatomo =
-			JSON.parse(localStorage.getItem('userMatomo')) &&
-			JSON.parse(localStorage.getItem('appMatomo'));
-		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null){
+			JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
+		if (localStorage.getItem('userMatomo') !== null && localStorage.getItem('appMatomo') !== null) {
 			if (!useMatomo) return;
 		}
 		// Set User

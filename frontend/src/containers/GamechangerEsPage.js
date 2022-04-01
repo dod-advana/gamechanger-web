@@ -84,10 +84,7 @@ const GamechangerEsPage = (props) => {
 						>
 							gamechanger
 						</MenuItem>
-						<MenuItem
-							value={'eda'}
-							inputProps={{ style: { fontSize: 10, fontFamily: 'Noto Sans' } }}
-						>
+						<MenuItem value={'eda'} inputProps={{ style: { fontSize: 10, fontFamily: 'Noto Sans' } }}>
 							eda
 						</MenuItem>
 					</Select>

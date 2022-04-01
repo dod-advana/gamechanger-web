@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('vendor',
+	return sequelize.define(
+		'vendor',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -8,24 +9,25 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 			},
 			global_parent_duns_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			vendor_name: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			piid: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			pe_num: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			fiscal_year: {
-				type: DataTypes.TEXT
-			}
-		}, {
+				type: DataTypes.TEXT,
+			},
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'vendors'
+			tableName: 'vendors',
 		}
 	);
 };

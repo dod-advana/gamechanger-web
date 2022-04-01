@@ -16,12 +16,7 @@ const ThumbnailRow = styled.div`
 `;
 
 const GameChangerThumbnailRow = (props) => {
-	const {
-		title = 'Thumbnail Row',
-		width = '225px',
-		children = [],
-		links,
-	} = props;
+	const { title = 'Thumbnail Row', width = '225px', children = [], links } = props;
 
 	const [rowWidth, setRowWidth] = useState(0);
 	const [scrollable, setScrollable] = useState(false);

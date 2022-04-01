@@ -6,44 +6,44 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			bli: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
-      projnumber: {
-				type: Sequelize.TEXT
+			projnumber: {
+				type: Sequelize.TEXT,
 			},
-      global_parent_duns_name: {
-				type: Sequelize.TEXT
+			global_parent_duns_name: {
+				type: Sequelize.TEXT,
 			},
-      vendor_name: {
-				type: Sequelize.TEXT
+			vendor_name: {
+				type: Sequelize.TEXT,
 			},
-      parent_award: {
-				type: Sequelize.TEXT
+			parent_award: {
+				type: Sequelize.TEXT,
 			},
-      piin: {
-				type: Sequelize.TEXT
+			piin: {
+				type: Sequelize.TEXT,
 			},
-      fiscal_year: {
-				type: Sequelize.TEXT
+			fiscal_year: {
+				type: Sequelize.TEXT,
 			},
-      product_desc: {
-				type: Sequelize.TEXT
+			product_desc: {
+				type: Sequelize.TEXT,
 			},
-      award_desc: {
-				type: Sequelize.TEXT
+			award_desc: {
+				type: Sequelize.TEXT,
 			},
-      budget_type: {
-				type: Sequelize.TEXT
+			budget_type: {
+				type: Sequelize.TEXT,
 			},
-      table_source: {
-				type: Sequelize.TEXT
+			table_source: {
+				type: Sequelize.TEXT,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('gl_contracts');
-	}
+	},
 };

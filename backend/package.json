@@ -16,7 +16,7 @@
     "gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
     "orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
     "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo",
-    "eslint": "eslint --fix --debug -c package.json ./node_app/"
+    "eslint": "eslint --fix --debug -c .eslintrc.json ./node_app/"
   },
   "author": "",
   "license": "ISC",
@@ -70,7 +70,10 @@
   },
   "devDependencies": {
     "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "jest": "^25.1.0",
+    "prettier": "^2.6.1",
     "sonarqube-scanner": "^2.5.0"
   },
   "jest": {
@@ -81,49 +84,5 @@
       "lcov"
     ],
     "testTimeout": 10000
-  },
-  "eslintConfig": {
-    "rules": {
-      "semi": [
-        "error",
-        "always",
-        {
-          "omitLastInOneLineBlock": true
-        }
-      ],
-      "max-len": 0,
-      "indent": [
-        "warn",
-        "tab",
-        {
-          "SwitchCase": 1
-        }
-      ],
-      "space-before-function-paren": 0,
-      "radix": 0,
-      "comma-dangle": 0,
-      "strict": 0,
-      "no-throw-literal": 0,
-      "quotes": [
-        "warn",
-        "single",
-        {
-          "allowTemplateLiterals": true
-        }
-      ],
-      "no-eval": 0,
-      "no-irregular-whitespace": [
-        "error",
-        {
-          "skipComments": true
-        }
-      ]
-    },
-    "env": {
-      "es6": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2020
-    }
   }
 }

@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('reviewer',
+	return sequelize.define(
+		'reviewer',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -12,25 +13,26 @@ module.exports = (sequelize, DataTypes) => {
 				unique: true,
 			},
 			type: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			title: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			organization: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			email: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			phone_number: {
 				type: DataTypes.BOOLEAN,
-				defaultValue: false
+				defaultValue: false,
 			},
-		}, {
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'reviewer'
+			tableName: 'reviewer',
 		}
 	);
 };

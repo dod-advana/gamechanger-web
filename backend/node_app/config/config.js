@@ -3,25 +3,25 @@ const fs = require('fs');
 
 let secretsPath = path.join(__dirname, '../../../gc_secrets.json');
 let secrets = {
-	'postgres_host_game_changer': 'FAKE',
+	postgres_host_game_changer: 'FAKE',
 	'postgres_host_gc-orchestration': 'FAKE',
-	'postgres_host_uot': 'FAKE',
-	'postgres_host_jbook': 'FAKE',
-	'postgres_user_game_changer': 'FAKE',
+	postgres_host_uot: 'FAKE',
+	postgres_host_jbook: 'FAKE',
+	postgres_user_game_changer: 'FAKE',
 	'postgres_user_gc-orchestration': 'FAKE',
-	'postgres_user_uot': 'FAKE',
-	'postgres_user_jbook': 'FAKE',
-	'postgres_password_game_changer': 'FAKE',
+	postgres_user_uot: 'FAKE',
+	postgres_user_jbook: 'FAKE',
+	postgres_password_game_changer: 'FAKE',
 	'postgres_password_gc-orchestration': 'FAKE',
-	'postgres_password_uot': 'FAKE',
-	'postgres_password_jbook': 'FAKE',
-	'elasticsearch_password_game_changer': 'FAKE',
-	'elasticsearch_password_eda': 'FAKE',
-	'neo4j_password': 'FAKE',
-	'mysql_password_matomo': 'FAKE',
-	'data_catalog_password': 'FAKE'
+	postgres_password_uot: 'FAKE',
+	postgres_password_jbook: 'FAKE',
+	elasticsearch_password_game_changer: 'FAKE',
+	elasticsearch_password_eda: 'FAKE',
+	neo4j_password: 'FAKE',
+	mysql_password_matomo: 'FAKE',
+	data_catalog_password: 'FAKE',
 };
-if(fs.existsSync(secretsPath)) {
+if (fs.existsSync(secretsPath)) {
 	console.log('Using secrets file');
 	let rawSecrets = fs.readFileSync(secretsPath);
 	secrets = JSON.parse(rawSecrets);
@@ -39,7 +39,7 @@ module.exports = {
 				host: secrets.postgres_host_game_changer,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			'gc-orchestration': {
 				username: secrets['postgres_user_gc-orchestration'],
@@ -48,7 +48,7 @@ module.exports = {
 				host: secrets['postgres_host_gc-orchestration'],
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
 			jbook: {
 				username: secrets.postgres_user_jbook,
@@ -57,9 +57,9 @@ module.exports = {
 				host: secrets.postgres_host_jbook,
 				port: 5432,
 				dialect: 'postgres',
-				logging: false
+				logging: false,
 			},
-		}
+		},
 	},
 	game_changer: {
 		username: secrets.postgres_user_game_changer,
@@ -68,7 +68,7 @@ module.exports = {
 		host: secrets.postgres_host_game_changer,
 		port: 5432,
 		dialect: 'postgres',
-		logging: false
+		logging: false,
 	},
 	'gc-orchestration': {
 		username: secrets['postgres_user_gc-orchestration'],
@@ -77,7 +77,7 @@ module.exports = {
 		host: secrets['postgres_host_gc-orchestration'],
 		port: 5432,
 		dialect: 'postgres',
-		logging: false
+		logging: false,
 	},
 	jbook: {
 		username: secrets.postgres_user_jbook,
@@ -86,6 +86,6 @@ module.exports = {
 		host: secrets.postgres_host_jbook,
 		port: 5432,
 		dialect: 'postgres',
-		logging: false
+		logging: false,
 	},
 };

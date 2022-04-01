@@ -6,24 +6,24 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			keyword_id: {
 				type: Sequelize.INTEGER,
-				primaryKey: true
+				primaryKey: true,
 			},
 			pdoc_id: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			rdoc_id: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			om_id: {
-				type: Sequelize.INTEGER
-			}
+				type: Sequelize.INTEGER,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('keyword_assoc');
-	}
+	},
 };

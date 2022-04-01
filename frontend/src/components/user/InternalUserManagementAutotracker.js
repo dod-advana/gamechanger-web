@@ -4,18 +4,14 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
 export default () => {
-	const [message, setMessage] = useState(
-		`Adding you to internal user ID tracking...`
-	);
+	const [message, setMessage] = useState(`Adding you to internal user ID tracking...`);
 
 	const handleTrackUser = async () => {
 		try {
 			const {
 				data: { id, username },
 			} = await gameChangerAPI.addInternalUser({ trackByRequest: true });
-			setMessage(
-				`You're identified as an internal user now.  Table ID # ${id} - hash: ${username}`
-			);
+			setMessage(`You're identified as an internal user now.  Table ID # ${id} - hash: ${username}`);
 		} catch (e) {
 			const { response = {} } = e;
 			const { data } = response;

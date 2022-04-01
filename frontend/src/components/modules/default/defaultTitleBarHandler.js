@@ -157,9 +157,7 @@ const DefaultTitleBarHandler = {
 
 		return (
 			<>
-				{rawSearchResults?.length !== 0 &&
-					!loading &&
-					pageDisplayed === 'main' && (
+				{rawSearchResults?.length !== 0 && !loading && pageDisplayed === 'main' && (
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,
@@ -183,11 +181,8 @@ const DefaultTitleBarHandler = {
 		const { rawSearchResults, pageDisplayed, backgroundColor } = props;
 		return {
 			...styles.titleBar,
-			borderBottom:
-				rawSearchResults.length > 0 && pageDisplayed === 'main'
-					? '2px solid rgb(176, 186, 197)'
-					: '',
-			backgroundColor: `${backgroundColor || null}`
+			borderBottom: rawSearchResults.length > 0 && pageDisplayed === 'main' ? '2px solid rgb(176, 186, 197)' : '',
+			backgroundColor: `${backgroundColor || null}`,
 		};
 	},
 };

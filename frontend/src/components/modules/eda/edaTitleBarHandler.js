@@ -10,11 +10,7 @@ const EdaTitleBarHandler = {
 				src={ContractSearchLogo}
 				style={{ ...styles.title, cursor: 'auto', width: 320 }}
 				alt="contractSearch"
-				className={
-					componentStepNumbers
-						? `tutorial-step-${componentStepNumbers['Gamechanger Title']}`
-						: null
-				}
+				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Gamechanger Title']}` : null}
 			/>
 		);
 	},

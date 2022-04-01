@@ -5,7 +5,6 @@ const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');
 const constantsFile = require('../config/constants');
 class AdminController {
-
 	constructor(opts = {}) {
 		const {
 			logger = LOGGER,
@@ -14,7 +13,6 @@ class AdminController {
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
 			constants = constantsFile,
-
 		} = opts;
 
 		this.logger = logger;
@@ -23,8 +21,6 @@ class AdminController {
 		this.appSettings = appSettings;
 		this.searchUtility = searchUtility;
 		this.constants = constants;
-
-
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
 		this.storeGCAdminData = this.storeGCAdminData.bind(this);
@@ -40,10 +36,9 @@ class AdminController {
 			// const { searchQuery, docTitle } = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			this.gcAdmins.findAll({ raw: true }).then(results => {
+			this.gcAdmins.findAll({ raw: true }).then((results) => {
 				res.status(200).send({ admins: results, timeStamp: new Date().toISOString() });
 			});
-
 		} catch (err) {
 			this.logger.error(err, '9BN7UGI', userId);
 			res.status(500).send(err);
@@ -56,14 +51,12 @@ class AdminController {
 			const { adminData } = req.body;
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const [admin, created] = await this.gcAdmins.findOrCreate(
-				{
-					where: { username: adminData.username },
-					defaults: {
-						username: adminData.username
-					}
-				}
-			);
+			const [admin, created] = await this.gcAdmins.findOrCreate({
+				where: { username: adminData.username },
+				defaults: {
+					username: adminData.username,
+				},
+			});
 
 			if (!created) {
 				admin.username = adminData.username;
@@ -71,7 +64,6 @@ class AdminController {
 			}
 
 			res.status(200).send({ created: created, updated: !created });
-
 		} catch (err) {
 			this.logger.error(err, 'GZ3D0DQ', userId);
 			res.status(500).send(err);
@@ -88,31 +80,26 @@ class AdminController {
 			await admin.destroy();
 
 			res.status(200).send({ deleted: true });
-
 		} catch (err) {
 			this.logger.error(err, 'QH2QBDU', userId);
 			res.status(500).send(err);
 		}
 	}
-	async getHomepageUserData(req, esIndex, userId){
+	async getHomepageUserData(req, esIndex, userId) {
 		let results = [];
-		const {
-			favorite_documents =[],
-			export_history=[],
-			pdf_opened=[],
-		} = req.body;
+		const { favorite_documents = [], export_history = [], pdf_opened=[] } = req.body;
 		let favDocList = [];
 		let exportDocList = [];
 		let last_opened = [];
 		// remove pdf, and get favorited docs
-		for (let doc of favorite_documents){
+		for (let doc of favorite_documents) {
 			favDocList.push(doc.filename.split('.pdf')[0]);
 		}
 		// remove pdf, and get exported docs
-		for (let obj of export_history){
+		for (let obj of export_history) {
 			const sel_docs = obj.download_request_body.selectedDocuments;
 			for (let doc of sel_docs) {
-				exportDocList.push(doc.split(".pdf")[0]);
+				exportDocList.push(doc.split('.pdf')[0]);
 			}
 		}
 		for (let obj of pdf_opened){
@@ -125,22 +112,21 @@ class AdminController {
 
 		let docs = {};
 		let recDocs = {};
-		docs.key = "popular_docs";
-		recDocs.key = "rec_docs";
+		docs.key = 'popular_docs';
+		recDocs.key = 'rec_docs';
 		try {
-			docs.value =  await this.searchUtility.getPopularDocs(userId, esIndex);
-
+			docs.value = await this.searchUtility.getPopularDocs(userId, esIndex);
 		} catch (err) {
 			this.logger.error(err, 'FL1LLDU', userId);
 			docs.value = [];
 		}
 		try {
-			if (combinedDocList.length > 0){
+			if (combinedDocList.length > 0) {
 				// get recommendations
-				const rec_results =  await this.searchUtility.getRecDocs(combinedDocList, userId);
-				recDocs.value = rec_results.results ? rec_results.results: [];
+				const rec_results = await this.searchUtility.getRecDocs(combinedDocList, userId);
+				recDocs.value = rec_results.results ? rec_results.results : [];
 				// only get top 20 recommendations
-				recDocs.value = recDocs.value.slice(0,20);
+				recDocs.value = recDocs.value.slice(0, 20);
 			} else {
 				recDocs.value = [];
 			}
@@ -154,25 +140,20 @@ class AdminController {
 	}
 	async getHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
-		let esIndex = "gamechanger";
+		let esIndex = 'gamechanger';
 		let userResults = [];
 		try {
 			userResults = await this.getHomepageUserData(req, esIndex, userId);
-
-		} catch (err){
+		} catch (err) {
 			this.logger.error(err, 'PP1QOA3', userId);
 		}
-
 
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			let results = await this.appSettings.findAll({
 				where: {
-					key: [
-						'homepage_topics',
-						'homepage_major_pubs',
-						'homepage_popular_docs_inactive'					]
-				}
+					key: ['homepage_topics', 'homepage_major_pubs', 'homepage_popular_docs_inactive'],
+				},
 			});
 			results = results.concat(userResults);
 			res.status(200).send(results);
@@ -181,7 +162,6 @@ class AdminController {
 			res.status(500).send(err);
 		}
 	}
-	
 
 	async setHomepageEditorData(req, res) {
 		let userId = 'webapp_unknown';
@@ -191,12 +171,14 @@ class AdminController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			await this.appSettings.update(
 				{
-					value: JSON.stringify(tableData)
-				}, {
-					where:{
-						key: `homepage_${key}`
-					}
-				});
+					value: JSON.stringify(tableData),
+				},
+				{
+					where: {
+						key: `homepage_${key}`,
+					},
+				}
+			);
 			res.status(200).send();
 		} catch (err) {
 			this.logger.error(err, 'QKTBF4J', userId);

@@ -7,37 +7,36 @@ import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
 import { JBookContext } from './jbookContext';
 
-
 const StyledButtonDiv = styled.div`
-    border: 1px solid rgba(0,0,0,0.1);
-    padding: 3px 7px;
-    border-radius: 3px;
-    outline: none;
-    width: 100%;
-    text-align: right;
-    cursor: pointer;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 3px 7px;
+	border-radius: 3px;
+	outline: none;
+	width: 100%;
+	text-align: right;
+	cursor: pointer;
 `;
 
 const StyledDropdownDiv = styled.div`
     width: ${({ width }) => `${width ? width + 'px' : 'unset'}`};
     padding: 10px;
-    display: ${({ show }) => show ? 'block' : 'none'}
+    display: ${({ show }) => (show ? 'block' : 'none')}
     border: 1px solid rgba(0,0,0,0.1);
     position: absolute;
     background-color: white;
-	right: ${({ right }) => right ? right : ''};
+	right: ${({ right }) => (right ? right : '')};
 	max-height: 600px;
 `;
 
 const StyledIcon = styled.img`
-    width: 20px;
-    opacity: .5;
+	width: 20px;
+	opacity: 0.5;
 `;
 
 const StyledCheckboxContainer = styled.div`
-    display: flex;
-    width: 100%;
-    flex-direction: column;
+	display: flex;
+	width: 100%;
+	flex-direction: column;
 	overflow: auto;
 	max-height: 370px;
 `;
@@ -58,7 +57,7 @@ const DropdownFilter = (props) => {
 		setOpenDropdown,
 		right,
 		secondaryOptions = [],
-		secondaryTitle
+		secondaryTitle,
 	} = props;
 
 	const context = useContext(JBookContext);
@@ -76,12 +75,12 @@ const DropdownFilter = (props) => {
 		let newSecondaryOptions = secondaryOptions ?? [];
 
 		if (filteredSearch !== '') {
-			newOptions = newOptions.filter(option => {
+			newOptions = newOptions.filter((option) => {
 				return option.toLowerCase().includes(filteredSearch.toLowerCase());
 			});
 
 			if (secondaryOptions && secondaryOptions.length && secondaryOptions.length > 0) {
-				newSecondaryOptions = [...secondaryOptions].filter(option => {
+				newSecondaryOptions = [...secondaryOptions].filter((option) => {
 					return option.toLowerCase().includes(filteredSearch.toLowerCase());
 				});
 			}
@@ -89,7 +88,6 @@ const DropdownFilter = (props) => {
 
 		setFilteredSecondaryOptions(newSecondaryOptions);
 		setFilteredOptions(newOptions);
-
 	}, [options, filteredSearch, secondaryOptions]);
 
 	useEffect(() => {
@@ -121,48 +119,59 @@ const DropdownFilter = (props) => {
 	}, [textBoxActive]);
 
 	const renderAllNone = () => {
-
 		return (
 			<StyledAllNoneContainer>
 				<FormControlLabel
 					name={'All'}
 					value={'All'}
-					control={<Checkbox
-						style={{
-							backgroundColor: '#ffffff',
-							borderRadius: '5px',
-							padding: '2px',
-							border: '2px solid #bdccde',
-							pointerEvents: 'none',
-							margin: '2px 5px 0px'
-						}}
-						onClick={() => setJBookSetting(type, 'all', state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].length === options.length}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name={'All'}
-					/>}
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '2px 5px 0px',
+							}}
+							onClick={() => setJBookSetting(type, 'all', state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={
+								jbookSearchSettings &&
+								jbookSearchSettings[type] &&
+								jbookSearchSettings[type].length === options.length
+							}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name={'All'}
+						/>
+					}
 					label={<span style={{ fontSize: 13, fontWeight: 600 }}>All</span>}
 					labelPlacement="end"
 				/>
 				<FormControlLabel
 					name={'None'}
 					value={'None'}
-					control={<Checkbox
-						style={{
-							backgroundColor: '#ffffff',
-							borderRadius: '5px',
-							padding: '2px',
-							border: '2px solid #bdccde',
-							pointerEvents: 'none',
-							margin: '2px 5px 0px'
-						}}
-						onClick={() => setJBookSetting(type, 'none', state, dispatch)}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].length === 0}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name={'None'}
-					/>}
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '2px 5px 0px',
+							}}
+							onClick={() => setJBookSetting(type, 'none', state, dispatch)}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={
+								jbookSearchSettings &&
+								jbookSearchSettings[type] &&
+								jbookSearchSettings[type].length === 0
+							}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name={'None'}
+						/>
+					}
 					label={<span style={{ fontSize: 13, fontWeight: 600 }}>Clear</span>}
 					labelPlacement="end"
 				/>
@@ -181,26 +190,32 @@ const DropdownFilter = (props) => {
 					value={option}
 					style={{ margin: '0 20px 0 0' }}
 					key={option}
-					control={<Checkbox
-						style={{
-							backgroundColor: '#ffffff',
-							borderRadius: '5px',
-							padding: '2px',
-							border: '2px solid #bdccde',
-							pointerEvents: 'none',
-							margin: '2px 5px 0px'
-						}}
-						onClick={() => {
-							if (jbookSearchSettings.clearText === true) {
-								setJBookSetting('clearText', false, state, dispatch);
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '2px 5px 0px',
+							}}
+							onClick={() => {
+								if (jbookSearchSettings.clearText === true) {
+									setJBookSetting('clearText', false, state, dispatch);
+								}
+								setJBookSetting(type, option, state, dispatch);
+							}}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={
+								jbookSearchSettings &&
+								jbookSearchSettings[type] &&
+								jbookSearchSettings[type].indexOf(option) !== -1
 							}
-							setJBookSetting(type, option, state, dispatch);
-						}}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name={options}
-					/>}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name={options}
+						/>
+					}
 					label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{option}</span>}
 					labelPlacement="end"
 				/>
@@ -214,26 +229,32 @@ const DropdownFilter = (props) => {
 					value={option}
 					style={{ margin: '0 20px 0 0' }}
 					key={option}
-					control={<Checkbox
-						style={{
-							backgroundColor: '#ffffff',
-							borderRadius: '5px',
-							padding: '2px',
-							border: '2px solid #bdccde',
-							pointerEvents: 'none',
-							margin: '2px 5px 0px'
-						}}
-						onClick={() => {
-							if (jbookSearchSettings.clearText === true) {
-								setJBookSetting('clearText', false, state, dispatch);
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '2px 5px 0px',
+							}}
+							onClick={() => {
+								if (jbookSearchSettings.clearText === true) {
+									setJBookSetting('clearText', false, state, dispatch);
+								}
+								setJBookSetting(type, option, state, dispatch);
+							}}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checked={
+								jbookSearchSettings &&
+								jbookSearchSettings[type] &&
+								jbookSearchSettings[type].indexOf(option) !== -1
 							}
-							setJBookSetting(type, option, state, dispatch);
-						}}
-						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-						checked={jbookSearchSettings && jbookSearchSettings[type] && jbookSearchSettings[type].indexOf(option) !== -1}
-						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name={options}
-					/>}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							name={options}
+						/>
+					}
 					label={<span style={{ fontSize: 13, margin: '0 5px', fontWeight: 600 }}>{option}</span>}
 					labelPlacement="end"
 				/>
@@ -243,14 +264,13 @@ const DropdownFilter = (props) => {
 		return (
 			<StyledCheckboxContainer>
 				{checkboxes}
-				{secondaryCheckboxes.length > 0 &&
+				{secondaryCheckboxes.length > 0 && (
 					<>
 						<hr style={{ margin: '7px 0' }} />
 						{secondaryTitle}
 						{secondaryCheckboxes}
 					</>
-				}
-
+				)}
 			</StyledCheckboxContainer>
 		);
 	};
@@ -274,8 +294,8 @@ const DropdownFilter = (props) => {
 				}}
 				inputProps={{
 					style: {
-						width: '100%'
-					}
+						width: '100%',
+					},
 				}}
 			/>
 		);
@@ -288,14 +308,22 @@ const DropdownFilter = (props) => {
 			</StyledButtonDiv>
 			<StyledDropdownDiv width={width} show={openDropdown} right={right}>
 				{renderAllNone()}
-				{(options.length + secondaryOptions.length) > 12 &&
-					renderFilterSearch()
-				}
+				{options.length + secondaryOptions.length > 12 && renderFilterSearch()}
 				<hr style={{ margin: '7px 0' }} />
 				{renderOptions()}
 				<hr style={{ margin: '7px 0' }} />
 				<GCPrimaryButton
-					style={{ margin: '5px 0', color: '#3F4956', backgroundColor: 'white', borderColor: '#3F4956', height: 25, width: 110, fontSize: '12px', lineHeight: 0, padding: 0 }}
+					style={{
+						margin: '5px 0',
+						color: '#3F4956',
+						backgroundColor: 'white',
+						borderColor: '#3F4956',
+						height: 25,
+						width: 110,
+						fontSize: '12px',
+						lineHeight: 0,
+						padding: 0,
+					}}
 					onClick={() => setState(dispatch, { runSearch: true, resultsPage: 1, loading: true })}
 				>
 					Update Search

@@ -1,10 +1,10 @@
-function getTenDigitUserId (user_id) {
+function getTenDigitUserId(user_id) {
 	const regex = /\d{10}/g;
 	const id = regex.exec(user_id);
 	return id ? id[0] : null;
 }
 
-function getUserIdFromSAMLUserId (obj, fromReq = true) {
+function getUserIdFromSAMLUserId(obj, fromReq = true) {
 	if (!fromReq) {
 		return obj.split('@')[0];
 	}

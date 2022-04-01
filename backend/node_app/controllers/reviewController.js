@@ -26,7 +26,7 @@ class ReviewController {
 			pdoc = PDOC,
 			rdoc = RDOC,
 			odoc = ODOC,
-			db = DB
+			db = DB,
 		} = opts;
 
 		this.logger = logger;
@@ -47,7 +47,7 @@ class ReviewController {
 		if (process.env.EMAIL_REQUIRE_TLS?.toUpperCase() === 'TRUE') {
 			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS;
 			transportOptions.tls = {
-				servername: process.env.EMAIL_TLS_SERVERNAME || ''
+				servername: process.env.EMAIL_TLS_SERVERNAME || '',
 			};
 		}
 
@@ -79,7 +79,7 @@ class ReviewController {
 
 			let giantQuery = `${pQuery} UNION ALL ${rQuery} UNION ALL ${oQuery};`;
 
-			let data =  await this.db.jbook.query(giantQuery);
+			let data = await this.db.jbook.query(giantQuery);
 
 			// Split reviews out to which section are not completed but only if the previous section is completed
 			const primaryReviewsNeedingFinished = [];
@@ -87,7 +87,7 @@ class ReviewController {
 			const pocReviewsNeedingFinished = [];
 
 			if (data[0]) {
-				data[0].forEach(review => {
+				data[0].forEach((review) => {
 					if (review.primaryReviewStatus !== 'Finished Review') {
 						primaryReviewsNeedingFinished.push(review);
 						return;
@@ -113,11 +113,11 @@ class ReviewController {
 			let pocReviewerStatus = workbook.addWorksheet('POCReviewerStatus');
 
 			const columns = [
-				{ header: 'Name', key: 'name', width: 30},
-				{ header: 'Email', key: 'email', width: 35},
-				{ header: 'Organization', key: 'org', width: 30},
-				{ header: 'Profile Page Link', key: 'profile_page_link', width: 30},
-				{ header: 'Status', key: 'status', width: 20},
+				{ header: 'Name', key: 'name', width: 30 },
+				{ header: 'Email', key: 'email', width: 35 },
+				{ header: 'Organization', key: 'org', width: 30 },
+				{ header: 'Profile Page Link', key: 'profile_page_link', width: 30 },
+				{ header: 'Status', key: 'status', width: 20 },
 			];
 
 			primaryReviewerStatus.columns = columns;
@@ -134,7 +134,7 @@ class ReviewController {
 			};
 			const headerStyle = {
 				size: 14,
-				bold: true
+				bold: true,
 			};
 
 			let row = 1;
@@ -143,10 +143,13 @@ class ReviewController {
 					name: review.primaryReviewer,
 					email: review.primary_reviewer_email || 'N/A',
 					org: review.primary_reviewer_org || 'N/A',
-					profile_page_link: { text: 'Click to View Profile Page', hyperlink: await this.getProfilePageLinkForReview(review)},
-					status: review.primaryReviewStatus
+					profile_page_link: {
+						text: 'Click to View Profile Page',
+						hyperlink: await this.getProfilePageLinkForReview(review),
+					},
+					status: review.primaryReviewStatus,
 				});
-				primaryLinks.push({row: row, column: 4});
+				primaryLinks.push({ row: row, column: 4 });
 				row += 1;
 			}
 
@@ -158,10 +161,13 @@ class ReviewController {
 					name: review.serviceReviewer,
 					email: review.service_reviewer_email || 'N/A',
 					org: review.service_reviewer_org || 'N/A',
-					profile_page_link: { text: 'Click to View Profile Page', hyperlink: await this.getProfilePageLinkForReview(review)},
-					status: review.serviceReviewStatus
+					profile_page_link: {
+						text: 'Click to View Profile Page',
+						hyperlink: await this.getProfilePageLinkForReview(review),
+					},
+					status: review.serviceReviewStatus,
 				});
-				serviceLinks.push({row: row, column: 4});
+				serviceLinks.push({ row: row, column: 4 });
 				row += 1;
 			}
 			this.applyLinkStyle(serviceReviewerStatus, serviceLinks, linkStyle);
@@ -172,21 +178,24 @@ class ReviewController {
 					name: review.servicePOCName,
 					email: review.servicePOCEmail || 'N/A',
 					org: review.servicePOCOrg || 'N/A',
-					profile_page_link: { text: 'Click to View Profile Page', hyperlink: await this.getProfilePageLinkForReview(review)},
-					status: review.pocReviewStatus
+					profile_page_link: {
+						text: 'Click to View Profile Page',
+						hyperlink: await this.getProfilePageLinkForReview(review),
+					},
+					status: review.pocReviewStatus,
 				});
-				pocLinks.push({row: row, column: 4});
+				pocLinks.push({ row: row, column: 4 });
 				row += 1;
 			}
 			this.applyLinkStyle(pocReviewerStatus, pocLinks, linkStyle);
 
 			// Style Headers
 			const headers = [
-				{row: 1, column: 1},
-				{row: 1, column: 2},
-				{row: 1, column: 3},
-				{row: 1, column: 4},
-				{row: 1, column: 5},
+				{ row: 1, column: 1 },
+				{ row: 1, column: 2 },
+				{ row: 1, column: 3 },
+				{ row: 1, column: 4 },
+				{ row: 1, column: 5 },
 			];
 
 			this.applyLinkStyle(primaryReviewerStatus, headers, headerStyle);
@@ -197,7 +206,7 @@ class ReviewController {
 			const attachment = {
 				filename,
 				content: buffer,
-				contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+				contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 			};
 
 			if (await this.sendReviewStatusEmail(attachment, emails, userId)) res.sendStatus(200);
@@ -208,10 +217,8 @@ class ReviewController {
 		}
 	}
 
-
-
 	applyLinkStyle(sheet, cells, style) {
-		cells.forEach(cellInfo => {
+		cells.forEach((cellInfo) => {
 			const cell = sheet.getRow(cellInfo.row).getCell(cellInfo.column);
 			if (cell) {
 				cell.font = style;
@@ -251,17 +258,17 @@ class ReviewController {
 				{
 					filename: 'jbook-newsletter-header.png',
 					path: __dirname + '/../images/email/JBOOK Search API Newsletter.png',
-					cid: 'jbook-newsletter-header'
+					cid: 'jbook-newsletter-header',
 				},
 				{
 					filename: 'jbook-newsletter-footer.png',
 					path: __dirname + '/../images/email/JBOOK Search Newsletter.png',
-					cid: 'jbook-newsletter-footer'
+					cid: 'jbook-newsletter-footer',
 				},
-				excelAttachment
+				excelAttachment,
 			];
-			await this.emailUtility.sendEmail(emailBody,'JBOOK Review Status', emails, null, attachment, userId);
-        	return true;
+			await this.emailUtility.sendEmail(emailBody, 'JBOOK Review Status', emails, null, attachment, userId);
+			return true;
 		} catch (err) {
 			this.logger.error(err, '164X80Q', userId);
 			return false;

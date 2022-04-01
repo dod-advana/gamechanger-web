@@ -42,6 +42,8 @@ const controller = new ExternalGraphController();
  *         401:
  *            $ref: "#/components/responses/UnauthorizedError"
  */
-router.get('/graph/queryGraph', async (req, res) => { await controller.queryGraph(req, res) });
+router.get('/graph/queryGraph', async (req, res) => {
+	await controller.queryGraph(req, res);
+});
 
 module.exports = router;

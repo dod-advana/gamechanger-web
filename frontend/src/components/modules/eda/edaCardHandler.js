@@ -8,13 +8,7 @@ import {
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
 import { getEDAMetadataForPropertyTable, getDisplayTitle } from './edaUtils';
-import {
-	List,
-	ListItem,
-	ListItemIcon,
-	ListItemText,
-	Divider,
-} from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
@@ -73,7 +67,7 @@ export const EDA_FPDS_MAP = {
 	contract_issue_name_eda_ext: 'fpds_contracting_agency_name_eda_ext',
 	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
 	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
-	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext'
+	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext',
 };
 
 export const EDA_FIELD_JSON_MAP = {
@@ -114,8 +108,8 @@ export const EDA_FIELD_JSON_MAP = {
 	fpds_description_of_requirement_eda_ext: 'FPDS Description of Requirement',
 	fpds_psc_eda_ext: 'FPDS PSC',
 	fpds_funding_agency_name_eda_ext: 'FPDS Funding Agency',
-	fpds_naics_code_eda_ext: 'FPDS NAICS Code', 
-	fpds_duns_eda_ext: 'FPDS DUNS'
+	fpds_naics_code_eda_ext: 'FPDS NAICS Code',
+	fpds_duns_eda_ext: 'FPDS DUNS',
 };
 
 const styles = {
@@ -176,8 +170,7 @@ const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 	font-weight: bold;
 	font-family: Montserrat;
 	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
@@ -197,7 +190,7 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
 			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
@@ -224,8 +217,7 @@ const StyledFrontCardHeader = styled.div`
 		color: black;
 		margin-bottom: 0px;
 		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -237,10 +229,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -256,8 +246,7 @@ const StyledFrontCardSubHeader = styled.div`
 		width: 50%;
 		color: white;
 		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
 	}
 `;
 
@@ -453,23 +442,9 @@ const StyledFrontCardContent = styled.div`
 `;
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'PDFOpen'
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'filename',
-		filename
-	);
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'CardInteraction',
-		'pageNumber',
-		pageNumber
-	);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(
 			filename
@@ -492,17 +467,12 @@ const EdaCardHandler = {
 			const isBaseAward = item.mod_identifier_eda_ext === 'base_award';
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					docListView={docListView}
-				>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={
-									docListView ? () => clickFn(item.filename, 0) : () => {}
-								}
+								onClick={docListView ? () => clickFn(item.filename, 0) : () => {}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -515,14 +485,10 @@ const EdaCardHandler = {
 								</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight
-											style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-										/>
+										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 									</div>
 								)}
-								{isBaseAward && (
-									<img src={AwardIcon} style={{ width: 19 }} alt="award" />
-								)}
+								{isBaseAward && <img src={AwardIcon} style={{ width: 19 }} alt="award" />}
 							</div>
 						</GCTooltip>
 						<div className={'selected-favorite'}>
@@ -595,17 +561,10 @@ const EdaCardHandler = {
 			const currentAsOfText = `Page Count: ${item.page_count}`;
 
 			let tooltipText = 'No metadata available';
-			if (
-				item &&
-				item.metadata_type_eda_ext &&
-				item.contract_issue_dodaac_eda_ext
-			) {
+			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
-				} else if (
-					item.metadata_type_eda_ext === 'syn' &&
-					item.award_id_eda_ext
-				) {
+				} else if (item.metadata_type_eda_ext === 'syn' && item.award_id_eda_ext) {
 					tooltipText = 'Pulled from Synopsis data';
 				}
 			}
@@ -628,9 +587,7 @@ const EdaCardHandler = {
 							>
 								<span className="buttonText">Page Hits</span>
 								<i
-									className={
-										hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-									}
+									className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 									aria-hidden="true"
 								/>
 							</button>
@@ -657,17 +614,12 @@ const EdaCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
+														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color:
-																hoveredHit === key
-																	? 'white'
-																	: 'rgb(189, 189, 189)',
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -684,12 +636,7 @@ const EdaCardHandler = {
 								</div>
 							</div>
 						)}
-						<GCTooltip
-							title={tooltipText}
-							arrow
-							placement="top"
-							enterDelay={400}
-						>
+						<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
 							<div>
 								<button
 									type="button"
@@ -698,20 +645,14 @@ const EdaCardHandler = {
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'ListViewInteraction',
-											!metadataExpanded
-												? 'Expand metadata'
-												: 'Collapse metadata'
+											!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
 										);
 										setMetadataExpanded(!metadataExpanded);
 									}}
 								>
 									<span className="buttonText">Document Metadata</span>
 									<i
-										className={
-											metadataExpanded
-												? 'fa fa-chevron-up'
-												: 'fa fa-chevron-down'
-										}
+										className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 										aria-hidden="true"
 									/>
 								</button>
@@ -747,18 +688,11 @@ const EdaCardHandler = {
 													clickFn(item.filename, page.pageNumber);
 												}}
 											>
-												<span>
-													{page.pageNumber === 0
-														? 'ID'
-														: `Page ${page.pageNumber}`}
-												</span>
+												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
 												<i
 													className="fa fa-chevron-right"
 													style={{
-														color:
-															hoveredHit === key
-																? 'white'
-																: 'rgb(189, 189, 189)',
+														color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 													}}
 												/>
 											</div>
@@ -788,9 +722,7 @@ const EdaCardHandler = {
 						>
 							<span className="buttonText">Document Metadata</span>
 							<i
-								className={
-									metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
-								}
+								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
 								aria-hidden="true"
 							/>
 						</button>
@@ -847,17 +779,12 @@ const EdaCardHandler = {
 													}}
 												>
 													<span>
-														{page.pageNumber === 0
-															? 'ID'
-															: `Page ${page.pageNumber}`}
+														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
 													</span>
 													<i
 														className="fa fa-chevron-right"
 														style={{
-															color:
-																hoveredHit === key
-																	? 'white'
-																	: 'rgb(189, 189, 189)',
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 														}}
 													/>
 												</div>
@@ -885,11 +812,7 @@ const EdaCardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
-			if (
-				item &&
-				item.metadata_type_eda_ext &&
-				item.contract_issue_dodaac_eda_ext
-			) {
+			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
 				} else if (item.metadata_type_eda_ext === 'syn') {
@@ -923,9 +846,7 @@ const EdaCardHandler = {
 									isSearch: false,
 								},
 							});
-							contractAwards[awardID] = contractMods?.data?.length
-								? contractMods.data
-								: [];
+							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
 
 							setState(dispatch, { contractAwards });
 						} catch (err) {
@@ -962,11 +883,7 @@ const EdaCardHandler = {
 					for (const mod of contractMods) {
 						const { modNumber, signatureDate, effectiveDate } = mod;
 						if (modNumber !== 'Award') {
-							let date = signatureDate
-								? signatureDate
-								: effectiveDate
-									? effectiveDate
-									: null;
+							let date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
 							let dateText = '';
 							if (signatureDate) {
 								date = signatureDate;
@@ -988,10 +905,7 @@ const EdaCardHandler = {
 										)}
 										<ListItemText
 											style={{
-												margin:
-													item.modification_eda_ext !== modNumber
-														? '0 0 0 54px'
-														: '',
+												margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
 												display: 'flex',
 												justifyContent: 'space-between',
 											}}
@@ -1009,18 +923,9 @@ const EdaCardHandler = {
 			};
 
 			return (
-				<GCTooltip
-					title={state.listView ? '' : tooltipText}
-					arrow
-					placement="top"
-					enterDelay={400}
-				>
-					<div
-						style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-					>
-						{item.award_id_eda_ext &&
-							item.award_id_eda_ext !== 'empty' &&
-							!detailPage && (
+				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
+					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+						{item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage && (
 							<GCAccordion
 								onChange={loadContractAward}
 								contentPadding={0}
@@ -1034,21 +939,16 @@ const EdaCardHandler = {
 								<List style={{ width: '100%', padding: '0' }}>
 									<ListItem>
 										<ListItemIcon>
-											<img
-												src={AwardIcon}
-												style={{ width: 15 }}
-												alt="award"
-											/>
+											<img src={AwardIcon} style={{ width: 15 }} alt="award" />
 										</ListItemIcon>
 										<ListItemText primary={item.award_id_eda_ext} />
 									</ListItem>
 									<Divider light={true} />
 									{renderContractMods()}
 									{state.contractAwards &&
-											state.contractAwards[item.award_id_eda_ext] ===
-												'loading' && (
-										<LoadingIndicator customColor={gcOrange} />
-									)}
+										state.contractAwards[item.award_id_eda_ext] === 'loading' && (
+											<LoadingIndicator customColor={gcOrange} />
+										)}
 								</List>
 							</GCAccordion>
 						)}
@@ -1057,12 +957,7 @@ const EdaCardHandler = {
 							tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={getEDAMetadataForPropertyTable(
-								EDA_FIELD_JSON_MAP,
-								fields,
-								item,
-								EDA_FPDS_MAP
-							)}
+							rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP)}
 							height={'auto'}
 							dontScroll={true}
 							colWidth={colWidth}
@@ -1070,9 +965,7 @@ const EdaCardHandler = {
 							title={'Metadata'}
 							hideHeader={true}
 							margin={
-								item.award_id_eda_ext &&
-								item.award_id_eda_ext !== 'empty' &&
-								!detailPage
+								item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage
 									? '-10px 0 0 0'
 									: ''
 							}
@@ -1124,9 +1017,7 @@ const EdaCardHandler = {
 								Close
 							</CardButton>
 						)}
-						<GCTooltip
-							title={'Click here to view the contract award details page'}
-						>
+						<GCTooltip title={'Click here to view the contract award details page'}>
 							<CardButton
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
@@ -1159,11 +1050,7 @@ const EdaCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);
