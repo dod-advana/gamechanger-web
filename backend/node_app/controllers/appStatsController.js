@@ -252,10 +252,11 @@ class AppStatsController {
 	 * 
 	 * 
 	 */
-	async queryPDFOpenedByUserId(userId, connection) {
+	 async queryPDFOpenedByUserId(userId, connection) {
 		return new Promise((resolve, reject) => {
 			const self = this;
-			connection.query(`
+			connection.query(
+				`
 				select 
 					b.name as document, 
 					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
@@ -269,16 +270,17 @@ class AppStatsController {
 				order by 
 					documenttime desc
 				limit 10`,
-			[userId],
-			(error, results, fields) => {
-				if (error) {
-					this.logger.error('No userids found', 'B07IQHT');
+				[userId],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error('No userids found', 'B07IQHT');
+						resolve([]);
+					}
+					resolve(results);
 				}
-				resolve([]);
-			});
+			);
 		});
 	}
-
 	/**
 	 * This method gets an array of searches made with a timestamp and idvisit
 	 * depending on how many days back
